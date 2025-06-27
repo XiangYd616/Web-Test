@@ -226,11 +226,13 @@ class BackgroundTestManager {
   // 执行API测试
   async executeAPITest(testInfo) {
     const { config } = testInfo;
-    
+
     this.updateTestProgress(testInfo.id, 10, '🔌 正在准备API测试...');
-    
+
     try {
-      const response = await fetch(`${this.apiBaseUrl}/test/api`, {
+      console.log('🔍 Starting API test with config:', config);
+
+      const response = await fetch(`${this.apiBaseUrl}/test/api-test`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -240,21 +242,28 @@ class BackgroundTestManager {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
 
-      this.updateTestProgress(testInfo.id, 50, '🧪 正在执行API测试...');
-      
+      this.updateTestProgress(testInfo.id, 30, '🧪 正在执行API端点测试...');
+
       const data = await response.json();
-      
-      this.updateTestProgress(testInfo.id, 90, '📋 正在生成测试报告...');
-      
-      if (data.success || data.status === 'completed') {
-        this.completeTest(testInfo.id, data.results || data);
+      console.log('🔍 API test response:', data);
+
+      this.updateTestProgress(testInfo.id, 80, '📊 正在分析测试结果...');
+
+      // 模拟一些处理时间
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      if (data.success) {
+        this.updateTestProgress(testInfo.id, 100, '✅ API测试完成');
+        this.completeTest(testInfo.id, data.data || data);
       } else {
         throw new Error(data.message || 'API测试失败');
       }
     } catch (error) {
+      console.error('API test error:', error);
       this.handleTestError(testInfo.id, error);
     }
   }
@@ -476,7 +485,10 @@ class BackgroundTestManager {
       const data = await response.json();
 
       if (data.success || data.status === 'completed') {
-        this.completeTest(testInfo.id, data.results || data);
+        // 兼容性测试返回的数据结构是 { success: true, data: results }
+        const testResult = data.data || data.results || data;
+        console.log('🔍 Processing compatibility test result:', testResult);
+        this.completeTest(testInfo.id, testResult);
       } else {
         throw new Error(data.message || '兼容性测试失败');
       }

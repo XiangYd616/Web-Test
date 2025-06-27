@@ -7,6 +7,7 @@ const { query } = require('../config/database');
 const { authMiddleware, optionalAuth } = require('../middleware/auth');
 const { testRateLimiter } = require('../middleware/rateLimiter');
 const { asyncHandler } = require('../middleware/errorHandler');
+const { validateURLMiddleware, validateAPIURLMiddleware } = require('../middleware/urlValidator');
 
 // 导入测试引擎类
 const { RealTestEngine } = require('../services/realTestEngine');
@@ -252,27 +253,14 @@ router.post('/website', optionalAuth, testRateLimiter, asyncHandler(async (req, 
  * 压力测试
  * POST /api/test/stress
  */
-router.post('/stress', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
+router.post('/stress', optionalAuth, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
   const { url, options = {} } = req.body;
 
-  if (!url) {
-    return res.status(400).json({
-      success: false,
-      message: 'URL是必填的'
-    });
-  }
+  // URL验证已由中间件完成，可以直接使用验证后的URL
+  const validatedURL = req.validatedURL.url.toString();
 
   try {
-    new URL(url);
-  } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: '无效的URL格式'
-    });
-  }
-
-  try {
-    const testResult = await realStressTestEngine.runStressTest(url, {
+    const testResult = await realStressTestEngine.runStressTest(validatedURL, {
       ...options,
       userId: req.user?.id
     });
@@ -313,30 +301,17 @@ router.post('/stress', optionalAuth, testRateLimiter, asyncHandler(async (req, r
  * SEO测试
  * POST /api/test/seo
  */
-router.post('/seo', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
+router.post('/seo', optionalAuth, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
   const { url, config = {} } = req.body;
 
-  if (!url) {
-    return res.status(400).json({
-      success: false,
-      message: 'URL是必填的'
-    });
-  }
+  // URL验证已由中间件完成，可以直接使用验证后的URL
+  const validatedURL = req.validatedURL.url.toString();
 
   try {
-    new URL(url);
-  } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: '无效的URL格式'
-    });
-  }
-
-  try {
-    console.log('🔍 Starting comprehensive SEO analysis for:', url);
+    console.log('🔍 Starting comprehensive SEO analysis for:', validatedURL);
 
     // 使用专门的SEO测试引擎
-    const testResult = await realSEOTestEngine.runSEOTest(url, {
+    const testResult = await realSEOTestEngine.runSEOTest(validatedURL, {
       ...config,
       userId: req.user?.id,
       keywords: config.keywords || config.customKeywords || '',
@@ -371,28 +346,15 @@ router.post('/seo', optionalAuth, testRateLimiter, asyncHandler(async (req, res)
  * 安全测试
  * POST /api/test/security
  */
-router.post('/security', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
+router.post('/security', optionalAuth, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
   const { url, options = {} } = req.body;
 
-  if (!url) {
-    return res.status(400).json({
-      success: false,
-      message: 'URL是必填的'
-    });
-  }
-
-  try {
-    new URL(url);
-  } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: '无效的URL格式'
-    });
-  }
+  // URL验证已由中间件完成，可以直接使用验证后的URL
+  const validatedURL = req.validatedURL.url.toString();
 
   try {
     const testResult = await realSecurityTestEngine.runSecurityTest({
-      url,
+      url: validatedURL,
       checkSSL: options.checkSSL !== false,
       checkHeaders: options.checkHeaders !== false,
       checkVulnerabilities: options.checkVulnerabilities !== false,
@@ -422,27 +384,14 @@ router.post('/security', optionalAuth, testRateLimiter, asyncHandler(async (req,
  * 兼容性测试
  * POST /api/test/compatibility
  */
-router.post('/compatibility', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
+router.post('/compatibility', optionalAuth, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
   const { url, options = {} } = req.body;
 
-  if (!url) {
-    return res.status(400).json({
-      success: false,
-      message: 'URL是必填的'
-    });
-  }
+  // URL验证已由中间件完成，可以直接使用验证后的URL
+  const validatedURL = req.validatedURL.url.toString();
 
   try {
-    new URL(url);
-  } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: '无效的URL格式'
-    });
-  }
-
-  try {
-    console.log(`🌐 Starting enhanced compatibility test for: ${url}`);
+    console.log(`🌐 Starting enhanced compatibility test for: ${validatedURL}`);
     console.log(`📋 Options:`, JSON.stringify(options, null, 2));
 
     // 增强的测试配置
@@ -460,7 +409,7 @@ router.post('/compatibility', optionalAuth, testRateLimiter, asyncHandler(async 
       ...options
     };
 
-    const testResult = await realCompatibilityTestEngine.runCompatibilityTest(url, enhancedOptions);
+    const testResult = await realCompatibilityTestEngine.runCompatibilityTest(validatedURL, enhancedOptions);
 
     // 如果测试成功，生成详细报告
     if (testResult.success && testResult.data) {
@@ -536,36 +485,73 @@ router.post('/ux', optionalAuth, testRateLimiter, asyncHandler(async (req, res) 
 
 /**
  * API测试
- * POST /api/test/api
+ * POST /api/test/api-test
  */
-router.post('/api', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
-  const { url, options = {} } = req.body;
+router.post('/api-test', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
+  const {
+    baseUrl,
+    endpoints = [],
+    authentication,
+    globalHeaders = [],
+    config = {}
+  } = req.body;
 
-  if (!url) {
+  // 验证必填参数
+  if (!baseUrl) {
     return res.status(400).json({
       success: false,
-      message: 'URL是必填的'
+      message: 'API基础URL是必填的'
+    });
+  }
+
+  if (!endpoints || endpoints.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: '至少需要一个API端点'
     });
   }
 
   try {
-    new URL(url);
+    // 验证baseUrl格式
+    new URL(baseUrl);
   } catch (error) {
     return res.status(400).json({
       success: false,
-      message: '无效的URL格式'
+      message: 'API基础URL格式无效'
     });
   }
 
   try {
-    const testResult = await realAPITestEngine.runAPITest(url, {
-      ...options,
-      userId: req.user?.id
-    });
+    console.log(`🔌 Starting API test for: ${baseUrl}`);
+    console.log(`📊 Testing ${endpoints.length} endpoints`);
+
+    // 准备测试配置
+    const testConfig = {
+      baseUrl,
+      endpoints,
+      timeout: config.timeout || 10000,
+      retries: config.retries || 3,
+      validateSchema: config.validateSchema || false,
+      loadTest: config.loadTest || false,
+      testSecurity: config.testSecurity || false,
+      testPerformance: config.testPerformance || true,
+      testReliability: config.testReliability || false,
+      concurrentUsers: config.concurrentUsers || 1,
+      headers: globalHeaders.reduce((acc, header) => {
+        if (header.enabled && header.key && header.value) {
+          acc[header.key] = header.value;
+        }
+        return acc;
+      }, {}),
+      auth: authentication && authentication.type !== 'none' ? authentication : null
+    };
+
+    const testResult = await realAPITestEngine.runAPITest(testConfig);
 
     res.json({
       success: true,
-      data: testResult
+      data: testResult,
+      message: 'API测试完成'
     });
   } catch (error) {
     console.error('API测试失败:', error);

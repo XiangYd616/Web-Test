@@ -77,6 +77,7 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
 
     // 获取总体评分，支持多种数据结构
     const overallScore = latestResult.overallScore ||
+                        (latestResult as any).securityScore ||
                         (latestResult.scores && latestResult.scores.overall) ||
                         0;
 
@@ -228,19 +229,20 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
   // 生成发现问题的分布数据
   const findingsData = useMemo(() => {
     // 支持多种问题数据结构
-    const findings = latestResult?.findings || latestResult?.issues || [];
+    const findings = latestResult?.findings || (latestResult as any)?.vulnerabilities || latestResult?.issues || [];
     if (!findings || findings.length === 0) return [];
 
-    const severityCount = findings.reduce((acc, finding) => {
-      acc[finding.severity] = (acc[finding.severity] || 0) + 1;
+    const severityCount = findings.reduce((acc: Record<string, number>, finding: any) => {
+      const severity = finding.severity || finding.level || 'low';
+      acc[severity] = (acc[severity] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
     return [
       { name: '严重', value: severityCount.critical || 0, color: currentColors.danger },
-      { name: '高危', value: severityCount.high || 0, color: '#F97316' },
-      { name: '中危', value: severityCount.medium || 0, color: currentColors.warning },
-      { name: '低危', value: severityCount.low || 0, color: currentColors.success }
+      { name: '高危', value: severityCount.high || severityCount['高'] || 0, color: '#F97316' },
+      { name: '中危', value: severityCount.medium || severityCount['中'] || 0, color: currentColors.warning },
+      { name: '低危', value: severityCount.low || severityCount['低'] || 0, color: currentColors.success }
     ].filter(item => item.value > 0);
   }, [latestResult, currentColors]);
 
@@ -433,27 +435,27 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
         <div className={`p-3 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
           <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>总体评分</div>
           <div className={`text-xl font-bold ${
-            latestResult.overallScore >= 90 ? 'text-green-500' : 
-            latestResult.overallScore >= 70 ? 'text-yellow-500' : 'text-red-500'
+            (latestResult.overallScore || (latestResult as any).securityScore || 0) >= 90 ? 'text-green-500' :
+            (latestResult.overallScore || (latestResult as any).securityScore || 0) >= 70 ? 'text-yellow-500' : 'text-red-500'
           }`}>
-            {Math.round(latestResult.overallScore)}
+            {Math.round(latestResult.overallScore || (latestResult as any).securityScore || 0)}
           </div>
         </div>
         
         <div className={`p-3 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
           <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>测试时长</div>
           <div className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-            {latestResult.duration.toFixed(1)}s
+            {latestResult.duration ? latestResult.duration.toFixed(1) : '0.0'}s
           </div>
         </div>
-        
+
         <div className={`p-3 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
           <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>发现问题</div>
           <div className={`text-xl font-bold ${
-            latestResult.findings.length === 0 ? 'text-green-500' : 
-            latestResult.findings.length <= 3 ? 'text-yellow-500' : 'text-red-500'
+            (latestResult.findings || (latestResult as any).vulnerabilities || []).length === 0 ? 'text-green-500' :
+            (latestResult.findings || (latestResult as any).vulnerabilities || []).length <= 3 ? 'text-yellow-500' : 'text-red-500'
           }`}>
-            {latestResult.findings.length}
+            {(latestResult.findings || (latestResult as any).vulnerabilities || []).length}
           </div>
         </div>
         

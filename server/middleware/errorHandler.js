@@ -201,8 +201,18 @@ process.on('unhandledRejection', (err, promise) => {
  */
 process.on('uncaughtException', (err) => {
   console.error('未捕获的异常:', err.message);
-  logError(err, { method: 'SYSTEM', originalUrl: 'uncaughtException', ip: 'system' });
-  
+
+  // 创建一个模拟的req对象用于日志记录
+  const mockReq = {
+    method: 'SYSTEM',
+    originalUrl: 'uncaughtException',
+    ip: 'system',
+    get: (header) => header === 'User-Agent' ? 'System Process' : null,
+    user: null
+  };
+
+  logError(err, mockReq);
+
   // 优雅关闭
   process.exit(1);
 });

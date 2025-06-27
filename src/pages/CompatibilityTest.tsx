@@ -6,6 +6,7 @@ import { AdvancedTestConfig } from '../services/advancedTestEngine';
 import AdvancedTestCharts from '../components/AdvancedTestCharts';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { useUserStats } from '../hooks/useUserStats';
+import URLInput from '../components/URLInput';
 
 interface CompatibilityConfig extends AdvancedTestConfig {
   checkDesktop: boolean;
@@ -256,12 +257,11 @@ const CompatibilityTest: React.FC = () => {
           <label className="block text-sm font-medium text-gray-300 mb-2">
             测试URL
           </label>
-          <input
-            type="url"
+          <URLInput
             value={config.url}
-            onChange={(e) => setConfig(prev => ({ ...prev, url: e.target.value }))}
-            className="themed-input"
+            onChange={(url) => setConfig(prev => ({ ...prev, url }))}
             placeholder="https://www.example.com"
+            enableReachabilityCheck={false}
           />
         </div>
 
@@ -440,7 +440,7 @@ const CompatibilityTest: React.FC = () => {
                   </div>
                   <div className="text-sm text-gray-300 mt-1">总体兼容性评分</div>
                   <div className="text-xs text-gray-400 mt-2">
-                    测试时间: {results.actualDuration ? `${results.actualDuration.toFixed(1)}秒` : '未知'}
+                    测试时间: {results.duration ? `${results.duration.toFixed(1)}秒` : '未知'}
                   </div>
                 </div>
 

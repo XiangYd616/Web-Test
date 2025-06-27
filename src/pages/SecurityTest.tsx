@@ -98,6 +98,11 @@ const SecurityTest: React.FC = () => {
     clearError
   } = useAdvancedTestEngine();
 
+  // 添加本地状态管理
+  const [localResults, setLocalResults] = useState<any>(null);
+  const [localError, setLocalError] = useState<string | null>(null);
+  const [isLocalRunning, setIsLocalRunning] = useState(false);
+
   // 状态管理
   const [testStatus, setTestStatus] = useState<'idle' | 'starting' | 'running' | 'completed' | 'failed'>('idle');
 
@@ -180,10 +185,7 @@ const SecurityTest: React.FC = () => {
     }));
   };
 
-  // 添加本地状态管理
-  const [localResults, setLocalResults] = useState<any>(null);
-  const [localError, setLocalError] = useState<string | null>(null);
-  const [isLocalRunning, setIsLocalRunning] = useState(false);
+
 
   const handleStartTest = async () => {
     // 检查登录状态

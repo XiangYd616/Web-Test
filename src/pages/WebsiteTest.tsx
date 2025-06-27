@@ -25,6 +25,7 @@ import { AdvancedTestConfig } from '../services/advancedTestEngine';
 import AdvancedTestCharts from '../components/AdvancedTestCharts';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { useUserStats } from '../hooks/useUserStats';
+import URLInput from '../components/URLInput';
 
 interface WebsiteTestConfig extends AdvancedTestConfig {
   testTypes: {
@@ -486,12 +487,11 @@ const WebsiteTest: React.FC = () => {
         {/* URL 输入 */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-300">测试URL</label>
-          <input
-            type="url"
+          <URLInput
             value={config.url}
-            onChange={(e) => setConfig(prev => ({ ...prev, url: e.target.value }))}
+            onChange={(url) => setConfig(prev => ({ ...prev, url }))}
             placeholder="输入要测试的网站URL..."
-            className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            enableReachabilityCheck={false}
           />
         </div>
       </div>

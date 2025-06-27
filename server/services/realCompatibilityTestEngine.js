@@ -90,6 +90,7 @@ class RealCompatibilityTestEngine {
       results.status = 'completed';
       results.endTime = new Date().toISOString();
       results.actualDuration = (Date.now() - startTime) / 1000;
+      results.duration = results.actualDuration; // 确保两个字段都存在
 
       console.log(`✅ Compatibility test completed for: ${url}`);
       console.log(`📊 Overall Score: ${Math.round(results.overallScore)}`);
@@ -101,11 +102,13 @@ class RealCompatibilityTestEngine {
       results.status = 'failed';
       results.error = error.message;
       results.endTime = new Date().toISOString();
-      
-      return { 
-        success: false, 
+      results.actualDuration = (Date.now() - startTime) / 1000;
+      results.duration = results.actualDuration; // 确保两个字段都存在
+
+      return {
+        success: false,
         error: error.message,
-        data: results 
+        data: results
       };
     }
   }
