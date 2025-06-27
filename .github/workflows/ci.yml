@@ -1,0 +1,402 @@
+name: Test Web App CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # 每天凌晨2点运行完整测试
+    - cron: '0 2 * * *'
+
+env:
+  NODE_VERSION: '18'
+  PYTHON_VERSION: '3.9'
+
+jobs:
+  # 代码质量检查
+  code-quality:
+    name: Code Quality Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type checking
+        run: npm run type-check
+
+      - name: Lint check
+        run: npm run lint --if-present
+
+      - name: Format check
+        run: npm run format:check --if-present
+
+  # 单元测试
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: code-quality
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm run test:run
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        if: always()
+        with:
+          file: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+
+  # 构建测试
+  build-test:
+    name: Build Test
+    runs-on: ${{ matrix.os }}
+    needs: code-quality
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build web application
+        run: npm run build
+
+      - name: Build desktop application
+        run: npm run build:desktop:quick
+        if: matrix.os == 'ubuntu-latest'
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.os }}
+          path: |
+            dist/
+            dist-electron/
+          retention-days: 7
+
+  # 集成测试
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [unit-tests, build-test]
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: testweb_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          pip install playwright pytest
+
+      - name: Install Playwright browsers
+        run: npx playwright install
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-ubuntu-latest
+
+      - name: Start application
+        run: |
+          npm run preview &
+          sleep 10
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/testweb_test
+
+      - name: Run integration tests
+        run: npm run test:integration --if-present
+
+      - name: Run E2E tests
+        run: npx playwright test --if-present
+
+  # 性能测试
+  performance-tests:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    needs: build-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-ubuntu-latest
+
+      - name: Start application
+        run: |
+          npm run preview &
+          sleep 10
+
+      - name: Run stress tests
+        run: |
+          node -e "
+          const { realStressTestEngine } = require('./src/services/realStressTestEngine');
+          const config = {
+            url: 'http://localhost:4173',
+            users: 50,
+            duration: 60,
+            rampUpTime: 10
+          };
+          realStressTestEngine.runStressTest(config).then(result => {
+            console.log('Performance Test Results:', JSON.stringify(result, null, 2));
+            if (result.overallScore < 70) {
+              process.exit(1);
+            }
+          }).catch(err => {
+            console.error('Performance test failed:', err);
+            process.exit(1);
+          });
+          "
+
+      - name: Run API performance tests
+        run: |
+          node -e "
+          const { APITestEngine } = require('./src/services/apiTestEngine');
+          const engine = new APITestEngine();
+          const config = {
+            baseUrl: 'http://localhost:4173',
+            endpoints: [
+              { id: '1', name: 'Health Check', method: 'GET', path: '/api/health', expectedStatus: [200], priority: 'high' }
+            ],
+            timeout: 5000,
+            retries: 3,
+            loadTest: true,
+            concurrentUsers: 20,
+            testSecurity: true,
+            testPerformance: true,
+            testReliability: true
+          };
+          engine.runAPITest(config).then(result => {
+            console.log('API Performance Results:', JSON.stringify(result, null, 2));
+            if (result.overallScore < 75) {
+              process.exit(1);
+            }
+          }).catch(err => {
+            console.error('API performance test failed:', err);
+            process.exit(1);
+          });
+          "
+
+  # 安全扫描
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: build-test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-ubuntu-latest
+
+      - name: Start application
+        run: |
+          npm run preview &
+          sleep 10
+
+      - name: Run security tests
+        run: |
+          node -e "
+          const { SecurityTestEngine } = require('./src/services/securityTestEngine');
+          const engine = new SecurityTestEngine();
+          const config = {
+            url: 'http://localhost:4173',
+            testSSL: true,
+            testHeaders: true,
+            testVulnerabilities: true,
+            testAuthentication: false
+          };
+          engine.runSecurityTest(config).then(result => {
+            console.log('Security Test Results:', JSON.stringify(result, null, 2));
+            if (result.overallScore < 80) {
+              console.warn('Security score below threshold');
+            }
+          }).catch(err => {
+            console.error('Security test failed:', err);
+            process.exit(1);
+          });
+          "
+
+  # 质量门禁
+  quality-gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests, performance-tests, security-scan]
+    if: always()
+    steps:
+      - name: Check test results
+        run: |
+          echo "Unit Tests: ${{ needs.unit-tests.result }}"
+          echo "Integration Tests: ${{ needs.integration-tests.result }}"
+          echo "Performance Tests: ${{ needs.performance-tests.result }}"
+          echo "Security Scan: ${{ needs.security-scan.result }}"
+          
+          if [[ "${{ needs.unit-tests.result }}" != "success" ]]; then
+            echo "❌ Unit tests failed"
+            exit 1
+          fi
+          
+          if [[ "${{ needs.integration-tests.result }}" != "success" ]]; then
+            echo "❌ Integration tests failed"
+            exit 1
+          fi
+          
+          if [[ "${{ needs.performance-tests.result }}" == "failure" ]]; then
+            echo "❌ Performance tests failed"
+            exit 1
+          fi
+          
+          if [[ "${{ needs.security-scan.result }}" == "failure" ]]; then
+            echo "❌ Security scan failed"
+            exit 1
+          fi
+          
+          echo "✅ All quality checks passed!"
+
+  # 部署到测试环境
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: quality-gate
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    environment:
+      name: staging
+      url: https://staging.testweb.app
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-ubuntu-latest
+
+      - name: Deploy to staging
+        run: |
+          echo "🚀 Deploying to staging environment..."
+          # 这里添加实际的部署脚本
+          # 例如：rsync, scp, 或云服务商的部署工具
+
+  # 部署到生产环境
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: quality-gate
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: production
+      url: https://testweb.app
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-ubuntu-latest
+
+      - name: Deploy to production
+        run: |
+          echo "🚀 Deploying to production environment..."
+          # 这里添加实际的部署脚本
+
+      - name: Post-deployment tests
+        run: |
+          echo "🧪 Running post-deployment tests..."
+          # 添加生产环境的冒烟测试

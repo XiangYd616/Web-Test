@@ -1,0 +1,124 @@
+/* 进度条样式 */
+.progress-bar {
+  width: 100%;
+  background-color: var(--bg-tertiary, #374151);
+  border-radius: 9999px;
+  height: 0.5rem;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.3s ease-in-out;
+}
+
+.progress-fill-blue {
+  background-color: #3b82f6;
+}
+
+.progress-fill-purple {
+  background-color: #8b5cf6;
+}
+
+.progress-fill-green {
+  background-color: #10b981;
+}
+
+.progress-fill-red {
+  background-color: #ef4444;
+}
+
+.progress-fill-yellow {
+  background-color: #f59e0b;
+}
+
+/* 圆形进度条 */
+.circular-progress {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.circular-progress svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.circular-progress-bg {
+  fill: none;
+  stroke: #374151;
+  stroke-width: 8;
+}
+
+.circular-progress-fill {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.3s ease-in-out;
+}
+
+.circular-progress-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+/* 动画点 */
+.loading-dots {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.loading-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: #9ca3af;
+  border-radius: 50%;
+  animation: bounce 1.4s ease-in-out infinite both;
+}
+
+.loading-dot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.loading-dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.loading-dot:nth-child(3) {
+  animation-delay: 0s;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+/* 主题变量支持 */
+.themed-progress-bar {
+  background-color: var(--bg-tertiary);
+}
+
+.themed-progress-fill {
+  background-color: var(--accent-primary);
+}
+
+/* 响应式调整 */
+@media (max-width: 640px) {
+  .circular-progress {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .progress-bar {
+    height: 0.375rem;
+  }
+}

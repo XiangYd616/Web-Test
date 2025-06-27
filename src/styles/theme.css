@@ -1,0 +1,508 @@
+/* 全局主题样式 */
+
+/* CSS变量定义 */
+:root {
+  /* 默认深色主题变量 */
+  --bg-primary: #1f2937;
+  --bg-secondary: #374151;
+  --bg-tertiary: #4b5563;
+  --text-primary: #ffffff;
+  --text-secondary: #d1d5db;
+  --text-tertiary: #9ca3af;
+  --border-primary: #4b5563;
+  --border-secondary: #6b7280;
+  --accent-primary: #3b82f6;
+  --accent-secondary: #1d4ed8;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --error-color: #ef4444;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  
+  /* 渐变背景 */
+  --gradient-primary: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
+  --gradient-secondary: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+  --gradient-accent: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px 0 var(--shadow-color);
+  --shadow-md: 0 4px 6px -1px var(--shadow-color);
+  --shadow-lg: 0 10px 15px -3px var(--shadow-color);
+  --shadow-xl: 0 20px 25px -5px var(--shadow-color);
+  
+  /* 边框半径 */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  
+  /* 间距 */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+}
+
+/* 浅色主题变量 */
+.light-theme {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #64748b;
+  --border-primary: #e2e8f0;
+  --border-secondary: #cbd5e1;
+  --accent-primary: #3b82f6;
+  --accent-secondary: #1d4ed8;
+  --success-color: #059669;
+  --warning-color: #d97706;
+  --error-color: #dc2626;
+  --shadow-color: rgba(15, 23, 42, 0.08);
+
+  /* 登录页面专用变量 - 优化配色 */
+  --gradient-primary: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 30%, #f1f5f9 70%, #fdf2f8 100%);
+  --card-background: rgba(255, 255, 255, 0.90);
+  --input-background: rgba(255, 255, 255, 0.98);
+  --input-border: #cbd5e1;
+  --border-color: #cbd5e1;
+  --secondary-button-background: rgba(248, 250, 252, 0.95);
+  --error-background: rgba(254, 242, 242, 0.98);
+  --error-border: #f87171;
+  --error-text: #dc2626;
+
+  /* 新增变量 */
+  --card-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(15, 23, 42, 0.05);
+  --input-focus-ring: rgba(59, 130, 246, 0.20);
+  --button-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.25);
+  --text-gradient: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+  --link-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+}
+
+/* 深色主题变量 */
+.dark-theme {
+  --bg-primary: #1f2937;
+  --bg-secondary: #374151;
+  --bg-tertiary: #4b5563;
+  --text-primary: #ffffff;
+  --text-secondary: #d1d5db;
+  --text-tertiary: #9ca3af;
+  --border-primary: #4b5563;
+  --border-secondary: #6b7280;
+  --accent-primary: #3b82f6;
+  --accent-secondary: #1d4ed8;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --error-color: #ef4444;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+
+  /* 登录页面专用变量 */
+  --gradient-primary: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  --card-background: rgba(31, 41, 55, 0.95);
+  --input-background: rgba(55, 65, 81, 0.8);
+  --input-border: #4b5563;
+  --border-color: #4b5563;
+  --secondary-button-background: rgba(55, 65, 81, 0.6);
+  --error-background: rgba(127, 29, 29, 0.3);
+  --error-border: #f87171;
+  --error-text: #fca5a5;
+}
+
+/* 全局基础样式 */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--gradient-primary);
+  color: var(--text-primary);
+  transition: all 0.3s ease-in-out;
+  min-height: 100vh;
+}
+
+/* 主题切换动画 */
+.theme-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 通用组件样式 */
+.themed-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  color: var(--text-primary);
+  transition: all 0.2s ease-in-out;
+}
+
+.themed-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.themed-input {
+  background: var(--input-background, var(--bg-primary));
+  border: 2px solid var(--input-border, var(--border-primary));
+  border-radius: 12px;
+  color: var(--text-primary);
+  padding: 12px 16px;
+  width: 100%;
+  font-size: 14px;
+  transition: all 0.2s ease-in-out;
+}
+
+.themed-input:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--input-focus-ring, rgba(59, 130, 246, 0.15));
+}
+
+.themed-input:hover {
+  border-color: var(--border-secondary);
+}
+
+.themed-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.themed-button {
+  background: var(--gradient-accent);
+  border: none;
+  border-radius: var(--radius-md);
+  color: white;
+  cursor: pointer;
+  font-weight: 500;
+  padding: var(--spacing-md) var(--spacing-lg);
+  transition: all 0.2s ease-in-out;
+}
+
+.themed-button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.themed-button:active {
+  transform: translateY(0);
+}
+
+.themed-button-secondary {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-weight: 500;
+  padding: var(--spacing-md) var(--spacing-lg);
+  transition: all 0.2s ease-in-out;
+}
+
+.themed-button-secondary:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--border-secondary);
+}
+
+/* 状态颜色 */
+.text-success {
+  color: var(--success-color);
+}
+
+.text-warning {
+  color: var(--warning-color);
+}
+
+.text-error {
+  color: var(--error-color);
+}
+
+.bg-success {
+  background-color: var(--success-color);
+}
+
+.bg-warning {
+  background-color: var(--warning-color);
+}
+
+.bg-error {
+  background-color: var(--error-color);
+}
+
+/* 主题切换按钮样式 */
+.theme-toggle {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 50%;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md);
+  transition: all 0.2s ease-in-out;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.theme-toggle:hover {
+  background: var(--bg-tertiary);
+  transform: scale(1.05);
+}
+
+.theme-toggle:active {
+  transform: scale(0.95);
+}
+
+/* 侧边栏主题样式 */
+.themed-sidebar {
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-primary);
+  color: var(--text-primary);
+}
+
+.themed-sidebar-item {
+  color: var(--text-secondary);
+  transition: all 0.2s ease-in-out;
+}
+
+.themed-sidebar-item:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.themed-sidebar-item.active {
+  background: var(--accent-primary);
+  color: white;
+}
+
+/* 顶部导航栏主题样式 */
+.themed-navbar {
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-primary);
+  color: var(--text-primary);
+}
+
+/* 模态框主题样式 */
+.themed-modal {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  color: var(--text-primary);
+}
+
+.themed-modal-overlay {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+/* 表格主题样式 */
+.themed-table {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+}
+
+.themed-table th {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-primary);
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.themed-table td {
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.themed-table tr:hover {
+  background: var(--bg-secondary);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  :root {
+    --spacing-xs: 0.125rem;
+    --spacing-sm: 0.25rem;
+    --spacing-md: 0.75rem;
+    --spacing-lg: 1rem;
+    --spacing-xl: 1.5rem;
+    --spacing-2xl: 2rem;
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .light-theme,
+  .dark-theme {
+    --bg-primary: white;
+    --bg-secondary: white;
+    --bg-tertiary: white;
+    --text-primary: black;
+    --text-secondary: black;
+    --text-tertiary: black;
+    --border-primary: #ccc;
+    --border-secondary: #999;
+    --shadow-color: transparent;
+  }
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+  :root {
+    --border-primary: currentColor;
+    --border-secondary: currentColor;
+  }
+}
+
+/* 减少动画模式支持 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 页面级主题样式 */
+.themed-page {
+  background: var(--gradient-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+.themed-page-title {
+  color: var(--text-primary);
+}
+
+.themed-page-subtitle {
+  color: var(--text-secondary);
+}
+
+.themed-page-description {
+  color: var(--text-tertiary);
+}
+
+/* 表单主题样式 */
+.themed-form-label {
+  color: var(--text-secondary);
+}
+
+.themed-form-error {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: var(--error-color);
+}
+
+.themed-form-success {
+  background-color: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: var(--success-color);
+}
+
+.themed-form-warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: var(--warning-color);
+}
+
+/* 图标主题样式 */
+.themed-icon-primary {
+  color: var(--text-primary);
+}
+
+.themed-icon-secondary {
+  color: var(--text-secondary);
+}
+
+.themed-icon-tertiary {
+  color: var(--text-tertiary);
+}
+
+.themed-icon-accent {
+  color: var(--accent-primary);
+}
+
+/* 进度条主题样式 */
+.themed-progress-bg {
+  background-color: var(--bg-tertiary);
+}
+
+.themed-progress-bar {
+  background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary));
+}
+
+/* 状态徽章主题样式 */
+.themed-badge-success {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: var(--success-color);
+}
+
+.themed-badge-warning {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: var(--warning-color);
+}
+
+.themed-badge-error {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: var(--error-color);
+}
+
+.themed-badge-info {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: var(--accent-primary);
+}
+
+/* 分隔线主题样式 */
+.themed-divider {
+  border-color: var(--border-primary);
+}
+
+/* 加载动画主题样式 */
+.themed-spinner {
+  border-color: var(--accent-primary);
+}
+
+/* 选项卡主题样式 */
+.themed-tab {
+  color: var(--text-tertiary);
+  border-color: transparent;
+}
+
+.themed-tab.active {
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.themed-tab:hover {
+  color: var(--text-secondary);
+}
+
+/* 测试结果卡片主题样式 */
+.themed-test-card {
+  border: 1px solid var(--border-primary);
+  background-color: var(--bg-secondary);
+}
+
+.themed-test-metrics {
+  background-color: var(--bg-tertiary);
+}
+
+/* 统计卡片主题样式 */
+.themed-stat-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+/* 登录页面特殊样式 */
+.themed-login-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  backdrop-filter: blur(20px);
+}
+
+/* 主题切换过渡 */
+.theme-transition * {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
