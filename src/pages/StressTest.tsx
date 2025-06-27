@@ -697,18 +697,18 @@ const StressTest: React.FC = () => {
 
             {isRunning ? (
               <div className="space-y-6">
-                {/* JMeter风格线性图表 - 扩大显示 */}
-                <div className="bg-white rounded-lg p-6 h-80">
-                  <svg className="w-full h-full" viewBox="0 0 500 280">
-                    {/* 网格线 - 扩大网格 */}
+                {/* JMeter风格线性图表 - 扩大横轴显示范围 */}
+                <div className="bg-white rounded-lg p-4 h-80">
+                  <svg className="w-full h-full" viewBox="0 0 800 280">
+                    {/* 网格线 - 扩大横轴网格 */}
                     <defs>
-                      <pattern id="grid" width="50" height="40" patternUnits="userSpaceOnUse">
-                        <path d="M 50 0 L 0 0 0 40" fill="none" stroke="#e5e7eb" strokeWidth="0.5"/>
+                      <pattern id="grid" width="40" height="35" patternUnits="userSpaceOnUse">
+                        <path d="M 40 0 L 0 0 0 35" fill="none" stroke="#e5e7eb" strokeWidth="0.5"/>
                       </pattern>
                     </defs>
-                    <rect width="500" height="280" fill="url(#grid)" />
+                    <rect width="800" height="280" fill="url(#grid)" />
 
-                    {/* Y轴标签 - 调整位置 */}
+                    {/* Y轴标签 - 保持位置 */}
                     <g className="text-sm" fill="#6b7280">
                       <text x="8" y="25" fontSize="12">{testConfig.users}</text>
                       <text x="8" y="75" fontSize="12">{Math.floor(testConfig.users * 0.75)}</text>
@@ -717,19 +717,21 @@ const StressTest: React.FC = () => {
                       <text x="8" y="225" fontSize="12">0</text>
                     </g>
 
-                    {/* X轴标签 - 调整位置 */}
+                    {/* X轴标签 - 扩大横轴范围 */}
                     <g className="text-sm" fill="#6b7280">
-                      <text x="50" y="270" fontSize="12">0s</text>
-                      <text x="150" y="270" fontSize="12">15s</text>
-                      <text x="250" y="270" fontSize="12">30s</text>
-                      <text x="350" y="270" fontSize="12">45s</text>
-                      <text x="450" y="270" fontSize="12">60s</text>
+                      <text x="60" y="270" fontSize="12">0s</text>
+                      <text x="180" y="270" fontSize="12">10s</text>
+                      <text x="300" y="270" fontSize="12">20s</text>
+                      <text x="420" y="270" fontSize="12">30s</text>
+                      <text x="540" y="270" fontSize="12">40s</text>
+                      <text x="660" y="270" fontSize="12">50s</text>
+                      <text x="780" y="270" fontSize="12">60s</text>
                     </g>
 
                     {/* 活跃线程数曲线 - 绿色 */}
                     <path
-                      d={`M 50,200 ${Array.from({length: 40}, (_, i) => {
-                        const x = 50 + i * 10;
+                      d={`M 60,200 ${Array.from({length: 60}, (_, i) => {
+                        const x = 60 + i * 12;
                         const baseY = 200 - (liveStats.activeUsers || Math.floor(testConfig.users * 0.8)) / testConfig.users * 150;
                         const variance = Math.sin((Date.now() / 1000) + i * 0.3) * 12;
                         return `L ${x},${baseY + variance}`;
@@ -742,8 +744,8 @@ const StressTest: React.FC = () => {
 
                     {/* 响应时间曲线 - 蓝色 */}
                     <path
-                      d={`M 50,160 ${Array.from({length: 40}, (_, i) => {
-                        const x = 50 + i * 10;
+                      d={`M 60,160 ${Array.from({length: 60}, (_, i) => {
+                        const x = 60 + i * 12;
                         const baseY = 160 + Math.sin((Date.now() / 2000) + i * 0.4) * 20;
                         return `L ${x},${baseY}`;
                       }).join(' ')}`}
@@ -755,8 +757,8 @@ const StressTest: React.FC = () => {
 
                     {/* 错误率曲线 - 红色 */}
                     <path
-                      d={`M 50,210 ${Array.from({length: 40}, (_, i) => {
-                        const x = 50 + i * 10;
+                      d={`M 60,210 ${Array.from({length: 60}, (_, i) => {
+                        const x = 60 + i * 12;
                         const errorRate = (liveStats.errorUsers || Math.floor(testConfig.users * 0.1)) / testConfig.users;
                         const baseY = 210 - errorRate * 80;
                         const variance = Math.random() * 6;
@@ -817,11 +819,12 @@ const StressTest: React.FC = () => {
               </div>
             ) : (
               <div className="text-center py-12">
-                <div className="bg-white rounded-lg p-8 h-80 mb-6 flex items-center justify-center">
+                <div className="bg-white rounded-lg p-4 h-80 mb-6 flex items-center justify-center">
                   <div className="text-center">
                     <TrendingUp className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                     <div className="text-gray-500 font-medium text-lg">JMeter Style Chart</div>
                     <div className="text-gray-400 text-base mt-2">等待测试开始...</div>
+                    <div className="text-gray-500 text-sm mt-3">横轴范围: 0-60秒，更宽的时间显示</div>
                   </div>
                 </div>
                 <p className="text-gray-400 text-base">测试开始后将显示专业级压力测试图表</p>
