@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { Link, Globe, AlertCircle, CheckCircle, Loader, AlertTriangle } from 'lucide-react';
-import { validateURL, URLValidationResult } from '../utils/urlValidator';
+import { AlertCircle, AlertTriangle, CheckCircle, Globe, Link, Loader } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { URLValidationResult, validateURL } from '../../utils/urlValidator';
 
 interface URLInputProps {
   value: string;
@@ -111,12 +111,12 @@ const URLInput: React.FC<URLInputProps> = ({
             ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
           `}
         />
-        
+
         {/* 左侧图标 */}
         <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
           <Globe className={`w-5 h-5 ${getIconColor()}`} />
         </div>
-        
+
         {/* 右侧状态图标 */}
         <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
           {isChecking && (

@@ -1,22 +1,22 @@
-import React, { useState } from 'react';
 import {
-  Play,
-  FileText,
-  Search,
   AlertTriangle,
+  BarChart3,
   CheckCircle,
+  Download,
+  FileText,
   Link,
   Loader,
-  XCircle,
-  Download,
-  BarChart3,
-  Square,
   Lock,
+  Play,
+  Search,
   Shield,
-  Smartphone
+  Smartphone,
+  Square,
+  XCircle
 } from 'lucide-react';
-import URLInput from '../components/URLInput';
-import { EnhancedContentAnalysis } from '../components/EnhancedContentAnalysis';
+import React, { useState } from 'react';
+import { EnhancedContentAnalysis } from '../components/analysis';
+import { URLInput } from '../components/testing';
 import { useSimpleTestEngine } from '../hooks/useSimpleTestEngine';
 // import { ContentTestTemplateManager } from '../utils/testTemplates';
 import { formatScore } from '../utils/numberFormatter';
@@ -386,13 +386,12 @@ const ContentTest: React.FC = () => {
                 type="button"
                 onClick={handleStartTest}
                 disabled={!testConfig.url}
-                className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition-all duration-200 ${
-                  !testConfig.url
+                className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition-all duration-200 ${!testConfig.url
                     ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                     : isAuthenticated
-                    ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800'
-                    : 'bg-yellow-600 hover:bg-yellow-700 text-white border border-yellow-500/30'
-                }`}
+                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800'
+                      : 'bg-yellow-600 hover:bg-yellow-700 text-white border border-yellow-500/30'
+                  }`}
               >
                 {isAuthenticated ? (
                   <Play className="w-4 h-4" />
@@ -568,63 +567,61 @@ const ContentTest: React.FC = () => {
               ].map((test) => {
                 const isChecked = Boolean(testConfig[test.key as keyof SimpleContentTestConfig]);
                 return (
-                <div
-                  key={test.key}
-                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                    isChecked
-                      ? `border-${test.color}-500 bg-${test.color}-500/10`
-                      : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
-                  }`}
-                  onClick={() => setTestConfig(prev => ({ ...prev, [test.key]: !prev[test.key as keyof SimpleContentTestConfig] }))}
-                >
-                  <div className="flex items-start space-x-3">
-                    <div className={`w-10 h-10 bg-${test.color}-500/20 rounded-lg flex items-center justify-center`}>
-                      <test.icon className={`w-5 h-5 text-${test.color}-400`} />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-semibold text-white">{test.name}</h4>
-                        <div className="relative">
-                          <input
-                            type="checkbox"
-                            id={`content-test-${test.key}`}
-                            checked={testConfig[test.key as keyof SimpleContentTestConfig] as boolean}
-                            onChange={() => setTestConfig(prev => ({ ...prev, [test.key]: !prev[test.key as keyof SimpleContentTestConfig] }))}
-                            className="sr-only"
-                            aria-label={`启用或禁用${test.name}检测`}
-                            title={`启用或禁用${test.name}检测`}
-                          />
-                          <div
-                            className={`w-6 h-6 rounded-lg border-2 cursor-pointer transition-all duration-200 flex items-center justify-center ${
-                              isChecked
-                                ? `border-${test.color}-500 bg-${test.color}-500 shadow-lg shadow-${test.color}-500/25`
-                                : 'border-gray-500 bg-gray-700/50 hover:border-gray-400 hover:bg-gray-600/50'
-                            }`}
-                            onClick={() => setTestConfig(prev => ({ ...prev, [test.key]: !prev[test.key as keyof SimpleContentTestConfig] }))}
-                            role="checkbox"
-                            aria-checked={isChecked ? "true" : "false"}
-                            aria-labelledby={`content-test-${test.key}`}
-                            tabIndex={0}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' || e.key === ' ') {
-                                e.preventDefault();
-                                setTestConfig(prev => ({ ...prev, [test.key]: !prev[test.key as keyof SimpleContentTestConfig] }));
-                              }
-                            }}
-                          >
-                            {isChecked && (
-                              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                              </svg>
-                            )}
+                  <div
+                    key={test.key}
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${isChecked
+                        ? `border-${test.color}-500 bg-${test.color}-500/10`
+                        : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
+                      }`}
+                    onClick={() => setTestConfig(prev => ({ ...prev, [test.key]: !prev[test.key as keyof SimpleContentTestConfig] }))}
+                  >
+                    <div className="flex items-start space-x-3">
+                      <div className={`w-10 h-10 bg-${test.color}-500/20 rounded-lg flex items-center justify-center`}>
+                        <test.icon className={`w-5 h-5 text-${test.color}-400`} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-semibold text-white">{test.name}</h4>
+                          <div className="relative">
+                            <input
+                              type="checkbox"
+                              id={`content-test-${test.key}`}
+                              checked={testConfig[test.key as keyof SimpleContentTestConfig] as boolean}
+                              onChange={() => setTestConfig(prev => ({ ...prev, [test.key]: !prev[test.key as keyof SimpleContentTestConfig] }))}
+                              className="sr-only"
+                              aria-label={`启用或禁用${test.name}检测`}
+                              title={`启用或禁用${test.name}检测`}
+                            />
+                            <div
+                              className={`w-6 h-6 rounded-lg border-2 cursor-pointer transition-all duration-200 flex items-center justify-center ${isChecked
+                                  ? `border-${test.color}-500 bg-${test.color}-500 shadow-lg shadow-${test.color}-500/25`
+                                  : 'border-gray-500 bg-gray-700/50 hover:border-gray-400 hover:bg-gray-600/50'
+                                }`}
+                              onClick={() => setTestConfig(prev => ({ ...prev, [test.key]: !prev[test.key as keyof SimpleContentTestConfig] }))}
+                              role="checkbox"
+                              aria-checked={isChecked ? "true" : "false"}
+                              aria-labelledby={`content-test-${test.key}`}
+                              tabIndex={0}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  setTestConfig(prev => ({ ...prev, [test.key]: !prev[test.key as keyof SimpleContentTestConfig] }));
+                                }
+                              }}
+                            >
+                              {isChecked && (
+                                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              )}
+                            </div>
                           </div>
                         </div>
+                        <p className="text-sm text-gray-300 mt-1">{test.description}</p>
+                        <p className="text-xs text-gray-400 mt-2">预计时间: {test.estimatedTime}</p>
                       </div>
-                      <p className="text-sm text-gray-300 mt-1">{test.description}</p>
-                      <p className="text-xs text-gray-400 mt-2">预计时间: {test.estimatedTime}</p>
                     </div>
                   </div>
-                </div>
                 );
               })}
             </div>

@@ -8,3 +8,10 @@ export { default as EnhancedStressTestCharts } from './EnhancedStressTestCharts'
 export { default as SimpleCharts } from './SimpleCharts';
 export { default as TestComparisonCharts } from './TestComparisonCharts';
 export { default as UnifiedStressTestCharts } from './UnifiedStressTestCharts';
+
+// 从 SimpleCharts 导出特定组件
+export {
+    AdvancedStressTestChart,
+    RealTimeStressTestChart
+} from './SimpleCharts';
+

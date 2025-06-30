@@ -9,7 +9,7 @@ import {
   TrendingUp
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { TestTemplate, TestTemplateService } from '../../services/testing/testTemplates';
+import { TestTemplate, TestTemplateService } from '../../services/testTemplates';
 
 interface TestTemplateSelectorProps {
   onSelectTemplate: (template: TestTemplate) => void;
@@ -198,8 +198,8 @@ const TestTemplateSelector: React.FC<TestTemplateSelectorProps> = ({
               type="button"
               onClick={() => setShowFavorites(!showFavorites)}
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${showFavorites
-                  ? 'bg-yellow-100 text-yellow-800'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-yellow-100 text-yellow-800'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
             >
               {showFavorites ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
@@ -224,8 +224,8 @@ const TestTemplateSelector: React.FC<TestTemplateSelectorProps> = ({
           <div
             key={template.id}
             className={`bg-white rounded-xl shadow-sm border-2 transition-all cursor-pointer hover:shadow-md ${selectedTemplateId === template.id
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-100 hover:border-gray-300'
+              ? 'border-blue-500 bg-blue-50'
+              : 'border-gray-100 hover:border-gray-300'
               }`}
             onClick={() => handleSelectTemplate(template)}
           >
@@ -248,8 +248,8 @@ const TestTemplateSelector: React.FC<TestTemplateSelectorProps> = ({
                     toggleFavorite(template.id);
                   }}
                   className={`p-2 rounded-lg transition-colors ${favorites.includes(template.id)
-                      ? 'text-yellow-600 bg-yellow-100'
-                      : 'text-gray-400 hover:text-yellow-600 hover:bg-yellow-50'
+                    ? 'text-yellow-600 bg-yellow-100'
+                    : 'text-gray-400 hover:text-yellow-600 hover:bg-yellow-50'
                     }`}
                   aria-label={favorites.includes(template.id) ? `取消收藏 ${template.name}` : `收藏 ${template.name}`}
                   title={favorites.includes(template.id) ? `取消收藏 ${template.name}` : `收藏 ${template.name}`}

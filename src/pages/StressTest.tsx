@@ -1,10 +1,9 @@
 import { AlertCircle, BarChart3, CheckCircle, Clock, Download, FileText, Loader, Lock, Play, RotateCcw, Square, TrendingUp, Users, XCircle } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { AdvancedStressTestChart, RealTimeStressTestChart } from '../components/SimpleCharts';
-import UnifiedStressTestCharts, { TestStatusType } from '../components/UnifiedStressTestCharts';
-// @ts-ignore
-import URLInput from '../components/URLInput';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
+import { AdvancedStressTestChart, RealTimeStressTestChart, UnifiedStressTestCharts } from '../components/charts';
+import type { TestStatusType } from '../components/charts/UnifiedStressTestCharts';
+import { URLInput } from '../components/testing';
 import { AdvancedStressTestConfig as ImportedAdvancedStressTestConfig } from '../hooks/useSimpleTestEngine';
 import { useUserStats } from '../hooks/useUserStats';
 import backgroundTestManager from '../services/BackgroundTestManager.js';

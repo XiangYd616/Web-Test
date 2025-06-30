@@ -1,8 +1,5 @@
 // 测试组件统一导出
 
-// 图表组件导出 (命名导出)
-export * from './TestCharts';
-
 // 默认导出
 export { default as TestEngineStatus } from './TestEngineStatus';
 export { default as TestInterface } from './TestInterface';

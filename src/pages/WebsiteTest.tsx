@@ -1,31 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import '../styles/progress-bars.css';
-import { useSearchParams } from 'react-router-dom';
 import {
-  Play,
-  Clock,
-  CheckCircle,
   AlertTriangle,
-  XCircle,
-  Download,
-  Share2,
-  Square,
-  Loader,
-  RotateCcw,
-  Lock,
-  Gauge,
-  Search,
-  Shield,
-  Globe,
+  CheckCircle,
+  Clock,
   Code,
-  Eye
+  Download,
+  Eye,
+  Gauge,
+  Globe,
+  Loader,
+  Lock,
+  Play,
+  RotateCcw,
+  Search,
+  Share2,
+  Shield,
+  Square,
+  XCircle
 } from 'lucide-react';
-import { useAdvancedTestEngine } from '../hooks/useAdvancedTestEngine';
-import { AdvancedTestConfig } from '../services/advancedTestEngine';
-import AdvancedTestCharts from '../components/AdvancedTestCharts';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
+import { AdvancedTestCharts } from '../components/charts';
+import { URLInput } from '../components/testing';
+import { useAdvancedTestEngine } from '../hooks/useAdvancedTestEngine';
 import { useUserStats } from '../hooks/useUserStats';
-import URLInput from '../components/URLInput';
+import { AdvancedTestConfig } from '../services/advancedTestEngine';
+import '../styles/progress-bars.css';
 
 interface WebsiteTestConfig extends AdvancedTestConfig {
   testTypes: {
@@ -341,13 +341,12 @@ const WebsiteTest: React.FC = () => {
                 type="button"
                 onClick={handleStartTest}
                 disabled={!config.url.trim() || selectedTestsCount === 0}
-                className={`btn btn-md flex items-center space-x-2 ${
-                  !config.url.trim() || selectedTestsCount === 0
+                className={`btn btn-md flex items-center space-x-2 ${!config.url.trim() || selectedTestsCount === 0
                     ? 'btn-disabled opacity-50 cursor-not-allowed'
                     : isAuthenticated
-                    ? 'btn-primary hover:btn-primary-dark'
-                    : 'bg-yellow-600 hover:bg-yellow-700 text-white border border-yellow-500/30'
-                }`}
+                      ? 'btn-primary hover:btn-primary-dark'
+                      : 'bg-yellow-600 hover:bg-yellow-700 text-white border border-yellow-500/30'
+                  }`}
               >
                 {isAuthenticated ? (
                   <Play className="w-4 h-4" />
@@ -507,11 +506,10 @@ const WebsiteTest: React.FC = () => {
               {testTypes.map((test) => (
                 <div
                   key={test.key}
-                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                    config.testTypes[test.key as keyof WebsiteTestConfig['testTypes']]
+                  className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${config.testTypes[test.key as keyof WebsiteTestConfig['testTypes']]
                       ? `border-${test.color}-500 bg-${test.color}-500/10`
                       : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
-                  }`}
+                    }`}
                   onClick={() => handleTestTypeChange(test.key as keyof WebsiteTestConfig['testTypes'])}
                 >
                   <div className="flex items-start space-x-3">
@@ -532,11 +530,10 @@ const WebsiteTest: React.FC = () => {
                             className="sr-only"
                           />
                           <div
-                            className={`w-6 h-6 rounded-lg border-2 cursor-pointer transition-all duration-200 flex items-center justify-center ${
-                              config.testTypes[test.key as keyof WebsiteTestConfig['testTypes']]
+                            className={`w-6 h-6 rounded-lg border-2 cursor-pointer transition-all duration-200 flex items-center justify-center ${config.testTypes[test.key as keyof WebsiteTestConfig['testTypes']]
                                 ? `border-${test.color}-500 bg-${test.color}-500 shadow-lg shadow-${test.color}-500/25`
                                 : 'border-gray-500 bg-gray-700/50 hover:border-gray-400 hover:bg-gray-600/50'
-                            }`}
+                              }`}
                           >
                             {config.testTypes[test.key as keyof WebsiteTestConfig['testTypes']] && (
                               <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -658,11 +655,10 @@ const WebsiteTest: React.FC = () => {
               <h3 className="text-lg font-semibold text-white mb-4">测试结果</h3>
               <div className="space-y-4">
                 <div className="text-center p-6 bg-gray-700/50 rounded-lg">
-                  <div className={`text-4xl font-bold ${
-                    results.overallScore >= 90 ? 'text-green-400' :
-                    results.overallScore >= 70 ? 'text-yellow-400' :
-                    'text-red-400'
-                  }`}>
+                  <div className={`text-4xl font-bold ${results.overallScore >= 90 ? 'text-green-400' :
+                      results.overallScore >= 70 ? 'text-yellow-400' :
+                        'text-red-400'
+                    }`}>
                     {Math.round(results.overallScore)}
                   </div>
                   <div className="text-sm text-gray-300 mt-1">总体评分</div>
@@ -760,9 +756,8 @@ const WebsiteTest: React.FC = () => {
             {testHistory.slice(0, 5).map((test, index) => (
               <div key={test.id} className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
                 <div className="flex items-center space-x-3">
-                  <div className={`w-3 h-3 rounded-full ${
-                    test.status === 'completed' ? 'bg-green-500' : 'bg-red-500'
-                  }`} />
+                  <div className={`w-3 h-3 rounded-full ${test.status === 'completed' ? 'bg-green-500' : 'bg-red-500'
+                    }`} />
                   <div>
                     <div className="text-sm font-medium text-white">{test.url}</div>
                     <div className="text-xs text-gray-400">
@@ -771,11 +766,10 @@ const WebsiteTest: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <div className={`px-2 py-1 rounded text-xs font-medium ${
-                    test.overallScore >= 80 ? 'bg-green-500/20 text-green-400' :
-                    test.overallScore >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
-                    'bg-red-500/20 text-red-400'
-                  }`}>
+                  <div className={`px-2 py-1 rounded text-xs font-medium ${test.overallScore >= 80 ? 'bg-green-500/20 text-green-400' :
+                      test.overallScore >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
+                        'bg-red-500/20 text-red-400'
+                    }`}>
                     {Math.round(test.overallScore)}分
                   </div>
                   <div className="text-xs text-gray-400">

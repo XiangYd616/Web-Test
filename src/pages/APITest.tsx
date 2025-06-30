@@ -1,34 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import '../styles/progress-bars.css';
 import {
-  Play,
-  Plus,
-  Trash2,
-  XCircle,
-  Loader,
-  Code,
-  Download,
-  FileText,
-  Shield,
-  Zap,
-  Square,
-  Globe,
-  Database,
-  Eye,
-  EyeOff,
+  BarChart3,
   CheckCircle,
   Clock,
-  RotateCcw,
-  Lock,
-  Settings,
+  Code,
+  Database,
+  Download,
+  Eye,
+  EyeOff,
+  FileText,
+  Globe,
   Key,
-  BarChart3
+  Loader,
+  Lock,
+  Play,
+  Plus,
+  RotateCcw,
+  Settings,
+  Shield,
+  Square,
+  Trash2,
+  XCircle,
+  Zap
 } from 'lucide-react';
-import type { APITestConfig, APIEndpoint } from '../services/apiTestEngine';
-import backgroundTestManager from '../services/BackgroundTestManager';
+import React, { useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
+import { URLInput } from '../components/testing';
 import { useUserStats } from '../hooks/useUserStats';
-import URLInput from '../components/URLInput';
+import type { APIEndpoint, APITestConfig } from '../services/apiTestEngine';
+import backgroundTestManager from '../services/BackgroundTestManager';
+import '../styles/progress-bars.css';
 
 // 认证配置类型定义
 interface AuthenticationConfig {
@@ -87,9 +87,9 @@ const APITest: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'basic' | 'auth' | 'headers' | 'environment' | 'advanced'>('basic');
   const [showAuthPassword, setShowAuthPassword] = useState(false);
-  
-  
-  const [globalHeaders, setGlobalHeaders] = useState<Array<{key: string, value: string, enabled: boolean}>>([
+
+
+  const [globalHeaders, setGlobalHeaders] = useState<Array<{ key: string, value: string, enabled: boolean }>>([
     { key: 'Content-Type', value: 'application/json', enabled: true },
     { key: 'Accept', value: 'application/json', enabled: true }
   ]);
@@ -344,7 +344,7 @@ const APITest: React.FC = () => {
   const updateEndpoint = (id: string, updates: Partial<APIEndpoint>) => {
     setTestConfig(prev => ({
       ...prev,
-      endpoints: prev.endpoints.map(ep => 
+      endpoints: prev.endpoints.map(ep =>
         ep.id === id ? { ...ep, ...updates } : ep
       )
     }));
@@ -525,13 +525,12 @@ const APITest: React.FC = () => {
                 type="button"
                 onClick={handleStartTest}
                 disabled={!testConfig.baseUrl || testConfig.endpoints.length === 0}
-                className={`btn btn-md flex items-center space-x-2 ${
-                  !testConfig.baseUrl || testConfig.endpoints.length === 0
+                className={`btn btn-md flex items-center space-x-2 ${!testConfig.baseUrl || testConfig.endpoints.length === 0
                     ? 'btn-disabled opacity-50 cursor-not-allowed'
                     : isAuthenticated
-                    ? 'btn-primary hover:btn-primary-dark'
-                    : 'bg-yellow-600 hover:bg-yellow-700 text-white border border-yellow-500/30'
-                }`}
+                      ? 'btn-primary hover:btn-primary-dark'
+                      : 'bg-yellow-600 hover:bg-yellow-700 text-white border border-yellow-500/30'
+                  }`}
               >
                 {isAuthenticated ? (
                   <Play className="w-4 h-4" />
@@ -687,12 +686,11 @@ const APITest: React.FC = () => {
         <h3 className="text-xl font-semibold text-white mb-6">测试类型选择</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* 安全测试 */}
-          <div className={`relative p-4 rounded-xl border-2 transition-all duration-300 cursor-pointer ${
-            testConfig.testSecurity
+          <div className={`relative p-4 rounded-xl border-2 transition-all duration-300 cursor-pointer ${testConfig.testSecurity
               ? 'border-red-500/50 bg-red-500/10 shadow-lg shadow-red-500/20'
               : 'border-gray-600/50 bg-gray-700/30 hover:border-red-500/30 hover:bg-red-500/5'
-          }`}
-          onClick={() => setTestConfig(prev => ({ ...prev, testSecurity: !prev.testSecurity }))}>
+            }`}
+            onClick={() => setTestConfig(prev => ({ ...prev, testSecurity: !prev.testSecurity }))}>
             <div className="flex items-center space-x-3 mb-3">
               <div className={`p-2 rounded-lg ${testConfig.testSecurity ? 'bg-red-500/20' : 'bg-gray-600/20'}`}>
                 <Shield className={`w-5 h-5 ${testConfig.testSecurity ? 'text-red-400' : 'text-gray-400'}`} />
@@ -701,11 +699,10 @@ const APITest: React.FC = () => {
                 <h4 className="font-semibold text-white">安全测试</h4>
                 <p className="text-xs text-gray-400">预计 3-5 分钟</p>
               </div>
-              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-                testConfig.testSecurity
+              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${testConfig.testSecurity
                   ? 'border-red-500 bg-red-500'
                   : 'border-gray-500 bg-transparent'
-              }`}>
+                }`}>
                 {testConfig.testSecurity && <CheckCircle className="w-3 h-3 text-white" />}
               </div>
             </div>
@@ -713,12 +710,11 @@ const APITest: React.FC = () => {
           </div>
 
           {/* 性能测试 */}
-          <div className={`relative p-4 rounded-xl border-2 transition-all duration-300 cursor-pointer ${
-            testConfig.testPerformance
+          <div className={`relative p-4 rounded-xl border-2 transition-all duration-300 cursor-pointer ${testConfig.testPerformance
               ? 'border-blue-500/50 bg-blue-500/10 shadow-lg shadow-blue-500/20'
               : 'border-gray-600/50 bg-gray-700/30 hover:border-blue-500/30 hover:bg-blue-500/5'
-          }`}
-          onClick={() => setTestConfig(prev => ({ ...prev, testPerformance: !prev.testPerformance }))}>
+            }`}
+            onClick={() => setTestConfig(prev => ({ ...prev, testPerformance: !prev.testPerformance }))}>
             <div className="flex items-center space-x-3 mb-3">
               <div className={`p-2 rounded-lg ${testConfig.testPerformance ? 'bg-blue-500/20' : 'bg-gray-600/20'}`}>
                 <Zap className={`w-5 h-5 ${testConfig.testPerformance ? 'text-blue-400' : 'text-gray-400'}`} />
@@ -727,11 +723,10 @@ const APITest: React.FC = () => {
                 <h4 className="font-semibold text-white">性能测试</h4>
                 <p className="text-xs text-gray-400">预计 2-4 分钟</p>
               </div>
-              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-                testConfig.testPerformance
+              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${testConfig.testPerformance
                   ? 'border-blue-500 bg-blue-500'
                   : 'border-gray-500 bg-transparent'
-              }`}>
+                }`}>
                 {testConfig.testPerformance && <CheckCircle className="w-3 h-3 text-white" />}
               </div>
             </div>
@@ -739,12 +734,11 @@ const APITest: React.FC = () => {
           </div>
 
           {/* 可靠性测试 */}
-          <div className={`relative p-4 rounded-xl border-2 transition-all duration-300 cursor-pointer ${
-            testConfig.testReliability
+          <div className={`relative p-4 rounded-xl border-2 transition-all duration-300 cursor-pointer ${testConfig.testReliability
               ? 'border-green-500/50 bg-green-500/10 shadow-lg shadow-green-500/20'
               : 'border-gray-600/50 bg-gray-700/30 hover:border-green-500/30 hover:bg-green-500/5'
-          }`}
-          onClick={() => setTestConfig(prev => ({ ...prev, testReliability: !prev.testReliability }))}>
+            }`}
+            onClick={() => setTestConfig(prev => ({ ...prev, testReliability: !prev.testReliability }))}>
             <div className="flex items-center space-x-3 mb-3">
               <div className={`p-2 rounded-lg ${testConfig.testReliability ? 'bg-green-500/20' : 'bg-gray-600/20'}`}>
                 <Database className={`w-5 h-5 ${testConfig.testReliability ? 'text-green-400' : 'text-gray-400'}`} />
@@ -753,11 +747,10 @@ const APITest: React.FC = () => {
                 <h4 className="font-semibold text-white">可靠性测试</h4>
                 <p className="text-xs text-gray-400">预计 4-6 分钟</p>
               </div>
-              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-                testConfig.testReliability
+              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${testConfig.testReliability
                   ? 'border-green-500 bg-green-500'
                   : 'border-gray-500 bg-transparent'
-              }`}>
+                }`}>
                 {testConfig.testReliability && <CheckCircle className="w-3 h-3 text-white" />}
               </div>
             </div>
@@ -765,12 +758,11 @@ const APITest: React.FC = () => {
           </div>
 
           {/* 文档生成 */}
-          <div className={`relative p-4 rounded-xl border-2 transition-all duration-300 cursor-pointer ${
-            testConfig.generateDocumentation
+          <div className={`relative p-4 rounded-xl border-2 transition-all duration-300 cursor-pointer ${testConfig.generateDocumentation
               ? 'border-purple-500/50 bg-purple-500/10 shadow-lg shadow-purple-500/20'
               : 'border-gray-600/50 bg-gray-700/30 hover:border-purple-500/30 hover:bg-purple-500/5'
-          }`}
-          onClick={() => setTestConfig(prev => ({ ...prev, generateDocumentation: !prev.generateDocumentation }))}>
+            }`}
+            onClick={() => setTestConfig(prev => ({ ...prev, generateDocumentation: !prev.generateDocumentation }))}>
             <div className="flex items-center space-x-3 mb-3">
               <div className={`p-2 rounded-lg ${testConfig.generateDocumentation ? 'bg-purple-500/20' : 'bg-gray-600/20'}`}>
                 <FileText className={`w-5 h-5 ${testConfig.generateDocumentation ? 'text-purple-400' : 'text-gray-400'}`} />
@@ -779,11 +771,10 @@ const APITest: React.FC = () => {
                 <h4 className="font-semibold text-white">文档生成</h4>
                 <p className="text-xs text-gray-400">预计 1-2 分钟</p>
               </div>
-              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-                testConfig.generateDocumentation
+              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${testConfig.generateDocumentation
                   ? 'border-purple-500 bg-purple-500'
                   : 'border-gray-500 bg-transparent'
-              }`}>
+                }`}>
                 {testConfig.generateDocumentation && <CheckCircle className="w-3 h-3 text-white" />}
               </div>
             </div>
@@ -808,12 +799,11 @@ const APITest: React.FC = () => {
             <button
               key={key}
               type="button"
-            onClick={() => setActiveTab(key as any)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
-                activeTab === key
+              onClick={() => setActiveTab(key as any)}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${activeTab === key
                   ? 'bg-blue-600 text-white'
                   : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
-              }`}
+                }`}
             >
               <Icon className="w-4 h-4" />
               <span className="text-sm font-medium">{label}</span>
@@ -1318,9 +1308,8 @@ const APITest: React.FC = () => {
           <div className="space-y-3">
             <h4 className="text-lg font-semibold text-white">端点测试结果</h4>
             {(result.endpointResults || []).map((endpoint: any, index: number) => (
-              <div key={index} className={`p-4 rounded-lg border ${
-                endpoint.status === 'pass' ? 'border-green-500/30 bg-green-500/10' : 'border-red-500/30 bg-red-500/10'
-              }`}>
+              <div key={index} className={`p-4 rounded-lg border ${endpoint.status === 'pass' ? 'border-green-500/30 bg-green-500/10' : 'border-red-500/30 bg-red-500/10'
+                }`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <span className={`px-2 py-1 text-xs font-semibold rounded ${getMethodColor(endpoint.method)}`}>

@@ -1,24 +1,14 @@
-import React, { useState, useCallback } from 'react';
 import {
-  Play,
-  Pause,
-  Square,
-  RefreshCw,
-  Download,
-  Share2,
-  AlertCircle,
-  CheckCircle,
   Clock,
-  Target,
-  TrendingUp,
-  TrendingDown,
-  Info,
-  ExternalLink
+  Play,
+  Square,
+  Target
 } from 'lucide-react';
-import { TestResult, TestProgress, TestType, Recommendation } from '../services/unifiedTestEngine';
-import { SmartLoader, useLoadingState } from './LoadingStates';
-import { ErrorDisplay, useErrorHandler, useNotifications } from './ErrorHandling';
-import { ButtonFeedback, ProgressIndicator } from './InteractiveFeedback';
+import React, { useCallback, useState } from 'react';
+import { TestResult, TestType } from '../../services/unifiedTestEngine';
+import { ButtonFeedback } from '../integration/InteractiveFeedback';
+import { ErrorDisplay, useErrorHandler, useNotifications } from '../system/ErrorHandling';
+import { SmartLoader, useLoadingState } from '../ui/LoadingStates';
 
 interface UnifiedTestInterfaceProps {
   testType: TestType;
@@ -135,7 +125,7 @@ const UnifiedTestInterface: React.FC<UnifiedTestInterfaceProps> = ({
             disabled={isLoading}
           />
         </div>
-        
+
         {/* 根据测试类型显示特定配置 */}
         {testType === 'stress' && (
           <>

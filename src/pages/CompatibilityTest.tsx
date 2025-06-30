@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import '../styles/progress-bars.css';
-import { Monitor, Smartphone, Tablet, Globe, CheckCircle, XCircle, AlertTriangle, Play, Settings, Square, Loader, RotateCcw, Clock, Lock } from 'lucide-react';
-import { useAdvancedTestEngine } from '../hooks/useAdvancedTestEngine';
-import { AdvancedTestConfig } from '../services/advancedTestEngine';
-import AdvancedTestCharts from '../components/AdvancedTestCharts';
+import { AlertTriangle, CheckCircle, Clock, Globe, Loader, Lock, Monitor, Play, RotateCcw, Settings, Smartphone, Square, Tablet, XCircle } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
+import { AdvancedTestCharts } from '../components/charts';
+import { URLInput } from '../components/testing';
+import { useAdvancedTestEngine } from '../hooks/useAdvancedTestEngine';
 import { useUserStats } from '../hooks/useUserStats';
-import URLInput from '../components/URLInput';
+import { AdvancedTestConfig } from '../services/advancedTestEngine';
+import '../styles/progress-bars.css';
 
 interface CompatibilityConfig extends AdvancedTestConfig {
   checkDesktop: boolean;
@@ -170,13 +170,12 @@ const CompatibilityTest: React.FC = () => {
                 type="button"
                 onClick={handleStartTest}
                 disabled={!config.url}
-                className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition-all duration-200 ${
-                  !config.url
+                className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition-all duration-200 ${!config.url
                     ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                     : isAuthenticated
-                    ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-700 hover:to-purple-800'
-                    : 'bg-yellow-600 hover:bg-yellow-700 text-white border border-yellow-500/30'
-                }`}
+                      ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-700 hover:to-purple-800'
+                      : 'bg-yellow-600 hover:bg-yellow-700 text-white border border-yellow-500/30'
+                  }`}
               >
                 {isAuthenticated ? (
                   <Play className="w-4 h-4" />
@@ -480,7 +479,7 @@ const CompatibilityTest: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {Object.entries(results.deviceCompatibility || {}).map(([device, score]) => {
                       const DeviceIcon = device === 'desktop' ? Monitor :
-                                       device === 'tablet' ? Tablet : Smartphone;
+                        device === 'tablet' ? Tablet : Smartphone;
                       return (
                         <div key={device} className="bg-gray-700/50 rounded-lg p-4">
                           <div className="flex items-center justify-between mb-2">
@@ -488,7 +487,7 @@ const CompatibilityTest: React.FC = () => {
                               <DeviceIcon className="w-4 h-4 mr-2 text-gray-400" />
                               <span className="text-sm font-medium text-gray-300">
                                 {device === 'desktop' ? '桌面端' :
-                                 device === 'tablet' ? '平板端' : '移动端'}
+                                  device === 'tablet' ? '平板端' : '移动端'}
                               </span>
                             </div>
                             <span className={`text-sm font-bold ${getScoreColor(score)}`}>
@@ -517,11 +516,10 @@ const CompatibilityTest: React.FC = () => {
                     </h3>
                     <div className="space-y-3">
                       {results.issues.slice(0, 10).map((issue, index) => (
-                        <div key={index} className={`p-3 rounded-lg border-l-4 ${
-                          issue.severity === 'high' ? 'bg-red-900/20 border-red-500' :
-                          issue.severity === 'medium' ? 'bg-yellow-900/20 border-yellow-500' :
-                          'bg-blue-900/20 border-blue-500'
-                        }`}>
+                        <div key={index} className={`p-3 rounded-lg border-l-4 ${issue.severity === 'high' ? 'bg-red-900/20 border-red-500' :
+                            issue.severity === 'medium' ? 'bg-yellow-900/20 border-yellow-500' :
+                              'bg-blue-900/20 border-blue-500'
+                          }`}>
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center space-x-2 mb-1">
@@ -539,13 +537,12 @@ const CompatibilityTest: React.FC = () => {
                               </div>
                               <p className="text-sm text-gray-300">{issue.description}</p>
                             </div>
-                            <span className={`text-xs px-2 py-1 rounded ${
-                              issue.severity === 'high' ? 'bg-red-600 text-white' :
-                              issue.severity === 'medium' ? 'bg-yellow-600 text-white' :
-                              'bg-blue-600 text-white'
-                            }`}>
+                            <span className={`text-xs px-2 py-1 rounded ${issue.severity === 'high' ? 'bg-red-600 text-white' :
+                                issue.severity === 'medium' ? 'bg-yellow-600 text-white' :
+                                  'bg-blue-600 text-white'
+                              }`}>
                               {issue.severity === 'high' ? '严重' :
-                               issue.severity === 'medium' ? '中等' : '轻微'}
+                                issue.severity === 'medium' ? '中等' : '轻微'}
                             </span>
                           </div>
                         </div>
@@ -659,9 +656,8 @@ const CompatibilityTest: React.FC = () => {
             {testHistory.slice(0, 5).map((test, index) => (
               <div key={test.id} className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
                 <div className="flex items-center space-x-3">
-                  <div className={`w-3 h-3 rounded-full ${
-                    test.status === 'completed' ? 'bg-green-500' : 'bg-red-500'
-                  }`} />
+                  <div className={`w-3 h-3 rounded-full ${test.status === 'completed' ? 'bg-green-500' : 'bg-red-500'
+                    }`} />
                   <div>
                     <div className="text-sm font-medium text-white">{test.url}</div>
                     <div className="text-xs text-gray-400">
@@ -670,11 +666,10 @@ const CompatibilityTest: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <div className={`px-2 py-1 rounded text-xs font-medium ${
-                    test.overallScore >= 80 ? 'bg-green-500/20 text-green-400' :
-                    test.overallScore >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
-                    'bg-red-500/20 text-red-400'
-                  }`}>
+                  <div className={`px-2 py-1 rounded text-xs font-medium ${test.overallScore >= 80 ? 'bg-green-500/20 text-green-400' :
+                      test.overallScore >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
+                        'bg-red-500/20 text-red-400'
+                    }`}>
                     {Math.round(test.overallScore)}分
                   </div>
                   <div className="text-xs text-gray-400">

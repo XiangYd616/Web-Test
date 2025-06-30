@@ -1,5 +1,5 @@
+import { AlertTriangle, CheckCircle, Info, TrendingDown, TrendingUp, XCircle } from 'lucide-react';
 import React from 'react';
-import { CheckCircle, XCircle, AlertTriangle, Info, TrendingUp, TrendingDown } from 'lucide-react';
 
 interface ContentAnalysisResult {
   seoScore: number;
@@ -182,8 +182,8 @@ export const EnhancedContentAnalysis: React.FC<EnhancedContentAnalysisProps> = (
                   </div>
                   <div className="text-xs text-gray-400 mt-1">
                     分类: {issue.category === 'seo' ? 'SEO' :
-                           issue.category === 'performance' ? '性能' :
-                           issue.category === 'accessibility' ? '可访问性' : '内容'}
+                      issue.category === 'performance' ? '性能' :
+                        issue.category === 'accessibility' ? '可访问性' : '内容'}
                   </div>
                 </div>
               </div>
@@ -205,13 +205,13 @@ export const EnhancedContentAnalysis: React.FC<EnhancedContentAnalysisProps> = (
                     <span className="text-sm text-blue-300">{recommendation.message}</span>
                     <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getPriorityColor(recommendation.priority)}`}>
                       {recommendation.priority === 'high' ? '高优先级' :
-                       recommendation.priority === 'medium' ? '中优先级' : '低优先级'}
+                        recommendation.priority === 'medium' ? '中优先级' : '低优先级'}
                     </span>
                   </div>
                   <div className="text-xs text-blue-400 mt-1">
                     分类: {recommendation.category === 'seo' ? 'SEO' :
-                           recommendation.category === 'performance' ? '性能' :
-                           recommendation.category === 'accessibility' ? '可访问性' : '内容'}
+                      recommendation.category === 'performance' ? '性能' :
+                        recommendation.category === 'accessibility' ? '可访问性' : '内容'}
                   </div>
                 </div>
               </div>
@@ -222,3 +222,5 @@ export const EnhancedContentAnalysis: React.FC<EnhancedContentAnalysisProps> = (
     </div>
   );
 };
+
+export default EnhancedContentAnalysis;

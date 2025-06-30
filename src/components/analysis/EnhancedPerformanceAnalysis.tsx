@@ -1,6 +1,6 @@
+import { AlertTriangle, BarChart3, CheckCircle, TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
-import '../styles/progress-bars.css';
-import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, BarChart3 } from 'lucide-react';
+import '../../styles/progress-bars.css';
 
 interface PerformanceAnalysis {
   scalabilityScore: number;
@@ -80,17 +80,17 @@ export const EnhancedPerformanceAnalysis: React.FC<EnhancedPerformanceAnalysisPr
           </div>
           <div className="mt-2 text-sm font-medium text-gray-900">性能评级</div>
         </div>
-        
+
         <div className="text-center">
           <div className="text-3xl font-bold text-blue-600">{performanceAnalysis.scalabilityScore}</div>
           <div className="text-sm text-gray-600">可扩展性评分</div>
           <div className="mt-1 w-full bg-gray-200 rounded-full h-2">
-            <div 
+            <div
               className="bg-blue-500 h-2 rounded-full progress-fill progress-fill-blue" style={{ width: `performanceAnalysis.scalabilityScore%` }}
             />
           </div>
         </div>
-        
+
         <div className="text-center">
           <div className="text-3xl font-bold text-green-600">
             {((metrics.successfulRequests / metrics.totalRequests) * 100).toFixed(1)}%
@@ -105,17 +105,17 @@ export const EnhancedPerformanceAnalysis: React.FC<EnhancedPerformanceAnalysisPr
           <div className="text-2xl font-bold text-gray-900">{metrics.totalRequests}</div>
           <div className="text-sm text-gray-600">总请求数</div>
         </div>
-        
+
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <div className="text-2xl font-bold text-gray-900">{metrics.averageResponseTime}ms</div>
           <div className="text-sm text-gray-600">平均响应时间</div>
         </div>
-        
+
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <div className="text-2xl font-bold text-gray-900">{metrics.p95ResponseTime}ms</div>
           <div className="text-sm text-gray-600">P95响应时间</div>
         </div>
-        
+
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           <div className="text-2xl font-bold text-gray-900">{metrics.throughput.toFixed(1)}</div>
           <div className="text-sm text-gray-600">吞吐量 (req/s)</div>
@@ -133,7 +133,7 @@ export const EnhancedPerformanceAnalysis: React.FC<EnhancedPerformanceAnalysisPr
               <span className="text-sm text-gray-600">{getTrendText(performanceAnalysis.trends.responseTime)}</span>
             </div>
           </div>
-          
+
           <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
             <span className="text-sm font-medium text-gray-700">吞吐量</span>
             <div className="flex items-center space-x-2">
@@ -141,7 +141,7 @@ export const EnhancedPerformanceAnalysis: React.FC<EnhancedPerformanceAnalysisPr
               <span className="text-sm text-gray-600">{getTrendText(performanceAnalysis.trends.throughput)}</span>
             </div>
           </div>
-          
+
           <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
             <span className="text-sm font-medium text-gray-700">错误率</span>
             <div className="flex items-center space-x-2">

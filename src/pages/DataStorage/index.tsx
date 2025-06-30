@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import {
   Activity,
   BarChart3,
@@ -7,20 +5,22 @@ import {
   Download,
   FileText
 } from 'lucide-react';
+import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
 // 组件导入
 import AnalyticsOverview from '../../components/analytics/AnalyticsOverview';
 import ImportExport from '../../components/analytics/ImportExport';
 import RealTimeMonitoring from '../../components/analytics/RealTimeMonitoring';
 import ReportManagement from '../../components/analytics/ReportManagement';
-import TestResultDisplay from '../../components/TestResultDisplay';
 import { Pagination } from '../../components/shared';
+import { TestResultDisplay } from '../../components/testing';
 
 // 本地组件导入
-import { DataList, DataStats, DataFilters } from './components';
+import { DataFilters, DataList, DataStats } from './components';
 
 // Hook导入
-import { useDataStorage, TestRecord } from '../../hooks/useDataStorage';
+import { TestRecord, useDataStorage } from '../../hooks/useDataStorage';
 
 const DataStorage: React.FC = () => {
   const location = useLocation();
@@ -112,11 +112,10 @@ const DataStorage: React.FC = () => {
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors relative ${
-                    activeTab === tab.id
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors relative ${activeTab === tab.id
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'
-                  }`}
+                    }`}
                 >
                   <tab.icon className="w-4 h-4" />
                   <span>{tab.label}</span>
@@ -142,10 +141,10 @@ const DataStorage: React.FC = () => {
         {activeTab === 'history' && (
           <>
             {/* 统计信息 */}
-            <DataStats 
-              records={testRecords} 
-              pagination={pagination} 
-              loading={loading} 
+            <DataStats
+              records={testRecords}
+              pagination={pagination}
+              loading={loading}
             />
 
             {/* 过滤器 */}

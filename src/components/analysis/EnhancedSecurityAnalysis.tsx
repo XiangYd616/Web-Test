@@ -1,18 +1,16 @@
-import React from 'react';
-import { 
-  Shield, 
-  AlertTriangle, 
-  CheckCircle, 
-  XCircle, 
-  Lock, 
-  Globe, 
-  Server, 
-  Eye,
+import {
   AlertCircle,
+  AlertTriangle,
+  CheckCircle,
+  Eye,
   Info,
+  Lock,
+  Shield,
+  TrendingDown,
   TrendingUp,
-  TrendingDown
+  XCircle
 } from 'lucide-react';
+import React from 'react';
 
 interface SecurityAnalysisResult {
   securityScore: number;
@@ -112,8 +110,8 @@ export const EnhancedSecurityAnalysis: React.FC<EnhancedSecurityAnalysisProps> =
   };
 
   const getCheckIcon = (passed: boolean) => {
-    return passed ? 
-      <CheckCircle className="w-4 h-4 text-green-400" /> : 
+    return passed ?
+      <CheckCircle className="w-4 h-4 text-green-400" /> :
       <XCircle className="w-4 h-4 text-red-400" />;
   };
 
@@ -270,3 +268,5 @@ export const EnhancedSecurityAnalysis: React.FC<EnhancedSecurityAnalysisProps> =
     </div>
   );
 };
+
+export default EnhancedSecurityAnalysis;
