@@ -1,7 +1,7 @@
+import { AlertTriangle, ArrowLeft, Lock, Shield } from 'lucide-react';
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { Shield, AlertTriangle, Lock, ArrowLeft } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface AdminGuardProps {
   children: React.ReactNode;
@@ -69,7 +69,7 @@ const AdminGuard: React.FC<AdminGuardProps> = ({
                 <AlertTriangle className="h-5 w-5" />
                 <span className="font-medium">权限不足</span>
               </div>
-              
+
               <p className="text-gray-600 text-sm leading-relaxed">
                 您正在尝试访问后台管理系统，但您的账户没有相应的管理员权限。
                 如果您认为这是一个错误，请联系系统管理员。
@@ -88,16 +88,16 @@ const AdminGuard: React.FC<AdminGuardProps> = ({
             <div className="space-y-3">
               <button
                 type="button"
-            onClick={() => window.history.back()}
+                onClick={() => window.history.back()}
                 className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 返回上一页
               </button>
-              
+
               <button
                 type="button"
-            onClick={() => window.location.href = fallbackPath}
+                onClick={() => window.location.href = fallbackPath}
                 className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm bg-primary-600 text-sm font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
               >
                 <Shield className="h-4 w-4 mr-2" />
