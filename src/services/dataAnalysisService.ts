@@ -62,23 +62,81 @@ export class DataAnalysisService {
   private baseUrl = 'http://localhost:3001/api';
 
   /**
+   * 处理测试数据
+   */
+  async processTestData(testRecords: any[], dateRange: number = 30): Promise<AnalyticsData> {
+    try {
+      // 转换数据库字段到前端期望的字段
+      const normalizedRecords = testRecords.map(record => ({
+        id: record.id,
+        testType: record.test_type || record.testType,
+        url: record.url,
+        status: record.status,
+        overallScore: record.overall_score || record.overallScore,
+        startTime: record.start_time || record.startTime,
+        endTime: record.end_time || record.endTime,
+        actualDuration: record.duration || record.actualDuration,
+        results: record.results,
+        config: record.config,
+        scores: record.scores,
+        recommendations: record.recommendations,
+        savedAt: record.created_at || record.savedAt
+      }));
+
+      // 过滤指定时间范围内的数据
+      const cutoffDate = subDays(new Date(), dateRange);
+      const filteredRecords = normalizedRecords.filter(record =>
+        new Date(record.startTime || record.savedAt) >= cutoffDate
+      );
+
+      return this.analyzeTestData(filteredRecords);
+    } catch (error) {
+      console.error('Error processing test data:', error);
+      throw error;
+    }
+  }
+
+  /**
    * 获取测试数据分析
    */
   async getAnalyticsData(dateRange: number = 30): Promise<AnalyticsData> {
     try {
       // 获取测试数据
-      const response = await fetch(`${this.baseUrl}/test/history`);
+      const response = await fetch(`${this.baseUrl}/test/history`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
       const data = await response.json();
 
       if (!data.success) {
         throw new Error(data.error || 'Failed to fetch test data');
       }
 
-      const testRecords: TestRecord[] = data.data;
+      // 处理API返回的数据结构
+      const testRecords: TestRecord[] = data.data.tests || data.data || [];
+
+      // 转换数据库字段到前端期望的字段
+      const normalizedRecords = testRecords.map(record => ({
+        id: record.id,
+        testType: record.test_type || record.testType,
+        url: record.url,
+        status: record.status,
+        overallScore: record.overall_score || record.overallScore,
+        startTime: record.start_time || record.startTime,
+        endTime: record.end_time || record.endTime,
+        actualDuration: record.duration || record.actualDuration,
+        results: record.results,
+        config: record.config,
+        scores: record.scores,
+        recommendations: record.recommendations,
+        savedAt: record.created_at || record.savedAt
+      }));
 
       // 过滤指定时间范围内的数据
       const cutoffDate = subDays(new Date(), dateRange);
-      const filteredRecords = testRecords.filter(record =>
+      const filteredRecords = normalizedRecords.filter(record =>
         new Date(record.startTime || record.savedAt) >= cutoffDate
       );
 

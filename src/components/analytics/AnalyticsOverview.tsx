@@ -108,9 +108,30 @@ const AnalyticsOverview: React.FC = () => {
   const loadAnalyticsData = async () => {
     setLoading(true);
     try {
-      const data = await dataAnalysisService.getAnalyticsData(dateRange);
-      setAnalyticsData(data);
-      setLastUpdated(new Date());
+      // 直接调用测试历史API获取原始数据
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:3001/api/test/history', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('API Response:', result);
+
+      if (result.success && result.data && result.data.tests) {
+        // 使用dataAnalysisService处理数据
+        const processedData = await dataAnalysisService.processTestData(result.data.tests, dateRange);
+        setAnalyticsData(processedData);
+        setLastUpdated(new Date());
+      } else {
+        console.warn('No test data found in response:', result);
+      }
     } catch (error) {
       console.error('Failed to load analytics data:', error);
     } finally {
@@ -278,8 +299,8 @@ const AnalyticsOverview: React.FC = () => {
                     type="button"
                     onClick={() => setDateRange(days)}
                     className={`px-3 py-2 rounded-lg text-sm transition-colors ${dateRange === days
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
                       }`}
                   >
                     {days}天
@@ -511,8 +532,8 @@ const AnalyticsOverview: React.FC = () => {
                     <td className="py-3 px-4 text-gray-300">{url.count}</td>
                     <td className="py-3 px-4">
                       <span className={`px-2 py-1 rounded text-xs font-medium ${url.avgScore >= 80 ? 'bg-green-500/20 text-green-400' :
-                          url.avgScore >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
-                            'bg-red-500/20 text-red-400'
+                        url.avgScore >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
+                          'bg-red-500/20 text-red-400'
                         }`}>
                         {url.avgScore.toFixed(1)}
                       </span>
