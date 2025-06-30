@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
+import { useTheme } from '../../contexts/ThemeContext';
+import { DebugPanel } from '../system';
 import ModernSidebar from './ModernSidebar';
 import TopNavbar from './TopNavbar';
-import DebugPanel from '../DebugPanel';
-import { useTheme } from '../../contexts/ThemeContext';
 
 interface ModernLayoutProps {
   children: React.ReactNode;

@@ -1,6 +1,6 @@
 import { Activity, AlertTriangle, BarChart3, Server, TestTube, Users } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { useNotifications } from '../NotificationSystem';
+import { useNotifications } from '../ui/NotificationSystem';
 import SystemHealthCheck from './SystemHealthCheck';
 
 interface SystemMetrics {
@@ -28,7 +28,7 @@ const SystemStatusDashboard: React.FC = () => {
     errorRate: 0,
     responseTime: 0
   });
-  
+
   const [alerts, setAlerts] = useState<SystemAlert[]>([]);
   const [loading, setLoading] = useState(true);
   const { addNotification } = useNotifications();
@@ -38,7 +38,7 @@ const SystemStatusDashboard: React.FC = () => {
       try {
         // 模拟获取系统指标
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
         const mockMetrics: SystemMetrics = {
           totalTests: Math.floor(Math.random() * 10000) + 5000,
           activeUsers: Math.floor(Math.random() * 100) + 20,
@@ -47,9 +47,9 @@ const SystemStatusDashboard: React.FC = () => {
           errorRate: Math.random() * 0.1,
           responseTime: Math.floor(Math.random() * 200) + 50
         };
-        
+
         setMetrics(mockMetrics);
-        
+
         // 模拟系统警告
         const mockAlerts: SystemAlert[] = [
           {
@@ -65,9 +65,9 @@ const SystemStatusDashboard: React.FC = () => {
             timestamp: new Date(Date.now() - 600000)
           }
         ];
-        
+
         setAlerts(mockAlerts);
-        
+
         // 检查是否需要发送通知
         if (mockMetrics.errorRate > 0.05) {
           addNotification({
@@ -78,7 +78,7 @@ const SystemStatusDashboard: React.FC = () => {
             timestamp: new Date()
           });
         }
-        
+
       } catch (error) {
         console.error('获取系统指标失败:', error);
         addNotification({

@@ -42,7 +42,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { NotificationItem, useNotifications } from '../../hooks/useNotifications';
 import { globalSearchService, SearchResult } from '../../services/globalSearchService';
-import ThemeToggle from '../ThemeToggle';
+import { ThemeToggle } from '../ui';
 import UserDropdownMenu from './UserDropdownMenu';
 
 interface TopNavbarProps {
@@ -312,8 +312,8 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
 
   return (
     <header className={`px-6 py-4 relative z-[1000] transition-all duration-300 ${actualTheme === 'light'
-        ? 'bg-white/95 border-b border-gray-200 backdrop-blur-sm'
-        : 'bg-gray-800/50 backdrop-blur-sm border-b border-gray-700/50'
+      ? 'bg-white/95 border-b border-gray-200 backdrop-blur-sm'
+      : 'bg-gray-800/50 backdrop-blur-sm border-b border-gray-700/50'
       }`}>
       <div className="flex items-center justify-between">
         {/* 左侧：Logo和导航控制 */}
@@ -322,8 +322,8 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
             type="button"
             onClick={onToggleSidebar}
             className={`p-2 rounded-lg transition-colors ${actualTheme === 'light'
-                ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+              ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
               }`}
             title={sidebarCollapsed ? '展开侧边栏' : '收起侧边栏'}
           >
@@ -380,14 +380,14 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
               }}
               placeholder="搜索测试、报告、设置..."
               className={`w-full pl-10 pr-4 py-2 text-sm transition-all duration-200 ${actualTheme === 'light'
-                  ? `bg-gray-50 border text-gray-900 placeholder-gray-500 ${showSearchDropdown
-                    ? 'border-blue-500 ring-2 ring-blue-500/20 rounded-t-lg rounded-b-none bg-white'
-                    : 'border-gray-300 rounded-lg hover:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                  }`
-                  : `bg-gray-700/50 border text-white placeholder-gray-400 ${showSearchDropdown
-                    ? 'border-blue-500 ring-2 ring-blue-500/20 rounded-t-lg rounded-b-none bg-gray-700/80'
-                    : 'border-gray-600 rounded-lg hover:bg-gray-600/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                  }`
+                ? `bg-gray-50 border text-gray-900 placeholder-gray-500 ${showSearchDropdown
+                  ? 'border-blue-500 ring-2 ring-blue-500/20 rounded-t-lg rounded-b-none bg-white'
+                  : 'border-gray-300 rounded-lg hover:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                }`
+                : `bg-gray-700/50 border text-white placeholder-gray-400 ${showSearchDropdown
+                  ? 'border-blue-500 ring-2 ring-blue-500/20 rounded-t-lg rounded-b-none bg-gray-700/80'
+                  : 'border-gray-600 rounded-lg hover:bg-gray-600/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                }`
                 }`}
             />
             {searchQuery && (
@@ -424,16 +424,16 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                           type="button"
                           onClick={() => handleSearchResultClick(result)}
                           className={`w-full text-left px-4 py-3 transition-all duration-150 ${selectedSearchIndex === index
-                              ? 'bg-blue-500/20 border-l-2 border-blue-500'
-                              : 'hover:bg-gray-600/50'
+                            ? 'bg-blue-500/20 border-l-2 border-blue-500'
+                            : 'hover:bg-gray-600/50'
                             }`}
                         >
                           <div className="flex items-center space-x-3">
                             <div className={`p-2 rounded-lg ${result.type === 'page' ? 'bg-blue-500/20 text-blue-400' :
-                                result.type === 'test' ? 'bg-green-500/20 text-green-400' :
-                                  result.type === 'setting' ? 'bg-purple-500/20 text-purple-400' :
-                                    result.type === 'help' ? 'bg-orange-500/20 text-orange-400' :
-                                      'bg-gray-500/20 text-gray-400'
+                              result.type === 'test' ? 'bg-green-500/20 text-green-400' :
+                                result.type === 'setting' ? 'bg-purple-500/20 text-purple-400' :
+                                  result.type === 'help' ? 'bg-orange-500/20 text-orange-400' :
+                                    'bg-gray-500/20 text-gray-400'
                               }`}>
                               {renderSearchIcon(result.icon || 'Search')}
                             </div>
@@ -618,8 +618,8 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                       type="button"
                       onClick={() => setNotificationFilter('all')}
                       className={`px-3 py-1 text-xs rounded-full transition-colors ${notificationFilter === 'all'
-                          ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                          : 'text-gray-400 hover:text-gray-300 border border-gray-600/50'
+                        ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                        : 'text-gray-400 hover:text-gray-300 border border-gray-600/50'
                         }`}
                     >
                       全部
@@ -628,8 +628,8 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                       type="button"
                       onClick={() => setNotificationFilter('unread')}
                       className={`px-3 py-1 text-xs rounded-full transition-colors ${notificationFilter === 'unread'
-                          ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                          : 'text-gray-400 hover:text-gray-300 border border-gray-600/50'
+                        ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                        : 'text-gray-400 hover:text-gray-300 border border-gray-600/50'
                         }`}
                     >
                       未读 ({unreadCount})
@@ -696,8 +696,8 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                                   )}
                                   {notification.priority && notification.priority !== 'low' && (
                                     <span className={`px-2 py-0.5 text-xs rounded ${notification.priority === 'urgent' ? 'bg-red-500/20 text-red-400' :
-                                        notification.priority === 'high' ? 'bg-orange-500/20 text-orange-400' :
-                                          'bg-yellow-500/20 text-yellow-400'
+                                      notification.priority === 'high' ? 'bg-orange-500/20 text-orange-400' :
+                                        'bg-yellow-500/20 text-yellow-400'
                                       }`}>
                                       {notification.priority === 'urgent' ? '紧急' :
                                         notification.priority === 'high' ? '高' : '中'}
@@ -781,8 +781,8 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
           <Link
             to="/help"
             className={`p-2 rounded-lg transition-colors ${actualTheme === 'light'
-                ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+              ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
               }`}
             title="帮助中心"
           >
@@ -816,8 +816,8 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
             <Link
               to="/login"
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${actualTheme === 'light'
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
+                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                : 'bg-blue-600 text-white hover:bg-blue-700'
                 }`}
               title="登录"
             >
