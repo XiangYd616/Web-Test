@@ -1,6 +1,6 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { testAPI } from '../services/testApi';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import backgroundTestManager from '../services/BackgroundTestManager';
+import { testAPI } from '../services/testApi';
 
 export interface AdvancedStressTestConfig {
   url: string;
@@ -169,7 +169,8 @@ export const useAdvancedTestEngine = () => {
     };
 
     checkEngineStatus();
-    const interval = setInterval(checkEngineStatus, 30000); // 每30秒检查一次
+    // 减少检查频率：每3分钟检查一次，避免429错误
+    const interval = setInterval(checkEngineStatus, 3 * 60 * 1000);
 
     return () => clearInterval(interval);
   }, []);

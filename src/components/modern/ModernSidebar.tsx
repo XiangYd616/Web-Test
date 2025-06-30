@@ -1,30 +1,28 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
 import {
-  Home,
-  TestTube,
-  BarChart3,
-  Shield,
-  Globe,
-  Code,
   Activity,
-  Settings,
-  User,
-  FileText,
-  Monitor,
+  BarChart3,
   ChevronRight,
-  Zap,
-  Search,
+  Code,
   Crown,
   Database,
-  TrendingUp,
+  FileText,
   GitBranch,
-  Package,
+  Globe,
+  Home,
   Key,
-  Link2
+  Link2,
+  Monitor,
+  Package,
+  Search,
+  Settings,
+  Shield,
+  TestTube,
+  Zap
 } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
+import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useAuth } from '../../hooks/useAuth';
 import AuthStatusIndicator from '../auth/AuthStatusIndicator';
 
 interface SidebarItem {
@@ -128,12 +126,6 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
           name: '分析概览',
           icon: BarChart3,
           href: '/analytics'
-        },
-        {
-          id: 'performance-analysis',
-          name: '性能分析',
-          icon: TrendingUp,
-          href: '/performance'
         },
         {
           id: 'monitoring',
@@ -361,27 +353,24 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
             }}
             onMouseEnter={(e) => handleButtonHover(item.id, e)}
             onMouseLeave={handleButtonLeave}
-            className={`w-full sidebar-button-hover transition-all duration-200 ${
-              collapsed
+            className={`w-full sidebar-button-hover transition-all duration-200 ${collapsed
                 ? 'flex items-center justify-center p-3 rounded-lg'
                 : 'flex items-center justify-between px-3 py-2.5 rounded-lg text-left'
-            } ${
-              clickedItem === item.id
+              } ${clickedItem === item.id
                 ? 'scale-95 bg-blue-600/30 text-blue-300 sidebar-button-clicked'
                 : directlyActive
-                ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30 shadow-lg'
-                : groupActiveByChild
-                ? 'bg-blue-500/10 text-blue-300 border border-blue-500/20'
-                : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:scale-[1.02]'
-            }`}
+                  ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30 shadow-lg'
+                  : groupActiveByChild
+                    ? 'bg-blue-500/10 text-blue-300 border border-blue-500/20'
+                    : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:scale-[1.02]'
+              }`}
             title={collapsed ? item.name : undefined}
           >
             {collapsed ? (
               // 收起状态：图标居中，选中框以图标为中心
               <div className="relative flex items-center justify-center">
-                <item.icon className={`w-5 h-5 flex-shrink-0 transition-all duration-200 ${
-                  groupActive ? 'scale-110' : ''
-                }`} />
+                <item.icon className={`w-5 h-5 flex-shrink-0 transition-all duration-200 ${groupActive ? 'scale-110' : ''
+                  }`} />
                 {/* 收起状态下的活跃指示器 */}
                 {directlyActive && (
                   <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
@@ -404,9 +393,8 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
                   )}
                 </div>
                 <ChevronRight
-                  className={`w-4 h-4 transition-transform duration-200 ${
-                    isExpanded ? 'rotate-90' : ''
-                  }`}
+                  className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''
+                    }`}
                 />
               </>
             )}
@@ -427,31 +415,28 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
         <Link
           to={item.href}
           onClick={() => handleButtonClick(item.id)}
-          className={`sidebar-button-hover relative transition-all duration-200 ${
-            collapsed
+          className={`sidebar-button-hover relative transition-all duration-200 ${collapsed
               ? 'flex items-center justify-center p-3 rounded-lg'
               : level > 0
-              ? 'flex items-center gap-3 px-3 py-2 rounded-md text-sm'
-              : 'flex items-center gap-3 px-3 py-2.5 rounded-lg'
-          } ${
-            clickedItem === item.id
+                ? 'flex items-center gap-3 px-3 py-2 rounded-md text-sm'
+                : 'flex items-center gap-3 px-3 py-2.5 rounded-lg'
+            } ${clickedItem === item.id
               ? 'scale-95 bg-blue-600/30 text-blue-300 sidebar-button-clicked'
               : active
-              ? level > 0
-                ? 'bg-blue-600/30 text-blue-200 border-l-2 border-blue-400 shadow-md'
-                : 'bg-blue-500/20 text-blue-400 border border-blue-500/30 shadow-lg'
-              : level > 0
-              ? 'text-gray-400 hover:bg-gray-700/30 hover:text-gray-200 hover:border-l-2 hover:border-gray-500 hover:scale-[1.02]'
-              : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:scale-[1.02]'
-          }`}
+                ? level > 0
+                  ? 'bg-blue-600/30 text-blue-200 border-l-2 border-blue-400 shadow-md'
+                  : 'bg-blue-500/20 text-blue-400 border border-blue-500/30 shadow-lg'
+                : level > 0
+                  ? 'text-gray-400 hover:bg-gray-700/30 hover:text-gray-200 hover:border-l-2 hover:border-gray-500 hover:scale-[1.02]'
+                  : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:scale-[1.02]'
+            }`}
           title={collapsed ? item.name : undefined}
         >
           {collapsed ? (
             // 收起状态：图标居中，选中框以图标为中心
             <div className="relative flex items-center justify-center">
-              <item.icon className={`w-5 h-5 flex-shrink-0 transition-all duration-200 ${
-                active ? 'scale-110' : ''
-              }`} />
+              <item.icon className={`w-5 h-5 flex-shrink-0 transition-all duration-200 ${active ? 'scale-110' : ''
+                }`} />
               {/* 收起状态下的活跃指示器 */}
               {active && (
                 <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
@@ -469,9 +454,8 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
               <item.icon className={`flex-shrink-0 ${level > 0 ? 'w-4 h-4' : 'w-5 h-5'}`} />
               <span className={`${level > 0 ? 'font-normal' : 'font-medium'}`}>{item.name}</span>
               {item.badge && (
-                <span className={`px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full ml-auto ${
-                  level > 0 ? 'text-xs' : ''
-                }`}>
+                <span className={`px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full ml-auto ${level > 0 ? 'text-xs' : ''
+                  }`}>
                   {item.badge}
                 </span>
               )}
@@ -504,9 +488,8 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
   };
 
   return (
-    <div className={`sidebar-container themed-sidebar transition-all duration-300 ${
-      collapsed ? 'w-16' : 'w-56'
-    } flex flex-col h-full overflow-visible`}>
+    <div className={`sidebar-container themed-sidebar transition-all duration-300 ${collapsed ? 'w-16' : 'w-56'
+      } flex flex-col h-full overflow-visible`}>
       {/* 导航菜单滚动区域 */}
       <div className="flex-1 min-h-0">
         <div className="h-full px-4 py-4 overflow-y-auto overflow-x-visible sidebar-scrollbar">
@@ -572,13 +555,12 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
                         setHoveredItem(null);
                         setHoverPosition(null);
                       }}
-                      className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm sidebar-button-hover transition-all duration-200 ${
-                        clickedItem === child.id
+                      className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm sidebar-button-hover transition-all duration-200 ${clickedItem === child.id
                           ? 'scale-95 bg-blue-600/30 text-blue-300 sidebar-button-clicked'
                           : isActive(child.href)
-                          ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                          : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:scale-[1.02]'
-                      }`}
+                            ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                            : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:scale-[1.02]'
+                        }`}
                     >
                       <child.icon className="w-4 h-4 flex-shrink-0" />
                       <span className="flex-1">{child.name}</span>

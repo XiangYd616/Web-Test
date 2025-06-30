@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, AlertTriangle, RefreshCw, Zap, Globe, Code, Shield } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Code, Globe, RefreshCw, Shield, XCircle, Zap } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
 interface EngineStatus {
   name: string;
@@ -14,10 +14,19 @@ interface EngineStatus {
 const TestEngineStatus: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
   const [engines, setEngines] = useState<EngineStatus[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastCheckTime, setLastCheckTime] = useState<number>(0);
 
   const checkEngineStatus = async () => {
+    // 缓存机制：如果距离上次检查不到2分钟，跳过检查
+    const now = Date.now();
+    if (now - lastCheckTime < 2 * 60 * 1000 && engines.length > 0) {
+      console.log('⏰ 跳过引擎状态检查（缓存有效）');
+      return;
+    }
+
     setIsRefreshing(true);
-    
+    setLastCheckTime(now);
+
     try {
       // 检查各个测试引擎的状态
       const engineChecks = await Promise.allSettled([
@@ -234,9 +243,9 @@ const TestEngineStatus: React.FC<{ compact?: boolean }> = ({ compact = false }) 
 
   useEffect(() => {
     checkEngineStatus();
-    
-    // 每分钟检查一次
-    const interval = setInterval(checkEngineStatus, 60000);
+
+    // 减少检查频率：每5分钟检查一次，避免429错误
+    const interval = setInterval(checkEngineStatus, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 

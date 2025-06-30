@@ -1,0 +1,85 @@
+/**
+ * 📄 统一报告服务入口
+ * 整合所有报告相关功能，避免重复和耦合
+ */
+
+// 核心类型定义
+export interface Report {
+    id: string;
+    name: string;
+    type: 'performance' | 'security' | 'comprehensive' | 'custom';
+    format: 'pdf' | 'excel' | 'html' | 'json';
+    status: 'generating' | 'completed' | 'failed';
+    progress: number;
+    createdAt: string;
+    completedAt?: string;
+    downloadUrl?: string;
+    fileSize?: string;
+    config: ReportConfig;
+    metadata: {
+        recordCount: number;
+        dateRange: string;
+        generatedBy: string;
+        version: string;
+    };
+}
+
+export interface ReportConfig {
+    dateRange: number; // 天数
+    testTypes: string[];
+    includeCharts: boolean;
+    includeRecommendations: boolean;
+    includeMonitoring: boolean;
+    includeRawData: boolean;
+    customFilters?: {
+        urls?: string[];
+        scores?: { min: number; max: number };
+        statuses?: string[];
+    };
+}
+
+export interface ReportTemplate {
+    id: string;
+    name: string;
+    description: string;
+    type: 'performance' | 'security' | 'comprehensive';
+    sections: ReportSection[];
+    defaultConfig: ReportConfig;
+    preview?: string;
+}
+
+export interface ReportSection {
+    id: string;
+    title: string;
+    type: 'summary' | 'chart' | 'table' | 'recommendations' | 'raw_data';
+    required: boolean;
+    configurable: boolean;
+    description: string;
+}
+
+export interface ExportTask {
+    id: string;
+    name: string;
+    format: 'json' | 'csv' | 'excel' | 'pdf';
+    status: 'preparing' | 'exporting' | 'completed' | 'failed';
+    progress: number;
+    recordCount?: number;
+    downloadUrl?: string;
+    createdAt: string;
+    completedAt?: string;
+    errorMessage?: string;
+}
+
+// 统一服务导出
+export { default as reportService } from './reportService';
+
+// 兼容性导出（逐步迁移）
+export { reportGenerator as legacyReportGenerator } from '../reportGenerator';
+export { reportService as legacyReportService } from '../reportService';
+
+// 类型导出
+export type {
+    ExportTask, Report,
+    ReportConfig, ReportSection, ReportTemplate
+};
+

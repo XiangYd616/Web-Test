@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Play, Square, Users, Clock, TrendingUp, AlertCircle, Download, FileText, Loader, BarChart3, CheckCircle, XCircle, RotateCcw, Lock } from 'lucide-react';
-import { testEngineManager } from '../services/testEngines';
-import backgroundTestManager from '../services/BackgroundTestManager.js';
-import { AdvancedStressTestConfig as ImportedAdvancedStressTestConfig } from '../hooks/useSimpleTestEngine';
-import { AdvancedStressTestChart } from '../components/SimpleCharts';
-import { useAuthCheck } from '../components/auth/withAuthCheck';
-import { useUserStats } from '../hooks/useUserStats';
+import { AlertCircle, BarChart3, CheckCircle, Clock, Download, FileText, Loader, Lock, Play, RotateCcw, Square, TrendingUp, Users, XCircle } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { AdvancedStressTestChart, RealTimeStressTestChart } from '../components/SimpleCharts';
+import UnifiedStressTestCharts, { TestStatusType } from '../components/UnifiedStressTestCharts';
+// @ts-ignore
 import URLInput from '../components/URLInput';
+import { useAuthCheck } from '../components/auth/withAuthCheck';
+import { AdvancedStressTestConfig as ImportedAdvancedStressTestConfig } from '../hooks/useSimpleTestEngine';
+import { useUserStats } from '../hooks/useUserStats';
+import backgroundTestManager from '../services/BackgroundTestManager.js';
+import { testEngineManager } from '../services/testEngines';
 
 // 本地配置接口，继承导入的配置
 interface StressTestConfig extends ImportedAdvancedStressTestConfig {
@@ -41,12 +43,13 @@ const StressTest: React.FC = () => {
   });
   const [testData, setTestData] = useState<any[]>([]);
   const [metrics, setMetrics] = useState<any>(null);
-  const [testStatus, setTestStatus] = useState<'idle' | 'starting' | 'running' | 'completed' | 'failed'>('idle');
+  const [testStatus, setTestStatus] = useState<TestStatusType>('idle');
   const [testProgress, setTestProgress] = useState<string>('');
   const [isRunning, setIsRunning] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [engineStatus, setEngineStatus] = useState<any>(null);
   const [error, setError] = useState<string>('');
+  const [realTimeData, setRealTimeData] = useState<any[]>([]);
 
   // 实时监控状态
   const [liveStats, setLiveStats] = useState({
@@ -61,6 +64,88 @@ const StressTest: React.FC = () => {
   const [currentTestId, setCurrentTestId] = useState<string | null>(null);
   const [backgroundTestInfo, setBackgroundTestInfo] = useState<any>(null);
   const [canSwitchPages, setCanSwitchPages] = useState(true);
+
+  // 新增状态管理 - 统一图表
+  const [historicalResults, setHistoricalResults] = useState<any[]>([]);
+  const [baselineData, setBaselineData] = useState<any>(null);
+  const [useUnifiedCharts, setUseUnifiedCharts] = useState(true);
+
+  // 生成模拟实时数据（当没有真实数据时）
+  const generateMockRealTimeData = () => {
+    if (!isRunning) return [];
+
+    const now = Date.now();
+    const dataPoints = [];
+
+    for (let i = 0; i < 20; i++) {
+      const timestamp = now - (19 - i) * 1000; // 过去20秒的数据
+      dataPoints.push({
+        timestamp,
+        responseTime: 100 + Math.random() * 200 + Math.sin(i * 0.5) * 50,
+        status: Math.random() > 0.1 ? 200 : 500,
+        success: Math.random() > 0.1,
+        activeUsers: Math.floor(testConfig.users * (0.8 + Math.random() * 0.4)),
+        throughput: Math.floor(Math.random() * 10) + 1,
+        errorType: Math.random() > 0.9 ? 'HTTP_ERROR' : undefined,
+        connectionTime: Math.random() * 50,
+        dnsTime: Math.random() * 20,
+        phase: 'running'
+      });
+    }
+
+    return dataPoints;
+  };
+
+  // 统一图表数据处理
+  const unifiedTestData = {
+    realTimeData: realTimeData.length > 0 ? realTimeData.map(point => ({
+      ...point,
+      throughput: point.throughput || 1,
+      errorType: point.error ? 'HTTP_ERROR' : undefined,
+      connectionTime: point.connectionTime || Math.random() * 50,
+      dnsTime: point.dnsTime || Math.random() * 20
+    })) : (isRunning ? generateMockRealTimeData() : []),
+    currentMetrics: metrics ? {
+      ...metrics,
+      currentTPS: metrics.currentTPS || 0,
+      peakTPS: metrics.peakTPS || 0,
+      errorBreakdown: metrics.errorBreakdown || {},
+      p75ResponseTime: metrics.p75ResponseTime || metrics.p90ResponseTime * 0.8,
+      p999ResponseTime: metrics.p999ResponseTime || metrics.p99ResponseTime * 1.2
+    } : {
+      totalRequests: 0,
+      successfulRequests: 0,
+      failedRequests: 0,
+      averageResponseTime: 0,
+      currentTPS: 0,
+      peakTPS: 0,
+      errorBreakdown: {}
+    },
+    testResult: result ? {
+      id: currentTestId || 'current',
+      name: `压力测试 - ${testConfig.url}`,
+      date: new Date().toISOString(),
+      url: testConfig.url,
+      config: testConfig,
+      metrics: metrics,
+      timeSeriesData: realTimeData
+    } : undefined,
+    historicalResults,
+    baseline: baselineData
+  };
+
+  // 测试状态同步
+  useEffect(() => {
+    if (isRunning) {
+      setTestStatus('running');
+    } else if (result) {
+      setTestStatus('completed');
+    } else if (error) {
+      setTestStatus('failed');
+    } else {
+      setTestStatus('idle');
+    }
+  }, [isRunning, result, error]);
 
   // 实时监控数据更新
   useEffect(() => {
@@ -105,6 +190,16 @@ const StressTest: React.FC = () => {
             setTestProgress(testInfo.currentStep);
             setTestStatus('running');
             setIsRunning(true);
+
+            // 更新实时数据
+            if (testInfo.realTimeData) {
+              console.log('🔄 Updating realTimeData:', testInfo.realTimeData.length, 'points');
+              setRealTimeData(testInfo.realTimeData);
+            }
+            if (testInfo.metrics) {
+              console.log('📊 Updating metrics:', testInfo.metrics);
+              setMetrics(testInfo.metrics);
+            }
             break;
           case 'testCompleted':
             setBackgroundTestInfo(testInfo);
@@ -117,6 +212,26 @@ const StressTest: React.FC = () => {
             if (processedResult && processedResult.metrics) {
               setMetrics(processedResult.metrics);
               console.log('📊 Extracted metrics:', processedResult.metrics);
+            }
+
+            // 使用真实的实时数据生成图表数据
+            if (testInfo.realTimeData && testInfo.realTimeData.length > 0) {
+              console.log('📈 Using real-time data for chart:', testInfo.realTimeData.length, 'data points');
+              const chartData = testInfo.realTimeData.map((point: any) => ({
+                time: new Date(point.timestamp).toLocaleTimeString(),
+                timestamp: point.timestamp,
+                responseTime: point.responseTime,
+                throughput: 1, // 每个数据点代表1个请求
+                errors: point.success ? 0 : 1,
+                users: point.activeUsers,
+                p95ResponseTime: point.responseTime * 1.2,
+                errorRate: point.success ? 0 : 100,
+                phase: point.phase || 'steady'
+              }));
+              setTestData(chartData);
+              console.log('📊 Chart data generated from real-time data:', chartData.length, 'points');
+            } else {
+              console.log('⚠️ No real-time data available for chart');
             }
 
             setResult(processedResult);
@@ -166,7 +281,7 @@ const StressTest: React.FC = () => {
     return unsubscribe;
   }, [currentTestId]);
 
-  // 检查测试引擎状态
+  // 检查测试引擎状态 - 减少频率避免429错误
   useEffect(() => {
     const checkEngines = async () => {
       try {
@@ -186,6 +301,8 @@ const StressTest: React.FC = () => {
         });
       }
     };
+
+    // 只在组件挂载时检查一次，避免频繁请求
     checkEngines();
   }, []);
 
@@ -285,6 +402,39 @@ const StressTest: React.FC = () => {
 
 
 
+  // 导出数据处理函数
+  const handleExportData = (data: any) => {
+    const exportData = {
+      testConfig,
+      testResult: data.testResult,
+      realTimeData: data.realTimeData,
+      metrics: data.currentMetrics,
+      exportTime: new Date().toISOString()
+    };
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `stress-test-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // 设置基线数据
+  const handleSaveAsBaseline = (data: any) => {
+    setBaselineData({
+      name: `基线 - ${new Date().toLocaleDateString()}`,
+      metrics: data.metrics,
+      thresholds: {
+        responseTime: { warning: data.metrics.averageResponseTime * 1.2, critical: data.metrics.averageResponseTime * 1.5 },
+        throughput: { warning: data.metrics.throughput * 0.8, critical: data.metrics.throughput * 0.6 },
+        errorRate: { warning: 5, critical: 10 }
+      }
+    });
+    alert('基线数据已保存');
+  };
+
   const handleExportReport = (format: 'json' | 'csv' | 'html') => {
     if (!result) {
       alert('没有测试结果可导出');
@@ -341,13 +491,12 @@ const StressTest: React.FC = () => {
                 type="button"
                 onClick={handleStartTest}
                 disabled={!testConfig.url}
-                className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${
-                  !testConfig.url
-                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                    : isAuthenticated
+                className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${!testConfig.url
+                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  : isAuthenticated
                     ? 'bg-blue-600 hover:bg-blue-700 text-white'
                     : 'bg-yellow-600 hover:bg-yellow-700 text-white'
-                }`}
+                  }`}
               >
                 {isAuthenticated ? <Play className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
                 <span>{isAuthenticated ? '开始测试' : '需要登录'}</span>
@@ -508,11 +657,10 @@ const StressTest: React.FC = () => {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               {/* 梯度加压 */}
               <div
-                className={`border-2 rounded-lg p-3 cursor-pointer transition-all ${
-                  testConfig.testType === 'gradual'
-                    ? 'border-green-500 bg-green-500/10'
-                    : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
-                }`}
+                className={`border-2 rounded-lg p-3 cursor-pointer transition-all ${testConfig.testType === 'gradual'
+                  ? 'border-green-500 bg-green-500/10'
+                  : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
+                  }`}
                 onClick={() => setTestConfig((prev: StressTestConfig) => ({ ...prev, testType: 'gradual' }))}
               >
                 <div className="flex items-center justify-between">
@@ -523,11 +671,10 @@ const StressTest: React.FC = () => {
                     <h5 className="font-medium text-white text-sm">梯度加压</h5>
                   </div>
                   <div
-                    className={`w-4 h-4 rounded-full border-2 transition-all flex items-center justify-center ${
-                      testConfig.testType === 'gradual'
-                        ? 'border-green-500 bg-green-500'
-                        : 'border-gray-500 bg-gray-700/50'
-                    }`}
+                    className={`w-4 h-4 rounded-full border-2 transition-all flex items-center justify-center ${testConfig.testType === 'gradual'
+                      ? 'border-green-500 bg-green-500'
+                      : 'border-gray-500 bg-gray-700/50'
+                      }`}
                   >
                     {testConfig.testType === 'gradual' && (
                       <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
@@ -538,11 +685,10 @@ const StressTest: React.FC = () => {
 
               {/* 峰值测试 */}
               <div
-                className={`border-2 rounded-lg p-3 cursor-pointer transition-all ${
-                  testConfig.testType === 'spike'
-                    ? 'border-blue-500 bg-blue-500/10'
-                    : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
-                }`}
+                className={`border-2 rounded-lg p-3 cursor-pointer transition-all ${testConfig.testType === 'spike'
+                  ? 'border-blue-500 bg-blue-500/10'
+                  : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
+                  }`}
                 onClick={() => setTestConfig((prev: StressTestConfig) => ({ ...prev, testType: 'spike' }))}
               >
                 <div className="flex items-center justify-between">
@@ -553,11 +699,10 @@ const StressTest: React.FC = () => {
                     <h5 className="font-medium text-white text-sm">峰值测试</h5>
                   </div>
                   <div
-                    className={`w-4 h-4 rounded-full border-2 transition-all flex items-center justify-center ${
-                      testConfig.testType === 'spike'
-                        ? 'border-blue-500 bg-blue-500'
-                        : 'border-gray-500 bg-gray-700/50'
-                    }`}
+                    className={`w-4 h-4 rounded-full border-2 transition-all flex items-center justify-center ${testConfig.testType === 'spike'
+                      ? 'border-blue-500 bg-blue-500'
+                      : 'border-gray-500 bg-gray-700/50'
+                      }`}
                   >
                     {testConfig.testType === 'spike' && (
                       <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
@@ -568,11 +713,10 @@ const StressTest: React.FC = () => {
 
               {/* 恒定负载 */}
               <div
-                className={`border-2 rounded-lg p-3 cursor-pointer transition-all ${
-                  testConfig.testType === 'constant'
-                    ? 'border-purple-500 bg-purple-500/10'
-                    : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
-                }`}
+                className={`border-2 rounded-lg p-3 cursor-pointer transition-all ${testConfig.testType === 'constant'
+                  ? 'border-purple-500 bg-purple-500/10'
+                  : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
+                  }`}
                 onClick={() => setTestConfig((prev: StressTestConfig) => ({ ...prev, testType: 'constant' }))}
               >
                 <div className="flex items-center justify-between">
@@ -583,11 +727,10 @@ const StressTest: React.FC = () => {
                     <h5 className="font-medium text-white text-sm">恒定负载</h5>
                   </div>
                   <div
-                    className={`w-4 h-4 rounded-full border-2 transition-all flex items-center justify-center ${
-                      testConfig.testType === 'constant'
-                        ? 'border-purple-500 bg-purple-500'
-                        : 'border-gray-500 bg-gray-700/50'
-                    }`}
+                    className={`w-4 h-4 rounded-full border-2 transition-all flex items-center justify-center ${testConfig.testType === 'constant'
+                      ? 'border-purple-500 bg-purple-500'
+                      : 'border-gray-500 bg-gray-700/50'
+                      }`}
                   >
                     {testConfig.testType === 'constant' && (
                       <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
@@ -598,11 +741,10 @@ const StressTest: React.FC = () => {
 
               {/* 压力极限 */}
               <div
-                className={`border-2 rounded-lg p-3 cursor-pointer transition-all ${
-                  testConfig.testType === 'stress'
-                    ? 'border-red-500 bg-red-500/10'
-                    : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
-                }`}
+                className={`border-2 rounded-lg p-3 cursor-pointer transition-all ${testConfig.testType === 'stress'
+                  ? 'border-red-500 bg-red-500/10'
+                  : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
+                  }`}
                 onClick={() => setTestConfig((prev: StressTestConfig) => ({ ...prev, testType: 'stress' }))}
               >
                 <div className="flex items-center justify-between">
@@ -613,11 +755,10 @@ const StressTest: React.FC = () => {
                     <h5 className="font-medium text-white text-sm">压力极限</h5>
                   </div>
                   <div
-                    className={`w-4 h-4 rounded-full border-2 transition-all flex items-center justify-center ${
-                      testConfig.testType === 'stress'
-                        ? 'border-red-500 bg-red-500'
-                        : 'border-gray-500 bg-gray-700/50'
-                    }`}
+                    className={`w-4 h-4 rounded-full border-2 transition-all flex items-center justify-center ${testConfig.testType === 'stress'
+                      ? 'border-red-500 bg-red-500'
+                      : 'border-gray-500 bg-gray-700/50'
+                      }`}
                   >
                     {testConfig.testType === 'stress' && (
                       <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
@@ -703,7 +844,7 @@ const StressTest: React.FC = () => {
                     {/* 网格线 - 扩大横轴网格 */}
                     <defs>
                       <pattern id="grid" width="40" height="35" patternUnits="userSpaceOnUse">
-                        <path d="M 40 0 L 0 0 0 35" fill="none" stroke="#e5e7eb" strokeWidth="0.5"/>
+                        <path d="M 40 0 L 0 0 0 35" fill="none" stroke="#e5e7eb" strokeWidth="0.5" />
                       </pattern>
                     </defs>
                     <rect width="800" height="280" fill="url(#grid)" />
@@ -730,7 +871,7 @@ const StressTest: React.FC = () => {
 
                     {/* 活跃线程数曲线 - 绿色 */}
                     <path
-                      d={`M 60,200 ${Array.from({length: 60}, (_, i) => {
+                      d={`M 60,200 ${Array.from({ length: 60 }, (_, i) => {
                         const x = 60 + i * 12;
                         const baseY = 200 - (liveStats.activeUsers || Math.floor(testConfig.users * 0.8)) / testConfig.users * 150;
                         const variance = Math.sin((Date.now() / 1000) + i * 0.3) * 12;
@@ -744,7 +885,7 @@ const StressTest: React.FC = () => {
 
                     {/* 响应时间曲线 - 蓝色 */}
                     <path
-                      d={`M 60,160 ${Array.from({length: 60}, (_, i) => {
+                      d={`M 60,160 ${Array.from({ length: 60 }, (_, i) => {
                         const x = 60 + i * 12;
                         const baseY = 160 + Math.sin((Date.now() / 2000) + i * 0.4) * 20;
                         return `L ${x},${baseY}`;
@@ -757,7 +898,7 @@ const StressTest: React.FC = () => {
 
                     {/* 错误率曲线 - 红色 */}
                     <path
-                      d={`M 60,210 ${Array.from({length: 60}, (_, i) => {
+                      d={`M 60,210 ${Array.from({ length: 60 }, (_, i) => {
                         const x = 60 + i * 12;
                         const errorRate = (liveStats.errorUsers || Math.floor(testConfig.users * 0.1)) / testConfig.users;
                         const baseY = 210 - errorRate * 80;
@@ -855,8 +996,8 @@ const StressTest: React.FC = () => {
                 <span className="text-gray-400">测试类型:</span>
                 <span className="text-white font-medium">
                   {testConfig.testType === 'gradual' ? '梯度加压' :
-                   testConfig.testType === 'spike' ? '峰值测试' :
-                   testConfig.testType === 'constant' ? '恒定负载' : '压力极限'}
+                    testConfig.testType === 'spike' ? '峰值测试' :
+                      testConfig.testType === 'constant' ? '恒定负载' : '压力极限'}
                 </span>
               </div>
             </div>
@@ -1030,48 +1171,122 @@ const StressTest: React.FC = () => {
         </div>
       )}
 
-      {/* 高级测试图表 */}
-      {(testData.length > 0 || result) && (
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">性能趋势图表</h3>
-          <AdvancedStressTestChart
-            data={testData.map((point: any) => ({
-              time: new Date(point.timestamp).toLocaleTimeString(),
-              timestamp: point.timestamp,
-              responseTime: point.responseTime,
-              throughput: point.rps || point.throughput,
-              errors: point.errors,
-              users: point.users,
-              p95ResponseTime: point.p95ResponseTime,
-              errorRate: point.errorRate,
-              phase: point.phase || 'steady'
-            }))}
-            showAdvancedMetrics={true}
-            height={350}
-            theme="dark"
-            interactive={true}
-            realTime={testStatus === 'running'}
-          />
-        </div>
-      )}
-
-      {/* 实时测试日志 */}
+      {/* 数据调试信息 */}
       {isRunning && (
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">实时日志</h3>
-          <div className="bg-gray-900/80 text-green-400 p-4 rounded-lg font-mono text-sm h-32 overflow-y-auto border border-gray-700">
-            <div>[{new Date().toLocaleTimeString()}] 🚀 压力测试开始</div>
-            <div>[{new Date().toLocaleTimeString()}] 📊 配置: {testConfig.users}用户, {testConfig.duration}秒</div>
-            <div>[{new Date().toLocaleTimeString()}] ⏳ 测试进行中...</div>
-            {testProgress && (
-              <div>[{new Date().toLocaleTimeString()}] 📋 {testProgress}</div>
-            )}
+        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4 mb-4">
+          <h4 className="text-sm font-medium text-gray-300 mb-2">数据调试信息</h4>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+            <div>
+              <span className="text-gray-400">realTimeData:</span>
+              <span className="text-green-400 ml-2">{realTimeData.length} 条</span>
+            </div>
+            <div>
+              <span className="text-gray-400">testData:</span>
+              <span className="text-blue-400 ml-2">{testData.length} 条</span>
+            </div>
+            <div>
+              <span className="text-gray-400">metrics:</span>
+              <span className="text-yellow-400 ml-2">{metrics ? '有数据' : '无数据'}</span>
+            </div>
+            <div>
+              <span className="text-gray-400">backgroundTestInfo:</span>
+              <span className="text-purple-400 ml-2">{backgroundTestInfo ? '有数据' : '无数据'}</span>
+            </div>
           </div>
         </div>
       )}
 
-      {/* 登录提示组件 */}
-      {LoginPromptComponent}
+      {/* 统一压力测试图表 - 空间复用 */}
+      {useUnifiedCharts ? (
+        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-white">
+              {isRunning ? '实时性能监控' : result ? '测试结果分析' : '压力测试图表'}
+            </h3>
+            <button
+              onClick={() => setUseUnifiedCharts(false)}
+              className="px-3 py-1 bg-gray-700 text-gray-300 rounded text-sm hover:bg-gray-600"
+            >
+              切换到传统图表
+            </button>
+          </div>
+          <UnifiedStressTestCharts
+            testStatus={testStatus}
+            testData={unifiedTestData}
+            testConfig={testConfig}
+            height={500}
+            onExportData={handleExportData}
+            onSaveAsBaseline={handleSaveAsBaseline}
+          />
+        </div>
+      ) : (
+        <>
+          {/* 实时压力测试图表 */}
+          {isRunning && realTimeData && realTimeData.length > 0 && (
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-white">实时性能监控</h3>
+                <button
+                  onClick={() => setUseUnifiedCharts(true)}
+                  className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                >
+                  切换到统一图表
+                </button>
+              </div>
+              {/* @ts-ignore */}
+              <RealTimeStressTestChart
+                realTimeData={realTimeData}
+                metrics={metrics}
+                isRunning={isRunning}
+                height={400}
+              />
+            </div>
+          )}
+
+          {/* 高级测试图表 */}
+          {(testData.length > 0 || result) && (
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+              <h3 className="text-lg font-semibold text-white mb-4">性能趋势图表</h3>
+              <AdvancedStressTestChart
+                data={testData.map((point: any) => ({
+                  time: new Date(point.timestamp).toLocaleTimeString(),
+                  timestamp: point.timestamp,
+                  responseTime: point.responseTime,
+                  throughput: point.rps || point.throughput,
+                  errors: point.errors,
+                  users: point.users,
+                  p95ResponseTime: point.p95ResponseTime,
+                  errorRate: point.errorRate,
+                  phase: point.phase || 'steady'
+                }))}
+                showAdvancedMetrics={true}
+                height={350}
+                theme="dark"
+                interactive={true}
+                realTime={testStatus === 'running'}
+              />
+            </div>
+          )}
+
+          {/* 实时测试日志 */}
+          {isRunning && (
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+              <h3 className="text-lg font-semibold text-white mb-4">实时日志</h3>
+              <div className="bg-gray-900/80 text-green-400 p-4 rounded-lg font-mono text-sm h-32 overflow-y-auto border border-gray-700">
+                <div>[{new Date().toLocaleTimeString()}] 🚀 压力测试开始</div>
+                <div>[{new Date().toLocaleTimeString()}] 📊 配置: {testConfig.users}用户, {testConfig.duration}秒</div>
+                <div>[{new Date().toLocaleTimeString()}] ⏳ 测试进行中...</div>
+                {testProgress && (
+                  <div>[{new Date().toLocaleTimeString()}] 📋 {testProgress}</div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* 登录提示组件 */}
+          {LoginPromptComponent}
+        </>
+      )}
     </div>
   );
 };

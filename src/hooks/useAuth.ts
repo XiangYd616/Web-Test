@@ -1,12 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
-import { unifiedAuthService } from '../services/unifiedAuthService';
+import { useCallback, useEffect, useState } from 'react';
+import { authService } from '../services/auth';
 import type {
-  User,
+  AuthResponse,
+  ChangePasswordData,
   LoginCredentials,
   RegisterData,
-  AuthResponse,
   UpdateUserData,
-  ChangePasswordData
+  User
 } from '../types/user';
 
 export const useAuth = () => {
@@ -16,12 +16,12 @@ export const useAuth = () => {
 
   // 初始化认证状态
   useEffect(() => {
-    const currentUser = unifiedAuthService.getCurrentUser();
+    const currentUser = authService.getCurrentUser();
     setUser(currentUser);
     setIsLoading(false);
 
     // 监听认证状态变化
-    const unsubscribe = unifiedAuthService.onAuthStateChange((user) => {
+    const unsubscribe = authService.onAuthStateChange((user) => {
       setUser(user);
       setIsLoading(false);
     });
@@ -35,7 +35,7 @@ export const useAuth = () => {
     setError(null);
 
     try {
-      const response = await unifiedAuthService.login(credentials);
+      const response = await authService.login(credentials);
 
       if (!response.success) {
         setError(response.message || '登录失败');
@@ -60,7 +60,7 @@ export const useAuth = () => {
     setError(null);
 
     try {
-      const response = await unifiedAuthService.register(data);
+      const response = await authService.register(data);
 
       if (!response.success) {
         setError(response.message || '注册失败');
@@ -82,9 +82,9 @@ export const useAuth = () => {
   // 登出
   const logout = useCallback(() => {
     setIsLoading(true);
-    unifiedAuthService.logout();
+    authService.logout();
     setError(null);
-    // unifiedAuthService.logout() 会触发 onAuthStateChange，所以不需要手动设置 user
+    // authService.logout() 会触发 onAuthStateChange，所以不需要手动设置 user
   }, []);
 
   // 更新用户信息
@@ -93,7 +93,7 @@ export const useAuth = () => {
     setError(null);
 
     try {
-      const response = await unifiedAuthService.updateProfile(updates);
+      const response = await authService.updateProfile(updates);
 
       if (!response.success) {
         setError(response.message || '更新失败');
@@ -118,7 +118,7 @@ export const useAuth = () => {
     setError(null);
 
     try {
-      const response = await unifiedAuthService.changePassword(data);
+      const response = await authService.changePassword(data);
 
       if (!response.success) {
         setError(response.message || '密码修改失败');
@@ -139,12 +139,12 @@ export const useAuth = () => {
 
   // 检查权限
   const hasPermission = useCallback((permission: string): boolean => {
-    return unifiedAuthService.hasPermission(permission);
+    return authService.hasPermission(permission);
   }, []);
 
   // 检查角色
   const hasRole = useCallback((role: string): boolean => {
-    return unifiedAuthService.hasRole(role);
+    return authService.hasRole(role);
   }, []);
 
   // 清除错误
@@ -154,7 +154,7 @@ export const useAuth = () => {
 
   // 获取环境信息
   const getEnvironmentInfo = useCallback(() => {
-    return unifiedAuthService.getEnvironmentInfo();
+    return authService.getEnvironmentInfo();
   }, []);
 
   return {

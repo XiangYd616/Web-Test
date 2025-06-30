@@ -1,19 +1,16 @@
-import React, { useState, useEffect } from 'react';
 import {
-  FileText,
-  Download,
-  Share2,
-  Calendar,
-  Filter,
-  Eye,
-  Trash2,
-  Plus,
-  BarChart3,
-  Globe,
+  CheckCircle,
   Clock,
-  CheckCircle
+  Download,
+  Eye,
+  FileText,
+  Filter,
+  Plus,
+  Share2,
+  Trash2
 } from 'lucide-react';
-import { reportService, Report, ReportConfig } from '../../services/reportService';
+import React, { useEffect, useState } from 'react';
+import { Report, ReportConfig, reportService } from '../../services/reporting';
 
 interface ReportTemplate {
   id: string;
@@ -270,8 +267,8 @@ const ReportManagement: React.FC = () => {
                       <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(report.status)}`}>
                         {getStatusIcon(report.status)}
                         <span>
-                          {report.status === 'completed' ? '已完成' : 
-                           report.status === 'generating' ? '生成中' : '失败'}
+                          {report.status === 'completed' ? '已完成' :
+                            report.status === 'generating' ? '生成中' : '失败'}
                         </span>
                       </span>
                     </td>
@@ -295,7 +292,7 @@ const ReportManagement: React.FC = () => {
                             </button>
                           </>
                         )}
-                        <button 
+                        <button
                           onClick={() => deleteReport(report.id)}
                           className="p-1 text-gray-400 hover:text-red-400 transition-colors"
                           title="删除"
@@ -317,7 +314,7 @@ const ReportManagement: React.FC = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-semibold text-white mb-6">生成新报告</h3>
-            
+
             {/* 报告模板选择 */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-300 mb-3">选择报告模板</label>
@@ -326,16 +323,15 @@ const ReportManagement: React.FC = () => {
                   <div
                     key={template.id}
                     onClick={() => setSelectedTemplate(template.id)}
-                    className={`p-4 rounded-lg border cursor-pointer transition-colors ${
-                      selectedTemplate === template.id
+                    className={`p-4 rounded-lg border cursor-pointer transition-colors ${selectedTemplate === template.id
                         ? 'border-blue-500 bg-blue-500/10'
                         : 'border-gray-600 hover:border-gray-500'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center space-x-3 mb-2">
                       <div className="text-blue-400">
                         {template.type === 'performance' ? '⚡' :
-                         template.type === 'security' ? '🔒' : '📊'}
+                          template.type === 'security' ? '🔒' : '📊'}
                       </div>
                       <h4 className="text-white font-medium">{template.name}</h4>
                     </div>

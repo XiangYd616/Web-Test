@@ -121,7 +121,7 @@ export class EnhancedReportGenerator {
   private static generateHTMLReport(data: ReportData, config: ReportConfig): string {
     const template = this.TEMPLATES[config.template];
     const styles = this.generateCSS(template.styling, config.branding);
-    
+
     const html = `
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -151,7 +151,7 @@ export class EnhancedReportGenerator {
   // 生成PDF报告（使用HTML转PDF）
   private static async generatePDFReport(data: ReportData, config: ReportConfig): Promise<Blob> {
     const html = this.generateHTMLReport(data, config);
-    
+
     // 在实际应用中，这里会使用如 Puppeteer 或 jsPDF 等库
     // 这里提供一个模拟实现
     const pdfContent = this.convertHTMLToPDF(html);
@@ -202,8 +202,8 @@ export class EnhancedReportGenerator {
   private static generateExcelReport(data: ReportData, config: ReportConfig): Blob {
     // 这里使用 SheetJS 或类似库的模拟实现
     const workbook = this.createExcelWorkbook(data, config);
-    return new Blob([workbook], { 
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    return new Blob([workbook], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     });
   }
 
@@ -408,7 +408,7 @@ export class EnhancedReportGenerator {
   // 生成目录
   private static generateTableOfContents(config: ReportConfig): string {
     const enabledSections = config.sections.filter(s => s.enabled).sort((a, b) => a.order - b.order);
-    
+
     return `
       <div class="toc">
         <h2>目录</h2>
@@ -424,7 +424,7 @@ export class EnhancedReportGenerator {
   // 生成报告章节
   private static generateSections(data: ReportData, config: ReportConfig): string {
     const enabledSections = config.sections.filter(s => s.enabled).sort((a, b) => a.order - b.order);
-    
+
     return enabledSections.map(section => {
       switch (section.type) {
         case 'summary':
@@ -446,7 +446,7 @@ export class EnhancedReportGenerator {
   // 生成摘要章节
   private static generateSummarySection(data: ReportData, section: ReportSection): string {
     const summary = this.generateSummaryData(data);
-    
+
     return `
       <div class="section" id="section-${section.id}">
         <h2>${section.title}</h2>
@@ -479,7 +479,7 @@ export class EnhancedReportGenerator {
   // 生成指标章节
   private static generateMetricsSection(data: ReportData, section: ReportSection): string {
     const metrics = this.generateMetricsData(data);
-    
+
     return `
       <div class="section" id="section-${section.id}">
         <h2>${section.title}</h2>
@@ -525,7 +525,7 @@ export class EnhancedReportGenerator {
   // 生成建议章节
   private static generateRecommendationsSection(data: ReportData, section: ReportSection): string {
     const recommendations = this.generateRecommendationsData(data);
-    
+
     return `
       <div class="section" id="section-${section.id}">
         <h2>${section.title}</h2>
@@ -815,3 +815,7 @@ export class EnhancedReportGenerator {
     }
   }
 }
+
+// 创建默认实例并导出
+export const reportGenerator = EnhancedReportGenerator;
+export default EnhancedReportGenerator;

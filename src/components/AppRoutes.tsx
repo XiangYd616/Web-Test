@@ -1,12 +1,12 @@
 import React, { Suspense, lazy } from 'react';
-import { Routes, Route } from 'react-router-dom';
-import ModernLayout from './modern/ModernLayout';
-import ProtectedRoute from './ProtectedRoute';
+import { Route, Routes } from 'react-router-dom';
+import Login from '../pages/Login';
+import Register from '../pages/Register';
 import AdminGuard from './AdminGuard';
 import EnhancedErrorBoundary from './EnhancedErrorBoundary';
 import EnhancedLoadingSpinner from './EnhancedLoadingSpinner';
-import Login from '../pages/Login';
-import Register from '../pages/Register';
+import ModernLayout from './modern/ModernLayout';
+import ProtectedRoute from './ProtectedRoute';
 
 // 懒加载页面组件 - 统一使用懒加载以提高性能
 const WebsiteTest = lazy(() => import('../pages/WebsiteTest'));
@@ -173,15 +173,7 @@ const AppRoutes: React.FC = () => {
         </ModernLayout>
       } />
 
-      <Route path="/performance" element={
-        <ProtectedRoute>
-          <ModernLayout>
-            <LazyPageWrapper>
-              <Performance />
-            </LazyPageWrapper>
-          </ModernLayout>
-        </ProtectedRoute>
-      } />
+
 
       <Route path="/integrations" element={
         <ProtectedRoute>

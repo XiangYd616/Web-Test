@@ -1,4 +1,8 @@
-import { unifiedApiService } from './unifiedApiService';
+
+import { apiService } from './api';
+
+// 临时替换所有 unifiedApiService 为 apiService
+const unifiedApiService = apiService;
 
 export interface UserProfile {
   id: string;
@@ -105,7 +109,7 @@ class UserService {
   // 获取用户个人资料
   async getProfile(): Promise<UserProfile> {
     try {
-      const response = await unifiedApiService.get('/api/user/profile');
+      const response = await apiService.get('/api/user/profile');
       if (response.success) {
         return response.data.user;
       }
@@ -119,7 +123,7 @@ class UserService {
   // 更新用户个人资料
   async updateProfile(data: UpdateProfileData): Promise<UserProfile> {
     try {
-      const response = await unifiedApiService.put('/api/user/profile', data);
+      const response = await apiService.put('/api/user/profile', data);
       if (response.success) {
         return response.data.user;
       }

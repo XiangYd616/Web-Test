@@ -18,6 +18,7 @@ const testRoutes = require('./routes/test');
 const userRoutes = require('./routes/user');
 const adminRoutes = require('./routes/admin');
 const dataRoutes = require('./routes/data');
+const dataManagementRoutes = require('./routes/dataManagement');
 const monitoringRoutes = require('./routes/monitoring');
 const reportRoutes = require('./routes/reports');
 const integrationRoutes = require('./routes/integrations');
@@ -113,10 +114,13 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // API路由
 app.use('/api/auth', authRoutes);
 app.use('/api/test', testRoutes);
+app.use('/api/tests', testRoutes); // 复数形式的别名
 app.use('/api/test-engines', testRoutes); // 测试引擎状态API
+app.use('/api/test-history', testRoutes); // 兼容性路由 - 重定向到test路由
 app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/data', dataRoutes);
+app.use('/api/data-management', dataManagementRoutes);
 app.use('/api/monitoring', monitoringRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/integrations', integrationRoutes);
@@ -126,7 +130,7 @@ app.get('/health', async (req, res) => {
   try {
     // 检查数据库连接
     await testConnection();
-    
+
     res.json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
@@ -187,11 +191,11 @@ const startServer = async () => {
   try {
     // 确保目录存在
     ensureDirectories();
-    
+
     // 连接数据库
     await connectDB();
     console.log('✅ 数据库连接成功');
-    
+
     // 启动服务器
     const server = app.listen(PORT, () => {
       console.log(`🚀 服务器运行在端口 ${PORT}`);

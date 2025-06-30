@@ -108,16 +108,7 @@ class GlobalSearchService {
         category: '数据中心',
         relevance: 1.0
       },
-      {
-        id: 'performance',
-        title: '性能分析',
-        description: '网站性能指标和优化建议',
-        type: 'page',
-        url: '/performance',
-        icon: 'Activity',
-        category: '数据管理',
-        relevance: 1.0
-      },
+
       {
         id: 'monitoring',
         title: '实时监控',
@@ -287,20 +278,20 @@ class GlobalSearchService {
 
       // 文本匹配
       const searchText = `${item.title} ${item.description} ${item.category}`.toLowerCase();
-      
+
       // 计算匹配度
       let score = 0;
-      
+
       // 标题完全匹配
       if (item.title.toLowerCase().includes(normalizedQuery)) {
         score += 10;
       }
-      
+
       // 描述匹配
       if (item.description.toLowerCase().includes(normalizedQuery)) {
         score += 5;
       }
-      
+
       // 分词匹配
       words.forEach(word => {
         if (searchText.includes(word)) {
@@ -310,7 +301,7 @@ class GlobalSearchService {
 
       // 设置匹配分数
       item.relevance = score * item.relevance;
-      
+
       return score > 0;
     });
 
@@ -341,7 +332,7 @@ class GlobalSearchService {
       if (title.includes(normalizedQuery)) {
         suggestions.add(item.title);
       }
-      
+
       // 添加相关词汇
       if (title.includes('测试')) suggestions.add('测试');
       if (title.includes('分析')) suggestions.add('分析');
@@ -358,7 +349,7 @@ class GlobalSearchService {
     await this.initializeSearchIndex();
 
     const categoryMap = new Map<string, number>();
-    
+
     this.searchIndex.forEach(item => {
       categoryMap.set(item.category, (categoryMap.get(item.category) || 0) + 1);
     });

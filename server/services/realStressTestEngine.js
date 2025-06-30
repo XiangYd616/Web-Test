@@ -13,6 +13,7 @@ class RealStressTestEngine {
     this.name = 'real-stress-test-engine';
     this.version = '1.0.0';
     this.maxConcurrentUsers = Math.min(1000, os.cpus().length * 50); // 基于CPU核心数限制
+    this.runningTests = new Map(); // 存储正在运行的测试状态
   }
 
   /**
@@ -29,7 +30,27 @@ class RealStressTestEngine {
       thinkTime = 1
     } = config;
 
-    console.log(`⚡ Starting real stress test for: ${url}`);
+    // 生成测试ID
+    const testId = `stress_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    // 初始化测试状态
+    this.updateTestStatus(testId, {
+      status: 'running',
+      progress: 0,
+      startTime: Date.now(),
+      url: url,
+      config: config,
+      realTimeMetrics: {
+        totalRequests: 0,
+        successfulRequests: 0,
+        failedRequests: 0,
+        lastResponseTime: 0,
+        lastRequestSuccess: true,
+        activeRequests: 0
+      }
+    });
+
+    console.log(`⚡ Starting real stress test for: ${url} (ID: ${testId})`);
     console.log(`👥 Users: ${users}, Duration: ${duration}s, Ramp-up: ${rampUpTime}s, Type: ${testType}`);
 
     // 验证参数
@@ -45,7 +66,6 @@ class RealStressTestEngine {
       throw new Error('无效的URL格式');
     }
 
-    const testId = `stress-${Date.now()}`;
     const startTime = Date.now();
 
     const results = {
@@ -91,6 +111,9 @@ class RealStressTestEngine {
       console.log(`⚡ Average response time: ${results.metrics.averageResponseTime}ms`);
       console.log(`🚀 Throughput: ${results.metrics.throughput} req/s`);
       console.log(`❌ Error rate: ${results.metrics.errorRate}%`);
+
+      // 清理测试状态
+      this.removeTestStatus(testId);
 
       return { success: true, data: results };
 
@@ -309,12 +332,16 @@ class RealStressTestEngine {
   async runVirtualUser(url, duration, method, timeout, thinkTime, results) {
     const startTime = Date.now();
     const endTime = startTime + duration;
+    const userId = Math.random().toString(36).substr(2, 9);
     const userResults = {
       requests: 0,
       successes: 0,
       failures: 0,
-      responseTimes: []
+      responseTimes: [],
+      userId: userId
     };
+
+    console.log(`🤖 Virtual user ${userId} started for ${duration}ms`);
 
     while (Date.now() < endTime) {
       try {
@@ -329,12 +356,14 @@ class RealStressTestEngine {
           userResults.successes++;
         } else {
           userResults.failures++;
-          if (results.metrics.errors.length < 50) { // 限制错误数量
+          if (results.metrics.errors.length < 100) { // 增加错误记录数量
             results.metrics.errors.push({
               timestamp: new Date().toISOString(),
               error: response.error || 'Unknown error',
               statusCode: response.statusCode,
-              url: url
+              url: url,
+              userId: userId,
+              responseTime: responseTime
             });
           }
         }
@@ -342,35 +371,121 @@ class RealStressTestEngine {
         // 更新全局结果（线程安全）
         this.updateGlobalResults(results, responseTime, response.success);
 
-        // 思考时间 - 模拟真实用户行为
-        if (thinkTime > 0) {
-          const actualThinkTime = thinkTime * 1000 + (Math.random() * 1000); // 基础思考时间 + 随机延迟
-          await this.sleep(actualThinkTime);
+        // 更新实时状态（如果有testId的话）
+        if (results.testId) {
+          const testStatus = this.getTestStatus(results.testId);
+          if (testStatus) {
+            testStatus.realTimeMetrics.totalRequests = results.metrics.totalRequests;
+            testStatus.realTimeMetrics.successfulRequests = results.metrics.successfulRequests;
+            testStatus.realTimeMetrics.failedRequests = results.metrics.failedRequests;
+            testStatus.realTimeMetrics.lastResponseTime = responseTime;
+            testStatus.realTimeMetrics.lastRequestSuccess = response.success;
+            testStatus.realTimeMetrics.activeRequests = results.metrics.activeUsers;
+            this.updateTestStatus(results.testId, testStatus);
+          }
+        }
+
+        // 记录实时数据点用于图表显示
+        this.recordRealTimeDataPoint(results, {
+          timestamp: Date.now(),
+          responseTime: responseTime,
+          status: response.statusCode || (response.success ? 200 : 500),
+          success: response.success,
+          activeUsers: results.metrics.activeUsers,
+          userId: userId,
+          phase: results.currentPhase || 'running'
+        });
+
+        // 动态思考时间 - 基于当前性能调整
+        const dynamicThinkTime = this.calculateDynamicThinkTime(thinkTime, results.metrics);
+        if (dynamicThinkTime > 0) {
+          await this.sleep(dynamicThinkTime);
         } else {
           // 最小延迟避免过于密集的请求
           await this.sleep(Math.random() * 100 + 50); // 50-150ms随机延迟
         }
 
       } catch (error) {
+        const responseTime = Date.now() - requestStart;
         userResults.requests++;
         userResults.failures++;
 
-        if (results.metrics.errors.length < 50) {
+        if (results.metrics.errors.length < 100) {
           results.metrics.errors.push({
             timestamp: new Date().toISOString(),
             error: error.message,
-            url: url
+            url: url,
+            userId: userId,
+            responseTime: responseTime,
+            type: 'network_error'
           });
         }
 
-        this.updateGlobalResults(results, 0, false);
+        this.updateGlobalResults(results, responseTime, false);
 
-        // 错误后稍微延迟
-        await this.sleep(1000);
+        // 记录错误的实时数据点
+        this.recordRealTimeDataPoint(results, {
+          timestamp: Date.now(),
+          responseTime: responseTime,
+          status: 0,
+          success: false,
+          activeUsers: results.metrics.activeUsers,
+          userId: userId,
+          error: error.message,
+          phase: results.currentPhase || 'running'
+        });
+
+        // 错误后适当延迟，避免连续错误
+        await this.sleep(Math.min(2000, 500 + Math.random() * 1500));
       }
     }
 
+    console.log(`🏁 Virtual user ${userId} completed: ${userResults.successes}/${userResults.requests} successful`);
     return userResults;
+  }
+
+  /**
+   * 记录实时数据点
+   */
+  recordRealTimeDataPoint(results, dataPoint) {
+    results.realTimeData.push(dataPoint);
+
+    // 限制实时数据点数量，避免内存溢出
+    if (results.realTimeData.length > 1000) {
+      results.realTimeData = results.realTimeData.slice(-800);
+    }
+  }
+
+  /**
+   * 计算动态思考时间
+   */
+  calculateDynamicThinkTime(baseThinkTime, metrics) {
+    // 基于错误率调整思考时间
+    const errorRate = metrics.totalRequests > 0 ?
+      (metrics.failedRequests / metrics.totalRequests) * 100 : 0;
+
+    // 基于平均响应时间调整
+    const avgResponseTime = metrics.averageResponseTime || 0;
+
+    let multiplier = 1;
+
+    // 如果错误率高，增加思考时间以减少服务器压力
+    if (errorRate > 20) {
+      multiplier = 3; // 三倍思考时间
+    } else if (errorRate > 10) {
+      multiplier = 2; // 双倍思考时间
+    } else if (errorRate > 5) {
+      multiplier = 1.5; // 1.5倍思考时间
+    }
+
+    // 如果响应时间过长，也增加思考时间
+    if (avgResponseTime > 5000) {
+      multiplier = Math.max(multiplier, 2);
+    } else if (avgResponseTime > 2000) {
+      multiplier = Math.max(multiplier, 1.5);
+    }
+
+    return baseThinkTime * 1000 * multiplier;
   }
 
   /**
@@ -461,18 +576,77 @@ class RealStressTestEngine {
    */
   updateGlobalResults(results, responseTime, success) {
     results.metrics.totalRequests++;
-    
+
     if (success) {
       results.metrics.successfulRequests++;
     } else {
       results.metrics.failedRequests++;
     }
-    
+
     if (responseTime > 0) {
       results.metrics.responseTimes.push(responseTime);
-      results.metrics.minResponseTime = Math.min(results.metrics.minResponseTime, responseTime);
-      results.metrics.maxResponseTime = Math.max(results.metrics.maxResponseTime, responseTime);
+
+      // 实时更新响应时间统计
+      this.updateResponseTimeStats(results.metrics, responseTime);
     }
+  }
+
+  /**
+   * 更新响应时间统计
+   */
+  updateResponseTimeStats(metrics, responseTime) {
+    // 更新最小/最大响应时间
+    if (metrics.minResponseTime === 0 || responseTime < metrics.minResponseTime) {
+      metrics.minResponseTime = responseTime;
+    }
+    if (responseTime > metrics.maxResponseTime) {
+      metrics.maxResponseTime = responseTime;
+    }
+
+    // 计算平均响应时间
+    if (metrics.totalRequests > 0) {
+      const totalTime = metrics.responseTimes.reduce((sum, time) => sum + time, 0);
+      metrics.averageResponseTime = Math.round(totalTime / metrics.totalRequests);
+    }
+
+    // 每100个请求计算一次百分位数以提高性能
+    if (metrics.totalRequests % 100 === 0) {
+      this.calculatePercentiles(metrics);
+    }
+
+    // 计算错误率
+    metrics.errorRate = metrics.totalRequests > 0 ?
+      ((metrics.failedRequests / metrics.totalRequests) * 100).toFixed(2) : 0;
+  }
+
+  /**
+   * 计算百分位数
+   */
+  calculatePercentiles(metrics) {
+    if (metrics.responseTimes.length === 0) return;
+
+    const sortedTimes = [...metrics.responseTimes].sort((a, b) => a - b);
+    const length = sortedTimes.length;
+
+    metrics.p50ResponseTime = this.getPercentile(sortedTimes, 50);
+    metrics.p90ResponseTime = this.getPercentile(sortedTimes, 90);
+    metrics.p95ResponseTime = this.getPercentile(sortedTimes, 95);
+    metrics.p99ResponseTime = this.getPercentile(sortedTimes, 99);
+  }
+
+  /**
+   * 获取指定百分位数
+   */
+  getPercentile(sortedArray, percentile) {
+    const index = Math.ceil((percentile / 100) * sortedArray.length) - 1;
+    return sortedArray[Math.max(0, index)] || 0;
+  }
+
+  /**
+   * 睡眠函数
+   */
+  sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**
@@ -480,13 +654,13 @@ class RealStressTestEngine {
    */
   calculateFinalMetrics(results) {
     const metrics = results.metrics;
-    
+
     // 计算平均响应时间
     if (metrics.responseTimes.length > 0) {
       metrics.averageResponseTime = Math.round(
         metrics.responseTimes.reduce((sum, time) => sum + time, 0) / metrics.responseTimes.length
       );
-      
+
       // 计算百分位数
       const sortedTimes = [...metrics.responseTimes].sort((a, b) => a - b);
       metrics.p50ResponseTime = this.getPercentile(sortedTimes, 50);
@@ -507,7 +681,7 @@ class RealStressTestEngine {
 
     // 清理详细数据以减少响应大小
     delete metrics.responseTimes; // 保留统计信息，删除原始数据
-    
+
     // 限制错误信息数量
     if (metrics.errors.length > 10) {
       metrics.errors = metrics.errors.slice(0, 10);
@@ -559,6 +733,31 @@ class RealStressTestEngine {
         arch: os.arch()
       }
     };
+  }
+
+  /**
+   * 获取测试状态
+   */
+  getTestStatus(testId) {
+    return this.runningTests.get(testId) || null;
+  }
+
+  /**
+   * 更新测试状态
+   */
+  updateTestStatus(testId, status) {
+    this.runningTests.set(testId, {
+      ...this.runningTests.get(testId),
+      ...status,
+      lastUpdated: Date.now()
+    });
+  }
+
+  /**
+   * 移除测试状态
+   */
+  removeTestStatus(testId) {
+    this.runningTests.delete(testId);
   }
 }
 

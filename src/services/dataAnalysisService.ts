@@ -3,7 +3,7 @@
  * 提供测试数据的统计分析功能
  */
 
-import { format, subDays, startOfDay, endOfDay, isWithinInterval } from 'date-fns';
+import { format, subDays } from 'date-fns';
 
 export interface TestRecord {
   id: string;
@@ -67,18 +67,18 @@ export class DataAnalysisService {
   async getAnalyticsData(dateRange: number = 30): Promise<AnalyticsData> {
     try {
       // 获取测试数据
-      const response = await fetch(`${this.baseUrl}/test-results`);
+      const response = await fetch(`${this.baseUrl}/test/history`);
       const data = await response.json();
-      
+
       if (!data.success) {
         throw new Error(data.error || 'Failed to fetch test data');
       }
 
       const testRecords: TestRecord[] = data.data;
-      
+
       // 过滤指定时间范围内的数据
       const cutoffDate = subDays(new Date(), dateRange);
-      const filteredRecords = testRecords.filter(record => 
+      const filteredRecords = testRecords.filter(record =>
         new Date(record.startTime || record.savedAt) >= cutoffDate
       );
 
@@ -96,11 +96,11 @@ export class DataAnalysisService {
     const totalTests = records.length;
     const completedTests = records.filter(r => r.status === 'completed');
     const successRate = totalTests > 0 ? (completedTests.length / totalTests) * 100 : 0;
-    
+
     // 计算平均分数
     const scoredTests = records.filter(r => r.overallScore !== undefined);
-    const averageScore = scoredTests.length > 0 
-      ? scoredTests.reduce((sum, r) => sum + (r.overallScore || 0), 0) / scoredTests.length 
+    const averageScore = scoredTests.length > 0
+      ? scoredTests.reduce((sum, r) => sum + (r.overallScore || 0), 0) / scoredTests.length
       : 0;
 
     // 按类型统计
@@ -153,7 +153,7 @@ export class DataAnalysisService {
    */
   private getDailyTestStats(records: TestRecord[]): Array<{ date: string; count: number; successCount: number }> {
     const dailyStats: { [key: string]: { count: number; successCount: number } } = {};
-    
+
     // 初始化最近30天的数据
     for (let i = 29; i >= 0; i--) {
       const date = format(subDays(new Date(), i), 'yyyy-MM-dd');
@@ -209,7 +209,7 @@ export class DataAnalysisService {
    */
   private getPerformanceTrends(records: TestRecord[]): Array<{ date: string; avgScore: number; testCount: number }> {
     const trends: { [key: string]: { scores: number[]; count: number } } = {};
-    
+
     // 初始化最近30天的数据
     for (let i = 29; i >= 0; i--) {
       const date = format(subDays(new Date(), i), 'yyyy-MM-dd');
@@ -227,8 +227,8 @@ export class DataAnalysisService {
 
     return Object.entries(trends).map(([date, data]) => ({
       date,
-      avgScore: data.scores.length > 0 
-        ? data.scores.reduce((sum, score) => sum + score, 0) / data.scores.length 
+      avgScore: data.scores.length > 0
+        ? data.scores.reduce((sum, score) => sum + score, 0) / data.scores.length
         : 0,
       testCount: data.count
     }));
@@ -256,8 +256,8 @@ export class DataAnalysisService {
       .map(([url, stats]) => ({
         url,
         count: stats.count,
-        avgScore: stats.scores.length > 0 
-          ? stats.scores.reduce((sum, score) => sum + score, 0) / stats.scores.length 
+        avgScore: stats.scores.length > 0
+          ? stats.scores.reduce((sum, score) => sum + score, 0) / stats.scores.length
           : 0
       }))
       .sort((a, b) => b.count - a.count)
@@ -326,7 +326,7 @@ export class DataAnalysisService {
    */
   private getPerformanceScores(records: TestRecord[]): Array<{ date: string; performance: number; seo: number; accessibility: number }> {
     const scores: { [key: string]: { performance: number[]; seo: number[]; accessibility: number[] } } = {};
-    
+
     // 初始化最近30天的数据
     for (let i = 29; i >= 0; i--) {
       const date = format(subDays(new Date(), i), 'yyyy-MM-dd');
@@ -345,14 +345,14 @@ export class DataAnalysisService {
 
     return Object.entries(scores).map(([date, data]) => ({
       date,
-      performance: data.performance.length > 0 
-        ? data.performance.reduce((sum, score) => sum + score, 0) / data.performance.length 
+      performance: data.performance.length > 0
+        ? data.performance.reduce((sum, score) => sum + score, 0) / data.performance.length
         : 0,
-      seo: data.seo.length > 0 
-        ? data.seo.reduce((sum, score) => sum + score, 0) / data.seo.length 
+      seo: data.seo.length > 0
+        ? data.seo.reduce((sum, score) => sum + score, 0) / data.seo.length
         : 0,
-      accessibility: data.accessibility.length > 0 
-        ? data.accessibility.reduce((sum, score) => sum + score, 0) / data.accessibility.length 
+      accessibility: data.accessibility.length > 0
+        ? data.accessibility.reduce((sum, score) => sum + score, 0) / data.accessibility.length
         : 0
     }));
   }
@@ -425,13 +425,13 @@ export class DataAnalysisService {
       .map(([url, stats]) => {
         const avgScore = stats.scores.reduce((sum, score) => sum + score, 0) / stats.scores.length;
         const lastTested = stats.dates.sort().pop() || '';
-        
+
         // 简单的趋势分析
         let trend: 'improving' | 'declining' | 'stable' = 'stable';
         if (stats.scores.length >= 2) {
           const recent = stats.scores.slice(-3).reduce((sum, score) => sum + score, 0) / Math.min(3, stats.scores.length);
           const earlier = stats.scores.slice(0, -3).reduce((sum, score) => sum + score, 0) / Math.max(1, stats.scores.length - 3);
-          
+
           if (recent > earlier + 5) trend = 'improving';
           else if (recent < earlier - 5) trend = 'declining';
         }

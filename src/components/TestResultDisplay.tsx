@@ -1,21 +1,21 @@
-import React from 'react';
-import { 
-  CheckCircle, 
-  XCircle, 
-  AlertCircle, 
-  Clock, 
-  TrendingUp, 
-  TrendingDown,
+import {
+  AlertCircle,
+  BarChart3,
+  CheckCircle,
+  Clock,
+  Database,
   Download,
   Eye,
-  BarChart3,
-  Zap,
-  Shield,
+  FileText,
   Globe,
-  Database,
+  Shield,
+  TrendingDown,
+  TrendingUp,
   Wifi,
-  FileText
+  XCircle,
+  Zap
 } from 'lucide-react';
+import React from 'react';
 
 interface TestResult {
   testId: string;
@@ -44,6 +44,7 @@ const TestResultDisplay: React.FC<TestResultDisplayProps> = ({
   onRetry
 }) => {
   const getTestTypeIcon = (type: string) => {
+    if (!type) return <BarChart3 className="w-5 h-5" />;
     switch (type.toLowerCase()) {
       case 'website':
       case 'comprehensive':
@@ -69,6 +70,7 @@ const TestResultDisplay: React.FC<TestResultDisplayProps> = ({
   };
 
   const getTestTypeLabel = (type: string) => {
+    if (!type) return '未知测试';
     const labels = {
       website: '网站综合测试',
       comprehensive: '网站综合测试',
@@ -137,11 +139,11 @@ const TestResultDisplay: React.FC<TestResultDisplayProps> = ({
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3">
           <div className="flex-shrink-0 p-2 bg-gray-700 rounded-lg">
-            {getTestTypeIcon(result.testType)}
+            {getTestTypeIcon(result.testType || result.test_type)}
           </div>
           <div>
             <h3 className="text-lg font-semibold text-white">
-              {getTestTypeLabel(result.testType)}
+              {getTestTypeLabel(result.testType || result.test_type)}
             </h3>
             {result.url && (
               <p className="text-sm text-gray-400 mt-1">
@@ -162,7 +164,7 @@ const TestResultDisplay: React.FC<TestResultDisplayProps> = ({
               {getStatusLabel(result.status)}
             </span>
           </div>
-          
+
           {result.overallScore !== undefined && result.status === 'completed' && (
             <div className="flex items-center justify-end space-x-1">
               {getScoreIcon(result.overallScore)}
@@ -180,14 +182,14 @@ const TestResultDisplay: React.FC<TestResultDisplayProps> = ({
           <span className="text-gray-400">开始时间:</span>
           <p className="text-white mt-1">{formatDate(result.startTime)}</p>
         </div>
-        
+
         {result.endTime && (
           <div>
             <span className="text-gray-400">结束时间:</span>
             <p className="text-white mt-1">{formatDate(result.endTime)}</p>
           </div>
         )}
-        
+
         {result.actualDuration && (
           <div>
             <span className="text-gray-400">耗时:</span>
@@ -242,7 +244,7 @@ const TestResultDisplay: React.FC<TestResultDisplayProps> = ({
               <div className="bg-gray-700 p-3 rounded-lg text-center">
                 <p className="text-gray-400">成功率</p>
                 <p className="text-white font-semibold">
-                  {result.metrics.totalRequests ? 
+                  {result.metrics.totalRequests ?
                     Math.round((result.metrics.successfulRequests / result.metrics.totalRequests) * 100) : 0}%
                 </p>
               </div>

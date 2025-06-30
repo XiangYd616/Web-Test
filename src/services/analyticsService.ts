@@ -68,12 +68,12 @@ export interface DetailedAnalysis {
 }
 
 export class AnalyticsService {
-  private static readonly BASE_URL = '/api/tests';
+  private static readonly BASE_URL = '/api/test';
 
   // 获取分析数据
   static async getAnalytics(timeRange: string = '30d'): Promise<AnalyticsData> {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
 
       // 构建请求头，如果有token则添加认证头
       const headers: Record<string, string> = {
@@ -110,7 +110,7 @@ export class AnalyticsService {
   // 获取详细分析报告
   static async getDetailedAnalysis(testId: string): Promise<DetailedAnalysis> {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
       if (!token) {
         throw new Error('用户未登录');
       }
@@ -207,7 +207,7 @@ export class AnalyticsService {
   // 生成分析报告
   static async generateReport(testIds: string[]): Promise<Blob> {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
       if (!token) {
         throw new Error('用户未登录');
       }

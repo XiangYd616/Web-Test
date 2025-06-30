@@ -1,41 +1,34 @@
-import React, { useState, useEffect } from 'react';
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
+  Activity,
+  AlertTriangle,
+  BarChart3,
+  Calendar,
+  CheckCircle,
+  Download,
+  Filter,
+  Globe,
+  RefreshCw,
+  TrendingDown,
+  TrendingUp
+} from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import {
   Area,
   AreaChart,
-  ComposedChart
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
 } from 'recharts';
-import {
-  TrendingUp,
-  TrendingDown,
-  Activity,
-  Users,
-  CheckCircle,
-  XCircle,
-  Clock,
-  BarChart3,
-  RefreshCw,
-  Filter,
-  Download,
-  AlertTriangle,
-  Target,
-  Zap,
-  Globe,
-  Calendar,
-  Eye
-} from 'lucide-react';
-import { dataAnalysisService, AnalyticsData } from '../../services/dataAnalysisService';
+import { AnalyticsData, dataAnalysisService } from '../../services/analytics';
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 
@@ -211,9 +204,8 @@ const AnalyticsOverview: React.FC = () => {
         <div className="flex items-center space-x-3">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-              showFilters ? 'bg-blue-600 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
-            }`}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${showFilters ? 'bg-blue-600 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+              }`}
           >
             <Filter className="w-4 h-4" />
             <span>筛选</span>
@@ -221,9 +213,8 @@ const AnalyticsOverview: React.FC = () => {
 
           <button
             onClick={toggleAutoRefresh}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-              autoRefresh ? 'bg-green-600 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
-            }`}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${autoRefresh ? 'bg-green-600 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+              }`}
           >
             <RefreshCw className={`w-4 h-4 ${autoRefresh ? 'animate-spin' : ''}`} />
             <span>{autoRefresh ? '停止自动刷新' : '自动刷新'}</span>
@@ -286,11 +277,10 @@ const AnalyticsOverview: React.FC = () => {
                     key={days}
                     type="button"
                     onClick={() => setDateRange(days)}
-                    className={`px-3 py-2 rounded-lg text-sm transition-colors ${
-                      dateRange === days
+                    className={`px-3 py-2 rounded-lg text-sm transition-colors ${dateRange === days
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
-                    }`}
+                      }`}
                   >
                     {days}天
                   </button>
@@ -374,8 +364,8 @@ const AnalyticsOverview: React.FC = () => {
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={analyticsData.dailyTests}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis 
-                dataKey="date" 
+              <XAxis
+                dataKey="date"
                 stroke="#9CA3AF"
                 fontSize={12}
                 tickFormatter={(value) => new Date(value).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}
@@ -449,8 +439,8 @@ const AnalyticsOverview: React.FC = () => {
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={analyticsData.performanceTrends}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis 
-                dataKey="date" 
+              <XAxis
+                dataKey="date"
                 stroke="#9CA3AF"
                 fontSize={12}
                 tickFormatter={(value) => new Date(value).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}
@@ -520,11 +510,10 @@ const AnalyticsOverview: React.FC = () => {
                     </td>
                     <td className="py-3 px-4 text-gray-300">{url.count}</td>
                     <td className="py-3 px-4">
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        url.avgScore >= 80 ? 'bg-green-500/20 text-green-400' :
-                        url.avgScore >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
-                        'bg-red-500/20 text-red-400'
-                      }`}>
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${url.avgScore >= 80 ? 'bg-green-500/20 text-green-400' :
+                          url.avgScore >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
+                            'bg-red-500/20 text-red-400'
+                        }`}>
                         {url.avgScore.toFixed(1)}
                       </span>
                     </td>

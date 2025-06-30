@@ -1,43 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  AreaChart,
-  Area
-} from 'recharts';
-import { monitoringService, MonitoringSite, MonitoringData, MonitoringStats } from '../../services/monitoringService';
 import {
   Activity,
-  Globe,
   AlertTriangle,
+  BarChart3,
+  Bell,
   CheckCircle,
   Clock,
-  Zap,
+  Eye,
+  Globe,
+  Pause,
+  Play,
   Plus,
   Settings,
-  Bell,
-  Eye,
-  Trash2,
-  Play,
-  Pause,
-  RefreshCw,
-  Download,
-  Filter,
-  TrendingUp,
-  TrendingDown,
-  Wifi,
-  WifiOff,
-  Server,
   Shield,
   Target,
-  Calendar,
-  BarChart3
+  Trash2,
+  TrendingDown,
+  TrendingUp,
+  Wifi,
+  Zap
 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
+} from 'recharts';
+import { MonitoringData, monitoringService, MonitoringSite, MonitoringStats } from '../../services/monitoring';
 
 interface AlertRule {
   id: string;
@@ -226,11 +220,10 @@ const RealTimeMonitoring: React.FC = () => {
           </button>
           <button
             onClick={toggleMonitoring}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-              isMonitoring 
-                ? 'bg-red-600 hover:bg-red-700 text-white' 
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${isMonitoring
+                ? 'bg-red-600 hover:bg-red-700 text-white'
                 : 'bg-green-600 hover:bg-green-700 text-white'
-            }`}
+              }`}
           >
             {isMonitoring ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
             <span>{isMonitoring ? '停止监控' : '开始监控'}</span>
@@ -347,13 +340,13 @@ const RealTimeMonitoring: React.FC = () => {
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={realTimeData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis 
-                dataKey="timestamp" 
+              <XAxis
+                dataKey="timestamp"
                 stroke="#9CA3AF"
                 fontSize={12}
-                tickFormatter={(value) => new Date(value).toLocaleTimeString('zh-CN', { 
-                  hour: '2-digit', 
-                  minute: '2-digit' 
+                tickFormatter={(value) => new Date(value).toLocaleTimeString('zh-CN', {
+                  hour: '2-digit',
+                  minute: '2-digit'
                 })}
               />
               <YAxis stroke="#9CA3AF" fontSize={12} />
@@ -385,13 +378,13 @@ const RealTimeMonitoring: React.FC = () => {
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={realTimeData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis 
-                dataKey="timestamp" 
+              <XAxis
+                dataKey="timestamp"
                 stroke="#9CA3AF"
                 fontSize={12}
-                tickFormatter={(value) => new Date(value).toLocaleTimeString('zh-CN', { 
-                  hour: '2-digit', 
-                  minute: '2-digit' 
+                tickFormatter={(value) => new Date(value).toLocaleTimeString('zh-CN', {
+                  hour: '2-digit',
+                  minute: '2-digit'
                 })}
               />
               <YAxis stroke="#9CA3AF" fontSize={12} domain={[95, 100]} />

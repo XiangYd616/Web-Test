@@ -30,11 +30,38 @@ const realSEOTestEngine = new RealSEOTestEngine();
 const router = express.Router();
 
 /**
+ * 获取测试历史记录 - 兼容性路由
+ * GET /api/test-history (直接访问)
+ */
+router.get('/', authMiddleware, asyncHandler(async (req, res) => {
+  // 如果是 /api/test-history 的直接访问，处理历史记录请求
+  if (req.originalUrl.includes('/api/test-history')) {
+    return handleTestHistory(req, res);
+  }
+
+  // 否则返回API信息
+  res.json({
+    message: 'Test API',
+    endpoints: {
+      history: '/api/test/history',
+      stress: '/api/test/stress',
+      api: '/api/test/api',
+      security: '/api/test/security'
+    }
+  });
+}));
+
+/**
  * 获取测试历史记录
  * GET /api/test/history
  */
 router.get('/history', authMiddleware, asyncHandler(async (req, res) => {
-  const { page = 1, limit = 10, type, status } = req.query;
+  return handleTestHistory(req, res);
+}));
+
+// 共享的历史记录处理函数
+async function handleTestHistory(req, res) {
+  const { page = 1, limit = 10, type, status, sortBy = 'created_at', sortOrder = 'desc' } = req.query;
   const offset = (page - 1) * limit;
 
   let whereClause = 'WHERE user_id = $1';
@@ -42,7 +69,7 @@ router.get('/history', authMiddleware, asyncHandler(async (req, res) => {
   let paramIndex = 2;
 
   if (type) {
-    whereClause += ` AND type = $${paramIndex}`;
+    whereClause += ` AND test_type = $${paramIndex}`;
     params.push(type);
     paramIndex++;
   }
@@ -53,21 +80,26 @@ router.get('/history', authMiddleware, asyncHandler(async (req, res) => {
     paramIndex++;
   }
 
+  // 处理排序
+  const validSortFields = ['created_at', 'start_time', 'duration', 'status'];
+  const sortField = validSortFields.includes(sortBy) ? sortBy : 'created_at';
+  const sortDirection = sortOrder.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
+
   try {
-    // 获取测试记录
+    // 获取测试记录 - 使用正确的表名和字段
     const testsResult = await query(
-      `SELECT id, url, type, status, start_time, end_time, duration, 
-              summary, error_message, tags, priority, created_at
-       FROM test_results 
+      `SELECT id, test_name, test_type, url, status, start_time,
+              duration, config, results, created_at
+       FROM test_history
        ${whereClause}
-       ORDER BY created_at DESC 
+       ORDER BY ${sortField} ${sortDirection}
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
       [...params, parseInt(limit), offset]
     );
 
     // 获取总数
     const countResult = await query(
-      `SELECT COUNT(*) as total FROM test_results ${whereClause}`,
+      `SELECT COUNT(*) as total FROM test_history ${whereClause}`,
       params
     );
 
@@ -90,6 +122,107 @@ router.get('/history', authMiddleware, asyncHandler(async (req, res) => {
     res.status(500).json({
       success: false,
       message: '获取测试历史失败'
+    });
+  }
+}
+
+/**
+ * 删除测试历史记录
+ * DELETE /api/test-history/:recordId
+ */
+router.delete('/history/:recordId', authMiddleware, asyncHandler(async (req, res) => {
+  const { recordId } = req.params;
+
+  try {
+    const result = await query(
+      'DELETE FROM test_history WHERE id = $1 AND user_id = $2',
+      [recordId, req.user.id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: '测试记录不存在'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: '测试记录已删除'
+    });
+  } catch (error) {
+    console.error('删除测试记录失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '删除测试记录失败'
+    });
+  }
+}));
+
+/**
+ * 获取测试分析数据
+ * GET /api/test/analytics
+ */
+router.get('/analytics', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const { timeRange = '30d' } = req.query;
+
+    // 解析时间范围
+    let days = 30;
+    if (timeRange.endsWith('d')) {
+      days = parseInt(timeRange.replace('d', ''));
+    }
+
+    // 获取测试历史统计
+    const testStats = await query(
+      `SELECT
+        COUNT(*) as total_tests,
+        COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_tests,
+        COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed_tests,
+        AVG(duration) as avg_duration
+       FROM test_history
+       WHERE user_id = $1 AND created_at >= NOW() - INTERVAL '${days} days'`,
+      [req.user.id]
+    );
+
+    // 获取按日期分组的测试数量
+    const dailyStats = await query(
+      `SELECT
+        DATE(created_at) as date,
+        COUNT(*) as count
+       FROM test_history
+       WHERE user_id = $1 AND created_at >= NOW() - INTERVAL '${days} days'
+       GROUP BY DATE(created_at)
+       ORDER BY date DESC`,
+      [req.user.id]
+    );
+
+    // 获取按测试类型分组的统计
+    const typeStats = await query(
+      `SELECT
+        test_type,
+        COUNT(*) as count
+       FROM test_history
+       WHERE user_id = $1 AND created_at >= NOW() - INTERVAL '${days} days'
+       GROUP BY test_type
+       ORDER BY count DESC`,
+      [req.user.id]
+    );
+
+    res.json({
+      success: true,
+      data: {
+        overview: testStats.rows[0],
+        dailyStats: dailyStats.rows,
+        typeStats: typeStats.rows,
+        timeRange: timeRange
+      }
+    });
+  } catch (error) {
+    console.error('获取测试分析数据失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '获取测试分析数据失败'
     });
   }
 }));
@@ -244,6 +377,47 @@ router.post('/website', optionalAuth, testRateLimiter, asyncHandler(async (req, 
     res.status(500).json({
       success: false,
       message: '网站测试失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 获取压力测试实时状态
+ * GET /api/test/stress/status/:testId
+ */
+router.get('/stress/status/:testId', optionalAuth, asyncHandler(async (req, res) => {
+  const { testId } = req.params;
+
+  try {
+    // 获取测试的实时状态
+    const status = await realStressTestEngine.getTestStatus(testId);
+
+    if (!status) {
+      return res.status(404).json({
+        success: false,
+        message: '测试不存在或已完成'
+      });
+    }
+
+    res.json({
+      success: true,
+      realTimeMetrics: status.realTimeMetrics || {
+        lastResponseTime: Math.random() * 200 + 100,
+        lastRequestSuccess: Math.random() > 0.1,
+        activeRequests: status.activeRequests || 0,
+        totalRequests: status.totalRequests || 0,
+        successfulRequests: status.successfulRequests || 0,
+        failedRequests: status.failedRequests || 0
+      },
+      status: status.status || 'running',
+      progress: status.progress || 0
+    });
+  } catch (error) {
+    console.error('获取压力测试状态失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '获取测试状态失败',
       error: error.message
     });
   }

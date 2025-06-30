@@ -1,11 +1,31 @@
-import React, { useMemo, useState, useCallback } from 'react';
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  LineChart, Line, PieChart, Pie, Cell, AreaChart, Area, ScatterChart, Scatter,
-  ComposedChart, Legend, ReferenceLine, Brush, RadarChart, PolarGrid,
-  PolarAngleAxis, PolarRadiusAxis, Radar, FunnelChart, Funnel, LabelList
-} from 'recharts';
 import { format } from 'date-fns';
+import React, { useMemo, useState } from 'react';
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  Brush,
+  CartesianGrid,
+  Cell,
+  ComposedChart,
+  Funnel,
+  FunnelChart,
+  LabelList,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis, Radar,
+  RadarChart,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis, YAxis
+} from 'recharts';
 
 // 高级压力测试图表
 interface AdvancedStressTestChartProps {
@@ -856,10 +876,9 @@ export const AdvancedSecurityChart: React.FC<AdvancedSecurityChartProps> = ({
             {chartData.find(item => item.category === selectedCategory)?.details?.map((detail, index) => (
               <div key={index} className={`p-3 rounded flex items-center justify-between ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
                 <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full ${
-                    detail.status === 'pass' ? 'bg-green-500' :
+                  <div className={`w-3 h-3 rounded-full ${detail.status === 'pass' ? 'bg-green-500' :
                     detail.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
-                  }`} />
+                    }`} />
                   <div>
                     <div className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                       {detail.name}
@@ -1194,11 +1213,10 @@ export const AdvancedTrendChart: React.FC<AdvancedTrendChartProps> = ({
             {showPrediction && (
               <button
                 onClick={() => setShowConfidenceInterval(!showConfidenceInterval)}
-                className={`px-3 py-1 rounded text-sm ${
-                  showConfidenceInterval
-                    ? 'bg-blue-600 text-white'
-                    : theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'
-                }`}
+                className={`px-3 py-1 rounded text-sm ${showConfidenceInterval
+                  ? 'bg-blue-600 text-white'
+                  : theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'
+                  }`}
                 title="显示置信区间"
               >
                 置信区间
@@ -1265,6 +1283,256 @@ export const AdvancedTrendChart: React.FC<AdvancedTrendChartProps> = ({
               />
             )}
           </LineChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+};
+
+// 增强的实时压力测试图表组件
+interface RealTimeStressTestChartProps {
+  realTimeData?: Array<{
+    timestamp: number;
+    responseTime: number;
+    status: number;
+    success: boolean;
+    activeUsers: number;
+    userId?: string;
+    error?: string;
+    phase?: string;
+    throughput?: number;
+    errorType?: string;
+    connectionTime?: number;
+    dnsTime?: number;
+  }>;
+  metrics?: {
+    totalRequests: number;
+    successfulRequests: number;
+    failedRequests: number;
+    averageResponseTime: number;
+    minResponseTime: number;
+    maxResponseTime: number;
+    p50ResponseTime?: number;
+    p75ResponseTime?: number;
+    p90ResponseTime?: number;
+    p95ResponseTime?: number;
+    p99ResponseTime?: number;
+    p999ResponseTime?: number;
+    errorRate: number;
+    activeUsers: number;
+    currentTPS: number;
+    peakTPS: number;
+    errorBreakdown?: Record<string, number>;
+  };
+  isRunning?: boolean;
+  height?: number;
+  showAdvancedMetrics?: boolean;
+  enableZoom?: boolean;
+  dataPointDensity?: 'low' | 'medium' | 'high';
+  testPhases?: Array<{
+    name: string;
+    startTime: number;
+    endTime?: number;
+    color: string;
+  }>;
+}
+
+export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = ({
+  realTimeData = [],
+  metrics,
+  isRunning = false,
+  height = 400,
+  showAdvancedMetrics = true,
+  enableZoom = true,
+  dataPointDensity = 'medium',
+  testPhases = []
+}) => {
+  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['responseTime', 'throughput', 'activeUsers']);
+  const [zoomDomain, setZoomDomain] = useState<{ startIndex?: number, endIndex?: number }>({});
+  const [showErrorBreakdown, setShowErrorBreakdown] = useState(false);
+
+  // 根据数据点密度控制显示的数据量
+  const getDataPointStep = () => {
+    switch (dataPointDensity) {
+      case 'low': return 5;
+      case 'medium': return 2;
+      case 'high': return 1;
+      default: return 2;
+    }
+  };
+
+  // 处理实时数据为图表格式
+  const chartData = useMemo(() => {
+    if (!realTimeData || realTimeData.length === 0) {
+      return [];
+    }
+
+    // 按时间分组数据（每秒一个数据点）
+    const groupedData = new Map();
+
+    realTimeData.forEach(point => {
+      const timeKey = Math.floor(point.timestamp / 1000) * 1000;
+      if (!groupedData.has(timeKey)) {
+        groupedData.set(timeKey, {
+          timestamp: timeKey,
+          responseTimes: [],
+          successes: 0,
+          failures: 0,
+          activeUsers: point.activeUsers,
+          phase: point.phase
+        });
+      }
+
+      const group = groupedData.get(timeKey);
+      group.responseTimes.push(point.responseTime);
+      if (point.success) {
+        group.successes++;
+      } else {
+        group.failures++;
+      }
+      group.activeUsers = Math.max(group.activeUsers, point.activeUsers);
+    });
+
+    // 转换为图表数据
+    return Array.from(groupedData.values())
+      .sort((a, b) => a.timestamp - b.timestamp)
+      .map(group => ({
+        time: format(new Date(group.timestamp), 'HH:mm:ss'),
+        timestamp: group.timestamp,
+        responseTime: group.responseTimes.length > 0 ?
+          Math.round(group.responseTimes.reduce((sum, time) => sum + time, 0) / group.responseTimes.length) : 0,
+        maxResponseTime: group.responseTimes.length > 0 ? Math.max(...group.responseTimes) : 0,
+        minResponseTime: group.responseTimes.length > 0 ? Math.min(...group.responseTimes) : 0,
+        throughput: group.successes + group.failures,
+        successRate: group.responseTimes.length > 0 ?
+          Math.round((group.successes / (group.successes + group.failures)) * 100) : 100,
+        errorRate: group.responseTimes.length > 0 ?
+          Math.round((group.failures / (group.successes + group.failures)) * 100) : 0,
+        activeUsers: group.activeUsers,
+        phase: group.phase
+      }))
+      .slice(-60); // 只保留最近60秒的数据
+  }, [realTimeData]);
+
+  return (
+    <div className="space-y-4">
+      {/* 实时指标卡片 */}
+      {metrics && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          <div className="bg-gray-800 p-3 rounded-lg">
+            <div className="text-sm text-gray-400">总请求数</div>
+            <div className="text-xl font-bold text-white">{metrics.totalRequests}</div>
+          </div>
+          <div className="bg-gray-800 p-3 rounded-lg">
+            <div className="text-sm text-gray-400">平均响应时间</div>
+            <div className="text-xl font-bold text-blue-400">{metrics.averageResponseTime}ms</div>
+          </div>
+          <div className="bg-gray-800 p-3 rounded-lg">
+            <div className="text-sm text-gray-400">错误率</div>
+            <div className="text-xl font-bold text-red-400">{metrics.errorRate}%</div>
+          </div>
+          <div className="bg-gray-800 p-3 rounded-lg">
+            <div className="text-sm text-gray-400">活跃用户</div>
+            <div className="text-xl font-bold text-green-400">{metrics.activeUsers}</div>
+          </div>
+        </div>
+      )}
+
+      {/* 实时图表 */}
+      <div className="bg-gray-800 p-4 rounded-lg">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-white">实时性能监控</h3>
+          {isRunning && (
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span className="text-sm text-green-400">实时监控中</span>
+            </div>
+          )}
+        </div>
+
+        <ResponsiveContainer width="100%" height={height}>
+          <ComposedChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+            <XAxis
+              dataKey="time"
+              stroke="#9CA3AF"
+              fontSize={12}
+            />
+            <YAxis
+              yAxisId="left"
+              stroke="#9CA3AF"
+              fontSize={12}
+              label={{ value: '响应时间 (ms)', angle: -90, position: 'insideLeft' }}
+            />
+            <YAxis
+              yAxisId="right"
+              orientation="right"
+              stroke="#9CA3AF"
+              fontSize={12}
+              label={{ value: '用户数/吞吐量', angle: 90, position: 'insideRight' }}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: '#1F2937',
+                border: '1px solid #374151',
+                borderRadius: '8px',
+                color: '#F9FAFB'
+              }}
+              formatter={(value, name) => {
+                const formatters = {
+                  responseTime: (v) => [`${v}ms`, '平均响应时间'],
+                  maxResponseTime: (v) => [`${v}ms`, '最大响应时间'],
+                  throughput: (v) => [`${v} req/s`, '吞吐量'],
+                  successRate: (v) => [`${v}%`, '成功率'],
+                  activeUsers: (v) => [`${v}`, '活跃用户']
+                };
+                return formatters[name] ? formatters[name](value) : [value, name];
+              }}
+            />
+            <Legend />
+
+            {/* 响应时间线 */}
+            <Line
+              yAxisId="left"
+              type="monotone"
+              dataKey="responseTime"
+              stroke="#3B82F6"
+              strokeWidth={2}
+              dot={false}
+              name="平均响应时间"
+            />
+
+            {/* 最大响应时间区域 */}
+            <Area
+              yAxisId="left"
+              type="monotone"
+              dataKey="maxResponseTime"
+              stroke="#8B5CF6"
+              fill="#8B5CF6"
+              fillOpacity={0.1}
+              name="最大响应时间"
+            />
+
+            {/* 活跃用户柱状图 */}
+            <Bar
+              yAxisId="right"
+              dataKey="activeUsers"
+              fill="#10B981"
+              fillOpacity={0.6}
+              name="活跃用户"
+            />
+
+            {/* 吞吐量线 */}
+            <Line
+              yAxisId="right"
+              type="monotone"
+              dataKey="throughput"
+              stroke="#F59E0B"
+              strokeWidth={2}
+              dot={false}
+              name="吞吐量"
+            />
+          </ComposedChart>
         </ResponsiveContainer>
       </div>
     </div>
