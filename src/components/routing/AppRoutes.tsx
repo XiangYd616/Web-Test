@@ -3,9 +3,8 @@ import { Route, Routes } from 'react-router-dom';
 import Login from '../../pages/Login';
 import Register from '../../pages/Register';
 import { AdminGuard, ProtectedRoute } from '../auth';
-import EnhancedErrorBoundary from '../EnhancedErrorBoundary';
 import ModernLayout from '../modern/ModernLayout';
-import { LoadingSpinner } from '../ui';
+import { EnhancedErrorBoundary, LoadingSpinner } from '../ui';
 
 // 懒加载页面组件
 const ModernDashboard = lazy(() => import('../../pages/ModernDashboard'));

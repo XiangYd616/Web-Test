@@ -1,6 +1,6 @@
+import { BarChart3, Code, Globe, Loader2, Shield, Zap } from 'lucide-react';
 import React from 'react';
-import '../styles/progress-bars.css';
-import { Loader2, Zap, Shield, Code, BarChart3, Globe } from 'lucide-react';
+import '../../styles/progress-bars.css';
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -42,7 +42,7 @@ const EnhancedLoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 
   const getIcon = () => {
     const iconClass = sizeClasses[size];
-    
+
     switch (type) {
       case 'stress':
         return <Zap className={`${iconClass} text-yellow-500 animate-pulse`} />;

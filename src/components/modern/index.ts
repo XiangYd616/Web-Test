@@ -10,18 +10,20 @@ export { default as ModernButton } from './ModernButton';
 export type { ModernButtonProps } from './ModernButton';
 
 export {
-  ModernLineChart,
-  ModernBarChart,
-  ModernDoughnutChart,
-  ProgressRing,
-  MiniLineChart,
-  chartColors
+  MiniLineChart, ModernBarChart,
+  ModernDoughnutChart, ModernLineChart, ProgressRing, chartColors
 } from './ModernChart';
 
 export type {
-  LineChartProps,
   BarChartProps,
-  DoughnutChartProps,
-  ProgressRingProps,
-  MiniChartProps
+  DoughnutChartProps, LineChartProps, MiniChartProps, ProgressRingProps
 } from './ModernChart';
+
+// 布局和导航组件
+export { default as ModernLayout } from './ModernLayout';
+export { default as ModernNavigation } from './ModernNavigation';
+export { default as ModernSidebar } from './ModernSidebar';
+export { default as TopNavbar } from './TopNavbar';
+export { default as UserDropdownMenu } from './UserDropdownMenu';
+export { default as UserMenu } from './UserMenu';
+

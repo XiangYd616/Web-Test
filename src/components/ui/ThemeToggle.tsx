@@ -1,6 +1,6 @@
+import { Moon, Sun } from 'lucide-react';
 import React from 'react';
-import { Sun, Moon } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface ThemeToggleProps {
   className?: string;
@@ -8,8 +8,8 @@ interface ThemeToggleProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-const ThemeToggle: React.FC<ThemeToggleProps> = ({ 
-  className = '', 
+const ThemeToggle: React.FC<ThemeToggleProps> = ({
+  className = '',
   showLabel = false,
   size = 'md'
 }) => {
@@ -85,8 +85,8 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
           focus:ring-2
           focus:ring-offset-2
           focus:ring-blue-500
-          ${actualTheme === 'light' 
-            ? 'bg-white border-gray-300 hover:bg-gray-50 focus:ring-offset-white' 
+          ${actualTheme === 'light'
+            ? 'bg-white border-gray-300 hover:bg-gray-50 focus:ring-offset-white'
             : 'bg-gray-800 border-gray-600 hover:bg-gray-700 focus:ring-offset-gray-900'
           }
         `}
@@ -95,11 +95,10 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
       >
         {getIcon()}
       </button>
-      
+
       {showLabel && (
-        <span className={`text-sm font-medium ${
-          actualTheme === 'light' ? 'text-gray-700' : 'text-gray-300'
-        }`}>
+        <span className={`text-sm font-medium ${actualTheme === 'light' ? 'text-gray-700' : 'text-gray-300'
+          }`}>
           {getThemeLabel()}
         </span>
       )}
@@ -113,9 +112,8 @@ export const ThemeSelector: React.FC<{ className?: string }> = ({ className = ''
 
   return (
     <div className={`space-y-2 ${className}`}>
-      <label htmlFor="theme-select" className={`block text-sm font-medium ${
-        actualTheme === 'light' ? 'text-gray-700' : 'text-gray-300'
-      }`}>
+      <label htmlFor="theme-select" className={`block text-sm font-medium ${actualTheme === 'light' ? 'text-gray-700' : 'text-gray-300'
+        }`}>
         主题模式
       </label>
       <select
@@ -150,14 +148,14 @@ export const ThemeSwitch: React.FC<{ className?: string }> = ({ className = '' }
   return (
     <div className={`flex items-center space-x-3 ${className}`}>
       <Sun className={`w-4 h-4 ${actualTheme === 'light' ? 'text-yellow-500' : 'text-gray-400'}`} />
-      
+
       <button
         onClick={toggleTheme}
         className={`
           relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200
           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-          ${actualTheme === 'light' 
-            ? 'bg-gray-200 focus:ring-offset-white' 
+          ${actualTheme === 'light'
+            ? 'bg-gray-200 focus:ring-offset-white'
             : 'bg-blue-600 focus:ring-offset-gray-900'
           }
         `}
@@ -172,7 +170,7 @@ export const ThemeSwitch: React.FC<{ className?: string }> = ({ className = '' }
           `}
         />
       </button>
-      
+
       <Moon className={`w-4 h-4 ${actualTheme === 'dark' ? 'text-blue-400' : 'text-gray-400'}`} />
     </div>
   );
