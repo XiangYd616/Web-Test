@@ -1,27 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  Menu,
-  X,
-  Zap,
-  Search,
-  Shield,
-  Globe,
-  Code,
   BarChart3,
-  User,
-  Settings,
-  LogOut,
   Bell,
+  Calendar,
   ChevronDown,
-  FileText,
-  HelpCircle,
-  Monitor,
-  Eye,
+  Code,
   Database,
+  Eye,
+  FileText,
+  Globe,
+  HelpCircle,
+  LogOut,
+  Menu,
+  Monitor,
+  Search,
+  Settings,
+  Shield,
+  User,
   Wifi,
-  Calendar
+  X,
+  Zap
 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 interface NavigationItem {
@@ -37,7 +37,7 @@ const ModernNavigation: React.FC = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isTestMenuOpen, setIsTestMenuOpen] = useState(false);
   const [notifications] = useState(3);
-  
+
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -45,7 +45,7 @@ const ModernNavigation: React.FC = () => {
   const testingTools: NavigationItem[] = [
     {
       name: '网站测试',
-      href: '/test',
+      href: '/website-test',
       icon: Zap,
       description: '综合网站测试平台'
     },
@@ -192,11 +192,10 @@ const ModernNavigation: React.FC = () => {
               <Link
                 key={item.name}
                 to={item.href}
-                className={`flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  isActivePath(item.href)
+                className={`flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActivePath(item.href)
                     ? 'text-blue-600 bg-blue-50'
                     : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                }`}
+                  }`}
               >
                 <item.icon className="w-4 h-4" />
                 <span>{item.name}</span>
@@ -357,11 +356,10 @@ const ModernNavigation: React.FC = () => {
               <Link
                 key={item.name}
                 to={item.href}
-                className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  isActivePath(item.href)
+                className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActivePath(item.href)
                     ? 'text-blue-600 bg-blue-50'
                     : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                }`}
+                  }`}
               >
                 <item.icon className="w-4 h-4" />
                 <span>{item.name}</span>

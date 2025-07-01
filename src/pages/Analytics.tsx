@@ -1,31 +1,23 @@
-import React, { useState, useEffect } from 'react';
 import {
-  BarChart3,
-  TrendingUp,
-  TrendingDown,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Target,
-  Users,
-  Globe,
-  Zap,
-  Shield,
-  Eye,
-  Search,
-  Filter,
-  Download,
-  RefreshCw,
-  Brain,
-  Lightbulb,
   Activity,
-  ArrowUpRight,
+  AlertTriangle,
   ArrowDownRight,
-  Minus,
+  ArrowUpRight,
+  BarChart3,
+  Brain,
+  ExternalLink,
+  Eye,
   Info,
-  ExternalLink
+  Lightbulb,
+  Minus,
+  RefreshCw,
+  Search,
+  Shield,
+  Target,
+  TrendingDown,
+  TrendingUp
 } from 'lucide-react';
-import { AnalyticsService, AnalyticsData } from '../services/analyticsService';
+import React, { useEffect, useState } from 'react';
 
 interface AnalyticsInsight {
   id: string;
@@ -294,7 +286,7 @@ const Analytics: React.FC = () => {
           <div className="text-center">
             <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getRatingColor(data.coreWebVitals.lcp.rating)}`}>
               {data.coreWebVitals.lcp.rating === 'good' ? '良好' :
-               data.coreWebVitals.lcp.rating === 'needs-improvement' ? '需要改进' : '较差'}
+                data.coreWebVitals.lcp.rating === 'needs-improvement' ? '需要改进' : '较差'}
             </div>
             <div className="mt-3">
               <div className="text-3xl font-bold text-white">{data.coreWebVitals.lcp.value}s</div>
@@ -311,7 +303,7 @@ const Analytics: React.FC = () => {
           <div className="text-center">
             <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getRatingColor(data.coreWebVitals.fid.rating)}`}>
               {data.coreWebVitals.fid.rating === 'good' ? '良好' :
-               data.coreWebVitals.fid.rating === 'needs-improvement' ? '需要改进' : '较差'}
+                data.coreWebVitals.fid.rating === 'needs-improvement' ? '需要改进' : '较差'}
             </div>
             <div className="mt-3">
               <div className="text-3xl font-bold text-white">{data.coreWebVitals.fid.value}ms</div>
@@ -328,7 +320,7 @@ const Analytics: React.FC = () => {
           <div className="text-center">
             <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getRatingColor(data.coreWebVitals.cls.rating)}`}>
               {data.coreWebVitals.cls.rating === 'good' ? '良好' :
-               data.coreWebVitals.cls.rating === 'needs-improvement' ? '需要改进' : '较差'}
+                data.coreWebVitals.cls.rating === 'needs-improvement' ? '需要改进' : '较差'}
             </div>
             <div className="mt-3">
               <div className="text-3xl font-bold text-white">{data.coreWebVitals.cls.value}</div>
@@ -474,15 +466,14 @@ const Analytics: React.FC = () => {
                           <h4 className="font-semibold text-white">{insight.title}</h4>
                           <div className="flex items-center space-x-2">
                             <span className="text-xs text-gray-300">置信度: {insight.confidence}%</span>
-                            <span className={`px-2 py-1 text-xs rounded-full ${
-                              insight.severity === 'critical' ? 'bg-red-500/20 text-red-300 border border-red-500/30' :
+                            <span className={`px-2 py-1 text-xs rounded-full ${insight.severity === 'critical' ? 'bg-red-500/20 text-red-300 border border-red-500/30' :
                               insight.severity === 'high' ? 'bg-orange-500/20 text-orange-300 border border-orange-500/30' :
-                              insight.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30' :
-                              'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                            }`}>
+                                insight.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30' :
+                                  'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                              }`}>
                               {insight.severity === 'critical' ? '严重' :
-                               insight.severity === 'high' ? '高' :
-                               insight.severity === 'medium' ? '中' : '低'}
+                                insight.severity === 'high' ? '高' :
+                                  insight.severity === 'medium' ? '中' : '低'}
                             </span>
                           </div>
                         </div>
@@ -511,8 +502,8 @@ const Analytics: React.FC = () => {
                       <h4 className="font-semibold text-white">{rec.title}</h4>
                       <span className={`inline-block px-2 py-1 text-xs rounded-full mt-1 ${getPriorityColor(rec.priority)}`}>
                         {rec.priority === 'critical' ? '严重' :
-                         rec.priority === 'high' ? '高优先级' :
-                         rec.priority === 'medium' ? '中优先级' : '低优先级'}
+                          rec.priority === 'high' ? '高优先级' :
+                            rec.priority === 'medium' ? '中优先级' : '低优先级'}
                       </span>
                     </div>
                     <div className="text-right text-sm">

@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
+import { Outlet } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { DebugPanel } from '../system';
 import ModernSidebar from './ModernSidebar';
 import TopNavbar from './TopNavbar';
 
-interface ModernLayoutProps {
-  children: React.ReactNode;
-}
-
-const ModernLayout: React.FC<ModernLayoutProps> = ({ children }) => {
+const ModernLayout: React.FC = () => {
   const { actualTheme } = useTheme();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -36,7 +33,7 @@ const ModernLayout: React.FC<ModernLayoutProps> = ({ children }) => {
           {/* 主内容 */}
           <main className="flex-1 overflow-y-auto dark-page-scrollbar">
             <div className="p-6">
-              {children}
+              <Outlet />
             </div>
           </main>
         </div>

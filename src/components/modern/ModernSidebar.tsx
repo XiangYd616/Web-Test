@@ -67,7 +67,7 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
           id: 'website-test',
           name: '网站测试',
           icon: Globe,
-          href: '/test'
+          href: '/website-test'
         },
         {
           id: 'stress-test',
@@ -354,8 +354,8 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
             onMouseEnter={(e) => handleButtonHover(item.id, e)}
             onMouseLeave={handleButtonLeave}
             className={`w-full sidebar-button-hover transition-all duration-200 ${collapsed
-                ? 'flex items-center justify-center p-3 rounded-lg'
-                : 'flex items-center justify-between px-3 py-2.5 rounded-lg text-left'
+              ? 'flex items-center justify-center p-3 rounded-lg'
+              : 'flex items-center justify-between px-3 py-2.5 rounded-lg text-left'
               } ${clickedItem === item.id
                 ? 'scale-95 bg-blue-600/30 text-blue-300 sidebar-button-clicked'
                 : directlyActive
@@ -416,10 +416,10 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
           to={item.href}
           onClick={() => handleButtonClick(item.id)}
           className={`sidebar-button-hover relative transition-all duration-200 ${collapsed
-              ? 'flex items-center justify-center p-3 rounded-lg'
-              : level > 0
-                ? 'flex items-center gap-3 px-3 py-2 rounded-md text-sm'
-                : 'flex items-center gap-3 px-3 py-2.5 rounded-lg'
+            ? 'flex items-center justify-center p-3 rounded-lg'
+            : level > 0
+              ? 'flex items-center gap-3 px-3 py-2 rounded-md text-sm'
+              : 'flex items-center gap-3 px-3 py-2.5 rounded-lg'
             } ${clickedItem === item.id
               ? 'scale-95 bg-blue-600/30 text-blue-300 sidebar-button-clicked'
               : active
@@ -556,10 +556,10 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
                         setHoverPosition(null);
                       }}
                       className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm sidebar-button-hover transition-all duration-200 ${clickedItem === child.id
-                          ? 'scale-95 bg-blue-600/30 text-blue-300 sidebar-button-clicked'
-                          : isActive(child.href)
-                            ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                            : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:scale-[1.02]'
+                        ? 'scale-95 bg-blue-600/30 text-blue-300 sidebar-button-clicked'
+                        : isActive(child.href)
+                          ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                          : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:scale-[1.02]'
                         }`}
                     >
                       <child.icon className="w-4 h-4 flex-shrink-0" />

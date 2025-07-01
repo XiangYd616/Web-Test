@@ -142,31 +142,31 @@ export const ThemeSwitch: React.FC<{ className?: string }> = ({ className = '' }
   const { theme, setTheme, actualTheme } = useTheme();
 
   const toggleTheme = () => {
-    setTheme(actualTheme === 'light' ? 'dark' : 'light');
+    setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
   return (
     <div className={`flex items-center space-x-3 ${className}`}>
-      <Sun className={`w-4 h-4 ${actualTheme === 'light' ? 'text-yellow-500' : 'text-gray-400'}`} />
+      <Sun className={`w-4 h-4 ${theme === 'light' ? 'text-yellow-500' : 'text-gray-400'}`} />
 
       <button
         onClick={toggleTheme}
         className={`
           relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200
           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-          ${actualTheme === 'light'
+          ${theme === 'light'
             ? 'bg-gray-200 focus:ring-offset-white'
             : 'bg-blue-600 focus:ring-offset-gray-900'
           }
         `}
         role="switch"
-        aria-checked={actualTheme === 'dark' ? 'true' : 'false'}
+        aria-checked={theme === 'dark' ? 'true' : 'false'}
         aria-label="切换深色/浅色主题"
       >
         <span
           className={`
             inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200
-            ${actualTheme === 'dark' ? 'translate-x-6' : 'translate-x-1'}
+            ${theme === 'dark' ? 'translate-x-6' : 'translate-x-1'}
           `}
         />
       </button>

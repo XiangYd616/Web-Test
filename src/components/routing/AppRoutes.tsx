@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import Login from '../../pages/Login';
 import Register from '../../pages/Register';
 import { AdminGuard, ProtectedRoute } from '../auth';
@@ -110,6 +110,7 @@ const AppRoutes: React.FC = () => {
         } />
 
         {/* 测试工具 */}
+        <Route path="test" element={<Navigate to="/website-test" replace />} />
         <Route path="website-test" element={
           <LazyPageWrapper>
             <WebsiteTest />
@@ -238,6 +239,7 @@ const AppRoutes: React.FC = () => {
         } />
 
         {/* 集成和配置 */}
+        <Route path="cicd" element={<Navigate to="/cicd-integration" replace />} />
         <Route path="integrations" element={
           <LazyPageWrapper>
             <Integrations />
