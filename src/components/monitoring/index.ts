@@ -2,9 +2,12 @@
  * 📊 监控组件统一导出
  */
 
-export { default as EnhancedDashboardCharts } from './EnhancedDashboardCharts';
-export { default as MonitoringDashboard } from './MonitoringDashboard';
+// 实际存在的监控组件
 export { default as RealTimeMonitoringDashboard } from './RealTimeMonitoringDashboard';
-export { default as SystemHealthCheck } from './SystemHealthCheck';
-export { default as SystemStatusDashboard } from './SystemStatusDashboard';
+
+// 从其他位置重新导出相关组件
+export { default as MonitoringDashboard } from '../../pages/MonitoringDashboard';
+export { default as EnhancedDashboardCharts } from '../charts/EnhancedDashboardCharts';
+export { default as SystemHealthCheck } from '../system/SystemHealthCheck';
+export { default as SystemStatusDashboard } from '../system/SystemStatusDashboard';
 

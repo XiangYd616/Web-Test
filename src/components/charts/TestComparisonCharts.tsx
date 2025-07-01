@@ -2,12 +2,24 @@
  * 测试对比分析图表组件 - 支持多次测试结果对比和基线对比
  */
 
-import React, { useState, useMemo } from 'react';
+import { BarChart3, Download, GitCompare, Target, TrendingUp } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
 import {
-  LineChart, Line, BarChart, Bar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart, Area, AreaChart
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ComposedChart,
+  Legend,
+  Line,
+  LineChart,
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis, Radar,
+  RadarChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis, YAxis
 } from 'recharts';
-import { TrendingUp, BarChart3, Target, GitCompare, Download, Settings } from 'lucide-react';
 
 // 测试结果数据接口
 interface TestResult {
@@ -76,7 +88,7 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
   // 处理对比数据
   const comparisonData = useMemo(() => {
     const allTests = currentTest ? [...testResults, currentTest] : testResults;
-    
+
     return allTests.map((test, index) => ({
       name: test.name || `测试 ${index + 1}`,
       date: new Date(test.date).toLocaleDateString(),
@@ -154,10 +166,10 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
     if (!showTimeSeriesComparison || testResults.length === 0) return [];
 
     const maxLength = Math.max(...testResults.map(test => test.timeSeriesData?.length || 0));
-    
+
     return Array.from({ length: maxLength }, (_, index) => {
       const dataPoint: any = { time: index };
-      
+
       testResults.forEach((test, testIndex) => {
         const point = test.timeSeriesData?.[index];
         if (point) {
@@ -166,7 +178,7 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
           dataPoint[`test${testIndex}_errorRate`] = point.errorRate;
         }
       });
-      
+
       return dataPoint;
     });
   }, [testResults, showTimeSeriesComparison]);
@@ -177,22 +189,22 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
       <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
       <XAxis dataKey="name" stroke="#9CA3AF" fontSize={12} />
       <YAxis stroke="#9CA3AF" fontSize={12} />
-      <Tooltip 
-        contentStyle={{ 
-          backgroundColor: '#1F2937', 
+      <Tooltip
+        contentStyle={{
+          backgroundColor: '#1F2937',
           border: '1px solid #374151',
           borderRadius: '8px',
           color: '#F9FAFB'
         }}
       />
       <Legend />
-      
-      <Bar 
-        dataKey={selectedMetric} 
-        fill="#3B82F6" 
+
+      <Bar
+        dataKey={selectedMetric}
+        fill="#3B82F6"
         name={getMetricLabel(selectedMetric)}
       />
-      
+
       {showBaseline && baseline && (
         <Line
           type="monotone"
@@ -213,16 +225,16 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
       <XAxis dataKey="testNumber" stroke="#9CA3AF" fontSize={12} />
       <YAxis yAxisId="left" stroke="#9CA3AF" fontSize={12} />
       <YAxis yAxisId="right" orientation="right" stroke="#9CA3AF" fontSize={12} />
-      <Tooltip 
-        contentStyle={{ 
-          backgroundColor: '#1F2937', 
+      <Tooltip
+        contentStyle={{
+          backgroundColor: '#1F2937',
           border: '1px solid #374151',
           borderRadius: '8px',
           color: '#F9FAFB'
         }}
       />
       <Legend />
-      
+
       <Line
         yAxisId="left"
         type="monotone"
@@ -231,7 +243,7 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
         strokeWidth={2}
         name="平均响应时间"
       />
-      
+
       <Line
         yAxisId="right"
         type="monotone"
@@ -240,7 +252,7 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
         strokeWidth={2}
         name="吞吐量"
       />
-      
+
       <Bar
         yAxisId="right"
         dataKey="errorRate"
@@ -256,9 +268,9 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
     <RadarChart data={radarData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
       <PolarGrid stroke="#374151" />
       <PolarAngleAxis dataKey="metric" tick={{ fill: '#9CA3AF', fontSize: 12 }} />
-      <PolarRadiusAxis 
-        angle={90} 
-        domain={[0, 200]} 
+      <PolarRadiusAxis
+        angle={90}
+        domain={[0, 200]}
         tick={{ fill: '#9CA3AF', fontSize: 10 }}
       />
       <Radar
@@ -289,16 +301,16 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
       <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
       <XAxis dataKey="time" stroke="#9CA3AF" fontSize={12} />
       <YAxis stroke="#9CA3AF" fontSize={12} />
-      <Tooltip 
-        contentStyle={{ 
-          backgroundColor: '#1F2937', 
+      <Tooltip
+        contentStyle={{
+          backgroundColor: '#1F2937',
           border: '1px solid #374151',
           borderRadius: '8px',
           color: '#F9FAFB'
         }}
       />
       <Legend />
-      
+
       {testResults.map((test, index) => (
         <Line
           key={test.id}
@@ -346,12 +358,12 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
               ].map(({ key, label, icon: Icon }) => (
                 <button
                   key={key}
+                  type="button"
                   onClick={() => setComparisonType(key as any)}
-                  className={`px-3 py-1 rounded text-sm flex items-center gap-1 transition-colors ${
-                    comparisonType === key
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  }`}
+                  className={`px-3 py-1 rounded text-sm flex items-center gap-1 transition-colors ${comparisonType === key
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }`}
                 >
                   <Icon className="w-4 h-4" />
                   {label}
@@ -359,14 +371,16 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
               ))}
             </div>
           </div>
-          
+
           {(comparisonType === 'metrics' || comparisonType === 'timeseries') && (
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-300">指标:</span>
+              <label htmlFor="metric-select" className="text-sm text-gray-300">指标:</label>
               <select
+                id="metric-select"
                 value={selectedMetric}
                 onChange={(e) => setSelectedMetric(e.target.value)}
                 className="px-3 py-1 bg-gray-700 text-gray-300 rounded text-sm"
+                aria-label="选择对比指标"
               >
                 <option value="averageResponseTime">平均响应时间</option>
                 <option value="throughput">吞吐量</option>
@@ -377,7 +391,7 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
             </div>
           )}
         </div>
-        
+
         <div className="flex items-center gap-2">
           {baseline && (
             <label className="flex items-center gap-2 text-sm text-gray-300">
@@ -390,8 +404,11 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
               显示基线
             </label>
           )}
-          
-          <button className="px-3 py-1 bg-gray-700 text-gray-300 rounded text-sm hover:bg-gray-600 flex items-center gap-1">
+
+          <button
+            type="button"
+            className="px-3 py-1 bg-gray-700 text-gray-300 rounded text-sm hover:bg-gray-600 flex items-center gap-1"
+          >
             <Download className="w-4 h-4" />
             导出
           </button>
@@ -401,10 +418,20 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
       {/* 图表区域 */}
       <div className="bg-gray-800/50 rounded-lg p-4" style={{ height: `${height}px` }}>
         <ResponsiveContainer width="100%" height="100%">
-          {comparisonType === 'metrics' && renderMetricsComparison()}
-          {comparisonType === 'trends' && renderTrendsChart()}
-          {comparisonType === 'radar' && renderRadarChart()}
-          {comparisonType === 'timeseries' && renderTimeSeriesComparison()}
+          {(() => {
+            switch (comparisonType) {
+              case 'metrics':
+                return renderMetricsComparison();
+              case 'trends':
+                return renderTrendsChart();
+              case 'radar':
+                return renderRadarChart();
+              case 'timeseries':
+                return renderTimeSeriesComparison();
+              default:
+                return renderMetricsComparison();
+            }
+          })()}
         </ResponsiveContainer>
       </div>
 
@@ -414,7 +441,7 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
           <div className="bg-gray-800/50 rounded-lg p-4">
             <h4 className="text-sm font-medium text-gray-300 mb-2">最佳性能</h4>
             <div className="text-lg font-bold text-green-400">
-              {comparisonData.reduce((best, current) => 
+              {comparisonData.reduce((best, current) =>
                 current.averageResponseTime < best.averageResponseTime ? current : best
               ).name}
             </div>
@@ -422,11 +449,11 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
               响应时间: {Math.min(...comparisonData.map(d => d.averageResponseTime))}ms
             </div>
           </div>
-          
+
           <div className="bg-gray-800/50 rounded-lg p-4">
             <h4 className="text-sm font-medium text-gray-300 mb-2">最高吞吐量</h4>
             <div className="text-lg font-bold text-blue-400">
-              {comparisonData.reduce((best, current) => 
+              {comparisonData.reduce((best, current) =>
                 current.throughput > best.throughput ? current : best
               ).name}
             </div>
@@ -434,11 +461,11 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
               吞吐量: {Math.max(...comparisonData.map(d => d.throughput))} req/s
             </div>
           </div>
-          
+
           <div className="bg-gray-800/50 rounded-lg p-4">
             <h4 className="text-sm font-medium text-gray-300 mb-2">最低错误率</h4>
             <div className="text-lg font-bold text-purple-400">
-              {comparisonData.reduce((best, current) => 
+              {comparisonData.reduce((best, current) =>
                 current.errorRate < best.errorRate ? current : best
               ).name}
             </div>

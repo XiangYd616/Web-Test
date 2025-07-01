@@ -31,7 +31,7 @@ import {
   XAxis,
   YAxis
 } from 'recharts';
-import { MonitoringData, monitoringService, MonitoringSite, MonitoringStats } from '../../services/monitoring';
+import { MonitoringData, monitoringService, MonitoringSite, MonitoringStats } from '../../services/monitoringService';
 
 interface AlertRule {
   id: string;
@@ -221,8 +221,8 @@ const RealTimeMonitoring: React.FC = () => {
           <button
             onClick={toggleMonitoring}
             className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${isMonitoring
-                ? 'bg-red-600 hover:bg-red-700 text-white'
-                : 'bg-green-600 hover:bg-green-700 text-white'
+              ? 'bg-red-600 hover:bg-red-700 text-white'
+              : 'bg-green-600 hover:bg-green-700 text-white'
               }`}
           >
             {isMonitoring ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}

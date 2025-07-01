@@ -113,8 +113,8 @@ const DataStorage: React.FC = () => {
                   type="button"
                   onClick={() => setActiveTab(tab.id as any)}
                   className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors relative ${activeTab === tab.id
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'
                     }`}
                 >
                   <tab.icon className="w-4 h-4" />
@@ -202,13 +202,29 @@ const DataStorage: React.FC = () => {
 
         {/* 测试结果详情弹窗 */}
         {showTestResult && selectedRecord && (
-          <TestResultDisplay
-            result={selectedRecord}
-            onClose={() => {
-              setShowTestResult(false);
-              setSelectedRecord(null);
-            }}
-          />
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-gray-800 rounded-lg p-6 max-w-4xl max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-white">测试结果详情</h2>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowTestResult(false);
+                    setSelectedRecord(null);
+                  }}
+                  className="text-gray-400 hover:text-white"
+                >
+                  ✕
+                </button>
+              </div>
+              <TestResultDisplay
+                result={{
+                  ...selectedRecord,
+                  testId: selectedRecord.id, // 将 id 映射为 testId
+                }}
+              />
+            </div>
+          </div>
         )}
       </div>
     </div>

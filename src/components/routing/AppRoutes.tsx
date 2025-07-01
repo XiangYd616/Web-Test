@@ -7,7 +7,7 @@ import ModernLayout from '../modern/ModernLayout';
 import { EnhancedErrorBoundary, LoadingSpinner } from '../ui';
 
 // 懒加载页面组件
-const ModernDashboard = lazy(() => import('../../pages/ModernDashboard'));
+const ModernDashboard = lazy(() => import('../../pages/dashboard/ModernDashboard'));
 const WebsiteTest = lazy(() => import('../../pages/WebsiteTest'));
 const SecurityTest = lazy(() => import('../../pages/SecurityTest'));
 const PerformanceTest = lazy(() => import('../../pages/Performance'));
@@ -64,7 +64,6 @@ const Subscription = lazy(() => import('../../pages/Subscription'));
 const DownloadDesktop = lazy(() => import('../../pages/DownloadDesktop'));
 
 // 演示页面
-const LoginDemo = lazy(() => import('../../pages/LoginDemo'));
 const BackgroundTestDemo = lazy(() => import('../../pages/BackgroundTestDemo'));
 
 interface LazyPageWrapperProps {
@@ -85,11 +84,7 @@ const AppRoutes: React.FC = () => {
       {/* 公开路由 */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/login-demo" element={
-        <LazyPageWrapper>
-          <LoginDemo />
-        </LazyPageWrapper>
-      } />
+      {/* LoginDemo 路由已移除，因为文件不存在 */}
       <Route path="/background-test-demo" element={
         <LazyPageWrapper>
           <BackgroundTestDemo />

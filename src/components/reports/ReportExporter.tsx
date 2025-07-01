@@ -1,18 +1,16 @@
-import React, { useState } from 'react';
 import {
-  Download,
-  FileText,
-  Image,
-  Table,
-  Settings,
-  Eye,
-  Palette,
-  Layout,
-  CheckCircle,
   AlertCircle,
-  Loader
+  CheckCircle,
+  Download,
+  Eye,
+  FileText,
+  Layout,
+  Loader,
+  Settings,
+  Table
 } from 'lucide-react';
-import { EnhancedReportGenerator, ReportConfig, ReportData, ExportFormat } from '../services/reportGenerator';
+import React, { useState } from 'react';
+import { EnhancedReportGenerator, ExportFormat, ReportConfig, ReportData } from '../../services/reportGeneratorService';
 
 interface ReportExporterProps {
   testResults: any[];
@@ -29,8 +27,8 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('html');
-  const [config, setConfig] = useState<ReportConfig>(() => 
-    EnhancedReportGenerator.createDefaultConfig('测试报告')
+  const [config, setConfig] = useState<ReportConfig>(() =>
+    EnhancedReportGenerator.getDefaultConfig()
   );
   const [isGenerating, setIsGenerating] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
@@ -74,6 +72,10 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
   ];
 
   const templates = EnhancedReportGenerator.getAvailableTemplates();
+  const templatesMap = templates.reduce((acc, template) => {
+    acc[template.id] = template;
+    return acc;
+  }, {} as Record<string, any>);
 
   const handleExport = async () => {
     if (!testResults.length) {
@@ -82,7 +84,7 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
     }
 
     setIsGenerating(true);
-    
+
     try {
       const reportData: ReportData = {
         testId: `report-${Date.now()}`,
@@ -110,8 +112,9 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
         }
       };
 
-      const result = await EnhancedReportGenerator.generateReport(reportData, config, selectedFormat);
-      
+      const reportId = await EnhancedReportGenerator.generateReport(reportData, config);
+      const result = await EnhancedReportGenerator.exportReport(reportId, { format: selectedFormat });
+
       // 下载文件
       const blob = typeof result === 'string' ? new Blob([result], { type: 'text/plain' }) : result;
       const url = URL.createObjectURL(blob);
@@ -187,11 +190,10 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
                 {formats.map((format) => (
                   <label
                     key={format.id}
-                    className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${
-                      selectedFormat === format.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
+                    className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${selectedFormat === format.id
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                      }`}
                   >
                     <input
                       type="radio"
@@ -216,7 +218,7 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
             {/* 报告配置 */}
             <div className="mb-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">报告配置</h3>
-              
+
               {/* 标题 */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -266,7 +268,7 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
                   ))}
                 </select>
                 <p className="text-xs text-gray-500 mt-1">
-                  {templates[config.template]?.description}
+                  {templatesMap[config.template]?.description}
                 </p>
               </div>
 
@@ -359,7 +361,7 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
                     <p className="text-gray-600 mt-2">{config.description}</p>
                   )}
                 </div>
-                
+
                 <div className="space-y-4">
                   {config.sections.filter(s => s.enabled).sort((a, b) => a.order - b.order).map(section => (
                     <div key={section.id} className="border-l-4 border-blue-500 pl-4">
@@ -405,9 +407,9 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
                 <div>
                   <span className="text-blue-700">预计大小:</span>
                   <span className="font-medium ml-2">
-                    {selectedFormat === 'pdf' ? '~2MB' : 
-                     selectedFormat === 'html' ? '~500KB' : 
-                     selectedFormat === 'xlsx' ? '~1MB' : '~100KB'}
+                    {selectedFormat === 'pdf' ? '~2MB' :
+                      selectedFormat === 'html' ? '~500KB' :
+                        selectedFormat === 'xlsx' ? '~1MB' : '~100KB'}
                   </span>
                 </div>
               </div>
@@ -430,7 +432,7 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
               </>
             )}
           </div>
-          
+
           <div className="flex items-center space-x-3">
             <button
               type="button"

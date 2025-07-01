@@ -4,24 +4,17 @@ import {
   BarChart3,
   CheckCircle,
   Clock,
-  Shield,
-  TestTube,
-  Users,
-  Zap
+  Download,
+  Globe,
+  TestTube
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 // Layout is provided by the router, no need to import
-import ModernButton from '../../components/modern/ModernButton';
-import ModernCard from '../../components/modern/ModernCard';
 import {
-  MiniLineChart,
-  ModernBarChart,
   ModernDoughnutChart,
   ModernLineChart,
-  ProgressRing,
   chartColors
 } from '../../components/modern/ModernChart';
-import StatCard from '../../components/modern/StatCard';
 import { useTheme } from '../../contexts/ThemeContext';
 import '../../styles/modern-design-system.css';
 
@@ -38,65 +31,71 @@ const ModernDashboard: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // 模拟数据
+  // 网站测试平台统计数据 - 结合参考图片风格
   const statsData = [
     {
       title: '总测试次数',
-      value: 23090,
+      value: '1,234',
+      subtitle: 'Total Tests',
       icon: TestTube,
-      trend: { value: 12, direction: 'up' as const, label: '较昨日' },
-      variant: 'primary' as const
+      trend: { value: 12, direction: 'up' as const, label: '较昨日增长' },
+      variant: 'primary' as const,
+      bgGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
     },
     {
-      title: '活跃用户',
-      value: 1245,
-      icon: Users,
-      trend: { value: 8, direction: 'up' as const, label: '本周' },
-      variant: 'success' as const
+      title: '成功率',
+      value: '98.5%',
+      subtitle: 'Success Rate',
+      icon: CheckCircle,
+      trend: { value: 2.3, direction: 'up' as const, label: '本周平均' },
+      variant: 'success' as const,
+      bgGradient: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)'
     },
     {
-      title: '安全扫描',
-      value: 6525,
-      icon: Shield,
-      trend: { value: 3, direction: 'down' as const, label: '本月' },
-      variant: 'warning' as const
+      title: '平均响应时间',
+      value: '245ms',
+      subtitle: 'Avg Response',
+      icon: Clock,
+      trend: { value: 8.1, direction: 'down' as const, label: '性能提升' },
+      variant: 'warning' as const,
+      bgGradient: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)'
     },
     {
-      title: '系统状态',
-      value: '99.9%',
-      icon: Activity,
-      trend: { value: 0, direction: 'neutral' as const, label: '可用性' },
-      variant: 'info' as const
+      title: '活跃网站',
+      value: '89',
+      subtitle: 'Active Sites',
+      icon: Globe,
+      trend: { value: 5.2, direction: 'up' as const, label: '本月新增' },
+      variant: 'info' as const,
+      bgGradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)'
     }
   ];
 
-  // 折线图数据
+  // 网站测试趋势图表数据 - 结合参考图片风格
   const lineChartData = {
     labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
     datasets: [
       {
         label: '性能测试',
         data: [65, 78, 90, 81, 95, 88],
-        borderColor: chartColors.primary,
-        backgroundColor: `${chartColors.primary}20`,
+        borderColor: '#667eea',
+        backgroundColor: 'rgba(102, 126, 234, 0.1)',
         fill: true,
-        tension: 0.4
+        tension: 0.4,
+        pointBackgroundColor: '#667eea',
+        pointBorderColor: '#667eea',
+        pointRadius: 4
       },
       {
         label: '安全扫描',
         data: [45, 52, 68, 74, 82, 79],
-        borderColor: chartColors.success,
-        backgroundColor: `${chartColors.success}20`,
+        borderColor: '#11998e',
+        backgroundColor: 'rgba(17, 153, 142, 0.1)',
         fill: true,
-        tension: 0.4
-      },
-      {
-        label: '兼容性测试',
-        data: [35, 42, 58, 65, 71, 68],
-        borderColor: chartColors.warning,
-        backgroundColor: `${chartColors.warning}20`,
-        fill: true,
-        tension: 0.4
+        tension: 0.4,
+        pointBackgroundColor: '#11998e',
+        pointBorderColor: '#11998e',
+        pointRadius: 4
       }
     ]
   };
@@ -123,58 +122,82 @@ const ModernDashboard: React.FC = () => {
     ]
   };
 
-  // 圆环图数据
+  // 测试类型分布圆环图数据 - 结合项目实际需要
   const doughnutData = {
     labels: ['性能测试', '安全扫描', '兼容性测试', 'API测试'],
     datasets: [
       {
         data: [35, 25, 20, 20],
         backgroundColor: [
-          chartColors.primary,
-          chartColors.success,
-          chartColors.warning,
-          chartColors.info
+          '#667eea',  // 紫蓝色
+          '#11998e',  // 青绿色
+          '#ff9a9e',  // 粉红色
+          '#a8edea'   // 浅青色
         ],
         borderWidth: 0,
         hoverBorderWidth: 2,
-        hoverBorderColor: '#ffffff'
+        hoverBorderColor: '#ffffff',
+        cutout: '70%'
       }
     ]
   };
 
-  // 最近测试数据
-  const recentTests = [
+  // 应用销售数据 - 参考图片风格
+  const applicationSales = [
     {
       id: 1,
-      name: 'example.com',
-      type: '性能测试',
-      status: 'success',
-      score: 95,
-      time: '2分钟前'
+      application: 'Able Pro',
+      description: 'Powerful Admin Theme',
+      sales: 16300,
+      change: 5.3,
+      avgPrice: 53,
+      total: '$15,652',
+      trend: 'up'
     },
     {
       id: 2,
-      name: 'test-site.com',
-      type: '安全扫描',
-      status: 'warning',
-      score: 78,
-      time: '5分钟前'
+      application: 'Photoshop',
+      description: 'Design Software',
+      sales: 26421,
+      change: -2.5,
+      avgPrice: 35,
+      total: '$18,785',
+      trend: 'down'
     },
     {
       id: 3,
-      name: 'demo.org',
-      type: '兼容性测试',
-      status: 'success',
-      score: 92,
-      time: '8分钟前'
+      application: 'Guruable',
+      description: 'Best Admin Template',
+      sales: 8265,
+      change: 8.2,
+      avgPrice: 98,
+      total: '$9,652',
+      trend: 'up'
+    }
+  ];
+
+  // 用户活动数据 - 参考图片风格
+  const userActivity = [
+    {
+      id: 1,
+      user: 'John Doe',
+      description: 'Lorem ipsum is simply dummy text.',
+      time: '2 min ago',
+      avatar: '/api/placeholder/32/32'
     },
     {
-      id: 4,
-      name: 'api.service.com',
-      type: 'API测试',
-      status: 'error',
-      score: 45,
-      time: '12分钟前'
+      id: 2,
+      user: 'John Doe',
+      description: 'Lorem ipsum is simply dummy text.',
+      time: '2 min ago',
+      avatar: '/api/placeholder/32/32'
+    },
+    {
+      id: 3,
+      user: 'John Doe',
+      description: 'Lorem ipsum is simply dummy text.',
+      time: '2 min ago',
+      avatar: '/api/placeholder/32/32'
     }
   ];
 
@@ -206,188 +229,231 @@ const ModernDashboard: React.FC = () => {
   };
 
   return (
-    <div className={`p-6 ${actualTheme === 'light' ? 'light-dashboard' : 'dark-dashboard'}`}>
+    <div className={`min-h-screen p-6 ${actualTheme === 'light' ? 'bg-gray-100' : 'bg-gray-900'}`}>
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* 页面标题 */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className={`text-3xl font-bold mb-2 ${actualTheme === 'light' ? 'gradient-text' : 'text-primary'}`}>
-              仪表板概览
-            </h1>
-            <p className={`${actualTheme === 'light' ? 'themed-text-secondary' : 'text-secondary'}`}>
-              实时监控您的网站测试和性能数据
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <ModernButton variant="outline" icon={BarChart3}>
-              查看报告
-            </ModernButton>
-            <ModernButton variant="primary" icon={Zap}>
-              开始测试
-            </ModernButton>
-          </div>
-        </div>
-
-        {/* 统计卡片 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* 顶部统计卡片 - 参考图片风格 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           {statsData.map((stat, index) => (
-            <StatCard
+            <div
               key={index}
-              title={stat.title}
-              value={stat.value}
-              icon={stat.icon}
-              trend={stat.trend}
-              variant={stat.variant}
-              loading={loading}
-            />
+              className="relative overflow-hidden rounded-xl p-6 text-white shadow-lg"
+              style={{ background: stat.bgGradient }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-2 bg-white/20 rounded-lg">
+                  <stat.icon className="w-6 h-6" />
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold">{stat.value}</div>
+                  <div className="text-sm opacity-90">{stat.title}</div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="text-sm opacity-75">{stat.subtitle}</div>
+                <div className="text-xs opacity-75">{stat.trend.label}</div>
+              </div>
+              {/* 装饰性图表线 */}
+              <div className="absolute bottom-0 right-0 w-16 h-8 opacity-30">
+                <svg viewBox="0 0 64 32" className="w-full h-full">
+                  <path
+                    d="M0,20 Q16,10 32,15 T64,12"
+                    stroke="white"
+                    strokeWidth="2"
+                    fill="none"
+                  />
+                </svg>
+              </div>
+            </div>
           ))}
         </div>
 
-        {/* 主要图表区域 */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* 趋势图表 */}
+        {/* 主要图表区域 - 结合项目实际需要 */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          {/* 测试趋势分析 */}
           <div className="lg:col-span-2">
-            <ModernCard
-              title="测试趋势分析"
-              subtitle="过去6个月的测试数据趋势"
-              headerAction={
-                <ModernButton variant="ghost" size="sm">
-                  查看详情
-                </ModernButton>
-              }
-              hover
-            >
+            <div className={`rounded-xl p-6 shadow-sm ${actualTheme === 'light' ? 'bg-white' : 'bg-gray-800'}`}>
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className={`text-lg font-semibold ${actualTheme === 'light' ? 'text-gray-900' : 'text-gray-100'}`}>测试趋势分析</h3>
+                  <p className={`text-sm ${actualTheme === 'light' ? 'text-gray-500' : 'text-gray-300'}`}>过去6个月的网站测试数据趋势</p>
+                </div>
+                <div className="flex space-x-2">
+                  <button type="button" className="p-2 hover:bg-gray-100 rounded" title="图表视图">
+                    <BarChart3 className="w-4 h-4 text-gray-400" />
+                  </button>
+                  <button type="button" className="p-2 hover:bg-gray-100 rounded" title="活动视图">
+                    <Activity className="w-4 h-4 text-gray-400" />
+                  </button>
+                </div>
+              </div>
               {loading ? (
                 <div className="loading-shimmer w-full h-64 rounded-lg"></div>
               ) : (
                 <ModernLineChart data={lineChartData} height={300} />
               )}
-            </ModernCard>
+            </div>
           </div>
 
           {/* 测试类型分布 */}
           <div>
-            <ModernCard
-              title="测试类型分布"
-              subtitle="本月测试类型占比"
-              hover
-            >
+            <div className={`rounded-xl p-6 shadow-sm ${actualTheme === 'light' ? 'bg-white' : 'bg-gray-800'}`}>
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className={`text-lg font-semibold ${actualTheme === 'light' ? 'text-gray-900' : 'text-gray-100'}`}>测试类型分布</h3>
+                </div>
+                <button type="button" className="p-2 hover:bg-gray-100 rounded" title="更多选项">
+                  <Activity className="w-4 h-4 text-gray-400" />
+                </button>
+              </div>
               {loading ? (
                 <div className="loading-shimmer w-full h-64 rounded-lg"></div>
               ) : (
                 <div className="flex flex-col items-center">
-                  <ModernDoughnutChart data={doughnutData} size={200} />
+                  <div className="relative">
+                    <ModernDoughnutChart data={doughnutData} size={200} />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-blue-600">85%</div>
+                        <div className={`text-sm ${actualTheme === 'light' ? 'text-gray-500' : 'text-gray-300'}`}>健康度</div>
+                      </div>
+                    </div>
+                  </div>
                   <div className="mt-4 text-center">
-                    <ProgressRing percentage={85} size={80} showText />
-                    <p className="text-sm text-secondary mt-2">总体健康度</p>
+                    <button type="button" className="text-blue-600 text-sm hover:underline">
+                      查看详细报告
+                    </button>
                   </div>
                 </div>
               )}
-            </ModernCard>
+            </div>
           </div>
         </div>
 
-        {/* 详细数据区域 */}
+        {/* 底部数据区域 - 结合参考图片风格 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* 每日测试统计 */}
-          <ModernCard
-            title="每日测试统计"
-            subtitle="本周测试活动概览"
-            hover
-          >
-            {loading ? (
-              <div className="loading-shimmer w-full h-64 rounded-lg"></div>
-            ) : (
-              <ModernBarChart data={barChartData} height={250} />
-            )}
-          </ModernCard>
-
-          {/* 最近测试 */}
-          <ModernCard
-            title="最近测试"
-            subtitle="最新的测试结果"
-            headerAction={
-              <ModernButton variant="ghost" size="sm">
-                查看全部
-              </ModernButton>
-            }
-            hover
-          >
+          {/* 网站测试统计表格 */}
+          <div className={`rounded-xl p-6 shadow-sm ${actualTheme === 'light' ? 'bg-white' : 'bg-gray-800'}`}>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className={`text-lg font-semibold ${actualTheme === 'light' ? 'text-gray-900' : 'text-gray-100'}`}>网站测试统计</h3>
+              </div>
+              <div className="flex space-x-2">
+                <button type="button" className={`p-2 rounded ${actualTheme === 'light' ? 'hover:bg-gray-100' : 'hover:bg-gray-700'}`} title="刷新">
+                  <Activity className="w-4 h-4 text-gray-400" />
+                </button>
+                <button type="button" className={`p-2 rounded ${actualTheme === 'light' ? 'hover:bg-gray-100' : 'hover:bg-gray-700'}`} title="导出">
+                  <Download className="w-4 h-4 text-gray-400" />
+                </button>
+              </div>
+            </div>
             {loading ? (
               <div className="space-y-4">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="flex items-center justify-between">
+                  <div key={i} className="flex items-center justify-between p-3">
                     <div className="loading-shimmer w-32 h-4 rounded"></div>
                     <div className="loading-shimmer w-16 h-4 rounded"></div>
                   </div>
                 ))}
               </div>
             ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className={`border-b ${actualTheme === 'light' ? 'border-gray-200' : 'border-gray-700'}`}>
+                      <th className={`text-left py-3 px-2 font-medium ${actualTheme === 'light' ? 'text-gray-600' : 'text-gray-200'}`}>网站</th>
+                      <th className={`text-left py-3 px-2 font-medium ${actualTheme === 'light' ? 'text-gray-600' : 'text-gray-200'}`}>测试次数</th>
+                      <th className={`text-left py-3 px-2 font-medium ${actualTheme === 'light' ? 'text-gray-600' : 'text-gray-200'}`}>变化</th>
+                      <th className={`text-left py-3 px-2 font-medium ${actualTheme === 'light' ? 'text-gray-600' : 'text-gray-200'}`}>平均分</th>
+                      <th className={`text-left py-3 px-2 font-medium ${actualTheme === 'light' ? 'text-gray-600' : 'text-gray-200'}`}>总分</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {applicationSales.map((item) => (
+                      <tr key={item.id} className={`border-b ${actualTheme === 'light' ? 'border-gray-100 hover:bg-gray-50' : 'border-gray-700 hover:bg-gray-700'}`}>
+                        <td className="py-3 px-2">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                            <div>
+                              <div className={`font-medium ${actualTheme === 'light' ? 'text-gray-900' : 'text-gray-100'}`}>{item.application}</div>
+                              <div className={`text-sm ${actualTheme === 'light' ? 'text-gray-500' : 'text-gray-300'}`}>{item.description}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className={`py-3 px-2 ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'}`}>{item.sales.toLocaleString()}</td>
+                        <td className="py-3 px-2">
+                          <div className="flex items-center space-x-1">
+                            <div className={`w-16 h-8 rounded flex items-center justify-center ${actualTheme === 'light' ? 'bg-gray-100' : 'bg-gray-700'}`}>
+                              <svg className="w-12 h-4" viewBox="0 0 48 16">
+                                <path
+                                  d={item.trend === 'up' ? "M2,12 Q12,4 24,8 T46,6" : "M2,4 Q12,12 24,8 T46,10"}
+                                  stroke={item.trend === 'up' ? "#10B981" : "#EF4444"}
+                                  strokeWidth="2"
+                                  fill="none"
+                                />
+                              </svg>
+                            </div>
+                          </div>
+                        </td>
+                        <td className={`py-3 px-2 ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'}`}>{item.avgPrice}</td>
+                        <td className={`py-3 px-2 font-medium ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'}`}>{item.total}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* 用户活动 */}
+          <div className={`rounded-xl p-6 shadow-sm ${actualTheme === 'light' ? 'bg-white' : 'bg-gray-800'}`}>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className={`text-lg font-semibold ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'}`}>用户活动</h3>
+              </div>
+            </div>
+            {loading ? (
               <div className="space-y-4">
-                {recentTests.map((test) => (
-                  <div key={test.id} className="flex items-center justify-between p-3 rounded-lg bg-elevated hover:bg-tertiary transition-colors">
-                    <div className="flex items-center gap-3">
-                      {getStatusIcon(test.status)}
-                      <div>
-                        <p className="font-medium text-primary">{test.name}</p>
-                        <p className="text-sm text-secondary">{test.type}</p>
-                      </div>
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="flex items-center space-x-3">
+                    <div className="loading-shimmer w-8 h-8 rounded-full"></div>
+                    <div className="flex-1">
+                      <div className="loading-shimmer w-32 h-4 rounded mb-2"></div>
+                      <div className="loading-shimmer w-24 h-3 rounded"></div>
                     </div>
-                    <div className="text-right">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-lg font-bold text-primary">{test.score}</span>
-                        <MiniLineChart
-                          data={[65, 70, 75, 80, test.score]}
-                          color={test.status === 'success' ? chartColors.success : chartColors.warning}
-                        />
-                      </div>
-                      <span className={getStatusBadge(test.status)}>
-                        {test.time}
-                      </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {userActivity.map((activity) => (
+                  <div key={activity.id} className={`flex items-start space-x-3 p-3 rounded-lg transition-colors ${actualTheme === 'light' ? 'hover:bg-gray-50' : 'hover:bg-gray-700'}`}>
+                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                      {activity.user.charAt(0)}
+                    </div>
+                    <div className="flex-1">
+                      <div className={`font-medium ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'}`}>{activity.user}</div>
+                      <div className={`text-sm mt-1 ${actualTheme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>{activity.description}</div>
+                      <div className={`text-xs mt-1 ${actualTheme === 'light' ? 'text-gray-400' : 'text-gray-500'}`}>{activity.time}</div>
                     </div>
                   </div>
                 ))}
               </div>
             )}
-          </ModernCard>
+          </div>
         </div>
 
-        {/* 系统状�?*/}
-        <ModernCard
-          title="系统监控"
-          subtitle="实时系统状态和性能指标"
-          hover
-        >
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="text-center">
-                  <div className="loading-shimmer w-16 h-16 rounded-full mx-auto mb-2"></div>
-                  <div className="loading-shimmer w-20 h-4 rounded mx-auto"></div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="text-center">
-                <ProgressRing percentage={92} color={chartColors.success} size={80} />
-                <p className="text-sm text-secondary mt-2">CPU 使用率</p>
-              </div>
-              <div className="text-center">
-                <ProgressRing percentage={68} color={chartColors.info} size={80} />
-                <p className="text-sm text-secondary mt-2">内存使用率</p>
-              </div>
-              <div className="text-center">
-                <ProgressRing percentage={45} color={chartColors.warning} size={80} />
-                <p className="text-sm text-secondary mt-2">磁盘使用率</p>
-              </div>
-              <div className="text-center">
-                <ProgressRing percentage={99} color={chartColors.primary} size={80} />
-                <p className="text-sm text-secondary mt-2">网络状态</p>
-              </div>
-            </div>
-          )}
-        </ModernCard>
+        {/* 底部操作按钮 */}
+        <div className="flex justify-center mt-8">
+          <button
+            type="button"
+            className={`px-6 py-3 rounded-lg font-medium transition-colors text-white ${actualTheme === 'light'
+              ? 'bg-orange-500 hover:bg-orange-600'
+              : 'bg-blue-600 hover:bg-blue-700'
+              }`}
+          >
+            下载整体报告
+          </button>
+        </div>
       </div>
     </div>
   );

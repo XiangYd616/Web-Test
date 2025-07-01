@@ -2,8 +2,8 @@
  * 高级测试引擎 - 统一管理所有测试工具
  */
 
-import { testAPI } from './testApi';
 import backgroundTestManager from './BackgroundTestManager';
+import { testAPI } from './testApiService';
 
 // 浏览器兼容的事件发射器
 class BrowserEventEmitter {
@@ -326,20 +326,20 @@ class AdvancedTestEngine extends BrowserEventEmitter {
       case 'performance':
       case 'seo':
       case 'accessibility':
-        return this.engines.lighthouse ? 'lighthouse' : 
-               this.engines.playwright ? 'playwright' : 
-               this.engines.puppeteer ? 'puppeteer' : 'auto';
-      
+        return this.engines.lighthouse ? 'lighthouse' :
+          this.engines.playwright ? 'playwright' :
+            this.engines.puppeteer ? 'puppeteer' : 'auto';
+
       case 'stress':
       case 'api':
-        return this.engines.k6 ? 'k6' : 
-               this.engines.playwright ? 'playwright' : 'auto';
-      
+        return this.engines.k6 ? 'k6' :
+          this.engines.playwright ? 'playwright' : 'auto';
+
       case 'security':
       case 'compatibility':
-        return this.engines.playwright ? 'playwright' : 
-               this.engines.puppeteer ? 'puppeteer' : 'auto';
-      
+        return this.engines.playwright ? 'playwright' :
+          this.engines.puppeteer ? 'puppeteer' : 'auto';
+
       default:
         return this.engines.lighthouse ? 'lighthouse' : 'auto';
     }
@@ -399,19 +399,19 @@ class AdvancedTestEngine extends BrowserEventEmitter {
     // 基于Core Web Vitals计算
     const metrics = result.metrics || {};
     let score = 100;
-    
+
     if (metrics.lcp > 2.5) score -= 20;
     if (metrics.fid > 100) score -= 20;
     if (metrics.cls > 0.1) score -= 20;
     if (metrics.loadTime > 3000) score -= 20;
-    
+
     return Math.max(0, score);
   }
 
   private calculateSecurityScore(result: any): number {
     const findings = result.findings || [];
     let score = 100;
-    
+
     findings.forEach((finding: TestFinding) => {
       switch (finding.severity) {
         case 'critical': score -= 25; break;
@@ -420,7 +420,7 @@ class AdvancedTestEngine extends BrowserEventEmitter {
         case 'low': score -= 5; break;
       }
     });
-    
+
     return Math.max(0, score);
   }
 
@@ -507,11 +507,11 @@ class AdvancedTestEngine extends BrowserEventEmitter {
 
   private extractFindings(result: any, _testType: string): TestFinding[] {
     const findings: TestFinding[] = [];
-    
+
     if (result.findings && Array.isArray(result.findings)) {
       findings.push(...result.findings);
     }
-    
+
     if (result.userExperienceIssues && Array.isArray(result.userExperienceIssues)) {
       findings.push(...result.userExperienceIssues.map((issue: any) => ({
         type: issue.type || 'ux',
@@ -522,17 +522,17 @@ class AdvancedTestEngine extends BrowserEventEmitter {
         details: issue
       })));
     }
-    
+
     return findings;
   }
 
   private generateRecommendations(result: any, testType: string): string[] {
     const recommendations: string[] = [];
-    
+
     if (result.recommendations && Array.isArray(result.recommendations)) {
       recommendations.push(...result.recommendations);
     }
-    
+
     // 基于测试类型生成通用建议
     switch (testType) {
       case 'performance':
@@ -551,7 +551,7 @@ class AdvancedTestEngine extends BrowserEventEmitter {
         }
         break;
     }
-    
+
     return [...new Set(recommendations)]; // 去重
   }
 

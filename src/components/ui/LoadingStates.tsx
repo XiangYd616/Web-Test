@@ -58,8 +58,27 @@ export const ProgressLoader: React.FC<{
 
       <div className="w-full bg-gray-200 rounded-full h-2">
         <div
-          className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out"
-          style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
+          className={`bg-blue-600 h-2 rounded-full transition-all duration-300 ease-out progress-bar-fill ${progress <= 0 ? 'w-0' :
+              progress <= 5 ? 'w-5' :
+                progress <= 10 ? 'w-10' :
+                  progress <= 15 ? 'w-15' :
+                    progress <= 20 ? 'w-20' :
+                      progress <= 25 ? 'w-25' :
+                        progress <= 30 ? 'w-30' :
+                          progress <= 35 ? 'w-35' :
+                            progress <= 40 ? 'w-40' :
+                              progress <= 45 ? 'w-45' :
+                                progress <= 50 ? 'w-50' :
+                                  progress <= 55 ? 'w-55' :
+                                    progress <= 60 ? 'w-60' :
+                                      progress <= 65 ? 'w-65' :
+                                        progress <= 70 ? 'w-70' :
+                                          progress <= 75 ? 'w-75' :
+                                            progress <= 80 ? 'w-80' :
+                                              progress <= 85 ? 'w-85' :
+                                                progress <= 90 ? 'w-90' :
+                                                  progress <= 95 ? 'w-95' : 'w-100'
+            }`}
         />
       </div>
 

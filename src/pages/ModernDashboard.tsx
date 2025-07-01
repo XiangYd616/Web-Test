@@ -1,400 +1,292 @@
-import React, { useState, useEffect } from 'react';
 import {
-  Activity,
-  Users,
-  TestTube,
+  AlertCircle,
+  ArrowRight,
+  BarChart3,
+  CheckCircle2,
+  Clock,
+  Globe,
   Shield,
   TrendingUp,
-  Server,
-  Globe,
-  Clock,
-  AlertTriangle,
-  CheckCircle,
-  BarChart3,
   Zap
 } from 'lucide-react';
-import StatCard from '../components/modern/StatCard';
-import ModernCard from '../components/modern/ModernCard';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ModernButton from '../components/modern/ModernButton';
-import ModernLayout from '../components/modern/ModernLayout';
-import {
-  ModernLineChart,
-  ModernBarChart,
-  ModernDoughnutChart,
-  ProgressRing,
-  MiniLineChart,
-  chartColors
-} from '../components/modern/ModernChart';
-import '../styles/modern-design-system.css';
+import ModernCard from '../components/modern/ModernCard';
 import { useTheme } from '../contexts/ThemeContext';
+import '../styles/modern-design-system.css';
 
 const ModernDashboard: React.FC = () => {
   const { actualTheme } = useTheme();
-  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
-    // 模拟数据加载
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1500);
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
 
-    return () => clearTimeout(timer);
+    return () => clearInterval(timer);
   }, []);
 
-  // 模拟数据
-  const statsData = [
+  // 快速操作数据
+  const quickActions = [
     {
-      title: '总测试次数',
-      value: 23090,
-      icon: TestTube,
-      trend: { value: 12, direction: 'up' as const, label: '较昨日' },
-      variant: 'primary' as const
-    },
-    {
-      title: '活跃用户',
-      value: 1245,
-      icon: Users,
-      trend: { value: 8, direction: 'up' as const, label: '本周' },
-      variant: 'success' as const
+      title: '网站测试',
+      description: '检测网站性能和可用性',
+      icon: Globe,
+      color: 'bg-blue-500',
+      path: '/website-test'
     },
     {
       title: '安全扫描',
-      value: 6525,
+      description: '全面的安全漏洞检测',
       icon: Shield,
-      trend: { value: 3, direction: 'down' as const, label: '本月' },
-      variant: 'warning' as const
+      color: 'bg-green-500',
+      path: '/security-test'
     },
     {
-      title: '系统状态',
-      value: '99.9%',
-      icon: Activity,
-      trend: { value: 0, direction: 'neutral' as const, label: '可用性' },
-      variant: 'info' as const
+      title: 'API 测试',
+      description: '接口功能和性能测试',
+      icon: Zap,
+      color: 'bg-purple-500',
+      path: '/api-test'
+    },
+    {
+      title: 'SEO 分析',
+      description: '搜索引擎优化检测',
+      icon: TrendingUp,
+      color: 'bg-orange-500',
+      path: '/seo-test'
     }
   ];
 
-  // 折线图数据
-  const lineChartData = {
-    labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
-    datasets: [
-      {
-        label: '性能测试',
-        data: [65, 78, 90, 81, 95, 88],
-        borderColor: chartColors.primary,
-        backgroundColor: `${chartColors.primary}20`,
-        fill: true,
-        tension: 0.4
-      },
-      {
-        label: '安全扫描',
-        data: [45, 52, 68, 74, 82, 79],
-        borderColor: chartColors.success,
-        backgroundColor: `${chartColors.success}20`,
-        fill: true,
-        tension: 0.4
-      },
-      {
-        label: '兼容性测试',
-        data: [35, 42, 58, 65, 71, 68],
-        borderColor: chartColors.warning,
-        backgroundColor: `${chartColors.warning}20`,
-        fill: true,
-        tension: 0.4
-      }
-    ]
-  };
-
-  // 柱状图数据
-  const barChartData = {
-    labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
-    datasets: [
-      {
-        label: '测试次数',
-        data: [120, 190, 300, 500, 200, 300, 450],
-        backgroundColor: [
-          chartColors.primary,
-          chartColors.success,
-          chartColors.warning,
-          chartColors.error,
-          chartColors.info,
-          chartColors.purple,
-          chartColors.cyan
-        ],
-        borderRadius: 8,
-        borderSkipped: false
-      }
-    ]
-  };
-
-  // 圆环图数据
-  const doughnutData = {
-    labels: ['性能测试', '安全扫描', '兼容性测试', 'API测试'],
-    datasets: [
-      {
-        data: [35, 25, 20, 20],
-        backgroundColor: [
-          chartColors.primary,
-          chartColors.success,
-          chartColors.warning,
-          chartColors.info
-        ],
-        borderWidth: 0,
-        hoverBorderWidth: 2,
-        hoverBorderColor: '#ffffff'
-      }
-    ]
-  };
-
-  // 最近测试数据
-  const recentTests = [
+  // 最近活动数据
+  const recentActivities = [
     {
       id: 1,
-      name: 'example.com',
-      type: '性能测试',
+      type: '网站测试',
+      target: 'example.com',
       status: 'success',
-      score: 95,
-      time: '2分钟前'
+      time: '2分钟前',
+      score: 95
     },
     {
       id: 2,
-      name: 'test-site.com',
       type: '安全扫描',
+      target: 'test-site.com',
       status: 'warning',
-      score: 78,
-      time: '5分钟前'
+      time: '15分钟前',
+      score: 78
     },
     {
       id: 3,
-      name: 'demo.org',
-      type: '兼容性测试',
-      status: 'success',
-      score: 92,
-      time: '8分钟前'
-    },
-    {
-      id: 4,
-      name: 'api.service.com',
       type: 'API测试',
-      status: 'error',
-      score: 45,
-      time: '12分钟前'
+      target: 'api.service.com',
+      status: 'success',
+      time: '1小时前',
+      score: 92
     }
   ];
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'success':
-        return <CheckCircle className="w-4 h-4 text-success" />;
+        return <CheckCircle2 className="w-4 h-4 text-green-500" />;
       case 'warning':
-        return <AlertTriangle className="w-4 h-4 text-warning" />;
+        return <AlertCircle className="w-4 h-4 text-yellow-500" />;
       case 'error':
-        return <AlertTriangle className="w-4 h-4 text-error" />;
+        return <AlertCircle className="w-4 h-4 text-red-500" />;
       default:
-        return <Clock className="w-4 h-4 text-muted" />;
+        return <Clock className="w-4 h-4 text-gray-500" />;
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    const baseClass = 'modern-badge';
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'success':
-        return `${baseClass} modern-badge-success`;
+        return 'text-green-600 bg-green-50 border-green-200';
       case 'warning':
-        return `${baseClass} modern-badge-warning`;
+        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
       case 'error':
-        return `${baseClass} modern-badge-error`;
+        return 'text-red-600 bg-red-50 border-red-200';
       default:
-        return `${baseClass} modern-badge-gray`;
+        return 'text-gray-600 bg-gray-50 border-gray-200';
     }
   };
 
+
+
   return (
-    <ModernLayout>
-      <div className={`p-6 ${actualTheme === 'light' ? 'light-dashboard' : 'dark-dashboard'}`}>
-        <div className="max-w-7xl mx-auto space-y-6">
-        {/* 页面标题 */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className={`text-3xl font-bold mb-2 ${actualTheme === 'light' ? 'gradient-text' : 'text-primary'}`}>
-              仪表板概览
-            </h1>
-            <p className={`${actualTheme === 'light' ? 'themed-text-secondary' : 'text-secondary'}`}>
-              实时监控您的网站测试和性能数据
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <ModernButton variant="outline" icon={BarChart3}>
-              查看报告
-            </ModernButton>
-            <ModernButton variant="primary" icon={Zap}>
-              开始测试
-            </ModernButton>
+    <div className={`min-h-screen p-6 ${actualTheme === 'light' ? 'bg-gray-50' : 'bg-gray-900'}`}>
+      <div className="max-w-7xl mx-auto">
+        {/* 欢迎区域 */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className={`text-4xl font-bold mb-2 ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+                欢迎回来！ 👋
+              </h1>
+              <p className={`text-lg ${actualTheme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>
+                {currentTime.toLocaleString('zh-CN', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </p>
+            </div>
+            <div className="hidden md:flex items-center space-x-4">
+              <div className={`px-4 py-2 rounded-lg ${actualTheme === 'light' ? 'bg-green-100 text-green-800' : 'bg-green-900 text-green-200'}`}>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium">系统正常运行</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* 统计卡片 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {statsData.map((stat, index) => (
-            <StatCard
-              key={index}
-              title={stat.title}
-              value={stat.value}
-              icon={stat.icon}
-              trend={stat.trend}
-              variant={stat.variant}
-              loading={loading}
-            />
-          ))}
-        </div>
-
-        {/* 主要图表区域 */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* 趋势图表 */}
-          <div className="lg:col-span-2">
-            <ModernCard
-              title="测试趋势分析"
-              subtitle="过去6个月的测试数据趋势"
-              headerAction={
-                <ModernButton variant="ghost" size="sm">
-                  查看详情
-                </ModernButton>
-              }
-              hover
-            >
-              {loading ? (
-                <div className="loading-shimmer w-full h-64 rounded-lg"></div>
-              ) : (
-                <ModernLineChart data={lineChartData} height={300} />
-              )}
-            </ModernCard>
-          </div>
-
-          {/* 测试类型分布 */}
-          <div>
-            <ModernCard
-              title="测试类型分布"
-              subtitle="本月测试类型占比"
-              hover
-            >
-              {loading ? (
-                <div className="loading-shimmer w-full h-64 rounded-lg"></div>
-              ) : (
-                <div className="flex flex-col items-center">
-                  <ModernDoughnutChart data={doughnutData} size={200} />
-                  <div className="mt-4 text-center">
-                    <ProgressRing percentage={85} size={80} showText />
-                    <p className="text-sm text-secondary mt-2">总体健康度</p>
+        {/* 快速操作区域 */}
+        <div className="mb-8">
+          <h2 className={`text-2xl font-bold mb-6 ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+            快速开始
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {quickActions.map((action, index) => (
+              <ModernCard
+                key={index}
+                hover
+                className="cursor-pointer transition-all duration-200 hover:scale-105"
+                onClick={() => navigate(action.path)}
+              >
+                <div className="p-6">
+                  <div className={`w-12 h-12 ${action.color} rounded-lg flex items-center justify-center mb-4`}>
+                    <action.icon className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className={`text-lg font-semibold mb-2 ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+                    {action.title}
+                  </h3>
+                  <p className={`text-sm ${actualTheme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>
+                    {action.description}
+                  </p>
+                  <div className="mt-4 flex items-center text-blue-500 text-sm font-medium">
+                    开始测试
+                    <ArrowRight className="w-4 h-4 ml-1" />
                   </div>
                 </div>
-              )}
-            </ModernCard>
+              </ModernCard>
+            ))}
           </div>
         </div>
 
-        {/* 详细数据区域 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* 每日测试统计 */}
+        {/* 最近活动 */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* 最近测试活动 */}
           <ModernCard
-            title="每日测试统计"
-            subtitle="本周测试活动概览"
-            hover
-          >
-            {loading ? (
-              <div className="loading-shimmer w-full h-64 rounded-lg"></div>
-            ) : (
-              <ModernBarChart data={barChartData} height={250} />
-            )}
-          </ModernCard>
-
-          {/* 最近测试 */}
-          <ModernCard
-            title="最近测试"
+            title="最近活动"
             subtitle="最新的测试结果"
             headerAction={
-              <ModernButton variant="ghost" size="sm">
+              <ModernButton
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/test-history')}
+              >
                 查看全部
               </ModernButton>
             }
             hover
           >
-            {loading ? (
-              <div className="space-y-4">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <div className="loading-shimmer w-32 h-4 rounded"></div>
-                    <div className="loading-shimmer w-16 h-4 rounded"></div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {recentTests.map((test) => (
-                  <div key={test.id} className="flex items-center justify-between p-3 rounded-lg bg-elevated hover:bg-tertiary transition-colors">
-                    <div className="flex items-center gap-3">
-                      {getStatusIcon(test.status)}
+            <div className="space-y-4">
+              {recentActivities.map((activity) => (
+                <div key={activity.id} className={`p-4 rounded-lg border ${actualTheme === 'light' ? 'bg-white border-gray-200' : 'bg-gray-800 border-gray-700'} hover:shadow-md transition-all duration-200`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      {getStatusIcon(activity.status)}
                       <div>
-                        <p className="font-medium text-primary">{test.name}</p>
-                        <p className="text-sm text-secondary">{test.type}</p>
+                        <p className={`font-medium ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+                          {activity.target}
+                        </p>
+                        <p className={`text-sm ${actualTheme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>
+                          {activity.type}
+                        </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-lg font-bold text-primary">{test.score}</span>
-                        <MiniLineChart 
-                          data={[65, 70, 75, 80, test.score]} 
-                          color={test.status === 'success' ? chartColors.success : chartColors.warning}
-                        />
+                      <div className={`text-lg font-bold ${activity.score >= 90 ? 'text-green-500' : activity.score >= 70 ? 'text-yellow-500' : 'text-red-500'}`}>
+                        {activity.score}
                       </div>
-                      <span className={getStatusBadge(test.status)}>
-                        {test.time}
-                      </span>
+                      <div className={`text-xs px-2 py-1 rounded-full border ${getStatusColor(activity.status)}`}>
+                        {activity.time}
+                      </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </ModernCard>
-        </div>
-
-        {/* 系统状态 */}
-        <ModernCard
-          title="系统监控"
-          subtitle="实时系统状态和性能指标"
-          hover
-        >
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="text-center">
-                  <div className="loading-shimmer w-16 h-16 rounded-full mx-auto mb-2"></div>
-                  <div className="loading-shimmer w-20 h-4 rounded mx-auto"></div>
                 </div>
               ))}
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="text-center">
-                <ProgressRing percentage={92} color={chartColors.success} size={80} />
-                <p className="text-sm text-secondary mt-2">CPU 使用率</p>
-              </div>
-              <div className="text-center">
-                <ProgressRing percentage={68} color={chartColors.info} size={80} />
-                <p className="text-sm text-secondary mt-2">内存使用率</p>
-              </div>
-              <div className="text-center">
-                <ProgressRing percentage={45} color={chartColors.warning} size={80} />
-                <p className="text-sm text-secondary mt-2">磁盘使用率</p>
-              </div>
-              <div className="text-center">
-                <ProgressRing percentage={99} color={chartColors.primary} size={80} />
-                <p className="text-sm text-secondary mt-2">网络状态</p>
-              </div>
+          </ModernCard>
+
+          {/* 快速链接 */}
+          <ModernCard
+            title="快速链接"
+            subtitle="常用功能和工具"
+            hover
+          >
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={() => navigate('/reports')}
+                className={`w-full p-4 rounded-lg border text-left transition-all duration-200 hover:shadow-md ${actualTheme === 'light' ? 'bg-white border-gray-200 hover:border-blue-300' : 'bg-gray-800 border-gray-700 hover:border-blue-500'}`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <BarChart3 className="w-5 h-5 text-blue-500" />
+                    <span className={`font-medium ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+                      测试报告
+                    </span>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-gray-400" />
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate('/analytics')}
+                className={`w-full p-4 rounded-lg border text-left transition-all duration-200 hover:shadow-md ${actualTheme === 'light' ? 'bg-white border-gray-200 hover:border-green-300' : 'bg-gray-800 border-gray-700 hover:border-green-500'}`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <TrendingUp className="w-5 h-5 text-green-500" />
+                    <span className={`font-medium ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+                      数据分析
+                    </span>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-gray-400" />
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate('/settings')}
+                className={`w-full p-4 rounded-lg border text-left transition-all duration-200 hover:shadow-md ${actualTheme === 'light' ? 'bg-white border-gray-200 hover:border-purple-300' : 'bg-gray-800 border-gray-700 hover:border-purple-500'}`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Shield className="w-5 h-5 text-purple-500" />
+                    <span className={`font-medium ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+                      系统设置
+                    </span>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-gray-400" />
+                </div>
+              </button>
             </div>
-          )}
-        </ModernCard>
+          </ModernCard>
         </div>
       </div>
-    </ModernLayout>
+    </div>
   );
 };
 

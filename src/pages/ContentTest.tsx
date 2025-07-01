@@ -387,10 +387,10 @@ const ContentTest: React.FC = () => {
                 onClick={handleStartTest}
                 disabled={!testConfig.url}
                 className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition-all duration-200 ${!testConfig.url
-                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                    : isAuthenticated
-                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800'
-                      : 'bg-yellow-600 hover:bg-yellow-700 text-white border border-yellow-500/30'
+                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  : isAuthenticated
+                    ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800'
+                    : 'bg-yellow-600 hover:bg-yellow-700 text-white border border-yellow-500/30'
                   }`}
               >
                 {isAuthenticated ? (
@@ -570,8 +570,8 @@ const ContentTest: React.FC = () => {
                   <div
                     key={test.key}
                     className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${isChecked
-                        ? `border-${test.color}-500 bg-${test.color}-500/10`
-                        : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
+                      ? `border-${test.color}-500 bg-${test.color}-500/10`
+                      : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
                       }`}
                     onClick={() => setTestConfig(prev => ({ ...prev, [test.key]: !prev[test.key as keyof SimpleContentTestConfig] }))}
                   >
@@ -594,12 +594,12 @@ const ContentTest: React.FC = () => {
                             />
                             <div
                               className={`w-6 h-6 rounded-lg border-2 cursor-pointer transition-all duration-200 flex items-center justify-center ${isChecked
-                                  ? `border-${test.color}-500 bg-${test.color}-500 shadow-lg shadow-${test.color}-500/25`
-                                  : 'border-gray-500 bg-gray-700/50 hover:border-gray-400 hover:bg-gray-600/50'
+                                ? `border-${test.color}-500 bg-${test.color}-500 shadow-lg shadow-${test.color}-500/25`
+                                : 'border-gray-500 bg-gray-700/50 hover:border-gray-400 hover:bg-gray-600/50'
                                 }`}
                               onClick={() => setTestConfig(prev => ({ ...prev, [test.key]: !prev[test.key as keyof SimpleContentTestConfig] }))}
                               role="checkbox"
-                              aria-checked={isChecked ? "true" : "false"}
+                              aria-checked={Boolean(isChecked) ? "true" : "false"}
                               aria-labelledby={`content-test-${test.key}`}
                               tabIndex={0}
                               onKeyDown={(e) => {

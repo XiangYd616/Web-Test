@@ -1,9 +1,10 @@
 // 🛠️ 管理服务统一导出
-export { default as adminService } from './adminService';
-export { default as systemService } from './systemService';
-export { default as settingsService } from './settingsService';
+export { adminService } from '../adminService';
+export { settingsService } from '../settingsService';
+export { systemService } from '../systemService';
 
 // 类型导出
-export type { AdminService } from './adminService';
-export type { SystemService } from './systemService';
-export type { SettingsService } from './settingsService';
+export type { AdminService } from '../adminService';
+export type { SettingsService } from '../settingsService';
+export type { SystemService } from '../systemService';
+

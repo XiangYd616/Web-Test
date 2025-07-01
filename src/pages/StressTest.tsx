@@ -1203,6 +1203,7 @@ const StressTest: React.FC = () => {
               {isRunning ? '实时性能监控' : result ? '测试结果分析' : '压力测试图表'}
             </h3>
             <button
+              type="button"
               onClick={() => setUseUnifiedCharts(false)}
               className="px-3 py-1 bg-gray-700 text-gray-300 rounded text-sm hover:bg-gray-600"
             >
@@ -1226,6 +1227,7 @@ const StressTest: React.FC = () => {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-white">实时性能监控</h3>
                 <button
+                  type="button"
                   onClick={() => setUseUnifiedCharts(true)}
                   className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
                 >

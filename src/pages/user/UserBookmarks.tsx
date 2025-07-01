@@ -259,6 +259,7 @@ const UserBookmarks: React.FC = () => {
               type="button"
               onClick={() => setError(null)}
               className="ml-auto text-red-400 hover:text-red-300"
+              aria-label="关闭错误提示"
             >
               <X className="w-4 h-4" />
             </button>
@@ -273,6 +274,7 @@ const UserBookmarks: React.FC = () => {
               type="button"
               onClick={() => setSuccess(null)}
               className="ml-auto text-green-400 hover:text-green-300"
+              aria-label="关闭成功提示"
             >
               <X className="w-4 h-4" />
             </button>
@@ -281,8 +283,8 @@ const UserBookmarks: React.FC = () => {
 
         {/* 页面标题 */}
         <div className={`rounded-xl border p-6 mb-8 ${actualTheme === 'light'
-            ? 'bg-white border-gray-200'
-            : 'bg-gray-800/50 backdrop-blur-sm border-gray-700/50'
+          ? 'bg-white border-gray-200'
+          : 'bg-gray-800/50 backdrop-blur-sm border-gray-700/50'
           }`}>
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center space-x-4 mb-4 lg:mb-0">
@@ -319,8 +321,8 @@ const UserBookmarks: React.FC = () => {
             <div className="space-y-6">
               {/* 搜索框 */}
               <div className={`rounded-xl border p-4 ${actualTheme === 'light'
-                  ? 'bg-white border-gray-200'
-                  : 'bg-gray-800/50 backdrop-blur-sm border-gray-700/50'
+                ? 'bg-white border-gray-200'
+                : 'bg-gray-800/50 backdrop-blur-sm border-gray-700/50'
                 }`}>
                 <div className="relative">
                   <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${actualTheme === 'light' ? 'text-gray-500' : 'text-gray-400'
@@ -331,8 +333,8 @@ const UserBookmarks: React.FC = () => {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="搜索收藏..."
                     className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${actualTheme === 'light'
-                        ? 'bg-white border-gray-300 text-gray-900'
-                        : 'bg-gray-700 border-gray-600 text-white'
+                      ? 'bg-white border-gray-300 text-gray-900'
+                      : 'bg-gray-700 border-gray-600 text-white'
                       }`}
                   />
                 </div>
@@ -340,8 +342,8 @@ const UserBookmarks: React.FC = () => {
 
               {/* 分类筛选 */}
               <div className={`rounded-xl border p-4 ${actualTheme === 'light'
-                  ? 'bg-white border-gray-200'
-                  : 'bg-gray-800/50 backdrop-blur-sm border-gray-700/50'
+                ? 'bg-white border-gray-200'
+                : 'bg-gray-800/50 backdrop-blur-sm border-gray-700/50'
                 }`}>
                 <h3 className={`text-lg font-semibold mb-4 ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'
                   }`}>
@@ -352,10 +354,10 @@ const UserBookmarks: React.FC = () => {
                     type="button"
                     onClick={() => setSelectedCategory('all')}
                     className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center justify-between ${selectedCategory === 'all'
-                        ? 'bg-blue-500/20 text-blue-400'
-                        : actualTheme === 'light'
-                          ? 'text-gray-700 hover:bg-gray-100'
-                          : 'text-gray-300 hover:bg-gray-700/50'
+                      ? 'bg-blue-500/20 text-blue-400'
+                      : actualTheme === 'light'
+                        ? 'text-gray-700 hover:bg-gray-100'
+                        : 'text-gray-300 hover:bg-gray-700/50'
                       }`}
                   >
                     <span>全部</span>
@@ -367,10 +369,10 @@ const UserBookmarks: React.FC = () => {
                       type="button"
                       onClick={() => setSelectedCategory(category.id)}
                       className={`w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center justify-between ${selectedCategory === category.id
-                          ? 'bg-blue-500/20 text-blue-400'
-                          : actualTheme === 'light'
-                            ? 'text-gray-700 hover:bg-gray-100'
-                            : 'text-gray-300 hover:bg-gray-700/50'
+                        ? 'bg-blue-500/20 text-blue-400'
+                        : actualTheme === 'light'
+                          ? 'text-gray-700 hover:bg-gray-100'
+                          : 'text-gray-300 hover:bg-gray-700/50'
                         }`}
                     >
                       <span>{category.name}</span>
@@ -386,8 +388,8 @@ const UserBookmarks: React.FC = () => {
           <div className="lg:col-span-3">
             {filteredBookmarks.length === 0 ? (
               <div className={`rounded-xl border p-8 text-center ${actualTheme === 'light'
-                  ? 'bg-white border-gray-200'
-                  : 'bg-gray-800/50 backdrop-blur-sm border-gray-700/50'
+                ? 'bg-white border-gray-200'
+                : 'bg-gray-800/50 backdrop-blur-sm border-gray-700/50'
                 }`}>
                 <Bookmark className={`w-12 h-12 mx-auto mb-4 ${actualTheme === 'light' ? 'text-gray-400' : 'text-gray-500'
                   }`} />
@@ -416,8 +418,8 @@ const UserBookmarks: React.FC = () => {
                   <div
                     key={bookmark.id}
                     className={`rounded-xl border transition-all hover:shadow-lg ${actualTheme === 'light'
-                        ? 'bg-white border-gray-200 hover:border-gray-300'
-                        : 'bg-gray-800/50 backdrop-blur-sm border-gray-700/50 hover:border-gray-600/50'
+                      ? 'bg-white border-gray-200 hover:border-gray-300'
+                      : 'bg-gray-800/50 backdrop-blur-sm border-gray-700/50 hover:border-gray-600/50'
                       } ${viewMode === 'list' ? 'p-4' : 'p-6'}`}
                   >
                     <div className={`flex ${viewMode === 'list' ? 'items-center space-x-4' : 'flex-col space-y-4'}`}>
@@ -436,11 +438,13 @@ const UserBookmarks: React.FC = () => {
                               type="button"
                               onClick={() => toggleFavorite(bookmark.id)}
                               className={`p-1 rounded transition-colors ${bookmark.isFavorite
-                                  ? 'text-yellow-500 hover:text-yellow-600'
-                                  : actualTheme === 'light'
-                                    ? 'text-gray-400 hover:text-yellow-500'
-                                    : 'text-gray-500 hover:text-yellow-500'
+                                ? 'text-yellow-500 hover:text-yellow-600'
+                                : actualTheme === 'light'
+                                  ? 'text-gray-400 hover:text-yellow-500'
+                                  : 'text-gray-500 hover:text-yellow-500'
                                 }`}
+                              aria-label={bookmark.isFavorite ? '取消收藏' : '添加到收藏'}
+                              title={bookmark.isFavorite ? '取消收藏' : '添加到收藏'}
                             >
                               <Star className={`w-4 h-4 ${bookmark.isFavorite ? 'fill-current' : ''}`} />
                             </button>
@@ -448,9 +452,11 @@ const UserBookmarks: React.FC = () => {
                               type="button"
                               onClick={() => handleDeleteBookmark(bookmark.id)}
                               className={`p-1 rounded transition-colors ${actualTheme === 'light'
-                                  ? 'text-gray-400 hover:text-red-500'
-                                  : 'text-gray-500 hover:text-red-400'
+                                ? 'text-gray-400 hover:text-red-500'
+                                : 'text-gray-500 hover:text-red-400'
                                 }`}
+                              aria-label="删除书签"
+                              title="删除书签"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -476,8 +482,8 @@ const UserBookmarks: React.FC = () => {
                               <span
                                 key={tag}
                                 className={`px-2 py-1 text-xs rounded-full ${actualTheme === 'light'
-                                    ? 'bg-gray-100 text-gray-700'
-                                    : 'bg-gray-700 text-gray-300'
+                                  ? 'bg-gray-100 text-gray-700'
+                                  : 'bg-gray-700 text-gray-300'
                                   }`}
                               >
                                 {tag}

@@ -1400,7 +1400,7 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
         time: format(new Date(group.timestamp), 'HH:mm:ss'),
         timestamp: group.timestamp,
         responseTime: group.responseTimes.length > 0 ?
-          Math.round(group.responseTimes.reduce((sum, time) => sum + time, 0) / group.responseTimes.length) : 0,
+          Math.round(group.responseTimes.reduce((sum: number, time: number) => sum + time, 0) / group.responseTimes.length) : 0,
         maxResponseTime: group.responseTimes.length > 0 ? Math.max(...group.responseTimes) : 0,
         minResponseTime: group.responseTimes.length > 0 ? Math.min(...group.responseTimes) : 0,
         throughput: group.successes + group.failures,
@@ -1479,14 +1479,14 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
                 color: '#F9FAFB'
               }}
               formatter={(value, name) => {
-                const formatters = {
-                  responseTime: (v) => [`${v}ms`, '平均响应时间'],
-                  maxResponseTime: (v) => [`${v}ms`, '最大响应时间'],
-                  throughput: (v) => [`${v} req/s`, '吞吐量'],
-                  successRate: (v) => [`${v}%`, '成功率'],
-                  activeUsers: (v) => [`${v}`, '活跃用户']
+                const formatters: Record<string, (v: any) => string[]> = {
+                  responseTime: (v: any) => [`${v}ms`, '平均响应时间'],
+                  maxResponseTime: (v: any) => [`${v}ms`, '最大响应时间'],
+                  throughput: (v: any) => [`${v} req/s`, '吞吐量'],
+                  successRate: (v: any) => [`${v}%`, '成功率'],
+                  activeUsers: (v: any) => [`${v}`, '活跃用户']
                 };
-                return formatters[name] ? formatters[name](value) : [value, name];
+                return formatters[name as string] ? formatters[name as string](value) : [value, name];
               }}
             />
             <Legend />

@@ -10,7 +10,8 @@ import {
   Trash2
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { Report, ReportConfig, reportService } from '../../services/reporting';
+import { ReportConfig } from '../../services/reporting';
+import reportService, { Report } from '../../services/reporting/reportService';
 
 interface ReportTemplate {
   id: string;
@@ -324,8 +325,8 @@ const ReportManagement: React.FC = () => {
                     key={template.id}
                     onClick={() => setSelectedTemplate(template.id)}
                     className={`p-4 rounded-lg border cursor-pointer transition-colors ${selectedTemplate === template.id
-                        ? 'border-blue-500 bg-blue-500/10'
-                        : 'border-gray-600 hover:border-gray-500'
+                      ? 'border-blue-500 bg-blue-500/10'
+                      : 'border-gray-600 hover:border-gray-500'
                       }`}
                   >
                     <div className="flex items-center space-x-3 mb-2">

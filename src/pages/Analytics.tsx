@@ -103,7 +103,7 @@ const Analytics: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      const analyticsData = await AnalyticsService.getAnalytics(timeRange);
+      const analyticsData = await AdvancedAnalyticsService.getAnalytics(timeRange);
       setData(analyticsData);
 
     } catch (error) {
@@ -143,7 +143,7 @@ const Analytics: React.FC = () => {
   // 导出数据
   const handleExport = async (format: 'json' | 'csv' | 'excel') => {
     try {
-      const blob = await AnalyticsService.exportData(format, timeRange);
+      const blob = await AdvancedAnalyticsService.exportData(format, timeRange);
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;

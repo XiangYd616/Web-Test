@@ -27,7 +27,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import { SettingsService } from '../../services/admin/settingsService';
+import { SettingsService } from '../../services/settingsService';
 
 // 导入主题样式
 import '../../styles/dark-theme.css';

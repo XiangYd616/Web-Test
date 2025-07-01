@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { CheckCircle, AlertTriangle, XCircle, Info, X } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Info, X, XCircle } from 'lucide-react';
+import React, { createContext, ReactNode, useCallback, useContext, useState } from 'react';
 
 export interface Notification {
   id: string;
@@ -47,7 +47,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const addNotification = useCallback((notification: Omit<Notification, 'id'>) => {
-    const id = Date.now().toString(36) + Math.random().toString(36).substr(2);
+    const id = Date.now().toString(36) + Math.random().toString(36).substring(2);
     const newNotification: Notification = {
       id,
       duration: 5000,
@@ -182,6 +182,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification, onRem
           {notification.action && (
             <div className="mt-2">
               <button
+                type="button"
                 onClick={notification.action.onClick}
                 className="text-sm font-medium text-blue-600 hover:text-blue-500"
               >
@@ -192,6 +193,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification, onRem
         </div>
         <div className="ml-4 flex-shrink-0">
           <button
+            type="button"
             onClick={onRemove}
             className="inline-flex text-gray-400 hover:text-gray-600 focus:outline-none"
             aria-label="关闭通知"

@@ -20,7 +20,6 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import DataBackupManager from '../../components/data/DataBackupManager';
-import DataManager from '../../components/data/DataManager';
 import DataSyncManager from '../../components/data/DataSyncManager';
 
 interface DataExportTask {
@@ -405,8 +404,8 @@ const DataManagement: React.FC = () => {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
                   className={`flex items-center space-x-2 px-4 py-3 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${activeTab === tab.id
-                      ? 'border-blue-500 text-blue-400 bg-blue-500/10'
-                      : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-600'
+                    ? 'border-blue-500 text-blue-400 bg-blue-500/10'
+                    : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-600'
                     }`}
                 >
                   <tab.icon className="w-4 h-4" />

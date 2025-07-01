@@ -1,5 +1,5 @@
-import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import React from 'react';
 
 interface PaginationProps {
   current: number;
@@ -48,7 +48,7 @@ const Pagination: React.FC<PaginationProps> = ({
     const maxVisiblePages = 5;
     let startPage = Math.max(1, current - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-    
+
     // 调整起始页，确保显示足够的页码
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
@@ -78,11 +78,10 @@ const Pagination: React.FC<PaginationProps> = ({
           key={i}
           type="button"
           onClick={() => handlePageChange(i)}
-          className={`px-3 py-2 text-sm rounded-lg transition-colors ${
-            i === current
+          className={`px-3 py-2 text-sm rounded-lg transition-colors ${i === current
               ? 'bg-blue-600 text-white'
               : 'bg-gray-700 hover:bg-gray-600 text-white'
-          }`}
+            }`}
         >
           {i}
         </button>
@@ -175,12 +174,15 @@ const Pagination: React.FC<PaginationProps> = ({
         {/* 快速跳转 */}
         {showQuickJumper && (
           <div className="flex items-center space-x-2 text-sm text-gray-400">
-            <span>跳至</span>
+            <label htmlFor="page-jump-input" className="text-sm text-gray-400">跳至</label>
             <input
+              id="page-jump-input"
               type="number"
               min={1}
               max={totalPages}
               className="w-16 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              aria-label={`跳转到指定页面，当前第${currentPage}页，共${totalPages}页`}
+              placeholder="页码"
               onKeyPress={(e) => {
                 if (e.key === 'Enter') {
                   const page = parseInt((e.target as HTMLInputElement).value);

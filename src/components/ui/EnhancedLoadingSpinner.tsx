@@ -122,8 +122,14 @@ const EnhancedLoadingSpinner: React.FC<LoadingSpinnerProps> = ({
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div
-                  className={`h-2 rounded-full transition-all duration-300 ${getProgressColor()}`}
-                  style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
+                  className={`h-2 rounded-full transition-all duration-300 ${getProgressColor()} ${progress <= 0 ? 'w-0' :
+                    progress <= 5 ? 'w-5' :
+                      progress <= 10 ? 'w-10' :
+                        progress <= 25 ? 'w-25' :
+                          progress <= 50 ? 'w-50' :
+                            progress <= 75 ? 'w-75' :
+                              progress <= 90 ? 'w-90' : 'w-100'
+                    }`}
                 />
               </div>
             </div>
@@ -131,9 +137,9 @@ const EnhancedLoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 
           {/* 动画点 */}
           <div className="flex space-x-1">
-            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce loading-dot" style={{ animationDelay: '0ms' }} />
-            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce loading-dot" style={{ animationDelay: '150ms' }} />
-            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce loading-dot" style={{ animationDelay: '300ms' }} />
+            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce loading-dot loading-dot-1" />
+            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce loading-dot loading-dot-2" />
+            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce loading-dot loading-dot-3" />
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
+import { AlertTriangle, Calendar, Database, Download, HardDrive, RefreshCw, Upload } from 'lucide-react';
 import React, { useState } from 'react';
-import { Database, Download, Upload, RefreshCw, Calendar, HardDrive, AlertTriangle } from 'lucide-react';
 
 interface BackupRecord {
   id: string;
@@ -95,7 +95,7 @@ const BackupManagement: React.FC = () => {
 
   const handleCreateBackup = async () => {
     setIsCreatingBackup(true);
-    
+
     // 模拟备份创建过程
     setTimeout(() => {
       const newBackup: BackupRecord = {
@@ -107,7 +107,7 @@ const BackupManagement: React.FC = () => {
         status: 'completed',
         description: '手动创建的备份'
       };
-      
+
       setBackups(prev => [newBackup, ...prev]);
       setIsCreatingBackup(false);
     }, 3000);
@@ -144,11 +144,11 @@ const BackupManagement: React.FC = () => {
           <h2 className="text-2xl font-bold text-gray-900">备份管理</h2>
         </div>
         <button
+          type="button"
           onClick={handleCreateBackup}
           disabled={isCreatingBackup}
-          className={`btn btn-primary flex items-center space-x-2 ${
-            isCreatingBackup ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
+          className={`btn btn-primary flex items-center space-x-2 ${isCreatingBackup ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
         >
           {isCreatingBackup ? (
             <RefreshCw className="w-4 h-4 animate-spin" />
@@ -227,11 +227,13 @@ const BackupManagement: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">备份频率</label>
+            <label htmlFor="backup-interval-select" className="block text-sm font-medium text-gray-700 mb-2">备份频率</label>
             <select
+              id="backup-interval-select"
               value={backupSettings.backupInterval}
               onChange={(e) => setBackupSettings(prev => ({ ...prev, backupInterval: e.target.value }))}
               className="input"
+              aria-label="选择备份频率"
             >
               <option value="daily">每日</option>
               <option value="weekly">每周</option>
@@ -240,26 +242,30 @@ const BackupManagement: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">保留天数</label>
+            <label htmlFor="retention-days-input" className="block text-sm font-medium text-gray-700 mb-2">保留天数</label>
             <input
+              id="retention-days-input"
               type="number"
               value={backupSettings.retentionDays}
               onChange={(e) => setBackupSettings(prev => ({ ...prev, retentionDays: parseInt(e.target.value) }))}
               className="input"
               min="1"
               max="365"
+              aria-label="设置备份保留天数"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">最大备份数</label>
+            <label htmlFor="max-backups-input" className="block text-sm font-medium text-gray-700 mb-2">最大备份数</label>
             <input
+              id="max-backups-input"
               type="number"
               value={backupSettings.maxBackups}
               onChange={(e) => setBackupSettings(prev => ({ ...prev, maxBackups: parseInt(e.target.value) }))}
               className="input"
               min="1"
               max="100"
+              aria-label="设置最大备份数量"
             />
           </div>
         </div>
@@ -284,7 +290,7 @@ const BackupManagement: React.FC = () => {
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900">备份记录</h3>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -344,25 +350,31 @@ const BackupManagement: React.FC = () => {
                       {backup.status === 'completed' && (
                         <>
                           <button
+                            type="button"
                             onClick={() => handleDownloadBackup(backup)}
                             className="text-blue-600 hover:text-blue-900"
                             title="下载备份"
+                            aria-label="下载备份"
                           >
                             <Download className="w-4 h-4" />
                           </button>
                           <button
+                            type="button"
                             onClick={() => handleRestoreBackup(backup)}
                             className="text-green-600 hover:text-green-900"
                             title="恢复备份"
+                            aria-label="恢复备份"
                           >
                             <Upload className="w-4 h-4" />
                           </button>
                         </>
                       )}
                       <button
+                        type="button"
                         onClick={() => handleDeleteBackup(backup.id)}
                         className="text-red-600 hover:text-red-900"
                         title="删除备份"
+                        aria-label="删除备份"
                       >
                         <Database className="w-4 h-4" />
                       </button>

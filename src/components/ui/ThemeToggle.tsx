@@ -73,6 +73,7 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
   return (
     <div className={`flex items-center space-x-2 ${className}`}>
       <button
+        type="button"
         onClick={cycleTheme}
         className={`
           ${getButtonSizeClass()}
@@ -150,6 +151,7 @@ export const ThemeSwitch: React.FC<{ className?: string }> = ({ className = '' }
       <Sun className={`w-4 h-4 ${theme === 'light' ? 'text-yellow-500' : 'text-gray-400'}`} />
 
       <button
+        type="button"
         onClick={toggleTheme}
         className={`
           relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200

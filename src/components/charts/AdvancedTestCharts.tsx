@@ -22,8 +22,8 @@ import {
   Tooltip,
   XAxis, YAxis
 } from 'recharts';
+import { TestResult } from '../../services/advancedTestEngine';
 import '../../styles/progress-bars.css';
-import { TestResult } from '../services/advancedTestEngine';
 
 interface AdvancedTestChartsProps {
   results: TestResult | TestResult[];
@@ -421,10 +421,10 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
                 type="button"
                 onClick={() => setSelectedChart(chart as any)}
                 className={`px-3 py-1 rounded text-sm transition-colors ${selectedChart === chart
-                    ? 'bg-blue-600 text-white'
-                    : theme === 'dark'
-                      ? 'bg-gray-700 text-white hover:bg-gray-600'
-                      : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                  ? 'bg-blue-600 text-white'
+                  : theme === 'dark'
+                    ? 'bg-gray-700 text-white hover:bg-gray-600'
+                    : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
                   }`}
               >
                 {chart === 'overview' && '总览'}
@@ -448,7 +448,7 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
         <div className={`p-3 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
           <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>总体评分</div>
           <div className={`text-xl font-bold ${(latestResult.overallScore || (latestResult as any).securityScore || 0) >= 90 ? 'text-green-500' :
-              (latestResult.overallScore || (latestResult as any).securityScore || 0) >= 70 ? 'text-yellow-500' : 'text-red-500'
+            (latestResult.overallScore || (latestResult as any).securityScore || 0) >= 70 ? 'text-yellow-500' : 'text-red-500'
             }`}>
             {Math.round(latestResult.overallScore || (latestResult as any).securityScore || 0)}
           </div>
@@ -464,7 +464,7 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
         <div className={`p-3 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
           <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>发现问题</div>
           <div className={`text-xl font-bold ${(latestResult.findings || (latestResult as any).vulnerabilities || []).length === 0 ? 'text-green-500' :
-              (latestResult.findings || (latestResult as any).vulnerabilities || []).length <= 3 ? 'text-yellow-500' : 'text-red-500'
+            (latestResult.findings || (latestResult as any).vulnerabilities || []).length <= 3 ? 'text-yellow-500' : 'text-red-500'
             }`}>
             {(latestResult.findings || (latestResult as any).vulnerabilities || []).length}
           </div>

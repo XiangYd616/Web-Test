@@ -1,3 +1,11 @@
 // 集成与交互组件统一导出
 export { default as CICDDemo } from './CICDDemo';
-export { default as InteractiveFeedback } from './InteractiveFeedback';
+
+// 从 InteractiveFeedback 导出所有命名导出
+export {
+    AchievementBadge, ButtonFeedback,
+    CopyToClipboard, FeedbackCollector, FloatingActionButton, LikeButton,
+    ProgressIndicator,
+    RatingComponent, Tooltip
+} from './InteractiveFeedback';
+

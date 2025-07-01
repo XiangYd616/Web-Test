@@ -1,18 +1,16 @@
-import React, { useState, useEffect } from 'react';
 import {
-  Monitor,
-  Cpu,
-  MemoryStick,
-  HardDrive,
-  Network,
-  Database,
   Activity,
   AlertTriangle,
   CheckCircle,
-  RefreshCw,
-  Download,
-  Settings
+  Cpu,
+  Database,
+  HardDrive,
+  MemoryStick,
+  Monitor,
+  Network,
+  RefreshCw
 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { adminService } from '../../services/adminService';
 import type { SystemMonitor as SystemMonitorType } from '../../types/admin';
 
@@ -24,12 +22,12 @@ const SystemMonitor: React.FC = () => {
 
   useEffect(() => {
     loadMonitorData();
-    
+
     let interval: NodeJS.Timeout;
     if (autoRefresh) {
       interval = setInterval(loadMonitorData, refreshInterval * 1000);
     }
-    
+
     return () => {
       if (interval) clearInterval(interval);
     };
@@ -111,12 +109,14 @@ const SystemMonitor: React.FC = () => {
         </div>
         <div className="flex items-center space-x-3">
           <div className="flex items-center space-x-2">
-            <label className="text-sm font-medium text-gray-700">自动刷新</label>
+            <label htmlFor="auto-refresh-checkbox" className="text-sm font-medium text-gray-700">自动刷新</label>
             <input
+              id="auto-refresh-checkbox"
               type="checkbox"
               checked={autoRefresh}
               onChange={(e) => setAutoRefresh(e.target.checked)}
               className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+              aria-label="启用或禁用自动刷新"
             />
           </div>
           <select
@@ -209,20 +209,20 @@ const SystemMonitor: React.FC = () => {
             <h3 className="text-lg font-medium text-gray-900">系统资源</h3>
             <Activity className="w-5 h-5 text-gray-400" />
           </div>
-          
+
           <div className="space-y-6">
             <ProgressBar
               value={monitor?.metrics.memory.used || 0}
               max={monitor?.metrics.memory.total || 1}
               label="内存使用"
             />
-            
+
             <ProgressBar
               value={monitor?.metrics.disk.used || 0}
               max={monitor?.metrics.disk.total || 1}
               label="磁盘使用"
             />
-            
+
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="font-medium">CPU 温度</span>
@@ -240,7 +240,7 @@ const SystemMonitor: React.FC = () => {
             <h3 className="text-lg font-medium text-gray-900">网络流量</h3>
             <Network className="w-5 h-5 text-gray-400" />
           </div>
-          
+
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
@@ -251,7 +251,7 @@ const SystemMonitor: React.FC = () => {
                 {formatBytes(monitor?.metrics.network.incoming || 0)}/s
               </span>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
@@ -261,7 +261,7 @@ const SystemMonitor: React.FC = () => {
                 {formatBytes(monitor?.metrics.network.outgoing || 0)}/s
               </span>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <div className="w-3 h-3 bg-orange-500 rounded-full mr-2"></div>
@@ -280,7 +280,7 @@ const SystemMonitor: React.FC = () => {
             <h3 className="text-lg font-medium text-gray-900">数据库状态</h3>
             <Database className="w-5 h-5 text-gray-400" />
           </div>
-          
+
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">连接数</span>
@@ -288,14 +288,14 @@ const SystemMonitor: React.FC = () => {
                 {monitor?.metrics.database.connections} / 100
               </span>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">平均查询时间</span>
               <span className="text-sm text-gray-600">
                 {monitor?.metrics.database.queryTime.toFixed(2)}ms
               </span>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">数据库大小</span>
               <span className="text-sm text-gray-600">
@@ -311,7 +311,7 @@ const SystemMonitor: React.FC = () => {
             <h3 className="text-lg font-medium text-gray-900">应用状态</h3>
             <Monitor className="w-5 h-5 text-gray-400" />
           </div>
-          
+
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">活跃用户</span>
@@ -319,26 +319,25 @@ const SystemMonitor: React.FC = () => {
                 {monitor?.metrics.application.activeUsers}
               </span>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">运行中测试</span>
               <span className="text-sm text-gray-600">
                 {monitor?.metrics.application.runningTests}
               </span>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">队列中测试</span>
               <span className="text-sm text-gray-600">
                 {monitor?.metrics.application.queuedTests}
               </span>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">错误率</span>
-              <span className={`text-sm font-medium ${
-                (monitor?.metrics.application.errorRate || 0) < 5 ? 'text-green-600' : 'text-red-600'
-              }`}>
+              <span className={`text-sm font-medium ${(monitor?.metrics.application.errorRate || 0) < 5 ? 'text-green-600' : 'text-red-600'
+                }`}>
                 {monitor?.metrics.application.errorRate.toFixed(2)}%
               </span>
             </div>
@@ -357,7 +356,7 @@ const SystemMonitor: React.FC = () => {
               <p className="text-xs text-green-700">所有服务正常运行</p>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-3 p-3 bg-yellow-50 rounded-lg">
             <AlertTriangle className="w-5 h-5 text-yellow-600" />
             <div>
@@ -365,7 +364,7 @@ const SystemMonitor: React.FC = () => {
               <p className="text-xs text-yellow-700">建议关注内存使用情况</p>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
             <Activity className="w-5 h-5 text-blue-600" />
             <div>

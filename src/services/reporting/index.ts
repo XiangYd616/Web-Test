@@ -74,8 +74,7 @@ export interface ExportTask {
 export { default as reportService } from './reportService';
 
 // 兼容性导出（逐步迁移）
-export { reportGenerator as legacyReportGenerator } from '../reportGenerator';
-export { reportService as legacyReportService } from '../reportService';
+export { reportGeneratorService as legacyReportGenerator, reportGeneratorService as legacyReportService } from '../reportGeneratorService';
 
 // 类型导出
 export type {

@@ -1,5 +1,5 @@
+import { Activity, AlertTriangle, Eye, EyeOff, Key, Lock, Shield, Users } from 'lucide-react';
 import React, { useState } from 'react';
-import { Shield, AlertTriangle, Lock, Eye, EyeOff, Key, Users, Activity } from 'lucide-react';
 
 interface SecurityEvent {
   id: string;
@@ -110,7 +110,7 @@ const SecurityCenter: React.FC = () => {
           <Shield className="w-6 h-6 text-red-600" />
           <h2 className="text-2xl font-bold text-gray-900">安全中心</h2>
         </div>
-        <button className="btn btn-primary flex items-center space-x-2">
+        <button type="button" className="btn btn-primary flex items-center space-x-2">
           <Shield className="w-4 h-4" />
           <span>安全扫描</span>
         </button>
@@ -174,8 +174,10 @@ const SecurityCenter: React.FC = () => {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">密码策略</h3>
             <button
+              type="button"
               onClick={() => setShowPasswordPolicy(!showPasswordPolicy)}
               className="text-blue-600 hover:text-blue-800"
+              aria-label={showPasswordPolicy ? "隐藏密码策略" : "显示密码策略"}
             >
               {showPasswordPolicy ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
@@ -184,8 +186,9 @@ const SecurityCenter: React.FC = () => {
           {showPasswordPolicy && (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">最小长度</label>
+                <label htmlFor="password-min-length" className="block text-sm font-medium text-gray-700 mb-2">最小长度</label>
                 <input
+                  id="password-min-length"
                   type="number"
                   value={securitySettings.passwordPolicy.minLength}
                   onChange={(e) => setSecuritySettings(prev => ({
@@ -195,6 +198,7 @@ const SecurityCenter: React.FC = () => {
                   className="input"
                   min="6"
                   max="32"
+                  aria-label="设置密码最小长度"
                 />
               </div>
 
@@ -286,8 +290,9 @@ const SecurityCenter: React.FC = () => {
             </label>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">最大登录尝试次数</label>
+              <label htmlFor="max-login-attempts" className="block text-sm font-medium text-gray-700 mb-2">最大登录尝试次数</label>
               <input
+                id="max-login-attempts"
                 type="number"
                 value={securitySettings.accessControl.maxLoginAttempts}
                 onChange={(e) => setSecuritySettings(prev => ({
@@ -297,6 +302,7 @@ const SecurityCenter: React.FC = () => {
                 className="input"
                 min="3"
                 max="10"
+                aria-label="设置最大登录尝试次数"
               />
             </div>
           </div>
@@ -308,7 +314,7 @@ const SecurityCenter: React.FC = () => {
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900">安全事件日志</h3>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -350,8 +356,8 @@ const SecurityCenter: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getSeverityColor(event.severity)}`}>
-                      {event.severity === 'high' ? '高危' : 
-                       event.severity === 'medium' ? '中危' : '低危'}
+                      {event.severity === 'high' ? '高危' :
+                        event.severity === 'medium' ? '中危' : '低危'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

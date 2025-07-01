@@ -1,6 +1,6 @@
+import { AlertCircle, CheckCircle, Eye, EyeOff, Lock, Mail, Moon, Sun, User } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, User, AlertCircle, CheckCircle, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -91,9 +91,10 @@ const Register: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative"
-         style={{ background: 'var(--gradient-primary)' }}>
+      style={{ background: 'var(--gradient-primary)' }}>
       {/* 主题切换按钮 */}
       <button
+        type="button"
         onClick={toggleTheme}
         className="fixed top-6 right-6 z-50 p-3 rounded-full transition-all duration-300 hover:scale-110"
         style={{
@@ -110,18 +111,18 @@ const Register: React.FC = () => {
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <div className="w-16 h-16 rounded-full flex items-center justify-center"
-                 style={{ background: 'var(--accent-primary)' }}>
+              style={{ background: 'var(--accent-primary)' }}>
               <User className="w-8 h-8 text-white" />
             </div>
           </div>
           <h1 className="text-4xl font-bold mb-2"
-              style={{
-                background: 'var(--text-gradient, linear-gradient(135deg, #1e293b 0%, #475569 100%))',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                color: 'var(--text-primary)'
-              }}>
+            style={{
+              background: 'var(--text-gradient, linear-gradient(135deg, #1e293b 0%, #475569 100%))',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              color: 'var(--text-primary)'
+            }}>
             Test Web App
           </h1>
           <p className="text-lg" style={{ color: 'var(--text-secondary)' }}>专业的网站测试平台</p>
@@ -134,13 +135,13 @@ const Register: React.FC = () => {
           <p className="text-base" style={{ color: 'var(--text-secondary)' }}>
             已有账户？{' '}
             <Link to="/login"
-                  className="font-semibold hover:underline transition-colors duration-200"
-                  style={{
-                    background: 'var(--link-gradient, linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%))',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text'
-                  }}>
+              className="font-semibold hover:underline transition-colors duration-200"
+              style={{
+                background: 'var(--link-gradient, linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%))',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}>
               立即登录
             </Link>
           </p>
@@ -149,19 +150,19 @@ const Register: React.FC = () => {
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="backdrop-blur-xl rounded-3xl border p-8 sm:p-10"
-             style={{
-               background: 'var(--card-background)',
-               boxShadow: 'var(--card-shadow, 0 25px 50px -12px rgba(0, 0, 0, 0.25))',
-               borderColor: 'var(--border-color)'
-             }}>
+          style={{
+            background: 'var(--card-background)',
+            boxShadow: 'var(--card-shadow, 0 25px 50px -12px rgba(0, 0, 0, 0.25))',
+            borderColor: 'var(--border-color)'
+          }}>
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
               <div className="rounded-2xl p-4 flex items-start space-x-3"
-                   style={{
-                     background: 'var(--error-background)',
-                     border: '1px solid var(--error-border)',
-                     color: 'var(--error-text)'
-                   }}>
+                style={{
+                  background: 'var(--error-background)',
+                  border: '1px solid var(--error-border)',
+                  color: 'var(--error-text)'
+                }}>
                 <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                 <p className="text-sm font-medium">{error}</p>
               </div>
@@ -169,7 +170,7 @@ const Register: React.FC = () => {
 
             <div>
               <label htmlFor="username" className="block text-sm font-medium mb-2"
-                     style={{ color: 'var(--text-secondary)' }}>
+                style={{ color: 'var(--text-secondary)' }}>
                 用户名
               </label>
               <div className="relative">
@@ -205,7 +206,7 @@ const Register: React.FC = () => {
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium mb-2"
-                     style={{ color: 'var(--text-secondary)' }}>
+                style={{ color: 'var(--text-secondary)' }}>
                 邮箱地址
               </label>
               <div className="relative">
@@ -280,10 +281,9 @@ const Register: React.FC = () => {
                   </div>
                   <div className="mt-1 w-full bg-gray-200 rounded-full h-1">
                     <div
-                      className={`h-1 rounded-full transition-all ${
-                        passwordStrength <= 2 ? 'bg-red-500' : 
-                        passwordStrength <= 3 ? 'bg-yellow-500' : 'bg-green-500'
-                      }`}
+                      className={`h-1 rounded-full transition-all ${passwordStrength <= 2 ? 'bg-red-500' :
+                          passwordStrength <= 3 ? 'bg-yellow-500' : 'bg-green-500'
+                        }`}
                       style={{ width: `${(passwordStrength / 5) * 100}%` }}
                     />
                   </div>
@@ -364,9 +364,8 @@ const Register: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-                  isLoading ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+                className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
               >
                 {isLoading ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>

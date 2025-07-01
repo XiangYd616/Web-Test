@@ -2,14 +2,24 @@
  * 增强的压力测试图表组件 - 支持空间复用、多Y轴、动态缩放等专业功能
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import { Clock, RotateCcw, TrendingUp, Users } from 'lucide-react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
-  ComposedChart, LineChart, BarChart, PieChart, Pie, Cell,
-  Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-  ResponsiveContainer, Brush, ReferenceLine, ReferenceArea,
-  ScatterChart, Scatter
+  Bar,
+  BarChart,
+  Brush,
+  CartesianGrid,
+  Cell,
+  ComposedChart,
+  Legend,
+  Line,
+  Pie,
+  PieChart,
+  ReferenceArea,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis, YAxis
 } from 'recharts';
-import { ZoomIn, ZoomOut, RotateCcw, Settings, TrendingUp, AlertTriangle, Users, Clock } from 'lucide-react';
 
 // 测试阶段定义
 interface TestPhase {
@@ -59,26 +69,26 @@ interface BaselineData {
 interface EnhancedStressTestChartsProps {
   // 实时数据（测试进行中）
   realTimeData?: EnhancedRealTimeData[];
-  
+
   // 测试结果数据（测试完成后）
   testResultData?: TestResultData[];
-  
+
   // 当前状态
   isRunning: boolean;
   testCompleted: boolean;
-  
+
   // 基线对比数据
   baselineData?: BaselineData[];
-  
+
   // 测试阶段
   testPhases?: TestPhase[];
-  
+
   // 配置选项
   height?: number;
   enableZoom?: boolean;
   dataPointDensity?: 'low' | 'medium' | 'high';
   showAdvancedMetrics?: boolean;
-  
+
   // 当前测试指标
   currentMetrics?: {
     totalRequests: number;
@@ -113,7 +123,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
   // 状态管理
   const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['responseTime', 'throughput', 'activeUsers']);
   const [chartType, setChartType] = useState<'realtime' | 'results' | 'comparison' | 'distribution'>('realtime');
-  const [zoomDomain, setZoomDomain] = useState<{left?: number, right?: number}>({});
+  const [zoomDomain, setZoomDomain] = useState<{ left?: number, right?: number }>({});
   const [showErrorBreakdown, setShowErrorBreakdown] = useState(false);
   const [densityControl, setDensityControl] = useState(dataPointDensity);
 
@@ -138,35 +148,35 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
   // 响应时间分布数据
   const responseTimeDistribution = useMemo(() => {
     if (!processedData.length) return [];
-    
+
     const bins = 20;
     const responseTimes = processedData.map(d => d.responseTime);
     const min = Math.min(...responseTimes);
     const max = Math.max(...responseTimes);
     const binSize = (max - min) / bins;
-    
+
     const distribution = Array.from({ length: bins }, (_, i) => ({
       range: `${Math.round(min + i * binSize)}-${Math.round(min + (i + 1) * binSize)}ms`,
       count: 0,
       percentage: 0
     }));
-    
+
     responseTimes.forEach(time => {
       const binIndex = Math.min(Math.floor((time - min) / binSize), bins - 1);
       distribution[binIndex].count++;
     });
-    
+
     distribution.forEach(bin => {
       bin.percentage = (bin.count / responseTimes.length) * 100;
     });
-    
+
     return distribution;
   }, [processedData]);
 
   // 错误类型分布数据
   const errorTypeDistribution = useMemo(() => {
     if (!currentMetrics?.errorBreakdown) return [];
-    
+
     return Object.entries(currentMetrics.errorBreakdown).map(([type, count]) => ({
       name: type,
       value: count,
@@ -187,18 +197,18 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
   const renderRealTimeChart = () => (
     <ComposedChart data={processedData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
       <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-      <XAxis 
-        dataKey="timestamp" 
-        stroke="#9CA3AF" 
+      <XAxis
+        dataKey="timestamp"
+        stroke="#9CA3AF"
         fontSize={12}
         tickFormatter={(value) => new Date(value).toLocaleTimeString()}
       />
       <YAxis yAxisId="left" stroke="#9CA3AF" fontSize={12} />
       <YAxis yAxisId="right" orientation="right" stroke="#9CA3AF" fontSize={12} />
-      
-      <Tooltip 
-        contentStyle={{ 
-          backgroundColor: '#1F2937', 
+
+      <Tooltip
+        contentStyle={{
+          backgroundColor: '#1F2937',
           border: '1px solid #374151',
           borderRadius: '8px',
           color: '#F9FAFB'
@@ -206,16 +216,16 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
         labelFormatter={(value) => new Date(value).toLocaleString()}
       />
       <Legend />
-      
+
       {enableZoom && (
-        <Brush 
-          dataKey="timestamp" 
-          height={30} 
+        <Brush
+          dataKey="timestamp"
+          height={30}
           stroke="#3B82F6"
           tickFormatter={(value) => new Date(value).toLocaleTimeString()}
         />
       )}
-      
+
       {/* 测试阶段标注 */}
       {testPhases.map((phase, index) => (
         <ReferenceArea
@@ -228,7 +238,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
           label={phase.name}
         />
       ))}
-      
+
       {/* 多Y轴指标线 */}
       {selectedMetrics.includes('responseTime') && (
         <Line
@@ -241,7 +251,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
           name="响应时间 (ms)"
         />
       )}
-      
+
       {selectedMetrics.includes('throughput') && (
         <Bar
           yAxisId="right"
@@ -251,7 +261,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
           opacity={0.7}
         />
       )}
-      
+
       {selectedMetrics.includes('activeUsers') && (
         <Line
           yAxisId="right"
@@ -272,9 +282,9 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
       <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
       <XAxis dataKey="range" stroke="#9CA3AF" fontSize={12} />
       <YAxis stroke="#9CA3AF" fontSize={12} />
-      <Tooltip 
-        contentStyle={{ 
-          backgroundColor: '#1F2937', 
+      <Tooltip
+        contentStyle={{
+          backgroundColor: '#1F2937',
           border: '1px solid #374151',
           borderRadius: '8px',
           color: '#F9FAFB'
@@ -287,7 +297,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
   // 渲染错误类型分布饼图
   const renderErrorBreakdownChart = () => {
     const COLORS = ['#EF4444', '#F59E0B', '#8B5CF6', '#06B6D4', '#84CC16'];
-    
+
     return (
       <PieChart margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
         <Pie
@@ -323,12 +333,12 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
             ].map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
+                type="button"
                 onClick={() => setChartType(key as any)}
-                className={`px-3 py-1 rounded text-sm flex items-center gap-1 transition-colors ${
-                  chartType === key
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                }`}
+                className={`px-3 py-1 rounded text-sm flex items-center gap-1 transition-colors ${chartType === key
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
               >
                 <Icon className="w-4 h-4" />
                 {label}
@@ -336,10 +346,11 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
             ))}
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2">
           {enableZoom && (
             <button
+              type="button"
               onClick={resetZoom}
               className="px-3 py-1 bg-gray-700 text-gray-300 rounded text-sm hover:bg-gray-600 flex items-center gap-1"
             >
@@ -347,11 +358,14 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
               重置缩放
             </button>
           )}
-          
+
           <select
+            id="chart-density-select"
             value={densityControl}
             onChange={(e) => setDensityControl(e.target.value as any)}
             className="px-3 py-1 bg-gray-700 text-gray-300 rounded text-sm"
+            aria-label="选择图表数据密度"
+            title="数据密度控制"
           >
             <option value="low">低密度</option>
             <option value="medium">中密度</option>
@@ -363,9 +377,18 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
       {/* 图表区域 */}
       <div className="bg-gray-800/50 rounded-lg p-4" style={{ height: `${height}px` }}>
         <ResponsiveContainer width="100%" height="100%">
-          {chartType === 'realtime' && renderRealTimeChart()}
-          {chartType === 'distribution' && renderDistributionChart()}
-          {chartType === 'results' && renderRealTimeChart()}
+          {(() => {
+            switch (chartType) {
+              case 'realtime':
+                return renderRealTimeChart();
+              case 'distribution':
+                return renderDistributionChart();
+              case 'results':
+                return renderRealTimeChart();
+              default:
+                return renderRealTimeChart();
+            }
+          })()}
         </ResponsiveContainer>
       </div>
 

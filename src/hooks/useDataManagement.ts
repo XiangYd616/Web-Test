@@ -1,5 +1,38 @@
-import { useState, useEffect, useCallback } from 'react';
-import { advancedDataManager, DataRecord, DataQuery, DataAnalytics, DataBackup, DataSyncConfig } from '../services/advancedDataManager';
+import { useCallback, useEffect, useState } from 'react';
+import { DataBackup, DataQuery, DataRecord, advancedDataManager } from '../services/advancedDataService';
+
+// 临时类型定义，直到这些类型被正式添加到服务中
+interface DataAnalytics {
+  summary: {
+    totalRecords: number;
+    recordsByType: Record<string, number>;
+    dateRange: {
+      earliest: string;
+      latest: string;
+    };
+  };
+  trends: Array<{
+    period: string;
+    count: number;
+    growth: number;
+  }>;
+}
+
+interface DataSyncConfig {
+  id: string;
+  name: string;
+  enabled: boolean;
+  targets: Array<{
+    id: string;
+    name: string;
+    type: 'database' | 'api' | 'file';
+    config: any;
+  }>;
+  schedule: {
+    frequency: 'manual' | 'hourly' | 'daily' | 'weekly';
+    time?: string;
+  };
+}
 
 export interface UseDataManagementReturn {
   // 数据浏览
@@ -7,46 +40,46 @@ export interface UseDataManagementReturn {
   totalRecords: number;
   loading: boolean;
   error: string | null;
-  
+
   // 分析数据
   analytics: DataAnalytics | null;
   analyticsLoading: boolean;
-  
+
   // 备份管理
   backups: DataBackup[];
   backupsLoading: boolean;
-  
+
   // 同步配置
   syncConfig: DataSyncConfig | null;
   syncLoading: boolean;
-  
+
   // 查询和过滤
   query: DataQuery;
   setQuery: (query: DataQuery) => void;
-  
+
   // 数据操作
   loadData: () => Promise<void>;
   loadAnalytics: () => Promise<void>;
   loadBackups: () => Promise<void>;
   loadSyncConfig: () => Promise<void>;
-  
+
   createRecord: (type: string, data: any, metadata?: any) => Promise<DataRecord>;
   updateRecord: (id: string, data: any, metadata?: any) => Promise<DataRecord>;
   deleteRecord: (id: string) => Promise<boolean>;
   batchDelete: (ids: string[]) => Promise<void>;
-  
+
   // 备份操作
   createBackup: (config: any) => Promise<DataBackup>;
   restoreBackup: (backupId: string, options?: any) => Promise<{ taskId: string }>;
-  
+
   // 同步操作
   updateSyncConfig: (config: Partial<DataSyncConfig>) => Promise<DataSyncConfig>;
   triggerSync: (targetId?: string) => Promise<{ taskId: string }>;
-  
+
   // 导入导出
   exportData: (format: 'json' | 'csv' | 'xlsx', selectedIds?: string[]) => Promise<void>;
   importData: (file: File, config: any) => Promise<{ taskId: string }>;
-  
+
   // 数据验证和清理
   validateData: (query?: DataQuery) => Promise<any>;
   cleanupData: (config: any) => Promise<{ taskId: string }>;
@@ -58,16 +91,16 @@ export const useDataManagement = (): UseDataManagementReturn => {
   const [totalRecords, setTotalRecords] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [analytics, setAnalytics] = useState<DataAnalytics | null>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
-  
+
   const [backups, setBackups] = useState<DataBackup[]>([]);
   const [backupsLoading, setBackupsLoading] = useState(false);
-  
+
   const [syncConfig, setSyncConfig] = useState<DataSyncConfig | null>(null);
   const [syncLoading, setSyncLoading] = useState(false);
-  
+
   const [query, setQuery] = useState<DataQuery>({
     limit: 50,
     offset: 0,
@@ -79,7 +112,7 @@ export const useDataManagement = (): UseDataManagementReturn => {
   const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const result = await advancedDataManager.queryData(query);
       setRecords(result.data);
@@ -95,7 +128,7 @@ export const useDataManagement = (): UseDataManagementReturn => {
 
   const loadAnalytics = useCallback(async () => {
     setAnalyticsLoading(true);
-    
+
     try {
       const analyticsData = await advancedDataManager.getAnalytics();
       setAnalytics(analyticsData);
@@ -108,7 +141,7 @@ export const useDataManagement = (): UseDataManagementReturn => {
 
   const loadBackups = useCallback(async () => {
     setBackupsLoading(true);
-    
+
     try {
       const backupList = await advancedDataManager.getBackups();
       setBackups(backupList);
@@ -121,7 +154,7 @@ export const useDataManagement = (): UseDataManagementReturn => {
 
   const loadSyncConfig = useCallback(async () => {
     setSyncLoading(true);
-    
+
     try {
       const config = await advancedDataManager.getSyncConfig();
       setSyncConfig(config);
@@ -185,7 +218,7 @@ export const useDataManagement = (): UseDataManagementReturn => {
         type: 'delete' as const,
         id
       }));
-      
+
       await advancedDataManager.batchOperation(operations);
       await loadData(); // 重新加载数据
     } catch (err) {
@@ -246,10 +279,10 @@ export const useDataManagement = (): UseDataManagementReturn => {
   // 导入导出函数
   const exportData = useCallback(async (format: 'json' | 'csv' | 'xlsx', selectedIds?: string[]): Promise<void> => {
     try {
-      const exportQuery = selectedIds && selectedIds.length > 0 
+      const exportQuery = selectedIds && selectedIds.length > 0
         ? { ...query, ids: selectedIds }
         : query;
-        
+
       const result = await advancedDataManager.exportData({
         query: exportQuery,
         format,
@@ -272,7 +305,7 @@ export const useDataManagement = (): UseDataManagementReturn => {
 
   const importData = useCallback(async (file: File, config: any): Promise<{ taskId: string }> => {
     try {
-      const result = await advancedDataManager.importData(file, config);
+      const result = await advancedDataService.importData(file, config);
       await loadData(); // 重新加载数据
       return result;
     } catch (err) {
@@ -285,7 +318,7 @@ export const useDataManagement = (): UseDataManagementReturn => {
   // 数据验证和清理函数
   const validateData = useCallback(async (validateQuery?: DataQuery): Promise<any> => {
     try {
-      const result = await advancedDataManager.validateData(validateQuery);
+      const result = await advancedDataService.validateData(validateQuery);
       return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : '数据验证失败';
@@ -328,46 +361,46 @@ export const useDataManagement = (): UseDataManagementReturn => {
     totalRecords,
     loading,
     error,
-    
+
     // 分析数据
     analytics,
     analyticsLoading,
-    
+
     // 备份数据
     backups,
     backupsLoading,
-    
+
     // 同步配置
     syncConfig,
     syncLoading,
-    
+
     // 查询状态
     query,
     setQuery,
-    
+
     // 数据操作
     loadData,
     loadAnalytics,
     loadBackups,
     loadSyncConfig,
-    
+
     createRecord,
     updateRecord,
     deleteRecord,
     batchDelete,
-    
+
     // 备份操作
     createBackup,
     restoreBackup,
-    
+
     // 同步操作
     updateSyncConfig,
     triggerSync,
-    
+
     // 导入导出
     exportData,
     importData,
-    
+
     // 数据验证和清理
     validateData,
     cleanupData

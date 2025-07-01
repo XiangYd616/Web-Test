@@ -1,5 +1,5 @@
+import { ChevronDown, Filter, RefreshCw, Search } from 'lucide-react';
 import React, { useState } from 'react';
-import { Search, Filter, RefreshCw, ChevronDown } from 'lucide-react';
 import { FilterOptions } from '../../../hooks/useDataStorage';
 
 interface DataFiltersProps {
@@ -59,7 +59,7 @@ const DataFilters: React.FC<DataFiltersProps> = ({
     });
   };
 
-  const hasActiveFilters = filters.testType || filters.status || filters.dateRange || 
+  const hasActiveFilters = filters.testType || filters.status || filters.dateRange ||
     filters.searchQuery || filters.scoreRange[0] > 0 || filters.scoreRange[1] < 100;
 
   return (
@@ -79,10 +79,13 @@ const DataFilters: React.FC<DataFiltersProps> = ({
         </div>
 
         {/* 测试类型 */}
+        <label htmlFor="test-type-filter" className="sr-only">选择测试类型</label>
         <select
+          id="test-type-filter"
           value={filters.testType}
           onChange={(e) => handleFilterChange('testType', e.target.value)}
           className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          aria-label="选择测试类型"
         >
           {testTypes.map(type => (
             <option key={type.value} value={type.value}>{type.label}</option>
@@ -90,10 +93,13 @@ const DataFilters: React.FC<DataFiltersProps> = ({
         </select>
 
         {/* 状态 */}
+        <label htmlFor="status-filter" className="sr-only">选择状态</label>
         <select
+          id="status-filter"
           value={filters.status}
           onChange={(e) => handleFilterChange('status', e.target.value)}
           className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          aria-label="选择状态"
         >
           {statusOptions.map(status => (
             <option key={status.value} value={status.value}>{status.label}</option>
@@ -101,10 +107,13 @@ const DataFilters: React.FC<DataFiltersProps> = ({
         </select>
 
         {/* 时间范围 */}
+        <label htmlFor="date-range-filter" className="sr-only">选择时间范围</label>
         <select
+          id="date-range-filter"
           value={filters.dateRange}
           onChange={(e) => handleFilterChange('dateRange', e.target.value)}
           className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          aria-label="选择时间范围"
         >
           {dateRangeOptions.map(range => (
             <option key={range.value} value={range.value}>{range.label}</option>
@@ -115,9 +124,8 @@ const DataFilters: React.FC<DataFiltersProps> = ({
         <button
           type="button"
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
-            showAdvanced ? 'bg-blue-600 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
-          }`}
+          className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${showAdvanced ? 'bg-blue-600 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+            }`}
         >
           <Filter className="w-4 h-4" />
           <span>高级</span>
@@ -158,20 +166,24 @@ const DataFilters: React.FC<DataFiltersProps> = ({
               </label>
               <div className="flex items-center space-x-3">
                 <input
+                  id="score-range-min"
                   type="range"
                   min="0"
                   max="100"
                   value={filters.scoreRange[0]}
                   onChange={(e) => handleFilterChange('scoreRange', [parseInt(e.target.value), filters.scoreRange[1]])}
                   className="flex-1"
+                  aria-label="最小分数"
                 />
                 <input
+                  id="score-range-max"
                   type="range"
                   min="0"
                   max="100"
                   value={filters.scoreRange[1]}
                   onChange={(e) => handleFilterChange('scoreRange', [filters.scoreRange[0], parseInt(e.target.value)])}
                   className="flex-1"
+                  aria-label="最大分数"
                 />
               </div>
               <div className="flex justify-between text-xs text-gray-400 mt-1">

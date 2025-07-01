@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import React from 'react';
 import { Link, Outlet } from 'react-router-dom';
-import Navigation from './Navigation';
+import { ModernNavigation } from '../modern';
 
 interface LayoutProps {
   showFooter?: boolean;
@@ -76,7 +76,7 @@ const Layout: React.FC<LayoutProps> = ({ showFooter = true }) => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Navigation */}
-      <Navigation />
+      <ModernNavigation />
 
       {/* Main Content */}
       <main className="flex-1">
@@ -118,13 +118,28 @@ const Layout: React.FC<LayoutProps> = ({ showFooter = true }) => {
                   专业的网站测试平台，为开发者和企业提供全方位的网站性能、安全性和用户体验测试服务。
                 </p>
                 <div className="flex space-x-4">
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <a
+                    href="#"
+                    className="text-gray-400 hover:text-white transition-colors"
+                    aria-label="访问我们的GitHub"
+                    title="GitHub"
+                  >
                     <Github className="w-5 h-5" />
                   </a>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <a
+                    href="#"
+                    className="text-gray-400 hover:text-white transition-colors"
+                    aria-label="关注我们的Twitter"
+                    title="Twitter"
+                  >
                     <Twitter className="w-5 h-5" />
                   </a>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <a
+                    href="#"
+                    className="text-gray-400 hover:text-white transition-colors"
+                    aria-label="发送邮件联系我们"
+                    title="邮箱联系"
+                  >
                     <Mail className="w-5 h-5" />
                   </a>
                 </div>

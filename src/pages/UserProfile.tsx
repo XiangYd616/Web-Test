@@ -1,25 +1,25 @@
-import React, { useState, useEffect, useRef } from 'react';
 import {
-  User,
-  Calendar,
-  Edit,
-  Save,
-  X,
-  Camera,
-  Clock,
-  Key,
-  Trash2,
   AlertCircle,
+  Calendar,
+  Camera,
   CheckCircle,
-  Loader,
-  Globe,
+  Clock,
+  Edit,
   Github,
+  Globe,
+  Key,
+  Linkedin,
+  Loader,
+  Save,
+  Trash2,
   Twitter,
-  Linkedin
+  User,
+  X
 } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { userService, UserProfile, UserStats, UpdateProfileData } from '../services/userService';
 import { useTheme } from '../contexts/ThemeContext';
+import { UpdateProfileData, UserProfile, userService, UserStats } from '../services/user/userService';
 
 interface PasswordChangeForm {
   currentPassword: string;
@@ -31,7 +31,7 @@ const UserProfilePage: React.FC = () => {
   const { user } = useAuth();
   const { actualTheme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -41,8 +41,8 @@ const UserProfilePage: React.FC = () => {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  
-  
+
+
   // 表单数据
   const [formData, setFormData] = useState<UpdateProfileData>({});
   const [passwordForm, setPasswordForm] = useState<PasswordChangeForm>({
@@ -144,7 +144,7 @@ const UserProfilePage: React.FC = () => {
       setError(null);
 
       const avatarUrl = await userService.uploadAvatar(file);
-      
+
       if (profile) {
         setProfile({ ...profile, avatar: avatarUrl });
         setSuccess('头像已更新！');
@@ -211,9 +211,8 @@ const UserProfilePage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className={`min-h-screen flex items-center justify-center ${
-        actualTheme === 'light' ? 'bg-gray-50' : 'bg-gray-900'
-      }`}>
+      <div className={`min-h-screen flex items-center justify-center ${actualTheme === 'light' ? 'bg-gray-50' : 'bg-gray-900'
+        }`}>
         <div className="text-center">
           <Loader className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-500" />
           <p className={actualTheme === 'light' ? 'text-gray-600' : 'text-gray-400'}>
@@ -226,9 +225,8 @@ const UserProfilePage: React.FC = () => {
 
   if (!profile || !stats) {
     return (
-      <div className={`min-h-screen flex items-center justify-center ${
-        actualTheme === 'light' ? 'bg-gray-50' : 'bg-gray-900'
-      }`}>
+      <div className={`min-h-screen flex items-center justify-center ${actualTheme === 'light' ? 'bg-gray-50' : 'bg-gray-900'
+        }`}>
         <div className="text-center">
           <AlertCircle className="w-8 h-8 mx-auto mb-4 text-red-500" />
           <p className={actualTheme === 'light' ? 'text-gray-600' : 'text-gray-400'}>
@@ -247,9 +245,8 @@ const UserProfilePage: React.FC = () => {
   }
 
   return (
-    <div className={`min-h-screen ${
-      actualTheme === 'light' ? 'bg-gray-50' : 'bg-gray-900'
-    }`}>
+    <div className={`min-h-screen ${actualTheme === 'light' ? 'bg-gray-50' : 'bg-gray-900'
+      }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 消息提示 */}
         {error && (
@@ -285,32 +282,31 @@ const UserProfilePage: React.FC = () => {
         )}
 
         {/* 页面标题和头像 */}
-        <div className={`rounded-xl border p-6 mb-8 ${
-          actualTheme === 'light'
+        <div className={`rounded-xl border p-6 mb-8 ${actualTheme === 'light'
             ? 'bg-white border-gray-200'
             : 'bg-gray-800/50 backdrop-blur-sm border-gray-700/50'
-        }`}>
+          }`}>
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center space-x-6 mb-4 lg:mb-0">
               {/* 头像 */}
               <div className="relative">
                 <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center overflow-hidden">
                   {profile.avatar ? (
-                    <img 
-                      src={profile.avatar} 
-                      alt="Avatar" 
-                      className="w-full h-full object-cover" 
+                    <img
+                      src={profile.avatar}
+                      alt="Avatar"
+                      className="w-full h-full object-cover"
                     />
                   ) : (
                     <User className="w-10 h-10 text-white" />
                   )}
                 </div>
-                
+
                 {/* 头像操作按钮 */}
                 <div className="absolute -bottom-2 -right-2 flex space-x-1">
                   <button
                     type="button"
-            onClick={() => fileInputRef.current?.click()}
+                    onClick={() => fileInputRef.current?.click()}
                     disabled={uploadingAvatar}
                     className="p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors disabled:opacity-50"
                     title="上传头像"
@@ -321,19 +317,19 @@ const UserProfilePage: React.FC = () => {
                       <Camera className="w-3 h-3" />
                     )}
                   </button>
-                  
+
                   {profile.avatar && (
                     <button
                       onClick={handleDeleteAvatar}
                       disabled={uploadingAvatar}
                       className="p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors disabled:opacity-50"
                       title="删除头像"
-                     type="button">
+                      type="button">
                       <Trash2 className="w-3 h-3" />
                     </button>
                   )}
                 </div>
-                
+
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -347,17 +343,15 @@ const UserProfilePage: React.FC = () => {
 
               {/* 用户信息 */}
               <div>
-                <h1 className={`text-2xl font-bold ${
-                  actualTheme === 'light' ? 'text-gray-900' : 'text-white'
-                }`}>
+                <h1 className={`text-2xl font-bold ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'
+                  }`}>
                   {profile.fullName || profile.username}
                 </h1>
                 <p className={actualTheme === 'light' ? 'text-gray-600' : 'text-gray-300'}>
                   @{profile.username}
                 </p>
-                <div className={`flex items-center space-x-4 mt-2 text-sm ${
-                  actualTheme === 'light' ? 'text-gray-500' : 'text-gray-400'
-                }`}>
+                <div className={`flex items-center space-x-4 mt-2 text-sm ${actualTheme === 'light' ? 'text-gray-500' : 'text-gray-400'
+                  }`}>
                   <div className="flex items-center space-x-1">
                     <Calendar className="w-4 h-4" />
                     <span>加入于 {new Date(profile.createdAt).toLocaleDateString('zh-CN')}</span>
@@ -377,7 +371,7 @@ const UserProfilePage: React.FC = () => {
               {!isEditing ? (
                 <button
                   type="button"
-            onClick={() => setIsEditing(true)}
+                  onClick={() => setIsEditing(true)}
                   className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   <Edit className="w-4 h-4" />
@@ -389,7 +383,7 @@ const UserProfilePage: React.FC = () => {
                     onClick={handleSave}
                     disabled={saving}
                     className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
-                   type="button">
+                    type="button">
                     {saving ? (
                       <Loader className="w-4 h-4 animate-spin" />
                     ) : (
@@ -401,16 +395,16 @@ const UserProfilePage: React.FC = () => {
                     onClick={handleCancel}
                     disabled={saving}
                     className="flex items-center space-x-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50"
-                   type="button">
+                    type="button">
                     <X className="w-4 h-4" />
                     <span>取消</span>
                   </button>
                 </div>
               )}
-              
+
               <button
                 type="button"
-            onClick={() => setShowPasswordModal(true)}
+                onClick={() => setShowPasswordModal(true)}
                 className="flex items-center space-x-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
               >
                 <Key className="w-4 h-4" />
@@ -424,23 +418,20 @@ const UserProfilePage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* 左侧：个人资料表单 */}
           <div className="lg:col-span-2">
-            <div className={`rounded-xl border p-6 ${
-              actualTheme === 'light'
+            <div className={`rounded-xl border p-6 ${actualTheme === 'light'
                 ? 'bg-white border-gray-200'
                 : 'bg-gray-800/50 backdrop-blur-sm border-gray-700/50'
-            }`}>
-              <h2 className={`text-xl font-semibold mb-6 ${
-                actualTheme === 'light' ? 'text-gray-900' : 'text-white'
               }`}>
+              <h2 className={`text-xl font-semibold mb-6 ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'
+                }`}>
                 个人信息
               </h2>
 
               <div className="space-y-6">
                 {/* 全名 */}
                 <div>
-                  <label className={`block text-sm font-medium mb-2 ${
-                    actualTheme === 'light' ? 'text-gray-700' : 'text-gray-300'
-                  }`}>
+                  <label className={`block text-sm font-medium mb-2 ${actualTheme === 'light' ? 'text-gray-700' : 'text-gray-300'
+                    }`}>
                     全名
                   </label>
                   {isEditing ? (
@@ -448,11 +439,10 @@ const UserProfilePage: React.FC = () => {
                       type="text"
                       value={formData.fullName || ''}
                       onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        actualTheme === 'light'
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${actualTheme === 'light'
                           ? 'bg-white border-gray-300 text-gray-900'
                           : 'bg-gray-700 border-gray-600 text-white'
-                      }`}
+                        }`}
                       placeholder="请输入您的全名"
                     />
                   ) : (
@@ -464,9 +454,8 @@ const UserProfilePage: React.FC = () => {
 
                 {/* 邮箱 */}
                 <div>
-                  <label className={`block text-sm font-medium mb-2 ${
-                    actualTheme === 'light' ? 'text-gray-700' : 'text-gray-300'
-                  }`}>
+                  <label className={`block text-sm font-medium mb-2 ${actualTheme === 'light' ? 'text-gray-700' : 'text-gray-300'
+                    }`}>
                     邮箱地址
                   </label>
                   <div className="flex items-center space-x-2">
@@ -487,9 +476,8 @@ const UserProfilePage: React.FC = () => {
 
                 {/* 个人简介 */}
                 <div>
-                  <label className={`block text-sm font-medium mb-2 ${
-                    actualTheme === 'light' ? 'text-gray-700' : 'text-gray-300'
-                  }`}>
+                  <label className={`block text-sm font-medium mb-2 ${actualTheme === 'light' ? 'text-gray-700' : 'text-gray-300'
+                    }`}>
                     个人简介
                   </label>
                   {isEditing ? (
@@ -497,11 +485,10 @@ const UserProfilePage: React.FC = () => {
                       value={formData.bio || ''}
                       onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                       rows={3}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        actualTheme === 'light'
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${actualTheme === 'light'
                           ? 'bg-white border-gray-300 text-gray-900'
                           : 'bg-gray-700 border-gray-600 text-white'
-                      }`}
+                        }`}
                       placeholder="介绍一下您自己..."
                     />
                   ) : (
@@ -514,9 +501,8 @@ const UserProfilePage: React.FC = () => {
                 {/* 联系信息 */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className={`block text-sm font-medium mb-2 ${
-                      actualTheme === 'light' ? 'text-gray-700' : 'text-gray-300'
-                    }`}>
+                    <label className={`block text-sm font-medium mb-2 ${actualTheme === 'light' ? 'text-gray-700' : 'text-gray-300'
+                      }`}>
                       电话号码
                     </label>
                     {isEditing ? (
@@ -524,11 +510,10 @@ const UserProfilePage: React.FC = () => {
                         type="tel"
                         value={formData.phone || ''}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                          actualTheme === 'light'
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${actualTheme === 'light'
                             ? 'bg-white border-gray-300 text-gray-900'
                             : 'bg-gray-700 border-gray-600 text-white'
-                        }`}
+                          }`}
                         placeholder="+86 138****8888"
                       />
                     ) : (
@@ -539,9 +524,8 @@ const UserProfilePage: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className={`block text-sm font-medium mb-2 ${
-                      actualTheme === 'light' ? 'text-gray-700' : 'text-gray-300'
-                    }`}>
+                    <label className={`block text-sm font-medium mb-2 ${actualTheme === 'light' ? 'text-gray-700' : 'text-gray-300'
+                      }`}>
                       所在地区
                     </label>
                     {isEditing ? (
@@ -549,11 +533,10 @@ const UserProfilePage: React.FC = () => {
                         type="text"
                         value={formData.location || ''}
                         onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                          actualTheme === 'light'
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${actualTheme === 'light'
                             ? 'bg-white border-gray-300 text-gray-900'
                             : 'bg-gray-700 border-gray-600 text-white'
-                        }`}
+                          }`}
                         placeholder="北京, 中国"
                       />
                     ) : (
@@ -566,9 +549,8 @@ const UserProfilePage: React.FC = () => {
 
                 {/* 社交链接 */}
                 <div>
-                  <h3 className={`text-lg font-medium mb-4 ${
-                    actualTheme === 'light' ? 'text-gray-900' : 'text-white'
-                  }`}>
+                  <h3 className={`text-lg font-medium mb-4 ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'
+                    }`}>
                     社交链接
                   </h3>
                   <div className="space-y-4">
@@ -579,9 +561,8 @@ const UserProfilePage: React.FC = () => {
                       { key: 'linkedin', label: 'LinkedIn', icon: Linkedin, placeholder: 'username' }
                     ].map(({ key, label, icon: Icon, placeholder }) => (
                       <div key={key}>
-                        <label className={`block text-sm font-medium mb-2 ${
-                          actualTheme === 'light' ? 'text-gray-700' : 'text-gray-300'
-                        }`}>
+                        <label className={`block text-sm font-medium mb-2 ${actualTheme === 'light' ? 'text-gray-700' : 'text-gray-300'
+                          }`}>
                           <Icon className="w-4 h-4 inline mr-2" />
                           {label}
                         </label>
@@ -590,11 +571,10 @@ const UserProfilePage: React.FC = () => {
                             type="text"
                             value={(formData as any)[key] || ''}
                             onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
-                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                              actualTheme === 'light'
+                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${actualTheme === 'light'
                                 ? 'bg-white border-gray-300 text-gray-900'
                                 : 'bg-gray-700 border-gray-600 text-white'
-                            }`}
+                              }`}
                             placeholder={placeholder}
                           />
                         ) : (
@@ -613,14 +593,12 @@ const UserProfilePage: React.FC = () => {
           {/* 右侧：统计信息 */}
           <div className="space-y-6">
             {/* 用户统计 */}
-            <div className={`rounded-xl border p-6 ${
-              actualTheme === 'light'
+            <div className={`rounded-xl border p-6 ${actualTheme === 'light'
                 ? 'bg-white border-gray-200'
                 : 'bg-gray-800/50 backdrop-blur-sm border-gray-700/50'
-            }`}>
-              <h3 className={`text-lg font-semibold mb-4 ${
-                actualTheme === 'light' ? 'text-gray-900' : 'text-white'
               }`}>
+              <h3 className={`text-lg font-semibold mb-4 ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'
+                }`}>
                 测试统计
               </h3>
               <div className="space-y-4">
@@ -628,9 +606,8 @@ const UserProfilePage: React.FC = () => {
                   <span className={actualTheme === 'light' ? 'text-gray-600' : 'text-gray-400'}>
                     总测试数
                   </span>
-                  <span className={`font-semibold ${
-                    actualTheme === 'light' ? 'text-gray-900' : 'text-white'
-                  }`}>
+                  <span className={`font-semibold ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'
+                    }`}>
                     {stats.totalTests}
                   </span>
                 </div>
@@ -654,9 +631,8 @@ const UserProfilePage: React.FC = () => {
                   <span className={actualTheme === 'light' ? 'text-gray-600' : 'text-gray-400'}>
                     平均分数
                   </span>
-                  <span className={`font-semibold ${
-                    actualTheme === 'light' ? 'text-gray-900' : 'text-white'
-                  }`}>
+                  <span className={`font-semibold ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'
+                    }`}>
                     {stats.averageScore.toFixed(1)}
                   </span>
                 </div>
@@ -664,9 +640,8 @@ const UserProfilePage: React.FC = () => {
                   <span className={actualTheme === 'light' ? 'text-gray-600' : 'text-gray-400'}>
                     收藏测试
                   </span>
-                  <span className={`font-semibold ${
-                    actualTheme === 'light' ? 'text-gray-900' : 'text-white'
-                  }`}>
+                  <span className={`font-semibold ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'
+                    }`}>
                     {stats.favoriteTests}
                   </span>
                 </div>
@@ -674,14 +649,12 @@ const UserProfilePage: React.FC = () => {
             </div>
 
             {/* 账户安全 */}
-            <div className={`rounded-xl border p-6 ${
-              actualTheme === 'light'
+            <div className={`rounded-xl border p-6 ${actualTheme === 'light'
                 ? 'bg-white border-gray-200'
                 : 'bg-gray-800/50 backdrop-blur-sm border-gray-700/50'
-            }`}>
-              <h3 className={`text-lg font-semibold mb-4 ${
-                actualTheme === 'light' ? 'text-gray-900' : 'text-white'
               }`}>
+              <h3 className={`text-lg font-semibold mb-4 ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'
+                }`}>
                 账户安全
               </h3>
               <div className="space-y-4">
@@ -709,9 +682,8 @@ const UserProfilePage: React.FC = () => {
                   <span className={actualTheme === 'light' ? 'text-gray-600' : 'text-gray-400'}>
                     账户状态
                   </span>
-                  <span className={`text-sm ${
-                    profile.status === 'active' ? 'text-green-500' : 'text-red-500'
-                  }`}>
+                  <span className={`text-sm ${profile.status === 'active' ? 'text-green-500' : 'text-red-500'
+                    }`}>
                     {profile.status === 'active' ? '正常' : '异常'}
                   </span>
                 </div>
@@ -723,73 +695,65 @@ const UserProfilePage: React.FC = () => {
         {/* 修改密码模态框 */}
         {showPasswordModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className={`w-full max-w-md mx-4 rounded-xl border p-6 ${
-              actualTheme === 'light'
+            <div className={`w-full max-w-md mx-4 rounded-xl border p-6 ${actualTheme === 'light'
                 ? 'bg-white border-gray-200'
                 : 'bg-gray-800 border-gray-700'
-            }`}>
-              <h3 className={`text-lg font-semibold mb-4 ${
-                actualTheme === 'light' ? 'text-gray-900' : 'text-white'
               }`}>
+              <h3 className={`text-lg font-semibold mb-4 ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'
+                }`}>
                 修改密码
               </h3>
 
               <div className="space-y-4">
                 <div>
-                  <label className={`block text-sm font-medium mb-2 ${
-                    actualTheme === 'light' ? 'text-gray-700' : 'text-gray-300'
-                  }`}>
+                  <label className={`block text-sm font-medium mb-2 ${actualTheme === 'light' ? 'text-gray-700' : 'text-gray-300'
+                    }`}>
                     当前密码
                   </label>
                   <input
                     type="password"
                     value={passwordForm.currentPassword}
                     onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      actualTheme === 'light'
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${actualTheme === 'light'
                         ? 'bg-white border-gray-300 text-gray-900'
                         : 'bg-gray-700 border-gray-600 text-white'
-                    }`}
+                      }`}
                     aria-label="当前密码"
                     placeholder="请输入当前密码"
                   />
                 </div>
 
                 <div>
-                  <label className={`block text-sm font-medium mb-2 ${
-                    actualTheme === 'light' ? 'text-gray-700' : 'text-gray-300'
-                  }`}>
+                  <label className={`block text-sm font-medium mb-2 ${actualTheme === 'light' ? 'text-gray-700' : 'text-gray-300'
+                    }`}>
                     新密码
                   </label>
                   <input
                     type="password"
                     value={passwordForm.newPassword}
                     onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      actualTheme === 'light'
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${actualTheme === 'light'
                         ? 'bg-white border-gray-300 text-gray-900'
                         : 'bg-gray-700 border-gray-600 text-white'
-                    }`}
+                      }`}
                     aria-label="新密码"
                     placeholder="请输入新密码"
                   />
                 </div>
 
                 <div>
-                  <label className={`block text-sm font-medium mb-2 ${
-                    actualTheme === 'light' ? 'text-gray-700' : 'text-gray-300'
-                  }`}>
+                  <label className={`block text-sm font-medium mb-2 ${actualTheme === 'light' ? 'text-gray-700' : 'text-gray-300'
+                    }`}>
                     确认新密码
                   </label>
                   <input
                     type="password"
                     value={passwordForm.confirmPassword}
                     onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      actualTheme === 'light'
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${actualTheme === 'light'
                         ? 'bg-white border-gray-300 text-gray-900'
                         : 'bg-gray-700 border-gray-600 text-white'
-                    }`}
+                      }`}
                     aria-label="确认新密码"
                     placeholder="请再次输入新密码"
                   />
@@ -801,7 +765,7 @@ const UserProfilePage: React.FC = () => {
                   onClick={handlePasswordChange}
                   disabled={saving}
                   className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-                 type="button">
+                  type="button">
                   {saving ? (
                     <Loader className="w-4 h-4 animate-spin" />
                   ) : (
@@ -811,7 +775,7 @@ const UserProfilePage: React.FC = () => {
                 </button>
                 <button
                   type="button"
-            onClick={() => {
+                  onClick={() => {
                     setShowPasswordModal(false);
                     setPasswordForm({
                       currentPassword: '',

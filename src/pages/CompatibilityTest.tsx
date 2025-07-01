@@ -171,10 +171,10 @@ const CompatibilityTest: React.FC = () => {
                 onClick={handleStartTest}
                 disabled={!config.url}
                 className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition-all duration-200 ${!config.url
-                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                    : isAuthenticated
-                      ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-700 hover:to-purple-800'
-                      : 'bg-yellow-600 hover:bg-yellow-700 text-white border border-yellow-500/30'
+                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  : isAuthenticated
+                    ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-700 hover:to-purple-800'
+                    : 'bg-yellow-600 hover:bg-yellow-700 text-white border border-yellow-500/30'
                   }`}
               >
                 {isAuthenticated ? (
@@ -450,19 +450,19 @@ const CompatibilityTest: React.FC = () => {
                     浏览器兼容性详情
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {Object.entries(results.browserCompatibility || {}).map(([browser, score]) => (
+                    {Object.entries((results as any)?.browserCompatibility || {}).map(([browser, score]) => (
                       <div key={browser} className="bg-gray-700/50 rounded-lg p-4">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-sm font-medium text-gray-300">{browser}</span>
-                          <span className={`text-sm font-bold ${getScoreColor(score)}`}>
-                            {Math.round(score)}
+                          <span className={`text-sm font-bold ${getScoreColor(Number(score))}`}>
+                            {Math.round(Number(score))}
                           </span>
                         </div>
                         <div className="w-full bg-gray-600 rounded-full h-2">
                           <div
-                            className={`h-2 rounded-full ${getScoreBg(score).includes('green') ? 'bg-green-500' :
-                              getScoreBg(score).includes('yellow') ? 'bg-yellow-500' : 'bg-red-500'}`}
-                            style={{ width: `${Math.max(0, Math.min(100, score))}%` }}
+                            className={`h-2 rounded-full ${getScoreBg(Number(score)).includes('green') ? 'bg-green-500' :
+                              getScoreBg(Number(score)).includes('yellow') ? 'bg-yellow-500' : 'bg-red-500'}`}
+                            style={{ width: `${Math.max(0, Math.min(100, Number(score)))}%` }}
                           ></div>
                         </div>
                       </div>
@@ -477,7 +477,7 @@ const CompatibilityTest: React.FC = () => {
                     设备兼容性
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {Object.entries(results.deviceCompatibility || {}).map(([device, score]) => {
+                    {Object.entries((results as any)?.deviceCompatibility || {}).map(([device, score]) => {
                       const DeviceIcon = device === 'desktop' ? Monitor :
                         device === 'tablet' ? Tablet : Smartphone;
                       return (
@@ -490,15 +490,15 @@ const CompatibilityTest: React.FC = () => {
                                   device === 'tablet' ? '平板端' : '移动端'}
                               </span>
                             </div>
-                            <span className={`text-sm font-bold ${getScoreColor(score)}`}>
-                              {Math.round(score)}
+                            <span className={`text-sm font-bold ${getScoreColor(Number(score))}`}>
+                              {Math.round(Number(score))}
                             </span>
                           </div>
                           <div className="w-full bg-gray-600 rounded-full h-2">
                             <div
-                              className={`h-2 rounded-full ${getScoreBg(score).includes('green') ? 'bg-green-500' :
-                                getScoreBg(score).includes('yellow') ? 'bg-yellow-500' : 'bg-red-500'}`}
-                              style={{ width: `${Math.max(0, Math.min(100, score))}%` }}
+                              className={`h-2 rounded-full ${getScoreBg(Number(score)).includes('green') ? 'bg-green-500' :
+                                getScoreBg(Number(score)).includes('yellow') ? 'bg-yellow-500' : 'bg-red-500'}`}
+                              style={{ width: `${Math.max(0, Math.min(100, Number(score)))}%` }}
                             ></div>
                           </div>
                         </div>
@@ -517,8 +517,8 @@ const CompatibilityTest: React.FC = () => {
                     <div className="space-y-3">
                       {results.issues.slice(0, 10).map((issue, index) => (
                         <div key={index} className={`p-3 rounded-lg border-l-4 ${issue.severity === 'high' ? 'bg-red-900/20 border-red-500' :
-                            issue.severity === 'medium' ? 'bg-yellow-900/20 border-yellow-500' :
-                              'bg-blue-900/20 border-blue-500'
+                          issue.severity === 'medium' ? 'bg-yellow-900/20 border-yellow-500' :
+                            'bg-blue-900/20 border-blue-500'
                           }`}>
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
@@ -538,8 +538,8 @@ const CompatibilityTest: React.FC = () => {
                               <p className="text-sm text-gray-300">{issue.description}</p>
                             </div>
                             <span className={`text-xs px-2 py-1 rounded ${issue.severity === 'high' ? 'bg-red-600 text-white' :
-                                issue.severity === 'medium' ? 'bg-yellow-600 text-white' :
-                                  'bg-blue-600 text-white'
+                              issue.severity === 'medium' ? 'bg-yellow-600 text-white' :
+                                'bg-blue-600 text-white'
                               }`}>
                               {issue.severity === 'high' ? '严重' :
                                 issue.severity === 'medium' ? '中等' : '轻微'}
@@ -667,8 +667,8 @@ const CompatibilityTest: React.FC = () => {
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className={`px-2 py-1 rounded text-xs font-medium ${test.overallScore >= 80 ? 'bg-green-500/20 text-green-400' :
-                      test.overallScore >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
-                        'bg-red-500/20 text-red-400'
+                    test.overallScore >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
+                      'bg-red-500/20 text-red-400'
                     }`}>
                     {Math.round(test.overallScore)}分
                   </div>

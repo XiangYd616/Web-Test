@@ -26,8 +26,8 @@ import React, { useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { URLInput } from '../components/testing';
 import { useUserStats } from '../hooks/useUserStats';
-import type { APIEndpoint, APITestConfig } from '../services/apiTestEngine';
 import backgroundTestManager from '../services/BackgroundTestManager';
+import type { APIEndpoint, APITestConfig } from '../services/testing/apiTestEngine';
 import '../styles/progress-bars.css';
 
 // 认证配置类型定义
@@ -526,10 +526,10 @@ const APITest: React.FC = () => {
                 onClick={handleStartTest}
                 disabled={!testConfig.baseUrl || testConfig.endpoints.length === 0}
                 className={`btn btn-md flex items-center space-x-2 ${!testConfig.baseUrl || testConfig.endpoints.length === 0
-                    ? 'btn-disabled opacity-50 cursor-not-allowed'
-                    : isAuthenticated
-                      ? 'btn-primary hover:btn-primary-dark'
-                      : 'bg-yellow-600 hover:bg-yellow-700 text-white border border-yellow-500/30'
+                  ? 'btn-disabled opacity-50 cursor-not-allowed'
+                  : isAuthenticated
+                    ? 'btn-primary hover:btn-primary-dark'
+                    : 'bg-yellow-600 hover:bg-yellow-700 text-white border border-yellow-500/30'
                   }`}
               >
                 {isAuthenticated ? (
@@ -687,8 +687,8 @@ const APITest: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* 安全测试 */}
           <div className={`relative p-4 rounded-xl border-2 transition-all duration-300 cursor-pointer ${testConfig.testSecurity
-              ? 'border-red-500/50 bg-red-500/10 shadow-lg shadow-red-500/20'
-              : 'border-gray-600/50 bg-gray-700/30 hover:border-red-500/30 hover:bg-red-500/5'
+            ? 'border-red-500/50 bg-red-500/10 shadow-lg shadow-red-500/20'
+            : 'border-gray-600/50 bg-gray-700/30 hover:border-red-500/30 hover:bg-red-500/5'
             }`}
             onClick={() => setTestConfig(prev => ({ ...prev, testSecurity: !prev.testSecurity }))}>
             <div className="flex items-center space-x-3 mb-3">
@@ -700,8 +700,8 @@ const APITest: React.FC = () => {
                 <p className="text-xs text-gray-400">预计 3-5 分钟</p>
               </div>
               <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${testConfig.testSecurity
-                  ? 'border-red-500 bg-red-500'
-                  : 'border-gray-500 bg-transparent'
+                ? 'border-red-500 bg-red-500'
+                : 'border-gray-500 bg-transparent'
                 }`}>
                 {testConfig.testSecurity && <CheckCircle className="w-3 h-3 text-white" />}
               </div>
@@ -711,8 +711,8 @@ const APITest: React.FC = () => {
 
           {/* 性能测试 */}
           <div className={`relative p-4 rounded-xl border-2 transition-all duration-300 cursor-pointer ${testConfig.testPerformance
-              ? 'border-blue-500/50 bg-blue-500/10 shadow-lg shadow-blue-500/20'
-              : 'border-gray-600/50 bg-gray-700/30 hover:border-blue-500/30 hover:bg-blue-500/5'
+            ? 'border-blue-500/50 bg-blue-500/10 shadow-lg shadow-blue-500/20'
+            : 'border-gray-600/50 bg-gray-700/30 hover:border-blue-500/30 hover:bg-blue-500/5'
             }`}
             onClick={() => setTestConfig(prev => ({ ...prev, testPerformance: !prev.testPerformance }))}>
             <div className="flex items-center space-x-3 mb-3">
@@ -724,8 +724,8 @@ const APITest: React.FC = () => {
                 <p className="text-xs text-gray-400">预计 2-4 分钟</p>
               </div>
               <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${testConfig.testPerformance
-                  ? 'border-blue-500 bg-blue-500'
-                  : 'border-gray-500 bg-transparent'
+                ? 'border-blue-500 bg-blue-500'
+                : 'border-gray-500 bg-transparent'
                 }`}>
                 {testConfig.testPerformance && <CheckCircle className="w-3 h-3 text-white" />}
               </div>
@@ -735,8 +735,8 @@ const APITest: React.FC = () => {
 
           {/* 可靠性测试 */}
           <div className={`relative p-4 rounded-xl border-2 transition-all duration-300 cursor-pointer ${testConfig.testReliability
-              ? 'border-green-500/50 bg-green-500/10 shadow-lg shadow-green-500/20'
-              : 'border-gray-600/50 bg-gray-700/30 hover:border-green-500/30 hover:bg-green-500/5'
+            ? 'border-green-500/50 bg-green-500/10 shadow-lg shadow-green-500/20'
+            : 'border-gray-600/50 bg-gray-700/30 hover:border-green-500/30 hover:bg-green-500/5'
             }`}
             onClick={() => setTestConfig(prev => ({ ...prev, testReliability: !prev.testReliability }))}>
             <div className="flex items-center space-x-3 mb-3">
@@ -748,8 +748,8 @@ const APITest: React.FC = () => {
                 <p className="text-xs text-gray-400">预计 4-6 分钟</p>
               </div>
               <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${testConfig.testReliability
-                  ? 'border-green-500 bg-green-500'
-                  : 'border-gray-500 bg-transparent'
+                ? 'border-green-500 bg-green-500'
+                : 'border-gray-500 bg-transparent'
                 }`}>
                 {testConfig.testReliability && <CheckCircle className="w-3 h-3 text-white" />}
               </div>
@@ -759,8 +759,8 @@ const APITest: React.FC = () => {
 
           {/* 文档生成 */}
           <div className={`relative p-4 rounded-xl border-2 transition-all duration-300 cursor-pointer ${testConfig.generateDocumentation
-              ? 'border-purple-500/50 bg-purple-500/10 shadow-lg shadow-purple-500/20'
-              : 'border-gray-600/50 bg-gray-700/30 hover:border-purple-500/30 hover:bg-purple-500/5'
+            ? 'border-purple-500/50 bg-purple-500/10 shadow-lg shadow-purple-500/20'
+            : 'border-gray-600/50 bg-gray-700/30 hover:border-purple-500/30 hover:bg-purple-500/5'
             }`}
             onClick={() => setTestConfig(prev => ({ ...prev, generateDocumentation: !prev.generateDocumentation }))}>
             <div className="flex items-center space-x-3 mb-3">
@@ -772,8 +772,8 @@ const APITest: React.FC = () => {
                 <p className="text-xs text-gray-400">预计 1-2 分钟</p>
               </div>
               <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${testConfig.generateDocumentation
-                  ? 'border-purple-500 bg-purple-500'
-                  : 'border-gray-500 bg-transparent'
+                ? 'border-purple-500 bg-purple-500'
+                : 'border-gray-500 bg-transparent'
                 }`}>
                 {testConfig.generateDocumentation && <CheckCircle className="w-3 h-3 text-white" />}
               </div>
@@ -801,8 +801,8 @@ const APITest: React.FC = () => {
               type="button"
               onClick={() => setActiveTab(key as any)}
               className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${activeTab === key
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
                 }`}
             >
               <Icon className="w-4 h-4" />

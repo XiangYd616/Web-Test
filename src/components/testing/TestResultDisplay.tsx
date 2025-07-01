@@ -30,7 +30,7 @@ interface TestResult {
   [key: string]: any;
 }
 
-interface TestResultDisplayProps {
+export interface TestResultDisplayProps {
   result: TestResult;
   onViewDetails?: (result: TestResult) => void;
   onDownloadReport?: (result: TestResult) => void;
@@ -287,6 +287,7 @@ const TestResultDisplay: React.FC<TestResultDisplayProps> = ({
       <div className="flex items-center justify-end space-x-3 pt-4 border-t border-gray-700">
         {result.status === 'completed' && onViewDetails && (
           <button
+            type="button"
             onClick={() => onViewDetails(result)}
             className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
           >
@@ -297,6 +298,7 @@ const TestResultDisplay: React.FC<TestResultDisplayProps> = ({
 
         {result.status === 'completed' && onDownloadReport && (
           <button
+            type="button"
             onClick={() => onDownloadReport(result)}
             className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
           >
@@ -307,6 +309,7 @@ const TestResultDisplay: React.FC<TestResultDisplayProps> = ({
 
         {result.status === 'failed' && onRetry && (
           <button
+            type="button"
             onClick={() => onRetry(result)}
             className="flex items-center space-x-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors"
           >

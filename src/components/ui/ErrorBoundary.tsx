@@ -1,5 +1,5 @@
+import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
 import { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 
 interface Props {
   children: ReactNode;
@@ -26,7 +26,7 @@ class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
     this.setState({ error, errorInfo });
-    
+
     // 调用错误回调
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
@@ -57,11 +57,11 @@ class ErrorBoundary extends Component<Props, State> {
                 <AlertTriangle className="w-8 h-8 text-red-400" />
               </div>
             </div>
-            
+
             <h2 className="text-xl font-bold text-white mb-4">
               出现了一些问题
             </h2>
-            
+
             <p className="text-gray-300 mb-6">
               应用程序遇到了意外错误。我们已经记录了这个问题，请稍后重试。
             </p>
@@ -75,17 +75,19 @@ class ErrorBoundary extends Component<Props, State> {
                 </pre>
               </div>
             )}
-            
+
             <div className="flex flex-col sm:flex-row gap-3">
               <button
+                type="button"
                 onClick={this.handleRetry}
                 className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
               >
                 <RefreshCw className="w-4 h-4" />
                 <span>重试</span>
               </button>
-              
+
               <button
+                type="button"
                 onClick={this.handleGoHome}
                 className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
               >

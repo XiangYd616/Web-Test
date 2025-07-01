@@ -5,7 +5,7 @@ import {
   Target
 } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
-import { TestResult, TestType } from '../../services/unifiedTestEngine';
+import { TestResult, TestType } from '../../services/testing/unifiedTestEngine';
 import { ButtonFeedback } from '../integration/InteractiveFeedback';
 import { ErrorDisplay, useErrorHandler, useNotifications } from '../system/ErrorHandling';
 import { SmartLoader, useLoadingState } from '../ui/LoadingStates';

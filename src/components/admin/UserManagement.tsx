@@ -1,5 +1,5 @@
+import { Edit, Search, Shield, ShieldOff, Trash2, UserPlus, Users } from 'lucide-react';
 import React, { useState } from 'react';
-import { Users, UserPlus, Edit, Trash2, Shield, ShieldOff, Search } from 'lucide-react';
 
 interface User {
   id: string;
@@ -52,21 +52,21 @@ const UserManagement: React.FC = () => {
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase());
+      user.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = selectedRole === 'all' || user.role === selectedRole;
     const matchesStatus = selectedStatus === 'all' || user.status === selectedStatus;
-    
+
     return matchesSearch && matchesRole && matchesStatus;
   });
 
   const handleRoleChange = (userId: string, newRole: 'user' | 'admin') => {
-    setUsers(prev => prev.map(user => 
+    setUsers(prev => prev.map(user =>
       user.id === userId ? { ...user, role: newRole } : user
     ));
   };
 
   const handleStatusChange = (userId: string, newStatus: 'active' | 'inactive' | 'suspended') => {
-    setUsers(prev => prev.map(user => 
+    setUsers(prev => prev.map(user =>
       user.id === userId ? { ...user, status: newStatus } : user
     ));
   };
@@ -102,7 +102,7 @@ const UserManagement: React.FC = () => {
           <Users className="w-6 h-6 text-blue-600" />
           <h2 className="text-2xl font-bold text-gray-900">用户管理</h2>
         </div>
-        <button className="btn btn-primary flex items-center space-x-2">
+        <button type="button" className="btn btn-primary flex items-center space-x-2">
           <UserPlus className="w-4 h-4" />
           <span>添加用户</span>
         </button>
@@ -180,9 +180,11 @@ const UserManagement: React.FC = () => {
           </div>
 
           <select
+            id="role-filter-select"
             value={selectedRole}
             onChange={(e) => setSelectedRole(e.target.value as any)}
             className="input"
+            aria-label="按角色筛选用户"
           >
             <option value="all">所有角色</option>
             <option value="admin">管理员</option>
@@ -190,9 +192,11 @@ const UserManagement: React.FC = () => {
           </select>
 
           <select
+            id="status-filter-select"
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value as any)}
             className="input"
+            aria-label="按状态筛选用户"
           >
             <option value="all">所有状态</option>
             <option value="active">活跃</option>
@@ -248,8 +252,8 @@ const UserManagement: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(user.status)}`}>
-                      {user.status === 'active' ? '活跃' : 
-                       user.status === 'inactive' ? '非活跃' : '已暂停'}
+                      {user.status === 'active' ? '活跃' :
+                        user.status === 'inactive' ? '非活跃' : '已暂停'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -261,19 +265,28 @@ const UserManagement: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center space-x-2">
                       <button
+                        type="button"
                         onClick={() => handleRoleChange(user.id, user.role === 'admin' ? 'user' : 'admin')}
                         className="text-blue-600 hover:text-blue-900"
                         title={user.role === 'admin' ? '取消管理员' : '设为管理员'}
+                        aria-label={user.role === 'admin' ? '取消管理员权限' : '设为管理员'}
                       >
                         {user.role === 'admin' ? <ShieldOff className="w-4 h-4" /> : <Shield className="w-4 h-4" />}
                       </button>
-                      <button className="text-indigo-600 hover:text-indigo-900" title="编辑用户">
+                      <button
+                        type="button"
+                        className="text-indigo-600 hover:text-indigo-900"
+                        title="编辑用户"
+                        aria-label="编辑用户信息"
+                      >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
+                        type="button"
                         onClick={() => handleDeleteUser(user.id)}
                         className="text-red-600 hover:text-red-900"
                         title="删除用户"
+                        aria-label="删除用户"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

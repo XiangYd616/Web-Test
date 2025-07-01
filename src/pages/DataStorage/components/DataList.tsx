@@ -1,17 +1,17 @@
-import React from 'react';
-import { 
-  Eye, 
-  Edit, 
-  Copy, 
-  Trash2, 
+import {
+  Code,
+  Copy,
   Database,
+  Edit,
+  Eye,
   Globe,
   Shield,
-  Code,
+  Trash2,
   Wifi,
   Zap
 } from 'lucide-react';
-import { DataTable, Column } from '../../../components/shared';
+import React from 'react';
+import { Column, DataTable } from '../../../components/shared';
 import { TestRecord } from '../../../hooks/useDataStorage';
 
 interface DataListProps {
@@ -113,15 +113,14 @@ const DataList: React.FC<DataListProps> = ({
       sortable: true,
       width: '80px',
       render: (value) => (
-        <span className={`px-2 py-1 rounded text-xs font-medium ${
-          value === 'completed' ? 'bg-green-500/20 text-green-400' :
+        <span className={`px-2 py-1 rounded text-xs font-medium ${value === 'completed' ? 'bg-green-500/20 text-green-400' :
           value === 'failed' ? 'bg-red-500/20 text-red-400' :
-          value === 'running' ? 'bg-blue-500/20 text-blue-400' :
-          'bg-gray-500/20 text-gray-400'
-        }`}>
+            value === 'running' ? 'bg-blue-500/20 text-blue-400' :
+              'bg-gray-500/20 text-gray-400'
+          }`}>
           {value === 'completed' ? '完成' :
-           value === 'failed' ? '失败' :
-           value === 'running' ? '运行中' : value}
+            value === 'failed' ? '失败' :
+              value === 'running' ? '运行中' : value}
         </span>
       )
     },
@@ -160,7 +159,7 @@ const DataList: React.FC<DataListProps> = ({
       )
     },
     {
-      key: 'actions',
+      key: 'savedAt' as keyof TestRecord, // 使用不同的字段作为key避免重复
       title: '操作',
       width: '120px',
       align: 'center',
@@ -215,9 +214,9 @@ const DataList: React.FC<DataListProps> = ({
       columns={columns}
       data={records}
       loading={loading}
-      sortBy={sortBy === 'type' ? 'testType' : 
-             sortBy === 'score' ? 'overallScore' : 
-             sortBy === 'date' ? 'startTime' : sortBy}
+      sortBy={(sortBy === 'type' ? 'testType' :
+        sortBy === 'score' ? 'overallScore' :
+          sortBy === 'date' ? 'startTime' : 'id') as keyof TestRecord}
       sortOrder={sortOrder}
       onSort={handleSort}
       emptyText="没有找到匹配的测试记录"

@@ -1,34 +1,26 @@
-import React, { useState, useEffect } from 'react';
 import {
-  Database,
-  Search,
-  Filter,
-  Download,
-  Upload,
-  RefreshCw,
-  Settings,
+  Activity,
+  Archive,
   BarChart3,
-  Shield,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  Trash2,
+  Copy,
+  Database,
+  Download,
   Edit,
   Eye,
-  Copy,
-  Archive,
-  RotateCcw,
   FileText,
+  Filter,
   HardDrive,
-  Cloud,
-  Activity,
-  TrendingUp,
-  Users,
+  RefreshCw,
+  RotateCcw,
+  Search,
+  Settings,
+  Shield,
   TestTube,
-  Globe,
-  Zap
+  Trash2,
+  Users
 } from 'lucide-react';
-import { advancedDataManager, DataRecord, DataQuery, DataAnalytics } from '../../services/advancedDataManager';
+import React, { useEffect, useState } from 'react';
+import { advancedDataManager, DataAnalysisResult, DataQuery, DataRecord } from '../../services/advancedDataService';
 
 interface AdvancedDataManagerProps {
   className?: string;
@@ -37,14 +29,18 @@ interface AdvancedDataManagerProps {
 const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '' }) => {
   const [activeTab, setActiveTab] = useState<'browse' | 'analytics' | 'backup' | 'sync' | 'settings'>('browse');
   const [records, setRecords] = useState<DataRecord[]>([]);
-  const [analytics, setAnalytics] = useState<DataAnalytics | null>(null);
+  const [analytics, setAnalytics] = useState<DataAnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedRecords, setSelectedRecords] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState<DataQuery>({
-    limit: 50,
-    offset: 0,
-    sortBy: 'createdAt',
-    sortOrder: 'desc'
+    pagination: {
+      page: 1,
+      limit: 50
+    },
+    sort: {
+      field: 'createdAt',
+      order: 'desc'
+    }
   });
 
   const [showFilters, setShowFilters] = useState(false);
@@ -59,9 +55,10 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
     setLoading(true);
     try {
       const result = await advancedDataManager.queryData(query);
-      setRecords(result.data);
+      setRecords(result?.data || []);
     } catch (error) {
       console.error('Failed to load data:', error);
+      setRecords([]); // 确保在错误时设置为空数组
     } finally {
       setLoading(false);
     }
@@ -89,7 +86,10 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
     setQuery(prev => ({
       ...prev,
       ...filters,
-      offset: 0
+      pagination: {
+        ...prev.pagination,
+        page: 1
+      }
     }));
   };
 
@@ -105,7 +105,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
 
   const handleSelectAll = (selected: boolean) => {
     if (selected) {
-      setSelectedRecords(new Set(records.map(r => r.id)));
+      setSelectedRecords(new Set((records || []).map(r => r.id)));
     } else {
       setSelectedRecords(new Set());
     }
@@ -113,7 +113,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
 
   const handleBatchDelete = async () => {
     if (selectedRecords.size === 0) return;
-    
+
     if (!confirm(`确定要删除 ${selectedRecords.size} 条记录吗？此操作无法撤销。`)) {
       return;
     }
@@ -144,11 +144,15 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
         compression: true
       });
 
-      if (result.downloadUrl) {
-        window.open(result.downloadUrl, '_blank');
-      } else {
-        alert('导出任务已创建，请稍后在任务列表中查看进度');
-      }
+      // 创建下载链接
+      const url = URL.createObjectURL(result);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `data-export-${Date.now()}.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Failed to export data:', error);
       alert('导出失败，请稍后重试');
@@ -170,12 +174,12 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
     const units = ['B', 'KB', 'MB', 'GB'];
     let size = bytes;
     let unitIndex = 0;
-    
+
     while (size >= 1024 && unitIndex < units.length - 1) {
       size /= 1024;
       unitIndex++;
     }
-    
+
     return `${size.toFixed(1)} ${units[unitIndex]}`;
   };
 
@@ -192,17 +196,19 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
             <Database className="w-6 h-6 text-blue-400" />
             <h2 className="text-xl font-bold text-white">高级数据管理</h2>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <button
+              type="button"
               onClick={() => setShowFilters(!showFilters)}
               className="flex items-center space-x-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
             >
               <Filter className="w-4 h-4" />
               <span>过滤器</span>
             </button>
-            
+
             <button
+              type="button"
               onClick={loadData}
               className="flex items-center space-x-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
             >
@@ -223,12 +229,12 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
           ].map((tab) => (
             <button
               key={tab.id}
+              type="button"
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-                activeTab === tab.id
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white'
-              }`}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${activeTab === tab.id
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white'
+                }`}
             >
               <tab.icon className="w-4 h-4" />
               <span>{tab.label}</span>
@@ -254,13 +260,14 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
                     className="pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
-                
+
                 {selectedRecords.size > 0 && (
                   <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-300">
                       已选择 {selectedRecords.size} 项
                     </span>
                     <button
+                      type="button"
                       onClick={handleBatchDelete}
                       className="flex items-center space-x-1 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                     >
@@ -273,6 +280,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
 
               <div className="flex items-center space-x-2">
                 <button
+                  type="button"
                   onClick={() => handleExport('json')}
                   className="flex items-center space-x-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
                 >
@@ -287,11 +295,13 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
               <div className="bg-gray-700/30 rounded-lg p-4">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">数据类型</label>
+                    <label htmlFor="data-type-select" className="block text-sm font-medium text-gray-300 mb-2">数据类型</label>
                     <select
+                      id="data-type-select"
                       value={query.type || 'all'}
                       onChange={(e) => handleFilterChange({ type: e.target.value === 'all' ? undefined : e.target.value })}
                       className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-3 py-2"
+                      aria-label="选择数据类型"
                     >
                       <option value="all">全部类型</option>
                       <option value="test">测试数据</option>
@@ -303,11 +313,18 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">排序方式</label>
+                    <label htmlFor="sort-field-select" className="block text-sm font-medium text-gray-300 mb-2">排序方式</label>
                     <select
-                      value={query.sortBy || 'createdAt'}
-                      onChange={(e) => handleFilterChange({ sortBy: e.target.value })}
+                      id="sort-field-select"
+                      value={query.sort?.field || 'createdAt'}
+                      onChange={(e) => handleFilterChange({
+                        sort: {
+                          field: e.target.value,
+                          order: query.sort?.order || 'desc'
+                        }
+                      })}
                       className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-3 py-2"
+                      aria-label="选择排序方式"
                     >
                       <option value="createdAt">创建时间</option>
                       <option value="updatedAt">更新时间</option>
@@ -317,11 +334,18 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">排序顺序</label>
+                    <label htmlFor="sort-order-select" className="block text-sm font-medium text-gray-300 mb-2">排序顺序</label>
                     <select
-                      value={query.sortOrder || 'desc'}
-                      onChange={(e) => handleFilterChange({ sortOrder: e.target.value as 'asc' | 'desc' })}
+                      id="sort-order-select"
+                      value={query.sort?.order || 'desc'}
+                      onChange={(e) => handleFilterChange({
+                        sort: {
+                          field: query.sort?.field || 'createdAt',
+                          order: e.target.value as 'asc' | 'desc'
+                        }
+                      })}
                       className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-3 py-2"
+                      aria-label="选择排序顺序"
                     >
                       <option value="desc">降序</option>
                       <option value="asc">升序</option>
@@ -329,11 +353,18 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">每页显示</label>
+                    <label htmlFor="page-limit-select" className="block text-sm font-medium text-gray-300 mb-2">每页显示</label>
                     <select
-                      value={query.limit || 50}
-                      onChange={(e) => handleFilterChange({ limit: parseInt(e.target.value) })}
+                      id="page-limit-select"
+                      value={query.pagination?.limit || 50}
+                      onChange={(e) => handleFilterChange({
+                        pagination: {
+                          page: 1,
+                          limit: parseInt(e.target.value)
+                        }
+                      })}
                       className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-3 py-2"
+                      aria-label="选择每页显示数量"
                     >
                       <option value={25}>25 条</option>
                       <option value={50}>50 条</option>
@@ -352,11 +383,14 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
                   <thead className="bg-gray-700/50">
                     <tr>
                       <th className="px-4 py-3 text-left">
+                        <label className="sr-only" htmlFor="select-all-checkbox">全选/取消全选</label>
                         <input
+                          id="select-all-checkbox"
                           type="checkbox"
-                          checked={records.length > 0 && selectedRecords.size === records.length}
+                          checked={(records?.length || 0) > 0 && selectedRecords.size === (records?.length || 0)}
                           onChange={(e) => handleSelectAll(e.target.checked)}
                           className="rounded border-gray-600 bg-gray-700 text-blue-500"
+                          aria-label="全选或取消全选所有记录"
                         />
                       </th>
                       <th className="px-4 py-3 text-left text-sm font-medium text-gray-300">类型</th>
@@ -377,21 +411,24 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
                           </div>
                         </td>
                       </tr>
-                    ) : records.length === 0 ? (
+                    ) : (records?.length || 0) === 0 ? (
                       <tr>
                         <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
                           暂无数据
                         </td>
                       </tr>
                     ) : (
-                      records.map((record) => (
+                      (records || []).map((record) => (
                         <tr key={record.id} className="hover:bg-gray-700/20">
                           <td className="px-4 py-3">
+                            <label className="sr-only" htmlFor={`record-checkbox-${record.id}`}>选择记录 {record.id}</label>
                             <input
+                              id={`record-checkbox-${record.id}`}
                               type="checkbox"
                               checked={selectedRecords.has(record.id)}
                               onChange={(e) => handleRecordSelect(record.id, e.target.checked)}
                               className="rounded border-gray-600 bg-gray-700 text-blue-500"
+                              aria-label={`选择记录 ${record.id}`}
                             />
                           </td>
                           <td className="px-4 py-3">
@@ -404,7 +441,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
                             <span className="text-sm text-gray-300 font-mono">{record.id.slice(0, 8)}...</span>
                           </td>
                           <td className="px-4 py-3">
-                            <span className="text-sm text-gray-300">{formatSize(record.metadata.size)}</span>
+                            <span className="text-sm text-gray-300">{formatSize(JSON.stringify(record.data).length)}</span>
                           </td>
                           <td className="px-4 py-3">
                             <span className="text-sm text-gray-300">{formatDate(record.metadata.createdAt)}</span>
@@ -429,26 +466,34 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
                           <td className="px-4 py-3">
                             <div className="flex items-center space-x-2">
                               <button
+                                type="button"
                                 className="text-blue-400 hover:text-blue-300 p-1"
                                 title="查看详情"
+                                aria-label="查看详情"
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
                               <button
+                                type="button"
                                 className="text-green-400 hover:text-green-300 p-1"
                                 title="编辑"
+                                aria-label="编辑记录"
                               >
                                 <Edit className="w-4 h-4" />
                               </button>
                               <button
+                                type="button"
                                 className="text-gray-400 hover:text-gray-300 p-1"
                                 title="复制"
+                                aria-label="复制记录"
                               >
                                 <Copy className="w-4 h-4" />
                               </button>
                               <button
+                                type="button"
                                 className="text-red-400 hover:text-red-300 p-1"
                                 title="删除"
+                                aria-label="删除记录"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -473,7 +518,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
                   <Database className="w-8 h-8 text-blue-400" />
                   <div>
                     <p className="text-sm text-gray-400">总记录数</p>
-                    <p className="text-2xl font-bold text-white">{analytics.totalRecords.toLocaleString()}</p>
+                    <p className="text-2xl font-bold text-white">{analytics?.summary?.totalRecords?.toLocaleString() || 0}</p>
                   </div>
                 </div>
               </div>
@@ -483,8 +528,8 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
                   <HardDrive className="w-8 h-8 text-green-400" />
                   <div>
                     <p className="text-sm text-gray-400">存储使用</p>
-                    <p className="text-2xl font-bold text-white">{formatSize(analytics.storageUsage.used)}</p>
-                    <p className="text-xs text-gray-500">/ {formatSize(analytics.storageUsage.total)}</p>
+                    <p className="text-2xl font-bold text-white">{formatSize(0)}</p>
+                    <p className="text-xs text-gray-500">/ {formatSize(0)}</p>
                   </div>
                 </div>
               </div>
@@ -494,7 +539,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
                   <Activity className="w-8 h-8 text-yellow-400" />
                   <div>
                     <p className="text-sm text-gray-400">查询性能</p>
-                    <p className="text-2xl font-bold text-white">{analytics.performance.avgQueryTime}ms</p>
+                    <p className="text-2xl font-bold text-white">0ms</p>
                   </div>
                 </div>
               </div>
@@ -504,7 +549,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
                   <Shield className="w-8 h-8 text-purple-400" />
                   <div>
                     <p className="text-sm text-gray-400">数据质量</p>
-                    <p className="text-2xl font-bold text-white">{analytics.dataQuality.completeness}%</p>
+                    <p className="text-2xl font-bold text-white">{analytics?.summary?.dataQuality?.completeness || 0}%</p>
                   </div>
                 </div>
               </div>
@@ -514,7 +559,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
             <div className="bg-gray-700/30 rounded-lg p-6">
               <h3 className="text-lg font-semibold text-white mb-4">数据类型分布</h3>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                {Object.entries(analytics.recordsByType).map(([type, count]) => (
+                {Object.entries(analytics?.summary?.recordsByType || {}).map(([type, count]) => (
                   <div key={type} className="text-center">
                     <div className="flex justify-center mb-2">
                       {getTypeIcon(type)}

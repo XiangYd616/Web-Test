@@ -11,7 +11,11 @@ interface EngineStatus {
   errorMessage?: string;
 }
 
-const TestEngineStatus: React.FC<{ compact?: boolean }> = ({ compact = false }) => {
+export interface TestEngineStatusProps {
+  compact?: boolean;
+}
+
+const TestEngineStatus: React.FC<TestEngineStatusProps> = ({ compact = false }) => {
   const [engines, setEngines] = useState<EngineStatus[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastCheckTime, setLastCheckTime] = useState<number>(0);
@@ -259,6 +263,7 @@ const TestEngineStatus: React.FC<{ compact?: boolean }> = ({ compact = false }) 
           </div>
         ))}
         <button
+          type="button"
           onClick={checkEngineStatus}
           disabled={isRefreshing}
           className="p-1 rounded hover:bg-gray-100 transition-colors"
@@ -276,6 +281,7 @@ const TestEngineStatus: React.FC<{ compact?: boolean }> = ({ compact = false }) 
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-gray-900">测试引擎状态</h3>
         <button
+          type="button"
           onClick={checkEngineStatus}
           disabled={isRefreshing}
           className="flex items-center space-x-2 px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"

@@ -1,5 +1,5 @@
+import { Clock, Download, Filter, TestTube, TrendingUp, User } from 'lucide-react';
 import React, { useState } from 'react';
-import { TestTube, Calendar, User, Clock, TrendingUp, Filter, Download } from 'lucide-react';
 
 interface TestRecord {
   id: string;
@@ -125,7 +125,7 @@ const TestManagement: React.FC = () => {
           <TestTube className="w-6 h-6 text-green-600" />
           <h2 className="text-2xl font-bold text-gray-900">测试管理</h2>
         </div>
-        <button className="btn btn-primary flex items-center space-x-2">
+        <button type="button" className="btn btn-primary flex items-center space-x-2">
           <Download className="w-4 h-4" />
           <span>导出报告</span>
         </button>
@@ -188,14 +188,16 @@ const TestManagement: React.FC = () => {
           <Filter className="w-5 h-5 text-gray-600" />
           <span className="text-lg font-medium text-gray-900">筛选条件</span>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">测试类型</label>
+            <label htmlFor="test-type-select" className="block text-sm font-medium text-gray-700 mb-2">测试类型</label>
             <select
+              id="test-type-select"
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value as any)}
               className="input"
+              aria-label="选择测试类型"
             >
               <option value="all">所有类型</option>
               <option value="stress">压力测试</option>
@@ -206,11 +208,13 @@ const TestManagement: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">状态</label>
+            <label htmlFor="test-status-select" className="block text-sm font-medium text-gray-700 mb-2">状态</label>
             <select
+              id="test-status-select"
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value as any)}
               className="input"
+              aria-label="选择测试状态"
             >
               <option value="all">所有状态</option>
               <option value="completed">已完成</option>
@@ -220,11 +224,13 @@ const TestManagement: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">时间范围</label>
+            <label htmlFor="date-range-select" className="block text-sm font-medium text-gray-700 mb-2">时间范围</label>
             <select
+              id="date-range-select"
               value={dateRange}
               onChange={(e) => setDateRange(e.target.value)}
               className="input"
+              aria-label="选择时间范围"
             >
               <option value="today">今天</option>
               <option value="week">本周</option>
@@ -309,11 +315,11 @@ const TestManagement: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center space-x-2">
-                      <button className="text-blue-600 hover:text-blue-900">
+                      <button type="button" className="text-blue-600 hover:text-blue-900">
                         查看详情
                       </button>
                       {test.status === 'running' && (
-                        <button className="text-red-600 hover:text-red-900">
+                        <button type="button" className="text-red-600 hover:text-red-900">
                           停止
                         </button>
                       )}

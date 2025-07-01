@@ -11,7 +11,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import { TestTemplate, TestTemplateService } from '../../services/testTemplates';
 
-interface TestTemplateSelectorProps {
+export interface TestTemplateSelectorProps {
   onSelectTemplate: (template: TestTemplate) => void;
   selectedTemplateId?: string;
   testType?: string;

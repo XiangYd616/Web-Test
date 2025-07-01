@@ -1,36 +1,21 @@
-import React, { useState } from 'react';
 import {
-  Sun,
-  Moon,
-  Star,
-  Heart,
-  Shield,
-  Zap,
-  CheckCircle,
   AlertTriangle,
-  XCircle,
-  Info,
-  Download,
-  Share2,
-  Settings,
-  User,
-  Bell,
-  Search,
-  Filter,
-  Calendar,
   BarChart3,
-  TrendingUp,
-  Activity,
-  Database,
-  Server,
-  Globe,
-  Lock,
-  Eye,
+  CheckCircle,
+  Download,
+  Info,
+  Moon,
   Play,
-  Pause,
+  RefreshCw,
+  Search,
+  Settings,
   Square,
-  RefreshCw
+  Star,
+  Sun,
+  XCircle,
+  Zap
 } from 'lucide-react';
+import React, { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 
 const ThemeShowcase: React.FC = () => {
@@ -61,23 +46,23 @@ const ThemeShowcase: React.FC = () => {
             <span className="themed-text-secondary">当前主题:</span>
             <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
               <button
+                type="button"
                 onClick={() => setTheme('light')}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${
-                  actualTheme === 'light'
-                    ? 'bg-white shadow-md text-gray-900'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${actualTheme === 'light'
+                  ? 'bg-white shadow-md text-gray-900'
+                  : 'text-gray-600 hover:text-gray-900'
+                  }`}
               >
                 <Sun className="w-4 h-4" />
                 <span>浅色</span>
               </button>
               <button
+                type="button"
                 onClick={() => setTheme('dark')}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${
-                  actualTheme === 'dark'
-                    ? 'bg-gray-700 shadow-md text-white'
-                    : 'text-gray-400 hover:text-gray-200'
-                }`}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${actualTheme === 'dark'
+                  ? 'bg-gray-700 shadow-md text-white'
+                  : 'text-gray-400 hover:text-gray-200'
+                  }`}
               >
                 <Moon className="w-4 h-4" />
                 <span>深色</span>
@@ -97,11 +82,11 @@ const ThemeShowcase: React.FC = () => {
             { id: 'data', label: '数据展示', icon: BarChart3 }
           ].map((tab) => (
             <button
+              type="button"
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`tab-button flex items-center space-x-2 ${
-                activeTab === tab.id ? 'active' : ''
-              }`}
+              className={`tab-button flex items-center space-x-2 ${activeTab === tab.id ? 'active' : ''
+                }`}
             >
               <tab.icon className="w-4 h-4" />
               <span>{tab.label}</span>
@@ -145,8 +130,8 @@ const ThemeShowcase: React.FC = () => {
                       <span>{progress}%</span>
                     </div>
                     <div className="progress-bar h-3">
-                      <div 
-                        className="progress-fill" 
+                      <div
+                        className="progress-fill"
                         style={{ width: `${progress}%` }}
                       ></div>
                     </div>
@@ -230,7 +215,7 @@ const ThemeShowcase: React.FC = () => {
                     <Square className="w-4 h-4" />
                     <span>禁用按钮</span>
                   </button>
-                  <button 
+                  <button
                     onClick={simulateLoading}
                     className="themed-button-primary flex items-center justify-center space-x-2"
                     disabled={isLoading}

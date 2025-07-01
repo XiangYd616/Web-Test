@@ -1,17 +1,16 @@
-import React, { useState, useRef } from 'react';
 import {
-  Upload,
-  Download,
-  FileText,
-  Database,
-  CheckCircle,
   AlertTriangle,
+  CheckCircle,
   Clock,
-  X,
+  Database,
+  Download,
   File,
+  FileText,
   Folder,
-  Settings
+  Upload,
+  X
 } from 'lucide-react';
+import React, { useRef, useState } from 'react';
 
 interface ImportTask {
   id: string;
@@ -76,7 +75,7 @@ const ImportExport: React.FC = () => {
             clearInterval(uploadInterval);
             // 开始处理
             setTimeout(() => {
-              setImportTasks(prev => prev.map(t => 
+              setImportTasks(prev => prev.map(t =>
                 t.id === taskId ? { ...t, status: 'processing', progress: 0 } : t
               ));
               simulateProcessing(taskId);
@@ -149,7 +148,7 @@ const ImportExport: React.FC = () => {
   const simulateExport = (taskId: string) => {
     // 准备阶段
     setTimeout(() => {
-      setExportTasks(prev => prev.map(task => 
+      setExportTasks(prev => prev.map(task =>
         task.id === taskId ? { ...task, status: 'exporting', recordCount: Math.floor(Math.random() * 500) + 100 } : task
       ));
 
@@ -231,11 +230,10 @@ const ImportExport: React.FC = () => {
 
           {/* 文件上传区域 */}
           <div
-            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-              dragOver 
-                ? 'border-blue-500 bg-blue-500/10' 
-                : 'border-gray-600 hover:border-gray-500'
-            }`}
+            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragOver
+              ? 'border-blue-500 bg-blue-500/10'
+              : 'border-gray-600 hover:border-gray-500'
+              }`}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -243,6 +241,7 @@ const ImportExport: React.FC = () => {
             <Database className="w-12 h-12 text-gray-500 mx-auto mb-4" />
             <p className="text-gray-400 mb-4">拖拽文件到此处或点击选择文件</p>
             <button
+              type="button"
               onClick={() => fileInputRef.current?.click()}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
             >
@@ -255,6 +254,7 @@ const ImportExport: React.FC = () => {
               accept=".json,.csv,.xlsx"
               onChange={(e) => handleFileSelect(e.target.files)}
               className="hidden"
+              aria-label="选择要导入的文件"
             />
             <div className="text-sm text-gray-500 mt-4">
               支持格式：JSON, CSV, Excel (.xlsx)
@@ -281,19 +281,22 @@ const ImportExport: React.FC = () => {
                           {getStatusIcon(task.status)}
                           <span>
                             {task.status === 'uploading' ? '上传中' :
-                             task.status === 'processing' ? '处理中' :
-                             task.status === 'completed' ? '已完成' : '失败'}
+                              task.status === 'processing' ? '处理中' :
+                                task.status === 'completed' ? '已完成' : '失败'}
                           </span>
                         </span>
                         <button
+                          type="button"
                           onClick={() => removeTask(task.id, 'import')}
                           className="p-1 text-gray-400 hover:text-red-400 transition-colors"
+                          aria-label="删除导入任务"
+                          title="删除任务"
                         >
                           <X className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
-                    
+
                     {/* 进度条 */}
                     {(task.status === 'uploading' || task.status === 'processing') && (
                       <div className="mb-2">
@@ -302,7 +305,7 @@ const ImportExport: React.FC = () => {
                           <span>{Math.round(task.progress)}%</span>
                         </div>
                         <div className="w-full bg-gray-600 rounded-full h-2">
-                          <div 
+                          <div
                             className="bg-blue-500 h-2 rounded-full transition-all duration-300"
                             style={{ width: `${task.progress}%` }}
                           ></div>
@@ -316,7 +319,7 @@ const ImportExport: React.FC = () => {
                         成功导入 {task.recordsImported} 条记录
                       </div>
                     )}
-                    
+
                     {task.status === 'failed' && task.errors && (
                       <div className="text-red-400 text-sm">
                         <div>导入失败：</div>
@@ -342,6 +345,7 @@ const ImportExport: React.FC = () => {
               <h3 className="text-lg font-semibold text-white">数据导出</h3>
             </div>
             <button
+              type="button"
               onClick={() => setShowExportConfig(true)}
               className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
             >
@@ -353,6 +357,7 @@ const ImportExport: React.FC = () => {
           {/* 快速导出选项 */}
           <div className="grid grid-cols-1 gap-3 mb-6">
             <button
+              type="button"
               onClick={() => {
                 setExportConfig(prev => ({ ...prev, format: 'json' }));
                 setShowExportConfig(true);
@@ -370,6 +375,7 @@ const ImportExport: React.FC = () => {
             </button>
 
             <button
+              type="button"
               onClick={() => {
                 setExportConfig(prev => ({ ...prev, format: 'csv' }));
                 setShowExportConfig(true);
@@ -387,6 +393,7 @@ const ImportExport: React.FC = () => {
             </button>
 
             <button
+              type="button"
               onClick={() => {
                 setExportConfig(prev => ({ ...prev, format: 'excel' }));
                 setShowExportConfig(true);
@@ -426,24 +433,32 @@ const ImportExport: React.FC = () => {
                           {getStatusIcon(task.status)}
                           <span>
                             {task.status === 'preparing' ? '准备中' :
-                             task.status === 'exporting' ? '导出中' :
-                             task.status === 'completed' ? '已完成' : '失败'}
+                              task.status === 'exporting' ? '导出中' :
+                                task.status === 'completed' ? '已完成' : '失败'}
                           </span>
                         </span>
                         {task.status === 'completed' && task.downloadUrl && (
-                          <button className="p-1 text-green-400 hover:text-green-300 transition-colors">
+                          <button
+                            type="button"
+                            className="p-1 text-green-400 hover:text-green-300 transition-colors"
+                            aria-label="下载导出文件"
+                            title="下载文件"
+                          >
                             <Download className="w-4 h-4" />
                           </button>
                         )}
                         <button
+                          type="button"
                           onClick={() => removeTask(task.id, 'export')}
                           className="p-1 text-gray-400 hover:text-red-400 transition-colors"
+                          aria-label="删除导出任务"
+                          title="删除任务"
                         >
                           <X className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
-                    
+
                     {/* 进度条 */}
                     {(task.status === 'preparing' || task.status === 'exporting') && (
                       <div>
@@ -452,7 +467,7 @@ const ImportExport: React.FC = () => {
                           <span>{Math.round(task.progress)}%</span>
                         </div>
                         <div className="w-full bg-gray-600 rounded-full h-2">
-                          <div 
+                          <div
                             className="bg-green-500 h-2 rounded-full transition-all duration-300"
                             style={{ width: `${task.progress}%` }}
                           ></div>
@@ -474,33 +489,40 @@ const ImportExport: React.FC = () => {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-white">导出配置</h3>
               <button
+                type="button"
                 onClick={() => setShowExportConfig(false)}
                 className="p-1 text-gray-400 hover:text-white transition-colors"
+                aria-label="关闭导出配置对话框"
+                title="关闭"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">导出格式</label>
+                <label htmlFor="export-format-select" className="block text-sm font-medium text-gray-300 mb-2">导出格式</label>
                 <select
+                  id="export-format-select"
                   value={exportConfig.format}
                   onChange={(e) => setExportConfig(prev => ({ ...prev, format: e.target.value as any }))}
                   className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                  aria-label="选择导出格式"
                 >
                   <option value="json">JSON格式</option>
                   <option value="csv">CSV格式</option>
                   <option value="excel">Excel格式</option>
                 </select>
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">时间范围</label>
+                <label htmlFor="export-date-range-select" className="block text-sm font-medium text-gray-300 mb-2">时间范围</label>
                 <select
+                  id="export-date-range-select"
                   value={exportConfig.dateRange}
                   onChange={(e) => setExportConfig(prev => ({ ...prev, dateRange: e.target.value }))}
                   className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                  aria-label="选择导出时间范围"
                 >
                   <option value="7">最近7天</option>
                   <option value="30">最近30天</option>

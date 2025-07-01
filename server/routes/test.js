@@ -30,6 +30,93 @@ const realSEOTestEngine = new RealSEOTestEngine();
 const router = express.Router();
 
 /**
+ * 获取所有测试引擎状态
+ * GET /api/test-engines/status
+ */
+router.get('/status', asyncHandler(async (req, res) => {
+  const engines = ['k6', 'lighthouse', 'playwright', 'puppeteer'];
+  const engineStatuses = {};
+
+  for (const engine of engines) {
+    try {
+      let engineStatus = {
+        name: engine,
+        available: false,
+        version: 'unknown',
+        status: 'unavailable'
+      };
+
+      switch (engine) {
+        case 'k6':
+          try {
+            const { exec } = require('child_process');
+            const { promisify } = require('util');
+            const execAsync = promisify(exec);
+
+            const { stdout } = await execAsync('k6 version');
+            if (stdout) {
+              engineStatus.available = true;
+              engineStatus.version = stdout.trim().split(' ')[1] || 'unknown';
+              engineStatus.status = 'ready';
+            }
+          } catch (error) {
+            engineStatus.status = 'not_installed';
+          }
+          break;
+
+        case 'lighthouse':
+          try {
+            const lighthouse = require('lighthouse');
+            engineStatus.available = true;
+            engineStatus.version = require('lighthouse/package.json').version;
+            engineStatus.status = 'ready';
+          } catch (error) {
+            engineStatus.status = 'not_installed';
+          }
+          break;
+
+        case 'playwright':
+          try {
+            const { chromium } = require('playwright');
+            engineStatus.available = true;
+            engineStatus.version = require('playwright/package.json').version;
+            engineStatus.status = 'ready';
+          } catch (error) {
+            engineStatus.status = 'not_installed';
+          }
+          break;
+
+        case 'puppeteer':
+          try {
+            const puppeteer = require('puppeteer');
+            engineStatus.available = true;
+            engineStatus.version = require('puppeteer/package.json').version;
+            engineStatus.status = 'ready';
+          } catch (error) {
+            engineStatus.status = 'not_installed';
+          }
+          break;
+      }
+
+      engineStatuses[engine] = engineStatus;
+    } catch (error) {
+      engineStatuses[engine] = {
+        name: engine,
+        available: false,
+        version: 'unknown',
+        status: 'error',
+        error: error.message
+      };
+    }
+  }
+
+  res.json({
+    success: true,
+    data: engineStatuses
+  });
+}));
+
+/**
  * 获取测试历史记录 - 兼容性路由
  * GET /api/test-history (直接访问)
  */
@@ -37,6 +124,14 @@ router.get('/', authMiddleware, asyncHandler(async (req, res) => {
   // 如果是 /api/test-history 的直接访问，处理历史记录请求
   if (req.originalUrl.includes('/api/test-history')) {
     return handleTestHistory(req, res);
+  }
+
+  // 如果是 /api/test-engines 的访问，跳过这个路由
+  if (req.originalUrl.includes('/api/test-engines')) {
+    return res.status(404).json({
+      success: false,
+      message: '接口不存在'
+    });
   }
 
   // 否则返回API信息
@@ -770,6 +865,8 @@ router.delete('/:testId', authMiddleware, asyncHandler(async (req, res) => {
   }
 }));
 
+
+
 /**
  * 获取测试引擎状态
  * GET /api/test-engines/:engine/status
@@ -858,91 +955,6 @@ router.get('/:engine/status', asyncHandler(async (req, res) => {
   }
 }));
 
-/**
- * 获取所有测试引擎状态
- * GET /api/test-engines/status
- */
-router.get('/status', asyncHandler(async (req, res) => {
-  const engines = ['k6', 'lighthouse', 'playwright', 'puppeteer'];
-  const engineStatuses = {};
 
-  for (const engine of engines) {
-    try {
-      let engineStatus = {
-        name: engine,
-        available: false,
-        version: 'unknown',
-        status: 'unavailable'
-      };
-
-      switch (engine) {
-        case 'k6':
-          try {
-            const { exec } = require('child_process');
-            const { promisify } = require('util');
-            const execAsync = promisify(exec);
-
-            const { stdout } = await execAsync('k6 version');
-            if (stdout) {
-              engineStatus.available = true;
-              engineStatus.version = stdout.trim().split(' ')[1] || 'unknown';
-              engineStatus.status = 'ready';
-            }
-          } catch (error) {
-            engineStatus.status = 'not_installed';
-          }
-          break;
-
-        case 'lighthouse':
-          try {
-            const lighthouse = require('lighthouse');
-            engineStatus.available = true;
-            engineStatus.version = require('lighthouse/package.json').version;
-            engineStatus.status = 'ready';
-          } catch (error) {
-            engineStatus.status = 'not_installed';
-          }
-          break;
-
-        case 'playwright':
-          try {
-            const { chromium } = require('playwright');
-            engineStatus.available = true;
-            engineStatus.version = require('playwright/package.json').version;
-            engineStatus.status = 'ready';
-          } catch (error) {
-            engineStatus.status = 'not_installed';
-          }
-          break;
-
-        case 'puppeteer':
-          try {
-            const puppeteer = require('puppeteer');
-            engineStatus.available = true;
-            engineStatus.version = require('puppeteer/package.json').version;
-            engineStatus.status = 'ready';
-          } catch (error) {
-            engineStatus.status = 'not_installed';
-          }
-          break;
-      }
-
-      engineStatuses[engine] = engineStatus;
-    } catch (error) {
-      engineStatuses[engine] = {
-        name: engine,
-        available: false,
-        version: 'unknown',
-        status: 'error',
-        error: error.message
-      };
-    }
-  }
-
-  res.json({
-    success: true,
-    data: engineStatuses
-  });
-}));
 
 module.exports = router;

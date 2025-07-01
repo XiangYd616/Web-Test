@@ -1,22 +1,18 @@
-import React, { useState, useEffect } from 'react';
 import {
-  Calendar,
-  Clock,
-  Play,
-  Pause,
-  Trash2,
-  Plus,
-  Settings,
-  Bell,
-  BarChart3,
-  CheckCircle,
-  XCircle,
   AlertCircle,
+  BarChart3,
+  Calendar,
+  CheckCircle,
+  Clock,
+  Pause,
+  Play,
+  Plus,
   RefreshCw,
-  Edit,
-  Copy
+  Trash2,
+  XCircle
 } from 'lucide-react';
-import { testScheduler, ScheduledTest, TestExecution } from '../services/testScheduler';
+import React, { useEffect, useState } from 'react';
+import { ScheduledTest, TestExecution, testScheduler } from '../services/testing/testScheduler';
 
 const TestSchedule: React.FC = () => {
   const [schedules, setSchedules] = useState<ScheduledTest[]>([]);
@@ -29,12 +25,12 @@ const TestSchedule: React.FC = () => {
   const fetchSchedules = () => {
     const allSchedules = testScheduler.getAllSchedules();
     setSchedules(allSchedules);
-    
+
     if (selectedSchedule) {
       const history = testScheduler.getExecutionHistory(selectedSchedule, 20);
       setExecutions(history);
     }
-    
+
     setLoading(false);
   };
 
@@ -148,7 +144,7 @@ const TestSchedule: React.FC = () => {
           <div className="lg:col-span-2 space-y-4">
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
               <h3 className="text-lg font-semibold text-white mb-4">调度列表</h3>
-              
+
               {loading ? (
                 <div className="flex items-center justify-center py-8">
                   <RefreshCw className="w-6 h-6 animate-spin text-blue-400" />
@@ -171,11 +167,10 @@ const TestSchedule: React.FC = () => {
                   {schedules.map((schedule) => (
                     <div
                       key={schedule.id}
-                      className={`p-4 rounded-lg border cursor-pointer transition-all ${
-                        selectedSchedule === schedule.id
+                      className={`p-4 rounded-lg border cursor-pointer transition-all ${selectedSchedule === schedule.id
                           ? 'border-blue-500 bg-blue-500/10'
                           : 'border-gray-600 bg-gray-700/30 hover:bg-gray-700/50'
-                      }`}
+                        }`}
                       onClick={() => setSelectedSchedule(schedule.id)}
                     >
                       <div className="flex items-center justify-between mb-2">
@@ -226,7 +221,7 @@ const TestSchedule: React.FC = () => {
                           </button>
                         </div>
                       </div>
-                      
+
                       <div className="text-sm text-gray-400 space-y-1">
                         <div className="flex items-center space-x-4">
                           <div className="flex items-center space-x-1">
@@ -305,7 +300,7 @@ const TestSchedule: React.FC = () => {
                 {/* 执行历史 */}
                 <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
                   <h3 className="text-lg font-semibold text-white mb-4">执行历史</h3>
-                  
+
                   {executions.length === 0 ? (
                     <p className="text-gray-400 text-center py-4">暂无执行记录</p>
                   ) : (
@@ -354,7 +349,7 @@ const TestSchedule: React.FC = () => {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 w-full max-w-2xl mx-4">
               <h3 className="text-lg font-semibold text-white mb-4">创建测试调度</h3>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">调度名称</label>
@@ -364,7 +359,7 @@ const TestSchedule: React.FC = () => {
                     className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div>
                   <label htmlFor="test-type-select" className="block text-sm font-medium text-gray-300 mb-2">测试类型</label>
                   <select
@@ -378,7 +373,7 @@ const TestSchedule: React.FC = () => {
                     <option value="compatibility">兼容性测试</option>
                   </select>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="schedule-type-select" className="block text-sm font-medium text-gray-300 mb-2">调度类型</label>
@@ -406,7 +401,7 @@ const TestSchedule: React.FC = () => {
                     </select>
                   </div>
                 </div>
-                
+
                 <div>
                   <label htmlFor="start-time-input" className="block text-sm font-medium text-gray-300 mb-2">开始时间</label>
                   <input
@@ -417,7 +412,7 @@ const TestSchedule: React.FC = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-end space-x-3 mt-6">
                 <button
                   type="button"

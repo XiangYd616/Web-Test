@@ -1,26 +1,20 @@
-import React, { useState, useEffect } from 'react';
 import {
-  Archive,
-  Download,
-  Upload,
-  RefreshCw,
-  Calendar,
-  Clock,
-  CheckCircle,
   AlertCircle,
-  Trash2,
-  Settings,
-  HardDrive,
+  Archive,
+  CheckCircle,
+  Clock,
   Cloud,
-  Shield,
-  Zap,
+  HardDrive,
   Plus,
+  RefreshCw,
+  RotateCcw,
+  Shield,
+  Trash2,
   X,
-  Play,
-  Pause,
-  RotateCcw
+  Zap
 } from 'lucide-react';
-import { advancedDataManager, DataBackup } from '../../services/advancedDataManager';
+import React, { useEffect, useState } from 'react';
+import { advancedDataManager, DataBackup } from '../../services/advancedDataService';
 
 interface DataBackupManagerProps {
   className?: string;
@@ -153,12 +147,12 @@ const DataBackupManager: React.FC<DataBackupManagerProps> = ({ className = '' })
     const units = ['B', 'KB', 'MB', 'GB'];
     let size = bytes;
     let unitIndex = 0;
-    
+
     while (size >= 1024 && unitIndex < units.length - 1) {
       size /= 1024;
       unitIndex++;
     }
-    
+
     return `${size.toFixed(1)} ${units[unitIndex]}`;
   };
 
@@ -175,17 +169,19 @@ const DataBackupManager: React.FC<DataBackupManagerProps> = ({ className = '' })
             <Archive className="w-6 h-6 text-blue-400" />
             <h2 className="text-xl font-bold text-white">数据备份管理</h2>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <button
+              type="button"
               onClick={loadBackups}
               className="flex items-center space-x-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
             >
               <RefreshCw className="w-4 h-4" />
               <span>刷新</span>
             </button>
-            
+
             <button
+              type="button"
               onClick={() => setShowCreateModal(true)}
               className="flex items-center space-x-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
             >
@@ -208,6 +204,7 @@ const DataBackupManager: React.FC<DataBackupManagerProps> = ({ className = '' })
             <Archive className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-400 mb-4">暂无备份记录</p>
             <button
+              type="button"
               onClick={() => setShowCreateModal(true)}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
             >
@@ -265,9 +262,10 @@ const DataBackupManager: React.FC<DataBackupManagerProps> = ({ className = '' })
 
                   <div className="flex items-center space-x-3">
                     {getStatusIcon(backup.status)}
-                    
+
                     {backup.status === 'completed' && (
                       <button
+                        type="button"
                         onClick={() => handleRestoreBackup(backup)}
                         className="flex items-center space-x-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
                       >
@@ -275,10 +273,12 @@ const DataBackupManager: React.FC<DataBackupManagerProps> = ({ className = '' })
                         <span>恢复</span>
                       </button>
                     )}
-                    
+
                     <button
+                      type="button"
                       className="text-red-400 hover:text-red-300 p-2"
                       title="删除备份"
+                      aria-label="删除备份"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -305,8 +305,11 @@ const DataBackupManager: React.FC<DataBackupManagerProps> = ({ className = '' })
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-white">创建数据备份</h3>
               <button
+                type="button"
                 onClick={() => setShowCreateModal(false)}
                 className="text-gray-400 hover:text-gray-300"
+                aria-label="关闭创建备份对话框"
+                title="关闭"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -325,11 +328,13 @@ const DataBackupManager: React.FC<DataBackupManagerProps> = ({ className = '' })
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">备份类型</label>
+                <label htmlFor="backup-type-select" className="block text-sm font-medium text-gray-300 mb-2">备份类型</label>
                 <select
+                  id="backup-type-select"
                   value={createConfig.type}
                   onChange={(e) => setCreateConfig(prev => ({ ...prev, type: e.target.value as any }))}
                   className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  aria-label="选择备份类型"
                 >
                   <option value="full">完整备份</option>
                   <option value="incremental">增量备份</option>
@@ -369,11 +374,13 @@ const DataBackupManager: React.FC<DataBackupManagerProps> = ({ className = '' })
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">压缩方式</label>
+                <label htmlFor="compression-select" className="block text-sm font-medium text-gray-300 mb-2">压缩方式</label>
                 <select
+                  id="compression-select"
                   value={createConfig.compression}
                   onChange={(e) => setCreateConfig(prev => ({ ...prev, compression: e.target.value as any }))}
                   className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  aria-label="选择压缩方式"
                 >
                   <option value="none">无压缩</option>
                   <option value="gzip">GZIP 压缩</option>
@@ -396,14 +403,16 @@ const DataBackupManager: React.FC<DataBackupManagerProps> = ({ className = '' })
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">保留天数</label>
+                <label htmlFor="retention-days-input" className="block text-sm font-medium text-gray-300 mb-2">保留天数</label>
                 <input
+                  id="retention-days-input"
                   type="number"
                   value={createConfig.retentionDays}
                   onChange={(e) => setCreateConfig(prev => ({ ...prev, retentionDays: parseInt(e.target.value) || 30 }))}
                   min="1"
                   max="365"
                   className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  aria-label="设置备份保留天数"
                 />
               </div>
 
@@ -421,12 +430,14 @@ const DataBackupManager: React.FC<DataBackupManagerProps> = ({ className = '' })
 
             <div className="flex justify-end space-x-3 mt-6">
               <button
+                type="button"
                 onClick={() => setShowCreateModal(false)}
                 className="px-4 py-2 text-gray-300 border border-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
               >
                 取消
               </button>
               <button
+                type="button"
                 onClick={handleCreateBackup}
                 disabled={!createConfig.name.trim()}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
