@@ -1,0 +1,394 @@
+/**
+ * 专业级实时压力测试图表组件
+ * 解决耦合问题，提供真实数据展示，保持JMeter风格的专业外观
+ */
+
+import { BarChart3, Info, Settings, TrendingUp, Users, Zap } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+
+// 数据点接口
+interface StressTestDataPoint {
+  timestamp: number;
+  responseTime: number;
+  activeUsers: number;
+  throughput: number;
+  errorRate: number;
+  status: number;
+  success: boolean;
+  phase?: 'rampup' | 'steady' | 'rampdown';
+}
+
+// 图表配置接口
+interface ChartConfig {
+  showResponseTime: boolean;
+  showActiveUsers: boolean;
+  showErrorRate: boolean;
+  showThroughput: boolean;
+  timeWindow: number; // 显示的时间窗口（秒）
+  updateInterval: number; // 更新间隔（毫秒）
+}
+
+// 组件Props
+interface RealTimeStressChartProps {
+  data: StressTestDataPoint[];
+  isRunning: boolean;
+  testConfig?: {
+    users: number;
+    duration: number;
+    testType: string;
+  };
+  height?: number;
+  className?: string;
+  onConfigChange?: (config: ChartConfig) => void;
+}
+
+// 默认配置
+const defaultConfig: ChartConfig = {
+  showResponseTime: true,
+  showActiveUsers: true,
+  showErrorRate: true,
+  showThroughput: false,
+  timeWindow: 60,
+  updateInterval: 1000
+};
+
+export const RealTimeStressChart: React.FC<RealTimeStressChartProps> = ({
+  data,
+  isRunning,
+  testConfig,
+  height = 400,
+  className = '',
+  onConfigChange
+}) => {
+  const [config, setConfig] = useState<ChartConfig>(defaultConfig);
+  const [showSettings, setShowSettings] = useState(false);
+  const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; data: StressTestDataPoint } | null>(null);
+
+  // 处理配置变更
+  const handleConfigChange = (newConfig: Partial<ChartConfig>) => {
+    const updatedConfig = { ...config, ...newConfig };
+    setConfig(updatedConfig);
+    onConfigChange?.(updatedConfig);
+  };
+
+  // 计算图表数据
+  const chartData = useMemo(() => {
+    if (!data.length) return { points: [], scales: { x: [], y: [] } };
+
+    // 获取时间窗口内的数据
+    const now = Date.now();
+    const windowStart = now - (config.timeWindow * 1000);
+    const filteredData = data.filter(point => point.timestamp >= windowStart);
+
+    // 计算比例尺
+    const maxUsers = testConfig?.users || Math.max(...filteredData.map(d => d.activeUsers));
+    const maxResponseTime = Math.max(...filteredData.map(d => d.responseTime));
+    const maxThroughput = Math.max(...filteredData.map(d => d.throughput));
+
+    // 生成时间轴标签
+    const timeLabels = [];
+    for (let i = 0; i <= config.timeWindow; i += 10) {
+      timeLabels.push(`${i}s`);
+    }
+
+    return {
+      points: filteredData,
+      scales: {
+        x: timeLabels,
+        y: {
+          users: maxUsers,
+          responseTime: maxResponseTime,
+          throughput: maxThroughput
+        }
+      }
+    };
+  }, [data, config.timeWindow, testConfig]);
+
+  // 生成SVG路径
+  const generatePath = (dataKey: keyof StressTestDataPoint, scale: number) => {
+    if (!chartData.points.length) return '';
+
+    const chartWidth = 720; // SVG宽度减去边距
+    const chartHeight = 280; // SVG高度减去边距
+    const timeSpan = config.timeWindow * 1000;
+
+    const points = chartData.points.map((point, index) => {
+      const x = 60 + ((point.timestamp - (Date.now() - timeSpan)) / timeSpan) * chartWidth;
+      const value = point[dataKey] as number;
+      const y = chartHeight - 40 - ((value / scale) * (chartHeight - 80));
+      return `${index === 0 ? 'M' : 'L'} ${x},${y}`;
+    });
+
+    return points.join(' ');
+  };
+
+  // 当前指标计算
+  const currentMetrics = useMemo(() => {
+    if (!chartData.points.length) return null;
+
+    const latest = chartData.points[chartData.points.length - 1];
+    const recent = chartData.points.slice(-10); // 最近10个数据点
+
+    return {
+      activeUsers: latest.activeUsers,
+      avgResponseTime: recent.reduce((sum, p) => sum + p.responseTime, 0) / recent.length,
+      currentThroughput: recent.reduce((sum, p) => sum + p.throughput, 0) / recent.length,
+      errorRate: (recent.filter(p => !p.success).length / recent.length) * 100,
+      phase: latest.phase || 'steady'
+    };
+  }, [chartData.points]);
+
+  return (
+    <div className={`bg-gray-800/50 rounded-xl border border-gray-700/50 p-6 ${className}`}>
+      {/* 图表标题和控制 */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center space-x-3">
+          <TrendingUp className="w-6 h-6 text-blue-400" />
+          <h3 className="text-xl font-semibold text-white">Active Threads Over Time</h3>
+          {isRunning && (
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span className="text-sm text-green-300 font-medium">实时监控中</span>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setShowSettings(!showSettings)}
+            className={`p-2 rounded-lg transition-colors ${
+              showSettings ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+            title="图表设置"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* 设置面板 */}
+      {showSettings && (
+        <div className="mb-4 p-4 bg-gray-700/50 rounded-lg border border-gray-600/50">
+          <h4 className="text-sm font-medium text-gray-300 mb-3">图表配置</h4>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { key: 'showActiveUsers', label: '活跃用户', icon: Users, color: 'text-green-400' },
+              { key: 'showResponseTime', label: '响应时间', icon: Zap, color: 'text-blue-400' },
+              { key: 'showErrorRate', label: '错误率', icon: BarChart3, color: 'text-red-400' },
+              { key: 'showThroughput', label: '吞吐量', icon: TrendingUp, color: 'text-purple-400' }
+            ].map(({ key, label, icon: Icon, color }) => (
+              <label key={key} className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={config[key as keyof ChartConfig] as boolean}
+                  onChange={(e) => handleConfigChange({ [key]: e.target.checked })}
+                  className="rounded border-gray-600 text-blue-600 focus:ring-blue-500 bg-gray-700"
+                />
+                <Icon className={`w-4 h-4 ${color}`} />
+                <span className="text-sm text-gray-300">{label}</span>
+              </label>
+            ))}
+          </div>
+
+          <div className="mt-3 flex items-center space-x-4">
+            <label className="flex items-center space-x-2">
+              <span className="text-sm text-gray-300">时间窗口:</span>
+              <select
+                value={config.timeWindow}
+                onChange={(e) => handleConfigChange({ timeWindow: parseInt(e.target.value) })}
+                className="px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-sm"
+              >
+                <option value={30}>30秒</option>
+                <option value={60}>60秒</option>
+                <option value={120}>2分钟</option>
+                <option value={300}>5分钟</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      )}
+
+      {/* 当前指标显示 */}
+      {currentMetrics && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          <div className="bg-green-500/20 rounded-lg p-3 border border-green-500/30">
+            <div className="flex items-center space-x-2 mb-1">
+              <Users className="w-4 h-4 text-green-400" />
+              <span className="text-sm text-green-300">活跃用户</span>
+            </div>
+            <div className="text-lg font-bold text-green-400">{currentMetrics.activeUsers}</div>
+          </div>
+
+          <div className="bg-blue-500/20 rounded-lg p-3 border border-blue-500/30">
+            <div className="flex items-center space-x-2 mb-1">
+              <Zap className="w-4 h-4 text-blue-400" />
+              <span className="text-sm text-blue-300">响应时间</span>
+            </div>
+            <div className="text-lg font-bold text-blue-400">{currentMetrics.avgResponseTime.toFixed(0)}ms</div>
+          </div>
+
+          <div className="bg-purple-500/20 rounded-lg p-3 border border-purple-500/30">
+            <div className="flex items-center space-x-2 mb-1">
+              <TrendingUp className="w-4 h-4 text-purple-400" />
+              <span className="text-sm text-purple-300">吞吐量</span>
+            </div>
+            <div className="text-lg font-bold text-purple-400">{currentMetrics.currentThroughput.toFixed(1)} TPS</div>
+          </div>
+
+          <div className="bg-red-500/20 rounded-lg p-3 border border-red-500/30">
+            <div className="flex items-center space-x-2 mb-1">
+              <BarChart3 className="w-4 h-4 text-red-400" />
+              <span className="text-sm text-red-300">错误率</span>
+            </div>
+            <div className="text-lg font-bold text-red-400">{currentMetrics.errorRate.toFixed(1)}%</div>
+          </div>
+        </div>
+      )}
+
+      {/* 主图表区域 */}
+      <div className="bg-white rounded-lg p-4 relative" style={{ height: `${height}px` }}>
+        {chartData.points.length > 0 ? (
+          <svg className="w-full h-full" viewBox="0 0 800 320">
+            {/* 网格线 */}
+            <defs>
+              <pattern id="grid" width="40" height="32" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 32" fill="none" stroke="#e5e7eb" strokeWidth="0.5" />
+              </pattern>
+            </defs>
+            <rect width="800" height="320" fill="url(#grid)" />
+
+            {/* Y轴标签 */}
+            <g className="text-sm" fill="#6b7280">
+              {[0, 25, 50, 75, 100].map((percent, index) => (
+                <text key={index} x="8" y={280 - (percent * 2.4)} fontSize="12">
+                  {testConfig ? Math.floor((testConfig.users * percent) / 100) : percent}
+                </text>
+              ))}
+            </g>
+
+            {/* X轴标签 */}
+            <g className="text-sm" fill="#6b7280">
+              {chartData.scales.x.map((label, index) => (
+                <text key={index} x={60 + (index * 72)} y="310" fontSize="12">
+                  {label}
+                </text>
+              ))}
+            </g>
+
+            {/* 数据曲线 */}
+            {config.showActiveUsers && (
+              <path
+                d={generatePath('activeUsers', chartData.scales.y.users)}
+                fill="none"
+                stroke="#22c55e"
+                strokeWidth="3"
+                className="transition-all duration-300"
+              />
+            )}
+
+            {config.showResponseTime && (
+              <path
+                d={generatePath('responseTime', chartData.scales.y.responseTime)}
+                fill="none"
+                stroke="#3b82f6"
+                strokeWidth="3"
+                className="transition-all duration-300"
+              />
+            )}
+
+            {config.showErrorRate && (
+              <path
+                d={generatePath('errorRate', 100)}
+                fill="none"
+                stroke="#ef4444"
+                strokeWidth="3"
+                className="transition-all duration-300"
+              />
+            )}
+
+            {config.showThroughput && (
+              <path
+                d={generatePath('throughput', chartData.scales.y.throughput)}
+                fill="none"
+                stroke="#8b5cf6"
+                strokeWidth="3"
+                className="transition-all duration-300"
+              />
+            )}
+          </svg>
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <TrendingUp className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <div className="text-gray-500 font-medium text-lg">专业级压力测试图表</div>
+              <div className="text-gray-400 text-base mt-2">
+                {isRunning ? '等待测试数据...' : '开始测试后将显示实时数据'}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 悬停提示 */}
+        {hoveredPoint && (
+          <div
+            className="absolute bg-gray-800 text-white p-2 rounded shadow-lg pointer-events-none z-10"
+            style={{ left: hoveredPoint.x, top: hoveredPoint.y }}
+          >
+            <div className="text-xs">
+              <div>时间: {new Date(hoveredPoint.data.timestamp).toLocaleTimeString()}</div>
+              <div>用户: {hoveredPoint.data.activeUsers}</div>
+              <div>响应: {hoveredPoint.data.responseTime}ms</div>
+              <div>错误率: {hoveredPoint.data.errorRate.toFixed(1)}%</div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 图例 */}
+      <div className="mt-4 flex flex-wrap gap-4 text-sm">
+        {config.showActiveUsers && (
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-0.5 bg-green-500"></div>
+            <span className="text-green-400">活跃线程</span>
+          </div>
+        )}
+        {config.showResponseTime && (
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-0.5 bg-blue-500"></div>
+            <span className="text-blue-400">响应时间</span>
+          </div>
+        )}
+        {config.showErrorRate && (
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-0.5 bg-red-500"></div>
+            <span className="text-red-400">错误率</span>
+          </div>
+        )}
+        {config.showThroughput && (
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-0.5 bg-purple-500"></div>
+            <span className="text-purple-400">吞吐量</span>
+          </div>
+        )}
+      </div>
+
+      {/* 帮助信息 */}
+      <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+        <div className="flex items-start space-x-2">
+          <Info className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+          <div className="text-sm text-blue-300">
+            <p className="font-medium mb-1">图表说明:</p>
+            <ul className="text-xs space-y-1 text-blue-200">
+              <li>• 绿线: 当前活跃的虚拟用户数量</li>
+              <li>• 蓝线: 平均响应时间（毫秒）</li>
+              <li>• 红线: 错误请求占比（百分比）</li>
+              <li>• 紫线: 每秒事务数（TPS）</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default RealTimeStressChart;

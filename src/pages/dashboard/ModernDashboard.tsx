@@ -379,7 +379,7 @@ const ModernDashboard: React.FC = () => {
                             </div>
                           </div>
                         </td>
-                        <td className={`py-3 px-2 ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'}`}>{item.sales.toLocaleString()}</td>
+                        <td className={`py-3 px-2 ${actualTheme === 'light' ? 'text-gray-900' : 'text-gray-100'}`}>{item.sales.toLocaleString()}</td>
                         <td className="py-3 px-2">
                           <div className="flex items-center space-x-1">
                             <div className={`w-16 h-8 rounded flex items-center justify-center ${actualTheme === 'light' ? 'bg-gray-100' : 'bg-gray-700'}`}>
@@ -394,8 +394,8 @@ const ModernDashboard: React.FC = () => {
                             </div>
                           </div>
                         </td>
-                        <td className={`py-3 px-2 ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'}`}>{item.avgPrice}</td>
-                        <td className={`py-3 px-2 font-medium ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'}`}>{item.total}</td>
+                        <td className={`py-3 px-2 ${actualTheme === 'light' ? 'text-gray-900' : 'text-gray-100'}`}>{item.avgPrice}</td>
+                        <td className={`py-3 px-2 font-medium ${actualTheme === 'light' ? 'text-gray-900' : 'text-gray-100'}`}>{item.total}</td>
                       </tr>
                     ))}
                   </tbody>

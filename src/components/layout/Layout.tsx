@@ -74,12 +74,12 @@ const Layout: React.FC<LayoutProps> = ({ showFooter = true }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-gray-50 flex flex-col compact-layout page-optimized">
       {/* Navigation */}
       <ModernNavigation />
 
       {/* Main Content */}
-      <main className="flex-1">
+      <main className="flex-1 responsive-container py-4">
         <Outlet />
       </main>
 

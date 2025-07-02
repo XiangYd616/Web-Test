@@ -16,8 +16,16 @@ export class K6Engine implements TestEngine {
   name = 'k6';
   version = '';
   isAvailable = false;
+  private lastCheckTime = 0;
+  private cacheTimeout = 30000; // 30秒缓存
 
   async checkAvailability(): Promise<boolean> {
+    // 如果缓存还有效，直接返回缓存结果
+    const now = Date.now();
+    if (now - this.lastCheckTime < this.cacheTimeout) {
+      return this.isAvailable;
+    }
+
     try {
       // 通过API检查后端k6引擎状态
       const response = await fetch('/api/test-engines/k6/status');
@@ -26,13 +34,16 @@ export class K6Engine implements TestEngine {
         if (result.success && result.data) {
           this.version = result.data.version || 'unknown';
           this.isAvailable = result.data.available || result.data.isAvailable || false;
+          this.lastCheckTime = now;
           return this.isAvailable;
         }
       }
+      this.lastCheckTime = now;
       return false;
     } catch (error) {
       console.error('K6 availability check failed:', error);
       this.isAvailable = false;
+      this.lastCheckTime = now;
       return false;
     }
   }
@@ -95,8 +106,16 @@ export class LighthouseEngine implements TestEngine {
   name = 'lighthouse';
   version = '';
   isAvailable = false;
+  private lastCheckTime = 0;
+  private cacheTimeout = 30000; // 30秒缓存
 
   async checkAvailability(): Promise<boolean> {
+    // 如果缓存还有效，直接返回缓存结果
+    const now = Date.now();
+    if (now - this.lastCheckTime < this.cacheTimeout) {
+      return this.isAvailable;
+    }
+
     try {
       const response = await fetch('/api/test-engines/lighthouse/status');
       if (response.ok) {
@@ -104,13 +123,16 @@ export class LighthouseEngine implements TestEngine {
         if (result.success && result.data) {
           this.version = result.data.version || 'unknown';
           this.isAvailable = result.data.available || result.data.isAvailable || false;
+          this.lastCheckTime = now;
           return this.isAvailable;
         }
       }
+      this.lastCheckTime = now;
       return false;
     } catch (error) {
       console.error('Lighthouse availability check failed:', error);
       this.isAvailable = false;
+      this.lastCheckTime = now;
       return false;
     }
   }
@@ -169,8 +191,16 @@ export class PlaywrightEngine implements TestEngine {
   name = 'playwright';
   version = '';
   isAvailable = false;
+  private lastCheckTime = 0;
+  private cacheTimeout = 30000; // 30秒缓存
 
   async checkAvailability(): Promise<boolean> {
+    // 如果缓存还有效，直接返回缓存结果
+    const now = Date.now();
+    if (now - this.lastCheckTime < this.cacheTimeout) {
+      return this.isAvailable;
+    }
+
     try {
       const response = await fetch('/api/test-engines/playwright/status');
       if (response.ok) {
@@ -178,13 +208,16 @@ export class PlaywrightEngine implements TestEngine {
         if (result.success && result.data) {
           this.version = result.data.version || 'unknown';
           this.isAvailable = result.data.available || result.data.isAvailable || false;
+          this.lastCheckTime = now;
           return this.isAvailable;
         }
       }
+      this.lastCheckTime = now;
       return false;
     } catch (error) {
       console.error('Playwright availability check failed:', error);
       this.isAvailable = false;
+      this.lastCheckTime = now;
       return false;
     }
   }
@@ -242,6 +275,11 @@ export class PlaywrightEngine implements TestEngine {
 // 测试引擎管理器
 export class TestEngineManager {
   private engines: Map<string, TestEngine> = new Map();
+  private lastCheckAllTime = 0;
+  private checkAllCacheTimeout = 30000; // 30秒缓存
+  private cachedResults: Record<string, boolean> = {};
+  private isInitialized = false;
+  private initializationPromise: Promise<void> | null = null;
 
   constructor() {
     this.engines.set('k6', new K6Engine());
@@ -251,6 +289,26 @@ export class TestEngineManager {
 
   // 初始化所有引擎
   async initializeEngines(): Promise<void> {
+    // 如果已经初始化过，直接返回
+    if (this.isInitialized) {
+      console.log('🔄 Test engines already initialized');
+      return;
+    }
+
+    // 如果正在初始化，等待初始化完成
+    if (this.initializationPromise) {
+      console.log('⏳ Waiting for ongoing initialization...');
+      return this.initializationPromise;
+    }
+
+    // 开始初始化
+    this.initializationPromise = this.doInitialization();
+    await this.initializationPromise;
+    this.isInitialized = true;
+    this.initializationPromise = null;
+  }
+
+  private async doInitialization(): Promise<void> {
     console.log('Initializing test engines...');
 
     for (const [name, engine] of this.engines) {
@@ -269,6 +327,14 @@ export class TestEngineManager {
   }
 
   async checkAllEngines(): Promise<Record<string, boolean>> {
+    // 如果缓存还有效，直接返回缓存结果
+    const now = Date.now();
+    if (now - this.lastCheckAllTime < this.checkAllCacheTimeout && Object.keys(this.cachedResults).length > 0) {
+      console.log('🔄 Using cached engine status results');
+      return { ...this.cachedResults };
+    }
+
+    console.log('🔍 Checking all engines status...');
     const results: Record<string, boolean> = {};
 
     for (const [name, engine] of this.engines) {
@@ -279,6 +345,10 @@ export class TestEngineManager {
         results[name] = false;
       }
     }
+
+    // 更新缓存
+    this.cachedResults = { ...results };
+    this.lastCheckAllTime = now;
 
     return results;
   }

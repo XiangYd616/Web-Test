@@ -150,10 +150,13 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
     if (!processedData.length) return [];
 
     const bins = 20;
-    const responseTimes = processedData.map(d => d.responseTime);
+    const responseTimes = processedData.map(d => d.responseTime).filter(time => typeof time === 'number' && !isNaN(time));
+
+    if (responseTimes.length === 0) return [];
+
     const min = Math.min(...responseTimes);
     const max = Math.max(...responseTimes);
-    const binSize = (max - min) / bins;
+    const binSize = max === min ? 1 : (max - min) / bins;
 
     const distribution = Array.from({ length: bins }, (_, i) => ({
       range: `${Math.round(min + i * binSize)}-${Math.round(min + (i + 1) * binSize)}ms`,
@@ -162,12 +165,14 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
     }));
 
     responseTimes.forEach(time => {
-      const binIndex = Math.min(Math.floor((time - min) / binSize), bins - 1);
-      distribution[binIndex].count++;
+      const binIndex = Math.min(Math.max(0, Math.floor((time - min) / binSize)), bins - 1);
+      if (distribution[binIndex]) {
+        distribution[binIndex].count++;
+      }
     });
 
     distribution.forEach(bin => {
-      bin.percentage = (bin.count / responseTimes.length) * 100;
+      bin.percentage = responseTimes.length > 0 ? (bin.count / responseTimes.length) * 100 : 0;
     });
 
     return distribution;
@@ -177,10 +182,11 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
   const errorTypeDistribution = useMemo(() => {
     if (!currentMetrics?.errorBreakdown) return [];
 
+    const totalFailedRequests = currentMetrics.failedRequests || 0;
     return Object.entries(currentMetrics.errorBreakdown).map(([type, count]) => ({
       name: type,
       value: count,
-      percentage: (count / currentMetrics.failedRequests) * 100
+      percentage: totalFailedRequests > 0 ? (count / totalFailedRequests) * 100 : 0
     }));
   }, [currentMetrics]);
 

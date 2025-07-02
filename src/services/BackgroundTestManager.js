@@ -336,50 +336,64 @@ class BackgroundTestManager {
 
       this.updateTestProgress(testInfo.id, 10, '🚀 正在启动压力测试引擎...');
 
-      const response = await fetch(`${this.apiBaseUrl}/test/stress`, {
+      // 根据测试时长模拟进度
+      const duration = stressConfig.options.duration;
+
+      // 立即启动实时监控（在发送请求之前）
+      let realTimeMonitor = this.startRealTimeMonitoring(testInfo.id, duration, testInfo.id);
+      console.log('📊 Real-time monitoring started for test:', testInfo.id);
+
+      // 将监控器保存到测试信息中，以便后续停止
+      testInfo.realTimeMonitor = realTimeMonitor;
+
+      this.updateTestProgress(testInfo.id, 20, '📊 实时监控已启动...');
+
+      // 异步发送测试请求（不等待完成）
+      const testPromise = fetch(`${this.apiBaseUrl}/test/stress`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         },
         body: JSON.stringify(stressConfig)
+      }).then(async (response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      this.updateTestProgress(testInfo.id, 30, '👥 正在启动虚拟用户...');
 
-      this.updateTestProgress(testInfo.id, 20, '👥 正在启动虚拟用户...');
-
-      // 根据测试时长模拟进度
-      const duration = stressConfig.options.duration;
+      // 模拟测试进度（在实际测试运行期间）
       const progressSteps = [
-        { progress: 30, message: '📈 正在执行压力测试...' },
-        { progress: 50, message: '💾 正在收集响应时间数据...' },
-        { progress: 70, message: '🔍 正在分析并发性能...' },
-        { progress: 85, message: '📊 正在计算性能指标...' },
-        { progress: 95, message: '✅ 正在生成测试报告...' }
+        { progress: 40, message: '📈 正在执行压力测试...', delay: 2000 },
+        { progress: 60, message: '💾 正在收集响应时间数据...', delay: 4000 },
+        { progress: 80, message: '🔍 正在分析并发性能...', delay: 6000 },
+        { progress: 90, message: '📊 正在计算性能指标...', delay: 8000 }
       ];
 
-      // 获取响应数据以提取真实的testId
-      const data = await response.json();
+      // 异步执行进度更新
+      const progressPromise = this.simulateProgressSteps(testInfo.id, progressSteps);
+
+      // 等待测试完成
+      const data = await testPromise;
       console.log('🎯 Stress test response:', data);
+
+      // 停止实时监控
+      if (testInfo.realTimeMonitor) {
+        clearInterval(testInfo.realTimeMonitor);
+        testInfo.realTimeMonitor = null;
+        console.log('🛑 Real-time monitoring stopped for test:', testInfo.id);
+      }
 
       // 提取后端生成的真实testId
       let realTestId = testInfo.id; // 默认使用前端生成的ID
       if (data.success && data.data && data.data.testId) {
         realTestId = data.data.testId;
         console.log('🔑 Using backend testId:', realTestId);
-
-        // 更新测试信息中的ID
         testInfo.realTestId = realTestId;
       }
-
-      // 启动实时数据监控（使用真实的testId进行API调用，但用前端testId查找testInfo）
-      const realTimeMonitor = this.startRealTimeMonitoring(realTestId, duration, testInfo.id);
-
-      // 测试已经完成，立即停止实时监控
-      clearInterval(realTimeMonitor);
 
       // 从响应中获取实际的测试时长
       const actualDuration = data.duration || data.data?.actualDuration || duration;
@@ -566,6 +580,19 @@ class BackgroundTestManager {
     }
   }
 
+  // 异步执行进度步骤（用于压力测试）
+  async simulateProgressSteps(testId, progressSteps) {
+    for (const step of progressSteps) {
+      await new Promise(resolve => setTimeout(resolve, step.delay));
+      this.updateTestProgress(testId, step.progress, step.message);
+    }
+  }
+
+  // 睡眠函数
+  sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   // 更新测试进度
   updateTestProgress(testId, progress, currentStep, additionalData = {}) {
     const testInfo = this.runningTests.get(testId);
@@ -645,6 +672,13 @@ class BackgroundTestManager {
     if (testInfo) {
       testInfo.status = 'cancelled';
       testInfo.endTime = new Date();
+
+      // 停止实时监控（如果存在）
+      if (testInfo.realTimeMonitor) {
+        clearInterval(testInfo.realTimeMonitor);
+        testInfo.realTimeMonitor = null;
+        console.log('🛑 Real-time monitoring stopped due to test cancellation:', testId);
+      }
 
       this.runningTests.delete(testId);
       this.completedTests.set(testId, testInfo);
@@ -745,6 +779,7 @@ class BackgroundTestManager {
     let errorCount = 0;
     const responseTimes = [];
     const realTimeData = [];
+    const startTime = Date.now(); // 记录开始时间用于TPS计算
 
     return setInterval(async () => {
       try {
@@ -791,6 +826,10 @@ class BackgroundTestManager {
         }
         responseTimes.push(responseTime);
 
+        // 计算当前时刻的吞吐量（基于最近几个数据点）
+        const recentDataForThroughput = realTimeData.filter(d => (currentTime - d.timestamp) <= 2000); // 最近2秒
+        const currentThroughput = recentDataForThroughput.length > 0 ? Math.round((recentDataForThroughput.length / 2) * 10) / 10 : 0.5;
+
         // 生成实时数据点
         const dataPoint = {
           timestamp: currentTime,
@@ -798,6 +837,7 @@ class BackgroundTestManager {
           status: isSuccess ? 200 : 500,
           success: isSuccess,
           activeUsers: Math.floor(Math.random() * (testInfo.config.users || testInfo.config.options?.users || 5)) + 1,
+          throughput: currentThroughput, // 添加吞吐量字段
           phase: 'running'
         };
 
@@ -813,6 +853,14 @@ class BackgroundTestManager {
           Math.round(responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length) : 0;
         const errorRate = requestCount > 0 ? ((errorCount / requestCount) * 100).toFixed(2) : 0;
 
+        // 计算TPS（每秒事务数）
+        const elapsedTimeSeconds = (currentTime - startTime) / 1000;
+        const currentTPS = elapsedTimeSeconds > 0 ? Math.round((requestCount / elapsedTimeSeconds) * 10) / 10 : 0;
+
+        // 计算最近5秒的TPS（更准确的实时TPS）
+        const recentData = realTimeData.filter(d => (currentTime - d.timestamp) <= 5000);
+        const recentTPS = recentData.length > 0 ? Math.round((recentData.length / 5) * 10) / 10 : 0;
+
         const metrics = {
           totalRequests: requestCount,
           successfulRequests: successCount,
@@ -821,8 +869,14 @@ class BackgroundTestManager {
           minResponseTime: responseTimes.length > 0 ? Math.min(...responseTimes) : 0,
           maxResponseTime: responseTimes.length > 0 ? Math.max(...responseTimes) : 0,
           errorRate: parseFloat(errorRate),
-          activeUsers: dataPoint.activeUsers
+          activeUsers: dataPoint.activeUsers,
+          currentTPS: recentTPS, // 最近5秒的TPS
+          peakTPS: Math.max(currentTPS, testInfo.peakTPS || 0), // 峰值TPS
+          averageTPS: currentTPS // 平均TPS
         };
+
+        // 更新测试信息中的峰值TPS
+        testInfo.peakTPS = Math.max(metrics.currentTPS, testInfo.peakTPS || 0);
 
         // 更新测试信息（使用前端testId）
         this.updateTestProgress(frontendTestId || realTestId, testInfo.progress, testInfo.currentStep, {
