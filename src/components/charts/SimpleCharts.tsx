@@ -67,23 +67,8 @@ export const AdvancedStressTestChart: React.FC<AdvancedStressTestChartProps> = (
   // 处理数据
   const processedData = useMemo(() => {
     if (!data || data.length === 0) {
-      // 生成更真实的默认数据
-      const now = Date.now();
-      return Array.from({ length: 60 }, (_, i) => ({
-        time: format(new Date(now - (59 - i) * 1000), 'HH:mm:ss'),
-        timestamp: now - (59 - i) * 1000,
-        responseTime: 100 + Math.sin(i / 10) * 50 + Math.random() * 30,
-        throughput: 45 + Math.cos(i / 8) * 10 + Math.random() * 5,
-        errors: Math.random() < 0.1 ? Math.floor(Math.random() * 3) : 0,
-        users: Math.min(10 + Math.floor(i / 2), 100),
-        p95ResponseTime: 150 + Math.sin(i / 10) * 70 + Math.random() * 40,
-        p99ResponseTime: 200 + Math.sin(i / 10) * 90 + Math.random() * 50,
-        errorRate: Math.random() * 5,
-        bytesReceived: 1024 + Math.random() * 512,
-        bytesSent: 256 + Math.random() * 128,
-        connectionsActive: Math.floor(Math.random() * 50) + 10,
-        phase: i < 10 ? 'rampup' : i > 50 ? 'cooldown' : 'steady'
-      }));
+      // 返回空数组，不生成模拟数据
+      return [];
     }
 
     // 过滤时间范围

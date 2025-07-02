@@ -17,6 +17,9 @@ const { RealCompatibilityTestEngine } = require('../services/realCompatibilityTe
 const { RealUXTestEngine } = require('../services/realUXTestEngine');
 const { RealAPITestEngine } = require('../services/realAPITestEngine');
 const { RealSEOTestEngine } = require('../services/realSEOTestEngine');
+const { EnhancedSEOEngine } = require('../services/enhancedSEOEngine');
+const multer = require('multer');
+const path = require('path');
 
 // 创建测试引擎实例
 const realTestEngine = new RealTestEngine();
@@ -26,6 +29,27 @@ const realCompatibilityTestEngine = new RealCompatibilityTestEngine();
 const realUXTestEngine = new RealUXTestEngine();
 const realAPITestEngine = new RealAPITestEngine();
 const realSEOTestEngine = new RealSEOTestEngine();
+const enhancedSEOEngine = new EnhancedSEOEngine();
+
+// 配置文件上传
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB限制
+    files: 20 // 最多20个文件
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['.html', '.htm', '.xml', '.txt', '.css', '.js'];
+    const fileExt = path.extname(file.originalname).toLowerCase();
+
+    if (allowedTypes.includes(fileExt)) {
+      cb(null, true);
+    } else {
+      cb(new Error(`不支持的文件类型: ${fileExt}`), false);
+    }
+  }
+});
 
 const router = express.Router();
 
@@ -489,17 +513,30 @@ router.get('/stress/status/:testId', optionalAuth, asyncHandler(async (req, res)
     const status = await realStressTestEngine.getTestStatus(testId);
 
     if (!status) {
-      return res.status(404).json({
-        success: false,
-        message: '测试不存在或已完成'
+      // 测试不存在或已完成，返回完成状态而不是404
+      return res.json({
+        success: true,
+        data: {
+          status: 'completed',
+          message: '测试已完成或不存在',
+          progress: 100,
+          realTimeMetrics: {
+            totalRequests: 0,
+            successfulRequests: 0,
+            failedRequests: 0,
+            averageResponseTime: 0,
+            currentTPS: 0,
+            activeUsers: 0
+          }
+        }
       });
     }
 
     res.json({
       success: true,
       realTimeMetrics: status.realTimeMetrics || {
-        lastResponseTime: Math.random() * 200 + 100,
-        lastRequestSuccess: Math.random() > 0.1,
+        lastResponseTime: null, // 不使用随机数据，让前端处理
+        lastRequestSuccess: null,
         activeRequests: status.activeRequests || 0,
         totalRequests: status.totalRequests || 0,
         successfulRequests: status.successfulRequests || 0,
@@ -955,6 +992,94 @@ router.get('/:engine/status', asyncHandler(async (req, res) => {
   }
 }));
 
+/**
+ * 本地SEO文件分析
+ * POST /api/test/seo/local
+ */
+router.post('/seo/local', optionalAuth, upload.array('files', 20), asyncHandler(async (req, res) => {
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: '请上传至少一个文件'
+    });
+  }
 
+  try {
+    console.log(`📁 Starting local SEO analysis for ${req.files.length} files`);
+
+    const options = {
+      checkTechnicalSEO: req.body.checkTechnicalSEO !== 'false',
+      checkContentQuality: req.body.checkContentQuality !== 'false',
+      checkAccessibility: req.body.checkAccessibility !== 'false',
+      checkPerformance: req.body.checkPerformance !== 'false',
+      keywords: req.body.keywords || '',
+      userId: req.user?.id
+    };
+
+    const analysisResult = await enhancedSEOEngine.analyzeLocalFiles(req.files, options);
+
+    console.log(`✅ Local SEO analysis completed with score: ${analysisResult.overallScore}`);
+
+    res.json({
+      success: true,
+      data: analysisResult,
+      testType: 'seo-local'
+    });
+
+  } catch (error) {
+    console.error('本地SEO分析失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '本地SEO分析失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 增强SEO分析
+ * POST /api/test/seo/enhanced
+ */
+router.post('/seo/enhanced', optionalAuth, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
+  const { url, options = {} } = req.body;
+  const validatedURL = req.validatedURL.url.toString();
+
+  try {
+    console.log('🚀 Starting enhanced SEO analysis for:', validatedURL);
+
+    const enhancedOptions = {
+      ...options,
+      userId: req.user?.id,
+      keywords: options.keywords || '',
+      deepCrawl: options.deepCrawl === true,
+      maxPages: parseInt(options.maxPages) || 10,
+      maxDepth: parseInt(options.maxDepth) || 2,
+      competitorAnalysis: options.competitorAnalysis === true,
+      competitorUrls: options.competitorUrls || [],
+      backlinksAnalysis: options.backlinksAnalysis === true,
+      keywordRanking: options.keywordRanking === true,
+      internationalSEO: options.internationalSEO === true,
+      technicalAudit: options.technicalAudit === true
+    };
+
+    const testResult = await enhancedSEOEngine.runEnhancedSEOTest(validatedURL, enhancedOptions);
+
+    console.log('✅ Enhanced SEO analysis completed with score:', testResult.overallScore);
+
+    res.json({
+      success: true,
+      data: testResult,
+      testType: 'seo-enhanced'
+    });
+
+  } catch (error) {
+    console.error('增强SEO分析失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '增强SEO分析失败',
+      error: error.message
+    });
+  }
+}));
 
 module.exports = router;

@@ -3,7 +3,7 @@
 export { default as APITest } from '../APITest';
 export { default as BackgroundTestDemo } from '../BackgroundTestDemo';
 export { default as CompatibilityTest } from '../CompatibilityTest';
-export { default as ContentTest } from '../ContentTest';
+
 export { default as DatabaseTest } from '../DatabaseTest';
 export { default as NetworkTest } from '../NetworkTest';
 export { default as SecurityTest } from '../SecurityTest';

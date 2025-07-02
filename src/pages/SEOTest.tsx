@@ -84,7 +84,7 @@ const SEOTest: React.FC = () => {
     {
       key: 'checkContentQuality',
       name: '内容质量',
-      description: '分析页面内容质量、标题、描述等',
+      description: '全面分析内容质量、可读性、链接检查等',
       icon: FileText,
       color: 'green',
       estimatedTime: '30秒'
@@ -225,8 +225,8 @@ const SEOTest: React.FC = () => {
       <div className="themed-card p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-2xl font-bold themed-text-primary">SEO检测</h2>
-            <p className="themed-text-secondary mt-1">全面分析网站SEO表现，提供优化建议</p>
+            <h2 className="text-2xl font-bold themed-text-primary">SEO测试</h2>
+            <p className="themed-text-secondary mt-1">全面分析网站SEO表现和内容质量，提供优化建议</p>
           </div>
         </div>
 
@@ -257,8 +257,8 @@ const SEOTest: React.FC = () => {
                 <div
                   key={test.key}
                   className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${config[test.key as keyof SEOTestConfig]
-                      ? `border-${test.color}-500 bg-${test.color}-500/10`
-                      : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
+                    ? `border-${test.color}-500 bg-${test.color}-500/10`
+                    : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
                     }`}
                   onClick={() => handleTestTypeChange(test.key as keyof SEOTestConfig)}
                 >
@@ -281,8 +281,8 @@ const SEOTest: React.FC = () => {
                           />
                           <div
                             className={`w-6 h-6 rounded-lg border-2 cursor-pointer transition-all duration-200 flex items-center justify-center ${config[test.key as keyof SEOTestConfig]
-                                ? `border-${test.color}-500 bg-${test.color}-500 shadow-lg shadow-${test.color}-500/25`
-                                : 'border-gray-500 bg-gray-700/50 hover:border-gray-400 hover:bg-gray-600/50'
+                              ? `border-${test.color}-500 bg-${test.color}-500 shadow-lg shadow-${test.color}-500/25`
+                              : 'border-gray-500 bg-gray-700/50 hover:border-gray-400 hover:bg-gray-600/50'
                               }`}
                             onClick={() => handleTestTypeChange(test.key as keyof SEOTestConfig)}
                           >
@@ -519,8 +519,8 @@ const SEOTest: React.FC = () => {
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className={`px-2 py-1 rounded text-xs font-medium ${test.overallScore >= 80 ? 'bg-green-500/20 text-green-400' :
-                      test.overallScore >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
-                        'bg-red-500/20 text-red-400'
+                    test.overallScore >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
+                      'bg-red-500/20 text-red-400'
                     }`}>
                     {Math.round(test.overallScore)}分
                   </div>

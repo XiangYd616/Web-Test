@@ -75,12 +75,7 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
           icon: Zap,
           href: '/stress-test'
         },
-        {
-          id: 'content-test',
-          name: '内容测试',
-          icon: FileText,
-          href: '/content-test'
-        },
+
         {
           id: 'seo-test',
           name: 'SEO测试',

@@ -402,7 +402,7 @@ class RealStressTestEngine {
           await this.sleep(dynamicThinkTime);
         } else {
           // 最小延迟避免过于密集的请求
-          await this.sleep(Math.random() * 100 + 50); // 50-150ms随机延迟
+          await this.sleep(Math.random() * 20 + 10); // 10-30ms随机延迟，减少延迟提高请求频率
         }
 
       } catch (error) {

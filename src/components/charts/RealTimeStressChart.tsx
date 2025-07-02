@@ -3,7 +3,7 @@
  * 解决耦合问题，提供真实数据展示，保持JMeter风格的专业外观
  */
 
-import { BarChart3, Info, Settings, TrendingUp, Users, Zap } from 'lucide-react';
+import { BarChart3, Settings, TrendingUp, Users, Zap } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 
 // 数据点接口
@@ -111,15 +111,33 @@ export const RealTimeStressChart: React.FC<RealTimeStressChartProps> = ({
     const chartWidth = 720; // SVG宽度减去边距
     const chartHeight = 280; // SVG高度减去边距
     const timeSpan = config.timeWindow * 1000;
+    const now = Date.now();
+    const startTime = now - timeSpan;
 
-    const points = chartData.points.map((point, index) => {
-      const x = 60 + ((point.timestamp - (Date.now() - timeSpan)) / timeSpan) * chartWidth;
-      const value = point[dataKey] as number;
-      const y = chartHeight - 40 - ((value / scale) * (chartHeight - 80));
-      return `${index === 0 ? 'M' : 'L'} ${x},${y}`;
-    });
+    // 过滤掉时间窗口外的点，并确保坐标有效
+    const validPoints = chartData.points
+      .filter(point => point.timestamp >= startTime && point.timestamp <= now)
+      .map((point, index) => {
+        // 确保x坐标在有效范围内 (60 到 780)
+        const xRatio = Math.max(0, Math.min(1, (point.timestamp - startTime) / timeSpan));
+        const x = 60 + (xRatio * chartWidth);
 
-    return points.join(' ');
+        // 确保y坐标有效，防止NaN和无限值
+        const value = point[dataKey] as number || 0; // 使用0替代undefined或NaN
+        const yRatio = Math.max(0, Math.min(1, value / (scale || 1))); // 防止除以0
+        const y = chartHeight - 40 - (yRatio * (chartHeight - 80));
+
+        return { x, y, index };
+      });
+
+    if (validPoints.length === 0) return '';
+
+    // 生成路径字符串
+    const pathData = validPoints.map(({ x, y, index }) =>
+      `${index === 0 ? 'M' : 'L'} ${x.toFixed(1)},${y.toFixed(1)}`
+    );
+
+    return pathData.join(' ');
   };
 
   // 当前指标计算
@@ -156,9 +174,8 @@ export const RealTimeStressChart: React.FC<RealTimeStressChartProps> = ({
         <div className="flex items-center space-x-2">
           <button
             onClick={() => setShowSettings(!showSettings)}
-            className={`p-2 rounded-lg transition-colors ${
-              showSettings ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-            }`}
+            className={`p-2 rounded-lg transition-colors ${showSettings ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
             title="图表设置"
           >
             <Settings className="w-4 h-4" />
@@ -275,6 +292,34 @@ export const RealTimeStressChart: React.FC<RealTimeStressChartProps> = ({
               ))}
             </g>
 
+            {/* 图例 */}
+            <g className="text-sm">
+              {config.showActiveUsers && (
+                <g>
+                  <line x1="620" y1="20" x2="640" y2="20" stroke="#22c55e" strokeWidth="3" />
+                  <text x="645" y="25" fontSize="12" fill="#22c55e">活跃用户</text>
+                </g>
+              )}
+              {config.showResponseTime && (
+                <g>
+                  <line x1="620" y1="40" x2="640" y2="40" stroke="#3b82f6" strokeWidth="3" />
+                  <text x="645" y="45" fontSize="12" fill="#3b82f6">响应时间</text>
+                </g>
+              )}
+              {config.showErrorRate && (
+                <g>
+                  <line x1="620" y1="60" x2="640" y2="60" stroke="#ef4444" strokeWidth="3" />
+                  <text x="645" y="65" fontSize="12" fill="#ef4444">错误率</text>
+                </g>
+              )}
+              {config.showThroughput && (
+                <g>
+                  <line x1="620" y1="80" x2="640" y2="80" stroke="#8b5cf6" strokeWidth="3" />
+                  <text x="645" y="85" fontSize="12" fill="#8b5cf6">吞吐量</text>
+                </g>
+              )}
+            </g>
+
             {/* 数据曲线 */}
             {config.showActiveUsers && (
               <path
@@ -372,21 +417,7 @@ export const RealTimeStressChart: React.FC<RealTimeStressChartProps> = ({
         )}
       </div>
 
-      {/* 帮助信息 */}
-      <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-        <div className="flex items-start space-x-2">
-          <Info className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
-          <div className="text-sm text-blue-300">
-            <p className="font-medium mb-1">图表说明:</p>
-            <ul className="text-xs space-y-1 text-blue-200">
-              <li>• 绿线: 当前活跃的虚拟用户数量</li>
-              <li>• 蓝线: 平均响应时间（毫秒）</li>
-              <li>• 红线: 错误请求占比（百分比）</li>
-              <li>• 紫线: 每秒事务数（TPS）</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+
     </div>
   );
 };

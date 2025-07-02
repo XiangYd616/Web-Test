@@ -49,12 +49,7 @@ const ModernNavigation: React.FC = () => {
       icon: Zap,
       description: '综合网站测试平台'
     },
-    {
-      name: '内容测试',
-      href: '/content-test',
-      icon: FileText,
-      description: '网站内容质量检测'
-    },
+
     {
       name: 'SEO测试',
       href: '/seo-test',

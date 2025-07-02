@@ -75,8 +75,8 @@ const APITest: React.FC = () => {
     testEnvironment: 'development',
     followRedirects: true,
     validateSSL: true,
-    testSecurity: true,
-    testPerformance: true,
+    testSecurity: false,
+    testPerformance: false,
     testReliability: true,
     generateDocumentation: false,
   });
@@ -683,7 +683,10 @@ const APITest: React.FC = () => {
 
       {/* 测试类型选择 */}
       <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-        <h3 className="text-xl font-semibold text-white mb-6">测试类型选择</h3>
+        <h3 className="text-xl font-semibold text-white mb-2">测试类型选择</h3>
+        <p className="text-sm text-gray-400 mb-6">
+          💡 提示：性能和安全测试为API专用功能。如需全面的性能或安全测试，请使用专门的"压力测试"和"安全检测"工具。
+        </p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* 安全测试 */}
           <div className={`relative p-4 rounded-xl border-2 transition-all duration-300 cursor-pointer ${testConfig.testSecurity
@@ -696,7 +699,7 @@ const APITest: React.FC = () => {
                 <Shield className={`w-5 h-5 ${testConfig.testSecurity ? 'text-red-400' : 'text-gray-400'}`} />
               </div>
               <div className="flex-1">
-                <h4 className="font-semibold text-white">安全测试</h4>
+                <h4 className="font-semibold text-white">安全测试 <span className="text-xs text-yellow-400">(可选)</span></h4>
                 <p className="text-xs text-gray-400">预计 3-5 分钟</p>
               </div>
               <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${testConfig.testSecurity
@@ -706,7 +709,7 @@ const APITest: React.FC = () => {
                 {testConfig.testSecurity && <CheckCircle className="w-3 h-3 text-white" />}
               </div>
             </div>
-            <p className="text-sm text-gray-300">检测SQL注入、XSS攻击、认证漏洞等安全问题</p>
+            <p className="text-sm text-gray-300">API专用安全检测：认证漏洞、注入攻击、权限绕过等</p>
           </div>
 
           {/* 性能测试 */}
@@ -720,7 +723,7 @@ const APITest: React.FC = () => {
                 <Zap className={`w-5 h-5 ${testConfig.testPerformance ? 'text-blue-400' : 'text-gray-400'}`} />
               </div>
               <div className="flex-1">
-                <h4 className="font-semibold text-white">性能测试</h4>
+                <h4 className="font-semibold text-white">性能测试 <span className="text-xs text-yellow-400">(可选)</span></h4>
                 <p className="text-xs text-gray-400">预计 2-4 分钟</p>
               </div>
               <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${testConfig.testPerformance
@@ -730,7 +733,7 @@ const APITest: React.FC = () => {
                 {testConfig.testPerformance && <CheckCircle className="w-3 h-3 text-white" />}
               </div>
             </div>
-            <p className="text-sm text-gray-300">测试响应时间、吞吐量、并发处理能力</p>
+            <p className="text-sm text-gray-300">API专用性能测试：响应时间、吞吐量、并发处理能力</p>
           </div>
 
           {/* 可靠性测试 */}

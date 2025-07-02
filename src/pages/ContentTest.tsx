@@ -162,12 +162,12 @@ const ContentTest: React.FC = () => {
         metrics: {
           pageSize: (testResults.performanceMetrics?.pageSize || 1.2) * 1024, // 转换为字节
           loadTime: testResults.performanceMetrics?.loadTime || 2500,
-          imageCount: testResults.analysis?.images?.length || Math.floor(Math.random() * 20) + 5,
-          linkCount: testResults.analysis?.links?.length || Math.floor(Math.random() * 50) + 10,
-          headingStructure: testResults.analysis?.headings?.length > 0 || Math.random() > 0.3,
-          metaDescription: testResults.analysis?.description?.content?.length > 0 || Math.random() > 0.2,
-          altTexts: Math.floor(Math.random() * 15) + 5,
-          totalImages: Math.floor(Math.random() * 20) + 5
+          imageCount: testResults.analysis?.images?.length || 0, // 使用真实数据或0
+          linkCount: testResults.analysis?.links?.length || 0, // 使用真实数据或0
+          headingStructure: testResults.analysis?.headings?.length > 0 || false,
+          metaDescription: testResults.analysis?.description?.content?.length > 0 || false,
+          altTexts: testResults.analysis?.images?.filter((img: any) => img.alt).length || 0, // 实际有alt文本的图片数
+          totalImages: testResults.analysis?.images?.length || 0 // 实际图片总数
         }
       };
 
