@@ -116,11 +116,7 @@ const AppRoutes: React.FC = () => {
             <SecurityTest />
           </LazyPageWrapper>
         } />
-        <Route path="performance" element={
-          <LazyPageWrapper>
-            <WebsiteTest />
-          </LazyPageWrapper>
-        } />
+
         <Route path="seo-test" element={
           <LazyPageWrapper>
             <SEOTest />

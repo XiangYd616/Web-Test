@@ -50,14 +50,14 @@ const ModernNavigation: React.FC = () => {
       description: '综合网站测试平台'
     },
     {
-      name: '性能测试',
-      href: '/stress-test',
-      icon: Zap,
-      description: '网站速度和性能分析'
+      name: '内容测试',
+      href: '/content-test',
+      icon: FileText,
+      description: '网站内容质量检测'
     },
     {
-      name: 'SEO分析',
-      href: '/content-test',
+      name: 'SEO测试',
+      href: '/seo-test',
       icon: Search,
       description: '搜索引擎优化检测'
     },

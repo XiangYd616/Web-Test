@@ -9,7 +9,8 @@ export interface RouteInfo {
 export const routes: RouteInfo[] = [
   { path: '/', name: '仪表板', icon: 'BarChart3', requiresAuth: true },
   { path: '/stress-test', name: '压力测试', icon: 'Zap', requiresAuth: true },
-  { path: '/content-test', name: '内容检测', icon: 'FileText', requiresAuth: true },
+  { path: '/content-test', name: '内容测试', icon: 'FileText', requiresAuth: true },
+  { path: '/seo-test', name: 'SEO测试', icon: 'Search', requiresAuth: true },
   { path: '/compatibility-test', name: '兼容性测试', icon: 'Monitor', requiresAuth: true },
   { path: '/api-test', name: 'API测试', icon: 'Code', requiresAuth: true },
   { path: '/analytics', name: '高级分析', icon: 'TrendingUp', requiresAuth: true },
@@ -60,17 +61,17 @@ export const getNavigationRoutes = (isAuthenticated: boolean, isAdmin: boolean):
 
 export const getBreadcrumbs = (path: string): RouteInfo[] => {
   const breadcrumbs: RouteInfo[] = [];
-  
+
   // 总是包含首页
   if (path !== '/') {
     breadcrumbs.push({ path: '/', name: '首页', icon: 'Home' });
   }
-  
+
   // 添加当前页面
   const currentRoute = getRouteByPath(path);
   if (currentRoute && path !== '/') {
     breadcrumbs.push(currentRoute);
   }
-  
+
   return breadcrumbs;
 };
