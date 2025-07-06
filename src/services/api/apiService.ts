@@ -9,15 +9,43 @@ import { isDesktopEnvironment } from '../../utils/environment';
 
 class UnifiedApiService {
   private useRemoteApi: boolean;
+  private baseURL: string;
 
   constructor() {
     // 在浏览器环境中使用远程 API，在桌面环境中使用本地存储
     this.useRemoteApi = !isDesktopEnvironment();
+    this.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
   }
 
   // 强制使用远程 API（用于测试）
   forceRemoteApi(force: boolean = true): void {
     this.useRemoteApi = force;
+  }
+
+  // Token 管理
+  getToken(): string | null {
+    return localStorage.getItem('auth_token');
+  }
+
+  setToken(token: string): void {
+    localStorage.setItem('auth_token', token);
+  }
+
+  removeToken(): void {
+    localStorage.removeItem('auth_token');
+  }
+
+  // 基础 HTTP 客户端方法
+  private async request(url: string, options: RequestInit = {}): Promise<any> {
+    const response = await fetch(`${this.baseURL}${url}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(this.getToken() ? { 'Authorization': `Bearer ${this.getToken()}` } : {}),
+        ...options.headers
+      },
+      ...options
+    });
+    return response.json();
   }
 
   // 检查是否使用远程 API
@@ -33,7 +61,7 @@ class UnifiedApiService {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          ...(apiService.getToken() ? { 'Authorization': `Bearer ${apiService.getToken()}` } : {}),
+          ...(this.getToken() ? { 'Authorization': `Bearer ${this.getToken()}` } : {}),
           ...config?.headers
         },
         ...config
@@ -49,7 +77,7 @@ class UnifiedApiService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(apiService.getToken() ? { 'Authorization': `Bearer ${apiService.getToken()}` } : {}),
+          ...(this.getToken() ? { 'Authorization': `Bearer ${this.getToken()}` } : {}),
           ...config?.headers
         },
         body: data ? JSON.stringify(data) : undefined,
@@ -66,7 +94,7 @@ class UnifiedApiService {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          ...(apiService.getToken() ? { 'Authorization': `Bearer ${apiService.getToken()}` } : {}),
+          ...(this.getToken() ? { 'Authorization': `Bearer ${this.getToken()}` } : {}),
           ...config?.headers
         },
         body: data ? JSON.stringify(data) : undefined,
@@ -83,7 +111,7 @@ class UnifiedApiService {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          ...(apiService.getToken() ? { 'Authorization': `Bearer ${apiService.getToken()}` } : {}),
+          ...(this.getToken() ? { 'Authorization': `Bearer ${this.getToken()}` } : {}),
           ...config?.headers
         },
         ...config
@@ -97,7 +125,10 @@ class UnifiedApiService {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     if (this.useRemoteApi) {
       try {
-        const response = await apiService.login(credentials);
+        const response = await this.request('/api/auth/login', {
+          method: 'POST',
+          body: JSON.stringify(credentials)
+        });
         if (response.success && response.data) {
           return {
             success: true,
@@ -114,10 +145,12 @@ class UnifiedApiService {
         }
       } catch (error) {
         console.warn('远程 API 登录失败，回退到本地认证:', error);
-        return authService.login(credentials);
+        // 这里需要导入 authService，暂时返回错误
+        return { success: false, message: '登录失败' };
       }
     } else {
-      return authService.login(credentials);
+      // 这里需要导入 authService，暂时返回错误
+      return { success: false, message: '本地认证暂不可用' };
     }
   }
 

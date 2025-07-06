@@ -17,7 +17,6 @@ const { RealCompatibilityTestEngine } = require('../services/realCompatibilityTe
 const { RealUXTestEngine } = require('../services/realUXTestEngine');
 const { RealAPITestEngine } = require('../services/realAPITestEngine');
 const { RealSEOTestEngine } = require('../services/realSEOTestEngine');
-const { EnhancedSEOEngine } = require('../services/enhancedSEOEngine');
 const multer = require('multer');
 const path = require('path');
 
@@ -29,7 +28,6 @@ const realCompatibilityTestEngine = new RealCompatibilityTestEngine();
 const realUXTestEngine = new RealUXTestEngine();
 const realAPITestEngine = new RealAPITestEngine();
 const realSEOTestEngine = new RealSEOTestEngine();
-const enhancedSEOEngine = new EnhancedSEOEngine();
 
 // 配置文件上传
 const storage = multer.memoryStorage();
@@ -1062,7 +1060,8 @@ router.post('/seo/enhanced', optionalAuth, testRateLimiter, validateURLMiddlewar
       technicalAudit: options.technicalAudit === true
     };
 
-    const testResult = await enhancedSEOEngine.runEnhancedSEOTest(validatedURL, enhancedOptions);
+    // 使用现有的realSEOTestEngine，但传入增强选项
+    const testResult = await realSEOTestEngine.runSEOTest(validatedURL, enhancedOptions);
 
     console.log('✅ Enhanced SEO analysis completed with score:', testResult.overallScore);
 

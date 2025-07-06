@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { helpService } from '../../services/help/helpService';
+import { helpService } from '../../services/helpService';
 
 interface FAQItem {
   id: string;
@@ -574,8 +574,8 @@ const Help: React.FC = () => {
                 type="button"
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${activeTab === tab.id
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-300 hover:bg-gray-600/50'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-300 hover:bg-gray-600/50'
                   }`}
               >
                 <tab.icon className="w-4 h-4" />

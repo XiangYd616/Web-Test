@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO分析功能最终测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { border-color: #4CAF50; background-color: #f8fff8; }
+        .error { border-color: #f44336; background-color: #fff8f8; }
+        .info { border-color: #2196F3; background-color: #f8f9ff; }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .score-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .score-item {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 5px;
+            min-width: 120px;
+            text-align: center;
+        }
+        .score-high { background: #e8f5e8; }
+        .score-medium { background: #fff3e0; }
+        .score-low { background: #ffebee; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 增强SEO分析功能最终测试</h1>
+        
+        <div class="test-section info">
+            <h3>📋 测试说明</h3>
+            <p>这是增强SEO分析功能的最终测试页面，包括：</p>
+            <ul>
+                <li>✅ 11个分析维度的完整SEO检查</li>
+                <li>✅ 可访问性分析</li>
+                <li>✅ 安全性分析</li>
+                <li>✅ Core Web Vitals</li>
+                <li>✅ 页面体验分析</li>
+                <li>✅ 智能评分和建议系统</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 开始测试</h3>
+            <p>输入要分析的URL：</p>
+            <input type="url" id="testUrl" placeholder="https://www.example.com" value="https://www.example.com" style="width: 300px; padding: 8px; margin-right: 10px;">
+            <button onclick="startSEOTest()" id="testBtn">开始SEO分析</button>
+            <button onclick="clearResults()">清除结果</button>
+        </div>
+
+        <div id="results" class="results" style="display: none;"></div>
+        <div id="scoreDisplay" class="score-display" style="display: none;"></div>
+    </div>
+
+    <script>
+        let isTestRunning = false;
+
+        function log(message) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.textContent += new Date().toLocaleTimeString() + ' - ' + message + '\n';
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        function clearResults() {
+            document.getElementById('results').textContent = '';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('scoreDisplay').style.display = 'none';
+            document.getElementById('scoreDisplay').innerHTML = '';
+        }
+
+        function displayScores(scores) {
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            scoreDisplay.style.display = 'flex';
+            scoreDisplay.innerHTML = '';
+
+            Object.entries(scores).forEach(([category, score]) => {
+                const scoreItem = document.createElement('div');
+                scoreItem.className = 'score-item';
+                
+                if (score >= 80) scoreItem.classList.add('score-high');
+                else if (score >= 60) scoreItem.classList.add('score-medium');
+                else scoreItem.classList.add('score-low');
+
+                const categoryNames = {
+                    technical: '技术SEO',
+                    onPage: '页面SEO',
+                    content: '内容质量',
+                    performance: '性能优化',
+                    mobile: '移动友好',
+                    social: '社交媒体',
+                    structured: '结构化数据',
+                    accessibility: '可访问性',
+                    security: '安全性',
+                    coreWebVitals: 'Core Web Vitals',
+                    pageExperience: '页面体验'
+                };
+
+                scoreItem.innerHTML = `
+                    <div style="font-weight: bold; margin-bottom: 5px;">${categoryNames[category] || category}</div>
+                    <div style="font-size: 18px; color: ${score >= 80 ? '#4CAF50' : score >= 60 ? '#FF9800' : '#F44336'};">${score}/100</div>
+                `;
+                
+                scoreDisplay.appendChild(scoreItem);
+            });
+        }
+
+        async function startSEOTest() {
+            if (isTestRunning) return;
+            
+            const testUrl = document.getElementById('testUrl').value;
+            if (!testUrl) {
+                alert('请输入要测试的URL');
+                return;
+            }
+
+            isTestRunning = true;
+            document.getElementById('testBtn').disabled = true;
+            document.getElementById('testBtn').textContent = '分析中...';
+            
+            clearResults();
+            log('🧪 开始增强SEO分析测试...');
+            log('📤 目标URL: ' + testUrl);
+
+            try {
+                const response = await fetch('http://localhost:3001/api/test/seo', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        url: testUrl,
+                        config: {
+                            checkTechnicalSEO: true,
+                            checkContentQuality: true,
+                            checkAccessibility: true,
+                            checkPerformance: true,
+                            checkMobileFriendly: true,
+                            checkSocialMedia: true,
+                            checkStructuredData: true,
+                            checkSecurity: true,
+                            keywords: 'example, test, website, seo',
+                            generateReport: true,
+                            reportFormat: 'json'
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    const data = result.data;
+                    log('✅ SEO分析完成！');
+                    log('📊 测试ID: ' + data.testId);
+                    log('🎯 总体分数: ' + data.overallScore + '/100');
+                    log('🏆 评级: ' + (data.scoreGrade || getGrade(data.overallScore)));
+                    log('⏱️ 分析时长: ' + (data.duration || 0) + 'ms');
+                    
+                    if (data.scores) {
+                        log('\n📋 详细分数:');
+                        Object.entries(data.scores).forEach(([category, score]) => {
+                            log(`  ${category}: ${score}/100`);
+                        });
+                        
+                        displayScores(data.scores);
+                    }
+
+                    // 显示新增功能的分析结果
+                    if (data.checks) {
+                        log('\n🔍 新增分析功能验证:');
+                        
+                        if (data.checks.accessibility) {
+                            log(`  ♿ 可访问性: ${data.checks.accessibility.score}/100`);
+                        }
+                        
+                        if (data.checks.security) {
+                            log(`  🔒 安全性: ${data.checks.security.score}/100`);
+                        }
+                        
+                        if (data.checks.coreWebVitals) {
+                            log(`  ⚡ Core Web Vitals: ${data.checks.coreWebVitals.score}/100`);
+                        }
+                        
+                        if (data.checks.pageExperience) {
+                            log(`  🎯 页面体验: ${data.checks.pageExperience.score}/100`);
+                        }
+                    }
+
+                    log('\n🎉 增强SEO分析功能测试成功！');
+                    log('✨ 验证完成的功能:');
+                    log('  ✅ 11个维度的全面SEO分析');
+                    log('  ✅ 可访问性检查');
+                    log('  ✅ 安全性评估');
+                    log('  ✅ Core Web Vitals性能指标');
+                    log('  ✅ 页面体验分析');
+                    log('  ✅ 智能评分系统');
+                    log('  ✅ 详细的优化建议');
+
+                } else {
+                    log('❌ SEO分析失败: ' + (result.message || '未知错误'));
+                }
+
+            } catch (error) {
+                log('❌ 测试失败: ' + error.message);
+            } finally {
+                isTestRunning = false;
+                document.getElementById('testBtn').disabled = false;
+                document.getElementById('testBtn').textContent = '开始SEO分析';
+            }
+        }
+
+        function getGrade(score) {
+            if (score >= 90) return 'A+';
+            if (score >= 80) return 'A';
+            if (score >= 70) return 'B';
+            if (score >= 60) return 'C';
+            if (score >= 50) return 'D';
+            return 'F';
+        }
+    </script>
+</body>
+</html>

@@ -2,10 +2,13 @@
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "module": "ESNext",
     "skipLibCheck": true,
-
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
@@ -13,7 +16,9 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
     /* Linting - 渐进式启用严格模式 */
     "strict": false, // 暂时保持关闭，等修复所有错误后启用
     "noImplicitAny": true, // 启用：禁止隐式 any 类型
@@ -26,15 +31,29 @@
     "noImplicitReturns": true, // 启用：函数必须有明确返回值
     "noImplicitOverride": false, // 暂时关闭
     "exactOptionalPropertyTypes": false, // 暂时关闭
-
     /* Path mapping */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@electron/*": ["electron/*"]
+      "@/*": [
+        "src/*"
+      ],
+      "@electron/*": [
+        "electron/*"
+      ]
     }
   },
-  "include": ["src", "electron"],
-  "exclude": ["src/tests", "**/*.test.ts", "**/*.test.tsx"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": [
+    "src",
+    "electron"
+  ],
+  "exclude": [
+    "src/tests",
+    "**/*.test.ts",
+    "**/*.test.tsx"
+  ],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
 }

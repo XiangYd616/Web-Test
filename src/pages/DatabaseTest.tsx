@@ -1,44 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import '../styles/progress-bars.css';
 import {
-  Play,
-  Square,
-  Database,
-  Shield,
-  CheckCircle,
-  XCircle,
+  Activity,
+  AlertCircle,
   AlertTriangle,
   BarChart3,
-  Download,
-  Settings,
-  RefreshCw,
-  Save,
-  Monitor,
-  TrendingUp,
-  Gauge,
-  History,
-  Target,
-  AlertCircle,
-  WifiOff,
-  Wifi,
-  CloudOff,
-  RotateCcw,
-  Network,
-  Zap,
-  Search,
-  Layers,
-  Cpu,
-  HardDrive,
+  CheckCircle,
   Clock,
-  Activity,
-  Server,
+  CloudOff,
+  Cpu,
+  Database,
+  Download,
+  Gauge,
+  HardDrive,
+  History,
+  Layers,
+  Lock,
+  Monitor,
+  Network,
   Pause,
-  Timer,
+  Play,
+  RefreshCw,
+  RotateCcw,
+  Save,
+  Search,
+  Server,
+  Settings,
+  Shield,
   Signal,
-  Lock
+  Square,
+  Target,
+  Timer,
+  TrendingUp,
+  Wifi,
+  WifiOff,
+  XCircle,
+  Zap
 } from 'lucide-react';
-import backgroundTestManager from '../services/BackgroundTestManager';
+import React, { useEffect, useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
+import backgroundTestManager from '../services/BackgroundTestManager';
+import '../styles/progress-bars.css';
 
 interface DatabaseConfig {
   host: string;
@@ -148,9 +148,9 @@ const DatabaseTest: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState('');
   const [error, setError] = useState('');
-  
+
   const [showHistory, setShowHistory] = useState(false);
-  
+
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [configName, setConfigName] = useState('');
   const [currentTestId, setCurrentTestId] = useState<string | null>(null);
@@ -491,7 +491,7 @@ const DatabaseTest: React.FC = () => {
   };
 
   // 加载配置
-  
+
 
   const getScoreColor = (score: number) => {
     if (score >= 90) return 'text-green-400';
@@ -511,11 +511,10 @@ const DatabaseTest: React.FC = () => {
     <div className={`min-h-screen p-6 theme-transition ${actualTheme === 'light' ? 'light-theme-wrapper' : 'dark-theme-wrapper'}`}>
       {/* 网络状态指示器 */}
       <div className="fixed top-4 right-4 z-50">
-        <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg shadow-lg transition-all duration-300 ${
-          isOnline
+        <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg shadow-lg transition-all duration-300 ${isOnline
             ? 'bg-green-600/90 text-white'
             : 'bg-red-600/90 text-white animate-pulse'
-        }`}>
+          }`}>
           {isOnline ? (
             <>
               <Wifi className="w-4 h-4" />
@@ -652,10 +651,10 @@ const DatabaseTest: React.FC = () => {
                 onChange={(e) => {
                   const host = e.target.value.trim();
                   // 验证主机地址格式
-                  const isValidHost = /^[a-zA-Z0-9]([a-zA-Z0-9\-\.]*[a-zA-Z0-9])?$/.test(host) || 
-                                   /^(\d{1,3}\.){3}\d{1,3}$/.test(host);
-                  setDbConfig(prev => ({ 
-                    ...prev, 
+                  const isValidHost = /^[a-zA-Z0-9]([a-zA-Z0-9\-\.]*[a-zA-Z0-9])?$/.test(host) ||
+                    /^(\d{1,3}\.){3}\d{1,3}$/.test(host);
+                  setDbConfig(prev => ({
+                    ...prev,
                     host: host,
                     // 如果是本地主机，自动设置相关配置
                     ssl: host !== 'localhost' && host !== '127.0.0.1' ? prev.ssl : false
@@ -785,11 +784,10 @@ const DatabaseTest: React.FC = () => {
                         aria-label={test.label}
                       />
                       <div
-                        className={`w-6 h-6 rounded-lg border-2 cursor-pointer transition-all duration-200 flex items-center justify-center ${
-                          testConfig[test.key as keyof DatabaseTestConfig]
-                            ? 'border-blue-500 bg-blue-500 shadow-lg shadow-blue-500/25'
-                            : 'border-gray-500 bg-gray-700/50 hover:border-gray-400 hover:bg-gray-600/50'
-                        }`}
+                        className={`test-config-toggle ${testConfig[test.key as keyof DatabaseTestConfig]
+                            ? 'test-config-toggle-active'
+                            : 'test-config-toggle-inactive'
+                          }`}
                         onClick={() => setTestConfig(prev => ({ ...prev, [test.key]: !prev[test.key as keyof DatabaseTestConfig] }))}
                       >
                         {testConfig[test.key as keyof DatabaseTestConfig] && (
@@ -836,11 +834,10 @@ const DatabaseTest: React.FC = () => {
                         aria-label={test.label}
                       />
                       <div
-                        className={`w-6 h-6 rounded-lg border-2 cursor-pointer transition-all duration-200 flex items-center justify-center ${
-                          testConfig[test.key as keyof DatabaseTestConfig]
+                        className={`w-6 h-6 rounded-lg border-2 cursor-pointer transition-all duration-200 flex items-center justify-center ${testConfig[test.key as keyof DatabaseTestConfig]
                             ? 'border-purple-500 bg-purple-500 shadow-lg shadow-purple-500/25'
                             : 'border-gray-500 bg-gray-700/50 hover:border-gray-400 hover:bg-gray-600/50'
-                        }`}
+                          }`}
                         onClick={() => setTestConfig(prev => ({ ...prev, [test.key]: !prev[test.key as keyof DatabaseTestConfig] }))}
                       >
                         {testConfig[test.key as keyof DatabaseTestConfig] && (
@@ -961,11 +958,10 @@ const DatabaseTest: React.FC = () => {
                   type="button"
                   onClick={handleStartTest}
                   disabled={!dbConfig.host || !dbConfig.database}
-                  className={`px-6 py-3 rounded-lg font-medium flex items-center space-x-2 transition-all ${
-                    !dbConfig.host || !dbConfig.database
+                  className={`px-6 py-3 rounded-lg font-medium flex items-center space-x-2 transition-all ${!dbConfig.host || !dbConfig.database
                       ? 'themed-button-disabled'
                       : 'themed-button-primary'
-                  }`}
+                    }`}
                 >
                   <Play className="w-4 h-4" />
                   <span>开始测试</span>
@@ -996,7 +992,7 @@ const DatabaseTest: React.FC = () => {
                 <button
                   key={preset.name}
                   type="button"
-            onClick={() => setTestConfig(prev => ({ ...prev, ...preset.config }))}
+                  onClick={() => setTestConfig(prev => ({ ...prev, ...preset.config }))}
                   className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white rounded-md text-sm transition-colors"
                 >
                   {preset.name}
@@ -1083,11 +1079,10 @@ const DatabaseTest: React.FC = () => {
                   <div key={index} className="bg-gray-700/30 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
                       <metric.icon className="w-5 h-5 text-blue-400" />
-                      <span className={`text-lg font-bold ${
-                        metric.isBoolean ?
+                      <span className={`text-lg font-bold ${metric.isBoolean ?
                           (metric.value ? 'text-green-400' : 'text-red-400') :
                           'text-blue-400'
-                      }`}>
+                        }`}>
                         {metric.isBoolean ?
                           (metric.value ? '✅ 通过' : '❌ 失败') :
                           `${metric.value.toFixed(metric.unit === 'ms' ? 0 : 1)}${metric.unit}`

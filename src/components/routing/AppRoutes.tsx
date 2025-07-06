@@ -12,7 +12,6 @@ const WebsiteTest = lazy(() => import('../../pages/WebsiteTest'));
 const SecurityTest = lazy(() => import('../../pages/SecurityTest'));
 const PerformanceTest = lazy(() => import('../../pages/Performance'));
 const SEOTest = lazy(() => import('../../pages/SEOTest'));
-const EnhancedSEOTest = lazy(() => import('../../pages/EnhancedSEOTest'));
 
 const APITest = lazy(() => import('../../pages/APITest'));
 const NetworkTest = lazy(() => import('../../pages/NetworkTest'));
@@ -121,12 +120,6 @@ const AppRoutes: React.FC = () => {
         <Route path="seo-test" element={
           <LazyPageWrapper>
             <SEOTest />
-          </LazyPageWrapper>
-        } />
-
-        <Route path="enhanced-seo" element={
-          <LazyPageWrapper>
-            <EnhancedSEOTest />
           </LazyPageWrapper>
         } />
 

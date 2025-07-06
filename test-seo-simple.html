@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO分析功能测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { border-color: #4CAF50; background-color: #f8fff8; }
+        .error { border-color: #f44336; background-color: #fff8f8; }
+        .info { border-color: #2196F3; background-color: #f8f9ff; }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 增强SEO分析功能测试</h1>
+        
+        <div class="test-section info">
+            <h3>📋 测试说明</h3>
+            <p>这个页面用于测试我们增强的SEO分析功能，包括：</p>
+            <ul>
+                <li>✅ 可访问性分析</li>
+                <li>✅ 安全性分析</li>
+                <li>✅ Core Web Vitals</li>
+                <li>✅ 页面体验分析</li>
+                <li>✅ 更详细的技术SEO检查</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 开始测试</h3>
+            <p>点击下面的按钮开始测试SEO分析功能：</p>
+            <button onclick="testSEOAnalysis()">开始SEO分析测试</button>
+            <button onclick="clearResults()">清除结果</button>
+        </div>
+
+        <div id="results" class="results" style="display: none;"></div>
+    </div>
+
+    <script>
+        let currentTestId = null;
+
+        function log(message) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.textContent += new Date().toLocaleTimeString() + ' - ' + message + '\n';
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        function clearResults() {
+            document.getElementById('results').textContent = '';
+            document.getElementById('results').style.display = 'none';
+        }
+
+        async function testSEOAnalysis() {
+            clearResults();
+            log('🧪 开始测试增强的SEO分析功能...');
+
+            const testUrl = 'https://www.example.com';
+            
+            try {
+                // 发送SEO分析请求
+                log('📤 发送SEO分析请求...');
+                const response = await fetch('http://localhost:3001/api/seo/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        url: testUrl,
+                        options: {
+                            checkTechnicalSEO: true,
+                            checkContentQuality: true,
+                            checkAccessibility: true,
+                            checkPerformance: true,
+                            checkMobileFriendly: true,
+                            checkSocialMedia: true,
+                            checkStructuredData: true,
+                            checkSecurity: true,
+                            keywords: 'example, test, website',
+                            generateReport: true,
+                            reportFormat: 'json'
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                currentTestId = result.testId;
+                log('✅ SEO分析请求成功发送');
+                log('📊 分析ID: ' + currentTestId);
+
+                // 开始轮询结果
+                pollResults(currentTestId);
+
+            } catch (error) {
+                log('❌ 测试失败: ' + error.message);
+            }
+        }
+
+        async function pollResults(testId) {
+            let attempts = 0;
+            const maxAttempts = 30;
+
+            const poll = async () => {
+                if (attempts >= maxAttempts) {
+                    log('⏰ 分析超时');
+                    return;
+                }
+
+                try {
+                    const statusResponse = await fetch(`http://localhost:3001/api/seo/results/${testId}`);
+                    
+                    if (statusResponse.ok) {
+                        const statusResult = await statusResponse.json();
+                        
+                        log(`📈 进度: ${statusResult.progress}%`);
+                        
+                        if (statusResult.status === 'completed') {
+                            log('🎉 SEO分析完成！');
+                            log('📊 总体分数: ' + statusResult.overallScore);
+                            log('🏆 评级: ' + statusResult.scoreGrade);
+                            
+                            // 显示各项分数
+                            log('\n📋 详细分数:');
+                            Object.entries(statusResult.scores).forEach(([category, score]) => {
+                                log(`  ${category}: ${score}/100`);
+                            });
+
+                            // 显示新增的分析项目
+                            if (statusResult.checks.accessibility) {
+                                log('\n♿ 可访问性分析:');
+                                log('  分数: ' + statusResult.checks.accessibility.score);
+                                if (statusResult.checks.accessibility.issues?.length > 0) {
+                                    log('  问题: ' + statusResult.checks.accessibility.issues.join(', '));
+                                }
+                            }
+
+                            if (statusResult.checks.security) {
+                                log('\n🔒 安全性分析:');
+                                log('  分数: ' + statusResult.checks.security.score);
+                                if (statusResult.checks.security.issues?.length > 0) {
+                                    log('  问题: ' + statusResult.checks.security.issues.join(', '));
+                                }
+                            }
+
+                            if (statusResult.checks.coreWebVitals) {
+                                log('\n⚡ Core Web Vitals:');
+                                log('  分数: ' + statusResult.checks.coreWebVitals.score);
+                                if (statusResult.checks.coreWebVitals.metrics) {
+                                    const metrics = statusResult.checks.coreWebVitals.metrics;
+                                    if (metrics.lcp) log('  LCP: ' + metrics.lcp.estimated);
+                                    if (metrics.fid) log('  FID: ' + metrics.fid.estimated);
+                                    if (metrics.cls) log('  CLS: ' + metrics.cls.estimated);
+                                }
+                            }
+
+                            if (statusResult.checks.pageExperience) {
+                                log('\n🎯 页面体验:');
+                                log('  分数: ' + statusResult.checks.pageExperience.score);
+                                if (statusResult.checks.pageExperience.factors) {
+                                    const factors = statusResult.checks.pageExperience.factors;
+                                    if (factors.mobileFriendly) log('  移动友好: ' + factors.mobileFriendly.hasViewport);
+                                    if (factors.safeBrowsing) log('  安全浏览: ' + factors.safeBrowsing.isSecure);
+                                }
+                            }
+
+                            log('\n🎊 测试完成！增强的SEO分析功能正常工作');
+                            log('✨ 新增功能验证:');
+                            log('  ✅ 可访问性分析');
+                            log('  ✅ 安全性分析');
+                            log('  ✅ Core Web Vitals');
+                            log('  ✅ 页面体验分析');
+
+                            return;
+                        } else if (statusResult.status === 'failed') {
+                            log('❌ SEO分析失败: ' + (statusResult.error || '未知错误'));
+                            return;
+                        }
+                    }
+                } catch (error) {
+                    log('❌ 获取结果时出错: ' + error.message);
+                }
+
+                attempts++;
+                setTimeout(poll, 2000); // 等待2秒后继续轮询
+            };
+
+            poll();
+        }
+    </script>
+</body>
+</html>

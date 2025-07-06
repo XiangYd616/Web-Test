@@ -144,7 +144,7 @@ export class SettingsService {
     }
 
     try {
-      const result = category 
+      const result = category
         ? await systemSettingsAPI.getSettingsByCategory(category)
         : await systemSettingsAPI.getAllSettings();
 
@@ -163,10 +163,10 @@ export class SettingsService {
   static async updateSystemSettings(category: string, settings: Record<string, any>): Promise<any> {
     try {
       const result = await systemSettingsAPI.updateSettingsByCategory(category, settings);
-      
+
       // 清除缓存
       this.systemSettingsCache = {};
-      
+
       return result.data;
     } catch (error) {
       console.error('Failed to update system settings:', error);
@@ -181,7 +181,7 @@ export class SettingsService {
     }
 
     try {
-      const result = category 
+      const result = category
         ? await userPreferencesAPI.getPreferencesByCategory(category)
         : await userPreferencesAPI.getAllPreferences();
 
@@ -200,10 +200,10 @@ export class SettingsService {
   static async updateUserPreferences(category: string, preferences: Record<string, any>): Promise<any> {
     try {
       const result = await userPreferencesAPI.updatePreferencesByCategory(category, preferences);
-      
+
       // 清除缓存
       this.userPreferencesCache = {};
-      
+
       return result.data;
     } catch (error) {
       console.error('Failed to update user preferences:', error);
@@ -223,7 +223,7 @@ export class SettingsService {
     try {
       // 这里可以调用一个专门的公开设置接口
       const settings = await this.getSystemSettings();
-      
+
       // 过滤出公开设置
       const publicSettings: Record<string, any> = {};
       Object.keys(settings).forEach(category => {
@@ -241,7 +241,7 @@ export class SettingsService {
           };
         }
       });
-      
+
       return publicSettings;
     } catch (error) {
       console.error('Failed to get public settings:', error);
@@ -406,5 +406,8 @@ export const dataManagementAPI = {
     return response.data;
   },
 };
+
+// 创建单例实例
+export const settingsService = new SettingsService();
 
 export default SettingsService;

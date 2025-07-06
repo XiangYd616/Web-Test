@@ -21,7 +21,7 @@ import IntegrationService, {
   IntegrationStats,
   ThirdPartyIntegration,
   WebhookConfig
-} from '../../services/integration/integrationService';
+} from '../../services/integrationService';
 
 interface IntegrationsProps { }
 
@@ -207,8 +207,8 @@ const Integrations: React.FC<IntegrationsProps> = () => {
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${activeTab === tab.id
-                  ? 'bg-purple-600 text-white'
-                  : 'text-gray-300 hover:bg-gray-600/50'
+                ? 'bg-purple-600 text-white'
+                : 'text-gray-300 hover:bg-gray-600/50'
                 }`}
             >
               <tab.icon className="w-4 h-4" />
@@ -345,8 +345,8 @@ const Integrations: React.FC<IntegrationsProps> = () => {
                     </div>
                     <div className="flex items-center space-x-2">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium border ${apiKey.isActive
-                          ? 'text-green-400 bg-green-500/10 border-green-500/20'
-                          : 'text-gray-400 bg-gray-500/10 border-gray-500/20'
+                        ? 'text-green-400 bg-green-500/10 border-green-500/20'
+                        : 'text-gray-400 bg-gray-500/10 border-gray-500/20'
                         }`}>
                         {apiKey.isActive ? '活跃' : '禁用'}
                       </span>
@@ -470,8 +470,8 @@ const Integrations: React.FC<IntegrationsProps> = () => {
                     </div>
                     <div className="flex items-center space-x-2">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium border ${webhook.isActive
-                          ? 'text-green-400 bg-green-500/10 border-green-500/20'
-                          : 'text-gray-400 bg-gray-500/10 border-gray-500/20'
+                        ? 'text-green-400 bg-green-500/10 border-green-500/20'
+                        : 'text-gray-400 bg-gray-500/10 border-gray-500/20'
                         }`}>
                         {webhook.isActive ? '活跃' : '禁用'}
                       </span>
@@ -582,8 +582,8 @@ const Integrations: React.FC<IntegrationsProps> = () => {
                     </div>
                     <button
                       className={`px-3 py-1 rounded text-xs font-medium transition-colors ${integration.isEnabled
-                          ? 'bg-red-600 text-white hover:bg-red-700'
-                          : 'bg-green-600 text-white hover:bg-green-700'
+                        ? 'bg-red-600 text-white hover:bg-red-700'
+                        : 'bg-green-600 text-white hover:bg-green-700'
                         }`}
                     >
                       {integration.isEnabled ? '禁用' : '启用'}

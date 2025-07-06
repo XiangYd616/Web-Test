@@ -1,15 +1,15 @@
 // 系统管理服务 - 真实API实现
 
 import type {
-  SystemStats,
-  SystemConfig,
-  User,
-  SystemLog,
   BackupInfo,
+  LogFilter,
   MaintenanceInfo,
+  SystemConfig,
   SystemHealth,
-  UserFilter,
-  LogFilter
+  SystemLog,
+  SystemStats,
+  User,
+  UserFilter
 } from '../types/system';
 
 export class SystemService {
@@ -634,3 +634,6 @@ export class SystemService {
     };
   }
 }
+
+// 创建单例实例
+export const systemService = new SystemService();

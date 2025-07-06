@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { ChevronDown, LogOut, Settings, Shield, User } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { User, Settings, LogOut, ChevronDown, Shield } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 const UserMenu: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
