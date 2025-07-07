@@ -296,6 +296,7 @@ const EnhancedSEOResults: React.FC<EnhancedSEOResultsProps> = ({ results, onExpo
         {onExport && (
           <div className="flex space-x-2">
             <button
+              type="button"
               onClick={() => onExport('pdf')}
               className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
@@ -311,6 +312,7 @@ const EnhancedSEOResults: React.FC<EnhancedSEOResultsProps> = ({ results, onExpo
         <nav className="-mb-px flex space-x-8">
           {tabs.map((tab) => (
             <button
+              type="button"
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm ${activeTab === tab.id

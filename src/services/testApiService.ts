@@ -248,6 +248,19 @@ class TestApiService {
     }
   }
 
+  // 导出测试结果
+  async exportTestResults(testId: string, format: 'json' | 'csv' | 'pdf' | 'html'): Promise<any> {
+    try {
+      const result = await this.request(`/tests/export/${testId}?format=${format}`, {
+        method: 'GET',
+      });
+      return result;
+    } catch (error) {
+      console.error('Failed to export test results:', error);
+      throw error;
+    }
+  }
+
   // 删除测试结果
   async deleteTestResult(resultId: string): Promise<boolean> {
     try {

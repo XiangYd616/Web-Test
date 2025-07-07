@@ -19,8 +19,8 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    /* Linting - 渐进式启用严格模式 */
-    "strict": false, // 暂时保持关闭，等修复所有错误后启用
+    /* Linting - 启用严格模式以获得更好的类型安全 */
+    "strict": true, // 启用严格模式
     "noImplicitAny": true, // 启用：禁止隐式 any 类型
     "strictNullChecks": false, // 暂时关闭，需要大量代码修改
     "strictFunctionTypes": true, // 启用：严格函数类型检查

@@ -1,0 +1,374 @@
+/**
+ * Chrome浏览器兼容性修复
+ * 解决Chrome与其他浏览器的显示差异问题
+ */
+
+/* ===== 基础兼容性修复 ===== */
+
+/* 确保backdrop-filter在Chrome中正常工作 */
+.backdrop-blur-xl,
+.backdrop-blur-lg,
+.backdrop-blur-md,
+.backdrop-blur-sm {
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+}
+
+/* 修复Chrome中的Grid布局问题 */
+.grid {
+  display: -ms-grid;
+  display: grid;
+}
+
+.grid-cols-1 {
+  -ms-grid-columns: 1fr;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.grid-cols-2 {
+  -ms-grid-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grid-cols-3 {
+  -ms-grid-columns: 1fr 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* 修复Chrome中的gap属性 */
+.gap-1 {
+  gap: 0.25rem;
+  grid-gap: 0.25rem;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+  grid-gap: 0.5rem;
+}
+
+.gap-3 {
+  gap: 0.75rem;
+  grid-gap: 0.75rem;
+}
+
+.gap-4 {
+  gap: 1rem;
+  grid-gap: 1rem;
+}
+
+/* ===== 安全测试组件特定修复 ===== */
+
+/* 修复安全检查项目卡片在Chrome中的显示问题 */
+.security-check-card {
+  display: flex !important;
+  flex-direction: column;
+  border-radius: 0.5rem;
+  border-width: 2px;
+  padding: 1rem;
+  transition: all 0.2s ease-in-out;
+  background-color: rgba(255, 255, 255, 0.05);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+/* Chrome特定的颜色修复 - 仅限安全测试页面 */
+@supports (-webkit-appearance: none) {
+  .security-test-container .border-green-500,
+  .security-test-card.border-green-500 {
+    border-color: #10b981 !important;
+  }
+
+  .security-test-container .border-blue-500,
+  .security-test-card.border-blue-500 {
+    border-color: #3b82f6 !important;
+  }
+
+  .security-test-container .border-red-500,
+  .security-test-card.border-red-500 {
+    border-color: #ef4444 !important;
+  }
+
+  .security-test-container .border-purple-500,
+  .security-test-card.border-purple-500 {
+    border-color: #8b5cf6 !important;
+  }
+
+  .security-test-container .border-indigo-500,
+  .security-test-card.border-indigo-500 {
+    border-color: #6366f1 !important;
+  }
+
+  .security-test-container .border-orange-500,
+  .security-test-card.border-orange-500 {
+    border-color: #f97316 !important;
+  }
+}
+
+/* Chrome中的背景色修复 - 仅限安全测试页面 */
+@supports (-webkit-appearance: none) {
+  .security-test-container .bg-green-50,
+  .security-test-card.bg-green-50 {
+    background-color: rgba(16, 185, 129, 0.1) !important;
+  }
+
+  .security-test-container .bg-blue-50,
+  .security-test-card.bg-blue-50 {
+    background-color: rgba(59, 130, 246, 0.1) !important;
+  }
+
+  .security-test-container .bg-red-50,
+  .security-test-card.bg-red-50 {
+    background-color: rgba(239, 68, 68, 0.1) !important;
+  }
+
+  .security-test-container .bg-purple-50,
+  .security-test-card.bg-purple-50 {
+    background-color: rgba(139, 92, 246, 0.1) !important;
+  }
+
+  .security-test-container .bg-indigo-50,
+  .security-test-card.bg-indigo-50 {
+    background-color: rgba(99, 102, 241, 0.1) !important;
+  }
+
+  .security-test-container .bg-orange-50,
+  .security-test-card.bg-orange-50 {
+    background-color: rgba(249, 115, 22, 0.1) !important;
+  }
+}
+
+/* 深色模式下的背景色修复 - 仅限安全测试页面 */
+@supports (-webkit-appearance: none) {
+  .security-test-container .dark .bg-green-900\/20,
+  .security-test-container .dark-theme-wrapper .bg-green-900\/20 {
+    background-color: rgba(6, 78, 59, 0.2) !important;
+  }
+
+  .security-test-container .dark .bg-blue-900\/20,
+  .security-test-container .dark-theme-wrapper .bg-blue-900\/20 {
+    background-color: rgba(30, 58, 138, 0.2) !important;
+  }
+
+  .security-test-container .dark .bg-red-900\/20,
+  .security-test-container .dark-theme-wrapper .bg-red-900\/20 {
+    background-color: rgba(127, 29, 29, 0.2) !important;
+  }
+
+  .security-test-container .dark .bg-purple-900\/20,
+  .security-test-container .dark-theme-wrapper .bg-purple-900\/20 {
+    background-color: rgba(88, 28, 135, 0.2) !important;
+  }
+
+  .security-test-container .dark .bg-indigo-900\/20,
+  .security-test-container .dark-theme-wrapper .bg-indigo-900\/20 {
+    background-color: rgba(49, 46, 129, 0.2) !important;
+  }
+
+  .security-test-container .dark .bg-orange-900\/20,
+  .security-test-container .dark-theme-wrapper .bg-orange-900\/20 {
+    background-color: rgba(154, 52, 18, 0.2) !important;
+  }
+}
+
+/* ===== Flexbox兼容性修复 ===== */
+
+/* 确保flex容器在Chrome中正常工作 */
+.flex {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.flex-col {
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.items-center {
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.justify-center {
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.justify-between {
+  -webkit-box-pack: justify;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.space-x-2 > * + * {
+  margin-left: 0.5rem;
+}
+
+.space-y-2 > * + * {
+  margin-top: 0.5rem;
+}
+
+/* ===== 渐变背景兼容性修复 ===== */
+
+/* Chrome中的渐变修复 */
+.bg-gradient-to-r {
+  background-image: -webkit-linear-gradient(left, var(--tw-gradient-stops));
+  background-image: linear-gradient(to right, var(--tw-gradient-stops));
+}
+
+.from-blue-600 {
+  --tw-gradient-from: #2563eb;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(37, 99, 235, 0));
+}
+
+.to-blue-700 {
+  --tw-gradient-to: #1d4ed8;
+}
+
+/* ===== 动画兼容性修复 ===== */
+
+/* Chrome中的动画修复 */
+@-webkit-keyframes spin {
+  to {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin {
+  to {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  -webkit-animation: spin 1s linear infinite;
+  animation: spin 1s linear infinite;
+}
+
+/* ===== 阴影效果兼容性修复 ===== */
+
+/* Chrome中的阴影修复 */
+.shadow-lg {
+  -webkit-box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.shadow-xl {
+  -webkit-box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* ===== 边框圆角兼容性修复 ===== */
+
+.rounded-lg {
+  -webkit-border-radius: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.rounded-full {
+  -webkit-border-radius: 9999px;
+  border-radius: 9999px;
+}
+
+/* ===== 变换效果兼容性修复 ===== */
+
+.transform {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+.transition-all {
+  -webkit-transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
+}
+
+/* ===== Chrome特定的安全测试页面修复 ===== */
+
+/* 修复Chrome中安全测试卡片的布局问题 */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  .security-test-grid {
+    display: grid !important;
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+    gap: 0.5rem !important;
+  }
+
+  .security-test-card {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 1rem !important;
+    border-radius: 0.5rem !important;
+    border-width: 2px !important;
+    transition: all 0.2s ease-in-out !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+  }
+
+  .security-test-card-content {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+
+  .security-test-card-info {
+    display: flex !important;
+    align-items: center !important;
+    flex: 1 !important;
+  }
+
+  .security-test-card-toggle {
+    margin-left: auto !important;
+  }
+}
+
+/* 安全测试页面Chrome修复 - 不依赖JavaScript */
+@supports (-webkit-appearance: none) {
+  /* 这个查询主要针对WebKit内核浏览器（Chrome、Safari等） */
+
+  .security-test-container .grid {
+    display: -webkit-grid !important;
+    display: grid !important;
+  }
+
+  .security-test-container .grid-cols-1 {
+    -webkit-grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+
+  .security-test-container .grid-cols-3 {
+    -webkit-grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .security-test-container .gap-1 {
+    -webkit-grid-gap: 0.25rem !important;
+    grid-gap: 0.25rem !important;
+    gap: 0.25rem !important;
+  }
+
+  .security-test-container .gap-2 {
+    -webkit-grid-gap: 0.5rem !important;
+    grid-gap: 0.5rem !important;
+    gap: 0.5rem !important;
+  }
+}
+
+/* ===== 强制Chrome使用正确的渲染模式 ===== */
+
+/* 强制Chrome使用硬件加速 */
+.security-test-container {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* 修复Chrome中的文本渲染 */
+.security-test-text {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}

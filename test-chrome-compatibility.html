@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chrome兼容性测试</title>
+    <style>
+        /* 引入Chrome兼容性CSS */
+        @import url('./src/styles/chrome-compatibility.css');
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        
+        .title {
+            text-align: center;
+            color: #1f2937;
+            margin-bottom: 32px;
+        }
+        
+        .test-section {
+            margin-bottom: 32px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        .test-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #374151;
+        }
+        
+        /* 测试Grid布局 */
+        .security-test-grid {
+            display: grid;
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+            gap: 0.5rem;
+        }
+        
+        .grid-cols-3 {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        
+        .security-test-card {
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border-width: 2px;
+            border-style: solid;
+            transition: all 0.2s ease-in-out;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .border-green-500 {
+            border-color: #10b981;
+        }
+        
+        .border-blue-500 {
+            border-color: #3b82f6;
+        }
+        
+        .border-red-500 {
+            border-color: #ef4444;
+        }
+        
+        .border-purple-500 {
+            border-color: #8b5cf6;
+        }
+        
+        .bg-green-50 {
+            background-color: rgba(16, 185, 129, 0.1);
+        }
+        
+        .bg-blue-50 {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+        
+        .bg-red-50 {
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+        
+        .bg-purple-50 {
+            background-color: rgba(139, 92, 246, 0.1);
+        }
+        
+        .flex {
+            display: flex;
+        }
+        
+        .items-center {
+            align-items: center;
+        }
+        
+        .justify-between {
+            justify-content: space-between;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .text-sm {
+            font-size: 14px;
+        }
+        
+        .font-medium {
+            font-weight: 500;
+        }
+        
+        .browser-info {
+            background: #f3f4f6;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Chrome浏览器兼容性测试</h1>
+        
+        <!-- 浏览器信息 -->
+        <div class="test-section">
+            <h2 class="test-title">浏览器信息</h2>
+            <div class="browser-info">
+                <div><strong>User Agent:</strong> <span id="userAgent"></span></div>
+                <div><strong>Vendor:</strong> <span id="vendor"></span></div>
+                <div><strong>浏览器类型:</strong> <span id="browserType"></span></div>
+            </div>
+        </div>
+        
+        <!-- Grid布局测试 -->
+        <div class="test-section">
+            <h2 class="test-title">Grid布局测试 (单列)</h2>
+            <div class="security-test-grid">
+                <div class="security-test-card border-green-500 bg-green-50">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium">SSL/TLS检查</span>
+                        <span class="status status-success">正常</span>
+                    </div>
+                </div>
+                <div class="security-test-card border-blue-500 bg-blue-50">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium">安全头检查</span>
+                        <span class="status status-success">正常</span>
+                    </div>
+                </div>
+                <div class="security-test-card border-red-500 bg-red-50">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium">漏洞扫描</span>
+                        <span class="status status-warning">警告</span>
+                    </div>
+                </div>
+                <div class="security-test-card border-purple-500 bg-purple-50">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium">Cookie安全</span>
+                        <span class="status status-success">正常</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Grid布局测试 (三列) -->
+        <div class="test-section">
+            <h2 class="test-title">Grid布局测试 (三列)</h2>
+            <div class="security-test-grid grid-cols-3">
+                <div class="security-test-card border-green-500 bg-green-50">
+                    <div class="text-center text-sm font-medium">HTTPS</div>
+                </div>
+                <div class="security-test-card border-blue-500 bg-blue-50">
+                    <div class="text-center text-sm font-medium">SSL/TLS</div>
+                </div>
+                <div class="security-test-card border-red-500 bg-red-50">
+                    <div class="text-center text-sm font-medium">安全头</div>
+                </div>
+                <div class="security-test-card border-purple-500 bg-purple-50">
+                    <div class="text-center text-sm font-medium">漏洞扫描</div>
+                </div>
+                <div class="security-test-card border-green-500 bg-green-50">
+                    <div class="text-center text-sm font-medium">Cookie</div>
+                </div>
+                <div class="security-test-card border-blue-500 bg-blue-50">
+                    <div class="text-center text-sm font-medium">最终分析</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CSS特性支持测试 */ -->
+        <div class="test-section">
+            <h2 class="test-title">CSS特性支持测试</h2>
+            <div id="cssSupport"></div>
+        </div>
+    </div>
+    
+    <script>
+        // 显示浏览器信息
+        document.getElementById('userAgent').textContent = navigator.userAgent;
+        document.getElementById('vendor').textContent = navigator.vendor || '未知';
+        
+        // 检测浏览器类型
+        let browserType = '未知';
+        if (/Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)) {
+            browserType = 'Chrome';
+        } else if (/Edg/.test(navigator.userAgent)) {
+            browserType = 'Edge';
+        } else if (/Safari/.test(navigator.userAgent) && /Apple Computer/.test(navigator.vendor)) {
+            browserType = 'Safari';
+        } else if (/Firefox/.test(navigator.userAgent)) {
+            browserType = 'Firefox';
+        }
+        document.getElementById('browserType').textContent = browserType;
+        
+        // 检测CSS特性支持
+        const cssFeatures = [
+            { name: 'CSS Grid', property: 'display', value: 'grid' },
+            { name: 'Flexbox', property: 'display', value: 'flex' },
+            { name: 'Backdrop Filter', property: 'backdrop-filter', value: 'blur(10px)' },
+            { name: 'CSS Variables', property: 'color', value: 'var(--test)' },
+            { name: 'CSS Transforms', property: 'transform', value: 'translateX(10px)' }
+        ];
+        
+        const supportDiv = document.getElementById('cssSupport');
+        cssFeatures.forEach(feature => {
+            const isSupported = CSS.supports(feature.property, feature.value) || 
+                               CSS.supports(`-webkit-${feature.property}`, feature.value);
+            
+            const statusClass = isSupported ? 'status-success' : 'status-error';
+            const statusText = isSupported ? '支持' : '不支持';
+            
+            supportDiv.innerHTML += `
+                <div style="margin-bottom: 8px;">
+                    <strong>${feature.name}:</strong> 
+                    <span class="status ${statusClass}">${statusText}</span>
+                </div>
+            `;
+        });
+    </script>
+</body>
+</html>
