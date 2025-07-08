@@ -16,7 +16,7 @@ const RealSecurityTestEngine = require('../services/realSecurityTestEngine'); //
 const { RealCompatibilityTestEngine } = require('../services/realCompatibilityTestEngine');
 const { RealUXTestEngine } = require('../services/realUXTestEngine');
 const { RealAPITestEngine } = require('../services/realAPITestEngine');
-const { RealSEOTestEngine } = require('../services/realSEOTestEngine');
+
 const multer = require('multer');
 const path = require('path');
 
@@ -27,7 +27,7 @@ const realSecurityTestEngine = new RealSecurityTestEngine();
 const realCompatibilityTestEngine = new RealCompatibilityTestEngine();
 const realUXTestEngine = new RealUXTestEngine();
 const realAPITestEngine = new RealAPITestEngine();
-const realSEOTestEngine = new RealSEOTestEngine();
+
 
 // 配置文件上传
 const storage = multer.memoryStorage();
@@ -601,50 +601,7 @@ router.post('/stress', optionalAuth, testRateLimiter, validateURLMiddleware(), a
   }
 }));
 
-/**
- * SEO测试
- * POST /api/test/seo
- */
-router.post('/seo', optionalAuth, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
-  const { url, config = {} } = req.body;
 
-  // URL验证已由中间件完成，可以直接使用验证后的URL
-  const validatedURL = req.validatedURL.url.toString();
-
-  try {
-    console.log('🔍 Starting comprehensive SEO analysis for:', validatedURL);
-
-    // 使用专门的SEO测试引擎
-    const testResult = await realSEOTestEngine.runSEOTest(validatedURL, {
-      ...config,
-      userId: req.user?.id,
-      keywords: config.keywords || config.customKeywords || '',
-      depth: config.depth || 'medium',
-      checkSEO: config.checkSEO !== false,
-      checkPerformance: config.checkPerformance !== false,
-      checkAccessibility: config.checkAccessibility !== false,
-      checkContent: config.checkContent !== false,
-      checkSecurity: config.checkSecurity !== false,
-      checkMobile: config.checkMobile !== false,
-      checkLinks: config.checkLinks !== false
-    });
-
-    console.log('✅ SEO analysis completed with score:', testResult.overallScore);
-
-    res.json({
-      success: true,
-      data: testResult,
-      testType: 'seo'
-    });
-  } catch (error) {
-    console.error('❌ SEO测试失败:', error);
-    res.status(500).json({
-      success: false,
-      message: 'SEO测试失败',
-      error: error.message
-    });
-  }
-}));
 
 /**
  * 安全测试
@@ -990,95 +947,14 @@ router.get('/:engine/status', asyncHandler(async (req, res) => {
   }
 }));
 
-/**
- * 本地SEO文件分析
- * POST /api/test/seo/local
- */
-router.post('/seo/local', optionalAuth, upload.array('files', 20), asyncHandler(async (req, res) => {
-  if (!req.files || req.files.length === 0) {
-    return res.status(400).json({
-      success: false,
-      message: '请上传至少一个文件'
-    });
-  }
 
-  try {
-    console.log(`📁 Starting local SEO analysis for ${req.files.length} files`);
 
-    const options = {
-      checkTechnicalSEO: req.body.checkTechnicalSEO !== 'false',
-      checkContentQuality: req.body.checkContentQuality !== 'false',
-      checkAccessibility: req.body.checkAccessibility !== 'false',
-      checkPerformance: req.body.checkPerformance !== 'false',
-      keywords: req.body.keywords || '',
-      userId: req.user?.id
-    };
 
-    const analysisResult = await enhancedSEOEngine.analyzeLocalFiles(req.files, options);
 
-    console.log(`✅ Local SEO analysis completed with score: ${analysisResult.overallScore}`);
 
-    res.json({
-      success: true,
-      data: analysisResult,
-      testType: 'seo-local'
-    });
 
-  } catch (error) {
-    console.error('本地SEO分析失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '本地SEO分析失败',
-      error: error.message
-    });
-  }
-}));
 
-/**
- * 增强SEO分析
- * POST /api/test/seo/enhanced
- */
-router.post('/seo/enhanced', optionalAuth, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
-  const { url, options = {} } = req.body;
-  const validatedURL = req.validatedURL.url.toString();
 
-  try {
-    console.log('🚀 Starting enhanced SEO analysis for:', validatedURL);
 
-    const enhancedOptions = {
-      ...options,
-      userId: req.user?.id,
-      keywords: options.keywords || '',
-      deepCrawl: options.deepCrawl === true,
-      maxPages: parseInt(options.maxPages) || 10,
-      maxDepth: parseInt(options.maxDepth) || 2,
-      competitorAnalysis: options.competitorAnalysis === true,
-      competitorUrls: options.competitorUrls || [],
-      backlinksAnalysis: options.backlinksAnalysis === true,
-      keywordRanking: options.keywordRanking === true,
-      internationalSEO: options.internationalSEO === true,
-      technicalAudit: options.technicalAudit === true
-    };
-
-    // 使用现有的realSEOTestEngine，但传入增强选项
-    const testResult = await realSEOTestEngine.runSEOTest(validatedURL, enhancedOptions);
-
-    console.log('✅ Enhanced SEO analysis completed with score:', testResult.overallScore);
-
-    res.json({
-      success: true,
-      data: testResult,
-      testType: 'seo-enhanced'
-    });
-
-  } catch (error) {
-    console.error('增强SEO分析失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '增强SEO分析失败',
-      error: error.message
-    });
-  }
-}));
 
 module.exports = router;

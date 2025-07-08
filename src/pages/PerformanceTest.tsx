@@ -1,22 +1,19 @@
 import { 
   AlertCircle, 
+  BarChart3,
   CheckCircle, 
   Clock, 
   Download, 
-  Eye,
-  Globe,
-  Key,
+  Gauge,
+  Image,
   Loader, 
   Lock, 
+  Monitor,
   Play, 
-  Search,
-  Settings,
-  Shield,
-  ShieldAlert,
-  ShieldCheck,
+  Smartphone,
   Square,
+  Timer,
   TrendingUp,
-  Users,
   Wifi,
   XCircle,
   Zap
@@ -26,51 +23,53 @@ import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { URLInput } from '../components/testing';
 import { useUserStats } from '../hooks/useUserStats';
 
-type TestMode = 'basic' | 'standard' | 'comprehensive' | 'penetration';
+type TestMode = 'basic' | 'standard' | 'comprehensive' | 'lighthouse';
 type TestStatusType = 'idle' | 'starting' | 'running' | 'completed' | 'failed';
 
-interface SecurityTestConfig {
+interface PerformanceTestConfig {
   url: string;
   mode: TestMode;
-  checkSSL: boolean;
-  checkHeaders: boolean;
-  checkVulnerabilities: boolean;
-  checkAuthentication: boolean;
-  checkCORS: boolean;
-  checkCSP: boolean;
-  checkXSS: boolean;
-  checkSQLInjection: boolean;
-  checkDirectoryTraversal: boolean;
-  checkDDoSProtection: boolean;
+  checkPageSpeed: boolean;
+  checkCoreWebVitals: boolean;
+  checkResourceOptimization: boolean;
+  checkCaching: boolean;
+  checkCompression: boolean;
+  checkImageOptimization: boolean;
+  checkJavaScriptOptimization: boolean;
+  checkCSSOptimization: boolean;
+  checkMobilePerformance: boolean;
+  checkAccessibility: boolean;
+  device: 'desktop' | 'mobile' | 'both';
 }
 
-const SecurityTest: React.FC = () => {
+const PerformanceTest: React.FC = () => {
   // 登录检查
   const {
     isAuthenticated,
     requireLogin,
     LoginPromptComponent
   } = useAuthCheck({
-    feature: "安全测试",
-    description: "使用安全测试功能"
+    feature: "性能测试",
+    description: "使用性能测试功能"
   });
 
   // 用户统计
   const { recordTestCompletion } = useUserStats();
 
-  const [testConfig, setTestConfig] = useState<SecurityTestConfig>({
+  const [testConfig, setTestConfig] = useState<PerformanceTestConfig>({
     url: '',
     mode: 'standard',
-    checkSSL: true,
-    checkHeaders: true,
-    checkVulnerabilities: true,
-    checkAuthentication: true,
-    checkCORS: true,
-    checkCSP: true,
-    checkXSS: false,
-    checkSQLInjection: false,
-    checkDirectoryTraversal: false,
-    checkDDoSProtection: false,
+    checkPageSpeed: true,
+    checkCoreWebVitals: true,
+    checkResourceOptimization: true,
+    checkCaching: true,
+    checkCompression: true,
+    checkImageOptimization: true,
+    checkJavaScriptOptimization: false,
+    checkCSSOptimization: false,
+    checkMobilePerformance: true,
+    checkAccessibility: false,
+    device: 'both'
   });
 
   const [isAdvancedMode, setIsAdvancedMode] = useState(false);
@@ -85,171 +84,175 @@ const SecurityTest: React.FC = () => {
   const quickTemplates = [
     {
       id: 'basic',
-      name: '基础检测',
-      description: '检查基本安全配置',
-      icon: Shield,
+      name: '快速检测',
+      description: '基本性能指标检测',
+      icon: Zap,
       color: 'blue',
-      duration: '1-2分钟',
+      duration: '30-60秒',
       config: {
         mode: 'basic' as TestMode,
-        checkSSL: true,
-        checkHeaders: true,
-        checkVulnerabilities: false,
-        checkAuthentication: false,
-        checkCORS: false,
-        checkCSP: false,
-        checkXSS: false,
-        checkSQLInjection: false,
-        checkDirectoryTraversal: false,
-        checkDDoSProtection: false,
+        checkPageSpeed: true,
+        checkCoreWebVitals: true,
+        checkResourceOptimization: false,
+        checkCaching: false,
+        checkCompression: false,
+        checkImageOptimization: false,
+        checkJavaScriptOptimization: false,
+        checkCSSOptimization: false,
+        checkMobilePerformance: false,
+        checkAccessibility: false,
+        device: 'desktop' as const
       }
     },
     {
       id: 'standard',
-      name: '标准扫描',
-      description: '全面的安全检测（推荐）',
-      icon: ShieldCheck,
+      name: '标准测试',
+      description: '全面的性能分析（推荐）',
+      icon: Gauge,
       color: 'green',
-      duration: '3-5分钟',
+      duration: '2-3分钟',
       config: {
         mode: 'standard' as TestMode,
-        checkSSL: true,
-        checkHeaders: true,
-        checkVulnerabilities: true,
-        checkAuthentication: true,
-        checkCORS: true,
-        checkCSP: true,
-        checkXSS: false,
-        checkSQLInjection: false,
-        checkDirectoryTraversal: false,
-        checkDDoSProtection: false,
+        checkPageSpeed: true,
+        checkCoreWebVitals: true,
+        checkResourceOptimization: true,
+        checkCaching: true,
+        checkCompression: true,
+        checkImageOptimization: true,
+        checkJavaScriptOptimization: false,
+        checkCSSOptimization: false,
+        checkMobilePerformance: true,
+        checkAccessibility: false,
+        device: 'both' as const
       }
     },
     {
       id: 'comprehensive',
-      name: '深度审计',
-      description: '详细的安全漏洞扫描',
-      icon: ShieldAlert,
-      color: 'orange',
-      duration: '5-10分钟',
+      name: '深度分析',
+      description: '详细的性能优化建议',
+      icon: BarChart3,
+      color: 'purple',
+      duration: '3-5分钟',
       config: {
         mode: 'comprehensive' as TestMode,
-        checkSSL: true,
-        checkHeaders: true,
-        checkVulnerabilities: true,
-        checkAuthentication: true,
-        checkCORS: true,
-        checkCSP: true,
-        checkXSS: true,
-        checkSQLInjection: true,
-        checkDirectoryTraversal: true,
-        checkDDoSProtection: false,
+        checkPageSpeed: true,
+        checkCoreWebVitals: true,
+        checkResourceOptimization: true,
+        checkCaching: true,
+        checkCompression: true,
+        checkImageOptimization: true,
+        checkJavaScriptOptimization: true,
+        checkCSSOptimization: true,
+        checkMobilePerformance: true,
+        checkAccessibility: true,
+        device: 'both' as const
       }
     },
     {
-      id: 'penetration',
-      name: '渗透测试',
-      description: '高级安全渗透测试',
-      icon: Key,
-      color: 'red',
-      duration: '10-20分钟',
+      id: 'lighthouse',
+      name: 'Lighthouse审计',
+      description: 'Google Lighthouse完整审计',
+      icon: TrendingUp,
+      color: 'orange',
+      duration: '2-4分钟',
       config: {
-        mode: 'penetration' as TestMode,
-        checkSSL: true,
-        checkHeaders: true,
-        checkVulnerabilities: true,
-        checkAuthentication: true,
-        checkCORS: true,
-        checkCSP: true,
-        checkXSS: true,
-        checkSQLInjection: true,
-        checkDirectoryTraversal: true,
-        checkDDoSProtection: true,
+        mode: 'lighthouse' as TestMode,
+        checkPageSpeed: true,
+        checkCoreWebVitals: true,
+        checkResourceOptimization: true,
+        checkCaching: true,
+        checkCompression: true,
+        checkImageOptimization: true,
+        checkJavaScriptOptimization: true,
+        checkCSSOptimization: true,
+        checkMobilePerformance: true,
+        checkAccessibility: true,
+        device: 'both' as const
       }
     }
   ];
 
-  // 安全检测项目
-  const securityTests = [
+  // 性能检测项目
+  const performanceTests = [
     {
-      key: 'checkSSL',
-      name: 'SSL/TLS检测',
-      description: '检查HTTPS配置和证书',
-      icon: Lock,
-      color: 'green',
+      key: 'checkPageSpeed',
+      name: '页面速度',
+      description: '检测页面加载速度',
+      icon: Timer,
+      color: 'blue',
       estimatedTime: '10-20秒'
     },
     {
-      key: 'checkHeaders',
-      name: '安全头检测',
-      description: '检查HTTP安全头配置',
-      icon: Settings,
-      color: 'blue',
+      key: 'checkCoreWebVitals',
+      name: 'Core Web Vitals',
+      description: '检测核心网页指标',
+      icon: Gauge,
+      color: 'green',
       estimatedTime: '15-30秒'
     },
     {
-      key: 'checkVulnerabilities',
-      name: '漏洞扫描',
-      description: '检查已知安全漏洞',
-      icon: Search,
+      key: 'checkResourceOptimization',
+      name: '资源优化',
+      description: '检查资源加载优化',
+      icon: Zap,
       color: 'yellow',
-      estimatedTime: '30-60秒'
-    },
-    {
-      key: 'checkAuthentication',
-      name: '认证检测',
-      description: '检查身份验证机制',
-      icon: Users,
-      color: 'purple',
       estimatedTime: '20-40秒'
     },
     {
-      key: 'checkCORS',
-      name: 'CORS检测',
-      description: '检查跨域资源共享配置',
-      icon: Globe,
-      color: 'indigo',
-      estimatedTime: '15-25秒'
-    },
-    {
-      key: 'checkCSP',
-      name: 'CSP检测',
-      description: '检查内容安全策略',
-      icon: Shield,
-      color: 'teal',
+      key: 'checkCaching',
+      name: '缓存策略',
+      description: '检查缓存配置',
+      icon: Clock,
+      color: 'purple',
       estimatedTime: '10-20秒'
     },
     {
-      key: 'checkXSS',
-      name: 'XSS检测',
-      description: '检查跨站脚本攻击漏洞',
-      icon: AlertCircle,
+      key: 'checkCompression',
+      name: '压缩优化',
+      description: '检查Gzip/Brotli压缩',
+      icon: Wifi,
+      color: 'indigo',
+      estimatedTime: '10-15秒'
+    },
+    {
+      key: 'checkImageOptimization',
+      name: '图片优化',
+      description: '检查图片压缩和格式',
+      icon: Image,
+      color: 'pink',
+      estimatedTime: '20-30秒'
+    },
+    {
+      key: 'checkJavaScriptOptimization',
+      name: 'JavaScript优化',
+      description: '检查JS代码优化',
+      icon: BarChart3,
       color: 'orange',
+      estimatedTime: '30-45秒'
+    },
+    {
+      key: 'checkCSSOptimization',
+      name: 'CSS优化',
+      description: '检查CSS代码优化',
+      icon: Monitor,
+      color: 'teal',
+      estimatedTime: '20-30秒'
+    },
+    {
+      key: 'checkMobilePerformance',
+      name: '移动性能',
+      description: '检查移动端性能',
+      icon: Smartphone,
+      color: 'red',
       estimatedTime: '30-60秒'
     },
     {
-      key: 'checkSQLInjection',
-      name: 'SQL注入检测',
-      description: '检查SQL注入漏洞',
-      icon: Eye,
-      color: 'red',
-      estimatedTime: '45-90秒'
-    },
-    {
-      key: 'checkDirectoryTraversal',
-      name: '目录遍历检测',
-      description: '检查目录遍历漏洞',
-      icon: Zap,
-      color: 'pink',
-      estimatedTime: '20-40秒'
-    },
-    {
-      key: 'checkDDoSProtection',
-      name: 'DDoS防护检测',
-      description: '检查DDoS防护机制',
-      icon: Wifi,
+      key: 'checkAccessibility',
+      name: '可访问性',
+      description: '检查页面可访问性',
+      icon: CheckCircle,
       color: 'gray',
-      estimatedTime: '60-120秒'
+      estimatedTime: '15-25秒'
     }
   ];
 
@@ -279,18 +282,18 @@ const SecurityTest: React.FC = () => {
       setTestStatus('starting');
       setIsRunning(true);
       setProgress(0);
-      setTestProgress('正在初始化安全测试...');
+      setTestProgress('正在初始化性能测试...');
       
       // 模拟测试过程
       const steps = [
-        '连接目标服务器...',
-        '检查SSL/TLS配置...',
-        '分析HTTP安全头...',
-        '扫描常见漏洞...',
-        '检查认证机制...',
-        '测试CORS配置...',
-        '验证CSP策略...',
-        '生成安全报告...'
+        '连接目标网站...',
+        '分析页面结构...',
+        '测量加载时间...',
+        '检查Core Web Vitals...',
+        '分析资源优化...',
+        '检查缓存策略...',
+        '测试移动性能...',
+        '生成性能报告...'
       ];
 
       setTestStatus('running');
@@ -304,28 +307,32 @@ const SecurityTest: React.FC = () => {
       // 模拟测试结果
       const mockResults = {
         score: Math.floor(Math.random() * 40) + 60, // 60-100分
-        vulnerabilities: Math.floor(Math.random() * 5),
-        warnings: Math.floor(Math.random() * 10),
-        passed: Math.floor(Math.random() * 20) + 10,
+        fcp: Math.floor(Math.random() * 2000) + 1000, // 1-3秒
+        lcp: Math.floor(Math.random() * 3000) + 2000, // 2-5秒
+        cls: (Math.random() * 0.2).toFixed(3), // 0-0.2
+        fid: Math.floor(Math.random() * 100) + 50, // 50-150ms
+        loadTime: Math.floor(Math.random() * 5000) + 2000, // 2-7秒
+        pageSize: Math.floor(Math.random() * 2000) + 1000, // 1-3MB
+        requests: Math.floor(Math.random() * 50) + 30, // 30-80个请求
         details: {
-          ssl: { status: 'pass', score: 95 },
-          headers: { status: 'warning', score: 75 },
-          vulnerabilities: { status: 'pass', score: 90 },
-          authentication: { status: 'pass', score: 85 }
+          performance: { score: Math.floor(Math.random() * 40) + 60 },
+          accessibility: { score: Math.floor(Math.random() * 30) + 70 },
+          bestPractices: { score: Math.floor(Math.random() * 20) + 80 },
+          seo: { score: Math.floor(Math.random() * 30) + 70 }
         }
       };
 
       setResults(mockResults);
       setTestStatus('completed');
-      setTestProgress('安全测试完成！');
+      setTestProgress('性能测试完成！');
       setIsRunning(false);
 
       // 记录测试完成统计
-      recordTestCompletion('安全测试', true, mockResults.score, 16);
+      recordTestCompletion('性能测试', true, mockResults.score, 16);
 
     } catch (err: any) {
-      console.error('❌ Failed to start security test:', err);
-      setError(err.message || '安全测试启动失败');
+      console.error('❌ Failed to start performance test:', err);
+      setError(err.message || '性能测试启动失败');
       setTestStatus('failed');
       setIsRunning(false);
     }
@@ -337,10 +344,10 @@ const SecurityTest: React.FC = () => {
     setError('');
     setIsRunning(false);
     setProgress(0);
-    console.log('✅ Security test stopped');
+    console.log('✅ Performance test stopped');
   };
 
-  const handleTestTypeChange = (testKey: keyof SecurityTestConfig) => {
+  const handleTestTypeChange = (testKey: keyof PerformanceTestConfig) => {
     setTestConfig(prev => ({
       ...prev,
       [testKey]: !prev[testKey]
@@ -357,8 +364,8 @@ const SecurityTest: React.FC = () => {
       <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-white">安全测试</h2>
-            <p className="text-gray-300 mt-1">全面检测网站安全漏洞和防护措施</p>
+            <h2 className="text-2xl font-bold text-white">性能测试</h2>
+            <p className="text-gray-300 mt-1">全面分析网站性能表现和优化建议</p>
           </div>
 
           {/* 模式切换 */}
@@ -395,11 +402,11 @@ const SecurityTest: React.FC = () => {
                   disabled={!testConfig.url}
                   className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${!testConfig.url
                     ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                    : 'bg-red-600 hover:bg-red-700 text-white'
+                    : 'bg-green-600 hover:bg-green-700 text-white'
                     }`}
                 >
-                  <Shield className="w-5 h-5" />
-                  <span>开始扫描</span>
+                  <Gauge className="w-5 h-5" />
+                  <span>开始测试</span>
                 </button>
               ) : testStatus === 'starting' ? (
                 <div className="flex items-center space-x-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg">
@@ -410,7 +417,7 @@ const SecurityTest: React.FC = () => {
                 <div className="flex items-center space-x-3">
                   <div className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
                     <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-sm text-green-300 font-medium">扫描中</span>
+                    <span className="text-sm text-green-300 font-medium">测试中</span>
                   </div>
                   <button
                     type="button"
@@ -424,12 +431,12 @@ const SecurityTest: React.FC = () => {
               ) : testStatus === 'completed' ? (
                 <div className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
                   <CheckCircle className="w-4 h-4 text-green-400" />
-                  <span className="text-sm text-green-300 font-medium">扫描完成</span>
+                  <span className="text-sm text-green-300 font-medium">测试完成</span>
                 </div>
               ) : testStatus === 'failed' ? (
                 <div className="flex items-center space-x-2 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg">
                   <XCircle className="w-4 h-4 text-red-400" />
-                  <span className="text-sm text-red-300 font-medium">扫描失败</span>
+                  <span className="text-sm text-red-300 font-medium">测试失败</span>
                 </div>
               ) : null}
             </div>
@@ -440,4 +447,4 @@ const SecurityTest: React.FC = () => {
   );
 };
 
-export default SecurityTest;
+export default PerformanceTest;

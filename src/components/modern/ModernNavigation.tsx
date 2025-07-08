@@ -7,6 +7,7 @@ import {
   Database,
   Eye,
   FileText,
+  Gauge,
   Globe,
   HelpCircle,
   LogOut,
@@ -61,6 +62,12 @@ const ModernNavigation: React.FC = () => {
       href: '/security-test',
       icon: Shield,
       description: '安全漏洞扫描'
+    },
+    {
+      name: '性能测试',
+      href: '/performance-test',
+      icon: Gauge,
+      description: '网站性能分析'
     },
     {
       name: '兼容性测试',

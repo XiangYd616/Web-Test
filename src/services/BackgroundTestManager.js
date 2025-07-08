@@ -136,55 +136,10 @@ class BackgroundTestManager {
     }
   }
 
-  // 执行SEO测试
+  // 执行SEO测试 - 已迁移到专用SEO测试页面
   async executeSEOTest(testInfo) {
-    const { config } = testInfo;
-
-    this.updateTestProgress(testInfo.id, 10, '🔍 正在准备SEO测试...');
-
-    try {
-      const response = await fetch(`${this.apiBaseUrl}/test/seo`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        },
-        body: JSON.stringify(config)
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      this.updateTestProgress(testInfo.id, 30, '📈 正在执行SEO分析...');
-
-      // 模拟SEO测试步骤
-      await this.simulateProgressiveTest(testInfo.id, 30, 90, [
-        '🏷️ 正在检查标题和描述...',
-        '🔗 正在分析内链结构...',
-        '📱 正在测试移动友好性...',
-        '⚡ 正在检查页面速度...',
-        '📊 正在生成SEO报告...'
-      ]);
-
-      const data = await response.json();
-
-      if (data.success || data.status === 'completed') {
-        // 确保SEO测试结果有正确的数据结构
-        const seoResults = data.data || data.results || data;
-
-        // 如果是直接的SEO结果，确保有必要的字段
-        if (seoResults && !seoResults.findings && seoResults.issues) {
-          seoResults.findings = seoResults.issues;
-        }
-
-        this.completeTest(testInfo.id, seoResults);
-      } else {
-        throw new Error(data.message || 'SEO测试失败');
-      }
-    } catch (error) {
-      this.handleTestError(testInfo.id, error);
-    }
+    // SEO测试现在使用前端实现，不再需要后端API
+    this.handleTestError(testInfo.id, new Error('SEO测试已迁移到专用的SEO测试页面，请使用SEO测试功能'));
   }
 
   // 执行数据库测试

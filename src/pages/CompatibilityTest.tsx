@@ -3,9 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { AdvancedTestCharts } from '../components/charts';
 import { URLInput } from '../components/testing';
-import { useAdvancedTestEngine } from '../hooks/useAdvancedTestEngine';
+// import { useAdvancedTestEngine } from '../hooks/useAdvancedTestEngine'; // 已删除
 import { useUserStats } from '../hooks/useUserStats';
-import { AdvancedTestConfig } from '../services/advancedTestEngine';
+// import { AdvancedTestConfig } from '../services/advancedTestEngine'; // 已删除
 import '../styles/progress-bars.css';
 
 interface CompatibilityConfig extends AdvancedTestConfig {
@@ -53,7 +53,8 @@ const CompatibilityTest: React.FC = () => {
     timeout: 300000
   });
 
-  // 使用高级测试引擎
+  // 使用高级测试引擎 - 已删除，需要重构
+  /*
   const {
     isRunning,
     progress,
@@ -69,6 +70,22 @@ const CompatibilityTest: React.FC = () => {
     clearResults,
     clearError
   } = useAdvancedTestEngine();
+  */
+
+  // 临时状态，等待重构
+  const isRunning = false;
+  const progress = 0;
+  const currentStep = '';
+  const testPhase = 'idle';
+  const estimatedTimeRemaining = 0;
+  const results = null;
+  const testHistory: any[] = [];
+  const error = null;
+  const engineStatus = {};
+  const runTest = async () => { };
+  const stopTest = async () => { };
+  const clearResults = () => { };
+  const clearError = () => { };
 
   // 状态管理
   const [testStatus, setTestStatus] = useState<'idle' | 'starting' | 'running' | 'completed' | 'failed'>('idle');

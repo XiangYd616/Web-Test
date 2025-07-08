@@ -84,9 +84,17 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
         },
         {
           id: 'security-test',
-          name: '安全检测',
+          name: '安全测试',
           icon: Shield,
-          href: '/security-test'
+          href: '/security-test',
+          badge: 'NEW'
+        },
+        {
+          id: 'performance-test',
+          name: '性能测试',
+          icon: Zap,
+          href: '/performance-test',
+          badge: 'NEW'
         },
         {
           id: 'compatibility-test',

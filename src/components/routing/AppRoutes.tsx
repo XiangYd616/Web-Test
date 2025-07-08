@@ -10,8 +10,8 @@ import { EnhancedErrorBoundary, LoadingSpinner } from '../ui';
 const ModernDashboard = lazy(() => import('../../pages/dashboard/ModernDashboard'));
 const WebsiteTest = lazy(() => import('../../pages/WebsiteTest'));
 const SecurityTest = lazy(() => import('../../pages/SecurityTest'));
-const PerformanceTest = lazy(() => import('../../pages/Performance'));
-const SEOTest = lazy(() => import('../../pages/SEOTestUnified'));
+const PerformanceTest = lazy(() => import('../../pages/PerformanceTest'));
+const SEOTest = lazy(() => import('../../pages/SEOTest'));
 
 const APITest = lazy(() => import('../../pages/APITest'));
 const NetworkTest = lazy(() => import('../../pages/NetworkTest'));
@@ -114,6 +114,11 @@ const AppRoutes: React.FC = () => {
         <Route path="security-test" element={
           <LazyPageWrapper>
             <SecurityTest />
+          </LazyPageWrapper>
+        } />
+        <Route path="performance-test" element={
+          <LazyPageWrapper>
+            <PerformanceTest />
           </LazyPageWrapper>
         } />
 

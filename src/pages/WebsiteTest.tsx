@@ -22,12 +22,12 @@ import { useSearchParams } from 'react-router-dom';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { AdvancedTestCharts } from '../components/charts';
 import { URLInput } from '../components/testing';
-import { useAdvancedTestEngine } from '../hooks/useAdvancedTestEngine';
+// import { useAdvancedTestEngine } from '../hooks/useAdvancedTestEngine'; // 已删除
 import { useUserStats } from '../hooks/useUserStats';
-import { AdvancedTestConfig } from '../services/advancedTestEngine';
+// import { AdvancedTestConfig } from '../services/advancedTestEngine'; // 已删除
 import '../styles/progress-bars.css';
 
-interface WebsiteTestConfig extends AdvancedTestConfig {
+interface WebsiteTestConfig {
   testTypes: {
     performance: boolean;
     seo: boolean;
@@ -78,7 +78,8 @@ const WebsiteTest: React.FC = () => {
     timeout: 120000
   });
 
-  // 使用高级测试引擎
+  // 使用高级测试引擎 - 已删除，需要重构
+  /*
   const {
     isRunning,
     progress,
@@ -94,6 +95,22 @@ const WebsiteTest: React.FC = () => {
     clearResults,
     clearError
   } = useAdvancedTestEngine();
+  */
+
+  // 临时状态，等待重构
+  const isRunning = false;
+  const progress = 0;
+  const currentStep = '';
+  const testPhase = 'idle';
+  const estimatedTimeRemaining = 0;
+  const results = null;
+  const testHistory: any[] = [];
+  const error = null;
+  const engineStatus = {};
+  const runTest = async () => { };
+  const stopTest = async () => { };
+  const clearResults = () => { };
+  const clearError = () => { };
 
   // 状态管理
   const [testStatus, setTestStatus] = useState<'idle' | 'starting' | 'running' | 'completed' | 'failed'>('idle');
@@ -342,10 +359,10 @@ const WebsiteTest: React.FC = () => {
                 onClick={handleStartTest}
                 disabled={!config.url.trim() || selectedTestsCount === 0}
                 className={`btn btn-md flex items-center space-x-2 ${!config.url.trim() || selectedTestsCount === 0
-                    ? 'btn-disabled opacity-50 cursor-not-allowed'
-                    : isAuthenticated
-                      ? 'btn-primary hover:btn-primary-dark'
-                      : 'bg-yellow-600 hover:bg-yellow-700 text-white border border-yellow-500/30'
+                  ? 'btn-disabled opacity-50 cursor-not-allowed'
+                  : isAuthenticated
+                    ? 'btn-primary hover:btn-primary-dark'
+                    : 'bg-yellow-600 hover:bg-yellow-700 text-white border border-yellow-500/30'
                   }`}
               >
                 {isAuthenticated ? (
@@ -507,8 +524,8 @@ const WebsiteTest: React.FC = () => {
                 <div
                   key={test.key}
                   className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${config.testTypes[test.key as keyof WebsiteTestConfig['testTypes']]
-                      ? `border-${test.color}-500 bg-${test.color}-500/10`
-                      : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
+                    ? `border-${test.color}-500 bg-${test.color}-500/10`
+                    : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
                     }`}
                   onClick={() => handleTestTypeChange(test.key as keyof WebsiteTestConfig['testTypes'])}
                 >
@@ -531,8 +548,8 @@ const WebsiteTest: React.FC = () => {
                           />
                           <div
                             className={`w-6 h-6 rounded-lg border-2 cursor-pointer transition-all duration-200 flex items-center justify-center ${config.testTypes[test.key as keyof WebsiteTestConfig['testTypes']]
-                                ? `border-${test.color}-500 bg-${test.color}-500 shadow-lg shadow-${test.color}-500/25`
-                                : 'border-gray-500 bg-gray-700/50 hover:border-gray-400 hover:bg-gray-600/50'
+                              ? `border-${test.color}-500 bg-${test.color}-500 shadow-lg shadow-${test.color}-500/25`
+                              : 'border-gray-500 bg-gray-700/50 hover:border-gray-400 hover:bg-gray-600/50'
                               }`}
                           >
                             {config.testTypes[test.key as keyof WebsiteTestConfig['testTypes']] && (
@@ -656,8 +673,8 @@ const WebsiteTest: React.FC = () => {
               <div className="space-y-4">
                 <div className="text-center p-6 bg-gray-700/50 rounded-lg">
                   <div className={`text-4xl font-bold ${results.overallScore >= 90 ? 'text-green-400' :
-                      results.overallScore >= 70 ? 'text-yellow-400' :
-                        'text-red-400'
+                    results.overallScore >= 70 ? 'text-yellow-400' :
+                      'text-red-400'
                     }`}>
                     {Math.round(results.overallScore)}
                   </div>
@@ -767,8 +784,8 @@ const WebsiteTest: React.FC = () => {
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className={`px-2 py-1 rounded text-xs font-medium ${test.overallScore >= 80 ? 'bg-green-500/20 text-green-400' :
-                      test.overallScore >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
-                        'bg-red-500/20 text-red-400'
+                    test.overallScore >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
+                      'bg-red-500/20 text-red-400'
                     }`}>
                     {Math.round(test.overallScore)}分
                   </div>

@@ -27,7 +27,7 @@ interface SecurityAnalysisResult {
   };
   vulnerabilities: Array<{
     type: string;
-    severity: '低' | '中' | '高' | '信息';
+    severity: 'low' | 'medium' | 'high' | 'critical' | 'info' | '低' | '中' | '高' | '信息';
     description: string;
     recommendation: string;
   }>;
@@ -91,6 +91,12 @@ export const EnhancedSecurityAnalysis: React.FC<EnhancedSecurityAnalysisProps> =
 
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
+      case 'critical':
+      case 'high': return <XCircle className="w-4 h-4 text-red-400" />;
+      case 'medium': return <AlertTriangle className="w-4 h-4 text-yellow-400" />;
+      case 'low': return <AlertCircle className="w-4 h-4 text-blue-400" />;
+      case 'info': return <Info className="w-4 h-4 text-gray-400" />;
+      // 兼容中文值
       case '高': return <XCircle className="w-4 h-4 text-red-400" />;
       case '中': return <AlertTriangle className="w-4 h-4 text-yellow-400" />;
       case '低': return <AlertCircle className="w-4 h-4 text-blue-400" />;
@@ -101,12 +107,29 @@ export const EnhancedSecurityAnalysis: React.FC<EnhancedSecurityAnalysisProps> =
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
+      case 'critical':
+      case 'high': return 'border-red-500/30 bg-red-500/10';
+      case 'medium': return 'border-yellow-500/30 bg-yellow-500/10';
+      case 'low': return 'border-blue-500/30 bg-blue-500/10';
+      case 'info': return 'border-gray-500/30 bg-gray-500/10';
+      // 兼容中文值
       case '高': return 'border-red-500/30 bg-red-500/10';
       case '中': return 'border-yellow-500/30 bg-yellow-500/10';
       case '低': return 'border-blue-500/30 bg-blue-500/10';
       case '信息': return 'border-gray-500/30 bg-gray-500/10';
       default: return 'border-gray-500/30 bg-gray-500/10';
     }
+  };
+
+  const getSeverityText = (severity: string) => {
+    const textMap: { [key: string]: string } = {
+      'critical': '严重',
+      'high': '高',
+      'medium': '中',
+      'low': '低',
+      'info': '信息'
+    };
+    return textMap[severity] || severity;
   };
 
   const getCheckIcon = (passed: boolean) => {
@@ -199,7 +222,7 @@ export const EnhancedSecurityAnalysis: React.FC<EnhancedSecurityAnalysisProps> =
                   <div className="flex items-center space-x-2">
                     <span className="text-sm font-medium text-white">{vuln.type}</span>
                     <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getSeverityColor(vuln.severity)}`}>
-                      {vuln.severity}
+                      {getSeverityText(vuln.severity)}
                     </span>
                   </div>
                   <p className="text-sm text-gray-300 mt-1">{vuln.description}</p>

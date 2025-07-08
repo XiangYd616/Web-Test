@@ -15,6 +15,7 @@ require('dotenv').config();
 // 导入路由
 const authRoutes = require('./routes/auth');
 const testRoutes = require('./routes/test');
+// const unifiedSecurityRoutes = require('./routes/unifiedSecurity'); // 已移除
 const userRoutes = require('./routes/user');
 const adminRoutes = require('./routes/admin');
 const dataRoutes = require('./routes/data');
@@ -120,6 +121,7 @@ app.use('/api/test', testRoutes);
 app.use('/api/tests', testRoutes); // 复数形式的别名
 app.use('/api/test-engines', testRoutes); // 测试引擎状态API
 app.use('/api/test-history', testRoutes); // 兼容性路由 - 重定向到test路由
+// app.use('/api/unified-security', unifiedSecurityRoutes); // 已移除
 app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
 
