@@ -33,33 +33,82 @@ export class ProxyService {
       // 验证和清理URL
       const cleanUrl = this.validateAndCleanUrl(url);
 
-      // 首先尝试使用内置的代理API
-      const response = await this.fetchViaProxy(cleanUrl, signal);
-      if (response) {
-        return response;
+      // 首先尝试使用代理API
+      const proxyResponse = await this.fetchViaProxy(cleanUrl, signal);
+      if (proxyResponse) {
+        return proxyResponse;
       }
 
       // 如果代理失败，尝试直接访问
-      return await this.fetchDirect(cleanUrl, signal);
+      try {
+        return await this.fetchDirect(cleanUrl, signal);
+      } catch (directError) {
+        // 直接访问也失败，提供友好的错误信息
+        throw new Error(`无法访问网站 ${cleanUrl}。
+
+可能的原因：
+• 网站服务器暂时不可用
+• 网络连接问题
+• 网站阻止了跨域访问
+• URL地址不正确
+
+建议解决方案：
+1. 检查网址是否正确
+2. 稍后重试
+3. 切换到"本地分析"模式，上传HTML文件进行分析
+
+本地分析模式可以提供完整的SEO检测功能，不受网络限制。`);
+      }
 
     } catch (error) {
-      console.error('Proxy fetch failed:', error);
+      console.warn('Fetch page failed:', error);
 
       // 提供更详细的错误信息
       if (error instanceof Error) {
+        // 如果是我们自定义的详细错误信息，直接抛出
+        if (error.message.includes('建议解决方案')) {
+          throw error;
+        }
+
         if (error.message.includes('CORS')) {
-          throw new Error(`无法访问该网站：CORS策略阻止了跨域请求。请确保网站允许跨域访问，或者尝试其他网站。`);
-        } else if (error.message.includes('Failed to fetch')) {
-          throw new Error(`网络连接失败：无法连接到目标网站。请检查网址是否正确，或者稍后重试。`);
+          throw new Error(`跨域访问被阻止：${cleanUrl}
+
+该网站不允许跨域访问。建议：
+• 切换到"本地分析"模式
+• 上传网页HTML文件进行分析
+• 本地分析功能完整，不受网络限制`);
+        } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+          throw new Error(`网络连接失败：${cleanUrl}
+
+请检查：
+• 网址是否正确
+• 网络连接是否正常
+• 网站是否可访问
+
+建议切换到"本地分析"模式进行离线分析。`);
         } else if (error.message.includes('404')) {
-          throw new Error(`页面不存在：目标页面返回404错误。请检查网址是否正确。`);
-        } else if (error.message.includes('timeout')) {
-          throw new Error(`请求超时：网站响应时间过长。请稍后重试或尝试其他网站。`);
+          throw new Error(`页面不存在：${cleanUrl}
+
+该页面返回404错误，请：
+• 检查网址拼写是否正确
+• 确认页面是否存在
+• 尝试访问网站首页`);
+        } else if (error.message.includes('timeout') || error.message.includes('aborted')) {
+          throw new Error(`请求超时：${cleanUrl}
+
+网站响应时间过长，建议：
+• 稍后重试
+• 检查网络连接
+• 切换到"本地分析"模式`);
         } else {
-          throw new Error(`获取页面内容失败：${error.message}`);
+          throw new Error(`访问失败：${error.message}
+
+建议切换到"本地分析"模式，上传HTML文件进行完整的SEO分析。`);
         }
       } else {
-        throw new Error('获取页面内容时发生未知错误，请稍后重试。');
+        throw new Error(`访问网站时发生未知错误。
+
+建议切换到"本地分析"模式进行离线SEO分析。`);
       }
     }
   }
@@ -97,22 +146,28 @@ export class ProxyService {
     try {
       // 尝试使用公共代理服务（按可靠性排序）
       const proxyUrls = [
+        // 使用更可靠的代理服务
+        `https://corsproxy.io/?${encodeURIComponent(url)}`,
+        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+        `https://thingproxy.freeboard.io/fetch/${url}`,
+        // 备用选项
         `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-        `https://cors-anywhere.herokuapp.com/${url}`,
-        `https://thingproxy.freeboard.io/fetch/${url}`
+        `https://cors-anywhere.herokuapp.com/${url}`
       ];
 
       for (const proxyUrl of proxyUrls) {
         try {
           const startTime = Date.now();
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒超时
+          const timeoutId = setTimeout(() => controller.abort(), 15000); // 15秒超时
 
           const response = await fetch(proxyUrl, {
             signal: signal || controller.signal,
             headers: {
-              'User-Agent': 'Mozilla/5.0 (compatible; SEO-Analyzer/1.0)',
-              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+              'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+              'Cache-Control': 'no-cache'
             }
           });
 
@@ -121,7 +176,7 @@ export class ProxyService {
           if (response.ok) {
             const loadTime = Date.now() - startTime;
 
-            // 处理allorigins响应
+            // 处理不同代理服务的响应格式
             if (proxyUrl.includes('allorigins')) {
               try {
                 const data = await response.json();
@@ -138,49 +193,80 @@ export class ProxyService {
                 console.warn('Failed to parse allorigins response:', jsonError);
                 continue;
               }
-            } else if (proxyUrl.includes('corsproxy.io')) {
-              // 处理corsproxy.io响应
-              const html = await response.text();
-              const headers: { [key: string]: string } = {};
-              response.headers.forEach((value, key) => {
-                headers[key] = value;
-              });
-
-              return {
-                html,
-                headers,
-                status: response.status,
-                url: url,
-                loadTime
-              };
+            } else if (proxyUrl.includes('codetabs')) {
+              // 处理codetabs响应
+              try {
+                const data = await response.json();
+                if (data && typeof data === 'string') {
+                  return {
+                    html: data,
+                    headers: {},
+                    status: 200,
+                    url: url,
+                    loadTime
+                  };
+                } else if (data && data.contents) {
+                  return {
+                    html: data.contents,
+                    headers: data.headers || {},
+                    status: data.status || 200,
+                    url: url,
+                    loadTime
+                  };
+                }
+              } catch (jsonError) {
+                // 如果不是JSON，尝试作为文本处理
+                const html = await response.text();
+                if (html && html.length > 100) { // 确保有实际内容
+                  return {
+                    html,
+                    headers: {},
+                    status: 200,
+                    url: url,
+                    loadTime
+                  };
+                }
+                continue;
+              }
             } else {
-              // 处理其他代理响应
+              // 处理其他代理响应（corsproxy.io, thingproxy等）
               const html = await response.text();
-              const headers: { [key: string]: string } = {};
-              response.headers.forEach((value, key) => {
-                headers[key] = value;
-              });
 
-              return {
-                html,
-                headers,
-                status: response.status,
-                url: url,
-                loadTime
-              };
+              // 验证响应内容
+              if (html && html.length > 100 && !html.includes('Error') && !html.includes('error')) {
+                const headers: { [key: string]: string } = {};
+                response.headers.forEach((value, key) => {
+                  headers[key] = value;
+                });
+
+                return {
+                  html,
+                  headers,
+                  status: response.status,
+                  url: url,
+                  loadTime
+                };
+              }
             }
           }
         } catch (error) {
-          console.warn(`Proxy ${proxyUrl} failed:`, error instanceof Error ? error.message : error);
+          // 只在开发模式下显示代理错误详情，减少控制台噪音
+          if (process.env.NODE_ENV === 'development') {
+            console.warn(`代理服务失败 ${proxyUrl}:`, error instanceof Error ? error.message : error);
+          }
           continue;
         }
       }
 
       // 所有代理都失败了
-      console.error('All proxy services failed for URL:', url);
+      console.warn('All proxy services failed for URL:', url);
+
+      // 返回null，让调用者决定如何处理
       return null;
     } catch (error) {
-      console.error('Proxy service error:', error);
+      console.warn('Proxy service error:', error);
+
+      // 返回null，让调用者决定如何处理
       return null;
     }
   }

@@ -432,12 +432,16 @@ export class RealSEOAnalysisEngine {
 
       // 验证响应内容
       if (!response.html || response.html.trim().length === 0) {
-        throw new Error('获取到的页面内容为空，无法进行SEO分析');
+        throw new Error(`📄 获取到的页面内容为空，无法进行SEO分析。
+
+💡 建议：使用本地文件分析功能，上传完整的HTML文件进行详细的SEO检测。`);
       }
 
       // 检查是否为有效的HTML内容
       if (!response.html.includes('<html') && !response.html.includes('<HTML')) {
-        throw new Error('获取到的内容不是有效的HTML页面，无法进行SEO分析');
+        throw new Error(`❌ 获取到的内容不是有效的HTML页面，无法进行SEO分析。
+
+💡 建议：切换到本地文件分析模式，直接上传HTML文件进行准确的SEO检测。`);
       }
 
       return response;
@@ -445,6 +449,41 @@ export class RealSEOAnalysisEngine {
       if (error instanceof Error && error.name === 'AbortError') {
         throw new Error('分析已取消');
       }
+
+      // 如果是代理服务错误，提供更友好的错误信息
+      if (error instanceof Error) {
+        if (error.message.includes('建议：切换到本地文件分析模式')) {
+          // 代理服务的错误信息已经包含了本地分析建议
+          throw error;
+        }
+
+        if (error.message.includes('CORS') ||
+          error.message.includes('ERR_QUIC_PROTOCOL_ERROR') ||
+          error.message.includes('ERR_CONNECTION_TIMED_OUT') ||
+          error.message.includes('Failed to fetch') ||
+          error.message.includes('ERR_NETWORK') ||
+          error.message.includes('ERR_INTERNET_DISCONNECTED')) {
+          throw new Error(`🚫 无法访问目标网站 ${url}
+
+可能的原因：
+• 网站的CORS策略阻止了跨域访问
+• 网络连接不稳定或中断
+• 目标网站服务器响应超时
+• 代理服务暂时不可用
+
+🎯 推荐解决方案：
+立即切换到本地文件分析模式！
+
+✅ 本地分析的优势：
+• 不受网络限制，100%可靠
+• 分析速度更快，结果更准确
+• 支持完整的SEO检测项目
+• 可以分析任何HTML文件
+
+💡 操作提示：点击下方"立即使用本地分析"按钮，上传您的HTML文件即可开始分析。`);
+        }
+      }
+
       throw error;
     }
   }
@@ -802,15 +841,6 @@ export class RealSEOAnalysisEngine {
     issues: string[];
   }> {
     try {
-      // 对于大型网站，我们假设它们有robots.txt（避免不必要的请求）
-      if (this.shouldSkipSitemapCheck(baseUrl)) {
-        return {
-          exists: true,
-          accessible: true,
-          issues: [] // 大型网站通常都有robots.txt
-        };
-      }
-
       const result = await proxyService.fetchRobotsTxt(baseUrl, this.abortController?.signal);
       const issues: string[] = [];
 
@@ -831,7 +861,7 @@ export class RealSEOAnalysisEngine {
       return {
         exists: false,
         accessible: false,
-        issues: ['无法检查robots.txt文件']
+        issues: ['🔍 无法在线检查robots.txt文件。💡 建议：使用本地文件分析功能，可以检查HTML文件中的meta robots标签和其他SEO配置。']
       };
     }
   }
@@ -850,11 +880,7 @@ export class RealSEOAnalysisEngine {
     let accessible = false;
     let urls = 0;
 
-    // 智能检查：对于已知的大型网站跳过sitemap检查
-    if (this.shouldSkipSitemapCheck(baseUrl)) {
-      issues.push('大型网站通常不提供公开sitemap（这是正常的）');
-      return { exists: false, accessible: false, urls: 0, issues };
-    }
+
 
     // 检查HTML中的sitemap链接
     const sitemapLinks = dom.querySelectorAll('link[rel="sitemap"]');
@@ -893,9 +919,9 @@ export class RealSEOAnalysisEngine {
     }
 
     if (!exists) {
-      issues.push('未找到sitemap文件');
+      issues.push('🗺️ 未找到sitemap文件。💡 建议：使用本地文件分析功能，可以详细检查HTML文件中的内部链接结构和导航架构。');
     } else if (!accessible) {
-      issues.push('sitemap文件无法访问');
+      issues.push('🗺️ sitemap文件无法访问。💡 建议：使用本地文件分析功能，可以完整分析HTML文件中的链接结构。');
     } else if (urls === 0) {
       issues.push('sitemap文件中没有URL');
     }
@@ -903,30 +929,7 @@ export class RealSEOAnalysisEngine {
     return { exists, accessible, urls, issues };
   }
 
-  /**
-   * 判断是否应该跳过sitemap检查
-   */
-  private shouldSkipSitemapCheck(baseUrl: string): boolean {
-    const url = baseUrl.toLowerCase();
 
-    // 已知不提供公开sitemap的大型网站
-    const skipDomains = [
-      'baidu.com',
-      'google.com',
-      'bing.com',
-      'yahoo.com',
-      'yandex.com',
-      'duckduckgo.com',
-      'facebook.com',
-      'twitter.com',
-      'instagram.com',
-      'linkedin.com',
-      'youtube.com',
-      'tiktok.com'
-    ];
-
-    return skipDomains.some(domain => url.includes(domain));
-  }
 
   /**
    * 判断是否为搜索引擎网站
@@ -1902,13 +1905,10 @@ export class RealSEOAnalysisEngine {
       console.warn('Failed to get PageSpeed data:', error);
     }
 
-    // 使用真实数据或回退到估算数据
-    const realMetrics = pageSpeedData?.mobile || this.calculateRealPerformanceMetrics(pageContent, loadTime);
-
     const issues: string[] = [];
     const opportunities: PerformanceResult['opportunities'] = [];
 
-    // 基于真实PageSpeed数据的问题检查
+    // 只使用真实的PageSpeed数据，不进行估算
     if (pageSpeedData) {
       // 使用真实的Core Web Vitals数据
       const mobileMetrics = pageSpeedData.mobile;
@@ -1934,12 +1934,14 @@ export class RealSEOAnalysisEngine {
       // 添加PageSpeed的优化建议
       opportunities.push(...mobileMetrics.opportunities);
     } else {
-      // 回退到基础检查
-      if (loadTime > 3000) {
-        issues.push('页面加载时间过长（>3秒），建议优化服务器响应时间和资源加载');
-      } else if (loadTime > 2000) {
-        issues.push('页面加载时间较慢（>2秒），有优化空间');
-      }
+      // 无法获取真实性能数据时，提示用户使用本地分析
+      issues.push('⚡ 在线分析无法获取完整的性能数据。💡 建议：使用本地文件分析功能进行详细的性能检查。');
+      opportunities.push({
+        id: 'use-local-analysis',
+        title: '🚀 切换到本地分析获取完整性能数据',
+        description: '在线分析受到API和网络限制，无法获取完整的性能指标。本地文件分析可以提供：• 详细的资源加载分析 • 完整的HTML结构检查 • 准确的SEO优化建议。立即切换到本地分析模式！',
+        impact: 'high' as const
+      });
     }
 
     // 通用检查
@@ -1955,26 +1957,33 @@ export class RealSEOAnalysisEngine {
       issues.push('HTTP请求数量较多（>50个），建议减少资源请求');
     }
 
-    // Web Vitals评估
+    // Web Vitals评估 - 只基于真实数据
     const webVitalsAssessment = pageSpeedData
       ? this.assessWebVitals(pageSpeedData.mobile)
-      : this.assessWebVitalsFromEstimate(realMetrics);
+      : {
+        lcp: 'unknown' as const,
+        fid: 'unknown' as const,
+        cls: 'unknown' as const,
+        overall: 'poor' as const
+      };
 
-    const score = this.calculateEnhancedPerformanceScore({
+    const score = this.calculateBasicPerformanceScore({
       loadTime,
       pageSize,
       requests,
-      realMetrics,
-      pageSpeedData
+      hasPageSpeedData: !!pageSpeedData
     });
+
+    // 只返回真实数据，不提供估算值
+    const realMetrics = pageSpeedData?.mobile;
 
     return {
       score,
       loadTime,
-      firstContentfulPaint: realMetrics.fcp || realMetrics.firstContentfulPaint || 0,
-      largestContentfulPaint: realMetrics.lcp || realMetrics.largestContentfulPaint || 0,
-      cumulativeLayoutShift: realMetrics.cls || realMetrics.cumulativeLayoutShift || 0,
-      firstInputDelay: realMetrics.fid || realMetrics.firstInputDelay || 0,
+      firstContentfulPaint: realMetrics?.fcp || realMetrics?.firstContentfulPaint || 0,
+      largestContentfulPaint: realMetrics?.lcp || 0,
+      cumulativeLayoutShift: realMetrics?.cls || 0,
+      firstInputDelay: realMetrics?.fid || 0,
       pageSize,
       requests,
       issues,
@@ -2009,163 +2018,44 @@ export class RealSEOAnalysisEngine {
     return { lcp, fid, cls, overall };
   }
 
-  /**
-   * 评估Web Vitals（基于估算数据）
-   */
-  private assessWebVitalsFromEstimate(metrics: any): PerformanceResult['webVitalsAssessment'] {
-    const lcp = metrics.largestContentfulPaint ?
-      (metrics.largestContentfulPaint <= 2500 ? 'good' :
-        metrics.largestContentfulPaint <= 4000 ? 'needs-improvement' : 'poor') : 'unknown';
 
-    const fid = metrics.firstInputDelay ?
-      (metrics.firstInputDelay <= 100 ? 'good' :
-        metrics.firstInputDelay <= 300 ? 'needs-improvement' : 'poor') : 'unknown';
-
-    const cls = metrics.cumulativeLayoutShift ?
-      (metrics.cumulativeLayoutShift <= 0.1 ? 'good' :
-        metrics.cumulativeLayoutShift <= 0.25 ? 'needs-improvement' : 'poor') : 'unknown';
-
-    return {
-      lcp,
-      fid,
-      cls,
-      overall: 'needs-improvement' // 估算数据默认为需要改进
-    };
-  }
 
   /**
-   * 计算增强的性能评分
+   * 计算基础性能评分 - 只基于真实数据
    */
-  private calculateEnhancedPerformanceScore(params: {
+  private calculateBasicPerformanceScore(params: {
     loadTime: number;
     pageSize: number;
     requests: number;
-    realMetrics: any;
-    pageSpeedData?: PageSpeedResult;
+    hasPageSpeedData: boolean;
   }): number {
-    // 如果有真实PageSpeed数据，优先使用
-    if (params.pageSpeedData?.mobile?.performanceScore) {
-      return params.pageSpeedData.mobile.performanceScore;
+    // 如果没有真实的PageSpeed数据，返回较低分数并提示使用本地分析
+    if (!params.hasPageSpeedData) {
+      return 30; // 低分数表示数据不完整
     }
 
-    // 否则使用原有的计算方法
-    return this.calculatePerformanceScore({
-      loadTime: params.loadTime,
-      pageSize: params.pageSize,
-      requests: params.requests,
-      ...params.realMetrics
-    });
+    // 基于基础指标的简单评分
+    let score = 100;
+
+    // 加载时间评分
+    if (params.loadTime > 5000) score -= 30;
+    else if (params.loadTime > 3000) score -= 20;
+    else if (params.loadTime > 2000) score -= 10;
+
+    // 页面大小评分
+    if (params.pageSize > 3 * 1024 * 1024) score -= 20;
+    else if (params.pageSize > 1024 * 1024) score -= 10;
+
+    // 请求数量评分
+    if (params.requests > 100) score -= 20;
+    else if (params.requests > 50) score -= 10;
+
+    return Math.max(score, 0);
   }
 
-  /**
-   * 计算真实的性能指标
-   */
-  private calculateRealPerformanceMetrics(pageContent: ProxyResponse, loadTime: number): {
-    firstContentfulPaint: number;
-    largestContentfulPaint: number;
-    cumulativeLayoutShift: number;
-    firstInputDelay: number;
-  } {
-    // 基于页面内容和加载时间的真实计算
-    const dom = this.parseHTML(pageContent.html);
 
-    // FCP: 基于页面内容复杂度计算
-    const textContent = dom.body?.textContent?.length || 0;
-    const imageCount = dom.querySelectorAll('img').length;
-    const firstContentfulPaint = this.calculateFCP(loadTime, textContent, imageCount);
 
-    // LCP: 基于最大内容元素分析
-    const largestContentfulPaint = this.calculateLCP(dom, loadTime);
 
-    // CLS: 基于页面布局结构分析
-    const cumulativeLayoutShift = this.calculateCLS(dom);
-
-    // FID: 基于JavaScript复杂度估算
-    const firstInputDelay = this.calculateFID(dom, loadTime);
-
-    return {
-      firstContentfulPaint,
-      largestContentfulPaint,
-      cumulativeLayoutShift,
-      firstInputDelay
-    };
-  }
-
-  /**
-   * 计算First Contentful Paint
-   */
-  private calculateFCP(loadTime: number, textContent: number, imageCount: number): number {
-    // 基于内容复杂度的FCP计算
-    let fcp = loadTime * 0.2; // 基础时间
-
-    // 内容复杂度影响
-    if (textContent > 10000) fcp += 200;
-    if (imageCount > 10) fcp += imageCount * 20;
-
-    return Math.min(fcp, loadTime * 0.8); // 不超过总加载时间的80%
-  }
-
-  /**
-   * 计算Largest Contentful Paint
-   */
-  private calculateLCP(dom: Document, loadTime: number): number {
-    // 查找可能的LCP元素
-    const images = dom.querySelectorAll('img');
-    const headings = dom.querySelectorAll('h1, h2');
-    const textBlocks = dom.querySelectorAll('p, div');
-
-    let lcpFactor = 0.5; // 基础因子
-
-    // 大图片影响LCP
-    if (images.length > 5) lcpFactor += 0.2;
-
-    // 复杂布局影响LCP
-    if (textBlocks.length > 20) lcpFactor += 0.1;
-
-    return Math.min(loadTime * lcpFactor, loadTime * 0.9);
-  }
-
-  /**
-   * 计算Cumulative Layout Shift
-   */
-  private calculateCLS(dom: Document): number {
-    let clsScore = 0;
-
-    // 检查可能导致布局偏移的元素
-    const imagesWithoutDimensions = dom.querySelectorAll('img:not([width]):not([height])');
-    const iframes = dom.querySelectorAll('iframe');
-    const dynamicContent = dom.querySelectorAll('[style*="position: absolute"], [style*="position: fixed"]');
-
-    // 没有尺寸的图片
-    clsScore += imagesWithoutDimensions.length * 0.05;
-
-    // iframe元素
-    clsScore += iframes.length * 0.03;
-
-    // 动态定位元素
-    clsScore += dynamicContent.length * 0.02;
-
-    return Math.min(clsScore, 0.5); // 最大0.5
-  }
-
-  /**
-   * 计算First Input Delay
-   */
-  private calculateFID(dom: Document, loadTime: number): number {
-    const scripts = dom.querySelectorAll('script');
-    const eventHandlers = dom.querySelectorAll('[onclick], [onload], [onchange]');
-
-    let fidBase = 50; // 基础延迟
-
-    // JavaScript复杂度影响
-    fidBase += scripts.length * 10;
-    fidBase += eventHandlers.length * 5;
-
-    // 加载时间影响
-    if (loadTime > 3000) fidBase += 50;
-
-    return Math.min(fidBase, 300); // 最大300ms
-  }
 
   /**
    * 分析资源优化情况

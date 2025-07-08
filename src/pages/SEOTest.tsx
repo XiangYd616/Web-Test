@@ -3,6 +3,8 @@ import {
   CheckCircle,
   Clock,
   Eye,
+  Globe,
+  HardDrive,
   Loader,
   Search,
   Settings,
@@ -15,8 +17,12 @@ import {
 import React, { useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import EnhancedSEOResults from '../components/seo/EnhancedSEOResults';
+import FileUploadSEO from '../components/seo/FileUploadSEO';
+import LocalSEOResults from '../components/seo/LocalSEOResults';
+import NetworkErrorPrompt from '../components/seo/NetworkErrorPrompt';
 import { URLInput } from '../components/testing';
-import { useRealSEOTest } from '../hooks/useRealSEOTest';
+import type { SEOTestMode } from '../hooks/useUnifiedSEOTest';
+import { useUnifiedSEOTest } from '../hooks/useUnifiedSEOTest';
 
 type TestMode = 'standard' | 'comprehensive';
 type TestStatusType = 'idle' | 'starting' | 'running' | 'completed' | 'failed';
@@ -33,6 +39,12 @@ interface SEOTestConfig {
   checkSocialMedia: boolean;
   checkStructuredData: boolean;
   checkSecurity: boolean;
+  checkImageOptimization: boolean;
+  checkInternalLinking: boolean;
+  checkSchemaMarkup: boolean;
+  checkLocalSEO: boolean;
+  checkCompetitorAnalysis: boolean;
+  checkKeywordDensity: boolean;
   [key: string]: any; // 允许动态属性访问
 }
 
@@ -47,15 +59,17 @@ const SEOTest: React.FC = () => {
     description: "使用SEO分析功能"
   });
 
-  // 真实SEO测试
+  // 统一SEO测试（支持在线和本地）
   const {
-    isRunning: isRealTimeRunning,
-    progress: realTimeProgress,
-    results: realTimeResults,
-    error: realTimeError,
-    startTest: startRealTimeTest,
-    stopTest: stopRealTimeTest
-  } = useRealSEOTest();
+    currentMode,
+    isRunning,
+    progress: testProgress,
+    results: testResults,
+    error: testError,
+    startTest: startUnifiedTest,
+    stopTest: stopUnifiedTest,
+    switchMode
+  } = useUnifiedSEOTest();
 
   const [testConfig, setTestConfig] = useState<SEOTestConfig>({
     url: '',
@@ -69,36 +83,45 @@ const SEOTest: React.FC = () => {
     checkSocialMedia: true,
     checkStructuredData: true,
     checkSecurity: true,
+    checkImageOptimization: false,
+    checkInternalLinking: false,
+    checkSchemaMarkup: false,
+    checkLocalSEO: false,
+    checkCompetitorAnalysis: false,
+    checkKeywordDensity: false,
   });
 
 
   const [testStatus, setTestStatus] = useState<TestStatusType>('idle');
   const [error, setError] = useState('');
+  const [seoTestMode, setSeoTestMode] = useState<SEOTestMode>('online');
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
-  // 使用真实SEO测试的状态
-  const isRunning = isRealTimeRunning;
-  const progress = realTimeProgress?.progress || 0;
-  const currentStep = realTimeProgress?.currentStep || '';
-  const results = realTimeResults;
+  // 使用统一SEO测试的状态
+  const progress = testProgress?.progress || 0;
+  const currentStep = testProgress?.currentStep || '';
+  const results = testResults;
 
-  // 监听真实SEO测试状态变化，同步更新testStatus
+  // 监听统一SEO测试状态变化，同步更新testStatus
   useEffect(() => {
-    if (!isRealTimeRunning && testStatus === 'running') {
+    if (!isRunning && testStatus === 'running') {
       // 如果有结果，说明测试完成；如果有错误，说明测试失败
-      if (realTimeResults) {
+      if (results) {
         setTestStatus('completed');
-      } else if (realTimeError) {
+      } else if (testError) {
         setTestStatus('failed');
       } else {
         setTestStatus('idle');
       }
     }
-  }, [isRealTimeRunning, testStatus, realTimeResults, realTimeError]);
+  }, [isRunning, testStatus, results, testError]);
 
 
 
-  // 简化的SEO检测项目 - 只保留最有价值的5个核心项目
+  // 扩展的SEO检测项目 - 包含核心和高级检测功能
   const seoTests = [
+    // 核心检测项目
     {
       key: 'checkTechnicalSEO',
       name: '页面基础SEO',
@@ -106,7 +129,8 @@ const SEOTest: React.FC = () => {
       icon: Settings,
       color: 'blue',
       estimatedTime: '30-45秒',
-      priority: 'high'
+      priority: 'high',
+      category: 'core'
     },
     {
       key: 'checkContentQuality',
@@ -115,7 +139,8 @@ const SEOTest: React.FC = () => {
       icon: Eye,
       color: 'green',
       estimatedTime: '20-30秒',
-      priority: 'high'
+      priority: 'high',
+      category: 'core'
     },
     {
       key: 'checkPerformance',
@@ -124,7 +149,8 @@ const SEOTest: React.FC = () => {
       icon: Zap,
       color: 'yellow',
       estimatedTime: '30-45秒',
-      priority: 'high'
+      priority: 'high',
+      category: 'core'
     },
     {
       key: 'checkMobileFriendly',
@@ -133,7 +159,8 @@ const SEOTest: React.FC = () => {
       icon: Smartphone,
       color: 'pink',
       estimatedTime: '20-30秒',
-      priority: 'high'
+      priority: 'high',
+      category: 'core'
     },
     {
       key: 'checkSecurity',
@@ -142,15 +169,84 @@ const SEOTest: React.FC = () => {
       icon: Shield,
       color: 'red',
       estimatedTime: '10-20秒',
-      priority: 'medium'
+      priority: 'medium',
+      category: 'core'
+    },
+
+    // 高级检测项目
+    {
+      key: 'checkImageOptimization',
+      name: '图片优化',
+      description: '检查图片Alt标签、尺寸、格式优化',
+      icon: Globe, // 临时使用，稍后会更新
+      color: 'purple',
+      estimatedTime: '15-25秒',
+      priority: 'medium',
+      category: 'advanced'
+    },
+    {
+      key: 'checkInternalLinking',
+      name: '内链结构',
+      description: '分析内部链接结构和锚文本优化',
+      icon: Globe, // 临时使用，稍后会更新
+      color: 'indigo',
+      estimatedTime: '20-30秒',
+      priority: 'medium',
+      category: 'advanced'
+    },
+    {
+      key: 'checkSchemaMarkup',
+      name: '结构化数据',
+      description: '检查Schema.org标记和富摘要',
+      icon: Globe, // 临时使用，稍后会更新
+      color: 'teal',
+      estimatedTime: '15-20秒',
+      priority: 'medium',
+      category: 'advanced'
+    },
+    {
+      key: 'checkSocialMedia',
+      name: '社交媒体',
+      description: '检查Open Graph和Twitter Card标签',
+      icon: Globe, // 临时使用，稍后会更新
+      color: 'cyan',
+      estimatedTime: '10-15秒',
+      priority: 'low',
+      category: 'advanced'
+    },
+    {
+      key: 'checkKeywordDensity',
+      name: '关键词分析',
+      description: '深度分析关键词分布和密度',
+      icon: Search,
+      color: 'orange',
+      estimatedTime: '25-35秒',
+      priority: 'medium',
+      category: 'advanced'
+    },
+    {
+      key: 'checkLocalSEO',
+      name: '本地SEO',
+      description: '检查本地业务相关的SEO要素',
+      icon: Globe,
+      color: 'emerald',
+      estimatedTime: '20-30秒',
+      priority: 'low',
+      category: 'advanced'
     }
   ];
 
 
 
   const handleStartTest = async () => {
-    if (!testConfig.url) {
+    // 验证输入
+    if (seoTestMode === 'online' && !testConfig.url) {
       setError('请输入要分析的URL');
+      return;
+    }
+
+    if (seoTestMode === 'local' && uploadedFiles.length === 0) {
+      setError('请上传要分析的HTML文件');
       return;
     }
 
@@ -163,23 +259,45 @@ const SEOTest: React.FC = () => {
       setError('');
       setTestStatus('starting');
 
-      // 使用真实SEO测试
-      await startRealTimeTest({
-        url: testConfig.url,
-        keywords: testConfig.keywords,
-        checkTechnicalSEO: testConfig.checkTechnicalSEO,
-        checkContentQuality: testConfig.checkContentQuality,
-        checkAccessibility: testConfig.checkAccessibility,
-        checkPerformance: testConfig.checkPerformance,
-        checkMobileFriendly: testConfig.checkMobileFriendly,
-        checkSocialMedia: testConfig.checkSocialMedia,
-        checkStructuredData: testConfig.checkStructuredData,
-        checkSecurity: testConfig.checkSecurity,
-        depth: testConfig.mode === 'comprehensive' ? 'comprehensive' : 'standard'
-      });
+      // 使用统一SEO测试
+      if (seoTestMode === 'online') {
+        await startUnifiedTest({
+          mode: 'online',
+          online: {
+            url: testConfig.url,
+            keywords: testConfig.keywords,
+            checkTechnicalSEO: testConfig.checkTechnicalSEO,
+            checkContentQuality: testConfig.checkContentQuality,
+            checkAccessibility: testConfig.checkAccessibility,
+            checkPerformance: testConfig.checkPerformance,
+            checkMobileFriendly: testConfig.checkMobileFriendly,
+            checkSocialMedia: testConfig.checkSocialMedia,
+            checkStructuredData: testConfig.checkStructuredData,
+            checkSecurity: testConfig.checkSecurity,
+            depth: testConfig.mode === 'comprehensive' ? 'comprehensive' : 'standard'
+          }
+        });
+      } else {
+        await startUnifiedTest({
+          mode: 'local',
+          local: {
+            files: uploadedFiles,
+            keywords: testConfig.keywords,
+            checkTechnicalSEO: testConfig.checkTechnicalSEO,
+            checkContentQuality: testConfig.checkContentQuality,
+            checkAccessibility: testConfig.checkAccessibility,
+            checkPerformance: testConfig.checkPerformance,
+            checkMobileFriendly: testConfig.checkMobileFriendly,
+            checkSocialMedia: testConfig.checkSocialMedia,
+            checkStructuredData: testConfig.checkStructuredData,
+            checkSecurity: testConfig.checkSecurity,
+            depth: testConfig.mode === 'comprehensive' ? 'comprehensive' : 'standard'
+          }
+        });
+      }
 
       setTestStatus('running');
-      console.log('✅ Real SEO test started');
+      console.log(`✅ ${seoTestMode === 'online' ? 'Online' : 'Local'} SEO test started`);
 
     } catch (err: any) {
       console.error('❌ Failed to start SEO test:', err);
@@ -211,7 +329,7 @@ const SEOTest: React.FC = () => {
 
   const handleStopTest = async () => {
     try {
-      await stopRealTimeTest();
+      await stopUnifiedTest();
       setTestStatus('idle');
       setError('');
       console.log('✅ SEO test stopped');
@@ -225,6 +343,50 @@ const SEOTest: React.FC = () => {
       ...prev,
       [testKey]: !prev[testKey]
     }));
+  };
+
+  // 处理测试模式切换
+  const handleModeSwitch = async (mode: SEOTestMode) => {
+    if (mode !== seoTestMode) {
+      // 如果正在运行测试，先停止
+      if (isRunning) {
+        await handleStopTest();
+      }
+
+      setSeoTestMode(mode);
+      await switchMode(mode);
+      setError('');
+
+      // 清除相关状态
+      if (mode === 'online') {
+        setUploadedFiles([]);
+      } else {
+        setTestConfig(prev => ({ ...prev, url: '' }));
+      }
+    }
+  };
+
+  // 处理本地文件上传（仅上传，不自动开始分析）
+  const handleLocalFileUpload = (files: File[], options: any) => {
+    setUploadedFiles(files);
+
+    // 更新测试配置
+    setTestConfig(prev => ({
+      ...prev,
+      keywords: options.keywords || '',
+      checkTechnicalSEO: options.checkTechnicalSEO !== false,
+      checkContentQuality: options.checkContentQuality !== false,
+      checkAccessibility: options.checkAccessibility !== false,
+      checkPerformance: options.checkPerformance !== false
+    }));
+
+    // 清除错误信息
+    setError('');
+  };
+
+  // 处理切换到本地分析的请求
+  const handleSwitchToLocalAnalysis = async () => {
+    await handleModeSwitch('local');
   };
 
   const handleExportReport = async (format: string) => {
@@ -380,14 +542,20 @@ const SEOTest: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleStartTest}
-                  disabled={!testConfig.url}
-                  className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${!testConfig.url
+                  disabled={
+                    seoTestMode === 'online'
+                      ? !testConfig.url
+                      : uploadedFiles.length === 0
+                  }
+                  className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${(seoTestMode === 'online' ? !testConfig.url : uploadedFiles.length === 0)
                     ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                     : 'bg-blue-600 hover:bg-blue-700 text-white'
                     }`}
                 >
                   <Search className="w-5 h-5" />
-                  <span>开始分析</span>
+                  <span>
+                    {seoTestMode === 'online' ? '开始分析' : '开始本地分析'}
+                  </span>
                 </button>
               ) : testStatus === 'starting' ? (
                 <div className="flex items-center space-x-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg">
@@ -420,40 +588,179 @@ const SEOTest: React.FC = () => {
                   <span className="text-sm text-red-300 font-medium">分析失败</span>
                 </div>
               ) : null}
+
+              {/* 失败状态操作按钮 - 独立区域 */}
+              {testStatus === 'failed' && (
+                <div className="flex items-center space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setError('');
+                      setTestStatus('idle');
+                      handleStartTest();
+                    }}
+                    className="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 rounded-lg text-blue-300 transition-colors font-medium"
+                  >
+                    重新测试
+                  </button>
+                  {seoTestMode === 'online' && (
+                    <button
+                      type="button"
+                      onClick={handleSwitchToLocalAnalysis}
+                      className="px-3 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 rounded-lg text-green-300 transition-colors font-medium"
+                    >
+                      切换本地分析
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* URL输入区域 */}
+      {/* 测试模式选择 */}
       <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              网站URL
+            <label className="block text-sm font-medium text-gray-300 mb-3">
+              选择分析模式
             </label>
-            <URLInput
-              value={testConfig.url}
-              onChange={(url) => setTestConfig(prev => ({ ...prev, url }))}
-              placeholder="请输入要分析的网站URL，例如：https://example.com"
-              disabled={isRunning}
-            />
-            <div className="mt-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-              <div className="flex items-start space-x-2">
-                <AlertCircle className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-blue-300">
-                  <div className="font-medium mb-1">使用说明</div>
-                  <div className="text-blue-200 space-y-1">
-                    <div>• 本工具只分析真实的网站内容，不提供模拟数据</div>
-                    <div>• 由于浏览器安全限制，某些网站可能无法直接分析</div>
-                    <div>• 建议测试支持CORS的网站或您自己的网站</div>
-                    <div>• 推荐测试网站：httpbin.org、公开API测试网站</div>
-                    <div>• 如果遇到访问问题，请尝试其他网站或稍后重试</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* 在线URL分析 */}
+              <div
+                className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${seoTestMode === 'online'
+                  ? 'border-blue-500 bg-blue-500/10'
+                  : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
+                  }`}
+                onClick={() => handleModeSwitch('online')}
+              >
+                <div className="flex items-center space-x-3">
+                  <Globe className={`w-6 h-6 ${seoTestMode === 'online' ? 'text-blue-400' : 'text-gray-400'}`} />
+                  <div>
+                    <div className={`font-medium ${seoTestMode === 'online' ? 'text-blue-300' : 'text-gray-300'}`}>
+                      在线网站分析
+                    </div>
+                    <div className="text-sm text-gray-400 mt-1">
+                      输入URL分析在线网站
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 本地文件分析 */}
+              <div
+                className={`p-4 rounded-lg border-2 cursor-pointer transition-all relative ${seoTestMode === 'local'
+                  ? 'border-green-500 bg-green-500/10'
+                  : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
+                  }`}
+                onClick={() => handleModeSwitch('local')}
+              >
+                {/* 推荐标签 */}
+                <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                  推荐
+                </div>
+                <div className="flex items-center space-x-3">
+                  <HardDrive className={`w-6 h-6 ${seoTestMode === 'local' ? 'text-green-400' : 'text-gray-400'}`} />
+                  <div>
+                    <div className={`font-medium ${seoTestMode === 'local' ? 'text-green-300' : 'text-gray-300'}`}>
+                      本地文件分析 ⚡
+                    </div>
+                    <div className="text-sm text-gray-400 mt-1">
+                      上传HTML文件，不受网络限制
+                    </div>
+                    <div className="text-xs text-green-400 mt-1 font-medium">
+                      ✓ 更快速 ✓ 更准确 ✓ 更稳定
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* 模式状态提示 */}
+          <div className="mt-4 space-y-3">
+            <div className="p-3 rounded-lg border border-gray-600/50 bg-gray-700/30">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  {seoTestMode === 'online' ? (
+                    <Globe className="w-4 h-4 text-blue-400" />
+                  ) : (
+                    <HardDrive className="w-4 h-4 text-green-400" />
+                  )}
+                  <span className="text-sm text-gray-300">
+                    当前模式: {seoTestMode === 'online' ? '在线网站分析' : '本地文件分析'}
+                  </span>
+                </div>
+                <div className="text-sm text-gray-400">
+                  {seoTestMode === 'online'
+                    ? (testConfig.url ? '✓ URL已输入' : '请输入URL')
+                    : (uploadedFiles.length > 0 ? `✓ 已上传${uploadedFiles.length}个文件` : '请上传HTML文件')
+                  }
+                </div>
+              </div>
+            </div>
+
+            {/* 本地分析优势提示 */}
+            {seoTestMode === 'online' && (
+              <div className="p-3 rounded-lg border border-green-500/30 bg-green-500/10">
+                <div className="flex items-start space-x-2">
+                  <div className="text-green-400 text-lg">💡</div>
+                  <div>
+                    <div className="text-sm text-green-300 font-medium mb-1">
+                      遇到网络问题？试试本地文件分析！
+                    </div>
+                    <div className="text-xs text-green-400">
+                      本地分析不受网络限制，分析速度更快，结果更准确。只需上传HTML文件即可开始。
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 输入区域 */}
+      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+        <div className="space-y-4">
+          {seoTestMode === 'online' ? (
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                网站URL
+              </label>
+              <URLInput
+                value={testConfig.url}
+                onChange={(url) => setTestConfig(prev => ({ ...prev, url }))}
+                placeholder="请输入要分析的网站URL，例如：https://example.com"
+                disabled={isRunning}
+              />
+              <div className="mt-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                <div className="flex items-start space-x-2">
+                  <AlertCircle className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                  <div className="text-sm text-blue-300">
+                    <div className="font-medium mb-1">使用说明</div>
+                    <div className="text-blue-200 space-y-1">
+                      <div>• 本工具只分析真实的网站内容，不提供模拟数据</div>
+                      <div>• 由于浏览器安全限制，某些网站可能无法直接分析</div>
+                      <div>• 建议测试支持CORS的网站或您自己的网站</div>
+                      <div>• 推荐测试网站：httpbin.org、公开API测试网站</div>
+                      <div>• 如果遇到访问问题，请尝试其他网站或稍后重试</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* 本地文件上传 */
+            <div>
+              <FileUploadSEO
+                onAnalysisComplete={() => { }}
+                isAnalyzing={isRunning}
+                onFileUpload={handleLocalFileUpload}
+              />
+            </div>
+          )}
 
           {/* 关键词输入 */}
           <div>
@@ -476,8 +783,37 @@ const SEOTest: React.FC = () => {
 
       {/* 检测项目选择 */}
       <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-white">选择检测项目</h3>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-4">
+            <h3 className="text-lg font-semibold text-white">选择检测项目</h3>
+
+            {/* 分类切换 */}
+            <div className="flex items-center bg-gray-700/50 rounded-lg p-1">
+              <button
+                type="button"
+                onClick={() => setShowAdvanced(false)}
+                disabled={isRunning}
+                className={`px-3 py-1 text-xs rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${!showAdvanced
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
+                  }`}
+              >
+                核心项目
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowAdvanced(true)}
+                disabled={isRunning}
+                className={`px-3 py-1 text-xs rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${showAdvanced
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
+                  }`}
+              >
+                全部项目
+              </button>
+            </div>
+          </div>
+
           <div className="flex items-center space-x-4">
             <div className="text-sm text-gray-400">
               已选 {seoTests.filter(test => testConfig[test.key as keyof SEOTestConfig]).length}/{seoTests.length} 项
@@ -486,9 +822,10 @@ const SEOTest: React.FC = () => {
               <button
                 type="button"
                 onClick={() => {
-                  const allEnabled = seoTests.every(test => testConfig[test.key as keyof SEOTestConfig]);
+                  const visibleTests = showAdvanced ? seoTests : seoTests.filter(test => test.category === 'core');
+                  const allEnabled = visibleTests.every(test => testConfig[test.key as keyof SEOTestConfig]);
                   const newConfig = { ...testConfig };
-                  seoTests.forEach(test => {
+                  visibleTests.forEach(test => {
                     newConfig[test.key as keyof SEOTestConfig] = !allEnabled as any;
                   });
                   setTestConfig(newConfig);
@@ -496,7 +833,10 @@ const SEOTest: React.FC = () => {
                 disabled={isRunning}
                 className="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {seoTests.every(test => testConfig[test.key as keyof SEOTestConfig]) ? '全不选' : '全选'}
+                {(() => {
+                  const visibleTests = showAdvanced ? seoTests : seoTests.filter(test => test.category === 'core');
+                  return visibleTests.every(test => testConfig[test.key as keyof SEOTestConfig]) ? '全不选' : '全选';
+                })()}
               </button>
               <button
                 type="button"
@@ -516,66 +856,220 @@ const SEOTest: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {seoTests.map((test) => {
-            const IconComponent = test.icon;
-            const isEnabled = testConfig[test.key as keyof SEOTestConfig] as boolean;
+        {/* 核心项目 */}
+        {(!showAdvanced || showAdvanced) && (
+          <div className="space-y-6">
+            {!showAdvanced && (
+              <div>
+                <h4 className="text-sm font-medium text-gray-300 mb-3 flex items-center space-x-2">
+                  <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                  <span>核心检测项目 (推荐)</span>
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {seoTests.filter(test => test.category === 'core').map((test) => {
+                    const IconComponent = test.icon;
+                    const isEnabled = testConfig[test.key as keyof SEOTestConfig] as boolean;
 
-            return (
-              <button
-                key={test.key}
-                type="button"
-                onClick={() => handleTestTypeChange(test.key as keyof SEOTestConfig)}
-                disabled={isRunning}
-                className={`w-full p-4 rounded-lg border transition-all duration-200 text-left ${isEnabled
-                  ? `border-${test.color}-500 bg-${test.color}-500/10 hover:bg-${test.color}-500/15`
-                  : 'border-gray-600 bg-gray-700/30 hover:bg-gray-700/50 hover:border-gray-500'
-                  } ${isRunning
-                    ? 'opacity-50 cursor-not-allowed'
-                    : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'
-                  }`}
-              >
-                <div className="flex items-start space-x-3">
-                  <div
-                    className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${isEnabled
-                      ? `border-${test.color}-500 bg-${test.color}-500`
-                      : 'border-gray-500'
-                      }`}
-                  >
-                    {isEnabled && <CheckCircle className="w-3 h-3 text-white" />}
-                  </div>
+                    return (
+                      <button
+                        key={test.key}
+                        type="button"
+                        onClick={() => handleTestTypeChange(test.key as keyof SEOTestConfig)}
+                        disabled={isRunning}
+                        className={`w-full p-4 rounded-lg border transition-all duration-200 text-left ${isEnabled
+                          ? `border-${test.color}-500 bg-${test.color}-500/10 hover:bg-${test.color}-500/15`
+                          : 'border-gray-600 bg-gray-700/30 hover:bg-gray-700/50 hover:border-gray-500'
+                          } ${isRunning
+                            ? 'opacity-50 cursor-not-allowed'
+                            : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'
+                          }`}
+                      >
+                        <div className="flex items-start space-x-3">
+                          <div
+                            className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${isEnabled
+                              ? `border-${test.color}-500 bg-${test.color}-500`
+                              : 'border-gray-500'
+                              }`}
+                          >
+                            {isEnabled && <CheckCircle className="w-3 h-3 text-white" />}
+                          </div>
 
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <IconComponent className={`w-4 h-4 ${isEnabled ? `text-${test.color}-400` : 'text-gray-400'}`} />
-                      <span className={`font-medium text-sm ${isEnabled ? `text-${test.color}-300` : 'text-gray-300'}`}>
-                        {test.name}
-                      </span>
-                      {test.priority === 'high' && (
-                        <span className="px-1.5 py-0.5 text-xs bg-blue-500/20 text-blue-300 rounded">
-                          推荐
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-gray-400 mb-2">{test.description}</p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-1">
-                        <Clock className="w-3 h-3 text-gray-500" />
-                        <span className="text-xs text-gray-500">{test.estimatedTime}</span>
-                      </div>
-                      {isEnabled && (
-                        <div className="flex items-center space-x-1">
-                          <CheckCircle className="w-3 h-3 text-green-400" />
-                          <span className="text-xs text-green-400">已选择</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center space-x-2 mb-1">
+                              <IconComponent className={`w-4 h-4 ${isEnabled ? `text-${test.color}-400` : 'text-gray-400'}`} />
+                              <span className={`font-medium text-sm ${isEnabled ? `text-${test.color}-300` : 'text-gray-300'}`}>
+                                {test.name}
+                              </span>
+                              {test.priority === 'high' && (
+                                <span className="px-1.5 py-0.5 text-xs bg-blue-500/20 text-blue-300 rounded">
+                                  推荐
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-gray-400 mb-2">{test.description}</p>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-1">
+                                <Clock className="w-3 h-3 text-gray-500" />
+                                <span className="text-xs text-gray-500">{test.estimatedTime}</span>
+                              </div>
+                              {isEnabled && (
+                                <div className="flex items-center space-x-1">
+                                  <CheckCircle className="w-3 h-3 text-green-400" />
+                                  <span className="text-xs text-green-400">已选择</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      )}
-                    </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* 全部项目 */}
+            {showAdvanced && (
+              <div className="space-y-6">
+                {/* 核心项目组 */}
+                <div>
+                  <h4 className="text-sm font-medium text-gray-300 mb-3 flex items-center space-x-2">
+                    <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                    <span>核心检测项目</span>
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {seoTests.filter(test => test.category === 'core').map((test) => {
+                      const IconComponent = test.icon;
+                      const isEnabled = testConfig[test.key as keyof SEOTestConfig] as boolean;
+
+                      return (
+                        <button
+                          key={test.key}
+                          type="button"
+                          onClick={() => handleTestTypeChange(test.key as keyof SEOTestConfig)}
+                          disabled={isRunning}
+                          className={`w-full p-4 rounded-lg border transition-all duration-200 text-left ${isEnabled
+                            ? `border-${test.color}-500 bg-${test.color}-500/10 hover:bg-${test.color}-500/15`
+                            : 'border-gray-600 bg-gray-700/30 hover:bg-gray-700/50 hover:border-gray-500'
+                            } ${isRunning
+                              ? 'opacity-50 cursor-not-allowed'
+                              : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'
+                            }`}
+                        >
+                          <div className="flex items-start space-x-3">
+                            <div
+                              className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${isEnabled
+                                ? `border-${test.color}-500 bg-${test.color}-500`
+                                : 'border-gray-500'
+                                }`}
+                            >
+                              {isEnabled && <CheckCircle className="w-3 h-3 text-white" />}
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <IconComponent className={`w-4 h-4 ${isEnabled ? `text-${test.color}-400` : 'text-gray-400'}`} />
+                                <span className={`font-medium text-sm ${isEnabled ? `text-${test.color}-300` : 'text-gray-300'}`}>
+                                  {test.name}
+                                </span>
+                                {test.priority === 'high' && (
+                                  <span className="px-1.5 py-0.5 text-xs bg-blue-500/20 text-blue-300 rounded">
+                                    推荐
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-gray-400 mb-2">{test.description}</p>
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-1">
+                                  <Clock className="w-3 h-3 text-gray-500" />
+                                  <span className="text-xs text-gray-500">{test.estimatedTime}</span>
+                                </div>
+                                {isEnabled && (
+                                  <div className="flex items-center space-x-1">
+                                    <CheckCircle className="w-3 h-3 text-green-400" />
+                                    <span className="text-xs text-green-400">已选择</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
-              </button>
-            );
-          })}
-        </div>
+
+                {/* 高级项目组 */}
+                <div>
+                  <h4 className="text-sm font-medium text-gray-300 mb-3 flex items-center space-x-2">
+                    <div className="w-2 h-2 rounded-full bg-purple-400"></div>
+                    <span>高级检测项目</span>
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {seoTests.filter(test => test.category === 'advanced').map((test) => {
+                      const IconComponent = test.icon;
+                      const isEnabled = testConfig[test.key as keyof SEOTestConfig] as boolean;
+
+                      return (
+                        <button
+                          key={test.key}
+                          type="button"
+                          onClick={() => handleTestTypeChange(test.key as keyof SEOTestConfig)}
+                          disabled={isRunning}
+                          className={`w-full p-4 rounded-lg border transition-all duration-200 text-left ${isEnabled
+                            ? `border-${test.color}-500 bg-${test.color}-500/10 hover:bg-${test.color}-500/15`
+                            : 'border-gray-600 bg-gray-700/30 hover:bg-gray-700/50 hover:border-gray-500'
+                            } ${isRunning
+                              ? 'opacity-50 cursor-not-allowed'
+                              : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'
+                            }`}
+                        >
+                          <div className="flex items-start space-x-3">
+                            <div
+                              className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${isEnabled
+                                ? `border-${test.color}-500 bg-${test.color}-500`
+                                : 'border-gray-500'
+                                }`}
+                            >
+                              {isEnabled && <CheckCircle className="w-3 h-3 text-white" />}
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center space-x-2 mb-1">
+                                <IconComponent className={`w-4 h-4 ${isEnabled ? `text-${test.color}-400` : 'text-gray-400'}`} />
+                                <span className={`font-medium text-sm ${isEnabled ? `text-${test.color}-300` : 'text-gray-300'}`}>
+                                  {test.name}
+                                </span>
+                                {test.priority === 'medium' && (
+                                  <span className="px-1.5 py-0.5 text-xs bg-yellow-500/20 text-yellow-300 rounded">
+                                    进阶
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-gray-400 mb-2">{test.description}</p>
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-1">
+                                  <Clock className="w-3 h-3 text-gray-500" />
+                                  <span className="text-xs text-gray-500">{test.estimatedTime}</span>
+                                </div>
+                                {isEnabled && (
+                                  <div className="flex items-center space-x-1">
+                                    <CheckCircle className="w-3 h-3 text-green-400" />
+                                    <span className="text-xs text-green-400">已选择</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* 进度显示 */}
@@ -637,13 +1131,14 @@ const SEOTest: React.FC = () => {
 
       {/* 错误显示 */}
       {error && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
-          <div className="flex items-center space-x-2">
-            <AlertCircle className="w-5 h-5 text-red-400" />
-            <span className="text-red-300 font-medium">分析失败</span>
-          </div>
-          <p className="text-red-200 mt-2">{error}</p>
-        </div>
+        <NetworkErrorPrompt
+          error={error}
+          onRetry={() => {
+            setError('');
+            handleStartTest();
+          }}
+          onSwitchToLocal={handleSwitchToLocalAnalysis}
+        />
       )}
 
       {/* 结果显示 */}
@@ -667,7 +1162,11 @@ const SEOTest: React.FC = () => {
               </div>
             </div>
 
-            <EnhancedSEOResults results={results} onExport={handleExportReport} />
+            {seoTestMode === 'online' ? (
+              <EnhancedSEOResults results={results} onExport={handleExportReport} />
+            ) : (
+              <LocalSEOResults results={results} onExport={handleExportReport} />
+            )}
           </div>
         </div>
       )}

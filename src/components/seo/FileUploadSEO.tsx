@@ -1,11 +1,11 @@
-import React, { useState, useRef } from 'react';
-import { Upload, FileText, X, CheckCircle, AlertCircle, Loader } from 'lucide-react';
+import { AlertCircle, CheckCircle, Loader, Upload, X } from 'lucide-react';
+import React, { useRef, useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 
 interface FileUploadSEOProps {
   onAnalysisComplete: (results: any) => void;
   isAnalyzing: boolean;
-  onStartAnalysis: (files: File[], options: any) => void;
+  onFileUpload: (files: File[], options: any) => void;
 }
 
 interface UploadedFile {
@@ -18,7 +18,7 @@ interface UploadedFile {
 const FileUploadSEO: React.FC<FileUploadSEOProps> = ({
   onAnalysisComplete,
   isAnalyzing,
-  onStartAnalysis
+  onFileUpload
 }) => {
   const { actualTheme } = useTheme();
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
@@ -104,7 +104,10 @@ const FileUploadSEO: React.FC<FileUploadSEOProps> = ({
     }
 
     if (validFiles.length > 0) {
-      setUploadedFiles(prev => [...prev, ...validFiles]);
+      const newFiles = [...uploadedFiles, ...validFiles];
+      setUploadedFiles(newFiles);
+      // 通知父组件文件已上传（但不自动开始分析）
+      notifyFileUpload(newFiles);
     }
   };
 
@@ -116,14 +119,12 @@ const FileUploadSEO: React.FC<FileUploadSEOProps> = ({
     setUploadedFiles([]);
   };
 
-  const startAnalysis = () => {
-    if (uploadedFiles.length === 0) {
-      alert('请先上传文件');
-      return;
+  // 当文件上传时通知父组件（仅传递文件信息，不触发分析）
+  const notifyFileUpload = (files: UploadedFile[]) => {
+    if (files.length > 0) {
+      const fileList = files.map(f => f.file);
+      onFileUpload(fileList, analysisOptions);
     }
-
-    const files = uploadedFiles.map(f => f.file);
-    onStartAnalysis(files, analysisOptions);
   };
 
   const getFileIcon = (filename: string) => {
@@ -167,8 +168,8 @@ const FileUploadSEO: React.FC<FileUploadSEOProps> = ({
         <div
           className={`
             relative border-2 border-dashed rounded-lg p-8 text-center transition-colors
-            ${dragActive 
-              ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20' 
+            ${dragActive
+              ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20'
               : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
             }
             ${actualTheme === 'dark' ? 'bg-gray-800' : 'bg-gray-50'}
@@ -185,8 +186,10 @@ const FileUploadSEO: React.FC<FileUploadSEOProps> = ({
             accept={supportedFormats.join(',')}
             onChange={handleFileInput}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            aria-label="选择HTML文件进行SEO分析"
+            title="选择HTML文件进行SEO分析"
           />
-          
+
           <div className="space-y-4">
             <Upload className="mx-auto h-12 w-12 text-gray-400" />
             <div>
@@ -221,8 +224,8 @@ const FileUploadSEO: React.FC<FileUploadSEOProps> = ({
                 key={file.id}
                 className={`
                   flex items-center justify-between p-3 rounded-lg border
-                  ${actualTheme === 'dark' 
-                    ? 'bg-gray-800 border-gray-700' 
+                  ${actualTheme === 'dark'
+                    ? 'bg-gray-800 border-gray-700'
                     : 'bg-white border-gray-200'
                   }
                 `}
@@ -247,11 +250,13 @@ const FileUploadSEO: React.FC<FileUploadSEOProps> = ({
                   {file.status === 'error' && (
                     <AlertCircle className="h-4 w-4 text-red-500" />
                   )}
-                  
+
                   <button
                     onClick={() => removeFile(file.id)}
                     disabled={isAnalyzing}
                     className="p-1 text-gray-400 hover:text-red-500"
+                    aria-label={`删除文件 ${file.file.name}`}
+                    title={`删除文件 ${file.file.name}`}
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -265,7 +270,7 @@ const FileUploadSEO: React.FC<FileUploadSEOProps> = ({
       {/* 分析选项 */}
       <div className="space-y-4">
         <h4 className="font-medium">分析选项</h4>
-        
+
         <div className="grid grid-cols-2 gap-4">
           <label className="flex items-center space-x-2">
             <input
@@ -334,8 +339,8 @@ const FileUploadSEO: React.FC<FileUploadSEOProps> = ({
             placeholder="输入关键词，用逗号分隔"
             className={`
               w-full px-3 py-2 border rounded-lg
-              ${actualTheme === 'dark' 
-                ? 'bg-gray-800 border-gray-600 text-white' 
+              ${actualTheme === 'dark'
+                ? 'bg-gray-800 border-gray-600 text-white'
                 : 'bg-white border-gray-300 text-gray-900'
               }
             `}
@@ -343,32 +348,18 @@ const FileUploadSEO: React.FC<FileUploadSEOProps> = ({
         </div>
       </div>
 
-      {/* 开始分析按钮 */}
-      <div className="flex justify-center">
-        <button
-          onClick={startAnalysis}
-          disabled={uploadedFiles.length === 0 || isAnalyzing}
-          className={`
-            px-6 py-3 rounded-lg font-medium flex items-center space-x-2
-            ${uploadedFiles.length === 0 || isAnalyzing
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-blue-600 text-white hover:bg-blue-700'
-            }
-          `}
-        >
-          {isAnalyzing ? (
-            <>
-              <Loader className="h-5 w-5 animate-spin" />
-              <span>分析中...</span>
-            </>
-          ) : (
-            <>
-              <FileText className="h-5 w-5" />
-              <span>开始本地SEO分析</span>
-            </>
-          )}
-        </button>
-      </div>
+      {/* 文件上传完成提示 */}
+      {uploadedFiles.length > 0 && (
+        <div className="text-center">
+          <div className={`inline-flex items-center space-x-2 px-4 py-2 rounded-lg ${actualTheme === 'dark'
+            ? 'bg-green-900/20 text-green-300 border border-green-500/30'
+            : 'bg-green-50 text-green-700 border border-green-200'
+            }`}>
+            <CheckCircle className="h-4 w-4" />
+            <span className="text-sm">文件已准备就绪，请点击下方"开始分析"按钮</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { RealSEOAnalysisEngine, SEOAnalysisResult } from '../services/realSEOAnalysisEngine';
 
 interface SEOTestConfig {
@@ -129,7 +129,7 @@ export const useRealSEOTest = () => {
   // 获取预估剩余时间
   const getEstimatedTimeRemaining = useCallback(() => {
     if (!isRunning || progress.progress >= 100) return 0;
-    
+
     // 简单估算：假设每个步骤平均需要10秒
     const remainingSteps = (100 - progress.progress) / 10;
     return Math.ceil(remainingSteps * 10);
