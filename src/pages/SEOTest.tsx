@@ -589,6 +589,31 @@ const SEOTest: React.FC = () => {
                 </div>
               ) : null}
 
+              {/* 完成状态操作按钮 - 独立区域 */}
+              {testStatus === 'completed' && (
+                <div className="flex items-center space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setError('');
+                      setTestStatus('idle');
+                    }}
+                    className="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 rounded-lg text-blue-300 transition-colors font-medium"
+                  >
+                    新测试
+                  </button>
+                  {seoTestMode === 'online' && (
+                    <button
+                      type="button"
+                      onClick={handleSwitchToLocalAnalysis}
+                      className="px-3 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 rounded-lg text-green-300 transition-colors font-medium"
+                    >
+                      切换本地分析
+                    </button>
+                  )}
+                </div>
+              )}
+
               {/* 失败状态操作按钮 - 独立区域 */}
               {testStatus === 'failed' && (
                 <div className="flex items-center space-x-2">

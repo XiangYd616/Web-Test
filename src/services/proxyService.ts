@@ -33,7 +33,13 @@ export class ProxyService {
       // 验证和清理URL
       const cleanUrl = this.validateAndCleanUrl(url);
 
-      // 首先尝试使用代理API
+      // 首先尝试使用后端API
+      const backendResponse = await this.fetchViaBackend(cleanUrl, signal);
+      if (backendResponse) {
+        return backendResponse;
+      }
+
+      // 如果后端失败，尝试使用代理API
       const proxyResponse = await this.fetchViaProxy(cleanUrl, signal);
       if (proxyResponse) {
         return proxyResponse;
@@ -140,7 +146,56 @@ export class ProxyService {
   }
 
   /**
-   * 通过代理API获取内容
+   * 通过后端API获取内容（优先方案）
+   */
+  private async fetchViaBackend(url: string, signal?: AbortSignal): Promise<ProxyResponse | null> {
+    try {
+      const startTime = Date.now();
+
+      // 后端API地址
+      const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+      const apiEndpoint = `${backendUrl}/api/seo/fetch-page`;
+
+      console.log(`🔄 尝试后端API: ${apiEndpoint}`);
+
+      const response = await fetch(apiEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url }),
+        signal
+      });
+
+      if (!response.ok) {
+        throw new Error(`后端API请求失败: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        const loadTime = Date.now() - startTime;
+        console.log(`✅ 后端API成功: ${url} (${loadTime}ms)`);
+
+        return {
+          html: result.data.html,
+          headers: result.data.headers || {},
+          status: result.data.status || 200,
+          url: result.data.url || url,
+          loadTime: result.data.loadTime || loadTime
+        };
+      } else {
+        throw new Error(result.error || '后端API返回错误');
+      }
+
+    } catch (error) {
+      console.warn(`❌ 后端API失败: ${error instanceof Error ? error.message : error}`);
+      return null;
+    }
+  }
+
+  /**
+   * 通过代理API获取内容（备用方案）
    */
   private async fetchViaProxy(url: string, signal?: AbortSignal): Promise<ProxyResponse | null> {
     try {
@@ -352,13 +407,34 @@ export class ProxyService {
     accessible: boolean;
   }> {
     try {
+      // 首先尝试后端API
+      const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+      const apiEndpoint = `${backendUrl}/api/seo/fetch-robots`;
+
+      const response = await fetch(apiEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ baseUrl }),
+        signal
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.data) {
+          return result.data;
+        }
+      }
+
+      // 后端失败，回退到原方法
       const robotsUrl = `${baseUrl}/robots.txt`;
-      const response = await this.fetchPage(robotsUrl, signal);
+      const pageResponse = await this.fetchPage(robotsUrl, signal);
 
       return {
         exists: true,
-        content: response.html,
-        accessible: response.status === 200
+        content: pageResponse.html,
+        accessible: pageResponse.status === 200
       };
     } catch (error) {
       return {
@@ -379,15 +455,36 @@ export class ProxyService {
     urls: string[];
   }> {
     try {
-      const response = await this.fetchPage(sitemapUrl, signal);
+      // 首先尝试后端API
+      const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+      const apiEndpoint = `${backendUrl}/api/seo/fetch-sitemap`;
+
+      const response = await fetch(apiEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sitemapUrl }),
+        signal
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.data) {
+          return result.data;
+        }
+      }
+
+      // 后端失败，回退到原方法
+      const pageResponse = await this.fetchPage(sitemapUrl, signal);
 
       // 解析sitemap中的URL
-      const urls = this.parseSitemapUrls(response.html);
+      const urls = this.parseSitemapUrls(pageResponse.html);
 
       return {
         exists: true,
-        content: response.html,
-        accessible: response.status === 200,
+        content: pageResponse.html,
+        accessible: pageResponse.status === 200,
         urls
       };
     } catch (error) {
