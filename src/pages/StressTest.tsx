@@ -538,9 +538,9 @@ const StressTest: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4 dark-page-scrollbar">
+    <div className="space-y-4 dark-page-scrollbar min-h-screen" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' }}>
       {/* 页面标题和控制 */}
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl font-bold text-white">压力测试</h2>
@@ -655,7 +655,7 @@ const StressTest: React.FC = () => {
         </div>
 
         {/* URL 输入 */}
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+        <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
           <label className="block text-sm font-medium text-gray-300 mb-3">测试URL</label>
           <URLInput
             value={testConfig.url}
@@ -667,7 +667,7 @@ const StressTest: React.FC = () => {
 
         {/* 进度和错误显示 */}
         {(testProgress || backgroundTestInfo || error) && (
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+          <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
             {/* 测试进度 */}
             {(testProgress || backgroundTestInfo) && (
               <div className="mb-4">
@@ -736,7 +736,7 @@ const StressTest: React.FC = () => {
         {/* 主要配置区域 */}
         {!isAdvancedMode ? (
           /* 简化模式 - 快速模板选择 */
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+          <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
             <div className="text-center mb-6">
               <h3 className="text-xl font-semibold text-white mb-2">选择测试强度</h3>
               <p className="text-gray-400 text-sm">根据您的网站类型选择合适的测试模板</p>
@@ -817,7 +817,7 @@ const StressTest: React.FC = () => {
           /* 高级模式 - 原有的详细配置 */
           <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
             {/* 测试配置 */}
-            <div className="xl:col-span-3 bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+            <div className="xl:col-span-3 bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
               <h3 className="text-xl font-semibold text-white mb-4">高级测试配置</h3>
 
               {/* 测试类型选择 - 移动端优化布局 */}
@@ -1152,7 +1152,7 @@ const StressTest: React.FC = () => {
             </div>
 
             {/* 右侧控制面板 */}
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+            <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
               <h3 className="text-lg font-semibold text-white mb-4">测试控制</h3>
 
               {/* 当前配置摘要 */}
@@ -1288,7 +1288,7 @@ const StressTest: React.FC = () => {
 
         {/* 测试结果 */}
         {(result || metrics) && (
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+          <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-semibold text-white">测试结果</h3>
               <div className="flex space-x-2">
@@ -1348,7 +1348,7 @@ const StressTest: React.FC = () => {
 
         {/* 数据调试信息 */}
         {isRunning && (
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4 mb-4">
+          <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4 mb-4">
             <h4 className="text-sm font-medium text-gray-300 mb-2">数据调试信息</h4>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
               <div>
@@ -1373,7 +1373,7 @@ const StressTest: React.FC = () => {
 
         {/* 统一压力测试图表 - 空间复用 */}
         {useUnifiedCharts ? (
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6 mb-6">
+          <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-white">
                 {isRunning ? '实时性能监控' : result ? '测试结果分析' : '压力测试图表'}
@@ -1398,7 +1398,7 @@ const StressTest: React.FC = () => {
         ) : (
           <>
             {/* 传统压力测试图表 - 始终显示 */}
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6 mb-6">
+            <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6 mb-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-white">
                   {isRunning ? '实时性能监控' : '传统压力测试图表'}
@@ -1445,7 +1445,7 @@ const StressTest: React.FC = () => {
 
             {/* 高级测试图表 */}
             {(testData.length > 0 || result) && (
-              <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+              <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
                 <h3 className="text-lg font-semibold text-white mb-4">性能趋势图表</h3>
                 <AdvancedStressTestChart
                   data={testData.map((point: any) => ({
@@ -1470,7 +1470,7 @@ const StressTest: React.FC = () => {
 
             {/* 实时测试日志 */}
             {isRunning && (
-              <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+              <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
                 <h3 className="text-lg font-semibold text-white mb-4">实时日志</h3>
                 <div className="bg-gray-900/80 text-green-400 p-4 rounded-lg font-mono text-sm h-32 overflow-y-auto border border-gray-700">
                   <div>[{new Date().toLocaleTimeString()}] 🚀 压力测试开始</div>

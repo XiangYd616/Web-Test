@@ -1,15 +1,11 @@
-import { 
-  AlertCircle, 
+import {
   BarChart3,
-  CheckCircle, 
-  Clock, 
-  Download, 
+  CheckCircle,
+  Clock,
   Gauge,
   Image,
-  Loader, 
-  Lock, 
+  Loader,
   Monitor,
-  Play, 
   Smartphone,
   Square,
   Timer,
@@ -20,7 +16,6 @@ import {
 } from 'lucide-react';
 import React, { useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
-import { URLInput } from '../components/testing';
 import { useUserStats } from '../hooks/useUserStats';
 
 type TestMode = 'basic' | 'standard' | 'comprehensive' | 'lighthouse';
@@ -283,7 +278,7 @@ const PerformanceTest: React.FC = () => {
       setIsRunning(true);
       setProgress(0);
       setTestProgress('正在初始化性能测试...');
-      
+
       // 模拟测试过程
       const steps = [
         '连接目标网站...',
@@ -297,7 +292,7 @@ const PerformanceTest: React.FC = () => {
       ];
 
       setTestStatus('running');
-      
+
       for (let i = 0; i < steps.length; i++) {
         setTestProgress(steps[i]);
         setProgress((i + 1) / steps.length * 100);
@@ -359,9 +354,9 @@ const PerformanceTest: React.FC = () => {
   }
 
   return (
-    <div className="space-y-4 dark-page-scrollbar">
+    <div className="space-y-4 dark-page-scrollbar min-h-screen" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' }}>
       {/* 页面标题和控制 */}
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl font-bold text-white">性能测试</h2>

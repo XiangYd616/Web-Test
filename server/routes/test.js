@@ -16,6 +16,7 @@ const RealSecurityTestEngine = require('../services/realSecurityTestEngine'); //
 const { RealCompatibilityTestEngine } = require('../services/realCompatibilityTestEngine');
 const { RealUXTestEngine } = require('../services/realUXTestEngine');
 const { RealAPITestEngine } = require('../services/realAPITestEngine');
+const securityTestStorage = require('../services/securityTestStorage');
 
 const multer = require('multer');
 const path = require('path');
@@ -604,38 +605,190 @@ router.post('/stress', optionalAuth, testRateLimiter, validateURLMiddleware(), a
 
 
 /**
- * 安全测试
+ * 安全测试 - 支持统一安全引擎和传统模式
  * POST /api/test/security
  */
 router.post('/security', optionalAuth, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
-  const { url, options = {} } = req.body;
+  const { url, options = {}, module } = req.body;
 
   // URL验证已由中间件完成，可以直接使用验证后的URL
   const validatedURL = req.validatedURL.url.toString();
 
   try {
-    const testResult = await realSecurityTestEngine.runSecurityTest({
-      url: validatedURL,
-      checkSSL: options.checkSSL !== false,
-      checkHeaders: options.checkHeaders !== false,
-      checkVulnerabilities: options.checkVulnerabilities !== false,
-      checkCookies: options.checkCookies !== false,
-      timeout: options.timeout || 30000,
-      userId: req.user?.id
-    });
+    let testResult;
 
-    console.log('✅ Security test completed with score:', testResult.securityScore);
+    // 如果指定了模块，执行单个模块测试（统一安全引擎模式）
+    if (module) {
+      console.log(`🔍 Running ${module} security test for ${validatedURL}`);
+
+      // 根据模块类型执行相应的测试
+      switch (module) {
+        case 'ssl':
+          testResult = await realSecurityTestEngine.runSSLTest(validatedURL, options);
+          break;
+        case 'headers':
+          testResult = await realSecurityTestEngine.runHeadersTest(validatedURL, options);
+          break;
+        case 'vulnerabilities':
+          testResult = await realSecurityTestEngine.runVulnerabilityTest(validatedURL, options);
+          break;
+        case 'cookies':
+          testResult = await realSecurityTestEngine.runCookieTest(validatedURL, options);
+          break;
+        case 'content':
+          testResult = await realSecurityTestEngine.runContentTest(validatedURL, options);
+          break;
+        case 'network':
+          testResult = await realSecurityTestEngine.runNetworkTest(validatedURL, options);
+          break;
+        case 'compliance':
+          testResult = await realSecurityTestEngine.runComplianceTest(validatedURL, options);
+          break;
+        default:
+          throw new Error(`Unknown security test module: ${module}`);
+      }
+    } else {
+      // 传统模式：运行完整的安全测试
+      testResult = await realSecurityTestEngine.runSecurityTest({
+        url: validatedURL,
+        checkSSL: options.checkSSL !== false,
+        checkHeaders: options.checkHeaders !== false,
+        checkVulnerabilities: options.checkVulnerabilities !== false,
+        checkCookies: options.checkCookies !== false,
+        timeout: options.timeout || 30000,
+        userId: req.user?.id
+      });
+    }
+
+    console.log(`✅ Security test completed for ${module || 'full'} with score:`, testResult.score || testResult.securityScore);
+
+    // 保存测试结果到数据库
+    try {
+      await securityTestStorage.saveSecurityTestResult(testResult, req.user?.id);
+      console.log('💾 Security test result saved to database');
+    } catch (saveError) {
+      console.error('⚠️ Failed to save security test result:', saveError.message);
+      // 不影响主要响应，只记录错误
+    }
 
     res.json({
       success: true,
       data: testResult,
-      testType: 'security'
+      testType: 'security',
+      module: module || 'full'
     });
   } catch (error) {
     console.error('安全测试失败:', error);
     res.status(500).json({
       success: false,
       message: '安全测试失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 获取安全测试历史记录
+ * GET /api/test/security/history
+ */
+router.get('/security/history', optionalAuth, asyncHandler(async (req, res) => {
+  try {
+    const {
+      limit = 50,
+      offset = 0,
+      sortBy = 'created_at',
+      sortOrder = 'DESC',
+      status,
+      dateFrom,
+      dateTo
+    } = req.query;
+
+    const options = {
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      sortBy,
+      sortOrder,
+      status,
+      dateFrom,
+      dateTo
+    };
+
+    const result = await securityTestStorage.getSecurityTestHistory(req.user?.id, options);
+
+    res.json(result);
+  } catch (error) {
+    console.error('获取安全测试历史失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '获取安全测试历史失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 获取安全测试统计信息
+ * GET /api/test/security/statistics
+ */
+router.get('/security/statistics', optionalAuth, asyncHandler(async (req, res) => {
+  try {
+    const { days = 30 } = req.query;
+    const result = await securityTestStorage.getSecurityTestStatistics(req.user?.id, parseInt(days));
+
+    res.json(result);
+  } catch (error) {
+    console.error('获取安全测试统计失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '获取安全测试统计失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 获取单个安全测试结果详情
+ * GET /api/test/security/:testId
+ */
+router.get('/security/:testId', optionalAuth, asyncHandler(async (req, res) => {
+  try {
+    const { testId } = req.params;
+    const result = await securityTestStorage.getSecurityTestResult(testId, req.user?.id);
+
+    if (!result.success) {
+      return res.status(404).json(result);
+    }
+
+    res.json(result);
+  } catch (error) {
+    console.error('获取安全测试结果失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '获取安全测试结果失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 删除安全测试结果
+ * DELETE /api/test/security/:testId
+ */
+router.delete('/security/:testId', optionalAuth, asyncHandler(async (req, res) => {
+  try {
+    const { testId } = req.params;
+    const result = await securityTestStorage.deleteSecurityTestResult(testId, req.user?.id);
+
+    if (!result.success) {
+      return res.status(404).json(result);
+    }
+
+    res.json(result);
+  } catch (error) {
+    console.error('删除安全测试结果失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '删除安全测试结果失败',
       error: error.message
     });
   }

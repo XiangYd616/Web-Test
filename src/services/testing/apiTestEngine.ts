@@ -1142,15 +1142,18 @@ export class APITestEngine {
       'Permissions-Policy': '控制浏览器功能权限'
     };
 
+    // 使用真实的安全头检测，而不是随机生成
     for (const [header, description] of Object.entries(requiredSecurityHeaders)) {
-      const present = Math.random() > 0.4; // 60%概率存在
+      // 这里应该从实际的API响应中检查安全头
+      // 暂时标记为需要真实检测
+      const present = false; // 待实现真实检测
       securityHeaders[header] = present;
       if (!present) {
         securityScore -= 5;
         vulnerabilities.push({
           type: 'missing_security_header',
           severity: 'medium' as const,
-          description: `缺少安全头 ${header}: ${description}`,
+          description: `需要检测安全头 ${header}: ${description}`,
           recommendation: `添加 ${header} 头以增强安全性`
         });
       }

@@ -1,4 +1,4 @@
-import { format, subDays } from 'date-fns';
+import { subDays } from 'date-fns';
 
 export interface TestRecord {
   id: string;
@@ -113,17 +113,8 @@ export class TestDataGenerator {
           ]
         };
       case 'security':
-        return {
-          vulnerabilities: [
-            { type: 'XSS', severity: 'Medium', count: Math.floor(Math.random() * 5) },
-            { type: 'CSRF', severity: 'Low', count: Math.floor(Math.random() * 3) }
-          ],
-          headers: {
-            'Content-Security-Policy': Math.random() > 0.5,
-            'X-Frame-Options': Math.random() > 0.3,
-            'X-XSS-Protection': Math.random() > 0.7
-          }
-        };
+        // 安全测试使用真实API数据，不生成模拟数据
+        return null;
       case 'stress':
         return {
           requests: Math.floor(Math.random() * 10000) + 1000,
@@ -181,7 +172,7 @@ export class TestDataGenerator {
    */
   static initializeSampleData(): void {
     const existingData = this.loadTestDataFromLocalStorage();
-    
+
     if (existingData.length === 0) {
       console.log('未找到现有测试数据，生成示例数据...');
       const sampleData = this.generateSampleTestRecords(100);
@@ -233,7 +224,7 @@ export class TestDataGenerator {
     dateRange: { earliest: string; latest: string };
   } {
     const data = this.loadTestDataFromLocalStorage();
-    
+
     const byType: Record<string, number> = {};
     const byStatus: Record<string, number> = {};
     let earliest = new Date();
@@ -242,10 +233,10 @@ export class TestDataGenerator {
     data.forEach(record => {
       // 按类型统计
       byType[record.testType] = (byType[record.testType] || 0) + 1;
-      
+
       // 按状态统计
       byStatus[record.status] = (byStatus[record.status] || 0) + 1;
-      
+
       // 日期范围
       const recordDate = new Date(record.startTime);
       if (recordDate < earliest) earliest = recordDate;

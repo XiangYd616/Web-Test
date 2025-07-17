@@ -1,21 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Clock, 
-  CheckCircle, 
-  XCircle, 
-  AlertCircle, 
-  Download, 
-  Eye, 
-  Trash2, 
-  Filter,
-  Search,
-  Calendar,
+import {
+  AlertCircle,
   BarChart3,
+  CheckCircle,
+  Clock,
+  Download,
+  Eye,
+  FileText,
   Globe,
+  Search,
   Shield,
-  Zap,
-  FileText
+  Trash2,
+  XCircle,
+  Zap
 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
 interface TestRecord {
   id: string;
@@ -40,84 +38,63 @@ const TestHistory: React.FC = () => {
   const [sortBy, setSortBy] = useState<'date' | 'score' | 'duration'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-  // 模拟测试历史数据
+  // 从后端API加载真实的测试历史数据
   useEffect(() => {
-    const mockData: TestRecord[] = [
-      {
-        id: '1',
-        testName: '百度首页性能测试',
-        testType: 'performance',
-        url: 'https://www.baidu.com',
-        status: 'completed',
-        score: 85,
-        duration: 45,
-        startTime: '2024-01-15T10:30:00Z',
-        endTime: '2024-01-15T10:30:45Z',
-        reportPath: '/reports/test-1.pdf'
-      },
-      {
-        id: '2',
-        testName: '淘宝安全检测',
-        testType: 'security',
-        url: 'https://www.taobao.com',
-        status: 'completed',
-        score: 92,
-        duration: 120,
-        startTime: '2024-01-15T09:15:00Z',
-        endTime: '2024-01-15T09:17:00Z',
-        reportPath: '/reports/test-2.pdf'
-      },
-      {
-        id: '3',
-        testName: '京东压力测试',
-        testType: 'stress',
-        url: 'https://www.jd.com',
-        status: 'failed',
-        score: 0,
-        duration: 30,
-        startTime: '2024-01-14T16:20:00Z',
-        endTime: '2024-01-14T16:20:30Z'
-      },
-      {
-        id: '4',
-        testName: '微博内容检测',
-        testType: 'content',
-        url: 'https://weibo.com',
-        status: 'completed',
-        score: 78,
-        duration: 90,
-        startTime: '2024-01-14T14:10:00Z',
-        endTime: '2024-01-14T14:11:30Z',
-        reportPath: '/reports/test-4.pdf'
-      },
-      {
-        id: '5',
-        testName: '知乎网站综合测试',
-        testType: 'website',
-        url: 'https://www.zhihu.com',
-        status: 'completed',
-        score: 88,
-        duration: 180,
-        startTime: '2024-01-13T11:00:00Z',
-        endTime: '2024-01-13T11:03:00Z',
-        reportPath: '/reports/test-5.pdf'
-      }
-    ];
+    const loadTestHistory = async () => {
+      try {
+        setLoading(true);
 
-    setTimeout(() => {
-      setTestHistory(mockData);
-      setFilteredHistory(mockData);
-      setLoading(false);
-    }, 1000);
+        // 并行加载不同类型的测试历史
+        const [generalResponse, securityResponse] = await Promise.allSettled([
+          fetch('/api/test/history'),
+          fetch('/api/test/security/history')
+        ]);
+
+        const allRecords = [];
+
+        // 处理通用测试历史
+        if (generalResponse.status === 'fulfilled' && generalResponse.value.ok) {
+          const generalData = await generalResponse.value.json();
+          if (generalData.success && Array.isArray(generalData.data)) {
+            allRecords.push(...generalData.data);
+          }
+        }
+
+        // 处理安全测试历史
+        if (securityResponse.status === 'fulfilled' && securityResponse.value.ok) {
+          const securityData = await securityResponse.value.json();
+          if (securityData.success && Array.isArray(securityData.data)) {
+            allRecords.push(...securityData.data);
+          }
+        }
+
+        // 按时间排序
+        allRecords.sort((a, b) => new Date(b.createdAt || b.startTime).getTime() - new Date(a.createdAt || a.startTime).getTime());
+
+        setTestRecords(allRecords);
+
+        if (allRecords.length === 0) {
+          console.log('No test history found, this is normal for new installations');
+        }
+
+      } catch (error) {
+        console.error('Error loading test history:', error);
+        setTestRecords([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTestHistory();
   }, []);
 
   // 过滤和搜索
   useEffect(() => {
-    let filtered = testHistory;
+    let filtered = testRecords;
 
     // 搜索过滤
     if (searchTerm) {
-      filtered = filtered.filter(test => 
+      filtered = filtered.filter(test =>
         test.testName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         test.url.toLowerCase().includes(searchTerm.toLowerCase())
       );
@@ -136,7 +113,7 @@ const TestHistory: React.FC = () => {
     // 排序
     filtered.sort((a, b) => {
       let aValue, bValue;
-      
+
       switch (sortBy) {
         case 'score':
           aValue = a.score;
@@ -161,7 +138,7 @@ const TestHistory: React.FC = () => {
     });
 
     setFilteredHistory(filtered);
-  }, [testHistory, searchTerm, filterType, filterStatus, sortBy, sortOrder]);
+  }, [testRecords, searchTerm, filterType, filterStatus, sortBy, sortOrder]);
 
   const getTestTypeIcon = (type: string) => {
     switch (type) {
@@ -478,7 +455,7 @@ const TestHistory: React.FC = () => {
           </div>
           <div className="bg-gray-800 rounded-lg p-4">
             <div className="text-2xl font-bold text-blue-400">
-              {testHistory.filter(t => t.status === 'completed').length > 0 
+              {testHistory.filter(t => t.status === 'completed').length > 0
                 ? Math.round(testHistory.filter(t => t.status === 'completed').reduce((sum, t) => sum + t.score, 0) / testHistory.filter(t => t.status === 'completed').length)
                 : 0}
             </div>

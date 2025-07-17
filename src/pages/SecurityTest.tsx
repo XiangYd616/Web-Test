@@ -1,48 +1,14 @@
-import { 
-  AlertCircle, 
-  CheckCircle, 
-  Clock, 
-  Download, 
-  Eye,
-  Globe,
-  Key,
-  Loader, 
-  Lock, 
-  Play, 
-  Search,
-  Settings,
-  Shield,
-  ShieldAlert,
-  ShieldCheck,
-  Square,
-  TrendingUp,
-  Users,
-  Wifi,
-  XCircle,
-  Zap
-} from 'lucide-react';
-import React, { useState } from 'react';
+import { Search } from 'lucide-react';
+import React, { useRef, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
-import { URLInput } from '../components/testing';
+import SecurityTestComparison from '../components/security/SecurityTestComparison';
+import { SecurityTestHistory } from '../components/security/SecurityTestHistory';
+import { UnifiedSecurityResults } from '../components/security/UnifiedSecurityResults';
+import { UnifiedSecurityTestPanel } from '../components/security/UnifiedSecurityTestPanel';
 import { useUserStats } from '../hooks/useUserStats';
-
-type TestMode = 'basic' | 'standard' | 'comprehensive' | 'penetration';
-type TestStatusType = 'idle' | 'starting' | 'running' | 'completed' | 'failed';
-
-interface SecurityTestConfig {
-  url: string;
-  mode: TestMode;
-  checkSSL: boolean;
-  checkHeaders: boolean;
-  checkVulnerabilities: boolean;
-  checkAuthentication: boolean;
-  checkCORS: boolean;
-  checkCSP: boolean;
-  checkXSS: boolean;
-  checkSQLInjection: boolean;
-  checkDirectoryTraversal: boolean;
-  checkDDoSProtection: boolean;
-}
+import { SecurityTestResult, TestProgress } from '../services/unifiedSecurityEngine';
+import '../styles/security-test-clarity.css';
+import '../styles/security-test-enhanced.css';
 
 const SecurityTest: React.FC = () => {
   // 登录检查
@@ -58,384 +24,211 @@ const SecurityTest: React.FC = () => {
   // 用户统计
   const { recordTestCompletion } = useUserStats();
 
-  const [testConfig, setTestConfig] = useState<SecurityTestConfig>({
-    url: '',
-    mode: 'standard',
-    checkSSL: true,
-    checkHeaders: true,
-    checkVulnerabilities: true,
-    checkAuthentication: true,
-    checkCORS: true,
-    checkCSP: true,
-    checkXSS: false,
-    checkSQLInjection: false,
-    checkDirectoryTraversal: false,
-    checkDDoSProtection: false,
-  });
+  // 状态管理
+  const [testResult, setTestResult] = useState<SecurityTestResult | null>(null);
+  const [testProgress, setTestProgress] = useState<TestProgress | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isTestRunning, setIsTestRunning] = useState(false);
+  const [activeTab, setActiveTab] = useState<'test' | 'history' | 'comparison'>('test');
+  const [canStartTest, setCanStartTest] = useState(false);
+  const [comparisonResults, setComparisonResults] = useState<SecurityTestResult[]>([]);
+  const historyRef = useRef<any>(null);
+  const testPanelRef = useRef<any>(null);
 
-  const [isAdvancedMode, setIsAdvancedMode] = useState(false);
-  const [testStatus, setTestStatus] = useState<TestStatusType>('idle');
-  const [testProgress, setTestProgress] = useState('');
-  const [progress, setProgress] = useState(0);
-  const [error, setError] = useState('');
-  const [results, setResults] = useState<any>(null);
-  const [isRunning, setIsRunning] = useState(false);
+  // 更新按钮状态
+  React.useEffect(() => {
+    const updateButtonState = () => {
+      if (testPanelRef.current) {
+        const canStart = testPanelRef.current.canStartTest();
+        setCanStartTest(canStart);
+      }
+    };
 
-  // 快速模板
-  const quickTemplates = [
-    {
-      id: 'basic',
-      name: '基础检测',
-      description: '检查基本安全配置',
-      icon: Shield,
-      color: 'blue',
-      duration: '1-2分钟',
-      config: {
-        mode: 'basic' as TestMode,
-        checkSSL: true,
-        checkHeaders: true,
-        checkVulnerabilities: false,
-        checkAuthentication: false,
-        checkCORS: false,
-        checkCSP: false,
-        checkXSS: false,
-        checkSQLInjection: false,
-        checkDirectoryTraversal: false,
-        checkDDoSProtection: false,
-      }
-    },
-    {
-      id: 'standard',
-      name: '标准扫描',
-      description: '全面的安全检测（推荐）',
-      icon: ShieldCheck,
-      color: 'green',
-      duration: '3-5分钟',
-      config: {
-        mode: 'standard' as TestMode,
-        checkSSL: true,
-        checkHeaders: true,
-        checkVulnerabilities: true,
-        checkAuthentication: true,
-        checkCORS: true,
-        checkCSP: true,
-        checkXSS: false,
-        checkSQLInjection: false,
-        checkDirectoryTraversal: false,
-        checkDDoSProtection: false,
-      }
-    },
-    {
-      id: 'comprehensive',
-      name: '深度审计',
-      description: '详细的安全漏洞扫描',
-      icon: ShieldAlert,
-      color: 'orange',
-      duration: '5-10分钟',
-      config: {
-        mode: 'comprehensive' as TestMode,
-        checkSSL: true,
-        checkHeaders: true,
-        checkVulnerabilities: true,
-        checkAuthentication: true,
-        checkCORS: true,
-        checkCSP: true,
-        checkXSS: true,
-        checkSQLInjection: true,
-        checkDirectoryTraversal: true,
-        checkDDoSProtection: false,
-      }
-    },
-    {
-      id: 'penetration',
-      name: '渗透测试',
-      description: '高级安全渗透测试',
-      icon: Key,
-      color: 'red',
-      duration: '10-20分钟',
-      config: {
-        mode: 'penetration' as TestMode,
-        checkSSL: true,
-        checkHeaders: true,
-        checkVulnerabilities: true,
-        checkAuthentication: true,
-        checkCORS: true,
-        checkCSP: true,
-        checkXSS: true,
-        checkSQLInjection: true,
-        checkDirectoryTraversal: true,
-        checkDDoSProtection: true,
-      }
-    }
-  ];
+    // 初始检查
+    updateButtonState();
 
-  // 安全检测项目
-  const securityTests = [
-    {
-      key: 'checkSSL',
-      name: 'SSL/TLS检测',
-      description: '检查HTTPS配置和证书',
-      icon: Lock,
-      color: 'green',
-      estimatedTime: '10-20秒'
-    },
-    {
-      key: 'checkHeaders',
-      name: '安全头检测',
-      description: '检查HTTP安全头配置',
-      icon: Settings,
-      color: 'blue',
-      estimatedTime: '15-30秒'
-    },
-    {
-      key: 'checkVulnerabilities',
-      name: '漏洞扫描',
-      description: '检查已知安全漏洞',
-      icon: Search,
-      color: 'yellow',
-      estimatedTime: '30-60秒'
-    },
-    {
-      key: 'checkAuthentication',
-      name: '认证检测',
-      description: '检查身份验证机制',
-      icon: Users,
-      color: 'purple',
-      estimatedTime: '20-40秒'
-    },
-    {
-      key: 'checkCORS',
-      name: 'CORS检测',
-      description: '检查跨域资源共享配置',
-      icon: Globe,
-      color: 'indigo',
-      estimatedTime: '15-25秒'
-    },
-    {
-      key: 'checkCSP',
-      name: 'CSP检测',
-      description: '检查内容安全策略',
-      icon: Shield,
-      color: 'teal',
-      estimatedTime: '10-20秒'
-    },
-    {
-      key: 'checkXSS',
-      name: 'XSS检测',
-      description: '检查跨站脚本攻击漏洞',
-      icon: AlertCircle,
-      color: 'orange',
-      estimatedTime: '30-60秒'
-    },
-    {
-      key: 'checkSQLInjection',
-      name: 'SQL注入检测',
-      description: '检查SQL注入漏洞',
-      icon: Eye,
-      color: 'red',
-      estimatedTime: '45-90秒'
-    },
-    {
-      key: 'checkDirectoryTraversal',
-      name: '目录遍历检测',
-      description: '检查目录遍历漏洞',
-      icon: Zap,
-      color: 'pink',
-      estimatedTime: '20-40秒'
-    },
-    {
-      key: 'checkDDoSProtection',
-      name: 'DDoS防护检测',
-      description: '检查DDoS防护机制',
-      icon: Wifi,
-      color: 'gray',
-      estimatedTime: '60-120秒'
-    }
-  ];
+    // 定期检查状态
+    const interval = setInterval(updateButtonState, 500);
+    return () => clearInterval(interval);
+  }, []);
 
-  const applyTemplate = (templateId: string) => {
-    const template = quickTemplates.find(t => t.id === templateId);
-    if (template) {
-      setTestConfig(prev => ({
-        ...prev,
-        ...template.config
-      }));
-    }
+  // 处理测试开始
+  const handleTestStart = () => {
+    setIsTestRunning(true);
+    setError(null);
+    setTestResult(null);
+    setTestProgress(null);
   };
 
-  const handleStartTest = async () => {
-    if (!testConfig.url) {
-      setError('请输入要测试的URL');
-      return;
-    }
-
-    if (!isAuthenticated) {
-      requireLogin();
-      return;
-    }
-
-    try {
-      setError('');
-      setTestStatus('starting');
-      setIsRunning(true);
-      setProgress(0);
-      setTestProgress('正在初始化安全测试...');
-      
-      // 模拟测试过程
-      const steps = [
-        '连接目标服务器...',
-        '检查SSL/TLS配置...',
-        '分析HTTP安全头...',
-        '扫描常见漏洞...',
-        '检查认证机制...',
-        '测试CORS配置...',
-        '验证CSP策略...',
-        '生成安全报告...'
-      ];
-
-      setTestStatus('running');
-      
-      for (let i = 0; i < steps.length; i++) {
-        setTestProgress(steps[i]);
-        setProgress((i + 1) / steps.length * 100);
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      }
-
-      // 模拟测试结果
-      const mockResults = {
-        score: Math.floor(Math.random() * 40) + 60, // 60-100分
-        vulnerabilities: Math.floor(Math.random() * 5),
-        warnings: Math.floor(Math.random() * 10),
-        passed: Math.floor(Math.random() * 20) + 10,
-        details: {
-          ssl: { status: 'pass', score: 95 },
-          headers: { status: 'warning', score: 75 },
-          vulnerabilities: { status: 'pass', score: 90 },
-          authentication: { status: 'pass', score: 85 }
-        }
-      };
-
-      setResults(mockResults);
-      setTestStatus('completed');
-      setTestProgress('安全测试完成！');
-      setIsRunning(false);
-
-      // 记录测试完成统计
-      recordTestCompletion('安全测试', true, mockResults.score, 16);
-
-    } catch (err: any) {
-      console.error('❌ Failed to start security test:', err);
-      setError(err.message || '安全测试启动失败');
-      setTestStatus('failed');
-      setIsRunning(false);
-    }
+  // 处理测试进度
+  const handleTestProgress = (progress: TestProgress) => {
+    setTestProgress(progress);
   };
 
-  const handleStopTest = async () => {
-    setTestStatus('idle');
-    setTestProgress('');
-    setError('');
-    setIsRunning(false);
-    setProgress(0);
-    console.log('✅ Security test stopped');
+  // 处理测试完成
+  const handleTestComplete = (result: SecurityTestResult) => {
+    setTestResult(result);
+    setIsTestRunning(false);
+    setTestProgress(null);
+
+    // 保存到历史记录
+    if (historyRef.current?.saveTestResult) {
+      historyRef.current.saveTestResult(result);
+    }
+
+    // 记录测试完成统计
+    recordTestCompletion('安全测试', true, result.overallScore, Math.round(result.duration / 1000));
   };
 
-  const handleTestTypeChange = (testKey: keyof SecurityTestConfig) => {
-    setTestConfig(prev => ({
-      ...prev,
-      [testKey]: !prev[testKey]
-    }));
+  // 处理测试错误
+  const handleTestError = (errorMessage: string) => {
+    setError(errorMessage);
+    setIsTestRunning(false);
+    setTestProgress(null);
+  };
+
+  // 处理测试对比
+  const handleCompareTests = (results: SecurityTestResult[]) => {
+    setComparisonResults(results);
+    setActiveTab('comparison');
+  };
+
+  // 关闭对比页面
+  const handleCloseComparison = () => {
+    setActiveTab('history');
+    setComparisonResults([]);
   };
 
   if (!isAuthenticated) {
-    return <LoginPromptComponent />;
+    return LoginPromptComponent;
   }
 
   return (
-    <div className="space-y-4 dark-page-scrollbar">
-      {/* 页面标题和控制 */}
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <div className="dark security-test space-y-6 dark-page-scrollbar min-h-screen security-test-bg">
+      {/* 页面标题 - 增强可读性 */}
+      <div className="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700/60 p-7 shadow-lg">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
           <div>
-            <h2 className="text-2xl font-bold text-white">安全测试</h2>
-            <p className="text-gray-300 mt-1">全面检测网站安全漏洞和防护措施</p>
+            <h2 className="text-3xl font-bold text-white mb-2 flex items-center">
+              <span className="text-4xl mr-3">🛡️</span>
+              安全测试
+            </h2>
+            <p className="text-gray-200 text-lg font-medium">全面检测网站安全漏洞和防护措施</p>
           </div>
 
-          {/* 模式切换 */}
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center bg-gray-700/50 rounded-lg p-1">
-              <button
-                type="button"
-                onClick={() => setIsAdvancedMode(false)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${!isAdvancedMode
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-gray-300 hover:text-white'
-                  }`}
-              >
-                快速模式
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsAdvancedMode(true)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${isAdvancedMode
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-gray-300 hover:text-white'
-                  }`}
-              >
-                高级模式
-              </button>
-            </div>
-
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
             {/* 测试状态和控制按钮 */}
-            <div className="flex items-center space-x-3">
-              {testStatus === 'idle' ? (
-                <button
-                  type="button"
-                  onClick={handleStartTest}
-                  disabled={!testConfig.url}
-                  className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${!testConfig.url
-                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                    : 'bg-red-600 hover:bg-red-700 text-white'
-                    }`}
-                >
-                  <Shield className="w-5 h-5" />
-                  <span>开始扫描</span>
-                </button>
-              ) : testStatus === 'starting' ? (
-                <div className="flex items-center space-x-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg">
-                  <Loader className="w-4 h-4 animate-spin text-blue-400" />
-                  <span className="text-sm text-blue-300 font-medium">正在启动...</span>
-                </div>
-              ) : testStatus === 'running' || isRunning ? (
-                <div className="flex items-center space-x-3">
-                  <div className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-sm text-green-300 font-medium">扫描中</span>
-                  </div>
+            {activeTab === 'test' && (
+              <div className="flex items-center space-x-4">
+                {!isTestRunning ? (
                   <button
                     type="button"
-                    onClick={handleStopTest}
-                    className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                    onClick={() => {
+                      if (testPanelRef.current) {
+                        testPanelRef.current.startTest();
+                      }
+                    }}
+                    disabled={!canStartTest}
+                    className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${canStartTest
+                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                      : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                      }`}
                   >
-                    <Square className="w-4 h-4" />
-                    <span>停止</span>
+                    <Search className="w-5 h-5" />
+                    <span>开始测试</span>
                   </button>
-                </div>
-              ) : testStatus === 'completed' ? (
-                <div className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
-                  <CheckCircle className="w-4 h-4 text-green-400" />
-                  <span className="text-sm text-green-300 font-medium">扫描完成</span>
-                </div>
-              ) : testStatus === 'failed' ? (
-                <div className="flex items-center space-x-2 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg">
-                  <XCircle className="w-4 h-4 text-red-400" />
-                  <span className="text-sm text-red-300 font-medium">扫描失败</span>
-                </div>
-              ) : null}
+                ) : (
+                  <div className="flex items-center space-x-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg">
+                    <div className="w-4 h-4 animate-spin rounded-full border-2 border-blue-400 border-t-transparent"></div>
+                    <span className="text-sm text-blue-300 font-medium">测试中...</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 标签页切换 - 增强可读性 */}
+            <div className="bg-gray-700/60 border border-gray-600/70 rounded-xl p-1.5 flex gap-1.5 shadow-md">
+              <button
+                type="button"
+                onClick={() => setActiveTab('test')}
+                className={`px-5 py-2.5 rounded-lg font-bold text-sm transition-all ${activeTab === 'test'
+                  ? 'bg-blue-600 text-white shadow-lg transform scale-105'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-600/60'
+                  }`}
+              >
+                安全测试
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('history')}
+                className={`px-5 py-2.5 rounded-lg font-bold text-sm transition-all ${activeTab === 'history'
+                  ? 'bg-blue-600 text-white shadow-lg transform scale-105'
+                  : 'text-gray-300 hover:text-white hover:bg-gray-600/60'
+                  }`}
+              >
+                测试历史
+              </button>
+              {comparisonResults.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('comparison')}
+                  className={`px-5 py-2.5 rounded-lg font-bold text-sm transition-all ${activeTab === 'comparison'
+                    ? 'bg-blue-600 text-white shadow-lg transform scale-105'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-600/60'
+                    }`}
+                >
+                  结果对比
+                </button>
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* 内容区域 */}
+      {activeTab === 'test' ? (
+        <>
+          {/* 统一安全测试面板 */}
+          <UnifiedSecurityTestPanel
+            ref={testPanelRef}
+            onTestStart={handleTestStart}
+            onTestProgress={handleTestProgress}
+            onTestComplete={handleTestComplete}
+            onTestError={handleTestError}
+          />
+
+          {/* 测试结果展示 */}
+          {testResult && (
+            <UnifiedSecurityResults result={testResult} />
+          )}
+
+          {/* 错误显示 */}
+          {error && (
+            <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-4">
+              <div className="flex items-center">
+                <div className="text-red-400 mr-3">⚠️</div>
+                <span className="text-red-300">{error}</span>
+              </div>
+            </div>
+          )}
+        </>
+      ) : activeTab === 'history' ? (
+        /* 安全测试历史 */
+        <SecurityTestHistory
+          ref={historyRef}
+          onSelectTest={(result) => {
+            setTestResult(result);
+            setActiveTab('test');
+          }}
+          onCompareTests={handleCompareTests}
+        />
+      ) : activeTab === 'comparison' ? (
+        /* 测试结果对比 */
+        <SecurityTestComparison
+          results={comparisonResults}
+          onClose={handleCloseComparison}
+        />
+      ) : null}
     </div>
   );
 };

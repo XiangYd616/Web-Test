@@ -1,0 +1,292 @@
+/**
+ * 安全测试页面增强配色方案
+ * 优化显示清晰度和对比度
+ */
+
+/* 安全测试页面专用主题变量 */
+.security-test {
+  /* 浅色主题 - 优化配色 */
+  --security-bg-primary: #f8fafc;
+  --security-bg-secondary: #ffffff;
+  --security-bg-card: rgba(255, 255, 255, 0.95);
+  --security-bg-card-hover: rgba(255, 255, 255, 1);
+  --security-border-color: #e2e8f0;
+  --security-border-hover: #cbd5e1;
+  --security-text-primary: #1e293b;
+  --security-text-secondary: #475569;
+  --security-text-tertiary: #64748b;
+  --security-accent-color: #3b82f6;
+  --security-accent-hover: #2563eb;
+  --security-success-color: #10b981;
+  --security-warning-color: #f59e0b;
+  --security-error-color: #ef4444;
+  --security-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --security-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* 深色主题 - 增强对比度 */
+.dark .security-test,
+.dark-theme .security-test {
+  --security-bg-primary: #0f172a;
+  --security-bg-secondary: #1e293b;
+  --security-bg-card: rgba(30, 41, 59, 0.85);
+  --security-bg-card-hover: rgba(30, 41, 59, 0.95);
+  --security-border-color: rgba(71, 85, 105, 0.8);
+  --security-border-hover: rgba(71, 85, 105, 1);
+  --security-text-primary: #f8fafc;
+  --security-text-secondary: #cbd5e1;
+  --security-text-tertiary: #94a3b8;
+  --security-accent-color: #60a5fa;
+  --security-accent-hover: #3b82f6;
+  --security-success-color: #34d399;
+  --security-warning-color: #fbbf24;
+  --security-error-color: #f87171;
+  --security-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --security-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+}
+
+/* 页面整体背景优化 */
+.security-test {
+  background: linear-gradient(135deg, var(--security-bg-primary) 0%, var(--security-bg-secondary) 100%);
+  min-height: 100vh;
+  color: var(--security-text-primary);
+}
+
+/* 卡片组件增强 */
+.security-test .enhanced-card {
+  background: var(--security-bg-card);
+  border: 1px solid var(--security-border-color);
+  border-radius: 1rem;
+  box-shadow: var(--security-shadow);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  transition: all 0.3s ease;
+}
+
+.security-test .enhanced-card:hover {
+  background: var(--security-bg-card-hover);
+  border-color: var(--security-border-hover);
+  box-shadow: var(--security-shadow-lg);
+  transform: translateY(-2px);
+}
+
+/* 文字颜色增强 */
+.security-test .enhanced-text-primary {
+  color: var(--security-text-primary);
+  font-weight: 600;
+}
+
+.security-test .enhanced-text-secondary {
+  color: var(--security-text-secondary);
+  font-weight: 500;
+}
+
+.security-test .enhanced-text-tertiary {
+  color: var(--security-text-tertiary);
+  font-weight: 400;
+}
+
+/* 按钮样式增强 */
+.security-test .enhanced-button-primary {
+  background: linear-gradient(135deg, var(--security-accent-color), var(--security-accent-hover));
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  box-shadow: var(--security-shadow);
+  transition: all 0.3s ease;
+}
+
+.security-test .enhanced-button-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--security-shadow-lg);
+}
+
+.security-test .enhanced-button-secondary {
+  background: var(--security-bg-card);
+  color: var(--security-text-primary);
+  border: 1px solid var(--security-border-color);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.security-test .enhanced-button-secondary:hover {
+  background: var(--security-bg-card-hover);
+  border-color: var(--security-border-hover);
+  transform: translateY(-1px);
+}
+
+/* 状态指示器增强 */
+.security-test .status-success {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--security-success-color);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.security-test .status-warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--security-warning-color);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.security-test .status-error {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--security-error-color);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* 输入框增强 */
+.security-test .enhanced-input {
+  background: var(--security-bg-card);
+  border: 1px solid var(--security-border-color);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: var(--security-text-primary);
+  transition: all 0.3s ease;
+}
+
+.security-test .enhanced-input:focus {
+  outline: none;
+  border-color: var(--security-accent-color);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.security-test .enhanced-input::placeholder {
+  color: var(--security-text-tertiary);
+}
+
+/* 标签页导航增强 */
+.security-test .enhanced-tab-nav {
+  background: var(--security-bg-card);
+  border: 1px solid var(--security-border-color);
+  border-radius: 1rem;
+  padding: 0.5rem;
+  display: flex;
+  gap: 0.25rem;
+}
+
+.security-test .enhanced-tab-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: none;
+  background: transparent;
+  color: var(--security-text-secondary);
+}
+
+.security-test .enhanced-tab-button.active {
+  background: var(--security-accent-color);
+  color: white;
+  box-shadow: var(--security-shadow);
+}
+
+.security-test .enhanced-tab-button:hover:not(.active) {
+  background: var(--security-bg-card-hover);
+  color: var(--security-text-primary);
+}
+
+/* 进度条增强 */
+.security-test .enhanced-progress-bar {
+  background: var(--security-bg-card);
+  border: 1px solid var(--security-border-color);
+  border-radius: 1rem;
+  overflow: hidden;
+  height: 0.75rem;
+}
+
+.security-test .enhanced-progress-fill {
+  background: linear-gradient(90deg, var(--security-accent-color), var(--security-accent-hover));
+  height: 100%;
+  transition: width 0.3s ease;
+  border-radius: 0.75rem;
+}
+
+/* 统计卡片增强 */
+.security-test .enhanced-stat-card {
+  background: var(--security-bg-card);
+  border: 1px solid var(--security-border-color);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.security-test .enhanced-stat-card:hover {
+  background: var(--security-bg-card-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--security-shadow-lg);
+}
+
+.security-test .enhanced-stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--security-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.security-test .enhanced-stat-label {
+  color: var(--security-text-secondary);
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+/* 响应式优化 */
+@media (max-width: 640px) {
+  .security-test .enhanced-card {
+    border-radius: 0.75rem;
+    padding: 1rem;
+  }
+  
+  .security-test .enhanced-button-primary,
+  .security-test .enhanced-button-secondary {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+  }
+  
+  .security-test .enhanced-tab-button {
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* 动画效果 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.security-test .fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* 加载状态增强 */
+.security-test .enhanced-loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--security-text-secondary);
+}
+
+.security-test .enhanced-loading-spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--security-border-color);
+  border-top: 2px solid var(--security-accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

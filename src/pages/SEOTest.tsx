@@ -525,9 +525,9 @@ const SEOTest: React.FC = () => {
   }
 
   return (
-    <div className="space-y-4 dark-page-scrollbar">
+    <div className="space-y-4 dark-page-scrollbar min-h-screen" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' }}>
       {/* 页面标题和控制 */}
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl font-bold text-white">SEO综合分析</h2>
@@ -645,7 +645,7 @@ const SEOTest: React.FC = () => {
       </div>
 
       {/* 测试模式选择 */}
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-3">
@@ -747,7 +747,7 @@ const SEOTest: React.FC = () => {
       </div>
 
       {/* 输入区域 */}
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <div className="space-y-4">
           {seoTestMode === 'online' ? (
             <div>
@@ -807,7 +807,7 @@ const SEOTest: React.FC = () => {
 
 
       {/* 检测项目选择 */}
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
             <h3 className="text-lg font-semibold text-white">选择检测项目</h3>
@@ -1099,7 +1099,7 @@ const SEOTest: React.FC = () => {
 
       {/* 进度显示 */}
       {(isRunning || progress > 0) && (
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+        <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-white">分析进度</h3>
@@ -1169,7 +1169,7 @@ const SEOTest: React.FC = () => {
       {/* 结果显示 */}
       {results && (
         <div className="space-y-6">
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+          <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-white">分析结果</h3>
               <div className="flex items-center space-x-3">
