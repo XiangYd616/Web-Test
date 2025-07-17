@@ -64,7 +64,7 @@ const Subscription = lazy(() => import('../../pages/Subscription'));
 const DownloadDesktop = lazy(() => import('../../pages/DownloadDesktop'));
 
 // 演示页面
-const BackgroundTestDemo = lazy(() => import('../../pages/BackgroundTestDemo'));
+// const BackgroundTestDemo = lazy(() => import('../../pages/BackgroundTestDemo')); // 已移除
 
 interface LazyPageWrapperProps {
   children: React.ReactNode;
@@ -85,11 +85,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       {/* LoginDemo 路由已移除，因为文件不存在 */}
-      <Route path="/background-test-demo" element={
-        <LazyPageWrapper>
-          <BackgroundTestDemo />
-        </LazyPageWrapper>
-      } />
+      {/* background-test-demo 路由已移除 */}
 
       {/* 受保护的路由 */}
       <Route path="/" element={

@@ -22,7 +22,7 @@ const adminRoutes = require('./routes/admin');
 const dataRoutes = require('./routes/data');
 
 // 导入中间件
-const { authMiddleware } = require('./middleware/auth');
+// const { authMiddleware } = require('./middleware/auth'); // 已移除，不再需要
 const dataManagementRoutes = require('./routes/dataManagement');
 const monitoringRoutes = require('./routes/monitoring');
 const reportRoutes = require('./routes/reports');
@@ -119,103 +119,17 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // API路由
 app.use('/api/auth', authRoutes);
 app.use('/api/test', testRoutes);
-app.use('/api/tests', testRoutes); // 复数形式的别名
-app.use('/api/test-engines', testRoutes); // 测试引擎状态API
-app.use('/api/test-history', testRoutes); // 兼容性路由 - 重定向到test路由
+// app.use('/api/tests', testRoutes); // 复数形式的别名 - 已移除，统一使用 /api/test
+// app.use('/api/test-engines', testRoutes); // 测试引擎状态API - 已移除，功能重复
+// app.use('/api/test-history', testRoutes); // 兼容性路由 - 已移除，使用 /api/test/history
 app.use('/api/seo', seoRoutes); // SEO测试API - 解决CORS问题
 // app.use('/api/unified-security', unifiedSecurityRoutes); // 已移除
 app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
 
-// 偏好设置API别名路由
-app.get('/api/preferences', authMiddleware, async (req, res) => {
-  try {
-    // 直接调用用户偏好设置逻辑
-    const { query } = require('./config/database');
+// 偏好设置API已移除，请使用 /api/user/preferences
+// 原有的 /api/preferences 路由功能已整合到 /api/user/preferences 中
 
-    const result = await query(
-      'SELECT * FROM user_preferences WHERE user_id = $1',
-      [req.user.id]
-    );
-
-    const preferences = result.rows[0] || {
-      theme: 'dark',
-      language: 'zh-CN',
-      notifications: true,
-      email_notifications: true,
-      auto_save: true
-    };
-
-    res.json({
-      success: true,
-      data: preferences
-    });
-  } catch (error) {
-    console.error('获取用户偏好失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取用户偏好失败'
-    });
-  }
-});
-
-app.put('/api/preferences', authMiddleware, async (req, res) => {
-  const { theme, language, notifications, email_notifications, auto_save } = req.body;
-
-  try {
-    const { query } = require('./config/database');
-
-    // 检查偏好设置是否存在
-    const existingResult = await query(
-      'SELECT id FROM user_preferences WHERE user_id = $1',
-      [req.user.id]
-    );
-
-    const preferences = {
-      theme: theme || 'dark',
-      language: language || 'zh-CN',
-      notifications: notifications !== undefined ? notifications : true,
-      email_notifications: email_notifications !== undefined ? email_notifications : true,
-      auto_save: auto_save !== undefined ? auto_save : true
-    };
-
-    let result;
-    if (existingResult.rows.length > 0) {
-      // 更新现有偏好
-      result = await query(
-        `UPDATE user_preferences
-         SET theme = $2, language = $3, notifications = $4,
-             email_notifications = $5, auto_save = $6, updated_at = NOW()
-         WHERE user_id = $1
-         RETURNING *`,
-        [req.user.id, preferences.theme, preferences.language,
-        preferences.notifications, preferences.email_notifications, preferences.auto_save]
-      );
-    } else {
-      // 创建新偏好
-      result = await query(
-        `INSERT INTO user_preferences
-         (user_id, theme, language, notifications, email_notifications, auto_save, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
-         RETURNING *`,
-        [req.user.id, preferences.theme, preferences.language,
-        preferences.notifications, preferences.email_notifications, preferences.auto_save]
-      );
-    }
-
-    res.json({
-      success: true,
-      data: result.rows[0],
-      message: '偏好设置更新成功'
-    });
-  } catch (error) {
-    console.error('更新用户偏好失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '更新用户偏好失败'
-    });
-  }
-});
 app.use('/api/data', dataRoutes);
 app.use('/api/data-management', dataManagementRoutes);
 app.use('/api/monitoring', monitoringRoutes);
@@ -268,6 +182,16 @@ app.get('/api', (req, res) => {
       monitoring: '/api/monitoring',
       reports: '/api/reports',
       integrations: '/api/integrations'
+    },
+    deprecatedEndpoints: {
+      note: '以下端点已废弃，请使用新的统一端点',
+      removed: [
+        '/api/tests (使用 /api/test)',
+        '/api/test-engines (功能已整合)',
+        '/api/test-history (使用 /api/test/history)',
+        '/api/preferences (使用 /api/user/preferences)',
+        '/api/unified-security (已移除)'
+      ]
     },
     documentation: '/api/docs',
     health: '/health'
