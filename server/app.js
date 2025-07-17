@@ -259,6 +259,9 @@ app.get('/api', (req, res) => {
     endpoints: {
       auth: '/api/auth',
       test: '/api/test',
+      performance: '/api/test/performance',
+      seo: '/api/seo',
+      seoUnified: '/api/test/seo',
       user: '/api/user',
       admin: '/api/admin',
       data: '/api/data',

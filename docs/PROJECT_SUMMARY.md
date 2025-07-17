@@ -99,15 +99,22 @@ Node.js + Express
 ├── GET  /api/auth/profile
 └── PUT  /api/auth/profile
 
-测试API (8个端点)
-├── POST /api/tests/website
-├── POST /api/tests/stress
-├── POST /api/tests/security
-├── POST /api/tests/compatibility
-├── POST /api/tests/seo
-├── GET  /api/tests/history
-├── GET  /api/tests/history/:id
-└── DELETE /api/tests/history/:id
+测试API (15个端点)
+├── POST /api/test/website
+├── POST /api/test/stress
+├── POST /api/test/security
+├── POST /api/test/compatibility
+├── POST /api/test/performance
+├── POST /api/test/performance/page-speed
+├── POST /api/test/performance/core-web-vitals
+├── POST /api/test/performance/resources
+├── POST /api/test/performance/save
+├── POST /api/test/seo
+├── POST /api/test/ux
+├── POST /api/test/api-test
+├── GET  /api/test/history
+├── GET  /api/test/history/:id
+└── DELETE /api/test/history/:id
 
 数据管理API (10个端点)
 ├── POST /api/data-management/query
