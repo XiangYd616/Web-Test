@@ -19,6 +19,7 @@ import {
   X
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import DataManager from '../../components/admin/DataManager';
 import DataBackupManager from '../../components/data/DataBackupManager';
 import DataSyncManager from '../../components/data/DataSyncManager';
 

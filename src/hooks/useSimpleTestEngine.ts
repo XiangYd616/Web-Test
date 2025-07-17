@@ -336,9 +336,10 @@ export const useAdvancedTestEngine = () => {
 
   const getTestHistory = useCallback(async () => {
     try {
-      const response = await testAPI.getTestHistory({ testType: 'stress' });
-      setTestHistory(response.data || []);
-      return response.data;
+      const response = await testAPI.getTestHistory(10); // 获取最近10条记录
+      const data = Array.isArray(response) ? response : (response as any)?.data || [];
+      setTestHistory(data);
+      return data;
     } catch (error) {
       console.error('Failed to fetch test history:', error);
       return [];
@@ -368,7 +369,7 @@ export const useAdvancedTestEngine = () => {
   const getTestTemplates = useCallback(async () => {
     try {
       const response = await testAPI.getTestTemplates('stress');
-      return response.data || [];
+      return Array.isArray(response) ? response : (response as any)?.data || [];
     } catch (error) {
       console.error('Failed to fetch test templates:', error);
       return [];

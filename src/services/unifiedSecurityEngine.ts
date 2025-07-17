@@ -644,17 +644,7 @@ class UnifiedSecurityEngine {
     return `security-test-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
 
-  private validateConfig(config: SecurityTestConfig): void {
-    if (!config.url) {
-      throw new Error('URL is required');
-    }
-
-    try {
-      new URL(config.url);
-    } catch {
-      throw new Error('Invalid URL format');
-    }
-  }
+  // validateConfig方法已在文件末尾定义，删除重复实现
 
   private async executeTestModules(
     config: SecurityTestConfig,
@@ -664,7 +654,7 @@ class UnifiedSecurityEngine {
   ): Promise<void> {
     // 准备阶段
     onProgress?.({
-      phase: 'preparing',
+      phase: 'initializing',
       progress: 10,
       currentModule: 'initialization',
       currentCheck: 'Preparing security test'
@@ -894,10 +884,11 @@ class UnifiedSecurityEngine {
 
     Object.values(result.modules).forEach(module => {
       if (module) {
-        totalChecks += module.totalChecks || 0;
-        passedChecks += module.passedChecks || 0;
-        failedChecks += module.failedChecks || 0;
-        warningChecks += module.warningChecks || 0;
+        const moduleWithStats = module as any; // 类型断言以访问统计属性
+        totalChecks += moduleWithStats.totalChecks || 0;
+        passedChecks += moduleWithStats.passedChecks || 0;
+        failedChecks += moduleWithStats.failedChecks || 0;
+        warningChecks += moduleWithStats.warningChecks || 0;
       }
     });
 
@@ -1264,12 +1255,13 @@ class UnifiedSecurityEngine {
       data.vulnerabilities.forEach((vuln: any, index: number) => {
         findings.push({
           id: `finding-${index + 1}`,
-          category: 'vulnerability',
+          type: vuln.type || 'vulnerability',
+          category: 'vulnerabilities',
           severity: this.mapSeverity(vuln.severity),
           title: vuln.type || 'Security Issue',
           description: vuln.description || '',
+          impact: vuln.recommendation || vuln.impact || 'Security vulnerability detected',
           evidence: vuln.evidence || {},
-          recommendation: vuln.recommendation || '',
           cwe: vuln.cwe,
           cvss: vuln.cvss
         });
@@ -1280,12 +1272,13 @@ class UnifiedSecurityEngine {
     if (data.sslInfo && !data.sslInfo.valid) {
       findings.push({
         id: `finding-ssl`,
+        type: 'ssl-certificate',
         category: 'ssl',
         severity: 'high',
         title: 'SSL证书问题',
         description: data.sslInfo.reason || 'SSL证书无效',
-        evidence: data.sslInfo,
-        recommendation: '修复SSL证书配置'
+        impact: '网站安全性受到影响，用户数据可能面临风险',
+        evidence: data.sslInfo
       });
     }
 
@@ -1347,21 +1340,21 @@ class UnifiedSecurityEngine {
         throw error;
       }
 
-      if (error.name === 'AbortError') {
+      if (error instanceof Error && error.name === 'AbortError') {
         throw new SecurityTestError('连接超时', 'TIMEOUT', {
           timeout: 10000,
           suggestion: '网络连接超时，请检查网络状况或稍后重试'
         });
       }
 
-      if (error.code === 'ENOTFOUND') {
+      if (error instanceof Error && (error as any).code === 'ENOTFOUND') {
         throw new SecurityTestError('域名解析失败', 'DNS_ERROR', {
           hostname: new URL(url).hostname,
           suggestion: '无法解析域名，请检查URL是否正确'
         });
       }
 
-      if (error.code === 'ECONNREFUSED') {
+      if (error instanceof Error && (error as any).code === 'ECONNREFUSED') {
         throw new SecurityTestError('连接被拒绝', 'CONNECTION_REFUSED', {
           url: url,
           suggestion: '目标服务器拒绝连接，请检查服务是否正常运行'
@@ -1369,7 +1362,7 @@ class UnifiedSecurityEngine {
       }
 
       throw new SecurityTestError('网络连接失败', 'NETWORK_ERROR', {
-        originalError: error.message,
+        originalError: error instanceof Error ? error.message : String(error),
         suggestion: '网络连接失败，请检查网络设置'
       });
     }

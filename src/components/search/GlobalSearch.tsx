@@ -1,11 +1,66 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
-  Search, Clock, TrendingUp, X, ArrowRight, Home, Globe, Zap, Shield,
-  BarChart3, Settings, HelpCircle, Code, Monitor, Activity, Upload,
-  Download, User, Bell, Key, Play, Book, Lock, TestTube
+  Activity,
+  ArrowRight,
+  BarChart3,
+  Bell,
+  Book,
+  Clock,
+  Code,
+  Download,
+  Globe,
+  HelpCircle,
+  Home,
+  Key,
+  Lock,
+  Monitor,
+  Play,
+  Search,
+  Settings,
+  Shield,
+  TestTube,
+  TrendingUp,
+  Upload,
+  User,
+  X,
+  Zap
 } from 'lucide-react';
-import { globalSearchService, SearchResult } from '../services/globalSearchService';
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+// import { globalSearchService, SearchResult } from '../services/globalSearchService';
+
+// 临时类型定义
+interface SearchResult {
+  id: string;
+  title: string;
+  description: string;
+  type: 'test' | 'report' | 'setting' | 'help' | 'page';
+  url: string;
+  score: number;
+  icon?: string;
+  category?: string;
+}
+
+// 临时搜索服务
+const globalSearchService = {
+  search: async (query: string, options?: { limit?: number }): Promise<SearchResult[]> => {
+    // 模拟搜索结果
+    return [];
+  },
+  getSuggestions: async (query: string): Promise<string[]> => {
+    // 模拟搜索建议
+    return [];
+  },
+  getSearchHistory: (): string[] => {
+    // 模拟搜索历史
+    return [];
+  },
+  recordSearch: (query: string): void => {
+    // 模拟记录搜索
+  },
+  clearSearchHistory: (): void => {
+    // 模拟清除搜索历史
+  }
+};
 
 interface GlobalSearchProps {
   isOpen: boolean;
@@ -38,7 +93,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose, initialQue
       setQuery(initialQuery);
       setSearchHistory(globalSearchService.getSearchHistory());
       setShowHistory(!initialQuery);
-      
+
       // 聚焦搜索框
       setTimeout(() => {
         searchInputRef.current?.focus();
@@ -57,7 +112,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose, initialQue
 
       setIsSearching(true);
       setShowHistory(false);
-      
+
       try {
         const searchResults = await globalSearchService.search(query, { limit: 8 });
         setResults(searchResults);
@@ -99,7 +154,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose, initialQue
           break;
         case 'ArrowDown':
           e.preventDefault();
-          setSelectedIndex(prev => 
+          setSelectedIndex(prev =>
             prev < results.length - 1 ? prev + 1 : prev
           );
           break;
@@ -127,7 +182,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose, initialQue
     if (searchQuery.trim()) {
       globalSearchService.recordSearch(searchQuery);
       setSearchHistory(globalSearchService.getSearchHistory());
-      
+
       // 如果没有精确匹配的结果，导航到帮助页面进行搜索
       if (results.length === 0) {
         navigate(`/help?search=${encodeURIComponent(searchQuery)}`);
@@ -166,11 +221,11 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose, initialQue
   // 高亮搜索词
   const highlightText = (text: string, searchQuery: string) => {
     if (!searchQuery.trim()) return text;
-    
+
     const regex = new RegExp(`(${searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
     const parts = text.split(regex);
-    
-    return parts.map((part, index) => 
+
+    return parts.map((part, index) =>
       regex.test(part) ? (
         <span key={index} className="bg-blue-500/30 text-blue-300 font-medium">
           {part}
@@ -253,20 +308,18 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose, initialQue
                       <button
                         key={result.id}
                         onClick={() => handleResultClick(result)}
-                        className={`w-full text-left p-3 rounded-lg transition-all duration-200 ${
-                          selectedIndex === index
-                            ? 'bg-blue-500/20 border border-blue-500/30'
-                            : 'hover:bg-gray-700/50'
-                        }`}
+                        className={`w-full text-left p-3 rounded-lg transition-all duration-200 ${selectedIndex === index
+                          ? 'bg-blue-500/20 border border-blue-500/30'
+                          : 'hover:bg-gray-700/50'
+                          }`}
                       >
                         <div className="flex items-center space-x-3">
-                          <div className={`p-2 rounded-lg ${
-                            result.type === 'page' ? 'bg-blue-500/20 text-blue-400' :
+                          <div className={`p-2 rounded-lg ${result.type === 'page' ? 'bg-blue-500/20 text-blue-400' :
                             result.type === 'test' ? 'bg-green-500/20 text-green-400' :
-                            result.type === 'setting' ? 'bg-purple-500/20 text-purple-400' :
-                            result.type === 'help' ? 'bg-orange-500/20 text-orange-400' :
-                            'bg-gray-500/20 text-gray-400'
-                          }`}>
+                              result.type === 'setting' ? 'bg-purple-500/20 text-purple-400' :
+                                result.type === 'help' ? 'bg-orange-500/20 text-orange-400' :
+                                  'bg-gray-500/20 text-gray-400'
+                            }`}>
                             {renderIcon(result.icon || 'Search')}
                           </div>
                           <div className="flex-1 min-w-0">

@@ -118,21 +118,24 @@ export class DataAnalysisService {
       const testRecords: TestRecord[] = data.data.tests || data.data || [];
 
       // 转换数据库字段到前端期望的字段
-      const normalizedRecords = testRecords.map(record => ({
-        id: record.id,
-        testType: record.test_type || record.testType,
-        url: record.url,
-        status: record.status,
-        overallScore: record.overall_score || record.overallScore,
-        startTime: record.start_time || record.startTime,
-        endTime: record.end_time || record.endTime,
-        actualDuration: record.duration || record.actualDuration,
-        results: record.results,
-        config: record.config,
-        scores: record.scores,
-        recommendations: record.recommendations,
-        savedAt: record.created_at || record.savedAt
-      }));
+      const normalizedRecords = testRecords.map(record => {
+        const dbRecord = record as any; // 类型断言以访问数据库字段
+        return {
+          id: record.id,
+          testType: dbRecord.test_type || record.testType,
+          url: record.url,
+          status: record.status,
+          overallScore: dbRecord.overall_score || record.overallScore,
+          startTime: dbRecord.start_time || record.startTime,
+          endTime: dbRecord.end_time || record.endTime,
+          actualDuration: dbRecord.duration || record.actualDuration,
+          results: record.results,
+          config: record.config,
+          scores: record.scores,
+          recommendations: record.recommendations,
+          savedAt: dbRecord.created_at || record.savedAt
+        };
+      });
 
       // 过滤指定时间范围内的数据
       const cutoffDate = subDays(new Date(), dateRange);

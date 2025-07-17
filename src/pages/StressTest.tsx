@@ -120,7 +120,9 @@ const StressTest: React.FC = () => {
     if (template) {
       setTestConfig(prev => ({
         ...prev,
-        ...template.config
+        ...template.config,
+        // 确保testType是正确的类型
+        testType: template.config.testType as StressTestConfig['testType']
       }));
       setSelectedTemplate(templateId);
     }

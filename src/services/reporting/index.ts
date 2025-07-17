@@ -76,9 +76,5 @@ export { default as reportService } from './reportService';
 // 兼容性导出（逐步迁移）
 export { reportGeneratorService as legacyReportGenerator, reportGeneratorService as legacyReportService } from '../reportGeneratorService';
 
-// 类型导出
-export type {
-    ExportTask, Report,
-    ReportConfig, ReportSection, ReportTemplate
-};
+// 类型已在上面定义并自动导出，无需重复导出
 

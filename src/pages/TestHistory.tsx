@@ -71,7 +71,7 @@ const TestHistory: React.FC = () => {
         // 按时间排序
         allRecords.sort((a, b) => new Date(b.createdAt || b.startTime).getTime() - new Date(a.createdAt || a.startTime).getTime());
 
-        setTestRecords(allRecords);
+        setTestHistory(allRecords);
 
         if (allRecords.length === 0) {
           console.log('No test history found, this is normal for new installations');
@@ -79,7 +79,7 @@ const TestHistory: React.FC = () => {
 
       } catch (error) {
         console.error('Error loading test history:', error);
-        setTestRecords([]);
+        setTestHistory([]);
       } finally {
         setLoading(false);
       }
@@ -90,11 +90,11 @@ const TestHistory: React.FC = () => {
 
   // 过滤和搜索
   useEffect(() => {
-    let filtered = testRecords;
+    let filtered = testHistory;
 
     // 搜索过滤
     if (searchTerm) {
-      filtered = filtered.filter(test =>
+      filtered = filtered.filter((test: TestRecord) =>
         test.testName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         test.url.toLowerCase().includes(searchTerm.toLowerCase())
       );
@@ -102,16 +102,16 @@ const TestHistory: React.FC = () => {
 
     // 类型过滤
     if (filterType !== 'all') {
-      filtered = filtered.filter(test => test.testType === filterType);
+      filtered = filtered.filter((test: TestRecord) => test.testType === filterType);
     }
 
     // 状态过滤
     if (filterStatus !== 'all') {
-      filtered = filtered.filter(test => test.status === filterStatus);
+      filtered = filtered.filter((test: TestRecord) => test.status === filterStatus);
     }
 
     // 排序
-    filtered.sort((a, b) => {
+    filtered.sort((a: TestRecord, b: TestRecord) => {
       let aValue, bValue;
 
       switch (sortBy) {
@@ -138,7 +138,7 @@ const TestHistory: React.FC = () => {
     });
 
     setFilteredHistory(filtered);
-  }, [testRecords, searchTerm, filterType, filterStatus, sortBy, sortOrder]);
+  }, [testHistory, searchTerm, filterType, filterStatus, sortBy, sortOrder]);
 
   const getTestTypeIcon = (type: string) => {
     switch (type) {

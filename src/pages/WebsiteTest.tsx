@@ -5,6 +5,7 @@ import {
   Code,
   Download,
   Eye,
+  Gauge,
   Globe,
   Loader,
   Lock,
@@ -27,6 +28,8 @@ import { useUserStats } from '../hooks/useUserStats';
 import '../styles/progress-bars.css';
 
 interface WebsiteTestConfig {
+  url: string;
+  testType: string;
   testTypes: {
     seo: boolean;
     security: boolean;
@@ -37,6 +40,11 @@ interface WebsiteTestConfig {
   // 性能测试配置移到独立配置中
   performanceLevel: 'basic' | 'standard' | 'comprehensive';
   includePerformance: boolean;
+  options: {
+    device: string;
+    location: string;
+    throttling: string;
+  };
 }
 
 const WebsiteTest: React.FC = () => {
@@ -71,13 +79,7 @@ const WebsiteTest: React.FC = () => {
       device: 'desktop',
       location: 'beijing',
       throttling: 'none'
-    },
-    device: 'desktop',
-    location: 'beijing',
-    screenshots: true,
-    videoRecording: false,
-    realUserMetrics: false,
-    timeout: 120000
+    }
   });
 
   // 使用高级测试引擎 - 已删除，需要重构
@@ -105,11 +107,14 @@ const WebsiteTest: React.FC = () => {
   const currentStep = '';
   const testPhase = 'idle';
   const estimatedTimeRemaining = 0;
-  const results = null;
+  const results: any = null;
   const testHistory: any[] = [];
-  const error = null;
+  const error: string | null = null;
   const engineStatus = {};
-  const runTest = async () => { };
+  const runTest = async (testConfig?: any) => {
+    // 临时实现，不做任何事情
+    console.log('Running test with config:', testConfig);
+  };
   const stopTest = async () => { };
   const clearResults = () => { };
   const clearError = () => { };
@@ -238,7 +243,7 @@ const WebsiteTest: React.FC = () => {
     setTestStatus('starting');
 
     // 准备高级测试配置
-    const testConfig: AdvancedTestConfig = {
+    const testConfig: any = {
       ...config,
       testType: 'website',
       options: {
@@ -749,7 +754,7 @@ const WebsiteTest: React.FC = () => {
                     <div>
                       <h4 className="text-md font-medium text-white mb-3">发现的问题</h4>
                       <div className="space-y-2">
-                        {results.findings.slice(0, 5).map((finding, index) => (
+                        {results.findings.slice(0, 5).map((finding: any, index: number) => (
                           <div key={index} className="flex items-start space-x-2 p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
                             <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5" />
                             <div>
@@ -764,7 +769,7 @@ const WebsiteTest: React.FC = () => {
                     <div>
                       <h4 className="text-md font-medium text-white mb-3">优化建议</h4>
                       <div className="space-y-2">
-                        {results.recommendations?.slice(0, 5).map((rec, index) => (
+                        {results.recommendations?.slice(0, 5).map((rec: any, index: number) => (
                           <div key={index} className="flex items-start space-x-2 p-3 bg-blue-500/20 border border-blue-500/30 rounded-lg">
                             <CheckCircle className="w-4 h-4 text-blue-400 mt-0.5" />
                             <p className="text-sm text-blue-300">{typeof rec === 'string' ? rec : rec.description || rec.title || String(rec)}</p>

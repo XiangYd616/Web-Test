@@ -3,13 +3,13 @@
  * 提供向后兼容的接口，将旧的性能测试接口适配到新的核心模块
  */
 
-import { performanceTestCore } from './PerformanceTestCore';
-import { 
-  UnifiedPerformanceConfig, 
-  PerformanceTestResult,
+import {
+  PERFORMANCE_CONFIG_PRESETS,
   PerformanceTestProgress,
-  PERFORMANCE_CONFIG_PRESETS 
+  PerformanceTestResult,
+  UnifiedPerformanceConfig
 } from '../../types/performance';
+import { performanceTestCore } from './PerformanceTestCore';
 
 // ==================== 兼容性接口定义 ====================
 
@@ -50,30 +50,30 @@ export class PerformanceTestAdapter {
     try {
       // 转换配置格式
       const unifiedConfig = this.convertLegacyConfig(config);
-      
+
       // 转换进度回调
       const onProgress = callbacks ? this.convertProgressCallback(callbacks) : undefined;
-      
+
       // 执行性能测试
       const result = await performanceTestCore.runPerformanceTest(
         config.url,
         unifiedConfig,
-        { 
+        {
           onProgress,
-          saveResults: true 
+          saveResults: true
         }
       );
-      
+
       // 转换结果格式以兼容旧接口
       const legacyResult = this.convertResultToLegacy(result);
-      
+
       // 调用完成回调
       if (callbacks?.onComplete) {
         callbacks.onComplete(legacyResult);
       }
-      
+
       return legacyResult;
-      
+
     } catch (error) {
       // 调用错误回调
       if (callbacks?.onError) {
@@ -107,7 +107,7 @@ export class PerformanceTestAdapter {
     };
 
     const result = await performanceTestCore.runPerformanceTest(url, config);
-    
+
     // 转换为网站测试期望的格式
     return {
       performance: {
@@ -157,7 +157,7 @@ export class PerformanceTestAdapter {
     };
 
     const result = await performanceTestCore.runPerformanceTest(url, config);
-    
+
     // 转换为SEO测试期望的格式
     return {
       score: result.overallScore,
@@ -169,7 +169,7 @@ export class PerformanceTestAdapter {
         pageSize: result.pageSpeed?.pageSize || 0,
         mobileScore: result.mobilePerformance?.score || null
       },
-      issues: result.issues.filter(issue => 
+      issues: result.issues.filter(issue =>
         issue.type === 'speed' || issue.type === 'size'
       ).map(issue => ({
         type: 'performance',
@@ -205,14 +205,14 @@ export class PerformanceTestAdapter {
     };
 
     const result = await performanceTestCore.runPerformanceTest(url, config);
-    
+
     // 转换为API测试期望的格式
     return {
       responseTime: result.pageSpeed?.responseTime || 0,
       loadTime: result.pageSpeed?.loadTime || 0,
       ttfb: result.pageSpeed?.ttfb || 0,
       score: result.overallScore,
-      issues: result.issues.filter(issue => 
+      issues: result.issues.filter(issue =>
         issue.type === 'speed'
       ).map(issue => ({
         type: 'slow_response',
@@ -261,7 +261,7 @@ export class PerformanceTestAdapter {
   /**
    * 转换结果到旧格式
    */
-  private static convertResultToLegacy(result: PerformanceTestResult): any {
+  public static convertResultToLegacy(result: PerformanceTestResult): any {
     return {
       score: result.overallScore,
       grade: result.grade,

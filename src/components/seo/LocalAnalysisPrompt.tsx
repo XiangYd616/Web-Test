@@ -14,29 +14,27 @@ const LocalAnalysisPrompt: React.FC<LocalAnalysisPromptProps> = ({
   className = ''
 }) => {
   const { theme } = useTheme();
-  const actualTheme = theme === 'auto' ? 'dark' : theme;
+  const actualTheme = theme; // theme 已经是 'light' | 'dark'
 
   return (
     <div className={`
       p-4 rounded-lg border-2 border-dashed transition-all
-      ${actualTheme === 'dark' 
-        ? 'border-blue-500/30 bg-blue-900/10' 
+      ${actualTheme === 'dark'
+        ? 'border-blue-500/30 bg-blue-900/10'
         : 'border-blue-400/30 bg-blue-50/50'
       }
       ${className}
     `}>
       <div className="flex items-start space-x-3">
-        <Info className={`w-5 h-5 mt-0.5 flex-shrink-0 ${
-          actualTheme === 'dark' ? 'text-blue-400' : 'text-blue-600'
-        }`} />
-        
+        <Info className={`w-5 h-5 mt-0.5 flex-shrink-0 ${actualTheme === 'dark' ? 'text-blue-400' : 'text-blue-600'
+          }`} />
+
         <div className="flex-1">
-          <div className={`text-sm ${
-            actualTheme === 'dark' ? 'text-blue-300' : 'text-blue-700'
-          }`}>
+          <div className={`text-sm ${actualTheme === 'dark' ? 'text-blue-300' : 'text-blue-700'
+            }`}>
             {message}
           </div>
-          
+
           {onSwitchToLocal && (
             <button
               onClick={onSwitchToLocal}

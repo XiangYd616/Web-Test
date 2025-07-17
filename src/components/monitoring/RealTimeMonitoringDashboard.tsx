@@ -1,27 +1,105 @@
-import React, { useState, useEffect } from 'react';
 import {
   Activity,
   AlertTriangle,
+  Bell,
   CheckCircle,
   Clock,
-  Globe,
-  Plus,
-  Settings,
-  Bell,
-  BellOff,
-  Play,
-  Pause,
-  Trash2,
   Edit,
   Eye,
   EyeOff,
-  Zap,
+  Globe,
+  Pause,
+  Play,
+  Plus,
+  Trash2,
   TrendingUp,
-  TrendingDown,
-  Wifi,
-  WifiOff
+  Zap
 } from 'lucide-react';
-import { RealTimeMonitoringService, MonitoringTarget, MonitoringStats, Alert } from '../services/realTimeMonitoring';
+import React, { useEffect, useState } from 'react';
+// import { RealTimeMonitoringService, MonitoringTarget, MonitoringStats, Alert } from '../services/realTimeMonitoring';
+
+// 临时类型定义，直到服务实现完成
+interface MonitoringTarget {
+  id: string;
+  name: string;
+  url: string;
+  type: 'website' | 'api' | 'database';
+  status: 'online' | 'offline' | 'warning' | 'healthy' | 'critical';
+  enabled: boolean;
+  interval: number;
+  lastChecked: string;
+}
+
+interface MonitoringStats {
+  responseTime: number;
+  uptime: number;
+  errorRate: number;
+  throughput: number;
+  totalTargets: number;
+  activeTargets: number;
+  overallAvailability: number;
+  avgResponseTime: number;
+  activeAlerts: number;
+  resolvedAlerts: number;
+}
+
+interface Alert {
+  id: string;
+  message: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  timestamp: string;
+  title: string;
+  resolved: boolean;
+}
+
+// 临时监控服务
+const monitoringService = {
+  on: (event: string, handler: (...args: any[]) => void) => {
+    // 临时实现，不做任何事情
+  },
+  off: (event: string, handler: (...args: any[]) => void) => {
+    // 临时实现，不做任何事情
+  },
+  getTargets: async (): Promise<MonitoringTarget[]> => {
+    return [];
+  },
+  getStats: async (): Promise<MonitoringStats> => {
+    return {
+      responseTime: 0,
+      uptime: 0,
+      errorRate: 0,
+      throughput: 0,
+      totalTargets: 0,
+      activeTargets: 0,
+      overallAvailability: 0,
+      avgResponseTime: 0,
+      activeAlerts: 0,
+      resolvedAlerts: 0
+    };
+  },
+  getAlerts: async (): Promise<Alert[]> => {
+    return [];
+  },
+  updateTarget: async (targetId: string, updates: Partial<MonitoringTarget>) => {
+    // 临时实现，不做任何事情
+  },
+  startGlobalMonitoring: () => {
+    // 临时实现，不做任何事情
+  },
+  stopGlobalMonitoring: () => {
+    // 临时实现，不做任何事情
+  },
+  removeTarget: async (targetId: string) => {
+    // 临时实现，不做任何事情
+  }
+};
+
+// 临时监控服务类
+class RealTimeMonitoringService {
+  static getInstance() {
+    return monitoringService;
+  }
+}
 
 interface RealTimeMonitoringDashboardProps {
   className?: string;
@@ -65,9 +143,18 @@ const RealTimeMonitoringDashboard: React.FC<RealTimeMonitoringDashboardProps> = 
     };
   }, [monitoringService]);
 
-  const loadData = () => {
-    setTargets(monitoringService.getTargets());
-    setStats(monitoringService.getStats());
+  const loadData = async () => {
+    try {
+      const [targetsData, statsData] = await Promise.all([
+        monitoringService.getTargets(),
+        monitoringService.getStats()
+      ]);
+
+      setTargets(targetsData);
+      setStats(statsData);
+    } catch (error) {
+      console.error('Failed to load monitoring data:', error);
+    }
   };
 
   const handleStartMonitoring = () => {
@@ -125,7 +212,7 @@ const RealTimeMonitoringDashboard: React.FC<RealTimeMonitoringDashboardProps> = 
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const minutes = Math.floor(diff / 60000);
-    
+
     if (minutes < 1) return '刚刚';
     if (minutes < 60) return `${minutes}分钟前`;
     const hours = Math.floor(minutes / 60);
@@ -282,11 +369,10 @@ const RealTimeMonitoringDashboard: React.FC<RealTimeMonitoringDashboardProps> = 
                     <button
                       type="button"
                       onClick={() => handleToggleTarget(target.id)}
-                      className={`p-2 rounded-lg transition-colors ${
-                        target.enabled 
-                          ? 'text-green-600 bg-green-100 hover:bg-green-200' 
-                          : 'text-gray-400 bg-gray-100 hover:bg-gray-200'
-                      }`}
+                      className={`p-2 rounded-lg transition-colors ${target.enabled
+                        ? 'text-green-600 bg-green-100 hover:bg-green-200'
+                        : 'text-gray-400 bg-gray-100 hover:bg-gray-200'
+                        }`}
                       title={target.enabled ? '禁用监控' : '启用监控'}
                     >
                       {target.enabled ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
@@ -325,12 +411,10 @@ const RealTimeMonitoringDashboard: React.FC<RealTimeMonitoringDashboardProps> = 
             {alerts.slice(0, 5).map((alert) => (
               <div key={alert.id} className="p-4">
                 <div className="flex items-start space-x-3">
-                  <div className={`p-2 rounded-lg ${
-                    alert.severity === 'critical' ? 'bg-red-100' : 'bg-yellow-100'
-                  }`}>
-                    <AlertTriangle className={`w-4 h-4 ${
-                      alert.severity === 'critical' ? 'text-red-600' : 'text-yellow-600'
-                    }`} />
+                  <div className={`p-2 rounded-lg ${alert.severity === 'critical' ? 'bg-red-100' : 'bg-yellow-100'
+                    }`}>
+                    <AlertTriangle className={`w-4 h-4 ${alert.severity === 'critical' ? 'text-red-600' : 'text-yellow-600'
+                      }`} />
                   </div>
                   <div className="flex-1">
                     <h4 className="font-medium text-gray-900">{alert.title}</h4>

@@ -29,9 +29,10 @@ export class ProxyService {
   async fetchPage(url: string, signal?: AbortSignal): Promise<ProxyResponse> {
     const startTime = Date.now();
 
+    // 验证和清理URL（在try外部定义以便在catch中使用）
+    const cleanUrl = this.validateAndCleanUrl(url);
+
     try {
-      // 验证和清理URL
-      const cleanUrl = this.validateAndCleanUrl(url);
 
       // 首先尝试使用后端API
       const backendResponse = await this.fetchViaBackend(cleanUrl, signal);

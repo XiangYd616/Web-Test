@@ -104,7 +104,7 @@ export const UnifiedStressTestCharts: React.FC<UnifiedStressTestChartsProps> = (
 
   // 自动切换视图逻辑
   useEffect(() => {
-    if (!autoSwitch) return;
+    if (!autoSwitch) return undefined;
 
     switch (testStatus) {
       case TestStatus.IDLE:
@@ -123,7 +123,10 @@ export const UnifiedStressTestCharts: React.FC<UnifiedStressTestChartsProps> = (
       case TestStatus.FAILED:
         setActiveView('results');
         break;
+      default:
+        break;
     }
+    return undefined;
   }, [testStatus, autoSwitch]);
 
   // 测试阶段定义

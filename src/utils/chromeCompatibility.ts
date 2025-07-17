@@ -269,7 +269,7 @@ export class ChromeCompatibilityHelper {
   static initialize() {
     // 检查是否在浏览器环境中
     if (typeof document === 'undefined' || typeof window === 'undefined') {
-      return { browserInfo: {}, cssSupport: {}, issues: [], needsFixes: false };
+      return { browserInfo: {}, cssSupport: {}, issues: [] as string[], needsFixes: false };
     }
 
     // 等待DOM加载完成

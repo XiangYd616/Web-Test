@@ -808,8 +808,7 @@ router.post('/performance', optionalAuth, testRateLimiter, validateURLMiddleware
     console.log(`🚀 Starting performance test for: ${validatedURL}`);
 
     // 使用现有的网站测试引擎进行性能测试
-    const testResult = await realTestEngine.runTest(validatedURL, {
-      testType: 'performance',
+    const testResult = await realTestEngine.runEnhancedPerformanceTest(validatedURL, {
       device: config.device || 'desktop',
       location: config.location || 'beijing',
       timeout: config.timeout || 60000,

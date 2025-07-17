@@ -4,8 +4,47 @@
  */
 
 import type { AuthResponse, LoginCredentials, RegisterData, User } from '../../types/user';
-// 移除循环导入
 import { isDesktopEnvironment } from '../../utils/environment';
+
+// 延迟导入以避免循环依赖
+let authService: any = null;
+let remoteApiService: any = null;
+
+// 动态导入函数
+const getAuthService = async () => {
+  if (!authService) {
+    const { authService: auth } = await import('../auth/authService');
+    authService = auth;
+  }
+  return authService;
+};
+
+const getRemoteApiService = async () => {
+  if (!remoteApiService) {
+    // 这里应该导入实际的远程API服务
+    // 暂时返回一个模拟的服务
+    remoteApiService = {
+      register: async (data: RegisterData) => ({ success: false, message: '远程API暂不可用' }),
+      login: async (credentials: LoginCredentials) => ({ success: false, message: '远程API暂不可用' }),
+      logout: async () => { },
+      getCurrentUser: async () => ({ success: false, data: null as any }),
+      updateUserProfile: async (updates: Partial<User>) => ({ success: false, message: '远程API暂不可用' }),
+      changePassword: async (data: any) => ({ success: false, message: '远程API暂不可用' }),
+      getUserSettings: async () => ({ success: false, data: null as any }),
+      updateUserSettings: async (settings: any) => ({ success: false, message: '远程API暂不可用' }),
+      getUserTests: async () => ({ success: false, data: [] as any[] }),
+      getUserStats: async () => ({ success: false, data: null as any }),
+      getAdminDashboard: async () => ({ success: false, data: null as any }),
+      getAdminUsers: async (page: number, limit: number) => ({ success: false, data: [] as any[] }),
+      createUser: async (userData: any) => ({ success: false, message: '远程API暂不可用' }),
+      updateUser: async (userId: string, userData: any) => ({ success: false, message: '远程API暂不可用' }),
+      deleteUser: async (userId: string) => ({ success: false, message: '远程API暂不可用' }),
+      getSystemInfo: async () => ({ success: false, data: null as any }),
+      getHealth: async () => ({ success: false, data: null as any })
+    };
+  }
+  return remoteApiService;
+};
 
 class UnifiedApiService {
   private useRemoteApi: boolean;
@@ -145,19 +184,20 @@ class UnifiedApiService {
         }
       } catch (error) {
         console.warn('远程 API 登录失败，回退到本地认证:', error);
-        // 这里需要导入 authService，暂时返回错误
-        return { success: false, message: '登录失败' };
+        const auth = await getAuthService();
+        return auth.login(credentials);
       }
     } else {
-      // 这里需要导入 authService，暂时返回错误
-      return { success: false, message: '本地认证暂不可用' };
+      const auth = await getAuthService();
+      return auth.login(credentials);
     }
   }
 
   async register(data: RegisterData): Promise<AuthResponse> {
     if (this.useRemoteApi) {
       try {
-        const response = await apiService.register(data);
+        const remoteApi = await getRemoteApiService();
+        const response = await remoteApi.register(data);
         if (response.success && response.data) {
           return {
             success: true,
@@ -174,29 +214,34 @@ class UnifiedApiService {
         }
       } catch (error) {
         console.warn('远程 API 注册失败，回退到本地注册:', error);
-        return authService.register(data);
+        const auth = await getAuthService();
+        return auth.register(data);
       }
     } else {
-      return authService.register(data);
+      const auth = await getAuthService();
+      return auth.register(data);
     }
   }
 
   async logout(): Promise<void> {
     if (this.useRemoteApi) {
       try {
-        await apiService.logout();
+        const remoteApi = await getRemoteApiService();
+        await remoteApi.logout();
       } catch (error) {
         console.warn('远程 API 登出失败:', error);
       }
     }
     // 总是执行本地登出清理
-    authService.logout();
+    const auth = await getAuthService();
+    auth.logout();
   }
 
   async getCurrentUser(): Promise<User | null> {
     if (this.useRemoteApi) {
       try {
-        const response = await apiService.getCurrentUser();
+        const remoteApi = await getRemoteApiService();
+        const response = await remoteApi.getCurrentUser();
         if (response.success && response.data) {
           return response.data.user;
         }
@@ -204,13 +249,15 @@ class UnifiedApiService {
         console.warn('远程 API 获取用户信息失败，使用本地信息:', error);
       }
     }
-    return authService.getCurrentUser();
+    const auth = await getAuthService();
+    return auth.getCurrentUser();
   }
 
   async updateProfile(updates: Partial<User>): Promise<AuthResponse> {
     if (this.useRemoteApi) {
       try {
-        const response = await apiService.updateUserProfile(updates);
+        const remoteApi = await getRemoteApiService();
+        const response = await remoteApi.updateUserProfile(updates);
         if (response.success && response.data) {
           return {
             success: true,
@@ -227,13 +274,15 @@ class UnifiedApiService {
         console.warn('远程 API 更新失败，使用本地更新:', error);
       }
     }
-    return authService.updateProfile(updates);
+    const auth = await getAuthService();
+    return auth.updateProfile(updates);
   }
 
   async changePassword(data: { currentPassword: string; newPassword: string; confirmNewPassword: string }): Promise<AuthResponse> {
     if (this.useRemoteApi) {
       try {
-        const response = await apiService.changePassword(data);
+        const remoteApi = await getRemoteApiService();
+        const response = await remoteApi.changePassword(data);
         return {
           success: response.success,
           message: response.message || (response.success ? '密码修改成功' : '密码修改失败')
@@ -258,7 +307,8 @@ class UnifiedApiService {
   async getUserSettings(): Promise<any> {
     if (this.useRemoteApi) {
       try {
-        const response = await apiService.getUserSettings();
+        const remoteApi = await getRemoteApiService();
+        const response = await remoteApi.getUserSettings();
         if (response.success) {
           return response.data;
         }
@@ -282,7 +332,8 @@ class UnifiedApiService {
   async updateUserSettings(settings: any): Promise<boolean> {
     if (this.useRemoteApi) {
       try {
-        const response = await apiService.updateUserSettings(settings);
+        const remoteApi = await getRemoteApiService();
+        const response = await remoteApi.updateUserSettings(settings);
         return response.success;
       } catch (error) {
         console.warn('远程 API 更新设置失败:', error);
@@ -302,7 +353,8 @@ class UnifiedApiService {
   async getUserTests(): Promise<any[]> {
     if (this.useRemoteApi) {
       try {
-        const response = await apiService.getUserTests();
+        const remoteApi = await getRemoteApiService();
+        const response = await remoteApi.getUserTests();
         if (response.success && response.data) {
           return response.data.tests || [];
         }
@@ -324,7 +376,8 @@ class UnifiedApiService {
   async getUserStats(): Promise<any> {
     if (this.useRemoteApi) {
       try {
-        const response = await apiService.getUserStats();
+        const remoteApi = await getRemoteApiService();
+        const response = await remoteApi.getUserStats();
         if (response.success && response.data) {
           return response.data.stats;
         }
@@ -349,7 +402,8 @@ class UnifiedApiService {
       throw new Error('管理员功能仅在浏览器版本中可用');
     }
 
-    const response = await apiService.getAdminDashboard();
+    const remoteApi = await getRemoteApiService();
+    const response = await remoteApi.getAdminDashboard();
     if (response.success) {
       return response.data;
     }
@@ -361,7 +415,8 @@ class UnifiedApiService {
       throw new Error('用户管理功能仅在浏览器版本中可用');
     }
 
-    const response = await apiService.getAdminUsers(page, limit);
+    const remoteApi = await getRemoteApiService();
+    const response = await remoteApi.getAdminUsers(page, limit);
     if (response.success) {
       return response.data;
     }
@@ -373,7 +428,8 @@ class UnifiedApiService {
       throw new Error('用户创建功能仅在浏览器版本中可用');
     }
 
-    const response = await apiService.createUser(userData);
+    const remoteApi = await getRemoteApiService();
+    const response = await remoteApi.createUser(userData);
     if (response.success && response.data) {
       return response.data.user;
     }
@@ -385,7 +441,8 @@ class UnifiedApiService {
       throw new Error('用户更新功能仅在浏览器版本中可用');
     }
 
-    const response = await apiService.updateUser(userId, userData);
+    const remoteApi = await getRemoteApiService();
+    const response = await remoteApi.updateUser(userId, userData);
     if (response.success && response.data) {
       return response.data.user;
     }
@@ -397,7 +454,8 @@ class UnifiedApiService {
       throw new Error('用户删除功能仅在浏览器版本中可用');
     }
 
-    const response = await apiService.deleteUser(userId);
+    const remoteApi = await getRemoteApiService();
+    const response = await remoteApi.deleteUser(userId);
     if (!response.success) {
       throw new Error(response.error || '删除用户失败');
     }
@@ -407,7 +465,8 @@ class UnifiedApiService {
   async getSystemInfo(): Promise<any> {
     if (this.useRemoteApi) {
       try {
-        const response = await apiService.getSystemInfo();
+        const remoteApi = await getRemoteApiService();
+        const response = await remoteApi.getSystemInfo();
         if (response.success) {
           return response.data;
         }
@@ -432,7 +491,8 @@ class UnifiedApiService {
   async checkHealth(): Promise<boolean> {
     if (this.useRemoteApi) {
       try {
-        const response = await apiService.getHealth();
+        const remoteApi = await getRemoteApiService();
+        const response = await remoteApi.getHealth();
         return response.success;
       } catch (error) {
         console.warn('健康检查失败:', error);

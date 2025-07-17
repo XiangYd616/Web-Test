@@ -8,12 +8,25 @@ import { useUserStats } from '../hooks/useUserStats';
 // import { AdvancedTestConfig } from '../services/advancedTestEngine'; // 已删除
 import '../styles/progress-bars.css';
 
+// 临时配置接口
+interface AdvancedTestConfig {
+  url: string;
+  testType: string;
+  timeout?: number;
+  options?: any;
+}
+
 interface CompatibilityConfig extends AdvancedTestConfig {
   checkDesktop: boolean;
   checkMobile: boolean;
   checkTablet: boolean;
   checkAccessibility: boolean;
   browsers: string[];
+  options: {
+    device: string;
+    location: string;
+    throttling: string;
+  };
 }
 
 interface CompatibilityResult {
@@ -23,6 +36,14 @@ interface CompatibilityResult {
   accessibilityScore: number;
   issues: Array<{ type: string; description: string; severity: 'low' | 'medium' | 'high' }>;
   recommendations: string[];
+  duration: number;
+  findings: Array<{
+    type: string;
+    description: string;
+    severity: 'low' | 'medium' | 'high';
+    impact: string;
+  }>;
+  engine: string;
 }
 
 const CompatibilityTest: React.FC = () => {
@@ -47,9 +68,11 @@ const CompatibilityTest: React.FC = () => {
     checkTablet: true,
     checkAccessibility: true,
     browsers: ['Chrome', 'Firefox', 'Safari', 'Edge'],
-    options: {},
-    device: 'desktop',
-    screenshots: true,
+    options: {
+      device: 'desktop',
+      location: 'beijing',
+      throttling: 'none'
+    },
     timeout: 300000
   });
 
@@ -78,11 +101,14 @@ const CompatibilityTest: React.FC = () => {
   const currentStep = '';
   const testPhase = 'idle';
   const estimatedTimeRemaining = 0;
-  const results = null;
+  const results: CompatibilityResult | null = null;
   const testHistory: any[] = [];
-  const error = null;
+  const error: string | null = null;
   const engineStatus = {};
-  const runTest = async () => { };
+  const runTest = async (testConfig?: AdvancedTestConfig) => {
+    // 临时实现，不做任何事情
+    console.log('Running test with config:', testConfig);
+  };
   const stopTest = async () => { };
   const clearResults = () => { };
   const clearError = () => { };
@@ -532,7 +558,7 @@ const CompatibilityTest: React.FC = () => {
                       发现的兼容性问题
                     </h3>
                     <div className="space-y-3">
-                      {results.issues.slice(0, 10).map((issue, index) => (
+                      {results.issues.slice(0, 10).map((issue: any, index: number) => (
                         <div key={index} className={`p-3 rounded-lg border-l-4 ${issue.severity === 'high' ? 'bg-red-900/20 border-red-500' :
                           issue.severity === 'medium' ? 'bg-yellow-900/20 border-yellow-500' :
                             'bg-blue-900/20 border-blue-500'
@@ -581,7 +607,7 @@ const CompatibilityTest: React.FC = () => {
                       优化建议
                     </h3>
                     <div className="space-y-2">
-                      {results.recommendations.slice(0, 8).map((recommendation, index) => (
+                      {results.recommendations.slice(0, 8).map((recommendation: any, index: number) => (
                         <div key={index} className="flex items-start space-x-3">
                           <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
                           <p className="text-sm text-gray-300">{recommendation}</p>
@@ -620,7 +646,7 @@ const CompatibilityTest: React.FC = () => {
                     <div>
                       <h4 className="text-md font-medium text-white mb-3">发现的问题</h4>
                       <div className="space-y-2">
-                        {results.findings.slice(0, 5).map((finding, index) => (
+                        {results.findings.slice(0, 5).map((finding: any, index: number) => (
                           <div key={index} className="flex items-start space-x-2 p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
                             <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5" />
                             <div>
@@ -635,7 +661,7 @@ const CompatibilityTest: React.FC = () => {
                     <div>
                       <h4 className="text-md font-medium text-white mb-3">优化建议</h4>
                       <div className="space-y-2">
-                        {results.recommendations?.slice(0, 5).map((rec, index) => (
+                        {results.recommendations?.slice(0, 5).map((rec: any, index: number) => (
                           <div key={index} className="flex items-start space-x-2 p-3 bg-blue-500/20 border border-blue-500/30 rounded-lg">
                             <CheckCircle className="w-4 h-4 text-blue-400 mt-0.5" />
                             <p className="text-sm text-blue-300">{typeof rec === 'string' ? rec : rec.description || rec.title || String(rec)}</p>
@@ -655,7 +681,29 @@ const CompatibilityTest: React.FC = () => {
       {results && (
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
           <AdvancedTestCharts
-            results={results}
+            results={{
+              id: Date.now().toString(),
+              testType: 'compatibility',
+              url: config.url,
+              timestamp: new Date().toISOString(),
+              duration: results.duration || 0,
+              status: 'completed' as const,
+              overallScore: results.overallScore,
+              metrics: {
+                overallScore: results.overallScore,
+                browserCompatibility: results.browserCompatibility,
+                deviceCompatibility: results.deviceCompatibility,
+                accessibilityScore: results.accessibilityScore
+              },
+              findings: (results.findings || []).map(f => ({
+                ...f,
+                title: f.type,
+                recommendation: f.impact
+              })),
+              recommendations: results.recommendations || [],
+              engine: results.engine || 'auto',
+              config: config as any
+            }}
             testType="compatibility"
             theme="dark"
             height={400}
@@ -670,7 +718,7 @@ const CompatibilityTest: React.FC = () => {
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
           <h3 className="text-lg font-semibold text-white mb-4">测试历史</h3>
           <div className="space-y-3">
-            {testHistory.slice(0, 5).map((test, index) => (
+            {testHistory.slice(0, 5).map((test) => (
               <div key={test.id} className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
                 <div className="flex items-center space-x-3">
                   <div className={`w-3 h-3 rounded-full ${test.status === 'completed' ? 'bg-green-500' : 'bg-red-500'

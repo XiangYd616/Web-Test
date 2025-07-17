@@ -60,23 +60,32 @@ interface SEOResults {
     coreWebVitals: number;
     pageExperience: number;
   };
-  keywords: any;
+  keywords: string[];
   issues: {
-    critical: any[];
-    warning: any[];
-    info: any[];
+    critical: Array<{ id: string; title: string; description: string; impact: string }>;
+    warning: Array<{ id: string; title: string; description: string; impact: string }>;
+    info: Array<{ id: string; title: string; description: string; impact: string }>;
   };
   recommendations: {
-    high: any[];
-    medium: any[];
-    low: any[];
+    high: Array<{ id: string; title: string; description: string; action: string }>;
+    medium: Array<{ id: string; title: string; description: string; action: string }>;
+    low: Array<{ id: string; title: string; description: string; action: string }>;
   };
-  details: any;
-  summary?: any;
+  details: Record<string, any>;
+  summary?: Record<string, any>;
+  // 添加缺失的属性
+  score?: number; // 总体评分
+  grade?: string; // 评级
+  performance?: {
+    pageSize: number;
+    loadTime: number;
+  };
+  technicalSEO?: any;
+  contentQuality?: any;
 }
 
 interface EnhancedSEOResultsProps {
-  results: any; // 更新为支持新的SEOAnalysisResult结构
+  results: SEOResults | Record<string, any>; // 支持新的SEOAnalysisResult结构
   onExport?: (format: string) => void;
 }
 
@@ -159,11 +168,11 @@ const EnhancedSEOResults: React.FC<EnhancedSEOResultsProps> = ({ results, onExpo
       {/* 总体评分 */}
       <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
         <div className="text-center">
-          <div className={`text-6xl font-bold mb-2 ${getScoreColor(results.score || 0)}`}>
-            {results.score || 0}
+          <div className={`text-6xl font-bold mb-2 ${getScoreColor(results.overallScore || 0)}`}>
+            {results.overallScore || 0}
           </div>
           <div className="text-lg text-gray-600 dark:text-gray-400 mb-4">
-            总体SEO评分 ({results.grade || 'N/A'})
+            总体SEO评分 ({results.scoreGrade || 'N/A'})
           </div>
           <div className="text-sm text-gray-500 dark:text-gray-500">
             分析时间: {new Date(results.timestamp || Date.now()).toLocaleString()}
@@ -239,7 +248,7 @@ const EnhancedSEOResults: React.FC<EnhancedSEOResultsProps> = ({ results, onExpo
         <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">关键问题</h3>
           <div className="space-y-3">
-            {(results.issues || []).slice(0, 5).map((issue, index) => (
+            {(results.issues || []).slice(0, 5).map((issue: any, index: number) => (
               <div key={index} className="flex items-start space-x-3">
                 {issue.type === 'error' ? (
                   <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
@@ -346,7 +355,7 @@ const EnhancedSEOResults: React.FC<EnhancedSEOResultsProps> = ({ results, onExpo
                   <div className="space-y-3 mt-4">
                     <p className="text-sm font-semibold text-orange-600 dark:text-orange-400">优化建议：</p>
                     <ul className="space-y-2">
-                      {contentQuality.titleTag.issues.map((issue, index) => (
+                      {contentQuality.titleTag.issues.map((issue: any, index: number) => (
                         <li key={index} className="text-sm text-gray-700 dark:text-gray-300 flex items-start space-x-2">
                           <span className="text-orange-500 dark:text-orange-400 mt-1 font-bold">•</span>
                           <span className="leading-relaxed">{issue}</span>
@@ -402,7 +411,7 @@ const EnhancedSEOResults: React.FC<EnhancedSEOResultsProps> = ({ results, onExpo
                   <div className="space-y-3 mt-4">
                     <p className="text-sm font-semibold text-orange-600 dark:text-orange-400">优化建议：</p>
                     <ul className="space-y-2">
-                      {contentQuality.metaDescription.issues.map((issue, index) => (
+                      {contentQuality.metaDescription.issues.map((issue: any, index: number) => (
                         <li key={index} className="text-sm text-gray-700 dark:text-gray-300 flex items-start space-x-2">
                           <span className="text-orange-500 dark:text-orange-400 mt-1 font-bold">•</span>
                           <span className="leading-relaxed">{issue}</span>
@@ -445,7 +454,7 @@ const EnhancedSEOResults: React.FC<EnhancedSEOResultsProps> = ({ results, onExpo
               <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded p-4">
                 <p className="text-sm text-gray-700 dark:text-gray-300 mb-3 font-medium">H1标签内容：</p>
                 <ul className="space-y-2">
-                  {contentQuality.headings.h1Content.map((h1, index) => (
+                  {contentQuality.headings.h1Content.map((h1: any, index: number) => (
                     <li key={index} className="text-gray-900 dark:text-white text-sm leading-relaxed">
                       <span className="text-blue-500 dark:text-blue-400 font-bold mr-2">•</span>
                       {h1}
@@ -459,7 +468,7 @@ const EnhancedSEOResults: React.FC<EnhancedSEOResultsProps> = ({ results, onExpo
               <div className="space-y-3 mt-4">
                 <p className="text-sm font-semibold text-orange-600 dark:text-orange-400">优化建议：</p>
                 <ul className="space-y-2">
-                  {contentQuality.headings.issues.map((issue, index) => (
+                  {contentQuality.headings.issues.map((issue: any, index: number) => (
                     <li key={index} className="text-sm text-gray-700 dark:text-gray-300 flex items-start space-x-2">
                       <span className="text-orange-500 dark:text-orange-400 mt-1 font-bold">•</span>
                       <span className="leading-relaxed">{issue}</span>
@@ -502,10 +511,10 @@ const EnhancedSEOResults: React.FC<EnhancedSEOResultsProps> = ({ results, onExpo
             <div className="mt-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded p-4">
               <p className="text-sm text-gray-700 dark:text-gray-300 mb-3 font-medium">关键词密度：</p>
               <div className="space-y-2">
-                {Object.entries(contentQuality.content.keywordDensity).map(([keyword, density]) => (
+                {Object.entries(contentQuality.content.keywordDensity).map(([keyword, density]: [string, any]) => (
                   <div key={keyword} className="flex items-center justify-between">
                     <span className="text-sm text-gray-900 dark:text-white font-medium">{keyword}</span>
-                    <span className="text-sm text-gray-700 dark:text-gray-300 font-semibold">{density.toFixed(1)}%</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300 font-semibold">{(density as number).toFixed(1)}%</span>
                   </div>
                 ))}
               </div>
@@ -538,21 +547,21 @@ const EnhancedSEOResults: React.FC<EnhancedSEOResultsProps> = ({ results, onExpo
 
     // 从各个分析结果中收集问题
     if (results.technicalSEO) {
-      if (results.technicalSEO.robotsTxt.issues) allIssues.push(...results.technicalSEO.robotsTxt.issues.map(issue => ({ title: 'robots.txt', description: issue, priority: 'medium' as const })));
-      if (results.technicalSEO.sitemap.issues) allIssues.push(...results.technicalSEO.sitemap.issues.map(issue => ({ title: 'XML Sitemap', description: issue, priority: 'medium' as const })));
-      if (results.technicalSEO.canonicalTags.issues) allIssues.push(...results.technicalSEO.canonicalTags.issues.map(issue => ({ title: 'Canonical标签', description: issue, priority: 'high' as const })));
-      if (results.technicalSEO.metaRobots.issues) allIssues.push(...results.technicalSEO.metaRobots.issues.map(issue => ({ title: 'Meta Robots', description: issue, priority: 'medium' as const })));
+      if (results.technicalSEO.robotsTxt.issues) allIssues.push(...results.technicalSEO.robotsTxt.issues.map((issue: any) => ({ title: 'robots.txt', description: issue, priority: 'medium' as const })));
+      if (results.technicalSEO.sitemap.issues) allIssues.push(...results.technicalSEO.sitemap.issues.map((issue: any) => ({ title: 'XML Sitemap', description: issue, priority: 'medium' as const })));
+      if (results.technicalSEO.canonicalTags.issues) allIssues.push(...results.technicalSEO.canonicalTags.issues.map((issue: any) => ({ title: 'Canonical标签', description: issue, priority: 'high' as const })));
+      if (results.technicalSEO.metaRobots.issues) allIssues.push(...results.technicalSEO.metaRobots.issues.map((issue: any) => ({ title: 'Meta Robots', description: issue, priority: 'medium' as const })));
     }
 
     if (results.contentQuality) {
-      if (results.contentQuality.titleTag.issues) allIssues.push(...results.contentQuality.titleTag.issues.map(issue => ({ title: '标题标签', description: issue, priority: 'high' as const })));
-      if (results.contentQuality.metaDescription.issues) allIssues.push(...results.contentQuality.metaDescription.issues.map(issue => ({ title: 'Meta描述', description: issue, priority: 'high' as const })));
-      if (results.contentQuality.headings.issues) allIssues.push(...results.contentQuality.headings.issues.map(issue => ({ title: '标题结构', description: issue, priority: 'medium' as const })));
-      if (results.contentQuality.content.issues) allIssues.push(...results.contentQuality.content.issues.map(issue => ({ title: '内容质量', description: issue, priority: 'medium' as const })));
+      if (results.contentQuality.titleTag.issues) allIssues.push(...results.contentQuality.titleTag.issues.map((issue: any) => ({ title: '标题标签', description: issue, priority: 'high' as const })));
+      if (results.contentQuality.metaDescription.issues) allIssues.push(...results.contentQuality.metaDescription.issues.map((issue: any) => ({ title: 'Meta描述', description: issue, priority: 'high' as const })));
+      if (results.contentQuality.headings.issues) allIssues.push(...results.contentQuality.headings.issues.map((issue: any) => ({ title: '标题结构', description: issue, priority: 'medium' as const })));
+      if (results.contentQuality.content.issues) allIssues.push(...results.contentQuality.content.issues.map((issue: any) => ({ title: '内容质量', description: issue, priority: 'medium' as const })));
     }
 
     const priorityOrder = { high: 0, medium: 1, low: 2 };
-    const sortedIssues = allIssues.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+    const sortedIssues = allIssues.sort((a: any, b: any) => priorityOrder[a.priority as keyof typeof priorityOrder] - priorityOrder[b.priority as keyof typeof priorityOrder]);
 
     return (
       <div className="space-y-6">

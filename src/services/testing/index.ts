@@ -4,7 +4,7 @@ export { default as testScheduler } from './testScheduler';
 export { default as unifiedTestEngine } from './unifiedTestEngine';
 
 // 类型导出
-export type { ApiTestEngine } from './apiTestEngine';
+export type { APITestEngine as ApiTestEngine } from './apiTestEngine';
 export type { TestScheduler } from './testScheduler';
 export type { UnifiedTestEngine } from './unifiedTestEngine';
 

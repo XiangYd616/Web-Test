@@ -98,9 +98,5 @@ export { analyticsService } from './analyticsService';
 // 兼容性导出（逐步迁移）
 export { dataAnalysisService } from '../dataAnalysisService';
 
-// 类型导出
-export type {
-    AnalyticsData, AnalyticsInsight,
-    SmartRecommendation, TestRecord
-};
+// 类型已在上面定义并自动导出，无需重复导出
 

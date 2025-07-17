@@ -1,16 +1,13 @@
-import React from 'react';
-import { 
-  CheckCircle, 
-  XCircle, 
-  AlertTriangle, 
-  Info, 
-  Globe, 
-  FileText, 
-  Link, 
+import {
+  AlertTriangle,
+  CheckCircle,
+  FileText,
+  Info,
+  Link,
   Search,
-  Shield,
-  Smartphone
+  XCircle
 } from 'lucide-react';
+import React from 'react';
 import { TechnicalSEOResult } from '../../services/realSEOAnalysisEngine';
 
 interface EnhancedTechnicalResultsProps {
@@ -21,8 +18,8 @@ const EnhancedTechnicalResults: React.FC<EnhancedTechnicalResultsProps> = ({ res
   const getStatusIcon = (status: boolean | undefined, hasIssues?: boolean) => {
     if (status === undefined) return <Info className="w-5 h-5 text-gray-400" />;
     if (hasIssues) return <AlertTriangle className="w-5 h-5 text-yellow-500" />;
-    return status ? 
-      <CheckCircle className="w-5 h-5 text-green-500" /> : 
+    return status ?
+      <CheckCircle className="w-5 h-5 text-green-500" /> :
       <XCircle className="w-5 h-5 text-red-500" />;
   };
 
@@ -62,7 +59,7 @@ const EnhancedTechnicalResults: React.FC<EnhancedTechnicalResultsProps> = ({ res
           <FileText className="w-5 h-5 mr-2 text-green-400" />
           基础技术检查
         </h3>
-        
+
         <div className="space-y-4">
           {/* robots.txt */}
           <div className="flex items-start space-x-3 p-3 bg-gray-700/30 rounded-lg">
@@ -76,9 +73,9 @@ const EnhancedTechnicalResults: React.FC<EnhancedTechnicalResultsProps> = ({ res
                   '文件不存在或无法访问'
                 )}
               </div>
-              {results.robotsTxt?.content && (
-                <div className="text-xs text-blue-400 mt-1">
-                  检测到 {results.robotsTxt.content.split('\n').length} 行规则
+              {results.robotsTxt?.issues && results.robotsTxt.issues.length > 0 && (
+                <div className="text-xs text-red-400 mt-1">
+                  问题: {results.robotsTxt.issues.join(', ')}
                 </div>
               )}
             </div>
@@ -94,9 +91,9 @@ const EnhancedTechnicalResults: React.FC<EnhancedTechnicalResultsProps> = ({ res
                   ? `发现 ${results.sitemap.urls || 0} 个URL`
                   : '未找到sitemap文件'}
               </div>
-              {results.sitemap?.lastModified && (
+              {results.sitemap?.urls && (
                 <div className="text-xs text-blue-400 mt-1">
-                  最后更新: {new Date(results.sitemap.lastModified).toLocaleDateString()}
+                  包含 {results.sitemap.urls} 个URL
                 </div>
               )}
             </div>
@@ -108,13 +105,13 @@ const EnhancedTechnicalResults: React.FC<EnhancedTechnicalResultsProps> = ({ res
             <div className="flex-1">
               <div className="font-medium text-white">Canonical标签</div>
               <div className="text-sm text-gray-400 mt-1">
-                {results.canonicalTags?.present 
+                {results.canonicalTags?.present
                   ? (results.canonicalTags?.correct ? '配置正确' : '存在但需要优化')
                   : '未发现canonical标签'}
               </div>
-              {results.canonicalTags?.url && (
-                <div className="text-xs text-blue-400 mt-1 break-all">
-                  指向: {results.canonicalTags.url}
+              {results.canonicalTags?.issues && results.canonicalTags.issues.length > 0 && (
+                <div className="text-xs text-red-400 mt-1">
+                  问题: {results.canonicalTags.issues.join(', ')}
                 </div>
               )}
             </div>
@@ -126,7 +123,7 @@ const EnhancedTechnicalResults: React.FC<EnhancedTechnicalResultsProps> = ({ res
             <div className="flex-1">
               <div className="font-medium text-white">Meta Robots</div>
               <div className="text-sm text-gray-400 mt-1">
-                {results.metaRobots?.present 
+                {results.metaRobots?.present
                   ? (results.metaRobots?.issues?.length > 0 ? '存在但有问题' : '配置正确')
                   : '未发现meta robots标签'}
               </div>
@@ -147,7 +144,7 @@ const EnhancedTechnicalResults: React.FC<EnhancedTechnicalResultsProps> = ({ res
             <Link className="w-5 h-5 mr-2 text-purple-400" />
             URL结构分析
           </h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="p-3 bg-gray-700/30 rounded-lg">
               <div className="flex items-center justify-between mb-2">
@@ -160,7 +157,7 @@ const EnhancedTechnicalResults: React.FC<EnhancedTechnicalResultsProps> = ({ res
                 {results.urlStructure.friendly ? 'URL结构友好' : 'URL结构需要优化'}
               </div>
             </div>
-            
+
             <div className="p-3 bg-gray-700/30 rounded-lg">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-white">HTTPS使用</span>
@@ -189,31 +186,43 @@ const EnhancedTechnicalResults: React.FC<EnhancedTechnicalResultsProps> = ({ res
       )}
 
       {/* 技术问题汇总 */}
-      {results.issues && results.issues.length > 0 && (
-        <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700/50">
-          <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-            <AlertTriangle className="w-5 h-5 mr-2 text-red-400" />
-            技术问题汇总
-          </h3>
-          
-          <div className="space-y-3">
-            {results.issues.slice(0, 5).map((issue, index) => (
-              <div key={index} className="flex items-start space-x-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-                <XCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-                <span className="text-sm text-gray-300">{issue}</span>
-              </div>
-            ))}
-            
-            {results.issues.length > 5 && (
-              <div className="text-center">
-                <span className="text-xs text-gray-400">
-                  还有 {results.issues.length - 5} 个问题未显示
-                </span>
-              </div>
-            )}
+      {(() => {
+        // 从各个模块收集问题
+        const allIssues = [
+          ...results.robotsTxt?.issues || [],
+          ...results.sitemap?.issues || [],
+          ...results.canonicalTags?.issues || [],
+          ...results.metaRobots?.issues || [],
+          ...results.hreflang?.issues || [],
+          ...results.urlStructure?.issues || []
+        ];
+
+        return allIssues.length > 0 && (
+          <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700/50">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+              <AlertTriangle className="w-5 h-5 mr-2 text-red-400" />
+              技术问题汇总
+            </h3>
+
+            <div className="space-y-3">
+              {allIssues.slice(0, 5).map((issue: any, index: number) => (
+                <div key={index} className="flex items-start space-x-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                  <XCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm text-gray-300">{issue}</span>
+                </div>
+              ))}
+
+              {allIssues.length > 5 && (
+                <div className="text-center">
+                  <span className="text-xs text-gray-400">
+                    还有 {allIssues.length - 5} 个问题未显示
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* 技术SEO建议 */}
       <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">

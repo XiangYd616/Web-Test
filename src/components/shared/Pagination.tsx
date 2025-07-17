@@ -79,8 +79,8 @@ const Pagination: React.FC<PaginationProps> = ({
           type="button"
           onClick={() => handlePageChange(i)}
           className={`px-3 py-2 text-sm rounded-lg transition-colors ${i === current
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-700 hover:bg-gray-600 text-white'
+            ? 'bg-blue-600 text-white'
+            : 'bg-gray-700 hover:bg-gray-600 text-white'
             }`}
         >
           {i}
@@ -181,7 +181,7 @@ const Pagination: React.FC<PaginationProps> = ({
               min={1}
               max={totalPages}
               className="w-16 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              aria-label={`跳转到指定页面，当前第${currentPage}页，共${totalPages}页`}
+              aria-label={`跳转到指定页面，当前第${current}页，共${totalPages}页`}
               placeholder="页码"
               onKeyPress={(e) => {
                 if (e.key === 'Enter') {

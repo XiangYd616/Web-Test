@@ -69,7 +69,7 @@ const SECURITY_CHECKS = {
     '8080': '开发服务器端口',
     '3000': 'Node.js开发端口',
     '8000': 'Python开发端口'
-  }
+  } as { [key: string]: string }
 };
 
 /**
@@ -117,9 +117,9 @@ export function validateUrlFormat(url: string): { isValid: boolean; error?: stri
     const urlObj = new URL(url);
     return { isValid: true, urlObj };
   } catch (error) {
-    return { 
-      isValid: false, 
-      error: error instanceof Error ? error.message : 'URL格式无效' 
+    return {
+      isValid: false,
+      error: error instanceof Error ? error.message : 'URL格式无效'
     };
   }
 }
@@ -191,7 +191,7 @@ export function generateSuggestions(urlObj: URL, options: URLValidationOptions):
  * 主要的增强URL验证函数
  */
 export async function validateUrlEnhanced(
-  url: string, 
+  url: string,
   options: URLValidationOptions = {}
 ): Promise<URLValidationResult> {
   const opts = { ...DEFAULT_OPTIONS, ...options };

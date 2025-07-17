@@ -248,8 +248,8 @@ const SecurityTestComparison: React.FC<SecurityTestComparisonProps> = ({
                       return (
                         <div key={index} className="flex items-center justify-between bg-gray-700/30 rounded-lg p-3">
                           <span className={`font-semibold ${isRisk ? getRiskColor(value as string) :
-                              isGrade ? getGradeColor(value as string) :
-                                'text-white'
+                            isGrade ? getGradeColor(value as string) :
+                              'text-white'
                             }`}>
                             {metric.format ? metric.format(value) : value}
                           </span>
@@ -287,7 +287,7 @@ const SecurityTestComparison: React.FC<SecurityTestComparisonProps> = ({
             {/* 模块分数对比 */}
             <div className="space-y-4">
               {Object.keys(results[0].modules || {}).map((moduleKey) => {
-                const moduleScores = results.map(result => result.modules[moduleKey]?.score || 0);
+                const moduleScores = results.map(result => (result.modules as any)[moduleKey]?.score || 0);
                 const moduleNames = {
                   ssl: 'SSL/TLS安全',
                   headers: '安全头检查',
@@ -310,8 +310,8 @@ const SecurityTestComparison: React.FC<SecurityTestComparisonProps> = ({
                           <div key={index} className="text-center">
                             <div className="flex items-center justify-center space-x-2 mb-2">
                               <span className={`text-lg font-bold ${score >= 90 ? 'text-green-400' :
-                                  score >= 70 ? 'text-yellow-400' :
-                                    score >= 50 ? 'text-orange-400' : 'text-red-400'
+                                score >= 70 ? 'text-yellow-400' :
+                                  score >= 50 ? 'text-orange-400' : 'text-red-400'
                                 }`}>
                                 {score}
                               </span>
@@ -320,8 +320,8 @@ const SecurityTestComparison: React.FC<SecurityTestComparisonProps> = ({
                             <div className="w-full bg-gray-600 rounded-full h-2">
                               <div
                                 className={`h-2 rounded-full transition-all duration-500 ${score >= 90 ? 'bg-green-500' :
-                                    score >= 70 ? 'bg-yellow-500' :
-                                      score >= 50 ? 'bg-orange-500' : 'bg-red-500'
+                                  score >= 70 ? 'bg-yellow-500' :
+                                    score >= 50 ? 'bg-orange-500' : 'bg-red-500'
                                   }`}
                                 style={{ width: `${score}%` }}
                               ></div>
@@ -495,8 +495,8 @@ const SecurityTestComparison: React.FC<SecurityTestComparisonProps> = ({
                         <div className="w-24 bg-gray-600 rounded-full h-2">
                           <div
                             className={`h-2 rounded-full ${result.overallScore >= 90 ? 'bg-green-500' :
-                                result.overallScore >= 70 ? 'bg-yellow-500' :
-                                  result.overallScore >= 50 ? 'bg-orange-500' : 'bg-red-500'
+                              result.overallScore >= 70 ? 'bg-yellow-500' :
+                                result.overallScore >= 50 ? 'bg-orange-500' : 'bg-red-500'
                               }`}
                             style={{ width: `${result.overallScore}%` }}
                           ></div>

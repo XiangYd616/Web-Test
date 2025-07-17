@@ -5,7 +5,27 @@
 
 import { AlertTriangle, BarChart3, CheckCircle, Clock, TrendingDown, TrendingUp, Users, Zap } from 'lucide-react';
 import React from 'react';
-import type { StressTestMetrics } from '../../hooks/useStressTestData';
+
+// 临时类型定义
+interface StressTestMetricsType {
+  totalRequests: number;
+  successfulRequests: number;
+  failedRequests: number;
+  averageResponseTime: number;
+  minResponseTime: number;
+  maxResponseTime: number;
+  requestsPerSecond: number;
+  errorRate: number;
+  activeUsers: number;
+  peakUsers: number;
+  throughput: number;
+  errorBreakdown: { [key: string]: number };
+  // 添加缺少的属性
+  currentTPS: number;
+  peakTPS: number;
+  p95ResponseTime?: number;
+  p99ResponseTime?: number;
+}
 
 interface MetricCardProps {
   title: string;
@@ -20,7 +40,7 @@ interface MetricCardProps {
 }
 
 interface StressTestMetricsProps {
-  metrics: StressTestMetrics | null;
+  metrics: StressTestMetricsType | null;
   isRunning: boolean;
   testConfig?: {
     users: number;
@@ -137,21 +157,21 @@ export const StressTestMetrics: React.FC<StressTestMetricsProps> = ({
   }
 
   // 计算指标状态
-  const successRate = metrics.totalRequests > 0 
-    ? (metrics.successfulRequests / metrics.totalRequests) * 100 
+  const successRate = metrics.totalRequests > 0
+    ? (metrics.successfulRequests / metrics.totalRequests) * 100
     : 0;
-  
-  const errorRate = metrics.totalRequests > 0 
-    ? (metrics.failedRequests / metrics.totalRequests) * 100 
+
+  const errorRate = metrics.totalRequests > 0
+    ? (metrics.failedRequests / metrics.totalRequests) * 100
     : 0;
 
   // 阈值检查
   const responseTimeWarning = metrics.averageResponseTime > thresholds.responseTime.warning;
   const responseTimeCritical = metrics.averageResponseTime > thresholds.responseTime.critical;
-  
+
   const errorRateWarning = errorRate > thresholds.errorRate.warning;
   const errorRateCritical = errorRate > thresholds.errorRate.critical;
-  
+
   const tpsWarning = metrics.currentTPS < thresholds.tps.warning;
   const tpsCritical = metrics.currentTPS < thresholds.tps.critical;
 
@@ -252,12 +272,12 @@ export const StressTestMetrics: React.FC<StressTestMetricsProps> = ({
             错误分类
           </h4>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {Object.entries(metrics.errorBreakdown).map(([errorType, count]) => (
+            {Object.entries(metrics.errorBreakdown || {}).map(([errorType, count]) => (
               <div key={errorType} className="bg-red-500/20 rounded p-2">
                 <div className="text-sm font-medium text-red-300">{errorType}</div>
-                <div className="text-lg font-bold text-red-400">{count}</div>
+                <div className="text-lg font-bold text-red-400">{count as number}</div>
                 <div className="text-xs text-red-200">
-                  {((count / metrics.totalRequests) * 100).toFixed(1)}%
+                  {(((count as number) / metrics.totalRequests) * 100).toFixed(1)}%
                 </div>
               </div>
             ))}
@@ -279,10 +299,10 @@ export const StressTestMetrics: React.FC<StressTestMetricsProps> = ({
             <span>整体评级:</span>
             <span className={
               errorRate < 1 && metrics.averageResponseTime < 500 ? 'text-green-400' :
-              errorRate < 5 && metrics.averageResponseTime < 1000 ? 'text-yellow-400' : 'text-red-400'
+                errorRate < 5 && metrics.averageResponseTime < 1000 ? 'text-yellow-400' : 'text-red-400'
             }>
               {errorRate < 1 && metrics.averageResponseTime < 500 ? '优秀' :
-               errorRate < 5 && metrics.averageResponseTime < 1000 ? '良好' : '需要优化'}
+                errorRate < 5 && metrics.averageResponseTime < 1000 ? '良好' : '需要优化'}
             </span>
           </div>
           {metrics.peakTPS > 0 && (

@@ -71,22 +71,18 @@ const SystemStatusDashboard: React.FC = () => {
         // 检查是否需要发送通知
         if (mockMetrics.errorRate > 0.05) {
           addNotification({
-            id: Date.now().toString(),
             type: 'warning',
             title: '系统警告',
-            message: '错误率超过阈值，请检查系统状态',
-            timestamp: new Date()
+            message: '错误率超过阈值，请检查系统状态'
           });
         }
 
       } catch (error) {
         console.error('获取系统指标失败:', error);
         addNotification({
-          id: Date.now().toString(),
           type: 'error',
           title: '系统错误',
-          message: '无法获取系统状态信息',
-          timestamp: new Date()
+          message: '无法获取系统状态信息'
         });
       } finally {
         setLoading(false);

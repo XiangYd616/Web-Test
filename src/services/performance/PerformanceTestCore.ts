@@ -4,19 +4,19 @@
  */
 
 import {
-  UnifiedPerformanceConfig,
-  PerformanceTestResult,
-  PerformanceTestProgress,
-  PerformanceTestCallback,
-  PerformanceTestOptions,
-  CoreWebVitals,
-  PageSpeedMetrics,
-  ResourceAnalysis,
   CacheAnalysis,
   CompressionAnalysis,
-  PerformanceRecommendation,
+  CoreWebVitals,
+  PageSpeedMetrics,
+  PERFORMANCE_CONFIG_PRESETS,
   PerformanceIssue,
-  PERFORMANCE_CONFIG_PRESETS
+  PerformanceRecommendation,
+  PerformanceTestCallback,
+  PerformanceTestOptions,
+  PerformanceTestProgress,
+  PerformanceTestResult,
+  ResourceAnalysis,
+  UnifiedPerformanceConfig
 } from '../../types/performance';
 
 export class PerformanceTestCore {
@@ -33,13 +33,13 @@ export class PerformanceTestCore {
   ): Promise<PerformanceTestResult> {
     // 合并配置
     const finalConfig = this.mergeConfig(config);
-    
+
     // 生成测试ID
     const testId = this.generateTestId();
-    
+
     // 验证URL
     this.validateUrl(url);
-    
+
     // 初始化测试结果
     const result: PerformanceTestResult = {
       testId,
@@ -56,7 +56,7 @@ export class PerformanceTestCore {
     try {
       // 记录测试开始
       this.activeTests.set(testId, { config: finalConfig, startTime: Date.now() });
-      
+
       // 报告进度
       this.reportProgress(options.onProgress, {
         phase: 'initializing',
@@ -104,7 +104,7 @@ export class PerformanceTestCore {
       // 错误处理
       result.error = error instanceof Error ? error.message : '性能测试失败';
       result.duration = Date.now() - (this.activeTests.get(testId)?.startTime || Date.now());
-      
+
       this.reportProgress(options.onProgress, {
         phase: 'failed',
         progress: 0,
@@ -277,8 +277,8 @@ export class PerformanceTestCore {
     // 实现移动端性能检测逻辑
     return {
       score: Math.floor(Math.random() * 40) + 60,
-      issues: [],
-      recommendations: []
+      issues: [] as string[],
+      recommendations: [] as string[]
     };
   }
 
@@ -394,60 +394,60 @@ export class PerformanceTestCore {
 
   private calculateSpeedScore(metrics: PageSpeedMetrics): number {
     let score = 100;
-    
+
     // 加载时间评分
     if (metrics.loadTime > 3000) score -= 30;
     else if (metrics.loadTime > 2000) score -= 20;
     else if (metrics.loadTime > 1000) score -= 10;
-    
+
     // 响应时间评分
     if (metrics.responseTime > 1000) score -= 20;
     else if (metrics.responseTime > 500) score -= 10;
-    
+
     // 页面大小评分
     if (metrics.pageSize > 2000000) score -= 15; // 2MB
     else if (metrics.pageSize > 1000000) score -= 10; // 1MB
-    
+
     return Math.max(0, score);
   }
 
   private calculateVitalsScore(vitals: CoreWebVitals): number {
     let score = 100;
-    
+
     // LCP评分
     if (vitals.lcp > 4000) score -= 25;
     else if (vitals.lcp > 2500) score -= 15;
-    
+
     // FID评分
     if (vitals.fid > 300) score -= 25;
     else if (vitals.fid > 100) score -= 15;
-    
+
     // CLS评分
     if (vitals.cls > 0.25) score -= 25;
     else if (vitals.cls > 0.1) score -= 15;
-    
+
     // FCP评分
     if (vitals.fcp > 3000) score -= 15;
     else if (vitals.fcp > 1800) score -= 10;
-    
+
     return Math.max(0, score);
   }
 
   private calculateResourceScore(resources: ResourceAnalysis): number {
     let score = 100;
-    
+
     // 图片优化评分
     if (resources.images.unoptimized > 5) score -= 20;
     else if (resources.images.unoptimized > 2) score -= 10;
-    
+
     // JavaScript优化评分
     if (resources.javascript.unused > 50) score -= 15;
     else if (resources.javascript.unused > 20) score -= 10;
-    
+
     // CSS优化评分
     if (resources.css.unused > 30) score -= 15;
     else if (resources.css.unused > 10) score -= 10;
-    
+
     return Math.max(0, score);
   }
 
@@ -523,7 +523,7 @@ export class PerformanceTestCore {
   private getDefaultCompressionAnalysis(): CompressionAnalysis {
     const originalSize = Math.floor(Math.random() * 1000000) + 500000;
     const ratio = Math.random() * 0.6 + 0.3;
-    
+
     return {
       type: Math.random() > 0.5 ? 'gzip' : 'brotli',
       ratio,

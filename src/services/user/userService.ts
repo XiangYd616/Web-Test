@@ -1,7 +1,4 @@
-import { apiService } from '../api';
-
-// 临时替换所有 unifiedApiService 为 apiService
-const unifiedApiService = apiService;
+import { unifiedApiService } from '../api/apiService';
 
 export interface UserProfile {
   id: string;

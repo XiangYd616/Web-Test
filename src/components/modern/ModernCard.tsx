@@ -1,6 +1,6 @@
 import React from 'react';
-import '../../styles/modern-design-system.css';
 import { useTheme } from '../../contexts/ThemeContext';
+import '../../styles/modern-design-system.css';
 
 export interface ModernCardProps {
   children: React.ReactNode;
@@ -11,6 +11,7 @@ export interface ModernCardProps {
   hover?: boolean;
   glass?: boolean;
   className?: string;
+  onClick?: () => void;
 }
 
 const ModernCard: React.FC<ModernCardProps> = ({
@@ -21,7 +22,8 @@ const ModernCard: React.FC<ModernCardProps> = ({
   variant = 'default',
   hover = false,
   glass = false,
-  className = ''
+  className = '',
+  onClick
 }) => {
   const { actualTheme } = useTheme();
 
@@ -44,22 +46,23 @@ const ModernCard: React.FC<ModernCardProps> = ({
   };
 
   return (
-    <div className={`${getCardClasses()} ${className}`}>
+    <div
+      className={`${getCardClasses()} ${className} ${onClick ? 'cursor-pointer' : ''}`}
+      onClick={onClick}
+    >
       {(title || subtitle || headerAction) && (
         <div className="card-header mb-6">
           <div className="flex items-start justify-between">
             <div>
               {title && (
-                <h3 className={`text-lg font-semibold mb-1 ${
-                  actualTheme === 'light' ? 'themed-text-primary' : 'text-primary'
-                }`}>
+                <h3 className={`text-lg font-semibold mb-1 ${actualTheme === 'light' ? 'themed-text-primary' : 'text-primary'
+                  }`}>
                   {title}
                 </h3>
               )}
               {subtitle && (
-                <p className={`text-sm ${
-                  actualTheme === 'light' ? 'themed-text-secondary' : 'text-secondary'
-                }`}>
+                <p className={`text-sm ${actualTheme === 'light' ? 'themed-text-secondary' : 'text-secondary'
+                  }`}>
                   {subtitle}
                 </p>
               )}
@@ -72,7 +75,7 @@ const ModernCard: React.FC<ModernCardProps> = ({
           </div>
         </div>
       )}
-      
+
       <div className="card-content">
         {children}
       </div>

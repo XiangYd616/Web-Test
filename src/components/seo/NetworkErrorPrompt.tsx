@@ -16,7 +16,7 @@ const NetworkErrorPrompt: React.FC<NetworkErrorPromptProps> = ({
   className = ''
 }) => {
   const { theme } = useTheme();
-  const actualTheme = theme === 'auto' ? 'dark' : theme;
+  const actualTheme = theme; // theme 已经是 'light' | 'dark'
 
   // 检查错误类型
   const isNetworkError = error.includes('代理服务') ||

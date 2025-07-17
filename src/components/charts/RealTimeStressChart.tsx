@@ -73,7 +73,13 @@ export const RealTimeStressChart: React.FC<RealTimeStressChartProps> = ({
 
   // 计算图表数据
   const chartData = useMemo(() => {
-    if (!data.length) return { points: [], scales: { x: [], y: [] } };
+    if (!data.length) return {
+      points: [] as any[],
+      scales: {
+        x: [] as any[],
+        y: [] as any[]
+      }
+    };
 
     // 获取时间窗口内的数据
     const now = Date.now();
@@ -323,7 +329,7 @@ export const RealTimeStressChart: React.FC<RealTimeStressChartProps> = ({
             {/* 数据曲线 */}
             {config.showActiveUsers && (
               <path
-                d={generatePath('activeUsers', chartData.scales.y.users)}
+                d={generatePath('activeUsers', (chartData.scales.y as any)?.users || [])}
                 fill="none"
                 stroke="#22c55e"
                 strokeWidth="3"
@@ -333,7 +339,7 @@ export const RealTimeStressChart: React.FC<RealTimeStressChartProps> = ({
 
             {config.showResponseTime && (
               <path
-                d={generatePath('responseTime', chartData.scales.y.responseTime)}
+                d={generatePath('responseTime', (chartData.scales.y as any)?.responseTime || [])}
                 fill="none"
                 stroke="#3b82f6"
                 strokeWidth="3"
@@ -353,7 +359,7 @@ export const RealTimeStressChart: React.FC<RealTimeStressChartProps> = ({
 
             {config.showThroughput && (
               <path
-                d={generatePath('throughput', chartData.scales.y.throughput)}
+                d={generatePath('throughput', (chartData.scales.y as any)?.throughput || [])}
                 fill="none"
                 stroke="#8b5cf6"
                 strokeWidth="3"

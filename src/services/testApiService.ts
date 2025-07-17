@@ -355,6 +355,31 @@ class TestApiService {
     this.sessions.clear();
     this.progressCallbacks.clear();
   }
+
+  // 获取测试模板
+  async getTestTemplates(testType: string): Promise<any[]> {
+    try {
+      const result = await this.request(`/tests/templates?type=${testType}`);
+      return result.data || [];
+    } catch (error) {
+      console.error('Failed to get test templates:', error);
+      return [];
+    }
+  }
+
+  // 保存测试模板
+  async saveTestTemplate(template: { testType: string; name: string; description: string; config: any }): Promise<any> {
+    try {
+      const result = await this.request('/tests/templates', {
+        method: 'POST',
+        body: JSON.stringify(template)
+      });
+      return result;
+    } catch (error) {
+      console.error('Failed to save test template:', error);
+      throw error;
+    }
+  }
 }
 
 // 导出单例实例

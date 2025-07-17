@@ -492,6 +492,17 @@ export class UnifiedAuthService {
         refreshInterval: 30,
         showTips: true,
       },
+      testing: {
+        defaultTimeout: 30000,
+        maxConcurrentTests: 3,
+        autoSaveResults: true,
+        enableAdvancedFeatures: false
+      },
+      privacy: {
+        shareUsageData: false,
+        allowCookies: true,
+        trackingEnabled: false
+      }
     };
   }
 

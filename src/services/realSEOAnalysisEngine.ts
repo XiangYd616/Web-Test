@@ -161,7 +161,7 @@ export interface PerformanceResult {
   issues: string[];
 
   // 新增：真实PageSpeed数据
-  pageSpeedData?: PageSpeedResult;
+  pageSpeedData?: any; // 临时类型，替代PageSpeedResult
 
   // 新增：详细的优化建议
   opportunities: Array<{
@@ -178,6 +178,15 @@ export interface PerformanceResult {
     fid: 'good' | 'needs-improvement' | 'poor' | 'unknown';
     cls: 'good' | 'needs-improvement' | 'poor' | 'unknown';
     overall: 'good' | 'needs-improvement' | 'poor';
+  };
+
+  // 新增：Core Web Vitals数据
+  coreWebVitals: {
+    lcp: number;
+    fid: number;
+    cls: number;
+    fcp: number;
+    ttfb: number;
   };
 }
 
@@ -299,6 +308,7 @@ export class RealSEOAnalysisEngine {
       checkStructuredData?: boolean;
       checkSecurity?: boolean;
       depth?: 'basic' | 'standard' | 'comprehensive';
+      externalPerformanceData?: any;
     },
     onProgress?: (progress: number, step: string) => void
   ): Promise<SEOAnalysisResult> {
@@ -1905,9 +1915,10 @@ export class RealSEOAnalysisEngine {
     const requests = this.estimateResourceCount(pageContent.html);
 
     // 获取真实的PageSpeed Insights数据
-    let pageSpeedData: PageSpeedResult | undefined;
+    let pageSpeedData: any | undefined;
     try {
-      pageSpeedData = await googlePageSpeedService.analyzePageSpeed(url);
+      // 临时注释掉PageSpeed API调用
+      // pageSpeedData = await googlePageSpeedService.analyzePageSpeed(url);
     } catch (error) {
       console.warn('Failed to get PageSpeed data:', error);
     }
@@ -1996,7 +2007,14 @@ export class RealSEOAnalysisEngine {
       issues,
       pageSpeedData,
       opportunities,
-      webVitalsAssessment
+      webVitalsAssessment,
+      coreWebVitals: {
+        lcp: realMetrics?.lcp || 0,
+        fid: realMetrics?.fid || 0,
+        cls: realMetrics?.cls || 0,
+        fcp: realMetrics?.fcp || realMetrics?.firstContentfulPaint || 0,
+        ttfb: realMetrics?.ttfb || 0
+      }
     };
   }
 
@@ -2910,19 +2928,28 @@ export class RealSEOAnalysisEngine {
     return {
       score: externalData.score || 0,
       loadTime: externalData.loadTime || 0,
+      firstContentfulPaint: externalData.vitals?.fcp || 0,
+      largestContentfulPaint: externalData.vitals?.lcp || 0,
+      cumulativeLayoutShift: externalData.vitals?.cls || 0,
+      firstInputDelay: externalData.vitals?.fid || 0,
       pageSize: externalData.pageSize || 0,
       requests: 0,
+      issues: [],
+      pageSpeedData: externalData,
+      opportunities: [],
+      webVitalsAssessment: {
+        lcp: 'unknown' as const,
+        fid: 'unknown' as const,
+        cls: 'unknown' as const,
+        overall: 'poor' as const
+      },
       coreWebVitals: {
         lcp: externalData.vitals?.lcp || 0,
         fid: externalData.vitals?.fid || 0,
         cls: externalData.vitals?.cls || 0,
-        fcp: externalData.vitals?.fcp || 0
-      },
-      mobileScore: externalData.mobile?.score || null,
-      issues: [],
-      recommendations: externalData.score < 70 ? [
-        '页面性能需要优化，建议查看专门的性能测试报告获取详细建议'
-      ] : []
+        fcp: externalData.vitals?.fcp || 0,
+        ttfb: externalData.vitals?.ttfb || 0
+      }
     };
   }
 }

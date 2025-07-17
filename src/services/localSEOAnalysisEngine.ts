@@ -1165,7 +1165,14 @@ export class LocalSEOAnalysisEngine {
         lcp: 'unknown' as const,
         fid: 'unknown' as const,
         cls: 'unknown' as const,
-        overall: 'unknown' as const
+        overall: 'poor' as const
+      },
+      coreWebVitals: {
+        lcp: 0,
+        fid: 0,
+        cls: 0,
+        fcp: 0,
+        ttfb: 0
       }
     };
   }

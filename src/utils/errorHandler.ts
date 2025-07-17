@@ -204,14 +204,14 @@ const SOLUTION_TEMPLATES: Record<string, ErrorSolution[]> = {
  */
 function determineErrorType(error: Error | string): keyof typeof ERROR_PATTERNS {
   const message = typeof error === 'string' ? error : error.message;
-  
+
   for (const [type, patterns] of Object.entries(ERROR_PATTERNS)) {
     if (patterns.some(pattern => pattern.test(message))) {
       return type as keyof typeof ERROR_PATTERNS;
     }
   }
-  
-  return 'unknown';
+
+  return 'network' as const;
 }
 
 /**
@@ -261,7 +261,7 @@ function createQuickActions(type: string, context: ErrorContext): Array<{
         });
       }
       break;
-    
+
     case 'network':
       actions.push({
         label: '检查网络',
@@ -270,7 +270,7 @@ function createQuickActions(type: string, context: ErrorContext): Array<{
         }
       });
       break;
-    
+
     case 'security':
       if (context.url) {
         actions.push({
@@ -295,7 +295,7 @@ export function enhanceError(
 ): EnhancedError {
   const message = typeof error === 'string' ? error : error.message;
   const type = determineErrorType(error);
-  
+
   // 生成用户友好的标题
   const titles = {
     network: '网络连接问题',
@@ -319,7 +319,7 @@ export function enhanceError(
   if (context.url) {
     details += `\n目标URL: ${context.url}`;
   }
-  
+
   if (context.operation) {
     details += `\n操作类型: ${context.operation}`;
   }
@@ -347,22 +347,22 @@ export const createCommonErrors = {
     new Error('网络连接失败，请检查您的网络设置'),
     { url, operation: 'network_request' }
   ),
-  
+
   invalidUrl: (url?: string): EnhancedError => enhanceError(
     new Error('URL格式无效，请检查输入的网址'),
     { url, operation: 'url_validation' }
   ),
-  
+
   sslError: (url?: string): EnhancedError => enhanceError(
     new Error('SSL证书验证失败，网站可能存在安全问题'),
     { url, operation: 'ssl_verification' }
   ),
-  
+
   timeoutError: (url?: string): EnhancedError => enhanceError(
     new Error('请求超时，网站响应时间过长'),
     { url, operation: 'request_timeout' }
   ),
-  
+
   serverError: (url?: string, statusCode?: number): EnhancedError => enhanceError(
     new Error(`服务器错误 ${statusCode ? `(${statusCode})` : ''}，请稍后重试`),
     { url, operation: 'server_request' }
