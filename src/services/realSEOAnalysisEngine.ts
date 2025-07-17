@@ -347,7 +347,14 @@ export class RealSEOAnalysisEngine {
 
       if (config.checkPerformance !== false) {
         onProgress?.(currentProgress, '分析性能指标...');
-        results.performance = await this.analyzePerformance(validatedUrl, pageContent);
+
+        // 如果有外部性能数据，使用外部数据；否则进行内部检测
+        if (config.externalPerformanceData) {
+          results.performance = this.convertExternalPerformanceData(config.externalPerformanceData);
+        } else {
+          results.performance = await this.analyzePerformance(validatedUrl, pageContent);
+        }
+
         currentProgress += progressStep;
       }
 
@@ -2895,4 +2902,30 @@ export class RealSEOAnalysisEngine {
 
     return squaredDiffs.reduce((sum, diff) => sum + diff, 0) / numbers.length;
   }
+
+  /**
+   * 转换外部性能数据为SEO分析格式
+   */
+  private convertExternalPerformanceData(externalData: any): PerformanceResult {
+    return {
+      score: externalData.score || 0,
+      loadTime: externalData.loadTime || 0,
+      pageSize: externalData.pageSize || 0,
+      requests: 0,
+      coreWebVitals: {
+        lcp: externalData.vitals?.lcp || 0,
+        fid: externalData.vitals?.fid || 0,
+        cls: externalData.vitals?.cls || 0,
+        fcp: externalData.vitals?.fcp || 0
+      },
+      mobileScore: externalData.mobile?.score || null,
+      issues: [],
+      recommendations: externalData.score < 70 ? [
+        '页面性能需要优化，建议查看专门的性能测试报告获取详细建议'
+      ] : []
+    };
+  }
 }
+
+// 导出单例实例
+export const realSEOAnalysisEngine = new RealSEOAnalysisEngine();

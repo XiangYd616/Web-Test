@@ -5,7 +5,6 @@ import {
   Code,
   Download,
   Eye,
-  Gauge,
   Globe,
   Loader,
   Lock,
@@ -29,13 +28,15 @@ import '../styles/progress-bars.css';
 
 interface WebsiteTestConfig {
   testTypes: {
-    performance: boolean;
     seo: boolean;
     security: boolean;
     compatibility: boolean;
     api: boolean;
     accessibility: boolean;
   };
+  // 性能测试配置移到独立配置中
+  performanceLevel: 'basic' | 'standard' | 'comprehensive';
+  includePerformance: boolean;
 }
 
 const WebsiteTest: React.FC = () => {
@@ -58,13 +59,14 @@ const WebsiteTest: React.FC = () => {
     url: searchParams.get('url') || '',
     testType: 'website',
     testTypes: {
-      performance: true,
       seo: true,
       security: false,
       compatibility: false,
       api: false,
       accessibility: false
     },
+    performanceLevel: 'standard',
+    includePerformance: true,
     options: {
       device: 'desktop',
       location: 'beijing',
@@ -143,14 +145,6 @@ const WebsiteTest: React.FC = () => {
   }, [isRunning, results, error, recordTestCompletion]);
 
   const testTypes = [
-    {
-      key: 'performance',
-      name: '性能测试',
-      icon: Gauge,
-      description: '分析页面加载速度、Core Web Vitals等性能指标',
-      color: 'blue',
-      estimatedTime: '30-60秒'
-    },
     {
       key: 'seo',
       name: 'SEO分析',
@@ -516,9 +510,57 @@ const WebsiteTest: React.FC = () => {
         {/* 测试配置 */}
         <div className="lg:col-span-2 space-y-6">
 
+          {/* 性能测试配置 */}
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+            <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
+              <Gauge className="w-5 h-5 mr-2 text-blue-400" />
+              性能测试配置
+            </h3>
+
+            <div className="space-y-4">
+              {/* 是否包含性能测试 */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-white font-medium">包含性能测试</label>
+                  <p className="text-sm text-gray-400">检测页面加载速度和Core Web Vitals</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={config.includePerformance}
+                    onChange={(e) => setConfig(prev => ({ ...prev, includePerformance: e.target.checked }))}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+
+              {/* 性能测试级别 */}
+              {config.includePerformance && (
+                <div>
+                  <label className="block text-white font-medium mb-2">性能测试级别</label>
+                  <select
+                    value={config.performanceLevel}
+                    onChange={(e) => setConfig(prev => ({ ...prev, performanceLevel: e.target.value as 'basic' | 'standard' | 'comprehensive' }))}
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="basic">基础检测 - 页面速度</option>
+                    <option value="standard">标准检测 - 包含Core Web Vitals</option>
+                    <option value="comprehensive">全面检测 - 完整性能分析</option>
+                  </select>
+                  <p className="text-sm text-gray-400 mt-1">
+                    {config.performanceLevel === 'basic' && '快速检测页面加载时间和基本指标'}
+                    {config.performanceLevel === 'standard' && '包含Core Web Vitals和资源优化分析'}
+                    {config.performanceLevel === 'comprehensive' && '完整的性能分析，包含所有优化建议'}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* 测试类型选择 */}
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-            <h3 className="text-xl font-semibold text-white mb-4">选择测试类型</h3>
+            <h3 className="text-xl font-semibold text-white mb-4">选择其他测试类型</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {testTypes.map((test) => (
                 <div

@@ -77,7 +77,7 @@ class RealAPITestEngine {
       // 测试每个端点
       for (const endpoint of endpoints) {
         console.log(`🎯 Testing endpoint: ${endpoint.method || 'GET'} ${endpoint.path}`);
-        
+
         const endpointResult = await this.testEndpoint(apiClient, endpoint, {
           retries,
           validateSchema,
@@ -208,7 +208,7 @@ class RealAPITestEngine {
         });
 
         const responseTime = performance.now() - startTime;
-        
+
         result.statusCode = response.status;
         result.responseTime = Math.round(responseTime);
         result.responseSize = JSON.stringify(response.data).length;
@@ -217,7 +217,7 @@ class RealAPITestEngine {
 
         // 检查状态码
         const expectedStatus = endpoint.expectedStatus || [200, 201, 202, 204];
-        const isStatusValid = Array.isArray(expectedStatus) 
+        const isStatusValid = Array.isArray(expectedStatus)
           ? expectedStatus.includes(response.status)
           : response.status === expectedStatus;
 
@@ -252,7 +252,7 @@ class RealAPITestEngine {
       } catch (error) {
         lastError = error;
         result.retryCount = attempt;
-        
+
         if (attempt === retries) {
           // 最后一次重试失败
           result.status = 'fail';
@@ -275,7 +275,7 @@ class RealAPITestEngine {
     const duration = 30000; // 30秒
     const startTime = Date.now();
     const endTime = startTime + duration;
-    
+
     const results = {
       totalRequests: 0,
       successfulRequests: 0,
@@ -352,11 +352,11 @@ class RealAPITestEngine {
   validateResponseSchema(data, schema) {
     // 简单的模式验证实现
     const errors = [];
-    
+
     if (schema.type === 'object' && typeof data !== 'object') {
       errors.push('Response should be an object');
     }
-    
+
     if (schema.required) {
       for (const field of schema.required) {
         if (!(field in data)) {
@@ -377,7 +377,7 @@ class RealAPITestEngine {
     // 检查敏感信息泄露
     const responseText = JSON.stringify(response.data).toLowerCase();
     const sensitivePatterns = ['password', 'secret', 'token', 'key', 'private'];
-    
+
     for (const pattern of sensitivePatterns) {
       if (responseText.includes(pattern)) {
         issues.push({
@@ -402,30 +402,44 @@ class RealAPITestEngine {
   }
 
   /**
-   * 执行性能检查
+   * 执行性能检查 - 使用统一的性能评估标准
    */
   performPerformanceChecks(responseTime, responseSize) {
     const issues = [];
 
-    if (responseTime > 2000) {
+    // 使用统一的性能阈值标准
+    if (responseTime > 3000) {
+      issues.push({
+        type: 'slow_response',
+        severity: 'critical',
+        description: `API响应时间 ${responseTime}ms 严重超标 (>3000ms)`
+      });
+    } else if (responseTime > 2000) {
       issues.push({
         type: 'slow_response',
         severity: 'high',
-        description: `Response time ${responseTime}ms exceeds 2000ms threshold`
+        description: `API响应时间 ${responseTime}ms 超过推荐值 (>2000ms)`
       });
     } else if (responseTime > 1000) {
       issues.push({
         type: 'slow_response',
         severity: 'medium',
-        description: `Response time ${responseTime}ms exceeds 1000ms threshold`
+        description: `API响应时间 ${responseTime}ms 需要优化 (>1000ms)`
       });
     }
 
-    if (responseSize > 1024 * 1024) { // 1MB
+    // 统一的响应大小检查
+    if (responseSize > 5 * 1024 * 1024) { // 5MB
+      issues.push({
+        type: 'large_response',
+        severity: 'high',
+        description: `API响应大小 ${Math.round(responseSize / 1024 / 1024)}MB 过大，影响性能`
+      });
+    } else if (responseSize > 1024 * 1024) { // 1MB
       issues.push({
         type: 'large_response',
         severity: 'medium',
-        description: `Response size ${Math.round(responseSize / 1024)}KB is quite large`
+        description: `API响应大小 ${Math.round(responseSize / 1024)}KB 较大，建议优化`
       });
     }
 

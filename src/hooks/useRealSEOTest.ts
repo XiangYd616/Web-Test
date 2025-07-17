@@ -43,6 +43,26 @@ export const useRealSEOTest = () => {
       // 创建新的SEO分析引擎实例
       seoEngineRef.current = new RealSEOAnalysisEngine();
 
+      // 如果需要性能检测，先获取性能指标
+      let performanceData = null;
+      if (config.checkPerformance) {
+        setProgress({
+          progress: 10,
+          currentStep: '获取性能指标...',
+          isRunning: true
+        });
+
+        try {
+          performanceData = await getPerformanceMetrics(config.url, {
+            includeVitals: true,
+            includeMobile: config.checkMobileFriendly,
+            device: 'both'
+          });
+        } catch (error) {
+          console.warn('获取性能指标失败，继续SEO分析:', error);
+        }
+      }
+
       // 开始真实的SEO分析
       const analysisResult = await seoEngineRef.current.analyzeSEO(
         config.url,
@@ -51,16 +71,17 @@ export const useRealSEOTest = () => {
           checkTechnicalSEO: config.checkTechnicalSEO,
           checkContentQuality: config.checkContentQuality,
           checkAccessibility: config.checkAccessibility,
-          checkPerformance: config.checkPerformance,
+          checkPerformance: false, // 使用外部性能数据，不重复检测
           checkMobileFriendly: config.checkMobileFriendly,
           checkSocialMedia: config.checkSocialMedia,
           checkStructuredData: config.checkStructuredData,
           checkSecurity: config.checkSecurity,
-          depth: config.depth
+          depth: config.depth,
+          externalPerformanceData: performanceData // 传入外部性能数据
         },
         (progressValue: number, step: string) => {
           setProgress({
-            progress: progressValue,
+            progress: Math.max(progressValue, 20), // 确保进度不倒退
             currentStep: step,
             isRunning: true
           });

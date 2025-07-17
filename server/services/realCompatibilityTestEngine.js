@@ -35,7 +35,7 @@ class RealCompatibilityTestEngine {
 
     const testId = `compatibility-${Date.now()}`;
     const startTime = Date.now();
-    
+
     const results = {
       testId,
       url,
@@ -53,7 +53,7 @@ class RealCompatibilityTestEngine {
 
     try {
       // 并行测试所有浏览器
-      const browserTests = browsers.map(browser => 
+      const browserTests = browsers.map(browser =>
         this.testBrowser(url, browser, devices, accessibility)
       );
 
@@ -64,7 +64,7 @@ class RealCompatibilityTestEngine {
         const browser = browsers[index];
         results.browserCompatibility[browser] = result.score;
         results.detailedResults[browser] = result;
-        
+
         // 收集问题和建议
         results.issues.push(...result.issues);
         results.recommendations.push(...result.recommendations);
@@ -94,7 +94,7 @@ class RealCompatibilityTestEngine {
 
       console.log(`✅ Compatibility test completed for: ${url}`);
       console.log(`📊 Overall Score: ${Math.round(results.overallScore)}`);
-      
+
       return { success: true, data: results };
 
     } catch (error) {
@@ -145,7 +145,7 @@ class RealCompatibilityTestEngine {
 
       // 测试不同设备
       const deviceTests = [];
-      
+
       if (devices.desktop) {
         deviceTests.push(this.testDevice(browser, url, 'desktop', browserName));
       }
@@ -157,7 +157,7 @@ class RealCompatibilityTestEngine {
       }
 
       const deviceResults = await Promise.all(deviceTests);
-      
+
       // 处理设备测试结果
       deviceResults.forEach(deviceResult => {
         result.deviceResults[deviceResult.device] = deviceResult;
@@ -167,7 +167,7 @@ class RealCompatibilityTestEngine {
 
       // 计算浏览器分数
       const deviceScores = deviceResults.map(dr => dr.score);
-      result.score = deviceScores.length > 0 ? 
+      result.score = deviceScores.length > 0 ?
         Math.round(deviceScores.reduce((a, b) => a + b, 0) / deviceScores.length) : 0;
 
       // 可访问性检查
@@ -215,14 +215,14 @@ class RealCompatibilityTestEngine {
 
     try {
       page = await browser.newPage();
-      
+
       // 设置视口
       await page.setViewportSize({ width: config.width, height: config.height });
 
       // 导航到页面
-      const response = await page.goto(url, { 
+      const response = await page.goto(url, {
         waitUntil: 'networkidle',
-        timeout: 30000 
+        timeout: 30000
       });
 
       if (!response.ok()) {
@@ -363,9 +363,9 @@ class RealCompatibilityTestEngine {
 
         // JavaScript特性检测
         testResults.js = {
-          es6Classes: typeof class {} === 'function',
-          arrow: (() => { try { eval('() => {}'); return true; } catch(e) { return false; } })(),
-          async: (() => { try { eval('async function() {}'); return true; } catch(e) { return false; } })(),
+          es6Classes: typeof class { } === 'function',
+          arrow: (() => { try { eval('() => {}'); return true; } catch (e) { return false; } })(),
+          async: (() => { try { eval('async function() {}'); return true; } catch (e) { return false; } })(),
           modules: 'noModule' in document.createElement('script'),
           fetch: typeof fetch !== 'undefined',
           promises: typeof Promise !== 'undefined',
@@ -601,7 +601,7 @@ class RealCompatibilityTestEngine {
    */
   async checkJavaScriptErrors(page, result) {
     const errors = [];
-    
+
     page.on('pageerror', error => {
       errors.push(error.message);
     });
@@ -634,19 +634,19 @@ class RealCompatibilityTestEngine {
 
     try {
       // 检查图片alt属性
-      const imagesWithoutAlt = await page.$$eval('img', imgs => 
+      const imagesWithoutAlt = await page.$$eval('img', imgs =>
         imgs.filter(img => !img.alt).length
       );
       if (imagesWithoutAlt > 0) score -= 20;
 
       // 检查表单标签
-      const inputsWithoutLabels = await page.$$eval('input, textarea, select', inputs => 
+      const inputsWithoutLabels = await page.$$eval('input, textarea, select', inputs =>
         inputs.filter(input => !input.labels?.length && !input.getAttribute('aria-label')).length
       );
       if (inputsWithoutLabels > 0) score -= 15;
 
       // 检查标题结构
-      const headings = await page.$$eval('h1, h2, h3, h4, h5, h6', headings => 
+      const headings = await page.$$eval('h1, h2, h3, h4, h5, h6', headings =>
         headings.map(h => h.tagName)
       );
       if (headings.length === 0 || !headings.includes('H1')) score -= 15;
@@ -660,24 +660,75 @@ class RealCompatibilityTestEngine {
   }
 
   /**
-   * 检查性能
+   * 检查性能 - 使用统一的性能指标标准
    */
   async checkPerformance(page) {
     try {
       const metrics = await page.evaluate(() => {
         const navigation = performance.getEntriesByType('navigation')[0];
+        const paintEntries = performance.getEntriesByType('paint');
+
         return {
           loadTime: navigation ? navigation.loadEventEnd - navigation.loadEventStart : 0,
           domContentLoaded: navigation ? navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart : 0,
-          firstPaint: performance.getEntriesByType('paint')[0]?.startTime || 0
+          firstPaint: paintEntries.find(entry => entry.name === 'first-paint')?.startTime || 0,
+          firstContentfulPaint: paintEntries.find(entry => entry.name === 'first-contentful-paint')?.startTime || 0,
+          // 添加更多统一的性能指标
+          responseStart: navigation ? navigation.responseStart - navigation.fetchStart : 0,
+          responseEnd: navigation ? navigation.responseEnd - navigation.fetchStart : 0
         };
       });
 
-      return metrics;
+      // 使用统一的性能评估标准
+      const performanceScore = this.calculateCompatibilityPerformanceScore(metrics);
+
+      return {
+        ...metrics,
+        score: performanceScore,
+        grade: this.getPerformanceGrade(performanceScore)
+      };
     } catch (error) {
       console.error('Performance check failed:', error);
-      return {};
+      return {
+        loadTime: 0,
+        domContentLoaded: 0,
+        firstPaint: 0,
+        firstContentfulPaint: 0,
+        score: 0,
+        grade: 'F'
+      };
     }
+  }
+
+  /**
+   * 计算兼容性测试中的性能评分
+   */
+  calculateCompatibilityPerformanceScore(metrics) {
+    let score = 100;
+
+    // 使用与性能测试核心相同的评分标准
+    if (metrics.loadTime > 3000) score -= 30;
+    else if (metrics.loadTime > 2000) score -= 20;
+    else if (metrics.loadTime > 1000) score -= 10;
+
+    if (metrics.firstContentfulPaint > 3000) score -= 20;
+    else if (metrics.firstContentfulPaint > 1800) score -= 10;
+
+    if (metrics.domContentLoaded > 2000) score -= 15;
+    else if (metrics.domContentLoaded > 1000) score -= 8;
+
+    return Math.max(0, score);
+  }
+
+  /**
+   * 获取性能等级
+   */
+  getPerformanceGrade(score) {
+    if (score >= 90) return 'A';
+    if (score >= 80) return 'B';
+    if (score >= 70) return 'C';
+    if (score >= 60) return 'D';
+    return 'F';
   }
 
   /**
@@ -715,7 +766,7 @@ class RealCompatibilityTestEngine {
       .map(result => result.accessibilityScore)
       .filter(score => score > 0);
 
-    return scores.length > 0 ? 
+    return scores.length > 0 ?
       Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
   }
 
@@ -725,16 +776,16 @@ class RealCompatibilityTestEngine {
   calculateOverallScore(results) {
     const browserScores = Object.values(results.browserCompatibility);
     const deviceScores = Object.values(results.deviceCompatibility);
-    
-    const avgBrowserScore = browserScores.length > 0 ? 
+
+    const avgBrowserScore = browserScores.length > 0 ?
       browserScores.reduce((a, b) => a + b, 0) / browserScores.length : 0;
-    
-    const avgDeviceScore = deviceScores.length > 0 ? 
+
+    const avgDeviceScore = deviceScores.length > 0 ?
       deviceScores.reduce((a, b) => a + b, 0) / deviceScores.length : 0;
 
     // 权重分配：浏览器兼容性60%，设备兼容性30%，可访问性10%
     let score = avgBrowserScore * 0.6 + avgDeviceScore * 0.3;
-    
+
     if (results.accessibilityScore > 0) {
       score += results.accessibilityScore * 0.1;
     }
