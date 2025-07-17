@@ -26,7 +26,6 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-// import { globalSearchService, SearchResult } from '../services/globalSearchService';
 
 // 临时类型定义
 interface SearchResult {

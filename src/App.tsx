@@ -5,7 +5,6 @@ import ErrorBoundary from './components/ui/ErrorBoundary'
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { TestDataGenerator } from './utils/testDataGenerator'
-// import { NotificationProvider } from './components/NotificationSystem'
 
 // 导入主题样式
 import './styles/chrome-compatibility.css'

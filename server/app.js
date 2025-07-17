@@ -119,8 +119,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // API路由
 app.use('/api/auth', authRoutes);
 app.use('/api/test', testRoutes);
+app.use('/api/test-engines', testRoutes); // 测试引擎状态API
 // app.use('/api/tests', testRoutes); // 复数形式的别名 - 已移除，统一使用 /api/test
-// app.use('/api/test-engines', testRoutes); // 测试引擎状态API - 已移除，功能重复
 // app.use('/api/test-history', testRoutes); // 兼容性路由 - 已移除，使用 /api/test/history
 app.use('/api/seo', seoRoutes); // SEO测试API - 解决CORS问题
 // app.use('/api/unified-security', unifiedSecurityRoutes); // 已移除

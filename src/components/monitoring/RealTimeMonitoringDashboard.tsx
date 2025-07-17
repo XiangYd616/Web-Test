@@ -16,7 +16,6 @@ import {
   Zap
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-// import { RealTimeMonitoringService, MonitoringTarget, MonitoringStats, Alert } from '../services/realTimeMonitoring';
 
 // 临时类型定义，直到服务实现完成
 interface MonitoringTarget {

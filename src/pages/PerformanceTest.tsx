@@ -3,6 +3,8 @@ import {
   BarChart3,
   CheckCircle,
   Clock,
+  Download,
+  ExternalLink,
   Gauge,
   Globe,
   Image,
@@ -10,6 +12,7 @@ import {
   Monitor,
   RotateCcw,
   Settings,
+  Share2,
   Smartphone,
   Square,
   Timer,
@@ -18,14 +21,80 @@ import {
   XCircle,
   Zap
 } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { useUserStats } from '../hooks/useUserStats';
 import UnifiedApiService from '../services/api/apiService';
+import { googlePageSpeedService } from '../services/googlePageSpeedService';
 
+// 性能测试相关类型定义
 type TestMode = 'basic' | 'standard' | 'comprehensive' | 'lighthouse';
 type TestStatusType = 'idle' | 'starting' | 'running' | 'completed' | 'failed';
+type NetworkCondition = 'fast-3g' | 'slow-3g' | '4g' | 'wifi' | 'cable' | 'no-throttling';
+type DeviceType = 'desktop' | 'mobile' | 'tablet' | 'both';
+type TestEngine = 'pagespeed' | 'gtmetrix' | 'webpagetest' | 'lighthouse' | 'local';
 
+
+
+// Core Web Vitals 指标
+interface CoreWebVitals {
+  lcp: number; // Largest Contentful Paint
+  fid: number; // First Input Delay
+  cls: number; // Cumulative Layout Shift
+  fcp: number; // First Contentful Paint
+  ttfb: number; // Time to First Byte
+  si: number; // Speed Index
+}
+
+// 性能测试结果接口
+interface PerformanceTestResult {
+  id: string;
+  url: string;
+  timestamp: string;
+  engine: TestEngine;
+  device: DeviceType;
+  location: string;
+  overallScore: number;
+  coreWebVitals: CoreWebVitals;
+  metrics: {
+    loadTime: number;
+    domContentLoaded: number;
+    firstPaint: number;
+    pageSize: number;
+    requests: number;
+    domElements: number;
+  };
+  opportunities: Array<{
+    id: string;
+    title: string;
+    description: string;
+    impact: 'high' | 'medium' | 'low';
+    savings: number;
+  }>;
+  diagnostics: Array<{
+    id: string;
+    title: string;
+    description: string;
+    severity: 'error' | 'warning' | 'info';
+  }>;
+  screenshots?: string[];
+  videoUrl?: string;
+  waterfallUrl?: string;
+  reportUrl?: string;
+}
+
+// 测试历史记录
+interface TestHistoryItem {
+  id: string;
+  url: string;
+  timestamp: string;
+  engine: TestEngine;
+  overallScore: number;
+  loadTime: number;
+  status: 'completed' | 'failed';
+}
+
+// 保持与现有配置兼容的接口
 interface PerformanceTestConfig {
   url: string;
   mode: TestMode;
@@ -40,6 +109,24 @@ interface PerformanceTestConfig {
   checkMobilePerformance: boolean;
   checkAccessibility: boolean;
   device: 'desktop' | 'mobile' | 'both';
+  // 新增的高级配置
+  testMode?: TestMode;
+  networkCondition?: NetworkCondition;
+  engine?: TestEngine;
+  location?: string;
+  runs?: number;
+  timeout?: number;
+  includeScreenshots?: boolean;
+  includeVideo?: boolean;
+  includeWaterfall?: boolean;
+  blockAds?: boolean;
+  blockTrackers?: boolean;
+  customUserAgent?: string;
+  customHeaders?: Record<string, string>;
+  basicAuth?: {
+    username: string;
+    password: string;
+  };
 }
 
 const PerformanceTest: React.FC = () => {
@@ -80,8 +167,12 @@ const PerformanceTest: React.FC = () => {
   const [testProgress, setTestProgress] = useState('');
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState('');
-  const [results, setResults] = useState<any>(null);
+  const [results, setResults] = useState<PerformanceTestResult | null>(null);
   const [isRunning, setIsRunning] = useState(false);
+  const [currentTestId, setCurrentTestId] = useState<string | null>(null);
+  const [realTimeMetrics, setRealTimeMetrics] = useState<Partial<CoreWebVitals>>({});
+  const [testHistory, setTestHistory] = useState<TestHistoryItem[]>([]);
+  const [selectedEngine, setSelectedEngine] = useState<TestEngine>('pagespeed');
 
   // 快速模板
   const quickTemplates = [
@@ -269,41 +360,325 @@ const PerformanceTest: React.FC = () => {
     }
   };
 
-  // 真实的性能测试API调用
-  const runPerformanceTest = async (url: string, config: PerformanceTestConfig) => {
+  // 真实的性能测试引擎集成
+  const runRealPerformanceTest = useCallback(async (url: string, config: PerformanceTestConfig) => {
     try {
-      console.log('🚀 Starting real performance test for:', url);
+      console.log('🚀 Starting real performance test for:', url, 'with engine:', selectedEngine);
 
-      // 构建API请求配置
-      const apiConfig = {
-        level: config.mode,
-        device: config.device,
-        pageSpeed: config.checkPageSpeed,
-        coreWebVitals: config.checkCoreWebVitals,
-        resourceOptimization: config.checkResourceOptimization,
-        caching: config.checkCaching,
-        compression: config.checkCompression,
-        imageOptimization: config.checkImageOptimization,
-        mobilePerformance: config.checkMobilePerformance
-      };
+      let testResult: PerformanceTestResult;
 
-      // 调用后端性能测试API
-      const response = await apiService.post('/api/test/performance', {
-        url: url,
-        config: apiConfig
-      });
-
-      if (!response.success) {
-        throw new Error(response.message || '性能测试失败');
+      // 根据选择的引擎执行不同的测试
+      switch (selectedEngine) {
+        case 'pagespeed':
+          testResult = await runPageSpeedTest(url, config);
+          break;
+        case 'gtmetrix':
+          testResult = await runGTmetrixTest(url, config);
+          break;
+        case 'webpagetest':
+          testResult = await runWebPageTest(url, config);
+          break;
+        case 'lighthouse':
+          testResult = await runLighthouseTest(url, config);
+          break;
+        case 'local':
+          testResult = await runLocalTest(url, config);
+          break;
+        default:
+          throw new Error('不支持的测试引擎');
       }
 
-      console.log('✅ Performance test completed:', response.data);
-      return response.data;
-    } catch (error: any) {
-      console.error('❌ Performance test failed:', error);
-      throw new Error(error.message || '性能测试请求失败');
+      return testResult;
+    } catch (error) {
+      console.error('Performance test failed:', error);
+      throw error;
+    }
+  }, [selectedEngine]);
+
+  // Google PageSpeed Insights 测试
+  const runPageSpeedTest = async (url: string, config: PerformanceTestConfig): Promise<PerformanceTestResult> => {
+    setTestProgress('正在使用 Google PageSpeed Insights 分析...');
+    setProgress(20);
+
+    const pageSpeedResult = await googlePageSpeedService.analyzePageSpeed(url);
+
+    setProgress(60);
+    setTestProgress('正在处理测试结果...');
+
+    const result: PerformanceTestResult = {
+      id: `pagespeed_${Date.now()}`,
+      url,
+      timestamp: new Date().toISOString(),
+      engine: 'pagespeed',
+      device: config.device,
+      location: 'global',
+      overallScore: pageSpeedResult.desktop.performanceScore || 85,
+      coreWebVitals: {
+        lcp: pageSpeedResult.desktop.lcp || 0,
+        fid: pageSpeedResult.desktop.fid || 0,
+        cls: pageSpeedResult.desktop.cls || 0,
+        fcp: pageSpeedResult.desktop.fcp || 0,
+        ttfb: pageSpeedResult.desktop.ttfb || 0,
+        si: pageSpeedResult.desktop.fcp || 0 // 使用FCP作为Speed Index的替代
+      },
+      metrics: {
+        loadTime: pageSpeedResult.desktop.fcp || 2000,
+        domContentLoaded: 0,
+        firstPaint: pageSpeedResult.desktop.fcp || 0,
+        pageSize: 0,
+        requests: 0,
+        domElements: 0
+      },
+      opportunities: pageSpeedResult.desktop.opportunities?.map(opp => ({
+        id: opp.id,
+        title: opp.title,
+        description: opp.description,
+        impact: opp.impact as 'high' | 'medium' | 'low',
+        savings: opp.savings || 0
+      })) || [],
+      diagnostics: pageSpeedResult.desktop.diagnostics?.map(diag => ({
+        id: diag.id,
+        title: diag.title,
+        description: diag.description,
+        severity: (diag.impact === 'high' ? 'error' : diag.impact === 'medium' ? 'warning' : 'info') as 'error' | 'warning' | 'info'
+      })) || [],
+      reportUrl: `https://pagespeed.web.dev/report?url=${encodeURIComponent(url)}`
+    };
+
+    setProgress(100);
+    return result;
+  };
+
+  // GTmetrix 测试
+  const runGTmetrixTest = async (url: string, config: PerformanceTestConfig): Promise<PerformanceTestResult> => {
+    setTestProgress('正在使用 GTmetrix 分析...');
+    setProgress(20);
+
+    try {
+      // 调用GTmetrix API
+      const response = await apiService.post('/api/test/gtmetrix', {
+        url,
+        device: config.device,
+        location: config.location
+      });
+
+      setProgress(80);
+      setTestProgress('正在处理 GTmetrix 结果...');
+
+      const result: PerformanceTestResult = {
+        id: `gtmetrix_${Date.now()}`,
+        url,
+        timestamp: new Date().toISOString(),
+        engine: 'gtmetrix',
+        device: config.device,
+        location: config.location,
+        overallScore: response.data.scores?.performance || 0,
+        coreWebVitals: {
+          lcp: response.data.vitals?.lcp || 0,
+          fid: response.data.vitals?.fid || 0,
+          cls: response.data.vitals?.cls || 0,
+          fcp: response.data.vitals?.fcp || 0,
+          ttfb: response.data.vitals?.ttfb || 0,
+          si: response.data.vitals?.speedIndex || 0
+        },
+        metrics: {
+          loadTime: response.data.timings?.loadTime || 0,
+          domContentLoaded: response.data.timings?.domContentLoaded || 0,
+          firstPaint: response.data.timings?.firstPaint || 0,
+          pageSize: response.data.resources?.totalSize || 0,
+          requests: response.data.resources?.requests || 0,
+          domElements: response.data.structure?.domElements || 0
+        },
+        opportunities: response.data.recommendations?.map((rec: any) => ({
+          id: rec.id,
+          title: rec.title,
+          description: rec.description,
+          impact: rec.impact,
+          savings: rec.savings || 0
+        })) || [],
+        diagnostics: response.data.issues?.map((issue: any) => ({
+          id: issue.id,
+          title: issue.title,
+          description: issue.description,
+          severity: issue.severity
+        })) || [],
+        screenshots: response.data.screenshots || [],
+        reportUrl: response.data.reportUrl
+      };
+
+      setProgress(100);
+      return result;
+    } catch (error) {
+      console.warn('GTmetrix test failed, using fallback:', error);
+      return await runPageSpeedTest(url, config);
     }
   };
+
+  // WebPageTest 测试
+  const runWebPageTest = async (url: string, config: PerformanceTestConfig): Promise<PerformanceTestResult> => {
+    setTestProgress('正在使用 WebPageTest 分析...');
+    setProgress(20);
+
+    try {
+      const response = await apiService.post('/api/test/webpagetest', {
+        url,
+        device: config.device,
+        location: config.location,
+        runs: config.runs || 1
+      });
+
+      setProgress(80);
+      setTestProgress('正在处理 WebPageTest 结果...');
+
+      const result: PerformanceTestResult = {
+        id: `webpagetest_${Date.now()}`,
+        url,
+        timestamp: new Date().toISOString(),
+        engine: 'webpagetest',
+        device: config.device,
+        location: config.location,
+        overallScore: response.data.score || 0,
+        coreWebVitals: {
+          lcp: response.data.metrics?.lcp || 0,
+          fid: response.data.metrics?.fid || 0,
+          cls: response.data.metrics?.cls || 0,
+          fcp: response.data.metrics?.fcp || 0,
+          ttfb: response.data.metrics?.ttfb || 0,
+          si: response.data.metrics?.speedIndex || 0
+        },
+        metrics: {
+          loadTime: response.data.metrics?.loadTime || 0,
+          domContentLoaded: response.data.metrics?.domContentLoaded || 0,
+          firstPaint: response.data.metrics?.firstPaint || 0,
+          pageSize: response.data.metrics?.bytesIn || 0,
+          requests: response.data.metrics?.requests || 0,
+          domElements: response.data.metrics?.domElements || 0
+        },
+        opportunities: response.data.opportunities || [],
+        diagnostics: response.data.diagnostics || [],
+        videoUrl: response.data.videoUrl,
+        waterfallUrl: response.data.waterfallUrl,
+        reportUrl: response.data.reportUrl
+      };
+
+      setProgress(100);
+      return result;
+    } catch (error) {
+      console.warn('WebPageTest failed, using fallback:', error);
+      return await runPageSpeedTest(url, config);
+    }
+  };
+
+  // Lighthouse 测试
+  const runLighthouseTest = async (url: string, config: PerformanceTestConfig): Promise<PerformanceTestResult> => {
+    setTestProgress('正在使用 Lighthouse 分析...');
+    setProgress(20);
+
+    try {
+      const response = await apiService.post('/api/test/lighthouse', {
+        url,
+        device: config.device,
+        throttling: config.networkCondition
+      });
+
+      setProgress(80);
+      setTestProgress('正在处理 Lighthouse 结果...');
+
+      const result: PerformanceTestResult = {
+        id: `lighthouse_${Date.now()}`,
+        url,
+        timestamp: new Date().toISOString(),
+        engine: 'lighthouse',
+        device: config.device,
+        location: 'local',
+        overallScore: response.data.lhr?.categories?.performance?.score * 100 || 0,
+        coreWebVitals: {
+          lcp: response.data.lhr?.audits?.['largest-contentful-paint']?.numericValue || 0,
+          fid: response.data.lhr?.audits?.['max-potential-fid']?.numericValue || 0,
+          cls: response.data.lhr?.audits?.['cumulative-layout-shift']?.numericValue || 0,
+          fcp: response.data.lhr?.audits?.['first-contentful-paint']?.numericValue || 0,
+          ttfb: response.data.lhr?.audits?.['server-response-time']?.numericValue || 0,
+          si: response.data.lhr?.audits?.['speed-index']?.numericValue || 0
+        },
+        metrics: {
+          loadTime: response.data.lhr?.audits?.['interactive']?.numericValue || 0,
+          domContentLoaded: response.data.lhr?.audits?.['dom-content-loaded']?.numericValue || 0,
+          firstPaint: response.data.lhr?.audits?.['first-contentful-paint']?.numericValue || 0,
+          pageSize: response.data.lhr?.audits?.['total-byte-weight']?.numericValue || 0,
+          requests: response.data.lhr?.audits?.['network-requests']?.details?.items?.length || 0,
+          domElements: response.data.lhr?.audits?.['dom-size']?.numericValue || 0
+        },
+        opportunities: Object.values(response.data.lhr?.audits || {})
+          .filter((audit: any) => audit.scoreDisplayMode === 'binary' && audit.score < 1)
+          .map((audit: any) => ({
+            id: audit.id,
+            title: audit.title,
+            description: audit.description,
+            impact: audit.score < 0.5 ? 'high' : audit.score < 0.9 ? 'medium' : 'low',
+            savings: audit.numericValue || 0
+          })),
+        diagnostics: Object.values(response.data.lhr?.audits || {})
+          .filter((audit: any) => audit.scoreDisplayMode === 'informative')
+          .map((audit: any) => ({
+            id: audit.id,
+            title: audit.title,
+            description: audit.description,
+            severity: audit.score < 0.5 ? 'error' : audit.score < 0.9 ? 'warning' : 'info'
+          })),
+        reportUrl: response.data.reportUrl
+      };
+
+      setProgress(100);
+      return result;
+    } catch (error) {
+      console.warn('Lighthouse test failed, using fallback:', error);
+      return await runPageSpeedTest(url, config);
+    }
+  };
+
+  // 本地测试
+  const runLocalTest = async (url: string, config: PerformanceTestConfig): Promise<PerformanceTestResult> => {
+    setTestProgress('正在进行本地性能分析...');
+    setProgress(20);
+
+    try {
+      const response = await apiService.post('/api/test/local-performance', {
+        url,
+        device: config.device,
+        timeout: config.timeout
+      });
+
+      setProgress(80);
+      setTestProgress('正在处理本地测试结果...');
+
+      const result: PerformanceTestResult = {
+        id: `local_${Date.now()}`,
+        url,
+        timestamp: new Date().toISOString(),
+        engine: 'local',
+        device: config.device,
+        location: 'local',
+        overallScore: response.data.score || 0,
+        coreWebVitals: response.data.vitals || {
+          lcp: 0, fid: 0, cls: 0, fcp: 0, ttfb: 0, si: 0
+        },
+        metrics: response.data.metrics || {
+          loadTime: 0, domContentLoaded: 0, firstPaint: 0,
+          pageSize: 0, requests: 0, domElements: 0
+        },
+        opportunities: response.data.opportunities || [],
+        diagnostics: response.data.diagnostics || []
+      };
+
+      setProgress(100);
+      return result;
+    } catch (error) {
+      console.warn('Local test failed, using fallback:', error);
+      return await runPageSpeedTest(url, config);
+    }
+  };
+
+
 
   const handleStartTest = async () => {
     if (!testConfig.url) {
@@ -328,46 +703,34 @@ const PerformanceTest: React.FC = () => {
       setProgress(10);
       setTestProgress('连接目标网站...');
 
-      // 调用真实的性能测试API
-      const testResult = await runPerformanceTest(testConfig.url, testConfig);
+      // 调用真实的性能测试引擎
+      const testResult = await runRealPerformanceTest(testConfig.url, testConfig);
 
       // 更新进度到完成状态
       setProgress(100);
       setTestProgress('性能测试完成！');
 
-      // 处理测试结果，转换为前端显示格式
-      console.log('📊 Raw test result:', testResult);
-      console.log('📊 Metrics object:', testResult.metrics);
+      // 处理测试结果
+      console.log('📊 Performance test result:', testResult);
 
-      // 提取真实的性能数据
-      const metrics = testResult.metrics || {};
-      const score = testResult.score || 0;
-
-      const formattedResults = {
-        score: score > 0 ? score : 75, // 如果后端返回0，使用默认评分
-        fcp: metrics.firstByteTime || metrics.responseTime * 0.3 || 1500,
-        lcp: metrics.domContentLoaded || metrics.responseTime * 0.8 || 2500,
-        cls: '0.100', // 模拟CLS值，真实实现需要浏览器API
-        fid: metrics.firstByteTime || 100,
-        loadTime: metrics.loadComplete || metrics.responseTime || 2000,
-        pageSize: metrics.pageSize || 1024000, // 1MB默认值
-        requests: metrics.requests || 3,
-        details: {
-          performance: { score: score > 0 ? score : 75 },
-          accessibility: { score: 85 },
-          bestPractices: { score: 80 },
-          seo: { score: 75 }
-        }
-      };
-
-      console.log('✨ Formatted results:', formattedResults);
-
-      setResults(formattedResults);
+      setResults(testResult);
       setTestStatus('completed');
       setIsRunning(false);
 
+      // 添加到测试历史
+      const historyItem: TestHistoryItem = {
+        id: testResult.id,
+        url: testResult.url,
+        timestamp: testResult.timestamp,
+        engine: testResult.engine,
+        overallScore: testResult.overallScore,
+        loadTime: testResult.metrics.loadTime,
+        status: 'completed'
+      };
+      setTestHistory(prev => [historyItem, ...prev.slice(0, 9)]); // 保留最近10条记录
+
       // 记录测试完成统计
-      recordTestCompletion('性能测试', true, formattedResults.score, Math.floor(Date.now() / 1000));
+      recordTestCompletion('性能测试', true, testResult.overallScore, Math.floor(Date.now() / 1000));
 
     } catch (err: any) {
       console.error('❌ Failed to start performance test:', err);
@@ -523,6 +886,37 @@ const PerformanceTest: React.FC = () => {
               <div className="text-sm text-gray-400">
                 示例：https://www.example.com
               </div>
+            </div>
+          </div>
+
+          {/* 测试引擎选择 */}
+          <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+              <Settings className="w-5 h-5 mr-2 text-purple-400" />
+              测试引擎
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
+              {[
+                { id: 'pagespeed', name: 'PageSpeed', icon: '🚀', description: 'Google PageSpeed Insights' },
+                { id: 'gtmetrix', name: 'GTmetrix', icon: '📊', description: 'GTmetrix 性能分析' },
+                { id: 'webpagetest', name: 'WebPageTest', icon: '🌐', description: 'WebPageTest 详细分析' },
+                { id: 'lighthouse', name: 'Lighthouse', icon: '💡', description: 'Chrome Lighthouse' },
+                { id: 'local', name: '本地测试', icon: '🏠', description: '本地性能分析' }
+              ].map((engine) => (
+                <button
+                  key={engine.id}
+                  type="button"
+                  onClick={() => setSelectedEngine(engine.id as TestEngine)}
+                  className={`p-3 rounded-lg border-2 transition-all text-center ${selectedEngine === engine.id
+                    ? 'border-purple-500 bg-purple-500/20'
+                    : 'border-gray-600/50 bg-gray-700/30 hover:border-gray-500'
+                    }`}
+                >
+                  <div className="text-2xl mb-1">{engine.icon}</div>
+                  <div className="text-sm font-medium text-white">{engine.name}</div>
+                  <div className="text-xs text-gray-400 mt-1">{engine.description}</div>
+                </button>
+              ))}
             </div>
           </div>
 
@@ -721,6 +1115,38 @@ const PerformanceTest: React.FC = () => {
         </div>
       </div>
 
+      {/* 测试历史 */}
+      {testHistory.length > 0 && (
+        <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+          <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+            <Clock className="w-5 h-5 mr-2 text-blue-400" />
+            测试历史
+          </h3>
+          <div className="space-y-3">
+            {testHistory.slice(0, 5).map((item) => (
+              <div key={item.id} className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className={`w-2 h-2 rounded-full ${item.status === 'completed' ? 'bg-green-400' : 'bg-red-400'}`}></div>
+                  <div>
+                    <div className="text-white text-sm font-medium truncate max-w-xs">{item.url}</div>
+                    <div className="text-gray-400 text-xs">{new Date(item.timestamp).toLocaleString()}</div>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="text-right">
+                    <div className={`text-sm font-medium ${item.overallScore >= 90 ? 'text-green-400' :
+                      item.overallScore >= 70 ? 'text-yellow-400' : 'text-red-400'}`}>
+                      {item.overallScore}分
+                    </div>
+                    <div className="text-xs text-gray-400">{item.engine}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* 测试结果 */}
       {results && testStatus === 'completed' && (
         <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
@@ -732,24 +1158,24 @@ const PerformanceTest: React.FC = () => {
           {/* 总体评分 */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div className="text-center">
-              <div className={`text-4xl font-bold mb-2 ${results.score >= 90 ? 'text-green-400' :
-                results.score >= 70 ? 'text-yellow-400' :
+              <div className={`text-4xl font-bold mb-2 ${results.overallScore >= 90 ? 'text-green-400' :
+                results.overallScore >= 70 ? 'text-yellow-400' :
                   'text-red-400'
                 }`}>
-                {results.score}
+                {results.overallScore}
               </div>
               <div className="text-gray-300 text-sm">总体评分</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-400 mb-2">{(results.loadTime / 1000).toFixed(1)}s</div>
+              <div className="text-2xl font-bold text-blue-400 mb-2">{(results.metrics.loadTime / 1000).toFixed(1)}s</div>
               <div className="text-gray-300 text-sm">加载时间</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-purple-400 mb-2">{(results.pageSize / 1024).toFixed(1)}MB</div>
+              <div className="text-2xl font-bold text-purple-400 mb-2">{(results.metrics.pageSize / 1024).toFixed(1)}KB</div>
               <div className="text-gray-300 text-sm">页面大小</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-orange-400 mb-2">{results.requests}</div>
+              <div className="text-2xl font-bold text-orange-400 mb-2">{results.metrics.requests}</div>
               <div className="text-gray-300 text-sm">请求数量</div>
             </div>
           </div>
@@ -759,86 +1185,162 @@ const PerformanceTest: React.FC = () => {
             <div className="bg-gray-700/50 rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-gray-300 text-sm">FCP (首次内容绘制)</span>
-                <span className={`text-sm font-medium ${results.fcp < 1800 ? 'text-green-400' :
-                  results.fcp < 3000 ? 'text-yellow-400' :
+                <span className={`text-sm font-medium ${results.coreWebVitals.fcp < 1800 ? 'text-green-400' :
+                  results.coreWebVitals.fcp < 3000 ? 'text-yellow-400' :
                     'text-red-400'
                   }`}>
-                  {(results.fcp / 1000).toFixed(1)}s
+                  {(results.coreWebVitals.fcp / 1000).toFixed(1)}s
                 </span>
               </div>
               <div className="w-full bg-gray-600 rounded-full h-2">
                 <div
-                  className={`h-2 rounded-full ${results.fcp < 1800 ? 'bg-green-400' :
-                    results.fcp < 3000 ? 'bg-yellow-400' :
+                  className={`h-2 rounded-full ${results.coreWebVitals.fcp < 1800 ? 'bg-green-400' :
+                    results.coreWebVitals.fcp < 3000 ? 'bg-yellow-400' :
                       'bg-red-400'
                     }`}
-                  style={{ width: `${Math.min(100, (3000 - results.fcp) / 3000 * 100)}%` }}
+                  style={{ width: `${Math.min(100, (3000 - results.coreWebVitals.fcp) / 3000 * 100)}%` }}
                 ></div>
               </div>
             </div>
             <div className="bg-gray-700/50 rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-gray-300 text-sm">LCP (最大内容绘制)</span>
-                <span className={`text-sm font-medium ${results.lcp < 2500 ? 'text-green-400' :
-                  results.lcp < 4000 ? 'text-yellow-400' :
+                <span className={`text-sm font-medium ${results.coreWebVitals.lcp < 2500 ? 'text-green-400' :
+                  results.coreWebVitals.lcp < 4000 ? 'text-yellow-400' :
                     'text-red-400'
                   }`}>
-                  {(results.lcp / 1000).toFixed(1)}s
+                  {(results.coreWebVitals.lcp / 1000).toFixed(1)}s
                 </span>
               </div>
               <div className="w-full bg-gray-600 rounded-full h-2">
                 <div
-                  className={`h-2 rounded-full ${results.lcp < 2500 ? 'bg-green-400' :
-                    results.lcp < 4000 ? 'bg-yellow-400' :
+                  className={`h-2 rounded-full ${results.coreWebVitals.lcp < 2500 ? 'bg-green-400' :
+                    results.coreWebVitals.lcp < 4000 ? 'bg-yellow-400' :
                       'bg-red-400'
                     }`}
-                  style={{ width: `${Math.min(100, (4000 - results.lcp) / 4000 * 100)}%` }}
+                  style={{ width: `${Math.min(100, (4000 - results.coreWebVitals.lcp) / 4000 * 100)}%` }}
                 ></div>
               </div>
             </div>
             <div className="bg-gray-700/50 rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-gray-300 text-sm">CLS (累积布局偏移)</span>
-                <span className={`text-sm font-medium ${parseFloat(results.cls) < 0.1 ? 'text-green-400' :
-                  parseFloat(results.cls) < 0.25 ? 'text-yellow-400' :
+                <span className={`text-sm font-medium ${results.coreWebVitals.cls < 0.1 ? 'text-green-400' :
+                  results.coreWebVitals.cls < 0.25 ? 'text-yellow-400' :
                     'text-red-400'
                   }`}>
-                  {results.cls}
+                  {results.coreWebVitals.cls.toFixed(3)}
                 </span>
               </div>
               <div className="w-full bg-gray-600 rounded-full h-2">
                 <div
-                  className={`h-2 rounded-full ${parseFloat(results.cls) < 0.1 ? 'bg-green-400' :
-                    parseFloat(results.cls) < 0.25 ? 'bg-yellow-400' :
+                  className={`h-2 rounded-full ${results.coreWebVitals.cls < 0.1 ? 'bg-green-400' :
+                    results.coreWebVitals.cls < 0.25 ? 'bg-yellow-400' :
                       'bg-red-400'
                     }`}
-                  style={{ width: `${Math.min(100, (0.25 - parseFloat(results.cls)) / 0.25 * 100)}%` }}
+                  style={{ width: `${Math.min(100, (0.25 - results.coreWebVitals.cls) / 0.25 * 100)}%` }}
                 ></div>
               </div>
             </div>
           </div>
 
-          {/* 详细评分 */}
-          {results.details && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {Object.entries(results.details).map(([key, value]: [string, any]) => (
-                <div key={key} className="bg-gray-700/50 rounded-lg p-4 text-center">
-                  <div className={`text-2xl font-bold mb-2 ${value.score >= 90 ? 'text-green-400' :
-                    value.score >= 70 ? 'text-yellow-400' :
-                      'text-red-400'
-                    }`}>
-                    {value.score}
-                  </div>
-                  <div className="text-gray-300 text-sm capitalize">
-                    {key === 'performance' ? '性能' :
-                      key === 'accessibility' ? '可访问性' :
-                        key === 'bestPractices' ? '最佳实践' :
-                          key === 'seo' ? 'SEO' : key}
+          {/* 优化建议和诊断 */}
+          {(results.opportunities.length > 0 || results.diagnostics.length > 0) && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+              {/* 优化建议 */}
+              {results.opportunities.length > 0 && (
+                <div>
+                  <h4 className="text-lg font-semibold text-white mb-4">优化建议</h4>
+                  <div className="space-y-3">
+                    {results.opportunities.slice(0, 5).map((opportunity) => (
+                      <div key={opportunity.id} className="bg-gray-700/50 rounded-lg p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h5 className="text-white font-medium">{opportunity.title}</h5>
+                            <p className="text-gray-400 text-sm mt-1">{opportunity.description}</p>
+                          </div>
+                          <div className={`px-2 py-1 rounded text-xs font-medium ${opportunity.impact === 'high' ? 'bg-red-500/20 text-red-400' :
+                            opportunity.impact === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
+                              'bg-blue-500/20 text-blue-400'
+                            }`}>
+                            {opportunity.impact === 'high' ? '高' : opportunity.impact === 'medium' ? '中' : '低'}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
+              )}
+
+              {/* 诊断信息 */}
+              {results.diagnostics.length > 0 && (
+                <div>
+                  <h4 className="text-lg font-semibold text-white mb-4">诊断信息</h4>
+                  <div className="space-y-3">
+                    {results.diagnostics.slice(0, 5).map((diagnostic) => (
+                      <div key={diagnostic.id} className="bg-gray-700/50 rounded-lg p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h5 className="text-white font-medium">{diagnostic.title}</h5>
+                            <p className="text-gray-400 text-sm mt-1">{diagnostic.description}</p>
+                          </div>
+                          <div className={`px-2 py-1 rounded text-xs font-medium ${diagnostic.severity === 'error' ? 'bg-red-500/20 text-red-400' :
+                            diagnostic.severity === 'warning' ? 'bg-yellow-500/20 text-yellow-400' :
+                              'bg-blue-500/20 text-blue-400'
+                            }`}>
+                            {diagnostic.severity === 'error' ? '错误' : diagnostic.severity === 'warning' ? '警告' : '信息'}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
+
+          {/* 操作按钮 */}
+          <div className="flex flex-wrap gap-3 mt-8 pt-6 border-t border-gray-700/50">
+            {results.reportUrl && (
+              <a
+                href={results.reportUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                查看详细报告
+              </a>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                const data = JSON.stringify(results, null, 2);
+                const blob = new Blob([data], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `performance-test-${results.id}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+              className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              导出结果
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const text = `性能测试结果 - ${results.url}\n总分: ${results.overallScore}\n加载时间: ${(results.metrics.loadTime / 1000).toFixed(1)}s\n测试引擎: ${results.engine}`;
+                navigator.clipboard.writeText(text);
+              }}
+              className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              <Share2 className="w-4 h-4 mr-2" />
+              复制结果
+            </button>
+          </div>
         </div>
       )}
     </div>
