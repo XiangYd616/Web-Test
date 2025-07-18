@@ -33,9 +33,11 @@ class RealAPITestEngine {
       testSecurity = false,
       testPerformance = true,
       testReliability = false,
+      generateDocumentation = false,
       concurrentUsers = 1,
       headers = {},
-      auth = null
+      auth = null,
+      testEnvironment = 'development'
     } = config;
 
     console.log(`🔌 Starting API test: ${baseUrl}`);
@@ -47,6 +49,7 @@ class RealAPITestEngine {
     const results = {
       testId,
       baseUrl,
+      testEnvironment,
       startTime: new Date(startTime).toISOString(),
       endTime: null,
       totalTests: endpoints.length,
@@ -63,9 +66,45 @@ class RealAPITestEngine {
         errorRate: 0,
         throughput: 0,
         p95ResponseTime: 0,
-        p99ResponseTime: 0
+        p99ResponseTime: 0,
+        minResponseTime: Infinity,
+        maxResponseTime: 0,
+        responseTimeDistribution: {
+          fast: 0,    // < 200ms
+          medium: 0,  // 200-1000ms
+          slow: 0     // > 1000ms
+        },
+        statusCodeDistribution: {},
+        errorTypes: {}
       },
-      overallScore: 0
+      reliabilityMetrics: {
+        uptime: 100,
+        errorRate: 0,
+        retryCount: 0,
+        timeouts: 0,
+        consecutiveFailures: 0
+      },
+      documentation: generateDocumentation ? {
+        endpoints: [],
+        schemas: {},
+        examples: {},
+        generatedAt: new Date().toISOString()
+      } : null,
+      recommendations: [],
+      overallScore: 0,
+      testSummary: {
+        duration: 0,
+        testConfig: {
+          timeout,
+          retries,
+          validateSchema,
+          testSecurity,
+          testPerformance,
+          testReliability,
+          generateDocumentation,
+          concurrentUsers
+        }
+      }
     };
 
     this.activeTests.set(testId, { config, results, status: 'running' });
@@ -247,6 +286,21 @@ class RealAPITestEngine {
           result.performanceIssues = this.performPerformanceChecks(responseTime, result.responseSize);
         }
 
+        // 添加响应数据分析
+        result.responseAnalysis = {
+          contentType: response.headers['content-type'] || 'unknown',
+          hasData: !!response.data,
+          dataType: typeof response.data,
+          isJson: this.isJsonResponse(response),
+          compressionUsed: !!response.headers['content-encoding'],
+          cacheHeaders: this.analyzeCacheHeaders(response.headers),
+          responseSize: result.responseSize,
+          statusText: response.statusText || ''
+        };
+
+        // 添加性能分类
+        result.performanceCategory = this.categorizePerformance(result.responseTime);
+
         break; // 成功，退出重试循环
 
       } catch (error) {
@@ -258,6 +312,10 @@ class RealAPITestEngine {
           result.status = 'fail';
           result.error = error.message;
           result.responseTime = Math.round(performance.now() - startTime);
+
+          // 分析错误类型和添加诊断信息
+          result.errorType = this.categorizeError(error);
+          result.errorDiagnosis = this.diagnoseError(error, endpoint);
         } else {
           // 等待后重试
           await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)));
@@ -510,6 +568,99 @@ class RealAPITestEngine {
   getTestStatus(testId) {
     const test = this.activeTests.get(testId);
     return test ? test.status : 'not_found';
+  }
+
+  /**
+   * 检查是否为JSON响应
+   */
+  isJsonResponse(response) {
+    const contentType = response.headers['content-type'] || '';
+    return contentType.includes('application/json');
+  }
+
+  /**
+   * 分析缓存头
+   */
+  analyzeCacheHeaders(headers) {
+    return {
+      cacheControl: headers['cache-control'] || null,
+      expires: headers['expires'] || null,
+      etag: headers['etag'] || null,
+      lastModified: headers['last-modified'] || null,
+      isCacheable: !!(headers['cache-control'] || headers['expires'])
+    };
+  }
+
+  /**
+   * 性能分类
+   */
+  categorizePerformance(responseTime) {
+    if (responseTime < 200) return 'excellent';
+    if (responseTime < 500) return 'good';
+    if (responseTime < 1000) return 'fair';
+    if (responseTime < 2000) return 'poor';
+    return 'very-poor';
+  }
+
+  /**
+   * 错误分类
+   */
+  categorizeError(error) {
+    if (error.code === 'ECONNREFUSED') return 'connection-refused';
+    if (error.code === 'ENOTFOUND') return 'dns-error';
+    if (error.code === 'ETIMEDOUT') return 'timeout';
+    if (error.code === 'ECONNRESET') return 'connection-reset';
+    if (error.response) {
+      if (error.response.status >= 400 && error.response.status < 500) return 'client-error';
+      if (error.response.status >= 500) return 'server-error';
+    }
+    return 'unknown-error';
+  }
+
+  /**
+   * 错误诊断
+   */
+  diagnoseError(error, endpoint) {
+    const diagnosis = {
+      errorCode: error.code || 'unknown',
+      suggestion: '',
+      possibleCauses: [],
+      troubleshooting: []
+    };
+
+    switch (this.categorizeError(error)) {
+      case 'connection-refused':
+        diagnosis.suggestion = '服务器拒绝连接，请检查服务是否运行';
+        diagnosis.possibleCauses = ['服务未启动', '端口被占用', '防火墙阻止'];
+        diagnosis.troubleshooting = ['检查服务状态', '验证端口配置', '检查网络连接'];
+        break;
+      case 'dns-error':
+        diagnosis.suggestion = 'DNS解析失败，请检查域名是否正确';
+        diagnosis.possibleCauses = ['域名不存在', 'DNS服务器问题', '网络连接问题'];
+        diagnosis.troubleshooting = ['验证域名拼写', '尝试使用IP地址', '检查DNS设置'];
+        break;
+      case 'timeout':
+        diagnosis.suggestion = '请求超时，请检查网络连接或增加超时时间';
+        diagnosis.possibleCauses = ['网络延迟高', '服务器响应慢', '超时设置过短'];
+        diagnosis.troubleshooting = ['增加超时时间', '检查网络质量', '优化服务器性能'];
+        break;
+      case 'client-error':
+        diagnosis.suggestion = '客户端错误，请检查请求参数和认证信息';
+        diagnosis.possibleCauses = ['参数错误', '认证失败', '权限不足'];
+        diagnosis.troubleshooting = ['验证请求参数', '检查认证信息', '确认API权限'];
+        break;
+      case 'server-error':
+        diagnosis.suggestion = '服务器内部错误，请联系API提供方';
+        diagnosis.possibleCauses = ['服务器故障', '数据库问题', '代码错误'];
+        diagnosis.troubleshooting = ['查看服务器日志', '联系技术支持', '稍后重试'];
+        break;
+      default:
+        diagnosis.suggestion = '未知错误，请检查网络连接和API配置';
+        diagnosis.possibleCauses = ['网络问题', '配置错误', '服务异常'];
+        diagnosis.troubleshooting = ['检查网络连接', '验证配置', '查看错误日志'];
+    }
+
+    return diagnosis;
   }
 }
 

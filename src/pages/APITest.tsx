@@ -341,6 +341,126 @@ const APITest: React.FC = () => {
     }));
   };
 
+  // API测试模板
+  const applyTemplate = (templateType: string) => {
+    const templates = {
+      'rest-api': {
+        baseUrl: 'https://jsonplaceholder.typicode.com',
+        endpoints: [
+          {
+            id: Date.now().toString(),
+            name: '获取所有文章',
+            method: 'GET',
+            path: '/posts',
+            expectedStatus: [200],
+            description: '获取所有文章列表',
+            priority: 'high',
+            tags: ['posts', 'list']
+          },
+          {
+            id: (Date.now() + 1).toString(),
+            name: '获取单个文章',
+            method: 'GET',
+            path: '/posts/1',
+            expectedStatus: [200],
+            description: '根据ID获取文章详情',
+            priority: 'high',
+            tags: ['posts', 'detail']
+          },
+          {
+            id: (Date.now() + 2).toString(),
+            name: '创建文章',
+            method: 'POST',
+            path: '/posts',
+            expectedStatus: [201],
+            description: '创建新文章',
+            priority: 'medium',
+            tags: ['posts', 'create']
+          }
+        ]
+      },
+      'microservice': {
+        baseUrl: 'https://api.example.com',
+        endpoints: [
+          {
+            id: Date.now().toString(),
+            name: '健康检查',
+            method: 'GET',
+            path: '/health',
+            expectedStatus: [200],
+            description: '服务健康状态检查',
+            priority: 'high',
+            tags: ['health', 'monitoring']
+          },
+          {
+            id: (Date.now() + 1).toString(),
+            name: '服务信息',
+            method: 'GET',
+            path: '/info',
+            expectedStatus: [200],
+            description: '获取服务基本信息',
+            priority: 'medium',
+            tags: ['info', 'metadata']
+          },
+          {
+            id: (Date.now() + 2).toString(),
+            name: '指标数据',
+            method: 'GET',
+            path: '/metrics',
+            expectedStatus: [200],
+            description: '获取服务性能指标',
+            priority: 'medium',
+            tags: ['metrics', 'monitoring']
+          }
+        ]
+      },
+      'e-commerce': {
+        baseUrl: 'https://api.shop.com',
+        endpoints: [
+          {
+            id: Date.now().toString(),
+            name: '商品列表',
+            method: 'GET',
+            path: '/api/products',
+            expectedStatus: [200],
+            description: '获取商品列表',
+            priority: 'high',
+            tags: ['products', 'catalog']
+          },
+          {
+            id: (Date.now() + 1).toString(),
+            name: '购物车',
+            method: 'GET',
+            path: '/api/cart',
+            expectedStatus: [200],
+            description: '获取购物车内容',
+            priority: 'high',
+            tags: ['cart', 'shopping']
+          },
+          {
+            id: (Date.now() + 2).toString(),
+            name: '创建订单',
+            method: 'POST',
+            path: '/api/orders',
+            expectedStatus: [201],
+            description: '创建新订单',
+            priority: 'high',
+            tags: ['orders', 'checkout']
+          }
+        ]
+      }
+    };
+
+    const template = templates[templateType as keyof typeof templates];
+    if (template) {
+      setTestConfig(prev => ({
+        ...prev,
+        baseUrl: template.baseUrl,
+        endpoints: template.endpoints
+      }));
+    }
+  };
+
   const updateEndpoint = (id: string, updates: Partial<APIEndpoint>) => {
     setTestConfig(prev => ({
       ...prev,
@@ -1100,6 +1220,18 @@ const APITest: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-semibold text-white">API 端点管理</h3>
           <div className="flex space-x-3">
+            <select
+              onChange={(e) => e.target.value && applyTemplate(e.target.value)}
+              value=""
+              title="选择API测试模板"
+              aria-label="选择API测试模板"
+              className="px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            >
+              <option value="">选择模板...</option>
+              <option value="rest-api">REST API 模板</option>
+              <option value="microservice">微服务模板</option>
+              <option value="e-commerce">电商API模板</option>
+            </select>
             <button
               type="button"
               onClick={addCommonEndpoints}
@@ -1307,13 +1439,89 @@ const APITest: React.FC = () => {
             </div>
           </div>
 
+          {/* 性能分析 */}
+          {result.performanceMetrics && (
+            <div className="bg-gray-700/30 rounded-lg p-6 mb-6">
+              <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
+                <BarChart3 className="w-5 h-5 mr-2 text-green-500" />
+                性能分析
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-gray-800/50 rounded-lg p-4">
+                  <div className="text-sm text-gray-300 mb-2">响应时间分布</div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-400">快速 (&lt;200ms)</span>
+                      <span className="text-green-400">{result.performanceMetrics.responseTimeDistribution?.fast || 0}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-400">中等 (200-1000ms)</span>
+                      <span className="text-yellow-400">{result.performanceMetrics.responseTimeDistribution?.medium || 0}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-400">慢速 (&gt;1000ms)</span>
+                      <span className="text-red-400">{result.performanceMetrics.responseTimeDistribution?.slow || 0}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-gray-800/50 rounded-lg p-4">
+                  <div className="text-sm text-gray-300 mb-2">成功率</div>
+                  <div className="text-2xl font-bold text-green-400">
+                    {Math.round(result.performanceMetrics.successRate || 0)}%
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    {result.passedTests || 0} / {result.totalTests || 0} 通过
+                  </div>
+                </div>
+                <div className="bg-gray-800/50 rounded-lg p-4">
+                  <div className="text-sm text-gray-300 mb-2">吞吐量</div>
+                  <div className="text-2xl font-bold text-blue-400">
+                    {Math.round(result.performanceMetrics.throughput || 0)}
+                  </div>
+                  <div className="text-xs text-gray-400">请求/秒</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 安全问题 */}
+          {result.securityIssues && result.securityIssues.length > 0 && (
+            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-6 mb-6">
+              <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
+                <Shield className="w-5 h-5 mr-2 text-red-500" />
+                安全问题 ({result.securityIssues.length})
+              </h4>
+              <div className="space-y-3">
+                {result.securityIssues.slice(0, 5).map((issue: any, index: number) => (
+                  <div key={index} className="bg-red-500/5 border border-red-500/10 rounded-lg p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="font-medium text-red-400">{issue.type || '安全问题'}</div>
+                      <span className={`text-xs px-2 py-1 rounded ${issue.severity === 'high' ? 'bg-red-600 text-white' :
+                        issue.severity === 'medium' ? 'bg-yellow-600 text-white' :
+                          'bg-blue-600 text-white'
+                        }`}>
+                        {issue.severity === 'high' ? '高危' : issue.severity === 'medium' ? '中危' : '低危'}
+                      </span>
+                    </div>
+                    <div className="text-sm text-gray-300">{typeof issue === 'string' ? issue : (issue.description || issue.message || '安全问题')}</div>
+                    {issue.recommendation && (
+                      <div className="text-xs text-gray-400 mt-2">
+                        建议: {issue.recommendation}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* 端点测试结果 */}
           <div className="space-y-3">
             <h4 className="text-lg font-semibold text-white">端点测试结果</h4>
-            {(result.endpointResults || []).map((endpoint: any, index: number) => (
+            {(result.endpointResults || result.endpoints || []).map((endpoint: any, index: number) => (
               <div key={index} className={`p-4 rounded-lg border ${endpoint.status === 'pass' ? 'border-green-500/30 bg-green-500/10' : 'border-red-500/30 bg-red-500/10'
                 }`}>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-3">
                     <span className={`px-2 py-1 text-xs font-semibold rounded ${getMethodColor(endpoint.method)}`}>
                       {endpoint.method}
@@ -1322,15 +1530,75 @@ const APITest: React.FC = () => {
                     <span className="text-sm text-gray-400">{endpoint.path}</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <span className="text-sm text-gray-300">{Math.round(endpoint.responseTime || 0)}ms</span>
+                    <span className={`px-2 py-1 text-xs rounded ${endpoint.performanceCategory === 'excellent' ? 'bg-green-600 text-white' :
+                      endpoint.performanceCategory === 'good' ? 'bg-blue-600 text-white' :
+                        endpoint.performanceCategory === 'fair' ? 'bg-yellow-600 text-white' :
+                          'bg-red-600 text-white'
+                      }`}>
+                      {Math.round(endpoint.responseTime || 0)}ms
+                    </span>
                     <span className={`px-2 py-1 text-xs font-semibold rounded ${getStatusColor(endpoint.status)}`}>
                       {endpoint.statusCode}
                     </span>
                   </div>
                 </div>
-                {endpoint.errors && endpoint.errors.length > 0 && (
-                  <div className="mt-2 text-sm text-red-400">
-                    错误: {endpoint.errors.join(', ')}
+
+                {/* 详细信息 */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                  <div>
+                    <div className="text-gray-400 mb-1">响应信息</div>
+                    <div className="space-y-1">
+                      <div className="text-gray-300">大小: {endpoint.responseSize || 0} bytes</div>
+                      <div className="text-gray-300">重试: {endpoint.retryCount || 0} 次</div>
+                      {endpoint.responseAnalysis && (
+                        <div className="text-gray-300">类型: {endpoint.responseAnalysis.contentType}</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {endpoint.performanceIssues && endpoint.performanceIssues.length > 0 && (
+                    <div>
+                      <div className="text-gray-400 mb-1">性能问题</div>
+                      <div className="space-y-1">
+                        {endpoint.performanceIssues.slice(0, 2).map((issue: any, i: number) => (
+                          <div key={i} className="text-yellow-400 text-xs">{typeof issue === 'string' ? issue : (issue.description || issue.message || '性能问题')}</div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {endpoint.securityIssues && endpoint.securityIssues.length > 0 && (
+                    <div>
+                      <div className="text-gray-400 mb-1">安全问题</div>
+                      <div className="space-y-1">
+                        {endpoint.securityIssues.slice(0, 2).map((issue: any, i: number) => (
+                          <div key={i} className="text-red-400 text-xs">{typeof issue === 'string' ? issue : (issue.type || issue.message || '安全问题')}</div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 错误信息和诊断 */}
+                {endpoint.error && (
+                  <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded">
+                    <div className="text-sm text-red-400 mb-2">
+                      错误: {endpoint.error}
+                    </div>
+                    {endpoint.errorDiagnosis && (
+                      <div className="text-xs text-gray-400">
+                        <div className="mb-1">建议: {endpoint.errorDiagnosis.suggestion}</div>
+                        {endpoint.errorDiagnosis.troubleshooting && endpoint.errorDiagnosis.troubleshooting.length > 0 && (
+                          <div>排查: {endpoint.errorDiagnosis.troubleshooting.slice(0, 2).join(', ')}</div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {endpoint.validationErrors && endpoint.validationErrors.length > 0 && (
+                  <div className="mt-2 text-sm text-yellow-400">
+                    验证错误: {endpoint.validationErrors.slice(0, 2).join(', ')}
                   </div>
                 )}
               </div>
