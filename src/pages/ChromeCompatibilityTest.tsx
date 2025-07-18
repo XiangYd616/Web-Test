@@ -5,6 +5,7 @@
 
 import { AlertTriangle, CheckCircle, Chrome, Info, XCircle } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import { TestPageLayout } from '../components/testing/UnifiedTestingComponents';
 import { ChromeCompatibilityHelper } from '../utils/chromeCompatibility';
 
 interface CompatibilityTestResult {

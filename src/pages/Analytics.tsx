@@ -1,3 +1,7 @@
+// React相关导入
+import React, { useEffect, useState } from 'react';
+
+// 第三方库导入
 import {
   Activity,
   AlertTriangle,
@@ -17,8 +21,9 @@ import {
   TrendingDown,
   TrendingUp
 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
-import AdvancedAnalyticsService from '../services/AdvancedAnalyticsService';
+
+// 本地服务导入
+import { analyticsService as AdvancedAnalyticsService } from '../services/analytics';
 
 interface AnalyticsInsight {
   id: string;
@@ -93,7 +98,6 @@ const Analytics: React.FC = () => {
   });
 
   const [timeRange, setTimeRange] = useState('30d');
-  const [selectedMetric, setSelectedMetric] = useState('performance');
   const [selectedInsightType, setSelectedInsightType] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -162,23 +166,7 @@ const Analytics: React.FC = () => {
     fetchAnalyticsData();
   };
 
-  // 导出数据
-  const handleExport = async (format: 'json' | 'csv' | 'excel') => {
-    try {
-      const blob = await AdvancedAnalyticsService.exportData(format, timeRange);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `analytics-${timeRange}.${format}`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Export failed:', error);
-      alert('导出失败，请稍后重试');
-    }
-  };
+
 
   const getInsightIcon = (type: string) => {
     switch (type) {

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import React, { useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
+import { TestPageLayout } from '../components/testing/UnifiedTestingComponents';
 import { useUserStats } from '../hooks/useUserStats';
 import '../styles/progress-bars.css';
 

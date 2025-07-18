@@ -1,12 +1,19 @@
+// React相关导入
 import { useEffect } from 'react'
+
+// 本地组件导入
 import AppRoutes from './components/routing/AppRoutes'
 import BackgroundTestNotifications from './components/system/BackgroundTestNotifications'
 import ErrorBoundary from './components/ui/ErrorBoundary'
+
+// Context导入
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
+
+// 工具函数导入
 import { TestDataGenerator } from './utils/testDataGenerator'
 
-// 导入主题样式
+// 样式文件导入
 import './styles/chrome-compatibility.css'
 import './styles/dark-theme.css'
 import './styles/light-theme.css'

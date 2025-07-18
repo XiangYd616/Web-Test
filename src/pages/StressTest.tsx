@@ -10,7 +10,7 @@ import {
 } from '../components/testing/UnifiedTestingComponents';
 import { AdvancedStressTestConfig as ImportedAdvancedStressTestConfig } from '../hooks/useSimpleTestEngine';
 import { useUserStats } from '../hooks/useUserStats';
-import backgroundTestManager from '../services/BackgroundTestManager.js';
+import backgroundTestManager from '../services/backgroundTestManager';
 import { testEngineManager } from '../services/testEngines';
 import '../styles/unified-testing-tools.css';
 

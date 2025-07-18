@@ -1,12 +1,15 @@
+import { LucideIcon, Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
-import { LucideIcon, TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import '../../styles/modern-design-system.css';
 import { useTheme } from '../../contexts/ThemeContext';
+import '../../styles/modern-design-system.css';
 
 export interface StatCardProps {
   title: string;
   value: string | number;
-  icon: LucideIcon;
+  icon: LucideIcon | React.ReactElement;
+  subtitle?: string;
+  change?: number;
+  color?: string;
   trend?: {
     value: number;
     label?: string;
@@ -20,7 +23,10 @@ export interface StatCardProps {
 const StatCard: React.FC<StatCardProps> = ({
   title,
   value,
-  icon: Icon,
+  icon,
+  subtitle,
+  change,
+  color,
   trend,
   variant = 'primary',
   loading = false,
@@ -29,7 +35,7 @@ const StatCard: React.FC<StatCardProps> = ({
   const { actualTheme } = useTheme();
   const getTrendIcon = () => {
     if (!trend) return null;
-    
+
     switch (trend.direction) {
       case 'up':
         return <TrendingUp className="w-4 h-4" />;
@@ -42,7 +48,7 @@ const StatCard: React.FC<StatCardProps> = ({
 
   const getTrendClass = () => {
     if (!trend) return '';
-    
+
     switch (trend.direction) {
       case 'up':
         return 'stat-card-trend-up';
@@ -67,24 +73,27 @@ const StatCard: React.FC<StatCardProps> = ({
   }
 
   return (
-    <div className={`stat-card stat-card-${variant} modern-card-hover ${
-      actualTheme === 'light' ? 'card-elevated floating-element' : ''
-    } ${className}`}>
+    <div className={`stat-card stat-card-${variant} modern-card-hover ${actualTheme === 'light' ? 'card-elevated floating-element' : ''
+      } ${className}`}>
       <div className="stat-card-header">
-        <div className={`stat-card-icon stat-card-icon-${variant} ${
-          actualTheme === 'light' ? 'pulse-glow' : ''
-        }`}>
-          <Icon className="w-6 h-6" />
+        <div className={`stat-card-icon stat-card-icon-${variant} ${actualTheme === 'light' ? 'pulse-glow' : ''
+          }`}>
+          {React.isValidElement(icon) ? icon : React.createElement(icon as React.ComponentType<any>, { className: "w-6 h-6" })}
         </div>
-        <h3 className={`stat-card-title ${
-          actualTheme === 'light' ? 'themed-text-primary' : ''
-        }`}>{title}</h3>
+        <h3 className={`stat-card-title ${actualTheme === 'light' ? 'themed-text-primary' : ''
+          }`}>{title}</h3>
       </div>
-      
+
       <div className="stat-card-value">
         {typeof value === 'number' ? value.toLocaleString() : value}
       </div>
-      
+
+      {subtitle && (
+        <div className="stat-card-subtitle text-muted text-sm">
+          {subtitle}
+        </div>
+      )}
+
       {trend && (
         <div className={`stat-card-trend ${getTrendClass()}`}>
           {getTrendIcon()}

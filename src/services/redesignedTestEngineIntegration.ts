@@ -3,7 +3,7 @@
  * 连接重新设计的测试页面与实际的测试引擎
  */
 
-import backgroundTestManager from './BackgroundTestManager.js';
+import backgroundTestManager from './backgroundTestManager';
 
 // SEO测试配置接口
 export interface SEOTestConfig {

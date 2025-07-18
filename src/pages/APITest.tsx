@@ -26,7 +26,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { URLInput } from '../components/testing';
 import { useUserStats } from '../hooks/useUserStats';
-import backgroundTestManager from '../services/BackgroundTestManager';
+import backgroundTestManager from '../services/backgroundTestManager';
 import type { APIEndpoint, APITestConfig } from '../services/testing/apiTestEngine';
 import '../styles/progress-bars.css';
 
@@ -109,7 +109,7 @@ const APITest: React.FC = () => {
 
   // 监听后台测试状态变化
   useEffect(() => {
-    const unsubscribe = backgroundTestManager.addListener((event, testInfo) => {
+    const unsubscribe = backgroundTestManager.addListener((event: string, testInfo: any) => {
       if (testInfo.type === 'api' && testInfo.id === currentTestId) {
         switch (event) {
           case 'testProgress':
@@ -150,7 +150,7 @@ const APITest: React.FC = () => {
 
     // 检查是否有正在运行的API测试
     const runningTests = backgroundTestManager.getRunningTests();
-    const apiTest = runningTests.find(test => test.type === 'api');
+    const apiTest = runningTests.find((test: any) => test.type === 'api');
     if (apiTest) {
       setCurrentTestId(apiTest.id);
       setBackgroundTestInfo(apiTest);
@@ -207,12 +207,12 @@ const APITest: React.FC = () => {
       'api',
       testConfigData,
       // onProgress 回调
-      (_, step) => {
+      (_: number, step: string) => {
         setTestProgress(step);
         setTestStatus('running');
       },
       // onComplete 回调
-      (result) => {
+      (result: any) => {
         setResult(result);
         setTestStatus('completed');
         setTestProgress('API 测试完成！');
@@ -225,7 +225,7 @@ const APITest: React.FC = () => {
         recordTestCompletion('API测试', success, score, duration);
       },
       // onError 回调
-      (error) => {
+      (error: Error) => {
         setError(error.message || '测试失败');
         setTestStatus('failed');
         setCanSwitchPages(true);
@@ -343,38 +343,38 @@ const APITest: React.FC = () => {
 
   // API测试模板
   const applyTemplate = (templateType: string) => {
-    const templates = {
+    const templates: Record<string, { baseUrl: string; endpoints: APIEndpoint[] }> = {
       'rest-api': {
         baseUrl: 'https://jsonplaceholder.typicode.com',
         endpoints: [
           {
             id: Date.now().toString(),
             name: '获取所有文章',
-            method: 'GET',
+            method: 'GET' as const,
             path: '/posts',
             expectedStatus: [200],
             description: '获取所有文章列表',
-            priority: 'high',
+            priority: 'high' as const,
             tags: ['posts', 'list']
           },
           {
             id: (Date.now() + 1).toString(),
             name: '获取单个文章',
-            method: 'GET',
+            method: 'GET' as const,
             path: '/posts/1',
             expectedStatus: [200],
             description: '根据ID获取文章详情',
-            priority: 'high',
+            priority: 'high' as const,
             tags: ['posts', 'detail']
           },
           {
             id: (Date.now() + 2).toString(),
             name: '创建文章',
-            method: 'POST',
+            method: 'POST' as const,
             path: '/posts',
             expectedStatus: [201],
             description: '创建新文章',
-            priority: 'medium',
+            priority: 'medium' as const,
             tags: ['posts', 'create']
           }
         ]
@@ -385,31 +385,31 @@ const APITest: React.FC = () => {
           {
             id: Date.now().toString(),
             name: '健康检查',
-            method: 'GET',
+            method: 'GET' as const,
             path: '/health',
             expectedStatus: [200],
             description: '服务健康状态检查',
-            priority: 'high',
+            priority: 'high' as const,
             tags: ['health', 'monitoring']
           },
           {
             id: (Date.now() + 1).toString(),
             name: '服务信息',
-            method: 'GET',
+            method: 'GET' as const,
             path: '/info',
             expectedStatus: [200],
             description: '获取服务基本信息',
-            priority: 'medium',
+            priority: 'medium' as const,
             tags: ['info', 'metadata']
           },
           {
             id: (Date.now() + 2).toString(),
             name: '指标数据',
-            method: 'GET',
+            method: 'GET' as const,
             path: '/metrics',
             expectedStatus: [200],
             description: '获取服务性能指标',
-            priority: 'medium',
+            priority: 'medium' as const,
             tags: ['metrics', 'monitoring']
           }
         ]
@@ -420,31 +420,31 @@ const APITest: React.FC = () => {
           {
             id: Date.now().toString(),
             name: '商品列表',
-            method: 'GET',
+            method: 'GET' as const,
             path: '/api/products',
             expectedStatus: [200],
             description: '获取商品列表',
-            priority: 'high',
+            priority: 'high' as const,
             tags: ['products', 'catalog']
           },
           {
             id: (Date.now() + 1).toString(),
             name: '购物车',
-            method: 'GET',
+            method: 'GET' as const,
             path: '/api/cart',
             expectedStatus: [200],
             description: '获取购物车内容',
-            priority: 'high',
+            priority: 'high' as const,
             tags: ['cart', 'shopping']
           },
           {
             id: (Date.now() + 2).toString(),
             name: '创建订单',
-            method: 'POST',
+            method: 'POST' as const,
             path: '/api/orders',
             expectedStatus: [201],
             description: '创建新订单',
-            priority: 'high',
+            priority: 'high' as const,
             tags: ['orders', 'checkout']
           }
         ]

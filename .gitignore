@@ -83,3 +83,49 @@ playwright/.cache/
 
 # Server logs
 server/logs/
+
+# Vite cache
+.vite/
+node_modules/.vite/
+
+# Package manager files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Electron
+out/
+app/
+packages/
+
+# Backup files
+*.backup
+*.bak
+*.orig
+
+# IDE specific files
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+*.code-workspace
+
+# macOS
+.AppleDouble
+.LSOverride
+Icon?
+
+# Windows
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+.fuse_hidden*
+.directory
+.Trash-*
+
+# Project specific
+server/uploads/
+server/temp/
+server/exports/
+docs/reports/*.html
+scripts/logs/

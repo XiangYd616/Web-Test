@@ -1394,7 +1394,6 @@ export class RealSEOAnalysisEngine {
     keywordDensity: { [keyword: string]: number };
     issues: string[];
   } {
-    // 获取页面文本内容
     const textContent = this.extractTextContent(dom);
     const wordCount = this.countWords(textContent);
     const issues: string[] = [];
@@ -1405,49 +1404,17 @@ export class RealSEOAnalysisEngine {
     // 内容质量检查
     const contentQuality = this.analyzeContentDepthAndQuality(textContent, dom);
 
-    // 计算关键词密度
-    const keywordDensity: { [keyword: string]: number } = {};
-    if (keywords) {
-      const keywordList = keywords.split(',').map(k => k.trim().toLowerCase()).filter(k => k);
-      keywordList.forEach(keyword => {
-        const density = this.calculateKeywordDensity(textContent, keyword);
-        keywordDensity[keyword] = density;
+    // 计算关键词密度并检查
+    const keywordDensity = this.analyzeKeywordDensity(textContent, keywords, issues);
 
-        if (density === 0) {
-          issues.push(`关键词"${keyword}"未在内容中出现，建议自然地融入相关内容`);
-        } else if (density > 4) {
-          issues.push(`关键词"${keyword}"密度过高(${density.toFixed(1)}%)，可能被视为关键词堆砌，建议控制在1-3%`);
-        } else if (density > 3) {
-          issues.push(`关键词"${keyword}"密度较高(${density.toFixed(1)}%)，建议适当减少使用频率`);
-        }
-      });
-    }
+    // 检查内容长度
+    this.checkContentLength(wordCount, issues);
 
-    // 内容长度检查（基于SEO最佳实践）
-    if (wordCount < 150) {
-      issues.push('内容过短（<150词），搜索引擎可能认为页面价值不足');
-    } else if (wordCount < 300) {
-      issues.push('内容较短（<300词），建议增加有价值的内容以提升SEO效果');
-    } else if (wordCount > 3000) {
-      issues.push('内容过长（>3000词），建议考虑分页或分章节以提升用户体验');
-    }
+    // 检查内容结构
+    this.checkContentStructure(dom, wordCount, issues);
 
-    // 内容结构检查
-    const paragraphs = dom.querySelectorAll('p');
-    if (paragraphs.length === 0 && wordCount > 100) {
-      issues.push('内容缺少段落结构，建议使用<p>标签分段提升可读性');
-    }
-
-    // 检查内容重复
-    const duplicateRatio = this.checkContentDuplication(textContent);
-    if (duplicateRatio > 0.3) {
-      issues.push(`内容重复率较高(${(duplicateRatio * 100).toFixed(1)}%)，建议增加原创内容`);
-    }
-
-    // 检查内容深度
-    if (contentQuality.averageSentenceLength > 25) {
-      issues.push('句子平均长度过长，建议使用更简洁的表达方式');
-    }
+    // 检查内容重复和深度
+    this.checkContentQuality(textContent, contentQuality, issues);
 
     if (contentQuality.technicalTermsRatio < 0.02 && wordCount > 500) {
       issues.push('内容可能缺乏专业深度，建议增加相关专业术语和详细说明');
@@ -1459,6 +1426,72 @@ export class RealSEOAnalysisEngine {
       keywordDensity,
       issues
     };
+  }
+
+  /**
+   * 分析关键词密度
+   */
+  private analyzeKeywordDensity(textContent: string, keywords?: string, issues: string[] = []): { [keyword: string]: number } {
+    const keywordDensity: { [keyword: string]: number } = {};
+
+    if (!keywords) {
+      return keywordDensity;
+    }
+
+    const keywordList = keywords.split(',').map(k => k.trim().toLowerCase()).filter(k => k);
+    keywordList.forEach(keyword => {
+      const density = this.calculateKeywordDensity(textContent, keyword);
+      keywordDensity[keyword] = density;
+
+      if (density === 0) {
+        issues.push(`关键词"${keyword}"未在内容中出现，建议自然地融入相关内容`);
+      } else if (density > 4) {
+        issues.push(`关键词"${keyword}"密度过高(${density.toFixed(1)}%)，可能被视为关键词堆砌，建议控制在1-3%`);
+      } else if (density > 3) {
+        issues.push(`关键词"${keyword}"密度较高(${density.toFixed(1)}%)，建议适当减少使用频率`);
+      }
+    });
+
+    return keywordDensity;
+  }
+
+  /**
+   * 检查内容长度
+   */
+  private checkContentLength(wordCount: number, issues: string[]): void {
+    if (wordCount < 150) {
+      issues.push('内容过短（<150词），搜索引擎可能认为页面价值不足');
+    } else if (wordCount < 300) {
+      issues.push('内容较短（<300词），建议增加有价值的内容以提升SEO效果');
+    } else if (wordCount > 3000) {
+      issues.push('内容过长（>3000词），建议考虑分页或分章节以提升用户体验');
+    }
+  }
+
+  /**
+   * 检查内容结构
+   */
+  private checkContentStructure(dom: Document, wordCount: number, issues: string[]): void {
+    const paragraphs = dom.querySelectorAll('p');
+    if (paragraphs.length === 0 && wordCount > 100) {
+      issues.push('内容缺少段落结构，建议使用<p>标签分段提升可读性');
+    }
+  }
+
+  /**
+   * 检查内容质量
+   */
+  private checkContentQuality(textContent: string, contentQuality: any, issues: string[]): void {
+    // 检查内容重复
+    const duplicateRatio = this.checkContentDuplication(textContent);
+    if (duplicateRatio > 0.3) {
+      issues.push(`内容重复率较高(${(duplicateRatio * 100).toFixed(1)}%)，建议增加原创内容`);
+    }
+
+    // 检查内容深度
+    if (contentQuality.averageSentenceLength > 25) {
+      issues.push('句子平均长度过长，建议使用更简洁的表达方式');
+    }
   }
 
   /**

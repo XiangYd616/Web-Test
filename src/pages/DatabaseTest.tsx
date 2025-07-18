@@ -38,7 +38,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import { TestPageLayout } from '../components/testing/UnifiedTestingComponents';
 import { useTheme } from '../contexts/ThemeContext';
-import backgroundTestManager from '../services/BackgroundTestManager';
+import backgroundTestManager from '../services/backgroundTestManager';
 import '../styles/progress-bars.css';
 
 interface DatabaseConfig {

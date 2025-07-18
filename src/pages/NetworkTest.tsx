@@ -19,6 +19,7 @@ import {
   Zap
 } from 'lucide-react';
 import React, { useState } from 'react';
+import { TestPageLayout } from '../components/testing/UnifiedTestingComponents';
 
 interface NetworkTestConfig {
   target: string;
