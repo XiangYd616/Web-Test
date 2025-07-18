@@ -26,6 +26,7 @@ import {
 } from '../components/testing/UnifiedTestingComponents';
 import type { SEOTestMode } from '../hooks/useUnifiedSEOTest';
 import { useUnifiedSEOTest } from '../hooks/useUnifiedSEOTest';
+import '../styles/compact-layout.css';
 import '../styles/unified-testing-tools.css';
 
 type TestMode = 'standard' | 'comprehensive';
@@ -529,20 +530,20 @@ const SEOTest: React.FC = () => {
   }
 
   return (
-    <TestPageLayout className="space-y-4 dark-page-scrollbar"
+    <TestPageLayout className="space-y-3 dark-page-scrollbar compact-layout"
     >
       {/* 页面标题和控制 */}
-      <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-3">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           <div>
-            <h2 className="text-2xl font-bold text-white">SEO综合分析</h2>
-            <p className="text-gray-300 mt-1">全面分析网站SEO状况，发现关键问题和优化机会</p>
+            <h2 className="text-xl font-bold text-white">SEO综合分析</h2>
+            <p className="text-gray-300 text-sm">全面分析网站SEO状况，发现关键问题和优化机会</p>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
 
             {/* 测试状态和控制按钮 */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2">
               {testStatus === 'idle' ? (
                 <button
                   type="button"
@@ -552,45 +553,45 @@ const SEOTest: React.FC = () => {
                       ? !testConfig.url
                       : uploadedFiles.length === 0
                   }
-                  className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${(seoTestMode === 'online' ? !testConfig.url : uploadedFiles.length === 0)
+                  className={`flex items-center space-x-1.5 px-4 py-2 rounded-md text-sm font-medium transition-all ${(seoTestMode === 'online' ? !testConfig.url : uploadedFiles.length === 0)
                     ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                     : 'bg-blue-600 hover:bg-blue-700 text-white'
                     }`}
                 >
-                  <Search className="w-5 h-5" />
+                  <Search className="w-4 h-4" />
                   <span>
                     {seoTestMode === 'online' ? '开始分析' : '开始本地分析'}
                   </span>
                 </button>
               ) : testStatus === 'starting' ? (
-                <div className="flex items-center space-x-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg">
-                  <Loader className="w-4 h-4 animate-spin text-blue-400" />
-                  <span className="text-sm text-blue-300 font-medium">正在启动...</span>
+                <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-blue-500/20 border border-blue-500/30 rounded-md">
+                  <Loader className="w-3 h-3 animate-spin text-blue-400" />
+                  <span className="text-xs text-blue-300 font-medium">正在启动...</span>
                 </div>
               ) : testStatus === 'running' || isRunning ? (
-                <div className="flex items-center space-x-3">
-                  <div className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-sm text-green-300 font-medium">分析中</span>
+                <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-md">
+                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                    <span className="text-xs text-green-300 font-medium">分析中</span>
                   </div>
                   <button
                     type="button"
                     onClick={handleStopTest}
-                    className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                    className="flex items-center space-x-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors text-xs"
                   >
-                    <Square className="w-4 h-4" />
+                    <Square className="w-3 h-3" />
                     <span>停止</span>
                   </button>
                 </div>
               ) : testStatus === 'completed' ? (
-                <div className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
-                  <CheckCircle className="w-4 h-4 text-green-400" />
-                  <span className="text-sm text-green-300 font-medium">分析完成</span>
+                <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-md">
+                  <CheckCircle className="w-3 h-3 text-green-400" />
+                  <span className="text-xs text-green-300 font-medium">分析完成</span>
                 </div>
               ) : testStatus === 'failed' ? (
-                <div className="flex items-center space-x-2 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg">
-                  <XCircle className="w-4 h-4 text-red-400" />
-                  <span className="text-sm text-red-300 font-medium">分析失败</span>
+                <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-red-500/20 border border-red-500/30 rounded-md">
+                  <XCircle className="w-3 h-3 text-red-400" />
+                  <span className="text-xs text-red-300 font-medium">分析失败</span>
                 </div>
               ) : null}
 

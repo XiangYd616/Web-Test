@@ -1,14 +1,14 @@
-import { AlertCircle, Search, Shield, XCircle } from 'lucide-react';
+import { Search, Shield, XCircle } from 'lucide-react';
 import React, { useRef, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import SecurityTestComparison from '../components/security/SecurityTestComparison';
 import { SecurityTestHistory } from '../components/security/SecurityTestHistory';
 import { UnifiedSecurityResults } from '../components/security/UnifiedSecurityResults';
 import { UnifiedSecurityTestPanel } from '../components/security/UnifiedSecurityTestPanel';
-import { URLInput } from '../components/testing';
 import { TestPageLayout } from '../components/testing/UnifiedTestingComponents';
 import { useUserStats } from '../hooks/useUserStats';
 import { SecurityTestResult, TestProgress } from '../services/unifiedSecurityEngine';
+import '../styles/compact-layout.css';
 import '../styles/unified-testing-tools.css';
 
 const SecurityTest: React.FC = () => {
@@ -105,19 +105,19 @@ const SecurityTest: React.FC = () => {
   }
 
   return (
-    <TestPageLayout className="space-y-4 dark-page-scrollbar">
+    <TestPageLayout className="space-y-3 dark-page-scrollbar compact-layout">
       {/* 页面标题和控制 */}
-      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           <div>
-            <h2 className="text-2xl font-bold text-white flex items-center">
-              <Shield className="h-6 w-6 mr-3 text-blue-400" />
+            <h2 className="text-xl font-bold text-white flex items-center">
+              <Shield className="h-5 w-5 mr-2 text-blue-400" />
               安全测试
             </h2>
-            <p className="text-gray-300 mt-1">全面检测网站安全漏洞和防护措施</p>
+            <p className="text-gray-300 text-sm">全面检测网站安全漏洞和防护措施</p>
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             {/* 测试状态指示器 */}
             {activeTab === 'test' && (
               <>
@@ -130,29 +130,29 @@ const SecurityTest: React.FC = () => {
                       }
                     }}
                     disabled={!canStartTest}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${canStartTest
+                    className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${canStartTest
                       ? 'bg-blue-600 hover:bg-blue-700 text-white'
                       : 'bg-gray-600 text-gray-400 cursor-not-allowed'
                       }`}
                   >
-                    <Search className="w-4 h-4" />
+                    <Search className="w-3 h-3" />
                     <span>开始测试</span>
                   </button>
                 ) : (
-                  <div className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-sm text-green-300 font-medium">测试中</span>
+                  <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-md">
+                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                    <span className="text-xs text-green-300 font-medium">测试中</span>
                   </div>
                 )}
               </>
             )}
 
             {/* 标签页切换 */}
-            <div className="flex items-center bg-gray-700/50 rounded-lg p-1">
+            <div className="flex items-center bg-gray-700/50 rounded-md p-0.5">
               <button
                 type="button"
                 onClick={() => setActiveTab('test')}
-                className={`px-3 py-1 text-xs rounded transition-colors ${activeTab === 'test'
+                className={`px-2 py-1 text-xs rounded transition-colors ${activeTab === 'test'
                   ? 'bg-blue-600 text-white'
                   : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
                   }`}
@@ -162,7 +162,7 @@ const SecurityTest: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setActiveTab('history')}
-                className={`px-3 py-1 text-xs rounded transition-colors ${activeTab === 'history'
+                className={`px-2 py-1 text-xs rounded transition-colors ${activeTab === 'history'
                   ? 'bg-blue-600 text-white'
                   : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
                   }`}
@@ -173,7 +173,7 @@ const SecurityTest: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setActiveTab('comparison')}
-                  className={`px-3 py-1 text-xs rounded transition-colors ${activeTab === 'comparison'
+                  className={`px-2 py-1 text-xs rounded transition-colors ${activeTab === 'comparison'
                     ? 'bg-blue-600 text-white'
                     : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
                     }`}
@@ -189,36 +189,6 @@ const SecurityTest: React.FC = () => {
       {/* 内容区域 */}
       {activeTab === 'test' ? (
         <>
-          {/* URL输入区域 */}
-          <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  目标网站URL
-                </label>
-                <URLInput
-                  value=""
-                  onChange={() => { }}
-                  placeholder="请输入要测试的网站URL，例如：https://example.com"
-                  disabled={isTestRunning}
-                />
-                <div className="mt-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                  <div className="flex items-start space-x-2">
-                    <AlertCircle className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                    <div className="text-sm text-blue-300">
-                      <div className="font-medium mb-1">使用说明</div>
-                      <div className="text-blue-200 space-y-1">
-                        <div>• 请输入完整的URL，包含协议（http://或https://）</div>
-                        <div>• 支持测试各种类型的网站和Web应用</div>
-                        <div>• 建议使用HTTPS网站以获得更准确的安全评估</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* 统一安全测试面板 */}
           <UnifiedSecurityTestPanel
             ref={testPanelRef}

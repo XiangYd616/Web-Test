@@ -256,18 +256,14 @@ export const UnifiedSecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, 
   }), [runTest, config.url, isUrlValid, isRunning, config]);
 
   return (
-    <div className="unified-security-test-panel space-y-4 fade-in-up">
+    <div className="unified-security-test-panel space-y-3 fade-in-up compact-layout">
       {/* URL 输入 - 增强版 */}
-      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-        <label className="block text-base font-bold text-white mb-4 flex items-center">
-          <span className="text-2xl mr-2">🌐</span>
-          目标网站URL
-        </label>
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
         <EnhancedUrlInput
           value={config.url}
           onChange={handleUrlChange}
           onValidationChange={handleUrlValidation}
-          placeholder="https://example.com"
+          placeholder="请输入要测试的网站URL，例如：https://example.com"
           disabled={isRunning}
           showSuggestions={true}
           autoFix={true}
@@ -275,33 +271,33 @@ export const UnifiedSecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, 
       </div>
 
       {/* 快速预设 - 增强可读性 */}
-      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-        <h3 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-5 flex items-center">
-          <Zap className="h-5 w-5 sm:h-6 sm:w-6 mr-3 text-yellow-400" />
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
+        <h3 className="text-base font-bold text-white mb-3 flex items-center">
+          <Zap className="h-4 w-4 mr-2 text-yellow-400" />
           快速预设
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {Object.entries(presetConfigs).map(([key, preset]) => (
             <button
               key={key}
               type="button"
               onClick={() => applyPreset(key)}
               disabled={isRunning}
-              className="bg-gray-700/30 hover:bg-gray-600/50 border border-gray-600 hover:border-gray-500 p-4 sm:p-5 rounded-xl text-left group disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              className="bg-gray-700/30 hover:bg-gray-600/50 border border-gray-600 hover:border-gray-500 p-3 rounded-lg text-left group disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2 sm:gap-0">
-                <span className="font-bold text-white text-base sm:text-lg">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-1 sm:gap-0">
+                <span className="font-bold text-white text-sm">
                   {key === 'quick' ? '⚡ 快速扫描' :
                     key === 'standard' ? '🛡️ 标准扫描' :
                       '🔍 全面扫描'}
                 </span>
-                <div className="text-sm text-gray-300 font-medium bg-gray-600/50 px-2 py-1 rounded">
+                <div className="text-xs text-gray-300 font-medium bg-gray-600/50 px-2 py-0.5 rounded">
                   {key === 'quick' ? '1-2分钟' :
                     key === 'standard' ? '3-5分钟' :
                       '5-10分钟'}
                 </div>
               </div>
-              <p className="text-sm text-gray-300 leading-relaxed">
+              <p className="text-xs text-gray-300 leading-relaxed">
                 {key === 'quick' ? '基础安全检查，快速发现主要问题' :
                   key === 'standard' ? '全面安全检测，平衡速度和深度' :
                     '深度安全分析，包含所有检测模块'}
@@ -312,22 +308,22 @@ export const UnifiedSecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, 
       </div>
 
       {/* 模块配置 - 增强可读性 */}
-      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-        <h3 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-5 flex items-center">
-          <Settings className="h-5 w-5 sm:h-6 sm:w-6 mr-3 text-gray-300" />
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
+        <h3 className="text-base font-bold text-white mb-3 flex items-center">
+          <Settings className="h-4 w-4 mr-2 text-gray-300" />
           检测模块配置
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {moduleOptions.map((module) => {
             const isEnabled = config.modules[module.key as keyof typeof config.modules]?.enabled;
             return (
               <div
                 key={module.key}
-                className={`group relative p-4 sm:p-5 rounded-xl border-2 transition-all duration-300 transform overflow-hidden shadow-md ${isRunning
+                className={`group relative p-3 rounded-lg border transition-all duration-300 overflow-hidden ${isRunning
                   ? 'cursor-not-allowed opacity-60'
-                  : 'cursor-pointer hover:scale-[1.03] hover:shadow-lg'
+                  : 'cursor-pointer hover:shadow-md'
                   } ${isEnabled
-                    ? `${module.bgColor} ${module.borderColor} ${module.color} shadow-xl ring-2 ring-current/30 ${!isRunning ? 'hover:shadow-2xl hover:ring-current/50' : ''}`
+                    ? `${module.bgColor} ${module.borderColor} ${module.color} shadow-md ring-1 ring-current/20 ${!isRunning ? 'hover:shadow-lg hover:ring-current/30' : ''}`
                     : `bg-gray-700/40 border-gray-600/60 text-gray-400 ${!isRunning ? 'hover:bg-gray-700/60 hover:border-gray-600/80' : ''}`
                   }`}
                 onClick={() => !isRunning && toggleModule(module.key)}
@@ -336,17 +332,17 @@ export const UnifiedSecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, 
                 {isEnabled && (
                   <div className={`absolute top-0 left-0 right-0 h-1 bg-current rounded-t-xl opacity-80`}></div>
                 )}
-                <div className="flex items-start justify-between mb-2">
-                  <div className={`p-2 rounded-lg transition-all duration-200 ${isEnabled
-                    ? 'bg-white/30 backdrop-blur-sm shadow-lg border border-white/20'
+                <div className="flex items-start justify-between mb-1.5">
+                  <div className={`p-1.5 rounded-md transition-all duration-200 ${isEnabled
+                    ? 'bg-white/30 backdrop-blur-sm shadow-md border border-white/20'
                     : 'bg-gray-600/50 hover:bg-gray-600'
                     }`}>
                     {React.cloneElement(module.icon, {
-                      className: `h-5 w-5 transition-colors duration-200 ${isEnabled ? module.color : 'text-gray-400'}`
+                      className: `h-4 w-4 transition-colors duration-200 ${isEnabled ? module.color : 'text-gray-400'}`
                     })}
                   </div>
-                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${isEnabled
-                    ? 'bg-current border-current text-white shadow-lg transform scale-110 ring-2 ring-white/30'
+                  <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all duration-200 ${isEnabled
+                    ? 'bg-current border-current text-white shadow-md ring-1 ring-white/20'
                     : 'border-gray-600/70 hover:border-gray-500'
                     }`}>
                     {isEnabled && (

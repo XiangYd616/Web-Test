@@ -29,6 +29,7 @@ import {
 import { useUserStats } from '../hooks/useUserStats';
 import UnifiedApiService from '../services/api/apiService';
 import { googlePageSpeedService } from '../services/googlePageSpeedService';
+import '../styles/compact-layout.css';
 import '../styles/unified-testing-tools.css';
 
 // 性能测试相关类型定义
@@ -767,23 +768,23 @@ const PerformanceTest: React.FC = () => {
   }
 
   return (
-    <TestPageLayout className="space-y-4 dark-page-scrollbar"
+    <TestPageLayout className="space-y-3 dark-page-scrollbar compact-layout"
     >
       {/* 页面标题和控制 */}
-      <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-3">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           <div>
-            <h2 className="text-2xl font-bold text-white">性能测试</h2>
-            <p className="text-gray-300 mt-1">全面分析网站性能表现和优化建议</p>
+            <h2 className="text-xl font-bold text-white">性能测试</h2>
+            <p className="text-gray-300 text-sm">全面分析网站性能表现和优化建议</p>
           </div>
 
           {/* 模式切换 */}
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center bg-gray-700/50 rounded-lg p-1">
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center bg-gray-700/50 rounded-md p-0.5">
               <button
                 type="button"
                 onClick={() => setIsAdvancedMode(false)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${!isAdvancedMode
+                className={`px-2 py-1 text-xs font-medium rounded transition-all ${!isAdvancedMode
                   ? 'bg-blue-600 text-white shadow-sm'
                   : 'text-gray-300 hover:text-white'
                   }`}
@@ -793,7 +794,7 @@ const PerformanceTest: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsAdvancedMode(true)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${isAdvancedMode
+                className={`px-2 py-1 text-xs font-medium rounded transition-all ${isAdvancedMode
                   ? 'bg-blue-600 text-white shadow-sm'
                   : 'text-gray-300 hover:text-white'
                   }`}
@@ -803,63 +804,63 @@ const PerformanceTest: React.FC = () => {
             </div>
 
             {/* 测试状态和控制按钮 */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2">
               {testStatus === 'idle' ? (
                 <button
                   type="button"
                   onClick={handleStartTest}
                   disabled={!testConfig.url}
-                  className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${!testConfig.url
+                  className={`flex items-center space-x-1.5 px-4 py-2 rounded-md text-sm font-medium transition-all ${!testConfig.url
                     ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                     : 'bg-green-600 hover:bg-green-700 text-white'
                     }`}
                 >
-                  <Gauge className="w-5 h-5" />
+                  <Gauge className="w-4 h-4" />
                   <span>开始测试</span>
                 </button>
               ) : testStatus === 'starting' ? (
-                <div className="flex items-center space-x-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg">
-                  <Loader className="w-4 h-4 animate-spin text-blue-400" />
-                  <span className="text-sm text-blue-300 font-medium">正在启动...</span>
+                <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-blue-500/20 border border-blue-500/30 rounded-md">
+                  <Loader className="w-3 h-3 animate-spin text-blue-400" />
+                  <span className="text-xs text-blue-300 font-medium">正在启动...</span>
                 </div>
               ) : testStatus === 'running' || isRunning ? (
-                <div className="flex items-center space-x-3">
-                  <div className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-sm text-green-300 font-medium">测试中</span>
+                <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-md">
+                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                    <span className="text-xs text-green-300 font-medium">测试中</span>
                   </div>
                   <button
                     type="button"
                     onClick={handleStopTest}
-                    className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                    className="flex items-center space-x-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors text-xs"
                   >
-                    <Square className="w-4 h-4" />
+                    <Square className="w-3 h-3" />
                     <span>停止</span>
                   </button>
                 </div>
               ) : testStatus === 'completed' ? (
-                <div className="flex items-center space-x-3">
-                  <div className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
-                    <CheckCircle className="w-4 h-4 text-green-400" />
-                    <span className="text-sm text-green-300 font-medium">测试完成</span>
+                <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-md">
+                    <CheckCircle className="w-3 h-3 text-green-400" />
+                    <span className="text-xs text-green-300 font-medium">测试完成</span>
                   </div>
                   <button
                     type="button"
                     onClick={handleStartTest}
                     disabled={!testConfig.url}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all ${!testConfig.url
+                    className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${!testConfig.url
                       ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                       : 'bg-blue-600 hover:bg-blue-700 text-white'
                       }`}
                   >
-                    <RotateCcw className="w-4 h-4" />
+                    <RotateCcw className="w-3 h-3" />
                     <span>重新测试</span>
                   </button>
                 </div>
               ) : testStatus === 'failed' ? (
-                <div className="flex items-center space-x-2 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg">
-                  <XCircle className="w-4 h-4 text-red-400" />
-                  <span className="text-sm text-red-300 font-medium">测试失败</span>
+                <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-red-500/20 border border-red-500/30 rounded-md">
+                  <XCircle className="w-3 h-3 text-red-400" />
+                  <span className="text-xs text-red-300 font-medium">测试失败</span>
                 </div>
               ) : null}
             </div>
@@ -868,39 +869,41 @@ const PerformanceTest: React.FC = () => {
       </div>
 
       {/* 内容区域 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
         {/* 左侧：URL输入和配置 */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="lg:col-span-2 space-y-3">
           {/* URL输入 */}
-          <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-              <Globe className="w-5 h-5 mr-2 text-blue-400" />
+          <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
+            <h3 className="text-base font-semibold text-white mb-3 flex items-center">
+              <Globe className="w-4 h-4 mr-2 text-blue-400" />
               测试网站
             </h3>
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div className="relative">
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10">
+                  <Globe className="w-4 h-4 text-gray-400" />
+                </div>
                 <input
                   type="url"
                   value={testConfig.url}
                   onChange={(e) => setTestConfig(prev => ({ ...prev, url: e.target.value }))}
                   placeholder="输入要测试的网站URL..."
-                  className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="performance-url-input w-full pl-10 pr-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
-                <Globe className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               </div>
-              <div className="text-sm text-gray-400">
+              <div className="text-xs text-gray-400">
                 示例：https://www.example.com
               </div>
             </div>
           </div>
 
           {/* 测试引擎选择 */}
-          <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-              <Settings className="w-5 h-5 mr-2 text-purple-400" />
+          <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
+            <h3 className="text-base font-semibold text-white mb-3 flex items-center">
+              <Settings className="w-4 h-4 mr-2 text-purple-400" />
               测试引擎
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
               {[
                 { id: 'pagespeed', name: 'PageSpeed', icon: '🚀', description: 'Google PageSpeed Insights' },
                 { id: 'gtmetrix', name: 'GTmetrix', icon: '📊', description: 'GTmetrix 性能分析' },
@@ -912,14 +915,14 @@ const PerformanceTest: React.FC = () => {
                   key={engine.id}
                   type="button"
                   onClick={() => setSelectedEngine(engine.id as TestEngine)}
-                  className={`p-3 rounded-lg border-2 transition-all text-center ${selectedEngine === engine.id
+                  className={`p-2 rounded-md border transition-all text-center ${selectedEngine === engine.id
                     ? 'border-purple-500 bg-purple-500/20'
                     : 'border-gray-600/50 bg-gray-700/30 hover:border-gray-500'
                     }`}
                 >
-                  <div className="text-2xl mb-1">{engine.icon}</div>
-                  <div className="text-sm font-medium text-white">{engine.name}</div>
-                  <div className="text-xs text-gray-400 mt-1">{engine.description}</div>
+                  <div className="text-lg mb-0.5">{engine.icon}</div>
+                  <div className="text-xs font-medium text-white">{engine.name}</div>
+                  <div className="text-xs text-gray-400 mt-0.5 leading-tight">{engine.description}</div>
                 </button>
               ))}
             </div>
@@ -927,12 +930,12 @@ const PerformanceTest: React.FC = () => {
 
           {/* 快速模式 - 测试模式选择 */}
           {!isAdvancedMode && (
-            <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                <Zap className="w-5 h-5 mr-2 text-yellow-400" />
+            <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
+              <h3 className="text-base font-semibold text-white mb-3 flex items-center">
+                <Zap className="w-4 h-4 mr-2 text-yellow-400" />
                 测试模式
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {quickTemplates.map((mode) => {
                   const IconComponent = mode.icon;
                   const isSelected = testConfig.mode === mode.config.mode;
@@ -941,21 +944,21 @@ const PerformanceTest: React.FC = () => {
                       key={mode.id}
                       type="button"
                       onClick={() => setTestConfig(prev => ({ ...prev, ...mode.config }))}
-                      className={`p-4 rounded-lg border-2 transition-all text-left ${isSelected
+                      className={`p-3 rounded-md border transition-all text-left ${isSelected
                         ? 'border-blue-500 bg-blue-500/20'
                         : 'border-gray-600/50 bg-gray-700/30 hover:border-gray-500'
                         }`}
                     >
-                      <div className="flex items-start space-x-3">
-                        <IconComponent className={`w-6 h-6 mt-1 ${mode.color === 'blue' ? 'text-blue-400' :
+                      <div className="flex items-start space-x-2.5">
+                        <IconComponent className={`w-5 h-5 mt-0.5 ${mode.color === 'blue' ? 'text-blue-400' :
                           mode.color === 'green' ? 'text-green-400' :
                             mode.color === 'purple' ? 'text-purple-400' :
                               'text-orange-400'
                           }`} />
                         <div className="flex-1">
-                          <h4 className="font-medium text-white">{mode.name}</h4>
-                          <p className="text-sm text-gray-400 mt-1">{mode.description}</p>
-                          <div className="flex items-center mt-2 text-xs text-gray-500">
+                          <h4 className="text-sm font-medium text-white">{mode.name}</h4>
+                          <p className="text-xs text-gray-400 mt-0.5">{mode.description}</p>
+                          <div className="flex items-center mt-1.5 text-xs text-gray-500">
                             <Clock className="w-3 h-3 mr-1" />
                             {mode.duration}
                           </div>
@@ -1051,27 +1054,27 @@ const PerformanceTest: React.FC = () => {
         </div>
 
         {/* 右侧：测试状态和进度 */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           {/* 测试进度 */}
           {(isRunning || testStatus === 'running') && (
-            <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                <Gauge className="w-5 h-5 mr-2 text-green-400" />
+            <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
+              <h3 className="text-base font-semibold text-white mb-3 flex items-center">
+                <Gauge className="w-4 h-4 mr-2 text-green-400" />
                 测试进度
               </h3>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-300">整体进度</span>
                   <span className="text-white font-medium">{progress}%</span>
                 </div>
-                <div className="w-full bg-gray-700 rounded-full h-2">
+                <div className="w-full bg-gray-700 rounded-full h-1.5">
                   <div
-                    className="test-progress-gradient h-2 rounded-full transition-all duration-300"
+                    className="test-progress-gradient h-1.5 rounded-full transition-all duration-300"
                     style={{ width: `${progress}%` }}
                   ></div>
                 </div>
                 {testProgress && (
-                  <div className="text-sm text-gray-400">
+                  <div className="text-xs text-gray-400">
                     {testProgress}
                   </div>
                 )}
@@ -1081,38 +1084,38 @@ const PerformanceTest: React.FC = () => {
 
           {/* 错误显示 */}
           {error && (
-            <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-4">
-              <div className="flex items-start space-x-3">
-                <XCircle className="w-5 h-5 text-red-400 mt-0.5" />
+            <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3">
+              <div className="flex items-start space-x-2">
+                <XCircle className="w-4 h-4 text-red-400 mt-0.5" />
                 <div>
-                  <h4 className="text-red-300 font-medium">测试失败</h4>
-                  <p className="text-red-200 text-sm mt-1">{error}</p>
+                  <h4 className="text-red-300 font-medium text-sm">测试失败</h4>
+                  <p className="text-red-200 text-xs mt-0.5">{error}</p>
                 </div>
               </div>
             </div>
           )}
 
           {/* 测试提示 */}
-          <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-            <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-              <Image className="w-5 h-5 mr-2 text-blue-400" />
+          <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
+            <h3 className="text-base font-semibold text-white mb-3 flex items-center">
+              <Image className="w-4 h-4 mr-2 text-blue-400" />
               测试说明
             </h3>
-            <div className="space-y-3 text-sm text-gray-300">
-              <div className="flex items-start space-x-2">
-                <CheckCircle className="w-4 h-4 text-green-400 mt-0.5" />
+            <div className="space-y-2 text-xs text-gray-300">
+              <div className="flex items-start space-x-1.5">
+                <CheckCircle className="w-3 h-3 text-green-400 mt-0.5" />
                 <span>支持HTTP和HTTPS网站</span>
               </div>
-              <div className="flex items-start space-x-2">
-                <CheckCircle className="w-4 h-4 text-green-400 mt-0.5" />
+              <div className="flex items-start space-x-1.5">
+                <CheckCircle className="w-3 h-3 text-green-400 mt-0.5" />
                 <span>自动检测移动端适配</span>
               </div>
-              <div className="flex items-start space-x-2">
-                <CheckCircle className="w-4 h-4 text-green-400 mt-0.5" />
+              <div className="flex items-start space-x-1.5">
+                <CheckCircle className="w-3 h-3 text-green-400 mt-0.5" />
                 <span>提供详细优化建议</span>
               </div>
-              <div className="flex items-start space-x-2">
-                <AlertTriangle className="w-4 h-4 text-yellow-400 mt-0.5" />
+              <div className="flex items-start space-x-1.5">
+                <AlertTriangle className="w-3 h-3 text-yellow-400 mt-0.5" />
                 <span>测试时间根据网站复杂度而定</span>
               </div>
             </div>
@@ -1122,24 +1125,24 @@ const PerformanceTest: React.FC = () => {
 
       {/* 测试历史 */}
       {testHistory.length > 0 && (
-        <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-          <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-            <Clock className="w-5 h-5 mr-2 text-blue-400" />
+        <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
+          <h3 className="text-base font-semibold text-white mb-3 flex items-center">
+            <Clock className="w-4 h-4 mr-2 text-blue-400" />
             测试历史
           </h3>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {testHistory.slice(0, 5).map((item) => (
-              <div key={item.id} className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <div className={`w-2 h-2 rounded-full ${item.status === 'completed' ? 'bg-green-400' : 'bg-red-400'}`}></div>
+              <div key={item.id} className="flex items-center justify-between p-2.5 bg-gray-700/50 rounded-md">
+                <div className="flex items-center space-x-2.5">
+                  <div className={`w-1.5 h-1.5 rounded-full ${item.status === 'completed' ? 'bg-green-400' : 'bg-red-400'}`}></div>
                   <div>
-                    <div className="text-white text-sm font-medium truncate max-w-xs">{item.url}</div>
+                    <div className="text-white text-xs font-medium truncate max-w-xs">{item.url}</div>
                     <div className="text-gray-400 text-xs">{new Date(item.timestamp).toLocaleString()}</div>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2">
                   <div className="text-right">
-                    <div className={`text-sm font-medium ${item.overallScore >= 90 ? 'text-green-400' :
+                    <div className={`text-xs font-medium ${item.overallScore >= 90 ? 'text-green-400' :
                       item.overallScore >= 70 ? 'text-yellow-400' : 'text-red-400'}`}>
                       {item.overallScore}分
                     </div>
@@ -1154,50 +1157,50 @@ const PerformanceTest: React.FC = () => {
 
       {/* 测试结果 */}
       {results && testStatus === 'completed' && (
-        <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-          <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
-            <BarChart3 className="w-6 h-6 mr-2 text-green-400" />
+        <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
+          <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+            <BarChart3 className="w-5 h-5 mr-2 text-green-400" />
             测试结果
           </h3>
 
           {/* 总体评分 */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="text-center">
-              <div className={`text-4xl font-bold mb-2 ${results.overallScore >= 90 ? 'text-green-400' :
+              <div className={`text-3xl font-bold mb-1 ${results.overallScore >= 90 ? 'text-green-400' :
                 results.overallScore >= 70 ? 'text-yellow-400' :
                   'text-red-400'
                 }`}>
                 {results.overallScore}
               </div>
-              <div className="text-gray-300 text-sm">总体评分</div>
+              <div className="text-gray-300 text-xs">总体评分</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-400 mb-2">{(results.metrics.loadTime / 1000).toFixed(1)}s</div>
-              <div className="text-gray-300 text-sm">加载时间</div>
+              <div className="text-xl font-bold text-blue-400 mb-1">{(results.metrics.loadTime / 1000).toFixed(1)}s</div>
+              <div className="text-gray-300 text-xs">加载时间</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-purple-400 mb-2">{(results.metrics.pageSize / 1024).toFixed(1)}KB</div>
-              <div className="text-gray-300 text-sm">页面大小</div>
+              <div className="text-xl font-bold text-purple-400 mb-1">{(results.metrics.pageSize / 1024).toFixed(1)}KB</div>
+              <div className="text-gray-300 text-xs">页面大小</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-orange-400 mb-2">{results.metrics.requests}</div>
-              <div className="text-gray-300 text-sm">请求数量</div>
+              <div className="text-xl font-bold text-orange-400 mb-1">{results.metrics.requests}</div>
+              <div className="text-gray-300 text-xs">请求数量</div>
             </div>
           </div>
 
           {/* Core Web Vitals */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-gray-700/50 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-300 text-sm">FCP (首次内容绘制)</span>
-                <span className={`text-sm font-medium ${results.coreWebVitals.fcp < 1800 ? 'text-green-400' :
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+            <div className="bg-gray-700/50 rounded-md p-3">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-gray-300 text-xs">FCP (首次内容绘制)</span>
+                <span className={`text-xs font-medium ${results.coreWebVitals.fcp < 1800 ? 'text-green-400' :
                   results.coreWebVitals.fcp < 3000 ? 'text-yellow-400' :
                     'text-red-400'
                   }`}>
                   {(results.coreWebVitals.fcp / 1000).toFixed(1)}s
                 </span>
               </div>
-              <div className="w-full bg-gray-600 rounded-full h-2">
+              <div className="w-full bg-gray-600 rounded-full h-1.5">
                 <div
                   className={`h-2 rounded-full ${results.coreWebVitals.fcp < 1800 ? 'bg-green-400' :
                     results.coreWebVitals.fcp < 3000 ? 'bg-yellow-400' :
@@ -1305,15 +1308,15 @@ const PerformanceTest: React.FC = () => {
           )}
 
           {/* 操作按钮 */}
-          <div className="flex flex-wrap gap-3 mt-8 pt-6 border-t border-gray-700/50">
+          <div className="flex flex-wrap gap-2 mt-6 pt-4 border-t border-gray-700/50">
             {results.reportUrl && (
               <a
                 href={results.reportUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
               >
-                <ExternalLink className="w-4 h-4 mr-2" />
+                <ExternalLink className="w-3 h-3 mr-1.5" />
                 查看详细报告
               </a>
             )}
@@ -1329,9 +1332,9 @@ const PerformanceTest: React.FC = () => {
                 a.click();
                 URL.revokeObjectURL(url);
               }}
-              className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              className="inline-flex items-center px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm"
             >
-              <Download className="w-4 h-4 mr-2" />
+              <Download className="w-3 h-3 mr-1.5" />
               导出结果
             </button>
             <button
@@ -1340,9 +1343,9 @@ const PerformanceTest: React.FC = () => {
                 const text = `性能测试结果 - ${results.url}\n总分: ${results.overallScore}\n加载时间: ${(results.metrics.loadTime / 1000).toFixed(1)}s\n测试引擎: ${results.engine}`;
                 navigator.clipboard.writeText(text);
               }}
-              className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              className="inline-flex items-center px-3 py-1.5 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors text-sm"
             >
-              <Share2 className="w-4 h-4 mr-2" />
+              <Share2 className="w-3 h-3 mr-1.5" />
               复制结果
             </button>
           </div>

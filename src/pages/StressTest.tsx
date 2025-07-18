@@ -12,6 +12,7 @@ import { AdvancedStressTestConfig as ImportedAdvancedStressTestConfig } from '..
 import { useUserStats } from '../hooks/useUserStats';
 import backgroundTestManager from '../services/backgroundTestManager';
 import { testEngineManager } from '../services/testEngines';
+import '../styles/compact-layout.css';
 import '../styles/unified-testing-tools.css';
 
 // 注释：已简化实现，移除复杂的数据管理Hook
@@ -544,23 +545,23 @@ const StressTest: React.FC = () => {
   };
 
   return (
-    <TestPageLayout className="space-y-4 dark-page-scrollbar"
+    <TestPageLayout className="space-y-3 dark-page-scrollbar compact-layout"
     >
       {/* 页面标题和控制 */}
-      <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-3">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           <div>
-            <h2 className="text-2xl font-bold text-white">压力测试</h2>
-            <p className="text-gray-300 mt-1">测试网站在高并发访问下的性能表现</p>
+            <h2 className="text-xl font-bold text-white">压力测试</h2>
+            <p className="text-gray-300 text-sm">测试网站在高并发访问下的性能表现</p>
           </div>
 
           {/* 模式切换 */}
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center bg-gray-700/50 rounded-lg p-1">
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center bg-gray-700/50 rounded-md p-0.5">
               <button
                 type="button"
                 onClick={() => setIsAdvancedMode(false)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${!isAdvancedMode
+                className={`px-2 py-1 text-xs font-medium rounded transition-all ${!isAdvancedMode
                   ? 'bg-blue-600 text-white shadow-sm'
                   : 'text-gray-300 hover:text-white'
                   }`}
@@ -570,7 +571,7 @@ const StressTest: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsAdvancedMode(true)}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${isAdvancedMode
+                className={`px-2 py-1 text-xs font-medium rounded transition-all ${isAdvancedMode
                   ? 'bg-blue-600 text-white shadow-sm'
                   : 'text-gray-300 hover:text-white'
                   }`}
@@ -580,39 +581,39 @@ const StressTest: React.FC = () => {
             </div>
 
             {/* 测试状态和控制按钮 */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2">
               {testStatus === 'idle' ? (
                 <button
                   type="button"
                   onClick={handleStartTest}
                   disabled={!testConfig.url}
-                  className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${!testConfig.url
+                  className={`flex items-center space-x-1.5 px-4 py-2 rounded-md text-sm font-medium transition-all ${!testConfig.url
                     ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                     : isAuthenticated
                       ? 'bg-blue-600 hover:bg-blue-700 text-white'
                       : 'bg-yellow-600 hover:bg-yellow-700 text-white'
                     }`}
                 >
-                  {isAuthenticated ? <Play className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
+                  {isAuthenticated ? <Play className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
                   <span>{isAuthenticated ? '开始测试' : '需要登录'}</span>
                 </button>
               ) : testStatus === 'starting' ? (
-                <div className="flex items-center space-x-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg">
-                  <Loader className="w-4 h-4 animate-spin text-blue-400" />
-                  <span className="text-sm text-blue-300 font-medium">正在启动...</span>
+                <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-blue-500/20 border border-blue-500/30 rounded-md">
+                  <Loader className="w-3 h-3 animate-spin text-blue-400" />
+                  <span className="text-xs text-blue-300 font-medium">正在启动...</span>
                 </div>
               ) : testStatus === 'running' || isRunning ? (
-                <div className="flex items-center space-x-3">
-                  <div className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-sm text-green-300 font-medium">测试进行中</span>
+                <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-md">
+                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                    <span className="text-xs text-green-300 font-medium">测试进行中</span>
                   </div>
                   <button
                     type="button"
                     onClick={handleStopTest}
-                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center space-x-2"
+                    className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors flex items-center space-x-1.5 text-xs"
                   >
-                    <Square className="w-4 h-4" />
+                    <Square className="w-3 h-3" />
                     <span>停止</span>
                   </button>
                 </div>
@@ -663,8 +664,8 @@ const StressTest: React.FC = () => {
       </div>
 
       {/* URL 输入 */}
-      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-        <label className="block text-sm font-medium text-gray-300 mb-3">测试URL</label>
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
+        <label className="block text-sm font-medium text-gray-300 mb-2">测试URL</label>
         <URLInput
           value={testConfig.url}
           onChange={(url) => setTestConfig((prev: StressTestConfig) => ({ ...prev, url }))}
@@ -675,14 +676,14 @@ const StressTest: React.FC = () => {
 
       {/* 进度和错误显示 */}
       {(testProgress || backgroundTestInfo || error) && (
-        <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+        <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
           {/* 测试进度 */}
           {(testProgress || backgroundTestInfo) && (
-            <div className="mb-4">
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="text-lg font-semibold text-white">测试进度</h4>
+            <div className="mb-3">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-base font-semibold text-white">测试进度</h4>
                 {backgroundTestInfo && (
-                  <span className="text-sm text-blue-300 font-medium">
+                  <span className="text-xs text-blue-300 font-medium">
                     {Math.round(backgroundTestInfo.progress || 0)}%
                   </span>
                 )}
@@ -690,21 +691,21 @@ const StressTest: React.FC = () => {
 
               {/* 进度条 */}
               {backgroundTestInfo && (
-                <div className="w-full bg-gray-700 rounded-full h-3 mb-3">
+                <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
                   <div
-                    className="test-progress-dynamic h-3 rounded-full transition-all duration-300"
+                    className="test-progress-dynamic h-2 rounded-full transition-all duration-300"
                     style={{ width: `${backgroundTestInfo.progress || 0}%` }}
                   ></div>
                 </div>
               )}
 
-              <p className="text-blue-300 mb-2">{testProgress}</p>
+              <p className="text-blue-300 text-sm mb-2">{testProgress}</p>
 
               {/* 测试时间信息 */}
               {backgroundTestInfo && backgroundTestInfo.startTime && (
-                <div className="flex items-center space-x-4 text-sm text-gray-400">
+                <div className="flex items-center space-x-3 text-xs text-gray-400">
                   <div className="flex items-center space-x-1">
-                    <Clock className="w-4 h-4" />
+                    <Clock className="w-3 h-3" />
                     <span>开始: {new Date(backgroundTestInfo.startTime).toLocaleTimeString()}</span>
                   </div>
                   <span>•</span>
@@ -716,12 +717,12 @@ const StressTest: React.FC = () => {
 
               {/* 后台运行提示 */}
               {testStatus === 'running' && canSwitchPages && (
-                <div className="mt-3 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="w-4 h-4 text-green-400" />
-                    <span className="text-sm text-green-300 font-medium">后台运行模式</span>
+                <div className="mt-2 p-2 bg-green-500/10 border border-green-500/20 rounded-md">
+                  <div className="flex items-center space-x-1.5">
+                    <CheckCircle className="w-3 h-3 text-green-400" />
+                    <span className="text-xs text-green-300 font-medium">后台运行模式</span>
                   </div>
-                  <p className="text-xs text-green-200 mt-1">
+                  <p className="text-xs text-green-200 mt-0.5">
                     测试正在后台运行，您可以自由切换到其他页面，测试不会中断。
                   </p>
                 </div>
@@ -731,10 +732,10 @@ const StressTest: React.FC = () => {
 
           {/* 错误提示 */}
           {error && (
-            <div className="p-4 bg-red-500/20 border border-red-500/30 rounded-lg">
-              <div className="flex items-center space-x-2">
-                <AlertCircle className="w-5 h-5 text-red-400" />
-                <p className="text-red-300">{error}</p>
+            <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-md">
+              <div className="flex items-center space-x-1.5">
+                <AlertCircle className="w-4 h-4 text-red-400" />
+                <p className="text-red-300 text-sm">{error}</p>
               </div>
             </div>
           )}
@@ -744,10 +745,10 @@ const StressTest: React.FC = () => {
       {/* 主要配置区域 */}
       {!isAdvancedMode ? (
         /* 简化模式 - 快速模板选择 */
-        <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-          <div className="text-center mb-6">
-            <h3 className="text-xl font-semibold text-white mb-2">选择测试强度</h3>
-            <p className="text-gray-400 text-sm">根据您的网站类型选择合适的测试模板</p>
+        <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
+          <div className="text-center mb-4">
+            <h3 className="text-lg font-semibold text-white mb-1">选择测试强度</h3>
+            <p className="text-gray-400 text-xs">根据您的网站类型选择合适的测试模板</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

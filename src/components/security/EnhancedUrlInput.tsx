@@ -3,17 +3,17 @@
  * 提供实时验证、自动修复和智能建议
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Globe,
-  CheckCircle,
   AlertTriangle,
-  Zap,
+  CheckCircle,
   ExternalLink,
+  Globe,
   HelpCircle,
-  RefreshCw
+  RefreshCw,
+  Zap
 } from 'lucide-react';
-import { validateUrlSync, URLValidationResult } from '../../utils/enhancedUrlValidator';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { URLValidationResult, validateUrlSync } from '../../utils/enhancedUrlValidator';
 
 interface EnhancedUrlInputProps {
   value: string;
@@ -56,7 +56,7 @@ export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
     }
 
     setIsValidating(true);
-    
+
     // 使用setTimeout模拟异步验证，避免阻塞UI
     setTimeout(() => {
       const result = validateUrlSync(url, {
@@ -64,7 +64,7 @@ export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
         allowLocalhost: true,
         allowIP: true
       });
-      
+
       setValidationResult(result);
       onValidationChange?.(result.isValid, result);
       setIsValidating(false);
@@ -102,18 +102,18 @@ export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
   // 获取状态图标
   const getStatusIcon = useMemo(() => {
     if (isValidating) {
-      return <RefreshCw className="h-5 w-5 text-blue-400 animate-spin" />;
+      return <RefreshCw className="h-4 w-4 text-blue-400 animate-spin" />;
     }
-    
+
     if (!value.trim()) {
-      return <Globe className="h-5 w-5 text-gray-400" />;
+      return <Globe className="h-4 w-4 text-gray-400" />;
     }
-    
+
     if (validationResult?.isValid) {
-      return <CheckCircle className="h-5 w-5 text-green-500" />;
+      return <CheckCircle className="h-4 w-4 text-green-500" />;
     }
-    
-    return <AlertTriangle className="h-5 w-5 text-red-400" />;
+
+    return <AlertTriangle className="h-4 w-4 text-red-400" />;
   }, [isValidating, value, validationResult]);
 
   // 获取输入框边框样式
@@ -121,15 +121,15 @@ export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
     if (!value.trim()) {
       return 'border-gray-600 focus:border-blue-500';
     }
-    
+
     if (validationResult?.isValid) {
       return 'border-green-500/50 focus:border-green-500';
     }
-    
+
     if (validationResult?.errors.length) {
       return 'border-red-500/50 focus:border-red-500';
     }
-    
+
     return 'border-gray-600 focus:border-blue-500';
   }, [value, validationResult]);
 
@@ -137,20 +137,20 @@ export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
     <div className={`space-y-3 ${className}`}>
       {/* URL输入框 */}
       <div className="relative">
-        <div className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 z-10">
+        <div className="absolute left-3 sm:left-3.5 top-1/2 transform -translate-y-1/2 z-10">
           {getStatusIcon}
         </div>
-        
+
         <input
           type="url"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           disabled={disabled}
-          className={`w-full pl-10 sm:pl-12 pr-20 sm:pr-24 py-3 sm:py-4 text-sm bg-gray-700/50 border ${getBorderStyle} rounded-lg text-white placeholder-gray-400 focus:ring-1 focus:ring-current transition-all duration-200 ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`enhanced-url-input w-full pl-14 sm:pl-16 pr-16 sm:pr-18 py-2.5 sm:py-3 text-sm bg-gray-700/50 border ${getBorderStyle} rounded-lg text-white placeholder-gray-400 focus:ring-1 focus:ring-current transition-all duration-200 ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         />
-        
-        <div className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+
+        <div className="absolute right-2.5 sm:right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-1.5">
           {/* 自动修复按钮 */}
           {autoFix && validationResult?.autoFixes.length > 0 && validationResult.correctedUrl !== value && (
             <button
@@ -162,7 +162,7 @@ export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
               <Zap className="h-4 w-4 text-yellow-400" />
             </button>
           )}
-          
+
           {/* 在浏览器中打开 */}
           {validationResult?.isValid && (
             <button
@@ -174,7 +174,7 @@ export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
               <ExternalLink className="h-4 w-4 text-blue-400" />
             </button>
           )}
-          
+
           {/* 帮助按钮 */}
           <button
             type="button"
