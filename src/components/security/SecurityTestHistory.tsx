@@ -188,14 +188,14 @@ export const SecurityTestHistory = React.forwardRef<
   return (
     <div className="security-test-history space-y-6">
       {/* 头部控制 */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+      <div className="bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-gray-700/60">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-6">
           <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center">
+            <h2 className="text-xl font-bold text-white flex items-center">
               <Shield className="h-5 w-5 mr-2 text-blue-600" />
               安全测试历史
             </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <p className="text-sm text-gray-300 mt-1">
               共 {history.length} 条记录，显示 {filteredHistory.length} 条
             </p>
           </div>
@@ -230,14 +230,14 @@ export const SecurityTestHistory = React.forwardRef<
               placeholder="搜索URL..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              className="w-full pl-10 pr-4 py-2 border border-gray-700/60 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-800/90 backdrop-blur-sm text-white"
             />
           </div>
 
           <select
             value={filterRisk}
             onChange={(e) => setFilterRisk(e.target.value)}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            className="px-3 py-2 border border-gray-700/60 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-800/90 backdrop-blur-sm text-white"
           >
             <option value="all">所有风险等级</option>
             <option value="low">低风险</option>
@@ -249,7 +249,7 @@ export const SecurityTestHistory = React.forwardRef<
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            className="px-3 py-2 border border-gray-700/60 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-800/90 backdrop-blur-sm text-white"
           >
             <option value="timestamp">按时间排序</option>
             <option value="score">按评分排序</option>
@@ -259,7 +259,7 @@ export const SecurityTestHistory = React.forwardRef<
           <button
             type="button"
             onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+            className="px-3 py-2 border border-gray-700/60 rounded-lg hover:bg-gray-700/90 bg-gray-800/90 backdrop-blur-sm text-white transition-colors"
           >
             {sortOrder === 'asc' ? '升序' : '降序'}
           </button>
@@ -269,9 +269,9 @@ export const SecurityTestHistory = React.forwardRef<
       {/* 历史记录列表 */}
       <div className="space-y-4">
         {filteredHistory.length === 0 ? (
-          <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+          <div className="text-center py-12 bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700/60 shadow-lg">
             <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-300">
               {history.length === 0 ? '暂无安全测试历史记录' : '没有符合条件的记录'}
             </p>
           </div>
@@ -279,7 +279,7 @@ export const SecurityTestHistory = React.forwardRef<
           filteredHistory.map((item) => (
             <div
               key={item.id}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700"
+              className="bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg border border-gray-700/60"
             >
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -291,10 +291,10 @@ export const SecurityTestHistory = React.forwardRef<
                       className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
                     <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white truncate max-w-md">
+                      <h3 className="font-semibold text-white truncate max-w-md">
                         {item.url}
                       </h3>
-                      <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      <div className="flex items-center space-x-4 text-sm text-gray-300 mt-1">
                         <span className="flex items-center">
                           <Calendar className="h-4 w-4 mr-1" />
                           {new Date(item.timestamp).toLocaleString()}
@@ -311,10 +311,10 @@ export const SecurityTestHistory = React.forwardRef<
                     <div className="text-right">
                       <div className="flex items-center space-x-2">
                         {getScoreIcon(item.score)}
-                        <span className="text-lg font-bold text-gray-900 dark:text-white">
+                        <span className="text-lg font-bold text-white">
                           {item.score}
                         </span>
-                        <span className="text-sm text-gray-500">/100</span>
+                        <span className="text-sm text-gray-400">/100</span>
                       </div>
                       <div className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${getRiskColor(item.riskLevel)}`}>
                         {item.riskLevel === 'low' ? '低风险' :
@@ -327,7 +327,7 @@ export const SecurityTestHistory = React.forwardRef<
                       <button
                         type="button"
                         onClick={() => onSelectTest?.(item.result)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                        className="p-2 text-blue-400 hover:bg-blue-900/30 rounded-lg transition-colors"
                         title="查看详情"
                       >
                         <Eye className="h-4 w-4" />
@@ -335,7 +335,7 @@ export const SecurityTestHistory = React.forwardRef<
                       <button
                         type="button"
                         onClick={() => toggleItemExpansion(item.id)}
-                        className="p-2 text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        className="p-2 text-gray-400 hover:bg-gray-700/60 rounded-lg transition-colors"
                       >
                         {expandedItems.has(item.id) ?
                           <ChevronDown className="h-4 w-4" /> :
@@ -345,7 +345,7 @@ export const SecurityTestHistory = React.forwardRef<
                       <button
                         type="button"
                         onClick={() => deleteHistoryItem(item.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        className="p-2 text-red-400 hover:bg-red-900/30 rounded-lg transition-colors"
                         title="删除记录"
                       >
                         <Trash2 className="h-4 w-4" />

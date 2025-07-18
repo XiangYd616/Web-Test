@@ -44,21 +44,12 @@
 }
 
 /* ===== 统一测试页面布局 ===== */
-.test-page-container {
-  min-height: 100vh;
-  background: linear-gradient(135deg, var(--test-bg-primary) 0%, var(--test-bg-secondary) 100%);
-  padding: 1.5rem;
-}
-
-.test-page-content {
-  max-width: 1400px;
-  margin: 0 auto;
-  space-y: 1.5rem;
-}
+/* 移除了不必要的容器样式，使用更简洁的布局 */
 
 /* ===== 统一测试卡片样式 ===== */
 .test-card {
   background: var(--test-bg-card);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border: 1px solid var(--test-border);
   border-radius: 0.75rem;
@@ -347,9 +338,7 @@
 
 /* ===== 响应式设计 ===== */
 @media (max-width: 768px) {
-  .test-page-container {
-    padding: 1rem;
-  }
+  /* 移动端优化样式 */
 
   .test-card {
     padding: 1rem;

@@ -101,7 +101,7 @@ export const UnifiedSecurityResults: React.FC<UnifiedSecurityResultsProps> = ({
   return (
     <div className="unified-security-results space-y-4 sm:space-y-6 fade-in-up">
       {/* 头部概览 - 响应式优化 */}
-      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white border border-blue-500/30">
+      <div className="bg-gray-800/90 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white border border-gray-700/60 shadow-lg">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-4 sm:mb-6 gap-4">
           <div className="flex items-center space-x-3 sm:space-x-4 min-w-0">
             <div className="p-2 sm:p-3 bg-white/20 rounded-lg sm:rounded-xl backdrop-blur-sm flex-shrink-0">
@@ -118,7 +118,7 @@ export const UnifiedSecurityResults: React.FC<UnifiedSecurityResultsProps> = ({
             <button
               type="button"
               onClick={() => onExport?.('json')}
-              className="px-3 sm:px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg sm:rounded-xl transition-all duration-200 flex items-center justify-center backdrop-blur-sm border border-white/20 hover:border-white/40 text-sm"
+              className="px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg sm:rounded-xl transition-all duration-200 flex items-center justify-center backdrop-blur-sm border border-blue-500/30 hover:border-blue-400/50 text-sm"
             >
               <Download className="h-4 w-4 mr-2" />
               导出报告
@@ -127,7 +127,7 @@ export const UnifiedSecurityResults: React.FC<UnifiedSecurityResultsProps> = ({
               <button
                 type="button"
                 onClick={onRetry}
-                className="px-3 sm:px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg sm:rounded-xl transition-all duration-200 flex items-center justify-center backdrop-blur-sm border border-white/20 hover:border-white/40 text-sm"
+                className="px-3 sm:px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg sm:rounded-xl transition-all duration-200 flex items-center justify-center backdrop-blur-sm border border-green-500/30 hover:border-green-400/50 text-sm"
               >
                 <TrendingUp className="h-4 w-4 mr-2" />
                 重新测试
@@ -139,10 +139,10 @@ export const UnifiedSecurityResults: React.FC<UnifiedSecurityResultsProps> = ({
         {/* 核心指标 - 增强可读性 */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {/* 总体评分 */}
-          <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4 sm:p-5 border border-white/30 shadow-lg">
+          <div className="bg-gray-700/60 backdrop-blur-sm rounded-xl p-4 sm:p-5 border border-gray-600/60 shadow-lg">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-blue-100 text-sm font-medium">总体评分</span>
-              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-blue-200" />
+              <span className="text-gray-200 text-sm font-medium">总体评分</span>
+              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-gray-300" />
             </div>
             <div className="text-3xl sm:text-4xl font-bold text-white mb-2">
               {result.overallScore}
@@ -154,10 +154,10 @@ export const UnifiedSecurityResults: React.FC<UnifiedSecurityResultsProps> = ({
           </div>
 
           {/* 风险等级 */}
-          <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4 sm:p-5 border border-white/30 shadow-lg">
+          <div className="bg-gray-700/60 backdrop-blur-sm rounded-xl p-4 sm:p-5 border border-gray-600/60 shadow-lg">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-blue-100 text-sm font-medium">风险等级</span>
-              <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-blue-200" />
+              <span className="text-gray-200 text-sm font-medium">风险等级</span>
+              <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-gray-300" />
             </div>
             <div className={`inline-flex px-3 py-2 rounded-full text-sm font-bold shadow-sm ${getRiskColor(result.riskLevel)}`}>
               {result.riskLevel === 'low' ? '🟢 低风险' :
@@ -167,10 +167,10 @@ export const UnifiedSecurityResults: React.FC<UnifiedSecurityResultsProps> = ({
           </div>
 
           {/* 发现问题 */}
-          <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4 sm:p-5 border border-white/30 shadow-lg">
+          <div className="bg-gray-700/60 backdrop-blur-sm rounded-xl p-4 sm:p-5 border border-gray-600/60 shadow-lg">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-blue-100 text-sm font-medium">发现问题</span>
-              <Target className="h-4 w-4 sm:h-5 sm:w-5 text-blue-200" />
+              <span className="text-gray-200 text-sm font-medium">发现问题</span>
+              <Target className="h-4 w-4 sm:h-5 sm:w-5 text-gray-300" />
             </div>
             <div className="text-3xl sm:text-4xl font-bold text-white mb-2">
               {result.findings.length}
@@ -181,10 +181,10 @@ export const UnifiedSecurityResults: React.FC<UnifiedSecurityResultsProps> = ({
           </div>
 
           {/* 修复建议 */}
-          <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4 sm:p-5 border border-white/30 shadow-lg">
+          <div className="bg-gray-700/60 backdrop-blur-sm rounded-xl p-4 sm:p-5 border border-gray-600/60 shadow-lg">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-blue-100 text-sm font-medium">修复建议</span>
-              <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-blue-200" />
+              <span className="text-gray-200 text-sm font-medium">修复建议</span>
+              <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-gray-300" />
             </div>
             <div className="text-3xl sm:text-4xl font-bold text-white mb-2">
               {result.recommendations.length}

@@ -331,10 +331,8 @@ export const TestPageLayout: React.FC<TestPageLayoutProps> = ({
   className = ''
 }) => {
   return (
-    <div className={`test-page-container ${className}`}>
-      <div className="test-page-content">
-        {children}
-      </div>
+    <div className={`w-full max-w-none space-y-6 ${className}`}>
+      {children}
     </div>
   );
 };

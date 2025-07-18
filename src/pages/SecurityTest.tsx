@@ -148,7 +148,7 @@ const SecurityTest: React.FC = () => {
             )}
 
             {/* 标签页切换 - 增强可读性 */}
-            <div className="bg-gray-700/60 border border-gray-600/70 rounded-xl p-1.5 flex gap-1.5 shadow-md">
+            <div className="bg-gray-800/90 backdrop-blur-sm border border-gray-700/60 rounded-xl p-1.5 flex gap-1.5 shadow-lg">
               <button
                 type="button"
                 onClick={() => setActiveTab('test')}

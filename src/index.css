@@ -213,14 +213,21 @@
 
   @media (min-width: 1024px) {
     .responsive-container {
-      max-width: 1200px; /* 减小最大宽度 */
+      max-width: 100%; /* 移除宽度限制，充分利用屏幕空间 */
       padding: 0 2rem;
     }
   }
 
   @media (min-width: 1440px) {
     .responsive-container {
-      max-width: 1400px; /* 大屏幕时适当增大 */
+      max-width: 100%; /* 移除宽度限制，充分利用屏幕空间 */
+      padding: 0 3rem; /* 大屏幕时增加左右边距 */
+    }
+  }
+
+  @media (min-width: 1920px) {
+    .responsive-container {
+      padding: 0 4rem; /* 超大屏幕时进一步增加边距 */
     }
   }
 
