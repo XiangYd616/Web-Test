@@ -39,6 +39,8 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,css,md}\"",
     "deps:check": "node scripts/dependency-analyzer.js",
     "deps:update": "npm update",
+    "ci:fix": "node scripts/fix-ci-issues.cjs",
+    "ci:check": "npm run type-check && npm run lint && npm run build",
     "clean": "rimraf dist dist-electron node_modules/.cache",
     "clean:all": "rimraf dist dist-electron node_modules"
   },
