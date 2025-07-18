@@ -331,7 +331,7 @@ export const TestPageLayout: React.FC<TestPageLayoutProps> = ({
   className = ''
 }) => {
   return (
-    <div className={`w-full max-w-none space-y-6 ${className}`}>
+    <div className={`w-full max-w-none space-y-4 page-optimized compact-layout ${className}`}>
       {children}
     </div>
   );

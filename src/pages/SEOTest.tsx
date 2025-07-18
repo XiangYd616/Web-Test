@@ -532,7 +532,7 @@ const SEOTest: React.FC = () => {
     <TestPageLayout className="space-y-4 dark-page-scrollbar"
     >
       {/* 页面标题和控制 */}
-      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl font-bold text-white">SEO综合分析</h2>

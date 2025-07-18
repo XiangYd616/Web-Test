@@ -21,16 +21,28 @@
     scrollbar-color: rgba(75, 85, 99, 0.7) rgba(17, 24, 39, 0.4);
   }
 
-  /* 响应式字体大小 */
-  @media (min-width: 1024px) {
+  /* 响应式字体大小 - 多屏幕尺寸优化 */
+  @media (min-width: 1024px) and (max-width: 1440px) {
     html {
-      font-size: 15px; /* 大屏幕稍微增大 */
+      font-size: 13px; /* 小笔记本屏幕 */
     }
   }
 
-  @media (min-width: 1440px) {
+  @media (min-width: 1441px) and (max-width: 1920px) {
     html {
-      font-size: 16px; /* 超大屏幕正常大小 */
+      font-size: 14px; /* 大笔记本/小台式机屏幕 */
+    }
+  }
+
+  @media (min-width: 1921px) and (max-width: 2560px) {
+    html {
+      font-size: 15px; /* 27寸显示屏 */
+    }
+  }
+
+  @media (min-width: 2561px) {
+    html {
+      font-size: 16px; /* 4K及以上超大屏幕 */
     }
   }
 
@@ -91,39 +103,39 @@
 /* 组件样式 */
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200;
+    @apply inline-flex items-center justify-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200;
   }
-  
+
   .btn-primary {
     @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
   }
-  
+
   .btn-secondary {
     @apply bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500;
   }
-  
+
   .btn-outline {
     @apply bg-white text-gray-700 border-gray-300 hover:bg-gray-50 focus:ring-blue-500;
   }
-  
+
   .btn-danger {
     @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
   }
-  
+
   .btn-sm {
-    @apply px-3 py-1.5 text-xs;
+    @apply px-2 py-1 text-xs;
   }
-  
+
   .btn-lg {
-    @apply px-6 py-3 text-base;
+    @apply px-4 py-2 text-base;
   }
   
   .input {
-    @apply block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 bg-white;
+    @apply block w-full px-2.5 py-1.5 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 bg-white;
   }
-  
+
   .card {
-    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-4;
   }
   
   .badge {
@@ -211,23 +223,31 @@
     }
   }
 
-  @media (min-width: 1024px) {
+  @media (min-width: 1024px) and (max-width: 1440px) {
     .responsive-container {
-      max-width: 100%; /* 移除宽度限制，充分利用屏幕空间 */
-      padding: 0 2rem;
+      max-width: 100%;
+      padding: 0 1.5rem; /* 小笔记本屏幕 */
     }
   }
 
-  @media (min-width: 1440px) {
+  @media (min-width: 1441px) and (max-width: 1920px) {
     .responsive-container {
-      max-width: 100%; /* 移除宽度限制，充分利用屏幕空间 */
-      padding: 0 3rem; /* 大屏幕时增加左右边距 */
+      max-width: 100%;
+      padding: 0 2rem; /* 大笔记本/小台式机屏幕 */
     }
   }
 
-  @media (min-width: 1920px) {
+  @media (min-width: 1921px) and (max-width: 2560px) {
     .responsive-container {
-      padding: 0 4rem; /* 超大屏幕时进一步增加边距 */
+      max-width: 100%;
+      padding: 0 3rem; /* 27寸显示屏 - 适中边距 */
+    }
+  }
+
+  @media (min-width: 2561px) {
+    .responsive-container {
+      max-width: 100%;
+      padding: 0 4rem; /* 4K及以上超大屏幕 */
     }
   }
 
@@ -240,99 +260,139 @@
     gap: calc(1rem * var(--spacing-scale, 0.85));
   }
 
-  /* 页面优化类 */
+  /* 页面优化类 - 更紧凑的设计 */
   .page-optimized {
     /* 减小整体字体大小 */
-    font-size: 0.9rem;
-    line-height: 1.4;
+    font-size: 0.85rem;
+    line-height: 1.35;
   }
 
   .page-optimized h1 {
-    font-size: 1.75rem;
-    margin-bottom: 0.75rem;
+    font-size: 1.5rem;
+    margin-bottom: 0.6rem;
+    font-weight: 600;
   }
 
   .page-optimized h2 {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+    margin-bottom: 0.4rem;
+    font-weight: 600;
   }
 
   .page-optimized h3 {
-    font-size: 1.25rem;
-    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    margin-bottom: 0.4rem;
+    font-weight: 500;
   }
 
   .page-optimized h4 {
-    font-size: 1.1rem;
-    margin-bottom: 0.4rem;
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+    font-weight: 500;
   }
 
   .page-optimized h5 {
-    font-size: 1rem;
-    margin-bottom: 0.3rem;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
   }
 
-  /* 紧凑的间距 */
+  /* 更紧凑的间距 */
   .page-optimized .space-y-6 > * + * {
-    margin-top: 1.25rem;
+    margin-top: 1rem;
   }
 
   .page-optimized .space-y-4 > * + * {
-    margin-top: 0.85rem;
+    margin-top: 0.7rem;
   }
 
   .page-optimized .space-y-8 > * + * {
-    margin-top: 1.7rem;
+    margin-top: 1.4rem;
   }
 
-  /* 紧凑的内边距 */
+  .page-optimized .space-y-2 > * + * {
+    margin-top: 0.4rem;
+  }
+
+  /* 更紧凑的内边距 */
   .page-optimized .p-6 {
-    padding: 1.25rem;
+    padding: 1rem;
   }
 
   .page-optimized .p-4 {
-    padding: 0.85rem;
+    padding: 0.7rem;
   }
 
   .page-optimized .p-8 {
-    padding: 1.7rem;
+    padding: 1.4rem;
   }
 
-  /* 紧凑的外边距 */
+  .page-optimized .p-3 {
+    padding: 0.5rem;
+  }
+
+  .page-optimized .px-6 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .page-optimized .py-4 {
+    padding-top: 0.7rem;
+    padding-bottom: 0.7rem;
+  }
+
+  /* 更紧凑的外边距 */
   .page-optimized .mb-6 {
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
   }
 
   .page-optimized .mb-4 {
-    margin-bottom: 0.85rem;
+    margin-bottom: 0.7rem;
   }
 
   .page-optimized .mb-8 {
-    margin-bottom: 1.7rem;
+    margin-bottom: 1.4rem;
   }
 
-  /* 按钮优化 */
+  .page-optimized .mt-6 {
+    margin-top: 1rem;
+  }
+
+  .page-optimized .mt-4 {
+    margin-top: 0.7rem;
+  }
+
+  /* 更紧凑的按钮优化 */
   .page-optimized button {
-    padding: 0.6rem 1rem;
-    font-size: 0.875rem;
+    padding: 0.5rem 0.85rem;
+    font-size: 0.8rem;
+    min-height: 2.2rem;
   }
 
   .page-optimized .btn-lg {
-    padding: 0.75rem 1.25rem;
-    font-size: 0.95rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.875rem;
+    min-height: 2.5rem;
   }
 
   .page-optimized .btn-sm {
-    padding: 0.4rem 0.75rem;
-    font-size: 0.8rem;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.75rem;
+    min-height: 1.8rem;
   }
 
-  /* 输入框优化 */
+  /* 更紧凑的输入框优化 */
   .page-optimized input,
   .page-optimized textarea,
   .page-optimized select {
-    padding: 0.6rem 0.85rem;
-    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    min-height: 2.2rem;
+  }
+
+  .page-optimized textarea {
+    min-height: 4rem;
+    line-height: 1.3;
   }
 
   /* 卡片优化 */
@@ -396,18 +456,87 @@
 
   /* 图表容器优化 */
   .page-optimized .chart-container {
-    height: 16rem; /* 减小图表高度 */
+    height: 14rem; /* 减小图表高度 */
   }
 
   /* 侧边栏优化 */
   .page-optimized .sidebar {
-    width: 14rem; /* 减小侧边栏宽度 */
+    width: 12rem; /* 减小侧边栏宽度 */
   }
 
-  /* 响应式优化 */
-  @media (max-width: 1024px) {
+  /* 表格优化 */
+  .page-optimized .table-responsive th {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  .page-optimized .table-responsive td {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  /* 模态框优化 */
+  .page-optimized .modal-content {
+    padding: 1rem;
+  }
+
+  .page-optimized .modal-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .page-optimized .modal-body {
+    padding: 1rem;
+  }
+
+  .page-optimized .modal-footer {
+    padding: 0.75rem 1rem;
+  }
+
+  /* 小笔记本屏幕优化 (1366x768等) */
+  @media (min-width: 1024px) and (max-width: 1440px) {
     .page-optimized {
       font-size: 0.85rem;
+      line-height: 1.3;
+    }
+
+    .page-optimized h1 {
+      font-size: 1.4rem;
+    }
+
+    .page-optimized h2 {
+      font-size: 1.2rem;
+    }
+
+    .page-optimized h3 {
+      font-size: 1.05rem;
+    }
+
+    .page-optimized .p-6 {
+      padding: 0.9rem;
+    }
+
+    .page-optimized .p-4 {
+      padding: 0.65rem;
+    }
+
+    .page-optimized .chart-container {
+      height: 13rem;
+    }
+
+    .page-optimized .space-y-6 > * + * {
+      margin-top: 0.9rem;
+    }
+
+    .page-optimized .space-y-4 > * + * {
+      margin-top: 0.65rem;
+    }
+  }
+
+  /* 大笔记本/小台式机屏幕优化 (1920x1080等) */
+  @media (min-width: 1441px) and (max-width: 1920px) {
+    .page-optimized {
+      font-size: 0.9rem;
+      line-height: 1.35;
     }
 
     .page-optimized h1 {
@@ -418,18 +547,12 @@
       font-size: 1.25rem;
     }
 
+    .page-optimized h3 {
+      font-size: 1.1rem;
+    }
+
     .page-optimized .p-6 {
       padding: 1rem;
-    }
-
-    .page-optimized .chart-container {
-      height: 14rem;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .page-optimized {
-      font-size: 0.8rem;
     }
 
     .page-optimized .p-4 {
@@ -437,7 +560,268 @@
     }
 
     .page-optimized .chart-container {
+      height: 14rem;
+    }
+
+    .page-optimized .space-y-6 > * + * {
+      margin-top: 1rem;
+    }
+
+    .page-optimized .space-y-4 > * + * {
+      margin-top: 0.75rem;
+    }
+  }
+
+  /* 27寸显示屏优化 (2560x1440等) */
+  @media (min-width: 1921px) and (max-width: 2560px) {
+    .page-optimized {
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    .page-optimized h1 {
+      font-size: 1.75rem;
+    }
+
+    .page-optimized h2 {
+      font-size: 1.4rem;
+    }
+
+    .page-optimized h3 {
+      font-size: 1.2rem;
+    }
+
+    .page-optimized .p-6 {
+      padding: 1.25rem;
+    }
+
+    .page-optimized .p-4 {
+      padding: 0.9rem;
+    }
+
+    .page-optimized .chart-container {
+      height: 16rem;
+    }
+
+    .page-optimized .space-y-6 > * + * {
+      margin-top: 1.25rem;
+    }
+
+    .page-optimized .space-y-4 > * + * {
+      margin-top: 0.9rem;
+    }
+
+    /* 27寸屏幕专用优化 */
+    .page-optimized button {
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    .page-optimized input,
+    .page-optimized textarea,
+    .page-optimized select {
+      padding: 0.6rem 0.9rem;
+      font-size: 0.9rem;
+    }
+  }
+
+  /* 4K及以上超大屏幕优化 */
+  @media (min-width: 2561px) {
+    .page-optimized {
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .page-optimized h1 {
+      font-size: 2rem;
+    }
+
+    .page-optimized h2 {
+      font-size: 1.5rem;
+    }
+
+    .page-optimized h3 {
+      font-size: 1.25rem;
+    }
+
+    .page-optimized .p-6 {
+      padding: 1.5rem;
+    }
+
+    .page-optimized .p-4 {
+      padding: 1rem;
+    }
+
+    .page-optimized .chart-container {
+      height: 18rem;
+    }
+
+    .page-optimized .space-y-6 > * + * {
+      margin-top: 1.5rem;
+    }
+
+    .page-optimized .space-y-4 > * + * {
+      margin-top: 1rem;
+    }
+  }
+
+  /* 平板和小屏幕优化 */
+  @media (max-width: 1024px) {
+    .page-optimized {
+      font-size: 0.8rem;
+    }
+
+    .page-optimized h1 {
+      font-size: 1.3rem;
+    }
+
+    .page-optimized h2 {
+      font-size: 1.1rem;
+    }
+
+    .page-optimized .p-6 {
+      padding: 0.8rem;
+    }
+
+    .page-optimized .chart-container {
       height: 12rem;
+    }
+  }
+
+  /* 手机屏幕优化 */
+  @media (max-width: 768px) {
+    .page-optimized {
+      font-size: 0.75rem;
+    }
+
+    .page-optimized .p-4 {
+      padding: 0.6rem;
+    }
+
+    .page-optimized .chart-container {
+      height: 10rem;
+    }
+  }
+
+  /* 响应式导航优化 */
+  .responsive-nav {
+    transition: all 0.3s ease;
+  }
+
+  /* 小笔记本屏幕导航 */
+  @media (min-width: 1024px) and (max-width: 1440px) {
+    .responsive-nav .responsive-container {
+      padding: 0 1rem;
+    }
+
+    .responsive-nav h-10 {
+      height: 2.25rem;
+    }
+  }
+
+  /* 大笔记本/小台式机屏幕导航 */
+  @media (min-width: 1441px) and (max-width: 1920px) {
+    .responsive-nav .responsive-container {
+      padding: 0 1.5rem;
+    }
+  }
+
+  /* 27寸显示屏导航 */
+  @media (min-width: 1921px) and (max-width: 2560px) {
+    .responsive-nav .responsive-container {
+      padding: 0 2rem;
+    }
+
+    .responsive-nav .flex.justify-between.items-center {
+      height: 3rem;
+    }
+
+    .responsive-nav .text-lg {
+      font-size: 1.25rem;
+    }
+
+    .responsive-nav .space-x-6 > * + * {
+      margin-left: 2rem;
+    }
+  }
+
+  /* 4K及以上超大屏幕导航 */
+  @media (min-width: 2561px) {
+    .responsive-nav .responsive-container {
+      padding: 0 3rem;
+    }
+
+    .responsive-nav .flex.justify-between.items-center {
+      height: 3.5rem;
+    }
+
+    .responsive-nav .text-lg {
+      font-size: 1.5rem;
+    }
+  }
+
+  /* 登录页面专用优化 */
+  .login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .login-content {
+    width: 100%;
+    max-width: 24rem; /* 减小最大宽度，使布局更紧凑 */
+    margin: 0 auto;
+    position: relative;
+    z-index: 10;
+    padding: 0 1rem; /* 添加左右内边距 */
+  }
+
+  /* 输入框图标避让样式 */
+  .input-with-icon {
+    padding-left: 2.75rem !important; /* 减小左内边距，让文字更接近图标 */
+  }
+
+  .input-with-icon::placeholder {
+    opacity: 0.7; /* 稍微降低透明度 */
+  }
+
+  /* 图标容器样式 */
+  .input-icon-container {
+    left: 0.75rem; /* 图标距离左边的距离 */
+  }
+
+  /* 确保登录页面在不同屏幕尺寸下的间距 */
+  @media (max-height: 700px) {
+    .login-container {
+      padding: 2rem 0;
+      align-items: flex-start;
+    }
+
+    .login-content .mb-6 {
+      margin-bottom: 1rem;
+    }
+
+    .login-content .space-y-5 > * + * {
+      margin-top: 1rem;
+    }
+  }
+
+  @media (max-height: 600px) {
+    .login-container {
+      padding: 1rem 0;
+    }
+
+    .login-content .mb-6 {
+      margin-bottom: 0.75rem;
+    }
+
+    .login-content .text-3xl {
+      font-size: 1.5rem;
+    }
+
+    .login-content .text-2xl {
+      font-size: 1.25rem;
     }
   }
 

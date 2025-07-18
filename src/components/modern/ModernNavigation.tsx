@@ -174,27 +174,27 @@ const ModernNavigation: React.FC = () => {
   };
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50 page-optimized">
+    <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50 page-optimized responsive-nav">
       <div className="responsive-container">
-        <div className="flex justify-between items-center h-12">
+        <div className="flex justify-between items-center h-10">
           {/* Logo */}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
-                <Zap className="w-5 h-5 text-white" />
+            <Link to="/" className="flex items-center space-x-2">
+              <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                <Zap className="w-4 h-4 text-white" />
               </div>
-              <span className="text-xl font-bold text-gray-900">TestWeb</span>
+              <span className="text-lg font-bold text-gray-900">TestWeb</span>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-6">
             {/* 主导航 */}
             {mainNavigation.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
-                className={`flex items-center space-x-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActivePath(item.href)
+                className={`flex items-center space-x-1 px-2 py-1.5 rounded-lg text-sm font-medium transition-colors ${isActivePath(item.href)
                   ? 'text-blue-600 bg-blue-50'
                   : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
                   }`}

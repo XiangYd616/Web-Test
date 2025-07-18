@@ -262,7 +262,7 @@ const ChromeCompatibilityTest: React.FC = () => {
   return (
     <TestPageLayout className="space-y-4 dark-page-scrollbar">
       {/* 页面标题 */}
-      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
         <h1 className="text-2xl font-bold mb-2">Chrome浏览器兼容性测试</h1>
         <p className="text-gray-600 dark:text-gray-400">
           检测和验证浏览器兼容性，确保在不同浏览器中的一致显示效果

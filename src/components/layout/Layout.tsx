@@ -79,7 +79,7 @@ const Layout: React.FC<LayoutProps> = ({ showFooter = true }) => {
       <ModernNavigation />
 
       {/* Main Content */}
-      <main className="flex-1 responsive-container py-4">
+      <main className="flex-1 responsive-container py-3">
         <Outlet />
       </main>
 
