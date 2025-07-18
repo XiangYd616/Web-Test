@@ -24,6 +24,7 @@ import { AdvancedTestCharts } from '../components/charts';
 import { URLInput } from '../components/testing';
 import { useUserStats } from '../hooks/useUserStats';
 import '../styles/progress-bars.css';
+import '../styles/unified-testing-tools.css';
 
 interface WebsiteTestConfig {
   url: string;
@@ -80,22 +81,23 @@ const WebsiteTest: React.FC = () => {
     }
   });
 
-  // 网站测试状态管理
-  const [isRunning, setIsRunning] = useState(false);
+  // 网站测试状态管理 - 使用统一的类型
+  const [testStatus, setTestStatus] = useState<'idle' | 'starting' | 'running' | 'completed' | 'failed' | 'stopped'>('idle');
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState('');
-  const [testPhase, setTestPhase] = useState<'idle' | 'analyzing' | 'testing' | 'completed'>('idle');
   const [estimatedTimeRemaining, setEstimatedTimeRemaining] = useState(0);
   const [results, setResults] = useState<any>(null);
   const [testHistory, setTestHistory] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  // 兼容性状态
+  const isRunning = testStatus === 'running' || testStatus === 'starting';
+
   // 测试功能实现
   const runTest = async (testConfig?: any) => {
-    setIsRunning(true);
+    setTestStatus('running');
     setProgress(0);
     setCurrentStep('正在初始化测试...');
-    setTestPhase('analyzing');
     setError(null);
 
     try {
@@ -120,26 +122,23 @@ const WebsiteTest: React.FC = () => {
 
       setResults(mockResult);
       setTestHistory(prev => [mockResult, ...prev.slice(0, 9)]);
-      setTestPhase('completed');
+      setTestStatus('completed');
       setCurrentStep('测试完成');
     } catch (err) {
       setError(err instanceof Error ? err.message : '测试失败');
-      setTestPhase('idle');
-    } finally {
-      setIsRunning(false);
+      setTestStatus('failed');
     }
   };
 
   const stopTest = async () => {
-    setIsRunning(false);
-    setTestPhase('idle');
+    setTestStatus('stopped');
     setCurrentStep('');
     setProgress(0);
   };
 
   const clearResults = () => {
     setResults(null);
-    setTestPhase('idle');
+    setTestStatus('idle');
     setCurrentStep('');
     setProgress(0);
   };
@@ -147,9 +146,6 @@ const WebsiteTest: React.FC = () => {
   const clearError = () => {
     setError(null);
   };
-
-  // 状态管理
-  const [testStatus, setTestStatus] = useState<'idle' | 'starting' | 'running' | 'completed' | 'failed'>('idle');
 
   // 监听测试状态变化
   useEffect(() => {
@@ -482,7 +478,8 @@ const WebsiteTest: React.FC = () => {
               {/* 进度条 */}
               <div className="w-full bg-gray-700 rounded-full h-2 mb-3">
                 <div
-                  className="bg-blue-500 h-2 rounded-full transition-all duration-300 progress-fill progress-fill-blue" style={{ width: `progress%` }}
+                  className="bg-blue-500 h-2 rounded-full transition-all duration-300 progress-fill progress-fill-blue"
+                  style={{ width: `${progress}%` }}
                 ></div>
               </div>
 
@@ -492,7 +489,7 @@ const WebsiteTest: React.FC = () => {
               <div className="flex items-center justify-between mt-2 text-xs text-blue-200">
                 <div className="flex items-center space-x-2">
                   <Clock className="w-3 h-3" />
-                  <span>阶段: {testPhase}</span>
+                  <span>状态: {testStatus}</span>
                 </div>
                 {estimatedTimeRemaining > 0 && (
                   <span>
@@ -564,6 +561,8 @@ const WebsiteTest: React.FC = () => {
                     checked={config.includePerformance}
                     onChange={(e) => setConfig(prev => ({ ...prev, includePerformance: e.target.checked }))}
                     className="sr-only peer"
+                    aria-label="包含性能测试"
+                    title="是否包含性能测试"
                   />
                   <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                 </label>
@@ -577,6 +576,8 @@ const WebsiteTest: React.FC = () => {
                     value={config.performanceLevel}
                     onChange={(e) => setConfig(prev => ({ ...prev, performanceLevel: e.target.value as 'basic' | 'standard' | 'comprehensive' }))}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    title="选择性能测试级别"
+                    aria-label="性能测试级别"
                   >
                     <option value="basic">基础检测 - 页面速度</option>
                     <option value="standard">标准检测 - 包含Core Web Vitals</option>
@@ -730,11 +731,8 @@ const WebsiteTest: React.FC = () => {
                   </div>
                   <div className="w-full rounded-full h-2 bg-themed-tertiary">
                     <div
-                      className="h-2 rounded-full transition-all duration-300"
-                      style={{
-                        width: `${progress}%`,
-                        background: 'linear-gradient(to right, var(--accent-primary), var(--accent-secondary))'
-                      }}
+                      className="h-2 rounded-full transition-all duration-300 test-progress-dynamic"
+                      style={{ width: `${progress}%` }}
                     ></div>
                   </div>
                 </div>
@@ -846,7 +844,7 @@ const WebsiteTest: React.FC = () => {
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
           <h3 className="text-lg font-semibold text-white mb-4">测试历史</h3>
           <div className="space-y-3">
-            {testHistory.slice(0, 5).map((test, index) => (
+            {testHistory.slice(0, 5).map((test) => (
               <div key={test.id} className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
                 <div className="flex items-center space-x-3">
                   <div className={`w-3 h-3 rounded-full ${test.status === 'completed' ? 'bg-green-500' : 'bg-red-500'

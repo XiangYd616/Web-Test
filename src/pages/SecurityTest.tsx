@@ -9,6 +9,7 @@ import { useUserStats } from '../hooks/useUserStats';
 import { SecurityTestResult, TestProgress } from '../services/unifiedSecurityEngine';
 import '../styles/security-test-clarity.css';
 import '../styles/security-test-enhanced.css';
+import '../styles/unified-testing-tools.css';
 
 const SecurityTest: React.FC = () => {
   // 登录检查

@@ -9,6 +9,7 @@ import { AdvancedStressTestConfig as ImportedAdvancedStressTestConfig } from '..
 import { useUserStats } from '../hooks/useUserStats';
 import backgroundTestManager from '../services/BackgroundTestManager.js';
 import { testEngineManager } from '../services/testEngines';
+import '../styles/unified-testing-tools.css';
 
 // 注释：已简化实现，移除复杂的数据管理Hook
 
@@ -540,7 +541,8 @@ const StressTest: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4 dark-page-scrollbar min-h-screen" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' }}>
+    <TestPageLayout className="space-y-4 dark-page-scrollbar"
+    >
       {/* 页面标题和控制 */}
       <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -686,7 +688,7 @@ const StressTest: React.FC = () => {
                 {backgroundTestInfo && (
                   <div className="w-full bg-gray-700 rounded-full h-3 mb-3">
                     <div
-                      className="bg-blue-500 h-3 rounded-full transition-all duration-300"
+                      className="test-progress-dynamic h-3 rounded-full transition-all duration-300"
                       style={{ width: `${backgroundTestInfo.progress || 0}%` }}
                     ></div>
                   </div>
@@ -1490,7 +1492,7 @@ const StressTest: React.FC = () => {
           </>
         )}
       </div>
-    </div>
+    </TestPageLayout>
   );
 };
 

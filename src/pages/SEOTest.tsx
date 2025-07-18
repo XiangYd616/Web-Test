@@ -21,8 +21,12 @@ import FileUploadSEO from '../components/seo/FileUploadSEO';
 import LocalSEOResults from '../components/seo/LocalSEOResults';
 import NetworkErrorPrompt from '../components/seo/NetworkErrorPrompt';
 import { URLInput } from '../components/testing';
+import {
+  TestPageLayout
+} from '../components/testing/UnifiedTestingComponents';
 import type { SEOTestMode } from '../hooks/useUnifiedSEOTest';
 import { useUnifiedSEOTest } from '../hooks/useUnifiedSEOTest';
+import '../styles/unified-testing-tools.css';
 
 type TestMode = 'standard' | 'comprehensive';
 type TestStatusType = 'idle' | 'starting' | 'running' | 'completed' | 'failed';
@@ -525,7 +529,8 @@ const SEOTest: React.FC = () => {
   }
 
   return (
-    <div className="space-y-4 dark-page-scrollbar min-h-screen" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' }}>
+    <TestPageLayout className="space-y-4 dark-page-scrollbar"
+    >
       {/* 页面标题和控制 */}
       <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -1109,7 +1114,7 @@ const SEOTest: React.FC = () => {
             {/* 进度条 */}
             <div className="w-full bg-gray-700 rounded-full h-2">
               <div
-                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                className="test-progress-dynamic h-2 rounded-full transition-all duration-300"
                 style={{ width: `${progress}%` }}
               />
             </div>
@@ -1195,7 +1200,7 @@ const SEOTest: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </TestPageLayout>
   );
 };
 
