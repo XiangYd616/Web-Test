@@ -99,7 +99,7 @@ export const UnifiedSecurityResults: React.FC<UnifiedSecurityResultsProps> = ({
   };
 
   return (
-    <div className="unified-security-results space-y-4 sm:space-y-6 fade-in-up">
+    <div className="unified-security-results space-y-4 fade-in-up">
       {/* 头部概览 - 响应式优化 */}
       <div className="bg-gray-800/90 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white border border-gray-700/60 shadow-lg">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-4 sm:mb-6 gap-4">

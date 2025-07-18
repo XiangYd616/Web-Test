@@ -626,9 +626,9 @@ const APITest: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 dark-page-scrollbar">
       {/* 页面标题 */}
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4 space-y-4 lg:space-y-0">
           <div className="flex items-center space-x-3">
             <Code className="w-8 h-8 text-blue-400" />
@@ -802,7 +802,7 @@ const APITest: React.FC = () => {
       </div>
 
       {/* 测试类型选择 */}
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <h3 className="text-xl font-semibold text-white mb-2">测试类型选择</h3>
         <p className="text-sm text-gray-400 mb-6">
           💡 提示：性能和安全测试为API专用功能。如需全面的性能或安全测试，请使用专门的"压力测试"和"安全检测"工具。
@@ -907,7 +907,7 @@ const APITest: React.FC = () => {
       </div>
 
       {/* 配置区域 */}
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <h3 className="text-xl font-semibold text-white mb-4">API配置</h3>
 
         {/* 配置标签页 */}
@@ -1216,7 +1216,7 @@ const APITest: React.FC = () => {
       </div>
 
       {/* 端点管理 */}
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-semibold text-white">API 端点管理</h3>
           <div className="flex space-x-3">
@@ -1385,7 +1385,7 @@ const APITest: React.FC = () => {
 
       {/* 测试结果显示 */}
       {result && (
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+        <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-semibold text-white">测试结果</h3>
             <div className="flex space-x-3">
@@ -1447,7 +1447,7 @@ const APITest: React.FC = () => {
                 性能分析
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-gray-800/50 rounded-lg p-4">
+                <div className="bg-gray-700/30 rounded-lg p-4">
                   <div className="text-sm text-gray-300 mb-2">响应时间分布</div>
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
@@ -1464,7 +1464,7 @@ const APITest: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <div className="bg-gray-800/50 rounded-lg p-4">
+                <div className="bg-gray-700/30 rounded-lg p-4">
                   <div className="text-sm text-gray-300 mb-2">成功率</div>
                   <div className="text-2xl font-bold text-green-400">
                     {Math.round(result.performanceMetrics.successRate || 0)}%
@@ -1473,7 +1473,7 @@ const APITest: React.FC = () => {
                     {result.passedTests || 0} / {result.totalTests || 0} 通过
                   </div>
                 </div>
-                <div className="bg-gray-800/50 rounded-lg p-4">
+                <div className="bg-gray-700/30 rounded-lg p-4">
                   <div className="text-sm text-gray-300 mb-2">吞吐量</div>
                   <div className="text-2xl font-bold text-blue-400">
                     {Math.round(result.performanceMetrics.throughput || 0)}

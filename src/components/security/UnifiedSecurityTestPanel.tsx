@@ -256,9 +256,9 @@ export const UnifiedSecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, 
   }), [runTest, config.url, isUrlValid, isRunning, config]);
 
   return (
-    <div className="unified-security-test-panel space-y-4 sm:space-y-6 fade-in-up">
+    <div className="unified-security-test-panel space-y-4 fade-in-up">
       {/* URL 输入 - 增强版 */}
-      <div className="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700/60 p-5 sm:p-7 shadow-lg">
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <label className="block text-base font-bold text-white mb-4 flex items-center">
           <span className="text-2xl mr-2">🌐</span>
           目标网站URL
@@ -275,7 +275,7 @@ export const UnifiedSecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, 
       </div>
 
       {/* 快速预设 - 增强可读性 */}
-      <div className="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700/60 p-5 sm:p-7 shadow-lg">
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <h3 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-5 flex items-center">
           <Zap className="h-5 w-5 sm:h-6 sm:w-6 mr-3 text-yellow-400" />
           快速预设
@@ -287,7 +287,7 @@ export const UnifiedSecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, 
               type="button"
               onClick={() => applyPreset(key)}
               disabled={isRunning}
-              className="bg-gray-800/90 hover:bg-gray-700/90 backdrop-blur-sm border border-gray-700/60 hover:border-gray-600/70 p-4 sm:p-5 rounded-xl text-left group disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
+              className="bg-gray-700/30 hover:bg-gray-600/50 border border-gray-600 hover:border-gray-500 p-4 sm:p-5 rounded-xl text-left group disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2 sm:gap-0">
                 <span className="font-bold text-white text-base sm:text-lg">
@@ -312,7 +312,7 @@ export const UnifiedSecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, 
       </div>
 
       {/* 模块配置 - 增强可读性 */}
-      <div className="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700/60 p-5 sm:p-7 shadow-lg">
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <h3 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-5 flex items-center">
           <Settings className="h-5 w-5 sm:h-6 sm:w-6 mr-3 text-gray-300" />
           检测模块配置
@@ -372,7 +372,7 @@ export const UnifiedSecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, 
 
       {/* 进度显示 - 增强可读性 */}
       {progress && (
-        <div className="bg-gray-800/90 backdrop-blur-sm rounded-xl border border-gray-700/60 p-5 sm:p-7 shadow-lg">
+        <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-5 gap-4 sm:gap-0">
             <div className="flex items-center space-x-4">
               <div className="animate-spin h-6 w-6 sm:h-7 sm:w-7 border-3 border-blue-500 border-t-transparent rounded-full flex-shrink-0"></div>
@@ -401,9 +401,9 @@ export const UnifiedSecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, 
             </div>
           </div>
 
-          <div className="relative w-full bg-gray-800/90 backdrop-blur-sm rounded-full h-5 overflow-hidden shadow-inner border border-gray-700/60">
+          <div className="w-full bg-gray-700 rounded-full h-2">
             <div
-              className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 rounded-full transition-all duration-700 ease-out shadow-lg"
+              className="h-2 bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 rounded-full transition-all duration-300"
               style={{ width: `${Math.min(progress.progress, 100)}%` }}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-white/40 to-transparent animate-pulse"></div>
@@ -412,25 +412,25 @@ export const UnifiedSecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, 
 
           {progress.statistics && (
             <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-center">
-              <div className="bg-gray-800/90 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-gray-700/60 shadow-lg">
+              <div className="bg-gray-700/30 rounded-lg p-3 sm:p-4 border border-gray-600/50">
                 <div className="text-lg sm:text-xl font-bold text-white mb-1">
                   {progress.statistics.totalChecks || 0}
                 </div>
                 <div className="text-sm text-gray-300 font-medium">总检查项</div>
               </div>
-              <div className="bg-gray-800/90 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-gray-700/60 shadow-lg">
+              <div className="bg-gray-700/30 rounded-lg p-3 sm:p-4 border border-gray-600/50">
                 <div className="text-lg sm:text-xl font-bold text-green-400 mb-1">
                   {progress.statistics.passedChecks || 0}
                 </div>
                 <div className="text-sm text-gray-300 font-medium">通过</div>
               </div>
-              <div className="bg-gray-800/90 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-gray-700/60 shadow-lg">
+              <div className="bg-gray-700/30 rounded-lg p-3 sm:p-4 border border-gray-600/50">
                 <div className="text-lg sm:text-xl font-bold text-red-400 mb-1">
                   {progress.statistics.failedChecks || 0}
                 </div>
                 <div className="text-sm text-gray-300 font-medium">失败</div>
               </div>
-              <div className="bg-gray-800/90 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-gray-700/60 shadow-lg">
+              <div className="bg-gray-700/30 rounded-lg p-3 sm:p-4 border border-gray-600/50">
                 <div className="text-lg sm:text-xl font-bold text-yellow-400 mb-1">
                   {progress.statistics.warningChecks || 0}
                 </div>

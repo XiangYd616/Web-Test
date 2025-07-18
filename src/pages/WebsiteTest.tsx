@@ -366,9 +366,9 @@ const WebsiteTest: React.FC = () => {
   const estimatedTime = selectedTestsCount * 45; // 平均45秒每个测试
 
   return (
-    <div className="space-y-6 dark-page-scrollbar">
+    <div className="space-y-4 dark-page-scrollbar">
       {/* 页面标题 */}
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-2xl font-bold text-white">网站综合测试</h2>
@@ -542,7 +542,7 @@ const WebsiteTest: React.FC = () => {
         <div className="lg:col-span-2 space-y-6">
 
           {/* 性能测试配置 */}
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+          <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
             <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
               <Gauge className="w-5 h-5 mr-2 text-blue-400" />
               性能测试配置
@@ -594,7 +594,7 @@ const WebsiteTest: React.FC = () => {
           </div>
 
           {/* 测试类型选择 */}
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+          <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
             <h3 className="text-xl font-semibold text-white mb-4">选择其他测试类型</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {testTypes.map((test) => (
@@ -742,7 +742,7 @@ const WebsiteTest: React.FC = () => {
 
           {/* 测试结果 */}
           {results && (
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+            <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
               <h3 className="text-lg font-semibold text-white mb-4">测试结果</h3>
               <div className="space-y-4">
                 <div className="text-center p-6 bg-gray-700/50 rounded-lg">
@@ -827,7 +827,7 @@ const WebsiteTest: React.FC = () => {
 
       {/* 高级网站测试图表 */}
       {results && (
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+        <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
           <AdvancedTestCharts
             results={results}
             testType="website"
@@ -841,7 +841,7 @@ const WebsiteTest: React.FC = () => {
 
       {/* 网站测试历史 */}
       {testHistory.length > 0 && (
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+        <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
           <h3 className="text-lg font-semibold text-white mb-4">测试历史</h3>
           <div className="space-y-3">
             {testHistory.slice(0, 5).map((test) => (

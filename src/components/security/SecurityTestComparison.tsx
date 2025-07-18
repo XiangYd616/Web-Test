@@ -173,7 +173,7 @@ const SecurityTestComparison: React.FC<SecurityTestComparisonProps> = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* 标题栏 */}
       <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <div className="flex items-center justify-between">

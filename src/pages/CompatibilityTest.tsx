@@ -804,9 +804,9 @@ const CompatibilityTest: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 dark-page-scrollbar">
       {/* 页面标题 */}
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-2xl font-bold text-white">兼容性测试</h2>
@@ -978,7 +978,7 @@ const CompatibilityTest: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* 测试配置 */}
         <div className="lg:col-span-1">
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+          <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
             <div className="flex items-center mb-4">
               <Settings className="w-5 h-5 text-gray-300 mr-2" />
               <h3 className="text-lg font-semibold text-white">测试配置</h3>
@@ -1093,7 +1093,7 @@ const CompatibilityTest: React.FC = () => {
 
         {/* 测试结果 */}
         <div className="lg:col-span-2">
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+          <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
             <h3 className="text-lg font-semibold text-white mb-4">测试结果</h3>
 
             {!results && !isRunning ? (
@@ -1117,7 +1117,7 @@ const CompatibilityTest: React.FC = () => {
                 </div>
 
                 {/* 浏览器兼容性详情 */}
-                <div className="bg-gray-800/30 rounded-lg p-6">
+                <div className="bg-gray-700/30 rounded-lg p-6">
                   <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
                     <Globe className="w-5 h-5 mr-2" />
                     浏览器兼容性详情
@@ -1144,7 +1144,7 @@ const CompatibilityTest: React.FC = () => {
                 </div>
 
                 {/* 设备兼容性 */}
-                <div className="bg-gray-800/30 rounded-lg p-6">
+                <div className="bg-gray-700/30 rounded-lg p-6">
                   <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
                     <Monitor className="w-5 h-5 mr-2" />
                     设备兼容性
@@ -1182,7 +1182,7 @@ const CompatibilityTest: React.FC = () => {
 
                 {/* 兼容性问题 */}
                 {results.issues && results.issues.length > 0 && (
-                  <div className="bg-gray-800/30 rounded-lg p-6">
+                  <div className="bg-gray-700/30 rounded-lg p-6">
                     <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
                       <AlertTriangle className="w-5 h-5 mr-2 text-yellow-500" />
                       发现的兼容性问题
@@ -1231,7 +1231,7 @@ const CompatibilityTest: React.FC = () => {
 
                 {/* 优化建议 */}
                 {results.recommendations && results.recommendations.length > 0 && (
-                  <div className="bg-gray-800/30 rounded-lg p-6">
+                  <div className="bg-gray-700/30 rounded-lg p-6">
                     <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
                       <CheckCircle className="w-5 h-5 mr-2 text-green-500" />
                       优化建议
@@ -1274,7 +1274,7 @@ const CompatibilityTest: React.FC = () => {
 
                 {/* 兼容性矩阵 */}
                 {results.compatibilityMatrix && Object.keys(results.compatibilityMatrix).length > 0 && (
-                  <div className="bg-gray-800/30 rounded-lg p-6">
+                  <div className="bg-gray-700/30 rounded-lg p-6">
                     <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
                       <Grid className="w-5 h-5 mr-2 text-blue-500" />
                       兼容性矩阵
@@ -1394,7 +1394,7 @@ const CompatibilityTest: React.FC = () => {
 
       {/* 高级兼容性图表 */}
       {results && (
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+        <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
           <AdvancedTestCharts
             results={{
               id: Date.now().toString(),
@@ -1430,7 +1430,7 @@ const CompatibilityTest: React.FC = () => {
 
       {/* 兼容性测试历史 */}
       {testHistory.length > 0 && (
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+        <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
           <h3 className="text-lg font-semibold text-white mb-4">测试历史</h3>
           <div className="space-y-3">
             {testHistory.slice(0, 5).map((test) => (
