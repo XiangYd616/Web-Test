@@ -868,9 +868,9 @@ const PerformanceTest: React.FC = () => {
       </div>
 
       {/* 内容区域 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* 左侧：URL输入和配置 */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4">
           {/* URL输入 */}
           <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
             <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
@@ -1051,7 +1051,7 @@ const PerformanceTest: React.FC = () => {
         </div>
 
         {/* 右侧：测试状态和进度 */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* 测试进度 */}
           {(isRunning || testStatus === 'running') && (
             <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">

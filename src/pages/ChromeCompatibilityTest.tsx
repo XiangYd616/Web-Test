@@ -22,7 +22,7 @@ const ChromeCompatibilityTest: React.FC = () => {
     // 运行兼容性检测
     const runCompatibilityTest = () => {
       setIsLoading(true);
-      
+
       setTimeout(() => {
         const result = ChromeCompatibilityHelper.detectCompatibilityIssues();
         setTestResult(result);
@@ -39,12 +39,12 @@ const ChromeCompatibilityTest: React.FC = () => {
     const { browserInfo } = testResult;
 
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <h3 className="text-lg font-semibold mb-4 flex items-center">
-          <Chrome className="mr-2 h-5 w-5" />
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+        <h3 className="text-lg font-semibold mb-4 flex items-center text-white">
+          <Chrome className="mr-2 h-5 w-5 text-blue-400" />
           浏览器信息
         </h3>
-        
+
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -53,21 +53,21 @@ const ChromeCompatibilityTest: React.FC = () => {
                 {browserInfo.isChrome ? '是' : '否'}
               </span>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600 dark:text-gray-400">Edge:</span>
               <span className={`text-sm font-medium ${browserInfo.isEdge ? 'text-blue-600' : 'text-gray-500'}`}>
                 {browserInfo.isEdge ? '是' : '否'}
               </span>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600 dark:text-gray-400">Safari:</span>
               <span className={`text-sm font-medium ${browserInfo.isSafari ? 'text-purple-600' : 'text-gray-500'}`}>
                 {browserInfo.isSafari ? '是' : '否'}
               </span>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600 dark:text-gray-400">Firefox:</span>
               <span className={`text-sm font-medium ${browserInfo.isFirefox ? 'text-orange-600' : 'text-gray-500'}`}>
@@ -75,7 +75,7 @@ const ChromeCompatibilityTest: React.FC = () => {
               </span>
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <div>
               <span className="text-sm text-gray-600 dark:text-gray-400">User Agent:</span>
@@ -83,7 +83,7 @@ const ChromeCompatibilityTest: React.FC = () => {
                 {browserInfo.userAgent}
               </p>
             </div>
-            
+
             <div>
               <span className="text-sm text-gray-600 dark:text-gray-400">Vendor:</span>
               <p className="text-xs text-gray-800 dark:text-gray-200 mt-1">
@@ -112,16 +112,16 @@ const ChromeCompatibilityTest: React.FC = () => {
     ];
 
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <h3 className="text-lg font-semibold mb-4 flex items-center">
-          <CheckCircle className="mr-2 h-5 w-5" />
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+        <h3 className="text-lg font-semibold mb-4 flex items-center text-white">
+          <CheckCircle className="mr-2 h-5 w-5 text-green-400" />
           CSS特性支持
         </h3>
-        
+
         <div className="grid grid-cols-1 gap-3">
           {features.map(({ name, key, description }) => {
             const isSupported = cssSupport[key];
-            
+
             return (
               <div key={key} className="flex items-center justify-between p-3 border rounded-lg">
                 <div className="flex items-center space-x-3">
@@ -152,12 +152,12 @@ const ChromeCompatibilityTest: React.FC = () => {
     const { issues, needsFixes } = testResult;
 
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <h3 className="text-lg font-semibold mb-4 flex items-center">
-          <AlertTriangle className="mr-2 h-5 w-5" />
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+        <h3 className="text-lg font-semibold mb-4 flex items-center text-white">
+          <AlertTriangle className="mr-2 h-5 w-5 text-yellow-400" />
           兼容性问题
         </h3>
-        
+
         {needsFixes ? (
           <div className="space-y-3">
             <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
@@ -168,7 +168,7 @@ const ChromeCompatibilityTest: React.FC = () => {
                 </span>
               </div>
             </div>
-            
+
             <div className="space-y-2">
               {issues.map((issue, index) => (
                 <div key={index} className="flex items-center space-x-2 p-2 bg-red-50 dark:bg-red-900/20 rounded">
@@ -194,12 +194,12 @@ const ChromeCompatibilityTest: React.FC = () => {
 
   const renderTestComponents = () => {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <h3 className="text-lg font-semibold mb-4 flex items-center">
-          <Info className="mr-2 h-5 w-5" />
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+        <h3 className="text-lg font-semibold mb-4 flex items-center text-white">
+          <Info className="mr-2 h-5 w-5 text-blue-400" />
           兼容性测试组件
         </h3>
-        
+
         <div className="space-y-4">
           {/* Grid布局测试 */}
           <div>
@@ -210,7 +210,7 @@ const ChromeCompatibilityTest: React.FC = () => {
               <div className="bg-purple-100 dark:bg-purple-900/20 p-2 rounded text-center text-sm">Grid 3</div>
             </div>
           </div>
-          
+
           {/* Flexbox测试 */}
           <div>
             <h4 className="text-sm font-medium mb-2">Flexbox测试</h4>
@@ -219,7 +219,7 @@ const ChromeCompatibilityTest: React.FC = () => {
               <span className="text-sm">右侧内容</span>
             </div>
           </div>
-          
+
           {/* 背景模糊测试 */}
           <div>
             <h4 className="text-sm font-medium mb-2">背景模糊测试</h4>
@@ -229,7 +229,7 @@ const ChromeCompatibilityTest: React.FC = () => {
               </div>
             </div>
           </div>
-          
+
           {/* 颜色测试 */}
           <div>
             <h4 className="text-sm font-medium mb-2">颜色渲染测试</h4>
@@ -247,22 +247,22 @@ const ChromeCompatibilityTest: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+      <TestPageLayout className="space-y-4 dark-page-scrollbar">
+        <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-8">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <h2 className="text-xl font-semibold mb-2">正在检测浏览器兼容性...</h2>
-            <p className="text-gray-600 dark:text-gray-400">请稍候，正在分析您的浏览器环境</p>
+            <h2 className="text-xl font-semibold mb-2 text-white">正在检测浏览器兼容性...</h2>
+            <p className="text-gray-300">请稍候，正在分析您的浏览器环境</p>
           </div>
         </div>
-      </div>
+      </TestPageLayout>
     );
   }
 
   return (
-    <div className="security-test-container space-y-6">
+    <TestPageLayout className="space-y-4 dark-page-scrollbar">
       {/* 页面标题 */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <h1 className="text-2xl font-bold mb-2">Chrome浏览器兼容性测试</h1>
         <p className="text-gray-600 dark:text-gray-400">
           检测和验证浏览器兼容性，确保在不同浏览器中的一致显示效果
@@ -280,7 +280,7 @@ const ChromeCompatibilityTest: React.FC = () => {
 
       {/* 测试组件 */}
       {renderTestComponents()}
-    </div>
+    </TestPageLayout>
   );
 };
 

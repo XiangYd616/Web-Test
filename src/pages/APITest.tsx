@@ -1275,7 +1275,7 @@ const APITest: React.FC = () => {
                     <option value="OPTIONS">OPTIONS</option>
                   </select>
                 </div>
-                <div className="md:col-span-3">
+                <div className="md:col-span-4">
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     路径
                   </label>
@@ -1315,14 +1315,18 @@ const APITest: React.FC = () => {
                     <option value="high">高</option>
                   </select>
                 </div>
-                <div className="md:col-span-2 flex items-end">
+                <div className="md:col-span-1">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    操作
+                  </label>
                   <button
                     type="button"
                     onClick={() => removeEndpoint(endpoint.id)}
-                    className="w-full px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center justify-center space-x-2"
+                    className="w-full h-[46px] px-3 bg-red-600 hover:bg-red-700 text-white rounded-lg border border-red-500 transition-colors flex items-center justify-center"
+                    title="删除端点"
+                    aria-label="删除端点"
                   >
                     <Trash2 className="w-4 h-4" />
-                    <span>删除</span>
                   </button>
                 </div>
               </div>

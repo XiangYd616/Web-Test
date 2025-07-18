@@ -36,6 +36,7 @@ import {
   Zap
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import { TestPageLayout } from '../components/testing/UnifiedTestingComponents';
 import { useTheme } from '../contexts/ThemeContext';
 import backgroundTestManager from '../services/BackgroundTestManager';
 import '../styles/progress-bars.css';
@@ -508,12 +509,12 @@ const DatabaseTest: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen p-6 theme-transition ${actualTheme === 'light' ? 'light-theme-wrapper' : 'dark-theme-wrapper'}`}>
+    <div className={`theme-transition ${actualTheme === 'light' ? 'light-theme-wrapper' : 'dark-theme-wrapper'}`}>
       {/* 网络状态指示器 */}
       <div className="fixed top-4 right-4 z-50">
         <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg shadow-lg transition-all duration-300 ${isOnline
-            ? 'bg-green-600/90 text-white'
-            : 'bg-red-600/90 text-white animate-pulse'
+          ? 'bg-green-600/90 text-white'
+          : 'bg-red-600/90 text-white animate-pulse'
           }`}>
           {isOnline ? (
             <>
@@ -554,7 +555,7 @@ const DatabaseTest: React.FC = () => {
         )}
       </div>
 
-      <div className="max-w-7xl mx-auto space-y-6">
+      <TestPageLayout className="space-y-4 dark-page-scrollbar">
         {/* 页面标题 */}
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
           <div className="flex items-center justify-between mb-4">
@@ -785,8 +786,8 @@ const DatabaseTest: React.FC = () => {
                       />
                       <div
                         className={`test-config-toggle ${testConfig[test.key as keyof DatabaseTestConfig]
-                            ? 'test-config-toggle-active'
-                            : 'test-config-toggle-inactive'
+                          ? 'test-config-toggle-active'
+                          : 'test-config-toggle-inactive'
                           }`}
                         onClick={() => setTestConfig(prev => ({ ...prev, [test.key]: !prev[test.key as keyof DatabaseTestConfig] }))}
                       >
@@ -835,8 +836,8 @@ const DatabaseTest: React.FC = () => {
                       />
                       <div
                         className={`w-6 h-6 rounded-lg border-2 cursor-pointer transition-all duration-200 flex items-center justify-center ${testConfig[test.key as keyof DatabaseTestConfig]
-                            ? 'border-purple-500 bg-purple-500 shadow-lg shadow-purple-500/25'
-                            : 'border-gray-500 bg-gray-700/50 hover:border-gray-400 hover:bg-gray-600/50'
+                          ? 'border-purple-500 bg-purple-500 shadow-lg shadow-purple-500/25'
+                          : 'border-gray-500 bg-gray-700/50 hover:border-gray-400 hover:bg-gray-600/50'
                           }`}
                         onClick={() => setTestConfig(prev => ({ ...prev, [test.key]: !prev[test.key as keyof DatabaseTestConfig] }))}
                       >
@@ -959,8 +960,8 @@ const DatabaseTest: React.FC = () => {
                   onClick={handleStartTest}
                   disabled={!dbConfig.host || !dbConfig.database}
                   className={`px-6 py-3 rounded-lg font-medium flex items-center space-x-2 transition-all ${!dbConfig.host || !dbConfig.database
-                      ? 'themed-button-disabled'
-                      : 'themed-button-primary'
+                    ? 'themed-button-disabled'
+                    : 'themed-button-primary'
                     }`}
                 >
                   <Play className="w-4 h-4" />
@@ -1080,8 +1081,8 @@ const DatabaseTest: React.FC = () => {
                     <div className="flex items-center justify-between mb-2">
                       <metric.icon className="w-5 h-5 text-blue-400" />
                       <span className={`text-lg font-bold ${metric.isBoolean ?
-                          (metric.value ? 'text-green-400' : 'text-red-400') :
-                          'text-blue-400'
+                        (metric.value ? 'text-green-400' : 'text-red-400') :
+                        'text-blue-400'
                         }`}>
                         {metric.isBoolean ?
                           (metric.value ? '✅ 通过' : '❌ 失败') :
@@ -1460,7 +1461,7 @@ const DatabaseTest: React.FC = () => {
             </div>
           </div>
         )}
-      </div>
+      </TestPageLayout>
     </div>
   );
 };
