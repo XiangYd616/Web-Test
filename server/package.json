@@ -23,6 +23,7 @@
     "cache:flush": "node scripts/flush-cache.js",
     "redis:check": "node scripts/check-redis.js",
     "redis:monitor": "node scripts/monitor-redis.js",
+    "redis:test": "node scripts/test-redis-integration.js",
     "docker:build": "docker build -f ../Dockerfile.api -t testweb-api .",
     "docker:run": "docker run -p 3001:3001 testweb-api"
   },

@@ -16,11 +16,11 @@ class CacheKeys {
     if (!key) {
       throw new Error('缓存键不能为空');
     }
-    
+
     // 清理键名，移除特殊字符
     const cleanKey = this.sanitizeKey(key);
     const cleanNamespace = this.sanitizeKey(namespace);
-    
+
     return `${this.prefix}${this.separator}${cleanNamespace}${this.separator}${cleanKey}`;
   }
 
@@ -149,13 +149,13 @@ class CacheKeys {
    */
   hashUrl(url) {
     if (!url) return 'empty';
-    
+
     // 简单的URL哈希，移除协议和www
     const cleanUrl = url.toLowerCase()
       .replace(/^https?:\/\//, '')
       .replace(/^www\./, '')
       .replace(/\/$/, '');
-    
+
     return this.createHash(cleanUrl);
   }
 
@@ -166,7 +166,7 @@ class CacheKeys {
     if (!config || typeof config !== 'object') {
       return 'default';
     }
-    
+
     // 创建配置的稳定哈希
     const sortedConfig = this.sortObject(config);
     const configString = JSON.stringify(sortedConfig);
@@ -179,13 +179,13 @@ class CacheKeys {
   createHash(str) {
     let hash = 0;
     if (str.length === 0) return hash.toString();
-    
+
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
       hash = ((hash << 5) - hash) + char;
       hash = hash & hash; // 转换为32位整数
     }
-    
+
     return Math.abs(hash).toString(36);
   }
 
@@ -196,18 +196,18 @@ class CacheKeys {
     if (obj === null || typeof obj !== 'object') {
       return obj;
     }
-    
+
     if (Array.isArray(obj)) {
       return obj.map(item => this.sortObject(item));
     }
-    
+
     const sortedKeys = Object.keys(obj).sort();
     const sortedObj = {};
-    
+
     sortedKeys.forEach(key => {
       sortedObj[key] = this.sortObject(obj[key]);
     });
-    
+
     return sortedObj;
   }
 
@@ -216,15 +216,19 @@ class CacheKeys {
    */
   parseKey(fullKey) {
     const parts = fullKey.split(this.separator);
-    
-    if (parts.length < 3 || !fullKey.startsWith(this.prefix)) {
+
+    if (parts.length < 4 || !fullKey.startsWith(this.prefix)) {
       return null;
     }
-    
+
+    // prefix包含环境信息，如 'testweb:dev' 或 'testweb:prod'
+    const prefixParts = this.prefix.split(this.separator);
+
     return {
-      prefix: parts[0],
-      namespace: parts[1],
-      key: parts.slice(2).join(this.separator),
+      prefix: prefixParts.join(this.separator), // 'testweb:dev'
+      environment: prefixParts[1], // 'dev' 或 'prod'
+      namespace: parts[prefixParts.length], // 'api', 'session', etc.
+      key: parts.slice(prefixParts.length + 1).join(this.separator),
       fullKey
     };
   }
@@ -259,18 +263,18 @@ class CacheKeys {
     if (!key || typeof key !== 'string') {
       return false;
     }
-    
+
     // 检查键名长度
     if (key.length > 250) {
       return false;
     }
-    
+
     // 检查是否包含非法字符
     const illegalChars = /[\s\n\r\t]/;
     if (illegalChars.test(key)) {
       return false;
     }
-    
+
     return true;
   }
 

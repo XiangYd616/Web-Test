@@ -27,6 +27,7 @@ const dataManagementRoutes = require('./routes/dataManagement');
 const monitoringRoutes = require('./routes/monitoring');
 const reportRoutes = require('./routes/reports');
 const integrationRoutes = require('./routes/integrations');
+const cacheRoutes = require('./routes/cache');
 
 // 导入中间件
 const { errorHandler } = require('./middleware/errorHandler');
@@ -139,6 +140,7 @@ app.use('/api/data-management', dataManagementRoutes);
 app.use('/api/monitoring', monitoringRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/integrations', integrationRoutes);
+app.use('/api/cache', cacheRoutes);
 
 // 健康检查端点
 app.get('/health', async (req, res) => {
