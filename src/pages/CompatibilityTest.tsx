@@ -21,6 +21,7 @@ import { AdvancedTestCharts } from '../components/charts';
 import { URLInput } from '../components/testing';
 import { useUserStats } from '../hooks/useUserStats';
 import '../styles/progress-bars.css';
+import '../styles/unified-testing-tools.css';
 
 // 兼容性测试相关类型定义
 type BrowserType = 'chrome' | 'firefox' | 'safari' | 'edge' | 'ie' | 'opera';
@@ -926,7 +927,8 @@ const CompatibilityTest: React.FC = () => {
               {/* 进度条 */}
               <div className="w-full bg-gray-700 rounded-full h-2 mb-3">
                 <div
-                  className="bg-purple-500 h-2 rounded-full transition-all duration-300 progress-fill progress-fill-blue" style={{ width: `progress%` }}
+                  className="test-progress-dynamic h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${progress}%` }}
                 ></div>
               </div>
 
@@ -1243,8 +1245,8 @@ const CompatibilityTest: React.FC = () => {
                             </h4>
                             {recommendation.priority && (
                               <span className={`text-xs px-2 py-1 rounded ${recommendation.priority === 'high' ? 'bg-red-600 text-white' :
-                                  recommendation.priority === 'medium' ? 'bg-yellow-600 text-white' :
-                                    'bg-blue-600 text-white'
+                                recommendation.priority === 'medium' ? 'bg-yellow-600 text-white' :
+                                  'bg-blue-600 text-white'
                                 }`}>
                                 {recommendation.priority === 'high' ? '高优先级' :
                                   recommendation.priority === 'medium' ? '中优先级' : '低优先级'}

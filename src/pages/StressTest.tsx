@@ -5,6 +5,9 @@ import { AdvancedStressTestChart, UnifiedStressTestCharts } from '../components/
 import { RealTimeStressChart } from '../components/charts/RealTimeStressChart';
 import type { TestStatusType } from '../components/charts/UnifiedStressTestCharts';
 import { URLInput } from '../components/testing';
+import {
+  TestPageLayout
+} from '../components/testing/UnifiedTestingComponents';
 import { AdvancedStressTestConfig as ImportedAdvancedStressTestConfig } from '../hooks/useSimpleTestEngine';
 import { useUserStats } from '../hooks/useUserStats';
 import backgroundTestManager from '../services/BackgroundTestManager.js';

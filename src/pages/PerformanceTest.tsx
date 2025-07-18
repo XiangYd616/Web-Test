@@ -23,9 +23,13 @@ import {
 } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
+import {
+  TestPageLayout
+} from '../components/testing/UnifiedTestingComponents';
 import { useUserStats } from '../hooks/useUserStats';
 import UnifiedApiService from '../services/api/apiService';
 import { googlePageSpeedService } from '../services/googlePageSpeedService';
+import '../styles/unified-testing-tools.css';
 
 // 性能测试相关类型定义
 type TestMode = 'basic' | 'standard' | 'comprehensive' | 'lighthouse';
@@ -763,7 +767,8 @@ const PerformanceTest: React.FC = () => {
   }
 
   return (
-    <div className="space-y-4 dark-page-scrollbar min-h-screen" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' }}>
+    <TestPageLayout className="space-y-4 dark-page-scrollbar"
+    >
       {/* 页面标题和控制 */}
       <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -1061,7 +1066,7 @@ const PerformanceTest: React.FC = () => {
                 </div>
                 <div className="w-full bg-gray-700 rounded-full h-2">
                   <div
-                    className="bg-gradient-to-r from-blue-500 to-green-500 h-2 rounded-full transition-all duration-300"
+                    className="test-progress-gradient h-2 rounded-full transition-all duration-300"
                     style={{ width: `${progress}%` }}
                   ></div>
                 </div>
@@ -1343,7 +1348,7 @@ const PerformanceTest: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </TestPageLayout>
   );
 };
 
