@@ -7,6 +7,7 @@ const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const rateLimit = require('express-rate-limit');
+const cacheMiddleware = require('../middleware/cache');
 
 const router = express.Router();
 
@@ -68,201 +69,210 @@ const cleanUrl = (url) => {
  * 获取网页内容的主要API端点
  * POST /api/seo/fetch-page
  */
-router.post('/fetch-page', seoRateLimiter, asyncHandler(async (req, res) => {
-  const startTime = Date.now();
+router.post('/fetch-page',
+  seoRateLimiter,
+  cacheMiddleware.apiCache('seo', { ttl: 1800 }), // 30分钟缓存
+  asyncHandler(async (req, res) => {
+    const startTime = Date.now();
 
-  try {
-    const { url } = req.body;
-
-    if (!url) {
-      return res.status(400).json({
-        success: false,
-        error: '缺少URL参数'
-      });
-    }
-
-    const cleanedUrl = cleanUrl(url);
-
-    // 验证URL格式
     try {
-      new URL(cleanedUrl);
-    } catch {
-      return res.status(400).json({
+      const { url } = req.body;
+
+      if (!url) {
+        return res.status(400).json({
+          success: false,
+          error: '缺少URL参数'
+        });
+      }
+
+      const cleanedUrl = cleanUrl(url);
+
+      // 验证URL格式
+      try {
+        new URL(cleanedUrl);
+      } catch {
+        return res.status(400).json({
+          success: false,
+          error: '无效的URL格式'
+        });
+      }
+
+      console.log(`📡 开始获取页面: ${cleanedUrl}`);
+
+      const axiosInstance = createAxiosInstance();
+      const response = await axiosInstance.get(cleanedUrl);
+
+      const loadTime = Date.now() - startTime;
+
+      console.log(`✅ 成功获取页面: ${cleanedUrl} (${loadTime}ms)`);
+
+      // 返回页面数据
+      res.json({
+        success: true,
+        data: {
+          html: response.data,
+          headers: response.headers,
+          status: response.status,
+          url: cleanedUrl,
+          loadTime,
+          timestamp: new Date().toISOString()
+        }
+      });
+
+    } catch (error) {
+      const loadTime = Date.now() - startTime;
+
+      console.error(`❌ 获取页面失败:`, error.message);
+
+      // 根据错误类型返回不同的错误信息
+      let errorMessage = '获取页面内容失败';
+      let statusCode = 500;
+
+      if (error.code === 'ENOTFOUND') {
+        errorMessage = '域名解析失败，请检查URL是否正确';
+        statusCode = 404;
+      } else if (error.code === 'ECONNREFUSED') {
+        errorMessage = '连接被拒绝，目标服务器可能不可用';
+        statusCode = 503;
+      } else if (error.code === 'ETIMEDOUT' || error.code === 'ECONNABORTED') {
+        errorMessage = '请求超时，请稍后重试';
+        statusCode = 408;
+      } else if (error.response) {
+        statusCode = error.response.status;
+        if (statusCode === 403) {
+          errorMessage = '访问被禁止，网站可能有访问限制';
+        } else if (statusCode === 404) {
+          errorMessage = '页面不存在 (404)';
+        } else if (statusCode >= 500) {
+          errorMessage = '服务器错误，请稍后重试';
+        } else {
+          errorMessage = `HTTP错误 ${statusCode}`;
+        }
+      }
+
+      res.status(statusCode).json({
         success: false,
-        error: '无效的URL格式'
+        error: errorMessage,
+        details: {
+          code: error.code,
+          status: error.response?.status,
+          loadTime,
+          timestamp: new Date().toISOString()
+        }
       });
     }
-
-    console.log(`📡 开始获取页面: ${cleanedUrl}`);
-
-    const axiosInstance = createAxiosInstance();
-    const response = await axiosInstance.get(cleanedUrl);
-
-    const loadTime = Date.now() - startTime;
-
-    console.log(`✅ 成功获取页面: ${cleanedUrl} (${loadTime}ms)`);
-
-    // 返回页面数据
-    res.json({
-      success: true,
-      data: {
-        html: response.data,
-        headers: response.headers,
-        status: response.status,
-        url: cleanedUrl,
-        loadTime,
-        timestamp: new Date().toISOString()
-      }
-    });
-
-  } catch (error) {
-    const loadTime = Date.now() - startTime;
-
-    console.error(`❌ 获取页面失败:`, error.message);
-
-    // 根据错误类型返回不同的错误信息
-    let errorMessage = '获取页面内容失败';
-    let statusCode = 500;
-
-    if (error.code === 'ENOTFOUND') {
-      errorMessage = '域名解析失败，请检查URL是否正确';
-      statusCode = 404;
-    } else if (error.code === 'ECONNREFUSED') {
-      errorMessage = '连接被拒绝，目标服务器可能不可用';
-      statusCode = 503;
-    } else if (error.code === 'ETIMEDOUT' || error.code === 'ECONNABORTED') {
-      errorMessage = '请求超时，请稍后重试';
-      statusCode = 408;
-    } else if (error.response) {
-      statusCode = error.response.status;
-      if (statusCode === 403) {
-        errorMessage = '访问被禁止，网站可能有访问限制';
-      } else if (statusCode === 404) {
-        errorMessage = '页面不存在 (404)';
-      } else if (statusCode >= 500) {
-        errorMessage = '服务器错误，请稍后重试';
-      } else {
-        errorMessage = `HTTP错误 ${statusCode}`;
-      }
-    }
-
-    res.status(statusCode).json({
-      success: false,
-      error: errorMessage,
-      details: {
-        code: error.code,
-        status: error.response?.status,
-        loadTime,
-        timestamp: new Date().toISOString()
-      }
-    });
-  }
-}));
+  }));
 
 /**
  * 获取robots.txt
  * POST /api/seo/fetch-robots
  */
-router.post('/fetch-robots', seoRateLimiter, asyncHandler(async (req, res) => {
-  try {
-    const { baseUrl } = req.body;
+router.post('/fetch-robots',
+  seoRateLimiter,
+  cacheMiddleware.apiCache('seo', { ttl: 3600 }), // 1小时缓存
+  asyncHandler(async (req, res) => {
+    try {
+      const { baseUrl } = req.body;
 
-    if (!baseUrl) {
-      return res.status(400).json({
-        success: false,
-        error: '缺少baseUrl参数'
+      if (!baseUrl) {
+        return res.status(400).json({
+          success: false,
+          error: '缺少baseUrl参数'
+        });
+      }
+
+      const robotsUrl = `${baseUrl}/robots.txt`;
+      console.log(`🤖 获取robots.txt: ${robotsUrl}`);
+
+      const axiosInstance = createAxiosInstance();
+      const response = await axiosInstance.get(robotsUrl);
+
+      res.json({
+        success: true,
+        data: {
+          exists: true,
+          content: response.data,
+          accessible: response.status === 200,
+          url: robotsUrl
+        }
+      });
+
+    } catch (error) {
+      console.log(`❌ robots.txt获取失败:`, error.message);
+
+      res.json({
+        success: true,
+        data: {
+          exists: false,
+          content: '',
+          accessible: false,
+          url: req.body.baseUrl ? `${req.body.baseUrl}/robots.txt` : ''
+        }
       });
     }
-
-    const robotsUrl = `${baseUrl}/robots.txt`;
-    console.log(`🤖 获取robots.txt: ${robotsUrl}`);
-
-    const axiosInstance = createAxiosInstance();
-    const response = await axiosInstance.get(robotsUrl);
-
-    res.json({
-      success: true,
-      data: {
-        exists: true,
-        content: response.data,
-        accessible: response.status === 200,
-        url: robotsUrl
-      }
-    });
-
-  } catch (error) {
-    console.log(`❌ robots.txt获取失败:`, error.message);
-
-    res.json({
-      success: true,
-      data: {
-        exists: false,
-        content: '',
-        accessible: false,
-        url: req.body.baseUrl ? `${req.body.baseUrl}/robots.txt` : ''
-      }
-    });
-  }
-}));
+  }));
 
 /**
  * 获取sitemap
  * POST /api/seo/fetch-sitemap
  */
-router.post('/fetch-sitemap', seoRateLimiter, asyncHandler(async (req, res) => {
-  try {
-    const { sitemapUrl } = req.body;
+router.post('/fetch-sitemap',
+  seoRateLimiter,
+  cacheMiddleware.apiCache('seo', { ttl: 3600 }), // 1小时缓存
+  asyncHandler(async (req, res) => {
+    try {
+      const { sitemapUrl } = req.body;
 
-    if (!sitemapUrl) {
-      return res.status(400).json({
-        success: false,
-        error: '缺少sitemapUrl参数'
+      if (!sitemapUrl) {
+        return res.status(400).json({
+          success: false,
+          error: '缺少sitemapUrl参数'
+        });
+      }
+
+      console.log(`🗺️ 获取sitemap: ${sitemapUrl}`);
+
+      const axiosInstance = createAxiosInstance();
+      const response = await axiosInstance.get(sitemapUrl);
+
+      // 简单解析sitemap中的URL
+      const urls = [];
+      const urlMatches = response.data.match(/<loc>(.*?)<\/loc>/g);
+      if (urlMatches) {
+        urlMatches.forEach(match => {
+          const url = match.replace(/<\/?loc>/g, '').trim();
+          if (url) {
+            urls.push(url);
+          }
+        });
+      }
+
+      res.json({
+        success: true,
+        data: {
+          exists: true,
+          content: response.data,
+          accessible: response.status === 200,
+          urls,
+          urlCount: urls.length
+        }
       });
-    }
 
-    console.log(`🗺️ 获取sitemap: ${sitemapUrl}`);
+    } catch (error) {
+      console.log(`❌ sitemap获取失败:`, error.message);
 
-    const axiosInstance = createAxiosInstance();
-    const response = await axiosInstance.get(sitemapUrl);
-
-    // 简单解析sitemap中的URL
-    const urls = [];
-    const urlMatches = response.data.match(/<loc>(.*?)<\/loc>/g);
-    if (urlMatches) {
-      urlMatches.forEach(match => {
-        const url = match.replace(/<\/?loc>/g, '').trim();
-        if (url) {
-          urls.push(url);
+      res.json({
+        success: true,
+        data: {
+          exists: false,
+          content: '',
+          accessible: false,
+          urls: [],
+          urlCount: 0
         }
       });
     }
-
-    res.json({
-      success: true,
-      data: {
-        exists: true,
-        content: response.data,
-        accessible: response.status === 200,
-        urls,
-        urlCount: urls.length
-      }
-    });
-
-  } catch (error) {
-    console.log(`❌ sitemap获取失败:`, error.message);
-
-    res.json({
-      success: true,
-      data: {
-        exists: false,
-        content: '',
-        accessible: false,
-        urls: [],
-        urlCount: 0
-      }
-    });
-  }
-}));
+  }));
 
 /**
  * 健康检查端点

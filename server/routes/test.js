@@ -8,6 +8,7 @@ const { authMiddleware, optionalAuth } = require('../middleware/auth');
 const { testRateLimiter } = require('../middleware/rateLimiter');
 const { asyncHandler } = require('../middleware/errorHandler');
 const { validateURLMiddleware, validateAPIURLMiddleware } = require('../middleware/urlValidator');
+const cacheMiddleware = require('../middleware/cache');
 
 // 导入测试引擎类
 const { RealTestEngine } = require('../services/realTestEngine');
@@ -882,123 +883,131 @@ router.post('/stress', optionalAuth, testRateLimiter, validateURLMiddleware(), a
  * 安全测试 - 支持统一安全引擎和传统模式
  * POST /api/test/security
  */
-router.post('/security', optionalAuth, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
-  const { url, options = {}, module } = req.body;
+router.post('/security',
+  optionalAuth,
+  testRateLimiter,
+  validateURLMiddleware(),
+  cacheMiddleware.apiCache('security', { ttl: 2400 }), // 40分钟缓存
+  asyncHandler(async (req, res) => {
+    const { url, options = {}, module } = req.body;
 
-  // URL验证已由中间件完成，可以直接使用验证后的URL
-  const validatedURL = req.validatedURL.url.toString();
+    // URL验证已由中间件完成，可以直接使用验证后的URL
+    const validatedURL = req.validatedURL.url.toString();
 
-  try {
-    let testResult;
+    try {
+      let testResult;
 
-    // 如果指定了模块，执行单个模块测试（统一安全引擎模式）
-    if (module) {
-      console.log(`🔍 Running ${module} security test for ${validatedURL}`);
+      // 如果指定了模块，执行单个模块测试（统一安全引擎模式）
+      if (module) {
+        console.log(`🔍 Running ${module} security test for ${validatedURL}`);
 
-      // 根据模块类型执行相应的测试
-      switch (module) {
-        case 'ssl':
-          testResult = await realSecurityTestEngine.runSSLTest(validatedURL, options);
-          break;
-        case 'headers':
-          testResult = await realSecurityTestEngine.runHeadersTest(validatedURL, options);
-          break;
-        case 'vulnerabilities':
-          testResult = await realSecurityTestEngine.runVulnerabilityTest(validatedURL, options);
-          break;
-        case 'cookies':
-          testResult = await realSecurityTestEngine.runCookieTest(validatedURL, options);
-          break;
-        case 'content':
-          testResult = await realSecurityTestEngine.runContentTest(validatedURL, options);
-          break;
-        case 'network':
-          testResult = await realSecurityTestEngine.runNetworkTest(validatedURL, options);
-          break;
-        case 'compliance':
-          testResult = await realSecurityTestEngine.runComplianceTest(validatedURL, options);
-          break;
-        default:
-          throw new Error(`Unknown security test module: ${module}`);
+        // 根据模块类型执行相应的测试
+        switch (module) {
+          case 'ssl':
+            testResult = await realSecurityTestEngine.runSSLTest(validatedURL, options);
+            break;
+          case 'headers':
+            testResult = await realSecurityTestEngine.runHeadersTest(validatedURL, options);
+            break;
+          case 'vulnerabilities':
+            testResult = await realSecurityTestEngine.runVulnerabilityTest(validatedURL, options);
+            break;
+          case 'cookies':
+            testResult = await realSecurityTestEngine.runCookieTest(validatedURL, options);
+            break;
+          case 'content':
+            testResult = await realSecurityTestEngine.runContentTest(validatedURL, options);
+            break;
+          case 'network':
+            testResult = await realSecurityTestEngine.runNetworkTest(validatedURL, options);
+            break;
+          case 'compliance':
+            testResult = await realSecurityTestEngine.runComplianceTest(validatedURL, options);
+            break;
+          default:
+            throw new Error(`Unknown security test module: ${module}`);
+        }
+      } else {
+        // 传统模式：运行完整的安全测试
+        testResult = await realSecurityTestEngine.runSecurityTest({
+          url: validatedURL,
+          checkSSL: options.checkSSL !== false,
+          checkHeaders: options.checkHeaders !== false,
+          checkVulnerabilities: options.checkVulnerabilities !== false,
+          checkCookies: options.checkCookies !== false,
+          timeout: options.timeout || 30000,
+          userId: req.user?.id
+        });
       }
-    } else {
-      // 传统模式：运行完整的安全测试
-      testResult = await realSecurityTestEngine.runSecurityTest({
-        url: validatedURL,
-        checkSSL: options.checkSSL !== false,
-        checkHeaders: options.checkHeaders !== false,
-        checkVulnerabilities: options.checkVulnerabilities !== false,
-        checkCookies: options.checkCookies !== false,
-        timeout: options.timeout || 30000,
-        userId: req.user?.id
+
+      console.log(`✅ Security test completed for ${module || 'full'} with score:`, testResult.score || testResult.securityScore);
+
+      // 保存测试结果到数据库
+      try {
+        await securityTestStorage.saveSecurityTestResult(testResult, req.user?.id);
+        console.log('💾 Security test result saved to database');
+      } catch (saveError) {
+        console.error('⚠️ Failed to save security test result:', saveError.message);
+        // 不影响主要响应，只记录错误
+      }
+
+      res.json({
+        success: true,
+        data: testResult,
+        testType: 'security',
+        module: module || 'full'
+      });
+    } catch (error) {
+      console.error('安全测试失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '安全测试失败',
+        error: error.message
       });
     }
-
-    console.log(`✅ Security test completed for ${module || 'full'} with score:`, testResult.score || testResult.securityScore);
-
-    // 保存测试结果到数据库
-    try {
-      await securityTestStorage.saveSecurityTestResult(testResult, req.user?.id);
-      console.log('💾 Security test result saved to database');
-    } catch (saveError) {
-      console.error('⚠️ Failed to save security test result:', saveError.message);
-      // 不影响主要响应，只记录错误
-    }
-
-    res.json({
-      success: true,
-      data: testResult,
-      testType: 'security',
-      module: module || 'full'
-    });
-  } catch (error) {
-    console.error('安全测试失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '安全测试失败',
-      error: error.message
-    });
-  }
-}));
+  }));
 
 /**
  * 获取安全测试历史记录
  * GET /api/test/security/history
  */
-router.get('/security/history', optionalAuth, asyncHandler(async (req, res) => {
-  try {
-    const {
-      limit = 50,
-      offset = 0,
-      sortBy = 'created_at',
-      sortOrder = 'DESC',
-      status,
-      dateFrom,
-      dateTo
-    } = req.query;
+router.get('/security/history',
+  optionalAuth,
+  cacheMiddleware.dbCache({ ttl: 300 }), // 5分钟缓存
+  asyncHandler(async (req, res) => {
+    try {
+      const {
+        limit = 50,
+        offset = 0,
+        sortBy = 'created_at',
+        sortOrder = 'DESC',
+        status,
+        dateFrom,
+        dateTo
+      } = req.query;
 
-    const options = {
-      limit: parseInt(limit),
-      offset: parseInt(offset),
-      sortBy,
-      sortOrder,
-      status,
-      dateFrom,
-      dateTo
-    };
+      const options = {
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        sortBy,
+        sortOrder,
+        status,
+        dateFrom,
+        dateTo
+      };
 
-    const result = await securityTestStorage.getSecurityTestHistory(req.user?.id, options);
+      const result = await securityTestStorage.getSecurityTestHistory(req.user?.id, options);
 
-    res.json(result);
-  } catch (error) {
-    console.error('获取安全测试历史失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取安全测试历史失败',
-      error: error.message
-    });
-  }
-}));
+      res.json(result);
+    } catch (error) {
+      console.error('获取安全测试历史失败:', error);
+      res.status(500).json({
+        success: false,
+        message: '获取安全测试历史失败',
+        error: error.message
+      });
+    }
+  }));
 
 /**
  * 获取安全测试统计信息
@@ -1072,99 +1081,109 @@ router.delete('/security/:testId', optionalAuth, asyncHandler(async (req, res) =
  * 性能测试 - 主接口
  * POST /api/test/performance
  */
-router.post('/performance', optionalAuth, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
-  const { url, config = {} } = req.body;
+router.post('/performance',
+  optionalAuth,
+  testRateLimiter,
+  validateURLMiddleware(),
+  cacheMiddleware.apiCache('performance', { ttl: 1800 }), // 30分钟缓存
+  asyncHandler(async (req, res) => {
+    const { url, config = {} } = req.body;
 
-  // URL验证已由中间件完成，可以直接使用验证后的URL
-  const validatedURL = req.validatedURL.url.toString();
+    // URL验证已由中间件完成，可以直接使用验证后的URL
+    const validatedURL = req.validatedURL.url.toString();
 
-  try {
-    console.log(`🚀 Starting performance test for: ${validatedURL}`);
+    try {
+      console.log(`🚀 Starting performance test for: ${validatedURL}`);
 
-    // 使用现有的网站测试引擎进行性能测试
-    const testResult = await realTestEngine.runEnhancedPerformanceTest(validatedURL, {
-      device: config.device || 'desktop',
-      location: config.location || 'beijing',
-      timeout: config.timeout || 60000,
-      checkPageSpeed: config.pageSpeed !== false,
-      checkCoreWebVitals: config.coreWebVitals !== false,
-      checkResourceOptimization: config.resourceOptimization !== false,
-      checkCaching: config.caching !== false,
-      checkCompression: config.compression !== false,
-      checkImageOptimization: config.imageOptimization !== false,
-      checkMobilePerformance: config.mobilePerformance !== false,
-      level: config.level || 'standard'
-    });
+      // 使用现有的网站测试引擎进行性能测试
+      const testResult = await realTestEngine.runEnhancedPerformanceTest(validatedURL, {
+        device: config.device || 'desktop',
+        location: config.location || 'beijing',
+        timeout: config.timeout || 60000,
+        checkPageSpeed: config.pageSpeed !== false,
+        checkCoreWebVitals: config.coreWebVitals !== false,
+        checkResourceOptimization: config.resourceOptimization !== false,
+        checkCaching: config.caching !== false,
+        checkCompression: config.compression !== false,
+        checkImageOptimization: config.imageOptimization !== false,
+        checkMobilePerformance: config.mobilePerformance !== false,
+        level: config.level || 'standard'
+      });
 
-    console.log(`✅ Performance test completed for ${validatedURL} with score:`, testResult.score);
+      console.log(`✅ Performance test completed for ${validatedURL} with score:`, testResult.score);
 
-    res.json({
-      success: true,
-      data: testResult,
-      testType: 'performance',
-      timestamp: new Date().toISOString()
-    });
+      res.json({
+        success: true,
+        data: testResult,
+        testType: 'performance',
+        timestamp: new Date().toISOString()
+      });
 
-  } catch (error) {
-    console.error('❌ Performance test failed:', error);
-    res.status(500).json({
-      success: false,
-      message: '性能测试失败',
-      error: error.message,
-      timestamp: new Date().toISOString()
-    });
-  }
-}));
+    } catch (error) {
+      console.error('❌ Performance test failed:', error);
+      res.status(500).json({
+        success: false,
+        message: '性能测试失败',
+        error: error.message,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }));
 
 /**
  * 页面速度检测
  * POST /api/test/performance/page-speed
  */
-router.post('/performance/page-speed', optionalAuth, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
-  const { url, device = 'desktop', timeout = 30000 } = req.body;
+router.post('/performance/page-speed',
+  optionalAuth,
+  testRateLimiter,
+  validateURLMiddleware(),
+  cacheMiddleware.apiCache('performance', { ttl: 1200 }), // 20分钟缓存
+  asyncHandler(async (req, res) => {
+    const { url, device = 'desktop', timeout = 30000 } = req.body;
 
-  // URL验证已由中间件完成
-  const validatedURL = req.validatedURL.url.toString();
+    // URL验证已由中间件完成
+    const validatedURL = req.validatedURL.url.toString();
 
-  try {
-    console.log(`📊 Starting page speed test for: ${validatedURL}`);
+    try {
+      console.log(`📊 Starting page speed test for: ${validatedURL}`);
 
-    // 使用网站测试引擎的性能检测功能
-    const testResult = await realTestEngine.runTest(validatedURL, {
-      testType: 'performance',
-      device,
-      timeout,
-      checkPageSpeed: true,
-      checkCoreWebVitals: false,
-      checkResourceOptimization: false
-    });
+      // 使用网站测试引擎的性能检测功能
+      const testResult = await realTestEngine.runTest(validatedURL, {
+        testType: 'performance',
+        device,
+        timeout,
+        checkPageSpeed: true,
+        checkCoreWebVitals: false,
+        checkResourceOptimization: false
+      });
 
-    // 提取页面速度相关指标
-    const pageSpeedMetrics = {
-      loadTime: testResult.performance?.loadTime || Math.floor(Math.random() * 3000) + 1000,
-      domContentLoaded: testResult.performance?.domContentLoaded || Math.floor(Math.random() * 2000) + 500,
-      ttfb: testResult.performance?.ttfb || Math.floor(Math.random() * 500) + 100,
-      pageSize: testResult.performance?.pageSize || Math.floor(Math.random() * 2000000) + 500000,
-      requestCount: testResult.performance?.requests || Math.floor(Math.random() * 50) + 20,
-      responseTime: testResult.performance?.responseTime || Math.floor(Math.random() * 1000) + 200,
-      transferSize: testResult.performance?.transferSize || Math.floor(Math.random() * 1500000) + 300000
-    };
+      // 提取页面速度相关指标
+      const pageSpeedMetrics = {
+        loadTime: testResult.performance?.loadTime || Math.floor(Math.random() * 3000) + 1000,
+        domContentLoaded: testResult.performance?.domContentLoaded || Math.floor(Math.random() * 2000) + 500,
+        ttfb: testResult.performance?.ttfb || Math.floor(Math.random() * 500) + 100,
+        pageSize: testResult.performance?.pageSize || Math.floor(Math.random() * 2000000) + 500000,
+        requestCount: testResult.performance?.requests || Math.floor(Math.random() * 50) + 20,
+        responseTime: testResult.performance?.responseTime || Math.floor(Math.random() * 1000) + 200,
+        transferSize: testResult.performance?.transferSize || Math.floor(Math.random() * 1500000) + 300000
+      };
 
-    res.json({
-      success: true,
-      data: pageSpeedMetrics,
-      timestamp: new Date().toISOString()
-    });
+      res.json({
+        success: true,
+        data: pageSpeedMetrics,
+        timestamp: new Date().toISOString()
+      });
 
-  } catch (error) {
-    console.error('❌ Page speed test failed:', error);
-    res.status(500).json({
-      success: false,
-      message: '页面速度检测失败',
-      error: error.message
-    });
-  }
-}));
+    } catch (error) {
+      console.error('❌ Page speed test failed:', error);
+      res.status(500).json({
+        success: false,
+        message: '页面速度检测失败',
+        error: error.message
+      });
+    }
+  }));
 
 /**
  * Core Web Vitals检测

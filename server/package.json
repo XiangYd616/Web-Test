@@ -19,6 +19,10 @@
     "reset-db": "node scripts/reset-database.js",
     "check-db": "node scripts/check-database.js",
     "check-health": "curl http://localhost:3001/health",
+    "cache:stats": "curl http://localhost:3001/cache/stats",
+    "cache:flush": "node scripts/flush-cache.js",
+    "redis:check": "node scripts/check-redis.js",
+    "redis:monitor": "node scripts/monitor-redis.js",
     "docker:build": "docker build -f ../Dockerfile.api -t testweb-api .",
     "docker:run": "docker run -p 3001:3001 testweb-api"
   },

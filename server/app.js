@@ -37,6 +37,10 @@ const { securityMiddleware } = require('./middleware/security');
 // 导入数据库连接
 const { connectDB, testConnection } = require('./config/database');
 
+// 导入Redis服务
+const redisConnection = require('./services/redis/connection');
+const cacheMonitoring = require('./services/redis/monitoring');
+
 const app = express();
 const PORT = parseInt(process.env.PORT || process.env.API_PORT || process.env.APP_PORT) || 3001;
 const HOST = process.env.HOST || 'localhost';
@@ -142,6 +146,9 @@ app.get('/health', async (req, res) => {
     // 检查数据库连接
     await testConnection();
 
+    // 检查Redis连接
+    const redisHealth = await redisConnection.healthCheck();
+
     res.json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
@@ -149,6 +156,7 @@ app.get('/health', async (req, res) => {
       version: APP_VERSION,
       environment: process.env.NODE_ENV || 'development',
       database: 'connected',
+      redis: redisHealth,
       uptime: process.uptime(),
       host: HOST,
       port: PORT
@@ -158,7 +166,26 @@ app.get('/health', async (req, res) => {
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
       error: error.message,
-      database: 'disconnected'
+      database: 'disconnected',
+      redis: { status: 'error', message: 'Health check failed' }
+    });
+  }
+});
+
+// 缓存监控端点
+app.get('/cache/stats', async (req, res) => {
+  try {
+    const period = req.query.period || '1h';
+    const report = cacheMonitoring.getMonitoringReport(period);
+
+    res.json({
+      success: true,
+      data: report
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
     });
   }
 });
