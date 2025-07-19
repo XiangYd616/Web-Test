@@ -72,7 +72,8 @@ class RealStressTestEngine {
       testId,
       url,
       config: { users, duration, rampUpTime, testType, method, timeout, thinkTime },
-      startTime: new Date(startTime).toISOString(),
+      startTime: startTime, // 保留数字时间戳用于计算
+      startTimeISO: new Date(startTime).toISOString(), // ISO字符串用于显示
       status: 'running',
       progress: 0,
       currentPhase: 'initializing',
@@ -111,6 +112,9 @@ class RealStressTestEngine {
       console.log(`⚡ Average response time: ${results.metrics.averageResponseTime}ms`);
       console.log(`🚀 Throughput: ${results.metrics.throughput} req/s`);
       console.log(`❌ Error rate: ${results.metrics.errorRate}%`);
+
+      // 广播测试完成
+      this.broadcastTestComplete(testId, results);
 
       // 清理测试状态
       this.removeTestStatus(testId);
@@ -308,11 +312,16 @@ class RealStressTestEngine {
       const recentResponseTime = results.metrics.responseTimes.length > 0 ?
         results.metrics.responseTimes[results.metrics.responseTimes.length - 1] : 0;
 
+      // 计算当前吞吐量（基于已完成的请求数和经过的时间）
+      const elapsedSeconds = elapsed / 1000;
+      const currentThroughput = elapsedSeconds > 0 ? recentRequests / elapsedSeconds : 0;
+
       results.realTimeData.push({
         timestamp: currentTime,
         totalRequests: recentRequests,
         activeUsers: results.metrics.activeUsers,
         responseTime: recentResponseTime,
+        throughput: Math.round(currentThroughput * 100) / 100, // 保留2位小数
         errorRate: results.metrics.totalRequests > 0 ?
           (results.metrics.failedRequests / results.metrics.totalRequests) * 100 : 0
       });
@@ -386,12 +395,17 @@ class RealStressTestEngine {
         }
 
         // 记录实时数据点用于图表显示
+        // 计算当前吞吐量
+        const elapsedTime = (Date.now() - results.startTime) / 1000;
+        const currentThroughput = elapsedTime > 0 ? results.metrics.totalRequests / elapsedTime : 0;
+
         this.recordRealTimeDataPoint(results, {
           timestamp: Date.now(),
           responseTime: responseTime,
           status: response.statusCode || (response.success ? 200 : 500),
           success: response.success,
           activeUsers: results.metrics.activeUsers,
+          throughput: Math.round(currentThroughput * 100) / 100, // 保留2位小数
           userId: userId,
           phase: results.currentPhase || 'running'
         });
@@ -454,6 +468,22 @@ class RealStressTestEngine {
     if (results.realTimeData.length > 1000) {
       results.realTimeData = results.realTimeData.slice(-800);
     }
+
+    // 通过WebSocket广播实时数据
+    this.broadcastRealTimeData(results.testId, {
+      dataPoint,
+      metrics: {
+        totalRequests: results.metrics.totalRequests,
+        successfulRequests: results.metrics.successfulRequests,
+        failedRequests: results.metrics.failedRequests,
+        averageResponseTime: results.metrics.averageResponseTime,
+        errorRate: results.metrics.errorRate,
+        activeUsers: results.metrics.activeUsers,
+        throughput: results.metrics.throughput
+      },
+      progress: results.progress || 0,
+      phase: results.currentPhase || 'running'
+    });
   }
 
   /**
@@ -675,8 +705,13 @@ class RealStressTestEngine {
     }
 
     // 计算吞吐量 (requests per second)
-    if (results.actualDuration > 0) {
-      metrics.throughput = (metrics.totalRequests / results.actualDuration).toFixed(2);
+    if (results.actualDuration > 0 && metrics.totalRequests > 0) {
+      const throughputValue = metrics.totalRequests / results.actualDuration;
+      metrics.throughput = isNaN(throughputValue) ? 0 : parseFloat(throughputValue.toFixed(2));
+      metrics.requestsPerSecond = metrics.throughput; // 确保两个字段都有值
+    } else {
+      metrics.throughput = 0;
+      metrics.requestsPerSecond = 0;
     }
 
     // 清理详细数据以减少响应大小
@@ -758,6 +793,58 @@ class RealStressTestEngine {
    */
   removeTestStatus(testId) {
     this.runningTests.delete(testId);
+  }
+
+  /**
+   * 通过WebSocket广播实时数据
+   */
+  broadcastRealTimeData(testId, data) {
+    try {
+      // 检查全局io实例是否存在
+      if (global.io) {
+        global.io.to(`stress-test-${testId}`).emit('stress-test-data', {
+          testId,
+          timestamp: Date.now(),
+          ...data
+        });
+      }
+    } catch (error) {
+      console.error('WebSocket广播失败:', error);
+    }
+  }
+
+  /**
+   * 广播测试状态更新
+   */
+  broadcastTestStatus(testId, status) {
+    try {
+      if (global.io) {
+        global.io.to(`stress-test-${testId}`).emit('stress-test-status', {
+          testId,
+          timestamp: Date.now(),
+          ...status
+        });
+      }
+    } catch (error) {
+      console.error('WebSocket状态广播失败:', error);
+    }
+  }
+
+  /**
+   * 广播测试完成
+   */
+  broadcastTestComplete(testId, results) {
+    try {
+      if (global.io) {
+        global.io.to(`stress-test-${testId}`).emit('stress-test-complete', {
+          testId,
+          timestamp: Date.now(),
+          results
+        });
+      }
+    } catch (error) {
+      console.error('WebSocket完成广播失败:', error);
+    }
   }
 }
 

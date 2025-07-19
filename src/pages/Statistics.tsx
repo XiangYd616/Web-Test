@@ -154,6 +154,8 @@ const Statistics: React.FC = () => {
                   value={timeRange}
                   onChange={(e) => setTimeRange(parseInt(e.target.value))}
                   className="bg-transparent border-none text-white focus:outline-none cursor-pointer"
+                  title="选择统计时间范围"
+                  aria-label="时间范围选择"
                 >
                   <option value={7}>最近 7 天</option>
                   <option value={30}>最近 30 天</option>
@@ -231,6 +233,7 @@ const Statistics: React.FC = () => {
                       <div className="flex items-center gap-3">
                         <div
                           className="w-3 h-3 rounded-full"
+                          // 动态计算的颜色值，需要使用内联样式
                           style={{
                             backgroundColor: `hsl(${(index * 360) / statistics.typeStats.length}, 70%, 50%)`
                           }}
@@ -263,7 +266,7 @@ const Statistics: React.FC = () => {
               </div>
               <div className="p-6">
                 <div className="space-y-4">
-                  {statistics.statusStats.map((stat, index) => (
+                  {statistics.statusStats.map((stat) => (
                     <div key={stat.status} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div
@@ -301,7 +304,7 @@ const Statistics: React.FC = () => {
               </div>
               <div className="p-6">
                 <div className="space-y-3">
-                  {statistics.topUrls.slice(0, 5).map((urlStat, index) => (
+                  {statistics.topUrls.slice(0, 5).map((urlStat) => (
                     <div key={urlStat.url} className="flex items-center justify-between">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 dark:text-white truncate">

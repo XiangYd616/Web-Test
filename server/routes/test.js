@@ -18,6 +18,7 @@ const { RealCompatibilityTestEngine } = require('../services/realCompatibilityTe
 const { RealUXTestEngine } = require('../services/realUXTestEngine');
 const { RealAPITestEngine } = require('../services/realAPITestEngine');
 const securityTestStorage = require('../services/securityTestStorage');
+const TestHistoryService = require('../services/dataManagement/testHistoryService');
 // const enhancedTestHistoryService = require('../services/enhancedTestHistoryService'); // 已移除，功能迁移到 dataManagement
 
 const multer = require('multer');
@@ -30,6 +31,7 @@ const realSecurityTestEngine = new RealSecurityTestEngine();
 const realCompatibilityTestEngine = new RealCompatibilityTestEngine();
 const realUXTestEngine = new RealUXTestEngine();
 const realAPITestEngine = new RealAPITestEngine();
+const testHistoryService = new TestHistoryService();
 
 
 // 配置文件上传
@@ -880,6 +882,41 @@ router.post('/stress', optionalAuth, testRateLimiter, validateURLMiddleware(), a
     } else {
       // 如果引擎直接返回数据，使用原始数据
       responseData = testResult;
+    }
+
+    // 保存测试历史到数据库
+    if (req.user?.id && responseData) {
+      try {
+        await testHistoryService.createTestRecord({
+          testName: `压力测试 - ${new URL(validatedURL).hostname}`,
+          testType: 'stress',
+          url: validatedURL,
+          status: responseData.status === 'completed' ? 'completed' : 'failed',
+          userId: req.user.id,
+          config: {
+            users: options.users || 10,
+            duration: options.duration || 30,
+            rampUpTime: options.rampUpTime || 5,
+            testType: options.testType || 'gradual',
+            method: options.method || 'GET',
+            timeout: options.timeout || 10,
+            thinkTime: options.thinkTime || 1
+          },
+          results: {
+            metrics: responseData.metrics,
+            realTimeData: responseData.realTimeData,
+            testId: responseData.testId,
+            startTime: responseData.startTime,
+            endTime: responseData.endTime,
+            actualDuration: responseData.actualDuration,
+            currentPhase: responseData.currentPhase
+          }
+        });
+        console.log('✅ 压力测试历史已保存到数据库');
+      } catch (dbError) {
+        console.error('❌ 保存测试历史失败:', dbError);
+        // 不影响测试结果返回，只记录错误
+      }
     }
 
     // 确保响应包含正确的结构供前端使用

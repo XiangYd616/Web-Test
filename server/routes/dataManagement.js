@@ -4,6 +4,7 @@
  */
 
 const express = require('express');
+const { query, transaction } = require('../config/database');
 const { authMiddleware } = require('../middleware/auth');
 const { asyncHandler } = require('../middleware/errorHandler');
 const DataManagementService = require('../services/dataManagement');
