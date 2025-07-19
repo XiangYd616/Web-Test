@@ -1,13 +1,17 @@
 /**
- * 数据管理路由
+ * 数据管理路由 - 重构版本
+ * 使用新的服务层架构
  */
 
 const express = require('express');
 const { authMiddleware } = require('../middleware/auth');
 const { asyncHandler } = require('../middleware/errorHandler');
-const { query } = require('../config/database');
+const DataManagementService = require('../services/dataManagement');
 
 const router = express.Router();
+
+// 初始化数据管理服务
+const dataManagementService = new DataManagementService();
 
 /**
  * 获取导出任务列表
@@ -15,38 +19,11 @@ const router = express.Router();
  */
 router.get('/exports', authMiddleware, asyncHandler(async (req, res) => {
   try {
-    // 模拟导出任务数据
-    const exports = [
-      {
-        id: '1',
-        name: '测试数据导出_2025-06-30',
-        type: 'test_history',
-        status: 'completed',
-        createdAt: new Date().toISOString(),
-        fileSize: '2.5MB',
-        downloadUrl: '/api/data-management/exports/1/download'
-      },
-      {
-        id: '2',
-        name: '用户数据导出_2025-06-29',
-        type: 'users',
-        status: 'processing',
-        createdAt: new Date(Date.now() - 86400000).toISOString(),
-        fileSize: null,
-        downloadUrl: null
-      }
-    ];
-
-    res.json({
-      success: true,
-      data: exports
-    });
+    const result = await dataManagementService.dataExport.getExportTasks(req.user.id);
+    res.json(result);
   } catch (error) {
-    console.error('获取导出任务失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取导出任务失败'
-    });
+    const errorResult = dataManagementService.handleError(error, '获取导出任务');
+    res.status(500).json(errorResult);
   }
 }));
 
@@ -56,39 +33,69 @@ router.get('/exports', authMiddleware, asyncHandler(async (req, res) => {
  */
 router.get('/imports', authMiddleware, asyncHandler(async (req, res) => {
   try {
-    // 模拟导入任务数据
-    const imports = [
-      {
-        id: '1',
-        name: '测试数据导入_2025-06-30',
-        type: 'test_history',
-        status: 'completed',
-        createdAt: new Date().toISOString(),
-        recordsProcessed: 150,
-        recordsTotal: 150
-      },
-      {
-        id: '2',
-        name: '配置数据导入_2025-06-29',
-        type: 'configurations',
-        status: 'failed',
-        createdAt: new Date(Date.now() - 86400000).toISOString(),
-        recordsProcessed: 45,
-        recordsTotal: 100,
-        error: '数据格式不匹配'
-      }
-    ];
-
-    res.json({
-      success: true,
-      data: imports
-    });
+    const result = await dataManagementService.dataImport.getImportTasks(req.user.id);
+    res.json(result);
   } catch (error) {
-    console.error('获取导入任务失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取导入任务失败'
-    });
+    const errorResult = dataManagementService.handleError(error, '获取导入任务');
+    res.status(500).json(errorResult);
+  }
+}));
+
+/**
+ * 获取测试历史记录
+ * GET /api/data-management/test-history
+ */
+router.get('/test-history', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const result = await dataManagementService.testHistory.getTestHistory(req.user.id, req.query);
+    res.json(result);
+  } catch (error) {
+    const errorResult = dataManagementService.handleError(error, '获取测试历史');
+    res.status(500).json(errorResult);
+  }
+}));
+
+/**
+ * 获取测试历史统计
+ * GET /api/data-management/statistics
+ */
+router.get('/statistics', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const timeRange = parseInt(req.query.timeRange) || 30;
+    const result = await dataManagementService.statistics.getTestHistoryStatistics(req.user.id, timeRange);
+    res.json(result);
+  } catch (error) {
+    const errorResult = dataManagementService.handleError(error, '获取统计信息');
+    res.status(500).json(errorResult);
+  }
+}));
+
+/**
+ * 导出测试历史数据
+ * POST /api/data-management/export
+ */
+router.post('/export', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const result = await dataManagementService.dataExport.exportTestHistory(req.user.id, req.body);
+    res.json(result);
+  } catch (error) {
+    const errorResult = dataManagementService.handleError(error, '导出数据');
+    res.status(500).json(errorResult);
+  }
+}));
+
+/**
+ * 批量删除测试记录
+ * DELETE /api/data-management/test-history/batch
+ */
+router.delete('/test-history/batch', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const { testIds } = req.body;
+    const result = await dataManagementService.testHistory.batchDeleteTestRecords(testIds, req.user.id);
+    res.json(result);
+  } catch (error) {
+    const errorResult = dataManagementService.handleError(error, '批量删除测试记录');
+    res.status(500).json(errorResult);
   }
 }));
 

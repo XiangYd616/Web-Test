@@ -3,6 +3,29 @@ const chromeLauncher = require('chrome-launcher');
 const fs = require('fs').promises;
 const path = require('path');
 
+// 安全地导入浏览器安全配置
+let browserSecurity;
+try {
+  browserSecurity = require('../../config/browser-security');
+} catch (error) {
+  console.warn('⚠️ 无法加载浏览器安全配置，使用默认配置');
+  // 提供默认的安全配置
+  browserSecurity = {
+    getChromeLauncherConfig: () => ({
+      chromeFlags: [
+        '--headless',
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        '--no-sandbox', // 默认启用以确保兼容性
+        '--disable-setuid-sandbox'
+      ]
+    }),
+    printSecurityWarning: () => {
+      console.warn('🔒 使用默认浏览器配置（已禁用沙盒）');
+    }
+  };
+}
+
 /**
  * 真实的Lighthouse性能测试引擎
  */
@@ -36,9 +59,9 @@ class RealLighthouseEngine {
   async install() {
     try {
       console.log('🔧 Installing Lighthouse...');
-      
+
       const { spawn } = require('child_process');
-      
+
       return new Promise((resolve, reject) => {
         const npmProcess = spawn('npm', ['install', 'lighthouse', 'chrome-launcher'], {
           stdio: 'inherit',
@@ -83,18 +106,13 @@ class RealLighthouseEngine {
     console.log(`📱 Device: ${device}, Categories: ${categories.join(', ')}`);
 
     let chrome;
-    
+
     try {
-      // 启动Chrome浏览器
-      chrome = await chromeLauncher.launch({
-        chromeFlags: [
-          '--headless',
-          '--disable-gpu',
-          '--no-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-extensions'
-        ]
-      });
+      // 启动Chrome浏览器 - 使用安全配置
+      browserSecurity.printSecurityWarning();
+      const launcherConfig = browserSecurity.getChromeLauncherConfig();
+
+      chrome = await chromeLauncher.launch(launcherConfig);
 
       // 配置Lighthouse选项
       const options = {
@@ -118,7 +136,7 @@ class RealLighthouseEngine {
 
       // 解析结果
       const results = this.parseLighthouseResults(runnerResult.lhr);
-      
+
       console.log('✅ Lighthouse audit completed');
       return results;
 
@@ -205,11 +223,11 @@ class RealLighthouseEngine {
       totalByteWeight: this.getMetricValue(audits['total-byte-weight']),
       unusedCssRules: this.getMetricValue(audits['unused-css-rules']),
       unusedJavaScript: this.getMetricValue(audits['unused-javascript']),
-      
+
       // 图片优化
       unoptimizedImages: this.getMetricValue(audits['unoptimized-images']),
       modernImageFormats: this.getMetricValue(audits['modern-image-formats']),
-      
+
       // 网络指标
       serverResponseTime: this.getMetricValue(audits['server-response-time']),
       redirects: this.getMetricValue(audits['redirects'])
@@ -244,7 +262,7 @@ class RealLighthouseEngine {
    */
   getMetricValue(audit) {
     if (!audit) return null;
-    
+
     return {
       value: audit.numericValue || audit.score,
       displayValue: audit.displayValue,
@@ -320,7 +338,7 @@ class RealLighthouseEngine {
   async generateReport(results, format = 'html') {
     try {
       const reportGenerator = require('lighthouse/lighthouse-core/report/report-generator');
-      
+
       if (format === 'html') {
         const html = reportGenerator.generateReport(results.rawLighthouseResult, 'html');
         return {
@@ -347,13 +365,13 @@ class RealLighthouseEngine {
    */
   async runMultiPageTest(urls, config = {}) {
     const results = [];
-    
+
     for (const url of urls) {
       try {
         console.log(`🔍 Testing page: ${url}`);
         const result = await this.runPerformanceTest({ ...config, url });
         results.push(result);
-        
+
         // 添加延迟避免过度负载
         await new Promise(resolve => setTimeout(resolve, 2000));
       } catch (error) {
@@ -365,7 +383,7 @@ class RealLighthouseEngine {
         });
       }
     }
-    
+
     return results;
   }
 }

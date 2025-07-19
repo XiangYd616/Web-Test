@@ -128,6 +128,12 @@ if errorlevel 1 (
     echo ✅ Playwright已安装，内容测试功能可用
 )
 
+:: 浏览器安全提示
+echo.
+echo 🔒 浏览器安全提示:
+echo    如果遇到 --no-sandbox 警告，请查看 docs/browser-security-guide.md
+echo    建议以非管理员身份运行以获得最佳安全性
+
 :: 完成启动
 echo.
 echo 🎉 项目启动完成！
