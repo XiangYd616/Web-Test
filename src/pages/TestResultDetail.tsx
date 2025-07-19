@@ -1,212 +1,453 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
-import { ArrowLeft, Download, Share2, Clock, CheckCircle, XCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import {
+  ArrowLeft,
+  Download,
+  Share2,
+  Star,
+  Clock,
+  Calendar,
+  Globe,
+  BarChart3,
+  Shield,
+  Zap,
+  TrendingUp,
+  Database,
+  FileText,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Info,
+  Copy,
+  Settings
+} from 'lucide-react';
+import { EnhancedTestRecord } from '../types/testHistory';
 
 const TestResultDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { testId } = useParams<{ testId: string }>();
+  const navigate = useNavigate();
+  
+  const [testResult, setTestResult] = useState<EnhancedTestRecord | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('overview');
 
-  // 模拟测试结果数据
-  const testResult = {
-    id: id || '1',
-    type: '压力测试',
-    url: 'https://example.com',
-    status: 'success',
-    createdAt: '2025-01-15 14:30:00',
-    duration: 120,
-    score: 85,
-    details: {
-      totalRequests: 1200,
-      successfulRequests: 1140,
-      failedRequests: 60,
-      averageResponseTime: 245,
-      maxResponseTime: 1200,
-      minResponseTime: 89,
-      throughput: 10.5,
-      errorRate: 5.0
+  // 获取测试结果详情
+  useEffect(() => {
+    const fetchTestResult = async () => {
+      if (!testId) return;
+      
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/test/history/enhanced?testId=${testId}&includeResults=true&includeConfig=true&includeMetadata=true`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('获取测试结果失败');
+        }
+
+        const data = await response.json();
+        if (data.success && data.data.tests.length > 0) {
+          setTestResult(data.data.tests[0]);
+        } else {
+          throw new Error('测试结果不存在');
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : '获取测试结果失败');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTestResult();
+  }, [testId]);
+
+  // 获取测试类型图标
+  const getTestTypeIcon = (type: string) => {
+    switch (type) {
+      case 'performance':
+        return <BarChart3 className="w-6 h-6" />;
+      case 'security':
+        return <Shield className="w-6 h-6" />;
+      case 'stress':
+        return <Zap className="w-6 h-6" />;
+      case 'seo':
+        return <TrendingUp className="w-6 h-6" />;
+      case 'api':
+        return <Database className="w-6 h-6" />;
+      case 'website':
+        return <Globe className="w-6 h-6" />;
+      default:
+        return <FileText className="w-6 h-6" />;
     }
   };
 
+  // 获取状态图标和颜色
+  const getStatusInfo = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return { icon: <CheckCircle className="w-5 h-5" />, color: 'text-green-600', bg: 'bg-green-100' };
+      case 'failed':
+        return { icon: <XCircle className="w-5 h-5" />, color: 'text-red-600', bg: 'bg-red-100' };
+      case 'running':
+        return { icon: <Clock className="w-5 h-5" />, color: 'text-blue-600', bg: 'bg-blue-100' };
+      case 'cancelled':
+        return { icon: <AlertCircle className="w-5 h-5" />, color: 'text-yellow-600', bg: 'bg-yellow-100' };
+      default:
+        return { icon: <Info className="w-5 h-5" />, color: 'text-gray-600', bg: 'bg-gray-100' };
+    }
+  };
+
+  // 格式化持续时间
+  const formatDuration = (duration?: number) => {
+    if (!duration) return '-';
+    
+    if (duration < 1000) {
+      return `${duration}ms`;
+    } else if (duration < 60000) {
+      return `${(duration / 1000).toFixed(1)}s`;
+    } else {
+      return `${(duration / 60000).toFixed(1)}m`;
+    }
+  };
+
+  // 格式化日期
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  };
+
+  // 获取分数颜色
+  const getScoreColor = (score?: number) => {
+    if (!score) return 'text-gray-500';
+    if (score >= 90) return 'text-green-600';
+    if (score >= 70) return 'text-yellow-600';
+    if (score >= 50) return 'text-orange-600';
+    return 'text-red-600';
+  };
+
+  // 复制到剪贴板
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+  };
+
+  // 下载报告
+  const downloadReport = () => {
+    if (testResult?.reportUrl) {
+      window.open(testResult.reportUrl, '_blank');
+    }
+  };
+
+  // 分享结果
+  const shareResult = () => {
+    const url = window.location.href;
+    copyToClipboard(url);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">加载测试结果中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !testResult) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <XCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">加载失败</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={() => navigate('/test-history')}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            返回测试历史
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const statusInfo = getStatusInfo(testResult.status);
+
   return (
-    <div className="space-y-6">
-      {/* 头部 */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-4">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* 头部 */}
+        <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
             <button
-              type="button"
-              onClick={() => window.history.back()}
-              className="flex items-center text-gray-600 hover:text-gray-900"
+              onClick={() => navigate('/test-history')}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
             >
-              <ArrowLeft className="w-5 h-5 mr-1" />
-              返回
-            </button>
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">测试结果详情</h2>
-              <p className="text-gray-600">测试ID: {testResult.id}</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            <button type="button" className="btn btn-outline btn-sm flex items-center space-x-1">
-              <Share2 className="w-4 h-4" />
-              <span>分享</span>
-            </button>
-            <button type="button" className="btn btn-outline btn-sm flex items-center space-x-1">
-              <Download className="w-4 h-4" />
-              <span>导出</span>
+              <ArrowLeft className="w-5 h-5" />
+              返回测试历史
             </button>
           </div>
-        </div>
 
-        {/* 基本信息 */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-gray-50 rounded-lg p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">测试类型</span>
-              <span className="text-sm font-medium text-gray-900">{testResult.type}</span>
-            </div>
-          </div>
-          <div className="bg-gray-50 rounded-lg p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">状态</span>
-              <div className="flex items-center">
-                {testResult.status === 'success' ? (
-                  <CheckCircle className="w-4 h-4 text-green-500 mr-1" />
-                ) : (
-                  <XCircle className="w-4 h-4 text-red-500 mr-1" />
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-blue-100 rounded-lg">
+                  {getTestTypeIcon(testResult.testType)}
+                </div>
+                
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                    {testResult.testName}
+                  </h1>
+                  
+                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                    <div className="flex items-center gap-1">
+                      <Globe className="w-4 h-4" />
+                      <span className="truncate max-w-md">{testResult.url}</span>
+                      <button
+                        onClick={() => copyToClipboard(testResult.url)}
+                        className="p-1 hover:bg-gray-100 rounded"
+                      >
+                        <Copy className="w-3 h-3" />
+                      </button>
+                    </div>
+                    
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
+                      <span>{formatDate(testResult.startTime)}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      <span>{formatDuration(testResult.duration)}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${statusInfo.bg} ${statusInfo.color}`}>
+                      {statusInfo.icon}
+                      <span className="text-sm font-medium">{testResult.status}</span>
+                    </div>
+                    
+                    {testResult.overallScore !== undefined && (
+                      <div className="flex items-center gap-2">
+                        <Star className="w-4 h-4 text-yellow-500" />
+                        <span className={`text-lg font-bold ${getScoreColor(testResult.overallScore)}`}>
+                          {testResult.overallScore.toFixed(1)}
+                        </span>
+                      </div>
+                    )}
+
+                    {testResult.tags && testResult.tags.length > 0 && (
+                      <div className="flex gap-1">
+                        {testResult.tags.map((tag, index) => (
+                          <span
+                            key={index}
+                            className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={shareResult}
+                  className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  <Share2 className="w-4 h-4" />
+                  分享
+                </button>
+                
+                {testResult.reportUrl && (
+                  <button
+                    onClick={downloadReport}
+                    className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    <Download className="w-4 h-4" />
+                    下载报告
+                  </button>
                 )}
-                <span className="text-sm font-medium text-gray-900">
-                  {testResult.status === 'success' ? '成功' : '失败'}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="bg-gray-50 rounded-lg p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">评分</span>
-              <span className="text-sm font-medium text-gray-900">{testResult.score}分</span>
-            </div>
-          </div>
-          <div className="bg-gray-50 rounded-lg p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">耗时</span>
-              <div className="flex items-center">
-                <Clock className="w-4 h-4 text-gray-400 mr-1" />
-                <span className="text-sm font-medium text-gray-900">{testResult.duration}s</span>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* 详细指标 */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">详细指标</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="text-center p-4 bg-blue-50 rounded-lg">
-            <div className="text-2xl font-bold text-blue-600">{testResult.details.totalRequests}</div>
-            <div className="text-sm text-blue-600">总请求数</div>
+        {/* 标签页导航 */}
+        <div className="bg-white rounded-lg shadow-sm mb-6">
+          <div className="border-b border-gray-200">
+            <nav className="flex space-x-8 px-6">
+              {[
+                { id: 'overview', name: '概览', icon: <BarChart3 className="w-4 h-4" /> },
+                { id: 'results', name: '详细结果', icon: <FileText className="w-4 h-4" /> },
+                { id: 'config', name: '配置信息', icon: <Settings className="w-4 h-4" /> },
+                { id: 'metadata', name: '元数据', icon: <Info className="w-4 h-4" /> }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === tab.id
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  {tab.icon}
+                  {tab.name}
+                </button>
+              ))}
+            </nav>
           </div>
-          <div className="text-center p-4 bg-green-50 rounded-lg">
-            <div className="text-2xl font-bold text-green-600">{testResult.details.successfulRequests}</div>
-            <div className="text-sm text-green-600">成功请求</div>
-          </div>
-          <div className="text-center p-4 bg-red-50 rounded-lg">
-            <div className="text-2xl font-bold text-red-600">{testResult.details.failedRequests}</div>
-            <div className="text-sm text-red-600">失败请求</div>
-          </div>
-          <div className="text-center p-4 bg-orange-50 rounded-lg">
-            <div className="text-2xl font-bold text-orange-600">{testResult.details.averageResponseTime}ms</div>
-            <div className="text-sm text-orange-600">平均响应时间</div>
-          </div>
-        </div>
 
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="text-center p-4 bg-purple-50 rounded-lg">
-            <div className="text-lg font-bold text-purple-600">{testResult.details.maxResponseTime}ms</div>
-            <div className="text-xs text-purple-600">最大响应时间</div>
-          </div>
-          <div className="text-center p-4 bg-indigo-50 rounded-lg">
-            <div className="text-lg font-bold text-indigo-600">{testResult.details.minResponseTime}ms</div>
-            <div className="text-xs text-indigo-600">最小响应时间</div>
-          </div>
-          <div className="text-center p-4 bg-yellow-50 rounded-lg">
-            <div className="text-lg font-bold text-yellow-600">{testResult.details.throughput} req/s</div>
-            <div className="text-xs text-yellow-600">吞吐量</div>
-          </div>
-          <div className="text-center p-4 bg-pink-50 rounded-lg">
-            <div className="text-lg font-bold text-pink-600">{testResult.details.errorRate}%</div>
-            <div className="text-xs text-pink-600">错误率</div>
-          </div>
-        </div>
-      </div>
+          <div className="p-6">
+            {/* 概览标签页 */}
+            {activeTab === 'overview' && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h3 className="font-medium text-gray-900 mb-2">测试信息</h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">测试类型:</span>
+                        <span className="font-medium">{testResult.testType}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">优先级:</span>
+                        <span className="font-medium">{testResult.priority || '-'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">环境:</span>
+                        <span className="font-medium">{testResult.environment || '-'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">分类:</span>
+                        <span className="font-medium">{testResult.category || '-'}</span>
+                      </div>
+                    </div>
+                  </div>
 
-      {/* 测试配置 */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">测试配置</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h4 className="text-md font-medium text-gray-900 mb-2">基本配置</h4>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">目标URL:</span>
-                <span className="text-gray-900">{testResult.url}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">测试时长:</span>
-                <span className="text-gray-900">{testResult.duration}秒</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">并发用户:</span>
-                <span className="text-gray-900">10</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">测试类型:</span>
-                <span className="text-gray-900">恒定负载</span>
-              </div>
-            </div>
-          </div>
-          <div>
-            <h4 className="text-md font-medium text-gray-900 mb-2">高级配置</h4>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">HTTP方法:</span>
-                <span className="text-gray-900">GET</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">超时时间:</span>
-                <span className="text-gray-900">30秒</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">思考时间:</span>
-                <span className="text-gray-900">1秒</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">加压时间:</span>
-                <span className="text-gray-900">10秒</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h3 className="font-medium text-gray-900 mb-2">时间信息</h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">开始时间:</span>
+                        <span className="font-medium">{formatDate(testResult.startTime)}</span>
+                      </div>
+                      {testResult.endTime && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">结束时间:</span>
+                          <span className="font-medium">{formatDate(testResult.endTime)}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">持续时间:</span>
+                        <span className="font-medium">{formatDuration(testResult.duration)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">创建时间:</span>
+                        <span className="font-medium">{formatDate(testResult.createdAt)}</span>
+                      </div>
+                    </div>
+                  </div>
 
-      {/* 建议和总结 */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">测试总结</h3>
-        <div className="space-y-4">
-          <div>
-            <h4 className="text-md font-medium text-gray-900 mb-2">性能评估</h4>
-            <p className="text-sm text-gray-600">
-              网站在{testResult.duration}秒的压力测试中表现良好，平均响应时间为{testResult.details.averageResponseTime}ms，
-              成功率达到{((testResult.details.successfulRequests / testResult.details.totalRequests) * 100).toFixed(1)}%。
-            </p>
-          </div>
-          <div>
-            <h4 className="text-md font-medium text-gray-900 mb-2">优化建议</h4>
-            <ul className="text-sm text-gray-600 space-y-1">
-              <li>• 考虑优化响应时间，目标控制在200ms以下</li>
-              <li>• 监控错误率，建议保持在2%以下</li>
-              <li>• 可以尝试增加并发用户数进行更严格的测试</li>
-            </ul>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h3 className="font-medium text-gray-900 mb-2">统计信息</h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">查看次数:</span>
+                        <span className="font-medium">{testResult.viewCount || 0}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">分享次数:</span>
+                        <span className="font-medium">{testResult.shareCount || 0}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">已收藏:</span>
+                        <span className="font-medium">{testResult.bookmarked ? '是' : '否'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {testResult.notes && (
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h3 className="font-medium text-gray-900 mb-2">备注</h3>
+                    <p className="text-sm text-gray-700">{testResult.notes}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 其他标签页内容 */}
+            {activeTab === 'results' && (
+              <div className="space-y-6">
+                {testResult.results ? (
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h3 className="font-medium text-gray-900 mb-4">测试结果详情</h3>
+                    <pre className="text-sm text-gray-700 overflow-auto max-h-96 bg-white p-4 rounded border">
+                      {JSON.stringify(testResult.results, null, 2)}
+                    </pre>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <p>暂无详细结果数据</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'config' && (
+              <div className="space-y-6">
+                {testResult.config ? (
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h3 className="font-medium text-gray-900 mb-4">测试配置</h3>
+                    <pre className="text-sm text-gray-700 overflow-auto max-h-96 bg-white p-4 rounded border">
+                      {JSON.stringify(testResult.config, null, 2)}
+                    </pre>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Settings className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <p>暂无配置信息</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'metadata' && (
+              <div className="space-y-6">
+                {testResult.metadata ? (
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h3 className="font-medium text-gray-900 mb-4">元数据信息</h3>
+                    <pre className="text-sm text-gray-700 overflow-auto max-h-96 bg-white p-4 rounded border">
+                      {JSON.stringify(testResult.metadata, null, 2)}
+                    </pre>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <Info className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <p>暂无元数据信息</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

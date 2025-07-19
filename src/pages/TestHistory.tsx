@@ -14,21 +14,46 @@ import {
   Zap
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import {
+  EnhancedTestRecord
+} from '../types/testHistory';
 
-interface TestRecord {
+// 兼容性类型（保持向后兼容）
+interface TestRecord extends Partial<EnhancedTestRecord> {
   id: string;
   testName: string;
-  testType: 'performance' | 'content' | 'security' | 'api' | 'stress' | 'website';
+  testType: string;
   url: string;
-  status: 'completed' | 'failed' | 'cancelled';
-  score: number;
-  duration: number;
+  status: string;
+  score?: number;
+  duration?: number;
   startTime: string;
-  endTime: string;
+  endTime?: string;
   reportPath?: string;
 }
 
+import EnhancedTestHistory from '../components/testHistory/EnhancedTestHistory';
+
 const TestHistory: React.FC = () => {
+  // 使用增强的测试历史组件
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">测试历史</h1>
+          <p className="mt-2 text-gray-600">
+            查看和管理您的所有测试记录，包括性能、安全、SEO等各类测试结果
+          </p>
+        </div>
+
+        <EnhancedTestHistory />
+      </div>
+    </div>
+  );
+};
+
+// 保留原有的组件作为备用（兼容性）
+const LegacyTestHistory: React.FC = () => {
   const [testHistory, setTestHistory] = useState<TestRecord[]>([]);
   const [filteredHistory, setFilteredHistory] = useState<TestRecord[]>([]);
   const [loading, setLoading] = useState(true);
