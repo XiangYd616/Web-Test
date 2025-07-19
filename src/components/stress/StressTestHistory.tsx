@@ -77,7 +77,10 @@ export const StressTestHistory = React.forwardRef<
       });
       const data = await response.json();
 
-      if (data.success && Array.isArray(data.data)) {
+      if (data.success && data.data && Array.isArray(data.data.tests)) {
+        setHistory(data.data.tests);
+      } else if (data.success && Array.isArray(data.data)) {
+        // 兼容旧的数据结构
         setHistory(data.data);
       } else {
         setHistory([]);
