@@ -18,6 +18,7 @@ const { RealCompatibilityTestEngine } = require('../services/realCompatibilityTe
 const { RealUXTestEngine } = require('../services/realUXTestEngine');
 const { RealAPITestEngine } = require('../services/realAPITestEngine');
 const securityTestStorage = require('../services/securityTestStorage');
+const enhancedTestHistoryService = require('../services/enhancedTestHistoryService');
 
 const multer = require('multer');
 const path = require('path');
@@ -450,6 +451,61 @@ router.get('/', authMiddleware, asyncHandler(async (req, res) => {
  */
 router.get('/history', authMiddleware, asyncHandler(async (req, res) => {
   return handleTestHistory(req, res);
+}));
+
+/**
+ * 获取增强的测试历史记录
+ * GET /api/test/history/enhanced
+ */
+router.get('/history/enhanced', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const result = await enhancedTestHistoryService.getEnhancedTestHistory(req.user.id, req.query);
+    res.json(result);
+  } catch (error) {
+    console.error('获取增强测试历史失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '获取增强测试历史失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 获取测试历史统计信息
+ * GET /api/test/history/statistics
+ */
+router.get('/history/statistics', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const { timeRange = 30 } = req.query;
+    const result = await enhancedTestHistoryService.getTestHistoryStatistics(req.user.id, parseInt(timeRange));
+    res.json(result);
+  } catch (error) {
+    console.error('获取测试历史统计失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '获取测试历史统计失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 批量操作测试历史记录
+ * POST /api/test/history/batch
+ */
+router.post('/history/batch', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const result = await enhancedTestHistoryService.batchOperation(req.user.id, req.body);
+    res.json(result);
+  } catch (error) {
+    console.error('批量操作失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '批量操作失败',
+      error: error.message
+    });
+  }
 }));
 
 // 共享的历史记录处理函数
