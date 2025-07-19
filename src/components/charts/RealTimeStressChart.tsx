@@ -86,10 +86,10 @@ export const RealTimeStressChart: React.FC<RealTimeStressChartProps> = ({
     const windowStart = now - (config.timeWindow * 1000);
     const filteredData = data.filter(point => point.timestamp >= windowStart);
 
-    // 计算比例尺
-    const maxUsers = testConfig?.users || Math.max(...filteredData.map(d => d.activeUsers));
-    const maxResponseTime = Math.max(...filteredData.map(d => d.responseTime));
-    const maxThroughput = Math.max(...filteredData.map(d => d.throughput));
+    // 计算比例尺，确保不为0
+    const maxUsers = Math.max(testConfig?.users || 10, ...filteredData.map(d => d.activeUsers || 0), 1);
+    const maxResponseTime = Math.max(...filteredData.map(d => d.responseTime || 0), 100); // 至少100ms
+    const maxThroughput = Math.max(...filteredData.map(d => d.throughput || 0), 1); // 至少1 TPS
 
     // 生成时间轴标签
     const timeLabels = [];
@@ -116,25 +116,28 @@ export const RealTimeStressChart: React.FC<RealTimeStressChartProps> = ({
 
     const chartWidth = 720; // SVG宽度减去边距
     const chartHeight = 280; // SVG高度减去边距
-    const timeSpan = config.timeWindow * 1000;
-    const now = Date.now();
-    const startTime = now - timeSpan;
 
-    // 过滤掉时间窗口外的点，并确保坐标有效
+    // 使用数据的实际时间范围
+    const timestamps = chartData.points.map(p => p.timestamp);
+    const minTime = Math.min(...timestamps);
+    const maxTime = Math.max(...timestamps);
+    const timeSpan = Math.max(maxTime - minTime, 1000); // 至少1秒的时间跨度
+
+    // 过滤并映射数据点
     const validPoints = chartData.points
-      .filter(point => point.timestamp >= startTime && point.timestamp <= now)
       .map((point, index) => {
-        // 确保x坐标在有效范围内 (60 到 780)
-        const xRatio = Math.max(0, Math.min(1, (point.timestamp - startTime) / timeSpan));
+        // 计算x坐标 - 基于数据的实际时间范围
+        const xRatio = timeSpan > 0 ? (point.timestamp - minTime) / timeSpan : 0;
         const x = 60 + (xRatio * chartWidth);
 
         // 确保y坐标有效，防止NaN和无限值
-        const value = point[dataKey] as number || 0; // 使用0替代undefined或NaN
-        const yRatio = Math.max(0, Math.min(1, value / (scale || 1))); // 防止除以0
+        const value = point[dataKey] as number || 0;
+        const yRatio = scale > 0 ? Math.max(0, Math.min(1, value / scale)) : 0;
         const y = chartHeight - 40 - (yRatio * (chartHeight - 80));
 
         return { x, y, index };
-      });
+      })
+      .filter(point => !isNaN(point.x) && !isNaN(point.y)); // 过滤掉无效坐标
 
     if (validPoints.length === 0) return '';
 
@@ -153,11 +156,24 @@ export const RealTimeStressChart: React.FC<RealTimeStressChartProps> = ({
     const latest = chartData.points[chartData.points.length - 1];
     const recent = chartData.points.slice(-10); // 最近10个数据点
 
+    // 安全的数值计算，避免NaN
+    const avgResponseTime = recent.length > 0
+      ? recent.reduce((sum, p) => sum + (p.responseTime || 0), 0) / recent.length
+      : 0;
+
+    const currentThroughput = recent.length > 0
+      ? recent.reduce((sum, p) => sum + (p.throughput || 0), 0) / recent.length
+      : 0;
+
+    const errorRate = recent.length > 0
+      ? (recent.filter(p => !p.success).length / recent.length) * 100
+      : 0;
+
     return {
-      activeUsers: latest.activeUsers,
-      avgResponseTime: recent.reduce((sum, p) => sum + p.responseTime, 0) / recent.length,
-      currentThroughput: recent.reduce((sum, p) => sum + p.throughput, 0) / recent.length,
-      errorRate: (recent.filter(p => !p.success).length / recent.length) * 100,
+      activeUsers: latest.activeUsers || 0,
+      avgResponseTime: isNaN(avgResponseTime) ? 0 : avgResponseTime,
+      currentThroughput: isNaN(currentThroughput) ? 0 : currentThroughput,
+      errorRate: isNaN(errorRate) ? 0 : errorRate,
       phase: latest.phase || 'steady'
     };
   }, [chartData.points]);

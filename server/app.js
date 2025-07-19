@@ -43,10 +43,23 @@ const redisConnection = require('./services/redis/connection');
 const cacheMonitoring = require('./services/redis/monitoring');
 
 const app = express();
+const http = require('http');
+const { Server } = require('socket.io');
+
 const PORT = parseInt(process.env.PORT || process.env.API_PORT || process.env.APP_PORT) || 3001;
 const HOST = process.env.HOST || 'localhost';
 const APP_NAME = process.env.APP_NAME || 'Test Web App';
 const APP_VERSION = process.env.APP_VERSION || '1.0.0';
+
+// 创建HTTP服务器和Socket.IO实例
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: process.env.FRONTEND_URL || "http://localhost:5175",
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+});
 
 // 确保必要的目录存在
 const ensureDirectories = () => {
@@ -245,12 +258,16 @@ const startServer = async () => {
     await connectDB();
     console.log('✅ 数据库连接成功');
 
+    // 设置WebSocket事件处理
+    setupWebSocketHandlers(io);
+
     // 启动服务器
-    const server = app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`🚀 服务器运行在端口 ${PORT}`);
       console.log(`📖 API文档: http://localhost:${PORT}/api`);
       console.log(`🏥 健康检查: http://localhost:${PORT}/health`);
       console.log(`🌍 环境: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`🔌 WebSocket服务已启动`);
     });
 
     // 优雅关闭
@@ -270,6 +287,33 @@ const startServer = async () => {
     process.exit(1);
   }
 };
+
+// WebSocket事件处理
+function setupWebSocketHandlers(io) {
+  io.on('connection', (socket) => {
+    console.log(`🔌 WebSocket客户端连接: ${socket.id}`);
+
+    // 加入压力测试房间
+    socket.on('join-stress-test', (testId) => {
+      socket.join(`stress-test-${testId}`);
+      console.log(`📊 客户端 ${socket.id} 加入压力测试房间: ${testId}`);
+    });
+
+    // 离开压力测试房间
+    socket.on('leave-stress-test', (testId) => {
+      socket.leave(`stress-test-${testId}`);
+      console.log(`📊 客户端 ${socket.id} 离开压力测试房间: ${testId}`);
+    });
+
+    // 处理断开连接
+    socket.on('disconnect', () => {
+      console.log(`🔌 WebSocket客户端断开连接: ${socket.id}`);
+    });
+  });
+
+  // 将io实例设置为全局变量，供其他模块使用
+  global.io = io;
+}
 
 // 启动应用
 if (require.main === module) {

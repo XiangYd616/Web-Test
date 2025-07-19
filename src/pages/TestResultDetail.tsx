@@ -1,32 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft,
-  Download,
-  Share2,
-  Star,
-  Clock,
-  Calendar,
-  Globe,
-  BarChart3,
-  Shield,
-  Zap,
-  TrendingUp,
-  Database,
-  FileText,
-  CheckCircle,
-  XCircle,
   AlertCircle,
-  Info,
+  ArrowLeft,
+  BarChart3,
+  Calendar,
+  CheckCircle,
+  Clock,
   Copy,
-  Settings
+  Database,
+  Download,
+  FileText,
+  Globe,
+  Info,
+  Settings,
+  Share2,
+  Shield,
+  Star,
+  TrendingUp,
+  XCircle,
+  Zap
 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { EnhancedTestRecord } from '../types/testHistory';
 
 const TestResultDetail: React.FC = () => {
   const { testId } = useParams<{ testId: string }>();
   const navigate = useNavigate();
-  
+
   const [testResult, setTestResult] = useState<EnhancedTestRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +36,7 @@ const TestResultDetail: React.FC = () => {
   useEffect(() => {
     const fetchTestResult = async () => {
       if (!testId) return;
-      
+
       try {
         setLoading(true);
         const response = await fetch(`/api/test/history/enhanced?testId=${testId}&includeResults=true&includeConfig=true&includeMetadata=true`, {
@@ -104,7 +104,7 @@ const TestResultDetail: React.FC = () => {
   // 格式化持续时间
   const formatDuration = (duration?: number) => {
     if (!duration) return '-';
-    
+
     if (duration < 1000) {
       return `${duration}ms`;
     } else if (duration < 60000) {
@@ -206,12 +206,12 @@ const TestResultDetail: React.FC = () => {
                 <div className="p-3 bg-blue-100 rounded-lg">
                   {getTestTypeIcon(testResult.testType)}
                 </div>
-                
+
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900 mb-2">
                     {testResult.testName}
                   </h1>
-                  
+
                   <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
                     <div className="flex items-center gap-1">
                       <Globe className="w-4 h-4" />
@@ -219,16 +219,18 @@ const TestResultDetail: React.FC = () => {
                       <button
                         onClick={() => copyToClipboard(testResult.url)}
                         className="p-1 hover:bg-gray-100 rounded"
+                        title="复制URL到剪贴板"
+                        aria-label="复制URL"
                       >
                         <Copy className="w-3 h-3" />
                       </button>
                     </div>
-                    
+
                     <div className="flex items-center gap-1">
                       <Calendar className="w-4 h-4" />
                       <span>{formatDate(testResult.startTime)}</span>
                     </div>
-                    
+
                     <div className="flex items-center gap-1">
                       <Clock className="w-4 h-4" />
                       <span>{formatDuration(testResult.duration)}</span>
@@ -240,7 +242,7 @@ const TestResultDetail: React.FC = () => {
                       {statusInfo.icon}
                       <span className="text-sm font-medium">{testResult.status}</span>
                     </div>
-                    
+
                     {testResult.overallScore !== undefined && (
                       <div className="flex items-center gap-2">
                         <Star className="w-4 h-4 text-yellow-500" />
@@ -274,7 +276,7 @@ const TestResultDetail: React.FC = () => {
                   <Share2 className="w-4 h-4" />
                   分享
                 </button>
-                
+
                 {testResult.reportUrl && (
                   <button
                     onClick={downloadReport}
@@ -302,11 +304,10 @@ const TestResultDetail: React.FC = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === tab.id
+                  className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${activeTab === tab.id
                       ? 'border-blue-500 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   {tab.icon}
                   {tab.name}

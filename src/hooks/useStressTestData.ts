@@ -115,7 +115,7 @@ export const useStressTestData = (config?: StressTestConfig): UseStressTestDataR
   // 添加数据点
   const addDataPoint = useCallback((point: StressTestDataPoint) => {
     dataCache.current.push(point);
-    
+
     // 定期清理数据
     if (dataCache.current.length % 100 === 0) {
       cleanupOldData();
@@ -203,7 +203,7 @@ export const useStressTestData = (config?: StressTestConfig): UseStressTestDataR
 
   // 获取时间范围内的数据
   const getDataInTimeRange = useCallback((startTime: number, endTime: number) => {
-    return dataCache.current.filter(point => 
+    return dataCache.current.filter(point =>
       point.timestamp >= startTime && point.timestamp <= endTime
     );
   }, []);
@@ -288,19 +288,23 @@ export const calculateMetrics = (data: StressTestDataPoint[]): StressTestMetrics
 
   // 计算TPS（基于最近的数据）
   const recentData = data.slice(-60); // 最近60个数据点
-  const timeSpan = recentData.length > 1 
-    ? (recentData[recentData.length - 1].timestamp - recentData[0].timestamp) / 1000 
+  const timeSpan = recentData.length > 1
+    ? (recentData[recentData.length - 1].timestamp - recentData[0].timestamp) / 1000
     : 1;
-  const currentTPS = recentData.length / timeSpan;
+  const currentTPS = timeSpan > 0 ? recentData.length / timeSpan : 0;
 
   // 计算峰值TPS
   const tpsHistory: number[] = [];
   for (let i = 60; i < data.length; i += 10) {
     const window = data.slice(i - 60, i);
-    const windowTimeSpan = (window[window.length - 1].timestamp - window[0].timestamp) / 1000;
-    tpsHistory.push(window.length / windowTimeSpan);
+    if (window.length > 1) {
+      const windowTimeSpan = (window[window.length - 1].timestamp - window[0].timestamp) / 1000;
+      if (windowTimeSpan > 0) {
+        tpsHistory.push(window.length / windowTimeSpan);
+      }
+    }
   }
-  const peakTPS = Math.max(...tpsHistory, currentTPS);
+  const peakTPS = tpsHistory.length > 0 ? Math.max(...tpsHistory, currentTPS) : currentTPS;
 
   // 响应时间百分位数
   const sortedResponseTimes = data.map(d => d.responseTime).sort((a, b) => a - b);
@@ -320,9 +324,9 @@ export const calculateMetrics = (data: StressTestDataPoint[]): StressTestMetrics
     totalRequests,
     successfulRequests,
     failedRequests,
-    averageResponseTime,
-    currentTPS,
-    peakTPS,
+    averageResponseTime: isNaN(averageResponseTime) ? 0 : averageResponseTime,
+    currentTPS: isNaN(currentTPS) ? 0 : currentTPS,
+    peakTPS: isNaN(peakTPS) ? 0 : peakTPS,
     errorBreakdown,
     p50ResponseTime: getPercentile(50),
     p75ResponseTime: getPercentile(75),

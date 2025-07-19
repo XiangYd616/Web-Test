@@ -2,7 +2,7 @@
  * 增强的压力测试图表组件 - 支持空间复用、多Y轴、动态缩放等专业功能
  */
 
-import { Clock, RotateCcw, TrendingUp, Users } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   Bar,
@@ -245,26 +245,28 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
         />
       ))}
 
-      {/* 多Y轴指标线 */}
-      {selectedMetrics.includes('responseTime') && (
-        <Line
-          yAxisId="left"
-          type="monotone"
-          dataKey="responseTime"
-          stroke="#EF4444"
-          strokeWidth={2}
-          dot={false}
-          name="响应时间 (ms)"
-        />
-      )}
-
+      {/* 多Y轴指标 - 先渲染柱状图，再渲染线条确保线条在上层 */}
       {selectedMetrics.includes('throughput') && (
         <Bar
           yAxisId="right"
           dataKey="throughput"
           fill="#10B981"
           name="吞吐量 (req/s)"
-          opacity={0.7}
+          opacity={0.6}
+        />
+      )}
+
+      {selectedMetrics.includes('responseTime') && (
+        <Line
+          yAxisId="left"
+          type="monotone"
+          dataKey="responseTime"
+          stroke="#EF4444"
+          strokeWidth={4}
+          dot={false}
+          name="响应时间 (ms)"
+          strokeDasharray="0"
+          strokeOpacity={1}
         />
       )}
 
@@ -274,9 +276,11 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
           type="monotone"
           dataKey="activeUsers"
           stroke="#F59E0B"
-          strokeWidth={2}
+          strokeWidth={3}
           dot={false}
           name="活跃用户数"
+          strokeDasharray="8 4"
+          strokeOpacity={0.9}
         />
       )}
     </ComposedChart>
@@ -326,33 +330,8 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
 
   return (
     <div className="space-y-4">
-      {/* 控制面板 */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-gray-800/50 rounded-lg">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-300">图表类型:</span>
-          <div className="flex gap-1">
-            {[
-              { key: 'realtime', label: '实时监控', icon: TrendingUp },
-              { key: 'results', label: '测试结果', icon: BarChart },
-              { key: 'comparison', label: '对比分析', icon: Users },
-              { key: 'distribution', label: '分布图', icon: Clock }
-            ].map(({ key, label, icon: Icon }) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setChartType(key as any)}
-                className={`px-3 py-1 rounded text-sm flex items-center gap-1 transition-colors ${chartType === key
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  }`}
-              >
-                <Icon className="w-4 h-4" />
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-
+      {/* 简化的控制面板 - 移除重复的图表类型按钮 */}
+      <div className="flex flex-wrap items-center justify-end gap-4 p-3 bg-gray-800/30 rounded-lg">
         <div className="flex items-center gap-2">
           {enableZoom && (
             <button
