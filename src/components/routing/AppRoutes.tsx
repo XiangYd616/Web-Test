@@ -21,8 +21,9 @@ const CompatibilityTest = lazy(() => import('../../pages/CompatibilityTest'));
 const UXTest = lazy(() => import('../../pages/UXTest'));
 
 // 数据管理相关页面
-const DataStorage = lazy(() => import('../../pages/DataStorage'));
+const DataStorage = lazy(() => import('../../pages/admin/DataStorage'));
 const DataManagement = lazy(() => import('../../pages/DataManagement'));
+const Statistics = lazy(() => import('../../pages/Statistics'));
 const Analytics = lazy(() => import('../../pages/Analytics'));
 const MonitoringDashboard = lazy(() => import('../../pages/MonitoringDashboard'));
 
@@ -164,6 +165,12 @@ const AppRoutes: React.FC = () => {
         <Route path="data-management" element={
           <LazyPageWrapper>
             <DataManagement />
+          </LazyPageWrapper>
+        } />
+
+        <Route path="statistics" element={
+          <LazyPageWrapper>
+            <Statistics />
           </LazyPageWrapper>
         } />
         <Route path="analytics" element={

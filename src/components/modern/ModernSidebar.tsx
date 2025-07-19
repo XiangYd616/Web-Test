@@ -1,11 +1,9 @@
 import {
-  Activity,
   BarChart3,
   ChevronRight,
   Code,
   Crown,
   Database,
-  FileText,
   GitBranch,
   Globe,
   Home,
@@ -116,32 +114,24 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
       icon: Database,
       href: '#',
       children: [
-
         {
-          id: 'data-storage',
-          name: '测试数据',
-          icon: Database,
-          href: '/data-storage',
-          badge: 'ALL'
+          id: 'test-history',
+          name: '测试历史',
+          icon: TestTube,
+          href: '/test-history',
+          badge: 'v2.0'
         },
         {
-          id: 'import-export',
-          name: '导入导出',
-          icon: FileText,
-          href: '/data-management'
-        },
-        {
-          id: 'analytics-overview',
-          name: '分析概览',
+          id: 'statistics',
+          name: '统计分析',
           icon: BarChart3,
-          href: '/analytics'
+          href: '/statistics'
         },
         {
-          id: 'monitoring',
-          name: '实时监控',
-          icon: Activity,
-          href: '/monitoring',
-          badge: 'NEW'
+          id: 'data-center',
+          name: '数据中心',
+          icon: Database,
+          href: '/data-storage'
         }
       ]
     },
@@ -331,14 +321,44 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
   // 智能展开包含活跃子项的组（仅在侧边栏展开时）
   React.useEffect(() => {
     if (!collapsed) {
-      // 只在侧边栏展开时才自动展开包含活跃子项的组
-      const activeGroupId = allSidebarItems.find(item =>
-        item.children && item.children.some(child => isActive(child.href))
-      )?.id;
+      const groupsToExpand: string[] = [];
 
-      if (activeGroupId && !expandedGroups.includes(activeGroupId)) {
-        setExpandedGroups(prev => [...prev, activeGroupId]);
-      }
+      // 递归查找包含活跃子项的组
+      const findActiveGroups = (items: SidebarItem[]): void => {
+        items.forEach(item => {
+          if (item.children) {
+            // 检查直接子项是否活跃
+            const hasActiveChild = item.children.some(child => isActive(child.href));
+            // 检查嵌套子项是否活跃
+            const hasActiveNestedChild = item.children.some(child =>
+              child.children && child.children.some(nestedChild => isActive(nestedChild.href))
+            );
+
+            if (hasActiveChild || hasActiveNestedChild) {
+              groupsToExpand.push(item.id);
+            }
+
+            // 如果有嵌套子项活跃，也要展开对应的子组
+            item.children.forEach(child => {
+              if (child.children && child.children.some(nestedChild => isActive(nestedChild.href))) {
+                groupsToExpand.push(child.id);
+              }
+            });
+
+            // 递归处理嵌套菜单
+            findActiveGroups(item.children);
+          }
+        });
+      };
+
+      findActiveGroups(allSidebarItems);
+
+      // 展开所有需要展开的组
+      groupsToExpand.forEach(groupId => {
+        if (!expandedGroups.includes(groupId)) {
+          setExpandedGroups(prev => [...prev, groupId]);
+        }
+      });
     }
   }, [location.pathname, collapsed, allSidebarItems, expandedGroups]);
 
@@ -364,14 +384,18 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
             onMouseLeave={handleButtonLeave}
             className={`w-full sidebar-button-hover transition-all duration-200 ${collapsed
               ? 'flex items-center justify-center p-3 rounded-lg'
-              : 'flex items-center justify-between px-3 py-2.5 rounded-lg text-left'
+              : level > 0
+                ? 'flex items-center justify-between px-6 py-2 rounded-md text-left text-sm'
+                : 'flex items-center justify-between px-3 py-2.5 rounded-lg text-left'
               } ${clickedItem === item.id
                 ? 'scale-95 bg-blue-600/30 text-blue-300 sidebar-button-clicked'
                 : directlyActive
                   ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30 shadow-lg'
                   : groupActiveByChild
                     ? 'bg-blue-500/10 text-blue-300 border border-blue-500/20'
-                    : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:scale-[1.02]'
+                    : level > 0
+                      ? 'text-gray-400 hover:bg-gray-700/30 hover:text-gray-200 hover:scale-[1.02]'
+                      : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:scale-[1.02]'
               }`}
             title={collapsed ? item.name : undefined}
           >
@@ -393,8 +417,8 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
               // 展开状态：正常布局
               <>
                 <div className="flex items-center gap-3">
-                  <item.icon className="w-5 h-5 flex-shrink-0" />
-                  <span className="font-medium">{item.name}</span>
+                  <item.icon className={`flex-shrink-0 ${level > 0 ? 'w-4 h-4' : 'w-5 h-5'}`} />
+                  <span className={`${level > 0 ? 'font-normal' : 'font-medium'}`}>{item.name}</span>
                   {item.badge && (
                     <span className="px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full">
                       {item.badge}
@@ -411,7 +435,7 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
 
           {/* 展开状态下的子菜单 */}
           {!collapsed && isExpanded && (
-            <div className="mt-1 ml-0 space-y-1 border-l border-gray-700/30 pl-3">
+            <div className={`mt-1 space-y-1 border-l border-gray-700/30 ${level === 0 ? 'ml-0 pl-3' : 'ml-3 pl-3'}`}>
               {item.children?.map(child => renderSidebarItem(child, level + 1))}
             </div>
           )}
@@ -555,34 +579,78 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
 
                 {/* 子菜单项 */}
                 <div className="space-y-1 px-1">
-                  {item.children.map((child) => (
-                    <Link
-                      key={child.id}
-                      to={child.href}
-                      onClick={() => {
-                        handleButtonClick(child.id);
-                        setHoveredItem(null);
-                        setHoverPosition(null);
-                      }}
-                      className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm sidebar-button-hover transition-all duration-200 ${clickedItem === child.id
-                        ? 'scale-95 bg-blue-600/30 text-blue-300 sidebar-button-clicked'
-                        : isActive(child.href)
-                          ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                          : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:scale-[1.02]'
-                        }`}
-                    >
-                      <child.icon className="w-4 h-4 flex-shrink-0" />
-                      <span className="flex-1">{child.name}</span>
-                      {child.badge && (
-                        <span className="px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full">
-                          {child.badge}
-                        </span>
-                      )}
-                      {isActive(child.href) && (
-                        <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                      )}
-                    </Link>
-                  ))}
+                  {item.children.map((child) => {
+                    // 如果子项有自己的子菜单，显示为分组
+                    if (child.children && child.children.length > 0) {
+                      return (
+                        <div key={child.id} className="mb-2">
+                          <div className="px-3 py-1 text-xs font-medium text-gray-400 uppercase tracking-wider">
+                            {child.name}
+                          </div>
+                          <div className="space-y-1 ml-2">
+                            {child.children.map((nestedChild) => (
+                              <Link
+                                key={nestedChild.id}
+                                to={nestedChild.href}
+                                onClick={() => {
+                                  handleButtonClick(nestedChild.id);
+                                  setHoveredItem(null);
+                                  setHoverPosition(null);
+                                }}
+                                className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm sidebar-button-hover transition-all duration-200 ${clickedItem === nestedChild.id
+                                  ? 'scale-95 bg-blue-600/30 text-blue-300 sidebar-button-clicked'
+                                  : isActive(nestedChild.href)
+                                    ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                                    : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:scale-[1.02]'
+                                  }`}
+                              >
+                                <nestedChild.icon className="w-4 h-4 flex-shrink-0" />
+                                <span className="flex-1">{nestedChild.name}</span>
+                                {nestedChild.badge && (
+                                  <span className="px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full">
+                                    {nestedChild.badge}
+                                  </span>
+                                )}
+                                {isActive(nestedChild.href) && (
+                                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                                )}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    // 普通子菜单项
+                    return (
+                      <Link
+                        key={child.id}
+                        to={child.href}
+                        onClick={() => {
+                          handleButtonClick(child.id);
+                          setHoveredItem(null);
+                          setHoverPosition(null);
+                        }}
+                        className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm sidebar-button-hover transition-all duration-200 ${clickedItem === child.id
+                          ? 'scale-95 bg-blue-600/30 text-blue-300 sidebar-button-clicked'
+                          : isActive(child.href)
+                            ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                            : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:scale-[1.02]'
+                          }`}
+                      >
+                        <child.icon className="w-4 h-4 flex-shrink-0" />
+                        <span className="flex-1">{child.name}</span>
+                        {child.badge && (
+                          <span className="px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full">
+                            {child.badge}
+                          </span>
+                        )}
+                        {isActive(child.href) && (
+                          <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                        )}
+                      </Link>
+                    );
+                  })}
                 </div>
 
 

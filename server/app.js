@@ -19,7 +19,7 @@ const seoRoutes = require('./routes/seo');
 // const unifiedSecurityRoutes = require('./routes/unifiedSecurity'); // 已移除
 const userRoutes = require('./routes/user');
 const adminRoutes = require('./routes/admin');
-const dataRoutes = require('./routes/data');
+// const dataRoutes = require('./routes/data'); // 已移除，功能合并到 dataManagementRoutes
 
 // 导入中间件
 // const { authMiddleware } = require('./middleware/auth'); // 已移除，不再需要
@@ -124,18 +124,14 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // API路由
 app.use('/api/auth', authRoutes);
 app.use('/api/test', testRoutes);
-app.use('/api/test-engines', testRoutes); // 测试引擎状态API
-// app.use('/api/tests', testRoutes); // 复数形式的别名 - 已移除，统一使用 /api/test
-// app.use('/api/test-history', testRoutes); // 兼容性路由 - 已移除，使用 /api/test/history
 app.use('/api/seo', seoRoutes); // SEO测试API - 解决CORS问题
-// app.use('/api/unified-security', unifiedSecurityRoutes); // 已移除
 app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
 
 // 偏好设置API已移除，请使用 /api/user/preferences
 // 原有的 /api/preferences 路由功能已整合到 /api/user/preferences 中
 
-app.use('/api/data', dataRoutes);
+// 数据管理API - 统一到 /api/data-management
 app.use('/api/data-management', dataManagementRoutes);
 app.use('/api/monitoring', monitoringRoutes);
 app.use('/api/reports', reportRoutes);

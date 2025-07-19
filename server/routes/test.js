@@ -18,7 +18,7 @@ const { RealCompatibilityTestEngine } = require('../services/realCompatibilityTe
 const { RealUXTestEngine } = require('../services/realUXTestEngine');
 const { RealAPITestEngine } = require('../services/realAPITestEngine');
 const securityTestStorage = require('../services/securityTestStorage');
-const enhancedTestHistoryService = require('../services/enhancedTestHistoryService');
+// const enhancedTestHistoryService = require('../services/enhancedTestHistoryService'); // 已移除，功能迁移到 dataManagement
 
 const multer = require('multer');
 const path = require('path');
@@ -416,31 +416,21 @@ router.get('/status', asyncHandler(async (req, res) => {
 }));
 
 /**
- * 获取测试历史记录 - 兼容性路由
- * GET /api/test-history (直接访问)
+ * 测试API根路径 - 返回API信息
+ * GET /api/test
  */
-router.get('/', authMiddleware, asyncHandler(async (req, res) => {
-  // 如果是 /api/test-history 的直接访问，处理历史记录请求
-  if (req.originalUrl.includes('/api/test-history')) {
-    return handleTestHistory(req, res);
-  }
-
-  // 如果是 /api/test-engines 的访问，跳过这个路由
-  if (req.originalUrl.includes('/api/test-engines')) {
-    return res.status(404).json({
-      success: false,
-      message: '接口不存在'
-    });
-  }
-
-  // 否则返回API信息
+router.get('/', asyncHandler(async (req, res) => {
   res.json({
     message: 'Test API',
+    version: '2.0',
     endpoints: {
       history: '/api/test/history',
+      performance: '/api/test/performance',
+      security: '/api/test/security',
+      seo: '/api/test/seo',
       stress: '/api/test/stress',
       api: '/api/test/api',
-      security: '/api/test/security'
+      website: '/api/test/website'
     }
   });
 }));
@@ -454,58 +444,39 @@ router.get('/history', authMiddleware, asyncHandler(async (req, res) => {
 }));
 
 /**
- * 获取增强的测试历史记录
- * GET /api/test/history/enhanced
+ * 获取增强的测试历史记录 - 已迁移
+ * 请使用 /api/data-management/test-history
  */
 router.get('/history/enhanced', authMiddleware, asyncHandler(async (req, res) => {
-  try {
-    const result = await enhancedTestHistoryService.getEnhancedTestHistory(req.user.id, req.query);
-    res.json(result);
-  } catch (error) {
-    console.error('获取增强测试历史失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取增强测试历史失败',
-      error: error.message
-    });
-  }
+  res.status(301).json({
+    success: false,
+    message: '此接口已迁移，请使用 /api/data-management/test-history',
+    redirectTo: '/api/data-management/test-history'
+  });
 }));
 
 /**
- * 获取测试历史统计信息
- * GET /api/test/history/statistics
+ * 获取测试历史统计信息 - 已迁移
+ * 请使用 /api/data-management/statistics
  */
 router.get('/history/statistics', authMiddleware, asyncHandler(async (req, res) => {
-  try {
-    const { timeRange = 30 } = req.query;
-    const result = await enhancedTestHistoryService.getTestHistoryStatistics(req.user.id, parseInt(timeRange));
-    res.json(result);
-  } catch (error) {
-    console.error('获取测试历史统计失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取测试历史统计失败',
-      error: error.message
-    });
-  }
+  res.status(301).json({
+    success: false,
+    message: '此接口已迁移，请使用 /api/data-management/statistics',
+    redirectTo: '/api/data-management/statistics'
+  });
 }));
 
 /**
- * 批量操作测试历史记录
- * POST /api/test/history/batch
+ * 批量操作测试历史记录 - 已迁移
+ * 请使用 /api/data-management/test-history/batch
  */
 router.post('/history/batch', authMiddleware, asyncHandler(async (req, res) => {
-  try {
-    const result = await enhancedTestHistoryService.batchOperation(req.user.id, req.body);
-    res.json(result);
-  } catch (error) {
-    console.error('批量操作失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '批量操作失败',
-      error: error.message
-    });
-  }
+  res.status(301).json({
+    success: false,
+    message: '此接口已迁移，请使用 /api/data-management/test-history/batch',
+    redirectTo: '/api/data-management/test-history/batch'
+  });
 }));
 
 // 共享的历史记录处理函数

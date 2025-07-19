@@ -7,6 +7,29 @@ const https = require('https');
 const http = require('http');
 const { URL } = require('url');
 
+// 安全地导入浏览器安全配置
+let browserSecurity;
+try {
+  browserSecurity = require('../../config/browser-security');
+} catch (error) {
+  console.warn('⚠️ 无法加载浏览器安全配置，使用默认配置');
+  // 提供默认的安全配置
+  browserSecurity = {
+    getPuppeteerConfig: () => ({
+      headless: true,
+      args: [
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--no-sandbox', // 默认启用以确保兼容性
+        '--disable-setuid-sandbox'
+      ]
+    }),
+    printSecurityWarning: () => {
+      console.warn('🔒 使用默认浏览器配置（已禁用沙盒）');
+    }
+  };
+}
+
 class RealUXTestEngine {
   constructor() {
     this.name = 'real-ux-test-engine';
@@ -33,7 +56,7 @@ class RealUXTestEngine {
 
     const testId = `ux-${Date.now()}`;
     const startTime = Date.now();
-    
+
     const results = {
       testId,
       url,
@@ -68,19 +91,11 @@ class RealUXTestEngine {
     let page = null;
 
     try {
-      // 启动浏览器
-      browser = await puppeteer.launch({
-        headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--no-first-run',
-          '--no-zygote',
-          '--disable-gpu'
-        ]
-      });
+      // 启动浏览器 - 使用安全配置
+      browserSecurity.printSecurityWarning();
+      const puppeteerConfig = browserSecurity.getPuppeteerConfig();
+
+      browser = await puppeteer.launch(puppeteerConfig);
 
       page = await browser.newPage();
 
@@ -99,7 +114,7 @@ class RealUXTestEngine {
       // 导航到页面
       console.log(`🌐 Navigating to: ${url}`);
       const navigationStart = Date.now();
-      
+
       const response = await page.goto(url, {
         waitUntil: 'networkidle2',
         timeout: timeout
@@ -157,7 +172,7 @@ class RealUXTestEngine {
 
       console.log(`✅ UX test completed for: ${url}`);
       console.log(`📊 Overall Score: ${Math.round(results.overallScore)}`);
-      
+
       return { success: true, data: results };
 
     } catch (error) {
@@ -165,11 +180,11 @@ class RealUXTestEngine {
       results.status = 'failed';
       results.error = error.message;
       results.endTime = new Date().toISOString();
-      
-      return { 
-        success: false, 
+
+      return {
+        success: false,
         error: error.message,
-        data: results 
+        data: results
       };
     } finally {
       if (page) await page.close();
@@ -291,7 +306,7 @@ class RealUXTestEngine {
     return await page.evaluate((navStart) => {
       const navigation = performance.getEntriesByType('navigation')[0];
       const now = performance.now();
-      
+
       return {
         loadTime: navigation ? navigation.loadEventEnd : now,
         domContentLoaded: navigation ? navigation.domContentLoadedEventEnd : now * 0.8,
@@ -414,13 +429,13 @@ class RealUXTestEngine {
 
     try {
       // 检查图片alt属性
-      const imagesWithoutAlt = await page.$$eval('img', imgs => 
+      const imagesWithoutAlt = await page.$$eval('img', imgs =>
         imgs.filter(img => !img.alt).length
       );
       if (imagesWithoutAlt > 0) score -= 20;
 
       // 检查标题结构
-      const headings = await page.$$eval('h1, h2, h3, h4, h5, h6', headings => 
+      const headings = await page.$$eval('h1, h2, h3, h4, h5, h6', headings =>
         headings.map(h => h.tagName)
       );
       if (headings.length === 0 || !headings.includes('H1')) score -= 15;
@@ -429,12 +444,12 @@ class RealUXTestEngine {
       const hasLowContrastText = await page.evaluate(() => {
         const elements = document.querySelectorAll('*');
         let lowContrastCount = 0;
-        
+
         for (let el of elements) {
           const style = window.getComputedStyle(el);
           const color = style.color;
           const backgroundColor = style.backgroundColor;
-          
+
           // 简化的对比度检查
           if (color && backgroundColor && color !== 'rgba(0, 0, 0, 0)' && backgroundColor !== 'rgba(0, 0, 0, 0)') {
             // 这里应该有更复杂的对比度计算
@@ -443,14 +458,14 @@ class RealUXTestEngine {
             }
           }
         }
-        
+
         return lowContrastCount > 0;
       });
 
       if (hasLowContrastText) score -= 10;
 
       // 检查表单标签
-      const formsWithoutLabels = await page.$$eval('input, textarea, select', inputs => 
+      const formsWithoutLabels = await page.$$eval('input, textarea, select', inputs =>
         inputs.filter(input => !input.labels?.length && !input.getAttribute('aria-label')).length
       );
       if (formsWithoutLabels > 0) score -= 15;
@@ -483,7 +498,7 @@ class RealUXTestEngine {
       if (h1Count !== 1) score -= 15;
 
       // 检查图片alt属性
-      const imagesWithoutAlt = await page.$$eval('img', imgs => 
+      const imagesWithoutAlt = await page.$$eval('img', imgs =>
         imgs.filter(img => !img.alt).length
       );
       if (imagesWithoutAlt > 0) score -= 10;

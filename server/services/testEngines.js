@@ -67,7 +67,7 @@ class K6Engine extends TestEngine {
   async install() {
     try {
       console.log('Installing k6...');
-      
+
       const platform = os.platform();
       let installCommand;
 
@@ -200,7 +200,7 @@ export default function() {
 
   getStages(testType, config) {
     const { vus = 10, duration = '30s' } = config;
-    
+
     switch (testType) {
       case 'spike':
         return JSON.stringify([
@@ -230,7 +230,7 @@ export default function() {
   parseK6Results(jsonData) {
     const lines = jsonData.split('\n').filter(line => line.trim());
     const metrics = {};
-    
+
     lines.forEach(line => {
       try {
         const data = JSON.parse(line);
@@ -252,7 +252,7 @@ export default function() {
     // 从stdout解析基本指标
     const lines = stdout.split('\n');
     const summary = {};
-    
+
     lines.forEach(line => {
       if (line.includes('http_req_duration')) {
         const match = line.match(/avg=([0-9.]+)ms.*p\(95\)=([0-9.]+)ms/);
@@ -279,7 +279,7 @@ export default function() {
 
   calculateSummary(metrics) {
     const summary = {};
-    
+
     // 计算HTTP请求持续时间统计
     if (metrics.http_req_duration) {
       const durations = metrics.http_req_duration.map(d => d.value);
@@ -318,33 +318,33 @@ export default function() {
 
   calculateScore(summary) {
     let score = 100;
-    
+
     if (summary.http_req_duration?.avg > 500) score -= 20;
     if (summary.http_req_duration?.avg > 1000) score -= 30;
     if (summary.http_req_failed > 1) score -= 25;
     if (summary.http_req_failed > 5) score -= 25;
-    
+
     return Math.max(0, score);
   }
 
   generateRecommendations(summary) {
     const recommendations = [];
-    
+
     if (summary.http_req_duration?.avg > 500) {
       recommendations.push('优化服务器响应时间，目标在500ms以下');
     }
-    
+
     if (summary.http_req_failed > 1) {
       recommendations.push('减少请求失败率，检查服务器稳定性');
     }
-    
+
     if (summary.http_req_duration?.p95 > 1000) {
       recommendations.push('优化95%分位数响应时间，提升用户体验');
     }
-    
+
     recommendations.push('启用Gzip压缩减少传输大小');
     recommendations.push('使用CDN加速静态资源加载');
-    
+
     return recommendations;
   }
 }
@@ -391,7 +391,19 @@ class LighthouseEngine extends TestEngine {
       const deviceFlag = device === 'mobile' ? '--preset=perf' : '--preset=desktop';
       const categoriesFlag = categories.map(cat => `--only-categories=${cat}`).join(' ');
 
-      const command = `lighthouse ${url} ${deviceFlag} ${categoriesFlag} --output=json --output-path=${outputPath} --chrome-flags="--headless --no-sandbox --disable-gpu"`;
+      // 构建安全的Chrome标志
+      let chromeFlags = '--headless --disable-gpu --disable-dev-shm-usage';
+
+      // 检查环境并添加必要的标志
+      const isContainerEnv = process.env.DOCKER_ENV === 'true' || process.env.CI === 'true';
+      const isRootUser = process.getuid && process.getuid() === 0;
+
+      if (isContainerEnv || isRootUser) {
+        chromeFlags += ' --no-sandbox --disable-setuid-sandbox';
+        console.warn('⚠️ 检测到需要禁用沙盒的环境，启用 --no-sandbox 模式');
+      }
+
+      const command = `lighthouse ${url} ${deviceFlag} ${categoriesFlag} --output=json --output-path=${outputPath} --chrome-flags="${chromeFlags}"`;
 
       console.log('Executing Lighthouse command:', command);
 

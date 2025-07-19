@@ -15,16 +15,18 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import {
-  EnhancedTestRecord
+  EnhancedTestRecord,
+  TestStatus,
+  TestType
 } from '../types/testHistory';
 
 // 兼容性类型（保持向后兼容）
 interface TestRecord extends Partial<EnhancedTestRecord> {
   id: string;
   testName: string;
-  testType: string;
+  testType: TestType;
   url: string;
-  status: string;
+  status: TestStatus;
   score?: number;
   duration?: number;
   startTime: string;
@@ -37,17 +39,24 @@ import EnhancedTestHistory from '../components/testHistory/EnhancedTestHistory';
 const TestHistory: React.FC = () => {
   // 使用增强的测试历史组件
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">测试历史</h1>
-          <p className="mt-2 text-gray-600">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 px-6 sm:px-8 lg:px-12 py-8">
+      {/* 页面标题 */}
+      <header className="flex items-center gap-4 mb-10 max-w-[95%] 2xl:max-w-[90%] mx-auto">
+        <div className="p-3 bg-blue-500/20 rounded-xl">
+          <FileText className="w-8 h-8 text-blue-400" />
+        </div>
+        <div>
+          <h1 className="text-4xl font-bold text-white">测试历史</h1>
+          <p className="mt-2 text-gray-300 text-lg">
             查看和管理您的所有测试记录，包括性能、安全、SEO等各类测试结果
           </p>
         </div>
+      </header>
 
+      {/* 主要内容 */}
+      <main className="max-w-[95%] 2xl:max-w-[90%] mx-auto">
         <EnhancedTestHistory />
-      </div>
+      </main>
     </div>
   );
 };
