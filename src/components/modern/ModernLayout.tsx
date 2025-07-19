@@ -32,7 +32,7 @@ const ModernLayout: React.FC = () => {
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* 主内容 */}
           <main className="flex-1 overflow-y-auto dark-page-scrollbar">
-            <div className="p-6">
+            <div className="p-0">
               <Outlet />
             </div>
           </main>

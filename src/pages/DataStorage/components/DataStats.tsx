@@ -30,7 +30,7 @@ const DataStats: React.FC<DataStatsProps> = ({ records, pagination, loading }) =
     ((currentPageStats.completed / currentPageStats.total) * 100).toFixed(1) : '0.0';
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" aria-label="数据统计概览">
       <StatCard
         title="总记录数"
         value={pagination.total}
@@ -69,7 +69,7 @@ const DataStats: React.FC<DataStatsProps> = ({ records, pagination, loading }) =
         color="bg-purple-500/20"
         loading={loading}
       />
-    </div>
+    </section>
   );
 };
 

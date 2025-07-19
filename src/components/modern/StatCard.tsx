@@ -61,41 +61,41 @@ const StatCard: React.FC<StatCardProps> = ({
 
   if (loading) {
     return (
-      <div className={`stat-card stat-card-${variant} ${className}`}>
-        <div className="stat-card-header">
-          <div className="loading-shimmer w-12 h-12 rounded-lg"></div>
-          <div className="loading-shimmer w-16 h-4 rounded"></div>
-        </div>
-        <div className="loading-shimmer w-24 h-8 rounded mb-2"></div>
-        <div className="loading-shimmer w-20 h-4 rounded"></div>
-      </div>
+      <article className={`stat-card stat-card-${variant} ${className}`} aria-busy="true" aria-label="加载统计数据">
+        <header className="stat-card-header">
+          <div className="loading-shimmer w-12 h-12 rounded-lg" aria-hidden="true"></div>
+          <div className="loading-shimmer w-16 h-4 rounded" aria-hidden="true"></div>
+        </header>
+        <div className="loading-shimmer w-24 h-8 rounded mb-2" aria-hidden="true"></div>
+        <div className="loading-shimmer w-20 h-4 rounded" aria-hidden="true"></div>
+      </article>
     );
   }
 
   return (
-    <div className={`stat-card stat-card-${variant} modern-card-hover ${actualTheme === 'light' ? 'card-elevated floating-element' : ''
+    <article className={`stat-card stat-card-${variant} modern-card-hover ${actualTheme === 'light' ? 'card-elevated floating-element' : ''
       } ${className}`}>
-      <div className="stat-card-header">
+      <header className="stat-card-header">
         <div className={`stat-card-icon stat-card-icon-${variant} ${actualTheme === 'light' ? 'pulse-glow' : ''
-          }`}>
+          }`} aria-hidden="true">
           {React.isValidElement(icon) ? icon : React.createElement(icon as React.ComponentType<any>, { className: "w-6 h-6" })}
         </div>
         <h3 className={`stat-card-title ${actualTheme === 'light' ? 'themed-text-primary' : ''
           }`}>{title}</h3>
-      </div>
+      </header>
 
-      <div className="stat-card-value">
+      <div className="stat-card-value" role="text" aria-label={`${title}: ${typeof value === 'number' ? value.toLocaleString() : value}`}>
         {typeof value === 'number' ? value.toLocaleString() : value}
       </div>
 
       {subtitle && (
-        <div className="stat-card-subtitle text-muted text-sm">
+        <p className="stat-card-subtitle text-muted text-sm">
           {subtitle}
-        </div>
+        </p>
       )}
 
       {trend && (
-        <div className={`stat-card-trend ${getTrendClass()}`}>
+        <div className={`stat-card-trend ${getTrendClass()}`} role="text" aria-label={`趋势: ${trend.direction === 'up' ? '上升' : trend.direction === 'down' ? '下降' : '持平'} ${Math.abs(trend.value)}%`}>
           {getTrendIcon()}
           <span>
             {trend.direction === 'up' ? '+' : trend.direction === 'down' ? '-' : ''}
@@ -106,7 +106,7 @@ const StatCard: React.FC<StatCardProps> = ({
           )}
         </div>
       )}
-    </div>
+    </article>
   );
 };
 

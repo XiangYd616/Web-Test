@@ -1,5 +1,5 @@
+import { ChevronDown, ChevronUp, SortAsc } from 'lucide-react';
 import React from 'react';
-import { ChevronUp, ChevronDown, SortAsc, SortDesc } from 'lucide-react';
 
 export interface Column<T> {
   key: keyof T;
@@ -44,7 +44,7 @@ function DataTable<T extends Record<string, any>>({
 
   const handleSort = (key: keyof T) => {
     if (!onSort) return;
-    
+
     const newOrder = sortBy === key && sortOrder === 'asc' ? 'desc' : 'asc';
     onSort(key, newOrder);
   };
@@ -53,66 +53,77 @@ function DataTable<T extends Record<string, any>>({
     if (sortBy !== key) {
       return <SortAsc className="w-4 h-4 text-gray-500" />;
     }
-    return sortOrder === 'asc' ? 
-      <ChevronUp className="w-4 h-4 text-blue-400" /> : 
+    return sortOrder === 'asc' ?
+      <ChevronUp className="w-4 h-4 text-blue-400" /> :
       <ChevronDown className="w-4 h-4 text-blue-400" />;
   };
 
   if (loading) {
     return (
-      <div className={`bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 overflow-hidden ${className}`}>
+      <section className={`bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 overflow-hidden ${className}`} aria-busy="true" aria-label="加载数据表格">
         <div className="animate-pulse">
           {/* 表头骨架 */}
-          <div className="bg-gray-700/30 px-6 py-4">
+          <header className="bg-gray-700/30 px-6 py-4">
             <div className="grid grid-cols-4 gap-4">
               {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-4 bg-gray-600 rounded"></div>
+                <div key={i} className="h-4 bg-gray-600 rounded" aria-hidden="true"></div>
               ))}
             </div>
-          </div>
-          
+          </header>
+
           {/* 表格内容骨架 */}
           <div className="divide-y divide-gray-700/50">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="px-6 py-4">
                 <div className="grid grid-cols-4 gap-4">
                   {Array.from({ length: 4 }).map((_, j) => (
-                    <div key={j} className="h-4 bg-gray-700 rounded"></div>
+                    <div key={j} className="h-4 bg-gray-700 rounded" aria-hidden="true"></div>
                   ))}
                 </div>
               </div>
             ))}
           </div>
         </div>
-      </div>
+      </section>
     );
   }
 
   return (
-    <div className={`bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 overflow-hidden ${className}`}>
+    <section className={`bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 overflow-hidden ${className}`} aria-label="数据表格">
       {/* 表头 */}
-      <div className="bg-gray-700/30">
+      <header className="bg-gray-700/30">
         <div className="grid gap-4 px-6 py-4" style={{ gridTemplateColumns: columns.map(col => col.width || '1fr').join(' ') }}>
           {columns.map((column) => (
             <div
               key={String(column.key)}
-              className={`flex items-center space-x-2 text-sm font-medium text-gray-300 ${
-                column.align === 'center' ? 'justify-center' : 
+              className={`flex items-center space-x-2 text-sm font-medium text-gray-300 ${column.align === 'center' ? 'justify-center' :
                 column.align === 'right' ? 'justify-end' : 'justify-start'
-              } ${column.sortable ? 'cursor-pointer hover:text-white' : ''}`}
+                } ${column.sortable ? 'cursor-pointer hover:text-white' : ''}`}
               onClick={() => column.sortable && handleSort(column.key)}
+              aria-sort={
+                sortBy === column.key
+                  ? (sortOrder === 'asc' ? 'ascending' : 'descending')
+                  : column.sortable ? 'none' : undefined
+              }
+              tabIndex={column.sortable ? 0 : undefined}
+              onKeyDown={(e) => {
+                if (column.sortable && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault();
+                  handleSort(column.key);
+                }
+              }}
             >
               <span>{column.title}</span>
               {column.sortable && getSortIcon(column.key)}
             </div>
           ))}
         </div>
-      </div>
+      </header>
 
       {/* 表格内容 */}
       {data.length === 0 ? (
-        <div className="text-center py-12">
-          {emptyIcon && <div className="mb-4">{emptyIcon}</div>}
+        <div className="text-center py-12" role="status">
+          {emptyIcon && <div className="mb-4" aria-hidden="true">{emptyIcon}</div>}
           <p className="text-gray-400">{emptyText}</p>
         </div>
       ) : (
@@ -126,13 +137,12 @@ function DataTable<T extends Record<string, any>>({
               {columns.map((column) => (
                 <div
                   key={String(column.key)}
-                  className={`text-sm ${
-                    column.align === 'center' ? 'text-center' : 
+                  className={`text-sm ${column.align === 'center' ? 'text-center' :
                     column.align === 'right' ? 'text-right' : 'text-left'
-                  }`}
+                    }`}
                 >
-                  {column.render ? 
-                    column.render(record[column.key], record) : 
+                  {column.render ?
+                    column.render(record[column.key], record) :
                     String(record[column.key] || '-')
                   }
                 </div>
@@ -141,7 +151,7 @@ function DataTable<T extends Record<string, any>>({
           ))}
         </div>
       )}
-    </div>
+    </section>
   );
 }
 
