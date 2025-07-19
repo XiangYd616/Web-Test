@@ -130,222 +130,224 @@ const Statistics: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-      <div className="max-w-[95%] 2xl:max-w-[90%] mx-auto px-6 sm:px-8 lg:px-12 py-8">
+    <div className="data-management-container">
+      <div className="data-management-wrapper">
         {/* 页面标题和筛选器 */}
-        <div className="mb-10 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-purple-500/20 rounded-xl">
-              <BarChart3 className="w-8 h-8 text-purple-400" />
-            </div>
-            <div>
-              <h1 className="text-4xl font-bold text-white">统计分析</h1>
-              <p className="mt-2 text-gray-300 text-lg">
-                测试数据的详细统计和趋势分析
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-6 sm:mt-0 flex items-center gap-4">
-            <div className="flex items-center gap-3 bg-gray-800/60 backdrop-blur-md rounded-xl px-4 py-3 border border-gray-600/30">
-              <Calendar className="w-5 h-5 text-gray-400" />
-              <select
-                value={timeRange}
-                onChange={(e) => setTimeRange(parseInt(e.target.value))}
-                className="bg-transparent border-none text-white focus:outline-none cursor-pointer"
-              >
-                <option value={7}>最近 7 天</option>
-                <option value={30}>最近 30 天</option>
-                <option value={90}>最近 90 天</option>
-                <option value={365}>最近一年</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* 概览卡片 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700/50 p-6">
-            <div className="flex items-center justify-between">
+        <div className="data-page-header">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-purple-500/20 rounded-xl">
+                <BarChart3 className="w-8 h-8 text-purple-400" />
+              </div>
               <div>
-                <p className="text-sm font-medium text-gray-400">总测试数</p>
-                <p className="text-2xl font-bold text-white">
-                  {formatNumber(statistics.overview.totalTests)}
+                <h1 className="data-page-title text-white font-bold">统计分析</h1>
+                <p className="data-page-subtitle text-gray-300">
+                  测试数据的详细统计和趋势分析
                 </p>
               </div>
-              <BarChart3 className="w-8 h-8 text-blue-400" />
             </div>
-          </div>
 
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700/50 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-400">成功率</p>
-                <p className="text-2xl font-bold text-green-400">
-                  {statistics.overview.successRate ? statistics.overview.successRate.toFixed(1) : '0.0'}%
-                </p>
+            <div className="mt-6 sm:mt-0 flex items-center gap-4">
+              <div className="flex items-center gap-3 bg-gray-800/60 backdrop-blur-md rounded-xl px-4 py-3 border border-gray-600/30">
+                <Calendar className="w-5 h-5 text-gray-400" />
+                <select
+                  value={timeRange}
+                  onChange={(e) => setTimeRange(parseInt(e.target.value))}
+                  className="bg-transparent border-none text-white focus:outline-none cursor-pointer"
+                >
+                  <option value={7}>最近 7 天</option>
+                  <option value={30}>最近 30 天</option>
+                  <option value={90}>最近 90 天</option>
+                  <option value={365}>最近一年</option>
+                </select>
               </div>
-              <TrendingUp className="w-8 h-8 text-green-500" />
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">平均分数</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {statistics.overview.averageScore ? statistics.overview.averageScore.toFixed(1) : '0.0'}
-                </p>
+          {/* 概览卡片 */}
+          <div className="data-stats-grid">
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700/50 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-400">总测试数</p>
+                  <p className="text-2xl font-bold text-white">
+                    {formatNumber(statistics.overview.totalTests)}
+                  </p>
+                </div>
+                <BarChart3 className="w-8 h-8 text-blue-400" />
               </div>
-              <PieChart className="w-8 h-8 text-blue-500" />
             </div>
-          </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">平均时长</p>
-                <p className="text-2xl font-bold text-purple-600">
-                  {formatDuration(statistics.overview.averageDuration)}
-                </p>
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700/50 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-400">成功率</p>
+                  <p className="text-2xl font-bold text-green-400">
+                    {statistics.overview.successRate ? statistics.overview.successRate.toFixed(1) : '0.0'}%
+                  </p>
+                </div>
+                <TrendingUp className="w-8 h-8 text-green-500" />
               </div>
-              <Activity className="w-8 h-8 text-purple-500" />
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">平均分数</p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {statistics.overview.averageScore ? statistics.overview.averageScore.toFixed(1) : '0.0'}
+                  </p>
+                </div>
+                <PieChart className="w-8 h-8 text-blue-500" />
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">平均时长</p>
+                  <p className="text-2xl font-bold text-purple-600">
+                    {formatDuration(statistics.overview.averageDuration)}
+                  </p>
+                </div>
+                <Activity className="w-8 h-8 text-purple-500" />
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* 测试类型统计 */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <BarChart3 className="w-5 h-5" />
-                测试类型分布
-              </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* 测试类型统计 */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5" />
+                  测试类型分布
+                </h2>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  {statistics.typeStats.map((stat, index) => (
+                    <div key={stat.type} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-3 h-3 rounded-full"
+                          style={{
+                            backgroundColor: `hsl(${(index * 360) / statistics.typeStats.length}, 70%, 50%)`
+                          }}
+                        ></div>
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">
+                          {getTestTypeName(stat.type)}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          {stat.count} 次
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          成功率 {stat.successRate ? stat.successRate.toFixed(1) : '0.0'}%
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-            <div className="p-6">
-              <div className="space-y-4">
-                {statistics.typeStats.map((stat, index) => (
-                  <div key={stat.type} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-3 h-3 rounded-full"
-                        style={{
-                          backgroundColor: `hsl(${(index * 360) / statistics.typeStats.length}, 70%, 50%)`
-                        }}
-                      ></div>
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">
-                        {getTestTypeName(stat.type)}
+
+            {/* 状态分布 */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                  <PieChart className="w-5 h-5" />
+                  状态分布
+                </h2>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  {statistics.statusStats.map((stat, index) => (
+                    <div key={stat.status} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-3 h-3 rounded-full ${stat.status === 'completed' ? 'bg-green-500' :
+                            stat.status === 'failed' ? 'bg-red-500' :
+                              stat.status === 'running' ? 'bg-blue-500' :
+                                'bg-gray-500'
+                            }`}
+                        ></div>
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">
+                          {getStatusName(stat.status)}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          {stat.count} 次
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {stat.percentage ? stat.percentage.toFixed(1) : '0.0'}%
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* 热门URL */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5" />
+                  热门测试URL
+                </h2>
+              </div>
+              <div className="p-6">
+                <div className="space-y-3">
+                  {statistics.topUrls.slice(0, 5).map((urlStat, index) => (
+                    <div key={urlStat.url} className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                          {urlStat.url}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          平均分数: {urlStat.averageScore ? urlStat.averageScore.toFixed(1) : '0.0'}
+                        </p>
+                      </div>
+                      <div className="ml-4 text-right">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                          {urlStat.count} 次
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* 趋势图 */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                  <Activity className="w-5 h-5" />
+                  测试趋势
+                </h2>
+              </div>
+              <div className="p-6">
+                <div className="space-y-3">
+                  {statistics.trends.slice(0, 7).map((trend) => (
+                    <div key={trend.date} className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        {new Date(trend.date).toLocaleDateString()}
                       </span>
+                      <div className="flex items-center gap-4">
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">
+                          {trend.count} 次测试
+                        </span>
+                        <span className="text-sm text-blue-600 dark:text-blue-400">
+                          平均 {trend.averageScore ? trend.averageScore.toFixed(1) : '0.0'} 分
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {stat.count} 次
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        成功率 {stat.successRate ? stat.successRate.toFixed(1) : '0.0'}%
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* 状态分布 */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <PieChart className="w-5 h-5" />
-                状态分布
-              </h2>
-            </div>
-            <div className="p-6">
-              <div className="space-y-4">
-                {statistics.statusStats.map((stat, index) => (
-                  <div key={stat.status} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-3 h-3 rounded-full ${stat.status === 'completed' ? 'bg-green-500' :
-                          stat.status === 'failed' ? 'bg-red-500' :
-                            stat.status === 'running' ? 'bg-blue-500' :
-                              'bg-gray-500'
-                          }`}
-                      ></div>
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">
-                        {getStatusName(stat.status)}
-                      </span>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {stat.count} 次
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {stat.percentage ? stat.percentage.toFixed(1) : '0.0'}%
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* 热门URL */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <TrendingUp className="w-5 h-5" />
-                热门测试URL
-              </h2>
-            </div>
-            <div className="p-6">
-              <div className="space-y-3">
-                {statistics.topUrls.slice(0, 5).map((urlStat, index) => (
-                  <div key={urlStat.url} className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                        {urlStat.url}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        平均分数: {urlStat.averageScore ? urlStat.averageScore.toFixed(1) : '0.0'}
-                      </p>
-                    </div>
-                    <div className="ml-4 text-right">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                        {urlStat.count} 次
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* 趋势图 */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <Activity className="w-5 h-5" />
-                测试趋势
-              </h2>
-            </div>
-            <div className="p-6">
-              <div className="space-y-3">
-                {statistics.trends.slice(0, 7).map((trend) => (
-                  <div key={trend.date} className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {new Date(trend.date).toLocaleDateString()}
-                    </span>
-                    <div className="flex items-center gap-4">
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">
-                        {trend.count} 次测试
-                      </span>
-                      <span className="text-sm text-blue-600 dark:text-blue-400">
-                        平均 {trend.averageScore ? trend.averageScore.toFixed(1) : '0.0'} 分
-                      </span>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </div>

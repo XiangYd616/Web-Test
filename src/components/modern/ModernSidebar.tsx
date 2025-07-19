@@ -485,17 +485,19 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
             // 展开状态：正常布局
             <>
               <item.icon className={`flex-shrink-0 ${level > 0 ? 'w-4 h-4' : 'w-5 h-5'}`} />
-              <span className={`${level > 0 ? 'font-normal' : 'font-medium'}`}>{item.name}</span>
-              {item.badge && (
-                <span className={`px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full ml-auto ${level > 0 ? 'text-xs' : ''
-                  }`}>
-                  {item.badge}
-                </span>
-              )}
-              {/* 子菜单项的活跃指示器 */}
-              {active && level > 0 && (
-                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse ml-auto"></div>
-              )}
+              <span className={`${level > 0 ? 'font-normal' : 'font-medium'} flex-1 min-w-0`}>{item.name}</span>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                {item.badge && (
+                  <span className={`px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full ${level > 0 ? 'text-xs' : ''
+                    }`}>
+                    {item.badge}
+                  </span>
+                )}
+                {/* 子菜单项的活跃指示器 */}
+                {active && level > 0 && (
+                  <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></div>
+                )}
+              </div>
             </>
           )}
         </Link>

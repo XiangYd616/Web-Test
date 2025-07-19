@@ -380,23 +380,21 @@ const DataStorage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <main className="data-management-container">
+      <div className="data-management-wrapper space-y-6">
         {/* 页面标题 */}
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-3">
-              <Database className="w-8 h-8 text-blue-400" />
-              <div>
-                <h1 className="text-2xl font-bold text-white">数据中心</h1>
-                <p className="text-gray-300">从数据存储到深度分析的完整数据管理平台</p>
-              </div>
-            </div>
+        <header className="data-page-header">
+          <div className="flex items-center space-x-3 mb-6">
+            <Database className="w-8 h-8 text-blue-400" />
+            <hgroup>
+              <h1 className="data-page-title text-white font-bold">数据中心</h1>
+              <p className="data-page-subtitle text-gray-300">从数据存储到深度分析的完整数据管理平台</p>
+            </hgroup>
           </div>
 
           {/* 标签页导航 */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex space-x-1 flex-wrap">
+          <nav className="flex items-center justify-between mb-4" aria-label="数据中心导航">
+            <div className="data-tabs-nav flex space-x-1 flex-wrap" role="tablist">
               {[
                 { id: 'history', label: '测试数据', icon: FileText },
                 { id: 'analytics', label: '数据概览', icon: BarChart3 },
@@ -408,13 +406,16 @@ const DataStorage: React.FC = () => {
                 <button
                   key={tab.id}
                   type="button"
+                  role="tab"
+                  aria-selected={activeTab === tab.id}
+                  aria-controls={`${tab.id}-panel`}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${activeTab === tab.id
+                  className={`data-tab-button flex items-center space-x-2 rounded-lg transition-colors ${activeTab === tab.id
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700 hover:text-white'
                     }`}
                 >
-                  <tab.icon className="w-4 h-4" />
+                  <tab.icon className="data-tab-icon" />
                   <span>{tab.label}</span>
                   {tab.badge && (
                     <span className="px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full">
@@ -447,36 +448,36 @@ const DataStorage: React.FC = () => {
                 </button>
               </div>
             )}
-          </div>
+          </nav>
 
           {/* 统计信息 - 只在测试历史标签页显示 */}
           {activeTab === 'history' && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="bg-gray-700/30 rounded-lg p-4 text-center">
+            <section className="grid grid-cols-1 md:grid-cols-4 gap-4" aria-label="测试数据统计">
+              <article className="bg-gray-700/30 rounded-lg p-4 text-center">
                 <div className="text-2xl font-bold text-white">{testRecords.length}</div>
                 <div className="text-sm text-gray-400">总记录数</div>
-              </div>
-              <div className="bg-gray-700/30 rounded-lg p-4 text-center">
+              </article>
+              <article className="bg-gray-700/30 rounded-lg p-4 text-center">
                 <div className="text-2xl font-bold text-green-400">
                   {testRecords.filter(r => r.status === 'completed').length}
                 </div>
                 <div className="text-sm text-gray-400">成功测试</div>
-              </div>
-              <div className="bg-gray-700/30 rounded-lg p-4 text-center">
+              </article>
+              <article className="bg-gray-700/30 rounded-lg p-4 text-center">
                 <div className="text-2xl font-bold text-red-400">
                   {testRecords.filter(r => r.status === 'failed').length}
                 </div>
                 <div className="text-sm text-gray-400">失败测试</div>
-              </div>
-              <div className="bg-gray-700/30 rounded-lg p-4 text-center">
+              </article>
+              <article className="bg-gray-700/30 rounded-lg p-4 text-center">
                 <div className="text-2xl font-bold text-blue-400">
                   {Math.round(testRecords.filter(r => r.overallScore).reduce((sum, r) => sum + (r.overallScore || 0), 0) / testRecords.filter(r => r.overallScore).length) || 0}
                 </div>
                 <div className="text-sm text-gray-400">平均分数</div>
-              </div>
-            </div>
+              </article>
+            </section>
           )}
-        </div>
+        </header>
 
 
 
@@ -485,44 +486,42 @@ const DataStorage: React.FC = () => {
           <>
             {/* 过滤器面板 */}
             {showFilters && (
-              <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+              <section className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6" aria-label="过滤器面板">
                 <h3 className="text-lg font-semibold text-white mb-4">过滤选项</h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                <form className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                   {/* 搜索框 */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">搜索</label>
+                  <label className="block">
+                    <span className="block text-sm font-medium text-gray-300 mb-2">搜索</span>
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                       <input
-                        type="text"
+                        type="search"
                         value={filters.searchQuery}
                         onChange={(e) => setFilters(prev => ({ ...prev, searchQuery: e.target.value }))}
                         placeholder="搜索URL、类型或ID..."
                         className="w-full pl-10 pr-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
-                  </div>
+                  </label>
 
                   {/* 测试类型 */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">测试类型</label>
+                  <label className="block">
+                    <span className="block text-sm font-medium text-gray-300 mb-2">测试类型</span>
                     <select
                       value={filters.testType}
                       onChange={(e) => setFilters(prev => ({ ...prev, testType: e.target.value }))}
                       className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      aria-label="选择测试类型"
-                      title="选择要筛选的测试类型"
                     >
                       {testTypes.map(type => (
                         <option key={type.value} value={type.value}>{type.label}</option>
                       ))}
                     </select>
-                  </div>
+                  </label>
 
                   {/* 状态 */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">状态</label>
+                  <label className="block">
+                    <span className="block text-sm font-medium text-gray-300 mb-2">状态</span>
                     <select
                       value={filters.status}
                       onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
@@ -534,7 +533,7 @@ const DataStorage: React.FC = () => {
                         <option key={status.value} value={status.value}>{status.label}</option>
                       ))}
                     </select>
-                  </div>
+                  </label>
 
                   {/* 日期范围 */}
                   <div>
@@ -551,7 +550,7 @@ const DataStorage: React.FC = () => {
                       ))}
                     </select>
                   </div>
-                </div>
+                </form>
 
                 {/* 排序和导出 */}
                 <div className="flex items-center justify-between">
@@ -598,19 +597,19 @@ const DataStorage: React.FC = () => {
                     </button>
                   </div>
                 </div>
-              </div>
+              </section>
             )}
 
             {/* 测试记录列表 */}
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-              <div className="flex items-center justify-between mb-4">
+            <section className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6" aria-label="测试记录列表">
+              <header className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-white">
                   测试记录 ({filteredRecords.length})
                 </h3>
-              </div>
+              </header>
 
               {loading ? (
-                <div className="flex items-center justify-center py-12">
+                <div className="flex items-center justify-center py-12" role="status" aria-live="polite">
                   <RefreshCw className="w-8 h-8 text-blue-400 animate-spin" />
                   <span className="ml-3 text-gray-300">加载中...</span>
                 </div>
@@ -620,17 +619,15 @@ const DataStorage: React.FC = () => {
                   <p className="text-gray-400">没有找到匹配的测试记录</p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <ul className="space-y-4" role="list">
                   {filteredRecords.map((record) => (
-                    <div key={record.id} className="bg-gray-700/30 rounded-lg p-4 border border-gray-600/50">
-                      <div className="flex items-start justify-between">
+                    <li key={record.id} className="bg-gray-700/30 rounded-lg p-4 border border-gray-600/50">
+                      <article className="flex items-start justify-between">
                         <div className="flex items-start space-x-4">
-                          <div className="flex-shrink-0 p-2 bg-gray-600 rounded-lg">
-                            {getTestTypeIcon(record.testType)}
-                          </div>
+                          {getTestTypeIcon(record.testType)}
 
                           <div className="flex-1">
-                            <div className="flex items-center space-x-3 mb-2">
+                            <header className="flex items-center space-x-3 mb-2">
                               <h4 className="text-lg font-semibold text-white">
                                 {getTestTypeLabel(record.testType)}
                               </h4>
@@ -642,7 +639,7 @@ const DataStorage: React.FC = () => {
                                   {Math.round(record.overallScore)}分
                                 </span>
                               )}
-                            </div>
+                            </header>
 
                             {record.url && (
                               <p className="text-sm text-gray-400 mb-2">{record.url}</p>
@@ -678,41 +675,53 @@ const DataStorage: React.FC = () => {
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
-                      </div>
-                    </div>
+                      </article>
+                    </li>
                   ))}
-                </div>
+                </ul>
               )}
-            </div>
+            </section>
           </>
         )}
 
-        {/* 报告管理标签页内容 */}
-        {activeTab === 'reports' && <ReportManagement />}
+        {/* 标签页内容区域 */}
+        <section id="reports-panel" role="tabpanel" aria-labelledby="reports-tab" hidden={activeTab !== 'reports'}>
+          {activeTab === 'reports' && <ReportManagement />}
+        </section>
 
-        {/* 分析概览标签页内容 */}
-        {activeTab === 'analytics' && <AnalyticsOverview />}
+        <section id="analytics-panel" role="tabpanel" aria-labelledby="analytics-tab" hidden={activeTab !== 'analytics'}>
+          {activeTab === 'analytics' && <AnalyticsOverview />}
+        </section>
 
-        {/* 性能分析标签页内容 */}
-        {activeTab === 'performance' && <PerformanceAnalysis />}
+        <section id="performance-panel" role="tabpanel" aria-labelledby="performance-tab" hidden={activeTab !== 'performance'}>
+          {activeTab === 'performance' && <PerformanceAnalysis />}
+        </section>
 
-        {/* 实时监控标签页内容 */}
-        {activeTab === 'monitoring' && <RealTimeMonitoring />}
+        <section id="monitoring-panel" role="tabpanel" aria-labelledby="monitoring-tab" hidden={activeTab !== 'monitoring'}>
+          {activeTab === 'monitoring' && <RealTimeMonitoring />}
+        </section>
 
-        {/* 导入导出标签页内容 */}
-        {activeTab === 'import-export' && <ImportExport />}
+        <section id="import-export-panel" role="tabpanel" aria-labelledby="import-export-tab" hidden={activeTab !== 'import-export'}>
+          {activeTab === 'import-export' && <ImportExport />}
+        </section>
 
         {/* 详情模态框 */}
         {selectedRecord && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="bg-gray-800 rounded-xl border border-gray-700 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
+          >
+            <article className="bg-gray-800 rounded-xl border border-gray-700 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <header className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-bold text-white">测试详情</h3>
+                  <h3 id="modal-title" className="text-xl font-bold text-white">测试详情</h3>
                   <button
                     type="button"
                     onClick={() => setSelectedRecord(null)}
                     className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                    aria-label="关闭详情模态框"
                   >
                     ×
                   </button>
@@ -734,12 +743,12 @@ const DataStorage: React.FC = () => {
                   onViewDetails={() => { }}
                   onDownloadReport={() => { }}
                 />
-              </div>
-            </div>
+              </header>
+            </article>
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 };
 

@@ -1,35 +1,24 @@
-import React, { useState, useEffect } from 'react';
 import {
-  Upload,
-  Download,
-  FileText,
-  Database,
-  RefreshCw,
-  Filter,
-  Search,
-  Calendar,
-  CheckCircle,
-  AlertCircle,
-  Clock,
-  Trash2,
-  Eye,
-  Settings,
-  BarChart3,
-  Users,
-  TestTube,
-  Shield,
-  Globe,
   Activity,
+  AlertCircle,
   Archive,
+  CheckCircle,
+  Clock,
+  Database,
+  Download,
+  File,
   FileJson,
   FileSpreadsheet,
-  File,
+  FileText,
   Plus,
-  X,
   RotateCcw,
-  HardDrive,
-  TrendingUp
+  TestTube,
+  Trash2,
+  Upload,
+  Users,
+  X
 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import AdvancedDataManager from '../components/data/AdvancedDataManager';
 import DataBackupManager from '../components/data/DataBackupManager';
 import DataSyncManager from '../components/data/DataSyncManager';
@@ -339,59 +328,59 @@ const DataManagement: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="data-management-container">
+      <div className="data-management-wrapper">
         {/* 页面标题 */}
-        <div className="mb-8">
+        <div className="data-page-header">
           <div className="flex items-center space-x-3 mb-4">
             <Database className="w-8 h-8 text-blue-400" />
             <div>
-              <h1 className="text-3xl font-bold text-white">高级数据管理中心</h1>
-              <p className="text-gray-300">统一的数据管理、备份、同步和分析平台</p>
+              <h1 className="data-page-title text-white font-bold">高级数据管理中心</h1>
+              <p className="data-page-subtitle text-gray-300">统一的数据管理、备份、同步和分析平台</p>
             </div>
           </div>
         </div>
 
         {/* 统计卡片 */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+        <div className="data-stats-grid">
+          <div className="data-stat-card">
             <div className="flex items-center">
-              <Download className="w-8 h-8 text-blue-400" />
+              <Download className="data-stat-icon text-blue-400" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-400">导出任务</p>
-                <p className="text-2xl font-bold text-white">{exportTasks.length}</p>
+                <p className="data-stat-label text-gray-400 font-medium">导出任务</p>
+                <p className="data-stat-value text-white">{exportTasks.length}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+          <div className="data-stat-card">
             <div className="flex items-center">
-              <Upload className="w-8 h-8 text-green-400" />
+              <Upload className="data-stat-icon text-green-400" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-400">导入任务</p>
-                <p className="text-2xl font-bold text-white">{importTasks.length}</p>
+                <p className="data-stat-label text-gray-400 font-medium">导入任务</p>
+                <p className="data-stat-value text-white">{importTasks.length}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+          <div className="data-stat-card">
             <div className="flex items-center">
-              <CheckCircle className="w-8 h-8 text-green-400" />
+              <CheckCircle className="data-stat-icon text-green-400" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-400">已完成</p>
-                <p className="text-2xl font-bold text-white">
+                <p className="data-stat-label text-gray-400 font-medium">已完成</p>
+                <p className="data-stat-value text-white">
                   {[...exportTasks, ...importTasks].filter(t => t.status === 'completed').length}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+          <div className="data-stat-card">
             <div className="flex items-center">
-              <Clock className="w-8 h-8 text-yellow-400" />
+              <Clock className="data-stat-icon text-yellow-400" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-400">处理中</p>
-                <p className="text-2xl font-bold text-white">
+                <p className="data-stat-label text-gray-400 font-medium">处理中</p>
+                <p className="data-stat-value text-white">
                   {[...exportTasks, ...importTasks].filter(t => t.status === 'processing').length}
                 </p>
               </div>
@@ -403,7 +392,7 @@ const DataManagement: React.FC = () => {
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50">
           {/* 标签页导航 */}
           <div className="border-b border-gray-700/50">
-            <nav className="flex space-x-1 px-6 overflow-x-auto">
+            <nav className="data-tabs-nav flex space-x-1 overflow-x-auto">
               {[
                 { id: 'advanced', label: '高级管理', icon: Database, badge: 'NEW' },
                 { id: 'backup', label: '备份管理', icon: Archive },
@@ -414,14 +403,14 @@ const DataManagement: React.FC = () => {
               ].map((tab) => (
                 <button
                   key={tab.id}
+                  type="button"
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center space-x-2 px-4 py-3 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${
-                    activeTab === tab.id
-                      ? 'border-blue-500 text-blue-400 bg-blue-500/10'
-                      : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-600'
-                  }`}
+                  className={`data-tab-button flex items-center space-x-2 border-b-2 font-medium transition-colors whitespace-nowrap ${activeTab === tab.id
+                    ? 'border-blue-500 text-blue-400 bg-blue-500/10'
+                    : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-600'
+                    }`}
                 >
-                  <tab.icon className="w-4 h-4" />
+                  <tab.icon className="data-tab-icon" />
                   <span>{tab.label}</span>
                   {tab.badge && (
                     <span className="px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full">
@@ -434,7 +423,7 @@ const DataManagement: React.FC = () => {
           </div>
 
           {/* 标签页内容 */}
-          <div className="p-6">
+          <div className="data-content-area">
             {activeTab === 'advanced' && (
               <AdvancedDataManager className="mb-6" />
             )}

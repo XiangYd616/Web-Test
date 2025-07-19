@@ -228,19 +228,19 @@ const EnhancedTestHistory: React.FC<EnhancedTestHistoryProps> = ({ className = '
   const getTestTypeIcon = (type: string) => {
     switch (type) {
       case 'performance':
-        return <BarChart3 className="w-4 h-4" />;
+        return <BarChart3 className="w-4 h-4 text-blue-400" />;
       case 'security':
-        return <Shield className="w-4 h-4" />;
+        return <Shield className="w-4 h-4 text-green-400" />;
       case 'stress':
-        return <Zap className="w-4 h-4" />;
+        return <Zap className="w-4 h-4 text-yellow-400" />;
       case 'seo':
-        return <TrendingUp className="w-4 h-4" />;
+        return <TrendingUp className="w-4 h-4 text-purple-400" />;
       case 'api':
-        return <Database className="w-4 h-4" />;
+        return <Database className="w-4 h-4 text-cyan-400" />;
       case 'website':
-        return <Globe className="w-4 h-4" />;
+        return <Globe className="w-4 h-4 text-indigo-400" />;
       default:
-        return <FileText className="w-4 h-4" />;
+        return <FileText className="w-4 h-4 text-gray-400" />;
     }
   };
 
@@ -292,117 +292,132 @@ const EnhancedTestHistory: React.FC<EnhancedTestHistoryProps> = ({ className = '
   };
 
   return (
-    <section className={`enhanced-test-history space-y-8 ${className}`}>
+    <section className={`enhanced-test-history ${className}`}>
       {/* 统计概览 */}
       {statistics && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <article className="bg-gray-800/40 backdrop-blur-sm rounded-xl border border-gray-700/30 p-6 shadow-lg hover:bg-gray-800/60 transition-all duration-300 hover:scale-[1.02] flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-300 mb-1">总测试数</p>
-              <p className="text-3xl font-bold text-white">{statistics.overview.totalTests}</p>
+        <section className="test-stats-grid" aria-label="测试统计概览">
+          <article className="test-stat-card">
+            <div className="test-stat-content">
+              <p className="test-stat-label">总测试数</p>
+              <p className="test-stat-value">{statistics.overview.totalTests}</p>
             </div>
-            <div className="p-3 bg-blue-500/20 rounded-lg">
-              <FileText className="w-8 h-8 text-blue-400" />
+            <div className="test-stat-icon-wrapper bg-blue-500/20">
+              <FileText className="test-stat-icon text-blue-400" />
             </div>
           </article>
 
-          <article className="bg-gray-800/40 backdrop-blur-sm rounded-xl border border-gray-700/30 p-6 shadow-lg hover:bg-gray-800/60 transition-all duration-300 hover:scale-[1.02] flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-300 mb-1">成功率</p>
-              <p className="text-3xl font-bold text-green-400">
+          <article className="test-stat-card">
+            <div className="test-stat-content">
+              <p className="test-stat-label">成功率</p>
+              <p className="test-stat-value text-green-400">
                 {statistics.overview.successRate ? statistics.overview.successRate.toFixed(1) : '0.0'}%
               </p>
             </div>
-            <div className="p-3 bg-green-500/20 rounded-lg">
-              <CheckCircle className="w-8 h-8 text-green-400" />
+            <div className="test-stat-icon-wrapper bg-green-500/20">
+              <CheckCircle className="test-stat-icon text-green-400" />
             </div>
           </article>
 
-          <article className="bg-gray-800/40 backdrop-blur-sm rounded-xl border border-gray-700/30 p-6 shadow-lg hover:bg-gray-800/60 transition-all duration-300 hover:scale-[1.02] flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-300 mb-1">平均分数</p>
-              <p className="text-3xl font-bold text-blue-400">
+          <article className="test-stat-card">
+            <div className="test-stat-content">
+              <p className="test-stat-label">平均分数</p>
+              <p className="test-stat-value text-blue-400">
                 {statistics.overview.averageScore ? statistics.overview.averageScore.toFixed(1) : '0.0'}
               </p>
             </div>
-            <div className="p-3 bg-yellow-500/20 rounded-lg">
-              <Star className="w-8 h-8 text-yellow-400" />
+            <div className="test-stat-icon-wrapper bg-yellow-500/20">
+              <Star className="test-stat-icon text-yellow-400" />
             </div>
           </article>
 
-          <article className="bg-gray-800/40 backdrop-blur-sm rounded-xl border border-gray-700/30 p-6 shadow-lg hover:bg-gray-800/60 transition-all duration-300 hover:scale-[1.02] flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-300 mb-1">平均耗时</p>
-              <p className="text-3xl font-bold text-purple-400">
+          <article className="test-stat-card">
+            <div className="test-stat-content">
+              <p className="test-stat-label">平均耗时</p>
+              <p className="test-stat-value text-purple-400">
                 {formatDuration(statistics.overview.averageDuration)}
               </p>
             </div>
-            <div className="p-3 bg-purple-500/20 rounded-lg">
-              <Clock className="w-8 h-8 text-purple-400" />
+            <div className="test-stat-icon-wrapper bg-purple-500/20">
+              <Clock className="test-stat-icon text-purple-400" />
             </div>
           </article>
-        </div>
+        </section>
       )}
 
       {/* 工具栏 */}
-      <nav className="bg-gray-800/30 backdrop-blur-sm rounded-xl border border-gray-700/30 shadow-lg">
-        <div className="p-6 border-b border-gray-700/30 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+      <nav className="test-toolbar" aria-label="测试历史工具栏">
+        <header className="test-toolbar-header">
           {/* 搜索框 */}
-          <div className="relative flex-1 max-w-lg">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-            <input
-              type="text"
-              placeholder="搜索测试名称、URL..."
-              className="w-full pl-12 pr-4 py-3 bg-gray-800/40 border border-gray-700/40 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500/50 transition-all duration-200"
-              value={query.search || ''}
-              onChange={(e) => handleSearch(e.target.value)}
-            />
+          <div className="test-search-wrapper">
+            <label>
+              <span className="sr-only">搜索测试记录</span>
+              <Search className="test-search-icon" />
+              <input
+                type="search"
+                placeholder="搜索测试名称、URL..."
+                className="test-search-input"
+                value={query.search || ''}
+                onChange={(e) => handleSearch(e.target.value)}
+              />
+            </label>
           </div>
 
           {/* 操作按钮 */}
-          <div className="flex gap-3">
+          <div className="test-actions-group" role="toolbar" aria-label="测试历史操作">
             <button
               type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-gray-800/40 border border-gray-700/40 rounded-xl text-gray-300 hover:bg-gray-800/60 hover:text-white transition-all duration-200 hover:scale-105"
+              className="test-action-button"
+              aria-expanded={showFilters}
+              aria-controls="filters-panel"
             >
-              <Filter className="w-4 h-4" />
+              <Filter className="test-action-icon" />
               过滤器
             </button>
 
             <button
               type="button"
               onClick={() => fetchTestHistory()}
-              className="flex items-center gap-2 px-4 py-2.5 bg-gray-800/40 border border-gray-700/40 rounded-xl text-gray-300 hover:bg-gray-800/60 hover:text-white transition-all duration-200 hover:scale-105"
+              className="test-action-button"
+              aria-label="刷新测试历史数据"
             >
-              <RefreshCw className="w-4 h-4" />
+              <RefreshCw className="test-action-icon" />
               刷新
             </button>
 
             {selectedTests.length > 0 && (
               <button
+                type="button"
                 onClick={() => setShowBatchActions(!showBatchActions)}
                 className="flex items-center gap-2 px-3 py-2 bg-blue-600/80 text-white rounded-lg hover:bg-blue-600"
+                aria-expanded={showBatchActions}
+                aria-label={`批量操作 ${selectedTests.length} 个选中项`}
               >
                 <MoreHorizontal className="w-4 h-4" />
                 批量操作 ({selectedTests.length})
               </button>
             )}
           </div>
-        </div>
+        </header>
       </nav>
 
       {/* 高级过滤器 */}
       {showFilters && (
-        <div className="p-4 bg-gray-800/20 border-b border-gray-700/40">
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <form
+          id="filters-panel"
+          className="test-filters-panel"
+          aria-label="高级过滤器"
+        >
+          <fieldset className="test-filters-grid">
+            <legend className="sr-only">测试历史过滤选项</legend>
+
             {/* 测试类型过滤 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+            <label className="test-filter-group">
+              <span className="test-filter-label">
                 测试类型
-              </label>
+              </span>
               <select
-                className="w-full bg-gray-800/40 border border-gray-700/40 rounded-lg px-3 py-2 text-white"
+                className="test-filter-select"
                 value={query.testType || ''}
                 onChange={(e) => handleFilter('testType', e.target.value || undefined)}
               >
@@ -411,15 +426,15 @@ const EnhancedTestHistory: React.FC<EnhancedTestHistoryProps> = ({ className = '
                   <option key={type} value={type}>{type}</option>
                 ))}
               </select>
-            </div>
+            </label>
 
             {/* 状态过滤 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+            <label className="test-filter-group">
+              <span className="test-filter-label">
                 状态
-              </label>
+              </span>
               <select
-                className="w-full bg-gray-800/40 border border-gray-700/40 rounded-lg px-3 py-2 text-white"
+                className="test-filter-select"
                 value={query.status || ''}
                 onChange={(e) => handleFilter('status', e.target.value || undefined)}
               >
@@ -428,38 +443,38 @@ const EnhancedTestHistory: React.FC<EnhancedTestHistoryProps> = ({ className = '
                   <option key={status} value={status}>{status}</option>
                 ))}
               </select>
-            </div>
+            </label>
 
             {/* 日期范围 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+            <label className="block">
+              <span className="block text-sm font-medium text-gray-300 mb-1">
                 开始日期
-              </label>
+              </span>
               <input
                 type="date"
                 className="w-full bg-gray-800/40 border border-gray-700/40 rounded-lg px-3 py-2 text-white"
                 value={query.dateFrom || ''}
                 onChange={(e) => handleFilter('dateFrom', e.target.value || undefined)}
               />
-            </div>
+            </label>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+            <label className="block">
+              <span className="block text-sm font-medium text-gray-300 mb-1">
                 结束日期
-              </label>
+              </span>
               <input
                 type="date"
                 className="w-full bg-gray-800/40 border border-gray-700/40 rounded-lg px-3 py-2 text-white"
                 value={query.dateTo || ''}
                 onChange={(e) => handleFilter('dateTo', e.target.value || undefined)}
               />
-            </div>
+            </label>
 
             {/* 分数范围 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+            <label className="block">
+              <span className="block text-sm font-medium text-gray-300 mb-1">
                 最低分数
-              </label>
+              </span>
               <input
                 type="number"
                 min="0"
@@ -468,9 +483,9 @@ const EnhancedTestHistory: React.FC<EnhancedTestHistoryProps> = ({ className = '
                 value={query.minScore || ''}
                 onChange={(e) => handleFilter('minScore', e.target.value ? parseFloat(e.target.value) : undefined)}
               />
-            </div>
-          </div>
-        </div>
+            </label>
+          </fieldset>
+        </form>
       )}
 
       {/* 批量操作面板 */}
@@ -478,6 +493,7 @@ const EnhancedTestHistory: React.FC<EnhancedTestHistoryProps> = ({ className = '
         <div className="p-4 bg-gray-800/20 border-b border-gray-700/40">
           <div className="flex gap-2">
             <button
+              type="button"
               onClick={() => handleBatchAction('delete')}
               className="flex items-center gap-2 px-3 py-2 bg-red-600/80 text-white rounded-lg hover:bg-red-600"
             >
@@ -486,6 +502,7 @@ const EnhancedTestHistory: React.FC<EnhancedTestHistoryProps> = ({ className = '
             </button>
 
             <button
+              type="button"
               onClick={() => handleBatchAction('archive')}
               className="flex items-center gap-2 px-3 py-2 bg-gray-800/50 text-white rounded-lg hover:bg-gray-800/70"
             >
@@ -494,6 +511,7 @@ const EnhancedTestHistory: React.FC<EnhancedTestHistoryProps> = ({ className = '
             </button>
 
             <button
+              type="button"
               onClick={() => {
                 const tags = prompt('请输入标签（用逗号分隔）:');
                 if (tags) {
@@ -510,9 +528,9 @@ const EnhancedTestHistory: React.FC<EnhancedTestHistoryProps> = ({ className = '
       )}
 
       {/* 测试历史列表 */}
-      <div className="bg-gray-800/30 backdrop-blur-sm rounded-xl border border-gray-700/30 shadow-lg">
+      <section className="test-records-container" aria-label="测试历史记录">
         {loading ? (
-          <div className="p-12 text-center">
+          <div className="p-12 text-center" role="status" aria-live="polite">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-400 mx-auto"></div>
             <p className="mt-4 text-gray-300 text-lg">加载中...</p>
           </div>
@@ -524,46 +542,50 @@ const EnhancedTestHistory: React.FC<EnhancedTestHistoryProps> = ({ className = '
         ) : (
           <>
             {/* 表格头部 */}
-            <div className="p-4 border-b border-gray-700/40">
-              <div className="flex items-center gap-4">
+            <header className="test-records-header">
+              <label className="flex items-center gap-4">
                 <input
                   type="checkbox"
                   checked={selectedTests.length === testHistory.length}
                   onChange={(e) => handleSelectAll(e.target.checked)}
                   className="rounded border-gray-700/40 bg-gray-800/40"
+                  aria-label="全选测试记录"
                 />
                 <span className="text-sm text-gray-300">
                   已选择 {selectedTests.length} / {testHistory.length} 项
                 </span>
-              </div>
-            </div>
+              </label>
+            </header>
 
             {/* 测试记录列表 */}
-            <div className="divide-y divide-gray-700/30">
+            <ul className="test-records-list" role="list">
               {testHistory.map((test) => (
-                <div key={test.id} className="p-6 hover:bg-gray-800/30 transition-all duration-200 hover:scale-[1.01] hover:shadow-lg">
-                  <div className="flex items-center gap-4">
-                    <input
-                      type="checkbox"
-                      checked={selectedTests.includes(test.id)}
-                      onChange={(e) => handleTestSelect(test.id, e.target.checked)}
-                      className="rounded border-gray-700/40 bg-gray-800/40"
-                    />
+                <li key={test.id} className="test-record-item">
+                  <article className="test-record-content">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedTests.includes(test.id)}
+                        onChange={(e) => handleTestSelect(test.id, e.target.checked)}
+                        className="rounded border-gray-700/40 bg-gray-800/40"
+                        aria-label={`选择测试 ${test.testName}`}
+                      />
+                    </label>
 
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-2">
+                    <div className="test-record-main">
+                      <header className="test-record-header">
                         {getTestTypeIcon(test.testType)}
-                        <h3 className="font-medium text-gray-900 truncate">
+                        <h3 className="test-record-title">
                           {test.testName}
                         </h3>
                         {getStatusIcon(test.status)}
-                        <span className="text-sm text-gray-500">
+                        <span className="text-sm text-gray-300">
                           {test.status}
                         </span>
-                      </div>
+                      </header>
 
-                      <div className="flex items-center gap-4 text-sm text-gray-600">
-                        <span className="truncate">{test.url}</span>
+                      <div className="test-record-meta">
+                        <span className="test-record-url">{test.url}</span>
                         <span>{formatDate(test.startTime)}</span>
                         <span>耗时: {formatDuration(test.duration)}</span>
                         {test.overallScore !== undefined && (
@@ -572,11 +594,11 @@ const EnhancedTestHistory: React.FC<EnhancedTestHistoryProps> = ({ className = '
                       </div>
 
                       {test.tags && test.tags.length > 0 && (
-                        <div className="flex gap-1 mt-2">
+                        <div className="test-record-tags">
                           {test.tags.map((tag, index) => (
                             <span
                               key={index}
-                              className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-500/20 text-blue-300"
+                              className="test-record-tag"
                             >
                               {tag}
                             </span>
@@ -587,6 +609,7 @@ const EnhancedTestHistory: React.FC<EnhancedTestHistoryProps> = ({ className = '
 
                     <div className="flex items-center gap-2">
                       <button
+                        type="button"
                         onClick={() => {
                           // 查看详情逻辑
                           window.open(`/test-result/${test.id}`, '_blank');
@@ -599,6 +622,7 @@ const EnhancedTestHistory: React.FC<EnhancedTestHistoryProps> = ({ className = '
 
                       {test.reportUrl && (
                         <button
+                          type="button"
                           onClick={() => window.open(test.reportUrl, '_blank')}
                           className="p-2 text-gray-400 hover:text-green-400 rounded-lg hover:bg-green-500/10"
                           title="下载报告"
@@ -607,47 +631,47 @@ const EnhancedTestHistory: React.FC<EnhancedTestHistoryProps> = ({ className = '
                         </button>
                       )}
                     </div>
-                  </div>
-                </div>
+                  </article>
+                </li>
               ))}
-            </div>
+            </ul>
 
             {/* 分页 */}
             {pagination.totalPages > 1 && (
-              <div className="p-4 border-t border-gray-700/40">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-300">
-                    显示 {((pagination.page - 1) * pagination.limit) + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)}
-                    / 共 {pagination.total} 条记录
-                  </div>
+              <div className="test-pagination-container">
+                <div className="test-pagination-info">
+                  显示 {((pagination.page - 1) * pagination.limit) + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)}
+                  / 共 {pagination.total} 条记录
+                </div>
 
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handlePageChange(pagination.page - 1)}
-                      disabled={!pagination.hasPrev}
-                      className="px-3 py-2 border border-gray-700/40 bg-gray-800/40 text-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-800/60"
-                    >
-                      上一页
-                    </button>
+                <div className="test-pagination-controls">
+                  <button
+                    type="button"
+                    onClick={() => handlePageChange(pagination.page - 1)}
+                    disabled={!pagination.hasPrev}
+                    className="test-pagination-button"
+                  >
+                    上一页
+                  </button>
 
-                    <span className="px-3 py-2 text-sm text-gray-300">
-                      第 {pagination.page} / {pagination.totalPages} 页
-                    </span>
+                  <span className="test-pagination-current">
+                    第 {pagination.page} / {pagination.totalPages} 页
+                  </span>
 
-                    <button
-                      onClick={() => handlePageChange(pagination.page + 1)}
-                      disabled={!pagination.hasNext}
-                      className="px-3 py-2 border border-gray-700/40 bg-gray-800/40 text-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-800/60"
-                    >
-                      下一页
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handlePageChange(pagination.page + 1)}
+                    disabled={!pagination.hasNext}
+                    className="test-pagination-button"
+                  >
+                    下一页
+                  </button>
                 </div>
               </div>
             )}
           </>
         )}
-      </div>
+      </section>
     </section>
   );
 };
