@@ -13,7 +13,9 @@ import { AdvancedStressTestConfig as ImportedAdvancedStressTestConfig } from '..
 import { useUserStats } from '../hooks/useUserStats';
 import backgroundTestManager from '../services/backgroundTestManager';
 import { testEngineManager } from '../services/testEngines';
+import { type RealTimeMetrics, type TestDataPoint, TestPhase } from '../services/TestStateManager';
 import '../styles/compact-layout.css';
+import '../styles/optimized-charts.css';
 import '../styles/unified-testing-tools.css';
 
 // 注释：已简化实现，移除复杂的数据管理Hook
@@ -22,6 +24,8 @@ import '../styles/unified-testing-tools.css';
 interface StressTestConfig extends ImportedAdvancedStressTestConfig {
   // 可以添加额外的本地配置
 }
+
+// 注释：ExtendedTestConfig已移除，直接使用StressTestConfig
 
 // 压力测试历史组件
 const StressTestHistoryContent: React.FC = () => {
@@ -404,8 +408,8 @@ const StressTest: React.FC = () => {
 
 
 
-  const [testData, setTestData] = useState<any[]>([]);
-  const [metrics, setMetrics] = useState<any>(null);
+  const [testData, setTestData] = useState<TestDataPoint[]>([]);
+  const [metrics, setMetrics] = useState<RealTimeMetrics | null>(null);
   const [testStatus, setTestStatus] = useState<TestStatusType>('idle');
   const [testProgress, setTestProgress] = useState<string>('');
   const [isRunning, setIsRunning] = useState(false);
@@ -416,22 +420,9 @@ const StressTest: React.FC = () => {
   // 标签页状态
   const [activeTab, setActiveTab] = useState<'test' | 'history'>('test');
 
-  // 历史组件引用
-  const historyRef = React.useRef<{ saveTestResult: (result: any) => void }>(null);
-
   // WebSocket相关状态
   const socketRef = useRef<any>(null);
-  const [socketConnected, setSocketConnected] = useState(false);
   const [currentTestId, setCurrentTestId] = useState<string | null>(null);
-
-  // 实时监控状态
-  const [liveStats, setLiveStats] = useState({
-    activeUsers: 0,
-    normalUsers: 0,
-    waitingUsers: 0,
-    errorUsers: 0,
-    loadProgress: 0
-  });
 
   // 实时数据轮询
   const pollTestStatus = useCallback(async (testId: string) => {
@@ -440,14 +431,7 @@ const StressTest: React.FC = () => {
       const data = await response.json();
 
       if (data.success) {
-        // 更新实时指标
-        setLiveStats(prev => ({
-          ...prev,
-          activeUsers: data.realTimeMetrics?.activeRequests || 0,
-          normalUsers: data.realTimeMetrics?.successfulRequests || 0,
-          errorUsers: data.realTimeMetrics?.failedRequests || 0,
-          loadProgress: data.progress || 0
-        }));
+        // 更新实时指标 (已移除liveStats)
 
         // 添加实时数据点
         if (data.realTimeMetrics) {
@@ -719,16 +703,7 @@ const StressTest: React.FC = () => {
           currentActiveUsers = testProgress > 0.1 ? baseUsers : Math.floor(baseUsers * testProgress * 10);
         }
 
-        const errorRate = metrics?.errorRate || Math.random() * 10; // 如果没有真实错误率，使用随机值
-        const successRate = 1 - (errorRate / 100);
-
-        setLiveStats({
-          activeUsers: currentActiveUsers,
-          normalUsers: Math.floor(currentActiveUsers * successRate),
-          waitingUsers: Math.floor(currentActiveUsers * 0.1), // 10%等待
-          errorUsers: Math.floor(currentActiveUsers * (errorRate / 100)),
-          loadProgress: backgroundTestInfo?.progress || (testProgress * 100)
-        });
+        // 实时统计已移除，使用metrics代替
 
         // 生成实时数据点用于图表显示
         if (realTimeData.length < 100) { // 限制数据点数量
@@ -739,7 +714,7 @@ const StressTest: React.FC = () => {
             responseTime: Math.round(baseResponseTime + (Math.random() - 0.5) * 100),
             throughput: Math.round(currentActiveUsers * (0.8 + Math.random() * 0.4)), // 模拟吞吐量
             activeUsers: currentActiveUsers,
-            success: Math.random() > (errorRate / 100),
+            success: Math.random() > 0.1, // 90%成功率
             phase: testProgress < 0.3 ? 'ramp-up' : testProgress > 0.8 ? 'ramp-down' : 'steady'
           };
 
@@ -759,22 +734,17 @@ const StressTest: React.FC = () => {
             failedRequests: totalRequests - successfulRequests,
             averageResponseTime: Math.round(avgResponseTime),
             currentTPS: avgThroughput,
+            peakTPS: avgThroughput,
             throughput: avgThroughput,
             requestsPerSecond: avgThroughput,
             errorRate: ((totalRequests - successfulRequests) / totalRequests) * 100,
-            activeUsers: currentActiveUsers
+            activeUsers: currentActiveUsers,
+            timestamp: Date.now()
           });
         }
       }, 2000); // 每2秒更新一次
     } else {
-      // 重置状态
-      setLiveStats({
-        activeUsers: 0,
-        normalUsers: 0,
-        waitingUsers: 0,
-        errorUsers: 0,
-        loadProgress: 0
-      });
+      // 重置状态 (已移除liveStats)
     }
 
     return () => {
@@ -908,12 +878,10 @@ const StressTest: React.FC = () => {
         // 连接事件
         socket.on('connect', () => {
           console.log('🔌 WebSocket连接成功');
-          setSocketConnected(true);
         });
 
         socket.on('disconnect', () => {
           console.log('🔌 WebSocket连接断开');
-          setSocketConnected(false);
         });
 
         // 压力测试实时数据
@@ -924,15 +892,15 @@ const StressTest: React.FC = () => {
             setRealTimeData(prev => [...prev, data.dataPoint]);
 
             // 转换为图表数据格式
-            const chartPoint = {
-              time: new Date(data.dataPoint.timestamp).toLocaleTimeString(),
+            const chartPoint: TestDataPoint = {
               timestamp: data.dataPoint.timestamp,
               responseTime: data.dataPoint.responseTime || 0,
+              activeUsers: data.dataPoint.activeUsers || 0,
               throughput: data.dataPoint.throughput || 0,
-              errors: data.dataPoint.errors || 0,
-              users: data.dataPoint.activeUsers || 0,
               errorRate: data.dataPoint.errorRate || 0,
-              phase: data.dataPoint.phase || 'running'
+              status: (data.dataPoint.errors || 0) > 0 ? 500 : 200,
+              success: (data.dataPoint.errors || 0) === 0,
+              phase: (data.dataPoint.phase || 'steady') as TestPhase
             };
 
             setTestData(prev => [...prev, chartPoint]);
@@ -988,7 +956,6 @@ const StressTest: React.FC = () => {
       if (socketRef.current) {
         socketRef.current.disconnect();
         socketRef.current = null;
-        setSocketConnected(false);
       }
     };
   }, []);
@@ -1450,9 +1417,27 @@ const StressTest: React.FC = () => {
                   {backgroundTestInfo && (
                     <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
                       <div
-                        className="test-progress-dynamic h-2 rounded-full transition-all duration-300"
-                        // 动态计算的进度值，需要使用内联样式
-                        style={{ width: `${backgroundTestInfo.progress || 0}%` }}
+                        className={`test-progress-dynamic h-2 rounded-full transition-all duration-300 ${backgroundTestInfo.progress >= 100 ? 'progress-100' :
+                          backgroundTestInfo.progress >= 95 ? 'progress-95' :
+                            backgroundTestInfo.progress >= 90 ? 'progress-90' :
+                              backgroundTestInfo.progress >= 85 ? 'progress-85' :
+                                backgroundTestInfo.progress >= 80 ? 'progress-80' :
+                                  backgroundTestInfo.progress >= 75 ? 'progress-75' :
+                                    backgroundTestInfo.progress >= 70 ? 'progress-70' :
+                                      backgroundTestInfo.progress >= 65 ? 'progress-65' :
+                                        backgroundTestInfo.progress >= 60 ? 'progress-60' :
+                                          backgroundTestInfo.progress >= 55 ? 'progress-55' :
+                                            backgroundTestInfo.progress >= 50 ? 'progress-50' :
+                                              backgroundTestInfo.progress >= 45 ? 'progress-45' :
+                                                backgroundTestInfo.progress >= 40 ? 'progress-40' :
+                                                  backgroundTestInfo.progress >= 35 ? 'progress-35' :
+                                                    backgroundTestInfo.progress >= 30 ? 'progress-30' :
+                                                      backgroundTestInfo.progress >= 25 ? 'progress-25' :
+                                                        backgroundTestInfo.progress >= 20 ? 'progress-20' :
+                                                          backgroundTestInfo.progress >= 15 ? 'progress-15' :
+                                                            backgroundTestInfo.progress >= 10 ? 'progress-10' :
+                                                              backgroundTestInfo.progress >= 5 ? 'progress-5' : 'progress-0'
+                          }`}
                       ></div>
                     </div>
                   )}
@@ -1829,17 +1814,26 @@ const StressTest: React.FC = () => {
                           <div className="bg-gray-800/50 rounded p-3">
                             <div className="text-sm text-gray-300 mb-2">响应时间趋势</div>
                             <div className="h-20 flex items-end space-x-1">
-                              {realTimeData.slice(-20).map((point, index) => (
-                                <div
-                                  key={index}
-                                  className="bg-blue-500 rounded-t"
-                                  // 动态计算的图表高度，需要使用内联样式
-                                  style={{
-                                    height: `${Math.min(100, (point.responseTime || 0) / 10)}%`,
-                                    width: '4px'
-                                  }}
-                                />
-                              ))}
+                              {realTimeData.slice(-20).map((point, index) => {
+                                const heightPercent = Math.min(100, (point.responseTime || 0) / 10);
+                                return (
+                                  <div
+                                    key={index}
+                                    className={`bg-blue-500 rounded-t chart-bar-dynamic ${heightPercent >= 90 ? 'chart-height-90' :
+                                      heightPercent >= 80 ? 'chart-height-80' :
+                                        heightPercent >= 70 ? 'chart-height-70' :
+                                          heightPercent >= 60 ? 'chart-height-60' :
+                                            heightPercent >= 50 ? 'chart-height-50' :
+                                              heightPercent >= 40 ? 'chart-height-40' :
+                                                heightPercent >= 30 ? 'chart-height-30' :
+                                                  heightPercent >= 20 ? 'chart-height-20' :
+                                                    heightPercent >= 10 ? 'chart-height-10' :
+                                                      heightPercent >= 5 ? 'chart-height-5' : 'chart-height-1'
+                                      }`}
+                                    title={`响应时间: ${point.responseTime || 0}ms`}
+                                  />
+                                );
+                              })}
                             </div>
                             <div className="text-xs text-gray-400 mt-1">
                               最新: {realTimeData[realTimeData.length - 1]?.responseTime || 0}ms
@@ -1850,17 +1844,26 @@ const StressTest: React.FC = () => {
                           <div className="bg-gray-800/50 rounded p-3">
                             <div className="text-sm text-gray-300 mb-2">TPS趋势</div>
                             <div className="h-20 flex items-end space-x-1">
-                              {realTimeData.slice(-20).map((point, index) => (
-                                <div
-                                  key={index}
-                                  className="bg-green-500 rounded-t"
-                                  // 动态计算的图表高度，需要使用内联样式
-                                  style={{
-                                    height: `${Math.min(100, (point.throughput || 0) * 10)}%`,
-                                    width: '4px'
-                                  }}
-                                />
-                              ))}
+                              {realTimeData.slice(-20).map((point, index) => {
+                                const heightPercent = Math.min(100, (point.throughput || 0) * 10);
+                                return (
+                                  <div
+                                    key={index}
+                                    className={`bg-green-500 rounded-t chart-bar-dynamic ${heightPercent >= 90 ? 'chart-height-90' :
+                                      heightPercent >= 80 ? 'chart-height-80' :
+                                        heightPercent >= 70 ? 'chart-height-70' :
+                                          heightPercent >= 60 ? 'chart-height-60' :
+                                            heightPercent >= 50 ? 'chart-height-50' :
+                                              heightPercent >= 40 ? 'chart-height-40' :
+                                                heightPercent >= 30 ? 'chart-height-30' :
+                                                  heightPercent >= 20 ? 'chart-height-20' :
+                                                    heightPercent >= 10 ? 'chart-height-10' :
+                                                      heightPercent >= 5 ? 'chart-height-5' : 'chart-height-1'
+                                      }`}
+                                    title={`TPS: ${point.throughput || 0}`}
+                                  />
+                                );
+                              })}
                             </div>
                             <div className="text-xs text-gray-400 mt-1">
                               当前: {(metrics?.currentTPS && !isNaN(metrics.currentTPS)) ? metrics.currentTPS.toFixed(1) : '0.0'} TPS

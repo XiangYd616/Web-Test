@@ -1,5 +1,6 @@
 import { ChevronDown, ChevronUp, SortAsc } from 'lucide-react';
 import React from 'react';
+import '../../styles/data-table.css';
 
 export interface Column<T> {
   key: keyof T;
@@ -40,6 +41,23 @@ function DataTable<T extends Record<string, any>>({
       return rowKey(record);
     }
     return record[rowKey] || index.toString();
+  };
+
+  // 生成网格CSS类名，避免内联样式
+  const getGridClassName = (): string => {
+    const columnCount = columns.length;
+    if (columnCount <= 12) {
+      return `grid-cols-${columnCount}`;
+    }
+    return 'grid-fixed-md'; // 超过12列时使用固定宽度
+  };
+
+  // 生成ARIA sort属性值
+  const getAriaSortValue = (columnKey: keyof T): "ascending" | "descending" | "none" | undefined => {
+    if (sortBy === columnKey) {
+      return sortOrder === 'asc' ? 'ascending' : 'descending';
+    }
+    return columns.find(col => col.key === columnKey)?.sortable ? 'none' : undefined;
   };
 
   const handleSort = (key: keyof T) => {
@@ -89,69 +107,69 @@ function DataTable<T extends Record<string, any>>({
   }
 
   return (
-    <section className={`bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 overflow-hidden ${className}`} aria-label="数据表格">
-      {/* 表头 */}
-      <header className="bg-gray-700/30">
-        <div className="grid gap-4 px-6 py-4" style={{ gridTemplateColumns: columns.map(col => col.width || '1fr').join(' ') }}>
-          {columns.map((column) => (
-            <div
-              key={String(column.key)}
-              className={`flex items-center space-x-2 text-sm font-medium text-gray-300 ${column.align === 'center' ? 'justify-center' :
-                column.align === 'right' ? 'justify-end' : 'justify-start'
-                } ${column.sortable ? 'cursor-pointer hover:text-white' : ''}`}
-              onClick={() => column.sortable && handleSort(column.key)}
-              aria-sort={
-                sortBy === column.key
-                  ? (sortOrder === 'asc' ? 'ascending' : 'descending')
-                  : column.sortable ? 'none' : undefined
-              }
-              tabIndex={column.sortable ? 0 : undefined}
-              onKeyDown={(e) => {
-                if (column.sortable && (e.key === 'Enter' || e.key === ' ')) {
-                  e.preventDefault();
-                  handleSort(column.key);
-                }
-              }}
-            >
-              <span>{column.title}</span>
-              {column.sortable && getSortIcon(column.key)}
-            </div>
-          ))}
-        </div>
-      </header>
-
-      {/* 表格内容 */}
+    <div className={`bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 overflow-hidden ${className}`}>
       {data.length === 0 ? (
-        <div className="text-center py-12" role="status">
+        <div className="text-center py-12" role="status" aria-label="数据表格状态">
           {emptyIcon && <div className="mb-4" aria-hidden="true">{emptyIcon}</div>}
           <p className="text-gray-400">{emptyText}</p>
         </div>
       ) : (
-        <div className="divide-y divide-gray-700/50">
-          {data.map((record, index) => (
-            <div
-              key={getRowKey(record, index)}
-              className="grid gap-4 px-6 py-4 hover:bg-gray-700/20 transition-colors"
-              style={{ gridTemplateColumns: columns.map(col => col.width || '1fr').join(' ') }}
-            >
+        <div role="table" aria-label="数据表格">
+          {/* 表头 */}
+          <div className="bg-gray-700/30" role="rowgroup">
+            <div className={`grid gap-4 px-6 py-4 ${getGridClassName()}`} role="row">
               {columns.map((column) => (
                 <div
                   key={String(column.key)}
-                  className={`text-sm ${column.align === 'center' ? 'text-center' :
-                    column.align === 'right' ? 'text-right' : 'text-left'
-                    }`}
+                  className={`flex items-center space-x-2 text-sm font-medium text-gray-300 ${column.align === 'center' ? 'justify-center' :
+                    column.align === 'right' ? 'justify-end' : 'justify-start'
+                    } ${column.sortable ? 'sortable-column' : ''}`}
+                  onClick={() => column.sortable && handleSort(column.key)}
+                  aria-sort={getAriaSortValue(column.key)}
+                  role="columnheader"
+                  tabIndex={column.sortable ? 0 : undefined}
+                  onKeyDown={(e) => {
+                    if (column.sortable && (e.key === 'Enter' || e.key === ' ')) {
+                      e.preventDefault();
+                      handleSort(column.key);
+                    }
+                  }}
                 >
-                  {column.render ?
-                    column.render(record[column.key], record) :
-                    String(record[column.key] || '-')
-                  }
+                  <span>{column.title}</span>
+                  {column.sortable && getSortIcon(column.key)}
                 </div>
               ))}
             </div>
-          ))}
+          </div>
+
+          {/* 表格内容 */}
+          <div className="divide-y divide-gray-700/50" role="rowgroup">
+            {data.map((record, index) => (
+              <div
+                key={getRowKey(record, index)}
+                className={`grid gap-4 px-6 py-4 hover:bg-gray-700/20 transition-colors ${getGridClassName()}`}
+                role="row"
+              >
+                {columns.map((column) => (
+                  <div
+                    key={String(column.key)}
+                    className={`text-sm ${column.align === 'center' ? 'text-center' :
+                      column.align === 'right' ? 'text-right' : 'text-left'
+                      }`}
+                    role="cell"
+                  >
+                    {column.render ?
+                      column.render(record[column.key], record) :
+                      String(record[column.key] || '-')
+                    }
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       )}
-    </section>
+    </div>
   );
 }
 

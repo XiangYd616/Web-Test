@@ -1,0 +1,23 @@
+# 浏览器支持配置
+# 用于CSS兼容性检查和自动前缀
+
+# 生产环境
+> 0.5%
+last 2 versions
+not dead
+not ie 11
+
+# 移动端支持
+iOS >= 9
+Android >= 4.4
+Samsung >= 5
+
+# 特定浏览器支持
+Chrome >= 60
+Firefox >= 55
+Safari >= 9
+Edge >= 16
+
+# 排除不支持的浏览器
+not op_mini all
+not kaios 2.5
