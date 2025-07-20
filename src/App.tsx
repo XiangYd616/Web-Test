@@ -10,8 +10,7 @@ import ErrorBoundary from './components/ui/ErrorBoundary'
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 
-// 工具函数导入
-import { TestDataGenerator } from './utils/testDataGenerator'
+
 
 // 样式文件导入
 import './styles/chrome-compatibility.css'
@@ -20,10 +19,7 @@ import './styles/light-theme.css'
 import './styles/theme.css'
 
 function App() {
-  // 初始化测试数据
   useEffect(() => {
-    TestDataGenerator.initializeSampleData();
-
     // 添加浏览器检测类到body
     const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
     const isEdge = /Edg/.test(navigator.userAgent);

@@ -353,6 +353,12 @@ class RealStressTestEngine {
     console.log(`🤖 Virtual user ${userId} started for ${duration}ms`);
 
     while (Date.now() < endTime) {
+      // 检查测试是否被中止
+      if (this.shouldStopTest(results.testId)) {
+        console.log(`🛑 用户 ${userId} 检测到测试中止，退出循环`);
+        break;
+      }
+
       try {
         const requestStart = Date.now();
         const response = await this.makeRequest(url, method, timeout);
@@ -665,7 +671,7 @@ class RealStressTestEngine {
 
     // 计算错误率
     metrics.errorRate = metrics.totalRequests > 0 ?
-      ((metrics.failedRequests / metrics.totalRequests) * 100).toFixed(2) : 0;
+      parseFloat(((metrics.failedRequests / metrics.totalRequests) * 100).toFixed(2)) : 0;
   }
 
   /**
@@ -720,7 +726,9 @@ class RealStressTestEngine {
 
     // 计算错误率
     if (metrics.totalRequests > 0) {
-      metrics.errorRate = ((metrics.failedRequests / metrics.totalRequests) * 100).toFixed(2);
+      metrics.errorRate = parseFloat(((metrics.failedRequests / metrics.totalRequests) * 100).toFixed(2));
+    } else {
+      metrics.errorRate = 0;
     }
 
     // 计算吞吐量 (requests per second)
@@ -863,6 +871,98 @@ class RealStressTestEngine {
       }
     } catch (error) {
       console.error('WebSocket完成广播失败:', error);
+    }
+  }
+
+  /**
+   * 停止/中止压力测试
+   */
+  async stopStressTest(testId) {
+    try {
+      console.log(`🛑 停止压力测试: ${testId}`);
+
+      // 获取测试状态
+      const testStatus = this.runningTests.get(testId);
+      if (!testStatus) {
+        console.log(`⚠️ 测试 ${testId} 不存在或已完成`);
+        return {
+          success: false,
+          message: '测试不存在或已完成'
+        };
+      }
+
+      // 标记测试为已取消
+      testStatus.status = 'cancelled';
+      testStatus.cancelled = true;
+      testStatus.endTime = new Date().toISOString();
+      testStatus.actualDuration = (Date.now() - new Date(testStatus.startTime).getTime()) / 1000;
+
+      // 更新测试状态
+      this.updateTestStatus(testId, testStatus);
+
+      // 广播测试取消状态
+      this.broadcastTestStatus(testId, {
+        status: 'cancelled',
+        message: '测试已被用户取消',
+        endTime: testStatus.endTime,
+        actualDuration: testStatus.actualDuration
+      });
+
+      // 计算最终指标
+      if (testStatus.metrics) {
+        this.calculateFinalMetrics(testStatus);
+      }
+
+      console.log(`✅ 压力测试 ${testId} 已成功停止`);
+
+      return {
+        success: true,
+        message: '测试已成功停止',
+        data: {
+          testId,
+          status: 'cancelled',
+          endTime: testStatus.endTime,
+          actualDuration: testStatus.actualDuration,
+          metrics: testStatus.metrics || {},
+          realTimeData: testStatus.realTimeData || []
+        }
+      };
+
+    } catch (error) {
+      console.error(`❌ 停止压力测试失败 ${testId}:`, error);
+      return {
+        success: false,
+        message: '停止测试失败',
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * 检查测试是否应该停止
+   */
+  shouldStopTest(testId) {
+    const testStatus = this.runningTests.get(testId);
+    return testStatus && (testStatus.cancelled || testStatus.status === 'cancelled');
+  }
+
+  /**
+   * 清理测试资源
+   */
+  cleanupTest(testId) {
+    try {
+      // 移除运行中的测试状态
+      this.runningTests.delete(testId);
+
+      // 广播清理完成
+      this.broadcastTestStatus(testId, {
+        status: 'cleanup_complete',
+        message: '测试资源已清理'
+      });
+
+      console.log(`🧹 测试 ${testId} 资源已清理`);
+    } catch (error) {
+      console.error(`❌ 清理测试资源失败 ${testId}:`, error);
     }
   }
 }

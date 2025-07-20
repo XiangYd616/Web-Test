@@ -33,14 +33,17 @@ export const OptimizedStressTestPage: React.FC = () => {
   // 测试配置
   const [testConfig, setTestConfig] = useState<TestConfig>({
     url: '',
-    users: 10,
-    duration: 30,
-    rampUp: 5,
+    users: 20, // 默认使用中等负载配置
+    duration: 60,
+    rampUp: 10,
     testType: 'gradual',
     method: 'GET',
     timeout: 10,
     thinkTime: 1,
   });
+
+  // 默认模板选择状态
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   // 使用优化的压力测试Hook
   const {
@@ -166,8 +169,8 @@ export const OptimizedStressTestPage: React.FC = () => {
               type="button"
               onClick={() => setActiveTab('test')}
               className={`px-3 py-1.5 text-sm rounded transition-colors ${activeTab === 'test'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
                 }`}
             >
               压力测试
@@ -176,8 +179,8 @@ export const OptimizedStressTestPage: React.FC = () => {
               type="button"
               onClick={() => setActiveTab('history')}
               className={`px-3 py-1.5 text-sm rounded transition-colors ${activeTab === 'history'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
                 }`}
             >
               测试历史

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
-import { DebugPanel } from '../system';
 import ModernSidebar from './ModernSidebar';
 import TopNavbar from './TopNavbar';
 
@@ -38,9 +37,6 @@ const ModernLayout: React.FC = () => {
           </main>
         </div>
       </div>
-
-      {/* 调试面板 */}
-      <DebugPanel />
     </div>
   );
 };
