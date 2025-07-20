@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export interface TestRecord {
   id: string;
@@ -8,6 +8,10 @@ export interface TestRecord {
   overallScore?: number;
   startTime: string;
   endTime?: string;
+  timestamp?: string; // 添加timestamp字段
+  createdAt?: string; // 添加createdAt字段
+  completedAt?: string; // 添加completedAt字段
+  duration?: number; // 持续时间（秒）
   actualDuration?: number;
   results?: any;
   config?: any;
@@ -36,15 +40,15 @@ export interface UseDataStorageReturn {
   testRecords: TestRecord[];
   loading: boolean;
   error: string | null;
-  
+
   // 分页状态
   pagination: PaginationInfo;
-  
+
   // 过滤和排序状态
   filters: FilterOptions;
   sortBy: 'date' | 'score' | 'type' | 'status';
   sortOrder: 'asc' | 'desc';
-  
+
   // 操作方法
   loadTestRecords: (page?: number) => Promise<void>;
   handlePageChange: (page: number) => void;
@@ -68,14 +72,14 @@ export const useDataStorage = (): UseDataStorageReturn => {
   const [testRecords, setTestRecords] = useState<TestRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [pagination, setPagination] = useState<PaginationInfo>({
     page: 1,
     limit: 10,
     total: 0,
     totalPages: 0
   });
-  
+
   const [filters, setFilters] = useState<FilterOptions>({
     testType: '',
     status: '',
@@ -83,7 +87,7 @@ export const useDataStorage = (): UseDataStorageReturn => {
     scoreRange: [0, 100],
     searchQuery: ''
   });
-  
+
   const [sortBy, setSortBy] = useState<'date' | 'score' | 'type' | 'status'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
@@ -91,7 +95,7 @@ export const useDataStorage = (): UseDataStorageReturn => {
   const loadTestRecords = useCallback(async (page: number = pagination.page) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       console.log('🔄 Loading test records from backend...');
 
@@ -101,7 +105,7 @@ export const useDataStorage = (): UseDataStorageReturn => {
         sortBy: sortBy,
         sortOrder: sortOrder,
         ...Object.fromEntries(
-          Object.entries(filters).filter(([_, value]) => 
+          Object.entries(filters).filter(([_, value]) =>
             value !== '' && value !== null && value !== undefined
           )
         )
@@ -118,10 +122,10 @@ export const useDataStorage = (): UseDataStorageReturn => {
       if (data.success) {
         const records = data.data.tests || [];
         const paginationData = data.data.pagination || {};
-        
+
         console.log(`✅ Loaded ${records.length} test records from backend`);
         console.log('📄 Pagination info:', paginationData);
-        
+
         setTestRecords(records);
         setPagination({
           page: paginationData.page || 1,

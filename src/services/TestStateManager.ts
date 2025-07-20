@@ -73,6 +73,11 @@ export interface RealTimeMetrics {
   p999ResponseTime?: number;
   throughput?: number;
   requestsPerSecond?: number;
+  // 数据传输相关指标
+  dataReceived?: number;
+  dataSent?: number;
+  minResponseTime?: number;
+  maxResponseTime?: number;
 }
 
 // 测试数据点接口

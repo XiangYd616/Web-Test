@@ -55,6 +55,10 @@ export class TestDataGenerator {
         status: Math.random() > 0.1 ? 'completed' : 'failed',
         startTime: startTime.toISOString(),
         endTime: endTime.toISOString(),
+        timestamp: startTime.toISOString(), // 添加timestamp字段
+        createdAt: startTime.toISOString(), // 添加createdAt字段
+        completedAt: endTime.toISOString(), // 添加completedAt字段
+        duration: Math.floor((endTime.getTime() - startTime.getTime()) / 1000), // 持续时间（秒）
         savedAt: endTime.toISOString(),
         overallScore: Math.random() * 100,
         scores: this.generateScores(testType),
@@ -116,11 +120,33 @@ export class TestDataGenerator {
         // 安全测试使用真实API数据，不生成模拟数据
         return null;
       case 'stress':
+        const totalRequests = Math.floor(Math.random() * 10000) + 1000;
+        const successfulRequests = Math.floor(totalRequests * (0.9 + Math.random() * 0.1));
+        const failedRequests = totalRequests - successfulRequests;
+        const duration = Math.floor(Math.random() * 300) + 60;
+        const avgResponseTime = Math.random() * 1000;
+
         return {
-          requests: Math.floor(Math.random() * 10000) + 1000,
-          duration: Math.floor(Math.random() * 300) + 60,
-          avgResponseTime: Math.random() * 1000,
-          errorRate: Math.random() * 10
+          metrics: {
+            totalRequests,
+            successfulRequests,
+            failedRequests,
+            averageResponseTime: Math.round(avgResponseTime),
+            minResponseTime: Math.round(avgResponseTime * 0.3),
+            maxResponseTime: Math.round(avgResponseTime * 3),
+            throughput: Math.round(totalRequests / duration),
+            requestsPerSecond: Math.round(totalRequests / duration),
+            rps: Math.round(totalRequests / duration),
+            errorRate: Math.round((failedRequests / totalRequests) * 100 * 100) / 100,
+            p95ResponseTime: Math.round(avgResponseTime * 1.5),
+            p99ResponseTime: Math.round(avgResponseTime * 2),
+            concurrentUsers: Math.floor(Math.random() * 100) + 10
+          },
+          // 保持向后兼容
+          requests: totalRequests,
+          duration: duration,
+          avgResponseTime: Math.round(avgResponseTime),
+          errorRate: Math.round((failedRequests / totalRequests) * 100 * 100) / 100
         };
       case 'api':
         return {

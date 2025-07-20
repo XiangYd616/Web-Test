@@ -1,5 +1,5 @@
 /* cSpell:ignore cooldown */
-import { AlertCircle, BarChart3, CheckCircle, Clock, Download, FileText, Loader, Lock, Play, RotateCcw, Square, TrendingUp, Users, XCircle } from 'lucide-react';
+import { AlertCircle, AlertTriangle, BarChart3, CheckCircle, Clock, Download, FileText, Loader, Lock, Play, RotateCcw, Square, TrendingUp, Users, XCircle, Zap } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { AdvancedStressTestChart, UnifiedStressTestCharts } from '../components/charts';
@@ -11,6 +11,7 @@ import {
   TestPageLayout
 } from '../components/testing/UnifiedTestingComponents';
 import { AdvancedStressTestConfig as ImportedAdvancedStressTestConfig } from '../hooks/useSimpleTestEngine';
+import { useStressTestRecord } from '../hooks/useStressTestRecord';
 import { useUserStats } from '../hooks/useUserStats';
 import backgroundTestManager from '../services/backgroundTestManager';
 import { testEngineManager } from '../services/testEngines';
@@ -44,6 +45,19 @@ const StressTest: React.FC = () => {
 
   // 用户统计
   const { recordTestCompletion } = useUserStats();
+
+  // 测试记录管理
+  const {
+    currentRecord,
+    startRecording,
+    updateProgress,
+    completeRecord,
+    failRecord,
+    addRealTimeData,
+    refreshRecords
+  } = useStressTestRecord({
+    autoLoad: false // 不自动加载，由历史组件管理
+  });
 
   // 注释：已移除复杂的数据管理Hook，使用现有状态变量
 
@@ -119,6 +133,55 @@ const StressTest: React.FC = () => {
     }
   }, []);
 
+  // 执行真实的演示压力测试
+  const runDemoStressTest = async () => {
+    // 演示URL选项（按可靠性排序）
+    const demoUrls = [
+      'https://httpbin.org/delay/1',      // 1秒延迟，稳定可靠
+      'https://httpbin.org/get',          // 简单GET请求
+      'https://jsonplaceholder.typicode.com/posts/1', // 免费API
+      'https://api.github.com',           // GitHub API
+      'https://httpbin.org/status/200'    // 固定200状态
+    ];
+
+    // 选择演示URL
+    const demoUrl = testConfig.url.trim() || demoUrls[0];
+
+    // 使用轻量级配置进行演示测试
+    const demoConfig = {
+      url: demoUrl,
+      users: 5,
+      duration: 30,
+      rampUp: 5,
+      testType: 'gradual' as const,
+      method: 'GET' as const,
+      timeout: 10,
+      thinkTime: 1,
+      warmupDuration: 0,
+      cooldownDuration: 0
+    };
+
+    // 临时更新测试配置
+    const originalConfig = { ...testConfig };
+    setTestConfig(demoConfig);
+
+    try {
+      console.log('🚀 开始演示压力测试:', demoUrl);
+      setError('');
+      setTestProgress('正在启动演示测试...');
+
+      // 执行真实的压力测试
+      await startRealStressTest();
+    } catch (error) {
+      console.error('演示测试失败:', error);
+      // 如果真实测试失败，恢复原配置并显示错误
+      setTestConfig(originalConfig);
+      setError(`演示测试失败: ${error instanceof Error ? error.message : '请检查网络连接'}`);
+      setTestProgress('');
+      setIsRunning(false);
+    }
+  };
+
   // 启动真实的压力测试
   const startRealStressTest = async () => {
     // 检查登录状态
@@ -140,6 +203,32 @@ const StressTest: React.FC = () => {
     setResult(null);
     setIsRunning(true);
     setCurrentTestId(null);
+
+    // 创建测试记录
+    let recordId: string | null = null;
+    try {
+      recordId = await startRecording({
+        testName: `压力测试 - ${new URL(testConfig.url.trim()).hostname}`,
+        url: testConfig.url.trim(),
+        config: {
+          users: testConfig.users,
+          duration: testConfig.duration,
+          rampUpTime: testConfig.rampUp,
+          testType: testConfig.testType === 'stress' || testConfig.testType === 'load' || testConfig.testType === 'volume'
+            ? 'gradual'
+            : testConfig.testType as 'gradual' | 'spike' | 'constant' | 'step',
+          method: testConfig.method,
+          timeout: testConfig.timeout,
+          thinkTime: testConfig.thinkTime,
+          warmupDuration: testConfig.warmupDuration,
+          cooldownDuration: testConfig.cooldownDuration
+        }
+      });
+      console.log('📝 创建测试记录:', recordId);
+    } catch (recordError) {
+      console.warn('创建测试记录失败:', recordError);
+      // 继续执行测试，不因记录失败而中断
+    }
 
     try {
       // 发送真实的压力测试请求
@@ -209,6 +298,23 @@ const StressTest: React.FC = () => {
             Math.max(0, 100 - Math.min(100, data.data.metrics.averageResponseTime / 10)) : undefined;
           const duration = data.data.actualDuration || data.data.duration || testConfig.duration;
           recordTestCompletion('压力测试', success, score, duration);
+
+          // 完成测试记录
+          if (recordId) {
+            try {
+              await completeRecord(recordId, {
+                metrics: {
+                  ...data.data.metrics,
+                  requestsPerSecond: data.data.metrics?.throughput || 0,
+                  rps: data.data.metrics?.throughput || 0
+                },
+                realTimeData: data.data.realTimeData || []
+              }, score);
+              console.log('✅ 测试记录已完成');
+            } catch (recordError) {
+              console.warn('完成测试记录失败:', recordError);
+            }
+          }
         }
 
       } else {
@@ -220,6 +326,16 @@ const StressTest: React.FC = () => {
       setTestStatus('failed');
       setTestProgress('测试失败');
       setIsRunning(false);
+
+      // 标记测试记录失败
+      if (recordId) {
+        try {
+          await failRecord(recordId, error.message || '测试失败');
+          console.log('❌ 测试记录已标记为失败');
+        } catch (recordError) {
+          console.warn('标记测试记录失败失败:', recordError);
+        }
+      }
     }
   };
 
@@ -303,7 +419,12 @@ const StressTest: React.FC = () => {
       peakTPS: metrics.peakTPS || 0,
       errorBreakdown: metrics.errorBreakdown || {},
       p75ResponseTime: metrics.p75ResponseTime || metrics.p90ResponseTime * 0.8,
-      p999ResponseTime: metrics.p999ResponseTime || metrics.p99ResponseTime * 1.2
+      p999ResponseTime: metrics.p999ResponseTime || metrics.p99ResponseTime * 1.2,
+      // 添加数据传输相关的默认值
+      dataReceived: metrics.dataReceived || 0,
+      dataSent: metrics.dataSent || 0,
+      minResponseTime: metrics.minResponseTime || 0,
+      maxResponseTime: metrics.maxResponseTime || 0
     } : {
       totalRequests: 0,
       successfulRequests: 0,
@@ -311,7 +432,11 @@ const StressTest: React.FC = () => {
       averageResponseTime: 0,
       currentTPS: 0,
       peakTPS: 0,
-      errorBreakdown: {}
+      errorBreakdown: {},
+      dataReceived: 0,
+      dataSent: 0,
+      minResponseTime: 0,
+      maxResponseTime: 0
     },
     testResult: result ? {
       id: currentTestId || 'current',
@@ -900,142 +1025,200 @@ const StressTest: React.FC = () => {
   return (
     <TestPageLayout className="space-y-3 dark-page-scrollbar compact-layout"
     >
-      {/* 页面标题和控制 */}
-      <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-3">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-          <div>
-            <h2 className="text-xl font-bold text-white">压力测试</h2>
-            <p className="text-gray-300 text-sm">测试网站在高并发访问下的性能表现</p>
-          </div>
+      {/* 美化的页面标题和控制 */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-gray-800/90 via-gray-800/80 to-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-2xl">
+        {/* 背景装饰 */}
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-purple-600/5 to-cyan-600/5"></div>
+        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-full blur-2xl"></div>
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-500/10 to-transparent rounded-full blur-xl"></div>
 
-          {/* 模式切换 - 只在压力测试标签页显示 */}
-          <div className="flex items-center space-x-2">
-            {activeTab === 'test' && (
-              <div className="flex items-center bg-gray-700/50 rounded-md p-0.5">
-                <button
-                  type="button"
-                  onClick={() => setIsAdvancedMode(false)}
-                  className={`px-2 py-1 text-xs font-medium rounded transition-all ${!isAdvancedMode
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-gray-300 hover:text-white'
-                    }`}
-                >
-                  简化模式
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsAdvancedMode(true)}
-                  className={`px-2 py-1 text-xs font-medium rounded transition-all ${isAdvancedMode
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-gray-300 hover:text-white'
-                    }`}
-                >
-                  高级模式
-                </button>
+        {/* 内容区域 */}
+        <div className="relative p-6">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            {/* 标题区域 */}
+            <div className="flex items-center space-x-4">
+              {/* 图标装饰 */}
+              <div className="relative">
+                <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <Zap className="w-8 h-8 text-white" />
+                </div>
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-gray-800 animate-pulse"></div>
               </div>
-            )}
 
-            {/* 测试状态和控制按钮 */}
+              {/* 标题文字 */}
+              <div>
+                <div className="flex items-center space-x-3">
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
+                    压力测试
+                  </h2>
+                  <div className="flex items-center space-x-1">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                    <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse [animation-delay:0.2s]"></div>
+                    <div className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse [animation-delay:0.4s]"></div>
+                  </div>
+                </div>
+                <p className="text-gray-300 text-sm mt-1 flex items-center space-x-2">
+                  <TrendingUp className="w-4 h-4 text-blue-400" />
+                  <span>测试网站在高并发访问下的性能表现</span>
+                </p>
+
+                {/* 状态指示器 */}
+                <div className="flex items-center space-x-4 mt-2">
+                  <div className="flex items-center space-x-2 text-xs">
+                    <div className={`w-2 h-2 rounded-full ${testStatus === 'running' ? 'bg-green-500 animate-pulse' :
+                      testStatus === 'completed' ? 'bg-blue-500' :
+                        testStatus === 'failed' ? 'bg-red-500' :
+                          'bg-gray-500'
+                      }`}></div>
+                    <span className="text-gray-400">
+                      {testStatus === 'running' ? '测试进行中' :
+                        testStatus === 'completed' ? '测试完成' :
+                          testStatus === 'failed' ? '测试失败' :
+                            '等待开始'}
+                    </span>
+                  </div>
+
+                  {testConfig.url && (
+                    <div className="flex items-center space-x-2 text-xs">
+                      <div className="w-2 h-2 bg-cyan-500 rounded-full"></div>
+                      <span className="text-gray-400 truncate max-w-48">
+                        目标: {testConfig.url}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* 模式切换 - 只在压力测试标签页显示 */}
             <div className="flex items-center space-x-2">
-              {/* 标签页切换 */}
-              <div className="flex items-center bg-gray-700/50 rounded-md p-0.5">
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('test')}
-                  className={`px-2 py-1 text-xs rounded transition-colors ${activeTab === 'test'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
-                    }`}
-                >
-                  压力测试
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('history')}
-                  className={`px-2 py-1 text-xs rounded transition-colors ${activeTab === 'history'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
-                    }`}
-                >
-                  测试历史
-                </button>
+              {activeTab === 'test' && (
+                <div className="flex items-center bg-gray-700/50 rounded-md p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setIsAdvancedMode(false)}
+                    className={`px-2 py-1 text-xs font-medium rounded transition-all ${!isAdvancedMode
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'text-gray-300 hover:text-white'
+                      }`}
+                  >
+                    简化模式
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsAdvancedMode(true)}
+                    className={`px-2 py-1 text-xs font-medium rounded transition-all ${isAdvancedMode
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'text-gray-300 hover:text-white'
+                      }`}
+                  >
+                    高级模式
+                  </button>
+                </div>
+              )}
+
+              {/* 测试状态和控制按钮 */}
+              <div className="flex items-center space-x-2">
+                {/* 标签页切换 */}
+                <div className="flex items-center bg-gray-700/50 rounded-md p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('test')}
+                    className={`px-2 py-1 text-xs rounded transition-colors ${activeTab === 'test'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
+                      }`}
+                  >
+                    压力测试
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('history')}
+                    className={`px-2 py-1 text-xs rounded transition-colors ${activeTab === 'history'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
+                      }`}
+                  >
+                    测试历史
+                  </button>
+                </div>
+                {testStatus === 'idle' ? (
+                  <button
+                    type="button"
+                    onClick={handleStartTest}
+                    disabled={!testConfig.url}
+                    className={`flex items-center space-x-1.5 px-4 py-2 rounded-md text-sm font-medium transition-all ${!testConfig.url
+                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                      : isAuthenticated
+                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                        : 'bg-yellow-600 hover:bg-yellow-700 text-white'
+                      }`}
+                  >
+                    {isAuthenticated ? <Play className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                    <span>{isAuthenticated ? '开始测试' : '需要登录'}</span>
+                  </button>
+                ) : testStatus === 'starting' ? (
+                  <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-blue-500/20 border border-blue-500/30 rounded-md">
+                    <Loader className="w-3 h-3 animate-spin text-blue-400" />
+                    <span className="text-xs text-blue-300 font-medium">正在启动...</span>
+                  </div>
+                ) : testStatus === 'running' || isRunning ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-md">
+                      <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                      <span className="text-xs text-green-300 font-medium">测试进行中</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleStopTest}
+                      className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors flex items-center space-x-1.5 text-xs"
+                    >
+                      <Square className="w-3 h-3" />
+                      <span>停止</span>
+                    </button>
+                  </div>
+                ) : testStatus === 'completed' ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
+                      <CheckCircle className="w-4 h-4 text-green-400" />
+                      <span className="text-sm text-green-300 font-medium">测试完成</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTestStatus('idle');
+                        setTestProgress('');
+                        setTestData([]);
+                        setMetrics(null);
+                        setResult(null);
+                      }}
+                      className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center space-x-2"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      <span>重新测试</span>
+                    </button>
+                  </div>
+                ) : testStatus === 'failed' ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg">
+                      <XCircle className="w-4 h-4 text-red-400" />
+                      <span className="text-sm text-red-300 font-medium">测试失败</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTestStatus('idle');
+                        setTestProgress('');
+                        setError('');
+                      }}
+                      className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center space-x-2"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      <span>重试</span>
+                    </button>
+                  </div>
+                ) : null}
               </div>
-              {testStatus === 'idle' ? (
-                <button
-                  type="button"
-                  onClick={handleStartTest}
-                  disabled={!testConfig.url}
-                  className={`flex items-center space-x-1.5 px-4 py-2 rounded-md text-sm font-medium transition-all ${!testConfig.url
-                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                    : isAuthenticated
-                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                      : 'bg-yellow-600 hover:bg-yellow-700 text-white'
-                    }`}
-                >
-                  {isAuthenticated ? <Play className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-                  <span>{isAuthenticated ? '开始测试' : '需要登录'}</span>
-                </button>
-              ) : testStatus === 'starting' ? (
-                <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-blue-500/20 border border-blue-500/30 rounded-md">
-                  <Loader className="w-3 h-3 animate-spin text-blue-400" />
-                  <span className="text-xs text-blue-300 font-medium">正在启动...</span>
-                </div>
-              ) : testStatus === 'running' || isRunning ? (
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-md">
-                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-xs text-green-300 font-medium">测试进行中</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleStopTest}
-                    className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors flex items-center space-x-1.5 text-xs"
-                  >
-                    <Square className="w-3 h-3" />
-                    <span>停止</span>
-                  </button>
-                </div>
-              ) : testStatus === 'completed' ? (
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
-                    <CheckCircle className="w-4 h-4 text-green-400" />
-                    <span className="text-sm text-green-300 font-medium">测试完成</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTestStatus('idle');
-                      setTestProgress('');
-                      setTestData([]);
-                      setMetrics(null);
-                      setResult(null);
-                    }}
-                    className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center space-x-2"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                    <span>重新测试</span>
-                  </button>
-                </div>
-              ) : testStatus === 'failed' ? (
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center space-x-2 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg">
-                    <XCircle className="w-4 h-4 text-red-400" />
-                    <span className="text-sm text-red-300 font-medium">测试失败</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTestStatus('idle');
-                      setTestProgress('');
-                      setError('');
-                    }}
-                    className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center space-x-2"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                    <span>重试</span>
-                  </button>
-                </div>
-              ) : null}
             </div>
           </div>
         </div>
@@ -1631,15 +1814,25 @@ const StressTest: React.FC = () => {
                     </button>
                   </div>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={handleStartTest}
-                    disabled={!testConfig.url.trim()}
-                    className="w-full flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed transition-all duration-200"
-                  >
-                    <Play className="w-5 h-5" />
-                    <span>开始压力测试</span>
-                  </button>
+                  <div className="space-y-3">
+                    <button
+                      type="button"
+                      onClick={handleStartTest}
+                      disabled={!testConfig.url.trim()}
+                      className="w-full flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed transition-all duration-200"
+                    >
+                      <Play className="w-5 h-5" />
+                      <span>开始压力测试</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={runDemoStressTest}
+                      className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-200 text-sm"
+                    >
+                      <Zap className="w-4 h-4" />
+                      <span>运行演示测试</span>
+                    </button>
+                  </div>
                 )}
 
                 {/* 快速模板 */}
@@ -1746,8 +1939,8 @@ const StressTest: React.FC = () => {
                 </div>
               </div>
 
-              {/* 性能指标卡片 */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* 主要性能指标卡片 */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <div className="text-center p-4 bg-blue-500/20 rounded-lg border border-blue-500/30">
                   <div className="text-2xl font-bold text-blue-400">
                     {result?.metrics?.totalRequests || metrics?.totalRequests || 0}
@@ -1774,6 +1967,228 @@ const StressTest: React.FC = () => {
                     })()}%
                   </div>
                   <div className="text-sm text-red-300">错误率</div>
+                </div>
+              </div>
+
+              {/* 详细性能指标 */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                {/* 响应时间分析 */}
+                <div className="bg-gray-700/50 rounded-lg p-4">
+                  <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
+                    <Clock className="w-5 h-5 mr-2 text-orange-400" />
+                    响应时间分析
+                  </h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-green-400">
+                        {result?.metrics?.p50ResponseTime || metrics?.p50ResponseTime || 0}ms
+                      </div>
+                      <div className="text-xs text-gray-400">P50响应时间</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-red-400">
+                        {result?.metrics?.p90ResponseTime || metrics?.p90ResponseTime || 0}ms
+                      </div>
+                      <div className="text-xs text-gray-400">P90响应时间</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-blue-400">
+                        {result?.metrics?.p95ResponseTime || metrics?.p95ResponseTime || 0}ms
+                      </div>
+                      <div className="text-xs text-gray-400">P95响应时间</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-purple-400">
+                        {result?.metrics?.p99ResponseTime || metrics?.p99ResponseTime || 0}ms
+                      </div>
+                      <div className="text-xs text-gray-400">P99响应时间</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 吞吐量分析 */}
+                <div className="bg-gray-700/50 rounded-lg p-4">
+                  <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
+                    <BarChart3 className="w-5 h-5 mr-2 text-blue-400" />
+                    吞吐量分析
+                  </h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-blue-400">
+                        {result?.metrics?.currentTPS || metrics?.currentTPS || 0}
+                      </div>
+                      <div className="text-xs text-gray-400">当前TPS</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-green-400">
+                        {result?.metrics?.peakTPS || metrics?.peakTPS || 0}
+                      </div>
+                      <div className="text-xs text-gray-400">峰值TPS</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-yellow-400">
+                        {result?.metrics?.throughput || metrics?.throughput || 0}
+                      </div>
+                      <div className="text-xs text-gray-400">总吞吐量</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-indigo-400">
+                        {result?.metrics?.requestsPerSecond || metrics?.requestsPerSecond || 0}
+                      </div>
+                      <div className="text-xs text-gray-400">请求/秒</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 错误分析 */}
+              {(result?.metrics?.errorBreakdown || metrics?.errorBreakdown) &&
+                Object.keys(result?.metrics?.errorBreakdown || metrics?.errorBreakdown || {}).length > 0 && (
+                  <div className="bg-gray-700/50 rounded-lg p-4 mb-6">
+                    <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
+                      <AlertTriangle className="w-5 h-5 mr-2 text-red-400" />
+                      错误类型分析
+                    </h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                      {Object.entries(result?.metrics?.errorBreakdown || metrics?.errorBreakdown || {}).map(([errorType, count]) => (
+                        <div key={errorType} className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-center">
+                          <div className="text-lg font-bold text-red-400">{String(count)}</div>
+                          <div className="text-xs text-red-300">{errorType}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+              {/* 数据传输分析 */}
+              {(result?.metrics?.dataReceived || metrics?.dataReceived || result?.metrics?.dataSent || metrics?.dataSent) && (
+                <div className="bg-gray-700/50 rounded-lg p-4 mb-6">
+                  <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
+                    <Download className="w-5 h-5 mr-2 text-teal-400" />
+                    数据传输分析
+                  </h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-teal-400">
+                        {(() => {
+                          const bytes = result?.metrics?.dataReceived || metrics?.dataReceived || 0;
+                          if (bytes > 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
+                          if (bytes > 1024) return `${(bytes / 1024).toFixed(1)}KB`;
+                          return `${bytes}B`;
+                        })()}
+                      </div>
+                      <div className="text-xs text-gray-400">接收数据量</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-teal-400">
+                        {(() => {
+                          const bytes = result?.metrics?.dataSent || metrics?.dataSent || 0;
+                          if (bytes > 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
+                          if (bytes > 1024) return `${(bytes / 1024).toFixed(1)}KB`;
+                          return `${bytes}B`;
+                        })()}
+                      </div>
+                      <div className="text-xs text-gray-400">发送数据量</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-teal-400">
+                        {(() => {
+                          const received = result?.metrics?.dataReceived || metrics?.dataReceived || 0;
+                          const sent = result?.metrics?.dataSent || metrics?.dataSent || 0;
+                          const total = received + sent;
+                          if (total > 1024 * 1024) return `${(total / (1024 * 1024)).toFixed(1)}MB`;
+                          if (total > 1024) return `${(total / 1024).toFixed(1)}KB`;
+                          return `${total}B`;
+                        })()}
+                      </div>
+                      <div className="text-xs text-gray-400">总数据量</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-teal-400">
+                        {(() => {
+                          const received = result?.metrics?.dataReceived || metrics?.dataReceived || 0;
+                          const totalRequests = result?.metrics?.totalRequests || metrics?.totalRequests || 1;
+                          const avgPerRequest = received / totalRequests;
+                          if (avgPerRequest > 1024) return `${(avgPerRequest / 1024).toFixed(1)}KB`;
+                          return `${avgPerRequest.toFixed(0)}B`;
+                        })()}
+                      </div>
+                      <div className="text-xs text-gray-400">平均响应大小</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 测试配置信息 */}
+              <div className="bg-gray-700/50 rounded-lg p-4 mb-6">
+                <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
+                  <Users className="w-5 h-5 mr-2 text-cyan-400" />
+                  测试配置
+                </h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-cyan-400">{testConfig.users}</div>
+                    <div className="text-xs text-gray-400">并发用户数</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-cyan-400">{testConfig.duration}s</div>
+                    <div className="text-xs text-gray-400">测试时长</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-cyan-400">{testConfig.rampUp}s</div>
+                    <div className="text-xs text-gray-400">加压时间</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-cyan-400">{testConfig.testType}</div>
+                    <div className="text-xs text-gray-400">测试类型</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 性能评估 */}
+              <div className="bg-gray-700/50 rounded-lg p-4">
+                <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
+                  <CheckCircle className="w-5 h-5 mr-2 text-green-400" />
+                  性能评估
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                    <div className="text-2xl font-bold text-green-400">
+                      {(() => {
+                        const successRate = result?.metrics?.totalRequests ?
+                          ((result.metrics.successfulRequests / result.metrics.totalRequests) * 100) :
+                          metrics?.totalRequests ?
+                            ((metrics.successfulRequests / metrics.totalRequests) * 100) : 0;
+                        return successRate.toFixed(1);
+                      })()}%
+                    </div>
+                    <div className="text-sm text-green-300">成功率</div>
+                  </div>
+                  <div className="text-center p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-400">
+                      {(() => {
+                        const avgResponseTime = result?.metrics?.averageResponseTime || metrics?.averageResponseTime || 0;
+                        if (avgResponseTime < 200) return 'A+';
+                        if (avgResponseTime < 500) return 'A';
+                        if (avgResponseTime < 1000) return 'B';
+                        if (avgResponseTime < 2000) return 'C';
+                        return 'D';
+                      })()}
+                    </div>
+                    <div className="text-sm text-blue-300">响应时间等级</div>
+                  </div>
+                  <div className="text-center p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                    <div className="text-2xl font-bold text-purple-400">
+                      {(() => {
+                        const tps = result?.metrics?.currentTPS || metrics?.currentTPS || 0;
+                        if (tps > 100) return '优秀';
+                        if (tps > 50) return '良好';
+                        if (tps > 20) return '一般';
+                        return '较差';
+                      })()}
+                    </div>
+                    <div className="text-sm text-purple-300">吞吐量评级</div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1951,7 +2366,26 @@ const StressTest: React.FC = () => {
         </>
       ) : activeTab === 'history' ? (
         /* 压力测试历史 */
-        <EnhancedStressTestHistory />
+        <div className="space-y-6">
+          <EnhancedStressTestHistory />
+
+          {/* 测试记录管理提示 */}
+          {currentRecord && (
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                  <FileText className="w-4 h-4 text-blue-400" />
+                </div>
+                <div>
+                  <h4 className="text-blue-400 font-medium">当前测试记录</h4>
+                  <p className="text-gray-300 text-sm">
+                    正在跟踪测试: {currentRecord.testName} - {currentRecord.status}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       ) : null}
 
       {/* 登录提示组件 */}

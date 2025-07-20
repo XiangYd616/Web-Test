@@ -22,6 +22,7 @@ import {
   Zap
 } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { debugApiResponse, debugTimeDisplay } from '../../utils/debugTimeDisplay';
 
 interface TestHistoryItem {
   id: string;
@@ -31,6 +32,8 @@ interface TestHistoryItem {
   createdAt?: string;
   startTime?: string;
   endTime?: string;
+  savedAt?: string;
+  completedAt?: string;
   duration?: number;
   config?: {
     users?: number;
@@ -45,6 +48,8 @@ interface TestHistoryItem {
       failedRequests?: number;
       averageResponseTime?: number;
       throughput?: number;
+      requestsPerSecond?: number;
+      rps?: number;
       errorRate?: number;
       p95ResponseTime?: number;
       p99ResponseTime?: number;
@@ -83,11 +88,58 @@ const EnhancedStressTestHistory: React.FC<EnhancedStressTestHistoryProps> = ({ c
       });
       const data = await response.json();
 
+      // 使用调试工具分析 API 响应
+      debugApiResponse(data);
+
       if (data.success && data.data && Array.isArray(data.data.tests)) {
-        setHistory(data.data.tests);
+        console.log('✅ 找到测试数据数组:', data.data.tests.length, '条记录');
+
+        // 处理数据格式，确保兼容性
+        const processedTests = data.data.tests.map((test: any) => {
+          const processed = {
+            ...test,
+            // 确保时间字段存在 - 优先使用后端返回的字段名
+            timestamp: test.timestamp || test.createdAt || test.created_at || test.startTime || test.start_time,
+            createdAt: test.createdAt || test.created_at || test.timestamp || test.startTime || test.start_time,
+            startTime: test.startTime || test.start_time || test.timestamp || test.createdAt || test.created_at,
+            savedAt: test.savedAt || test.createdAt || test.created_at || test.timestamp,
+            completedAt: test.completedAt || test.endTime || test.end_time,
+            // 确保结果字段存在
+            results: test.results || {
+              metrics: test.metrics || {}
+            }
+          };
+
+          console.log('🔧 数据处理调试 - ID:', test.id);
+          console.log('  - 原始数据时间字段:', {
+            timestamp: test.timestamp,
+            createdAt: test.createdAt,
+            created_at: test.created_at,
+            startTime: test.startTime,
+            start_time: test.start_time,
+            endTime: test.endTime,
+            end_time: test.end_time
+          });
+          console.log('  - 处理后时间字段:', {
+            timestamp: processed.timestamp,
+            createdAt: processed.createdAt,
+            startTime: processed.startTime,
+            savedAt: processed.savedAt,
+            completedAt: processed.completedAt
+          });
+
+          // 调试每个测试项的时间字段
+          debugTimeDisplay(processed, processed.id);
+
+          return processed;
+        });
+
+        setHistory(processedTests);
       } else if (data.success && Array.isArray(data.data)) {
+        console.log('✅ 直接数组格式:', data.data.length, '条记录');
         setHistory(data.data);
       } else {
+        console.warn('⚠️ 无有效数据或数据格式错误:', data);
         setHistory([]);
       }
     } catch (error) {
@@ -144,13 +196,38 @@ const EnhancedStressTestHistory: React.FC<EnhancedStressTestHistoryProps> = ({ c
 
   // 格式化时间
   const formatTime = (timestamp?: string) => {
-    if (!timestamp) return 'N/A';
+    if (!timestamp) {
+      console.warn('formatTime: 时间戳为空');
+      return 'N/A';
+    }
+
+    // 验证时间戳格式
     const date = new Date(timestamp);
+    if (isNaN(date.getTime())) {
+      console.warn('formatTime: 无效的时间戳格式:', timestamp);
+      return '无效时间';
+    }
+
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
+
+    // 如果时间差异过大（超过1年），可能是数据问题
+    if (Math.abs(diffDays) > 365) {
+      console.warn('formatTime: 时间差异过大:', { timestamp, diffDays });
+      return date.toLocaleDateString('zh-CN');
+    }
+
+    // 未来时间处理
+    if (diffMs < 0) {
+      const futureMins = Math.abs(diffMins);
+      if (futureMins < 60) return `${futureMins}分钟后`;
+      const futureHours = Math.abs(diffHours);
+      if (futureHours < 24) return `${futureHours}小时后`;
+      return date.toLocaleDateString('zh-CN');
+    }
 
     if (diffMins < 1) return '刚刚';
     if (diffMins < 60) return `${diffMins}分钟前`;
@@ -398,6 +475,123 @@ const EnhancedStressTestHistory: React.FC<EnhancedStressTestHistoryProps> = ({ c
               <RefreshCw className="w-4 h-4 mr-2" />
               刷新
             </button>
+
+            {/* 调试按钮 - 仅在开发环境显示 */}
+            {process.env.NODE_ENV === 'development' && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    // 生成测试数据
+                    import('../../utils/generateTestData').then(({ quickGenerateTestData }) => {
+                      const testData = quickGenerateTestData({
+                        count: 10,
+                        timeRange: 'week',
+                        includeRunning: true,
+                        includeFailed: true
+                      });
+                      console.log('🧪 生成测试数据:', testData);
+
+                      // 模拟 API 响应格式
+                      const mockApiResponse = {
+                        success: true,
+                        data: {
+                          tests: testData,
+                          pagination: {
+                            page: 1,
+                            limit: 10,
+                            total: testData.length,
+                            totalPages: Math.ceil(testData.length / 10)
+                          }
+                        }
+                      };
+
+                      // 使用调试工具分析
+                      debugApiResponse(mockApiResponse);
+
+                      // 直接设置到历史记录中进行测试
+                      setHistory(testData as any);
+                    });
+                  }}
+                  className="flex items-center px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+                >
+                  🧪 生成测试数据
+                </button>
+
+                <button
+                  type="button"
+                  onClick={async () => {
+                    console.log('🔍 直接测试 API 请求...');
+                    try {
+                      const response = await fetch('/api/test/history?type=stress&limit=5', {
+                        headers: {
+                          ...(localStorage.getItem('auth_token') ? {
+                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                          } : {})
+                        }
+                      });
+                      const data = await response.json();
+                      console.log('📡 API 响应状态:', response.status);
+                      console.log('📡 API 响应数据:', data);
+                      debugApiResponse(data);
+                    } catch (error) {
+                      console.error('❌ API 请求失败:', error);
+                    }
+                  }}
+                  className="flex items-center px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm"
+                >
+                  🔍 测试API
+                </button>
+
+                <button
+                  type="button"
+                  onClick={async () => {
+                    console.log('🔍 调试原始数据库数据...');
+                    try {
+                      const response = await fetch('/api/test/debug-history', {
+                        headers: {
+                          ...(localStorage.getItem('auth_token') ? {
+                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                          } : {})
+                        }
+                      });
+                      const data = await response.json();
+                      console.log('🗃️ 原始数据库数据:', data);
+
+                      if (data.success && data.data) {
+                        console.log('📊 原始记录:', data.data.rawRecords);
+                        console.log('🔧 格式化记录:', data.data.formattedRecords);
+
+                        // 分析时间字段
+                        data.data.rawRecords.forEach((record: any, index: number) => {
+                          console.group(`📝 记录 ${index + 1}: ${record.test_name}`);
+                          console.log('原始时间字段:', {
+                            created_at: record.created_at,
+                            start_time: record.start_time,
+                            end_time: record.end_time,
+                            updated_at: record.updated_at
+                          });
+
+                          const formatted = data.data.formattedRecords[index];
+                          console.log('格式化时间字段:', {
+                            timestamp: formatted.timestamp,
+                            createdAt: formatted.createdAt,
+                            startTime: formatted.startTime,
+                            savedAt: formatted.savedAt
+                          });
+                          console.groupEnd();
+                        });
+                      }
+                    } catch (error) {
+                      console.error('❌ 调试请求失败:', error);
+                    }
+                  }}
+                  className="flex items-center px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+                >
+                  🗃️ 调试数据库
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -419,6 +613,8 @@ const EnhancedStressTestHistory: React.FC<EnhancedStressTestHistoryProps> = ({ c
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
+            aria-label="过滤测试状态"
+            title="选择要显示的测试状态"
             className="px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">所有状态</option>
@@ -432,6 +628,8 @@ const EnhancedStressTestHistory: React.FC<EnhancedStressTestHistoryProps> = ({ c
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
+            aria-label="选择排序方式"
+            title="选择排序依据"
             className="px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="timestamp">按时间排序</option>
@@ -442,7 +640,10 @@ const EnhancedStressTestHistory: React.FC<EnhancedStressTestHistoryProps> = ({ c
 
           {/* 排序顺序 */}
           <button
+            type="button"
             onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+            title={sortOrder === 'asc' ? '切换为降序排列' : '切换为升序排列'}
+            aria-label={sortOrder === 'asc' ? '当前升序，点击切换为降序' : '当前降序，点击切换为升序'}
             className="flex items-center justify-center px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white hover:bg-gray-600/50 transition-colors"
           >
             {sortOrder === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
@@ -519,6 +720,7 @@ const EnhancedStressTestHistory: React.FC<EnhancedStressTestHistoryProps> = ({ c
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <button
+                    type="button"
                     onClick={() => setCurrentPage(1)}
                     disabled={currentPage === 1}
                     className="px-3 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -526,6 +728,7 @@ const EnhancedStressTestHistory: React.FC<EnhancedStressTestHistoryProps> = ({ c
                     首页
                   </button>
                   <button
+                    type="button"
                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                     disabled={currentPage === 1}
                     className="px-3 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -540,6 +743,7 @@ const EnhancedStressTestHistory: React.FC<EnhancedStressTestHistoryProps> = ({ c
                     return (
                       <button
                         key={pageNum}
+                        type="button"
                         onClick={() => setCurrentPage(pageNum)}
                         className={`px-3 py-2 rounded-lg ${currentPage === pageNum
                           ? 'bg-blue-600 text-white'
@@ -554,6 +758,7 @@ const EnhancedStressTestHistory: React.FC<EnhancedStressTestHistoryProps> = ({ c
 
                 <div className="flex items-center gap-2">
                   <button
+                    type="button"
                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                     disabled={currentPage === totalPages}
                     className="px-3 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -561,6 +766,7 @@ const EnhancedStressTestHistory: React.FC<EnhancedStressTestHistoryProps> = ({ c
                     下一页
                   </button>
                   <button
+                    type="button"
                     onClick={() => setCurrentPage(totalPages)}
                     disabled={currentPage === totalPages}
                     className="px-3 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -620,6 +826,8 @@ const TestHistoryCard: React.FC<TestHistoryCardProps> = ({
               type="checkbox"
               checked={isSelected}
               onChange={onToggleSelected}
+              aria-label={`选择测试记录 ${item.url}`}
+              title={`选择测试记录 ${item.url}`}
               className="mt-1 rounded border-gray-600 bg-gray-700 text-blue-600 focus:ring-blue-500"
             />
 
@@ -635,7 +843,31 @@ const TestHistoryCard: React.FC<TestHistoryCardProps> = ({
                   </span>
                 </div>
                 <span className="text-xs text-gray-400">
-                  {formatTime(item.timestamp || item.createdAt)}
+                  {(() => {
+                    // 尝试多个时间字段，包括原始字段名
+                    const itemAny = item as any;
+                    const timeValue = item.timestamp || item.createdAt || item.startTime || item.savedAt ||
+                      itemAny.created_at || itemAny.start_time || itemAny.updated_at;
+
+                    console.log('🕐 时间字段调试 - ID:', item.id);
+                    console.log('  - timestamp:', item.timestamp);
+                    console.log('  - createdAt:', item.createdAt);
+                    console.log('  - startTime:', item.startTime);
+                    console.log('  - savedAt:', item.savedAt);
+                    console.log('  - created_at:', itemAny.created_at);
+                    console.log('  - start_time:', itemAny.start_time);
+                    console.log('  - updated_at:', itemAny.updated_at);
+                    console.log('  - 选择的时间:', timeValue);
+
+                    if (timeValue) {
+                      const formatted = formatTime(timeValue);
+                      console.log('  - 格式化结果:', formatted);
+                      return formatted;
+                    } else {
+                      console.log('  - ❌ 没有找到有效的时间字段');
+                      return '无时间信息';
+                    }
+                  })()}
                 </span>
               </div>
 
@@ -684,7 +916,15 @@ const TestHistoryCard: React.FC<TestHistoryCardProps> = ({
                     <span className="text-xs text-gray-400">吞吐量</span>
                   </div>
                   <div className="text-lg font-semibold text-white">
-                    {metrics?.throughput ? `${metrics.throughput} req/s` : 'N/A'}
+                    {(() => {
+                      // 尝试多种可能的吞吐量字段
+                      const throughput = metrics?.throughput ||
+                        metrics?.requestsPerSecond ||
+                        metrics?.rps ||
+                        (metrics?.totalRequests && config?.duration ?
+                          Math.round(metrics.totalRequests / config.duration) : null);
+                      return throughput ? `${throughput} req/s` : 'N/A';
+                    })()}
                   </div>
                 </div>
               </div>
@@ -705,6 +945,8 @@ const TestHistoryCard: React.FC<TestHistoryCardProps> = ({
             <div className="relative group">
               <button
                 type="button"
+                title="更多操作"
+                aria-label="显示更多操作选项"
                 className="p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-700/50"
               >
                 <MoreHorizontal className="w-5 h-5" />
@@ -817,13 +1059,29 @@ const TestHistoryCard: React.FC<TestHistoryCardProps> = ({
                 <div>
                   <span className="text-gray-400">开始时间:</span>
                   <span className="text-white ml-2">
-                    {item.startTime ? new Date(item.startTime).toLocaleString('zh-CN') : 'N/A'}
+                    {(() => {
+                      const startTime = item.startTime || item.timestamp || item.createdAt;
+                      return startTime ? new Date(startTime).toLocaleString('zh-CN') : 'N/A';
+                    })()}
                   </span>
                 </div>
                 <div>
                   <span className="text-gray-400">结束时间:</span>
                   <span className="text-white ml-2">
-                    {item.endTime ? new Date(item.endTime).toLocaleString('zh-CN') : 'N/A'}
+                    {(() => {
+                      const endTime = item.endTime || item.completedAt;
+                      if (endTime) {
+                        return new Date(endTime).toLocaleString('zh-CN');
+                      }
+                      // 如果有开始时间和持续时间，计算结束时间
+                      const startTime = item.startTime || item.timestamp || item.createdAt;
+                      const duration = config?.duration || item.duration;
+                      if (startTime && duration) {
+                        const calculatedEndTime = new Date(new Date(startTime).getTime() + duration * 1000);
+                        return calculatedEndTime.toLocaleString('zh-CN');
+                      }
+                      return 'N/A';
+                    })()}
                   </span>
                 </div>
               </div>

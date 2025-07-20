@@ -510,8 +510,8 @@ async function handleTestHistory(req, res) {
   try {
     // 获取测试记录 - 使用正确的表名和字段
     const testsResult = await query(
-      `SELECT id, test_name, test_type, url, status, start_time,
-              duration, config, results, created_at
+      `SELECT id, test_name, test_type, url, status, start_time, end_time,
+              duration, config, results, created_at, updated_at, overall_score
        FROM test_history
        ${whereClause}
        ORDER BY ${sortField} ${sortDirection}
@@ -549,8 +549,162 @@ async function handleTestHistory(req, res) {
 }
 
 /**
+ * 创建测试记录
+ * POST /api/test/history
+ */
+router.post('/history', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const testData = {
+      ...req.body,
+      userId: req.user.id
+    };
+
+    const result = await testHistoryService.createTestRecord(testData);
+
+    res.json(result);
+  } catch (error) {
+    console.error('创建测试记录失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '创建测试记录失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 更新测试记录
+ * PUT /api/test/history/:recordId
+ */
+router.put('/history/:recordId', authMiddleware, asyncHandler(async (req, res) => {
+  const { recordId } = req.params;
+
+  try {
+    // 验证记录所有权
+    const existingRecord = await query(
+      'SELECT id FROM test_history WHERE id = $1 AND user_id = $2',
+      [recordId, req.user.id]
+    );
+
+    if (existingRecord.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: '记录不存在或无权限访问'
+      });
+    }
+
+    const result = await testHistoryService.updateTestRecord(recordId, req.body);
+
+    res.json(result);
+  } catch (error) {
+    console.error('更新测试记录失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '更新测试记录失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 获取单个测试记录
+ * GET /api/test/history/:recordId
+ */
+router.get('/history/:recordId', authMiddleware, asyncHandler(async (req, res) => {
+  const { recordId } = req.params;
+
+  try {
+    const result = await query(
+      `SELECT id, test_name, test_type, url, status, start_time, end_time,
+              duration, config, results, created_at, updated_at
+       FROM test_history
+       WHERE id = $1 AND user_id = $2`,
+      [recordId, req.user.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: '记录不存在或无权限访问'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: testHistoryService.formatTestRecord(result.rows[0])
+    });
+  } catch (error) {
+    console.error('获取测试记录失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '获取测试记录失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 调试路由 - 检查原始数据库数据
+ * GET /api/test/debug-history
+ */
+router.get('/debug-history', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    console.log('🔍 调试：检查原始数据库数据');
+
+    // 获取原始数据库记录
+    const rawResult = await query(`
+      SELECT id, test_name, test_type, url, status, start_time, end_time,
+             duration, config, results, created_at, updated_at, overall_score
+      FROM test_history
+      WHERE test_type = 'stress'
+      ORDER BY created_at DESC
+      LIMIT 3
+    `);
+
+    console.log('📊 原始数据库记录:', rawResult.rows);
+
+    // 格式化记录
+    const formattedRecords = rawResult.rows.map(record => {
+      console.log('🔧 格式化记录:', record.id);
+      console.log('  - 原始 created_at:', record.created_at);
+      console.log('  - 原始 start_time:', record.start_time);
+      console.log('  - 原始 end_time:', record.end_time);
+
+      const formatted = testHistoryService.formatTestRecord(record);
+      console.log('  - 格式化后:', {
+        id: formatted.id,
+        timestamp: formatted.timestamp,
+        createdAt: formatted.createdAt,
+        startTime: formatted.startTime,
+        savedAt: formatted.savedAt
+      });
+
+      return formatted;
+    });
+
+    res.json({
+      success: true,
+      debug: true,
+      data: {
+        rawRecords: rawResult.rows,
+        formattedRecords: formattedRecords,
+        recordCount: rawResult.rows.length
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ 调试路由错误:', error);
+    res.status(500).json({
+      success: false,
+      message: '调试失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
  * 删除测试历史记录
- * DELETE /api/test-history/:recordId
+ * DELETE /api/test/history/:recordId
  */
 router.delete('/history/:recordId', authMiddleware, asyncHandler(async (req, res) => {
   const { recordId } = req.params;
