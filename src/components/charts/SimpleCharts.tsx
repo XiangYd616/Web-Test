@@ -60,7 +60,7 @@ export const AdvancedStressTestChart: React.FC<AdvancedStressTestChartProps> = (
   interactive = true,
   realTime = false
 }) => {
-  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['responseTime', 'throughput', 'errors']);
+  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['responseTime', 'throughput', 'errorRate']);
   const [chartType, setChartType] = useState<'line' | 'area' | 'composed'>('line');
   const [timeRange, setTimeRange] = useState<'all' | '1m' | '5m' | '15m'>('all');
 
@@ -171,6 +171,17 @@ export const AdvancedStressTestChart: React.FC<AdvancedStressTestChartProps> = (
                 name="吞吐量 (req/s)"
               />
             )}
+            {selectedMetrics.includes('errorRate') && (
+              <Area
+                type="monotone"
+                dataKey="errorRate"
+                stackId="3"
+                stroke={currentColors.errors}
+                fill={currentColors.errors}
+                fillOpacity={0.4}
+                name="错误率 (%)"
+              />
+            )}
           </AreaChart>
         );
 
@@ -205,15 +216,16 @@ export const AdvancedStressTestChart: React.FC<AdvancedStressTestChartProps> = (
                 opacity={0.8}
               />
             )}
-            {selectedMetrics.includes('errors') && (
+            {selectedMetrics.includes('errorRate') && (
               <Line
                 yAxisId="right"
                 type="monotone"
-                dataKey="errors"
+                dataKey="errorRate"
                 stroke={currentColors.errors}
                 strokeWidth={2}
-                name="错误数"
+                name="错误率 (%)"
                 dot={false}
+                strokeDasharray="4 2"
               />
             )}
           </ComposedChart>
@@ -249,14 +261,15 @@ export const AdvancedStressTestChart: React.FC<AdvancedStressTestChartProps> = (
                 dot={false}
               />
             )}
-            {selectedMetrics.includes('errors') && (
+            {selectedMetrics.includes('errorRate') && (
               <Line
                 type="monotone"
-                dataKey="errors"
+                dataKey="errorRate"
                 stroke={currentColors.errors}
                 strokeWidth={2}
-                name="错误数"
+                name="错误率 (%)"
                 dot={false}
+                strokeDasharray="4 2"
               />
             )}
             {showAdvancedMetrics && selectedMetrics.includes('p95ResponseTime') && (
@@ -1332,7 +1345,7 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
   dataPointDensity = 'medium',
   testPhases = []
 }) => {
-  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['responseTime', 'throughput', 'activeUsers']);
+  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['responseTime', 'throughput', 'activeUsers', 'errorRate']);
   const [zoomDomain, setZoomDomain] = useState<{ startIndex?: number, endIndex?: number }>({});
   const [showErrorBreakdown, setShowErrorBreakdown] = useState(false);
 

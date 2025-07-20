@@ -121,7 +121,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
   currentMetrics
 }) => {
   // 状态管理
-  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['responseTime', 'throughput', 'activeUsers']);
+  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['responseTime', 'throughput', 'activeUsers', 'errorRate']);
   const [chartType, setChartType] = useState<'realtime' | 'results' | 'comparison' | 'distribution'>('realtime');
   const [zoomDomain, setZoomDomain] = useState<{ left?: number, right?: number }>({});
   const [showErrorBreakdown, setShowErrorBreakdown] = useState(false);
@@ -281,6 +281,20 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
           name="活跃用户数"
           strokeDasharray="8 4"
           strokeOpacity={0.9}
+        />
+      )}
+
+      {selectedMetrics.includes('errorRate') && (
+        <Line
+          yAxisId="right"
+          type="monotone"
+          dataKey="errorRate"
+          stroke="#DC2626"
+          strokeWidth={2}
+          dot={false}
+          name="错误率 (%)"
+          strokeDasharray="4 2"
+          strokeOpacity={0.8}
         />
       )}
     </ComposedChart>

@@ -35,10 +35,10 @@ class RealK6Engine {
   async install() {
     try {
       console.log('🔧 Installing k6...');
-      
+
       const platform = os.platform();
       let installCommand;
-      
+
       if (platform === 'win32') {
         // Windows: 使用chocolatey或直接下载
         installCommand = ['choco', ['install', 'k6']];
@@ -51,7 +51,7 @@ class RealK6Engine {
       }
 
       const result = await this.executeCommand(installCommand[0], installCommand[1]);
-      
+
       if (result.success) {
         console.log('✅ k6 installed successfully');
         this.isAvailable = true;
@@ -115,7 +115,7 @@ class RealK6Engine {
    */
   async generateK6Script(config) {
     const { url, testType, thresholds } = config;
-    
+
     const script = `
 import http from 'k6/http';
 import { check, sleep } from 'k6';
@@ -163,7 +163,7 @@ ${this.getTestTypeSetup(testType)}
     const tempDir = os.tmpdir();
     const scriptPath = path.join(tempDir, `k6-test-${Date.now()}.js`);
     await fs.writeFile(scriptPath, script);
-    
+
     return scriptPath;
   }
 
@@ -268,40 +268,111 @@ export function setup() {
       // 从stdout解析结果
       const lines = result.stdout.split('\n');
       const summaryData = {};
-      
+
       // 解析关键指标
       for (const line of lines) {
+        // 解析响应时间指标
         if (line.includes('http_req_duration')) {
-          const match = line.match(/avg=([0-9.]+)ms.*p\(95\)=([0-9.]+)ms/);
-          if (match) {
-            summaryData.avgResponseTime = parseFloat(match[1]);
-            summaryData.p95ResponseTime = parseFloat(match[2]);
-          }
+          const avgMatch = line.match(/avg=([0-9.]+)ms/);
+          const minMatch = line.match(/min=([0-9.]+)ms/);
+          const maxMatch = line.match(/max=([0-9.]+)ms/);
+          const p50Match = line.match(/p\(50\)=([0-9.]+)ms/);
+          const p90Match = line.match(/p\(90\)=([0-9.]+)ms/);
+          const p95Match = line.match(/p\(95\)=([0-9.]+)ms/);
+          const p99Match = line.match(/p\(99\)=([0-9.]+)ms/);
+
+          if (avgMatch) summaryData.avgResponseTime = parseFloat(avgMatch[1]);
+          if (minMatch) summaryData.minResponseTime = parseFloat(minMatch[1]);
+          if (maxMatch) summaryData.maxResponseTime = parseFloat(maxMatch[1]);
+          if (p50Match) summaryData.p50ResponseTime = parseFloat(p50Match[1]);
+          if (p90Match) summaryData.p90ResponseTime = parseFloat(p90Match[1]);
+          if (p95Match) summaryData.p95ResponseTime = parseFloat(p95Match[1]);
+          if (p99Match) summaryData.p99ResponseTime = parseFloat(p99Match[1]);
         }
-        
+
+        // 解析请求总数和TPS
         if (line.includes('http_reqs')) {
-          const match = line.match(/([0-9]+)/);
-          if (match) {
-            summaryData.totalRequests = parseInt(match[1]);
-          }
+          const totalMatch = line.match(/([0-9]+)/);
+          const rateMatch = line.match(/([0-9.]+)\/s/);
+          if (totalMatch) summaryData.totalRequests = parseInt(totalMatch[1]);
+          if (rateMatch) summaryData.requestsPerSecond = parseFloat(rateMatch[1]);
         }
-        
+
+        // 解析错误率
         if (line.includes('http_req_failed')) {
           const match = line.match(/([0-9.]+)%/);
           if (match) {
             summaryData.errorRate = parseFloat(match[1]);
           }
         }
+
+        // 解析虚拟用户数
+        if (line.includes('vus')) {
+          const match = line.match(/([0-9]+)/);
+          if (match) {
+            summaryData.maxVirtualUsers = parseInt(match[1]);
+          }
+        }
+
+        // 解析数据传输量
+        if (line.includes('data_received')) {
+          const match = line.match(/([0-9.]+)\s*([KMGT]?B)/);
+          if (match) {
+            const value = parseFloat(match[1]);
+            const unit = match[2];
+            let bytes = value;
+            if (unit.includes('K')) bytes *= 1024;
+            else if (unit.includes('M')) bytes *= 1024 * 1024;
+            else if (unit.includes('G')) bytes *= 1024 * 1024 * 1024;
+            summaryData.dataReceived = bytes;
+          }
+        }
+
+        if (line.includes('data_sent')) {
+          const match = line.match(/([0-9.]+)\s*([KMGT]?B)/);
+          if (match) {
+            const value = parseFloat(match[1]);
+            const unit = match[2];
+            let bytes = value;
+            if (unit.includes('K')) bytes *= 1024;
+            else if (unit.includes('M')) bytes *= 1024 * 1024;
+            else if (unit.includes('G')) bytes *= 1024 * 1024 * 1024;
+            summaryData.dataSent = bytes;
+          }
+        }
       }
+
+      // 计算衍生指标
+      const totalRequests = summaryData.totalRequests || 0;
+      const errorRate = summaryData.errorRate || 0;
+      const successfulRequests = Math.round(totalRequests * (1 - errorRate / 100));
+      const failedRequests = totalRequests - successfulRequests;
+      const currentTPS = summaryData.requestsPerSecond || 0;
+      const peakTPS = Math.round(currentTPS * 1.2); // 估算峰值TPS
 
       return {
         success: true,
-        summary: {
-          totalRequests: summaryData.totalRequests || 0,
-          avgResponseTime: summaryData.avgResponseTime || 0,
+        status: 'completed',
+        metrics: {
+          totalRequests,
+          successfulRequests,
+          failedRequests,
+          averageResponseTime: summaryData.avgResponseTime || 0,
+          minResponseTime: summaryData.minResponseTime || 0,
+          maxResponseTime: summaryData.maxResponseTime || 0,
+          p50ResponseTime: summaryData.p50ResponseTime || 0,
+          p90ResponseTime: summaryData.p90ResponseTime || 0,
           p95ResponseTime: summaryData.p95ResponseTime || 0,
-          errorRate: summaryData.errorRate || 0,
-          throughput: summaryData.totalRequests ? (summaryData.totalRequests / 60) : 0
+          p99ResponseTime: summaryData.p99ResponseTime || 0,
+          errorRate: errorRate,
+          currentTPS: currentTPS,
+          peakTPS: peakTPS,
+          requestsPerSecond: currentTPS,
+          throughput: totalRequests,
+          activeUsers: summaryData.maxVirtualUsers || 0,
+          dataReceived: summaryData.dataReceived || 0,
+          dataSent: summaryData.dataSent || 0,
+          errorBreakdown: this.parseErrorBreakdown(result.stdout)
         },
         rawOutput: result.stdout,
         timestamp: new Date().toISOString()
@@ -317,23 +388,51 @@ export function setup() {
   }
 
   /**
+   * 解析错误类型分布
+   */
+  parseErrorBreakdown(stdout) {
+    const errorBreakdown = {};
+    const lines = stdout.split('\n');
+
+    for (const line of lines) {
+      // 查找错误相关的行
+      if (line.includes('ERRO') || line.includes('ERROR') || line.includes('Failed')) {
+        // 简单的错误分类
+        if (line.includes('timeout') || line.includes('Timeout')) {
+          errorBreakdown['TIMEOUT'] = (errorBreakdown['TIMEOUT'] || 0) + 1;
+        } else if (line.includes('connection') || line.includes('Connection')) {
+          errorBreakdown['CONNECTION_ERROR'] = (errorBreakdown['CONNECTION_ERROR'] || 0) + 1;
+        } else if (line.includes('500')) {
+          errorBreakdown['HTTP_500'] = (errorBreakdown['HTTP_500'] || 0) + 1;
+        } else if (line.includes('404')) {
+          errorBreakdown['HTTP_404'] = (errorBreakdown['HTTP_404'] || 0) + 1;
+        } else {
+          errorBreakdown['OTHER_ERROR'] = (errorBreakdown['OTHER_ERROR'] || 0) + 1;
+        }
+      }
+    }
+
+    return errorBreakdown;
+  }
+
+  /**
    * 执行命令
    */
   async executeCommand(command, args) {
     return new Promise((resolve) => {
       const process = spawn(command, args, { stdio: 'pipe' });
-      
+
       let stdout = '';
       let stderr = '';
-      
+
       process.stdout.on('data', (data) => {
         stdout += data.toString();
       });
-      
+
       process.stderr.on('data', (data) => {
         stderr += data.toString();
       });
-      
+
       process.on('close', (code) => {
         resolve({
           success: code === 0,
@@ -342,7 +441,7 @@ export function setup() {
           exitCode: code
         });
       });
-      
+
       process.on('error', (error) => {
         resolve({
           success: false,

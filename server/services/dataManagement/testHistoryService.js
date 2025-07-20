@@ -26,7 +26,7 @@ class TestHistoryService {
   async getTestHistory(userId, queryParams = {}) {
     try {
       const { query } = require('../../config/database');
-      
+
       // 处理查询参数
       const {
         page = 1,
@@ -41,7 +41,7 @@ class TestHistoryService {
       } = queryParams;
 
       const offset = (page - 1) * limit;
-      
+
       // 构建查询条件
       let whereClause = 'WHERE 1=1';
       const params = [];
@@ -144,7 +144,7 @@ class TestHistoryService {
   async getTestById(testId, userId) {
     try {
       const { query } = require('../../config/database');
-      
+
       const result = await query(
         `SELECT * FROM test_history WHERE id = $1 AND user_id = $2`,
         [testId, userId]
@@ -171,7 +171,7 @@ class TestHistoryService {
   async createTestRecord(testData) {
     try {
       const { query } = require('../../config/database');
-      
+
       const {
         testName,
         testType,
@@ -204,16 +204,37 @@ class TestHistoryService {
   /**
    * 更新测试记录
    */
-  async updateTestRecord(testId, userId, updateData) {
+  async updateTestRecord(testId, updateData, userId = null) {
     try {
       const { query } = require('../../config/database');
-      
+
+      // 支持两种调用方式：updateTestRecord(id, data) 或 updateTestRecord(id, userId, data)
+      let actualUpdateData, actualUserId;
+      if (typeof updateData === 'string' && userId !== null) {
+        // 旧的调用方式：updateTestRecord(testId, userId, updateData)
+        actualUserId = updateData;
+        actualUpdateData = userId;
+      } else {
+        // 新的调用方式：updateTestRecord(testId, updateData)
+        actualUpdateData = updateData;
+        actualUserId = userId;
+      }
+
       const {
         status,
         results,
         duration,
-        endTime
-      } = updateData;
+        endTime,
+        testName,
+        url,
+        config,
+        overallScore,
+        error: errorMsg,
+        progress,
+        currentPhase,
+        completedAt,
+        actualDuration
+      } = actualUpdateData;
 
       const updates = [];
       const params = [];
@@ -243,17 +264,53 @@ class TestHistoryService {
         paramIndex++;
       }
 
+      if (testName !== undefined) {
+        updates.push(`test_name = $${paramIndex}`);
+        params.push(testName);
+        paramIndex++;
+      }
+
+      if (url !== undefined) {
+        updates.push(`url = $${paramIndex}`);
+        params.push(url);
+        paramIndex++;
+      }
+
+      if (config !== undefined) {
+        updates.push(`config = $${paramIndex}`);
+        params.push(JSON.stringify(config));
+        paramIndex++;
+      }
+
+      if (overallScore !== undefined) {
+        updates.push(`overall_score = $${paramIndex}`);
+        params.push(overallScore);
+        paramIndex++;
+      }
+
+      // 注意：error_message, completed_at, actual_duration 字段在当前数据库表中不存在
+      // 这些信息可以通过其他字段推导或存储在 results 中
+
       if (updates.length === 0) {
         throw new Error('没有提供更新数据');
       }
 
       updates.push(`updated_at = NOW()`);
-      params.push(testId, userId);
+
+      // 构建WHERE条件
+      let whereClause = `WHERE id = $${paramIndex}`;
+      params.push(testId);
+      paramIndex++;
+
+      if (actualUserId) {
+        whereClause += ` AND user_id = $${paramIndex}`;
+        params.push(actualUserId);
+      }
 
       const result = await query(
-        `UPDATE test_history 
+        `UPDATE test_history
          SET ${updates.join(', ')}
-         WHERE id = $${paramIndex} AND user_id = $${paramIndex + 1}
+         ${whereClause}
          RETURNING *`,
         params
       );
@@ -279,7 +336,7 @@ class TestHistoryService {
   async deleteTestRecord(testId, userId) {
     try {
       const { query } = require('../../config/database');
-      
+
       const result = await query(
         'DELETE FROM test_history WHERE id = $1 AND user_id = $2',
         [testId, userId]
@@ -306,7 +363,7 @@ class TestHistoryService {
   async batchDeleteTestRecords(testIds, userId) {
     try {
       const { query } = require('../../config/database');
-      
+
       const result = await query(
         'DELETE FROM test_history WHERE id = ANY($1) AND user_id = $2',
         [testIds, userId]
@@ -329,7 +386,7 @@ class TestHistoryService {
    */
   formatTestRecord(record) {
     if (!record) return null;
-    
+
     return {
       id: record.id,
       testName: record.test_name,
@@ -342,8 +399,17 @@ class TestHistoryService {
       createdAt: record.created_at,
       updatedAt: record.updated_at,
       userId: record.user_id,
+      overallScore: record.overall_score ? parseFloat(record.overall_score) : null,
       config: this.parseJsonField(record.config),
-      results: this.parseJsonField(record.results)
+      results: this.parseJsonField(record.results),
+      // 添加兼容性字段
+      timestamp: record.created_at || record.start_time,
+      savedAt: record.created_at,
+      // 计算实际持续时间
+      actualDuration: record.end_time && record.start_time ?
+        Math.floor((new Date(record.end_time) - new Date(record.start_time)) / 1000) : null,
+      // 从结束时间推导完成时间
+      completedAt: record.end_time
     };
   }
 
@@ -353,7 +419,7 @@ class TestHistoryService {
   parseJsonField(field) {
     if (!field) return null;
     if (typeof field === 'object') return field;
-    
+
     try {
       return JSON.parse(field);
     } catch (error) {
@@ -368,7 +434,7 @@ class TestHistoryService {
   async getTestTypeStats(userId, timeRange = 30) {
     try {
       const { query } = require('../../config/database');
-      
+
       const result = await query(
         `SELECT 
            test_type,

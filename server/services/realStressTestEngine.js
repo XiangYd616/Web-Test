@@ -380,7 +380,7 @@ class RealStressTestEngine {
         // 更新全局结果（线程安全）
         this.updateGlobalResults(results, responseTime, response.success);
 
-        // 更新实时状态（如果有testId的话）
+        // 更新实时状态并广播数据
         if (results.testId) {
           const testStatus = this.getTestStatus(results.testId);
           if (testStatus) {
@@ -391,6 +391,25 @@ class RealStressTestEngine {
             testStatus.realTimeMetrics.lastRequestSuccess = response.success;
             testStatus.realTimeMetrics.activeRequests = results.metrics.activeUsers;
             this.updateTestStatus(results.testId, testStatus);
+
+            // 广播实时数据点
+            const elapsedTime = (Date.now() - results.startTime) / 1000;
+            const currentThroughput = elapsedTime > 0 ? results.metrics.totalRequests / elapsedTime : 0;
+            const errorRate = results.metrics.totalRequests > 0 ?
+              (results.metrics.failedRequests / results.metrics.totalRequests) * 100 : 0;
+
+            this.broadcastRealTimeData(results.testId, {
+              timestamp: Date.now(),
+              responseTime: responseTime,
+              throughput: Math.round(currentThroughput * 100) / 100,
+              activeUsers: results.metrics.activeUsers,
+              errorRate: Math.round(errorRate * 100) / 100,
+              totalRequests: results.metrics.totalRequests,
+              successfulRequests: results.metrics.successfulRequests,
+              failedRequests: results.metrics.failedRequests,
+              success: response.success,
+              phase: results.currentPhase || 'running'
+            });
           }
         }
 
