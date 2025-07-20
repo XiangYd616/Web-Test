@@ -1482,6 +1482,7 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
                   maxResponseTime: (v: any) => [`${v}ms`, '最大响应时间'],
                   throughput: (v: any) => [`${v} req/s`, '吞吐量'],
                   successRate: (v: any) => [`${v}%`, '成功率'],
+                  errorRate: (v: any) => [`${v}%`, '错误率'],
                   activeUsers: (v: any) => [`${v}`, '活跃用户']
                 };
                 return formatters[name as string] ? formatters[name as string](value) : [value, name];
@@ -1529,6 +1530,18 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
               strokeWidth={2}
               dot={false}
               name="吞吐量"
+            />
+
+            {/* 错误率线 */}
+            <Line
+              yAxisId="right"
+              type="monotone"
+              dataKey="errorRate"
+              stroke="#DC2626"
+              strokeWidth={2}
+              dot={false}
+              name="错误率"
+              strokeDasharray="4 2"
             />
           </ComposedChart>
         </ResponsiveContainer>

@@ -84,6 +84,7 @@ const StressTest: React.FC = () => {
   const [testStatus, setTestStatus] = useState<TestStatusType>('idle');
   const [testProgress, setTestProgress] = useState<string>('');
   const [isRunning, setIsRunning] = useState(false);
+  const [isStopping, setIsStopping] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string>('');
   const [realTimeData, setRealTimeData] = useState<any[]>([]);
@@ -269,11 +270,22 @@ const StressTest: React.FC = () => {
 
         // 如果测试已经完成（同步返回结果）
         if (data.data.status === 'completed') {
-          setResult(data.data);
-          setMetrics(data.data.metrics);
+          // 确保错误率正确计算
+          const processedMetrics = {
+            ...data.data.metrics,
+            errorRate: data.data.metrics?.errorRate ||
+              (data.data.metrics?.totalRequests > 0 ?
+                parseFloat(((data.data.metrics.failedRequests / data.data.metrics.totalRequests) * 100).toFixed(2)) : 0)
+          };
+
+          setResult({ ...data.data, metrics: processedMetrics });
+          setMetrics(processedMetrics);
           setTestStatus('completed');
           setTestProgress('压力测试完成！');
           setIsRunning(false);
+
+          console.log('🔍 Final processed metrics:', processedMetrics);
+          console.log('🔍 Error rate in final result:', processedMetrics.errorRate);
 
           // 处理实时数据
           if (data.data.realTimeData && data.data.realTimeData.length > 0) {
@@ -306,7 +318,11 @@ const StressTest: React.FC = () => {
                 metrics: {
                   ...data.data.metrics,
                   requestsPerSecond: data.data.metrics?.throughput || 0,
-                  rps: data.data.metrics?.throughput || 0
+                  rps: data.data.metrics?.throughput || 0,
+                  // 确保错误率正确传递
+                  errorRate: data.data.metrics?.errorRate ||
+                    (data.data.metrics?.totalRequests > 0 ?
+                      parseFloat(((data.data.metrics.failedRequests / data.data.metrics.totalRequests) * 100).toFixed(2)) : 0)
                 },
                 realTimeData: data.data.realTimeData || []
               }, score);
@@ -351,6 +367,7 @@ const StressTest: React.FC = () => {
   // 渐进式信息披露状态
   const [isAdvancedMode, setIsAdvancedMode] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [hasAutoSelectedTemplate, setHasAutoSelectedTemplate] = useState(false);
 
   // 快速模板配置
   const quickTemplates = [
@@ -360,7 +377,9 @@ const StressTest: React.FC = () => {
       description: '适合小型网站或初次测试',
       icon: '🌱',
       config: { users: 5, duration: 30, testType: 'gradual', rampUp: 5 },
-      recommended: '个人博客、小型企业网站'
+      recommended: '个人博客、小型企业网站',
+      isDefault: false,
+      badge: '入门推荐'
     },
     {
       id: 'medium',
@@ -368,7 +387,9 @@ const StressTest: React.FC = () => {
       description: '适合中型网站的常规测试',
       icon: '⚡',
       config: { users: 20, duration: 60, testType: 'gradual', rampUp: 10 },
-      recommended: '企业网站、电商平台'
+      recommended: '企业网站、电商平台',
+      isDefault: true, // 设为默认模板
+      badge: '最受欢迎'
     },
     {
       id: 'heavy',
@@ -376,7 +397,9 @@ const StressTest: React.FC = () => {
       description: '适合大型网站的压力测试',
       icon: '🚀',
       config: { users: 50, duration: 120, testType: 'gradual', rampUp: 15 },
-      recommended: '大型电商、高流量网站'
+      recommended: '大型电商、高流量网站',
+      isDefault: false,
+      badge: '专业级'
     },
     {
       id: 'spike',
@@ -384,7 +407,9 @@ const StressTest: React.FC = () => {
       description: '模拟突发流量冲击',
       icon: '⚡',
       config: { users: 100, duration: 60, testType: 'spike', rampUp: 5 },
-      recommended: '促销活动、新闻热点'
+      recommended: '促销活动、新闻热点',
+      isDefault: false,
+      badge: '高级'
     }
   ];
 
@@ -401,6 +426,25 @@ const StressTest: React.FC = () => {
       setSelectedTemplate(templateId);
     }
   };
+
+  // 自动选择默认模板（仅在简化模式下且未手动选择时）
+  React.useEffect(() => {
+    if (!isAdvancedMode && !selectedTemplate && !hasAutoSelectedTemplate) {
+      const defaultTemplate = quickTemplates.find(t => t.isDefault);
+      if (defaultTemplate) {
+        applyTemplate(defaultTemplate.id);
+        setHasAutoSelectedTemplate(true);
+        console.log(`🎯 自动选择默认模板: ${defaultTemplate.name}`);
+      }
+    }
+  }, [isAdvancedMode, selectedTemplate, hasAutoSelectedTemplate]);
+
+  // 当切换到高级模式时，重置自动选择状态
+  React.useEffect(() => {
+    if (isAdvancedMode) {
+      setHasAutoSelectedTemplate(false);
+    }
+  }, [isAdvancedMode]);
 
   // 不再生成模拟数据，只使用真实的测试数据
 
@@ -564,31 +608,77 @@ const StressTest: React.FC = () => {
 
             // 确保 metrics 数据正确提取
             if (processedResult && processedResult.metrics) {
-              // 确保TPS字段正确映射
+              // 确保所有关键字段正确映射
               const finalMetrics = {
                 ...processedResult.metrics,
                 currentTPS: processedResult.metrics.throughput ||
                   processedResult.metrics.requestsPerSecond ||
-                  processedResult.metrics.currentTPS || 0
+                  processedResult.metrics.currentTPS || 0,
+                // 确保错误率正确传递
+                errorRate: processedResult.metrics.errorRate ||
+                  (processedResult.metrics.totalRequests > 0 ?
+                    parseFloat(((processedResult.metrics.failedRequests / processedResult.metrics.totalRequests) * 100).toFixed(2)) : 0)
               };
               setMetrics(finalMetrics);
               console.log('📊 Extracted metrics:', finalMetrics);
+              console.log('🔍 Error rate in final metrics:', finalMetrics.errorRate);
             }
 
             // 使用真实的实时数据生成图表数据
             if (testInfo.realTimeData && testInfo.realTimeData.length > 0) {
               console.log('📈 Using real-time data for chart:', testInfo.realTimeData.length, 'data points');
-              const chartData = testInfo.realTimeData.map((point: any) => ({
-                time: new Date(point.timestamp).toLocaleTimeString(),
-                timestamp: point.timestamp,
-                responseTime: point.responseTime,
-                throughput: point.throughput || point.rps || 0, // 使用真实的吞吐量数据
-                errors: point.success ? 0 : 1,
-                users: point.activeUsers,
-                p95ResponseTime: point.responseTime * 1.2,
-                errorRate: point.success ? 0 : 100,
-                phase: point.phase || 'steady'
-              }));
+
+              // 按时间窗口聚合数据来计算正确的错误率
+              const timeWindowMs = 1000; // 1秒时间窗口
+              const aggregatedData = new Map();
+
+              testInfo.realTimeData.forEach((point: any) => {
+                const timeKey = Math.floor(point.timestamp / timeWindowMs) * timeWindowMs;
+                if (!aggregatedData.has(timeKey)) {
+                  aggregatedData.set(timeKey, {
+                    timestamp: timeKey,
+                    responseTimes: [],
+                    successes: 0,
+                    failures: 0,
+                    activeUsers: point.activeUsers,
+                    phase: point.phase || 'steady'
+                  });
+                }
+
+                const window = aggregatedData.get(timeKey);
+                window.responseTimes.push(point.responseTime);
+                if (point.success) {
+                  window.successes++;
+                } else {
+                  window.failures++;
+                }
+                window.activeUsers = Math.max(window.activeUsers, point.activeUsers);
+              });
+
+              const chartData = Array.from(aggregatedData.values())
+                .sort((a, b) => a.timestamp - b.timestamp)
+                .map(window => {
+                  const totalRequests = window.successes + window.failures;
+                  const avgResponseTime = window.responseTimes.length > 0 ?
+                    Math.round(window.responseTimes.reduce((sum: number, time: number) => sum + time, 0) / window.responseTimes.length) : 0;
+                  const errorRate = totalRequests > 0 ? Math.round((window.failures / totalRequests) * 100) : 0;
+
+                  return {
+                    time: new Date(window.timestamp).toLocaleTimeString(),
+                    timestamp: window.timestamp,
+                    responseTime: avgResponseTime,
+                    throughput: totalRequests, // 每秒请求数
+                    errors: window.failures,
+                    users: window.activeUsers,
+                    activeUsers: window.activeUsers, // 添加缺失的字段
+                    p95ResponseTime: avgResponseTime * 1.2,
+                    errorRate: errorRate, // 正确计算的错误率
+                    phase: window.phase,
+                    status: window.failures > 0 ? 500 : 200, // 添加缺失的字段
+                    success: window.failures === 0 // 添加缺失的字段
+                  };
+                });
+
               setTestData(chartData);
               console.log('📊 Chart data generated from real-time data:', chartData.length, 'points');
             } else {
@@ -618,11 +708,24 @@ const StressTest: React.FC = () => {
             setCurrentTestId(null);
             break;
           case 'testCancelled':
-            setBackgroundTestInfo(null);
-            setTestStatus('idle');
-            setTestProgress('');
+            setBackgroundTestInfo(testInfo);
+            setTestProgress('测试已取消');
+            setTestStatus('failed'); // 使用 failed 状态表示取消
             setIsRunning(false);
+            setIsStopping(false);
             setCurrentTestId(null);
+
+            // 如果有结果数据，设置它
+            if (testInfo.result) {
+              setResult({
+                ...testInfo.result,
+                status: 'cancelled',
+                message: '测试已被用户取消'
+              });
+              setMetrics(testInfo.result.metrics || {});
+            }
+
+            console.log('🛑 测试已被取消');
             break;
         }
       }
@@ -909,14 +1012,81 @@ const StressTest: React.FC = () => {
 
 
   const handleStopTest = async () => {
-    if (currentTestId) {
-      backgroundTestManager.cancelTest(currentTestId);
+    if (!currentTestId) {
+      console.warn('没有正在运行的测试ID');
+      return;
+    }
+
+    // 确认对话框
+    const confirmed = window.confirm(
+      '确定要停止当前的压力测试吗？\n\n停止后将无法恢复测试，但会保留已收集的数据。'
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      console.log(`🛑 正在停止压力测试: ${currentTestId}`);
+      setIsStopping(true);
+      setTestProgress('正在停止测试...');
+
+      // 调用后端API停止测试
+      const response = await fetch(`/api/test/stress/stop/${currentTestId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        console.log('✅ 测试已成功停止:', data.message);
+
+        // 设置测试结果为取消状态
+        if (data.data) {
+          setResult({
+            ...data.data,
+            status: 'cancelled',
+            message: '测试已被用户取消'
+          });
+          setMetrics(data.data.metrics || {});
+        }
+
+        setTestStatus('failed'); // 使用 'failed' 状态表示取消
+        setTestProgress('测试已停止');
+        setIsRunning(false);
+        setError('');
+
+        // 取消后台测试管理器中的测试
+        backgroundTestManager.cancelTest(currentTestId);
+        setBackgroundTestInfo(null);
+
+        // 完成测试记录（标记为取消）
+        if (currentRecord) {
+          try {
+            await completeRecord(currentRecord.id, {
+              metrics: data.data?.metrics || {},
+              realTimeData: data.data?.realTimeData || []
+            }, 0); // 取消的测试评分为0
+            console.log('✅ 测试记录已标记为取消');
+          } catch (recordError) {
+            console.warn('更新测试记录失败:', recordError);
+          }
+        }
+
+      } else {
+        console.error('停止测试失败:', data.message);
+        setError(`停止测试失败: ${data.message}`);
+      }
+
+    } catch (error: any) {
+      console.error('停止测试请求失败:', error);
+      setError(`停止测试失败: ${error.message}`);
+    } finally {
+      setIsStopping(false);
       setCurrentTestId(null);
-      setBackgroundTestInfo(null);
-      setTestStatus('idle');
-      setTestProgress('');
-      setIsRunning(false);
-      setError('');
       setCanSwitchPages(true);
     }
   };
@@ -1171,10 +1341,18 @@ const StressTest: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleStopTest}
-                      className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors flex items-center space-x-1.5 text-xs"
+                      disabled={isStopping}
+                      className={`px-3 py-1.5 text-white rounded-md transition-colors flex items-center space-x-1.5 text-xs ${isStopping
+                        ? 'bg-gray-600 cursor-not-allowed'
+                        : 'bg-red-600 hover:bg-red-700'
+                        }`}
                     >
-                      <Square className="w-3 h-3" />
-                      <span>停止</span>
+                      {isStopping ? (
+                        <Loader className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <Square className="w-3 h-3" />
+                      )}
+                      <span>{isStopping ? '停止中...' : '停止'}</span>
                     </button>
                   </div>
                 ) : testStatus === 'completed' ? (
@@ -1344,15 +1522,28 @@ const StressTest: React.FC = () => {
                       : 'border-gray-600 bg-gray-700/30 hover:border-blue-400 hover:bg-blue-500/5'
                       }`}
                   >
-                    <div className="text-center">
+                    {/* 徽章 */}
+                    {template.badge && (
+                      <div className={`absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-medium ${selectedTemplate === template.id
+                        ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                        : 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+                        }`}>
+                        {template.badge}
+                      </div>
+                    )}
+
+                    <div className="text-center mt-6">
                       <div className="text-3xl mb-2">{template.icon}</div>
-                      <h4 className="font-semibold text-white mb-1">{template.name}</h4>
+                      <h4 className="font-semibold text-white mb-1">
+                        {template.name}
+                      </h4>
                       <p className="text-xs text-gray-400 mb-3">{template.description}</p>
                       <div className="text-xs text-blue-300 bg-blue-500/10 rounded-full px-2 py-1">
                         {template.config.users}用户 · {template.config.duration}秒
                       </div>
                       <div className="text-xs text-gray-500 mt-2">{template.recommended}</div>
                     </div>
+
                     {selectedTemplate === template.id && (
                       <div className="absolute top-2 right-2">
                         <CheckCircle className="w-5 h-5 text-blue-400" />
@@ -1807,10 +1998,18 @@ const StressTest: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleStopTest}
-                      className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                      disabled={isStopping}
+                      className={`w-full flex items-center justify-center space-x-2 px-4 py-2 text-white rounded-lg transition-colors ${isStopping
+                        ? 'bg-gray-600 cursor-not-allowed'
+                        : 'bg-red-600 hover:bg-red-700'
+                        }`}
                     >
-                      <Square className="w-4 h-4" />
-                      <span>停止测试</span>
+                      {isStopping ? (
+                        <Loader className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Square className="w-4 h-4" />
+                      )}
+                      <span>{isStopping ? '正在停止测试...' : '停止测试'}</span>
                     </button>
                   </div>
                 ) : (

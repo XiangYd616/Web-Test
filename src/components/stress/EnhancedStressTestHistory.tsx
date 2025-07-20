@@ -22,7 +22,6 @@ import {
   Zap
 } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { debugApiResponse, debugTimeDisplay } from '../../utils/debugTimeDisplay';
 
 interface TestHistoryItem {
   id: string;
@@ -88,11 +87,9 @@ const EnhancedStressTestHistory: React.FC<EnhancedStressTestHistoryProps> = ({ c
       });
       const data = await response.json();
 
-      // 使用调试工具分析 API 响应
-      debugApiResponse(data);
+
 
       if (data.success && data.data && Array.isArray(data.data.tests)) {
-        console.log('✅ 找到测试数据数组:', data.data.tests.length, '条记录');
 
         // 处理数据格式，确保兼容性
         const processedTests = data.data.tests.map((test: any) => {
@@ -110,36 +107,13 @@ const EnhancedStressTestHistory: React.FC<EnhancedStressTestHistoryProps> = ({ c
             }
           };
 
-          console.log('🔧 数据处理调试 - ID:', test.id);
-          console.log('  - 原始数据时间字段:', {
-            timestamp: test.timestamp,
-            createdAt: test.createdAt,
-            created_at: test.created_at,
-            startTime: test.startTime,
-            start_time: test.start_time,
-            endTime: test.endTime,
-            end_time: test.end_time
-          });
-          console.log('  - 处理后时间字段:', {
-            timestamp: processed.timestamp,
-            createdAt: processed.createdAt,
-            startTime: processed.startTime,
-            savedAt: processed.savedAt,
-            completedAt: processed.completedAt
-          });
-
-          // 调试每个测试项的时间字段
-          debugTimeDisplay(processed, processed.id);
-
           return processed;
         });
 
         setHistory(processedTests);
       } else if (data.success && Array.isArray(data.data)) {
-        console.log('✅ 直接数组格式:', data.data.length, '条记录');
         setHistory(data.data);
       } else {
-        console.warn('⚠️ 无有效数据或数据格式错误:', data);
         setHistory([]);
       }
     } catch (error) {
@@ -197,14 +171,12 @@ const EnhancedStressTestHistory: React.FC<EnhancedStressTestHistoryProps> = ({ c
   // 格式化时间
   const formatTime = (timestamp?: string) => {
     if (!timestamp) {
-      console.warn('formatTime: 时间戳为空');
       return 'N/A';
     }
 
     // 验证时间戳格式
     const date = new Date(timestamp);
     if (isNaN(date.getTime())) {
-      console.warn('formatTime: 无效的时间戳格式:', timestamp);
       return '无效时间';
     }
 
@@ -216,7 +188,6 @@ const EnhancedStressTestHistory: React.FC<EnhancedStressTestHistoryProps> = ({ c
 
     // 如果时间差异过大（超过1年），可能是数据问题
     if (Math.abs(diffDays) > 365) {
-      console.warn('formatTime: 时间差异过大:', { timestamp, diffDays });
       return date.toLocaleDateString('zh-CN');
     }
 
@@ -475,123 +446,6 @@ const EnhancedStressTestHistory: React.FC<EnhancedStressTestHistoryProps> = ({ c
               <RefreshCw className="w-4 h-4 mr-2" />
               刷新
             </button>
-
-            {/* 调试按钮 - 仅在开发环境显示 */}
-            {process.env.NODE_ENV === 'development' && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => {
-                    // 生成测试数据
-                    import('../../utils/generateTestData').then(({ quickGenerateTestData }) => {
-                      const testData = quickGenerateTestData({
-                        count: 10,
-                        timeRange: 'week',
-                        includeRunning: true,
-                        includeFailed: true
-                      });
-                      console.log('🧪 生成测试数据:', testData);
-
-                      // 模拟 API 响应格式
-                      const mockApiResponse = {
-                        success: true,
-                        data: {
-                          tests: testData,
-                          pagination: {
-                            page: 1,
-                            limit: 10,
-                            total: testData.length,
-                            totalPages: Math.ceil(testData.length / 10)
-                          }
-                        }
-                      };
-
-                      // 使用调试工具分析
-                      debugApiResponse(mockApiResponse);
-
-                      // 直接设置到历史记录中进行测试
-                      setHistory(testData as any);
-                    });
-                  }}
-                  className="flex items-center px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
-                >
-                  🧪 生成测试数据
-                </button>
-
-                <button
-                  type="button"
-                  onClick={async () => {
-                    console.log('🔍 直接测试 API 请求...');
-                    try {
-                      const response = await fetch('/api/test/history?type=stress&limit=5', {
-                        headers: {
-                          ...(localStorage.getItem('auth_token') ? {
-                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-                          } : {})
-                        }
-                      });
-                      const data = await response.json();
-                      console.log('📡 API 响应状态:', response.status);
-                      console.log('📡 API 响应数据:', data);
-                      debugApiResponse(data);
-                    } catch (error) {
-                      console.error('❌ API 请求失败:', error);
-                    }
-                  }}
-                  className="flex items-center px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm"
-                >
-                  🔍 测试API
-                </button>
-
-                <button
-                  type="button"
-                  onClick={async () => {
-                    console.log('🔍 调试原始数据库数据...');
-                    try {
-                      const response = await fetch('/api/test/debug-history', {
-                        headers: {
-                          ...(localStorage.getItem('auth_token') ? {
-                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-                          } : {})
-                        }
-                      });
-                      const data = await response.json();
-                      console.log('🗃️ 原始数据库数据:', data);
-
-                      if (data.success && data.data) {
-                        console.log('📊 原始记录:', data.data.rawRecords);
-                        console.log('🔧 格式化记录:', data.data.formattedRecords);
-
-                        // 分析时间字段
-                        data.data.rawRecords.forEach((record: any, index: number) => {
-                          console.group(`📝 记录 ${index + 1}: ${record.test_name}`);
-                          console.log('原始时间字段:', {
-                            created_at: record.created_at,
-                            start_time: record.start_time,
-                            end_time: record.end_time,
-                            updated_at: record.updated_at
-                          });
-
-                          const formatted = data.data.formattedRecords[index];
-                          console.log('格式化时间字段:', {
-                            timestamp: formatted.timestamp,
-                            createdAt: formatted.createdAt,
-                            startTime: formatted.startTime,
-                            savedAt: formatted.savedAt
-                          });
-                          console.groupEnd();
-                        });
-                      }
-                    } catch (error) {
-                      console.error('❌ 调试请求失败:', error);
-                    }
-                  }}
-                  className="flex items-center px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
-                >
-                  🗃️ 调试数据库
-                </button>
-              </>
-            )}
           </div>
         </div>
 
@@ -709,7 +563,6 @@ const EnhancedStressTestHistory: React.FC<EnhancedStressTestHistoryProps> = ({ c
                 formatTime={formatTime}
                 getStatusStyle={getStatusStyle}
                 getStatusIcon={getStatusIcon}
-                viewMode={viewMode}
               />
             ))}
           </div>
@@ -795,7 +648,6 @@ interface TestHistoryCardProps {
   formatTime: (timestamp?: string) => string;
   getStatusStyle: (status: string) => string;
   getStatusIcon: (status: string) => React.ReactNode;
-  viewMode: 'grid' | 'list';
 }
 
 const TestHistoryCard: React.FC<TestHistoryCardProps> = ({
@@ -808,8 +660,7 @@ const TestHistoryCard: React.FC<TestHistoryCardProps> = ({
   onDelete,
   formatTime,
   getStatusStyle,
-  getStatusIcon,
-  viewMode
+  getStatusIcon
 }) => {
   const metrics = item.results?.metrics;
   const config = item.config;
@@ -843,31 +694,7 @@ const TestHistoryCard: React.FC<TestHistoryCardProps> = ({
                   </span>
                 </div>
                 <span className="text-xs text-gray-400">
-                  {(() => {
-                    // 尝试多个时间字段，包括原始字段名
-                    const itemAny = item as any;
-                    const timeValue = item.timestamp || item.createdAt || item.startTime || item.savedAt ||
-                      itemAny.created_at || itemAny.start_time || itemAny.updated_at;
-
-                    console.log('🕐 时间字段调试 - ID:', item.id);
-                    console.log('  - timestamp:', item.timestamp);
-                    console.log('  - createdAt:', item.createdAt);
-                    console.log('  - startTime:', item.startTime);
-                    console.log('  - savedAt:', item.savedAt);
-                    console.log('  - created_at:', itemAny.created_at);
-                    console.log('  - start_time:', itemAny.start_time);
-                    console.log('  - updated_at:', itemAny.updated_at);
-                    console.log('  - 选择的时间:', timeValue);
-
-                    if (timeValue) {
-                      const formatted = formatTime(timeValue);
-                      console.log('  - 格式化结果:', formatted);
-                      return formatted;
-                    } else {
-                      console.log('  - ❌ 没有找到有效的时间字段');
-                      return '无时间信息';
-                    }
-                  })()}
+                  {formatTime(item.timestamp || item.createdAt || item.startTime || item.savedAt)}
                 </span>
               </div>
 

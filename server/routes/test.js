@@ -643,64 +643,7 @@ router.get('/history/:recordId', authMiddleware, asyncHandler(async (req, res) =
   }
 }));
 
-/**
- * 调试路由 - 检查原始数据库数据
- * GET /api/test/debug-history
- */
-router.get('/debug-history', authMiddleware, asyncHandler(async (req, res) => {
-  try {
-    console.log('🔍 调试：检查原始数据库数据');
 
-    // 获取原始数据库记录
-    const rawResult = await query(`
-      SELECT id, test_name, test_type, url, status, start_time, end_time,
-             duration, config, results, created_at, updated_at, overall_score
-      FROM test_history
-      WHERE test_type = 'stress'
-      ORDER BY created_at DESC
-      LIMIT 3
-    `);
-
-    console.log('📊 原始数据库记录:', rawResult.rows);
-
-    // 格式化记录
-    const formattedRecords = rawResult.rows.map(record => {
-      console.log('🔧 格式化记录:', record.id);
-      console.log('  - 原始 created_at:', record.created_at);
-      console.log('  - 原始 start_time:', record.start_time);
-      console.log('  - 原始 end_time:', record.end_time);
-
-      const formatted = testHistoryService.formatTestRecord(record);
-      console.log('  - 格式化后:', {
-        id: formatted.id,
-        timestamp: formatted.timestamp,
-        createdAt: formatted.createdAt,
-        startTime: formatted.startTime,
-        savedAt: formatted.savedAt
-      });
-
-      return formatted;
-    });
-
-    res.json({
-      success: true,
-      debug: true,
-      data: {
-        rawRecords: rawResult.rows,
-        formattedRecords: formattedRecords,
-        recordCount: rawResult.rows.length
-      }
-    });
-
-  } catch (error) {
-    console.error('❌ 调试路由错误:', error);
-    res.status(500).json({
-      success: false,
-      message: '调试失败',
-      error: error.message
-    });
-  }
-}));
 
 /**
  * 删除测试历史记录
@@ -1013,6 +956,40 @@ router.get('/stress/status/:testId', optionalAuth, asyncHandler(async (req, res)
 }));
 
 /**
+ * 停止压力测试
+ * POST /api/test/stress/stop/:testId
+ */
+router.post('/stress/stop/:testId', optionalAuth, asyncHandler(async (req, res) => {
+  const { testId } = req.params;
+
+  try {
+    console.log(`🛑 收到停止压力测试请求: ${testId}`);
+
+    const result = await realStressTestEngine.stopStressTest(testId);
+
+    if (result.success) {
+      res.json({
+        success: true,
+        message: result.message,
+        data: result.data
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: result.message
+      });
+    }
+  } catch (error) {
+    console.error('停止压力测试失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '停止测试失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
  * 压力测试
  * POST /api/test/stress
  */
@@ -1083,6 +1060,10 @@ router.post('/stress', optionalAuth, testRateLimiter, validateURLMiddleware(), a
       testType: responseData.testType || 'stress'
     };
 
+    // 调试错误率传递
+    console.log('🔍 Error rate in responseData.metrics:', responseData.metrics?.errorRate);
+    console.log('🔍 Failed requests:', responseData.metrics?.failedRequests);
+    console.log('🔍 Total requests:', responseData.metrics?.totalRequests);
     console.log('🔍 API returning stress test result:', JSON.stringify(response, null, 2));
     res.json(response);
   } catch (error) {

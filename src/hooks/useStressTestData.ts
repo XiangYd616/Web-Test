@@ -320,6 +320,9 @@ export const calculateMetrics = (data: StressTestDataPoint[]): StressTestMetrics
     errorBreakdown[errorType] = (errorBreakdown[errorType] || 0) + 1;
   });
 
+  // 计算错误率
+  const errorRate = totalRequests > 0 ? (failedRequests / totalRequests) * 100 : 0;
+
   return {
     totalRequests,
     successfulRequests,
@@ -327,6 +330,7 @@ export const calculateMetrics = (data: StressTestDataPoint[]): StressTestMetrics
     averageResponseTime: isNaN(averageResponseTime) ? 0 : averageResponseTime,
     currentTPS: isNaN(currentTPS) ? 0 : currentTPS,
     peakTPS: isNaN(peakTPS) ? 0 : peakTPS,
+    errorRate: parseFloat(errorRate.toFixed(2)), // 添加错误率
     errorBreakdown,
     p50ResponseTime: getPercentile(50),
     p75ResponseTime: getPercentile(75),
