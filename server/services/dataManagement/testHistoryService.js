@@ -166,7 +166,7 @@ class TestHistoryService {
   }
 
   /**
-   * 创建测试记录
+   * 创建测试记录 - 增强版本，支持完整的生命周期管理
    */
   async createTestRecord(testData) {
     try {
@@ -179,21 +179,71 @@ class TestHistoryService {
         status = 'pending',
         userId,
         config = {},
-        results = null
+        results = null,
+        tags = [],
+        environment = 'production'
       } = testData;
 
-      const result = await query(
-        `INSERT INTO test_history 
-         (test_name, test_type, url, status, user_id, config, results, created_at, start_time)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
-         RETURNING *`,
-        [testName, testType, url, status, userId, JSON.stringify(config), results ? JSON.stringify(results) : null]
-      );
+      // 开始事务
+      const client = await query.connect();
 
-      return {
-        success: true,
-        data: this.formatTestRecord(result.rows[0])
-      };
+      try {
+        await client.query('BEGIN');
+
+        // 创建测试记录
+        const testResult = await client.query(
+          `INSERT INTO test_history
+           (test_name, test_type, url, status, user_id, config, results, tags, environment, created_at, start_time)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), CASE WHEN $4 = 'running' THEN NOW() ELSE NULL END)
+           RETURNING *`,
+          [
+            testName,
+            testType,
+            url,
+            status,
+            userId,
+            JSON.stringify(config),
+            results ? JSON.stringify(results) : null,
+            tags,
+            environment
+          ]
+        );
+
+        const testRecord = testResult.rows[0];
+
+        // 记录初始状态
+        await client.query(
+          `INSERT INTO test_status_logs
+           (test_history_id, from_status, to_status, reason, change_source)
+           VALUES ($1, NULL, $2, $3, 'system')`,
+          [testRecord.id, status, `Test record created with status: ${status}`]
+        );
+
+        // 如果是运行状态，记录初始进度
+        if (status === 'running') {
+          await client.query(
+            `INSERT INTO test_progress_logs
+             (test_history_id, progress_percentage, current_phase, current_step)
+             VALUES ($1, 0, 'initialization', 'Test started')`,
+            [testRecord.id]
+          );
+        }
+
+        await client.query('COMMIT');
+
+        this.logger.info(`测试记录创建成功: ${testRecord.id}`);
+
+        return {
+          success: true,
+          data: this.formatTestRecord(testRecord)
+        };
+
+      } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+      } finally {
+        client.release();
+      }
 
     } catch (error) {
       this.logger.error('创建测试记录失败:', error);
@@ -331,6 +381,199 @@ class TestHistoryService {
   }
 
   /**
+   * 开始测试 - 将状态更新为运行中
+   */
+  async startTest(testId, userId = null) {
+    try {
+      const { query } = require('../../config/database');
+
+      const client = await query.connect();
+
+      try {
+        await client.query('BEGIN');
+
+        // 更新测试状态为运行中
+        const result = await client.query(
+          `UPDATE test_history
+           SET status = 'running', start_time = NOW(), updated_at = NOW()
+           WHERE id = $1 ${userId ? 'AND user_id = $2' : ''}
+           RETURNING *`,
+          userId ? [testId, userId] : [testId]
+        );
+
+        if (result.rows.length === 0) {
+          throw new Error('测试记录不存在或无权限操作');
+        }
+
+        const testRecord = result.rows[0];
+
+        // 记录进度
+        await client.query(
+          `INSERT INTO test_progress_logs
+           (test_history_id, progress_percentage, current_phase, current_step)
+           VALUES ($1, 0, 'initialization', 'Test execution started')`,
+          [testId]
+        );
+
+        await client.query('COMMIT');
+
+        this.logger.info(`测试开始: ${testId}`);
+
+        return {
+          success: true,
+          data: this.formatTestRecord(testRecord)
+        };
+
+      } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+      } finally {
+        client.release();
+      }
+
+    } catch (error) {
+      this.logger.error('开始测试失败:', error);
+      throw new Error(`开始测试失败: ${error.message}`);
+    }
+  }
+
+  /**
+   * 更新测试进度
+   */
+  async updateTestProgress(testId, progressData) {
+    try {
+      const { query } = require('../../config/database');
+
+      const {
+        progress = 0,
+        phase = 'running',
+        step = '',
+        currentUsers = 0,
+        currentTps = 0,
+        currentResponseTime = 0,
+        currentErrorRate = 0,
+        metrics = {}
+      } = progressData;
+
+      // 记录进度日志
+      await query(
+        `INSERT INTO test_progress_logs
+         (test_history_id, progress_percentage, current_phase, current_step,
+          current_users, current_tps, current_response_time, current_error_rate, metrics)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+        [testId, progress, phase, step, currentUsers, currentTps, currentResponseTime, currentErrorRate, JSON.stringify(metrics)]
+      );
+
+      this.logger.debug(`测试进度更新: ${testId} - ${progress}%`);
+
+      return {
+        success: true,
+        message: '进度更新成功'
+      };
+
+    } catch (error) {
+      this.logger.error('更新测试进度失败:', error);
+      throw new Error(`更新测试进度失败: ${error.message}`);
+    }
+  }
+
+  /**
+   * 完成测试
+   */
+  async completeTest(testId, finalResults, userId = null) {
+    try {
+      const { query } = require('../../config/database');
+
+      const client = await query.connect();
+
+      try {
+        await client.query('BEGIN');
+
+        const {
+          results = {},
+          overallScore = null,
+          performanceGrade = null,
+          totalRequests = 0,
+          successfulRequests = 0,
+          failedRequests = 0,
+          averageResponseTime = 0,
+          peakTps = 0,
+          errorRate = 0,
+          realTimeData = []
+        } = finalResults;
+
+        // 计算持续时间
+        const durationResult = await client.query(
+          `SELECT EXTRACT(EPOCH FROM (NOW() - start_time))::integer as duration
+           FROM test_history WHERE id = $1`,
+          [testId]
+        );
+
+        const duration = durationResult.rows[0]?.duration || 0;
+
+        // 更新测试记录
+        const updateResult = await client.query(
+          `UPDATE test_history
+           SET status = 'completed',
+               end_time = NOW(),
+               duration = $2,
+               results = $3,
+               overall_score = $4,
+               performance_grade = $5,
+               total_requests = $6,
+               successful_requests = $7,
+               failed_requests = $8,
+               average_response_time = $9,
+               peak_tps = $10,
+               error_rate = $11,
+               real_time_data = $12,
+               updated_at = NOW()
+           WHERE id = $1 ${userId ? 'AND user_id = $13' : ''}
+           RETURNING *`,
+          userId ?
+            [testId, duration, JSON.stringify(results), overallScore, performanceGrade,
+              totalRequests, successfulRequests, failedRequests, averageResponseTime,
+              peakTps, errorRate, JSON.stringify(realTimeData), userId] :
+            [testId, duration, JSON.stringify(results), overallScore, performanceGrade,
+              totalRequests, successfulRequests, failedRequests, averageResponseTime,
+              peakTps, errorRate, JSON.stringify(realTimeData)]
+        );
+
+        if (updateResult.rows.length === 0) {
+          throw new Error('测试记录不存在或无权限操作');
+        }
+
+        // 记录最终进度
+        await client.query(
+          `INSERT INTO test_progress_logs
+           (test_history_id, progress_percentage, current_phase, current_step)
+           VALUES ($1, 100, 'completed', 'Test completed successfully')`,
+          [testId]
+        );
+
+        await client.query('COMMIT');
+
+        this.logger.info(`测试完成: ${testId}`);
+
+        return {
+          success: true,
+          data: this.formatTestRecord(updateResult.rows[0])
+        };
+
+      } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+      } finally {
+        client.release();
+      }
+
+    } catch (error) {
+      this.logger.error('完成测试失败:', error);
+      throw new Error(`完成测试失败: ${error.message}`);
+    }
+  }
+
+  /**
    * 删除测试记录
    */
   async deleteTestRecord(testId, userId) {
@@ -354,6 +597,178 @@ class TestHistoryService {
     } catch (error) {
       this.logger.error('删除测试记录失败:', error);
       throw new Error(`删除测试记录失败: ${error.message}`);
+    }
+  }
+
+  /**
+   * 测试失败
+   */
+  async failTest(testId, errorMessage, errorDetails = {}, userId = null) {
+    try {
+      const { query } = require('../../config/database');
+
+      const client = await query.connect();
+
+      try {
+        await client.query('BEGIN');
+
+        // 计算持续时间
+        const durationResult = await client.query(
+          `SELECT EXTRACT(EPOCH FROM (NOW() - start_time))::integer as duration
+           FROM test_history WHERE id = $1`,
+          [testId]
+        );
+
+        const duration = durationResult.rows[0]?.duration || 0;
+
+        // 更新测试记录
+        const updateResult = await client.query(
+          `UPDATE test_history
+           SET status = 'failed',
+               end_time = NOW(),
+               duration = $2,
+               error_message = $3,
+               error_details = $4,
+               updated_at = NOW()
+           WHERE id = $1 ${userId ? 'AND user_id = $5' : ''}
+           RETURNING *`,
+          userId ?
+            [testId, duration, errorMessage, JSON.stringify(errorDetails), userId] :
+            [testId, duration, errorMessage, JSON.stringify(errorDetails)]
+        );
+
+        if (updateResult.rows.length === 0) {
+          throw new Error('测试记录不存在或无权限操作');
+        }
+
+        // 记录失败进度
+        await client.query(
+          `INSERT INTO test_progress_logs
+           (test_history_id, progress_percentage, current_phase, current_step)
+           VALUES ($1, -1, 'failed', $2)`,
+          [testId, `Test failed: ${errorMessage}`]
+        );
+
+        await client.query('COMMIT');
+
+        this.logger.warn(`测试失败: ${testId} - ${errorMessage}`);
+
+        return {
+          success: true,
+          data: this.formatTestRecord(updateResult.rows[0])
+        };
+
+      } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+      } finally {
+        client.release();
+      }
+
+    } catch (error) {
+      this.logger.error('标记测试失败失败:', error);
+      throw new Error(`标记测试失败失败: ${error.message}`);
+    }
+  }
+
+  /**
+   * 取消测试
+   */
+  async cancelTest(testId, reason = '用户取消', userId = null) {
+    try {
+      const { query } = require('../../config/database');
+
+      const client = await query.connect();
+
+      try {
+        await client.query('BEGIN');
+
+        // 计算持续时间
+        const durationResult = await client.query(
+          `SELECT EXTRACT(EPOCH FROM (NOW() - start_time))::integer as duration
+           FROM test_history WHERE id = $1`,
+          [testId]
+        );
+
+        const duration = durationResult.rows[0]?.duration || 0;
+
+        // 更新测试记录
+        const updateResult = await client.query(
+          `UPDATE test_history
+           SET status = 'cancelled',
+               end_time = NOW(),
+               duration = $2,
+               error_message = $3,
+               updated_at = NOW()
+           WHERE id = $1 ${userId ? 'AND user_id = $4' : ''}
+           RETURNING *`,
+          userId ? [testId, duration, reason, userId] : [testId, duration, reason]
+        );
+
+        if (updateResult.rows.length === 0) {
+          throw new Error('测试记录不存在或无权限操作');
+        }
+
+        // 记录取消进度
+        await client.query(
+          `INSERT INTO test_progress_logs
+           (test_history_id, progress_percentage, current_phase, current_step)
+           VALUES ($1, -1, 'cancelled', $2)`,
+          [testId, reason]
+        );
+
+        await client.query('COMMIT');
+
+        this.logger.info(`测试取消: ${testId} - ${reason}`);
+
+        return {
+          success: true,
+          data: this.formatTestRecord(updateResult.rows[0])
+        };
+
+      } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+      } finally {
+        client.release();
+      }
+
+    } catch (error) {
+      this.logger.error('取消测试失败:', error);
+      throw new Error(`取消测试失败: ${error.message}`);
+    }
+  }
+
+  /**
+   * 获取测试进度历史
+   */
+  async getTestProgress(testId, userId = null) {
+    try {
+      const { query } = require('../../config/database');
+
+      const whereClause = userId ?
+        'WHERE tpl.test_history_id = $1 AND th.user_id = $2' :
+        'WHERE tpl.test_history_id = $1';
+
+      const params = userId ? [testId, userId] : [testId];
+
+      const result = await query(
+        `SELECT tpl.*, th.test_name, th.status as test_status
+         FROM test_progress_logs tpl
+         JOIN test_history th ON th.id = tpl.test_history_id
+         ${whereClause}
+         ORDER BY tpl.recorded_at ASC`,
+        params
+      );
+
+      return {
+        success: true,
+        data: result.rows
+      };
+
+    } catch (error) {
+      this.logger.error('获取测试进度失败:', error);
+      throw new Error(`获取测试进度失败: ${error.message}`);
     }
   }
 
@@ -382,7 +797,7 @@ class TestHistoryService {
   }
 
   /**
-   * 格式化测试记录
+   * 格式化测试记录 - 增强版本
    */
   formatTestRecord(record) {
     if (!record) return null;
@@ -399,17 +814,51 @@ class TestHistoryService {
       createdAt: record.created_at,
       updatedAt: record.updated_at,
       userId: record.user_id,
+
+      // 性能评分
       overallScore: record.overall_score ? parseFloat(record.overall_score) : null,
+      performanceGrade: record.performance_grade,
+
+      // 配置和结果
       config: this.parseJsonField(record.config),
       results: this.parseJsonField(record.results),
+
+      // 错误信息
+      errorMessage: record.error_message,
+      errorDetails: this.parseJsonField(record.error_details),
+
+      // 统计信息
+      totalRequests: record.total_requests ? parseInt(record.total_requests) : 0,
+      successfulRequests: record.successful_requests ? parseInt(record.successful_requests) : 0,
+      failedRequests: record.failed_requests ? parseInt(record.failed_requests) : 0,
+      averageResponseTime: record.average_response_time ? parseFloat(record.average_response_time) : 0,
+      peakTps: record.peak_tps ? parseFloat(record.peak_tps) : 0,
+      errorRate: record.error_rate ? parseFloat(record.error_rate) : 0,
+
+      // 实时数据
+      realTimeData: this.parseJsonField(record.real_time_data) || [],
+
+      // 标签和环境
+      tags: record.tags || [],
+      environment: record.environment || 'production',
+
+      // 报告相关
+      reportGenerated: record.report_generated || false,
+      reportPath: record.report_path,
+
       // 添加兼容性字段
       timestamp: record.created_at || record.start_time,
       savedAt: record.created_at,
+
       // 计算实际持续时间
       actualDuration: record.end_time && record.start_time ?
         Math.floor((new Date(record.end_time) - new Date(record.start_time)) / 1000) : null,
+
       // 从结束时间推导完成时间
-      completedAt: record.end_time
+      completedAt: record.end_time,
+
+      // 状态历史
+      statusHistory: this.parseJsonField(record.status_history) || []
     };
   }
 

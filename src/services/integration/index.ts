@@ -7,5 +7,4 @@ export { IntegrationService } from '../integrationService';
 export { configService } from './configService';
 export { dataService } from './dataService';
 export { notificationService } from './notificationService';
-export { testEngineService } from './testEngineService';
 

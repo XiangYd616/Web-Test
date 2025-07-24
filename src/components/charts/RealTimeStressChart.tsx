@@ -73,18 +73,40 @@ export const RealTimeStressChart: React.FC<RealTimeStressChartProps> = ({
 
   // 计算图表数据
   const chartData = useMemo(() => {
-    if (!data.length) return {
-      points: [] as any[],
-      scales: {
-        x: [] as any[],
-        y: [] as any[]
-      }
-    };
+    console.log('📊 RealTimeStressChart 数据处理:', {
+      dataLength: data.length,
+      dataSample: data.slice(0, 3),
+      configTimeWindow: config.timeWindow,
+      testConfig
+    });
+
+    if (!data.length) {
+      console.log('⚠️ RealTimeStressChart: 没有数据');
+      return {
+        points: [] as any[],
+        scales: {
+          x: [] as any[],
+          y: [] as any[]
+        }
+      };
+    }
 
     // 获取时间窗口内的数据
     const now = Date.now();
     const windowStart = now - (config.timeWindow * 1000);
-    const filteredData = data.filter(point => point.timestamp >= windowStart);
+    const filteredData = data.filter(point => {
+      const timestamp = typeof point.timestamp === 'string' ?
+        new Date(point.timestamp).getTime() : point.timestamp;
+      return timestamp >= windowStart;
+    });
+
+    console.log('📊 时间窗口过滤结果:', {
+      now,
+      windowStart,
+      originalLength: data.length,
+      filteredLength: filteredData.length,
+      timeWindow: config.timeWindow
+    });
 
     // 计算比例尺，确保不为0
     const maxUsers = Math.max(testConfig?.users || 10, ...filteredData.map(d => d.activeUsers || 0), 1);
@@ -97,7 +119,7 @@ export const RealTimeStressChart: React.FC<RealTimeStressChartProps> = ({
       timeLabels.push(`${i}s`);
     }
 
-    return {
+    const result = {
       points: filteredData,
       scales: {
         x: timeLabels,
@@ -108,6 +130,13 @@ export const RealTimeStressChart: React.FC<RealTimeStressChartProps> = ({
         }
       }
     };
+
+    console.log('📊 图表数据计算结果:', {
+      pointsCount: result.points.length,
+      scales: result.scales.y
+    });
+
+    return result;
   }, [data, config.timeWindow, testConfig]);
 
   // 生成SVG路径
@@ -286,6 +315,11 @@ export const RealTimeStressChart: React.FC<RealTimeStressChartProps> = ({
 
       {/* 主图表区域 */}
       <div className="bg-white rounded-lg p-4 relative" style={{ height: `${height}px` }}>
+        {/* 调试信息 */}
+        <div className="absolute top-2 right-2 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+          数据点: {chartData.points.length} | 运行中: {isRunning ? '是' : '否'}
+        </div>
+
         {chartData.points.length > 0 ? (
           <svg className="w-full h-full" viewBox="0 0 800 320">
             {/* 网格线 */}

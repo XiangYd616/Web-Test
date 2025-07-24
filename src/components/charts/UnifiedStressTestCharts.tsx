@@ -251,7 +251,13 @@ export const UnifiedStressTestCharts: React.FC<UnifiedStressTestChartsProps> = (
               ].map(({ key, label, icon: Icon, disabled }) => (
                 <button
                   key={key}
-                  onClick={() => setActiveView(key as any)}
+                  onClick={() => {
+                    setActiveView(key as any);
+                    // 用户手动切换视图时，关闭自动切换功能，让用户完全控制
+                    if (autoSwitch) {
+                      setAutoSwitch(false);
+                    }
+                  }}
                   disabled={disabled}
                   className={`px-3 py-1 rounded text-sm flex items-center gap-1 transition-colors ${activeView === key
                     ? 'bg-blue-600 text-white'
@@ -320,7 +326,7 @@ export const UnifiedStressTestCharts: React.FC<UnifiedStressTestChartsProps> = (
         {activeView === 'realtime' && (
           <EnhancedStressTestCharts
             realTimeData={testData.realTimeData}
-            testResultData={testStatus === TestStatus.COMPLETED ? testData.testResult?.timeSeriesData : undefined}
+            testResultData={undefined}
             isRunning={testStatus === TestStatus.RUNNING}
             testCompleted={testStatus === TestStatus.COMPLETED}
             testPhases={testPhases}
@@ -334,6 +340,7 @@ export const UnifiedStressTestCharts: React.FC<UnifiedStressTestChartsProps> = (
 
         {activeView === 'results' && testData.testResult && (
           <EnhancedStressTestCharts
+            realTimeData={undefined}
             testResultData={testData.testResult.timeSeriesData}
             isRunning={false}
             testCompleted={true}

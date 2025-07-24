@@ -24,20 +24,23 @@ export interface UseStressTestRecordReturn {
     hasNext: boolean;
     hasPrev: boolean;
   };
-  
+
   // 当前测试记录
   currentRecord: StressTestRecord | null;
-  
+
   // 操作方法
   createRecord: (testData: Partial<StressTestRecord>) => Promise<StressTestRecord>;
   updateRecord: (id: string, updates: Partial<StressTestRecord>) => Promise<StressTestRecord>;
   completeRecord: (id: string, results: StressTestRecord['results'], score?: number) => Promise<StressTestRecord>;
   failRecord: (id: string, error: string) => Promise<StressTestRecord>;
+  cancelRecord: (id: string, reason?: string) => Promise<StressTestRecord>;
+  setWaitingRecord: (id: string, reason?: string) => Promise<StressTestRecord>;
+  startFromWaitingRecord: (id: string) => Promise<StressTestRecord>;
   deleteRecord: (id: string) => Promise<boolean>;
   loadRecords: (query?: TestRecordQuery) => Promise<void>;
   loadRecord: (id: string) => Promise<StressTestRecord>;
   refreshRecords: () => Promise<void>;
-  
+
   // 实时更新
   startRecording: (testData: Partial<StressTestRecord>) => Promise<string>;
   updateProgress: (id: string, progress: number, phase?: string) => Promise<void>;
@@ -67,11 +70,11 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
     try {
       setError(null);
       const record = await stressTestRecordService.createTestRecord(testData);
-      
+
       // 更新本地状态
       setRecords(prev => [record, ...prev]);
       setCurrentRecord(record);
-      
+
       return record;
     } catch (err: any) {
       setError(err.message);
@@ -84,16 +87,16 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
     try {
       setError(null);
       const updatedRecord = await stressTestRecordService.updateTestRecord(id, updates);
-      
+
       // 更新本地状态
-      setRecords(prev => prev.map(record => 
+      setRecords(prev => prev.map(record =>
         record.id === id ? updatedRecord : record
       ));
-      
+
       if (currentRecord?.id === id) {
         setCurrentRecord(updatedRecord);
       }
-      
+
       return updatedRecord;
     } catch (err: any) {
       setError(err.message);
@@ -103,23 +106,23 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
 
   // 完成测试记录
   const completeRecord = useCallback(async (
-    id: string, 
-    results: StressTestRecord['results'], 
+    id: string,
+    results: StressTestRecord['results'],
     score?: number
   ): Promise<StressTestRecord> => {
     try {
       setError(null);
       const completedRecord = await stressTestRecordService.completeTestRecord(id, results, score);
-      
+
       // 更新本地状态
-      setRecords(prev => prev.map(record => 
+      setRecords(prev => prev.map(record =>
         record.id === id ? completedRecord : record
       ));
-      
+
       if (currentRecord?.id === id) {
         setCurrentRecord(completedRecord);
       }
-      
+
       return completedRecord;
     } catch (err: any) {
       setError(err.message);
@@ -132,17 +135,83 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
     try {
       setError(null);
       const failedRecord = await stressTestRecordService.failTestRecord(id, errorMsg);
-      
+
       // 更新本地状态
-      setRecords(prev => prev.map(record => 
+      setRecords(prev => prev.map(record =>
         record.id === id ? failedRecord : record
       ));
-      
+
       if (currentRecord?.id === id) {
         setCurrentRecord(failedRecord);
       }
-      
+
       return failedRecord;
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
+    }
+  }, [currentRecord]);
+
+  // 取消测试记录
+  const cancelRecord = useCallback(async (id: string, reason?: string): Promise<StressTestRecord> => {
+    try {
+      setError(null);
+      const cancelledRecord = await stressTestRecordService.cancelTestRecord(id, reason);
+
+      // 更新本地状态
+      setRecords(prev => prev.map(record =>
+        record.id === id ? cancelledRecord : record
+      ));
+
+      if (currentRecord?.id === id) {
+        setCurrentRecord(cancelledRecord);
+      }
+
+      return cancelledRecord;
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
+    }
+  }, [currentRecord]);
+
+  // 设置等待状态
+  const setWaitingRecord = useCallback(async (id: string, reason?: string): Promise<StressTestRecord> => {
+    try {
+      setError(null);
+      const waitingRecord = await stressTestRecordService.setTestWaiting(id, reason);
+
+      // 更新本地状态
+      setRecords(prev => prev.map(record =>
+        record.id === id ? waitingRecord : record
+      ));
+
+      if (currentRecord?.id === id) {
+        setCurrentRecord(waitingRecord);
+      }
+
+      return waitingRecord;
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
+    }
+  }, [currentRecord]);
+
+  // 从等待状态开始测试
+  const startFromWaitingRecord = useCallback(async (id: string): Promise<StressTestRecord> => {
+    try {
+      setError(null);
+      const runningRecord = await stressTestRecordService.startFromWaiting(id);
+
+      // 更新本地状态
+      setRecords(prev => prev.map(record =>
+        record.id === id ? runningRecord : record
+      ));
+
+      if (currentRecord?.id === id) {
+        setCurrentRecord(runningRecord);
+      }
+
+      return runningRecord;
     } catch (err: any) {
       setError(err.message);
       throw err;
@@ -154,16 +223,16 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
     try {
       setError(null);
       const success = await stressTestRecordService.deleteTestRecord(id);
-      
+
       if (success) {
         // 更新本地状态
         setRecords(prev => prev.filter(record => record.id !== id));
-        
+
         if (currentRecord?.id === id) {
           setCurrentRecord(null);
         }
       }
-      
+
       return success;
     } catch (err: any) {
       setError(err.message);
@@ -176,12 +245,12 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
     try {
       setLoading(true);
       setError(null);
-      
+
       const mergedQuery = { ...currentQuery, ...query };
       setCurrentQuery(mergedQuery);
-      
+
       const response = await stressTestRecordService.getTestRecords(mergedQuery);
-      
+
       setRecords(response.data.tests);
       setPagination(response.data.pagination);
     } catch (err: any) {
@@ -259,17 +328,20 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
     error,
     pagination,
     currentRecord,
-    
+
     // 操作方法
     createRecord,
     updateRecord,
     completeRecord,
     failRecord,
+    cancelRecord,
+    setWaitingRecord,
+    startFromWaitingRecord,
     deleteRecord,
     loadRecords,
     loadRecord,
     refreshRecords,
-    
+
     // 实时更新
     startRecording,
     updateProgress,

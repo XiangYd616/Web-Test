@@ -646,6 +646,128 @@ router.get('/history/:recordId', authMiddleware, asyncHandler(async (req, res) =
 
 
 /**
+ * 开始测试 - 更新状态为运行中
+ * POST /api/test/history/:recordId/start
+ */
+router.post('/history/:recordId/start', authMiddleware, asyncHandler(async (req, res) => {
+  const { recordId } = req.params;
+
+  try {
+    const result = await testHistoryService.startTest(recordId, req.user.id);
+    res.json(result);
+  } catch (error) {
+    console.error('开始测试失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '开始测试失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 更新测试进度
+ * POST /api/test/history/:recordId/progress
+ */
+router.post('/history/:recordId/progress', authMiddleware, asyncHandler(async (req, res) => {
+  const { recordId } = req.params;
+
+  try {
+    const result = await testHistoryService.updateTestProgress(recordId, req.body);
+    res.json(result);
+  } catch (error) {
+    console.error('更新测试进度失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '更新测试进度失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 完成测试
+ * POST /api/test/history/:recordId/complete
+ */
+router.post('/history/:recordId/complete', authMiddleware, asyncHandler(async (req, res) => {
+  const { recordId } = req.params;
+
+  try {
+    const result = await testHistoryService.completeTest(recordId, req.body, req.user.id);
+    res.json(result);
+  } catch (error) {
+    console.error('完成测试失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '完成测试失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 测试失败
+ * POST /api/test/history/:recordId/fail
+ */
+router.post('/history/:recordId/fail', authMiddleware, asyncHandler(async (req, res) => {
+  const { recordId } = req.params;
+  const { errorMessage, errorDetails } = req.body;
+
+  try {
+    const result = await testHistoryService.failTest(recordId, errorMessage, errorDetails, req.user.id);
+    res.json(result);
+  } catch (error) {
+    console.error('标记测试失败失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '标记测试失败失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 取消测试
+ * POST /api/test/history/:recordId/cancel
+ */
+router.post('/history/:recordId/cancel', authMiddleware, asyncHandler(async (req, res) => {
+  const { recordId } = req.params;
+  const { reason } = req.body;
+
+  try {
+    const result = await testHistoryService.cancelTest(recordId, reason || '用户取消', req.user.id);
+    res.json(result);
+  } catch (error) {
+    console.error('取消测试失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '取消测试失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 获取测试进度历史
+ * GET /api/test/history/:recordId/progress
+ */
+router.get('/history/:recordId/progress', authMiddleware, asyncHandler(async (req, res) => {
+  const { recordId } = req.params;
+
+  try {
+    const result = await testHistoryService.getTestProgress(recordId, req.user.id);
+    res.json(result);
+  } catch (error) {
+    console.error('获取测试进度失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '获取测试进度失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
  * 删除测试历史记录
  * DELETE /api/test/history/:recordId
  */
@@ -994,14 +1116,22 @@ router.post('/stress/stop/:testId', optionalAuth, asyncHandler(async (req, res) 
  * POST /api/test/stress
  */
 router.post('/stress', optionalAuth, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
-  const { url, options = {} } = req.body;
+  const { url, testId, options = {} } = req.body;
 
   // URL验证已由中间件完成，可以直接使用验证后的URL
   const validatedURL = req.validatedURL.url.toString();
 
   try {
+    console.log('🚀 收到压力测试请求:', {
+      url: validatedURL,
+      testId: testId,
+      hasPreGeneratedTestId: !!testId,
+      options: options
+    });
+
     const testResult = await realStressTestEngine.runStressTest(validatedURL, {
       ...options,
+      testId: testId, // 传递预生成的testId
       userId: req.user?.id
     });
 
