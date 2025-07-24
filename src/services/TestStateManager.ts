@@ -90,6 +90,10 @@ export interface TestDataPoint {
   status: number;
   success: boolean;
   phase: TestPhase;
+  // 图表组件需要的额外字段
+  errorType?: string;
+  connectionTime?: number;
+  dnsTime?: number;
 }
 
 // 状态变更事件接口

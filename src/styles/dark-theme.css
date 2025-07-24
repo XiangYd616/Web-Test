@@ -270,7 +270,7 @@
 
 /* 深色主题特殊效果 */
 .dark-theme-wrapper .bg-gradient-to-br {
-  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 25%, var(--bg-tertiary) 50%, var(--bg-card) 75%, var(--bg-primary) 100%) !important;
+  background: var(--bg-secondary) !important;
 }
 
 /* 发光边框效果 */
@@ -384,13 +384,63 @@
 }
 
 /* 背景和容器深色主题 */
-.dark-theme-wrapper .bg-white {
-  background: linear-gradient(135deg, rgba(31, 41, 55, 0.8), rgba(55, 65, 81, 0.6)) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border: 1px solid rgba(75, 85, 99, 0.6) !important;
-  border-radius: 1rem !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 0 15px rgba(0, 0, 0, 0.2) !important;
+.dark-theme-wrapper .bg-white,
+.dark-theme-wrapper .bg-gray-50 {
+  background: #1f2937 !important;
+  border: 1px solid #374151 !important;
+  border-radius: 0.5rem !important;
+}
+
+/* 强制覆盖所有可能的白色背景 */
+.dark-theme-wrapper .bg-white,
+.dark-theme-wrapper .bg-gray-50,
+.dark-theme-wrapper div[class*="bg-white"],
+.dark-theme-wrapper div[class*="bg-gray-50"] {
+  background: #1f2937 !important;
+}
+
+/* 针对Tailwind CSS的dark模式覆盖 */
+.dark .bg-white,
+.dark .bg-gray-50 {
+  background: #1f2937 !important;
+}
+
+/* 更强的选择器优先级 */
+html.dark .bg-white,
+html.dark .bg-gray-50,
+html.dark-theme .bg-white,
+html.dark-theme .bg-gray-50 {
+  background: #1f2937 !important;
+}
+
+/* 强制覆盖彩色背景 */
+.dark-theme-wrapper .bg-blue-50,
+.dark-theme-wrapper .bg-green-50,
+.dark-theme-wrapper .bg-purple-50,
+.dark-theme-wrapper .bg-orange-50 {
+  background: #374151 !important;
+  border-color: #4b5563 !important;
+}
+
+html.dark .bg-blue-50,
+html.dark .bg-green-50,
+html.dark .bg-purple-50,
+html.dark .bg-orange-50 {
+  background: #374151 !important;
+  border-color: #4b5563 !important;
+}
+
+/* 最高优先级覆盖 */
+body.dark .bg-blue-50,
+body.dark .bg-green-50,
+body.dark .bg-purple-50,
+body.dark .bg-orange-50,
+body.dark-theme .bg-blue-50,
+body.dark-theme .bg-green-50,
+body.dark-theme .bg-purple-50,
+body.dark-theme .bg-orange-50 {
+  background-color: #374151 !important;
+  border-color: #4b5563 !important;
 }
 
 .dark-theme-wrapper .shadow {
@@ -440,10 +490,6 @@
 }
 
 /* 状态指示器深色主题 */
-.dark-theme-wrapper .bg-green-50 {
-  background: rgba(16, 185, 129, 0.2) !important;
-  border-color: rgba(16, 185, 129, 0.4) !important;
-}
 
 .dark-theme-wrapper .text-green-700 {
   color: #6ee7b7 !important;

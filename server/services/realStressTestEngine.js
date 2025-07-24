@@ -27,11 +27,18 @@ class RealStressTestEngine {
       testType = 'gradual',
       method = 'GET',
       timeout = 10,
-      thinkTime = 1
+      thinkTime = 1,
+      testId: preGeneratedTestId
     } = config;
 
-    // 生成测试ID
-    const testId = `stress_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    // 使用预生成的testId或生成新的testId
+    const testId = preGeneratedTestId || `stress_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    console.log('🎯 压力测试引擎使用testId:', {
+      testId: testId,
+      isPreGenerated: !!preGeneratedTestId,
+      url: url
+    });
 
     // 初始化测试状态
     this.updateTestStatus(testId, {
@@ -83,13 +90,17 @@ class RealStressTestEngine {
         failedRequests: 0,
         responseTimes: [],
         errors: [],
-        throughput: 0,
+        throughput: 0, // 总平均吞吐量
         averageResponseTime: 0,
         minResponseTime: Infinity,
         maxResponseTime: 0,
         errorRate: 0,
         activeUsers: 0,
-        requestsPerSecond: 0
+        requestsPerSecond: 0,
+        currentTPS: 0, // 当前瞬时吞吐量
+        peakTPS: 0, // 峰值吞吐量
+        recentRequests: [], // 用于计算当前吞吐量的最近请求记录
+        lastThroughputUpdate: Date.now()
       },
       realTimeData: []
     };
@@ -98,6 +109,9 @@ class RealStressTestEngine {
       // 执行压力测试
       await this.executeStressTest(url, users, duration, rampUpTime, testType, method, timeout, thinkTime, results);
 
+      // 设置实际持续时间
+      results.actualDuration = (Date.now() - startTime) / 1000;
+
       // 计算最终指标
       this.calculateFinalMetrics(results);
 
@@ -105,12 +119,13 @@ class RealStressTestEngine {
       results.progress = 100;
       results.currentPhase = 'completed';
       results.endTime = new Date().toISOString();
-      results.actualDuration = (Date.now() - startTime) / 1000;
 
       console.log(`✅ Stress test completed for: ${url}`);
       console.log(`📊 Results: ${results.metrics.successfulRequests}/${results.metrics.totalRequests} requests successful`);
       console.log(`⚡ Average response time: ${results.metrics.averageResponseTime}ms`);
-      console.log(`🚀 Throughput: ${results.metrics.throughput} req/s`);
+      console.log(`🚀 Total Throughput: ${results.metrics.throughput} req/s`);
+      console.log(`🔥 Current TPS: ${results.metrics.currentTPS} req/s`);
+      console.log(`⭐ Peak TPS: ${results.metrics.peakTPS} req/s`);
       console.log(`❌ Error rate: ${results.metrics.errorRate}%`);
 
       // 广播测试完成
@@ -123,10 +138,16 @@ class RealStressTestEngine {
 
     } catch (error) {
       console.error(`❌ Stress test failed for: ${url}`, error);
+
+      // 设置实际持续时间
+      results.actualDuration = (Date.now() - startTime) / 1000;
+
+      // 计算最终指标（即使失败也要计算已有的数据）
+      this.calculateFinalMetrics(results);
+
       results.status = 'failed';
       results.error = error.message;
       results.endTime = new Date().toISOString();
-      results.actualDuration = (Date.now() - startTime) / 1000;
 
       return {
         success: false,
@@ -321,9 +342,11 @@ class RealStressTestEngine {
         totalRequests: recentRequests,
         activeUsers: results.metrics.activeUsers,
         responseTime: recentResponseTime,
-        throughput: Math.round(currentThroughput * 100) / 100, // 保留2位小数
+        throughput: Math.round(currentThroughput * 10) / 10, // 保留1位小数
+        currentTPS: typeof results.metrics.currentTPS === 'number' ? results.metrics.currentTPS : 0, // 当前瞬时吞吐量
+        peakTPS: typeof results.metrics.peakTPS === 'number' ? results.metrics.peakTPS : 0, // 峰值吞吐量
         errorRate: results.metrics.totalRequests > 0 ?
-          (results.metrics.failedRequests / results.metrics.totalRequests) * 100 : 0
+          Math.round((results.metrics.failedRequests / results.metrics.totalRequests) * 1000) / 10 : 0 // 保留1位小数
       });
 
       // 限制实时数据数量
@@ -386,7 +409,7 @@ class RealStressTestEngine {
         // 更新全局结果（线程安全）
         this.updateGlobalResults(results, responseTime, response.success);
 
-        // 更新实时状态并广播数据
+        // 更新实时状态
         if (results.testId) {
           const testStatus = this.getTestStatus(results.testId);
           if (testStatus) {
@@ -397,32 +420,14 @@ class RealStressTestEngine {
             testStatus.realTimeMetrics.lastRequestSuccess = response.success;
             testStatus.realTimeMetrics.activeRequests = results.metrics.activeUsers;
             this.updateTestStatus(results.testId, testStatus);
-
-            // 广播实时数据点
-            const elapsedTime = (Date.now() - results.startTime) / 1000;
-            const currentThroughput = elapsedTime > 0 ? results.metrics.totalRequests / elapsedTime : 0;
-            const errorRate = results.metrics.totalRequests > 0 ?
-              (results.metrics.failedRequests / results.metrics.totalRequests) * 100 : 0;
-
-            this.broadcastRealTimeData(results.testId, {
-              timestamp: Date.now(),
-              responseTime: responseTime,
-              throughput: Math.round(currentThroughput * 100) / 100,
-              activeUsers: results.metrics.activeUsers,
-              errorRate: Math.round(errorRate * 100) / 100,
-              totalRequests: results.metrics.totalRequests,
-              successfulRequests: results.metrics.successfulRequests,
-              failedRequests: results.metrics.failedRequests,
-              success: response.success,
-              phase: results.currentPhase || 'running'
-            });
           }
         }
 
-        // 记录实时数据点用于图表显示
-        // 计算当前吞吐量
+        // 记录实时数据点用于图表显示（这里会触发WebSocket广播）
         const elapsedTime = (Date.now() - results.startTime) / 1000;
         const currentThroughput = elapsedTime > 0 ? results.metrics.totalRequests / elapsedTime : 0;
+        const errorRate = results.metrics.totalRequests > 0 ?
+          (results.metrics.failedRequests / results.metrics.totalRequests) * 100 : 0;
 
         this.recordRealTimeDataPoint(results, {
           timestamp: Date.now(),
@@ -430,7 +435,10 @@ class RealStressTestEngine {
           status: response.statusCode || (response.success ? 200 : 500),
           success: response.success,
           activeUsers: results.metrics.activeUsers,
-          throughput: Math.round(currentThroughput * 100) / 100, // 保留2位小数
+          throughput: Math.round(currentThroughput * 10) / 10,
+          currentTPS: typeof results.metrics.currentTPS === 'number' ? results.metrics.currentTPS : 0,
+          peakTPS: typeof results.metrics.peakTPS === 'number' ? results.metrics.peakTPS : 0,
+          errorRate: Math.round(errorRate * 10) / 10,
           userId: userId,
           phase: results.currentPhase || 'running'
         });
@@ -487,6 +495,12 @@ class RealStressTestEngine {
    * 记录实时数据点
    */
   recordRealTimeDataPoint(results, dataPoint) {
+    // 验证dataPoint参数
+    if (!dataPoint) {
+      console.warn('⚠️ recordRealTimeDataPoint called with undefined dataPoint');
+      return;
+    }
+
     results.realTimeData.push(dataPoint);
 
     // 限制实时数据点数量，避免内存溢出
@@ -494,18 +508,44 @@ class RealStressTestEngine {
       results.realTimeData = results.realTimeData.slice(-800);
     }
 
+    // 增强数据点，确保所有必要字段都存在
+    const enhancedDataPoint = {
+      timestamp: dataPoint.timestamp || Date.now(),
+      responseTime: dataPoint.responseTime || 0,
+      activeUsers: dataPoint.activeUsers || results.metrics.activeUsers || 0,
+      throughput: dataPoint.throughput || 0,
+      errorRate: dataPoint.errorRate || 0,
+      success: dataPoint.success !== undefined ? dataPoint.success : true,
+      phase: dataPoint.phase || results.currentPhase || 'running',
+      status: dataPoint.status || (dataPoint.success ? 200 : 500),
+      ...dataPoint // 保留原始数据的其他字段
+    };
+
+    // 增强指标数据
+    const enhancedMetrics = {
+      totalRequests: results.metrics.totalRequests || 0,
+      successfulRequests: results.metrics.successfulRequests || 0,
+      failedRequests: results.metrics.failedRequests || 0,
+      averageResponseTime: results.metrics.averageResponseTime || 0,
+      errorRate: results.metrics.errorRate || 0,
+      activeUsers: results.metrics.activeUsers || 0,
+      throughput: results.metrics.throughput || 0,
+      currentTPS: typeof results.metrics.currentTPS === 'number' ? results.metrics.currentTPS : 0,
+      peakTPS: typeof results.metrics.peakTPS === 'number' ? results.metrics.peakTPS : 0
+    };
+
+    console.log('📊 准备广播实时数据:', {
+      testId: results.testId,
+      dataPointKeys: Object.keys(enhancedDataPoint),
+      metricsKeys: Object.keys(enhancedMetrics),
+      totalDataPoints: results.realTimeData.length,
+      hasGlobalIO: !!global.io
+    });
+
     // 通过WebSocket广播实时数据
     this.broadcastRealTimeData(results.testId, {
-      dataPoint,
-      metrics: {
-        totalRequests: results.metrics.totalRequests,
-        successfulRequests: results.metrics.successfulRequests,
-        failedRequests: results.metrics.failedRequests,
-        averageResponseTime: results.metrics.averageResponseTime,
-        errorRate: results.metrics.errorRate,
-        activeUsers: results.metrics.activeUsers,
-        throughput: results.metrics.throughput
-      },
+      dataPoint: enhancedDataPoint,
+      metrics: enhancedMetrics,
       progress: results.progress || 0,
       phase: results.currentPhase || 'running'
     });
@@ -630,6 +670,7 @@ class RealStressTestEngine {
    * 更新全局测试结果
    */
   updateGlobalResults(results, responseTime, success) {
+    const now = Date.now();
     results.metrics.totalRequests++;
 
     if (success) {
@@ -644,7 +685,60 @@ class RealStressTestEngine {
       // 实时更新响应时间统计
       this.updateResponseTimeStats(results.metrics, responseTime);
     }
+
+    // 更新当前吞吐量计算所需的数据
+    this.updateCurrentThroughput(results.metrics, now);
   }
+
+  /**
+   * 更新当前吞吐量
+   */
+  updateCurrentThroughput(metrics, currentTime) {
+    // 记录当前请求时间
+    metrics.recentRequests.push(currentTime);
+
+    // 保留最近10秒的请求记录（增加时间窗口以获得更稳定的当前吞吐量）
+    const timeWindow = 10000; // 10秒
+    const cutoffTime = currentTime - timeWindow;
+    metrics.recentRequests = metrics.recentRequests.filter(time => time >= cutoffTime);
+
+    // 计算当前吞吐量
+    const recentRequestCount = metrics.recentRequests.length;
+
+    if (recentRequestCount >= 2) {
+      // 如果有足够的请求，使用实际时间窗口
+      const oldestRequest = metrics.recentRequests[0];
+      const actualTimeWindow = currentTime - oldestRequest;
+
+      if (actualTimeWindow > 0) {
+        const calculatedTPS = (recentRequestCount / (actualTimeWindow / 1000));
+        metrics.currentTPS = Math.round(calculatedTPS * 10) / 10; // 保留1位小数
+      } else {
+        metrics.currentTPS = metrics.currentTPS || 0; // 保持之前的值
+      }
+    } else if (recentRequestCount === 1) {
+      // 如果只有一个请求，保持之前的值或使用较低的估算值
+      metrics.currentTPS = metrics.currentTPS || 0.5; // 估算值
+    } else {
+      // 没有最近的请求，但保持之前的值一段时间
+      if (!metrics.lastThroughputUpdate || (currentTime - metrics.lastThroughputUpdate) < 15000) {
+        // 15秒内保持之前的值
+        metrics.currentTPS = metrics.currentTPS || 0;
+      } else {
+        // 超过15秒没有请求，设为0
+        metrics.currentTPS = 0;
+      }
+    }
+
+    // 更新峰值吞吐量
+    if (metrics.currentTPS > metrics.peakTPS) {
+      metrics.peakTPS = Math.round(metrics.currentTPS * 10) / 10; // 保留1位小数
+    }
+
+    metrics.lastThroughputUpdate = currentTime;
+  }
+
+
 
   /**
    * 更新响应时间统计
@@ -731,15 +825,34 @@ class RealStressTestEngine {
       metrics.errorRate = 0;
     }
 
-    // 计算吞吐量 (requests per second)
+    // 计算总平均吞吐量 (requests per second)
     if (results.actualDuration > 0 && metrics.totalRequests > 0) {
       const throughputValue = metrics.totalRequests / results.actualDuration;
-      metrics.throughput = isNaN(throughputValue) ? 0 : parseFloat(throughputValue.toFixed(2));
+      metrics.throughput = isNaN(throughputValue) ? 0 : Math.round(throughputValue * 10) / 10; // 保留1位小数
       metrics.requestsPerSecond = metrics.throughput; // 确保两个字段都有值
     } else {
       metrics.throughput = 0;
       metrics.requestsPerSecond = 0;
     }
+
+    // 确保当前TPS有合理的值
+    if (typeof metrics.currentTPS !== 'number' || isNaN(metrics.currentTPS) || metrics.currentTPS === 0) {
+      metrics.currentTPS = metrics.throughput || 0; // 使用平均吞吐量作为备选
+    }
+
+    // 确保峰值TPS有合理的值
+    if (typeof metrics.peakTPS !== 'number' || isNaN(metrics.peakTPS) || metrics.peakTPS === 0) {
+      // 峰值TPS至少应该等于当前TPS或总吞吐量中的较大值
+      metrics.peakTPS = Math.max(metrics.currentTPS, metrics.throughput);
+      // 如果仍然是0，设置一个最小值
+      if (metrics.peakTPS === 0 && metrics.totalRequests > 0) {
+        metrics.peakTPS = metrics.throughput * 1.2; // 估算峰值为平均值的1.2倍
+      }
+    }
+
+    // 确保数值精度
+    metrics.currentTPS = Math.round(metrics.currentTPS * 10) / 10;
+    metrics.peakTPS = Math.round(metrics.peakTPS * 10) / 10;
 
     // 清理详细数据以减少响应大小
     delete metrics.responseTimes; // 保留统计信息，删除原始数据
@@ -829,11 +942,64 @@ class RealStressTestEngine {
     try {
       // 检查全局io实例是否存在
       if (global.io) {
-        global.io.to(`stress-test-${testId}`).emit('stress-test-data', {
+        // 验证数据完整性
+        const hasDataPoint = !!data.dataPoint;
+        const hasMetrics = !!data.metrics;
+        const metricsValid = hasMetrics && typeof data.metrics.totalRequests === 'number';
+
+        // 检查房间中的客户端数量
+        const roomName = `stress-test-${testId}`;
+        const room = global.io.sockets.adapter.rooms.get(roomName);
+        const clientCount = room ? room.size : 0;
+
+        // 调试：列出所有房间
+        const allRooms = Array.from(global.io.sockets.adapter.rooms.keys());
+        console.log('🏠 所有活跃房间:', allRooms.filter(r => r.startsWith('stress-test-')));
+
+        console.log('📡 Broadcasting real-time data:', {
           testId,
-          timestamp: Date.now(),
-          ...data
+          roomName,
+          clientCount,
+          hasDataPoint,
+          hasMetrics,
+          metricsValid,
+          totalRequests: data.metrics?.totalRequests,
+          currentTPS: data.metrics?.currentTPS,
+          peakTPS: data.metrics?.peakTPS,
+          dataPointTimestamp: data.dataPoint?.timestamp,
+          dataPointResponseTime: data.dataPoint?.responseTime
         });
+
+        // 如果没有客户端在房间中，记录警告
+        if (clientCount === 0) {
+          console.warn(`⚠️ 没有客户端在房间 ${roomName} 中，数据将不会被接收`);
+        }
+
+        // 放宽验证条件：有数据点或有效指标就发送
+        if (hasDataPoint || (hasMetrics && metricsValid)) {
+          const broadcastData = {
+            testId,
+            timestamp: Date.now(),
+            ...data
+          };
+
+          global.io.to(roomName).emit('stress-test-data', broadcastData);
+
+          console.log('✅ Real-time data broadcasted successfully:', {
+            eventName: 'stress-test-data',
+            clientCount,
+            dataSize: JSON.stringify(broadcastData).length
+          });
+        } else {
+          console.warn('⚠️ Skipping broadcast due to invalid data:', {
+            hasDataPoint,
+            hasMetrics,
+            metricsValid,
+            dataKeys: Object.keys(data)
+          });
+        }
+      } else {
+        console.warn('⚠️ Global io instance not found for WebSocket broadcast');
       }
     } catch (error) {
       console.error('WebSocket广播失败:', error);

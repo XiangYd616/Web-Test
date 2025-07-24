@@ -7,8 +7,8 @@ export interface StressTestRecord {
   id: string;
   testName: string;
   url: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
-  
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled' | 'waiting';
+
   // 时间信息
   startTime: string;
   endTime?: string;
@@ -16,7 +16,13 @@ export interface StressTestRecord {
   updatedAt?: string;
   completedAt?: string;
   savedAt?: string;
-  
+
+  // 状态相关
+  error?: string;
+  waitingReason?: string;
+  progress?: number;
+  currentPhase?: string;
+
   // 测试配置
   config: {
     users: number;
@@ -31,7 +37,7 @@ export interface StressTestRecord {
     headers?: Record<string, string>;
     body?: string;
   };
-  
+
   // 测试结果
   results?: {
     metrics: {
@@ -76,7 +82,7 @@ export interface StressTestRecord {
       duration: number;
     }>;
   };
-  
+
   // 评分和建议
   overallScore?: number;
   performanceGrade?: 'A' | 'B' | 'C' | 'D' | 'F';
@@ -87,19 +93,19 @@ export interface StressTestRecord {
     description: string;
     impact: string;
   }>;
-  
+
   // 元数据
   testId?: string;
   userId?: string;
   actualDuration?: number;
   currentPhase?: string;
   progress?: number;
-  
+
   // 标签和分类
   tags?: string[];
   category?: string;
   environment?: 'development' | 'staging' | 'production';
-  
+
   // 错误信息
   error?: string;
   warnings?: string[];
@@ -254,12 +260,66 @@ class StressTestRecordService {
   }
 
   /**
+   * 取消测试记录
+   */
+  async cancelTestRecord(id: string, reason?: string): Promise<StressTestRecord> {
+    try {
+      const updates: Partial<StressTestRecord> = {
+        status: 'cancelled',
+        endTime: new Date().toISOString(),
+        error: reason || '测试已取消'
+      };
+
+      return await this.updateTestRecord(id, updates);
+    } catch (error) {
+      console.error('取消测试记录失败:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 设置测试为等待状态
+   */
+  async setTestWaiting(id: string, reason?: string): Promise<StressTestRecord> {
+    try {
+      const updates: Partial<StressTestRecord> = {
+        status: 'waiting',
+        updatedAt: new Date().toISOString(),
+        waitingReason: reason
+      };
+
+      return await this.updateTestRecord(id, updates);
+    } catch (error) {
+      console.error('设置测试等待状态失败:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 从等待状态开始测试
+   */
+  async startFromWaiting(id: string): Promise<StressTestRecord> {
+    try {
+      const updates: Partial<StressTestRecord> = {
+        status: 'running',
+        startTime: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      return await this.updateTestRecord(id, updates);
+    } catch (error) {
+      console.error('从等待状态开始测试失败:', error);
+      throw error;
+    }
+  }
+
+  /**
    * 查询测试记录
    */
   async getTestRecords(query: TestRecordQuery = {}): Promise<TestRecordResponse> {
     try {
       const params = new URLSearchParams();
-      
+
       Object.entries(query).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           params.append(key, value.toString());

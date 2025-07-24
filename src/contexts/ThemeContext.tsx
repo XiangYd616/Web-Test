@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
 // 主题类型定义
 export type ThemeMode = 'light' | 'dark';
@@ -32,7 +32,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     return currentTheme;
   };
 
-  const [actualTheme, setActualTheme] = useState<'light' | 'dark'>(() => 
+  const [actualTheme, setActualTheme] = useState<'light' | 'dark'>(() =>
     getActualTheme(theme)
   );
 
@@ -54,13 +54,15 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   // 应用主题到document
   useEffect(() => {
     const root = document.documentElement;
-    
+
     // 移除之前的主题类
-    root.classList.remove('light-theme', 'dark-theme');
-    
+    root.classList.remove('light-theme', 'dark-theme', 'light', 'dark');
+
     // 添加当前主题类
     root.classList.add(`${actualTheme}-theme`);
-    
+    // 同时添加 Tailwind CSS 需要的类
+    root.classList.add(actualTheme);
+
     // 设置CSS变量
     if (actualTheme === 'dark') {
       root.style.setProperty('--bg-primary', '#1f2937');

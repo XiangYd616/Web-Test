@@ -51,11 +51,16 @@ const HOST = process.env.HOST || 'localhost';
 const APP_NAME = process.env.APP_NAME || 'Test Web App';
 const APP_VERSION = process.env.APP_VERSION || '1.0.0';
 
+// CORS配置 - 需要在Socket.IO之前定义
+const corsOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
+  : ['http://localhost:5174', 'http://localhost:3001', 'http://127.0.0.1:5174', 'http://127.0.0.1:3001'];
+
 // 创建HTTP服务器和Socket.IO实例
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:5175",
+    origin: corsOrigins,
     methods: ["GET", "POST"],
     credentials: true
   }
@@ -86,11 +91,6 @@ app.use(helmet({
   },
   crossOriginEmbedderPolicy: false
 }));
-
-// CORS配置
-const corsOrigins = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
-  : ['http://localhost:5174', 'http://localhost:3001', 'http://127.0.0.1:5174', 'http://127.0.0.1:3001'];
 
 console.log('🔧 CORS允许的源:', corsOrigins);
 
@@ -297,12 +297,34 @@ function setupWebSocketHandlers(io) {
     socket.on('join-stress-test', (testId) => {
       socket.join(`stress-test-${testId}`);
       console.log(`📊 客户端 ${socket.id} 加入压力测试房间: ${testId}`);
+
+      // 发送房间加入确认
+      socket.emit('room-joined', {
+        testId,
+        roomName: `stress-test-${testId}`,
+        clientId: socket.id,
+        timestamp: Date.now()
+      });
+
+      // 检查房间中的客户端数量
+      const room = io.sockets.adapter.rooms.get(`stress-test-${testId}`);
+      console.log(`📊 房间 stress-test-${testId} 当前客户端数量: ${room ? room.size : 0}`);
     });
 
     // 离开压力测试房间
     socket.on('leave-stress-test', (testId) => {
       socket.leave(`stress-test-${testId}`);
       console.log(`📊 客户端 ${socket.id} 离开压力测试房间: ${testId}`);
+    });
+
+    // 测试连接ping/pong
+    socket.on('test-ping', (data) => {
+      console.log(`🏓 收到测试ping:`, data);
+      socket.emit('test-pong', {
+        ...data,
+        pongTime: Date.now(),
+        socketId: socket.id
+      });
     });
 
     // 处理断开连接

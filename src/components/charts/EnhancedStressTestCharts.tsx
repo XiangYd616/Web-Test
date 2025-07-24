@@ -138,12 +138,24 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
 
   // 数据处理 - 根据密度控制采样
   const processedData = useMemo(() => {
-    const sourceData = isRunning ? realTimeData : testResultData;
+    // 明确区分数据源：实时数据用于实时监控，测试结果数据用于结果视图
+    let sourceData: any[] = [];
+
+    if (realTimeData && realTimeData.length > 0) {
+      // 使用实时数据（用于实时监控视图）
+      sourceData = realTimeData;
+      console.log('📊 使用实时数据:', sourceData.length, '个数据点');
+    } else if (testResultData && testResultData.length > 0) {
+      // 使用测试结果数据（用于测试结果视图）
+      sourceData = testResultData;
+      console.log('📊 使用测试结果数据:', sourceData.length, '个数据点');
+    }
+
     if (!sourceData || sourceData.length === 0) return [];
 
     const step = densityControl === 'low' ? 5 : densityControl === 'medium' ? 2 : 1;
     return sourceData.filter((_, index) => index % step === 0);
-  }, [realTimeData, testResultData, isRunning, densityControl]);
+  }, [realTimeData, testResultData, densityControl]);
 
   // 响应时间分布数据
   const responseTimeDistribution = useMemo(() => {

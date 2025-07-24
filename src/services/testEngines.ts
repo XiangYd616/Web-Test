@@ -28,7 +28,7 @@ export class K6Engine implements TestEngine {
 
     try {
       // 通过API检查后端k6引擎状态
-      const response = await fetch('/api/test-engines/k6/status');
+      const response = await fetch('/api/test/k6/status');
       if (response.ok) {
         const result = await response.json();
         if (result.success && result.data) {
@@ -52,7 +52,7 @@ export class K6Engine implements TestEngine {
     try {
       console.log('Installing k6...');
       // 通过API请求后端安装k6
-      const response = await fetch('/api/test-engines/k6/install', {
+      const response = await fetch('/api/test/k6/install', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -117,7 +117,7 @@ export class LighthouseEngine implements TestEngine {
     }
 
     try {
-      const response = await fetch('/api/test-engines/lighthouse/status');
+      const response = await fetch('/api/test/lighthouse/status');
       if (response.ok) {
         const result = await response.json();
         if (result.success && result.data) {
@@ -140,7 +140,7 @@ export class LighthouseEngine implements TestEngine {
   async install(): Promise<boolean> {
     try {
       console.log('Installing Lighthouse...');
-      const response = await fetch('/api/test-engines/lighthouse/install', {
+      const response = await fetch('/api/test/lighthouse/install', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -164,7 +164,7 @@ export class LighthouseEngine implements TestEngine {
     categories: string[];
   }): Promise<any> {
     try {
-      const response = await fetch('/api/test-engines/lighthouse/run', {
+      const response = await fetch('/api/test/lighthouse/run', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -202,7 +202,7 @@ export class PlaywrightEngine implements TestEngine {
     }
 
     try {
-      const response = await fetch('/api/test-engines/playwright/status');
+      const response = await fetch('/api/test/playwright/status');
       if (response.ok) {
         const result = await response.json();
         if (result.success && result.data) {
@@ -225,7 +225,7 @@ export class PlaywrightEngine implements TestEngine {
   async install(): Promise<boolean> {
     try {
       console.log('Installing Playwright...');
-      const response = await fetch('/api/test-engines/playwright/install', {
+      const response = await fetch('/api/test/playwright/install', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -250,7 +250,7 @@ export class PlaywrightEngine implements TestEngine {
     viewport?: { width: number; height: number };
   }): Promise<any> {
     try {
-      const response = await fetch('/api/test-engines/playwright/run', {
+      const response = await fetch('/api/test/playwright/run', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

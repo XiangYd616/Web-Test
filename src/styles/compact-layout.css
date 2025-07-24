@@ -298,3 +298,81 @@
 .compact-layout .dark-page-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(107, 114, 128, 0.8);
 }
+
+/* 图表动态高度样式 */
+.chart-bar-dynamic {
+  width: 4px;
+  min-height: 2px;
+  transition: height 0.3s ease;
+}
+
+.chart-height-1 { height: 1%; }
+.chart-height-5 { height: 5%; }
+.chart-height-10 { height: 10%; }
+.chart-height-20 { height: 20%; }
+.chart-height-30 { height: 30%; }
+.chart-height-40 { height: 40%; }
+.chart-height-50 { height: 50%; }
+.chart-height-60 { height: 60%; }
+.chart-height-70 { height: 70%; }
+.chart-height-80 { height: 80%; }
+.chart-height-90 { height: 90%; }
+
+/* 实时监控状态指示器 */
+.status-indicator {
+  position: relative;
+}
+
+.status-indicator::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -12px;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.status-connected::before {
+  background-color: #10b981;
+  animation: pulse 2s infinite;
+}
+
+.status-disconnected::before {
+  background-color: #ef4444;
+}
+
+.status-running::before {
+  background-color: #3b82f6;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* 响应式设计优化 */
+@media (max-width: 768px) {
+  .compact-layout .grid-cols-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .compact-layout .grid-cols-3 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .compact-layout .grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .compact-layout .grid-cols-5 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
