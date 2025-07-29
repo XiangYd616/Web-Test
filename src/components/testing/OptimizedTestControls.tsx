@@ -5,7 +5,7 @@
 
 import { AlertCircle, CheckCircle, Loader, Lock, Play, RotateCcw, Square, XCircle } from 'lucide-react';
 import React from 'react';
-import { TestState, TestPhase } from '../../services/TestStateManager';
+import { TestPhase, TestState } from '../../services/testStateManager';
 
 // 控制组件属性接口
 export interface OptimizedTestControlsProps {
@@ -152,7 +152,7 @@ export const OptimizedTestControls: React.FC<OptimizedTestControlsProps> = ({
         </div>
       );
     }
-    
+
     if (isConnected && (testState === TestState.RUNNING || testState === TestState.STARTING)) {
       return (
         <div className="flex items-center space-x-1 text-xs text-green-400">
@@ -161,7 +161,7 @@ export const OptimizedTestControls: React.FC<OptimizedTestControlsProps> = ({
         </div>
       );
     }
-    
+
     return null;
   };
 
@@ -172,8 +172,8 @@ export const OptimizedTestControls: React.FC<OptimizedTestControlsProps> = ({
         <div className="flex items-center space-x-4">
           {/* 状态指示器 */}
           <div className={`flex items-center space-x-3 px-4 py-2 rounded-lg border ${config.bgColor} ${config.borderColor}`}>
-            <IconComponent 
-              className={`w-5 h-5 ${config.color} ${testState === TestState.STARTING || testState === TestState.RUNNING ? 'animate-pulse' : ''}`} 
+            <IconComponent
+              className={`w-5 h-5 ${config.color} ${testState === TestState.STARTING || testState === TestState.RUNNING ? 'animate-pulse' : ''}`}
             />
             <div>
               <div className={`font-medium ${config.color}`}>
@@ -215,13 +215,12 @@ export const OptimizedTestControls: React.FC<OptimizedTestControlsProps> = ({
               type="button"
               onClick={handleStartTest}
               disabled={!canStartTest}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                !canStartTest
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${!canStartTest
                   ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                   : isAuthenticated
                     ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md'
                     : 'bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm hover:shadow-md'
-              }`}
+                }`}
             >
               {isAuthenticated ? <Play className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
               <span>{isAuthenticated ? '开始测试' : '需要登录'}</span>
@@ -281,37 +280,33 @@ export const OptimizedTestControls: React.FC<OptimizedTestControlsProps> = ({
       {testState === TestState.RUNNING && (
         <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
           <div className="flex items-center space-x-2">
-            <div className={`w-2 h-2 rounded-full ${
-              testPhase === TestPhase.INITIALIZATION ? 'bg-yellow-400 animate-pulse' : 
-              testPhase === TestPhase.RAMP_UP || testPhase === TestPhase.STEADY_STATE || testPhase === TestPhase.RAMP_DOWN || testPhase === TestPhase.CLEANUP ? 'bg-green-400' : 'bg-gray-600'
-            }`}></div>
+            <div className={`w-2 h-2 rounded-full ${testPhase === TestPhase.INITIALIZATION ? 'bg-yellow-400 animate-pulse' :
+                testPhase === TestPhase.RAMP_UP || testPhase === TestPhase.STEADY_STATE || testPhase === TestPhase.RAMP_DOWN || testPhase === TestPhase.CLEANUP ? 'bg-green-400' : 'bg-gray-600'
+              }`}></div>
             <span className={testPhase === TestPhase.INITIALIZATION ? 'text-yellow-300' : 'text-gray-400'}>
               初始化
             </span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className={`w-2 h-2 rounded-full ${
-              testPhase === TestPhase.RAMP_UP ? 'bg-yellow-400 animate-pulse' : 
-              testPhase === TestPhase.STEADY_STATE || testPhase === TestPhase.RAMP_DOWN || testPhase === TestPhase.CLEANUP ? 'bg-green-400' : 'bg-gray-600'
-            }`}></div>
+            <div className={`w-2 h-2 rounded-full ${testPhase === TestPhase.RAMP_UP ? 'bg-yellow-400 animate-pulse' :
+                testPhase === TestPhase.STEADY_STATE || testPhase === TestPhase.RAMP_DOWN || testPhase === TestPhase.CLEANUP ? 'bg-green-400' : 'bg-gray-600'
+              }`}></div>
             <span className={testPhase === TestPhase.RAMP_UP ? 'text-yellow-300' : testPhase === TestPhase.STEADY_STATE || testPhase === TestPhase.RAMP_DOWN || testPhase === TestPhase.CLEANUP ? 'text-green-300' : 'text-gray-400'}>
               加压
             </span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className={`w-2 h-2 rounded-full ${
-              testPhase === TestPhase.STEADY_STATE ? 'bg-green-400 animate-pulse' : 
-              testPhase === TestPhase.RAMP_DOWN || testPhase === TestPhase.CLEANUP ? 'bg-green-400' : 'bg-gray-600'
-            }`}></div>
+            <div className={`w-2 h-2 rounded-full ${testPhase === TestPhase.STEADY_STATE ? 'bg-green-400 animate-pulse' :
+                testPhase === TestPhase.RAMP_DOWN || testPhase === TestPhase.CLEANUP ? 'bg-green-400' : 'bg-gray-600'
+              }`}></div>
             <span className={testPhase === TestPhase.STEADY_STATE ? 'text-green-300' : testPhase === TestPhase.RAMP_DOWN || testPhase === TestPhase.CLEANUP ? 'text-green-300' : 'text-gray-400'}>
               稳定
             </span>
           </div>
           <div className="flex items-center space-x-2">
-            <div className={`w-2 h-2 rounded-full ${
-              testPhase === TestPhase.RAMP_DOWN ? 'bg-yellow-400 animate-pulse' : 
-              testPhase === TestPhase.CLEANUP ? 'bg-green-400' : 'bg-gray-600'
-            }`}></div>
+            <div className={`w-2 h-2 rounded-full ${testPhase === TestPhase.RAMP_DOWN ? 'bg-yellow-400 animate-pulse' :
+                testPhase === TestPhase.CLEANUP ? 'bg-green-400' : 'bg-gray-600'
+              }`}></div>
             <span className={testPhase === TestPhase.RAMP_DOWN ? 'text-yellow-300' : testPhase === TestPhase.CLEANUP ? 'text-green-300' : 'text-gray-400'}>
               减压
             </span>

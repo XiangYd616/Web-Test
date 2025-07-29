@@ -15,7 +15,7 @@ import { useStressTestRecord } from '../hooks/useStressTestRecord';
 import { useUserStats } from '../hooks/useUserStats';
 import backgroundTestManager from '../services/backgroundTestManager';
 import { testEngineManager } from '../services/testEngines';
-import { type RealTimeMetrics, type TestDataPoint, TestPhase } from '../services/TestStateManager';
+import { type RealTimeMetrics, type TestDataPoint, TestPhase } from '../services/testStateManager';
 import '../styles/compact-layout.css';
 import '../styles/optimized-charts.css';
 import '../styles/unified-testing-tools.css';
