@@ -5,7 +5,7 @@
 
 import { BarChart3, Download, Settings, TrendingUp } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
-import { TestPhase, TestState, type RealTimeMetrics, type TestDataPoint } from '../../services/TestStateManager';
+import { TestPhase, TestState, type RealTimeMetrics, type TestDataPoint } from '../../services/testStateManager';
 import '../../styles/optimized-charts.css';
 
 // 图表配置接口
@@ -380,8 +380,8 @@ export const OptimizedStressTestChart: React.FC<OptimizedStressTestChartProps> =
 
       {/* 图表区域 */}
       <div className={`relative ${height <= 300 ? 'chart-container-sm' :
-          height <= 400 ? 'chart-container-md' :
-            height <= 500 ? 'chart-container-lg' : 'chart-container-xl'
+        height <= 400 ? 'chart-container-md' :
+          height <= 500 ? 'chart-container-lg' : 'chart-container-xl'
         }`}>
         {chartData.points.length === 0 ? (
           <div className="flex items-center justify-center h-full">

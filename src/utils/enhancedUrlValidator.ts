@@ -12,6 +12,8 @@ export interface URLValidationResult {
   suggestions: string[];
   autoFixes: string[];
   securityNotes: string[];
+  reachable?: boolean;
+  responseTime?: number;
 }
 
 export interface URLValidationOptions {

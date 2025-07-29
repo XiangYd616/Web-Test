@@ -30,24 +30,32 @@ const REPORT_FILES_TO_MOVE = [
 const DEPRECATED_FILES_TO_DELETE = [
   // 构建产物（可重新生成）
   'dist',
-  
+
   // 临时文件
   'temp',
   'tmp',
-  
+
   // 日志文件
   'logs',
   '*.log',
-  
+
   // 缓存文件
   'node_modules/.cache',
   '.npm',
   '.eslintcache',
-  
+
   // 数据库文件（开发环境）
   '*.db',
   '*.sqlite',
-  '*.sqlite3'
+  '*.sqlite3',
+
+  // 调试和测试脚本（开发临时文件）
+  'debug-websocket-data.js',
+  'test-engine-status.js',
+  'test-history-api.js',
+  'test-real-stress.js',
+  'test-room-join.js',
+  'test-websocket-realtime.js'
 ];
 
 // 需要检查的重复组件
@@ -131,22 +139,22 @@ function deleteFileOrDirectory(filePath) {
  */
 function moveReportFiles() {
   console.log('📋 移动报告文件到docs/reports目录...\n');
-  
+
   const reportsDir = path.join(PROJECT_ROOT, 'docs', 'reports');
   ensureDirectoryExists(reportsDir);
-  
+
   let movedCount = 0;
-  
+
   REPORT_FILES_TO_MOVE.forEach(fileName => {
     const sourceFile = path.join(PROJECT_ROOT, fileName);
     const targetFile = path.join(reportsDir, fileName);
-    
+
     if (moveFile(sourceFile, targetFile)) {
       cleanupResults.movedFiles.push(fileName);
       movedCount++;
     }
   });
-  
+
   console.log(`\n📊 移动报告文件统计: ${movedCount} 个文件已移动\n`);
 }
 
@@ -155,18 +163,18 @@ function moveReportFiles() {
  */
 function deleteDeprecatedFiles() {
   console.log('🗑️  删除废弃文件...\n');
-  
+
   let deletedCount = 0;
-  
+
   DEPRECATED_FILES_TO_DELETE.forEach(pattern => {
     const filePath = path.join(PROJECT_ROOT, pattern);
-    
+
     // 处理通配符
     if (pattern.includes('*')) {
       // 简单的通配符处理
       const dir = path.dirname(filePath);
       const fileName = path.basename(pattern);
-      
+
       if (fs.existsSync(dir)) {
         const files = fs.readdirSync(dir);
         files.forEach(file => {
@@ -186,7 +194,7 @@ function deleteDeprecatedFiles() {
       }
     }
   });
-  
+
   console.log(`\n📊 删除废弃文件统计: ${deletedCount} 个文件/目录已删除\n`);
 }
 
@@ -195,25 +203,25 @@ function deleteDeprecatedFiles() {
  */
 function handleDuplicateComponents() {
   console.log('🔄 处理重复组件...\n');
-  
+
   let mergedCount = 0;
-  
+
   DUPLICATE_COMPONENTS.forEach(({ keep, remove, reason }) => {
     const keepPath = path.join(PROJECT_ROOT, keep);
     const removePath = path.join(PROJECT_ROOT, remove);
-    
+
     if (fs.existsSync(keepPath) && fs.existsSync(removePath)) {
       console.log(`🔄 合并组件: ${remove} -> ${keep}`);
       console.log(`   原因: ${reason}`);
-      
+
       // 备份要删除的文件内容（以防需要恢复）
       const backupDir = path.join(PROJECT_ROOT, 'docs', 'reports', 'component-backups');
       ensureDirectoryExists(backupDir);
-      
+
       const backupFile = path.join(backupDir, `${path.basename(remove)}.backup`);
       const removeContent = fs.readFileSync(removePath, 'utf8');
       fs.writeFileSync(backupFile, removeContent, 'utf8');
-      
+
       // 删除重复组件
       if (deleteFileOrDirectory(removePath)) {
         cleanupResults.mergedComponents.push({
@@ -227,7 +235,7 @@ function handleDuplicateComponents() {
       console.log(`⚠️  组件文件不存在: ${!fs.existsSync(keepPath) ? keep : remove}`);
     }
   });
-  
+
   console.log(`\n📊 组件合并统计: ${mergedCount} 个重复组件已处理\n`);
 }
 
@@ -236,20 +244,20 @@ function handleDuplicateComponents() {
  */
 function updateImportReferences() {
   console.log('🔧 更新导入引用...\n');
-  
+
   // 更新ui/index.ts中的导出
   const uiIndexPath = path.join(PROJECT_ROOT, 'src', 'components', 'ui', 'index.ts');
-  
+
   if (fs.existsSync(uiIndexPath)) {
     let content = fs.readFileSync(uiIndexPath, 'utf8');
-    
+
     // 移除基础LoadingSpinner的导出，因为EnhancedLoadingSpinner包含了所有功能
     if (content.includes("export { default as LoadingSpinner } from './LoadingSpinner';")) {
       content = content.replace(
         "export { default as LoadingSpinner } from './LoadingSpinner';",
         "// LoadingSpinner已合并到EnhancedLoadingSpinner中"
       );
-      
+
       fs.writeFileSync(uiIndexPath, content, 'utf8');
       console.log('✅ 更新 src/components/ui/index.ts');
     }
@@ -304,30 +312,30 @@ ${cleanupResults.errors.length > 0 ? cleanupResults.errors.map(error => `- ${err
 function main() {
   try {
     console.log('🧹 开始废弃文件清理...\n');
-    
+
     // 移动报告文件
     moveReportFiles();
-    
+
     // 删除废弃文件
     deleteDeprecatedFiles();
-    
+
     // 处理重复组件
     handleDuplicateComponents();
-    
+
     // 更新导入引用
     updateImportReferences();
-    
+
     // 生成清理报告
     generateCleanupReport();
-    
+
     console.log('\n🎉 废弃文件清理完成！');
-    
+
     if (cleanupResults.errors.length === 0) {
       console.log('✅ 清理过程中无错误');
     } else {
       console.log(`⚠️  清理过程中发现 ${cleanupResults.errors.length} 个错误，请检查报告`);
     }
-    
+
   } catch (error) {
     console.error('\n💥 清理过程中发生错误:', error.message);
     process.exit(1);

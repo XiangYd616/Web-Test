@@ -47,9 +47,12 @@ const URLInput: React.FC<URLInputProps> = ({
     } catch (error) {
       const errorResult: URLValidationResult = {
         isValid: false,
+        originalUrl: url,
         errors: ['验证过程中发生错误'],
         warnings: [],
-        suggestions: []
+        suggestions: [],
+        autoFixes: [],
+        securityNotes: []
       };
       setValidationResult(errorResult);
       onValidationChange?.(false, errorResult);

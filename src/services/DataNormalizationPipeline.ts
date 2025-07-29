@@ -3,7 +3,7 @@
  * 统一处理来自不同数据源的测试数据，确保数据格式一致性
  */
 
-import { TestDataPoint, RealTimeMetrics, TestPhase } from './TestStateManager';
+import { RealTimeMetrics, TestDataPoint, TestPhase } from './testStateManager';
 
 // 原始数据源接口
 export interface RawWebSocketData {
@@ -376,12 +376,12 @@ export class DataNormalizationPipeline {
   private normalizeTimestamp(timestamp: any): number {
     const ts = Number(timestamp) || Date.now();
     const now = Date.now();
-    
+
     // 如果时间戳太旧，使用当前时间
     if (now - ts > this.validationRules.timestamp.maxAge) {
       return now;
     }
-    
+
     return ts;
   }
 
@@ -390,7 +390,7 @@ export class DataNormalizationPipeline {
    */
   private normalizePhase(phase: any): TestPhase {
     if (typeof phase !== 'string') return TestPhase.STEADY_STATE;
-    
+
     const phaseMap: Record<string, TestPhase> = {
       'initialization': TestPhase.INITIALIZATION,
       'ramp-up': TestPhase.RAMP_UP,
@@ -452,7 +452,7 @@ export class DataNormalizationPipeline {
     const stdDev = Math.sqrt(variance);
     const threshold = this.cleaningOptions.outlierThreshold * stdDev;
 
-    return dataPoints.filter(point => 
+    return dataPoints.filter(point =>
       Math.abs(point.responseTime - mean) <= threshold
     );
   }

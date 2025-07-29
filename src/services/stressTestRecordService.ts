@@ -98,16 +98,13 @@ export interface StressTestRecord {
   testId?: string;
   userId?: string;
   actualDuration?: number;
-  currentPhase?: string;
-  progress?: number;
 
   // 标签和分类
   tags?: string[];
   category?: string;
   environment?: 'development' | 'staging' | 'production';
 
-  // 错误信息
-  error?: string;
+  // 警告信息
   warnings?: string[];
 }
 
