@@ -604,10 +604,13 @@ async function handleTestHistory(req, res) {
 
     const total = parseInt(countResult.rows[0].total);
 
+    // 格式化测试记录
+    const formattedTests = testsResult.rows.map(test => testHistoryService.formatTestRecord(test));
+
     res.json({
       success: true,
       data: {
-        tests: testsResult.rows,
+        tests: formattedTests,
         pagination: {
           page: parseInt(page),
           limit: parseInt(limit),
