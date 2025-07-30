@@ -22,6 +22,7 @@ import {
   Zap
 } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 import {
   EnhancedTestRecord,
   TestHistoryQuery,
@@ -36,6 +37,9 @@ interface EnhancedTestHistoryProps {
 }
 
 const EnhancedTestHistory: React.FC<EnhancedTestHistoryProps> = ({ className = '' }) => {
+  // 认证状态
+  const { isAuthenticated, user } = useAuth();
+
   // 状态管理
   const [testHistory, setTestHistory] = useState<EnhancedTestRecord[]>([]);
   const [statistics, setStatistics] = useState<TestHistoryStatistics | null>(null);
@@ -77,6 +81,20 @@ const EnhancedTestHistory: React.FC<EnhancedTestHistoryProps> = ({ className = '
     try {
       setLoading(true);
 
+      // 如果用户未登录，直接设置空数据
+      if (!isAuthenticated) {
+        setTestHistory([]);
+        setPagination({
+          page: 1,
+          limit: 20,
+          total: 0,
+          totalPages: 0,
+          hasNext: false,
+          hasPrev: false
+        });
+        return;
+      }
+
       const params = new URLSearchParams();
       Object.entries(query).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
@@ -88,10 +106,14 @@ const EnhancedTestHistory: React.FC<EnhancedTestHistoryProps> = ({ className = '
         }
       });
 
-      const response = await fetch(`/api/data-management/test-history?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-        }
+      const headers: Record<string, string> = {};
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`/api/test/history?${params}`, {
+        headers
       });
 
       if (!response.ok) {
@@ -115,12 +137,12 @@ const EnhancedTestHistory: React.FC<EnhancedTestHistoryProps> = ({ className = '
     } finally {
       setLoading(false);
     }
-  }, [query]);
+  }, [query, isAuthenticated]);
 
   // 获取统计信息
   const fetchStatistics = useCallback(async () => {
     try {
-      const response = await fetch('/api/data-management/statistics?timeRange=30', {
+      const response = await fetch('/api/test/statistics?timeRange=30', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
@@ -135,6 +157,62 @@ const EnhancedTestHistory: React.FC<EnhancedTestHistoryProps> = ({ className = '
     } catch (error) {
       console.error('获取统计信息失败:', error);
     }
+  }, []);
+
+  // WebSocket连接用于实时更新
+  useEffect(() => {
+    // 连接到后端WebSocket服务器
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//localhost:3001`;
+    const ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+      console.log('测试历史WebSocket连接已建立');
+      // 加入测试历史更新房间
+      ws.send(JSON.stringify({
+        type: 'join-room',
+        room: 'test-history-updates'
+      }));
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+
+        // 处理测试记录更新
+        if (data.type === 'test-record-update') {
+          setTestHistory(prev => {
+            const updatedTests = [...prev];
+            const index = updatedTests.findIndex(test => test.id === data.recordId);
+
+            if (index >= 0) {
+              // 更新现有记录
+              updatedTests[index] = { ...updatedTests[index], ...data.updates };
+            } else if (data.updates.status === 'running') {
+              // 添加新的运行中测试记录
+              updatedTests.unshift(data.updates as EnhancedTestRecord);
+            }
+
+            return updatedTests;
+          });
+        }
+      } catch (error) {
+        console.error('处理WebSocket消息失败:', error);
+      }
+    };
+
+    ws.onclose = () => {
+      console.log('测试历史WebSocket连接已关闭');
+    };
+
+    ws.onerror = (error) => {
+      console.error('测试历史WebSocket错误:', error);
+    };
+
+    // 清理函数
+    return () => {
+      ws.close();
+    };
   }, []);
 
   // 初始化数据
@@ -290,6 +368,30 @@ const EnhancedTestHistory: React.FC<EnhancedTestHistoryProps> = ({ className = '
       minute: '2-digit'
     });
   };
+
+  // 未登录状态显示
+  if (!isAuthenticated) {
+    return (
+      <section className={`enhanced-test-history ${className}`}>
+        <div className="p-12 text-center">
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-8 max-w-md mx-auto">
+            <Shield className="w-16 h-16 mx-auto mb-6 text-gray-500" />
+            <h3 className="text-xl font-semibold text-white mb-4">需要登录</h3>
+            <p className="text-gray-300 mb-6">
+              请登录以查看您的测试历史记录
+            </p>
+            <button
+              type="button"
+              onClick={() => window.location.href = '/login'}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+            >
+              立即登录
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className={`enhanced-test-history ${className}`}>

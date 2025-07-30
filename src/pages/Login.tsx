@@ -23,7 +23,11 @@ const Login: React.FC = () => {
     setError('');
 
     try {
-      await login(formData.email, formData.password);
+      await login({
+        email: formData.email,
+        password: formData.password,
+        rememberMe: formData.rememberMe
+      });
       navigate('/');
     } catch (err: any) {
       setError(err.message || '登录失败，请检查邮箱和密码');
