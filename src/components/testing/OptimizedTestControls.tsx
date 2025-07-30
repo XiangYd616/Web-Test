@@ -216,10 +216,10 @@ export const OptimizedTestControls: React.FC<OptimizedTestControlsProps> = ({
               onClick={handleStartTest}
               disabled={!canStartTest}
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${!canStartTest
-                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                  : isAuthenticated
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md'
-                    : 'bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm hover:shadow-md'
+                ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                : isAuthenticated
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md'
+                  : 'bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm hover:shadow-md'
                 }`}
             >
               {isAuthenticated ? <Play className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
@@ -227,7 +227,7 @@ export const OptimizedTestControls: React.FC<OptimizedTestControlsProps> = ({
             </button>
           )}
 
-          {/* 停止测试按钮 */}
+          {/* 取消测试按钮 */}
           {config.allowStop && (
             <button
               type="button"
@@ -235,7 +235,7 @@ export const OptimizedTestControls: React.FC<OptimizedTestControlsProps> = ({
               className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all text-sm font-medium shadow-sm hover:shadow-md"
             >
               <Square className="w-4 h-4" />
-              <span>停止测试</span>
+              <span>取消测试</span>
             </button>
           )}
 
@@ -281,7 +281,7 @@ export const OptimizedTestControls: React.FC<OptimizedTestControlsProps> = ({
         <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
           <div className="flex items-center space-x-2">
             <div className={`w-2 h-2 rounded-full ${testPhase === TestPhase.INITIALIZATION ? 'bg-yellow-400 animate-pulse' :
-                testPhase === TestPhase.RAMP_UP || testPhase === TestPhase.STEADY_STATE || testPhase === TestPhase.RAMP_DOWN || testPhase === TestPhase.CLEANUP ? 'bg-green-400' : 'bg-gray-600'
+              testPhase === TestPhase.RAMP_UP || testPhase === TestPhase.STEADY_STATE || testPhase === TestPhase.RAMP_DOWN || testPhase === TestPhase.CLEANUP ? 'bg-green-400' : 'bg-gray-600'
               }`}></div>
             <span className={testPhase === TestPhase.INITIALIZATION ? 'text-yellow-300' : 'text-gray-400'}>
               初始化
@@ -289,7 +289,7 @@ export const OptimizedTestControls: React.FC<OptimizedTestControlsProps> = ({
           </div>
           <div className="flex items-center space-x-2">
             <div className={`w-2 h-2 rounded-full ${testPhase === TestPhase.RAMP_UP ? 'bg-yellow-400 animate-pulse' :
-                testPhase === TestPhase.STEADY_STATE || testPhase === TestPhase.RAMP_DOWN || testPhase === TestPhase.CLEANUP ? 'bg-green-400' : 'bg-gray-600'
+              testPhase === TestPhase.STEADY_STATE || testPhase === TestPhase.RAMP_DOWN || testPhase === TestPhase.CLEANUP ? 'bg-green-400' : 'bg-gray-600'
               }`}></div>
             <span className={testPhase === TestPhase.RAMP_UP ? 'text-yellow-300' : testPhase === TestPhase.STEADY_STATE || testPhase === TestPhase.RAMP_DOWN || testPhase === TestPhase.CLEANUP ? 'text-green-300' : 'text-gray-400'}>
               加压
@@ -297,7 +297,7 @@ export const OptimizedTestControls: React.FC<OptimizedTestControlsProps> = ({
           </div>
           <div className="flex items-center space-x-2">
             <div className={`w-2 h-2 rounded-full ${testPhase === TestPhase.STEADY_STATE ? 'bg-green-400 animate-pulse' :
-                testPhase === TestPhase.RAMP_DOWN || testPhase === TestPhase.CLEANUP ? 'bg-green-400' : 'bg-gray-600'
+              testPhase === TestPhase.RAMP_DOWN || testPhase === TestPhase.CLEANUP ? 'bg-green-400' : 'bg-gray-600'
               }`}></div>
             <span className={testPhase === TestPhase.STEADY_STATE ? 'text-green-300' : testPhase === TestPhase.RAMP_DOWN || testPhase === TestPhase.CLEANUP ? 'text-green-300' : 'text-gray-400'}>
               稳定
@@ -305,7 +305,7 @@ export const OptimizedTestControls: React.FC<OptimizedTestControlsProps> = ({
           </div>
           <div className="flex items-center space-x-2">
             <div className={`w-2 h-2 rounded-full ${testPhase === TestPhase.RAMP_DOWN ? 'bg-yellow-400 animate-pulse' :
-                testPhase === TestPhase.CLEANUP ? 'bg-green-400' : 'bg-gray-600'
+              testPhase === TestPhase.CLEANUP ? 'bg-green-400' : 'bg-gray-600'
               }`}></div>
             <span className={testPhase === TestPhase.RAMP_DOWN ? 'text-yellow-300' : testPhase === TestPhase.CLEANUP ? 'text-green-300' : 'text-gray-400'}>
               减压

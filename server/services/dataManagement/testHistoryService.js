@@ -4,6 +4,7 @@
  */
 
 const winston = require('winston');
+const { getPool, query } = require('../../config/database');
 
 class TestHistoryService {
   constructor() {
@@ -25,7 +26,6 @@ class TestHistoryService {
    */
   async getTestHistory(userId, queryParams = {}) {
     try {
-      const { query } = require('../../config/database');
 
       // 处理查询参数
       const {
@@ -143,7 +143,6 @@ class TestHistoryService {
    */
   async getTestById(testId, userId) {
     try {
-      const { query } = require('../../config/database');
 
       const result = await query(
         `SELECT * FROM test_history WHERE id = $1 AND user_id = $2`,
@@ -170,22 +169,22 @@ class TestHistoryService {
    */
   async createTestRecord(testData) {
     try {
-      const { query } = require('../../config/database');
 
       const {
         testName,
-        testType,
+        testType = 'stress',
         url,
         status = 'pending',
         userId,
         config = {},
-        results = null,
+        results = {},
         tags = [],
         environment = 'production'
       } = testData;
 
       // 开始事务
-      const client = await query.connect();
+      const pool = getPool();
+      const client = await pool.connect();
 
       try {
         await client.query('BEGIN');
@@ -194,7 +193,7 @@ class TestHistoryService {
         const testResult = await client.query(
           `INSERT INTO test_history
            (test_name, test_type, url, status, user_id, config, results, tags, environment, created_at, start_time)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), CASE WHEN $4 = 'running' THEN NOW() ELSE NULL END)
+           VALUES ($1, $2, $3, $4::varchar, $5, $6, $7, $8, $9, NOW(), CASE WHEN $4::varchar = 'running' THEN NOW() ELSE NULL END)
            RETURNING *`,
           [
             testName,
@@ -203,7 +202,7 @@ class TestHistoryService {
             status,
             userId,
             JSON.stringify(config),
-            results ? JSON.stringify(results) : null,
+            JSON.stringify(results),
             tags,
             environment
           ]
@@ -256,7 +255,6 @@ class TestHistoryService {
    */
   async updateTestRecord(testId, updateData, userId = null) {
     try {
-      const { query } = require('../../config/database');
 
       // 支持两种调用方式：updateTestRecord(id, data) 或 updateTestRecord(id, userId, data)
       let actualUpdateData, actualUserId;
@@ -283,7 +281,10 @@ class TestHistoryService {
         progress,
         currentPhase,
         completedAt,
-        actualDuration
+        actualDuration,
+        totalRequests,
+        successfulRequests,
+        failedRequests
       } = actualUpdateData;
 
       const updates = [];
@@ -338,6 +339,24 @@ class TestHistoryService {
         paramIndex++;
       }
 
+      if (totalRequests !== undefined) {
+        updates.push(`total_requests = $${paramIndex}`);
+        params.push(totalRequests);
+        paramIndex++;
+      }
+
+      if (successfulRequests !== undefined) {
+        updates.push(`successful_requests = $${paramIndex}`);
+        params.push(successfulRequests);
+        paramIndex++;
+      }
+
+      if (failedRequests !== undefined) {
+        updates.push(`failed_requests = $${paramIndex}`);
+        params.push(failedRequests);
+        paramIndex++;
+      }
+
       // 注意：error_message, completed_at, actual_duration 字段在当前数据库表中不存在
       // 这些信息可以通过其他字段推导或存储在 results 中
 
@@ -385,9 +404,8 @@ class TestHistoryService {
    */
   async startTest(testId, userId = null) {
     try {
-      const { query } = require('../../config/database');
-
-      const client = await query.connect();
+      const pool = getPool();
+      const client = await pool.connect();
 
       try {
         await client.query('BEGIN');
@@ -442,7 +460,6 @@ class TestHistoryService {
    */
   async updateTestProgress(testId, progressData) {
     try {
-      const { query } = require('../../config/database');
 
       const {
         progress = 0,
@@ -482,9 +499,8 @@ class TestHistoryService {
    */
   async completeTest(testId, finalResults, userId = null) {
     try {
-      const { query } = require('../../config/database');
-
-      const client = await query.connect();
+      const pool = getPool();
+      const client = await pool.connect();
 
       try {
         await client.query('BEGIN');
@@ -578,7 +594,6 @@ class TestHistoryService {
    */
   async deleteTestRecord(testId, userId) {
     try {
-      const { query } = require('../../config/database');
 
       const result = await query(
         'DELETE FROM test_history WHERE id = $1 AND user_id = $2',
@@ -605,9 +620,8 @@ class TestHistoryService {
    */
   async failTest(testId, errorMessage, errorDetails = {}, userId = null) {
     try {
-      const { query } = require('../../config/database');
-
-      const client = await query.connect();
+      const pool = getPool();
+      const client = await pool.connect();
 
       try {
         await client.query('BEGIN');
@@ -676,9 +690,8 @@ class TestHistoryService {
    */
   async cancelTest(testId, reason = '用户取消', userId = null) {
     try {
-      const { query } = require('../../config/database');
-
-      const client = await query.connect();
+      const pool = getPool();
+      const client = await pool.connect();
 
       try {
         await client.query('BEGIN');
@@ -744,7 +757,6 @@ class TestHistoryService {
    */
   async getTestProgress(testId, userId = null) {
     try {
-      const { query } = require('../../config/database');
 
       const whereClause = userId ?
         'WHERE tpl.test_history_id = $1 AND th.user_id = $2' :
@@ -777,7 +789,6 @@ class TestHistoryService {
    */
   async batchDeleteTestRecords(testIds, userId) {
     try {
-      const { query } = require('../../config/database');
 
       const result = await query(
         'DELETE FROM test_history WHERE id = ANY($1) AND user_id = $2',
@@ -882,7 +893,6 @@ class TestHistoryService {
    */
   async getTestTypeStats(userId, timeRange = 30) {
     try {
-      const { query } = require('../../config/database');
 
       const result = await query(
         `SELECT 

@@ -1,24 +1,24 @@
-# 压力测试中止功能完善
+# 压力测试取消功能完善
 
 ## 🎯 功能概述
 
-完善了压力测试的中止功能，允许用户在测试运行过程中安全地停止测试，并保留已收集的数据。
+完善了压力测试的取消功能，允许用户在测试运行过程中安全地取消测试，并保留已收集的数据。
 
 ## ✨ 新增功能
 
-### 1. **后端中止支持**
-- ✅ 添加了 `stopStressTest()` 方法
-- ✅ 添加了 `shouldStopTest()` 检查方法
+### 1. **后端取消支持**
+- ✅ 添加了 `cancelStressTest()` 方法
+- ✅ 添加了 `shouldCancelTest()` 检查方法
 - ✅ 添加了 `cleanupTest()` 资源清理方法
-- ✅ 在虚拟用户循环中添加中止检查
+- ✅ 在虚拟用户循环中添加取消检查
 
 ### 2. **API端点**
-- ✅ 新增 `POST /api/test/stress/stop/:testId` 端点
-- ✅ 支持安全的测试中止和状态更新
+- ✅ 新增 `POST /api/test/stress/cancel/:testId` 端点
+- ✅ 支持安全的测试取消和状态更新
 
 ### 3. **前端用户体验**
-- ✅ 添加中止确认对话框
-- ✅ 停止按钮加载状态显示
+- ✅ 添加取消确认对话框
+- ✅ 取消按钮加载状态显示
 - ✅ 实时状态更新和反馈
 - ✅ WebSocket事件处理
 
@@ -26,40 +26,40 @@
 
 ### 后端实现
 
-#### 1. 压力测试引擎中止方法
+#### 1. 压力测试引擎取消方法
 ```javascript
 // server/services/realStressTestEngine.js
 
-async stopStressTest(testId) {
+async cancelStressTest(testId) {
   // 获取测试状态
   const testStatus = this.runningTests.get(testId);
-  
+
   // 标记为取消
   testStatus.status = 'cancelled';
   testStatus.cancelled = true;
-  
+
   // 广播取消状态
   this.broadcastTestStatus(testId, {
     status: 'cancelled',
     message: '测试已被用户取消'
   });
-  
+
   // 计算最终指标
   this.calculateFinalMetrics(testStatus);
-  
+
   return { success: true, data: testStatus };
 }
 ```
 
-#### 2. 虚拟用户循环中止检查
+#### 2. 虚拟用户循环取消检查
 ```javascript
 while (Date.now() < endTime) {
-  // 检查测试是否被中止
-  if (this.shouldStopTest(results.testId)) {
-    console.log(`🛑 用户 ${userId} 检测到测试中止，退出循环`);
+  // 检查测试是否被取消
+  if (this.shouldCancelTest(results.testId)) {
+    console.log(`🛑 用户 ${userId} 检测到测试取消，退出循环`);
     break;
   }
-  
+
   // 继续执行请求...
 }
 ```
@@ -68,10 +68,10 @@ while (Date.now() < endTime) {
 ```javascript
 // server/routes/test.js
 
-router.post('/stress/stop/:testId', optionalAuth, asyncHandler(async (req, res) => {
+router.post('/stress/cancel/:testId', optionalAuth, asyncHandler(async (req, res) => {
   const { testId } = req.params;
-  const result = await realStressTestEngine.stopStressTest(testId);
-  
+  const result = await realStressTestEngine.cancelStressTest(testId);
+
   if (result.success) {
     res.json({ success: true, data: result.data });
   } else {
@@ -82,39 +82,39 @@ router.post('/stress/stop/:testId', optionalAuth, asyncHandler(async (req, res) 
 
 ### 前端实现
 
-#### 1. 中止函数
+#### 1. 取消函数
 ```typescript
 // src/pages/StressTest.tsx
 
-const handleStopTest = async () => {
+const handleCancelTest = async () => {
   // 确认对话框
   const confirmed = window.confirm(
-    '确定要停止当前的压力测试吗？\n\n停止后将无法恢复测试，但会保留已收集的数据。'
+    '确定要取消当前的压力测试吗？\n\n取消后将无法恢复测试，但会保留已收集的数据。'
   );
-  
+
   if (!confirmed) return;
-  
+
   try {
-    setIsStopping(true);
-    
+    setIsCancelling(true);
+
     // 调用后端API
-    const response = await fetch(`/api/test/stress/stop/${currentTestId}`, {
+    const response = await fetch(`/api/test/stress/cancel/${currentTestId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }
     });
-    
+
     const data = await response.json();
-    
+
     if (data.success) {
       // 更新状态
       setResult({ ...data.data, status: 'cancelled' });
-      setTestStatus('failed'); // 使用 failed 状态表示取消
-      setTestProgress('测试已停止');
+      setTestStatus('cancelled'); // 使用 cancelled 状态
+      setTestProgress('测试已取消');
     }
   } catch (error) {
-    setError(`停止测试失败: ${error.message}`);
+    setError(`取消测试失败: ${error.message}`);
   } finally {
-    setIsStopping(false);
+    setIsCancelling(false);
   }
 };
 ```

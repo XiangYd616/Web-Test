@@ -1167,16 +1167,50 @@ router.get('/stress/status/:testId', optionalAuth, asyncHandler(async (req, res)
 }));
 
 /**
- * 停止压力测试
+ * 取消压力测试
+ * POST /api/test/stress/cancel/:testId
+ */
+router.post('/stress/cancel/:testId', authMiddleware, asyncHandler(async (req, res) => {
+  const { testId } = req.params;
+
+  try {
+    console.log(`🛑 收到取消压力测试请求: ${testId}`);
+
+    const result = await realStressTestEngine.cancelStressTest(testId);
+
+    if (result.success) {
+      res.json({
+        success: true,
+        message: result.message,
+        data: result.data
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: result.message
+      });
+    }
+  } catch (error) {
+    console.error('取消压力测试失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '取消测试失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 停止压力测试 (向后兼容)
  * POST /api/test/stress/stop/:testId
  */
 router.post('/stress/stop/:testId', authMiddleware, asyncHandler(async (req, res) => {
   const { testId } = req.params;
 
   try {
-    console.log(`🛑 收到停止压力测试请求: ${testId}`);
+    console.log(`🛑 收到停止压力测试请求(向后兼容): ${testId}`);
 
-    const result = await realStressTestEngine.stopStressTest(testId);
+    const result = await realStressTestEngine.cancelStressTest(testId);
 
     if (result.success) {
       res.json({
@@ -1205,56 +1239,75 @@ router.post('/stress/stop/:testId', authMiddleware, asyncHandler(async (req, res
  * POST /api/test/stress
  */
 router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
-  const { url, testId, options = {} } = req.body;
+  const { url, testId, recordId, options = {} } = req.body;
 
   // URL验证已由中间件完成，可以直接使用验证后的URL
   const validatedURL = req.validatedURL.url.toString();
-  let testRecordId = null;
+  let testRecordId = recordId; // 使用前端传递的记录ID
 
   try {
     console.log('🚀 收到压力测试请求:', {
       url: validatedURL,
       testId: testId,
+      recordId: recordId,
       hasPreGeneratedTestId: !!testId,
+      hasRecordId: !!recordId,
       options: options
     });
 
-    // 1. 立即创建测试记录（状态为running）
+    // 1. 处理测试记录
     if (req.user?.id) {
       try {
-        const testRecord = await testHistoryService.createTestRecord({
-          testName: `压力测试 - ${new URL(validatedURL).hostname}`,
-          testType: 'stress',
-          url: validatedURL,
-          status: 'running',
-          userId: req.user.id,
-          config: {
-            users: options.users || 10,
-            duration: options.duration || 30,
-            rampUpTime: options.rampUpTime || 5,
-            testType: options.testType || 'gradual',
-            method: options.method || 'GET',
-            timeout: options.timeout || 10,
-            thinkTime: options.thinkTime || 1
-          }
-        });
-        testRecordId = testRecord.data.id;
+        if (recordId) {
+          // 如果前端传递了记录ID，更新现有记录状态为running
+          await testHistoryService.updateTestRecord(recordId, {
+            status: 'running',
+            config: {
+              users: options.users || 10,
+              duration: options.duration || 30,
+              rampUpTime: options.rampUpTime || 5,
+              testType: options.testType || 'gradual',
+              method: options.method || 'GET',
+              timeout: options.timeout || 10,
+              thinkTime: options.thinkTime || 1
+            }
+          });
+          console.log('✅ 测试记录已更新为运行中状态:', recordId);
+        } else {
+          // 如果没有记录ID，创建新记录
+          const testRecord = await testHistoryService.createTestRecord({
+            testName: `压力测试 - ${new URL(validatedURL).hostname}`,
+            testType: 'stress',
+            url: validatedURL,
+            status: 'running',
+            userId: req.user.id,
+            config: {
+              users: options.users || 10,
+              duration: options.duration || 30,
+              rampUpTime: options.rampUpTime || 5,
+              testType: options.testType || 'gradual',
+              method: options.method || 'GET',
+              timeout: options.timeout || 10,
+              thinkTime: options.thinkTime || 1
+            }
+          });
+          testRecordId = testRecord.data.id;
+          console.log('✅ 测试记录已创建(运行中状态):', testRecordId);
+        }
 
-        // 广播新测试记录到测试历史页面
-        if (global.io) {
+        // 广播测试记录状态更新到测试历史页面
+        if (global.io && testRecordId) {
           global.io.to('test-history-updates').emit('test-record-update', {
             type: 'test-record-update',
             recordId: testRecordId,
             updates: {
-              ...testRecord.data,
+              id: testRecordId,
               status: 'running'
             }
           });
         }
-
-        console.log('✅ 测试记录已创建(运行中状态):', testRecordId);
       } catch (dbError) {
-        console.error('❌ 创建测试记录失败:', dbError);
+        console.error('❌ 处理测试记录失败:', dbError);
         // 继续执行测试，不因记录失败而中断
       }
     }
@@ -1280,10 +1333,16 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
     // 3. 更新测试记录为完成状态
     if (req.user?.id && testRecordId && responseData) {
       try {
+        // 从测试结果中提取统计数据
+        const metrics = responseData.metrics || {};
+        const totalRequests = metrics.totalRequests || 0;
+        const successfulRequests = metrics.successfulRequests || 0;
+        const failedRequests = metrics.failedRequests || 0;
+
         await testHistoryService.updateTestRecord(testRecordId, {
           status: responseData.status === 'completed' ? 'completed' : 'failed',
           endTime: responseData.endTime || new Date().toISOString(),
-          duration: responseData.actualDuration,
+          duration: Math.round(responseData.actualDuration || 0),
           results: {
             metrics: responseData.metrics,
             realTimeData: responseData.realTimeData,
@@ -1293,7 +1352,10 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
             actualDuration: responseData.actualDuration,
             currentPhase: responseData.currentPhase
           },
-          overallScore: responseData.overallScore || this.calculateOverallScore(responseData.metrics)
+          overallScore: Math.round(responseData.overallScore || 0),
+          totalRequests: totalRequests,
+          successfulRequests: successfulRequests,
+          failedRequests: failedRequests
         });
 
         // 广播测试完成状态到测试历史页面
@@ -1305,7 +1367,7 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
               id: testRecordId,
               status: responseData.status === 'completed' ? 'completed' : 'failed',
               endTime: responseData.endTime || new Date().toISOString(),
-              duration: responseData.actualDuration,
+              duration: Math.round(responseData.actualDuration || 0),
               progress: 100
             }
           });

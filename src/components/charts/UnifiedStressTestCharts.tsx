@@ -13,11 +13,14 @@ export enum TestStatus {
   STARTING = 'starting',
   RUNNING = 'running',
   COMPLETED = 'completed',
-  FAILED = 'failed'
+  FAILED = 'failed',
+  CANCELLED = 'cancelled',
+  WAITING = 'waiting',
+  TIMEOUT = 'timeout'
 }
 
 // 测试状态类型
-export type TestStatusType = 'idle' | 'starting' | 'running' | 'completed' | 'failed';
+export type TestStatusType = 'idle' | 'starting' | 'running' | 'completed' | 'failed' | 'cancelled' | 'waiting' | 'timeout';
 
 // 统一的数据接口
 interface UnifiedTestData {
@@ -165,15 +168,35 @@ export const UnifiedStressTestCharts: React.FC<UnifiedStressTestChartsProps> = (
 
   // 状态指示器
   const getStatusIndicator = () => {
+
     const statusConfig = {
       [TestStatus.IDLE]: { color: 'bg-gray-500', text: '待机', icon: Square },
       [TestStatus.STARTING]: { color: 'bg-yellow-500', text: '启动中', icon: RefreshCw },
       [TestStatus.RUNNING]: { color: 'bg-green-500', text: '运行中', icon: Play },
       [TestStatus.COMPLETED]: { color: 'bg-blue-500', text: '已完成', icon: BarChart3 },
-      [TestStatus.FAILED]: { color: 'bg-red-500', text: '失败', icon: Square }
+      [TestStatus.FAILED]: { color: 'bg-red-500', text: '失败', icon: Square },
+      [TestStatus.CANCELLED]: { color: 'bg-yellow-500', text: '已取消', icon: Square },
+      [TestStatus.WAITING]: { color: 'bg-purple-500', text: '等待中', icon: RefreshCw },
+      [TestStatus.TIMEOUT]: { color: 'bg-orange-500', text: '已超时', icon: Square }
     };
 
-    const config = statusConfig[testStatus];
+    // 安全检查：处理字符串状态值和枚举值
+    let config = statusConfig[testStatus];
+
+    // 如果直接查找失败，尝试通过字符串值查找
+    if (!config) {
+      const statusKey = Object.keys(TestStatus).find(key => TestStatus[key as keyof typeof TestStatus] === testStatus);
+      if (statusKey) {
+        config = statusConfig[TestStatus[statusKey as keyof typeof TestStatus]];
+      }
+    }
+
+    // 最后的安全检查：使用默认配置
+    if (!config) {
+      console.warn('⚠️ 未知状态，使用默认配置:', testStatus);
+      config = statusConfig[TestStatus.IDLE];
+    }
+
     const Icon = config.icon;
 
     return (

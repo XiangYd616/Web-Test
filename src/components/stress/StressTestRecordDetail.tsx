@@ -33,13 +33,73 @@ const StressTestRecordDetail: React.FC<StressTestRecordDetailProps> = ({
   onExport,
   onDelete
 }) => {
-  const metrics = record.results?.metrics;
-  const config = record.config;
+  // 使用 useMemo 优化数据处理，避免不必要的重新计算
+  const processedData = useMemo(() => {
+    const config = record?.config || {};
+    const results = record?.results || {};
+    const metrics = results?.metrics || {};
+
+    // 安全的数据访问，防止 undefined 错误
+    const safeMetrics = {
+      totalRequests: metrics.totalRequests || 0,
+      successfulRequests: metrics.successfulRequests || 0,
+      failedRequests: metrics.failedRequests || 0,
+      averageResponseTime: metrics.averageResponseTime || 0,
+      minResponseTime: metrics.minResponseTime || 0,
+      maxResponseTime: metrics.maxResponseTime || 0,
+      throughput: metrics.throughput || 0,
+      errorRate: metrics.errorRate || 0,
+      ...metrics
+    };
+
+    return {
+      config,
+      results,
+      metrics: safeMetrics,
+      hasValidData: Boolean(record && Object.keys(config).length > 0)
+    };
+  }, [record]);
+
+  const { config, results, metrics, hasValidData } = processedData;
+
+  // 错误边界处理
+  if (!record) {
+    return (
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+        <div className="flex items-center justify-center py-12">
+          <AlertCircle className="w-12 h-12 text-red-400 mb-4" />
+          <div className="text-center">
+            <h3 className="text-lg font-medium text-white mb-2">数据加载错误</h3>
+            <p className="text-gray-400">无法加载测试记录详情</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!hasValidData) {
+    return (
+      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+        <div className="flex items-center justify-center py-12">
+          <AlertCircle className="w-12 h-12 text-yellow-400 mb-4" />
+          <div className="text-center">
+            <h3 className="text-lg font-medium text-white mb-2">数据不完整</h3>
+            <p className="text-gray-400">测试记录数据不完整或损坏</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // 格式化时间
   const formatTime = (timestamp?: string) => {
     if (!timestamp) return 'N/A';
-    return new Date(timestamp).toLocaleString('zh-CN');
+    try {
+      return new Date(timestamp).toLocaleString('zh-CN');
+    } catch (error) {
+      console.warn('时间格式化失败:', error);
+      return 'N/A';
+    }
   };
 
   // 格式化持续时间
@@ -112,7 +172,8 @@ const StressTestRecordDetail: React.FC<StressTestRecordDetailProps> = ({
                 <span className="capitalize">
                   {record.status === 'completed' ? '已完成' :
                     record.status === 'failed' ? '失败' :
-                      record.status === 'running' ? '运行中' : '已取消'}
+                      record.status === 'cancelled' ? '已取消' :
+                        record.status === 'running' ? '运行中' : '已取消'}
                 </span>
               </div>
               {record.performanceGrade && (
@@ -215,7 +276,7 @@ const StressTestRecordDetail: React.FC<StressTestRecordDetailProps> = ({
             <TrendingUp className="w-4 h-4 mr-2 text-purple-400" />
             性能指标
           </h3>
-          
+
           {/* 关键指标 */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
