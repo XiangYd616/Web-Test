@@ -14,6 +14,7 @@ import {
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import './StatusLabel.css';
 
 // 测试记录接口
 interface TestRecord {
@@ -176,26 +177,25 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
     }
   };
 
-  // 获取状态文字颜色（内联样式）
-  const getStatusTextColor = (status: string) => {
-    const isDark = document.documentElement.classList.contains('dark');
+  // 获取状态文字颜色CSS类（高specificity）
+  const getStatusTextColorClass = (status: string) => {
     switch (status) {
       case 'completed':
-        return isDark ? '#ffffff' : '#166534'; // 白色 : green-800 (深色模式用白色)
+        return 'status-label-completed';
       case 'failed':
-        return isDark ? '#ffffff' : '#991b1b'; // 白色 : red-800 (深色模式用白色)
+        return 'status-label-failed';
       case 'running':
-        return isDark ? '#ffffff' : '#1e40af'; // 白色 : blue-800 (深色模式用白色)
+        return 'status-label-running';
       case 'cancelled':
-        return isDark ? '#ffffff' : '#374151'; // 白色 : gray-800 (深色模式用白色)
+        return 'status-label-cancelled';
       case 'pending':
-        return isDark ? '#ffffff' : '#a16207'; // 白色 : yellow-800 (深色模式用白色)
+        return 'status-label-pending';
       case 'waiting':
-        return isDark ? '#ffffff' : '#6b21a8'; // 白色 : purple-800 (深色模式用白色)
+        return 'status-label-waiting';
       case 'timeout':
-        return isDark ? '#ffffff' : '#c2410c'; // 白色 : orange-800 (深色模式用白色)
+        return 'status-label-timeout';
       default:
-        return isDark ? '#ffffff' : '#374151'; // 白色 : gray-800 (深色模式用白色)
+        return 'status-label-default';
     }
   };
 
@@ -461,8 +461,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
                         {record.testName}
                       </h3>
                       <span
-                        className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${getStatusStyle(record.status)}`}
-                        style={{ color: getStatusTextColor(record.status) }}
+                        className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${getStatusStyle(record.status)} ${getStatusTextColorClass(record.status)}`}
                       >
                         {getStatusIcon(record.status)}
                         {record.status === 'completed' ? '已完成' :

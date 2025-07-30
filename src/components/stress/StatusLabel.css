@@ -1,0 +1,66 @@
+/* 状态标签颜色 - 高优先级覆盖全局样式 */
+
+/* 使用高specificity来覆盖 .dark-theme-wrapper 的 !important 规则 */
+.status-label-completed {
+  color: #166534 !important; /* green-800 */
+}
+
+.dark .status-label-completed {
+  color: #ffffff !important; /* white */
+}
+
+.status-label-failed {
+  color: #991b1b !important; /* red-800 */
+}
+
+.dark .status-label-failed {
+  color: #ffffff !important; /* white */
+}
+
+.status-label-running {
+  color: #1e40af !important; /* blue-800 */
+}
+
+.dark .status-label-running {
+  color: #ffffff !important; /* white */
+}
+
+.status-label-cancelled {
+  color: #374151 !important; /* gray-800 */
+}
+
+.dark .status-label-cancelled {
+  color: #ffffff !important; /* white */
+}
+
+.status-label-pending {
+  color: #a16207 !important; /* yellow-800 */
+}
+
+.dark .status-label-pending {
+  color: #ffffff !important; /* white */
+}
+
+.status-label-waiting {
+  color: #6b21a8 !important; /* purple-800 */
+}
+
+.dark .status-label-waiting {
+  color: #ffffff !important; /* white */
+}
+
+.status-label-timeout {
+  color: #c2410c !important; /* orange-800 */
+}
+
+.dark .status-label-timeout {
+  color: #ffffff !important; /* white */
+}
+
+.status-label-default {
+  color: #374151 !important; /* gray-800 */
+}
+
+.dark .status-label-default {
+  color: #ffffff !important; /* white */
+}
