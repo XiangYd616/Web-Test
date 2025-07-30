@@ -12,6 +12,7 @@ import {
   XCircle
 } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 
 // 测试记录接口
@@ -46,6 +47,9 @@ interface StressTestHistoryProps {
 }
 
 const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' }) => {
+  // 认证状态
+  const { isAuthenticated, user } = useAuth();
+
   // 主题钩子
   const { actualTheme } = useTheme();
 
@@ -291,6 +295,30 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
     link.click();
     URL.revokeObjectURL(url);
   };
+
+  // 未登录状态显示
+  if (!isAuthenticated) {
+    return (
+      <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 ${className}`}>
+        <div className="p-12 text-center">
+          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600 p-8 max-w-md mx-auto">
+            <Activity className="w-16 h-16 mx-auto mb-6 text-gray-400" />
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">需要登录</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
+              请登录以查看您的压力测试历史记录
+            </p>
+            <button
+              type="button"
+              onClick={() => window.location.href = '/login'}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+            >
+              立即登录
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 ${className}`}>
