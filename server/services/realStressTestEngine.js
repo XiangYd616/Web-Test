@@ -28,7 +28,9 @@ class RealStressTestEngine {
       method = 'GET',
       timeout = 10,
       thinkTime = 1,
-      testId: preGeneratedTestId
+      testId: preGeneratedTestId,
+      userId,
+      recordId
     } = config;
 
     // 使用预生成的testId或生成新的testId
@@ -37,7 +39,9 @@ class RealStressTestEngine {
     console.log('🎯 压力测试引擎使用testId:', {
       testId: testId,
       isPreGenerated: !!preGeneratedTestId,
-      url: url
+      url: url,
+      userId: userId,
+      recordId: recordId
     });
 
     // 初始化测试状态
@@ -47,6 +51,8 @@ class RealStressTestEngine {
       startTime: Date.now(),
       url: url,
       config: config,
+      userId: userId,
+      recordId: recordId,
       realTimeMetrics: {
         totalRequests: 0,
         successfulRequests: 0,
@@ -321,8 +327,10 @@ class RealStressTestEngine {
    */
   startProgressMonitor(results, totalDuration) {
     const startTime = Date.now();
+    let progressUpdateCount = 0;
 
     return setInterval(() => {
+      progressUpdateCount++;
       const elapsed = Date.now() - startTime;
       const progress = Math.min(100, (elapsed / totalDuration) * 100);
       results.progress = Math.round(progress);
@@ -352,6 +360,16 @@ class RealStressTestEngine {
       // 限制实时数据数量
       if (results.realTimeData.length > 100) {
         results.realTimeData = results.realTimeData.slice(-100);
+      }
+
+      // 每5秒更新一次数据库记录
+      if (progressUpdateCount % 5 === 0) {
+        this.updateTestRecordProgress(
+          results.testId,
+          results.progress,
+          results.currentPhase,
+          results.metrics
+        );
       }
 
       console.log(`📊 Progress: ${results.progress}%, Active users: ${results.metrics.activeUsers}, Total requests: ${results.metrics.totalRequests}`);
@@ -933,6 +951,53 @@ class RealStressTestEngine {
    */
   removeTestStatus(testId) {
     this.runningTests.delete(testId);
+  }
+
+  /**
+   * 更新数据库中的测试记录进度
+   */
+  async updateTestRecordProgress(testId, progress, phase, metrics) {
+    try {
+      const testStatus = this.runningTests.get(testId);
+      if (!testStatus || !testStatus.recordId || !testStatus.userId) {
+        return; // 没有数据库记录ID或用户ID，跳过更新
+      }
+
+      // 导入testHistoryService
+      const TestHistoryService = require('./dataManagement/testHistoryService');
+      const testHistoryService = new TestHistoryService();
+
+      // 更新测试记录进度
+      const updateData = {
+        progress: Math.round(progress),
+        currentPhase: phase,
+        results: {
+          metrics: metrics,
+          lastUpdate: new Date().toISOString()
+        }
+      };
+
+      await testHistoryService.updateTestRecord(testStatus.recordId, updateData);
+
+      // 广播测试记录更新到测试历史页面
+      if (global.io) {
+        global.io.to('test-history-updates').emit('test-record-update', {
+          type: 'test-record-update',
+          recordId: testStatus.recordId,
+          updates: {
+            id: testStatus.recordId,
+            progress: Math.round(progress),
+            currentPhase: phase,
+            status: 'running',
+            ...updateData
+          }
+        });
+      }
+
+      console.log(`📊 测试记录进度已更新: ${testStatus.recordId} - ${Math.round(progress)}%`);
+    } catch (error) {
+      console.error('更新测试记录进度失败:', error);
+    }
   }
 
   /**

@@ -88,20 +88,9 @@ const AppRoutes: React.FC = () => {
       {/* LoginDemo 路由已移除，因为文件不存在 */}
       {/* background-test-demo 路由已移除 */}
 
-      {/* 受保护的路由 */}
-      <Route path="/" element={
-        <ProtectedRoute>
-          <ModernLayout />
-        </ProtectedRoute>
-      }>
-        {/* 仪表板 */}
-        <Route index element={
-          <LazyPageWrapper>
-            <ModernDashboard />
-          </LazyPageWrapper>
-        } />
-
-        {/* 测试工具 */}
+      {/* 公开路由 - 测试工具页面 */}
+      <Route path="/" element={<ModernLayout />}>
+        {/* 测试工具 - 公开访问，但功能需要登录 */}
         <Route path="test" element={<Navigate to="/website-test" replace />} />
         <Route path="website-test" element={
           <LazyPageWrapper>
@@ -156,35 +145,7 @@ const AppRoutes: React.FC = () => {
           </LazyPageWrapper>
         } />
 
-        {/* 数据管理 */}
-        <Route path="data-storage" element={
-          <LazyPageWrapper>
-            <DataStorage />
-          </LazyPageWrapper>
-        } />
-        <Route path="data-management" element={
-          <LazyPageWrapper>
-            <DataManagement />
-          </LazyPageWrapper>
-        } />
-
-        <Route path="statistics" element={
-          <LazyPageWrapper>
-            <Statistics />
-          </LazyPageWrapper>
-        } />
-        <Route path="analytics" element={
-          <LazyPageWrapper>
-            <Analytics />
-          </LazyPageWrapper>
-        } />
-        <Route path="monitoring" element={
-          <LazyPageWrapper>
-            <MonitoringDashboard />
-          </LazyPageWrapper>
-        } />
-
-        {/* 报告和历史 */}
+        {/* 公开的测试历史查看 */}
         <Route path="test-history" element={
           <LazyPageWrapper>
             <TestHistory />
@@ -193,11 +154,6 @@ const AppRoutes: React.FC = () => {
         <Route path="enhanced-test-history" element={
           <LazyPageWrapper>
             <EnhancedTestHistory />
-          </LazyPageWrapper>
-        } />
-        <Route path="reports" element={
-          <LazyPageWrapper>
-            <Reports />
           </LazyPageWrapper>
         } />
         <Route path="test-result/:id" element={
@@ -216,43 +172,10 @@ const AppRoutes: React.FC = () => {
           </LazyPageWrapper>
         } />
 
-        {/* 用户相关 */}
-        <Route path="profile" element={
+        {/* 公开的帮助和文档 */}
+        <Route path="help" element={
           <LazyPageWrapper>
-            <UserProfile />
-          </LazyPageWrapper>
-        } />
-        <Route path="bookmarks" element={
-          <LazyPageWrapper>
-            <UserBookmarks />
-          </LazyPageWrapper>
-        } />
-        <Route path="notifications" element={
-          <LazyPageWrapper>
-            <Notifications />
-          </LazyPageWrapper>
-        } />
-
-        {/* 集成和配置 */}
-        <Route path="cicd" element={<Navigate to="/cicd-integration" replace />} />
-        <Route path="integrations" element={
-          <LazyPageWrapper>
-            <Integrations />
-          </LazyPageWrapper>
-        } />
-        <Route path="cicd-integration" element={
-          <LazyPageWrapper>
-            <CICDIntegration />
-          </LazyPageWrapper>
-        } />
-        <Route path="webhooks" element={
-          <LazyPageWrapper>
-            <Webhooks />
-          </LazyPageWrapper>
-        } />
-        <Route path="api-keys" element={
-          <LazyPageWrapper>
-            <APIKeys />
+            <Help />
           </LazyPageWrapper>
         } />
         <Route path="api-docs" element={
@@ -260,68 +183,9 @@ const AppRoutes: React.FC = () => {
             <APIDocs />
           </LazyPageWrapper>
         } />
-
-        {/* 调度和任务 */}
-        <Route path="test-schedule" element={
-          <LazyPageWrapper>
-            <TestSchedule />
-          </LazyPageWrapper>
-        } />
-        <Route path="scheduled-tasks" element={
-          <LazyPageWrapper>
-            <ScheduledTasks />
-          </LazyPageWrapper>
-        } />
-
-        {/* 系统管理 - 需要管理员权限 */}
-        <Route path="admin" element={
-          <AdminGuard>
-            <LazyPageWrapper>
-              <Admin />
-            </LazyPageWrapper>
-          </AdminGuard>
-        } />
-        <Route path="system-status" element={
-          <AdminGuard>
-            <LazyPageWrapper>
-              <SystemStatus />
-            </LazyPageWrapper>
-          </AdminGuard>
-        } />
-        <Route path="system-logs" element={
-          <AdminGuard>
-            <LazyPageWrapper>
-              <SystemLogs />
-            </LazyPageWrapper>
-          </AdminGuard>
-        } />
-        <Route path="backup-management" element={
-          <AdminGuard>
-            <LazyPageWrapper>
-              <BackupManagement />
-            </LazyPageWrapper>
-          </AdminGuard>
-        } />
-
-        {/* 其他功能 */}
-        <Route path="settings" element={
-          <LazyPageWrapper>
-            <UnifiedSettings />
-          </LazyPageWrapper>
-        } />
-        <Route path="help" element={
-          <LazyPageWrapper>
-            <Help />
-          </LazyPageWrapper>
-        } />
         <Route path="theme-showcase" element={
           <LazyPageWrapper>
             <ThemeShowcase />
-          </LazyPageWrapper>
-        } />
-        <Route path="subscription" element={
-          <LazyPageWrapper>
-            <Subscription />
           </LazyPageWrapper>
         } />
         <Route path="download-desktop" element={
@@ -330,6 +194,157 @@ const AppRoutes: React.FC = () => {
           </LazyPageWrapper>
         } />
       </Route>
+
+      {/* 首页重定向到网站测试 */}
+      <Route index element={<Navigate to="/website-test" replace />} />
+
+      {/* 仪表板 - 需要登录 */}
+      <Route path="dashboard" element={
+        <ProtectedRoute>
+          <LazyPageWrapper>
+            <ModernDashboard />
+          </LazyPageWrapper>
+        </ProtectedRoute>
+      } />
+
+      {/* 数据管理 - 需要登录 */}
+      <Route path="data-storage" element={
+        <ProtectedRoute>
+          <LazyPageWrapper>
+            <DataStorage />
+          </LazyPageWrapper>
+        </ProtectedRoute>
+      } />
+      <Route path="data-management" element={
+        <ProtectedRoute>
+          <LazyPageWrapper>
+            <DataManagement />
+          </LazyPageWrapper>
+        </ProtectedRoute>
+      } />
+
+      <Route path="statistics" element={
+        <ProtectedRoute>
+          <LazyPageWrapper>
+            <Statistics />
+          </LazyPageWrapper>
+        </ProtectedRoute>
+      } />
+      <Route path="analytics" element={
+        <ProtectedRoute>
+          <LazyPageWrapper>
+            <Analytics />
+          </LazyPageWrapper>
+        </ProtectedRoute>
+      } />
+      <Route path="monitoring" element={
+        <ProtectedRoute>
+          <LazyPageWrapper>
+            <MonitoringDashboard />
+          </LazyPageWrapper>
+        </ProtectedRoute>
+      } />
+
+      {/* 报告管理 - 需要登录 */}
+      <Route path="reports" element={
+        <LazyPageWrapper>
+          <Reports />
+        </LazyPageWrapper>
+      } />
+
+      {/* 用户相关 - 需要登录 */}
+      <Route path="profile" element={
+        <LazyPageWrapper>
+          <UserProfile />
+        </LazyPageWrapper>
+      } />
+      <Route path="bookmarks" element={
+        <LazyPageWrapper>
+          <UserBookmarks />
+        </LazyPageWrapper>
+      } />
+      <Route path="notifications" element={
+        <LazyPageWrapper>
+          <Notifications />
+        </LazyPageWrapper>
+      } />
+
+      {/* 集成和配置 - 需要登录 */}
+      <Route path="cicd" element={<Navigate to="/cicd-integration" replace />} />
+      <Route path="integrations" element={
+        <LazyPageWrapper>
+          <Integrations />
+        </LazyPageWrapper>
+      } />
+      <Route path="cicd-integration" element={
+        <LazyPageWrapper>
+          <CICDIntegration />
+        </LazyPageWrapper>
+      } />
+      <Route path="webhooks" element={
+        <LazyPageWrapper>
+          <Webhooks />
+        </LazyPageWrapper>
+      } />
+      <Route path="api-keys" element={
+        <LazyPageWrapper>
+          <APIKeys />
+        </LazyPageWrapper>
+      } />
+
+      {/* 调度和任务 - 需要登录 */}
+      <Route path="test-schedule" element={
+        <LazyPageWrapper>
+          <TestSchedule />
+        </LazyPageWrapper>
+      } />
+      <Route path="scheduled-tasks" element={
+        <LazyPageWrapper>
+          <ScheduledTasks />
+        </LazyPageWrapper>
+      } />
+
+      {/* 用户设置 - 需要登录 */}
+      <Route path="settings" element={
+        <LazyPageWrapper>
+          <UnifiedSettings />
+        </LazyPageWrapper>
+      } />
+      <Route path="subscription" element={
+        <LazyPageWrapper>
+          <Subscription />
+        </LazyPageWrapper>
+      } />
+
+      {/* 系统管理 - 需要管理员权限 */}
+      <Route path="admin" element={
+        <AdminGuard>
+          <LazyPageWrapper>
+            <Admin />
+          </LazyPageWrapper>
+        </AdminGuard>
+      } />
+      <Route path="system-status" element={
+        <AdminGuard>
+          <LazyPageWrapper>
+            <SystemStatus />
+          </LazyPageWrapper>
+        </AdminGuard>
+      } />
+      <Route path="system-logs" element={
+        <AdminGuard>
+          <LazyPageWrapper>
+            <SystemLogs />
+          </LazyPageWrapper>
+        </AdminGuard>
+      } />
+      <Route path="backup-management" element={
+        <AdminGuard>
+          <LazyPageWrapper>
+            <BackupManagement />
+          </LazyPageWrapper>
+        </AdminGuard>
+      } />
     </Routes>
   );
 };

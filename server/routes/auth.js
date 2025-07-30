@@ -447,4 +447,223 @@ router.put('/change-password', authMiddleware, asyncHandler(async (req, res) => 
   }
 }));
 
+/**
+ * 密码重置请求
+ * POST /api/auth/forgot-password
+ */
+router.post('/forgot-password', asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({
+      success: false,
+      message: '邮箱地址是必需的'
+    });
+  }
+
+  try {
+    // 检查用户是否存在
+    const userResult = await query(
+      'SELECT id, email, username FROM users WHERE email = $1 AND is_active = true',
+      [email]
+    );
+
+    // 无论用户是否存在，都返回成功消息（安全考虑）
+    if (userResult.rows.length === 0) {
+      return res.json({
+        success: true,
+        message: '如果该邮箱地址存在，我们已发送重置密码的邮件'
+      });
+    }
+
+    const user = userResult.rows[0];
+
+    // 生成重置令牌
+    const crypto = require('crypto');
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenExpiry = new Date(Date.now() + 3600000); // 1小时后过期
+
+    // 保存重置令牌
+    await query(
+      'UPDATE users SET reset_token = $1, reset_token_expires = $2 WHERE id = $3',
+      [resetToken, resetTokenExpiry, user.id]
+    );
+
+    // TODO: 发送重置密码邮件
+    console.log(`密码重置令牌: ${resetToken} (用户: ${user.email})`);
+
+    res.json({
+      success: true,
+      message: '如果该邮箱地址存在，我们已发送重置密码的邮件'
+    });
+
+  } catch (error) {
+    console.error('密码重置请求失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '服务器错误，请稍后重试'
+    });
+  }
+}));
+
+/**
+ * 重置密码
+ * POST /api/auth/reset-password
+ */
+router.post('/reset-password', asyncHandler(async (req, res) => {
+  const { token, newPassword, confirmPassword } = req.body;
+
+  if (!token || !newPassword || !confirmPassword) {
+    return res.status(400).json({
+      success: false,
+      message: '所有字段都是必需的'
+    });
+  }
+
+  if (newPassword !== confirmPassword) {
+    return res.status(400).json({
+      success: false,
+      message: '密码确认不匹配'
+    });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({
+      success: false,
+      message: '密码长度至少为6个字符'
+    });
+  }
+
+  try {
+    // 查找有效的重置令牌
+    const userResult = await query(
+      'SELECT id, email, username FROM users WHERE reset_token = $1 AND reset_token_expires > NOW() AND is_active = true',
+      [token]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: '重置令牌无效或已过期'
+      });
+    }
+
+    const user = userResult.rows[0];
+
+    // 加密新密码
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // 更新密码并清除重置令牌
+    await query(
+      'UPDATE users SET password = $1, reset_token = NULL, reset_token_expires = NULL, updated_at = NOW() WHERE id = $2',
+      [hashedPassword, user.id]
+    );
+
+    res.json({
+      success: true,
+      message: '密码重置成功，请使用新密码登录'
+    });
+
+  } catch (error) {
+    console.error('密码重置失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '服务器错误，请稍后重试'
+    });
+  }
+}));
+
+/**
+ * 发送邮箱验证
+ * POST /api/auth/send-verification
+ */
+router.post('/send-verification', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const user = req.user;
+
+    if (user.email_verified) {
+      return res.status(400).json({
+        success: false,
+        message: '邮箱已经验证过了'
+      });
+    }
+
+    // 生成验证令牌
+    const crypto = require('crypto');
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const verificationExpiry = new Date(Date.now() + 86400000); // 24小时后过期
+
+    // 保存验证令牌
+    await query(
+      'UPDATE users SET verification_token = $1, verification_expires = $2 WHERE id = $3',
+      [verificationToken, verificationExpiry, user.id]
+    );
+
+    // TODO: 发送验证邮件
+    console.log(`邮箱验证令牌: ${verificationToken} (用户: ${user.email})`);
+
+    res.json({
+      success: true,
+      message: '验证邮件已发送，请检查您的邮箱'
+    });
+
+  } catch (error) {
+    console.error('发送验证邮件失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '服务器错误，请稍后重试'
+    });
+  }
+}));
+
+/**
+ * 验证邮箱
+ * POST /api/auth/verify-email
+ */
+router.post('/verify-email', asyncHandler(async (req, res) => {
+  const { token } = req.body;
+
+  if (!token) {
+    return res.status(400).json({
+      success: false,
+      message: '验证令牌是必需的'
+    });
+  }
+
+  try {
+    // 查找有效的验证令牌
+    const userResult = await query(
+      'SELECT id, email, username FROM users WHERE verification_token = $1 AND verification_expires > NOW()',
+      [token]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: '验证令牌无效或已过期'
+      });
+    }
+
+    const user = userResult.rows[0];
+
+    // 标记邮箱为已验证
+    await query(
+      'UPDATE users SET email_verified = true, verification_token = NULL, verification_expires = NULL, updated_at = NOW() WHERE id = $1',
+      [user.id]
+    );
+
+    res.json({
+      success: true,
+      message: '邮箱验证成功'
+    });
+
+  } catch (error) {
+    console.error('邮箱验证失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '服务器错误，请稍后重试'
+    });
+  }
+}));
+
 module.exports = router;

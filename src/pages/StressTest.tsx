@@ -147,7 +147,7 @@ const StressTest: React.FC = () => {
 
     // 启动真实的压力测试
     const startRealStressTest = async () => {
-        // 检查登录状态
+        // 检查登录状态 - 要求登录
         if (!requireLogin()) {
             return;
         }
@@ -177,9 +177,7 @@ const StressTest: React.FC = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    ...(localStorage.getItem('auth_token') ? {
-                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-                    } : {})
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                 },
                 body: JSON.stringify({
                     testName: `压力测试 - ${new URL(testConfig.url.trim()).hostname}`,
@@ -1253,7 +1251,7 @@ const StressTest: React.FC = () => {
     };
 
     const handleStartTest = async () => {
-        // 检查登录状态
+        // 检查登录状态 - 要求登录
         if (!requireLogin()) {
             return;
         }
@@ -2055,7 +2053,7 @@ const StressTest: React.FC = () => {
                                         ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                                         : isAuthenticated
                                             ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl'
-                                            : 'bg-yellow-600 hover:bg-yellow-700 text-white'
+                                            : 'bg-yellow-600 hover:bg-yellow-700 text-white shadow-lg hover:shadow-xl'
                                         }`}
                                 >
                                     {isAuthenticated ? (

@@ -4,7 +4,7 @@
 
 const express = require('express');
 const { query } = require('../config/database');
-const { authMiddleware, optionalAuth } = require('../middleware/auth');
+const { authMiddleware, optionalAuth, adminAuth } = require('../middleware/auth');
 const { testRateLimiter } = require('../middleware/rateLimiter');
 const { asyncHandler } = require('../middleware/errorHandler');
 const { validateURLMiddleware, validateAPIURLMiddleware } = require('../middleware/urlValidator');
@@ -107,7 +107,7 @@ router.get('/k6/status', asyncHandler(async (req, res) => {
  * K6 引擎安装
  * POST /api/test-engines/k6/install
  */
-router.post('/k6/install', authMiddleware, asyncHandler(async (req, res) => {
+router.post('/k6/install', authMiddleware, adminAuth, asyncHandler(async (req, res) => {
   try {
     // 模拟安装过程
     console.log('Installing K6...');
@@ -169,7 +169,7 @@ router.get('/lighthouse/status', asyncHandler(async (req, res) => {
  * Lighthouse 引擎安装
  * POST /api/test-engines/lighthouse/install
  */
-router.post('/lighthouse/install', authMiddleware, asyncHandler(async (req, res) => {
+router.post('/lighthouse/install', authMiddleware, adminAuth, asyncHandler(async (req, res) => {
   try {
     console.log('Installing Lighthouse...');
 
@@ -269,7 +269,7 @@ router.get('/playwright/status', asyncHandler(async (req, res) => {
  * Playwright 引擎安装
  * POST /api/test-engines/playwright/install
  */
-router.post('/playwright/install', authMiddleware, asyncHandler(async (req, res) => {
+router.post('/playwright/install', authMiddleware, adminAuth, asyncHandler(async (req, res) => {
   try {
     console.log('Installing Playwright...');
 
@@ -441,7 +441,7 @@ router.get('/', asyncHandler(async (req, res) => {
  * 获取测试历史记录
  * GET /api/test/history
  */
-router.get('/history', authMiddleware, asyncHandler(async (req, res) => {
+router.get('/history', optionalAuth, asyncHandler(async (req, res) => {
   return handleTestHistory(req, res);
 }));
 
@@ -458,15 +458,68 @@ router.get('/history/enhanced', authMiddleware, asyncHandler(async (req, res) =>
 }));
 
 /**
- * 获取测试历史统计信息 - 已迁移
- * 请使用 /api/data-management/statistics
+ * 获取测试历史统计信息
+ * GET /api/test/statistics
  */
-router.get('/history/statistics', authMiddleware, asyncHandler(async (req, res) => {
-  res.status(301).json({
-    success: false,
-    message: '此接口已迁移，请使用 /api/data-management/statistics',
-    redirectTo: '/api/data-management/statistics'
-  });
+router.get('/statistics', optionalAuth, asyncHandler(async (req, res) => {
+  try {
+    const { timeRange = 30 } = req.query;
+    const days = parseInt(timeRange);
+
+    let whereClause = '';
+    const params = [];
+    let paramIndex = 1;
+
+    // 时间范围条件
+    whereClause += `WHERE created_at >= NOW() - INTERVAL '${days} days'`;
+
+    // 如果用户已登录，只统计该用户的记录
+    if (req.user?.id) {
+      whereClause += ` AND user_id = $${paramIndex}`;
+      params.push(req.user.id);
+      paramIndex++;
+    }
+
+    // 获取统计数据
+    const statsResult = await query(`
+      SELECT
+        COUNT(*) as total_tests,
+        COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_tests,
+        COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed_tests,
+        COUNT(CASE WHEN status = 'running' THEN 1 END) as running_tests,
+        COUNT(CASE WHEN test_type = 'stress' THEN 1 END) as stress_tests,
+        COUNT(CASE WHEN test_type = 'security' THEN 1 END) as security_tests,
+        COUNT(CASE WHEN test_type = 'seo' THEN 1 END) as seo_tests,
+        AVG(duration) as avg_duration,
+        AVG(overall_score) as avg_score
+      FROM test_history
+      ${whereClause}
+    `, params);
+
+    const stats = statsResult.rows[0];
+
+    res.json({
+      success: true,
+      data: {
+        totalTests: parseInt(stats.total_tests) || 0,
+        completedTests: parseInt(stats.completed_tests) || 0,
+        failedTests: parseInt(stats.failed_tests) || 0,
+        runningTests: parseInt(stats.running_tests) || 0,
+        stressTests: parseInt(stats.stress_tests) || 0,
+        securityTests: parseInt(stats.security_tests) || 0,
+        seoTests: parseInt(stats.seo_tests) || 0,
+        averageDuration: parseFloat(stats.avg_duration) || 0,
+        averageScore: parseFloat(stats.avg_score) || 0,
+        timeRange: days
+      }
+    });
+  } catch (error) {
+    console.error('获取测试统计信息失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '获取统计信息失败'
+    });
+  }
 }));
 
 /**
@@ -486,9 +539,33 @@ async function handleTestHistory(req, res) {
   const { page = 1, limit = 10, type, status, sortBy = 'created_at', sortOrder = 'desc' } = req.query;
   const offset = (page - 1) * limit;
 
-  let whereClause = 'WHERE user_id = $1';
-  const params = [req.user.id];
-  let paramIndex = 2;
+  let whereClause = '';
+  const params = [];
+  let paramIndex = 1;
+
+  // 如果用户已登录，只显示该用户的记录；未登录用户返回空结果
+  if (req.user?.id) {
+    whereClause = 'WHERE user_id = $1';
+    params.push(req.user.id);
+    paramIndex = 2;
+  } else {
+    // 未登录用户不能查看任何测试历史记录（隐私保护）
+    return res.json({
+      success: true,
+      data: {
+        tests: [],
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total: 0,
+          totalPages: 0,
+          hasNext: false,
+          hasPrev: false
+        }
+      },
+      message: '请登录以查看测试历史记录'
+    });
+  }
 
   if (type) {
     whereClause += ` AND test_type = $${paramIndex}`;
@@ -610,16 +687,25 @@ router.put('/history/:recordId', authMiddleware, asyncHandler(async (req, res) =
  * 获取单个测试记录
  * GET /api/test/history/:recordId
  */
-router.get('/history/:recordId', authMiddleware, asyncHandler(async (req, res) => {
+router.get('/history/:recordId', optionalAuth, asyncHandler(async (req, res) => {
   const { recordId } = req.params;
 
   try {
+    let whereClause = 'WHERE id = $1';
+    let params = [recordId];
+
+    // 如果用户已登录，只显示该用户的记录；否则显示公开记录
+    if (req.user?.id) {
+      whereClause += ' AND user_id = $2';
+      params.push(req.user.id);
+    }
+
     const result = await query(
       `SELECT id, test_name, test_type, url, status, start_time, end_time,
               duration, config, results, created_at, updated_at
        FROM test_history
-       WHERE id = $1 AND user_id = $2`,
-      [recordId, req.user.id]
+       ${whereClause}`,
+      params
     );
 
     if (result.rows.length === 0) {
@@ -1081,7 +1167,7 @@ router.get('/stress/status/:testId', optionalAuth, asyncHandler(async (req, res)
  * 停止压力测试
  * POST /api/test/stress/stop/:testId
  */
-router.post('/stress/stop/:testId', optionalAuth, asyncHandler(async (req, res) => {
+router.post('/stress/stop/:testId', authMiddleware, asyncHandler(async (req, res) => {
   const { testId } = req.params;
 
   try {
@@ -1115,11 +1201,12 @@ router.post('/stress/stop/:testId', optionalAuth, asyncHandler(async (req, res) 
  * 压力测试
  * POST /api/test/stress
  */
-router.post('/stress', optionalAuth, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
+router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
   const { url, testId, options = {} } = req.body;
 
   // URL验证已由中间件完成，可以直接使用验证后的URL
   const validatedURL = req.validatedURL.url.toString();
+  let testRecordId = null;
 
   try {
     console.log('🚀 收到压力测试请求:', {
@@ -1129,10 +1216,52 @@ router.post('/stress', optionalAuth, testRateLimiter, validateURLMiddleware(), a
       options: options
     });
 
+    // 1. 立即创建测试记录（状态为running）
+    if (req.user?.id) {
+      try {
+        const testRecord = await testHistoryService.createTestRecord({
+          testName: `压力测试 - ${new URL(validatedURL).hostname}`,
+          testType: 'stress',
+          url: validatedURL,
+          status: 'running',
+          userId: req.user.id,
+          config: {
+            users: options.users || 10,
+            duration: options.duration || 30,
+            rampUpTime: options.rampUpTime || 5,
+            testType: options.testType || 'gradual',
+            method: options.method || 'GET',
+            timeout: options.timeout || 10,
+            thinkTime: options.thinkTime || 1
+          }
+        });
+        testRecordId = testRecord.data.id;
+
+        // 广播新测试记录到测试历史页面
+        if (global.io) {
+          global.io.to('test-history-updates').emit('test-record-update', {
+            type: 'test-record-update',
+            recordId: testRecordId,
+            updates: {
+              ...testRecord.data,
+              status: 'running'
+            }
+          });
+        }
+
+        console.log('✅ 测试记录已创建(运行中状态):', testRecordId);
+      } catch (dbError) {
+        console.error('❌ 创建测试记录失败:', dbError);
+        // 继续执行测试，不因记录失败而中断
+      }
+    }
+
+    // 2. 运行压力测试
     const testResult = await realStressTestEngine.runStressTest(validatedURL, {
       ...options,
       testId: testId, // 传递预生成的testId
-      userId: req.user?.id
+      userId: req.user?.id,
+      recordId: testRecordId // 传递数据库记录ID
     });
 
     // 处理压力测试引擎的双重包装问题
@@ -1145,24 +1274,13 @@ router.post('/stress', optionalAuth, testRateLimiter, validateURLMiddleware(), a
       responseData = testResult;
     }
 
-    // 保存测试历史到数据库
-    if (req.user?.id && responseData) {
+    // 3. 更新测试记录为完成状态
+    if (req.user?.id && testRecordId && responseData) {
       try {
-        await testHistoryService.createTestRecord({
-          testName: `压力测试 - ${new URL(validatedURL).hostname}`,
-          testType: 'stress',
-          url: validatedURL,
+        await testHistoryService.updateTestRecord(testRecordId, {
           status: responseData.status === 'completed' ? 'completed' : 'failed',
-          userId: req.user.id,
-          config: {
-            users: options.users || 10,
-            duration: options.duration || 30,
-            rampUpTime: options.rampUpTime || 5,
-            testType: options.testType || 'gradual',
-            method: options.method || 'GET',
-            timeout: options.timeout || 10,
-            thinkTime: options.thinkTime || 1
-          },
+          endTime: responseData.endTime || new Date().toISOString(),
+          duration: responseData.actualDuration,
           results: {
             metrics: responseData.metrics,
             realTimeData: responseData.realTimeData,
@@ -1171,12 +1289,28 @@ router.post('/stress', optionalAuth, testRateLimiter, validateURLMiddleware(), a
             endTime: responseData.endTime,
             actualDuration: responseData.actualDuration,
             currentPhase: responseData.currentPhase
-          }
+          },
+          overallScore: responseData.overallScore || this.calculateOverallScore(responseData.metrics)
         });
-        console.log('✅ 压力测试历史已保存到数据库');
+
+        // 广播测试完成状态到测试历史页面
+        if (global.io) {
+          global.io.to('test-history-updates').emit('test-record-update', {
+            type: 'test-record-update',
+            recordId: testRecordId,
+            updates: {
+              id: testRecordId,
+              status: responseData.status === 'completed' ? 'completed' : 'failed',
+              endTime: responseData.endTime || new Date().toISOString(),
+              duration: responseData.actualDuration,
+              progress: 100
+            }
+          });
+        }
+
+        console.log('✅ 测试记录已更新为完成状态');
       } catch (dbError) {
-        console.error('❌ 保存测试历史失败:', dbError);
-        // 不影响测试结果返回，只记录错误
+        console.error('❌ 更新测试记录失败:', dbError);
       }
     }
 
