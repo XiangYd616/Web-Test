@@ -158,21 +158,21 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
   const getStatusStyle = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'bg-green-100 dark:bg-green-900/30 border-green-200 dark:border-green-700/50';
+        return 'bg-green-100 dark:bg-green-800/80 border-green-200 dark:border-green-600';
       case 'failed':
-        return 'bg-red-100 dark:bg-red-900/30 border-red-200 dark:border-red-700/50';
+        return 'bg-red-100 dark:bg-red-800/80 border-red-200 dark:border-red-600';
       case 'running':
-        return 'bg-blue-100 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700/50 animate-pulse';
+        return 'bg-blue-100 dark:bg-blue-800/80 border-blue-200 dark:border-blue-600 animate-pulse';
       case 'cancelled':
-        return 'bg-gray-100 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700/50';
+        return 'bg-gray-100 dark:bg-gray-700/80 border-gray-200 dark:border-gray-600';
       case 'pending':
-        return 'bg-yellow-100 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-700/50';
+        return 'bg-yellow-100 dark:bg-yellow-800/80 border-yellow-200 dark:border-yellow-600';
       case 'waiting':
-        return 'bg-purple-100 dark:bg-purple-900/30 border-purple-200 dark:border-purple-700/50';
+        return 'bg-purple-100 dark:bg-purple-800/80 border-purple-200 dark:border-purple-600';
       case 'timeout':
-        return 'bg-orange-100 dark:bg-orange-900/30 border-orange-200 dark:border-orange-700/50';
+        return 'bg-orange-100 dark:bg-orange-800/80 border-orange-200 dark:border-orange-600';
       default:
-        return 'bg-gray-100 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700/50';
+        return 'bg-gray-100 dark:bg-gray-700/80 border-gray-200 dark:border-gray-600';
     }
   };
 
@@ -181,21 +181,21 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
     const isDark = document.documentElement.classList.contains('dark');
     switch (status) {
       case 'completed':
-        return isDark ? '#22c55e' : '#166534'; // green-500 : green-800 (更亮的绿色)
+        return isDark ? '#ffffff' : '#166534'; // 白色 : green-800 (深色模式用白色)
       case 'failed':
-        return isDark ? '#ef4444' : '#991b1b'; // red-500 : red-800 (更亮的红色)
+        return isDark ? '#ffffff' : '#991b1b'; // 白色 : red-800 (深色模式用白色)
       case 'running':
-        return isDark ? '#3b82f6' : '#1e40af'; // blue-500 : blue-800 (更亮的蓝色)
+        return isDark ? '#ffffff' : '#1e40af'; // 白色 : blue-800 (深色模式用白色)
       case 'cancelled':
-        return isDark ? '#9ca3af' : '#374151'; // gray-400 : gray-800 (更亮的灰色)
+        return isDark ? '#ffffff' : '#374151'; // 白色 : gray-800 (深色模式用白色)
       case 'pending':
-        return isDark ? '#eab308' : '#a16207'; // yellow-500 : yellow-800 (更亮的黄色)
+        return isDark ? '#ffffff' : '#a16207'; // 白色 : yellow-800 (深色模式用白色)
       case 'waiting':
-        return isDark ? '#a855f7' : '#6b21a8'; // purple-500 : purple-800 (更亮的紫色)
+        return isDark ? '#ffffff' : '#6b21a8'; // 白色 : purple-800 (深色模式用白色)
       case 'timeout':
-        return isDark ? '#f97316' : '#c2410c'; // orange-500 : orange-800 (更亮的橙色)
+        return isDark ? '#ffffff' : '#c2410c'; // 白色 : orange-800 (深色模式用白色)
       default:
-        return isDark ? '#9ca3af' : '#374151'; // gray-400 : gray-800 (更亮的灰色)
+        return isDark ? '#ffffff' : '#374151'; // 白色 : gray-800 (深色模式用白色)
     }
   };
 
