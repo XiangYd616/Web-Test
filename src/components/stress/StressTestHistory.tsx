@@ -154,25 +154,48 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
     return filtered;
   }, [records, searchTerm, statusFilter, dateFilter, sortBy, sortOrder]);
 
-  // 获取状态样式
+  // 获取状态样式和内联样式
   const getStatusStyle = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700/50';
+        return 'bg-green-100 dark:bg-green-900/30 border-green-200 dark:border-green-700/50';
       case 'failed':
-        return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border-red-200 dark:border-red-700/50';
+        return 'bg-red-100 dark:bg-red-900/30 border-red-200 dark:border-red-700/50';
       case 'running':
-        return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-700/50 animate-pulse';
+        return 'bg-blue-100 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700/50 animate-pulse';
       case 'cancelled':
-        return 'bg-gray-100 dark:bg-gray-800/50 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-700/50';
+        return 'bg-gray-100 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700/50';
       case 'pending':
-        return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border-yellow-200 dark:border-yellow-700/50';
+        return 'bg-yellow-100 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-700/50';
       case 'waiting':
-        return 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-700/50';
+        return 'bg-purple-100 dark:bg-purple-900/30 border-purple-200 dark:border-purple-700/50';
       case 'timeout':
-        return 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 border-orange-200 dark:border-orange-700/50';
+        return 'bg-orange-100 dark:bg-orange-900/30 border-orange-200 dark:border-orange-700/50';
       default:
-        return 'bg-gray-100 dark:bg-gray-800/50 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-700/50';
+        return 'bg-gray-100 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700/50';
+    }
+  };
+
+  // 获取状态文字颜色（内联样式）
+  const getStatusTextColor = (status: string) => {
+    const isDark = document.documentElement.classList.contains('dark');
+    switch (status) {
+      case 'completed':
+        return isDark ? '#86efac' : '#166534'; // green-300 : green-800
+      case 'failed':
+        return isDark ? '#fca5a5' : '#991b1b'; // red-300 : red-800
+      case 'running':
+        return isDark ? '#93c5fd' : '#1e40af'; // blue-300 : blue-800
+      case 'cancelled':
+        return isDark ? '#d1d5db' : '#374151'; // gray-300 : gray-800
+      case 'pending':
+        return isDark ? '#fde047' : '#a16207'; // yellow-300 : yellow-800
+      case 'waiting':
+        return isDark ? '#c4b5fd' : '#6b21a8'; // purple-300 : purple-800
+      case 'timeout':
+        return isDark ? '#fdba74' : '#c2410c'; // orange-300 : orange-800
+      default:
+        return isDark ? '#d1d5db' : '#374151'; // gray-300 : gray-800
     }
   };
 
@@ -437,7 +460,10 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
                       <h3 className="text-lg font-medium text-gray-900 dark:text-white truncate">
                         {record.testName}
                       </h3>
-                      <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${getStatusStyle(record.status)}`}>
+                      <span
+                        className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${getStatusStyle(record.status)}`}
+                        style={{ color: getStatusTextColor(record.status) }}
+                      >
                         {getStatusIcon(record.status)}
                         {record.status === 'completed' ? '已完成' :
                           record.status === 'failed' ? '已失败' :
