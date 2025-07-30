@@ -6,6 +6,31 @@ const jwt = require('jsonwebtoken');
 const { query } = require('../config/database');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'testweb-super-secret-jwt-key-change-in-production-2024';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'testweb-refresh-secret-key';
+const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
+
+// 错误类型定义
+const AuthErrors = {
+  TOKEN_MISSING: 'TOKEN_MISSING',
+  TOKEN_INVALID: 'TOKEN_INVALID',
+  TOKEN_EXPIRED: 'TOKEN_EXPIRED',
+  USER_NOT_FOUND: 'USER_NOT_FOUND',
+  USER_INACTIVE: 'USER_INACTIVE',
+  INSUFFICIENT_PERMISSIONS: 'INSUFFICIENT_PERMISSIONS',
+  SESSION_EXPIRED: 'SESSION_EXPIRED'
+};
+
+// 创建标准化的认证错误响应
+const createAuthError = (type, message, statusCode = 401) => {
+  return {
+    success: false,
+    error: type,
+    message,
+    statusCode,
+    timestamp: new Date().toISOString()
+  };
+};
 
 /**
  * 验证JWT令牌
@@ -13,62 +38,62 @@ const JWT_SECRET = process.env.JWT_SECRET || 'testweb-super-secret-jwt-key-chang
 const authMiddleware = async (req, res, next) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
-    
+
     if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: '访问被拒绝，需要认证令牌'
-      });
+      const error = createAuthError(AuthErrors.TOKEN_MISSING, '访问被拒绝，需要认证令牌');
+      return res.status(error.statusCode).json(error);
     }
 
-    // 验证令牌
-    const decoded = jwt.verify(token, JWT_SECRET);
-    
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (jwtError) {
+      let error;
+      if (jwtError.name === 'TokenExpiredError') {
+        error = createAuthError(AuthErrors.TOKEN_EXPIRED, '令牌已过期，请重新登录');
+      } else {
+        error = createAuthError(AuthErrors.TOKEN_INVALID, '令牌无效');
+      }
+      return res.status(error.statusCode).json(error);
+    }
+
     // 查询用户信息
     const userResult = await query(
-      'SELECT id, email, username, role, is_active FROM users WHERE id = $1',
+      'SELECT id, email, username, role, is_active, last_login_at FROM users WHERE id = $1',
       [decoded.userId]
     );
 
     if (userResult.rows.length === 0) {
-      return res.status(401).json({
-        success: false,
-        message: '用户不存在'
-      });
+      const error = createAuthError(AuthErrors.USER_NOT_FOUND, '令牌无效，用户不存在');
+      return res.status(error.statusCode).json(error);
     }
 
     const user = userResult.rows[0];
-    
+
     if (!user.is_active) {
-      return res.status(401).json({
-        success: false,
-        message: '账户已被禁用'
-      });
+      const error = createAuthError(AuthErrors.USER_INACTIVE, '用户账户已被禁用');
+      return res.status(error.statusCode).json(error);
     }
 
     // 将用户信息添加到请求对象
-    req.user = user;
+    req.user = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      role: user.role,
+      lastLoginAt: user.last_login_at
+    };
+
     next();
   } catch (error) {
-    if (error.name === 'JsonWebTokenError') {
-      return res.status(401).json({
-        success: false,
-        message: '无效的认证令牌'
-      });
-    }
-    
-    if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({
-        success: false,
-        message: '认证令牌已过期'
-      });
-    }
-
     console.error('认证中间件错误:', error);
-    res.status(500).json({
-      success: false,
-      message: '认证验证失败'
-    });
+
+    const authError = createAuthError(
+      AuthErrors.TOKEN_INVALID,
+      '认证过程中发生错误',
+      500
+    );
+    return res.status(authError.statusCode).json(authError);
   }
 };
 
@@ -78,7 +103,7 @@ const authMiddleware = async (req, res, next) => {
 const optionalAuth = async (req, res, next) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
-    
+
     if (!token) {
       req.user = null;
       return next();
@@ -138,9 +163,9 @@ const requireRole = (roles) => {
 
     const userRoles = Array.isArray(req.user.role) ? req.user.role : [req.user.role];
     const requiredRoles = Array.isArray(roles) ? roles : [roles];
-    
+
     const hasPermission = requiredRoles.some(role => userRoles.includes(role));
-    
+
     if (!hasPermission) {
       return res.status(403).json({
         success: false,
@@ -181,7 +206,7 @@ const verifyToken = (token) => {
 const refreshToken = async (req, res, next) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
-    
+
     if (!token) {
       return res.status(401).json({
         success: false,
@@ -191,7 +216,7 @@ const refreshToken = async (req, res, next) => {
 
     // 即使令牌过期也要解析（用于刷新）
     const decoded = jwt.decode(token);
-    
+
     if (!decoded) {
       return res.status(401).json({
         success: false,
@@ -214,7 +239,7 @@ const refreshToken = async (req, res, next) => {
 
     // 生成新令牌
     const newToken = generateToken(decoded.userId);
-    
+
     res.json({
       success: true,
       token: newToken,
@@ -229,6 +254,55 @@ const refreshToken = async (req, res, next) => {
   }
 };
 
+/**
+ * 生成token哈希值（用于会话管理）
+ */
+const hashToken = (token) => {
+  const crypto = require('crypto');
+  return crypto.createHash('sha256').update(token).digest('hex');
+};
+
+/**
+ * 创建用户会话
+ */
+const createUserSession = async (userId, token, refreshToken, req) => {
+  try {
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 24); // 24小时后过期
+
+    const sessionResult = await query(`
+      INSERT INTO user_sessions (
+        user_id, token_hash, refresh_token_hash, expires_at,
+        ip_address, user_agent, is_active, created_at, last_activity_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, true, NOW(), NOW())
+      RETURNING id
+    `, [
+      userId,
+      hashToken(token),
+      hashToken(refreshToken),
+      expiresAt,
+      req.ip || req.connection.remoteAddress,
+      req.get('User-Agent') || 'Unknown'
+    ]);
+
+    return sessionResult.rows[0].id;
+  } catch (error) {
+    console.error('创建用户会话失败:', error);
+    throw error;
+  }
+};
+
+/**
+ * 清理过期会话
+ */
+const cleanupExpiredSessions = async () => {
+  try {
+    await query('DELETE FROM user_sessions WHERE expires_at < NOW() OR is_active = false');
+  } catch (error) {
+    console.error('清理过期会话失败:', error);
+  }
+};
+
 module.exports = {
   authMiddleware,
   optionalAuth,
@@ -236,5 +310,10 @@ module.exports = {
   requireRole,
   generateToken,
   verifyToken,
-  refreshToken
+  refreshToken,
+  createUserSession,
+  cleanupExpiredSessions,
+  hashToken,
+  AuthErrors,
+  createAuthError
 };

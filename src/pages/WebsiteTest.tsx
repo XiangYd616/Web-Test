@@ -95,6 +95,11 @@ const WebsiteTest: React.FC = () => {
 
   // 测试功能实现
   const runTest = async (testConfig?: any) => {
+    // 检查登录状态
+    if (!requireLogin()) {
+      return;
+    }
+
     setTestStatus('running');
     setProgress(0);
     setCurrentStep('正在初始化测试...');

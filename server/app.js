@@ -317,6 +317,29 @@ function setupWebSocketHandlers(io) {
       console.log(`📊 客户端 ${socket.id} 离开压力测试房间: ${testId}`);
     });
 
+    // 加入测试历史更新房间
+    socket.on('join-room', (data) => {
+      if (data.room === 'test-history-updates') {
+        socket.join('test-history-updates');
+        console.log(`📋 客户端 ${socket.id} 加入测试历史更新房间`);
+
+        // 发送房间加入确认
+        socket.emit('room-joined', {
+          room: 'test-history-updates',
+          clientId: socket.id,
+          timestamp: Date.now()
+        });
+      }
+    });
+
+    // 离开测试历史更新房间
+    socket.on('leave-room', (data) => {
+      if (data.room === 'test-history-updates') {
+        socket.leave('test-history-updates');
+        console.log(`📋 客户端 ${socket.id} 离开测试历史更新房间`);
+      }
+    });
+
     // 测试连接ping/pong
     socket.on('test-ping', (data) => {
       console.log(`🏓 收到测试ping:`, data);
