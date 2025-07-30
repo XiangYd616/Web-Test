@@ -134,6 +134,9 @@ class RealStressTestEngine {
       console.log(`⭐ Peak TPS: ${results.metrics.peakTPS} req/s`);
       console.log(`❌ Error rate: ${results.metrics.errorRate}%`);
 
+      // 保存最终测试结果到数据库
+      await this.saveFinalTestResults(testId, results);
+
       // 广播测试完成
       this.broadcastTestComplete(testId, results);
 
@@ -154,6 +157,9 @@ class RealStressTestEngine {
       results.status = 'failed';
       results.error = error.message;
       results.endTime = new Date().toISOString();
+
+      // 保存失败的测试结果到数据库
+      await this.saveFinalTestResults(testId, results);
 
       return {
         success: false,
@@ -1001,6 +1007,135 @@ class RealStressTestEngine {
   }
 
   /**
+   * 保存最终测试结果到数据库
+   */
+  async saveFinalTestResults(testId, results) {
+    try {
+      const testStatus = this.runningTests.get(testId);
+      if (!testStatus || !testStatus.recordId || !testStatus.userId) {
+        console.log('⚠️ 没有数据库记录ID或用户ID，跳过保存最终结果');
+        return;
+      }
+
+      // 导入testHistoryService
+      const TestHistoryService = require('./dataManagement/testHistoryService');
+      const testHistoryService = new TestHistoryService();
+
+      // 计算性能评分
+      const performanceScore = this.calculatePerformanceScore(results.metrics);
+      const performanceGrade = this.getPerformanceGrade(performanceScore);
+
+      const finalData = {
+        status: results.status,
+        end_time: results.endTime,
+        duration: Math.round(results.actualDuration || 0),
+
+        // 测试结果
+        results: {
+          metrics: results.metrics,
+          realTimeData: results.realTimeData,
+          config: results.config,
+          summary: {
+            totalRequests: results.metrics.totalRequests,
+            successfulRequests: results.metrics.successfulRequests,
+            failedRequests: results.metrics.failedRequests,
+            averageResponseTime: results.metrics.averageResponseTime,
+            peakTPS: results.metrics.peakTPS,
+            errorRate: results.metrics.errorRate,
+            throughput: results.metrics.throughput
+          }
+        },
+
+        // 性能评分
+        overall_score: performanceScore,
+        performance_grade: performanceGrade,
+
+        // 统计信息
+        total_requests: results.metrics.totalRequests || 0,
+        successful_requests: results.metrics.successfulRequests || 0,
+        failed_requests: results.metrics.failedRequests || 0,
+        average_response_time: results.metrics.averageResponseTime || 0,
+        peak_tps: results.metrics.peakTPS || 0,
+        error_rate: results.metrics.errorRate || 0,
+
+        // 错误信息（如果有）
+        error_message: results.error || null,
+        error_details: results.error ? { error: results.error, stack: results.stack } : null
+      };
+
+      await testHistoryService.updateTestRecord(testStatus.recordId, finalData);
+
+      console.log(`💾 测试结果已保存到数据库: ${testStatus.recordId}`);
+      console.log(`📊 总请求数: ${results.metrics.totalRequests}, 成功率: ${(100 - results.metrics.errorRate).toFixed(2)}%`);
+      console.log(`⭐ 性能评分: ${performanceScore}/100 (${performanceGrade})`);
+
+      // 广播最终结果更新
+      if (global.io) {
+        global.io.to('test-history-updates').emit('test-record-final', {
+          type: 'test-record-final',
+          recordId: testStatus.recordId,
+          data: finalData
+        });
+      }
+
+    } catch (error) {
+      console.error('保存最终测试结果失败:', error);
+    }
+  }
+
+  /**
+   * 计算性能评分
+   */
+  calculatePerformanceScore(metrics) {
+    try {
+      let score = 100;
+
+      // 错误率影响 (40分权重)
+      const errorRate = metrics.errorRate || 0;
+      if (errorRate > 0) {
+        score -= Math.min(errorRate * 2, 40); // 错误率每1%扣2分，最多扣40分
+      }
+
+      // 响应时间影响 (30分权重)
+      const avgResponseTime = metrics.averageResponseTime || 0;
+      if (avgResponseTime > 1000) { // 超过1秒
+        score -= Math.min((avgResponseTime - 1000) / 100, 30); // 每100ms扣1分，最多扣30分
+      }
+
+      // TPS性能影响 (20分权重)
+      const peakTPS = metrics.peakTPS || 0;
+      if (peakTPS < 10) { // TPS低于10
+        score -= Math.min((10 - peakTPS) * 2, 20); // 每少1TPS扣2分，最多扣20分
+      }
+
+      // 成功率影响 (10分权重)
+      const successRate = ((metrics.successfulRequests || 0) / (metrics.totalRequests || 1)) * 100;
+      if (successRate < 100) {
+        score -= Math.min((100 - successRate) * 0.1, 10); // 成功率每少1%扣0.1分，最多扣10分
+      }
+
+      return Math.max(0, Math.round(score));
+    } catch (error) {
+      console.error('计算性能评分失败:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * 获取性能等级
+   */
+  getPerformanceGrade(score) {
+    if (score >= 95) return 'A+';
+    if (score >= 90) return 'A';
+    if (score >= 85) return 'B+';
+    if (score >= 80) return 'B';
+    if (score >= 75) return 'C+';
+    if (score >= 70) return 'C';
+    if (score >= 60) return 'D';
+    return 'F';
+  }
+
+  /**
    * 通过WebSocket广播实时数据
    */
   broadcastRealTimeData(testId, data) {
@@ -1106,11 +1241,11 @@ class RealStressTestEngine {
   }
 
   /**
-   * 停止/中止压力测试
+   * 取消压力测试
    */
-  async stopStressTest(testId) {
+  async cancelStressTest(testId) {
     try {
-      console.log(`🛑 停止压力测试: ${testId}`);
+      console.log(`🛑 取消压力测试: ${testId}`);
 
       // 获取测试状态
       const testStatus = this.runningTests.get(testId);
@@ -1144,37 +1279,110 @@ class RealStressTestEngine {
         this.calculateFinalMetrics(testStatus);
       }
 
-      console.log(`✅ 压力测试 ${testId} 已成功停止`);
+      // 保存取消记录到数据库
+      await this.saveCancelledTestRecord(testId, testStatus);
+
+      console.log(`✅ 压力测试 ${testId} 已成功取消`);
 
       return {
         success: true,
-        message: '测试已成功停止',
+        message: '测试已成功取消',
         data: {
           testId,
           status: 'cancelled',
           endTime: testStatus.endTime,
           actualDuration: testStatus.actualDuration,
           metrics: testStatus.metrics || {},
-          realTimeData: testStatus.realTimeData || []
+          realTimeData: testStatus.realTimeData || [],
+          cancelReason: '用户手动取消',
+          cancelledAt: testStatus.endTime
         }
       };
 
     } catch (error) {
-      console.error(`❌ 停止压力测试失败 ${testId}:`, error);
+      console.error(`❌ 取消压力测试失败 ${testId}:`, error);
       return {
         success: false,
-        message: '停止测试失败',
+        message: '取消测试失败',
         error: error.message
       };
     }
   }
 
   /**
-   * 检查测试是否应该停止
+   * 停止压力测试 (向后兼容)
    */
-  shouldStopTest(testId) {
+  async stopStressTest(testId) {
+    return await this.cancelStressTest(testId);
+  }
+
+  /**
+   * 检查测试是否应该取消
+   */
+  shouldCancelTest(testId) {
     const testStatus = this.runningTests.get(testId);
     return testStatus && (testStatus.cancelled || testStatus.status === 'cancelled');
+  }
+
+  /**
+   * 检查测试是否应该停止 (向后兼容)
+   */
+  shouldStopTest(testId) {
+    return this.shouldCancelTest(testId);
+  }
+
+  /**
+   * 保存取消的测试记录到数据库
+   */
+  async saveCancelledTestRecord(testId, testStatus) {
+    try {
+      if (!testStatus.recordId || !testStatus.userId) {
+        console.log('⚠️ 没有数据库记录ID或用户ID，跳过保存取消记录');
+        return;
+      }
+
+      const testHistoryService = require('./dataManagement/testHistoryService');
+
+      // 更新测试记录状态为取消
+      const updateData = {
+        status: 'cancelled',
+        endTime: testStatus.endTime,
+        actualDuration: testStatus.actualDuration,
+        error: '用户手动取消测试',
+        cancelReason: 'user_cancelled',
+        results: {
+          ...testStatus.results,
+          status: 'cancelled',
+          cancelledAt: testStatus.endTime,
+          cancelReason: '用户手动取消',
+          metrics: testStatus.metrics || {},
+          realTimeData: testStatus.realTimeData || [],
+          partialData: true // 标记为部分数据
+        }
+      };
+
+      await testHistoryService.updateTestRecord(testStatus.recordId, updateData, testStatus.userId);
+
+      // 广播测试记录更新到测试历史页面
+      if (global.io) {
+        global.io.to('test-history-updates').emit('test-record-update', {
+          type: 'test-record-cancelled',
+          recordId: testStatus.recordId,
+          updates: {
+            id: testStatus.recordId,
+            status: 'cancelled',
+            endTime: testStatus.endTime,
+            actualDuration: testStatus.actualDuration,
+            cancelReason: '用户手动取消',
+            ...updateData
+          }
+        });
+      }
+
+      console.log(`📊 取消的测试记录已保存: ${testStatus.recordId}`);
+    } catch (error) {
+      console.error('保存取消测试记录失败:', error);
+    }
   }
 
   /**

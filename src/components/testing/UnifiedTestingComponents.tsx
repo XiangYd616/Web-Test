@@ -81,7 +81,7 @@ export const TestHeader: React.FC<TestHeaderProps> = ({
               className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center space-x-2"
             >
               <Square className="w-4 h-4" />
-              <span>停止测试</span>
+              <span>取消测试</span>
             </button>
           ) : (
             <button
