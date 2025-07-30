@@ -15,6 +15,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import './StatusLabel.css';
+import './StressTestHistory.css';
 
 // 测试记录接口
 interface TestRecord {
@@ -322,18 +323,18 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
   // 未登录状态显示
   if (!isAuthenticated) {
     return (
-      <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 ${className}`}>
+      <div className={`test-records-container bg-gray-800/30 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/40 dark:border-gray-600/30 shadow-lg ${className}`}>
         <div className="p-12 text-center">
-          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600 p-8 max-w-md mx-auto">
-            <Activity className="w-16 h-16 mx-auto mb-6 text-gray-400" />
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">需要登录</h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">
+          <div className="bg-gray-700/30 backdrop-blur-sm rounded-xl border border-gray-600/40 p-8 max-w-md mx-auto">
+            <Activity className="w-16 h-16 mx-auto mb-6 text-blue-400" />
+            <h3 className="text-xl font-semibold text-white mb-4">需要登录</h3>
+            <p className="text-gray-300 mb-6">
               请登录以查看您的压力测试历史记录
             </p>
             <button
               type="button"
               onClick={() => window.location.href = '/login'}
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+              className="px-6 py-3 bg-blue-600/80 hover:bg-blue-600 text-white rounded-lg font-medium transition-all duration-200 backdrop-blur-sm border border-blue-500/30 hover:border-blue-500/60"
             >
               立即登录
             </button>
@@ -344,22 +345,27 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
   }
 
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 ${className}`}>
+    <div className={`test-records-container bg-gray-800/30 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/40 dark:border-gray-600/30 shadow-lg ${className}`}>
       {/* 头部 */}
-      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+      <div className="test-records-header p-6 border-b border-gray-700/40 dark:border-gray-600/30">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">测试历史</h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              查看和管理压力测试记录
-            </p>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-blue-500/20 backdrop-blur-sm rounded-lg flex items-center justify-center border border-blue-500/30">
+              <BarChart3 className="w-4 h-4 text-blue-400" />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-white">测试历史</h2>
+              <p className="text-sm text-gray-300 mt-1">
+                查看和管理压力测试记录
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">
             <button
               onClick={loadTestRecords}
               disabled={loading}
-              className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50"
+              className="test-action-button inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700/50 hover:bg-gray-600/60 border border-gray-600/40 hover:border-gray-500/60 rounded-lg transition-all duration-200 disabled:opacity-50 backdrop-blur-sm"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               刷新
@@ -368,16 +374,16 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
         </div>
 
         {/* 筛选和搜索 */}
-        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="test-filters-panel mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* 搜索框 */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <div className="test-search-wrapper relative">
+            <Search className="test-search-icon absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
               placeholder="搜索测试名称或URL..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="test-search-input w-full pl-10 pr-4 py-2 text-sm border border-gray-600/40 rounded-lg bg-gray-700/30 backdrop-blur-sm text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
             />
           </div>
 
@@ -385,7 +391,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="test-filter-select px-3 py-2 text-sm border border-gray-600/40 rounded-lg bg-gray-700/30 backdrop-blur-sm text-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
           >
             <option value="all">全部状态</option>
             <option value="completed">已完成</option>
@@ -400,7 +406,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
           <select
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
-            className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="test-filter-select px-3 py-2 text-sm border border-gray-600/40 rounded-lg bg-gray-700/30 backdrop-blur-sm text-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
           >
             <option value="all">全部时间</option>
             <option value="today">今天</option>
@@ -413,15 +419,16 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as 'createdAt' | 'duration' | 'score')}
-              className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="test-filter-select flex-1 px-3 py-2 text-sm border border-gray-600/40 rounded-lg bg-gray-700/30 backdrop-blur-sm text-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
             >
               <option value="createdAt">创建时间</option>
               <option value="duration">测试时长</option>
               <option value="score">性能评分</option>
             </select>
             <button
+              type="button"
               onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-              className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-600"
+              className="test-action-button px-3 py-2 text-sm border border-gray-600/40 rounded-lg bg-gray-700/30 backdrop-blur-sm text-white hover:bg-gray-600/40 hover:border-gray-500/60 transition-all duration-200"
             >
               {sortOrder === 'asc' ? '↑' : '↓'}
             </button>
@@ -451,7 +458,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
             {filteredAndSortedRecords.map((record) => (
               <div
                 key={record.id}
-                className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow"
+                className="test-record-item bg-gray-800/40 dark:bg-gray-800/60 backdrop-blur-sm border border-gray-700/50 dark:border-gray-600/30 rounded-xl hover:bg-gray-800/60 dark:hover:bg-gray-700/50 transition-all duration-200 hover:shadow-lg hover:shadow-black/20"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
@@ -500,24 +507,27 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
                   </div>
 
                   {/* 操作按钮 */}
-                  <div className="flex items-center gap-2 ml-4">
+                  <div className="test-record-actions flex items-center gap-2 ml-4">
                     <button
+                      type="button"
                       onClick={() => viewDetails(record)}
-                      className="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                      className="test-record-action-button p-2 text-gray-400 hover:text-blue-400 hover:bg-gray-700/50 border border-gray-600/30 hover:border-blue-500/50 rounded-lg transition-all duration-200 backdrop-blur-sm"
                       title="查看详情"
                     >
                       <Eye className="w-4 h-4" />
                     </button>
                     <button
+                      type="button"
                       onClick={() => exportRecord(record)}
-                      className="p-2 text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                      className="test-record-action-button p-2 text-gray-400 hover:text-green-400 hover:bg-gray-700/50 border border-gray-600/30 hover:border-green-500/50 rounded-lg transition-all duration-200 backdrop-blur-sm"
                       title="导出记录"
                     >
                       <Download className="w-4 h-4" />
                     </button>
                     <button
+                      type="button"
                       onClick={() => deleteRecord(record.id)}
-                      className="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                      className="test-record-action-button p-2 text-gray-400 hover:text-red-400 hover:bg-gray-700/50 border border-gray-600/30 hover:border-red-500/50 rounded-lg transition-all duration-200 backdrop-blur-sm"
                       title="删除记录"
                     >
                       <Trash2 className="w-4 h-4" />
