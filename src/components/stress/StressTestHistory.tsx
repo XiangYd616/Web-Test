@@ -181,21 +181,21 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
     const isDark = document.documentElement.classList.contains('dark');
     switch (status) {
       case 'completed':
-        return isDark ? '#86efac' : '#166534'; // green-300 : green-800
+        return isDark ? '#22c55e' : '#166534'; // green-500 : green-800 (更亮的绿色)
       case 'failed':
-        return isDark ? '#fca5a5' : '#991b1b'; // red-300 : red-800
+        return isDark ? '#ef4444' : '#991b1b'; // red-500 : red-800 (更亮的红色)
       case 'running':
-        return isDark ? '#93c5fd' : '#1e40af'; // blue-300 : blue-800
+        return isDark ? '#3b82f6' : '#1e40af'; // blue-500 : blue-800 (更亮的蓝色)
       case 'cancelled':
-        return isDark ? '#d1d5db' : '#374151'; // gray-300 : gray-800
+        return isDark ? '#9ca3af' : '#374151'; // gray-400 : gray-800 (更亮的灰色)
       case 'pending':
-        return isDark ? '#fde047' : '#a16207'; // yellow-300 : yellow-800
+        return isDark ? '#eab308' : '#a16207'; // yellow-500 : yellow-800 (更亮的黄色)
       case 'waiting':
-        return isDark ? '#c4b5fd' : '#6b21a8'; // purple-300 : purple-800
+        return isDark ? '#a855f7' : '#6b21a8'; // purple-500 : purple-800 (更亮的紫色)
       case 'timeout':
-        return isDark ? '#fdba74' : '#c2410c'; // orange-300 : orange-800
+        return isDark ? '#f97316' : '#c2410c'; // orange-500 : orange-800 (更亮的橙色)
       default:
-        return isDark ? '#d1d5db' : '#374151'; // gray-300 : gray-800
+        return isDark ? '#9ca3af' : '#374151'; // gray-400 : gray-800 (更亮的灰色)
     }
   };
 
