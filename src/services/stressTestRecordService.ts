@@ -48,6 +48,9 @@ export interface StressTestRecord {
   currentPhase?: string;
   cancelReason?: CancelReason;
   failureReason?: FailureReason;
+  interruptedAt?: string;
+  interruptReason?: string;
+  resumedAt?: string;
 
   // 队列相关信息
   queuedAt?: string;
@@ -744,7 +747,7 @@ class StressTestRecordService {
     reason: string = '批量取消',
     cancelReason: CancelReason = CancelReason.USER_CANCELLED
   ): Promise<{ success: string[], failed: string[] }> {
-    const results = { success: [], failed: [] };
+    const results: { success: string[], failed: string[] } = { success: [], failed: [] };
 
     for (const id of ids) {
       try {

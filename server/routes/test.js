@@ -1239,19 +1239,24 @@ router.post('/stress/stop/:testId', authMiddleware, asyncHandler(async (req, res
  * POST /api/test/stress
  */
 router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
-  const { url, testId, recordId, options = {} } = req.body;
+  const { url, testId: providedTestId, recordId, options = {} } = req.body;
 
   // URL验证已由中间件完成，可以直接使用验证后的URL
   const validatedURL = req.validatedURL.url.toString();
   let testRecordId = recordId; // 使用前端传递的记录ID
 
+  // 🔧 修复：如果前端没有提供testId，自动生成一个
+  const testId = providedTestId || `stress_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
   try {
     console.log('🚀 收到压力测试请求:', {
       url: validatedURL,
       testId: testId,
+      providedTestId: providedTestId,
       recordId: recordId,
-      hasPreGeneratedTestId: !!testId,
+      hasPreGeneratedTestId: !!providedTestId,
       hasRecordId: !!recordId,
+      testIdAndRecordIdSeparate: testId !== recordId,
       options: options
     });
 
@@ -1312,105 +1317,174 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
       }
     }
 
-    // 2. 运行压力测试
-    const testResult = await realStressTestEngine.runStressTest(validatedURL, {
-      ...options,
-      testId: testId, // 传递预生成的testId
+    // 2. 立即返回响应，然后异步运行压力测试
+    console.log('🔄 准备异步启动压力测试引擎:', {
+      url: validatedURL,
+      testId: testId,
+      hasTestId: !!testId,
       userId: req.user?.id,
-      recordId: testRecordId // 传递数据库记录ID
+      recordId: testRecordId,
+      optionsKeys: Object.keys(options)
     });
 
-    // 处理压力测试引擎的双重包装问题
-    let responseData;
-    if (testResult.success && testResult.data) {
-      // 如果引擎返回了包装的数据，解包它
-      responseData = testResult.data;
-    } else {
-      // 如果引擎直接返回数据，使用原始数据
-      responseData = testResult;
-    }
+    // ✅ 关键修复：立即返回响应，不等待测试完成
+    res.json({
+      success: true,
+      message: '压力测试已启动',
+      testId: testId,
+      data: {
+        testId: testId,
+        status: 'starting',
+        url: validatedURL,
+        config: options,
+        recordId: testRecordId
+      }
+    });
 
-    // 3. 更新测试记录为完成状态
-    if (req.user?.id && testRecordId && responseData) {
+    // ✅ 异步执行压力测试，不阻塞响应
+    setImmediate(async () => {
       try {
-        // 从测试结果中提取统计数据
-        const metrics = responseData.metrics || {};
-        const totalRequests = metrics.totalRequests || 0;
-        const successfulRequests = metrics.successfulRequests || 0;
-        const failedRequests = metrics.failedRequests || 0;
+        console.log('🚀 异步执行压力测试:', testId);
 
-        await testHistoryService.updateTestRecord(testRecordId, {
-          status: responseData.status === 'completed' ? 'completed' : 'failed',
-          endTime: responseData.endTime || new Date().toISOString(),
-          duration: Math.round(responseData.actualDuration || 0),
-          results: {
-            metrics: responseData.metrics,
-            realTimeData: responseData.realTimeData,
-            testId: responseData.testId,
-            startTime: responseData.startTime,
-            endTime: responseData.endTime,
-            actualDuration: responseData.actualDuration,
-            currentPhase: responseData.currentPhase
-          },
-          overallScore: Math.round(responseData.overallScore || 0),
-          totalRequests: totalRequests,
-          successfulRequests: successfulRequests,
-          failedRequests: failedRequests
+        const testResult = await realStressTestEngine.runStressTest(validatedURL, {
+          ...options,
+          testId: testId, // 传递预生成的testId
+          userId: req.user?.id,
+          recordId: testRecordId // 传递数据库记录ID
         });
 
-        // 广播测试完成状态到测试历史页面
-        if (global.io) {
-          global.io.to('test-history-updates').emit('test-record-update', {
-            type: 'test-record-update',
-            recordId: testRecordId,
-            updates: {
-              id: testRecordId,
+        // 处理压力测试引擎的双重包装问题
+        let responseData;
+        if (testResult.success && testResult.data) {
+          // 如果引擎返回了包装的数据，解包它
+          responseData = testResult.data;
+        } else {
+          // 如果引擎直接返回数据，使用原始数据
+          responseData = testResult;
+        }
+
+        console.log('✅ 异步压力测试完成:', testId);
+
+        // 3. 更新测试记录为完成状态
+        if (req.user?.id && testRecordId && responseData) {
+          try {
+            // 从测试结果中提取统计数据
+            const metrics = responseData.metrics || {};
+            const totalRequests = metrics.totalRequests || 0;
+            const successfulRequests = metrics.successfulRequests || 0;
+            const failedRequests = metrics.failedRequests || 0;
+
+            await testHistoryService.updateTestRecord(testRecordId, {
               status: responseData.status === 'completed' ? 'completed' : 'failed',
               endTime: responseData.endTime || new Date().toISOString(),
               duration: Math.round(responseData.actualDuration || 0),
-              progress: 100
+              results: {
+                metrics: responseData.metrics,
+                realTimeData: responseData.realTimeData,
+                testId: responseData.testId,
+                startTime: responseData.startTime,
+                endTime: responseData.endTime,
+                actualDuration: responseData.actualDuration,
+                currentPhase: responseData.currentPhase
+              },
+              overallScore: Math.round(responseData.overallScore || 0),
+              totalRequests: totalRequests,
+              successfulRequests: successfulRequests,
+              failedRequests: failedRequests
+            });
+
+            // 广播测试完成状态到测试历史页面
+            if (global.io) {
+              global.io.to('test-history-updates').emit('test-record-update', {
+                type: 'test-record-update',
+                recordId: testRecordId,
+                updates: {
+                  id: testRecordId,
+                  status: responseData.status === 'completed' ? 'completed' : 'failed',
+                  endTime: responseData.endTime || new Date().toISOString(),
+                  duration: Math.round(responseData.actualDuration || 0),
+                  progress: 100
+                }
+              });
             }
+
+            console.log('✅ 测试记录已更新为完成状态');
+          } catch (dbError) {
+            console.error('❌ 更新测试记录失败:', dbError);
+          }
+        }
+
+        // ✅ 异步执行完成，通过WebSocket通知前端测试完成
+        if (global.io) {
+          global.io.to(`stress-test-${testId}`).emit('stress-test-complete', {
+            testId: testId,
+            success: true,
+            data: responseData,
+            metrics: responseData.metrics || {},
+            duration: responseData.actualDuration || responseData.duration,
+            testType: responseData.testType || 'stress'
           });
         }
 
-        console.log('✅ 测试记录已更新为完成状态');
-      } catch (dbError) {
-        console.error('❌ 更新测试记录失败:', dbError);
+        console.log('✅ 异步压力测试完成并通知前端:', testId);
+      } catch (error) {
+        console.error('❌ 异步压力测试失败:', error);
+
+        // 通过WebSocket通知前端测试失败
+        if (global.io) {
+          global.io.to(`stress-test-${testId}`).emit('stress-test-error', {
+            testId: testId,
+            success: false,
+            message: '压力测试失败',
+            error: error.message
+          });
+        }
+
+        // 更新测试记录为失败状态
+        if (req.user?.id && testRecordId) {
+          try {
+            await testHistoryService.updateTestRecord(testRecordId, {
+              status: 'failed',
+              endTime: new Date().toISOString(),
+              results: {
+                error: error.message,
+                testId: testId
+              }
+            });
+
+            // 广播测试失败状态到测试历史页面
+            if (global.io) {
+              global.io.to('test-history-updates').emit('test-record-update', {
+                type: 'test-record-update',
+                recordId: testRecordId,
+                updates: {
+                  id: testRecordId,
+                  status: 'failed',
+                  endTime: new Date().toISOString(),
+                  progress: 0
+                }
+              });
+            }
+          } catch (dbError) {
+            console.error('❌ 更新失败测试记录失败:', dbError);
+          }
+        }
       }
-    }
-
-    // 确保响应包含正确的结构供前端使用
-    const response = {
-      success: true,
-      data: responseData,
-      // 为了向后兼容，也直接暴露 metrics
-      metrics: responseData.metrics || {},
-      duration: responseData.actualDuration || responseData.duration,
-      testType: responseData.testType || 'stress'
-    };
-
-    // 调试错误率传递
-    console.log('🔍 Error rate in responseData.metrics:', responseData.metrics?.errorRate);
-    console.log('🔍 Failed requests:', responseData.metrics?.failedRequests);
-    console.log('🔍 Total requests:', responseData.metrics?.totalRequests);
-    console.log('🔍 API returning stress test result:', JSON.stringify(response, null, 2));
-    res.json(response);
+    });
   } catch (error) {
-    console.error('压力测试失败:', error);
+    console.error('❌ 压力测试API处理失败:', error);
     res.status(500).json({
       success: false,
-      message: '压力测试失败',
+      message: '压力测试启动失败',
       error: error.message
     });
   }
 }));
 
-
-
 /**
- * 安全测试 - 支持统一安全引擎和传统模式
- * POST /api/test/security
- */
+     * 安全测试 - 支持统一安全引擎和传统模式
+     * POST /api/test/security
+     */
 router.post('/security',
   optionalAuth,
   testRateLimiter,

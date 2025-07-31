@@ -35,8 +35,8 @@ const UserDropdownMenu: React.FC<UserDropdownMenuProps> = ({ onClose }) => {
 
   return (
     <div className={`absolute right-0 top-full mt-2 w-72 rounded-xl shadow-2xl z-[9999] border backdrop-blur-sm ${actualTheme === 'light'
-        ? 'bg-white/95 border-gray-200'
-        : 'bg-gray-800/95 border-gray-700'
+      ? 'bg-white/95 border-gray-200'
+      : 'bg-gray-800/95 border-gray-700'
       }`}>
       {/* 用户信息头部 */}
       <div className={`p-4 border-b ${actualTheme === 'light' ? 'border-gray-200' : 'border-gray-700'
@@ -57,7 +57,7 @@ const UserDropdownMenu: React.FC<UserDropdownMenuProps> = ({ onClose }) => {
             <div className="flex items-center space-x-2">
               <p className={`text-sm font-semibold truncate ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'
                 }`}>
-                {user?.fullName || user?.username || '用户'}
+                {user?.username || '用户'}
               </p>
               {isAdmin && (
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-yellow-500/20 text-yellow-600 border border-yellow-500/30">
@@ -137,14 +137,14 @@ const UserDropdownMenu: React.FC<UserDropdownMenuProps> = ({ onClose }) => {
         <Link
           to="/profile"
           className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 group ${actualTheme === 'light'
-              ? 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-              : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
+            ? 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+            : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
             }`}
           onClick={handleMenuItemClick}
         >
           <div className={`p-1.5 rounded-lg transition-colors ${actualTheme === 'light'
-              ? 'bg-blue-50 text-blue-600 group-hover:bg-blue-100'
-              : 'bg-blue-500/20 text-blue-400 group-hover:bg-blue-500/30'
+            ? 'bg-blue-50 text-blue-600 group-hover:bg-blue-100'
+            : 'bg-blue-500/20 text-blue-400 group-hover:bg-blue-500/30'
             }`}>
             <User className="w-4 h-4" />
           </div>
@@ -162,14 +162,14 @@ const UserDropdownMenu: React.FC<UserDropdownMenuProps> = ({ onClose }) => {
         <Link
           to="/bookmarks"
           className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 group ${actualTheme === 'light'
-              ? 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-              : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
+            ? 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+            : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
             }`}
           onClick={handleMenuItemClick}
         >
           <div className={`p-1.5 rounded-lg transition-colors ${actualTheme === 'light'
-              ? 'bg-yellow-50 text-yellow-600 group-hover:bg-yellow-100'
-              : 'bg-yellow-500/20 text-yellow-400 group-hover:bg-yellow-500/30'
+            ? 'bg-yellow-50 text-yellow-600 group-hover:bg-yellow-100'
+            : 'bg-yellow-500/20 text-yellow-400 group-hover:bg-yellow-500/30'
             }`}>
             <Bookmark className="w-4 h-4" />
           </div>
@@ -187,14 +187,14 @@ const UserDropdownMenu: React.FC<UserDropdownMenuProps> = ({ onClose }) => {
         <Link
           to="/settings"
           className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 group ${actualTheme === 'light'
-              ? 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-              : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
+            ? 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+            : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
             }`}
           onClick={handleMenuItemClick}
         >
           <div className={`p-1.5 rounded-lg transition-colors ${actualTheme === 'light'
-              ? 'bg-gray-50 text-gray-600 group-hover:bg-gray-100'
-              : 'bg-gray-500/20 text-gray-400 group-hover:bg-gray-500/30'
+            ? 'bg-gray-50 text-gray-600 group-hover:bg-gray-100'
+            : 'bg-gray-500/20 text-gray-400 group-hover:bg-gray-500/30'
             }`}>
             <Settings className="w-4 h-4" />
           </div>
@@ -212,14 +212,14 @@ const UserDropdownMenu: React.FC<UserDropdownMenuProps> = ({ onClose }) => {
         <Link
           to="/help"
           className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 group ${actualTheme === 'light'
-              ? 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-              : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
+            ? 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+            : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
             }`}
           onClick={handleMenuItemClick}
         >
           <div className={`p-1.5 rounded-lg transition-colors ${actualTheme === 'light'
-              ? 'bg-green-50 text-green-600 group-hover:bg-green-100'
-              : 'bg-green-500/20 text-green-400 group-hover:bg-green-500/30'
+            ? 'bg-green-50 text-green-600 group-hover:bg-green-100'
+            : 'bg-green-500/20 text-green-400 group-hover:bg-green-500/30'
             }`}>
             <HelpCircle className="w-4 h-4" />
           </div>
@@ -241,14 +241,14 @@ const UserDropdownMenu: React.FC<UserDropdownMenuProps> = ({ onClose }) => {
             <Link
               to="/admin"
               className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 group ${actualTheme === 'light'
-                  ? 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                  : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
+                ? 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
                 }`}
               onClick={handleMenuItemClick}
             >
               <div className={`p-1.5 rounded-lg transition-colors ${actualTheme === 'light'
-                  ? 'bg-purple-50 text-purple-600 group-hover:bg-purple-100'
-                  : 'bg-purple-500/20 text-purple-400 group-hover:bg-purple-500/30'
+                ? 'bg-purple-50 text-purple-600 group-hover:bg-purple-100'
+                : 'bg-purple-500/20 text-purple-400 group-hover:bg-purple-500/30'
                 }`}>
                 <Crown className="w-4 h-4" />
               </div>
@@ -272,8 +272,8 @@ const UserDropdownMenu: React.FC<UserDropdownMenuProps> = ({ onClose }) => {
           }`}>
           <div className="flex items-center space-x-3">
             <div className={`p-1.5 rounded-lg ${actualTheme === 'light'
-                ? 'bg-orange-50 text-orange-600'
-                : 'bg-orange-500/20 text-orange-400'
+              ? 'bg-orange-50 text-orange-600'
+              : 'bg-orange-500/20 text-orange-400'
               }`}>
               <Monitor className="w-4 h-4" />
             </div>
@@ -299,13 +299,13 @@ const UserDropdownMenu: React.FC<UserDropdownMenuProps> = ({ onClose }) => {
           type="button"
           onClick={handleLogout}
           className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 w-full group ${actualTheme === 'light'
-              ? 'text-red-600 hover:bg-red-50 hover:text-red-700'
-              : 'text-red-400 hover:bg-red-500/20 hover:text-red-300'
+            ? 'text-red-600 hover:bg-red-50 hover:text-red-700'
+            : 'text-red-400 hover:bg-red-500/20 hover:text-red-300'
             }`}
         >
           <div className={`p-1.5 rounded-lg transition-colors ${actualTheme === 'light'
-              ? 'bg-red-50 text-red-600 group-hover:bg-red-100'
-              : 'bg-red-500/20 text-red-400 group-hover:bg-red-500/30'
+            ? 'bg-red-50 text-red-600 group-hover:bg-red-100'
+            : 'bg-red-500/20 text-red-400 group-hover:bg-red-500/30'
             }`}>
             <LogOut className="w-4 h-4" />
           </div>

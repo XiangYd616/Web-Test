@@ -7,7 +7,8 @@ import { useTheme } from '../contexts/ThemeContext';
 const Login: React.FC = () => {
   const [formData, setFormData] = useState({
     email: '',
-    password: ''
+    password: '',
+    rememberMe: false
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

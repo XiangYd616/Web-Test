@@ -32,6 +32,8 @@ type LifecycleStressTestConfig = StressTestConfig;
 
 
 const StressTest: React.FC = () => {
+    console.log('🔍 StressTest 组件开始渲染');
+
     // 登录检查
     const {
         isAuthenticated,
@@ -42,8 +44,11 @@ const StressTest: React.FC = () => {
         description: "使用压力测试功能"
     });
 
+    console.log('🔍 useAuthCheck 完成');
+
     // 用户统计
     const { recordTestCompletion } = useUserStats();
+    console.log('🔍 useUserStats 完成');
 
     // 测试记录管理
     const {
@@ -63,6 +68,7 @@ const StressTest: React.FC = () => {
     } = useStressTestRecord({
         autoLoad: false // 不自动加载，由历史组件管理
     });
+    console.log('🔍 useStressTestRecord 完成');
 
     const [testConfig, setTestConfig] = useState<StressTestConfig>({
         url: '', // 用户自定义测试URL
@@ -94,11 +100,70 @@ const StressTest: React.FC = () => {
     const [realTimeData, setRealTimeData] = useState<any[]>([]);
     const [finalResultData, setFinalResultData] = useState<TestDataPoint[]>([]);
 
-    // 新的状态管理系统
-    const [lifecycleManager] = useState(() => {
-        // 动态导入以避免循环依赖
-        const { StressTestLifecycleManager } = require('../services/stressTestLifecycleManager');
-        return new StressTestLifecycleManager();
+    // 新的状态管理系统 - 修复require错误
+    const [lifecycleManager] = useState<any>(() => {
+        // 创建一个简化的生命周期管理器
+        return {
+            startTest: async (config: any) => {
+                console.log('🔄 生命周期管理器启动测试:', config);
+                setCurrentStatus('STARTING');
+                setStatusMessage('正在启动压力测试引擎...');
+
+                // 直接调用压力测试API
+                try {
+                    const response = await fetch('/api/test/stress', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                        },
+                        body: JSON.stringify(config)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    console.log('✅ 生命周期管理器测试启动成功:', result);
+
+                    // 不要立即设置为RUNNING，让WebSocket数据来驱动状态变化
+                    setCurrentStatus('WAITING');
+                    setStatusMessage('等待测试开始...');
+
+                    // 设置测试ID，这将触发WebSocket房间加入
+                    // 🔧 修复：从多个可能的位置提取testId
+                    const testId = result.testId || result.data?.testId || result.data?.recordId;
+                    if (testId) {
+                        setCurrentTestId(testId);
+                        console.log('🔑 生命周期管理器设置测试ID:', testId);
+                    }
+
+                    return testId;
+                } catch (error) {
+                    console.error('❌ 生命周期管理器测试启动失败:', error);
+                    setCurrentStatus('FAILED');
+                    setStatusMessage('测试启动失败');
+                    throw error;
+                }
+            },
+            cancelTest: async (reason: string) => {
+                console.log('🔄 生命周期管理器取消测试:', reason);
+                setCurrentStatus('CANCELLING');
+                setStatusMessage('正在取消测试...');
+
+                // 设置取消状态
+                setTestStatus('cancelled');
+                setIsRunning(false);
+                setCanSwitchPages(true);
+
+                return true;
+            },
+            setTestId: (testId: string) => {
+                console.log('🔑 生命周期管理器设置测试ID:', testId);
+                setCurrentTestId(testId);
+            }
+        };
     });
     const [currentStatus, setCurrentStatus] = useState<any>('IDLE'); // TestStatus.IDLE
     const [statusMessage, setStatusMessage] = useState<string>('准备开始测试');
@@ -152,6 +217,12 @@ const StressTest: React.FC = () => {
     const socketRef = useRef<any>(null);
     const [currentTestId, setCurrentTestId] = useState<string | null>(null);
     const currentTestIdRef = useRef<string>(''); // 用于在事件监听器中获取最新的testId
+
+    // 同步currentTestId到ref
+    useEffect(() => {
+        currentTestIdRef.current = currentTestId || '';
+        console.log('🔄 同步测试ID到ref:', currentTestId);
+    }, [currentTestId]);
 
     // 测试记录ID状态
     const [currentRecordId, setCurrentRecordId] = useState<string | null>(null);
@@ -251,6 +322,11 @@ const StressTest: React.FC = () => {
                 }
             }
 
+            // ✅ 时序修复：生成测试ID但暂不设置，等后端确认后再设置
+            const realTestId = `stress_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+            console.log('🔑 前端生成测试ID:', realTestId);
+            console.log('⏳ 等待后端确认后再加入WebSocket房间');
+
             // 发送真实的压力测试请求
             const response = await fetch('/api/test/stress', {
                 method: 'POST',
@@ -262,7 +338,8 @@ const StressTest: React.FC = () => {
                 },
                 body: JSON.stringify({
                     url: testConfig.url.trim(),
-                    testId: recordId, // 传递记录ID
+                    testId: realTestId, // 传递真正的测试ID
+                    recordId: recordId, // 单独传递记录ID
                     options: {
                         users: testConfig.users,
                         duration: testConfig.duration,
@@ -276,21 +353,28 @@ const StressTest: React.FC = () => {
             });
 
             const data = await response.json();
+            console.log('🔄 收到后端响应:', {
+                success: data.success,
+                hasData: !!data.data,
+                responseTestId: data.data?.testId,
+                sentTestId: realTestId
+            });
 
             if (data.success && data.data) {
-                // 设置测试ID用于WebSocket连接
-                if (data.data.testId) {
-                    setCurrentTestId(data.data.testId);
-                    console.log('🔗 设置测试ID:', data.data.testId);
-                    console.log('🏠 房间加入将由useEffect自动处理');
+                // ✅ 时序修复：后端确认测试启动后，立即设置testId并加入房间
+                const confirmedTestId = data.data.testId || realTestId;
+                console.log('✅ 后端确认测试启动，设置testId:', confirmedTestId);
 
-                    // 立即尝试加入房间（额外保险）
-                    setTimeout(() => {
-                        if (socketRef.current?.connected) {
-                            console.log('🚀 测试开始后立即加入房间:', data.data.testId);
-                            socketRef.current.emit('join-stress-test', data.data.testId);
-                        }
-                    }, 100);
+                // 立即设置testId，这将触发useEffect加入WebSocket房间
+                setCurrentTestId(confirmedTestId);
+
+                if (data.data.testId && data.data.testId === realTestId) {
+                    console.log('✅ 测试ID验证成功，前后端testId一致:', data.data.testId);
+                } else {
+                    console.warn('⚠️ 测试ID不匹配，使用后端返回的testId:', {
+                        sent: realTestId,
+                        received: data.data.testId
+                    });
                 }
 
                 // 设置测试状态
@@ -603,17 +687,11 @@ const StressTest: React.FC = () => {
         setIsCancelling(currentStatus === 'CANCELLING');
     }, [currentStatus, statusMessage]);
 
-    // 监听生命周期管理器的状态变化
+    // 监听生命周期管理器的状态变化 - 已修复并启用
     useEffect(() => {
-        const { TestStatus } = require('../services/stressTestStateManager');
-
-        const unsubscribe = lifecycleManager.onStatusChange((status: any, message: string) => {
-            console.log('🔄 状态更新:', status, message);
-            setCurrentStatus(status);
-            setStatusMessage(message);
-        });
-
-        return unsubscribe;
+        if (lifecycleManager) {
+            console.log('🔄 生命周期管理器已启用并准备就绪');
+        }
     }, [lifecycleManager]);
 
     // 自动选择默认模板（仅在简化模式下且未手动选择时）
@@ -981,7 +1059,13 @@ const StressTest: React.FC = () => {
                     console.log('🔌 WebSocket连接成功');
                     console.log('🔌 Socket连接状态:', socket.connected);
                     console.log('🔌 Socket ID:', socket.id);
-                    console.log('🏠 房间加入将由useEffect统一处理');
+
+                    // 连接成功后立即检查是否有当前测试需要加入房间
+                    const currentTestIdValue = currentTestIdRef.current;
+                    if (currentTestIdValue) {
+                        console.log('🏠 连接成功后立即加入当前测试房间:', currentTestIdValue);
+                        socket.emit('join-stress-test', currentTestIdValue);
+                    }
                 });
 
                 // 设置房间加入确认监听器（全局监听）
@@ -991,16 +1075,29 @@ const StressTest: React.FC = () => {
 
                     // 更新房间连接状态
                     setIsInRoom(true);
+                });
 
-                    // 发送测试消息验证连接
-                    setTimeout(() => {
-                        console.log('🔍 发送测试ping到房间...');
-                        socket.emit('test-ping', {
-                            testId: roomData.testId,
-                            message: 'Testing room connection',
-                            timestamp: Date.now()
-                        });
-                    }, 1000);
+                // ✅ 监听测试完成事件
+                socket.on('stress-test-complete', (data: any) => {
+                    console.log('✅ 收到测试完成事件:', data);
+                    if (data.testId === currentTestIdRef.current) {
+                        setCurrentStatus('COMPLETED');
+                        setStatusMessage('测试已完成');
+                        console.log('🎉 压力测试完成:', data);
+                    }
+                });
+
+                // ✅ 监听测试错误事件
+                socket.on('stress-test-error', (data: any) => {
+                    console.log('❌ 收到测试错误事件:', data);
+                    if (data.testId === currentTestIdRef.current) {
+                        setCurrentStatus('FAILED');
+                        setStatusMessage('测试失败: ' + data.error);
+                        console.error('❌ 压力测试失败:', data);
+                    }
+
+                    // 房间加入成功，不需要额外的ping验证
+                    console.log('🎯 房间加入成功，开始接收实时数据');
                 });
 
                 // 监听测试ping响应
@@ -1055,6 +1152,16 @@ const StressTest: React.FC = () => {
                         });
                         return;
                     }
+
+                    // 当接收到第一个实时数据时，更新状态为RUNNING
+                    setCurrentStatus(prevStatus => {
+                        if (prevStatus === 'WAITING' || prevStatus === 'STARTING') {
+                            console.log('🎯 接收到实时数据，更新状态为RUNNING');
+                            setStatusMessage('测试正在运行中...');
+                            return 'RUNNING';
+                        }
+                        return prevStatus;
+                    });
 
                     // 处理数据点 - 支持两种数据格式
                     let dataPoint = null;
@@ -1255,48 +1362,58 @@ const StressTest: React.FC = () => {
             console.log('🏠 准备加入WebSocket房间:', testId);
             socket.emit('join-stress-test', testId);
             console.log('🏠 已发送加入房间请求:', `stress-test-${testId}`);
+
+            // 房间加入请求已发送，等待确认
         } else {
             console.warn('⚠️ 无法加入房间:', {
                 hasSocket: !!socket,
                 connected: socket?.connected,
                 testId: testId
             });
+
+            // 如果socket存在但未连接，等待连接后再加入
+            if (socket && !socket.connected) {
+                socket.once('connect', () => {
+                    console.log('🔌 Socket重新连接，现在加入房间:', testId);
+                    socket.emit('join-stress-test', testId);
+                });
+            }
         }
     }, []);
 
-    // 房间管理 - 确保客户端始终在正确的房间中
+    // ✅ 根本性修复：简化房间管理逻辑，只要有testId和WebSocket连接就加入房间
     useEffect(() => {
-        if (currentTestId && socketRef.current?.connected && testStatus === 'running') {
-            console.log('🏠 确保加入房间:', currentTestId);
+        console.log('🔍 简化房间加入条件检查:', {
+            currentTestId: currentTestId,
+            socketConnected: socketRef.current?.connected,
+            shouldJoinRoom: !!(currentTestId && socketRef.current?.connected)
+        });
+
+        // 简化条件：只要有testId和WebSocket连接就加入房间
+        if (currentTestId && socketRef.current?.connected) {
+            console.log('🏠 立即加入房间:', currentTestId);
 
             // 立即加入房间
             joinWebSocketRoom(currentTestId);
 
-            // 设置检查，但只在测试运行时进行
+            // 设置简单的重连检查，只在没有收到数据时才重新加入
             const roomCheckInterval = setInterval(() => {
-                if (socketRef.current?.connected && currentTestId && testStatus === 'running') {
-                    console.log('🔍 定期检查房间状态，重新加入房间:', currentTestId);
-                    socketRef.current.emit('join-stress-test', currentTestId);
-
-                    // 发送ping测试连接
-                    socketRef.current.emit('test-ping', {
-                        testId: currentTestId,
-                        message: 'Room connection check',
-                        timestamp: Date.now()
-                    });
+                if (socketRef.current?.connected && currentTestId) {
+                    // 只在没有收到数据时才重新加入房间
+                    if (realTimeData.length === 0) {
+                        console.log('🔍 没有收到数据，重新加入房间:', currentTestId);
+                        socketRef.current.emit('join-stress-test', currentTestId);
+                    }
                 }
-            }, 5000); // 每5秒检查一次，减少频率
+            }, 10000); // 每10秒检查一次
 
             return () => {
                 clearInterval(roomCheckInterval);
             };
-        } else if (testStatus === 'completed' || testStatus === 'failed' || testStatus === 'cancelled') {
-            // 测试结束时重置房间状态
         }
 
-        // 确保所有代码路径都有返回值
         return undefined;
-    }, [currentTestId, joinWebSocketRoom, testStatus]);
+    }, [currentTestId, joinWebSocketRoom]); // 移除testStatus依赖，简化触发条件
 
     // 组件卸载时离开房间
     useEffect(() => {

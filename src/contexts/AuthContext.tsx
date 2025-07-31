@@ -2,6 +2,19 @@ import React, { createContext, ReactNode, useContext, useEffect, useState } from
 import { parseAuthError } from '../components/auth/AuthErrorHandler';
 import type { AuthContextType, User } from '../types/auth';
 
+interface LoginCredentials {
+  email: string;
+  password: string;
+  rememberMe?: boolean;
+}
+
+interface RegisterData {
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {

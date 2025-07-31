@@ -8,6 +8,40 @@ const { URL } = require('url');
 const { Worker, isMainThread, parentPort, workerData } = require('worker_threads');
 const os = require('os');
 
+// 日志级别配置
+const LOG_LEVELS = {
+  ERROR: 0,
+  WARN: 1,
+  INFO: 2,
+  DEBUG: 3
+};
+
+const CURRENT_LOG_LEVEL = process.env.NODE_ENV === 'production' ? LOG_LEVELS.WARN : LOG_LEVELS.DEBUG;
+
+// 日志工具函数
+const logger = {
+  error: (message, ...args) => {
+    if (CURRENT_LOG_LEVEL >= LOG_LEVELS.ERROR) {
+      console.error(message, ...args);
+    }
+  },
+  warn: (message, ...args) => {
+    if (CURRENT_LOG_LEVEL >= LOG_LEVELS.WARN) {
+      console.warn(message, ...args);
+    }
+  },
+  info: (message, ...args) => {
+    if (CURRENT_LOG_LEVEL >= LOG_LEVELS.INFO) {
+      console.log(message, ...args);
+    }
+  },
+  debug: (message, ...args) => {
+    if (CURRENT_LOG_LEVEL >= LOG_LEVELS.DEBUG) {
+      console.log(message, ...args);
+    }
+  }
+};
+
 class RealStressTestEngine {
   constructor() {
     this.name = 'real-stress-test-engine';
@@ -33,16 +67,25 @@ class RealStressTestEngine {
       recordId
     } = config;
 
-    // 使用预生成的testId或生成新的testId
+    // ✅ 修复：优先使用预生成的testId，确保前后端一致性
     const testId = preGeneratedTestId || `stress_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    console.log('🎯 压力测试引擎使用testId:', {
+    console.log('🎯 压力测试引擎testId处理:', {
       testId: testId,
+      preGeneratedTestId: preGeneratedTestId,
       isPreGenerated: !!preGeneratedTestId,
       url: url,
       userId: userId,
-      recordId: recordId
+      recordId: recordId,
+      configKeys: Object.keys(config)
     });
+
+    // 如果没有使用预生成的testId，发出警告
+    if (!preGeneratedTestId) {
+      console.warn('⚠️ 没有收到预生成的testId，使用引擎生成的testId:', testId);
+    } else {
+      console.log('✅ 使用前端预生成的testId:', testId);
+    }
 
     // 初始化测试状态
     this.updateTestStatus(testId, {
@@ -63,8 +106,8 @@ class RealStressTestEngine {
       }
     });
 
-    console.log(`⚡ Starting real stress test for: ${url} (ID: ${testId})`);
-    console.log(`👥 Users: ${users}, Duration: ${duration}s, Ramp-up: ${rampUpTime}s, Type: ${testType}`);
+    logger.info(`⚡ Starting real stress test for: ${url} (ID: ${testId})`);
+    logger.info(`👥 Users: ${users}, Duration: ${duration}s, Ramp-up: ${rampUpTime}s, Type: ${testType}`);
 
     // 验证参数
     if (users > this.maxConcurrentUsers) {
@@ -126,13 +169,13 @@ class RealStressTestEngine {
       results.currentPhase = 'completed';
       results.endTime = new Date().toISOString();
 
-      console.log(`✅ Stress test completed for: ${url}`);
-      console.log(`📊 Results: ${results.metrics.successfulRequests}/${results.metrics.totalRequests} requests successful`);
-      console.log(`⚡ Average response time: ${results.metrics.averageResponseTime}ms`);
-      console.log(`🚀 Total Throughput: ${results.metrics.throughput} req/s`);
-      console.log(`🔥 Current TPS: ${results.metrics.currentTPS} req/s`);
-      console.log(`⭐ Peak TPS: ${results.metrics.peakTPS} req/s`);
-      console.log(`❌ Error rate: ${results.metrics.errorRate}%`);
+      logger.info(`✅ Stress test completed for: ${url}`);
+      logger.info(`📊 Results: ${results.metrics.successfulRequests}/${results.metrics.totalRequests} requests successful`);
+      logger.info(`⚡ Average response time: ${results.metrics.averageResponseTime}ms`);
+      logger.info(`🚀 Total Throughput: ${results.metrics.throughput} req/s`);
+      logger.info(`🔥 Current TPS: ${results.metrics.currentTPS} req/s`);
+      logger.info(`⭐ Peak TPS: ${results.metrics.peakTPS} req/s`);
+      logger.info(`❌ Error rate: ${results.metrics.errorRate}%`);
 
       // 保存最终测试结果到数据库
       await this.saveFinalTestResults(testId, results);
@@ -146,7 +189,7 @@ class RealStressTestEngine {
       return { success: true, data: results };
 
     } catch (error) {
-      console.error(`❌ Stress test failed for: ${url}`, error);
+      logger.error(`❌ Stress test failed for: ${url}`, error);
 
       // 设置实际持续时间
       results.actualDuration = (Date.now() - startTime) / 1000;
@@ -378,7 +421,7 @@ class RealStressTestEngine {
         );
       }
 
-      console.log(`📊 Progress: ${results.progress}%, Active users: ${results.metrics.activeUsers}, Total requests: ${results.metrics.totalRequests}`);
+      logger.debug(`📊 Progress: ${results.progress}%, Active users: ${results.metrics.activeUsers}, Total requests: ${results.metrics.totalRequests}`);
     }, 1000); // 每秒更新一次
   }
 
@@ -397,12 +440,12 @@ class RealStressTestEngine {
       userId: userId
     };
 
-    console.log(`🤖 Virtual user ${userId} started for ${duration}ms`);
+    logger.debug(`🤖 Virtual user ${userId} started for ${duration}ms`);
 
     while (Date.now() < endTime) {
       // 检查测试是否被中止
       if (this.shouldStopTest(results.testId)) {
-        console.log(`🛑 用户 ${userId} 检测到测试中止，退出循环`);
+        logger.debug(`🛑 用户 ${userId} 检测到测试中止，退出循环`);
         break;
       }
 
@@ -521,7 +564,7 @@ class RealStressTestEngine {
   recordRealTimeDataPoint(results, dataPoint) {
     // 验证dataPoint参数
     if (!dataPoint) {
-      console.warn('⚠️ recordRealTimeDataPoint called with undefined dataPoint');
+      logger.warn('⚠️ recordRealTimeDataPoint called with undefined dataPoint');
       return;
     }
 
@@ -1403,6 +1446,13 @@ class RealStressTestEngine {
     } catch (error) {
       console.error(`❌ 清理测试资源失败 ${testId}:`, error);
     }
+  }
+
+  /**
+   * 获取测试状态
+   */
+  getTestStatus(testId) {
+    return this.runningTests.get(testId) || null;
   }
 }
 

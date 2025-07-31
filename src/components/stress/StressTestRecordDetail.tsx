@@ -17,7 +17,7 @@ import {
   XCircle,
   Zap
 } from 'lucide-react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { StressTestRecord } from '../../services/stressTestRecordService';
 
 interface StressTestRecordDetailProps {
@@ -35,9 +35,9 @@ const StressTestRecordDetail: React.FC<StressTestRecordDetailProps> = ({
 }) => {
   // 使用 useMemo 优化数据处理，避免不必要的重新计算
   const processedData = useMemo(() => {
-    const config = record?.config || {};
+    const config = (record?.config as any) || {};
     const results = record?.results || {};
-    const metrics = results?.metrics || {};
+    const metrics = (results as any)?.metrics || {};
 
     // 安全的数据访问，防止 undefined 错误
     const safeMetrics = {

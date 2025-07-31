@@ -295,20 +295,63 @@ function setupWebSocketHandlers(io) {
 
     // 加入压力测试房间
     socket.on('join-stress-test', (testId) => {
-      socket.join(`stress-test-${testId}`);
+      const roomName = `stress-test-${testId}`;
+      socket.join(roomName);
       console.log(`📊 客户端 ${socket.id} 加入压力测试房间: ${testId}`);
+
+      // 检查房间中的客户端数量
+      const room = io.sockets.adapter.rooms.get(roomName);
+      const clientCount = room ? room.size : 0;
+      console.log(`📊 房间 ${roomName} 当前客户端数量: ${clientCount}`);
 
       // 发送房间加入确认
       socket.emit('room-joined', {
         testId,
-        roomName: `stress-test-${testId}`,
+        roomName: roomName,
         clientId: socket.id,
+        clientCount: clientCount,
         timestamp: Date.now()
       });
 
-      // 检查房间中的客户端数量
-      const room = io.sockets.adapter.rooms.get(`stress-test-${testId}`);
-      console.log(`📊 房间 stress-test-${testId} 当前客户端数量: ${room ? room.size : 0}`);
+      console.log(`✅ 房间加入确认已发送给客户端 ${socket.id}`);
+
+      // 🆕 检查是否有正在运行或已完成的测试，发送当前状态
+      // 使用全局的压力测试引擎实例
+      const currentTest = global.stressTestEngine ? global.stressTestEngine.getTestStatus(testId) : null;
+
+      if (currentTest) {
+        console.log(`📤 向新加入的客户端发送当前测试状态:`, {
+          testId,
+          status: currentTest.status,
+          hasData: !!currentTest.data,
+          hasMetrics: !!currentTest.metrics
+        });
+
+        // 如果测试正在运行，发送当前数据
+        if (currentTest.status === 'running' && currentTest.data && currentTest.metrics) {
+          socket.emit('stress-test-data', {
+            testId,
+            dataPoint: currentTest.data[currentTest.data.length - 1] || null,
+            metrics: currentTest.metrics,
+            totalRequests: currentTest.metrics.totalRequests || 0,
+            currentTPS: currentTest.metrics.currentTPS || 0,
+            peakTPS: currentTest.metrics.peakTPS || 0,
+            dataPointTimestamp: Date.now(),
+            dataPointResponseTime: currentTest.metrics.averageResponseTime || 0,
+            clientCount: room ? room.size : 0,
+            timestamp: Date.now()
+          });
+        }
+
+        // 如果测试已完成，发送最终结果
+        if (currentTest.status === 'completed' && currentTest.results) {
+          socket.emit('stress-test-complete', {
+            testId,
+            timestamp: Date.now(),
+            results: currentTest.results
+          });
+        }
+      }
     });
 
     // 离开压力测试房间

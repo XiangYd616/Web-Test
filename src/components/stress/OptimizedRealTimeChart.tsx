@@ -44,14 +44,14 @@ const defaultConfig: ChartConfig = {
 // 数据采样函数，减少渲染的数据点
 const sampleData = (data: DataPoint[], maxPoints: number): DataPoint[] => {
   if (data.length <= maxPoints) return data;
-  
+
   const step = Math.ceil(data.length / maxPoints);
   const sampled: DataPoint[] = [];
-  
+
   for (let i = 0; i < data.length; i += step) {
     sampled.push(data[i]);
   }
-  
+
   return sampled;
 };
 
@@ -76,12 +76,12 @@ export const OptimizedRealTimeChart: React.FC<OptimizedRealTimeChartProps> = ({
   }, [config, onConfigChange]);
 
   // 优化的数据处理
-  const processedData = useMemo(() => {
+  const processedData = useMemo((): { data: DataPoint[]; stats: { avgResponseTime: number; maxResponseTime: number; currentThroughput: number; currentErrorRate: number; } } | any[] => {
     if (!data || data.length === 0) return [];
-    
+
     // 数据采样，避免渲染过多点
     const sampledData = sampleData(data, config.maxDataPoints);
-    
+
     // 计算统计信息
     const stats = {
       avgResponseTime: sampledData.reduce((sum, d) => sum + d.responseTime, 0) / sampledData.length,
@@ -89,14 +89,14 @@ export const OptimizedRealTimeChart: React.FC<OptimizedRealTimeChartProps> = ({
       currentThroughput: sampledData[sampledData.length - 1]?.throughput || 0,
       currentErrorRate: sampledData[sampledData.length - 1]?.errorRate || 0
     };
-    
+
     return { data: sampledData, stats };
   }, [data, config.maxDataPoints]);
 
   // Canvas绘制函数
-  const drawChart = useCallback(() => {
+  const drawChart = useCallback((): void => {
     const canvas = canvasRef.current;
-    if (!canvas || !processedData.data.length) return;
+    if (!canvas || Array.isArray(processedData) || !processedData.data.length) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -121,7 +121,7 @@ export const OptimizedRealTimeChart: React.FC<OptimizedRealTimeChartProps> = ({
     if (config.showGrid) {
       ctx.strokeStyle = 'rgba(75, 85, 99, 0.3)';
       ctx.lineWidth = 1;
-      
+
       // 水平网格线
       for (let i = 0; i <= 5; i++) {
         const y = (height - 20) * i / 5 + 20;
@@ -130,7 +130,7 @@ export const OptimizedRealTimeChart: React.FC<OptimizedRealTimeChartProps> = ({
         ctx.lineTo(width, y);
         ctx.stroke();
       }
-      
+
       // 垂直网格线
       for (let i = 0; i <= 10; i++) {
         const x = width * i / 10;
@@ -145,18 +145,18 @@ export const OptimizedRealTimeChart: React.FC<OptimizedRealTimeChartProps> = ({
     ctx.strokeStyle = '#3b82f6';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    
+
     chartData.forEach((point, index) => {
       const x = index * xScale;
       const y = height - 20 - (point.responseTime * yScale);
-      
+
       if (index === 0) {
         ctx.moveTo(x, y);
       } else {
         ctx.lineTo(x, y);
       }
     });
-    
+
     ctx.stroke();
 
     // 绘制填充区域
@@ -175,7 +175,7 @@ export const OptimizedRealTimeChart: React.FC<OptimizedRealTimeChartProps> = ({
       drawChart();
       lastUpdateRef.current = now;
     }
-    
+
     if (isRunning) {
       animationFrameRef.current = requestAnimationFrame(animate);
     }
@@ -202,24 +202,24 @@ export const OptimizedRealTimeChart: React.FC<OptimizedRealTimeChartProps> = ({
   // 调整Canvas尺寸
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) return undefined;
 
     const resizeCanvas = () => {
       const rect = canvas.getBoundingClientRect();
       canvas.width = rect.width * window.devicePixelRatio;
       canvas.height = rect.height * window.devicePixelRatio;
-      
+
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
       }
-      
+
       drawChart();
     };
 
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
-    
+
     return () => window.removeEventListener('resize', resizeCanvas);
   }, [drawChart]);
 
@@ -233,10 +233,10 @@ export const OptimizedRealTimeChart: React.FC<OptimizedRealTimeChartProps> = ({
             {isRunning ? '实时性能监控' : '测试结果'}
           </h3>
         </div>
-        
+
         <div className="flex items-center gap-2">
           {/* 性能指标 */}
-          {processedData.stats && (
+          {!Array.isArray(processedData) && processedData.stats && (
             <div className="flex items-center gap-4 text-sm">
               <div className="text-blue-400">
                 平均响应: {processedData.stats.avgResponseTime.toFixed(1)}ms
@@ -249,7 +249,7 @@ export const OptimizedRealTimeChart: React.FC<OptimizedRealTimeChartProps> = ({
               </div>
             </div>
           )}
-          
+
           <button
             onClick={() => setShowSettings(!showSettings)}
             className="p-2 bg-gray-700 text-gray-300 rounded hover:bg-gray-600"
@@ -286,7 +286,7 @@ export const OptimizedRealTimeChart: React.FC<OptimizedRealTimeChartProps> = ({
               />
             </div>
           </div>
-          
+
           <div className="flex items-center gap-4 mt-3">
             <label className="flex items-center gap-2 text-sm text-gray-300">
               <input
@@ -312,7 +312,7 @@ export const OptimizedRealTimeChart: React.FC<OptimizedRealTimeChartProps> = ({
 
       {/* 图表区域 */}
       <div className="relative" style={{ height: `${height}px` }}>
-        {processedData.data.length > 0 ? (
+        {!Array.isArray(processedData) && processedData.data.length > 0 ? (
           <canvas
             ref={canvasRef}
             className="w-full h-full rounded-lg"
