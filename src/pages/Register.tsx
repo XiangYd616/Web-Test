@@ -9,7 +9,8 @@ const Register: React.FC = () => {
     username: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    acceptTerms: false
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -50,7 +51,7 @@ const Register: React.FC = () => {
     }
 
     try {
-      await register(formData.username, formData.email, formData.password, formData.confirmPassword);
+      await register(formData);
       navigate('/');
     } catch (err: any) {
       setError(err.message || '注册失败，请稍后重试');
@@ -282,7 +283,7 @@ const Register: React.FC = () => {
                   <div className="mt-1 w-full bg-gray-200 rounded-full h-1">
                     <div
                       className={`h-1 rounded-full transition-all ${passwordStrength <= 2 ? 'bg-red-500' :
-                          passwordStrength <= 3 ? 'bg-yellow-500' : 'bg-green-500'
+                        passwordStrength <= 3 ? 'bg-yellow-500' : 'bg-green-500'
                         }`}
                       style={{ width: `${(passwordStrength / 5) * 100}%` }}
                     />
