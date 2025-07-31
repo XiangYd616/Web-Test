@@ -153,26 +153,55 @@ const StressTest: React.FC = () => {
                 setStatusMessage('正在取消测试...');
 
                 try {
-                    // 如果有当前测试ID，调用后端取消API
-                    if (currentTestId) {
-                        console.log('🛑 调用后端取消API:', currentTestId);
-                        const response = await fetch(`/api/test/stress/cancel/${currentTestId}`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-                            },
-                            body: JSON.stringify({ reason })
-                        });
+                    // 🔧 修复：优先使用ref，然后是state，最后尝试从WebSocket数据中获取
+                    let testIdToCancel = currentTestIdRef.current || currentTestId;
 
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
+                    // 如果都没有，尝试从最近的WebSocket数据中获取testId
+                    if (!testIdToCancel && realTimeData.length > 0) {
+                        const lastDataPoint = realTimeData[realTimeData.length - 1];
+                        if (lastDataPoint && lastDataPoint.testId) {
+                            testIdToCancel = lastDataPoint.testId;
+                            console.log('🔧 从WebSocket数据中恢复testId:', testIdToCancel);
+                        }
+                    }
+
+                    console.log('🔍 取消测试ID检查:', {
+                        testIdToCancel,
+                        currentTestIdRef: currentTestIdRef.current,
+                        currentTestId,
+                        realTimeDataLength: realTimeData.length,
+                        isRunning,
+                        testStatus
+                    });
+
+                    if (testIdToCancel) {
+                        console.log('🛑 调用后端取消API:', testIdToCancel);
+
+                        try {
+                            const response = await fetch(`/api/test/stress/cancel/${testIdToCancel}`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                                },
+                                body: JSON.stringify({ reason }),
+                                timeout: 10000 // 10秒超时
+                            });
+
+                            if (!response.ok) {
+                                console.warn(`⚠️ 后端取消API返回错误状态: ${response.status}`);
+                                // 即使后端返回错误，也继续设置本地状态
+                            } else {
+                                const result = await response.json();
+                                console.log('✅ 后端取消成功:', result);
+                            }
+                        } catch (fetchError: any) {
+                            console.warn('⚠️ 后端取消API调用失败，继续设置本地状态:', fetchError.message);
+                            // 不抛出错误，继续执行本地状态设置
                         }
 
-                        const result = await response.json();
-                        console.log('✅ 后端取消成功:', result);
-
-                        // 设置取消状态
+                        // 无论后端API是否成功，都设置本地取消状态
+                        console.log('🔄 设置本地取消状态...');
                         setCurrentStatus('CANCELLED');
                         setStatusMessage('测试已取消');
                         setTestStatus('cancelled');
@@ -293,7 +322,8 @@ const StressTest: React.FC = () => {
         setMetrics(null);
         setResult(null);
         setIsRunning(true);
-        setCurrentTestId(null);
+        // 🔧 修复：不要在测试开始时清空testId！这会导致WebSocket数据无法匹配
+        // setCurrentTestId(null);
         setCurrentRecordId(null); // 重置记录ID
 
 
@@ -515,12 +545,15 @@ const StressTest: React.FC = () => {
                 if (data.data.status === 'cancelled') {
                     setTestStatus('cancelled');
                     setTestProgress('测试已取消');
+                    // 🔧 修复：取消状态时延迟清空testId
+                    setTimeout(() => setCurrentTestId(null), 1000);
                 } else {
                     setTestStatus('completed');
                     setTestProgress('压力测试完成！');
+                    // 完成状态可以立即清空testId
+                    setCurrentTestId(null);
                 }
                 setIsRunning(false);
-                setCurrentTestId(null);
 
                 // 最后设置metrics，确保不被其他逻辑覆盖
                 setTimeout(() => setMetrics(processedMetrics), 100);
@@ -981,7 +1014,8 @@ const StressTest: React.FC = () => {
                             setTestProgress('压力测试完成！');
                         }
                         setIsRunning(false);
-                        setCurrentTestId(null);
+                        // 🔧 修复：延迟清空testId，确保取消请求能正常发送
+                        setTimeout(() => setCurrentTestId(null), 1000);
                         // 记录测试完成统计
                         if (processedResult) {
                             const success = processedResult.success !== false;
@@ -1013,7 +1047,8 @@ const StressTest: React.FC = () => {
                         setError(testInfo.error || '测试失败');
                         setTestStatus('failed');
                         setIsRunning(false);
-                        setCurrentTestId(null);
+                        // 🔧 修复：延迟清空testId，确保取消请求能正常发送
+                        setTimeout(() => setCurrentTestId(null), 1000);
 
                         // 更新测试记录为失败状态
                         if (currentRecord) {
@@ -1033,7 +1068,8 @@ const StressTest: React.FC = () => {
                         setTestStatus('cancelled'); // ✅ 修复：使用正确的 cancelled 状态
                         setIsRunning(false);
                         setIsStopping(false);
-                        setCurrentTestId(null);
+                        // 🔧 修复：延迟清空testId，确保取消请求能正常发送
+                        setTimeout(() => setCurrentTestId(null), 1000);
 
                         // 更新测试记录为取消状态
                         if (currentRecord) {
@@ -1175,12 +1211,25 @@ const StressTest: React.FC = () => {
 
                     // 检查testId是否匹配 - 使用ref获取最新值
                     const currentTestIdValue = currentTestIdRef.current;
+
+                    // 🔧 修复：如果当前没有testId，接受数据并更新testId（不管是否正在运行）
                     if (data.testId !== currentTestIdValue) {
-                        console.warn('⚠️ 收到的数据testId不匹配当前测试:', {
-                            received: data.testId,
-                            current: currentTestIdValue
-                        });
-                        return;
+                        if (!currentTestIdValue && data.testId) {
+                            console.log('🔧 没有testId，从WebSocket数据中恢复:', data.testId);
+                            setCurrentTestId(data.testId);
+                            currentTestIdRef.current = data.testId;
+                        } else if (currentTestIdValue && data.testId !== currentTestIdValue) {
+                            // 只有在有testId但不匹配时才警告并返回
+                            console.warn('⚠️ 收到的数据testId不匹配当前测试:', {
+                                received: data.testId,
+                                current: currentTestIdValue,
+                                receivedType: typeof data.testId,
+                                currentType: typeof currentTestIdValue,
+                                isRunning,
+                                testStatus
+                            });
+                            return;
+                        }
                     }
 
                     // 检查测试是否已被取消 - 如果已取消，忽略后续数据
@@ -1311,7 +1360,8 @@ const StressTest: React.FC = () => {
                         setIsRunning(false);
                         setIsCancelling(false);
                         setCanSwitchPages(true);
-                        setCurrentTestId(null);
+                        // 🔧 修复：延迟清空testId，确保取消请求能正常发送
+                        setTimeout(() => setCurrentTestId(null), 1000);
 
                         // 设置结果数据
                         if (data.metrics || data.realTimeData) {
@@ -1370,7 +1420,8 @@ const StressTest: React.FC = () => {
                         setStatusMessage('测试已完成');
                     }
                     setIsRunning(false);
-                    setCurrentTestId(null);
+                    // 🔧 修复：延迟清空testId，确保不会影响其他操作
+                    setTimeout(() => setCurrentTestId(null), 1000);
                     setIsInRoom(false);
                     setResult(data.results);
 
@@ -1598,39 +1649,205 @@ const StressTest: React.FC = () => {
         }
     };
 
-    const handleCancelTest = async () => {
-        // 增强的确认对话框
-        const confirmed = window.confirm(
-            '🛑 确定要取消当前的压力测试吗？\n\n' +
-            '• 测试将立即取消，无法恢复\n' +
-            '• 已收集的数据将被保留\n' +
-            '• 测试记录将标记为"已取消"\n\n' +
-            '点击"确定"继续取消测试'
-        );
+    // 完整的重置函数
+    const resetTestState = useCallback(() => {
+        console.log('🔄 重置所有测试状态...');
 
-        if (!confirmed) {
+        // 重置基本状态
+        setTestStatus('idle');
+        setTestProgress('');
+        setIsRunning(false);
+        setIsStopping(false);
+        setIsCancelling(false);
+        setError('');
+
+        // 重置数据
+        setTestData([]);
+        setRealTimeData([]);
+        setFinalResultData([]);
+        setMetrics(null);
+        setResult(null);
+
+        // 重置测试ID和记录ID
+        setCurrentTestId(null);
+        setCurrentRecordId(null);
+        currentTestIdRef.current = '';
+
+        // 重置状态管理
+        setCurrentStatus('IDLE');
+        setStatusMessage('准备开始测试');
+
+        // 重置房间状态
+        setIsInRoom(false);
+        setCanSwitchPages(true);
+
+        // 断开WebSocket连接并重新连接
+        if (socketRef.current) {
+            console.log('🔌 断开WebSocket连接...');
+            socketRef.current.disconnect();
+
+            // 等待一小段时间后重新连接
+            setTimeout(() => {
+                if (socketRef.current && !socketRef.current.connected) {
+                    console.log('🔌 重新连接WebSocket...');
+                    socketRef.current.connect();
+                }
+            }, 1000);
+        }
+
+        console.log('✅ 测试状态重置完成');
+    }, []);
+
+    const handleCancelTest = async () => {
+        console.log('🔍 取消按钮被点击，当前状态:', {
+            currentTestId,
+            currentTestIdRef: currentTestIdRef.current,
+            isRunning,
+            testStatus,
+            isCancelling,
+            realTimeDataLength: realTimeData.length,
+            lastDataPoint: realTimeData[realTimeData.length - 1]
+        });
+
+        // 防止重复取消
+        if (isCancelling) {
+            console.log('⚠️ 正在取消中，忽略重复请求');
             return;
         }
 
-        try {
-            console.log('🛑 正在取消压力测试');
-            setIsCancelling(true);
+        // 检查是否有正在运行的测试
+        if (!isRunning && testStatus !== 'running') {
+            console.log('⚠️ 没有正在运行的测试需要取消');
+            return;
+        }
 
-            // 使用新的状态管理系统取消测试
-            await lifecycleManager.cancelTest('用户手动取消');
+        // 简化的确认对话框
+        const confirmed = window.confirm('确定要取消当前的压力测试吗？');
+        if (!confirmed) {
+            console.log('🚫 用户取消了取消操作');
+            return;
+        }
+
+        console.log('✅ 用户确认取消测试，开始执行取消逻辑...');
+
+        // 立即设置取消状态
+        setIsCancelling(true);
+
+        try {
+            // 获取要取消的测试ID
+            const testIdToCancel = currentTestIdRef.current || currentTestId;
+            console.log('🛑 准备取消测试:', {
+                testIdToCancel,
+                currentTestIdRef: currentTestIdRef.current,
+                currentTestId,
+                isRunning,
+                testStatus
+            });
+
+            // 如果有测试ID，调用后端取消API
+            if (testIdToCancel) {
+                console.log('📡 调用后端取消API...');
+                console.log('📡 请求URL:', `/api/test/stress/cancel/${testIdToCancel}`);
+                console.log('📡 请求头:', {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                });
+                console.log('📡 请求体:', JSON.stringify({ reason: '用户手动取消' }));
+
+                try {
+                    const response = await fetch(`/api/test/stress/cancel/${testIdToCancel}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                        },
+                        body: JSON.stringify({ reason: '用户手动取消' })
+                    });
+
+                    console.log('📡 响应状态:', response.status, response.statusText);
+                    console.log('📡 响应头:', Object.fromEntries(response.headers.entries()));
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        console.log('✅ 后端取消成功:', result);
+
+                        // 如果后端确认取消成功，立即设置本地状态
+                        if (result.success) {
+                            console.log('🎯 后端确认取消成功，更新本地状态');
+                            setIsRunning(false);
+                            setTestStatus('cancelled');
+                            setCurrentStatus('CANCELLED');
+                            setStatusMessage('测试已取消');
+                        }
+                    } else {
+                        const errorText = await response.text();
+                        console.warn('⚠️ 后端取消失败:', response.status, errorText);
+
+                        // 即使后端取消失败，也要设置本地状态
+                        console.log('🔄 后端取消失败，但仍设置本地取消状态');
+                    }
+                } catch (fetchError) {
+                    console.error('❌ 网络请求失败:', fetchError);
+                }
+            } else {
+                console.warn('⚠️ 没有找到测试ID，无法调用后端取消API');
+            }
+
+            // 确保本地状态已设置为已取消（防止重复设置）
+            console.log('🔄 确保本地取消状态已设置...');
             setIsRunning(false);
-            setIsCancelling(false);
+            setTestStatus('cancelled');
             setCanSwitchPages(true);
+            setCurrentStatus('CANCELLED');
+            setStatusMessage('测试已取消');
+
+            // 断开WebSocket连接
+            if (socketRef.current) {
+                console.log('🔌 断开WebSocket连接...');
+                socketRef.current.disconnect();
+            }
+
+            // 清理实时数据接收
+            console.log('🧹 清理测试相关状态...');
+
+            console.log('✅ 取消测试完成');
 
         } catch (error: any) {
             console.error('❌ 取消测试失败:', error);
             setError(error.message || '取消测试失败');
+        } finally {
             setIsCancelling(false);
         }
     };
 
     // 向后兼容的停止测试方法
     const handleStopTest = handleCancelTest;
+
+    // 强制取消测试（紧急情况下使用）
+    const forceStopTest = useCallback(() => {
+        console.log('🚨 强制停止测试');
+
+        // 立即设置所有相关状态
+        setIsRunning(false);
+        setIsCancelling(false);
+        setIsStopping(false);
+        setTestStatus('cancelled');
+        setCurrentStatus('CANCELLED');
+        setStatusMessage('测试已强制取消');
+        setCanSwitchPages(true);
+
+        // 断开WebSocket连接
+        if (socketRef.current) {
+            console.log('🔌 强制断开WebSocket连接...');
+            socketRef.current.disconnect();
+        }
+
+        // 清理测试ID
+        setCurrentTestId(null);
+        currentTestIdRef.current = '';
+
+        console.log('✅ 强制取消完成');
+    }, []);
 
     // 导出数据处理函数
     const handleExportData = (data: any) => {
@@ -1902,6 +2119,18 @@ const StressTest: React.FC = () => {
                                             )}
                                             <span>{isCancelling ? '取消中...' : '取消'}</span>
                                         </button>
+                                        {/* 紧急取消按钮 - 只在正常取消失败时显示 */}
+                                        {isCancelling && (
+                                            <button
+                                                type="button"
+                                                onClick={forceStopTest}
+                                                className="px-2 py-1.5 text-white rounded-md transition-colors flex items-center space-x-1 text-xs bg-red-800 hover:bg-red-900 border border-red-600"
+                                                title="强制取消测试（紧急情况下使用）"
+                                            >
+                                                <AlertTriangle className="w-3 h-3" />
+                                                <span>强制取消</span>
+                                            </button>
+                                        )}
                                     </div>
                                 ) : testStatus === 'completed' ? (
                                     <div className="flex items-center space-x-2">
@@ -1911,13 +2140,7 @@ const StressTest: React.FC = () => {
                                         </div>
                                         <button
                                             type="button"
-                                            onClick={() => {
-                                                setTestStatus('idle');
-                                                setTestProgress('');
-                                                setTestData([]);
-                                                setMetrics(null);
-                                                setResult(null);
-                                            }}
+                                            onClick={resetTestState}
                                             className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center space-x-2"
                                         >
                                             <RotateCcw className="w-4 h-4" />
@@ -1951,13 +2174,7 @@ const StressTest: React.FC = () => {
                                         </div>
                                         <button
                                             type="button"
-                                            onClick={() => {
-                                                setTestStatus('idle');
-                                                setTestProgress('');
-                                                setError('');
-                                                setResult(null);
-                                                setMetrics(null);
-                                            }}
+                                            onClick={resetTestState}
                                             className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center space-x-2"
                                         >
                                             <RotateCcw className="w-4 h-4" />
@@ -2556,11 +2773,7 @@ const StressTest: React.FC = () => {
                                             </div>
                                             <button
                                                 type="button"
-                                                onClick={() => {
-                                                    setTestStatus('idle');
-                                                    setTestProgress('');
-                                                    setError('');
-                                                }}
+                                                onClick={resetTestState}
                                                 className="w-full flex items-center justify-center space-x-2 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors"
                                             >
                                                 <RotateCcw className="w-4 h-4" />
@@ -2578,11 +2791,7 @@ const StressTest: React.FC = () => {
                                             </div>
                                             <button
                                                 type="button"
-                                                onClick={() => {
-                                                    setTestStatus('idle');
-                                                    setTestProgress('');
-                                                    setError('');
-                                                }}
+                                                onClick={resetTestState}
                                                 className="w-full flex items-center justify-center space-x-2 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors"
                                             >
                                                 <RotateCcw className="w-4 h-4" />
@@ -2600,13 +2809,7 @@ const StressTest: React.FC = () => {
                                             </div>
                                             <button
                                                 type="button"
-                                                onClick={() => {
-                                                    setTestStatus('idle');
-                                                    setTestProgress('');
-                                                    setError('');
-                                                    setResult(null);
-                                                    setMetrics(null);
-                                                }}
+                                                onClick={resetTestState}
                                                 className="w-full flex items-center justify-center space-x-2 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors"
                                             >
                                                 <RotateCcw className="w-4 h-4" />
