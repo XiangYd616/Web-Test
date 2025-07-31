@@ -166,7 +166,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
       case 'running':
         return 'bg-blue-100 dark:bg-blue-800/80 border-blue-200 dark:border-blue-600 animate-pulse';
       case 'cancelled':
-        return 'bg-gray-100 dark:bg-gray-700/80 border-gray-200 dark:border-gray-600';
+        return 'bg-yellow-100 dark:bg-yellow-800/80 border-yellow-200 dark:border-yellow-600';
       case 'pending':
         return 'bg-yellow-100 dark:bg-yellow-800/80 border-yellow-200 dark:border-yellow-600';
       case 'waiting':
