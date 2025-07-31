@@ -445,6 +445,7 @@ class RealStressTestEngine {
     while (Date.now() < endTime) {
       // 检查测试是否被中止
       if (this.shouldStopTest(results.testId)) {
+        console.log(`🛑 用户 ${userId} 检测到测试取消，退出循环 (testId: ${results.testId})`);
         logger.debug(`🛑 用户 ${userId} 检测到测试中止，退出循环`);
         break;
       }
@@ -1306,6 +1307,8 @@ class RealStressTestEngine {
       testStatus.endTime = new Date().toISOString();
       testStatus.actualDuration = (Date.now() - new Date(testStatus.startTime).getTime()) / 1000;
 
+      console.log(`🛑 测试 ${testId} 已标记为取消: status=${testStatus.status}, cancelled=${testStatus.cancelled}`);
+
       // 更新测试状态
       this.updateTestStatus(testId, testStatus);
 
@@ -1380,7 +1383,11 @@ class RealStressTestEngine {
    */
   shouldCancelTest(testId) {
     const testStatus = this.runningTests.get(testId);
-    return testStatus && (testStatus.cancelled || testStatus.status === 'cancelled');
+    const shouldCancel = testStatus && (testStatus.cancelled || testStatus.status === 'cancelled');
+    if (shouldCancel) {
+      console.log(`🔍 测试 ${testId} 应该取消: status=${testStatus?.status}, cancelled=${testStatus?.cancelled}`);
+    }
+    return shouldCancel;
   }
 
   /**

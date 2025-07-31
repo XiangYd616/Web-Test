@@ -1115,15 +1115,7 @@ const StressTest: React.FC = () => {
                     setIsInRoom(true);
                 });
 
-                // ✅ 监听测试完成事件
-                socket.on('stress-test-complete', (data: any) => {
-                    console.log('✅ 收到测试完成事件:', data);
-                    if (data.testId === currentTestIdRef.current) {
-                        setCurrentStatus('COMPLETED');
-                        setStatusMessage('测试已完成');
-                        console.log('🎉 压力测试完成:', data);
-                    }
-                });
+                // ✅ 监听测试完成事件 (简化版，主要处理在下面的完整监听器中)
 
                 // ✅ 监听测试错误事件
                 socket.on('stress-test-error', (data: any) => {
@@ -1188,6 +1180,12 @@ const StressTest: React.FC = () => {
                             received: data.testId,
                             current: currentTestIdValue
                         });
+                        return;
+                    }
+
+                    // 检查测试是否已被取消 - 如果已取消，忽略后续数据
+                    if (testStatus === 'cancelled' || currentStatus === 'CANCELLED') {
+                        console.log('🛑 测试已取消，忽略WebSocket数据');
                         return;
                     }
 
@@ -1347,13 +1345,29 @@ const StressTest: React.FC = () => {
                 // 压力测试完成
                 socket.on('stress-test-complete', (data) => {
                     console.log('✅ 测试完成:', data);
-                    // 检查是否是取消状态，如果是则不覆盖
-                    if (data.results?.status === 'cancelled') {
+
+                    // 检查testId是否匹配
+                    if (data.testId !== currentTestIdRef.current) {
+                        console.warn('⚠️ 收到的完成事件testId不匹配:', {
+                            received: data.testId,
+                            current: currentTestIdRef.current
+                        });
+                        return;
+                    }
+
+                    // 检查是否是取消状态
+                    if (data.results?.status === 'cancelled' || data.status === 'cancelled' || data.results?.cancelled) {
+                        console.log('🛑 测试已取消，设置取消状态');
                         setTestStatus('cancelled');
                         setTestProgress('测试已取消');
+                        setCurrentStatus('CANCELLED');
+                        setStatusMessage('测试已取消');
                     } else {
+                        console.log('✅ 测试正常完成');
                         setTestStatus('completed');
                         setTestProgress('压力测试完成！');
+                        setCurrentStatus('COMPLETED');
+                        setStatusMessage('测试已完成');
                     }
                     setIsRunning(false);
                     setCurrentTestId(null);
