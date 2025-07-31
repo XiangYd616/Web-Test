@@ -1167,22 +1167,36 @@ router.get('/stress/status/:testId', optionalAuth, asyncHandler(async (req, res)
 }));
 
 /**
- * 取消压力测试
+ * 取消压力测试 - 增强版本
  * POST /api/test/stress/cancel/:testId
  */
 router.post('/stress/cancel/:testId', authMiddleware, asyncHandler(async (req, res) => {
   const { testId } = req.params;
+  const { reason = '用户手动取消', preserveData = true } = req.body;
 
   try {
-    console.log(`🛑 收到取消压力测试请求: ${testId}`);
+    console.log(`🛑 收到取消压力测试请求: ${testId}`, {
+      reason,
+      preserveData,
+      userId: req.user?.id
+    });
 
-    const result = await realStressTestEngine.cancelStressTest(testId);
+    const result = await realStressTestEngine.cancelStressTest(testId, reason, preserveData);
 
     if (result.success) {
+      // 记录取消操作到用户活动日志
+      if (req.user?.id) {
+        console.log(`📝 记录用户 ${req.user.id} 的取消操作`);
+      }
+
       res.json({
         success: true,
         message: result.message,
-        data: result.data
+        data: {
+          ...result.data,
+          cancelledBy: req.user?.id,
+          cancelledByUsername: req.user?.username
+        }
       });
     } else {
       res.status(400).json({
@@ -1374,8 +1388,18 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
             const successfulRequests = metrics.successfulRequests || 0;
             const failedRequests = metrics.failedRequests || 0;
 
+            // 正确处理所有可能的状态
+            let finalStatus = 'failed'; // 默认为失败
+            if (responseData.status === 'completed') {
+              finalStatus = 'completed';
+            } else if (responseData.status === 'cancelled') {
+              finalStatus = 'cancelled';
+            }
+
+            console.log(`📊 设置测试记录状态: ${responseData.status} -> ${finalStatus}`);
+
             await testHistoryService.updateTestRecord(testRecordId, {
-              status: responseData.status === 'completed' ? 'completed' : 'failed',
+              status: finalStatus,
               endTime: responseData.endTime || new Date().toISOString(),
               duration: Math.round(responseData.actualDuration || 0),
               results: {
@@ -1400,7 +1424,7 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
                 recordId: testRecordId,
                 updates: {
                   id: testRecordId,
-                  status: responseData.status === 'completed' ? 'completed' : 'failed',
+                  status: finalStatus,
                   endTime: responseData.endTime || new Date().toISOString(),
                   duration: Math.round(responseData.actualDuration || 0),
                   progress: 100

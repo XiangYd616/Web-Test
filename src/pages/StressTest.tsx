@@ -5,6 +5,8 @@ import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { AdvancedStressTestChart, UnifiedStressTestCharts } from '../components/charts';
 import { RealTimeStressChart } from '../components/charts/RealTimeStressChart';
 import type { TestStatusType } from '../components/charts/UnifiedStressTestCharts';
+import CancelTestConfirmDialog from '../components/dialogs/CancelTestConfirmDialog';
+import CancelProgressFeedback from '../components/feedback/CancelProgressFeedback';
 import StressTestHistory from '../components/stress/StressTestHistory';
 import { URLInput } from '../components/testing';
 import {
@@ -96,6 +98,11 @@ const StressTest: React.FC = () => {
     const [isStopping, setIsStopping] = useState(false);
     const [isCancelling, setIsCancelling] = useState(false);
     const [result, setResult] = useState<any>(null);
+
+    // 新的取消功能状态
+    const [showCancelDialog, setShowCancelDialog] = useState(false);
+    const [showCancelProgress, setShowCancelProgress] = useState(false);
+    const [cancelInProgress, setCancelInProgress] = useState(false);
     const [error, setError] = useState<string>('');
     const [realTimeData, setRealTimeData] = useState<any[]>([]);
     const [finalResultData, setFinalResultData] = useState<TestDataPoint[]>([]);
@@ -185,7 +192,7 @@ const StressTest: React.FC = () => {
                                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                                 },
                                 body: JSON.stringify({ reason }),
-                                timeout: 10000 // 10秒超时
+                                // timeout: 10000 // fetch API不支持timeout，使用AbortController代替
                             });
 
                             if (!response.ok) {
@@ -1239,7 +1246,7 @@ const StressTest: React.FC = () => {
                     }
 
                     // 当接收到第一个实时数据时，更新状态为RUNNING
-                    setCurrentStatus(prevStatus => {
+                    setCurrentStatus((prevStatus: string) => {
                         if (prevStatus === 'WAITING' || prevStatus === 'STARTING') {
                             console.log('🎯 接收到实时数据，更新状态为RUNNING');
                             setStatusMessage('测试正在运行中...');
@@ -1710,7 +1717,7 @@ const StressTest: React.FC = () => {
         });
 
         // 防止重复取消
-        if (isCancelling) {
+        if (isCancelling || cancelInProgress) {
             console.log('⚠️ 正在取消中，忽略重复请求');
             return;
         }
@@ -1721,14 +1728,17 @@ const StressTest: React.FC = () => {
             return;
         }
 
-        // 简化的确认对话框
-        const confirmed = window.confirm('确定要取消当前的压力测试吗？');
-        if (!confirmed) {
-            console.log('🚫 用户取消了取消操作');
-            return;
-        }
+        // 显示专业的取消确认对话框
+        setShowCancelDialog(true);
+    };
 
-        console.log('✅ 用户确认取消测试，开始执行取消逻辑...');
+    // 处理取消确认
+    const handleCancelConfirm = async (reason: string, preserveData: boolean) => {
+        console.log('✅ 用户确认取消测试，开始执行取消逻辑...', { reason, preserveData });
+
+        setShowCancelDialog(false);
+        setCancelInProgress(true);
+        setShowCancelProgress(true);
 
         // 立即设置取消状态
         setIsCancelling(true);
@@ -1752,7 +1762,10 @@ const StressTest: React.FC = () => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                 });
-                console.log('📡 请求体:', JSON.stringify({ reason: '用户手动取消' }));
+                console.log('📡 请求体:', JSON.stringify({
+                    reason: reason,
+                    preserveData: preserveData
+                }));
 
                 try {
                     const response = await fetch(`/api/test/stress/cancel/${testIdToCancel}`, {
@@ -1817,7 +1830,27 @@ const StressTest: React.FC = () => {
             setError(error.message || '取消测试失败');
         } finally {
             setIsCancelling(false);
+            setCancelInProgress(false);
         }
+    };
+
+    // 处理取消进度完成
+    const handleCancelProgressComplete = () => {
+        setShowCancelProgress(false);
+        setCancelInProgress(false);
+        setIsCancelling(false);
+
+        // 确保状态正确设置
+        setIsRunning(false);
+        setTestStatus('cancelled');
+        setTestProgress('测试已取消');
+
+        console.log('✅ 取消进度完成，状态已更新');
+    };
+
+    // 处理取消对话框关闭
+    const handleCancelDialogClose = () => {
+        setShowCancelDialog(false);
     };
 
     // 向后兼容的停止测试方法
@@ -3410,6 +3443,28 @@ const StressTest: React.FC = () => {
                 ) : null}
 
             {LoginPromptComponent}
+
+            {/* 取消测试确认对话框 */}
+            <CancelTestConfirmDialog
+                isOpen={showCancelDialog}
+                onCancel={handleCancelDialogClose}
+                onConfirm={handleCancelConfirm}
+                testProgress={isRunning ? {
+                    duration: Math.floor((Date.now() - (result?.startTime ? new Date(result.startTime).getTime() : Date.now())) / 1000),
+                    completedRequests: realTimeData.length,
+                    totalRequests: testConfig.users * testConfig.duration,
+                    currentUsers: testConfig.users,
+                    phase: testProgress || '运行中'
+                } : undefined}
+                isLoading={cancelInProgress}
+            />
+
+            {/* 取消进度反馈 */}
+            <CancelProgressFeedback
+                isVisible={showCancelProgress}
+                onComplete={handleCancelProgressComplete}
+                testId={currentTestId || undefined}
+            />
         </TestPageLayout >
     );
 };
