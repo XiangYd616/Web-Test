@@ -261,15 +261,14 @@ const startServer = async () => {
     // 设置WebSocket事件处理
     setupWebSocketHandlers(io);
 
-    // 清理旧的测试房间
+    // 创建全局压力测试引擎实例
     setTimeout(async () => {
       try {
-        const { RealStressTestEngine } = require('./services/realStressTestEngine');
-        const stressTestEngine = new RealStressTestEngine();
-        stressTestEngine.io = io; // 设置WebSocket实例
-        await stressTestEngine.cleanupAllTestRooms();
+        const { createGlobalInstance } = require('./services/realStressTestEngine');
+        const stressTestEngine = createGlobalInstance();
+        console.log('✅ 全局压力测试引擎实例已创建');
       } catch (error) {
-        console.error('❌ 清理旧测试房间失败:', error);
+        console.error('❌ 创建压力测试引擎实例失败:', error);
       }
     }, 2000); // 延迟2秒执行，确保服务器完全启动
 
