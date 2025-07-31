@@ -261,6 +261,18 @@ const startServer = async () => {
     // 设置WebSocket事件处理
     setupWebSocketHandlers(io);
 
+    // 清理旧的测试房间
+    setTimeout(async () => {
+      try {
+        const { RealStressTestEngine } = require('./services/realStressTestEngine');
+        const stressTestEngine = new RealStressTestEngine();
+        stressTestEngine.io = io; // 设置WebSocket实例
+        await stressTestEngine.cleanupAllTestRooms();
+      } catch (error) {
+        console.error('❌ 清理旧测试房间失败:', error);
+      }
+    }, 2000); // 延迟2秒执行，确保服务器完全启动
+
     // 启动服务器
     server.listen(PORT, () => {
       console.log(`🚀 服务器运行在端口 ${PORT}`);

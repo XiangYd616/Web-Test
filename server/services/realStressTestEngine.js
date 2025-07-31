@@ -181,7 +181,7 @@ class RealStressTestEngine {
       await this.saveFinalTestResults(testId, results);
 
       // 广播测试完成
-      this.broadcastTestComplete(testId, results);
+      await this.broadcastTestComplete(testId, results);
 
       // 清理测试状态
       this.removeTestStatus(testId);
@@ -486,8 +486,27 @@ class RealStressTestEngine {
 
       try {
         const requestStart = Date.now();
-        const response = await this.makeRequest(url, method, timeout);
+
+        // 在请求前再次检查取消状态
+        if (this.shouldStopTest(results.testId)) {
+          console.log(`🛑 用户 ${userId} 在请求前检测到测试取消，退出循环`);
+          break;
+        }
+
+        const response = await this.makeRequest(url, method, timeout, results.testId);
         const responseTime = Date.now() - requestStart;
+
+        // 在请求后再次检查取消状态
+        if (this.shouldStopTest(results.testId)) {
+          console.log(`🛑 用户 ${userId} 在请求后检测到测试取消，退出循环`);
+          break;
+        }
+
+        // 如果响应表明测试已取消，立即退出
+        if (response.cancelled) {
+          console.log(`🛑 用户 ${userId} 收到取消响应，退出循环`);
+          break;
+        }
 
         userResults.requests++;
         userResults.responseTimes.push(responseTime);
@@ -554,10 +573,10 @@ class RealStressTestEngine {
         // 动态思考时间 - 基于当前性能调整
         const dynamicThinkTime = this.calculateDynamicThinkTime(thinkTime, results.metrics);
         if (dynamicThinkTime > 0) {
-          await this.sleep(dynamicThinkTime);
+          await this.sleep(dynamicThinkTime, results.testId);
         } else {
           // 最小延迟避免过于密集的请求
-          await this.sleep(Math.random() * 20 + 10); // 10-30ms随机延迟，减少延迟提高请求频率
+          await this.sleep(Math.random() * 20 + 10, results.testId); // 10-30ms随机延迟，减少延迟提高请求频率
         }
 
       } catch (error) {
@@ -591,7 +610,7 @@ class RealStressTestEngine {
         });
 
         // 错误后适当延迟，避免连续错误
-        await this.sleep(Math.min(2000, 500 + Math.random() * 1500));
+        await this.sleep(Math.min(2000, 500 + Math.random() * 1500), results.testId);
       }
     }
 
@@ -700,8 +719,20 @@ class RealStressTestEngine {
   /**
    * 发起HTTP请求
    */
-  async makeRequest(url, method = 'GET', timeout = 10) {
+  async makeRequest(url, method = 'GET', timeout = 10, testId = null) {
     return new Promise((resolve) => {
+      // 在开始请求前检查取消状态
+      if (testId && this.shouldStopTest(testId)) {
+        resolve({
+          success: false,
+          error: 'Test cancelled before request',
+          statusCode: 0,
+          responseTime: 0,
+          cancelled: true
+        });
+        return;
+      }
+
       const urlObj = new URL(url);
       const client = urlObj.protocol === 'https:' ? https : http;
       const startTime = Date.now();
@@ -739,6 +770,19 @@ class RealStressTestEngine {
 
         res.on('end', () => {
           const responseTime = Date.now() - startTime;
+
+          // 在响应结束时再次检查取消状态
+          if (testId && this.shouldStopTest(testId)) {
+            resolve({
+              success: false,
+              error: 'Test cancelled during request',
+              statusCode: 0,
+              responseTime,
+              cancelled: true
+            });
+            return;
+          }
+
           const success = res.statusCode >= 200 && res.statusCode < 400;
 
           resolve({
@@ -906,10 +950,31 @@ class RealStressTestEngine {
   }
 
   /**
-   * 睡眠函数
+   * 可中断的睡眠函数 - 支持取消检查
    */
-  sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  sleep(ms, testId = null) {
+    return new Promise((resolve) => {
+      const checkInterval = Math.min(100, ms); // 每100ms或更短时间检查一次
+      let elapsed = 0;
+
+      const check = () => {
+        // 如果提供了testId，检查是否应该取消
+        if (testId && this.shouldStopTest(testId)) {
+          console.log(`🛑 睡眠期间检测到测试取消，立即中断: ${testId}`);
+          resolve();
+          return;
+        }
+
+        elapsed += checkInterval;
+        if (elapsed >= ms) {
+          resolve();
+        } else {
+          setTimeout(check, Math.min(checkInterval, ms - elapsed));
+        }
+      };
+
+      setTimeout(check, Math.min(checkInterval, ms));
+    });
   }
 
   /**
@@ -986,12 +1051,7 @@ class RealStressTestEngine {
     return sortedArray[Math.max(0, index)];
   }
 
-  /**
-   * 睡眠函数
-   */
-  sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
+
 
   /**
    * 验证URL格式
@@ -1316,7 +1376,7 @@ class RealStressTestEngine {
   /**
    * 广播测试完成
    */
-  broadcastTestComplete(testId, results) {
+  async broadcastTestComplete(testId, results) {
     try {
       if (global.io) {
         global.io.to(`stress-test-${testId}`).emit('stress-test-complete', {
@@ -1325,6 +1385,10 @@ class RealStressTestEngine {
           results
         });
       }
+
+      // 清理WebSocket房间
+      await this.cleanupTestRoom(testId);
+
     } catch (error) {
       console.error('WebSocket完成广播失败:', error);
     }
@@ -1362,10 +1426,14 @@ class RealStressTestEngine {
         testStatus.progressMonitor = null;
       }
 
+      // 强制停止所有虚拟用户（通过设置取消标志）
+      console.log(`🛑 强制停止所有虚拟用户: ${testId}`);
+
       // 更新测试状态
       this.updateTestStatus(testId, testStatus);
 
-      // 广播测试取消状态
+      // 立即广播取消状态，不等待
+      console.log(`📡 立即广播取消状态: ${testId}`);
       this.broadcastTestStatus(testId, {
         status: 'cancelled',
         message: '测试已被用户取消',
@@ -1373,8 +1441,12 @@ class RealStressTestEngine {
         actualDuration: testStatus.actualDuration,
         metrics: testStatus.metrics || {},
         realTimeData: testStatus.realTimeData || [],
-        cancelReason: '用户手动取消'
+        cancelReason: '用户手动取消',
+        cancelled: true
       });
+
+      // 清理WebSocket房间
+      await this.cleanupTestRoom(testId);
 
       // 计算最终指标
       if (testStatus.metrics) {
@@ -1382,7 +1454,7 @@ class RealStressTestEngine {
       }
 
       // 广播测试完成事件（取消也是一种完成）
-      this.broadcastTestComplete(testId, {
+      await this.broadcastTestComplete(testId, {
         status: 'cancelled',
         message: '测试已被用户取消',
         endTime: testStatus.endTime,
@@ -1396,6 +1468,10 @@ class RealStressTestEngine {
 
       // 保存取消记录到数据库
       await this.saveCancelledTestRecord(testId, testStatus);
+
+      // 从运行中的测试列表中移除
+      this.runningTests.delete(testId);
+      console.log(`🗑️ 已从运行列表中移除测试: ${testId}`);
 
       console.log(`✅ 压力测试 ${testId} 已成功取消`);
 
@@ -1451,6 +1527,44 @@ class RealStressTestEngine {
   }
 
   /**
+   * 清理测试的WebSocket房间
+   */
+  async cleanupTestRoom(testId) {
+    try {
+      const roomName = `stress-test-${testId}`;
+      console.log(`🧹 清理WebSocket房间: ${roomName}`);
+
+      if (this.io) {
+        // 获取房间中的所有客户端
+        const room = this.io.sockets.adapter.rooms.get(roomName);
+        if (room) {
+          console.log(`📊 房间 ${roomName} 有 ${room.size} 个客户端`);
+
+          // 通知所有客户端测试已取消
+          this.io.to(roomName).emit('test-cancelled', {
+            testId,
+            message: '测试已被取消',
+            timestamp: new Date().toISOString()
+          });
+
+          // 让所有客户端离开房间
+          for (const socketId of room) {
+            const socket = this.io.sockets.sockets.get(socketId);
+            if (socket) {
+              socket.leave(roomName);
+              console.log(`🚪 客户端 ${socketId} 已离开房间 ${roomName}`);
+            }
+          }
+        } else {
+          console.log(`⚠️ 房间 ${roomName} 不存在或已清空`);
+        }
+      }
+    } catch (error) {
+      console.error(`❌ 清理WebSocket房间失败:`, error);
+    }
+  }
+
+  /**
    * 保存取消的测试记录到数据库
    */
   async saveCancelledTestRecord(testId, testStatus) {
@@ -1460,7 +1574,8 @@ class RealStressTestEngine {
         return;
       }
 
-      const testHistoryService = require('./dataManagement/testHistoryService');
+      const TestHistoryService = require('./dataManagement/testHistoryService');
+      const testHistoryService = new TestHistoryService();
 
       // 更新测试记录状态为取消
       const updateData = {
@@ -1529,6 +1644,57 @@ class RealStressTestEngine {
    */
   getTestStatus(testId) {
     return this.runningTests.get(testId) || null;
+  }
+
+  /**
+   * 清理所有旧的测试房间
+   */
+  async cleanupAllTestRooms() {
+    try {
+      if (!this.io) {
+        console.log('⚠️ WebSocket服务器未初始化，跳过房间清理');
+        return;
+      }
+
+      console.log('🧹 开始清理所有旧的测试房间...');
+
+      const rooms = this.io.sockets.adapter.rooms;
+      let cleanedCount = 0;
+
+      for (const [roomName, room] of rooms) {
+        if (roomName.startsWith('stress-test-')) {
+          const testId = roomName.replace('stress-test-', '');
+
+          // 检查测试是否还在运行
+          const testStatus = this.runningTests.get(testId);
+          if (!testStatus || testStatus.status === 'completed' || testStatus.status === 'cancelled') {
+            console.log(`🧹 清理旧房间: ${roomName} (${room.size} 个客户端)`);
+
+            // 通知客户端测试已结束
+            this.io.to(roomName).emit('test-cleanup', {
+              testId,
+              message: '测试已结束，清理房间',
+              timestamp: new Date().toISOString()
+            });
+
+            // 让所有客户端离开房间
+            for (const socketId of room) {
+              const socket = this.io.sockets.sockets.get(socketId);
+              if (socket) {
+                socket.leave(roomName);
+              }
+            }
+
+            cleanedCount++;
+          }
+        }
+      }
+
+      console.log(`✅ 清理完成，共清理了 ${cleanedCount} 个旧房间`);
+
+    } catch (error) {
+      console.error('❌ 清理所有测试房间失败:', error);
+    }
   }
 }
 
