@@ -248,6 +248,13 @@ class RealStressTestEngine {
     // 启动进度监控
     const progressMonitor = this.startProgressMonitor(results, duration * 1000);
 
+    // 将进度监控器存储到测试状态中，以便取消时清理
+    const testStatus = this.getTestStatus(results.testId);
+    if (testStatus) {
+      testStatus.progressMonitor = progressMonitor;
+      this.updateTestStatus(results.testId, testStatus);
+    }
+
     // 启动所有虚拟用户
     for (let i = 0; i < users; i++) {
       const userStartDelay = i * userStartInterval;
@@ -282,6 +289,13 @@ class RealStressTestEngine {
 
     const progressMonitor = this.startProgressMonitor(results, duration * 1000);
 
+    // 将进度监控器存储到测试状态中
+    const testStatus = this.getTestStatus(results.testId);
+    if (testStatus) {
+      testStatus.progressMonitor = progressMonitor;
+      this.updateTestStatus(results.testId, testStatus);
+    }
+
     // 快速启动所有用户（在1秒内）
     for (let i = 0; i < users; i++) {
       const userStartDelay = (i * 1000) / users; // 在1秒内分散启动
@@ -312,6 +326,13 @@ class RealStressTestEngine {
 
     const progressMonitor = this.startProgressMonitor(results, duration * 1000);
 
+    // 将进度监控器存储到测试状态中
+    const testStatus = this.getTestStatus(results.testId);
+    if (testStatus) {
+      testStatus.progressMonitor = progressMonitor;
+      this.updateTestStatus(results.testId, testStatus);
+    }
+
     // 立即启动所有用户
     for (let i = 0; i < users; i++) {
       const userPromise = new Promise((resolve) => {
@@ -337,6 +358,13 @@ class RealStressTestEngine {
     const promises = [];
 
     const progressMonitor = this.startProgressMonitor(results, duration * 1000);
+
+    // 将进度监控器存储到测试状态中
+    const testStatus = this.getTestStatus(results.testId);
+    if (testStatus) {
+      testStatus.progressMonitor = progressMonitor;
+      this.updateTestStatus(results.testId, testStatus);
+    }
 
     // 分阶段增加用户数
     const phases = 3;
@@ -379,6 +407,12 @@ class RealStressTestEngine {
     let progressUpdateCount = 0;
 
     return setInterval(() => {
+      // 检查测试是否已被取消，如果是则停止进度更新
+      if (this.shouldStopTest(results.testId)) {
+        console.log(`🛑 测试 ${results.testId} 已取消，停止进度监控`);
+        return;
+      }
+
       progressUpdateCount++;
       const elapsed = Date.now() - startTime;
       const progress = Math.min(100, (elapsed / totalDuration) * 100);
@@ -491,6 +525,12 @@ class RealStressTestEngine {
           }
         }
 
+        // 再次检查测试是否被取消，避免发送取消后的数据
+        if (this.shouldStopTest(results.testId)) {
+          console.log(`🛑 用户 ${userId} 在数据记录前检测到测试取消，跳过数据记录`);
+          break;
+        }
+
         // 记录实时数据点用于图表显示（这里会触发WebSocket广播）
         const elapsedTime = (Date.now() - results.startTime) / 1000;
         const currentThroughput = elapsedTime > 0 ? results.metrics.totalRequests / elapsedTime : 0;
@@ -566,6 +606,12 @@ class RealStressTestEngine {
     // 验证dataPoint参数
     if (!dataPoint) {
       logger.warn('⚠️ recordRealTimeDataPoint called with undefined dataPoint');
+      return;
+    }
+
+    // 检查测试是否已被取消，如果是则不记录和广播数据
+    if (this.shouldStopTest(results.testId)) {
+      console.log(`🛑 测试 ${results.testId} 已取消，跳过实时数据记录和广播`);
       return;
     }
 
@@ -1308,6 +1354,13 @@ class RealStressTestEngine {
       testStatus.actualDuration = (Date.now() - new Date(testStatus.startTime).getTime()) / 1000;
 
       console.log(`🛑 测试 ${testId} 已标记为取消: status=${testStatus.status}, cancelled=${testStatus.cancelled}`);
+
+      // 清理进度监控器
+      if (testStatus.progressMonitor) {
+        console.log(`🧹 清理测试 ${testId} 的进度监控器`);
+        clearInterval(testStatus.progressMonitor);
+        testStatus.progressMonitor = null;
+      }
 
       // 更新测试状态
       this.updateTestStatus(testId, testStatus);
