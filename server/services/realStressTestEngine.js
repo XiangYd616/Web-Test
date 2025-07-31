@@ -48,6 +48,7 @@ class RealStressTestEngine {
     this.version = '1.0.0';
     this.maxConcurrentUsers = Math.min(1000, os.cpus().length * 50); // 基于CPU核心数限制
     this.runningTests = new Map(); // 存储正在运行的测试状态
+    this.globalTimers = new Map(); // 全局定时器跟踪
   }
 
   /**
@@ -164,9 +165,19 @@ class RealStressTestEngine {
       // 计算最终指标
       this.calculateFinalMetrics(results);
 
-      results.status = 'completed';
-      results.progress = 100;
-      results.currentPhase = 'completed';
+      // 检查测试是否被取消，如果是则设置取消状态
+      if (this.shouldStopTest(testId)) {
+        console.log(`🛑 测试 ${testId} 已被取消，设置最终状态为 cancelled`);
+        results.status = 'cancelled';
+        results.progress = Math.min(100, results.progress || 0);
+        results.currentPhase = 'cancelled';
+        results.cancelled = true;
+        results.cancelReason = '用户手动取消';
+      } else {
+        results.status = 'completed';
+        results.progress = 100;
+        results.currentPhase = 'completed';
+      }
       results.endTime = new Date().toISOString();
 
       logger.info(`✅ Stress test completed for: ${url}`);
@@ -178,6 +189,7 @@ class RealStressTestEngine {
       logger.info(`❌ Error rate: ${results.metrics.errorRate}%`);
 
       // 保存最终测试结果到数据库
+      console.log(`🔍 准备保存最终测试结果: ${testId}, status: ${results.status}`);
       await this.saveFinalTestResults(testId, results);
 
       // 广播测试完成
@@ -406,10 +418,30 @@ class RealStressTestEngine {
     const startTime = Date.now();
     let progressUpdateCount = 0;
 
-    return setInterval(() => {
-      // 检查测试是否已被取消，如果是则停止进度更新
+    const intervalId = setInterval(() => {
+      // 检查测试是否已被取消，如果是则立即停止
       if (this.shouldStopTest(results.testId)) {
-        console.log(`🛑 测试 ${results.testId} 已取消，停止进度监控`);
+        console.log(`🛑 测试 ${results.testId} 已取消，立即停止进度监控`);
+        clearInterval(intervalId);
+
+        // 从测试状态中移除这个监控器引用
+        const testStatus = this.runningTests.get(results.testId);
+        if (testStatus && testStatus.progressMonitor === intervalId) {
+          testStatus.progressMonitor = null;
+        }
+        return;
+      }
+
+      // 检查测试状态是否已停止广播
+      const testStatus = this.runningTests.get(results.testId);
+      if (testStatus && (testStatus.broadcastStopped || testStatus.cancelled)) {
+        console.log(`🛑 测试 ${results.testId} 广播已停止，清理进度监控器`);
+        clearInterval(intervalId);
+
+        // 从测试状态中移除这个监控器引用
+        if (testStatus.progressMonitor === intervalId) {
+          testStatus.progressMonitor = null;
+        }
         return;
       }
 
@@ -455,8 +487,32 @@ class RealStressTestEngine {
         );
       }
 
+      // 广播实时数据（只有在测试未取消时）
+      if (!this.shouldStopTest(results.testId)) {
+        this.broadcastRealTimeData(results.testId, {
+          timestamp: Date.now(),
+          responseTime: results.metrics.averageResponseTime || recentResponseTime,
+          throughput: currentThroughput,
+          activeUsers: results.metrics.activeUsers,
+          errorRate: results.metrics.totalRequests > 0 ?
+            Math.round((results.metrics.failedRequests / results.metrics.totalRequests) * 1000) / 10 : 0,
+          success: results.metrics.totalRequests > 0 ?
+            Math.round(((results.metrics.totalRequests - results.metrics.failedRequests) / results.metrics.totalRequests) * 1000) / 10 : 0,
+          phase: results.currentPhase,
+          status: results.status || 'running',
+          currentTPS: typeof results.metrics.currentTPS === 'number' ? results.metrics.currentTPS : 0,
+          peakTPS: typeof results.metrics.peakTPS === 'number' ? results.metrics.peakTPS : 0
+        });
+      }
+
       logger.debug(`📊 Progress: ${results.progress}%, Active users: ${results.metrics.activeUsers}, Total requests: ${results.metrics.totalRequests}`);
     }, 1000); // 每秒更新一次
+
+    // 跟踪这个定时器
+    this.globalTimers.set(`progress_${results.testId}`, intervalId);
+    console.log(`📝 已注册进度监控器: progress_${results.testId}`);
+
+    return intervalId;
   }
 
   /**
@@ -1167,6 +1223,12 @@ class RealStressTestEngine {
         return;
       }
 
+      // 检查测试是否已被取消，如果是则不保存完成状态
+      if (testStatus.cancelled || testStatus.status === 'cancelled') {
+        console.log(`🛑 测试 ${testId} 已被取消，跳过保存最终完成结果`);
+        return;
+      }
+
       // 导入testHistoryService
       const TestHistoryService = require('./dataManagement/testHistoryService');
       const testHistoryService = new TestHistoryService();
@@ -1290,6 +1352,19 @@ class RealStressTestEngine {
    */
   broadcastRealTimeData(testId, data) {
     try {
+      // 首先检查测试是否已被取消
+      if (this.shouldStopTest(testId)) {
+        console.log(`🛑 测试 ${testId} 已取消，跳过实时数据广播`);
+        return;
+      }
+
+      // 检查测试状态是否已停止广播
+      const testStatus = this.runningTests.get(testId);
+      if (testStatus && testStatus.broadcastStopped) {
+        console.log(`🛑 测试 ${testId} 广播已停止，跳过数据广播`);
+        return;
+      }
+
       // 检查全局io实例是否存在
       if (global.io) {
         // 验证数据完整性
@@ -1361,12 +1436,29 @@ class RealStressTestEngine {
    */
   broadcastTestStatus(testId, status) {
     try {
+      // 如果是取消状态，允许广播；否则检查是否应该停止
+      const isCancelStatus = status.status === 'cancelled' || status.status === 'cancelling';
+
+      if (!isCancelStatus && this.shouldStopTest(testId)) {
+        console.log(`🛑 测试 ${testId} 已取消，跳过状态广播`);
+        return;
+      }
+
+      // 检查测试状态是否已停止广播（取消状态除外）
+      const testStatus = this.runningTests.get(testId);
+      if (!isCancelStatus && testStatus && testStatus.broadcastStopped) {
+        console.log(`🛑 测试 ${testId} 广播已停止，跳过状态广播`);
+        return;
+      }
+
       if (global.io) {
         global.io.to(`stress-test-${testId}`).emit('stress-test-status', {
           testId,
           timestamp: Date.now(),
           ...status
         });
+
+        console.log(`📡 状态广播已发送: ${testId} - ${status.status || 'unknown'}`);
       }
     } catch (error) {
       console.error('WebSocket状态广播失败:', error);
@@ -1395,11 +1487,11 @@ class RealStressTestEngine {
   }
 
   /**
-   * 取消压力测试
+   * 取消压力测试 - 增强版本，包含完整的资源清理
    */
-  async cancelStressTest(testId) {
+  async cancelStressTest(testId, cancelReason = '用户手动取消', preserveData = true) {
     try {
-      console.log(`🛑 取消压力测试: ${testId}`);
+      console.log(`🛑 取消压力测试: ${testId}, 原因: ${cancelReason}`);
 
       // 获取测试状态
       const testStatus = this.runningTests.get(testId);
@@ -1411,19 +1503,110 @@ class RealStressTestEngine {
         };
       }
 
+      // 记录取消开始时间
+      const cancelStartTime = Date.now();
+
       // 标记测试为已取消
       testStatus.status = 'cancelled';
       testStatus.cancelled = true;
+      testStatus.cancelReason = cancelReason;
+      testStatus.cancelledAt = new Date().toISOString();
       testStatus.endTime = new Date().toISOString();
       testStatus.actualDuration = (Date.now() - new Date(testStatus.startTime).getTime()) / 1000;
 
       console.log(`🛑 测试 ${testId} 已标记为取消: status=${testStatus.status}, cancelled=${testStatus.cancelled}`);
 
-      // 清理进度监控器
+      // 立即广播取消状态，让前端知道取消开始
+      this.broadcastTestStatus(testId, {
+        status: 'cancelling',
+        message: '正在取消测试...',
+        progress: testStatus.progress || 0,
+        cancelReason: cancelReason
+      });
+
+      // 1. 立即停止所有定时器和广播
+      console.log(`🛑 立即停止测试 ${testId} 的所有定时器和广播`);
+
+      // 停止进度监控器
       if (testStatus.progressMonitor) {
-        console.log(`🧹 清理测试 ${testId} 的进度监控器`);
+        console.log(`🧹 停止进度监控器: ${testId}`);
         clearInterval(testStatus.progressMonitor);
         testStatus.progressMonitor = null;
+      }
+
+      // 停止所有相关的定时器
+      if (testStatus.dataUpdateTimer) {
+        console.log(`🧹 停止数据更新定时器: ${testId}`);
+        clearInterval(testStatus.dataUpdateTimer);
+        testStatus.dataUpdateTimer = null;
+      }
+
+      if (testStatus.metricsUpdateTimer) {
+        console.log(`🧹 停止指标更新定时器: ${testId}`);
+        clearInterval(testStatus.metricsUpdateTimer);
+        testStatus.metricsUpdateTimer = null;
+      }
+
+      // 立即标记为停止广播
+      testStatus.broadcastStopped = true;
+      testStatus.cancelled = true;
+      testStatus.status = 'cancelled';
+      console.log(`🔇 已标记测试 ${testId} 停止广播`);
+
+      // 强制清理所有可能的定时器
+      this.forceCleanupAllTimers(testId, testStatus);
+
+      // 紧急停止所有活动
+      this.emergencyStopTest(testId);
+
+      // 2. 清理定时器
+      if (testStatus.timers && testStatus.timers.length > 0) {
+        console.log(`⏰ 清理测试 ${testId} 的定时器 (${testStatus.timers.length}个)`);
+        testStatus.timers.forEach(timer => {
+          if (timer) clearTimeout(timer);
+        });
+        testStatus.timers = [];
+      }
+
+      // 3. 清理活跃连接
+      if (testStatus.activeConnections && testStatus.activeConnections.size > 0) {
+        console.log(`🔌 清理测试 ${testId} 的活跃连接 (${testStatus.activeConnections.size}个)`);
+        for (const connection of testStatus.activeConnections) {
+          try {
+            if (connection && typeof connection.destroy === 'function') {
+              connection.destroy();
+            }
+          } catch (error) {
+            console.warn(`⚠️ 清理连接时出错:`, error.message);
+          }
+        }
+        testStatus.activeConnections.clear();
+      }
+
+      // 4. 清理临时文件（如果有）
+      if (testStatus.tempFiles && testStatus.tempFiles.length > 0) {
+        console.log(`📁 清理测试 ${testId} 的临时文件 (${testStatus.tempFiles.length}个)`);
+        const fs = require('fs').promises;
+        for (const filePath of testStatus.tempFiles) {
+          try {
+            await fs.unlink(filePath);
+            console.log(`🗑️ 已删除临时文件: ${filePath}`);
+          } catch (error) {
+            console.warn(`⚠️ 删除临时文件失败: ${filePath}`, error.message);
+          }
+        }
+        testStatus.tempFiles = [];
+      }
+
+      // 5. 停止所有虚拟用户的活动
+      if (testStatus.virtualUsers && testStatus.virtualUsers.length > 0) {
+        console.log(`👥 停止测试 ${testId} 的虚拟用户活动 (${testStatus.virtualUsers.length}个)`);
+        testStatus.virtualUsers.forEach(user => {
+          if (user && user.active) {
+            user.active = false;
+            user.cancelled = true;
+          }
+        });
       }
 
       // 强制停止所有虚拟用户（通过设置取消标志）
@@ -1445,7 +1628,10 @@ class RealStressTestEngine {
         cancelled: true
       });
 
-      // 清理WebSocket房间
+      // 立即停止所有数据广播
+      console.log(`🛑 停止所有数据广播: ${testId}`);
+
+      // 清理WebSocket房间并停止广播
       await this.cleanupTestRoom(testId);
 
       // 计算最终指标
@@ -1453,7 +1639,8 @@ class RealStressTestEngine {
         this.calculateFinalMetrics(testStatus);
       }
 
-      // 广播测试完成事件（取消也是一种完成）
+      // 广播最终的取消状态（只广播一次）
+      console.log(`📡 发送最终取消广播: ${testId}`);
       await this.broadcastTestComplete(testId, {
         status: 'cancelled',
         message: '测试已被用户取消',
@@ -1463,15 +1650,31 @@ class RealStressTestEngine {
         realTimeData: testStatus.realTimeData || [],
         cancelReason: '用户手动取消',
         success: false,
-        cancelled: true
+        cancelled: true,
+        final: true // 标记为最终状态
       });
+
+      // 立即强制停止所有广播（不延迟）
+      console.log(`🔇 立即强制停止测试 ${testId} 的所有广播`);
+      this.stopAllBroadcasts(testId);
+
+      // 再次确保测试状态已更新
+      this.updateTestStatus(testId, testStatus);
 
       // 保存取消记录到数据库
       await this.saveCancelledTestRecord(testId, testStatus);
 
-      // 从运行中的测试列表中移除
-      this.runningTests.delete(testId);
-      console.log(`🗑️ 已从运行列表中移除测试: ${testId}`);
+      // 不要从运行列表中移除，保留状态以便虚拟用户线程能够检测到取消
+      // 但设置一个延迟清理，确保所有虚拟用户线程都能检测到取消状态
+      console.log(`🔄 保留测试状态在运行列表中，以便虚拟用户检测取消: ${testId}`);
+
+      // 30秒后清理测试状态（给虚拟用户足够时间检测取消）
+      setTimeout(() => {
+        if (this.runningTests.has(testId)) {
+          this.runningTests.delete(testId);
+          console.log(`🗑️ 延迟清理：已从运行列表中移除测试: ${testId}`);
+        }
+      }, 30000);
 
       console.log(`✅ 压力测试 ${testId} 已成功取消`);
 
@@ -1512,10 +1715,18 @@ class RealStressTestEngine {
    */
   shouldCancelTest(testId) {
     const testStatus = this.runningTests.get(testId);
-    const shouldCancel = testStatus && (testStatus.cancelled || testStatus.status === 'cancelled');
-    if (shouldCancel) {
-      console.log(`🔍 测试 ${testId} 应该取消: status=${testStatus?.status}, cancelled=${testStatus?.cancelled}`);
-    }
+    const shouldCancel = testStatus && (testStatus.cancelled || testStatus.status === 'cancelled' || testStatus.broadcastStopped);
+
+    // 添加详细的调试信息
+    console.log(`🔍 检查测试 ${testId} 是否应该取消:`, {
+      hasTestStatus: !!testStatus,
+      status: testStatus?.status,
+      cancelled: testStatus?.cancelled,
+      broadcastStopped: testStatus?.broadcastStopped,
+      shouldCancel,
+      allRunningTests: Array.from(this.runningTests.keys())
+    });
+
     return shouldCancel;
   }
 
@@ -1544,6 +1755,14 @@ class RealStressTestEngine {
           this.io.to(roomName).emit('test-cancelled', {
             testId,
             message: '测试已被取消',
+            timestamp: new Date().toISOString(),
+            final: true
+          });
+
+          // 停止向该房间广播数据
+          this.io.to(roomName).emit('stop-data-broadcast', {
+            testId,
+            message: '停止数据广播',
             timestamp: new Date().toISOString()
           });
 
@@ -1565,9 +1784,136 @@ class RealStressTestEngine {
   }
 
   /**
-   * 保存取消的测试记录到数据库
+   * 强制清理所有定时器
    */
-  async saveCancelledTestRecord(testId, testStatus) {
+  forceCleanupAllTimers(testId, testStatus) {
+    try {
+      console.log(`🧹 强制清理测试 ${testId} 的所有定时器`);
+
+      // 清理所有可能的定时器属性
+      const timerProperties = [
+        'progressMonitor', 'dataUpdateTimer', 'metricsUpdateTimer',
+        'statusUpdateTimer', 'broadcastTimer', 'cleanupTimer'
+      ];
+
+      timerProperties.forEach(prop => {
+        if (testStatus[prop]) {
+          console.log(`🧹 清理定时器: ${prop}`);
+          clearInterval(testStatus[prop]);
+          clearTimeout(testStatus[prop]);
+          testStatus[prop] = null;
+        }
+      });
+
+      // 清理定时器数组
+      if (testStatus.timers && Array.isArray(testStatus.timers)) {
+        testStatus.timers.forEach((timer, index) => {
+          if (timer) {
+            console.log(`🧹 清理定时器数组[${index}]`);
+            clearTimeout(timer);
+            clearInterval(timer);
+          }
+        });
+        testStatus.timers = [];
+      }
+
+      // 清理全局定时器跟踪
+      const globalTimerKeys = Array.from(this.globalTimers.keys()).filter(key => key.includes(testId));
+      globalTimerKeys.forEach(key => {
+        const timerId = this.globalTimers.get(key);
+        if (timerId) {
+          console.log(`🧹 清理全局定时器: ${key}`);
+          clearInterval(timerId);
+          clearTimeout(timerId);
+          this.globalTimers.delete(key);
+        }
+      });
+
+      console.log(`✅ 已强制清理测试 ${testId} 的所有定时器`);
+    } catch (error) {
+      console.error(`❌ 强制清理定时器失败:`, error);
+    }
+  }
+
+  /**
+   * 紧急停止测试
+   */
+  emergencyStopTest(testId) {
+    try {
+      console.log(`🚨 紧急停止测试: ${testId}`);
+
+      // 清理所有可能的全局定时器
+      const allTimerKeys = Array.from(this.globalTimers.keys());
+      allTimerKeys.forEach(key => {
+        if (key.includes(testId)) {
+          const timerId = this.globalTimers.get(key);
+          if (timerId) {
+            console.log(`🚨 紧急清理定时器: ${key}`);
+            clearInterval(timerId);
+            clearTimeout(timerId);
+            this.globalTimers.delete(key);
+          }
+        }
+      });
+
+      // 立即发送停止信号
+      if (global.io) {
+        const roomName = `stress-test-${testId}`;
+        global.io.to(roomName).emit('emergency-stop', {
+          testId,
+          message: '测试已紧急停止',
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      console.log(`✅ 紧急停止完成: ${testId}`);
+    } catch (error) {
+      console.error(`❌ 紧急停止失败:`, error);
+    }
+  }
+
+  /**
+   * 强制停止所有广播
+   */
+  stopAllBroadcasts(testId) {
+    try {
+      console.log(`🔇 强制停止测试 ${testId} 的所有广播`);
+
+      // 从运行测试列表中移除（如果还存在）
+      if (this.runningTests.has(testId)) {
+        const testStatus = this.runningTests.get(testId);
+
+        // 强制清理所有定时器
+        this.forceCleanupAllTimers(testId, testStatus);
+
+        // 标记为已停止
+        testStatus.broadcastStopped = true;
+        testStatus.status = 'cancelled';
+        testStatus.cancelled = true;
+
+        this.runningTests.set(testId, testStatus);
+      }
+
+      // 向房间发送停止广播信号
+      if (global.io) {
+        const roomName = `stress-test-${testId}`;
+        global.io.to(roomName).emit('force-stop-broadcast', {
+          testId,
+          message: '强制停止所有数据广播',
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      console.log(`✅ 已强制停止测试 ${testId} 的所有广播`);
+    } catch (error) {
+      console.error(`❌ 强制停止广播失败:`, error);
+    }
+  }
+
+  /**
+   * 保存取消的测试记录到数据库 - 增强版本
+   */
+  async saveCancelledTestRecord(testId, testStatus, cancelReason = '用户手动取消') {
     try {
       if (!testStatus.recordId || !testStatus.userId) {
         console.log('⚠️ 没有数据库记录ID或用户ID，跳过保存取消记录');
@@ -1577,25 +1923,66 @@ class RealStressTestEngine {
       const TestHistoryService = require('./dataManagement/testHistoryService');
       const testHistoryService = new TestHistoryService();
 
+      // 计算测试完成度
+      const completionPercentage = testStatus.progress || 0;
+      const totalRequests = testStatus.totalRequests || 0;
+      const completedRequests = testStatus.completedRequests || 0;
+
+      // 准备详细的取消信息
+      const cancelInfo = {
+        cancelledAt: testStatus.cancelledAt || new Date().toISOString(),
+        cancelReason: cancelReason,
+        cancelledBy: testStatus.userId,
+        completionPercentage: completionPercentage,
+        completedRequests: completedRequests,
+        totalRequests: totalRequests,
+        actualDuration: testStatus.actualDuration,
+        dataPreserved: true,
+        resourcesCleaned: {
+          progressMonitors: 1,
+          timers: testStatus.timers?.length || 0,
+          connections: testStatus.activeConnections?.size || 0,
+          tempFiles: testStatus.tempFiles?.length || 0,
+          virtualUsers: testStatus.virtualUsers?.length || 0
+        }
+      };
+
       // 更新测试记录状态为取消
       const updateData = {
         status: 'cancelled',
         endTime: testStatus.endTime,
         actualDuration: testStatus.actualDuration,
-        error: '用户手动取消测试',
+        error: `测试已取消: ${cancelReason}`,
         cancelReason: 'user_cancelled',
         results: {
           ...testStatus.results,
           status: 'cancelled',
-          cancelledAt: testStatus.endTime,
-          cancelReason: '用户手动取消',
+          cancelInfo: cancelInfo,
           metrics: testStatus.metrics || {},
           realTimeData: testStatus.realTimeData || [],
-          partialData: true // 标记为部分数据
+          partialData: true, // 标记为部分数据
+          dataQuality: {
+            isComplete: false,
+            completionPercentage: completionPercentage,
+            reasonForIncomplete: 'test_cancelled',
+            dataReliability: completionPercentage > 50 ? 'high' : completionPercentage > 20 ? 'medium' : 'low'
+          }
         }
       };
 
-      await testHistoryService.updateTestRecord(testStatus.recordId, updateData, testStatus.userId);
+      console.log(`📊 正在保存取消的测试记录: ${testStatus.recordId}`, {
+        status: updateData.status,
+        cancelReason: updateData.cancelReason,
+        endTime: updateData.endTime
+      });
+
+      const updateResult = await testHistoryService.updateTestRecord(testStatus.recordId, updateData, testStatus.userId);
+
+      console.log(`✅ 取消记录保存结果:`, {
+        success: updateResult.success,
+        recordId: testStatus.recordId,
+        finalStatus: updateResult.data?.status
+      });
 
       // 广播测试记录更新到测试历史页面
       if (global.io) {
