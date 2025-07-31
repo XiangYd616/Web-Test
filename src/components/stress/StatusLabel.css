@@ -58,7 +58,7 @@ span.status-label-running,
 .status-label-cancelled,
 span.status-label-cancelled,
 .inline-flex.status-label-cancelled {
-  color: #374151 !important; /* gray-800 */
+  color: #92400e !important; /* yellow-800 */
   opacity: 1 !important;
   text-shadow: none !important;
 }
@@ -66,8 +66,8 @@ span.status-label-cancelled,
 .dark .status-label-cancelled,
 .dark span.status-label-cancelled,
 .dark .inline-flex.status-label-cancelled {
-  color: #ffffff !important; /* pure white */
-  background-color: rgba(107, 114, 128, 0.8) !important; /* dark gray background - gray-500/80 */
+  color: #fbbf24 !important; /* yellow-400 */
+  background-color: rgba(217, 119, 6, 0.8) !important; /* dark yellow background - yellow-600/80 */
   opacity: 1 !important;
   text-shadow: 0 0 1px rgba(0, 0, 0, 0.8) !important; /* 黑色阴影增强对比度 */
 }

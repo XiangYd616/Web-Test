@@ -1314,13 +1314,29 @@ class RealStressTestEngine {
         status: 'cancelled',
         message: '测试已被用户取消',
         endTime: testStatus.endTime,
-        actualDuration: testStatus.actualDuration
+        actualDuration: testStatus.actualDuration,
+        metrics: testStatus.metrics || {},
+        realTimeData: testStatus.realTimeData || [],
+        cancelReason: '用户手动取消'
       });
 
       // 计算最终指标
       if (testStatus.metrics) {
         this.calculateFinalMetrics(testStatus);
       }
+
+      // 广播测试完成事件（取消也是一种完成）
+      this.broadcastTestComplete(testId, {
+        status: 'cancelled',
+        message: '测试已被用户取消',
+        endTime: testStatus.endTime,
+        actualDuration: testStatus.actualDuration,
+        metrics: testStatus.metrics || {},
+        realTimeData: testStatus.realTimeData || [],
+        cancelReason: '用户手动取消',
+        success: false,
+        cancelled: true
+      });
 
       // 保存取消记录到数据库
       await this.saveCancelledTestRecord(testId, testStatus);

@@ -152,12 +152,50 @@ const StressTest: React.FC = () => {
                 setCurrentStatus('CANCELLING');
                 setStatusMessage('正在取消测试...');
 
-                // 设置取消状态
-                setTestStatus('cancelled');
-                setIsRunning(false);
-                setCanSwitchPages(true);
+                try {
+                    // 如果有当前测试ID，调用后端取消API
+                    if (currentTestId) {
+                        console.log('🛑 调用后端取消API:', currentTestId);
+                        const response = await fetch(`/api/test/stress/cancel/${currentTestId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                            },
+                            body: JSON.stringify({ reason })
+                        });
 
-                return true;
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const result = await response.json();
+                        console.log('✅ 后端取消成功:', result);
+
+                        // 设置取消状态
+                        setCurrentStatus('CANCELLED');
+                        setStatusMessage('测试已取消');
+                        setTestStatus('cancelled');
+                        setIsRunning(false);
+                        setCanSwitchPages(true);
+
+                        return true;
+                    } else {
+                        // 没有测试ID，只设置本地状态
+                        console.log('⚠️ 没有测试ID，只设置本地取消状态');
+                        setCurrentStatus('CANCELLED');
+                        setStatusMessage('测试已取消');
+                        setTestStatus('cancelled');
+                        setIsRunning(false);
+                        setCanSwitchPages(true);
+                        return true;
+                    }
+                } catch (error: any) {
+                    console.error('❌ 取消测试失败:', error);
+                    setCurrentStatus('FAILED');
+                    setStatusMessage('取消测试失败');
+                    throw error;
+                }
             },
             setTestId: (testId: string) => {
                 console.log('🔑 生命周期管理器设置测试ID:', testId);
@@ -1266,6 +1304,32 @@ const StressTest: React.FC = () => {
                 // 压力测试状态更新
                 socket.on('stress-test-status', (data) => {
                     console.log('📊 收到状态更新:', data);
+
+                    // 处理取消状态
+                    if (data.status === 'cancelled') {
+                        console.log('🛑 收到取消状态通知');
+                        setTestStatus('cancelled');
+                        setTestProgress(data.message || '测试已取消');
+                        setIsRunning(false);
+                        setIsCancelling(false);
+                        setCanSwitchPages(true);
+                        setCurrentTestId(null);
+
+                        // 设置结果数据
+                        if (data.metrics || data.realTimeData) {
+                            setResult({
+                                status: 'cancelled',
+                                message: data.message || '测试已被用户取消',
+                                metrics: data.metrics || {},
+                                realTimeData: data.realTimeData || [],
+                                endTime: data.endTime,
+                                actualDuration: data.actualDuration,
+                                cancelReason: data.cancelReason || '用户手动取消'
+                            });
+                        }
+                        return;
+                    }
+
                     // ✅ 修复：保护取消状态不被覆盖
                     setTestStatus(prevStatus => {
                         if (prevStatus === 'cancelled') {
@@ -1274,6 +1338,7 @@ const StressTest: React.FC = () => {
                         }
                         return data.status || 'running';
                     });
+
                     if (data.progress !== undefined) {
                         setTestProgress(`测试进行中... ${Math.round(data.progress)}%`);
                     }
@@ -1535,15 +1600,18 @@ const StressTest: React.FC = () => {
 
         try {
             console.log('🛑 正在取消压力测试');
+            setIsCancelling(true);
 
             // 使用新的状态管理系统取消测试
             await lifecycleManager.cancelTest('用户手动取消');
             setIsRunning(false);
+            setIsCancelling(false);
             setCanSwitchPages(true);
 
         } catch (error: any) {
             console.error('❌ 取消测试失败:', error);
             setError(error.message || '取消测试失败');
+            setIsCancelling(false);
         }
     };
 
@@ -2942,7 +3010,8 @@ const StressTest: React.FC = () => {
                             <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
                                 <div className="flex items-center justify-between mb-4">
                                     <h3 className="text-lg font-semibold text-white">
-                                        {isRunning ? '实时性能监控' : result ? '测试结果分析' : '压力测试图表'}
+                                        {isRunning && testStatus !== 'cancelled' ? '实时性能监控' :
+                                            result || testStatus === 'cancelled' ? '测试结果分析' : '压力测试图表'}
                                     </h3>
                                     <div className="flex items-center gap-2">
                                         <button
@@ -2969,7 +3038,8 @@ const StressTest: React.FC = () => {
                                 <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
                                     <div className="flex items-center justify-between mb-4">
                                         <h3 className="text-lg font-semibold text-white">
-                                            {isRunning ? '实时性能监控' : '传统压力测试图表'}
+                                            {isRunning && testStatus !== 'cancelled' ? '实时性能监控' :
+                                                testStatus === 'cancelled' || result ? '测试结果分析' : '传统压力测试图表'}
                                         </h3>
                                         <button
                                             type="button"
