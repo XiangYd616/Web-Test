@@ -322,11 +322,7 @@ export const useAdvancedTestEngine = () => {
     setIsRunning(false);
   }, [stopRealTimeMetrics]);
 
-  const pauseTest = useCallback(() => {
-    if (currentTestId.current) {
-      (backgroundTestManager as any).pauseTest(currentTestId.current);
-    }
-  }, []);
+
 
   const resumeTest = useCallback(() => {
     if (currentTestId.current) {
@@ -410,8 +406,6 @@ export const useAdvancedTestEngine = () => {
     // 测试控制
     runStressTest: runAdvancedStressTest,
     stopTest,
-    pauseTest,
-    resumeTest,
 
     // 数据管理
     getTestHistory,

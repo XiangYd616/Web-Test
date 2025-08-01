@@ -150,13 +150,33 @@ class MetricsCalculator {
 
     // 计算总体吞吐量
     const actualDuration = results.actualDuration || 1;
-    metrics.throughput = Math.round((metrics.totalRequests / actualDuration) * 100) / 100;
+    if (metrics.totalRequests > 0 && actualDuration > 0) {
+      metrics.throughput = Math.round((metrics.totalRequests / actualDuration) * 100) / 100;
+    } else {
+      metrics.throughput = 0;
+    }
+
+    // 确保吞吐量不为负数或无穷大
+    if (!isFinite(metrics.throughput) || metrics.throughput < 0) {
+      metrics.throughput = 0;
+    }
+
+    // 🔧 修复：确保 requestsPerSecond 使用正确的吞吐量值
+    // 在测试结束时，使用平均吞吐量作为 requestsPerSecond
+    metrics.requestsPerSecond = metrics.throughput;
+
+    // 如果 currentTPS 为0或无效，也使用平均吞吐量
+    if (!metrics.currentTPS || metrics.currentTPS === 0) {
+      metrics.currentTPS = metrics.throughput;
+    }
 
     Logger.debug('最终指标计算完成', {
       totalRequests: metrics.totalRequests,
       averageResponseTime: metrics.averageResponseTime,
       errorRate: metrics.errorRate,
-      throughput: metrics.throughput
+      throughput: metrics.throughput,
+      requestsPerSecond: metrics.requestsPerSecond,
+      currentTPS: metrics.currentTPS
     });
   }
 
@@ -164,6 +184,23 @@ class MetricsCalculator {
     if (responseTime > 0) {
       metrics.minResponseTime = Math.min(metrics.minResponseTime, responseTime);
       metrics.maxResponseTime = Math.max(metrics.maxResponseTime, responseTime);
+
+      // 🔧 实时计算平均响应时间
+      if (metrics.responseTimes.length > 0) {
+        const totalTime = metrics.responseTimes.reduce((sum, time) => sum + time, 0);
+        metrics.averageResponseTime = Math.round(totalTime / metrics.responseTimes.length);
+
+        // 实时计算百分位数（每10个请求计算一次以提高性能）
+        if (metrics.responseTimes.length % 10 === 0) {
+          const sortedTimes = [...metrics.responseTimes].sort((a, b) => a - b);
+          const len = sortedTimes.length;
+
+          metrics.p50ResponseTime = sortedTimes[Math.floor(len * 0.5)] || metrics.averageResponseTime;
+          metrics.p90ResponseTime = sortedTimes[Math.floor(len * 0.9)] || metrics.averageResponseTime;
+          metrics.p95ResponseTime = sortedTimes[Math.floor(len * 0.95)] || metrics.averageResponseTime;
+          metrics.p99ResponseTime = sortedTimes[Math.floor(len * 0.99)] || metrics.averageResponseTime;
+        }
+      }
 
       // 限制响应时间数组大小
       if (metrics.responseTimes.length >= CONSTANTS.LIMITS.MAX_RESPONSE_TIMES) {
@@ -179,15 +216,27 @@ class MetricsCalculator {
 
     // 计算当前TPS（每秒事务数）
     const recentCount = metrics.recentRequests.length;
-    const timeSpan = recentCount > 1
-      ? (now - metrics.recentRequests[0]) / 1000
-      : 1;
 
-    metrics.currentTPS = Math.round((recentCount / timeSpan) * 10) / 10;
+    if (recentCount <= 1) {
+      // 如果只有1个或没有请求，TPS为0或基于单个请求的估算
+      metrics.currentTPS = recentCount;
+    } else {
+      // 计算实际时间跨度
+      const timeSpan = (now - metrics.recentRequests[0]) / 1000;
+      if (timeSpan > 0) {
+        metrics.currentTPS = Math.round((recentCount / timeSpan) * 10) / 10;
+      } else {
+        metrics.currentTPS = recentCount;
+      }
+    }
+
     metrics.peakTPS = Math.max(metrics.peakTPS, metrics.currentTPS);
 
     // 更新上次吞吐量更新时间
     metrics.lastThroughputUpdate = now;
+
+    // 更新每秒请求数（RPS）
+    metrics.requestsPerSecond = metrics.currentTPS;
   }
 }
 
@@ -315,6 +364,13 @@ class RealStressTestEngine {
       // 执行测试
       await this.executeTest(url, testConfig, results);
 
+      // 检查测试是否已经被其他机制（如进度监控器）处理完成
+      const currentStatus = this.getTestStatus(testId);
+      if (currentStatus && (currentStatus.status === 'completed' || currentStatus.status === 'cancelled')) {
+        Logger.info(`测试 ${testId} 已被其他机制处理完成，状态: ${currentStatus.status}`);
+        return { success: true, data: results };
+      }
+
       // 处理测试完成
       return this.handleTestCompletion(testId, results);
 
@@ -437,11 +493,33 @@ class RealStressTestEngine {
    * 处理测试完成
    */
   handleTestCompletion(testId, results) {
+    // 检查是否已经处理过，避免重复处理
+    const currentStatus = this.getTestStatus(testId);
+    if (currentStatus && currentStatus.finalProcessed) {
+      Logger.info(`测试 ${testId} 已经最终处理过，跳过重复处理`);
+      return { success: true, data: results };
+    }
+
+    Logger.info(`开始最终处理测试完成: ${testId}`);
+
     // 设置实际持续时间
     results.actualDuration = (Date.now() - results.startTime) / 1000;
 
     // 计算最终指标
+    console.log('🔍 计算最终指标前的数据:', {
+      totalRequests: results.metrics?.totalRequests,
+      responseTimes: results.metrics?.responseTimes?.length,
+      hasMetrics: !!results.metrics
+    });
+
     MetricsCalculator.calculateFinalMetrics(results);
+
+    console.log('✅ 最终指标计算完成:', {
+      totalRequests: results.metrics?.totalRequests,
+      averageResponseTime: results.metrics?.averageResponseTime,
+      throughput: results.metrics?.throughput,
+      errorRate: results.metrics?.errorRate
+    });
 
     // 检查测试是否被取消
     if (this.shouldStopTest(testId)) {
@@ -459,16 +537,26 @@ class RealStressTestEngine {
 
     results.endTime = new Date().toISOString();
 
+    // 标记为最终处理完成，防止重复处理
+    this.updateTestStatus(testId, {
+      finalProcessed: true,
+      finalProcessedAt: new Date().toISOString()
+    });
+
+    // 发送WebSocket完成事件
+    this.broadcastTestComplete(testId, results);
+
     // 保存最终测试结果
     this.saveFinalTestResults(testId, results);
 
     // 清理资源
     this.cleanupTest(testId);
 
-    Logger.info(`压力测试完成: ${testId}`, {
+    Logger.info(`压力测试最终处理完成: ${testId}`, {
       status: results.status,
       totalRequests: results.metrics.totalRequests,
-      duration: results.actualDuration
+      duration: results.actualDuration,
+      finalProcessed: true
     });
 
     return { success: true, data: results };
@@ -681,6 +769,7 @@ class RealStressTestEngine {
           status: response.statusCode,
           success: response.success,
           activeUsers: results.metrics.activeUsers,
+          throughput: results.metrics.currentTPS || 0, // 🔧 添加吞吐量字段
           userId: userId,
           phase: results.currentPhase || 'running'
         });
@@ -727,8 +816,17 @@ class RealStressTestEngine {
       MetricsCalculator.updateResponseTimeStats(results.metrics, responseTime);
     }
 
+    // 🔧 实时计算错误率
+    results.metrics.errorRate = results.metrics.totalRequests > 0
+      ? Math.round((results.metrics.failedRequests / results.metrics.totalRequests) * 100 * 100) / 100
+      : 0;
+
     // 更新当前吞吐量
     MetricsCalculator.updateCurrentThroughput(results.metrics, now);
+
+    // 🔧 修复：确保 requestsPerSecond 使用正确的吞吐量值
+    // 在实时更新时，使用当前TPS作为 requestsPerSecond
+    results.metrics.requestsPerSecond = results.metrics.currentTPS || 0;
   }
 
   /**
@@ -800,7 +898,10 @@ class RealStressTestEngine {
       multiplier = Math.max(multiplier, 1.5);
     }
 
-    return baseThinkTime * 1000 * multiplier;
+    // 🔧 修复：减少思考时间，提高请求频率
+    // 将基础思考时间从秒转换为毫秒，但使用更合理的值
+    const baseThinkTimeMs = Math.max(100, baseThinkTime * 200); // 最小100ms，基础值降低到200ms
+    return baseThinkTimeMs * multiplier;
   }
 
   /**
@@ -849,6 +950,33 @@ class RealStressTestEngine {
    */
   getTestStatus(testId) {
     return this.runningTests.get(testId);
+  }
+
+  /**
+   * 获取所有运行中的测试
+   */
+  getAllRunningTests() {
+    const runningTests = [];
+    for (const [testId, status] of this.runningTests.entries()) {
+      runningTests.push({
+        testId,
+        status: status.status,
+        startTime: status.startTime,
+        duration: status.duration,
+        cancelled: status.cancelled,
+        lastUpdated: status.lastUpdated,
+        userId: status.userId,
+        recordId: status.recordId
+      });
+    }
+    return runningTests;
+  }
+
+  /**
+   * 获取运行中测试的数量
+   */
+  getRunningTestsCount() {
+    return this.runningTests.size;
   }
 
   /**
@@ -912,6 +1040,128 @@ class RealStressTestEngine {
     return { success: false, message: '测试不存在或已完成' };
   }
 
+  /**
+   * 取消压力测试 - 增强版本，包含完整的资源清理
+   * 这是路由中调用的主要方法
+   */
+  async cancelStressTest(testId, cancelReason = '用户手动取消', preserveData = true) {
+    try {
+      Logger.info(`🛑 取消压力测试: ${testId}`, { reason: cancelReason, preserveData });
+
+      // 获取测试状态
+      const testStatus = this.getTestStatus(testId);
+      if (!testStatus) {
+        Logger.warn(`⚠️ 测试 ${testId} 不存在或已完成`);
+        return {
+          success: false,
+          message: '测试不存在或已完成'
+        };
+      }
+
+      // 记录取消开始时间
+      const cancelStartTime = Date.now();
+
+      // 标记测试为已取消
+      const updatedStatus = {
+        ...testStatus,
+        status: 'cancelled',
+        cancelled: true,
+        cancelReason: cancelReason,
+        cancelledAt: new Date().toISOString(),
+        endTime: new Date().toISOString(),
+        actualDuration: (Date.now() - new Date(testStatus.startTime).getTime()) / 1000
+      };
+
+      // 更新测试状态
+      this.updateTestStatus(testId, updatedStatus);
+
+      Logger.info(`🛑 测试 ${testId} 已标记为取消: status=${updatedStatus.status}, cancelled=${updatedStatus.cancelled}`);
+
+      // 立即广播取消状态
+      this.broadcastTestStatus(testId, {
+        status: 'cancelled',
+        message: '测试已被用户取消',
+        endTime: updatedStatus.endTime,
+        actualDuration: updatedStatus.actualDuration,
+        metrics: updatedStatus.metrics || {},
+        realTimeData: updatedStatus.realTimeData || [],
+        cancelReason: cancelReason,
+        cancelled: true
+      });
+
+      // 停止数据广播
+      this.stopBroadcast(testId);
+
+      // 清理定时器
+      this.clearTestTimers(testId);
+
+      // 清理WebSocket房间
+      await this.cleanupTestRoom(testId);
+
+      // 计算最终指标
+      if (updatedStatus.metrics) {
+        MetricsCalculator.calculateFinalMetrics(updatedStatus);
+      }
+
+      Logger.info(`✅ 压力测试 ${testId} 已成功取消`);
+
+      return {
+        success: true,
+        message: '测试已成功取消',
+        data: {
+          testId,
+          status: 'cancelled',
+          endTime: updatedStatus.endTime,
+          actualDuration: updatedStatus.actualDuration,
+          metrics: updatedStatus.metrics || {},
+          realTimeData: updatedStatus.realTimeData || [],
+          cancelReason: cancelReason,
+          cancelledAt: updatedStatus.endTime
+        }
+      };
+
+    } catch (error) {
+      Logger.error(`❌ 取消压力测试失败 ${testId}:`, error);
+      return {
+        success: false,
+        message: '取消测试失败',
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * 停止压力测试 (向后兼容)
+   */
+  async stopStressTest(testId) {
+    return await this.cancelStressTest(testId);
+  }
+
+  /**
+   * 清理测试的WebSocket房间
+   */
+  async cleanupTestRoom(testId) {
+    try {
+      const roomName = `stress-test-${testId}`;
+      Logger.info(`🧹 清理WebSocket房间: ${roomName}`);
+
+      if (this.io) {
+        // 通知房间内的所有客户端测试已结束
+        this.io.to(roomName).emit('test-room-cleanup', {
+          testId,
+          message: '测试已结束，房间即将清理',
+          timestamp: Date.now()
+        });
+
+        // 让所有客户端离开房间
+        this.io.socketsLeave(roomName);
+        Logger.info(`✅ 房间 ${roomName} 已清理`);
+      }
+    } catch (error) {
+      Logger.error(`❌ 清理房间 ${testId} 失败:`, error);
+    }
+  }
+
   // ==================== 监控和清理 ====================
 
   /**
@@ -933,6 +1183,62 @@ class RealStressTestEngine {
 
       results.progress = progress;
 
+      // 检查是否达到测试时间，自动结束测试
+      if (elapsed >= totalDuration) {
+        Logger.info(`测试 ${results.testId} 达到预定时间 ${totalDuration}ms，自动结束`);
+        clearInterval(monitor);
+
+        // 检查测试是否已经完成，避免重复处理
+        const currentStatus = this.getTestStatus(results.testId);
+        if (currentStatus && (currentStatus.status === 'completed' || currentStatus.status === 'cancelled')) {
+          Logger.info(`测试 ${results.testId} 已经完成，跳过重复处理`);
+          return;
+        }
+
+        // 设置测试为完成状态
+        this.updateTestStatus(results.testId, {
+          status: 'completed',
+          progress: 100,
+          endTime: new Date().toISOString(),
+          actualDuration: elapsed / 1000,
+          autoCompleted: true,
+          completedBy: 'progress-monitor'
+        });
+
+        // 广播测试完成状态
+        this.broadcastTestStatus(results.testId, {
+          status: 'completed',
+          message: '测试已自动完成',
+          progress: 100,
+          endTime: new Date().toISOString(),
+          actualDuration: elapsed / 1000,
+          metrics: results.metrics || {},
+          realTimeData: results.realTimeData || []
+        });
+
+        // 处理测试完成 - 延迟执行以确保状态更新完成
+        setTimeout(() => {
+          // 再次检查状态，确保不重复处理
+          const finalStatus = this.getTestStatus(results.testId);
+          if (finalStatus && finalStatus.status === 'completed' && !finalStatus.finalProcessed) {
+            // 标记为已最终处理
+            this.updateTestStatus(results.testId, { finalProcessed: true });
+            this.handleTestCompletion(results.testId, results);
+          }
+        }, 1000);
+
+        return;
+      }
+
+      // 🔧 调试：检查 metrics 数据
+      console.log('🔍 进度监控器检查 metrics:', {
+        testId: results.testId,
+        hasMetrics: !!results.metrics,
+        totalRequests: results.metrics?.totalRequests,
+        currentTPS: results.metrics?.currentTPS,
+        progress: progress
+      });
+
       // 广播进度更新
       this.broadcastProgress(results.testId, {
         progress,
@@ -944,6 +1250,50 @@ class RealStressTestEngine {
 
     // 跟踪监控器
     this.trackTimer(results.testId, monitor);
+
+    // 设置测试自动结束定时器（作为备用机制）
+    const autoEndTimer = setTimeout(() => {
+      Logger.info(`测试 ${results.testId} 备用定时器触发，检查是否需要强制结束测试`);
+
+      // 检查测试状态，只有在测试仍在运行且未被取消时才强制结束
+      const currentStatus = this.getTestStatus(results.testId);
+      if (currentStatus && currentStatus.status === 'running' && !this.shouldStopTest(results.testId)) {
+        Logger.info(`测试 ${results.testId} 备用定时器强制结束测试`);
+
+        this.updateTestStatus(results.testId, {
+          status: 'completed',
+          progress: 100,
+          endTime: new Date().toISOString(),
+          actualDuration: totalDuration / 1000,
+          autoCompleted: true,
+          completedBy: 'backup-timer'
+        });
+
+        this.broadcastTestStatus(results.testId, {
+          status: 'completed',
+          message: '测试已自动完成（备用定时器）',
+          progress: 100,
+          endTime: new Date().toISOString(),
+          actualDuration: totalDuration / 1000,
+          metrics: results.metrics || {},
+          realTimeData: results.realTimeData || []
+        });
+
+        // 延迟处理，确保状态更新完成
+        setTimeout(() => {
+          const finalStatus = this.getTestStatus(results.testId);
+          if (finalStatus && finalStatus.status === 'completed' && !finalStatus.finalProcessed) {
+            this.updateTestStatus(results.testId, { finalProcessed: true });
+            this.handleTestCompletion(results.testId, results);
+          }
+        }, 500);
+      } else {
+        Logger.info(`测试 ${results.testId} 备用定时器检查：测试已完成或被取消，无需处理`);
+      }
+    }, totalDuration + 5000); // 额外5秒缓冲时间
+
+    // 跟踪自动结束定时器
+    this.trackTimer(results.testId, autoEndTimer);
 
     return monitor;
   }
@@ -1031,7 +1381,13 @@ class RealStressTestEngine {
       if (global.io) {
         const roomName = `stress-test-${testId}`;
         global.io.to(roomName).emit('realTimeData', dataPoint);
-        Logger.debug(`广播实时数据到房间: ${roomName}`);
+        console.log(`📡 广播实时数据到房间: ${roomName}`, {
+          dataPoint: dataPoint,
+          hasGlobalIO: !!global.io,
+          roomName: roomName
+        });
+      } else {
+        console.warn('⚠️ global.io 不存在，无法广播实时数据');
       }
     } catch (error) {
       Logger.error(`广播实时数据失败: ${testId}`, error);
@@ -1044,7 +1400,98 @@ class RealStressTestEngine {
   broadcastProgress(testId, progressData) {
     // 这个方法需要在外部实现WebSocket广播逻辑
     if (global.io) {
-      global.io.to(`stress-test-${testId}`).emit('progress', progressData);
+      // 🔧 修复：确保发送完整的指标数据，包含testId
+      const completeProgressData = {
+        testId,
+        ...progressData
+      };
+
+      console.log('📡 广播进度更新:', {
+        testId,
+        progress: progressData.progress,
+        hasMetrics: !!progressData.metrics,
+        totalRequests: progressData.metrics?.totalRequests,
+        currentTPS: progressData.metrics?.currentTPS,
+        requestsPerSecond: progressData.metrics?.requestsPerSecond,
+        throughput: progressData.metrics?.throughput
+      });
+
+      global.io.to(`stress-test-${testId}`).emit('progress', completeProgressData);
+    }
+  }
+
+  /**
+   * 广播测试状态变化
+   */
+  broadcastTestStatus(testId, statusData) {
+    try {
+      if (global.io) {
+        const roomName = `stress-test-${testId}`;
+        const broadcastData = {
+          testId,
+          timestamp: Date.now(),
+          ...statusData
+        };
+
+        global.io.to(roomName).emit('testStatus', broadcastData);
+        Logger.info(`📡 广播测试状态: ${testId}`, {
+          status: statusData.status,
+          message: statusData.message,
+          hasGlobalIO: !!global.io,
+          roomName: roomName
+        });
+
+        // 如果是完成或取消状态，延迟清理房间
+        if (statusData.status === 'completed' || statusData.status === 'cancelled') {
+          setTimeout(() => {
+            this.cleanupTestRoom(testId);
+          }, 2000);
+        }
+      } else {
+        Logger.warn('⚠️ global.io 未设置，无法广播测试状态');
+      }
+    } catch (error) {
+      Logger.error('广播测试状态失败:', error);
+    }
+  }
+
+  /**
+   * 广播测试完成事件
+   */
+  broadcastTestComplete(testId, results) {
+    try {
+      if (global.io) {
+        const completeData = {
+          testId,
+          timestamp: Date.now(),
+          success: true,
+          data: results,
+          results: results,
+          metrics: results.metrics || {},
+          duration: results.actualDuration || results.duration,
+          testType: results.testType || 'stress',
+          status: results.status
+        };
+
+        console.log('📡 准备广播测试完成数据:', {
+          testId,
+          hasMetrics: !!results.metrics,
+          metricsKeys: results.metrics ? Object.keys(results.metrics) : [],
+          totalRequests: results.metrics?.totalRequests,
+          throughput: results.metrics?.throughput
+        });
+
+        global.io.to(`stress-test-${testId}`).emit('stress-test-complete', completeData);
+
+        Logger.info(`📡 测试完成事件已广播: ${testId}`, {
+          status: results.status,
+          totalRequests: results.metrics?.totalRequests || 0
+        });
+      } else {
+        Logger.warn('Global io instance not found for WebSocket broadcast');
+      }
+    } catch (error) {
+      Logger.error('WebSocket完成广播失败:', error);
     }
   }
 
@@ -1181,6 +1628,65 @@ class RealStressTestEngine {
       return global.stressTestEngine.shouldStopTest(testId);
     }
     return false;
+  }
+
+  /**
+   * 清理所有测试房间 - 服务器启动时调用
+   */
+  async cleanupAllTestRooms() {
+    try {
+      Logger.info('🧹 开始清理所有WebSocket测试房间...');
+
+      if (!this.io) {
+        Logger.warn('⚠️ WebSocket实例未设置，跳过房间清理');
+        return;
+      }
+
+      // 获取所有房间
+      const rooms = this.io.sockets.adapter.rooms;
+      let cleanedRooms = 0;
+
+      // 清理所有以 'stress-test-' 开头的房间
+      for (const [roomName, room] of rooms) {
+        if (roomName.startsWith('stress-test-')) {
+          Logger.info(`🧹 清理测试房间: ${roomName} (${room.size} 个连接)`);
+
+          // 让所有客户端离开房间
+          this.io.to(roomName).emit('test-room-cleanup', {
+            message: '服务器重启，测试房间已清理',
+            timestamp: Date.now()
+          });
+
+          // 清空房间
+          this.io.socketsLeave(roomName);
+          cleanedRooms++;
+        }
+      }
+
+      // 清理运行中的测试状态
+      if (this.runningTests && this.runningTests.size > 0) {
+        Logger.info(`🧹 清理 ${this.runningTests.size} 个运行中的测试状态`);
+        this.runningTests.clear();
+      }
+
+      // 清理全局定时器
+      if (this.globalTimers && this.globalTimers.size > 0) {
+        Logger.info(`🧹 清理 ${this.globalTimers.size} 个全局定时器`);
+        for (const [timerId, timer] of this.globalTimers) {
+          if (timer) {
+            clearInterval(timer);
+            clearTimeout(timer);
+          }
+        }
+        this.globalTimers.clear();
+      }
+
+      Logger.info(`✅ 房间清理完成: 清理了 ${cleanedRooms} 个测试房间`);
+
+    } catch (error) {
+      Logger.error('❌ 清理测试房间时发生错误:', error);
+      throw error;
+    }
   }
 }
 

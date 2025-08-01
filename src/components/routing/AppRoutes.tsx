@@ -64,6 +64,9 @@ const ThemeShowcase = lazy(() => import('../../pages/ThemeShowcase'));
 const Subscription = lazy(() => import('../../pages/Subscription'));
 const DownloadDesktop = lazy(() => import('../../pages/DownloadDesktop'));
 
+// 测试工具
+const WebSocketTest = lazy(() => import('../WebSocketTest'));
+
 // 演示页面
 // const BackgroundTestDemo = lazy(() => import('../../pages/BackgroundTestDemo')); // 已移除
 
@@ -191,6 +194,11 @@ const AppRoutes: React.FC = () => {
         <Route path="download-desktop" element={
           <LazyPageWrapper>
             <DownloadDesktop />
+          </LazyPageWrapper>
+        } />
+        <Route path="websocket-test" element={
+          <LazyPageWrapper>
+            <WebSocketTest />
           </LazyPageWrapper>
         } />
       </Route>

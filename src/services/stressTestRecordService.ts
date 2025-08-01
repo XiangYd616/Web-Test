@@ -31,7 +31,7 @@ export interface StressTestRecord {
   id: string;
   testName: string;
   url: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled' | 'waiting' | 'timeout';
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
 
   // 时间信息
   startTime: string;
@@ -441,27 +441,27 @@ class StressTestRecordService {
   }
 
   /**
-   * 设置测试为等待状态
+   * 设置测试为准备状态（带等待原因）
    */
-  async setTestWaiting(id: string, reason?: string): Promise<StressTestRecord> {
+  async setTestPending(id: string, reason?: string): Promise<StressTestRecord> {
     try {
       const updates: Partial<StressTestRecord> = {
-        status: 'waiting',
+        status: 'pending',
         updatedAt: new Date().toISOString(),
         waitingReason: reason
       };
 
       return await this.updateTestRecord(id, updates);
     } catch (error) {
-      console.error('设置测试等待状态失败:', error);
+      console.error('设置测试准备状态失败:', error);
       throw error;
     }
   }
 
   /**
-   * 从等待状态开始测试
+   * 从准备状态开始测试
    */
-  async startFromWaiting(id: string): Promise<StressTestRecord> {
+  async startFromPending(id: string): Promise<StressTestRecord> {
     try {
       const updates: Partial<StressTestRecord> = {
         status: 'running',
@@ -472,7 +472,7 @@ class StressTestRecordService {
 
       return await this.updateTestRecord(id, updates);
     } catch (error) {
-      console.error('从等待状态开始测试失败:', error);
+      console.error('从准备状态开始测试失败:', error);
       throw error;
     }
   }
@@ -497,9 +497,9 @@ class StressTestRecordService {
       }
 
       const updates: Partial<StressTestRecord> = {
-        status: 'timeout',
+        status: 'failed',
         endTime: new Date().toISOString(),
-        error: timeoutReason,
+        error: `测试超时失败: ${timeoutReason}`,
         failureReason: FailureReason.TIMEOUT,
         updatedAt: new Date().toISOString()
       };
@@ -528,7 +528,7 @@ class StressTestRecordService {
   ): Promise<StressTestRecord> {
     try {
       const updates: Partial<StressTestRecord> = {
-        status: 'waiting',
+        status: 'pending',
         interruptedAt: new Date().toISOString(),
         interruptReason,
         waitingReason: `测试已中断: ${interruptReason}`,
@@ -702,13 +702,11 @@ class StressTestRecordService {
     toStatus: StressTestRecord['status']
   ): boolean {
     const validTransitions: Record<string, string[]> = {
-      'pending': ['running', 'cancelled', 'waiting'],
-      'waiting': ['running', 'cancelled'],
-      'running': ['completed', 'failed', 'cancelled', 'timeout', 'waiting'],
+      'pending': ['running', 'cancelled'],
+      'running': ['completed', 'failed', 'cancelled'],
       'completed': [], // 完成状态不能转换
       'failed': [], // 失败状态不能转换
-      'cancelled': [], // 取消状态不能转换
-      'timeout': [] // 超时状态不能转换
+      'cancelled': [] // 取消状态不能转换
     };
 
     return validTransitions[fromStatus]?.includes(toStatus) || false;
