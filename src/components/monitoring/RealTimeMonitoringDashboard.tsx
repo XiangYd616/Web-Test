@@ -51,47 +51,11 @@ interface Alert {
   resolved: boolean;
 }
 
-// 临时监控服务
-const monitoringService = {
-  on: (event: string, handler: (...args: any[]) => void) => {
-    // 临时实现，不做任何事情
-  },
-  off: (event: string, handler: (...args: any[]) => void) => {
-    // 临时实现，不做任何事情
-  },
-  getTargets: async (): Promise<MonitoringTarget[]> => {
-    return [];
-  },
-  getStats: async (): Promise<MonitoringStats> => {
-    return {
-      responseTime: 0,
-      uptime: 0,
-      errorRate: 0,
-      throughput: 0,
-      totalTargets: 0,
-      activeTargets: 0,
-      overallAvailability: 0,
-      avgResponseTime: 0,
-      activeAlerts: 0,
-      resolvedAlerts: 0
-    };
-  },
-  getAlerts: async (): Promise<Alert[]> => {
-    return [];
-  },
-  updateTarget: async (targetId: string, updates: Partial<MonitoringTarget>) => {
-    // 临时实现，不做任何事情
-  },
-  startGlobalMonitoring: () => {
-    // 临时实现，不做任何事情
-  },
-  stopGlobalMonitoring: () => {
-    // 临时实现，不做任何事情
-  },
-  removeTarget: async (targetId: string) => {
-    // 临时实现，不做任何事情
-  }
+// 使用真实的监控服务实例
+const getMonitoringServiceInstance = () => {
+  return RealTimeMonitoringService.getInstance();
 };
+
 
 // 临时监控服务类
 class RealTimeMonitoringService {
@@ -105,7 +69,7 @@ interface RealTimeMonitoringDashboardProps {
 }
 
 const RealTimeMonitoringDashboard: React.FC<RealTimeMonitoringDashboardProps> = ({ className = '' }) => {
-  const [monitoringService] = useState(() => RealTimeMonitoringService.getInstance());
+  const [monitoringService] = useState(() => getMonitoringServiceInstance());
   const [targets, setTargets] = useState<MonitoringTarget[]>([]);
   const [stats, setStats] = useState<MonitoringStats | null>(null);
   const [alerts, setAlerts] = useState<Alert[]>([]);
@@ -133,24 +97,65 @@ const RealTimeMonitoringDashboard: React.FC<RealTimeMonitoringDashboardProps> = 
     monitoringService.on('checkCompleted', handleCheckCompleted);
     monitoringService.on('alertCreated', handleAlertCreated);
 
+    // 定期更新统计数据
+    const interval = setInterval(() => {
+      setStats(monitoringService.getStats());
+    }, 5000);
+
     return () => {
       monitoringService.off('targetAdded', handleTargetAdded);
       monitoringService.off('targetUpdated', handleTargetUpdated);
       monitoringService.off('targetRemoved', handleTargetRemoved);
       monitoringService.off('checkCompleted', handleCheckCompleted);
       monitoringService.off('alertCreated', handleAlertCreated);
+      clearInterval(interval);
     };
   }, [monitoringService]);
 
   const loadData = async () => {
     try {
-      const [targetsData, statsData] = await Promise.all([
-        monitoringService.getTargets(),
-        monitoringService.getStats()
-      ]);
-
+      // 获取监控目标
+      const targetsData = monitoringService.getTargets();
       setTargets(targetsData);
+
+      // 获取统计数据
+      const statsData = monitoringService.getStats();
       setStats(statsData);
+
+      // 如果没有监控目标，添加一些默认的
+      if (targetsData.length === 0) {
+        const defaultTargets = [
+          {
+            name: '本地开发服务器',
+            url: 'http://localhost:5174',
+            type: 'http' as const,
+            interval: 30,
+            enabled: true,
+            thresholds: {
+              responseTime: 1000,
+              availability: 95
+            }
+          },
+          {
+            name: 'Google',
+            url: 'https://www.google.com',
+            type: 'http' as const,
+            interval: 60,
+            enabled: true,
+            thresholds: {
+              responseTime: 2000,
+              availability: 99
+            }
+          }
+        ];
+
+        defaultTargets.forEach(target => {
+          monitoringService.addTarget(target);
+        });
+
+        // 重新获取目标
+        setTargets(monitoringService.getTargets());
+      }
     } catch (error) {
       console.error('Failed to load monitoring data:', error);
     }
@@ -170,12 +175,14 @@ const RealTimeMonitoringDashboard: React.FC<RealTimeMonitoringDashboardProps> = 
     const target = targets.find(t => t.id === targetId);
     if (target) {
       monitoringService.updateTarget(targetId, { enabled: !target.enabled });
+      loadData(); // 重新加载数据
     }
   };
 
   const handleDeleteTarget = (targetId: string) => {
     if (confirm('确定要删除这个监控目标吗？')) {
       monitoringService.removeTarget(targetId);
+      loadData(); // 重新加载数据
     }
   };
 
@@ -262,71 +269,69 @@ const RealTimeMonitoringDashboard: React.FC<RealTimeMonitoringDashboardProps> = 
       </div>
 
       {/* 统计概览 */}
-      {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-500 mb-1">监控目标</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalTargets}</p>
-                <p className="text-sm text-gray-600 mt-1">
-                  {stats.activeTargets} 个活跃
-                </p>
-              </div>
-              <div className="bg-blue-50 p-3 rounded-lg">
-                <Globe className="w-8 h-8 text-blue-600" />
-              </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-500 mb-1">监控目标</p>
+              <p className="text-3xl font-bold text-gray-900">{stats?.totalTargets || 0}</p>
+              <p className="text-sm text-gray-600 mt-1">
+                {stats?.activeTargets || 0} 个活跃
+              </p>
             </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-500 mb-1">整体可用性</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.overallAvailability}%</p>
-                <p className="text-sm text-green-600 mt-1">
-                  <TrendingUp className="w-4 h-4 inline mr-1" />
-                  正常运行
-                </p>
-              </div>
-              <div className="bg-green-50 p-3 rounded-lg">
-                <CheckCircle className="w-8 h-8 text-green-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-500 mb-1">平均响应时间</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.avgResponseTime}ms</p>
-                <p className="text-sm text-blue-600 mt-1">
-                  <Activity className="w-4 h-4 inline mr-1" />
-                  性能良好
-                </p>
-              </div>
-              <div className="bg-orange-50 p-3 rounded-lg">
-                <Zap className="w-8 h-8 text-orange-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-500 mb-1">活跃告警</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.activeAlerts}</p>
-                <p className="text-sm text-gray-600 mt-1">
-                  {stats.resolvedAlerts} 个已解决
-                </p>
-              </div>
-              <div className="bg-red-50 p-3 rounded-lg">
-                <Bell className="w-8 h-8 text-red-600" />
-              </div>
+            <div className="bg-blue-50 p-3 rounded-lg">
+              <Globe className="w-8 h-8 text-blue-600" />
             </div>
           </div>
         </div>
-      )}
+
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-500 mb-1">整体可用性</p>
+              <p className="text-3xl font-bold text-gray-900">{stats?.overallAvailability?.toFixed(1) || '0.0'}%</p>
+              <p className="text-sm text-green-600 mt-1">
+                <TrendingUp className="w-4 h-4 inline mr-1" />
+                正常运行
+              </p>
+            </div>
+            <div className="bg-green-50 p-3 rounded-lg">
+              <CheckCircle className="w-8 h-8 text-green-600" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-500 mb-1">平均响应时间</p>
+              <p className="text-3xl font-bold text-gray-900">{Math.round(stats?.avgResponseTime || 0)}ms</p>
+              <p className="text-sm text-blue-600 mt-1">
+                <Activity className="w-4 h-4 inline mr-1" />
+                性能良好
+              </p>
+            </div>
+            <div className="bg-orange-50 p-3 rounded-lg">
+              <Zap className="w-8 h-8 text-orange-600" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-500 mb-1">活跃告警</p>
+              <p className="text-3xl font-bold text-gray-900">{stats?.activeAlerts || 0}</p>
+              <p className="text-sm text-gray-600 mt-1">
+                {stats?.resolvedAlerts || 0} 个已解决
+              </p>
+            </div>
+            <div className="bg-red-50 p-3 rounded-lg">
+              <Bell className="w-8 h-8 text-red-600" />
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* 监控目标列表 */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100">

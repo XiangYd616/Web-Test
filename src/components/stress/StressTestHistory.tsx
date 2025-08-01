@@ -23,7 +23,7 @@ interface TestRecord {
   testName: string;
   testType: string;
   url: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled' | 'timeout' | 'waiting';
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
   startTime?: string;
   endTime?: string;
   duration?: number;
@@ -169,10 +169,6 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
         return 'bg-yellow-100 dark:bg-yellow-800/80 border-yellow-200 dark:border-yellow-600';
       case 'pending':
         return 'bg-yellow-100 dark:bg-yellow-800/80 border-yellow-200 dark:border-yellow-600';
-      case 'waiting':
-        return 'bg-purple-100 dark:bg-purple-800/80 border-purple-200 dark:border-purple-600';
-      case 'timeout':
-        return 'bg-orange-100 dark:bg-orange-800/80 border-orange-200 dark:border-orange-600';
       default:
         return 'bg-gray-100 dark:bg-gray-700/80 border-gray-200 dark:border-gray-600';
     }
@@ -191,10 +187,6 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
         return 'status-label-cancelled';
       case 'pending':
         return 'status-label-pending';
-      case 'waiting':
-        return 'status-label-waiting';
-      case 'timeout':
-        return 'status-label-timeout';
       default:
         return 'status-label-default';
     }
@@ -213,8 +205,6 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
         return <AlertCircle className="w-4 h-4" />;
       case 'pending':
         return <Clock className="w-4 h-4" />;
-      case 'waiting':
-        return <Clock className="w-4 h-4 animate-pulse" />;
       default:
         return <Clock className="w-4 h-4" />;
     }
@@ -365,6 +355,8 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
             <button
               onClick={loadTestRecords}
               disabled={loading}
+              aria-label={loading ? '正在刷新测试记录' : '刷新测试记录'}
+              title={loading ? '正在刷新测试记录...' : '刷新测试记录列表'}
               className="test-action-button inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700/50 hover:bg-gray-600/60 border border-gray-600/40 hover:border-gray-500/60 rounded-lg transition-all duration-200 disabled:opacity-50 backdrop-blur-sm"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -383,6 +375,8 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
               placeholder="搜索测试名称或URL..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              aria-label="搜索测试记录"
+              title="输入测试名称或URL进行搜索"
               className="test-search-input w-full pl-10 pr-4 py-2 text-sm border border-gray-600/40 rounded-lg bg-gray-700/30 backdrop-blur-sm text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
             />
           </div>
@@ -391,6 +385,8 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
+            aria-label="筛选测试状态"
+            title="选择要筛选的测试状态"
             className="test-filter-select px-3 py-2 text-sm border border-gray-600/40 rounded-lg bg-gray-700/30 backdrop-blur-sm text-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
           >
             <option value="all">全部状态</option>
@@ -398,7 +394,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
             <option value="failed">已失败</option>
             <option value="running">运行中</option>
             <option value="cancelled">已取消</option>
-            <option value="waiting">等待中</option>
+
             <option value="pending">准备中</option>
           </select>
 
@@ -406,6 +402,8 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
           <select
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
+            aria-label="筛选测试日期"
+            title="选择要筛选的测试日期范围"
             className="test-filter-select px-3 py-2 text-sm border border-gray-600/40 rounded-lg bg-gray-700/30 backdrop-blur-sm text-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
           >
             <option value="all">全部时间</option>
@@ -419,6 +417,8 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as 'createdAt' | 'duration' | 'score')}
+              aria-label="选择排序方式"
+              title="选择测试记录的排序方式"
               className="test-filter-select flex-1 px-3 py-2 text-sm border border-gray-600/40 rounded-lg bg-gray-700/30 backdrop-blur-sm text-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
             >
               <option value="createdAt">创建时间</option>
@@ -428,6 +428,8 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
             <button
               type="button"
               onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+              aria-label={`当前排序: ${sortOrder === 'asc' ? '升序' : '降序'}，点击切换`}
+              title={`切换排序顺序 (当前: ${sortOrder === 'asc' ? '升序' : '降序'})`}
               className="test-action-button px-3 py-2 text-sm border border-gray-600/40 rounded-lg bg-gray-700/30 backdrop-blur-sm text-white hover:bg-gray-600/40 hover:border-gray-500/60 transition-all duration-200"
             >
               {sortOrder === 'asc' ? '↑' : '↓'}
@@ -456,9 +458,10 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
         ) : (
           <div className="space-y-4">
             {filteredAndSortedRecords.map((record) => (
-              <div
+              <article
                 key={record.id}
                 className="test-record-item bg-gray-800/40 dark:bg-gray-800/60 backdrop-blur-sm border border-gray-700/50 dark:border-gray-600/30 rounded-xl hover:bg-gray-800/60 dark:hover:bg-gray-700/50 transition-all duration-200 hover:shadow-lg hover:shadow-black/20"
+                aria-label={`测试记录: ${record.testName}`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
@@ -469,14 +472,19 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
                       </h3>
                       <span
                         className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${getStatusStyle(record.status)} ${getStatusTextColorClass(record.status)}`}
+                        role="status"
+                        aria-label={`测试状态: ${record.status === 'completed' ? '已完成' :
+                          record.status === 'failed' ? '已失败' :
+                            record.status === 'running' ? '运行中' :
+                              record.status === 'cancelled' ? '已取消' :
+                                record.status === 'pending' ? '准备中' : '未知'}`}
                       >
                         {getStatusIcon(record.status)}
                         {record.status === 'completed' ? '已完成' :
                           record.status === 'failed' ? '已失败' :
                             record.status === 'running' ? '运行中' :
                               record.status === 'cancelled' ? '已取消' :
-                                record.status === 'waiting' ? '等待中' :
-                                  record.status === 'pending' ? '准备中' : '未知'}
+                                record.status === 'pending' ? '准备中' : '未知'}
                       </span>
                     </div>
 
@@ -511,6 +519,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
                     <button
                       type="button"
                       onClick={() => viewDetails(record)}
+                      aria-label={`查看测试详情: ${record.testName}`}
                       className="test-record-action-button p-2 text-gray-400 hover:text-blue-400 hover:bg-gray-700/50 border border-gray-600/30 hover:border-blue-500/50 rounded-lg transition-all duration-200 backdrop-blur-sm"
                       title="查看详情"
                     >
@@ -519,6 +528,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
                     <button
                       type="button"
                       onClick={() => exportRecord(record)}
+                      aria-label={`导出测试记录: ${record.testName}`}
                       className="test-record-action-button p-2 text-gray-400 hover:text-green-400 hover:bg-gray-700/50 border border-gray-600/30 hover:border-green-500/50 rounded-lg transition-all duration-200 backdrop-blur-sm"
                       title="导出记录"
                     >
@@ -527,6 +537,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
                     <button
                       type="button"
                       onClick={() => deleteRecord(record.id)}
+                      aria-label={`删除测试记录: ${record.testName}`}
                       className="test-record-action-button p-2 text-gray-400 hover:text-red-400 hover:bg-gray-700/50 border border-gray-600/30 hover:border-red-500/50 rounded-lg transition-all duration-200 backdrop-blur-sm"
                       title="删除记录"
                     >
@@ -534,7 +545,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
                     </button>
                   </div>
                 </div>
-              </div>
+              </article>
             ))}
           </div>
         )}

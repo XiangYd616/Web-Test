@@ -66,7 +66,7 @@ span.status-label-cancelled,
 .dark .status-label-cancelled,
 .dark span.status-label-cancelled,
 .dark .inline-flex.status-label-cancelled {
-  color: #fbbf24 !important; /* yellow-400 */
+  color: #ffffff !important; /* pure white - 与其他状态保持一致 */
   background-color: rgba(217, 119, 6, 0.8) !important; /* dark yellow background - yellow-600/80 */
   opacity: 1 !important;
   text-shadow: 0 0 1px rgba(0, 0, 0, 0.8) !important; /* 黑色阴影增强对比度 */

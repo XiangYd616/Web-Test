@@ -16,6 +16,7 @@ import { AdvancedStressTestConfig as ImportedAdvancedStressTestConfig } from '..
 import { useStressTestRecord } from '../hooks/useStressTestRecord';
 import { useUserStats } from '../hooks/useUserStats';
 import backgroundTestManager from '../services/backgroundTestManager';
+import { systemResourceMonitor } from '../services/systemResourceMonitor';
 import { testEngineManager } from '../services/testEngines';
 import { TestPhase, type RealTimeMetrics, type TestDataPoint } from '../services/testStateManager';
 import '../styles/compact-layout.css';
@@ -60,6 +61,7 @@ const StressTest: React.FC = () => {
         failRecord,
         cancelRecord,
         startFromWaitingRecord,
+
         // 队列管理
         queueStats,
         currentQueueId,
@@ -90,63 +92,130 @@ const StressTest: React.FC = () => {
 
 
 
-    const [testData, setTestData] = useState<TestDataPoint[]>([]);
-    const [metrics, setMetrics] = useState<RealTimeMetrics | null>(null);
+    // 🔧 简化数据状态管理 - 只使用一个主要数据源
+    const [stressTestData, setStressTestData] = useState<TestDataPoint[]>([]);  // 唯一数据源：压力测试实时数据
+    const [finalResultData, setFinalResultData] = useState<TestDataPoint[]>([]);  // 测试结果聚合数据
+    const [metrics, setMetrics] = useState<RealTimeMetrics | null>(null);  // 实时指标
     const [testStatus, setTestStatus] = useState<TestStatusType>('idle');
     const [testProgress, setTestProgress] = useState<string>('');
     const [isRunning, setIsRunning] = useState(false);
     const [isStopping, setIsStopping] = useState(false);
     const [isCancelling, setIsCancelling] = useState(false);
-    const [result, setResult] = useState<any>(null);
+    const [result, setResult] = useState<any>(null);  // 测试结果对象
 
     // 新的取消功能状态
     const [showCancelDialog, setShowCancelDialog] = useState(false);
     const [showCancelProgress, setShowCancelProgress] = useState(false);
     const [cancelInProgress, setCancelInProgress] = useState(false);
-    const [error, setError] = useState<string>('');
-    const [realTimeData, setRealTimeData] = useState<any[]>([]);
-    const [finalResultData, setFinalResultData] = useState<TestDataPoint[]>([]);
 
-    // 新的状态管理系统 - 修复require错误
+    const [error, setError] = useState<string>('');
+
+    // 测试超时定时器
+    const [testTimeoutTimer, setTestTimeoutTimer] = useState<NodeJS.Timeout | null>(null);
+
+    // 统一的生命周期管理器 - 集成队列系统
     const [lifecycleManager] = useState<any>(() => {
-        // 创建一个简化的生命周期管理器
+        // 创建统一的生命周期管理器
         return {
             startTest: async (config: any) => {
                 console.log('🔄 生命周期管理器启动测试:', config);
                 setCurrentStatus('STARTING');
-                setStatusMessage('正在启动压力测试引擎...');
+                setStatusMessage('正在检查系统资源和队列状态...');
 
-                // 直接调用压力测试API
                 try {
-                    const response = await fetch('/api/test/stress', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-                        },
-                        body: JSON.stringify(config)
+                    // 首先创建测试记录
+                    const recordId = await startRecording({
+                        testName: `压力测试 - ${new URL(config.url).hostname}`,
+                        url: config.url,
+                        config: config,
+                        status: 'pending'
                     });
 
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                    console.log('✅ 测试记录已创建:', recordId);
+                    setCurrentRecordId(recordId);
+
+                    // 检查是否需要排队
+                    const canStartImmediately = queueStats.totalRunning < 3 &&
+                        (systemResourceMonitor?.canStartNewTest() !== false);
+
+                    if (canStartImmediately) {
+                        // 可以立即启动
+                        console.log('🚀 系统资源充足，立即启动测试');
+                        setCurrentStatus('STARTING');
+                        setStatusMessage('正在启动压力测试引擎...');
+
+                        // 直接调用API启动测试
+                        const response = await fetch('/api/test/stress', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                            },
+                            body: JSON.stringify({
+                                ...config,
+                                recordId: recordId
+                            })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const result = await response.json();
+                        console.log('✅ 测试立即启动成功:', result);
+
+                        // 🔧 修复：提取testId并设置状态
+                        const testId = result.testId || result.data?.testId;
+                        if (testId) {
+                            setCurrentTestId(testId);
+                            console.log('🔑 立即启动设置测试ID:', testId);
+
+                            // 立即尝试加入WebSocket房间
+                            const socket = socketRef.current;
+                            if (socket && socket.connected) {
+                                console.log('🏠 立即启动后加入WebSocket房间:', testId);
+                                joinWebSocketRoom(testId);
+                            } else {
+                                console.log('⚠️ WebSocket未连接，等待连接后加入房间');
+                            }
+
+                            // 启动测试超时检查
+                            lifecycleManager.startTestTimeoutCheck(config.duration || 60);
+                        }
+
+                        return result;
+                    } else {
+                        // 需要排队
+                        console.log('📋 系统繁忙，测试加入队列');
+                        setCurrentStatus('PENDING');
+                        setStatusMessage('测试已加入队列，等待执行...');
+
+                        // 加入队列
+                        const queueId = await enqueueTest({
+                            testName: `压力测试 - ${new URL(config.url).hostname}`,
+                            url: config.url,
+                            testType: 'stress', // 明确标识为压力测试
+                            config: {
+                                users: config.users,
+                                duration: config.duration,
+                                rampUpTime: config.rampUp || 10,
+                                testType: config.testType === 'stress' ? 'gradual' :
+                                    config.testType === 'load' ? 'constant' :
+                                        config.testType === 'volume' ? 'spike' : 'gradual',
+                                method: config.method,
+                                timeout: config.timeout,
+                                thinkTime: config.thinkTime,
+                                warmupDuration: config.warmupDuration,
+                                cooldownDuration: config.cooldownDuration,
+                                headers: config.headers,
+                                body: config.body
+                            }
+                        }, 'high'); // 压力测试使用高优先级
+
+                        console.log('✅ 测试已加入队列:', queueId);
+                        return recordId;
                     }
 
-                    const result = await response.json();
-                    console.log('✅ 生命周期管理器测试启动成功:', result);
-
-                    // 不要立即设置为RUNNING，让WebSocket数据来驱动状态变化
-                    setCurrentStatus('WAITING');
-                    setStatusMessage('等待测试开始...');
-
-                    // 设置测试ID，这将触发WebSocket房间加入
-                    // 🔧 修复：从多个可能的位置提取testId
-                    const testId = result.testId || result.data?.testId || result.data?.recordId;
-                    if (testId) {
-                        setCurrentTestId(testId);
-                        console.log('🔑 生命周期管理器设置测试ID:', testId);
-                    }
-
-                    return testId;
                 } catch (error) {
                     console.error('❌ 生命周期管理器测试启动失败:', error);
                     setCurrentStatus('FAILED');
@@ -154,18 +223,57 @@ const StressTest: React.FC = () => {
                     throw error;
                 }
             },
+
+            // 直接启动测试的方法
+            startTestDirectly: async (config: any, recordId: string) => {
+                const response = await fetch('/api/test/stress', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    },
+                    body: JSON.stringify({
+                        ...config,
+                        recordId: recordId
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                console.log('✅ 测试直接启动成功:', result);
+
+                setCurrentStatus('WAITING');
+                setStatusMessage('等待测试开始...');
+
+                const testId = result.testId || result.data?.testId || recordId;
+                if (testId) {
+                    setCurrentTestId(testId);
+                    console.log('🔑 设置测试ID:', testId);
+                }
+
+                return testId;
+            },
+
+
+
             cancelTest: async (reason: string) => {
                 console.log('🔄 生命周期管理器取消测试:', reason);
                 setCurrentStatus('CANCELLING');
                 setStatusMessage('正在取消测试...');
+
+                // 清理超时检查
+                lifecycleManager.clearTestTimeoutCheck();
 
                 try {
                     // 🔧 修复：优先使用ref，然后是state，最后尝试从WebSocket数据中获取
                     let testIdToCancel = currentTestIdRef.current || currentTestId;
 
                     // 如果都没有，尝试从最近的WebSocket数据中获取testId
-                    if (!testIdToCancel && realTimeData.length > 0) {
-                        const lastDataPoint = realTimeData[realTimeData.length - 1];
+                    if (!testIdToCancel && stressTestData.length > 0) {
+                        const lastDataPoint = stressTestData[stressTestData.length - 1];
                         if (lastDataPoint && lastDataPoint.testId) {
                             testIdToCancel = lastDataPoint.testId;
                             console.log('🔧 从WebSocket数据中恢复testId:', testIdToCancel);
@@ -176,7 +284,7 @@ const StressTest: React.FC = () => {
                         testIdToCancel,
                         currentTestIdRef: currentTestIdRef.current,
                         currentTestId,
-                        realTimeDataLength: realTimeData.length,
+                        stressTestDataLength: stressTestData.length,
                         isRunning,
                         testStatus
                     });
@@ -236,6 +344,52 @@ const StressTest: React.FC = () => {
             setTestId: (testId: string) => {
                 console.log('🔑 生命周期管理器设置测试ID:', testId);
                 setCurrentTestId(testId);
+            },
+
+            // 启动测试超时检查
+            startTestTimeoutCheck: (durationSeconds: number) => {
+                console.log(`⏰ 启动测试超时检查，预期持续时间: ${durationSeconds}秒`);
+
+                // 清理之前的定时器
+                if (testTimeoutTimer) {
+                    clearTimeout(testTimeoutTimer);
+                }
+
+                // 设置超时时间为预期时间的1.5倍，给一些缓冲时间
+                const timeoutMs = durationSeconds * 1000 * 1.5;
+
+                const timer = setTimeout(async () => {
+                    console.log('⚠️ 测试超时，自动取消测试');
+
+                    // 检查测试是否仍在运行
+                    if (isRunning && testStatus !== 'cancelled' && testStatus !== 'completed') {
+                        console.log('🛑 测试超时，执行自动取消');
+                        setStatusMessage('测试超时，正在自动取消...');
+
+                        try {
+                            await lifecycleManager.cancelTest('测试执行超时');
+                        } catch (error) {
+                            console.error('❌ 自动取消测试失败:', error);
+                            // 强制设置本地状态
+                            setIsRunning(false);
+                            setTestStatus('cancelled');
+                            setCurrentStatus('CANCELLED');
+                            setStatusMessage('测试超时已取消');
+                        }
+                    }
+                }, timeoutMs);
+
+                setTestTimeoutTimer(timer);
+                console.log(`⏰ 测试超时检查已设置，将在 ${timeoutMs}ms 后检查`);
+            },
+
+            // 清理超时检查
+            clearTestTimeoutCheck: () => {
+                if (testTimeoutTimer) {
+                    clearTimeout(testTimeoutTimer);
+                    setTestTimeoutTimer(null);
+                    console.log('⏰ 测试超时检查已清理');
+                }
             }
         };
     });
@@ -269,21 +423,177 @@ const StressTest: React.FC = () => {
         return processedPoint;
     }, []);
 
-    // 统一的数据更新函数
+    // 🔧 统一的指标计算函数
+    const calculateMetricsFromData = useCallback((data: TestDataPoint[]) => {
+        if (!data || data.length === 0) {
+            return {
+                totalRequests: 0,
+                successfulRequests: 0,
+                failedRequests: 0,
+                averageResponseTime: 0,
+                currentTPS: 0,
+                peakTPS: 0,
+                throughput: 0,
+                errorRate: 0,
+                p95ResponseTime: 0,
+                p99ResponseTime: 0
+            };
+        }
+
+        const totalRequests = data.length;
+        const successfulRequests = data.filter(d => d.success !== false).length;
+        const failedRequests = totalRequests - successfulRequests;
+        const responseTimes = data.map(d => d.responseTime || 0).filter(t => t > 0);
+
+        const averageResponseTime = responseTimes.length > 0 ?
+            Math.round(responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length) : 0;
+
+        const errorRate = totalRequests > 0 ? ((failedRequests / totalRequests) * 100) : 0;
+
+        // 计算当前TPS（基于最近5秒的数据）
+        let currentTPS = 0;
+        if (data.length > 0) {
+            const now = Date.now();
+            const recentData = data.filter(d => (now - new Date(d.timestamp).getTime()) < 5000);
+
+            if (recentData.length > 1) {
+                // 计算最近数据的时间跨度
+                const timestamps = recentData.map(d => new Date(d.timestamp).getTime()).sort((a, b) => a - b);
+                const timeSpanMs = timestamps[timestamps.length - 1] - timestamps[0];
+                const timeSpanSeconds = Math.max(timeSpanMs / 1000, 1); // 至少1秒
+
+                // TPS = 最近请求数 / 时间跨度（秒）
+                currentTPS = Math.round(recentData.length / timeSpanSeconds);
+            } else if (recentData.length === 1) {
+                // 只有一个数据点，估算TPS
+                currentTPS = 1;
+            }
+
+            console.log('📊 当前TPS计算:', {
+                totalDataPoints: data.length,
+                recentDataPoints: recentData.length,
+                calculatedTPS: currentTPS
+            });
+        }
+
+        // 计算P95和P99响应时间
+        const sortedResponseTimes = responseTimes.sort((a, b) => a - b);
+        const p95Index = Math.floor(sortedResponseTimes.length * 0.95);
+        const p99Index = Math.floor(sortedResponseTimes.length * 0.99);
+        const p95ResponseTime = sortedResponseTimes[p95Index] || averageResponseTime;
+        const p99ResponseTime = sortedResponseTimes[p99Index] || averageResponseTime;
+
+        return {
+            totalRequests,
+            successfulRequests,
+            failedRequests,
+            averageResponseTime,
+            currentTPS,
+            peakTPS: Math.max(metrics?.peakTPS || 0, currentTPS),
+            throughput: currentTPS,
+            errorRate: parseFloat(errorRate.toFixed(2)),
+            p95ResponseTime: Math.round(p95ResponseTime),
+            p99ResponseTime: Math.round(p99ResponseTime)
+        };
+    }, [metrics?.peakTPS]);
+
+    // 🔧 简化的数据更新函数 - 只使用stressTestData
     const updateChartData = useCallback((newPoints: any[], isRealTime: boolean = true) => {
         const processedPoints = newPoints.map(point => processDataPoint(point, isRealTime));
 
         if (isRealTime) {
-            // 实时数据：追加到现有数据，用于实时监控视图
-            setTestData(prev => {
+            // 实时数据：追加到压力测试数据，用于实时监控视图
+            setStressTestData(prev => {
                 const combined = [...prev, ...processedPoints];
-                console.log(`🔄 实时数据更新: ${prev.length} -> ${combined.length}`);
-                return combined;
+                console.log(`🔄 压力测试数据更新: ${prev.length} -> ${combined.length}`);
+
+                // 🔧 修复：只有在没有后端指标数据时才重新计算
+                let currentMetrics = null;
+                setMetrics(prevMetrics => {
+                    // 如果已有后端提供的指标数据，保持不变
+                    if (prevMetrics && prevMetrics.totalRequests > 0 && typeof prevMetrics.currentTPS === 'number') {
+                        console.log('📊 保持后端提供的指标数据:', prevMetrics);
+                        currentMetrics = prevMetrics;
+                        return prevMetrics;
+                    }
+
+                    // 否则使用前端计算的指标
+                    const newMetrics = calculateMetricsFromData(combined);
+                    console.log('📊 使用前端计算的指标:', newMetrics);
+                    currentMetrics = newMetrics;
+                    return newMetrics;
+                });
+
+                // 更新结果状态
+                if (currentMetrics) {
+                    setResult(prev => ({
+                        ...prev,
+                        metrics: currentMetrics,
+                        status: 'running',
+                        message: '测试正在运行中...'
+                    }));
+                }
+
+                return combined.length > 1000 ? combined.slice(-800) : combined;
             });
         } else {
             // 最终结果：设置为独立的聚合数据，用于测试结果视图
             setFinalResultData(processedPoints);
             console.log(`🏁 最终结果数据设置: ${processedPoints.length} 个数据点`);
+        }
+    }, [processDataPoint, calculateMetricsFromData]);
+
+    // 获取测试结果的函数
+    const fetchTestResults = useCallback(async (testId: string) => {
+        try {
+            console.log('🔍 获取测试结果:', testId);
+            const response = await fetch(`/api/test/stress/status/${testId}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                }
+            });
+
+            if (response.ok) {
+                const statusData = await response.json();
+                console.log('📊 测试结果数据:', statusData);
+
+                if (statusData.success && statusData.data) {
+                    console.log('🔍 处理测试结果数据:', {
+                        hasMetrics: !!statusData.data.metrics,
+                        hasRealTimeMetrics: !!statusData.data.realTimeMetrics,
+                        hasRealTimeData: !!statusData.data.realTimeData,
+                        dataLength: statusData.data.realTimeData?.length || 0
+                    });
+
+                    // 设置完整的测试结果对象
+                    setResult(statusData.data);
+                    console.log('✅ 设置测试结果对象:', statusData.data);
+
+                    // 设置基本指标 - 优先使用 metrics，然后是 realTimeMetrics
+                    const metricsToUse = statusData.data.metrics || statusData.data.realTimeMetrics;
+                    if (metricsToUse) {
+                        setMetrics(metricsToUse);
+                        console.log('✅ 设置指标数据:', metricsToUse);
+                    }
+
+                    // 如果有实时数据，处理并显示
+                    if (statusData.data.realTimeData && statusData.data.realTimeData.length > 0) {
+                        console.log('📈 设置实时数据:', statusData.data.realTimeData.length, '条');
+                        setRealTimeData(statusData.data.realTimeData);
+
+                        // 处理数据点用于图表显示
+                        const processedData = statusData.data.realTimeData.map((point: any) => processDataPoint(point, false));
+                        setFinalResultData(processedData);
+                        setStressTestData(processedData); // 设置到主要数据源
+
+                        console.log('✅ 测试结果数据已加载');
+                    }
+
+                    // 视图会根据测试状态自动切换到测试结果
+                }
+            }
+        } catch (error) {
+            console.error('❌ 获取测试结果失败:', error);
         }
     }, [processDataPoint]);
 
@@ -292,14 +602,113 @@ const StressTest: React.FC = () => {
     const [currentTestId, setCurrentTestId] = useState<string | null>(null);
     const currentTestIdRef = useRef<string>(''); // 用于在事件监听器中获取最新的testId
 
+    // 页面加载时检查是否有正在运行的测试，防止自动重启
+    useEffect(() => {
+        const checkRunningTests = async () => {
+            try {
+                // 检查localStorage中是否有保存的测试状态
+                const savedTestId = localStorage.getItem('currentStressTestId');
+                const savedTestStatus = localStorage.getItem('currentStressTestStatus');
+
+                if (savedTestId && savedTestStatus) {
+                    console.log('🔍 检测到保存的测试状态:', { savedTestId, savedTestStatus });
+
+                    // 如果状态是运行中，检查后端是否真的在运行
+                    if (savedTestStatus === 'running' || savedTestStatus === 'starting') {
+                        try {
+                            const response = await fetch(`/api/test/stress/status/${savedTestId}`, {
+                                headers: {
+                                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                                }
+                            });
+
+                            if (response.ok) {
+                                const statusData = await response.json();
+                                if (statusData.success && statusData.data?.status === 'running') {
+                                    console.log('✅ 检测到正在运行的测试，恢复状态');
+                                    setCurrentTestId(savedTestId);
+                                    setTestStatus('running');
+                                    setIsRunning(true);
+                                    setCurrentStatus('RUNNING');
+                                    setStatusMessage('测试正在运行中...');
+                                } else if (statusData.success && statusData.data?.status === 'completed') {
+                                    console.log('✅ 检测到已完成的测试，加载测试结果');
+                                    // 不清理状态，而是加载测试结果
+                                    setCurrentTestId(savedTestId);
+                                    setTestStatus('completed');
+                                    setIsRunning(false);
+                                    setCurrentStatus('COMPLETED');
+                                    setStatusMessage('测试已完成');
+                                    setTestProgress('压力测试完成！');
+
+                                    // 获取测试结果数据
+                                    if (statusData.data.realTimeMetrics) {
+                                        setMetrics(statusData.data.realTimeMetrics);
+                                    }
+
+                                    // 尝试获取完整的测试结果
+                                    fetchTestResults(savedTestId);
+                                } else {
+                                    console.log('🧹 后端测试状态异常，清理本地状态');
+                                    localStorage.removeItem('currentStressTestId');
+                                    localStorage.removeItem('currentStressTestStatus');
+                                }
+                            } else {
+                                console.log('🧹 无法获取测试状态，清理本地状态');
+                                localStorage.removeItem('currentStressTestId');
+                                localStorage.removeItem('currentStressTestStatus');
+                            }
+                        } catch (error) {
+                            console.warn('⚠️ 检查测试状态失败:', error);
+                            localStorage.removeItem('currentStressTestId');
+                            localStorage.removeItem('currentStressTestStatus');
+                        }
+                    } else {
+                        // 如果状态不是运行中，清理保存的状态
+                        localStorage.removeItem('currentStressTestId');
+                        localStorage.removeItem('currentStressTestStatus');
+                    }
+                }
+            } catch (error) {
+                console.error('❌ 检查运行中测试失败:', error);
+            }
+        };
+
+        checkRunningTests();
+    }, []); // 只在组件挂载时执行一次
+
     // 同步currentTestId到ref
     useEffect(() => {
+        console.log('🔑🔑🔑 currentTestId 更新 🔑🔑🔑:', {
+            oldValue: currentTestIdRef.current,
+            newValue: currentTestId,
+            timestamp: Date.now()
+        });
         currentTestIdRef.current = currentTestId || '';
         console.log('🔄 同步测试ID到ref:', currentTestId);
+
+        // 保存测试ID到localStorage
+        if (currentTestId) {
+            localStorage.setItem('currentStressTestId', currentTestId);
+        } else {
+            localStorage.removeItem('currentStressTestId');
+        }
     }, [currentTestId]);
 
     // 测试记录ID状态
     const [currentRecordId, setCurrentRecordId] = useState<string | null>(null);
+
+    // 调试状态
+    const [debugInfo, setDebugInfo] = useState<any>({
+        socketConnected: false,
+        socketId: '',
+        roomJoined: false,
+        dataReceived: 0,
+        lastDataTime: null
+    });
+
+    // 房间加入状态管理
+    const [joinedRooms, setJoinedRooms] = useState<Set<string>>(new Set());
 
     const dataCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -323,9 +732,7 @@ const StressTest: React.FC = () => {
         setError('');
         setTestStatus('starting');
         setTestProgress('正在初始化压力测试...');
-        setTestData([]);
-        setRealTimeData([]);
-        setFinalResultData([]);
+        setStressTestData([]);  // 🔧 清理唯一数据源
         setMetrics(null);
         setResult(null);
         setIsRunning(true);
@@ -431,24 +838,38 @@ const StressTest: React.FC = () => {
             console.log('🔄 收到后端响应:', {
                 success: data.success,
                 hasData: !!data.data,
-                responseTestId: data.data?.testId,
-                sentTestId: realTestId
+                responseTestId: data.data?.testId || data.testId,
+                sentTestId: realTestId,
+                fullResponse: data
             });
 
-            if (data.success && data.data) {
+            // 🔧 修复：兼容多种响应格式
+            const isSuccess = data.success !== false && response.ok;
+            const testIdFromResponse = data.data?.testId || data.testId;
+
+            if (isSuccess && testIdFromResponse) {
                 // ✅ 时序修复：后端确认测试启动后，立即设置testId并加入房间
-                const confirmedTestId = data.data.testId || realTestId;
+                const confirmedTestId = testIdFromResponse || realTestId;
                 console.log('✅ 后端确认测试启动，设置testId:', confirmedTestId);
 
                 // 立即设置testId，这将触发useEffect加入WebSocket房间
                 setCurrentTestId(confirmedTestId);
 
-                if (data.data.testId && data.data.testId === realTestId) {
-                    console.log('✅ 测试ID验证成功，前后端testId一致:', data.data.testId);
+                // 🔧 立即尝试加入WebSocket房间（如果连接已建立）
+                const socket = socketRef.current;
+                if (socket && socket.connected) {
+                    console.log('🏠 测试启动后立即加入WebSocket房间:', confirmedTestId);
+                    joinWebSocketRoom(confirmedTestId);
+                } else {
+                    console.log('⚠️ WebSocket未连接，等待连接后加入房间');
+                }
+
+                if (testIdFromResponse && testIdFromResponse === realTestId) {
+                    console.log('✅ 测试ID验证成功，前后端testId一致:', testIdFromResponse);
                 } else {
                     console.warn('⚠️ 测试ID不匹配，使用后端返回的testId:', {
                         sent: realTestId,
-                        received: data.data.testId
+                        received: testIdFromResponse
                     });
                 }
 
@@ -456,16 +877,48 @@ const StressTest: React.FC = () => {
                 setTestStatus('running');
                 setTestProgress('压力测试正在运行...');
 
-                // 启动定期数据检查
-                if (data.data.testId) {
+                // 启动定期数据检查和状态同步
+                if (testIdFromResponse) {
                     dataCheckIntervalRef.current = setInterval(async () => {
-                        if (realTimeData.length === 0 && isRunning) {
-                            console.log('🔄 定期检查：没有收到WebSocket数据，尝试API轮询...');
-                            try {
-                                const response = await fetch(`/api/test/stress/status/${data.data.testId}`);
-                                const statusData = await response.json();
+                        try {
+                            const response = await fetch(`/api/test/stress/status/${testIdFromResponse}`);
+                            const statusData = await response.json();
 
-                                if (statusData.success && statusData.data) {
+                            if (statusData.success && statusData.data) {
+                                const serverStatus = statusData.data.status;
+
+                                // 检查状态同步
+                                if (serverStatus === 'completed' && testStatus === 'running') {
+                                    console.log('🔄 状态同步：服务器显示已完成，但前端仍显示运行中，更新状态...');
+                                    setTestStatus('completed');
+                                    setTestProgress('压力测试完成！');
+                                    setIsRunning(false);
+                                    setCurrentTestId(null);
+
+                                    // 设置结果数据
+                                    if (statusData.data.realTimeMetrics || statusData.data.metrics) {
+                                        setResult({
+                                            status: 'completed',
+                                            message: '测试已完成',
+                                            metrics: statusData.data.realTimeMetrics || statusData.data.metrics || {},
+                                            realTimeData: statusData.data.realTimeData || []
+                                        });
+                                    }
+                                    return;
+                                }
+
+                                if (serverStatus === 'cancelled' && testStatus !== 'cancelled') {
+                                    console.log('🔄 状态同步：服务器显示已取消，更新状态...');
+                                    setTestStatus('cancelled');
+                                    setTestProgress('测试已取消');
+                                    setIsRunning(false);
+                                    setCurrentTestId(null);
+                                    return;
+                                }
+
+                                // 数据检查逻辑（仅在状态为运行中时）
+                                if (stressTestData.length === 0 && isRunning && serverStatus === 'running') {
+                                    console.log('🔄 定期检查：没有收到WebSocket数据，尝试API轮询...');
                                     console.log('📡 API轮询获取到数据:', {
                                         hasRealTimeData: !!statusData.data.realTimeData,
                                         realTimeDataLength: statusData.data.realTimeData?.length || 0,
@@ -474,45 +927,40 @@ const StressTest: React.FC = () => {
 
                                     // 更新实时数据
                                     if (statusData.data.realTimeData && statusData.data.realTimeData.length > 0) {
-                                        setRealTimeData(statusData.data.realTimeData);
-
-                                        // 使用统一的数据处理函数，只处理新增的数据点
-                                        const newPoints = statusData.data.realTimeData.slice(testData.length);
-                                        if (newPoints.length > 0) {
-                                            updateChartData(newPoints, true);
-                                        }
-                                    }
-
-                                    // 更新指标
-                                    if (statusData.data.metrics) {
-                                        setMetrics(statusData.data.metrics);
+                                        // 转换为统一数据格式
+                                        // 🔧 使用统一的数据更新函数
+                                        updateChartData(statusData.data.realTimeData, true);
                                     }
                                 }
-                            } catch (error) {
-                                console.error('❌ 定期API轮询失败:', error);
+
+                                // 更新指标
+                                if (statusData.data.metrics) {
+                                    setMetrics(statusData.data.metrics);
+                                }
                             }
+                        } catch (error) {
+                            console.error('❌ 定期状态检查失败:', error);
                         }
                     }, 3000); // 每3秒检查一次
                 }
 
                 // WebSocket房间加入将由connect事件自动处理，无需在此处重复发送
-                if (data.data.testId) {
-                    console.log('🔗 测试ID已设置，WebSocket将自动加入房间:', data.data.testId);
+                if (testIdFromResponse) {
+                    console.log('🔗 测试ID已设置，WebSocket将自动加入房间:', testIdFromResponse);
 
                     // 设置一个定时器来检查是否收到数据
                     setTimeout(async () => {
                         console.log('⏰ 5秒后检查数据接收状态:', {
-                            realTimeDataLength: realTimeData.length,
-                            testDataLength: testData.length,
+                            stressTestDataLength: stressTestData.length,
                             currentMetrics: metrics,
                             testStatus: testStatus
                         });
 
                         // 如果没有收到数据，尝试通过API获取
-                        if (realTimeData.length === 0) {
+                        if (stressTestData.length === 0) {
                             console.log('🔄 没有收到WebSocket数据，尝试API轮询...');
                             try {
-                                const response = await fetch(`/api/test/stress/status/${data.data.testId}`);
+                                const response = await fetch(`/api/test/stress/status/${testIdFromResponse}`);
                                 const statusData = await response.json();
                                 console.log('📡 API状态查询结果:', statusData);
 
@@ -520,7 +968,8 @@ const StressTest: React.FC = () => {
                                     // 手动更新数据
                                     if (statusData.data.realTimeData && statusData.data.realTimeData.length > 0) {
                                         console.log('🔄 通过API获取到实时数据，手动更新UI');
-                                        setRealTimeData(statusData.data.realTimeData);
+                                        // 🔧 使用统一的数据更新函数
+                                        updateChartData(statusData.data.realTimeData, true);
                                     }
                                     if (statusData.data.metrics) {
                                         console.log('📊 通过API获取到指标数据，手动更新UI');
@@ -622,7 +1071,14 @@ const StressTest: React.FC = () => {
                     }
                 }
             } else {
-                throw new Error(data.message || '测试启动失败');
+                // 🔧 修复：提供更详细的错误信息
+                const errorMsg = data.message || data.error || '测试启动失败';
+                console.error('❌ 测试启动失败:', {
+                    isSuccess,
+                    testIdFromResponse,
+                    fullResponse: data
+                });
+                throw new Error(errorMsg);
             }
         } catch (error: any) {
             console.error('压力测试失败:', error);
@@ -795,8 +1251,8 @@ const StressTest: React.FC = () => {
 
     // 统一图表数据处理 - 使用真实数据或示例数据
     const unifiedTestData = {
-        // 实时监控使用处理过的testData，保持原始数据的细节
-        realTimeData: testData.length > 0 ? testData : [],
+        // 实时监控使用处理过的stressTestData，保持原始数据的细节
+        realTimeData: stressTestData.length > 0 ? stressTestData : [],
         currentMetrics: metrics ? {
             ...metrics,
             currentTPS: metrics.currentTPS || 0,
@@ -830,7 +1286,7 @@ const StressTest: React.FC = () => {
             config: testConfig,
             metrics: metrics,
             // 统一使用实时数据，确保两个视图显示相同的数据
-            timeSeriesData: testData.length > 0 ? testData : finalResultData
+            timeSeriesData: stressTestData.length > 0 ? stressTestData : finalResultData
         } : undefined,
         historicalResults: [] as any[],
         baseline: baselineData
@@ -847,22 +1303,30 @@ const StressTest: React.FC = () => {
                 return 'cancelled';
             }
 
+            let newStatus;
             if (result && !isRunning) {
                 // 检查结果中的状态，如果是取消状态则保持
                 if (result.status === 'cancelled') {
                     console.log('🔍 结果状态为取消，设置为 cancelled');
-                    return 'cancelled';
+                    newStatus = 'cancelled';
                 } else {
                     console.log('🔍 结果状态为:', result.status, '设置为 completed');
-                    return 'completed';
+                    newStatus = 'completed';
                 }
             } else if (error && !isRunning) {
-                return 'failed';
+                newStatus = 'failed';
             } else if (isRunning) {
-                return 'running';
+                newStatus = 'running';
             } else {
-                return 'idle';
+                newStatus = 'idle';
             }
+
+            // 保存状态到localStorage
+            if (newStatus) {
+                localStorage.setItem('currentStressTestStatus', newStatus);
+            }
+
+            return newStatus;
         });
     }, [isRunning, result, error]); // ✅ 修复：移除 testStatus 依赖
 
@@ -1120,6 +1584,123 @@ const StressTest: React.FC = () => {
         return unsubscribe;
     }, [currentTestId]);
 
+    // 连接错误后检查测试状态
+    const checkTestStatusAfterConnectionError = useCallback(async () => {
+        if (!currentTestIdRef.current) return;
+
+        try {
+            console.log('🔍 检查测试状态 (连接错误后):', currentTestIdRef.current);
+            const response = await fetch(`/api/stress-test/status/${currentTestIdRef.current}`);
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    console.log('❌ 测试不存在，重置状态');
+                    resetTestStateOnError('测试已结束或不存在');
+                }
+                return;
+            }
+
+            const data = await response.json();
+            if (data.success && data.data) {
+                if (data.data.status === 'completed' || data.data.status === 'cancelled') {
+                    console.log('✅ 测试已完成，更新状态');
+                    handleTestCompletion(data.data);
+                }
+            }
+        } catch (error) {
+            console.error('❌ 检查测试状态失败:', error);
+            // 如果连续检查失败，可能需要重置状态
+            setTimeout(() => {
+                if (isRunning && currentTestIdRef.current) {
+                    console.log('⚠️ 连续检查失败，考虑重置状态');
+                    resetTestStateOnError('无法连接到服务器');
+                }
+            }, 10000); // 10秒后重置
+        }
+    }, [isRunning]);
+
+    // 重连后检查测试状态
+    const checkTestStatusAfterReconnect = useCallback(async () => {
+        if (!currentTestIdRef.current) return;
+
+        try {
+            console.log('🔍 检查测试状态 (重连后):', currentTestIdRef.current);
+            const response = await fetch(`/api/stress-test/status/${currentTestIdRef.current}`);
+
+            if (!response.ok) {
+                if (response.status === 404) {
+                    console.log('❌ 测试不存在，重置状态');
+                    resetTestStateOnError('测试已结束');
+                }
+                return;
+            }
+
+            const data = await response.json();
+            if (data.success && data.data) {
+                console.log('📊 重连后测试状态:', data.data);
+
+                if (data.data.status === 'completed' || data.data.status === 'cancelled') {
+                    console.log('✅ 测试已完成，更新状态');
+                    handleTestCompletion(data.data);
+                } else if (data.data.status === 'running') {
+                    // 重新加入WebSocket房间
+                    console.log('🏠 重新加入测试房间');
+                    joinWebSocketRoom(currentTestIdRef.current, true);
+                }
+            }
+        } catch (error) {
+            console.error('❌ 重连后检查测试状态失败:', error);
+        }
+    }, []);
+
+    // 重置测试状态（连接错误时使用）
+    const resetTestStateOnError = useCallback((reason: string) => {
+        console.log('🔄 重置测试状态 (连接错误):', reason);
+        setIsRunning(false);
+        setTestStatus('idle');
+        setCurrentStatus('IDLE');
+        setStatusMessage(reason);
+        setCurrentTestId(null);
+        setIsInRoom(false);
+        setIsCancelling(false);
+        setCanSwitchPages(true);
+
+        // 清理定时器
+        if (testTimeoutTimer) {
+            clearTimeout(testTimeoutTimer);
+            setTestTimeoutTimer(null);
+        }
+    }, [testTimeoutTimer]);
+
+    // 处理测试完成
+    const handleTestCompletion = useCallback((testData: any) => {
+        console.log('🏁 处理测试完成:', testData);
+
+        if (testData.status === 'cancelled') {
+            setTestStatus('cancelled');
+            setCurrentStatus('CANCELLED');
+            setStatusMessage('测试已取消');
+        } else {
+            setTestStatus('completed');
+            setCurrentStatus('COMPLETED');
+            setStatusMessage('测试已完成');
+        }
+
+        setIsRunning(false);
+        setCurrentTestId(null);
+        setIsInRoom(false);
+
+        if (testData.metrics) {
+            setMetrics(testData.metrics);
+        }
+
+        if (testData.realTimeData) {
+            setRealTimeData(testData.realTimeData);
+        }
+
+        setResult(testData);
+    }, []);
+
     // WebSocket连接管理
     useEffect(() => {
         // 动态导入socket.io-client
@@ -1137,22 +1718,30 @@ const StressTest: React.FC = () => {
 
                 // 连接事件
                 socket.on('connect', () => {
-                    console.log('🔌 WebSocket连接成功');
-                    console.log('🔌 Socket连接状态:', socket.connected);
-                    console.log('🔌 Socket ID:', socket.id);
+                    console.log('✅ WebSocket连接成功:', socket.id);
+
+                    // 更新调试信息
+                    setDebugInfo(prev => ({
+                        ...prev,
+                        socketConnected: true,
+                        socketId: socket.id
+                    }));
 
                     // 连接成功后立即检查是否有当前测试需要加入房间
                     const currentTestIdValue = currentTestIdRef.current;
                     if (currentTestIdValue) {
                         console.log('🏠 连接成功后立即加入当前测试房间:', currentTestIdValue);
-                        socket.emit('join-stress-test', currentTestIdValue);
+                        joinWebSocketRoom(currentTestIdValue);
                     }
+
+                    // 🔧 发送测试ping来验证连接
+                    socket.emit('test-ping', { message: 'WebSocket连接测试', timestamp: Date.now() });
                 });
 
                 // 设置房间加入确认监听器（全局监听）
                 socket.on('room-joined', (roomData: any) => {
-                    console.log('✅ 房间加入确认:', roomData);
-                    console.log('🎯 房间加入成功，开始接收实时数据');
+                    console.log('✅✅✅ 房间加入确认 ✅✅✅:', roomData);
+                    console.log('🎯🎯🎯 房间加入成功，开间接收实时数据 🎯🎯🎯');
 
                     // 更新房间连接状态
                     setIsInRoom(true);
@@ -1181,9 +1770,65 @@ const StressTest: React.FC = () => {
                 // 保存socket实例到全局，供其他地方使用
                 (window as any).socket = socket;
 
-                socket.on('disconnect', () => {
-                    console.log('🔌 WebSocket连接断开');
+                socket.on('disconnect', (reason) => {
+                    console.log('🔌 WebSocket连接断开:', reason);
                     setIsInRoom(false);
+
+                    // 更新调试信息
+                    setDebugInfo(prev => ({
+                        ...prev,
+                        socketConnected: false,
+                        socketId: null
+                    }));
+
+                    // 如果有正在运行的测试，标记为可能失败
+                    if (isRunning && currentTestIdRef.current) {
+                        console.log('⚠️ 测试运行中WebSocket断开，可能需要重置状态');
+                        setStatusMessage('连接断开，正在尝试重连...');
+                    }
+                });
+
+                // 连接错误处理
+                socket.on('connect_error', (error) => {
+                    console.error('❌❌❌ WebSocket连接错误 ❌❌❌:', error);
+                    console.error('❌ 错误详情:', {
+                        message: error.message,
+                        description: error.description,
+                        context: error.context,
+                        type: error.type
+                    });
+
+                    // 更新调试信息
+                    setDebugInfo(prev => ({
+                        ...prev,
+                        socketConnected: false,
+                        lastError: error.message
+                    }));
+
+                    // 如果有正在运行的测试，检查是否需要重置
+                    if (isRunning && currentTestIdRef.current) {
+                        console.log('⚠️ 测试运行中连接错误，检查测试状态');
+                        checkTestStatusAfterConnectionError();
+                    }
+                });
+
+                // 重连成功处理
+                socket.on('reconnect', (attemptNumber) => {
+                    console.log(`🔄 WebSocket重连成功 (尝试 ${attemptNumber})`);
+
+                    // 更新调试信息
+                    setDebugInfo(prev => ({
+                        ...prev,
+                        socketConnected: true,
+                        socketId: socket.id,
+                        lastError: null
+                    }));
+
+                    // 重连后检查测试状态
+                    if (isRunning && currentTestIdRef.current) {
+                        console.log('🔍 重连后检查测试状态');
+                        checkTestStatusAfterReconnect();
+                    }
                 });
 
                 // 添加通用事件监听器来调试所有接收到的事件
@@ -1193,9 +1838,56 @@ const StressTest: React.FC = () => {
                     }
                 });
 
-                // 压力测试实时数据
+                // 🔧 调试：监听所有WebSocket事件
+                socket.onAny((eventName, ...args) => {
+                    console.log(`🔍 收到WebSocket事件: ${eventName}`, args);
+                });
+
+                // 🔧 调试：监听房间加入确认
+                socket.on('room-joined', (data) => {
+                    console.log('✅ 房间加入确认:', data);
+                });
+
+                // 统一的压力测试实时数据监听器
+                socket.on('realTimeData', (data) => {
+                    console.log('📊 收到实时数据:', {
+                        type: typeof data,
+                        hasTimestamp: !!data.timestamp,
+                        hasResponseTime: data.responseTime !== undefined,
+                        dataKeys: Object.keys(data)
+                    });
+
+                    // 更新调试信息
+                    setDebugInfo(prev => ({
+                        ...prev,
+                        dataReceived: prev.dataReceived + 1,
+                        lastDataTime: new Date().toLocaleTimeString()
+                    }));
+
+                    // 🔧 统一的实时数据处理逻辑
+                    if (data.timestamp && data.responseTime !== undefined) {
+                        console.log('📈 处理实时数据点:', data);
+
+                        // 使用统一的数据更新函数
+                        updateChartData([data], true);
+
+                        // 更新状态为运行中
+                        setCurrentStatus((prevStatus: string) => {
+                            if (prevStatus === 'WAITING' || prevStatus === 'STARTING') {
+                                console.log('🎯 接收到实时数据，更新状态为RUNNING');
+                                setStatusMessage('测试正在运行中...');
+                                return 'RUNNING';
+                            }
+                            return prevStatus;
+                        });
+                    } else {
+                        console.warn('⚠️ 收到的数据格式不正确:', data);
+                    }
+                });
+
+                // 恢复重要的 stress-test-data 监听器 - 处理完整测试数据和状态
                 socket.on('stress-test-data', (data) => {
-                    console.log('📊 收到WebSocket实时数据:', {
+                    console.log('📊 收到WebSocket实时数据 (stress-test-data):', {
                         testId: data.testId,
                         currentTestId: currentTestId,
                         testIdMatch: data.testId === currentTestId,
@@ -1211,6 +1903,13 @@ const StressTest: React.FC = () => {
                         },
                         timestamp: data.dataPointTimestamp ? new Date(data.dataPointTimestamp).toLocaleTimeString() : 'N/A',
                         rawData: data
+                    });
+
+                    // 🔧 添加数据接收统计
+                    console.log('📈 WebSocket数据接收统计:', {
+                        currentStressTestDataLength: stressTestData.length,
+                        isRunning: isRunning,
+                        testStatus: testStatus
                     });
 
                     // 添加事件接收确认
@@ -1276,31 +1975,8 @@ const StressTest: React.FC = () => {
                     }
 
                     if (dataPoint) {
-                        // 添加到实时数据
-                        setRealTimeData(prev => {
-                            const newData = [...prev, dataPoint];
-                            console.log('🔄 realTimeData更新:', {
-                                previousLength: prev.length,
-                                newLength: newData.length,
-                                latestPoint: dataPoint
-                            });
-                            // 限制数据点数量，避免内存溢出
-                            return newData.length > 1000 ? newData.slice(-800) : newData;
-                        });
-
-                        // 使用统一的数据处理函数
-                        const chartDataPoint = processDataPoint(dataPoint, true);
-                        console.log('📊 统一处理后的图表数据点:', chartDataPoint);
-
-                        setTestData(prev => {
-                            const newData = [...prev, chartDataPoint];
-                            console.log('🔄 testData更新:', {
-                                previousLength: prev.length,
-                                newLength: newData.length,
-                                latestPoint: chartDataPoint
-                            });
-                            return newData.length > 1000 ? newData.slice(-800) : newData;
-                        });
+                        // 🔧 使用统一的数据更新函数
+                        updateChartData([dataPoint], true);
                     }
 
                     // 更新实时指标 - 支持两种数据格式
@@ -1329,7 +2005,15 @@ const StressTest: React.FC = () => {
                         console.log('📊 收到直接指标数据:', metricsData);
                     }
 
-                    if (metricsData) {
+                    // 🔧 修复：添加调试日志查看metricsData内容
+                    console.log('🔍 检查指标数据:', {
+                        hasMetricsData: !!metricsData,
+                        metricsData: metricsData,
+                        hasValidTotalRequests: metricsData?.totalRequests > 0,
+                        realTimeDataLength: realTimeData.length
+                    });
+
+                    if (metricsData && metricsData.totalRequests > 0) {
                         const updatedMetrics = {
                             ...metricsData,
                             currentTPS: typeof metricsData.currentTPS === 'number' ? metricsData.currentTPS : 0,
@@ -1338,20 +2022,61 @@ const StressTest: React.FC = () => {
                             errorRate: typeof metricsData.errorRate === 'number' ? metricsData.errorRate : 0
                         };
 
-                        setMetrics(prev => {
-                            console.log('🔄 指标更新:', {
-                                previous: prev,
-                                new: updatedMetrics,
-                                hasChanged: JSON.stringify(prev) !== JSON.stringify(updatedMetrics)
-                            });
-
-                            return updatedMetrics;
-                        });
+                        console.log('🔄 使用后端提供的指标数据 (优先):', updatedMetrics);
+                        setMetrics(updatedMetrics);
+                    } else {
+                        // 只有在后端没有提供指标数据时才使用前端计算
+                        console.log('🔧 后端未提供指标数据，使用前端计算');
                     }
 
                     // 更新进度
                     if (data.progress !== undefined) {
                         setTestProgress(`测试进行中... ${Math.round(data.progress)}%`);
+                    }
+                });
+
+                // 🔧 添加专门的 progress 事件监听器
+                socket.on('progress', (data) => {
+                    console.log('📈 收到进度更新事件:', data);
+
+                    // 检查testId是否匹配
+                    if (data.testId !== currentTestIdRef.current) {
+                        console.warn('⚠️ 进度事件testId不匹配:', {
+                            received: data.testId,
+                            current: currentTestIdRef.current
+                        });
+                        return;
+                    }
+
+                    // 更新进度百分比
+                    if (data.progress !== undefined) {
+                        setTestProgress(`测试进行中... ${Math.round(data.progress)}%`);
+                    }
+
+                    // 🔧 关键修复：处理累积指标数据
+                    if (data.metrics) {
+                        console.log('📊 收到累积指标数据:', data.metrics);
+
+                        // 直接使用后端提供的累积指标数据
+                        const updatedMetrics = {
+                            totalRequests: data.metrics.totalRequests || 0,
+                            successfulRequests: data.metrics.successfulRequests || 0,
+                            failedRequests: data.metrics.failedRequests || 0,
+                            averageResponseTime: data.metrics.averageResponseTime || 0,
+                            currentTPS: data.metrics.currentTPS || 0,
+                            peakTPS: data.metrics.peakTPS || 0,
+                            throughput: data.metrics.currentTPS || 0,
+                            requestsPerSecond: data.metrics.requestsPerSecond || data.metrics.currentTPS || 0,
+                            errorRate: data.metrics.errorRate || 0,
+                            p50ResponseTime: data.metrics.p50ResponseTime || 0,
+                            p90ResponseTime: data.metrics.p90ResponseTime || 0,
+                            p95ResponseTime: data.metrics.p95ResponseTime || 0,
+                            p99ResponseTime: data.metrics.p99ResponseTime || 0,
+                            activeUsers: data.metrics.activeUsers || 0
+                        };
+
+                        console.log('📊 保持后端提供的指标数据:', updatedMetrics);
+                        setMetrics(updatedMetrics);
                     }
                 });
 
@@ -1432,8 +2157,19 @@ const StressTest: React.FC = () => {
                     setIsInRoom(false);
                     setResult(data.results);
 
+                    // 调试：检查接收到的指标数据
+                    console.log('🔍 测试完成 - 检查指标数据:', {
+                        hasResults: !!data.results,
+                        hasMetrics: !!data.results?.metrics,
+                        metricsData: data.results?.metrics,
+                        fullData: data
+                    });
+
                     if (data.results?.metrics) {
+                        console.log('✅ 设置最终指标:', data.results.metrics);
                         setMetrics(data.results.metrics);
+                    } else {
+                        console.warn('⚠️ 测试完成但没有指标数据');
                     }
 
                     // 处理WebSocket测试完成数据
@@ -1492,31 +2228,46 @@ const StressTest: React.FC = () => {
         };
     }, []);
 
-    // 房间加入函数
-    const joinWebSocketRoom = useCallback((testId: string) => {
+    // 统一的房间加入函数 - 避免重复加入
+    const joinWebSocketRoom = useCallback((testId: string, force: boolean = false) => {
         const socket = socketRef.current;
-        if (socket && socket.connected && testId) {
-            console.log('🏠 准备加入WebSocket房间:', testId);
-            socket.emit('join-stress-test', testId);
-            console.log('🏠 已发送加入房间请求:', `stress-test-${testId}`);
 
-            // 房间加入请求已发送，等待确认
+        console.log('🔍 房间加入检查:', {
+            testId: testId,
+            hasSocket: !!socket,
+            socketConnected: socket?.connected,
+            alreadyJoined: joinedRooms.has(testId),
+            force: force
+        });
+
+        // 检查是否已经加入过这个房间
+        if (!force && joinedRooms.has(testId)) {
+            console.log('🏠 房间已加入，跳过:', testId);
+            return;
+        }
+
+        if (socket && socket.connected && testId) {
+            console.log('🏠 加入WebSocket房间:', testId);
+            socket.emit('join-stress-test', testId);
+
+            // 记录已加入的房间
+            setJoinedRooms(prev => new Set([...prev, testId]));
+
+            // 更新调试信息
+            setDebugInfo(prev => ({
+                ...prev,
+                roomJoined: true
+            }));
+
+            console.log('✅ 房间加入请求已发送:', `stress-test-${testId}`);
         } else {
             console.warn('⚠️ 无法加入房间:', {
                 hasSocket: !!socket,
                 connected: socket?.connected,
                 testId: testId
             });
-
-            // 如果socket存在但未连接，等待连接后再加入
-            if (socket && !socket.connected) {
-                socket.once('connect', () => {
-                    console.log('🔌 Socket重新连接，现在加入房间:', testId);
-                    socket.emit('join-stress-test', testId);
-                });
-            }
         }
-    }, []);
+    }, [joinedRooms]);
 
     // ✅ 根本性修复：简化房间管理逻辑，只要有testId和WebSocket连接就加入房间
     useEffect(() => {
@@ -1537,9 +2288,9 @@ const StressTest: React.FC = () => {
             const roomCheckInterval = setInterval(() => {
                 if (socketRef.current?.connected && currentTestId) {
                     // 只在没有收到数据时才重新加入房间
-                    if (realTimeData.length === 0) {
+                    if (stressTestData.length === 0) {
                         console.log('🔍 没有收到数据，重新加入房间:', currentTestId);
-                        socketRef.current.emit('join-stress-test', currentTestId);
+                        joinWebSocketRoom(currentTestId, true); // 强制重新加入
                     }
                 }
             }, 10000); // 每10秒检查一次
@@ -1599,6 +2350,56 @@ const StressTest: React.FC = () => {
         };
     }, []);
 
+    // 🔧 测试完成检测逻辑 - 基于数据流停止检测测试是否完成
+    useEffect(() => {
+        if (!isRunning || !currentTestId || stressTestData.length === 0) return;
+
+        const checkTestCompletion = () => {
+            const now = Date.now();
+            const lastDataPoint = stressTestData[stressTestData.length - 1];
+
+            if (lastDataPoint) {
+                const timeSinceLastData = now - new Date(lastDataPoint.timestamp).getTime();
+
+                // 如果超过10秒没有新数据，认为测试可能已完成
+                if (timeSinceLastData > 10000) {
+                    console.log('🔍 检测到数据流停止，可能测试已完成');
+
+                    // 检查测试状态
+                    fetch(`/api/stress-test/status/${currentTestId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success && data.data.status === 'completed') {
+                                console.log('✅ 确认测试已完成');
+                                setTestStatus('completed');
+                                setTestProgress('压力测试完成！');
+                                setIsRunning(false);
+                                setCurrentTestId(null);
+
+                                // 设置最终结果
+                                if (data.data.metrics) {
+                                    setResult({
+                                        ...data.data,
+                                        metrics: data.data.metrics
+                                    });
+                                }
+                            }
+                        })
+                        .catch(error => {
+                            console.warn('⚠️ 检查测试状态失败:', error);
+                        });
+                }
+            }
+        };
+
+        // 每5秒检查一次
+        const completionCheckInterval = setInterval(checkTestCompletion, 5000);
+
+        return () => {
+            clearInterval(completionCheckInterval);
+        };
+    }, [isRunning, currentTestId, stressTestData.length]);
+
     // 生成测试ID
     const generateTestId = () => {
         const timestamp = Date.now();
@@ -1617,15 +2418,30 @@ const StressTest: React.FC = () => {
             return;
         }
 
+        // 防止重复启动测试
+        if (isRunning || currentStatus === 'STARTING' || currentStatus === 'RUNNING') {
+            console.warn('⚠️ 测试已在运行中，防止重复启动');
+            setError('测试已在运行中，请等待当前测试完成');
+            return;
+        }
+
+        // 检查是否有活跃的测试ID
+        if (currentTestId || currentTestIdRef.current) {
+            console.warn('⚠️ 检测到活跃的测试ID，防止重复启动:', {
+                currentTestId,
+                currentTestIdRef: currentTestIdRef.current
+            });
+            setError('检测到正在运行的测试，请先取消当前测试');
+            return;
+        }
+
         try {
             console.log('🎯 开始压力测试:', testConfig.url);
 
             // 清理之前的状态
             setError('');
             setResult(null);
-            setTestData([]);
-            setFinalResultData([]);
-            setRealTimeData([]);
+            setStressTestData([]);
             setMetrics(null);
             setCanSwitchPages(false);
 
@@ -1669,9 +2485,7 @@ const StressTest: React.FC = () => {
         setError('');
 
         // 重置数据
-        setTestData([]);
-        setRealTimeData([]);
-        setFinalResultData([]);
+        setStressTestData([]);  // 🔧 清理唯一数据源
         setMetrics(null);
         setResult(null);
 
@@ -1712,8 +2526,8 @@ const StressTest: React.FC = () => {
             isRunning,
             testStatus,
             isCancelling,
-            realTimeDataLength: realTimeData.length,
-            lastDataPoint: realTimeData[realTimeData.length - 1]
+            stressTestDataLength: stressTestData.length,
+            lastDataPoint: stressTestData[stressTestData.length - 1]
         });
 
         // 防止重复取消
@@ -1887,8 +2701,8 @@ const StressTest: React.FC = () => {
         const exportData = {
             testConfig,
             testResult: data.testResult,
-            realTimeData: data.realTimeData,
-            metrics: data.currentMetrics,
+            realTimeData: stressTestData,  // 🔧 使用统一的stressTestData
+            metrics: data.currentMetrics || metrics,
             exportTime: new Date().toISOString()
         };
 
@@ -1990,6 +2804,43 @@ const StressTest: React.FC = () => {
 
     return (
         <TestPageLayout className="space-y-3 dark-page-scrollbar compact-layout">
+
+            {/* WebSocket调试面板 */}
+            <div className="bg-gray-800 rounded-lg p-4 mb-4">
+                <h3 className="text-lg font-semibold mb-2 text-white">WebSocket状态</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div>
+                        <span className="text-gray-400">连接状态: </span>
+                        <span className={debugInfo.socketConnected ? 'text-green-400' : 'text-red-400'}>
+                            {debugInfo.socketConnected ? '已连接' : '未连接'}
+                        </span>
+                    </div>
+                    <div>
+                        <span className="text-gray-400">Socket ID: </span>
+                        <span className="text-blue-400">{debugInfo.socketId || '无'}</span>
+                    </div>
+                    <div>
+                        <span className="text-gray-400">房间状态: </span>
+                        <span className={debugInfo.roomJoined ? 'text-green-400' : 'text-yellow-400'}>
+                            {debugInfo.roomJoined ? '已加入' : '未加入'}
+                        </span>
+                    </div>
+                    <div>
+                        <span className="text-gray-400">数据接收: </span>
+                        <span className="text-purple-400">{debugInfo.dataReceived} 条</span>
+                    </div>
+                </div>
+                {debugInfo.lastDataTime && (
+                    <div className="mt-2 text-sm">
+                        <span className="text-gray-400">最后数据时间: </span>
+                        <span className="text-green-400">{debugInfo.lastDataTime}</span>
+                    </div>
+                )}
+                <div className="mt-2 text-sm">
+                    <span className="text-gray-400">当前测试ID: </span>
+                    <span className="text-yellow-400">{currentTestId || '无'}</span>
+                </div>
+            </div>
 
             {/* 美化的页面标题和控制 */}
             <div className="relative overflow-hidden bg-gradient-to-br from-gray-800/90 via-gray-800/80 to-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-2xl">
@@ -2134,8 +2985,13 @@ const StressTest: React.FC = () => {
                                     <div className="flex items-center space-x-2">
                                         <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-md">
                                             <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
-                                            <span className="text-xs text-green-300 font-medium">测试进行中</span>
+                                            <span className="text-xs text-green-300 font-medium">
+                                                测试进行中
+                                            </span>
                                         </div>
+
+
+
                                         <button
                                             type="button"
                                             onClick={handleCancelTest}
@@ -2235,6 +3091,41 @@ const StressTest: React.FC = () => {
                                 enableReachabilityCheck={false}
                             />
                         </div>
+
+                        {/* 队列状态显示 - 只在有排队或当前测试在队列中时显示 */}
+                        {(queueStats.queueLength > 0 || currentQueueId) && (
+                            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                                {/* 当前测试在队列中的位置 */}
+                                {currentQueueId ? (
+                                    <div>
+                                        <div className="flex items-center text-blue-300 mb-2">
+                                            <Loader className="w-4 h-4 mr-2 animate-spin" />
+                                            <span className="font-medium">您的测试在队列中</span>
+                                        </div>
+                                        <div className="text-sm text-blue-200">
+                                            队列位置: 第 {getQueuePosition(currentQueueId)} 位
+                                            {estimateWaitTime(currentQueueId) > 0 && (
+                                                <span className="ml-2">
+                                                    预计等待: {Math.round(estimateWaitTime(currentQueueId) / 60)} 分钟
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                ) : queueStats.queueLength > 0 && (
+                                    <div>
+                                        <div className="flex items-center text-blue-300 mb-2">
+                                            <Users className="w-4 h-4 mr-2" />
+                                            <span className="font-medium">系统繁忙</span>
+                                        </div>
+                                        <div className="text-sm text-blue-200">
+                                            当前有 {queueStats.queueLength} 个测试在排队等待
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+
 
                         {/* 进度和错误显示 */}
                         {(testProgress || backgroundTestInfo || error) && (
@@ -2631,7 +3522,7 @@ const StressTest: React.FC = () => {
                                                         <div>
                                                             <div className="text-gray-300 font-medium mb-2">实时状态</div>
                                                             <div className="text-gray-400 space-y-1">
-                                                                <div>数据点: {realTimeData.length}</div>
+                                                                <div>数据点: {stressTestData.length}</div>
                                                                 <div>WebSocket: {socketRef.current?.connected ? '✅ 已连接' : '❌ 未连接'}</div>
                                                                 <div>测试ID: {currentTestId ? currentTestId.slice(-8) : '生成中...'}</div>
                                                             </div>
@@ -2720,9 +3611,8 @@ const StressTest: React.FC = () => {
                                                         </div>
                                                         <div>
                                                             <div className="text-gray-400 font-medium">数据统计</div>
-                                                            <div>实时数据点: {realTimeData.length}</div>
-                                                            <div>图表数据点: {testData.length}</div>
-                                                            <div>最后更新: {realTimeData.length > 0 ? new Date(realTimeData[realTimeData.length - 1].timestamp).toLocaleTimeString() : '无'}</div>
+                                                            <div>数据点: {stressTestData.length}</div>
+                                                            <div>最后更新: {stressTestData.length > 0 ? new Date(stressTestData[stressTestData.length - 1].timestamp).toLocaleTimeString() : '无'}</div>
                                                         </div>
                                                     </div>
                                                     <div className="pt-2 border-t border-gray-700">
@@ -2974,6 +3864,12 @@ const StressTest: React.FC = () => {
                                             {result?.metrics?.totalRequests || metrics?.totalRequests || 0}
                                         </div>
                                         <div className="text-sm text-blue-300">总请求数</div>
+                                        {/* 调试信息 */}
+                                        {isRunning && (
+                                            <div className="text-xs text-gray-400 mt-1">
+                                                数据点: {stressTestData.length}
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="text-center p-4 bg-green-500/20 rounded-lg border border-green-500/30">
                                         <div className="text-2xl font-bold text-green-400">
@@ -3230,26 +4126,37 @@ const StressTest: React.FC = () => {
                             </div>
                         )}
 
-                        {/* 数据调试信息 */}
-                        {isRunning && (
+                        {/* 实时监控状态 */}
+                        {(isRunning || stressTestData.length > 0) && (
                             <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4">
-                                <h4 className="text-sm font-medium text-gray-300 mb-2">数据调试信息</h4>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                                <h4 className="text-sm font-medium text-gray-300 mb-2">实时监控状态</h4>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-xs">
                                     <div>
-                                        <span className="text-gray-400">realTimeData:</span>
-                                        <span className="text-green-400 ml-2">{realTimeData.length} 条</span>
+                                        <span className="text-gray-400">数据点:</span>
+                                        <span className="text-blue-400 ml-2">{stressTestData.length} 条</span>
                                     </div>
                                     <div>
-                                        <span className="text-gray-400">testData:</span>
-                                        <span className="text-blue-400 ml-2">{testData.length} 条</span>
-                                    </div>
-                                    <div>
-                                        <span className="text-gray-400">metrics:</span>
+                                        <span className="text-gray-400">指标状态:</span>
                                         <span className="text-yellow-400 ml-2">{metrics ? '有数据' : '无数据'}</span>
                                     </div>
                                     <div>
-                                        <span className="text-gray-400">backgroundTestInfo:</span>
-                                        <span className="text-purple-400 ml-2">{backgroundTestInfo ? '有数据' : '无数据'}</span>
+                                        <span className="text-gray-400">WebSocket:</span>
+                                        <span className={`ml-2 ${socketRef.current?.connected ? 'text-green-400' : 'text-red-400'}`}>
+                                            {socketRef.current?.connected ? '已连接' : '未连接'}
+                                        </span>
+                                    </div>
+                                </div>
+                                {/* 显示图表条件 */}
+                                <div className="mt-3 pt-3 border-t border-gray-700">
+                                    <div className="text-xs text-gray-400">
+                                        图表显示条件: {(stressTestData && stressTestData.length > 0) ?
+                                            '✅ 满足条件' : '❌ 不满足条件'}
+                                    </div>
+                                    <div className="text-xs text-gray-400 mt-1">
+                                        当前状态: isRunning={isRunning ? 'true' : 'false'}, testStatus={testStatus}
+                                    </div>
+                                    <div className="text-xs text-gray-400 mt-1">
+                                        🔧 数据优化: 使用统一数据源，减少重复存储
                                     </div>
                                 </div>
                             </div>
@@ -3304,33 +4211,72 @@ const StressTest: React.FC = () => {
                                     {((): null => {
                                         console.log('🔍 图表渲染条件检查:', {
                                             isRunning,
-                                            realTimeDataLength: realTimeData.length,
-                                            testDataLength: testData.length,
+                                            stressTestDataLength: stressTestData.length,
                                             testStatus,
-                                            realTimeDataSample: realTimeData.slice(0, 2),
-                                            testDataSample: testData.slice(0, 2)
+                                            stressTestDataSample: stressTestData.slice(0, 2)
                                         });
                                         return null;
                                     })()}
-                                    {realTimeData && realTimeData.length > 0 ? (
+                                    {(stressTestData && stressTestData.length > 0) ? (
                                         <div>
                                             <div className="mb-2 text-sm text-gray-400">
-                                                实时数据图表 (数据点: {realTimeData.length})
+                                                实时数据图表 (数据点: {stressTestData.length})
+                                                {isRunning && <span className="ml-2 text-green-400">● 运行中</span>}
                                             </div>
                                             <RealTimeStressChart
-                                                data={realTimeData}
+                                                data={stressTestData}
                                                 isRunning={isRunning}
                                                 testConfig={testConfig}
                                                 height={400}
                                             />
                                         </div>
-                                    ) : testData && testData.length > 0 ? (
+                                    ) : isRunning ? (
+                                        /* 测试运行中但还没有数据时的占位图表 */
+                                        <div className="bg-gray-800/50 rounded-lg border border-gray-700/50 h-96">
+                                            <div className="flex items-center justify-center h-full">
+                                                <div className="text-center">
+                                                    <div className="w-16 h-16 mx-auto mb-4 relative">
+                                                        <div className="w-16 h-16 border-4 border-gray-600 rounded-full"></div>
+                                                        <div className="absolute top-0 left-0 w-16 h-16 border-4 border-blue-500 rounded-full animate-spin border-t-transparent border-r-transparent"></div>
+                                                    </div>
+                                                    <div className="text-white font-medium text-lg mb-2">等待实时数据</div>
+                                                    <div className="text-gray-400 text-sm mb-4">
+                                                        压力测试正在运行，等待WebSocket数据...
+                                                    </div>
+                                                    <div className="text-gray-500 text-xs mb-4">
+                                                        数据点: {stressTestData.length} | WebSocket: {socketRef.current?.connected ? '已连接' : '未连接'}
+                                                    </div>
+                                                    {/* 临时调试按钮 */}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            // 添加模拟数据点用于测试
+                                                            const mockDataPoint = {
+                                                                timestamp: Date.now(),
+                                                                responseTime: Math.random() * 200 + 50,
+                                                                activeUsers: testConfig.users,
+                                                                throughput: Math.random() * 10 + 5,
+                                                                errorRate: Math.random() * 5,
+                                                                success: true
+                                                            };
+                                                            // 🔧 使用统一的数据更新函数
+                                                            updateChartData([mockDataPoint], true);
+                                                            console.log('🧪 添加模拟数据点:', mockDataPoint);
+                                                        }}
+                                                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm"
+                                                    >
+                                                        🧪 添加测试数据
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : stressTestData && stressTestData.length > 0 ? (
                                         /* 显示测试完成后的数据 */
                                         <div className="bg-white rounded-lg border border-gray-200 h-96">
                                             <div className="p-4 h-full">
                                                 <h4 className="text-lg font-semibold text-gray-800 mb-4">传统压力测试图表</h4>
                                                 <AdvancedStressTestChart
-                                                    data={testData.map((point: any) => ({
+                                                    data={stressTestData.map((point: any) => ({
                                                         time: new Date(point.timestamp).toLocaleTimeString(),
                                                         timestamp: point.timestamp,
                                                         responseTime: point.responseTime,
@@ -3376,11 +4322,11 @@ const StressTest: React.FC = () => {
                                 </div>
 
                                 {/* 高级测试图表 */}
-                                {(testData.length > 0 || result) && (
+                                {(stressTestData.length > 0 || result) && (
                                     <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
                                         <h3 className="text-lg font-semibold text-white mb-4">性能趋势图表</h3>
                                         <AdvancedStressTestChart
-                                            data={testData.map((point: any) => ({
+                                            data={stressTestData.map((point: any) => ({
                                                 time: new Date(point.timestamp).toLocaleTimeString(),
                                                 timestamp: point.timestamp,
                                                 responseTime: point.responseTime,
@@ -3440,7 +4386,8 @@ const StressTest: React.FC = () => {
                             </div>
                         )}
                     </div>
-                ) : null}
+                ) : null
+            }
 
             {LoginPromptComponent}
 
@@ -3451,7 +4398,7 @@ const StressTest: React.FC = () => {
                 onConfirm={handleCancelConfirm}
                 testProgress={isRunning ? {
                     duration: Math.floor((Date.now() - (result?.startTime ? new Date(result.startTime).getTime() : Date.now())) / 1000),
-                    completedRequests: realTimeData.length,
+                    completedRequests: stressTestData.length,
                     totalRequests: testConfig.users * testConfig.duration,
                     currentUsers: testConfig.users,
                     phase: testProgress || '运行中'

@@ -54,6 +54,8 @@ export interface UseStressTestRecordReturn {
   cancelRecord: (id: string, reason?: string) => Promise<StressTestRecord>;
   setWaitingRecord: (id: string, reason?: string) => Promise<StressTestRecord>;
   startFromWaitingRecord: (id: string) => Promise<StressTestRecord>;
+  interruptTestRecord: (id: string, reason?: string) => Promise<StressTestRecord>;
+  resumeTestRecord: (id: string) => Promise<StressTestRecord>;
   deleteRecord: (id: string) => Promise<boolean>;
   loadRecords: (query?: TestRecordQuery) => Promise<void>;
   loadRecord: (id: string) => Promise<StressTestRecord>;
@@ -122,13 +124,11 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
     toStatus: StressTestRecord['status']
   ): boolean => {
     const validTransitions: Record<string, string[]> = {
-      'pending': ['running', 'cancelled', 'waiting'],
-      'running': ['completed', 'failed', 'cancelled', 'timeout', 'waiting'],
-      'waiting': ['running', 'cancelled'],
+      'pending': ['running', 'cancelled'],
+      'running': ['completed', 'failed', 'cancelled'],
       'completed': [], // 完成状态不能转换到其他状态
       'failed': [], // 失败状态不能转换到其他状态
-      'cancelled': [], // 取消状态不能转换到其他状态
-      'timeout': [] // 超时状态不能转换到其他状态
+      'cancelled': [] // 取消状态不能转换到其他状态
     };
 
     return validTransitions[fromStatus]?.includes(toStatus) || false;
@@ -278,7 +278,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
   const setWaitingRecord = useCallback(async (id: string, reason?: string): Promise<StressTestRecord> => {
     try {
       setError(null);
-      const waitingRecord = await stressTestRecordService.setTestWaiting(id, reason);
+      const waitingRecord = await stressTestRecordService.setTestPending(id, reason);
 
       // 更新本地状态
       setRecords(prev => prev.map(record =>
@@ -300,7 +300,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
   const startFromWaitingRecord = useCallback(async (id: string): Promise<StressTestRecord> => {
     try {
       setError(null);
-      const runningRecord = await stressTestRecordService.startFromWaiting(id);
+      const runningRecord = await stressTestRecordService.startFromPending(id);
 
       // 更新本地状态
       setRecords(prev => prev.map(record =>
@@ -312,6 +312,50 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
       }
 
       return runningRecord;
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
+    }
+  }, [currentRecord]);
+
+  // 中断测试记录
+  const interruptTestRecord = useCallback(async (id: string, reason?: string): Promise<StressTestRecord> => {
+    try {
+      setError(null);
+      const interruptedRecord = await stressTestRecordService.setTestPending(id, reason || '用户中断');
+
+      // 更新本地状态
+      setRecords(prev => prev.map(record =>
+        record.id === id ? interruptedRecord : record
+      ));
+
+      if (currentRecord?.id === id) {
+        setCurrentRecord(interruptedRecord);
+      }
+
+      return interruptedRecord;
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
+    }
+  }, [currentRecord]);
+
+  // 恢复测试记录
+  const resumeTestRecord = useCallback(async (id: string): Promise<StressTestRecord> => {
+    try {
+      setError(null);
+      const resumedRecord = await stressTestRecordService.startFromPending(id);
+
+      // 更新本地状态
+      setRecords(prev => prev.map(record =>
+        record.id === id ? resumedRecord : record
+      ));
+
+      if (currentRecord?.id === id) {
+        setCurrentRecord(resumedRecord);
+      }
+
+      return resumedRecord;
     } catch (err: any) {
       setError(err.message);
       throw err;
@@ -601,6 +645,8 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
     cancelRecord,
     setWaitingRecord,
     startFromWaitingRecord,
+    interruptTestRecord,
+    resumeTestRecord,
     deleteRecord,
     loadRecords,
     loadRecord,

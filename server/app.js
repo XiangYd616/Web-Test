@@ -42,6 +42,9 @@ const { connectDB, testConnection } = require('./config/database');
 const redisConnection = require('./services/redis/connection');
 const cacheMonitoring = require('./services/redis/monitoring');
 
+// 导入测试历史服务
+const TestHistoryService = require('./services/dataManagement/testHistoryService');
+
 const app = express();
 const http = require('http');
 const { Server } = require('socket.io');
@@ -148,6 +151,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/data-management', dataManagementRoutes);
 app.use('/api/monitoring', monitoringRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/system', require('./routes/system'));
 app.use('/api/integrations', integrationRoutes);
 app.use('/api/cache', cacheRoutes);
 
@@ -258,17 +262,22 @@ const startServer = async () => {
     await connectDB();
     console.log('✅ 数据库连接成功');
 
+    // 初始化测试历史服务
+    global.testHistoryService = new TestHistoryService();
+    console.log('✅ 测试历史服务初始化成功');
+
     // 设置WebSocket事件处理
     setupWebSocketHandlers(io);
 
-    // 创建全局压力测试引擎实例
+    // 清理旧的测试房间
     setTimeout(async () => {
       try {
-        const { createGlobalInstance } = require('./services/realStressTestEngine');
-        const stressTestEngine = createGlobalInstance();
-        console.log('✅ 全局压力测试引擎实例已创建');
+        const { RealStressTestEngine } = require('./services/realStressTestEngine');
+        const stressTestEngine = new RealStressTestEngine();
+        stressTestEngine.io = io; // 设置WebSocket实例
+        await stressTestEngine.cleanupAllTestRooms();
       } catch (error) {
-        console.error('❌ 创建压力测试引擎实例失败:', error);
+        console.error('❌ 清理旧测试房间失败:', error);
       }
     }, 2000); // 延迟2秒执行，确保服务器完全启动
 
@@ -302,13 +311,21 @@ const startServer = async () => {
 // WebSocket事件处理
 function setupWebSocketHandlers(io) {
   io.on('connection', (socket) => {
-    console.log(`🔌 WebSocket客户端连接: ${socket.id}`);
+    console.log(`🔌🔌🔌 WebSocket客户端连接 🔌🔌🔌: ${socket.id}`);
+    console.log(`🔌 连接详情:`, {
+      socketId: socket.id,
+      remoteAddress: socket.handshake.address,
+      userAgent: socket.handshake.headers['user-agent'],
+      timestamp: new Date().toISOString()
+    });
 
     // 加入压力测试房间
     socket.on('join-stress-test', (testId) => {
+      console.log(`🔥🔥🔥 收到 join-stress-test 事件 🔥🔥🔥`, { testId, socketId: socket.id });
+
       const roomName = `stress-test-${testId}`;
       socket.join(roomName);
-      console.log(`📊 客户端 ${socket.id} 加入压力测试房间: ${testId}`);
+      console.log(`📊📊📊 客户端 ${socket.id} 加入压力测试房间: ${testId} 📊📊📊`);
 
       // 检查房间中的客户端数量
       const room = io.sockets.adapter.rooms.get(roomName);
@@ -316,15 +333,17 @@ function setupWebSocketHandlers(io) {
       console.log(`📊 房间 ${roomName} 当前客户端数量: ${clientCount}`);
 
       // 发送房间加入确认
-      socket.emit('room-joined', {
+      const confirmData = {
         testId,
         roomName: roomName,
         clientId: socket.id,
         clientCount: clientCount,
         timestamp: Date.now()
-      });
+      };
 
-      console.log(`✅ 房间加入确认已发送给客户端 ${socket.id}`);
+      console.log(`🚀🚀🚀 准备发送房间加入确认 🚀🚀🚀`, confirmData);
+      socket.emit('room-joined', confirmData);
+      console.log(`✅✅✅ 房间加入确认已发送给客户端 ${socket.id} ✅✅✅`);
 
       // 🆕 检查是否有正在运行或已完成的测试，发送当前状态
       // 使用全局的压力测试引擎实例
@@ -402,6 +421,13 @@ function setupWebSocketHandlers(io) {
         pongTime: Date.now(),
         socketId: socket.id
       });
+    });
+
+    // 简化的事件监听器 - 只记录关键事件
+    socket.onAny((eventName, ...args) => {
+      if (['join-stress-test', 'leave-stress-test'].includes(eventName)) {
+        console.log(`📥 收到关键事件: ${eventName}`, { socketId: socket.id, data: args[0] });
+      }
     });
 
     // 处理断开连接

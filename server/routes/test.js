@@ -12,7 +12,7 @@ const cacheMiddleware = require('../middleware/cache');
 
 // 导入测试引擎类
 const { RealTestEngine } = require('../services/realTestEngine');
-const { RealStressTestEngine } = require('../services/realStressTestEngine');
+const { RealStressTestEngine, createGlobalInstance } = require('../services/realStressTestEngine');
 const RealSecurityTestEngine = require('../services/realSecurityTestEngine'); // 直接导出
 const { RealCompatibilityTestEngine } = require('../services/realCompatibilityTestEngine');
 const { RealUXTestEngine } = require('../services/realUXTestEngine');
@@ -26,7 +26,8 @@ const path = require('path');
 
 // 创建测试引擎实例
 const realTestEngine = new RealTestEngine();
-const realStressTestEngine = new RealStressTestEngine();
+// 🔧 修复：使用全局实例确保WebSocket和API使用同一个引擎
+const realStressTestEngine = createGlobalInstance();
 const realSecurityTestEngine = new RealSecurityTestEngine();
 const realCompatibilityTestEngine = new RealCompatibilityTestEngine();
 const realUXTestEngine = new RealUXTestEngine();
@@ -1124,7 +1125,59 @@ router.get('/stress/status/:testId', optionalAuth, asyncHandler(async (req, res)
     const status = await realStressTestEngine.getTestStatus(testId);
 
     if (!status) {
-      // 测试不存在或已完成，返回完成状态而不是404
+      // 测试不存在或已完成，尝试从测试历史中获取结果
+      try {
+        // 查询测试历史记录
+        const historyQuery = `
+          SELECT * FROM test_history
+          WHERE test_name LIKE $1 OR id::text = $1
+          ORDER BY created_at DESC
+          LIMIT 1
+        `;
+        const historyResult = await query(historyQuery, [`%${testId}%`]);
+
+        if (historyResult.rows.length > 0) {
+          const testRecord = historyResult.rows[0];
+          console.log('📊 从测试历史获取结果:', testRecord.id, testRecord.status);
+
+          // 如果测试已完成，返回真实的测试结果
+          if (testRecord.status === 'completed') {
+            const realTimeData = testRecord.real_time_data ?
+              (typeof testRecord.real_time_data === 'string' ?
+                JSON.parse(testRecord.real_time_data) : testRecord.real_time_data) : [];
+
+            return res.json({
+              success: true,
+              data: {
+                status: 'completed',
+                message: '测试已完成',
+                progress: 100,
+                realTimeMetrics: {
+                  totalRequests: testRecord.total_requests || 0,
+                  successfulRequests: testRecord.successful_requests || 0,
+                  failedRequests: testRecord.failed_requests || 0,
+                  averageResponseTime: testRecord.average_response_time || 0,
+                  currentTPS: testRecord.peak_tps || 0,
+                  peakTPS: testRecord.peak_tps || 0,
+                  errorRate: testRecord.error_rate || 0,
+                  activeUsers: 0 // 测试完成后活跃用户为0
+                },
+                realTimeData: realTimeData,
+                results: testRecord.results ?
+                  (typeof testRecord.results === 'string' ?
+                    JSON.parse(testRecord.results) : testRecord.results) : {},
+                duration: testRecord.duration || 0,
+                overallScore: testRecord.overall_score || 0,
+                performanceGrade: testRecord.performance_grade || 'N/A'
+              }
+            });
+          }
+        }
+      } catch (historyError) {
+        console.error('查询测试历史失败:', historyError);
+      }
+
+      // 如果没有找到历史记录，返回默认的完成状态
       return res.json({
         success: true,
         data: {
@@ -1243,6 +1296,89 @@ router.post('/stress/stop/:testId', authMiddleware, asyncHandler(async (req, res
     res.status(500).json({
       success: false,
       message: '停止测试失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 获取所有运行中的压力测试
+ * GET /api/test/stress/running
+ */
+router.get('/stress/running', optionalAuth, asyncHandler(async (req, res) => {
+  try {
+    console.log('📊 获取所有运行中的压力测试');
+
+    const runningTests = realStressTestEngine.getAllRunningTests();
+    const runningCount = realStressTestEngine.getRunningTestsCount();
+
+    console.log(`📊 当前运行中的测试数量: ${runningCount}`);
+
+    res.json({
+      success: true,
+      data: {
+        runningTests,
+        count: runningCount,
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('获取运行中测试失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '获取运行中测试失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 强制清理所有运行中的测试 (管理员功能)
+ * POST /api/test/stress/cleanup-all
+ */
+router.post('/stress/cleanup-all', adminAuth, asyncHandler(async (req, res) => {
+  try {
+    console.log('🧹 管理员强制清理所有运行中的测试');
+
+    const runningTests = realStressTestEngine.getAllRunningTests();
+    const cleanupResults = [];
+
+    // 逐个取消所有运行中的测试
+    for (const test of runningTests) {
+      try {
+        const result = await realStressTestEngine.cancelStressTest(
+          test.testId,
+          '管理员强制清理',
+          true
+        );
+        cleanupResults.push({
+          testId: test.testId,
+          success: result.success,
+          message: result.message
+        });
+      } catch (error) {
+        cleanupResults.push({
+          testId: test.testId,
+          success: false,
+          message: error.message
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `已清理 ${runningTests.length} 个运行中的测试`,
+      data: {
+        cleanedCount: runningTests.length,
+        results: cleanupResults,
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('强制清理测试失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '强制清理失败',
       error: error.message
     });
   }
