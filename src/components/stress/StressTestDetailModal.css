@@ -1,0 +1,84 @@
+/* 压力测试详情模态窗口样式 */
+
+/* 模态窗口容器 - 确保始终在视口中心 */
+.stress-test-modal-container {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 99999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 1rem !important;
+  /* 确保不受父容器影响 */
+  margin: 0 !important;
+  transform: none !important;
+  /* 确保在所有浏览器中正确显示 */
+  box-sizing: border-box !important;
+}
+
+/* 背景遮罩 */
+.stress-test-modal-backdrop {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+}
+
+/* 模态窗口主体 */
+.stress-test-modal-content {
+  position: relative !important;
+  background-color: rgb(17, 24, 39) !important; /* gray-900 */
+  border-radius: 0.75rem !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  overflow: hidden !important; /* 只隐藏外部溢出，内部滚动由子元素控制 */
+  display: flex !important;
+  flex-direction: column !important;
+  max-width: 72rem !important; /* max-w-6xl */
+  width: 100% !important;
+  max-height: 90vh !important;
+  pointer-events: auto !important;
+}
+
+/* 确保在所有情况下都能正确显示 */
+.stress-test-modal-container * {
+  box-sizing: border-box;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .stress-test-modal-container {
+    padding: 0.5rem !important;
+  }
+  
+  .stress-test-modal-content {
+    max-width: 100% !important;
+    max-height: 95vh !important;
+  }
+}
+
+/* 确保模态窗口在所有主题下都正确显示 */
+.dark .stress-test-modal-content,
+html.dark .stress-test-modal-content,
+[data-theme="dark"] .stress-test-modal-content {
+  background-color: rgb(17, 24, 39) !important;
+}
+
+/* 注释掉页面滚动锁定，允许用户在模态窗口打开时滚动页面 */
+/* body.modal-open {
+  overflow: hidden !important;
+} */
+
+/* 确保模态窗口内容可以滚动 */
+.stress-test-modal-content .modal-body {
+  overflow-y: auto !important;
+  flex: 1 !important;
+}
