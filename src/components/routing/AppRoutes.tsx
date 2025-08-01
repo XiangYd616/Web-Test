@@ -32,6 +32,8 @@ const TestHistory = lazy(() => import('../../pages/TestHistory'));
 const EnhancedTestHistory = lazy(() => import('../../pages/EnhancedTestHistory'));
 const Reports = lazy(() => import('../../pages/Reports'));
 const TestResultDetail = lazy(() => import('../../pages/TestResultDetail'));
+const StressTestDetail = lazy(() => import('../../pages/StressTestDetail'));
+
 const StressTestReport = lazy(() => import('../../pages/StressTestReport'));
 const SecurityReport = lazy(() => import('../../pages/SecurityReport'));
 
@@ -64,8 +66,7 @@ const ThemeShowcase = lazy(() => import('../../pages/ThemeShowcase'));
 const Subscription = lazy(() => import('../../pages/Subscription'));
 const DownloadDesktop = lazy(() => import('../../pages/DownloadDesktop'));
 
-// 测试工具
-const WebSocketTest = lazy(() => import('../WebSocketTest'));
+
 
 // 演示页面
 // const BackgroundTestDemo = lazy(() => import('../../pages/BackgroundTestDemo')); // 已移除
@@ -164,6 +165,12 @@ const AppRoutes: React.FC = () => {
             <TestResultDetail />
           </LazyPageWrapper>
         } />
+        <Route path="stress-test/:testId" element={
+          <LazyPageWrapper>
+            <StressTestDetail />
+          </LazyPageWrapper>
+        } />
+
         <Route path="stress-test-report" element={
           <LazyPageWrapper>
             <StressTestReport />
@@ -196,11 +203,7 @@ const AppRoutes: React.FC = () => {
             <DownloadDesktop />
           </LazyPageWrapper>
         } />
-        <Route path="websocket-test" element={
-          <LazyPageWrapper>
-            <WebSocketTest />
-          </LazyPageWrapper>
-        } />
+
       </Route>
 
       {/* 首页重定向到网站测试 */}

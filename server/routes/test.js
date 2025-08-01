@@ -1524,12 +1524,23 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
             const successfulRequests = metrics.successfulRequests || 0;
             const failedRequests = metrics.failedRequests || 0;
 
-            // 正确处理所有可能的状态
+            // 智能状态判断逻辑
             let finalStatus = 'failed'; // 默认为失败
-            if (responseData.status === 'completed') {
-              finalStatus = 'completed';
-            } else if (responseData.status === 'cancelled') {
+
+            if (responseData.status === 'cancelled') {
+              // 明确的取消状态
               finalStatus = 'cancelled';
+            } else if (responseData.status === 'completed') {
+              // 明确的完成状态
+              finalStatus = 'completed';
+            } else if (responseData.metrics && responseData.metrics.totalRequests > 0) {
+              // 有有效的测试结果，认为是成功完成
+              finalStatus = 'completed';
+              console.log('📊 基于测试结果判断为完成状态:', {
+                totalRequests: responseData.metrics.totalRequests,
+                successfulRequests: responseData.metrics.successfulRequests,
+                hasRealTimeData: !!responseData.realTimeData
+              });
             }
 
             console.log(`📊 设置测试记录状态: ${responseData.status} -> ${finalStatus}`);

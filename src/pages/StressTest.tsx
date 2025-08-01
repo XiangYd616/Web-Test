@@ -476,6 +476,27 @@ const StressTest: React.FC = () => {
             });
         }
 
+        // 🔧 修复：计算平均TPS（基于整个测试期间的数据）
+        let averageTPS = 0;
+        if (data.length > 1) {
+            // 计算整个测试期间的时间跨度
+            const allTimestamps = data.map(d => new Date(d.timestamp).getTime()).sort((a, b) => a - b);
+            const totalTimeSpanMs = allTimestamps[allTimestamps.length - 1] - allTimestamps[0];
+            const totalTimeSpanSeconds = Math.max(totalTimeSpanMs / 1000, 1); // 至少1秒
+
+            // 平均TPS = 总请求数 / 总时间跨度（秒）
+            averageTPS = Math.round((data.length / totalTimeSpanSeconds) * 10) / 10; // 保留1位小数
+
+            console.log('📊 平均TPS计算:', {
+                totalDataPoints: data.length,
+                totalTimeSpanSeconds: totalTimeSpanSeconds,
+                calculatedAverageTPS: averageTPS
+            });
+        } else if (data.length === 1) {
+            // 只有一个数据点，平均TPS等于当前TPS
+            averageTPS = currentTPS;
+        }
+
         // 计算P95和P99响应时间
         const sortedResponseTimes = responseTimes.sort((a, b) => a - b);
         const p95Index = Math.floor(sortedResponseTimes.length * 0.95);
@@ -490,7 +511,7 @@ const StressTest: React.FC = () => {
             averageResponseTime,
             currentTPS,
             peakTPS: Math.max(metrics?.peakTPS || 0, currentTPS),
-            throughput: currentTPS,
+            throughput: averageTPS, // 🔧 修复：使用正确的平均TPS
             errorRate: parseFloat(errorRate.toFixed(2)),
             p95ResponseTime: Math.round(p95ResponseTime),
             p99ResponseTime: Math.round(p99ResponseTime)
@@ -698,14 +719,8 @@ const StressTest: React.FC = () => {
     // 测试记录ID状态
     const [currentRecordId, setCurrentRecordId] = useState<string | null>(null);
 
-    // 调试状态
-    const [debugInfo, setDebugInfo] = useState<any>({
-        socketConnected: false,
-        socketId: '',
-        roomJoined: false,
-        dataReceived: 0,
-        lastDataTime: null
-    });
+    // 实时数据状态
+    const [realTimeData, setRealTimeData] = useState<any[]>([]);
 
     // 房间加入状态管理
     const [joinedRooms, setJoinedRooms] = useState<Set<string>>(new Set());
@@ -1292,33 +1307,39 @@ const StressTest: React.FC = () => {
         baseline: baselineData
     };
 
-    // 测试状态同步 - 修复状态冲突问题，保持取消状态
+    // 智能测试状态同步逻辑
     useEffect(() => {
-        // ✅ 修复：使用函数式更新避免依赖 testStatus
         setTestStatus(prevStatus => {
-            // 优先级：cancelled > completed > failed > running > idle
-            // 如果当前状态是 cancelled，不要覆盖它
-            if (prevStatus === 'cancelled') {
-                console.log('🔍 保持取消状态，不覆盖');
-                return 'cancelled';
+            // 终态保护：已完成、已取消、失败状态不应被覆盖
+            if (['cancelled', 'completed', 'failed'].includes(prevStatus) && !isRunning) {
+                console.log('🔍 保持终态状态，不覆盖:', prevStatus);
+                return prevStatus;
             }
 
-            let newStatus;
-            if (result && !isRunning) {
-                // 检查结果中的状态，如果是取消状态则保持
-                if (result.status === 'cancelled') {
-                    console.log('🔍 结果状态为取消，设置为 cancelled');
-                    newStatus = 'cancelled';
-                } else {
-                    console.log('🔍 结果状态为:', result.status, '设置为 completed');
-                    newStatus = 'completed';
-                }
-            } else if (error && !isRunning) {
-                newStatus = 'failed';
-            } else if (isRunning) {
+            let newStatus: TestStatusType = 'idle';
+
+            if (isRunning) {
+                // 测试正在运行
                 newStatus = 'running';
-            } else {
-                newStatus = 'idle';
+            } else if (result) {
+                // 有测试结果，智能判断状态
+                if (result.status === 'cancelled') {
+                    newStatus = 'cancelled';
+                } else if (result.status === 'completed' ||
+                    (result.metrics && result.metrics.totalRequests > 0)) {
+                    // 明确完成状态 或 有有效测试结果
+                    newStatus = 'completed';
+                    console.log('🔍 智能判断为完成状态:', {
+                        resultStatus: result.status,
+                        hasMetrics: !!result.metrics,
+                        totalRequests: result.metrics?.totalRequests
+                    });
+                } else {
+                    newStatus = 'failed';
+                }
+            } else if (error && !result) {
+                // 只有在没有结果且有错误时才设置为失败
+                newStatus = 'failed';
             }
 
             // 保存状态到localStorage
@@ -1328,7 +1349,7 @@ const StressTest: React.FC = () => {
 
             return newStatus;
         });
-    }, [isRunning, result, error]); // ✅ 修复：移除 testStatus 依赖
+    }, [isRunning, result, error]);
 
     // 监听后台测试状态变化
     useEffect(() => {
@@ -1676,6 +1697,9 @@ const StressTest: React.FC = () => {
     const handleTestCompletion = useCallback((testData: any) => {
         console.log('🏁 处理测试完成:', testData);
 
+        // 清理错误状态，确保完成状态不被错误状态覆盖
+        setError(null);
+
         if (testData.status === 'cancelled') {
             setTestStatus('cancelled');
             setCurrentStatus('CANCELLED');
@@ -1719,13 +1743,6 @@ const StressTest: React.FC = () => {
                 // 连接事件
                 socket.on('connect', () => {
                     console.log('✅ WebSocket连接成功:', socket.id);
-
-                    // 更新调试信息
-                    setDebugInfo(prev => ({
-                        ...prev,
-                        socketConnected: true,
-                        socketId: socket.id
-                    }));
 
                     // 连接成功后立即检查是否有当前测试需要加入房间
                     const currentTestIdValue = currentTestIdRef.current;
@@ -1774,12 +1791,7 @@ const StressTest: React.FC = () => {
                     console.log('🔌 WebSocket连接断开:', reason);
                     setIsInRoom(false);
 
-                    // 更新调试信息
-                    setDebugInfo(prev => ({
-                        ...prev,
-                        socketConnected: false,
-                        socketId: null
-                    }));
+
 
                     // 如果有正在运行的测试，标记为可能失败
                     if (isRunning && currentTestIdRef.current) {
@@ -1798,12 +1810,7 @@ const StressTest: React.FC = () => {
                         type: error.type
                     });
 
-                    // 更新调试信息
-                    setDebugInfo(prev => ({
-                        ...prev,
-                        socketConnected: false,
-                        lastError: error.message
-                    }));
+
 
                     // 如果有正在运行的测试，检查是否需要重置
                     if (isRunning && currentTestIdRef.current) {
@@ -1816,13 +1823,7 @@ const StressTest: React.FC = () => {
                 socket.on('reconnect', (attemptNumber) => {
                     console.log(`🔄 WebSocket重连成功 (尝试 ${attemptNumber})`);
 
-                    // 更新调试信息
-                    setDebugInfo(prev => ({
-                        ...prev,
-                        socketConnected: true,
-                        socketId: socket.id,
-                        lastError: null
-                    }));
+
 
                     // 重连后检查测试状态
                     if (isRunning && currentTestIdRef.current) {
@@ -1857,12 +1858,7 @@ const StressTest: React.FC = () => {
                         dataKeys: Object.keys(data)
                     });
 
-                    // 更新调试信息
-                    setDebugInfo(prev => ({
-                        ...prev,
-                        dataReceived: prev.dataReceived + 1,
-                        lastDataTime: new Date().toLocaleTimeString()
-                    }));
+
 
                     // 🔧 统一的实时数据处理逻辑
                     if (data.timestamp && data.responseTime !== undefined) {
@@ -1967,7 +1963,7 @@ const StressTest: React.FC = () => {
                             timestamp: data.dataPointTimestamp,
                             responseTime: data.dataPointResponseTime || 0,
                             activeUsers: data.clientCount || 0,
-                            throughput: data.currentTPS || 0,
+                            throughput: data.throughput || data.currentTPS || 0, // 🔧 修复：优先使用throughput
                             errorRate: 0, // 需要计算
                             success: true
                         };
@@ -1995,7 +1991,7 @@ const StressTest: React.FC = () => {
                             averageResponseTime: data.dataPointResponseTime || 0,
                             currentTPS: data.currentTPS || 0,
                             peakTPS: data.peakTPS || 0,
-                            throughput: data.currentTPS || 0,
+                            throughput: data.throughput || 0, // 🔧 修复：使用正确的throughput字段
                             errorRate: 0,
                             p50ResponseTime: data.dataPointResponseTime || 0,
                             p90ResponseTime: data.dataPointResponseTime || 0,
@@ -2065,7 +2061,7 @@ const StressTest: React.FC = () => {
                             averageResponseTime: data.metrics.averageResponseTime || 0,
                             currentTPS: data.metrics.currentTPS || 0,
                             peakTPS: data.metrics.peakTPS || 0,
-                            throughput: data.metrics.currentTPS || 0,
+                            throughput: data.metrics.throughput || 0, // 🔧 修复：使用后端提供的平均吞吐量
                             requestsPerSecond: data.metrics.requestsPerSecond || data.metrics.currentTPS || 0,
                             errorRate: data.metrics.errorRate || 0,
                             p50ResponseTime: data.metrics.p50ResponseTime || 0,
@@ -2253,11 +2249,7 @@ const StressTest: React.FC = () => {
             // 记录已加入的房间
             setJoinedRooms(prev => new Set([...prev, testId]));
 
-            // 更新调试信息
-            setDebugInfo(prev => ({
-                ...prev,
-                roomJoined: true
-            }));
+
 
             console.log('✅ 房间加入请求已发送:', `stress-test-${testId}`);
         } else {
@@ -2439,7 +2431,7 @@ const StressTest: React.FC = () => {
             console.log('🎯 开始压力测试:', testConfig.url);
 
             // 清理之前的状态
-            setError('');
+            setError(null);
             setResult(null);
             setStressTestData([]);
             setMetrics(null);
@@ -2805,42 +2797,7 @@ const StressTest: React.FC = () => {
     return (
         <TestPageLayout className="space-y-3 dark-page-scrollbar compact-layout">
 
-            {/* WebSocket调试面板 */}
-            <div className="bg-gray-800 rounded-lg p-4 mb-4">
-                <h3 className="text-lg font-semibold mb-2 text-white">WebSocket状态</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                    <div>
-                        <span className="text-gray-400">连接状态: </span>
-                        <span className={debugInfo.socketConnected ? 'text-green-400' : 'text-red-400'}>
-                            {debugInfo.socketConnected ? '已连接' : '未连接'}
-                        </span>
-                    </div>
-                    <div>
-                        <span className="text-gray-400">Socket ID: </span>
-                        <span className="text-blue-400">{debugInfo.socketId || '无'}</span>
-                    </div>
-                    <div>
-                        <span className="text-gray-400">房间状态: </span>
-                        <span className={debugInfo.roomJoined ? 'text-green-400' : 'text-yellow-400'}>
-                            {debugInfo.roomJoined ? '已加入' : '未加入'}
-                        </span>
-                    </div>
-                    <div>
-                        <span className="text-gray-400">数据接收: </span>
-                        <span className="text-purple-400">{debugInfo.dataReceived} 条</span>
-                    </div>
-                </div>
-                {debugInfo.lastDataTime && (
-                    <div className="mt-2 text-sm">
-                        <span className="text-gray-400">最后数据时间: </span>
-                        <span className="text-green-400">{debugInfo.lastDataTime}</span>
-                    </div>
-                )}
-                <div className="mt-2 text-sm">
-                    <span className="text-gray-400">当前测试ID: </span>
-                    <span className="text-yellow-400">{currentTestId || '无'}</span>
-                </div>
-            </div>
+
 
             {/* 美化的页面标题和控制 */}
             <div className="relative overflow-hidden bg-gradient-to-br from-gray-800/90 via-gray-800/80 to-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-2xl">
@@ -3594,39 +3551,7 @@ const StressTest: React.FC = () => {
                                         </div>
                                     )}
 
-                                    {/* 调试信息面板 */}
-                                    {(isRunning || realTimeData.length > 0) && (
-                                        <div className="mt-4 bg-gray-800/30 rounded-lg p-3">
-                                            <details className="group">
-                                                <summary className="cursor-pointer text-sm text-gray-400 hover:text-gray-300 flex items-center">
-                                                    <span className="mr-2">🔧 调试信息</span>
-                                                    <span className="text-xs">(点击展开)</span>
-                                                </summary>
-                                                <div className="mt-3 text-xs text-gray-500 space-y-2">
-                                                    <div className="grid grid-cols-2 gap-4">
-                                                        <div>
-                                                            <div className="text-gray-400 font-medium">WebSocket状态</div>
-                                                            <div>连接: {socketRef.current?.connected ? '✅' : '❌'}</div>
-                                                            <div>房间: {currentTestId ? `stress-test-${currentTestId.slice(-8)}` : '未加入'}</div>
-                                                        </div>
-                                                        <div>
-                                                            <div className="text-gray-400 font-medium">数据统计</div>
-                                                            <div>数据点: {stressTestData.length}</div>
-                                                            <div>最后更新: {stressTestData.length > 0 ? new Date(stressTestData[stressTestData.length - 1].timestamp).toLocaleTimeString() : '无'}</div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="pt-2 border-t border-gray-700">
-                                                        <div className="text-gray-400 font-medium mb-1">最新指标</div>
-                                                        <div className="text-xs">
-                                                            {metrics ? (
-                                                                `总请求: ${metrics.totalRequests} | 成功: ${metrics.successfulRequests} | 失败: ${metrics.failedRequests} | 平均响应: ${metrics.averageResponseTime}ms | 当前TPS: ${metrics.currentTPS}`
-                                                            ) : '暂无指标数据'}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </details>
-                                        </div>
-                                    )}
+
 
 
                                 </div>
@@ -3832,138 +3757,164 @@ const StressTest: React.FC = () => {
 
                         {/* 测试结果 */}
                         {(result || metrics) && (
-                            <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-                                <div className="flex justify-between items-center mb-6">
-                                    <h3 className="text-xl font-semibold text-white">测试结果</h3>
+                            <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-semibold text-white">测试结果</h3>
                                     <div className="flex space-x-2">
                                         <button
                                             type="button"
                                             onClick={() => handleExportReport('json')}
-                                            className="px-3 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center space-x-1"
+                                            className="px-2 py-1 border border-gray-600 text-gray-300 rounded text-xs hover:bg-gray-700/50 transition-colors flex items-center space-x-1"
                                             title="导出JSON数据"
                                         >
-                                            <Download className="w-4 h-4" />
+                                            <Download className="w-3 h-3" />
                                             <span>JSON</span>
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => handleExportReport('csv')}
-                                            className="px-3 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center space-x-1"
+                                            className="px-2 py-1 border border-gray-600 text-gray-300 rounded text-xs hover:bg-gray-700/50 transition-colors flex items-center space-x-1"
                                             title="导出CSV数据"
                                         >
-                                            <FileText className="w-4 h-4" />
+                                            <FileText className="w-3 h-3" />
                                             <span>CSV</span>
                                         </button>
                                     </div>
                                 </div>
 
                                 {/* 主要性能指标卡片 */}
-                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                                    <div className="text-center p-4 bg-blue-500/20 rounded-lg border border-blue-500/30">
-                                        <div className="text-2xl font-bold text-blue-400">
+                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+                                    <div className="text-center p-3 bg-blue-500/20 rounded-lg border border-blue-500/30">
+                                        <div className="text-xl font-bold text-blue-400">
                                             {result?.metrics?.totalRequests || metrics?.totalRequests || 0}
                                         </div>
-                                        <div className="text-sm text-blue-300">总请求数</div>
-                                        {/* 调试信息 */}
-                                        {isRunning && (
-                                            <div className="text-xs text-gray-400 mt-1">
-                                                数据点: {stressTestData.length}
-                                            </div>
-                                        )}
+                                        <div className="text-xs text-blue-300">总请求数</div>
                                     </div>
-                                    <div className="text-center p-4 bg-green-500/20 rounded-lg border border-green-500/30">
-                                        <div className="text-2xl font-bold text-green-400">
+                                    <div className="text-center p-3 bg-green-500/20 rounded-lg border border-green-500/30">
+                                        <div className="text-xl font-bold text-green-400">
                                             {result?.metrics?.successfulRequests || metrics?.successfulRequests || 0}
                                         </div>
-                                        <div className="text-sm text-green-300">成功请求</div>
+                                        <div className="text-xs text-green-300">成功请求</div>
                                     </div>
-                                    <div className="text-center p-4 bg-orange-500/20 rounded-lg border border-orange-500/30">
-                                        <div className="text-2xl font-bold text-orange-400">
+                                    <div className="text-center p-3 bg-orange-500/20 rounded-lg border border-orange-500/30">
+                                        <div className="text-xl font-bold text-orange-400">
                                             {result?.metrics?.averageResponseTime || metrics?.averageResponseTime || 0}ms
                                         </div>
-                                        <div className="text-sm text-orange-300">平均响应时间</div>
+                                        <div className="text-xs text-orange-300">平均响应时间</div>
                                     </div>
-                                    <div className="text-center p-4 bg-red-500/20 rounded-lg border border-red-500/30">
-                                        <div className="text-2xl font-bold text-red-400">
+                                    <div className="text-center p-3 bg-red-500/20 rounded-lg border border-red-500/30">
+                                        <div className="text-xl font-bold text-red-400">
                                             {(() => {
                                                 const errorRate = result?.metrics?.errorRate || metrics?.errorRate || 0;
                                                 return typeof errorRate === 'string' ? errorRate : errorRate.toFixed(1);
                                             })()}%
                                         </div>
-                                        <div className="text-sm text-red-300">错误率</div>
+                                        <div className="text-xs text-red-300">错误率</div>
                                     </div>
                                 </div>
 
                                 {/* 详细性能指标 */}
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                                    {/* 响应时间分析 */}
-                                    <div className="bg-gray-700/50 rounded-lg p-4">
-                                        <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
-                                            <Clock className="w-5 h-5 mr-2 text-orange-400" />
-                                            响应时间分析
-                                        </h4>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="text-center">
-                                                <div className="text-xl font-bold text-green-400">
-                                                    {result?.metrics?.p50ResponseTime || metrics?.p50ResponseTime || 0}ms
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+                                    {/* 左侧：响应时间和吞吐量分析 */}
+                                    <div className="lg:col-span-2 space-y-4">
+                                        {/* 响应时间分析 */}
+                                        <div className="bg-gray-700/50 rounded-lg p-3">
+                                            <h4 className="text-sm font-semibold text-white mb-3 flex items-center">
+                                                <Clock className="w-4 h-4 mr-2 text-orange-400" />
+                                                响应时间分析
+                                            </h4>
+                                            <div className="grid grid-cols-4 gap-3">
+                                                <div className="text-center">
+                                                    <div className="text-lg font-bold text-green-400">
+                                                        {result?.metrics?.p50ResponseTime || metrics?.p50ResponseTime || 0}ms
+                                                    </div>
+                                                    <div className="text-xs text-gray-400">P50响应时间</div>
                                                 </div>
-                                                <div className="text-xs text-gray-400">P50响应时间</div>
+                                                <div className="text-center">
+                                                    <div className="text-lg font-bold text-red-400">
+                                                        {result?.metrics?.p90ResponseTime || metrics?.p90ResponseTime || 0}ms
+                                                    </div>
+                                                    <div className="text-xs text-gray-400">P90响应时间</div>
+                                                </div>
+                                                <div className="text-center">
+                                                    <div className="text-lg font-bold text-blue-400">
+                                                        {result?.metrics?.p95ResponseTime || metrics?.p95ResponseTime || 0}ms
+                                                    </div>
+                                                    <div className="text-xs text-gray-400">P95响应时间</div>
+                                                </div>
+                                                <div className="text-center">
+                                                    <div className="text-lg font-bold text-purple-400">
+                                                        {result?.metrics?.p99ResponseTime || metrics?.p99ResponseTime || 0}ms
+                                                    </div>
+                                                    <div className="text-xs text-gray-400">P99响应时间</div>
+                                                </div>
                                             </div>
-                                            <div className="text-center">
-                                                <div className="text-xl font-bold text-red-400">
-                                                    {result?.metrics?.p90ResponseTime || metrics?.p90ResponseTime || 0}ms
+                                        </div>
+
+                                        {/* 吞吐量分析 */}
+                                        <div className="bg-gray-700/50 rounded-lg p-3">
+                                            <h4 className="text-sm font-semibold text-white mb-3 flex items-center">
+                                                <BarChart3 className="w-4 h-4 mr-2 text-blue-400" />
+                                                吞吐量分析
+                                            </h4>
+                                            <div className="grid grid-cols-4 gap-3">
+                                                <div className="text-center">
+                                                    <div className="text-lg font-bold text-blue-400">
+                                                        {result?.metrics?.currentTPS || metrics?.currentTPS || 0}
+                                                    </div>
+                                                    <div className="text-xs text-gray-400">当前TPS</div>
                                                 </div>
-                                                <div className="text-xs text-gray-400">P90响应时间</div>
-                                            </div>
-                                            <div className="text-center">
-                                                <div className="text-xl font-bold text-blue-400">
-                                                    {result?.metrics?.p95ResponseTime || metrics?.p95ResponseTime || 0}ms
+                                                <div className="text-center">
+                                                    <div className="text-lg font-bold text-green-400">
+                                                        {result?.metrics?.peakTPS || metrics?.peakTPS || 0}
+                                                    </div>
+                                                    <div className="text-xs text-gray-400">峰值TPS</div>
                                                 </div>
-                                                <div className="text-xs text-gray-400">P95响应时间</div>
-                                            </div>
-                                            <div className="text-center">
-                                                <div className="text-xl font-bold text-purple-400">
-                                                    {result?.metrics?.p99ResponseTime || metrics?.p99ResponseTime || 0}ms
+                                                <div className="text-center">
+                                                    <div className="text-lg font-bold text-yellow-400">
+                                                        {(() => {
+                                                            const throughput = result?.metrics?.throughput || metrics?.throughput || 0;
+                                                            return throughput;
+                                                        })()}
+                                                    </div>
+                                                    <div className="text-xs text-gray-400">平均TPS</div>
                                                 </div>
-                                                <div className="text-xs text-gray-400">P99响应时间</div>
+                                                <div className="text-center">
+                                                    <div className="text-lg font-bold text-indigo-400">
+                                                        {result?.metrics?.requestsPerSecond || metrics?.requestsPerSecond || 0}
+                                                    </div>
+                                                    <div className="text-xs text-gray-400">请求/秒</div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* 吞吐量分析 */}
-                                    <div className="bg-gray-700/50 rounded-lg p-4">
-                                        <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
-                                            <BarChart3 className="w-5 h-5 mr-2 text-blue-400" />
-                                            吞吐量分析
+                                    {/* 右侧：测试配置 */}
+                                    <div className="bg-gray-700/50 rounded-lg p-3">
+                                        <h4 className="text-sm font-semibold text-white mb-3 flex items-center">
+                                            <Users className="w-4 h-4 mr-2 text-cyan-400" />
+                                            测试配置
                                         </h4>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="text-center">
-                                                <div className="text-xl font-bold text-blue-400">
-                                                    {result?.metrics?.currentTPS || metrics?.currentTPS || 0}
-                                                </div>
-                                                <div className="text-xs text-gray-400">当前TPS</div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="text-center p-2 bg-cyan-500/10 border border-cyan-500/20 rounded-lg">
+                                                <div className="text-lg font-bold text-cyan-400">{testConfig.users}</div>
+                                                <div className="text-xs text-gray-400">并发用户数</div>
                                             </div>
-                                            <div className="text-center">
-                                                <div className="text-xl font-bold text-green-400">
-                                                    {result?.metrics?.peakTPS || metrics?.peakTPS || 0}
-                                                </div>
-                                                <div className="text-xs text-gray-400">峰值TPS</div>
+                                            <div className="text-center p-2 bg-cyan-500/10 border border-cyan-500/20 rounded-lg">
+                                                <div className="text-lg font-bold text-cyan-400">{testConfig.duration}s</div>
+                                                <div className="text-xs text-gray-400">测试时长</div>
                                             </div>
-                                            <div className="text-center">
-                                                <div className="text-xl font-bold text-yellow-400">
-                                                    {(() => {
-                                                        const throughput = result?.metrics?.throughput || metrics?.throughput || 0;
-                                                        console.log('🔍 总吞吐量显示值:', throughput, 'result:', result?.metrics?.throughput, 'metrics:', metrics?.throughput);
-                                                        return throughput;
-                                                    })()}
-                                                </div>
-                                                <div className="text-xs text-gray-400">平均TPS</div>
+                                            <div className="text-center p-2 bg-cyan-500/10 border border-cyan-500/20 rounded-lg">
+                                                <div className="text-lg font-bold text-cyan-400">{testConfig.rampUp}s</div>
+                                                <div className="text-xs text-gray-400">加压时间</div>
                                             </div>
-                                            <div className="text-center">
-                                                <div className="text-xl font-bold text-indigo-400">
-                                                    {result?.metrics?.requestsPerSecond || metrics?.requestsPerSecond || 0}
+                                            <div className="text-center p-2 bg-cyan-500/10 border border-cyan-500/20 rounded-lg">
+                                                <div className="text-lg font-bold text-cyan-400">
+                                                    {testConfig.testType === 'gradual' ? '梯度加压' :
+                                                        testConfig.testType === 'spike' ? '峰值测试' :
+                                                            testConfig.testType === 'constant' ? '恒定负载' : '压力极限'}
                                                 </div>
-                                                <div className="text-xs text-gray-400">请求/秒</div>
+                                                <div className="text-xs text-gray-400">测试类型</div>
                                             </div>
                                         </div>
                                     </div>
@@ -4047,45 +3998,17 @@ const StressTest: React.FC = () => {
                                     </div>
                                 )}
 
-                                {/* 测试配置信息 */}
-                                <div className="bg-gray-700/50 rounded-lg p-4 mb-6">
-                                    <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
-                                        <Users className="w-5 h-5 mr-2 text-cyan-400" />
-                                        测试配置
-                                    </h4>
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                        <div className="text-center">
-                                            <div className="text-xl font-bold text-cyan-400">{testConfig.users}</div>
-                                            <div className="text-xs text-gray-400">并发用户数</div>
-                                        </div>
-                                        <div className="text-center">
-                                            <div className="text-xl font-bold text-cyan-400">{testConfig.duration}s</div>
-                                            <div className="text-xs text-gray-400">测试时长</div>
-                                        </div>
-                                        <div className="text-center">
-                                            <div className="text-xl font-bold text-cyan-400">{testConfig.rampUp}s</div>
-                                            <div className="text-xs text-gray-400">加压时间</div>
-                                        </div>
-                                        <div className="text-center">
-                                            <div className="text-xl font-bold text-cyan-400">
-                                                {testConfig.testType === 'gradual' ? '梯度加压' :
-                                                    testConfig.testType === 'spike' ? '峰值测试' :
-                                                        testConfig.testType === 'constant' ? '恒定负载' : '压力极限'}
-                                            </div>
-                                            <div className="text-xs text-gray-400">测试类型</div>
-                                        </div>
-                                    </div>
-                                </div>
+
 
                                 {/* 性能评估 */}
-                                <div className="bg-gray-700/50 rounded-lg p-4">
-                                    <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
-                                        <CheckCircle className="w-5 h-5 mr-2 text-green-400" />
+                                <div className="bg-gray-700/50 rounded-lg p-3">
+                                    <h4 className="text-sm font-semibold text-white mb-3 flex items-center">
+                                        <CheckCircle className="w-4 h-4 mr-2 text-green-400" />
                                         性能评估
                                     </h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div className="text-center p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
-                                            <div className="text-2xl font-bold text-green-400">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        <div className="text-center p-2 bg-green-500/10 border border-green-500/30 rounded-lg">
+                                            <div className="text-lg font-bold text-green-400">
                                                 {(() => {
                                                     const successRate = result?.metrics?.totalRequests ?
                                                         ((result.metrics.successfulRequests / result.metrics.totalRequests) * 100) :
@@ -4094,10 +4017,10 @@ const StressTest: React.FC = () => {
                                                     return successRate.toFixed(1);
                                                 })()}%
                                             </div>
-                                            <div className="text-sm text-green-300">成功率</div>
+                                            <div className="text-xs text-green-300">成功率</div>
                                         </div>
-                                        <div className="text-center p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                                            <div className="text-2xl font-bold text-blue-400">
+                                        <div className="text-center p-2 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                                            <div className="text-lg font-bold text-blue-400">
                                                 {(() => {
                                                     const avgResponseTime = result?.metrics?.averageResponseTime || metrics?.averageResponseTime || 0;
                                                     if (avgResponseTime < 200) return 'A+';
@@ -4107,10 +4030,10 @@ const StressTest: React.FC = () => {
                                                     return 'D';
                                                 })()}
                                             </div>
-                                            <div className="text-sm text-blue-300">响应时间等级</div>
+                                            <div className="text-xs text-blue-300">响应时间等级</div>
                                         </div>
-                                        <div className="text-center p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
-                                            <div className="text-2xl font-bold text-purple-400">
+                                        <div className="text-center p-2 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                                            <div className="text-lg font-bold text-purple-400">
                                                 {(() => {
                                                     const tps = result?.metrics?.currentTPS || metrics?.currentTPS || 0;
                                                     if (tps > 100) return '优秀';
@@ -4119,48 +4042,14 @@ const StressTest: React.FC = () => {
                                                     return '较差';
                                                 })()}
                                             </div>
-                                            <div className="text-sm text-purple-300">吞吐量评级</div>
+                                            <div className="text-xs text-purple-300">吞吐量评级</div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         )}
 
-                        {/* 实时监控状态 */}
-                        {(isRunning || stressTestData.length > 0) && (
-                            <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4">
-                                <h4 className="text-sm font-medium text-gray-300 mb-2">实时监控状态</h4>
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-xs">
-                                    <div>
-                                        <span className="text-gray-400">数据点:</span>
-                                        <span className="text-blue-400 ml-2">{stressTestData.length} 条</span>
-                                    </div>
-                                    <div>
-                                        <span className="text-gray-400">指标状态:</span>
-                                        <span className="text-yellow-400 ml-2">{metrics ? '有数据' : '无数据'}</span>
-                                    </div>
-                                    <div>
-                                        <span className="text-gray-400">WebSocket:</span>
-                                        <span className={`ml-2 ${socketRef.current?.connected ? 'text-green-400' : 'text-red-400'}`}>
-                                            {socketRef.current?.connected ? '已连接' : '未连接'}
-                                        </span>
-                                    </div>
-                                </div>
-                                {/* 显示图表条件 */}
-                                <div className="mt-3 pt-3 border-t border-gray-700">
-                                    <div className="text-xs text-gray-400">
-                                        图表显示条件: {(stressTestData && stressTestData.length > 0) ?
-                                            '✅ 满足条件' : '❌ 不满足条件'}
-                                    </div>
-                                    <div className="text-xs text-gray-400 mt-1">
-                                        当前状态: isRunning={isRunning ? 'true' : 'false'}, testStatus={testStatus}
-                                    </div>
-                                    <div className="text-xs text-gray-400 mt-1">
-                                        🔧 数据优化: 使用统一数据源，减少重复存储
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+
 
                         {/* 统一压力测试图表 - 空间复用 */}
                         {useUnifiedCharts ? (

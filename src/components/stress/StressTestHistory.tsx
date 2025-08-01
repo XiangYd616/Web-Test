@@ -5,6 +5,7 @@ import {
   CheckCircle,
   Clock,
   Download,
+  ExternalLink,
   Eye,
   RefreshCw,
   Search,
@@ -12,9 +13,11 @@ import {
   XCircle
 } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import './StatusLabel.css';
+import StressTestDetailModal from './StressTestDetailModal';
 import './StressTestHistory.css';
 
 // 测试记录接口
@@ -49,6 +52,9 @@ interface StressTestHistoryProps {
 }
 
 const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' }) => {
+  // 路由导航
+  const navigate = useNavigate();
+
   // 认证状态
   const { isAuthenticated, user } = useAuth();
 
@@ -64,6 +70,10 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
   const [sortBy, setSortBy] = useState<'createdAt' | 'duration' | 'score'>('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedRecords, setSelectedRecords] = useState<Set<string>>(new Set());
+
+  // 详情模态框状态
+  const [selectedRecord, setSelectedRecord] = useState<TestRecord | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // 加载测试记录
   const loadTestRecords = async () => {
@@ -291,11 +301,16 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
     }
   };
 
-  // 查看详细结果
-  const viewDetails = (record: TestRecord) => {
-    // 这里可以打开详细结果模态框或跳转到详细页面
-    console.log('查看详细结果:', record);
-    alert(`查看测试详情: ${record.testName}`);
+  // 查看详细结果 - 支持两种方式
+  const viewDetails = (record: TestRecord, useModal: boolean = false) => {
+    if (useModal) {
+      // 使用模态框方式
+      setSelectedRecord(record);
+      setIsDetailModalOpen(true);
+    } else {
+      // 使用页面跳转方式
+      navigate(`/stress-test/${record.id}`);
+    }
   };
 
   // 导出记录
@@ -353,6 +368,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
 
           <div className="flex items-center gap-3">
             <button
+              type="button"
               onClick={loadTestRecords}
               disabled={loading}
               aria-label={loading ? '正在刷新测试记录' : '刷新测试记录'}
@@ -518,12 +534,21 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
                   <div className="test-record-actions flex items-center gap-2 ml-4">
                     <button
                       type="button"
-                      onClick={() => viewDetails(record)}
-                      aria-label={`查看测试详情: ${record.testName}`}
+                      onClick={() => viewDetails(record, true)}
+                      aria-label={`快速查看: ${record.testName}`}
                       className="test-record-action-button p-2 text-gray-400 hover:text-blue-400 hover:bg-gray-700/50 border border-gray-600/30 hover:border-blue-500/50 rounded-lg transition-all duration-200 backdrop-blur-sm"
-                      title="查看详情"
+                      title="快速查看"
                     >
                       <Eye className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => viewDetails(record, false)}
+                      aria-label={`详细页面: ${record.testName}`}
+                      className="test-record-action-button p-2 text-gray-400 hover:text-purple-400 hover:bg-gray-700/50 border border-gray-600/30 hover:border-purple-500/50 rounded-lg transition-all duration-200 backdrop-blur-sm"
+                      title="详细页面"
+                    >
+                      <ExternalLink className="w-4 h-4" />
                     </button>
                     <button
                       type="button"
@@ -550,6 +575,16 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
           </div>
         )}
       </div>
+
+      {/* 详情模态框 */}
+      <StressTestDetailModal
+        record={selectedRecord}
+        isOpen={isDetailModalOpen}
+        onClose={() => {
+          setIsDetailModalOpen(false);
+          setSelectedRecord(null);
+        }}
+      />
     </div>
   );
 };

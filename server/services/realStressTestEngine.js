@@ -165,9 +165,11 @@ class MetricsCalculator {
     // 在测试结束时，使用平均吞吐量作为 requestsPerSecond
     metrics.requestsPerSecond = metrics.throughput;
 
-    // 如果 currentTPS 为0或无效，也使用平均吞吐量
-    if (!metrics.currentTPS || metrics.currentTPS === 0) {
-      metrics.currentTPS = metrics.throughput;
+    // 🔧 修复：不要将currentTPS设置为平均吞吐量，保持它们的独立性
+    // currentTPS应该反映最近的瞬时性能，而throughput反映整体平均性能
+    // 如果 currentTPS 为0或无效，保持为0，不要用平均值覆盖
+    if (!metrics.currentTPS || metrics.currentTPS === 0 || !isFinite(metrics.currentTPS)) {
+      metrics.currentTPS = 0; // 保持为0，表示当前没有活跃请求
     }
 
     Logger.debug('最终指标计算完成', {
@@ -824,8 +826,14 @@ class RealStressTestEngine {
     // 更新当前吞吐量
     MetricsCalculator.updateCurrentThroughput(results.metrics, now);
 
-    // 🔧 修复：确保 requestsPerSecond 使用正确的吞吐量值
-    // 在实时更新时，使用当前TPS作为 requestsPerSecond
+    // 🔧 修复：计算实时平均吞吐量
+    // 实时更新时，也要更新平均吞吐量（throughput）
+    const elapsedTime = (now - results.startTime) / 1000; // 已经过的时间（秒）
+    if (elapsedTime > 0 && results.metrics.totalRequests > 0) {
+      results.metrics.throughput = Math.round((results.metrics.totalRequests / elapsedTime) * 10) / 10;
+    }
+
+    // requestsPerSecond 使用当前TPS
     results.metrics.requestsPerSecond = results.metrics.currentTPS || 0;
   }
 
