@@ -3063,15 +3063,112 @@ const StressTest: React.FC = () => {
             {
                 activeTab === 'test' ? (
                     <>
-                        {/* URL 输入 */}
-                        <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
+                        {/* URL 输入与测试进度融合区域 */}
+                        <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4 url-input-card">
                             <label className="block text-sm font-medium text-gray-300 mb-2">测试URL</label>
-                            <URLInput
-                                value={testConfig.url}
-                                onChange={(url) => setTestConfig((prev: StressTestConfig) => ({ ...prev, url }))}
-                                placeholder="输入要进行压力测试的网站URL..."
-                                enableReachabilityCheck={false}
-                            />
+                            <div className="url-input-container">
+                                <URLInput
+                                    value={testConfig.url}
+                                    onChange={(url) => setTestConfig((prev: StressTestConfig) => ({ ...prev, url }))}
+                                    placeholder="输入要进行压力测试的网站URL..."
+                                    enableReachabilityCheck={false}
+                                    className="url-input-full-width"
+                                />
+                            </div>
+
+                            {/* 集成的测试进度显示 */}
+                            {(testProgress || backgroundTestInfo) && (
+                                <div className="mt-4 pt-4 border-t border-gray-700/50">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center space-x-2">
+                                            <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                                            <span className="text-sm font-medium text-white">测试进行中</span>
+                                        </div>
+                                        {backgroundTestInfo && (
+                                            <span className="text-sm text-blue-300 font-medium">
+                                                {Math.round(backgroundTestInfo.progress || 0)}%
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* 进度条 */}
+                                    {backgroundTestInfo && (
+                                        <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+                                            <div
+                                                className={`test-progress-dynamic h-2 rounded-full transition-all duration-300 ${backgroundTestInfo.progress >= 100 ? 'progress-100' :
+                                                    backgroundTestInfo.progress >= 95 ? 'progress-95' :
+                                                        backgroundTestInfo.progress >= 90 ? 'progress-90' :
+                                                            backgroundTestInfo.progress >= 85 ? 'progress-85' :
+                                                                backgroundTestInfo.progress >= 80 ? 'progress-80' :
+                                                                    backgroundTestInfo.progress >= 75 ? 'progress-75' :
+                                                                        backgroundTestInfo.progress >= 70 ? 'progress-70' :
+                                                                            backgroundTestInfo.progress >= 65 ? 'progress-65' :
+                                                                                backgroundTestInfo.progress >= 60 ? 'progress-60' :
+                                                                                    backgroundTestInfo.progress >= 55 ? 'progress-55' :
+                                                                                        backgroundTestInfo.progress >= 50 ? 'progress-50' :
+                                                                                            backgroundTestInfo.progress >= 45 ? 'progress-45' :
+                                                                                                backgroundTestInfo.progress >= 40 ? 'progress-40' :
+                                                                                                    backgroundTestInfo.progress >= 35 ? 'progress-35' :
+                                                                                                        backgroundTestInfo.progress >= 30 ? 'progress-30' :
+                                                                                                            backgroundTestInfo.progress >= 25 ? 'progress-25' :
+                                                                                                                backgroundTestInfo.progress >= 20 ? 'progress-20' :
+                                                                                                                    backgroundTestInfo.progress >= 15 ? 'progress-15' :
+                                                                                                                        backgroundTestInfo.progress >= 10 ? 'progress-10' :
+                                                                                                                            backgroundTestInfo.progress >= 5 ? 'progress-5' : 'progress-0'
+                                                    }`}
+                                                style={{ width: `${backgroundTestInfo.progress || 0}%` }}
+                                            />
+                                        </div>
+                                    )}
+
+                                    {/* 进度描述 */}
+                                    {(testProgress || backgroundTestInfo?.status) && (
+                                        <div className="text-xs text-gray-400 mb-2">
+                                            {backgroundTestInfo?.status || testProgress}
+                                        </div>
+                                    )}
+
+                                    {/* 测试时间信息 */}
+                                    {backgroundTestInfo && backgroundTestInfo.startTime && (
+                                        <div className="flex items-center space-x-3 text-xs text-gray-400 mb-2">
+                                            <div className="flex items-center space-x-1">
+                                                <Clock className="w-3 h-3" />
+                                                <span>开始: {new Date(backgroundTestInfo.startTime).toLocaleTimeString()}</span>
+                                            </div>
+                                            <span>•</span>
+                                            <span>
+                                                运行: {Math.floor((Date.now() - new Date(backgroundTestInfo.startTime).getTime()) / 1000)}秒
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {/* 后台运行提示 */}
+                                    {testStatus === 'running' && canSwitchPages && (
+                                        <div className="mt-2 p-2 bg-green-500/10 border border-green-500/20 rounded-md">
+                                            <div className="flex items-center space-x-1.5">
+                                                <CheckCircle className="w-3 h-3 text-green-400" />
+                                                <span className="text-xs text-green-300 font-medium">后台运行模式</span>
+                                            </div>
+                                            <p className="text-xs text-green-200 mt-0.5">
+                                                测试正在后台运行，您可以自由切换到其他页面，测试不会中断。
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* 错误信息显示 */}
+                            {error && (
+                                <div className="mt-4 pt-4 border-t border-red-500/20">
+                                    <div className="flex items-center space-x-2 mb-2">
+                                        <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                                        <span className="text-sm font-medium text-red-300">测试错误</span>
+                                    </div>
+                                    <div className="text-sm text-red-200 bg-red-500/10 rounded p-2">
+                                        {error}
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* 队列状态显示 - 只在有排队或当前测试在队列中时显示 */}
@@ -3109,92 +3206,7 @@ const StressTest: React.FC = () => {
 
 
 
-                        {/* 进度和错误显示 */}
-                        {(testProgress || backgroundTestInfo || error) && (
-                            <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
-                                {/* 测试进度 */}
-                                {(testProgress || backgroundTestInfo) && (
-                                    <div className="mb-3">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <h4 className="text-base font-semibold text-white">测试进度</h4>
-                                            {backgroundTestInfo && (
-                                                <span className="text-xs text-blue-300 font-medium">
-                                                    {Math.round(backgroundTestInfo.progress || 0)}%
-                                                </span>
-                                            )}
-                                        </div>
 
-                                        {/* 进度条 */}
-                                        {backgroundTestInfo && (
-                                            <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
-                                                <div
-                                                    className={`test-progress-dynamic h-2 rounded-full transition-all duration-300 ${backgroundTestInfo.progress >= 100 ? 'progress-100' :
-                                                        backgroundTestInfo.progress >= 95 ? 'progress-95' :
-                                                            backgroundTestInfo.progress >= 90 ? 'progress-90' :
-                                                                backgroundTestInfo.progress >= 85 ? 'progress-85' :
-                                                                    backgroundTestInfo.progress >= 80 ? 'progress-80' :
-                                                                        backgroundTestInfo.progress >= 75 ? 'progress-75' :
-                                                                            backgroundTestInfo.progress >= 70 ? 'progress-70' :
-                                                                                backgroundTestInfo.progress >= 65 ? 'progress-65' :
-                                                                                    backgroundTestInfo.progress >= 60 ? 'progress-60' :
-                                                                                        backgroundTestInfo.progress >= 55 ? 'progress-55' :
-                                                                                            backgroundTestInfo.progress >= 50 ? 'progress-50' :
-                                                                                                backgroundTestInfo.progress >= 45 ? 'progress-45' :
-                                                                                                    backgroundTestInfo.progress >= 40 ? 'progress-40' :
-                                                                                                        backgroundTestInfo.progress >= 35 ? 'progress-35' :
-                                                                                                            backgroundTestInfo.progress >= 30 ? 'progress-30' :
-                                                                                                                backgroundTestInfo.progress >= 25 ? 'progress-25' :
-                                                                                                                    backgroundTestInfo.progress >= 20 ? 'progress-20' :
-                                                                                                                        backgroundTestInfo.progress >= 15 ? 'progress-15' :
-                                                                                                                            backgroundTestInfo.progress >= 10 ? 'progress-10' :
-                                                                                                                                backgroundTestInfo.progress >= 5 ? 'progress-5' : 'progress-0'
-                                                        }`}
-                                                ></div>
-                                            </div>
-                                        )}
-
-                                        <p className="text-blue-300 text-sm mb-2">{testProgress}</p>
-
-                                        {/* 测试时间信息 */}
-                                        {backgroundTestInfo && backgroundTestInfo.startTime && (
-                                            <div className="flex items-center space-x-3 text-xs text-gray-400">
-                                                <div className="flex items-center space-x-1">
-                                                    <Clock className="w-3 h-3" />
-                                                    <span>开始: {new Date(backgroundTestInfo.startTime).toLocaleTimeString()}</span>
-                                                </div>
-                                                <span>•</span>
-                                                <span>
-                                                    运行: {Math.floor((Date.now() - new Date(backgroundTestInfo.startTime).getTime()) / 1000)}秒
-                                                </span>
-                                            </div>
-                                        )}
-
-                                        {/* 后台运行提示 */}
-                                        {testStatus === 'running' && canSwitchPages && (
-                                            <div className="mt-2 p-2 bg-green-500/10 border border-green-500/20 rounded-md">
-                                                <div className="flex items-center space-x-1.5">
-                                                    <CheckCircle className="w-3 h-3 text-green-400" />
-                                                    <span className="text-xs text-green-300 font-medium">后台运行模式</span>
-                                                </div>
-                                                <p className="text-xs text-green-200 mt-0.5">
-                                                    测试正在后台运行，您可以自由切换到其他页面，测试不会中断。
-                                                </p>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                {/* 错误提示 */}
-                                {error && (
-                                    <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-md">
-                                        <div className="flex items-center space-x-1.5">
-                                            <AlertCircle className="w-4 h-4 text-red-400" />
-                                            <p className="text-red-300 text-sm">{error}</p>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
 
                         {/* 主要配置区域 */}
                         {!isAdvancedMode ? (
