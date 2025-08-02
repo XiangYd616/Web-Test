@@ -78,6 +78,14 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
       const { TestNavigation } = require('../ui/TestNavigation');
       return <TestNavigation />;
     }
+    if (window.location.search.includes('migrated')) {
+      const StressTestHistoryMigrated = require('./StressTestHistoryMigrated').default;
+      return <StressTestHistoryMigrated />;
+    }
+    if (window.location.search.includes('migration-compare')) {
+      const { MigrationComparison } = require('../ui/MigrationComparison');
+      return <MigrationComparison />;
+    }
   }
 
   // 路由导航
