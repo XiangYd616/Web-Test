@@ -52,6 +52,12 @@ interface StressTestHistoryProps {
 }
 
 const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' }) => {
+  // 开发环境下显示Card组件测试
+  if (process.env.NODE_ENV === 'development' && window.location.search.includes('test-card')) {
+    const { CardTest } = require('../ui/CardTest');
+    return <CardTest />;
+  }
+
   // 路由导航
   const navigate = useNavigate();
 
