@@ -49,7 +49,9 @@
   "exclude": [
     "src/tests",
     "**/*.test.ts",
-    "**/*.test.tsx"
+    "**/*.test.tsx",
+    "**/*.stories.tsx",
+    "src/test-utils.tsx"
   ],
   "references": [
     {

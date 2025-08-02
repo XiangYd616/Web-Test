@@ -1,7 +1,7 @@
 import { AlertTriangle, CheckCircle, Download, Info, Share2, XCircle } from 'lucide-react';
 import React from 'react';
 import { TestResult } from '../../services/advancedTestEngine';
-import '../../styles/progress-bars.css';
+// CSS样式已迁移到组件库，不再需要外部CSS文件
 
 interface EnhancedSEOAnalysisProps {
   results: TestResult;
@@ -195,8 +195,8 @@ const EnhancedSEOAnalysis: React.FC<EnhancedSEOAnalysisProps> = ({
               <div className="space-y-3 max-h-96 overflow-y-auto">
                 {results.issues.slice(0, 10).map((issue, index) => (
                   <div key={index} className={`p-3 rounded-lg border-l-4 ${issue.severity === 'critical' || issue.severity === 'high' ? 'bg-red-500/10 border-red-500' :
-                      issue.severity === 'medium' ? 'bg-yellow-500/10 border-yellow-500' :
-                        'bg-blue-500/10 border-blue-500'
+                    issue.severity === 'medium' ? 'bg-yellow-500/10 border-yellow-500' :
+                      'bg-blue-500/10 border-blue-500'
                     }`}>
                     <div className="flex items-start space-x-2">
                       {getIssueIcon(issue.severity)}
@@ -229,8 +229,8 @@ const EnhancedSEOAnalysis: React.FC<EnhancedSEOAnalysisProps> = ({
 
                   return (
                     <div key={index} className={`p-3 rounded-lg border-l-4 ${rec.priority === 'high' ? 'bg-red-500/10 border-red-500' :
-                        rec.priority === 'medium' ? 'bg-yellow-500/10 border-yellow-500' :
-                          'bg-green-500/10 border-green-500'
+                      rec.priority === 'medium' ? 'bg-yellow-500/10 border-yellow-500' :
+                        'bg-green-500/10 border-green-500'
                       }`}>
                       <div className="flex items-start space-x-2">
                         {getRecommendationIcon(rec.priority)}
@@ -265,9 +265,9 @@ const EnhancedSEOAnalysis: React.FC<EnhancedSEOAnalysisProps> = ({
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-white">{keyword}</span>
                   <span className={`text-xs px-2 py-1 rounded ${data.status === 'optimal' ? 'bg-green-500/20 text-green-400' :
-                      data.status === 'high' ? 'bg-red-500/20 text-red-400' :
-                        data.status === 'low' ? 'bg-yellow-500/20 text-yellow-400' :
-                          'bg-gray-500/20 text-gray-400'
+                    data.status === 'high' ? 'bg-red-500/20 text-red-400' :
+                      data.status === 'low' ? 'bg-yellow-500/20 text-yellow-400' :
+                        'bg-gray-500/20 text-gray-400'
                     }`}>
                     {data.status === 'optimal' ? '最佳' :
                       data.status === 'high' ? '过高' :

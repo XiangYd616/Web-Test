@@ -1,7 +1,7 @@
 import { LucideIcon, Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
-import '../../styles/modern-design-system.css';
+// CSS样式已迁移到组件库和主题配置中
 
 export interface StatCardProps {
   title: string;

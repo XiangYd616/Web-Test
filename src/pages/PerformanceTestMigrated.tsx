@@ -1,38 +1,35 @@
-import React, { useState, useCallback } from 'react';
 import {
-  Timer,
-  Gauge,
-  Zap,
-  Clock,
-  Wifi,
-  Smartphone,
-  Monitor,
-  Globe,
-  Download,
+  AlertTriangle,
   BarChart3,
+  Clock,
+  Download,
   Eye,
-  Settings,
+  Gauge,
+  Globe,
   Play,
-  Square
+  Square,
+  Timer,
+  Wifi,
+  Zap
 } from 'lucide-react';
+import React, { useCallback, useState } from 'react';
+import { useAuthCheck } from '../components/auth/withAuthCheck';
 import {
+  Badge,
   Button,
   Card,
+  CardBody,
   CardHeader,
   CardTitle,
-  CardBody,
-  CardFooter,
   Input,
-  Select,
-  Badge,
-  StatusBadge,
-  ProgressBadge,
-  SimpleCheckbox,
   Modal,
   ModalBody,
-  ModalFooter
+  ModalFooter,
+  ProgressBadge,
+  Select,
+  SimpleCheckbox,
+  StatusBadge
 } from '../components/ui';
-import { useAuthCheck } from '../components/auth/withAuthCheck';
 
 type TestMode = 'quick' | 'standard' | 'comprehensive';
 type NetworkCondition = 'fast' | 'slow' | 'mobile';
@@ -242,6 +239,11 @@ const PerformanceTestMigrated: React.FC = () => {
 
   // 开始测试
   const handleStartTest = useCallback(async () => {
+    // 检查登录状态
+    if (!requireLogin()) {
+      return;
+    }
+
     if (!testConfig.url.trim()) {
       alert('请输入要测试的URL');
       return;
@@ -252,7 +254,7 @@ const PerformanceTestMigrated: React.FC = () => {
       setError(null);
       setTestResult(null);
       setTestProgress(0);
-      
+
       // 模拟测试进度
       const progressSteps = [
         { message: '正在连接测试服务器...', progress: 10 },
@@ -318,7 +320,7 @@ const PerformanceTestMigrated: React.FC = () => {
       };
 
       setTestResult(mockResult);
-      
+
     } catch (error) {
       console.error('性能测试失败:', error);
       setError('测试过程中发生错误，请重试');
@@ -363,14 +365,13 @@ const PerformanceTestMigrated: React.FC = () => {
     }
   };
 
-  if (!isAuthenticated) {
-    return LoginPromptComponent;
-  }
+  // 移除强制登录检查，允许未登录用户查看页面
+  // 在使用功能时才提示登录
 
   return (
     <div className="min-h-screen bg-gray-900 p-6">
       <div className="max-w-6xl mx-auto space-y-6">
-        
+
         {/* 页面标题 */}
         <Card>
           <CardHeader>
@@ -406,11 +407,10 @@ const PerformanceTestMigrated: React.FC = () => {
                   <button
                     key={tab.key}
                     onClick={() => setActiveTab(tab.key as any)}
-                    className={`flex items-center gap-2 px-6 py-4 text-sm font-medium transition-colors ${
-                      activeTab === tab.key
-                        ? 'text-blue-400 border-b-2 border-blue-400 bg-blue-500/5'
-                        : 'text-gray-400 hover:text-gray-300'
-                    }`}
+                    className={`flex items-center gap-2 px-6 py-4 text-sm font-medium transition-colors ${activeTab === tab.key
+                      ? 'text-blue-400 border-b-2 border-blue-400 bg-blue-500/5'
+                      : 'text-gray-400 hover:text-gray-300'
+                      }`}
                   >
                     <Icon className="w-4 h-4" />
                     {tab.label}
@@ -516,6 +516,7 @@ const PerformanceTestMigrated: React.FC = () => {
                           <SimpleCheckbox
                             checked={testConfig[test.key as keyof PerformanceTestConfig] as boolean}
                             onChange={(e) => handleConfigChange(test.key, e.target.checked)}
+                            aria-label={`启用${test.name}测试`}
                           />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-2">
@@ -585,36 +586,36 @@ const PerformanceTestMigrated: React.FC = () => {
                         <div className="text-gray-400 mb-2">性能评分</div>
                         <ProgressBadge value={testResult.overallScore} />
                       </div>
-                      
+
                       <div className="text-center">
                         <div className="text-3xl font-bold text-green-400 mb-2">
                           {testResult.metrics.loadTime}ms
                         </div>
                         <div className="text-gray-400 mb-2">加载时间</div>
-                        <StatusBadge 
-                          status={testResult.metrics.loadTime < 3000 ? 'success' : 'warning'} 
+                        <StatusBadge
+                          status={testResult.metrics.loadTime < 3000 ? 'success' : 'warning'}
                           text={testResult.metrics.loadTime < 3000 ? '良好' : '需优化'}
                         />
                       </div>
-                      
+
                       <div className="text-center">
                         <div className="text-3xl font-bold text-purple-400 mb-2">
                           {testResult.metrics.pageSize}MB
                         </div>
                         <div className="text-gray-400 mb-2">页面大小</div>
-                        <StatusBadge 
-                          status={testResult.metrics.pageSize < 3 ? 'success' : 'warning'} 
+                        <StatusBadge
+                          status={testResult.metrics.pageSize < 3 ? 'success' : 'warning'}
                           text={testResult.metrics.pageSize < 3 ? '合理' : '偏大'}
                         />
                       </div>
-                      
+
                       <div className="text-center">
                         <div className="text-3xl font-bold text-yellow-400 mb-2">
                           {testResult.metrics.requests}
                         </div>
                         <div className="text-gray-400 mb-2">请求数量</div>
-                        <StatusBadge 
-                          status={testResult.metrics.requests < 50 ? 'success' : 'warning'} 
+                        <StatusBadge
+                          status={testResult.metrics.requests < 50 ? 'success' : 'warning'}
                           text={testResult.metrics.requests < 50 ? '良好' : '较多'}
                         />
                       </div>
@@ -636,7 +637,7 @@ const PerformanceTestMigrated: React.FC = () => {
                           fid: 'FID (首次输入延迟)',
                           cls: 'CLS (累积布局偏移)'
                         };
-                        
+
                         return (
                           <div key={key} className="p-4 bg-gray-800/50 rounded-lg">
                             <div className="flex items-center justify-between mb-2">
@@ -669,7 +670,7 @@ const PerformanceTestMigrated: React.FC = () => {
                                 <p className="text-sm text-gray-400">{opportunity.description}</p>
                               </div>
                               <div className="flex items-center gap-2 ml-4">
-                                <Badge 
+                                <Badge
                                   variant={opportunity.impact === 'high' ? 'danger' : opportunity.impact === 'medium' ? 'warning' : 'info'}
                                   size="xs"
                                 >
@@ -696,9 +697,9 @@ const PerformanceTestMigrated: React.FC = () => {
                     <div>
                       <h4 className="font-semibold text-red-400 mb-2">测试失败</h4>
                       <p className="text-sm text-red-300">{error}</p>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         className="mt-3"
                         onClick={() => setError(null)}
                       >
@@ -777,6 +778,9 @@ const PerformanceTestMigrated: React.FC = () => {
             </Button>
           </ModalFooter>
         </Modal>
+
+        {/* 登录提示组件 */}
+        {LoginPromptComponent}
       </div>
     </div>
   );

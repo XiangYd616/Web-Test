@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '../../utils/cn';
 
-interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
+interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type' | 'size'> {
   label?: string;
   description?: string;
   indeterminate?: boolean;
@@ -50,7 +50,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
           disabled={disabled}
           {...props}
         />
-        
+
         {/* 自定义checkbox外观 */}
         <div className={cn(
           'rounded-md border-2 transition-all duration-200 flex items-center justify-center',
@@ -71,46 +71,46 @@ export const Checkbox: React.FC<CheckboxProps> = ({
         )}>
           {/* 选中图标 */}
           {checked && !indeterminate && (
-            <svg 
+            <svg
               className={cn(
                 'text-white animate-in fade-in duration-150',
                 sizeClasses.icon
               )}
-              fill="none" 
-              stroke="currentColor" 
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={3} 
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={3}
                 d="M5 13l4 4L19 7"
               />
             </svg>
           )}
-          
+
           {/* 半选中图标 */}
           {indeterminate && (
-            <svg 
+            <svg
               className={cn(
                 'text-white animate-in fade-in duration-150',
                 sizeClasses.icon
               )}
-              fill="none" 
-              stroke="currentColor" 
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={3} 
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={3}
                 d="M20 12H4"
               />
             </svg>
           )}
         </div>
       </div>
-      
+
       {/* 标签和描述 */}
       {(label || description) && (
         <div className="flex flex-col">

@@ -16,7 +16,7 @@ import {
   chartColors
 } from '../../components/modern/ModernChart';
 import { useTheme } from '../../contexts/ThemeContext';
-import '../../styles/modern-design-system.css';
+// CSS样式已迁移到组件库和主题配置中
 
 const ModernDashboard: React.FC = () => {
   const { actualTheme } = useTheme();

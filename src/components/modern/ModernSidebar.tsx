@@ -44,7 +44,7 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
   const location = useLocation();
   const { user } = useAuth();
   const { actualTheme } = useTheme();
-  const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
+  const [expandedGroups, setExpandedGroups] = useState<string[]>(['testing']);
 
   const isAdmin = user?.role === 'admin';
 

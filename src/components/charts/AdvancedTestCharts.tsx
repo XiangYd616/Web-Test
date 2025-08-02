@@ -23,7 +23,7 @@ import {
   XAxis, YAxis
 } from 'recharts';
 import { TestResult } from '../../services/advancedTestEngine';
-import '../../styles/progress-bars.css';
+// CSS样式已迁移到组件库，不再需要外部CSS文件
 
 interface AdvancedTestChartsProps {
   results: TestResult | TestResult[];

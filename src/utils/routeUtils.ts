@@ -8,12 +8,15 @@ export interface RouteInfo {
 
 export const routes: RouteInfo[] = [
   { path: '/', name: '仪表板', icon: 'BarChart3', requiresAuth: true },
-  { path: '/stress-test', name: '压力测试', icon: 'Zap', requiresAuth: true },
-  { path: '/seo-test', name: 'SEO测试', icon: 'Search', requiresAuth: true },
-  { path: '/security-test', name: '安全测试', icon: 'Shield', requiresAuth: true },
-  { path: '/performance-test', name: '性能测试', icon: 'Gauge', requiresAuth: true },
-  { path: '/compatibility-test', name: '兼容性测试', icon: 'Monitor', requiresAuth: true },
-  { path: '/api-test', name: 'API测试', icon: 'Code', requiresAuth: true },
+  // 测试工具 - 公开访问，但功能需要登录
+  { path: '/website-test', name: '网站测试', icon: 'Globe', requiresAuth: false },
+  { path: '/stress-test', name: '压力测试', icon: 'Zap', requiresAuth: false },
+  { path: '/seo-test', name: 'SEO测试', icon: 'Search', requiresAuth: false },
+  { path: '/security-test', name: '安全测试', icon: 'Shield', requiresAuth: false },
+  { path: '/performance-test', name: '性能测试', icon: 'Gauge', requiresAuth: false },
+  { path: '/compatibility-test', name: '兼容性测试', icon: 'Monitor', requiresAuth: false },
+  { path: '/api-test', name: 'API测试', icon: 'Code', requiresAuth: false },
+  // 数据和分析 - 需要登录
   { path: '/analytics', name: '高级分析', icon: 'TrendingUp', requiresAuth: true },
   { path: '/history', name: '测试历史', icon: 'History', requiresAuth: true },
   { path: '/cicd-integration', name: 'CI/CD集成', icon: 'GitBranch', requiresAuth: true },

@@ -43,7 +43,7 @@ export const Modal: React.FC<ModalProps> = ({
 
   // 处理ESC键关闭
   useEffect(() => {
-    if (!isOpen || !closeOnEscape) return;
+    if (!isOpen || !closeOnEscape) return undefined;
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -94,7 +94,7 @@ export const Modal: React.FC<ModalProps> = ({
   };
 
   // Focus trap - 简单实现
-  const handleKeyDown = (event: React.KeyEvent) => {
+  const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Tab') {
       const focusableElements = modalRef.current?.querySelectorAll(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
@@ -271,7 +271,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
           {cancelText}
         </Button>
         <Button
-          variant={variant}
+          variant={variant === 'warning' || variant === 'info' ? 'primary' : variant}
           onClick={handleConfirm}
         >
           {confirmText}

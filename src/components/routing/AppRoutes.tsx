@@ -248,13 +248,14 @@ const AppRoutes: React.FC = () => {
           </LazyPageWrapper>
         </ProtectedRoute>
       } />
-      <Route path="monitoring" element={
+      {/* 暂时注释掉监控面板路由，等待修复 */}
+      {/* <Route path="monitoring" element={
         <ProtectedRoute>
           <LazyPageWrapper>
             <MonitoringDashboard />
           </LazyPageWrapper>
         </ProtectedRoute>
-      } />
+      } /> */}
 
       {/* 报告管理 - 需要登录 */}
       <Route path="reports" element={

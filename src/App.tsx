@@ -12,11 +12,8 @@ import { ThemeProvider } from './contexts/ThemeContext'
 
 
 
-// 样式文件导入
-import './styles/chrome-compatibility.css'
-import './styles/dark-theme.css'
-import './styles/light-theme.css'
-import './styles/theme.css'
+// 样式文件导入 - 使用统一的主题系统
+// 主题样式已迁移到 theme-config.css 和组件库中
 
 function App() {
   useEffect(() => {

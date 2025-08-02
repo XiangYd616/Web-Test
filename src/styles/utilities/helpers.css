@@ -1,0 +1,75 @@
+/* 辅助工具类 */
+
+/* 文本平衡 */
+.text-balance {
+  text-wrap: balance;
+}
+
+/* 隐藏滚动条 */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* 图表容器 */
+.chart-container {
+  @apply relative h-64 w-full;
+}
+
+.chart-container canvas {
+  @apply max-h-full max-w-full;
+}
+
+/* 加载动画 */
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* 响应式表格 */
+.table-responsive {
+  @apply overflow-x-auto;
+}
+
+.table-responsive table {
+  @apply min-w-full divide-y divide-gray-200;
+}
+
+.table-responsive th {
+  @apply px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50;
+}
+
+.table-responsive td {
+  @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
+}
+
+/* 状态指示器 */
+.status-indicator {
+  @apply inline-block w-2 h-2 rounded-full;
+}
+
+.status-indicator.ready {
+  @apply bg-green-500;
+}
+
+.status-indicator.running {
+  @apply bg-blue-500 animate-pulse;
+}
+
+.status-indicator.error {
+  @apply bg-red-500;
+}
+
+.status-indicator.warning {
+  @apply bg-yellow-500;
+}
+
+/* 深色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .dark-mode {
+    @apply bg-gray-900 text-gray-100;
+  }
+}
