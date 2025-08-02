@@ -70,6 +70,14 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
       const { BadgeTest } = require('../ui/BadgeTest');
       return <BadgeTest />;
     }
+    if (window.location.search.includes('test-all')) {
+      const { ComponentLibraryTest } = require('../ui/ComponentLibraryTest');
+      return <ComponentLibraryTest />;
+    }
+    if (window.location.search.includes('test-nav')) {
+      const { TestNavigation } = require('../ui/TestNavigation');
+      return <TestNavigation />;
+    }
   }
 
   // 路由导航
