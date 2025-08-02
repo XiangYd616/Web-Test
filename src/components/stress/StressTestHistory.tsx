@@ -86,6 +86,22 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
       const { MigrationComparison } = require('../ui/MigrationComparison');
       return <MigrationComparison />;
     }
+    if (window.location.search.includes('seo-migrated')) {
+      const SEOTestMigrated = require('../../pages/SEOTestMigrated').default;
+      return <SEOTestMigrated />;
+    }
+    if (window.location.search.includes('security-migrated')) {
+      const SecurityTestMigrated = require('../../pages/SecurityTestMigrated').default;
+      return <SecurityTestMigrated />;
+    }
+    if (window.location.search.includes('performance-migrated')) {
+      const PerformanceTestMigrated = require('../../pages/PerformanceTestMigrated').default;
+      return <PerformanceTestMigrated />;
+    }
+    if (window.location.search.includes('test-pages-migration')) {
+      const { TestPageMigrationComparison } = require('../ui/TestPageMigrationComparison');
+      return <TestPageMigrationComparison />;
+    }
   }
 
   // 路由导航
