@@ -52,10 +52,16 @@ interface StressTestHistoryProps {
 }
 
 const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' }) => {
-  // 开发环境下显示Card组件测试
-  if (process.env.NODE_ENV === 'development' && window.location.search.includes('test-card')) {
-    const { CardTest } = require('../ui/CardTest');
-    return <CardTest />;
+  // 开发环境下显示组件测试
+  if (process.env.NODE_ENV === 'development') {
+    if (window.location.search.includes('test-card')) {
+      const { CardTest } = require('../ui/CardTest');
+      return <CardTest />;
+    }
+    if (window.location.search.includes('test-modal')) {
+      const { ModalTest } = require('../ui/ModalTest');
+      return <ModalTest />;
+    }
   }
 
   // 路由导航

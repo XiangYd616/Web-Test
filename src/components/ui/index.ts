@@ -34,3 +34,9 @@ export {
     Card, CardBody, CardDescription, CardFooter, CardHeader, CardTitle, SimpleCard
 } from './Card';
 
+// 模态框组件
+export {
+    ConfirmModal, Modal, ModalBody,
+    ModalFooter, ModalHeader
+} from './Modal';
+
