@@ -7,7 +7,6 @@ import {
   Eye,
   Gauge,
   ImageIcon,
-  Lock,
   MousePointer,
   Play,
   Square,
@@ -20,7 +19,7 @@ import React, { useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { TestPageLayout } from '../components/testing/UnifiedTestingComponents';
 import { useUserStats } from '../hooks/useUserStats';
-import '../styles/progress-bars.css';
+// CSS样式已迁移到组件库中
 
 interface UXTestConfig {
   url: string;
@@ -359,15 +358,10 @@ const UXTest: React.FC = () => {
                 <Square className="w-4 h-4" />
                 <span>测试中...</span>
               </>
-            ) : isAuthenticated ? (
+            ) : (
               <>
                 <Play className="w-4 h-4" />
                 <span>开始测试</span>
-              </>
-            ) : (
-              <>
-                <Lock className="w-4 h-4" />
-                <span>需要登录后测试</span>
               </>
             )}
           </button>

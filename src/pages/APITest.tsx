@@ -25,10 +25,12 @@ import {
 import React, { useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { URLInput } from '../components/testing';
+import { ProgressBar } from '../components/ui/ProgressBar';
 import { useUserStats } from '../hooks/useUserStats';
 import backgroundTestManager from '../services/backgroundTestManager';
 import type { APIEndpoint, APITestConfig } from '../services/testing/apiTestEngine';
-import '../styles/progress-bars.css';
+// CSS样式已迁移到组件库中
+// 进度条样式已集成到ProgressBar组件
 
 // 认证配置类型定义
 interface AuthenticationConfig {
@@ -657,7 +659,7 @@ const APITest: React.FC = () => {
                 ) : (
                   <Lock className="w-4 h-4" />
                 )}
-                <span>{isAuthenticated ? '开始测试' : '需要登录后测试'}</span>
+                <span>开始测试</span>
               </button>
             ) : testStatus === 'starting' ? (
               <div className="flex items-center space-x-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg">
@@ -748,11 +750,13 @@ const APITest: React.FC = () => {
 
               {/* 进度条 */}
               {backgroundTestInfo && (
-                <div className="w-full bg-gray-700 rounded-full h-2 mb-3">
-                  <div
-                    className="progress-fill progress-fill-blue h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${backgroundTestInfo.progress || 0}%` }}
-                  ></div>
+                <div className="mb-3">
+                  <ProgressBar
+                    value={backgroundTestInfo.progress || 0}
+                    variant="primary"
+                    size="md"
+                    animated
+                  />
                 </div>
               )}
 

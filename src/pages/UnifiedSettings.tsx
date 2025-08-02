@@ -1,44 +1,41 @@
-import React, { useState, useEffect } from 'react';
 import {
-  Settings as SettingsIcon,
-  Settings,
-  User,
-  Bell,
-  Shield,
-  Database,
-  Monitor,
-  Clock,
-  FileText,
-  Archive,
-  Server,
-  Globe,
-  Mail,
-  Save,
-  RefreshCw,
   AlertTriangle,
+  Archive,
+  Bell,
   CheckCircle,
-  Info,
+  Clock,
+  Database,
   Download,
-  Upload,
-  Trash2,
-  Play,
+  FileText,
+  Globe,
+  Info,
+  Lock,
+  Mail,
+  Monitor,
   Pause,
+  Play,
+  RefreshCw,
   RotateCcw,
-  Lock
+  Server,
+  Settings,
+  Settings as SettingsIcon,
+  Shield,
+  Trash2,
+  Upload,
+  User
 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { SettingsService, systemSettingsAPI, userPreferencesAPI } from '../services/settingsService';
+import { SettingsService } from '../services/settingsService';
 
 // 导入主题样式
-import '../styles/theme.css';
-import '../styles/light-theme.css';
-import '../styles/dark-theme.css';
+// CSS样式已迁移到组件库中
 
 // 导入现有组件
-import SystemSettings from '../components/admin/SystemSettings';
 import BackupManagement from '../components/admin/BackupManagement';
 import SecurityCenter from '../components/admin/SecurityCenter';
+import SystemSettings from '../components/admin/SystemSettings';
 
 interface TabConfig {
   id: string;
@@ -265,11 +262,10 @@ const UnifiedSettings: React.FC = () => {
 
             {/* 保存状态指示器 */}
             {saveStatus !== 'idle' && (
-              <div className={`flex items-center space-x-3 px-4 py-3 rounded-xl backdrop-blur-sm transition-all duration-300 ${
-                saveStatus === 'success'
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/20'
-                  : 'bg-red-500/20 text-red-300 border border-red-500/40 shadow-lg shadow-red-500/20'
-              }`}>
+              <div className={`flex items-center space-x-3 px-4 py-3 rounded-xl backdrop-blur-sm transition-all duration-300 ${saveStatus === 'success'
+                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-lg shadow-emerald-500/20'
+                : 'bg-red-500/20 text-red-300 border border-red-500/40 shadow-lg shadow-red-500/20'
+                }`}>
                 {saveStatus === 'success' ? (
                   <CheckCircle className="w-5 h-5" />
                 ) : (
@@ -295,17 +291,15 @@ const UnifiedSettings: React.FC = () => {
                       key={tab.id}
                       type="button"
                       onClick={() => setActiveTab(tab.id)}
-                      className={`group w-full flex items-start space-x-4 px-4 py-4 rounded-xl text-left transition-all duration-300 ${
-                        activeTab === tab.id
-                          ? 'bg-gradient-to-r from-blue-600/30 to-purple-600/20 text-blue-300 border border-blue-500/40 shadow-lg shadow-blue-500/20 transform scale-[1.02]'
-                          : 'text-gray-300 hover:bg-gradient-to-r hover:from-gray-700/50 hover:to-gray-600/30 hover:text-white border border-transparent hover:border-gray-600/50 hover:shadow-lg hover:transform hover:scale-[1.01]'
-                      }`}
+                      className={`group w-full flex items-start space-x-4 px-4 py-4 rounded-xl text-left transition-all duration-300 ${activeTab === tab.id
+                        ? 'bg-gradient-to-r from-blue-600/30 to-purple-600/20 text-blue-300 border border-blue-500/40 shadow-lg shadow-blue-500/20 transform scale-[1.02]'
+                        : 'text-gray-300 hover:bg-gradient-to-r hover:from-gray-700/50 hover:to-gray-600/30 hover:text-white border border-transparent hover:border-gray-600/50 hover:shadow-lg hover:transform hover:scale-[1.01]'
+                        }`}
                     >
-                      <div className={`p-2 rounded-lg transition-all duration-300 ${
-                        activeTab === tab.id
-                          ? 'bg-blue-500/20 text-blue-400'
-                          : 'bg-gray-700/50 text-gray-400 group-hover:bg-gray-600/50 group-hover:text-gray-300'
-                      }`}>
+                      <div className={`p-2 rounded-lg transition-all duration-300 ${activeTab === tab.id
+                        ? 'bg-blue-500/20 text-blue-400'
+                        : 'bg-gray-700/50 text-gray-400 group-hover:bg-gray-600/50 group-hover:text-gray-300'
+                        }`}>
                         <Icon className="w-5 h-5 flex-shrink-0" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -386,206 +380,206 @@ const PreferencesSettings: React.FC<{
   };
 
   return (
-  <div className="space-y-8">
-    <div className="flex items-center space-x-3 mb-6">
-      <div className="p-2 bg-gradient-to-br from-purple-500/20 to-pink-600/20 rounded-lg border border-purple-500/30">
-        <User className="w-6 h-6 text-purple-400" />
-      </div>
-      <h3 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-        个人偏好
-      </h3>
-    </div>
-
-    {/* 界面设置 */}
-    <div className="bg-gradient-to-br from-gray-800/60 to-gray-700/40 backdrop-blur-sm rounded-2xl p-8 border border-gray-600/50 shadow-xl">
+    <div className="space-y-8">
       <div className="flex items-center space-x-3 mb-6">
-        <div className="p-2 bg-blue-500/20 rounded-lg">
-          <Monitor className="w-5 h-5 text-blue-400" />
+        <div className="p-2 bg-gradient-to-br from-purple-500/20 to-pink-600/20 rounded-lg border border-purple-500/30">
+          <User className="w-6 h-6 text-purple-400" />
         </div>
-        <h4 className="text-xl font-semibold text-white">界面设置</h4>
+        <h3 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+          个人偏好
+        </h3>
       </div>
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label htmlFor="theme-select" className="block text-sm font-semibold text-gray-300">主题模式</label>
-            <select
-              id="theme-select"
-              value={interfacePrefs.theme}
-              onChange={(e) => {
-                const newTheme = e.target.value as 'light' | 'dark';
-                setInterfacePrefs(prev => ({ ...prev, theme: newTheme }));
-                // 立即应用主题更改
-                setTheme(newTheme);
-              }}
-              className="w-full px-4 py-3 bg-gray-700/60 border border-gray-600/60 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
-              aria-label="选择主题模式"
-            >
-              <option value="dark">深色主题</option>
-              <option value="light">浅色主题</option>
-            </select>
+
+      {/* 界面设置 */}
+      <div className="bg-gradient-to-br from-gray-800/60 to-gray-700/40 backdrop-blur-sm rounded-2xl p-8 border border-gray-600/50 shadow-xl">
+        <div className="flex items-center space-x-3 mb-6">
+          <div className="p-2 bg-blue-500/20 rounded-lg">
+            <Monitor className="w-5 h-5 text-blue-400" />
           </div>
-          <div className="space-y-2">
-            <label htmlFor="language-select" className="block text-sm font-semibold text-gray-300">语言</label>
-            <select
-              id="language-select"
-              value={interfacePrefs.language}
-              onChange={(e) => setInterfacePrefs(prev => ({ ...prev, language: e.target.value }))}
-              className="w-full px-4 py-3 bg-gray-700/60 border border-gray-600/60 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
-              aria-label="选择界面语言"
-            >
-              <option value="zh-CN">简体中文</option>
-              <option value="en-US">English</option>
-            </select>
+          <h4 className="text-xl font-semibold text-white">界面设置</h4>
+        </div>
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label htmlFor="theme-select" className="block text-sm font-semibold text-gray-300">主题模式</label>
+              <select
+                id="theme-select"
+                value={interfacePrefs.theme}
+                onChange={(e) => {
+                  const newTheme = e.target.value as 'light' | 'dark';
+                  setInterfacePrefs(prev => ({ ...prev, theme: newTheme }));
+                  // 立即应用主题更改
+                  setTheme(newTheme);
+                }}
+                className="w-full px-4 py-3 bg-gray-700/60 border border-gray-600/60 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
+                aria-label="选择主题模式"
+              >
+                <option value="dark">深色主题</option>
+                <option value="light">浅色主题</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="language-select" className="block text-sm font-semibold text-gray-300">语言</label>
+              <select
+                id="language-select"
+                value={interfacePrefs.language}
+                onChange={(e) => setInterfacePrefs(prev => ({ ...prev, language: e.target.value }))}
+                className="w-full px-4 py-3 bg-gray-700/60 border border-gray-600/60 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
+                aria-label="选择界面语言"
+              >
+                <option value="zh-CN">简体中文</option>
+                <option value="en-US">English</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="timezone-select" className="block text-sm font-semibold text-gray-300">时区</label>
+              <select
+                id="timezone-select"
+                value={interfacePrefs.timezone}
+                onChange={(e) => setInterfacePrefs(prev => ({ ...prev, timezone: e.target.value }))}
+                className="w-full px-4 py-3 bg-gray-700/60 border border-gray-600/60 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
+                aria-label="选择时区设置"
+              >
+                <option value="Asia/Shanghai">中国标准时间 (UTC+8)</option>
+                <option value="America/New_York">美国东部时间 (UTC-5)</option>
+                <option value="Europe/London">英国时间 (UTC+0)</option>
+                <option value="Asia/Tokyo">日本时间 (UTC+9)</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="date-format-select" className="block text-sm font-semibold text-gray-300">日期格式</label>
+              <select
+                id="date-format-select"
+                value={interfacePrefs.dateFormat}
+                onChange={(e) => setInterfacePrefs(prev => ({ ...prev, dateFormat: e.target.value }))}
+                className="w-full px-4 py-3 bg-gray-700/60 border border-gray-600/60 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
+                aria-label="选择日期格式"
+              >
+                <option value="YYYY-MM-DD">2025-01-15</option>
+                <option value="DD/MM/YYYY">15/01/2025</option>
+                <option value="MM/DD/YYYY">01/15/2025</option>
+              </select>
+            </div>
           </div>
-          <div className="space-y-2">
-            <label htmlFor="timezone-select" className="block text-sm font-semibold text-gray-300">时区</label>
-            <select
-              id="timezone-select"
-              value={interfacePrefs.timezone}
-              onChange={(e) => setInterfacePrefs(prev => ({ ...prev, timezone: e.target.value }))}
-              className="w-full px-4 py-3 bg-gray-700/60 border border-gray-600/60 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
-              aria-label="选择时区设置"
-            >
-              <option value="Asia/Shanghai">中国标准时间 (UTC+8)</option>
-              <option value="America/New_York">美国东部时间 (UTC-5)</option>
-              <option value="Europe/London">英国时间 (UTC+0)</option>
-              <option value="Asia/Tokyo">日本时间 (UTC+9)</option>
-            </select>
+
+          <div className="space-y-4">
+            <label className="flex items-center space-x-4 p-4 rounded-xl bg-gray-700/30 border border-gray-600/40 hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={interfacePrefs.enableAnimations}
+                onChange={(e) => setInterfacePrefs(prev => ({ ...prev, enableAnimations: e.target.checked }))}
+                className="w-5 h-5 text-blue-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-blue-500/50 focus:ring-2 transition-all duration-200"
+                aria-label="启用动画效果"
+              />
+              <span className="text-gray-200 font-medium">启用动画效果</span>
+            </label>
+            <label className="flex items-center space-x-4 p-4 rounded-xl bg-gray-700/30 border border-gray-600/40 hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={interfacePrefs.showAdvancedOptions}
+                onChange={(e) => setInterfacePrefs(prev => ({ ...prev, showAdvancedOptions: e.target.checked }))}
+                className="w-5 h-5 text-blue-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-blue-500/50 focus:ring-2 transition-all duration-200"
+                aria-label="显示高级选项"
+              />
+              <span className="text-gray-200 font-medium">显示高级选项</span>
+            </label>
+            <label className="flex items-center space-x-4 p-4 rounded-xl bg-gray-700/30 border border-gray-600/40 hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={interfacePrefs.autoSaveSettings}
+                onChange={(e) => setInterfacePrefs(prev => ({ ...prev, autoSaveSettings: e.target.checked }))}
+                className="w-5 h-5 text-blue-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-blue-500/50 focus:ring-2 transition-all duration-200"
+                aria-label="自动保存设置"
+              />
+              <span className="text-gray-200 font-medium">自动保存设置</span>
+            </label>
           </div>
-          <div className="space-y-2">
-            <label htmlFor="date-format-select" className="block text-sm font-semibold text-gray-300">日期格式</label>
-            <select
-              id="date-format-select"
-              value={interfacePrefs.dateFormat}
-              onChange={(e) => setInterfacePrefs(prev => ({ ...prev, dateFormat: e.target.value }))}
-              className="w-full px-4 py-3 bg-gray-700/60 border border-gray-600/60 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
-              aria-label="选择日期格式"
+
+          <div className="flex justify-end pt-4">
+            <button
+              type="button"
+              onClick={handleInterfaceSave}
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-medium transition-all duration-200 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
             >
-              <option value="YYYY-MM-DD">2025-01-15</option>
-              <option value="DD/MM/YYYY">15/01/2025</option>
-              <option value="MM/DD/YYYY">01/15/2025</option>
-            </select>
+              保存界面设置
+            </button>
           </div>
         </div>
+      </div>
 
-        <div className="space-y-4">
-          <label className="flex items-center space-x-4 p-4 rounded-xl bg-gray-700/30 border border-gray-600/40 hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={interfacePrefs.enableAnimations}
-              onChange={(e) => setInterfacePrefs(prev => ({ ...prev, enableAnimations: e.target.checked }))}
-              className="w-5 h-5 text-blue-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-blue-500/50 focus:ring-2 transition-all duration-200"
-              aria-label="启用动画效果"
-            />
-            <span className="text-gray-200 font-medium">启用动画效果</span>
-          </label>
-          <label className="flex items-center space-x-4 p-4 rounded-xl bg-gray-700/30 border border-gray-600/40 hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={interfacePrefs.showAdvancedOptions}
-              onChange={(e) => setInterfacePrefs(prev => ({ ...prev, showAdvancedOptions: e.target.checked }))}
-              className="w-5 h-5 text-blue-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-blue-500/50 focus:ring-2 transition-all duration-200"
-              aria-label="显示高级选项"
-            />
-            <span className="text-gray-200 font-medium">显示高级选项</span>
-          </label>
-          <label className="flex items-center space-x-4 p-4 rounded-xl bg-gray-700/30 border border-gray-600/40 hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={interfacePrefs.autoSaveSettings}
-              onChange={(e) => setInterfacePrefs(prev => ({ ...prev, autoSaveSettings: e.target.checked }))}
-              className="w-5 h-5 text-blue-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-blue-500/50 focus:ring-2 transition-all duration-200"
-              aria-label="自动保存设置"
-            />
-            <span className="text-gray-200 font-medium">自动保存设置</span>
-          </label>
+      {/* 测试偏好 */}
+      <div className="bg-gradient-to-br from-gray-800/60 to-gray-700/40 backdrop-blur-sm rounded-2xl p-8 border border-gray-600/50 shadow-xl">
+        <div className="flex items-center space-x-3 mb-6">
+          <div className="p-2 bg-green-500/20 rounded-lg">
+            <Settings className="w-5 h-5 text-green-400" />
+          </div>
+          <h4 className="text-xl font-semibold text-white">测试偏好</h4>
         </div>
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label htmlFor="default-timeout-input" className="block text-sm font-semibold text-gray-300">默认测试超时 (秒)</label>
+              <input
+                id="default-timeout-input"
+                type="number"
+                value={testingPrefs.defaultTimeout}
+                onChange={(e) => setTestingPrefs(prev => ({ ...prev, defaultTimeout: parseInt(e.target.value) || 60 }))}
+                min="10"
+                max="300"
+                aria-label="设置默认测试超时时间"
+                className="w-full px-4 py-3 bg-gray-700/60 border border-gray-600/60 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all duration-200"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="retention-days-input" className="block text-sm font-semibold text-gray-300">结果保留天数</label>
+              <input
+                id="retention-days-input"
+                type="number"
+                value={testingPrefs.resultRetentionDays}
+                onChange={(e) => setTestingPrefs(prev => ({ ...prev, resultRetentionDays: parseInt(e.target.value) || 30 }))}
+                min="7"
+                max="365"
+                aria-label="设置测试结果保留天数"
+                className="w-full px-4 py-3 bg-gray-700/60 border border-gray-600/60 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all duration-200"
+              />
+            </div>
+          </div>
 
-        <div className="flex justify-end pt-4">
-          <button
-            type="button"
-            onClick={handleInterfaceSave}
-            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-medium transition-all duration-200 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-          >
-            保存界面设置
-          </button>
+          <div className="space-y-4">
+            <label className="flex items-center space-x-4 p-4 rounded-xl bg-gray-700/30 border border-gray-600/40 hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={testingPrefs.autoStartTests}
+                onChange={(e) => setTestingPrefs(prev => ({ ...prev, autoStartTests: e.target.checked }))}
+                className="w-5 h-5 text-green-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-green-500/50 focus:ring-2 transition-all duration-200"
+                aria-label="自动开始测试"
+              />
+              <span className="text-gray-200 font-medium">自动开始测试</span>
+            </label>
+            <label className="flex items-center space-x-4 p-4 rounded-xl bg-gray-700/30 border border-gray-600/40 hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={testingPrefs.showDetailedLogs}
+                onChange={(e) => setTestingPrefs(prev => ({ ...prev, showDetailedLogs: e.target.checked }))}
+                className="w-5 h-5 text-green-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-green-500/50 focus:ring-2 transition-all duration-200"
+                aria-label="显示详细日志"
+              />
+              <span className="text-gray-200 font-medium">显示详细日志</span>
+            </label>
+          </div>
+
+          <div className="flex justify-end pt-4">
+            <button
+              type="button"
+              onClick={handleTestingSave}
+              className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl font-medium transition-all duration-200 shadow-lg shadow-green-500/25 hover:shadow-green-500/40 hover:transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500/50"
+            >
+              保存测试偏好
+            </button>
+          </div>
         </div>
       </div>
     </div>
-
-    {/* 测试偏好 */}
-    <div className="bg-gradient-to-br from-gray-800/60 to-gray-700/40 backdrop-blur-sm rounded-2xl p-8 border border-gray-600/50 shadow-xl">
-      <div className="flex items-center space-x-3 mb-6">
-        <div className="p-2 bg-green-500/20 rounded-lg">
-          <Settings className="w-5 h-5 text-green-400" />
-        </div>
-        <h4 className="text-xl font-semibold text-white">测试偏好</h4>
-      </div>
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label htmlFor="default-timeout-input" className="block text-sm font-semibold text-gray-300">默认测试超时 (秒)</label>
-            <input
-              id="default-timeout-input"
-              type="number"
-              value={testingPrefs.defaultTimeout}
-              onChange={(e) => setTestingPrefs(prev => ({ ...prev, defaultTimeout: parseInt(e.target.value) || 60 }))}
-              min="10"
-              max="300"
-              aria-label="设置默认测试超时时间"
-              className="w-full px-4 py-3 bg-gray-700/60 border border-gray-600/60 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all duration-200"
-            />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="retention-days-input" className="block text-sm font-semibold text-gray-300">结果保留天数</label>
-            <input
-              id="retention-days-input"
-              type="number"
-              value={testingPrefs.resultRetentionDays}
-              onChange={(e) => setTestingPrefs(prev => ({ ...prev, resultRetentionDays: parseInt(e.target.value) || 30 }))}
-              min="7"
-              max="365"
-              aria-label="设置测试结果保留天数"
-              className="w-full px-4 py-3 bg-gray-700/60 border border-gray-600/60 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:border-green-500/50 transition-all duration-200"
-            />
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <label className="flex items-center space-x-4 p-4 rounded-xl bg-gray-700/30 border border-gray-600/40 hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={testingPrefs.autoStartTests}
-              onChange={(e) => setTestingPrefs(prev => ({ ...prev, autoStartTests: e.target.checked }))}
-              className="w-5 h-5 text-green-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-green-500/50 focus:ring-2 transition-all duration-200"
-              aria-label="自动开始测试"
-            />
-            <span className="text-gray-200 font-medium">自动开始测试</span>
-          </label>
-          <label className="flex items-center space-x-4 p-4 rounded-xl bg-gray-700/30 border border-gray-600/40 hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={testingPrefs.showDetailedLogs}
-              onChange={(e) => setTestingPrefs(prev => ({ ...prev, showDetailedLogs: e.target.checked }))}
-              className="w-5 h-5 text-green-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-green-500/50 focus:ring-2 transition-all duration-200"
-              aria-label="显示详细日志"
-            />
-            <span className="text-gray-200 font-medium">显示详细日志</span>
-          </label>
-        </div>
-
-        <div className="flex justify-end pt-4">
-          <button
-            type="button"
-            onClick={handleTestingSave}
-            className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl font-medium transition-all duration-200 shadow-lg shadow-green-500/25 hover:shadow-green-500/40 hover:transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500/50"
-          >
-            保存测试偏好
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
   );
 };
 
@@ -721,7 +715,7 @@ const AccountSettings: React.FC = () => {
             <input
               type="email"
               value={userInfo?.email || ''}
-              onChange={() => {}} // 只读，但允许选择文本
+              onChange={() => { }} // 只读，但允许选择文本
               aria-label="邮箱地址"
               className="w-full px-4 py-3 bg-gray-700/60 border border-gray-600/60 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 hover:border-gray-500/60"
             />
@@ -825,110 +819,110 @@ const NotificationSettings: React.FC<{
   };
 
   return (
-  <div className="space-y-8">
-    <div className="flex items-center space-x-3 mb-6">
-      <div className="p-2 bg-gradient-to-br from-yellow-500/20 to-orange-600/20 rounded-lg border border-yellow-500/30">
-        <Bell className="w-6 h-6 text-yellow-400" />
-      </div>
-      <h3 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-        通知设置
-      </h3>
-    </div>
-
-    {/* 邮件通知 */}
-    <div className="bg-gradient-to-br from-gray-800/60 to-gray-700/40 backdrop-blur-sm rounded-2xl p-8 border border-gray-600/50 shadow-xl">
+    <div className="space-y-8">
       <div className="flex items-center space-x-3 mb-6">
-        <div className="p-2 bg-blue-500/20 rounded-lg">
-          <Mail className="w-5 h-5 text-blue-400" />
+        <div className="p-2 bg-gradient-to-br from-yellow-500/20 to-orange-600/20 rounded-lg border border-yellow-500/30">
+          <Bell className="w-6 h-6 text-yellow-400" />
         </div>
-        <h4 className="text-xl font-semibold text-white">邮件通知</h4>
-      </div>
-      <div className="space-y-4">
-        <label className="flex items-center space-x-4 p-4 rounded-xl bg-gray-700/30 border border-gray-600/40 hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={notificationPrefs.emailTestComplete}
-            onChange={(e) => setNotificationPrefs(prev => ({ ...prev, emailTestComplete: e.target.checked }))}
-            className="w-5 h-5 text-blue-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-blue-500/50 focus:ring-2 transition-all duration-200"
-            aria-label="测试完成通知"
-          />
-          <span className="text-gray-200 font-medium">测试完成通知</span>
-        </label>
-        <label className="flex items-center space-x-4 p-4 rounded-xl bg-gray-700/30 border border-gray-600/40 hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={notificationPrefs.emailSystemAlerts}
-            onChange={(e) => setNotificationPrefs(prev => ({ ...prev, emailSystemAlerts: e.target.checked }))}
-            className="w-5 h-5 text-blue-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-blue-500/50 focus:ring-2 transition-all duration-200"
-            aria-label="系统告警通知"
-          />
-          <span className="text-gray-200 font-medium">系统告警通知</span>
-        </label>
-        <label className="flex items-center space-x-4 p-4 rounded-xl bg-gray-700/30 border border-gray-600/40 hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={notificationPrefs.emailScheduledTasks}
-            onChange={(e) => setNotificationPrefs(prev => ({ ...prev, emailScheduledTasks: e.target.checked }))}
-            className="w-5 h-5 text-blue-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-blue-500/50 focus:ring-2 transition-all duration-200"
-            aria-label="定时任务状态通知"
-          />
-          <span className="text-gray-200 font-medium">定时任务状态通知</span>
-        </label>
+        <h3 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+          通知设置
+        </h3>
       </div>
 
-      <div className="flex justify-end pt-4">
-        <button
-          type="button"
-          onClick={handleSave}
-          className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-medium transition-all duration-200 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-        >
-          保存邮件设置
-        </button>
+      {/* 邮件通知 */}
+      <div className="bg-gradient-to-br from-gray-800/60 to-gray-700/40 backdrop-blur-sm rounded-2xl p-8 border border-gray-600/50 shadow-xl">
+        <div className="flex items-center space-x-3 mb-6">
+          <div className="p-2 bg-blue-500/20 rounded-lg">
+            <Mail className="w-5 h-5 text-blue-400" />
+          </div>
+          <h4 className="text-xl font-semibold text-white">邮件通知</h4>
+        </div>
+        <div className="space-y-4">
+          <label className="flex items-center space-x-4 p-4 rounded-xl bg-gray-700/30 border border-gray-600/40 hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={notificationPrefs.emailTestComplete}
+              onChange={(e) => setNotificationPrefs(prev => ({ ...prev, emailTestComplete: e.target.checked }))}
+              className="w-5 h-5 text-blue-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-blue-500/50 focus:ring-2 transition-all duration-200"
+              aria-label="测试完成通知"
+            />
+            <span className="text-gray-200 font-medium">测试完成通知</span>
+          </label>
+          <label className="flex items-center space-x-4 p-4 rounded-xl bg-gray-700/30 border border-gray-600/40 hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={notificationPrefs.emailSystemAlerts}
+              onChange={(e) => setNotificationPrefs(prev => ({ ...prev, emailSystemAlerts: e.target.checked }))}
+              className="w-5 h-5 text-blue-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-blue-500/50 focus:ring-2 transition-all duration-200"
+              aria-label="系统告警通知"
+            />
+            <span className="text-gray-200 font-medium">系统告警通知</span>
+          </label>
+          <label className="flex items-center space-x-4 p-4 rounded-xl bg-gray-700/30 border border-gray-600/40 hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={notificationPrefs.emailScheduledTasks}
+              onChange={(e) => setNotificationPrefs(prev => ({ ...prev, emailScheduledTasks: e.target.checked }))}
+              className="w-5 h-5 text-blue-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-blue-500/50 focus:ring-2 transition-all duration-200"
+              aria-label="定时任务状态通知"
+            />
+            <span className="text-gray-200 font-medium">定时任务状态通知</span>
+          </label>
+        </div>
+
+        <div className="flex justify-end pt-4">
+          <button
+            type="button"
+            onClick={handleSave}
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-medium transition-all duration-200 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+          >
+            保存邮件设置
+          </button>
+        </div>
+      </div>
+
+      {/* 推送通知 */}
+      <div className="bg-gradient-to-br from-gray-800/60 to-gray-700/40 backdrop-blur-sm rounded-2xl p-8 border border-gray-600/50 shadow-xl">
+        <div className="flex items-center space-x-3 mb-6">
+          <div className="p-2 bg-purple-500/20 rounded-lg">
+            <Bell className="w-5 h-5 text-purple-400" />
+          </div>
+          <h4 className="text-xl font-semibold text-white">浏览器推送</h4>
+        </div>
+        <div className="space-y-4">
+          <label className="flex items-center space-x-4 p-4 rounded-xl bg-gray-700/30 border border-gray-600/40 hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={notificationPrefs.browserPushEnabled}
+              onChange={(e) => setNotificationPrefs(prev => ({ ...prev, browserPushEnabled: e.target.checked }))}
+              className="w-5 h-5 text-purple-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-purple-500/50 focus:ring-2 transition-all duration-200"
+              aria-label="启用浏览器推送通知"
+            />
+            <span className="text-gray-200 font-medium">启用浏览器推送通知</span>
+          </label>
+          <label className="flex items-center space-x-4 p-4 rounded-xl bg-gray-700/30 border border-gray-600/40 hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={notificationPrefs.browserPushResults}
+              onChange={(e) => setNotificationPrefs(prev => ({ ...prev, browserPushResults: e.target.checked }))}
+              className="w-5 h-5 text-purple-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-purple-500/50 focus:ring-2 transition-all duration-200"
+              aria-label="测试结果推送"
+            />
+            <span className="text-gray-200 font-medium">测试结果推送</span>
+          </label>
+        </div>
+
+        <div className="flex justify-end pt-4">
+          <button
+            type="button"
+            onClick={handleSave}
+            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-xl font-medium transition-all duration-200 shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 hover:transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+          >
+            保存推送设置
+          </button>
+        </div>
       </div>
     </div>
-
-    {/* 推送通知 */}
-    <div className="bg-gradient-to-br from-gray-800/60 to-gray-700/40 backdrop-blur-sm rounded-2xl p-8 border border-gray-600/50 shadow-xl">
-      <div className="flex items-center space-x-3 mb-6">
-        <div className="p-2 bg-purple-500/20 rounded-lg">
-          <Bell className="w-5 h-5 text-purple-400" />
-        </div>
-        <h4 className="text-xl font-semibold text-white">浏览器推送</h4>
-      </div>
-      <div className="space-y-4">
-        <label className="flex items-center space-x-4 p-4 rounded-xl bg-gray-700/30 border border-gray-600/40 hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={notificationPrefs.browserPushEnabled}
-            onChange={(e) => setNotificationPrefs(prev => ({ ...prev, browserPushEnabled: e.target.checked }))}
-            className="w-5 h-5 text-purple-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-purple-500/50 focus:ring-2 transition-all duration-200"
-            aria-label="启用浏览器推送通知"
-          />
-          <span className="text-gray-200 font-medium">启用浏览器推送通知</span>
-        </label>
-        <label className="flex items-center space-x-4 p-4 rounded-xl bg-gray-700/30 border border-gray-600/40 hover:bg-gray-700/50 transition-all duration-200 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={notificationPrefs.browserPushResults}
-            onChange={(e) => setNotificationPrefs(prev => ({ ...prev, browserPushResults: e.target.checked }))}
-            className="w-5 h-5 text-purple-600 bg-gray-700/60 border-gray-600 rounded-lg focus:ring-purple-500/50 focus:ring-2 transition-all duration-200"
-            aria-label="测试结果推送"
-          />
-          <span className="text-gray-200 font-medium">测试结果推送</span>
-        </label>
-      </div>
-
-      <div className="flex justify-end pt-4">
-        <button
-          type="button"
-          onClick={handleSave}
-          className="px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-xl font-medium transition-all duration-200 shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 hover:transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
-        >
-          保存推送设置
-        </button>
-      </div>
-    </div>
-  </div>
   );
 };
 

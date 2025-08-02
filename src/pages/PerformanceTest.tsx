@@ -26,11 +26,12 @@ import { useAuthCheck } from '../components/auth/withAuthCheck';
 import {
   TestPageLayout
 } from '../components/testing/UnifiedTestingComponents';
+import { ProgressBar } from '../components/ui/ProgressBar';
 import { useUserStats } from '../hooks/useUserStats';
 import UnifiedApiService from '../services/api/apiService';
 import { googlePageSpeedService } from '../services/googlePageSpeedService';
-import '../styles/compact-layout.css';
-import '../styles/unified-testing-tools.css';
+// CSS样式已迁移到组件库中
+// 测试工具样式已集成到TestingTools组件
 
 // 性能测试相关类型定义
 type TestMode = 'basic' | 'standard' | 'comprehensive' | 'lighthouse';
@@ -763,9 +764,8 @@ const PerformanceTest: React.FC = () => {
     }));
   };
 
-  if (!isAuthenticated) {
-    return LoginPromptComponent as React.ReactElement;
-  }
+  // 移除强制登录检查，允许未登录用户查看页面
+  // 在使用功能时才提示登录
 
   return (
     <TestPageLayout className="space-y-3 dark-page-scrollbar compact-layout"
@@ -1067,12 +1067,12 @@ const PerformanceTest: React.FC = () => {
                   <span className="text-gray-300">整体进度</span>
                   <span className="text-white font-medium">{progress}%</span>
                 </div>
-                <div className="w-full bg-gray-700 rounded-full h-1.5">
-                  <div
-                    className="test-progress-gradient h-1.5 rounded-full transition-all duration-300"
-                    style={{ width: `${progress}%` }}
-                  ></div>
-                </div>
+                <ProgressBar
+                  value={progress}
+                  variant="primary"
+                  size="sm"
+                  animated
+                />
                 {testProgress && (
                   <div className="text-xs text-gray-400">
                     {testProgress}
@@ -1200,15 +1200,12 @@ const PerformanceTest: React.FC = () => {
                   {(results.coreWebVitals.fcp / 1000).toFixed(1)}s
                 </span>
               </div>
-              <div className="w-full bg-gray-600 rounded-full h-1.5">
-                <div
-                  className={`h-2 rounded-full ${results.coreWebVitals.fcp < 1800 ? 'bg-green-400' :
-                    results.coreWebVitals.fcp < 3000 ? 'bg-yellow-400' :
-                      'bg-red-400'
-                    }`}
-                  style={{ width: `${Math.min(100, (3000 - results.coreWebVitals.fcp) / 3000 * 100)}%` }}
-                ></div>
-              </div>
+              <ProgressBar
+                value={Math.min(100, (3000 - results.coreWebVitals.fcp) / 3000 * 100)}
+                variant={results.coreWebVitals.fcp < 1800 ? 'success' :
+                  results.coreWebVitals.fcp < 3000 ? 'warning' : 'danger'}
+                size="sm"
+              />
             </div>
             <div className="bg-gray-700/50 rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
@@ -1220,15 +1217,12 @@ const PerformanceTest: React.FC = () => {
                   {(results.coreWebVitals.lcp / 1000).toFixed(1)}s
                 </span>
               </div>
-              <div className="w-full bg-gray-600 rounded-full h-2">
-                <div
-                  className={`h-2 rounded-full ${results.coreWebVitals.lcp < 2500 ? 'bg-green-400' :
-                    results.coreWebVitals.lcp < 4000 ? 'bg-yellow-400' :
-                      'bg-red-400'
-                    }`}
-                  style={{ width: `${Math.min(100, (4000 - results.coreWebVitals.lcp) / 4000 * 100)}%` }}
-                ></div>
-              </div>
+              <ProgressBar
+                value={Math.min(100, (4000 - results.coreWebVitals.lcp) / 4000 * 100)}
+                variant={results.coreWebVitals.lcp < 2500 ? 'success' :
+                  results.coreWebVitals.lcp < 4000 ? 'warning' : 'danger'}
+                size="md"
+              />
             </div>
             <div className="bg-gray-700/50 rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
@@ -1240,15 +1234,12 @@ const PerformanceTest: React.FC = () => {
                   {results.coreWebVitals.cls.toFixed(3)}
                 </span>
               </div>
-              <div className="w-full bg-gray-600 rounded-full h-2">
-                <div
-                  className={`h-2 rounded-full ${results.coreWebVitals.cls < 0.1 ? 'bg-green-400' :
-                    results.coreWebVitals.cls < 0.25 ? 'bg-yellow-400' :
-                      'bg-red-400'
-                    }`}
-                  style={{ width: `${Math.min(100, (0.25 - results.coreWebVitals.cls) / 0.25 * 100)}%` }}
-                ></div>
-              </div>
+              <ProgressBar
+                value={Math.min(100, (0.25 - results.coreWebVitals.cls) / 0.25 * 100)}
+                variant={results.coreWebVitals.cls < 0.1 ? 'success' :
+                  results.coreWebVitals.cls < 0.25 ? 'warning' : 'danger'}
+                size="md"
+              />
             </div>
           </div>
 
@@ -1351,6 +1342,8 @@ const PerformanceTest: React.FC = () => {
           </div>
         </div>
       )}
+      {/* 登录提示组件 */}
+      {LoginPromptComponent}
     </TestPageLayout>
   );
 };

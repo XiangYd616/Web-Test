@@ -1,5 +1,5 @@
 /* cSpell:ignore cooldown rampup rampdown */
-import { AlertCircle, AlertTriangle, BarChart3, CheckCircle, Clock, Download, FileText, Loader, Lock, Play, RotateCcw, Square, TrendingUp, Users, XCircle, Zap } from 'lucide-react';
+import { AlertCircle, AlertTriangle, BarChart3, CheckCircle, Clock, Download, FileText, Loader, Play, RotateCcw, Square, TrendingUp, Users, XCircle, Zap } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { AdvancedStressTestChart, UnifiedStressTestCharts } from '../components/charts';
@@ -19,9 +19,9 @@ import backgroundTestManager from '../services/backgroundTestManager';
 import { systemResourceMonitor } from '../services/systemResourceMonitor';
 import { testEngineManager } from '../services/testEngines';
 import { TestPhase, type RealTimeMetrics, type TestDataPoint } from '../services/testStateManager';
-import '../styles/compact-layout.css';
-import '../styles/optimized-charts.css';
-import '../styles/unified-testing-tools.css';
+// CSS样式已迁移到组件库中
+// 图表样式已集成到Chart组件
+// 测试工具样式已集成到TestingTools组件
 import { getTemplateById } from '../utils/testTemplates';
 
 // 本地配置接口，继承导入的配置
@@ -2955,8 +2955,8 @@ const StressTest: React.FC = () => {
                                                 : 'bg-yellow-600 hover:bg-yellow-700 text-white'
                                             }`}
                                     >
-                                        {isAuthenticated ? <Play className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-                                        <span>{isAuthenticated ? '开始测试' : '需要登录'}</span>
+                                        <Play className="w-4 h-4" />
+                                        <span>开始测试</span>
                                     </button>
                                 ) : testStatus === 'starting' ? (
                                     <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-blue-500/20 border border-blue-500/30 rounded-md">
@@ -3285,8 +3285,8 @@ const StressTest: React.FC = () => {
                                             </div>
                                         ) : (
                                             <div className="flex items-center space-x-2">
-                                                <Lock className="w-5 h-5" />
-                                                <span>需要登录</span>
+                                                <Play className="w-5 h-5" />
+                                                <span>开始压力测试</span>
                                             </div>
                                         )}
                                     </button>

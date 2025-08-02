@@ -26,8 +26,7 @@ import {
 } from '../components/testing/UnifiedTestingComponents';
 import type { SEOTestMode } from '../hooks/useUnifiedSEOTest';
 import { useUnifiedSEOTest } from '../hooks/useUnifiedSEOTest';
-import '../styles/compact-layout.css';
-import '../styles/unified-testing-tools.css';
+// CSS样式已迁移到组件库中
 
 type TestMode = 'standard' | 'comprehensive';
 type TestStatusType = 'idle' | 'starting' | 'running' | 'completed' | 'failed';
@@ -244,6 +243,11 @@ const SEOTest: React.FC = () => {
 
 
   const handleStartTest = async () => {
+    // 检查登录状态
+    if (!requireLogin()) {
+      return;
+    }
+
     // 验证输入
     if (seoTestMode === 'online' && !testConfig.url) {
       setError('请输入要分析的URL');
@@ -255,10 +259,7 @@ const SEOTest: React.FC = () => {
       return;
     }
 
-    if (!isAuthenticated) {
-      requireLogin();
-      return;
-    }
+    // 登录检查已在函数开始处处理
 
     try {
       setError('');
@@ -525,9 +526,8 @@ const SEOTest: React.FC = () => {
     `;
   };
 
-  if (!isAuthenticated) {
-    return LoginPromptComponent;
-  }
+  // 移除强制登录检查，允许未登录用户查看页面
+  // 在使用功能时才提示登录
 
   return (
     <TestPageLayout className="space-y-3 dark-page-scrollbar compact-layout"
@@ -1201,6 +1201,9 @@ const SEOTest: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* 登录提示组件 */}
+      {LoginPromptComponent}
     </TestPageLayout>
   );
 };

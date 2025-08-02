@@ -1,42 +1,35 @@
-import React, { useEffect, useState } from 'react';
 import {
-  AlertCircle,
-  CheckCircle,
+  BarChart3,
   Clock,
+  Download,
   Eye,
   Globe,
-  HardDrive,
   Loader,
   Search,
   Settings,
   Shield,
   Smartphone,
-  Square,
   XCircle,
-  Zap,
-  Download,
-  BarChart3
+  Zap
 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { useAuthCheck } from '../components/auth/withAuthCheck';
 import {
+  Badge,
   Button,
   Card,
+  CardBody,
   CardHeader,
   CardTitle,
-  CardBody,
-  CardFooter,
   Input,
-  SearchInput,
-  Select,
-  Badge,
-  StatusBadge,
-  ProgressBadge,
-  SimpleCheckbox,
   Modal,
   ModalBody,
-  ModalFooter
+  ModalFooter,
+  ProgressBadge,
+  Select,
+  SimpleCheckbox,
+  StatusBadge
 } from '../components/ui';
-import { useAuthCheck } from '../components/auth/withAuthCheck';
-import { URLInput } from '../components/testing';
 import type { SEOTestMode } from '../hooks/useUnifiedSEOTest';
 import { useUnifiedSEOTest } from '../hooks/useUnifiedSEOTest';
 
@@ -192,6 +185,11 @@ const SEOTestMigrated: React.FC = () => {
 
   // 开始测试
   const handleStartTest = async () => {
+    // 检查登录状态
+    if (!requireLogin()) {
+      return;
+    }
+
     if (!testConfig.url.trim()) {
       alert('请输入要测试的URL');
       return;
@@ -199,7 +197,7 @@ const SEOTestMigrated: React.FC = () => {
 
     try {
       setTestStatus('starting');
-      
+
       if (seoTestMode === 'online') {
         await startUnifiedTest({
           mode: 'online',
@@ -261,16 +259,15 @@ const SEOTestMigrated: React.FC = () => {
     }
   }, [testResults, testError]);
 
-  if (!isAuthenticated) {
-    return LoginPromptComponent;
-  }
+  // 移除强制登录检查，允许未登录用户查看页面
+  // 在使用功能时才提示登录
 
   const statusConfig = getTestStatusConfig();
 
   return (
     <div className="min-h-screen bg-gray-900 p-6">
       <div className="max-w-6xl mx-auto space-y-6">
-        
+
         {/* 页面标题 */}
         <Card>
           <CardHeader>
@@ -288,8 +285,8 @@ const SEOTestMigrated: React.FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant="success">已迁移</Badge>
-                <StatusBadge 
-                  status={statusConfig.status} 
+                <StatusBadge
+                  status={statusConfig.status}
                   text={statusConfig.text}
                 />
               </div>
@@ -363,6 +360,7 @@ const SEOTestMigrated: React.FC = () => {
                       <SimpleCheckbox
                         checked={testConfig[test.key]}
                         onChange={(e) => handleConfigChange(test.key, e.target.checked)}
+                        aria-label={`启用${test.name}测试`}
                       />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
@@ -402,7 +400,7 @@ const SEOTestMigrated: React.FC = () => {
                   停止测试
                 </Button>
               </div>
-              <ProgressBadge value={testProgress || 0} showValue />
+              <ProgressBadge value={typeof testProgress === 'number' ? testProgress : testProgress?.progress || 0} showValue />
             </CardBody>
           </Card>
         )}
@@ -428,31 +426,31 @@ const SEOTestMigrated: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="text-center">
                   <div className="text-3xl font-bold text-blue-400 mb-2">
-                    {testResults.overallScore || 0}
+                    {testResults.score || 0}
                   </div>
                   <div className="text-gray-400 mb-2">总体评分</div>
-                  <ProgressBadge value={testResults.overallScore || 0} />
+                  <ProgressBadge value={testResults.score || 0} />
                 </div>
-                
+
                 <div className="text-center">
                   <div className="text-3xl font-bold text-green-400 mb-2">
-                    {testResults.passedChecks || 0}
+                    {testResults.issues?.filter(issue => issue.type === 'info').length || 0}
                   </div>
                   <div className="text-gray-400 mb-2">通过检查</div>
                   <StatusBadge status="success" text="正常" />
                 </div>
-                
+
                 <div className="text-center">
                   <div className="text-3xl font-bold text-yellow-400 mb-2">
-                    {testResults.warningChecks || 0}
+                    {testResults.issues?.filter(issue => issue.type === 'warning').length || 0}
                   </div>
                   <div className="text-gray-400 mb-2">警告项目</div>
                   <StatusBadge status="warning" text="需优化" />
                 </div>
-                
+
                 <div className="text-center">
                   <div className="text-3xl font-bold text-red-400 mb-2">
-                    {testResults.failedChecks || 0}
+                    {testResults.issues?.filter(issue => issue.type === 'error').length || 0}
                   </div>
                   <div className="text-gray-400 mb-2">失败检查</div>
                   <StatusBadge status="error" text="需修复" />
@@ -471,9 +469,9 @@ const SEOTestMigrated: React.FC = () => {
                 <div>
                   <h4 className="font-semibold text-red-400 mb-2">测试失败</h4>
                   <p className="text-sm text-red-300">{testError}</p>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="mt-3"
                     onClick={() => setTestStatus('idle')}
                   >
@@ -520,6 +518,9 @@ const SEOTestMigrated: React.FC = () => {
             </Button>
           </ModalFooter>
         </Modal>
+
+        {/* 登录提示组件 */}
+        {LoginPromptComponent}
       </div>
     </div>
   );

@@ -148,8 +148,8 @@ const Login: React.FC = () => {
               <label htmlFor="email" className="block text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>
                 邮箱地址
               </label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 input-icon-container flex items-center pointer-events-none z-10">
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10">
                   <Mail className="h-4 w-4 transition-colors duration-200" style={{ color: 'var(--text-tertiary)' }} />
                 </div>
                 <input
@@ -160,7 +160,7 @@ const Login: React.FC = () => {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="appearance-none block w-full pr-3 py-2.5 rounded-lg text-sm transition-all duration-200 border-2 input-with-icon"
+                  className="appearance-none block w-full pl-10 pr-3 py-2.5 rounded-lg text-sm transition-all duration-200 border-2"
                   style={{
                     background: 'var(--input-background)',
                     borderColor: 'var(--input-border)',
@@ -184,8 +184,8 @@ const Login: React.FC = () => {
               <label htmlFor="password" className="block text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>
                 密码
               </label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 input-icon-container flex items-center pointer-events-none z-10">
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10">
                   <Lock className="h-4 w-4 transition-colors duration-200" style={{ color: 'var(--text-tertiary)' }} />
                 </div>
                 <input
@@ -196,7 +196,7 @@ const Login: React.FC = () => {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="appearance-none block w-full pr-12 py-2.5 rounded-lg text-sm transition-all duration-200 border-2 input-with-icon"
+                  className="appearance-none block w-full pl-10 pr-12 py-2.5 rounded-lg text-sm transition-all duration-200 border-2"
                   style={{
                     background: 'var(--input-background)',
                     borderColor: 'var(--input-border)',
@@ -213,7 +213,7 @@ const Login: React.FC = () => {
                   }}
                   placeholder="请输入密码"
                 />
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center z-10">
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 z-10">
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}

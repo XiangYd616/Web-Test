@@ -19,9 +19,11 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { AdvancedTestCharts } from '../components/charts';
 import { URLInput } from '../components/testing';
+import { ProgressBar } from '../components/ui/ProgressBar';
 import { useUserStats } from '../hooks/useUserStats';
-import '../styles/progress-bars.css';
-import '../styles/unified-testing-tools.css';
+// CSS样式已迁移到组件库中
+// 进度条样式已集成到ProgressBar组件
+// 测试工具样式已集成到TestingTools组件
 
 // 兼容性测试相关类型定义
 type BrowserType = 'chrome' | 'firefox' | 'safari' | 'edge' | 'ie' | 'opera';
@@ -803,6 +805,12 @@ const CompatibilityTest: React.FC = () => {
     return 'bg-red-500/20 border-red-500/30';
   };
 
+  const getProgressVariant = (score: number): 'success' | 'warning' | 'danger' => {
+    if (score >= 90) return 'success';
+    if (score >= 70) return 'warning';
+    return 'danger';
+  };
+
   return (
     <div className="space-y-4 dark-page-scrollbar">
       {/* 页面标题 */}
@@ -830,7 +838,7 @@ const CompatibilityTest: React.FC = () => {
                 ) : (
                   <Lock className="w-4 h-4" />
                 )}
-                <span>{isAuthenticated ? '开始测试' : '需要登录后测试'}</span>
+                <span>开始测试</span>
               </button>
             ) : testStatus === 'starting' ? (
               <div className="flex items-center space-x-2 px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-lg">
@@ -925,11 +933,13 @@ const CompatibilityTest: React.FC = () => {
               </div>
 
               {/* 进度条 */}
-              <div className="w-full bg-gray-700 rounded-full h-2 mb-3">
-                <div
-                  className="test-progress-dynamic h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${progress}%` }}
-                ></div>
+              <div className="mb-3">
+                <ProgressBar
+                  value={progress}
+                  variant="primary"
+                  size="md"
+                  animated
+                />
               </div>
 
               <p className="text-sm text-purple-300">{currentStep}</p>
@@ -1131,13 +1141,11 @@ const CompatibilityTest: React.FC = () => {
                             {Math.round(Number(score))}
                           </span>
                         </div>
-                        <div className="w-full bg-gray-600 rounded-full h-2">
-                          <div
-                            className={`h-2 rounded-full ${getScoreBg(Number(score)).includes('green') ? 'bg-green-500' :
-                              getScoreBg(Number(score)).includes('yellow') ? 'bg-yellow-500' : 'bg-red-500'}`}
-                            style={{ width: `${Math.max(0, Math.min(100, Number(score)))}%` }}
-                          ></div>
-                        </div>
+                        <ProgressBar
+                          value={Math.max(0, Math.min(100, Number(score)))}
+                          variant={getProgressVariant(Number(score))}
+                          size="md"
+                        />
                       </div>
                     ))}
                   </div>
@@ -1167,13 +1175,11 @@ const CompatibilityTest: React.FC = () => {
                               {Math.round(Number(score))}
                             </span>
                           </div>
-                          <div className="w-full bg-gray-600 rounded-full h-2">
-                            <div
-                              className={`h-2 rounded-full ${getScoreBg(Number(score)).includes('green') ? 'bg-green-500' :
-                                getScoreBg(Number(score)).includes('yellow') ? 'bg-yellow-500' : 'bg-red-500'}`}
-                              style={{ width: `${Math.max(0, Math.min(100, Number(score)))}%` }}
-                            ></div>
-                          </div>
+                          <ProgressBar
+                            value={Math.max(0, Math.min(100, Number(score)))}
+                            variant={getProgressVariant(Number(score))}
+                            size="md"
+                          />
                         </div>
                       );
                     })}

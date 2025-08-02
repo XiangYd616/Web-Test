@@ -1,38 +1,33 @@
-import React, { useState, useRef } from 'react';
-import { 
-  Search, 
-  Shield, 
-  XCircle, 
-  Lock, 
-  AlertTriangle, 
-  CheckCircle, 
-  Globe,
-  Eye,
-  Download,
+import {
+  AlertTriangle,
   BarChart3,
+  Download,
+  Eye,
+  Globe,
+  Lock,
+  Search,
+  Shield,
+  XCircle,
   Zap
 } from 'lucide-react';
+import React, { useState } from 'react';
+import { useAuthCheck } from '../components/auth/withAuthCheck';
 import {
+  Badge,
   Button,
   Card,
+  CardBody,
   CardHeader,
   CardTitle,
-  CardBody,
-  CardFooter,
   Input,
-  SearchInput,
-  Select,
-  Badge,
-  StatusBadge,
-  ProgressBadge,
-  SimpleCheckbox,
   Modal,
   ModalBody,
   ModalFooter,
-  IconButton
+  ProgressBadge,
+  Select,
+  SimpleCheckbox,
+  StatusBadge
 } from '../components/ui';
-import { useAuthCheck } from '../components/auth/withAuthCheck';
-import { SecurityTestHistory } from '../components/security/SecurityTestHistory';
 import { useUserStats } from '../hooks/useUserStats';
 import { SecurityTestResult, TestProgress } from '../services/unifiedSecurityEngine';
 
@@ -86,7 +81,7 @@ const SecurityTestMigrated: React.FC = () => {
   const [showReportModal, setShowReportModal] = useState(false);
 
   // 用户统计
-  const { stats, updateStats } = useUserStats();
+  const { stats } = useUserStats();
 
   // 安全检测项目配置
   const securityTests = [
@@ -195,6 +190,11 @@ const SecurityTestMigrated: React.FC = () => {
 
   // 开始测试
   const handleStartTest = async () => {
+    // 检查登录状态
+    if (!requireLogin()) {
+      return;
+    }
+
     if (!testConfig.url.trim()) {
       alert('请输入要测试的URL');
       return;
@@ -204,15 +204,15 @@ const SecurityTestMigrated: React.FC = () => {
       setIsTestRunning(true);
       setError(null);
       setTestResult(null);
-      
+
       // 模拟测试进度
-      const progressSteps = [
-        { step: 1, message: '正在连接目标网站...', progress: 10 },
-        { step: 2, message: '检查SSL/TLS配置...', progress: 25 },
-        { step: 3, message: '扫描安全头部...', progress: 40 },
-        { step: 4, message: '检测安全漏洞...', progress: 60 },
-        { step: 5, message: '分析恶意软件...', progress: 80 },
-        { step: 6, message: '生成安全报告...', progress: 100 }
+      const progressSteps: TestProgress[] = [
+        { phase: 'initializing', progress: 10, currentModule: '连接检查', currentCheck: '正在连接目标网站...' },
+        { phase: 'scanning', progress: 25, currentModule: 'SSL检查', currentCheck: '检查SSL/TLS配置...' },
+        { phase: 'scanning', progress: 40, currentModule: '安全头部', currentCheck: '扫描安全头部...' },
+        { phase: 'analyzing', progress: 60, currentModule: '漏洞检测', currentCheck: '检测安全漏洞...' },
+        { phase: 'analyzing', progress: 80, currentModule: '恶意软件', currentCheck: '分析恶意软件...' },
+        { phase: 'reporting', progress: 100, currentModule: '报告生成', currentCheck: '生成安全报告...' }
       ];
 
       for (const step of progressSteps) {
@@ -225,31 +225,78 @@ const SecurityTestMigrated: React.FC = () => {
         id: `security_${Date.now()}`,
         url: testConfig.url,
         timestamp: new Date().toISOString(),
+        duration: 5000,
+        status: 'completed',
         overallScore: 85,
-        grade: 'B+',
-        vulnerabilities: {
-          critical: 0,
-          high: 1,
-          medium: 3,
-          low: 5,
-          info: 2
+        riskLevel: 'medium',
+        grade: 'B',
+        modules: {
+          headers: {
+            score: 88,
+            securityHeaders: [],
+            recommendations: []
+          }
         },
-        checks: {
-          ssl: { passed: true, score: 95, message: 'SSL配置良好' },
-          headers: { passed: true, score: 88, message: '安全头部配置基本完善' },
-          vulnerabilities: { passed: false, score: 75, message: '发现中等风险漏洞' },
-          malware: { passed: true, score: 100, message: '未发现恶意软件' }
+        findings: [
+          {
+            id: 'finding-1',
+            type: 'security-header',
+            category: 'headers',
+            severity: 'medium',
+            title: '缺少安全头部',
+            description: '网站缺少重要的安全响应头',
+            impact: '可能导致XSS攻击',
+            cvss: 5.0
+          }
+        ],
+        compliance: [],
+        statistics: {
+          totalChecks: 10,
+          passedChecks: 7,
+          failedChecks: 3,
+          warningChecks: 0,
+          skippedChecks: 0,
+          executionTime: 5000,
+          requestCount: 15,
+          errorCount: 3
         },
         recommendations: [
-          '建议启用HSTS头部',
-          '优化Content Security Policy配置',
-          '修复发现的中等风险漏洞'
+          {
+            id: 'rec-1',
+            category: 'headers',
+            priority: 'high',
+            title: '启用HSTS头部',
+            description: '建议启用HSTS头部以增强安全性',
+            solution: '在服务器配置中添加Strict-Transport-Security头部',
+            effort: 'low',
+            impact: 'high'
+          },
+          {
+            id: 'rec-2',
+            category: 'headers',
+            priority: 'medium',
+            title: '优化CSP配置',
+            description: '优化Content Security Policy配置',
+            solution: '配置更严格的CSP策略以防止XSS攻击',
+            effort: 'medium',
+            impact: 'medium'
+          },
+          {
+            id: 'rec-3',
+            category: 'vulnerabilities',
+            priority: 'medium',
+            title: '修复中等风险漏洞',
+            description: '修复发现的中等风险漏洞',
+            solution: '根据漏洞扫描结果修复相关安全问题',
+            effort: 'medium',
+            impact: 'medium'
+          }
         ]
       };
 
       setTestResult(mockResult);
-      updateStats('securityTests', 1);
-      
+      // 统计信息已在mockResult中设置
+
     } catch (error) {
       console.error('安全测试失败:', error);
       setError('测试过程中发生错误，请重试');
@@ -287,14 +334,13 @@ const SecurityTestMigrated: React.FC = () => {
     }
   };
 
-  if (!isAuthenticated) {
-    return LoginPromptComponent;
-  }
+  // 移除强制登录检查，允许未登录用户查看页面
+  // 在使用功能时才提示登录
 
   return (
     <div className="min-h-screen bg-gray-900 p-6">
       <div className="max-w-6xl mx-auto space-y-6">
-        
+
         {/* 页面标题 */}
         <Card>
           <CardHeader>
@@ -330,11 +376,10 @@ const SecurityTestMigrated: React.FC = () => {
                   <button
                     key={tab.key}
                     onClick={() => setActiveTab(tab.key as any)}
-                    className={`flex items-center gap-2 px-6 py-4 text-sm font-medium transition-colors ${
-                      activeTab === tab.key
-                        ? 'text-blue-400 border-b-2 border-blue-400 bg-blue-500/5'
-                        : 'text-gray-400 hover:text-gray-300'
-                    }`}
+                    className={`flex items-center gap-2 px-6 py-4 text-sm font-medium transition-colors ${activeTab === tab.key
+                      ? 'text-blue-400 border-b-2 border-blue-400 bg-blue-500/5'
+                      : 'text-gray-400 hover:text-gray-300'
+                      }`}
                   >
                     <Icon className="w-4 h-4" />
                     {tab.label}
@@ -410,6 +455,7 @@ const SecurityTestMigrated: React.FC = () => {
                           <SimpleCheckbox
                             checked={testConfig[test.key as keyof SecurityTestConfig] as boolean}
                             onChange={(e) => handleConfigChange(test.key, e.target.checked)}
+                            aria-label={`启用${test.name}测试`}
                           />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-2">
@@ -441,7 +487,7 @@ const SecurityTestMigrated: React.FC = () => {
                       <Shield className="w-5 h-5 animate-pulse text-blue-400" />
                       <div>
                         <h3 className="font-medium text-white">安全测试进行中</h3>
-                        <p className="text-sm text-gray-400">{testProgress.message}</p>
+                        <p className="text-sm text-gray-400">{testProgress.currentCheck}</p>
                       </div>
                     </div>
                     <Button variant="ghost" onClick={handleStopTest}>
@@ -480,36 +526,36 @@ const SecurityTestMigrated: React.FC = () => {
                       <div className="text-gray-400 mb-2">安全评分</div>
                       <ProgressBadge value={testResult.overallScore} />
                     </div>
-                    
+
                     <div className="text-center">
                       <div className="text-2xl font-bold text-white mb-2">
                         {testResult.grade}
                       </div>
                       <div className="text-gray-400 mb-2">安全等级</div>
-                      <StatusBadge 
-                        {...getSecurityGradeConfig(testResult.grade)} 
+                      <StatusBadge
+                        {...getSecurityGradeConfig(testResult.grade)}
                       />
                     </div>
-                    
+
                     <div className="text-center">
                       <div className="text-3xl font-bold text-red-400 mb-2">
-                        {testResult.vulnerabilities.critical + testResult.vulnerabilities.high}
+                        {testResult.findings?.filter(f => f.severity === 'critical' || f.severity === 'high').length || 0}
                       </div>
                       <div className="text-gray-400 mb-2">高危漏洞</div>
-                      <StatusBadge 
-                        status={testResult.vulnerabilities.critical + testResult.vulnerabilities.high > 0 ? 'error' : 'success'} 
-                        text={testResult.vulnerabilities.critical + testResult.vulnerabilities.high > 0 ? '需修复' : '安全'}
+                      <StatusBadge
+                        status={(testResult.findings?.filter(f => f.severity === 'critical' || f.severity === 'high').length || 0) > 0 ? 'error' : 'success'}
+                        text={(testResult.findings?.filter(f => f.severity === 'critical' || f.severity === 'high').length || 0) > 0 ? '需修复' : '安全'}
                       />
                     </div>
-                    
+
                     <div className="text-center">
                       <div className="text-3xl font-bold text-yellow-400 mb-2">
-                        {testResult.vulnerabilities.medium + testResult.vulnerabilities.low}
+                        {testResult.findings?.filter(f => f.severity === 'medium' || f.severity === 'low').length || 0}
                       </div>
                       <div className="text-gray-400 mb-2">中低危漏洞</div>
-                      <StatusBadge 
-                        status={testResult.vulnerabilities.medium + testResult.vulnerabilities.low > 0 ? 'warning' : 'success'} 
-                        text={testResult.vulnerabilities.medium + testResult.vulnerabilities.low > 0 ? '建议修复' : '良好'}
+                      <StatusBadge
+                        status={(testResult.findings?.filter(f => f.severity === 'medium' || f.severity === 'low').length || 0) > 0 ? 'warning' : 'success'}
+                        text={(testResult.findings?.filter(f => f.severity === 'medium' || f.severity === 'low').length || 0) > 0 ? '建议修复' : '良好'}
                       />
                     </div>
                   </div>
@@ -517,18 +563,18 @@ const SecurityTestMigrated: React.FC = () => {
                   {/* 检测详情 */}
                   <div className="space-y-3">
                     <h4 className="font-medium text-white">检测详情</h4>
-                    {Object.entries(testResult.checks).map(([key, check]) => (
-                      <div key={key} className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
+                    {testResult.findings?.map((finding) => (
+                      <div key={finding.id} className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
                         <div className="flex items-center gap-3">
-                          <StatusBadge 
-                            status={check.passed ? 'success' : 'error'} 
-                            text={check.passed ? '通过' : '失败'}
+                          <StatusBadge
+                            status={finding.severity === 'low' ? 'success' : finding.severity === 'medium' ? 'warning' : 'error'}
+                            text={finding.severity === 'low' ? '通过' : finding.severity === 'medium' ? '警告' : '失败'}
                           />
-                          <span className="text-white">{check.message}</span>
+                          <span className="text-white">{finding.title}</span>
                         </div>
-                        <ProgressBadge value={check.score} />
+                        <ProgressBadge value={finding.cvss || 0} />
                       </div>
-                    ))}
+                    )) || []}
                   </div>
                 </CardBody>
               </Card>
@@ -543,9 +589,9 @@ const SecurityTestMigrated: React.FC = () => {
                     <div>
                       <h4 className="font-semibold text-red-400 mb-2">测试失败</h4>
                       <p className="text-sm text-red-300">{error}</p>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         className="mt-3"
                         onClick={() => setError(null)}
                       >
@@ -624,6 +670,9 @@ const SecurityTestMigrated: React.FC = () => {
             </Button>
           </ModalFooter>
         </Modal>
+
+        {/* 登录提示组件 */}
+        {LoginPromptComponent}
       </div>
     </div>
   );

@@ -22,9 +22,11 @@ import { useSearchParams } from 'react-router-dom';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { AdvancedTestCharts } from '../components/charts';
 import { URLInput } from '../components/testing';
+import { ProgressBar } from '../components/ui/ProgressBar';
 import { useUserStats } from '../hooks/useUserStats';
-import '../styles/progress-bars.css';
-import '../styles/unified-testing-tools.css';
+// CSS样式已迁移到组件库中
+// 进度条样式已集成到ProgressBar组件
+// 测试工具样式已集成到TestingTools组件
 
 interface WebsiteTestConfig {
   url: string;
@@ -399,7 +401,7 @@ const WebsiteTest: React.FC = () => {
                 ) : (
                   <Lock className="w-4 h-4" />
                 )}
-                <span>{isAuthenticated ? '开始测试' : '需要登录后测试'}</span>
+                <span>开始测试</span>
               </button>
             ) : testStatus === 'starting' ? (
               <div className="flex items-center space-x-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg">
@@ -481,11 +483,13 @@ const WebsiteTest: React.FC = () => {
               </div>
 
               {/* 进度条 */}
-              <div className="w-full bg-gray-700 rounded-full h-2 mb-3">
-                <div
-                  className="bg-blue-500 h-2 rounded-full transition-all duration-300 progress-fill progress-fill-blue"
-                  style={{ width: `${progress}%` }}
-                ></div>
+              <div className="mb-3">
+                <ProgressBar
+                  value={progress}
+                  variant="primary"
+                  size="md"
+                  animated
+                />
               </div>
 
               <p className="text-sm text-blue-300">{currentStep}</p>
@@ -734,12 +738,12 @@ const WebsiteTest: React.FC = () => {
                     <span>进度</span>
                     <span>{Math.round(progress)}%</span>
                   </div>
-                  <div className="w-full rounded-full h-2 bg-themed-tertiary">
-                    <div
-                      className="h-2 rounded-full transition-all duration-300 test-progress-dynamic"
-                      style={{ width: `${progress}%` }}
-                    ></div>
-                  </div>
+                  <ProgressBar
+                    value={progress}
+                    variant="primary"
+                    size="md"
+                    animated
+                  />
                 </div>
               )}
             </div>

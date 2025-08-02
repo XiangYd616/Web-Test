@@ -1,19 +1,19 @@
-import React from 'react';
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
   ArcElement,
-  Title,
-  Tooltip,
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Filler,
   Legend,
-  Filler
+  LinearScale,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip
 } from 'chart.js';
-import { Line, Bar, Doughnut } from 'react-chartjs-2';
-import '../../styles/modern-design-system.css';
+import React from 'react';
+import { Bar, Doughnut, Line } from 'react-chartjs-2';
+// CSS样式已迁移到组件库中
 
 ChartJS.register(
   CategoryScale,

@@ -3,7 +3,7 @@
  * 基于状态机的UI控制，提供清晰的用户交互体验
  */
 
-import { AlertCircle, CheckCircle, Loader, Lock, Play, RotateCcw, Square, XCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle, Loader, Play, RotateCcw, Square, XCircle } from 'lucide-react';
 import React from 'react';
 import { TestPhase, TestState } from '../../services/testStateManager';
 
@@ -222,8 +222,8 @@ export const OptimizedTestControls: React.FC<OptimizedTestControlsProps> = ({
                   : 'bg-yellow-600 hover:bg-yellow-700 text-white shadow-sm hover:shadow-md'
                 }`}
             >
-              {isAuthenticated ? <Play className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
-              <span>{isAuthenticated ? '开始测试' : '需要登录'}</span>
+              <Play className="w-4 h-4" />
+              <span>开始测试</span>
             </button>
           )}
 

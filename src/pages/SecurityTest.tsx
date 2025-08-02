@@ -8,8 +8,7 @@ import { UnifiedSecurityTestPanel } from '../components/security/UnifiedSecurity
 import { TestPageLayout } from '../components/testing/UnifiedTestingComponents';
 import { useUserStats } from '../hooks/useUserStats';
 import { SecurityTestResult, TestProgress } from '../services/unifiedSecurityEngine';
-import '../styles/compact-layout.css';
-import '../styles/unified-testing-tools.css';
+// CSS样式已迁移到组件库中
 
 const SecurityTest: React.FC = () => {
   // 登录检查
@@ -100,9 +99,8 @@ const SecurityTest: React.FC = () => {
     setComparisonResults([]);
   };
 
-  if (!isAuthenticated) {
-    return LoginPromptComponent;
-  }
+  // 移除强制登录检查，允许未登录用户查看页面
+  // 在使用功能时才提示登录
 
   return (
     <TestPageLayout className="space-y-3 dark-page-scrollbar compact-layout">
@@ -233,6 +231,9 @@ const SecurityTest: React.FC = () => {
           onClose={handleCloseComparison}
         />
       ) : null}
+
+      {/* 登录提示组件 */}
+      {LoginPromptComponent}
     </TestPageLayout>
   );
 };

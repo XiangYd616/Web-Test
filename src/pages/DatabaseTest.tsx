@@ -37,9 +37,11 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { TestPageLayout } from '../components/testing/UnifiedTestingComponents';
+import { ProgressBar } from '../components/ui/ProgressBar';
 import { useTheme } from '../contexts/ThemeContext';
 import backgroundTestManager from '../services/backgroundTestManager';
-import '../styles/progress-bars.css';
+// CSS样式已迁移到组件库中
+// 进度条样式已集成到ProgressBar组件
 
 interface DatabaseConfig {
   host: string;
@@ -922,11 +924,13 @@ const DatabaseTest: React.FC = () => {
               {isRunning && (
                 <div className="mt-2">
                   <p className="text-sm text-gray-300">{currentStep}</p>
-                  <div className="w-full bg-gray-700 rounded-full h-2 mt-2">
-                    <div
-                      className="progress-fill progress-fill-blue h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${progress}%` }}
-                    ></div>
+                  <div className="mt-2">
+                    <ProgressBar
+                      value={progress}
+                      variant="primary"
+                      size="md"
+                      animated
+                    />
                   </div>
                 </div>
               )}

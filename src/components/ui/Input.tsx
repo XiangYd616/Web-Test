@@ -3,7 +3,7 @@ import React, { forwardRef } from 'react';
 import { cn } from '../../utils/cn';
 
 // 基础Input组件
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   label?: string;
   description?: string;
   error?: string;
