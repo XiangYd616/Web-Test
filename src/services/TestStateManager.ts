@@ -94,6 +94,8 @@ export interface TestDataPoint {
   errorType?: string;
   connectionTime?: number;
   dnsTime?: number;
+  // 测试ID字段
+  testId?: string;
 }
 
 // 状态变更事件接口

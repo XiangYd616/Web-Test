@@ -31,6 +31,7 @@ export interface StressTestRecord {
   id: string;
   testName: string;
   url: string;
+  testType?: 'stress' | 'website' | 'seo' | 'security' | 'performance' | 'api'; // 测试类型
   status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
 
   // 时间信息
