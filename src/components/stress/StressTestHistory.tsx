@@ -62,6 +62,14 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
       const { ModalTest } = require('../ui/ModalTest');
       return <ModalTest />;
     }
+    if (window.location.search.includes('test-input')) {
+      const { InputTest } = require('../ui/InputTest');
+      return <InputTest />;
+    }
+    if (window.location.search.includes('test-badge')) {
+      const { BadgeTest } = require('../ui/BadgeTest');
+      return <BadgeTest />;
+    }
   }
 
   // 路由导航

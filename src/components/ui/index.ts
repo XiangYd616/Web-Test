@@ -40,3 +40,14 @@ export {
     ModalFooter, ModalHeader
 } from './Modal';
 
+// 输入组件
+export {
+    Input, NumberInput, PasswordInput,
+    SearchInput, Select, Textarea
+} from './Input';
+
+// 徽章组件
+export {
+    Badge, DotBadge, NumberBadge, ProgressBadge, StatusBadge, TagBadge
+} from './Badge';
+
