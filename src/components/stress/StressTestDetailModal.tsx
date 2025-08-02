@@ -46,22 +46,76 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = ({
         document.removeEventListener('keydown', handleEscape);
       };
     }
+    // 当 isOpen 为 false 时，返回 undefined（可选）
+    return undefined;
   }, [isOpen, onClose]);
 
   if (!isOpen || !record) return null;
 
+  // 获取状态样式（与历史记录列表保持一致）
+  const getStatusStyle = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'bg-green-500 dark:bg-green-600 border-green-600 dark:border-green-500';
+      case 'failed':
+        return 'bg-red-500 dark:bg-red-600 border-red-600 dark:border-red-500';
+      case 'running':
+        return 'bg-blue-500 dark:bg-blue-600 border-blue-600 dark:border-blue-500';
+      case 'cancelled':
+        return 'bg-yellow-500 dark:bg-yellow-600 border-yellow-600 dark:border-yellow-500';
+      default:
+        return 'bg-gray-500 dark:bg-gray-600 border-gray-600 dark:border-gray-500';
+    }
+  };
+
+  // 获取状态文字颜色（与历史记录列表保持一致）
+  const getStatusTextColor = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'text-white dark:text-white';
+      case 'failed':
+        return 'text-white dark:text-white';
+      case 'running':
+        return 'text-white dark:text-white';
+      case 'cancelled':
+        return 'text-white dark:text-white';
+      default:
+        return 'text-white dark:text-white';
+    }
+  };
+
   const getStatusInfo = (status: string) => {
     switch (status) {
       case 'completed':
-        return { icon: <CheckCircle className="w-5 h-5" />, color: 'text-green-400', bg: 'bg-green-500/20' };
+        return {
+          icon: <CheckCircle className="w-5 h-5" />,
+          color: getStatusTextColor(status),
+          bg: getStatusStyle(status)
+        };
       case 'failed':
-        return { icon: <XCircle className="w-5 h-5" />, color: 'text-red-400', bg: 'bg-red-500/20' };
+        return {
+          icon: <XCircle className="w-5 h-5" />,
+          color: getStatusTextColor(status),
+          bg: getStatusStyle(status)
+        };
       case 'running':
-        return { icon: <Clock className="w-5 h-5" />, color: 'text-blue-400', bg: 'bg-blue-500/20' };
+        return {
+          icon: <Clock className="w-5 h-5" />,
+          color: getStatusTextColor(status),
+          bg: getStatusStyle(status)
+        };
       case 'cancelled':
-        return { icon: <AlertCircle className="w-5 h-5" />, color: 'text-yellow-400', bg: 'bg-yellow-500/20' };
+        return {
+          icon: <AlertCircle className="w-5 h-5" />,
+          color: getStatusTextColor(status),
+          bg: getStatusStyle(status)
+        };
       default:
-        return { icon: <Clock className="w-5 h-5" />, color: 'text-gray-400', bg: 'bg-gray-500/20' };
+        return {
+          icon: <Clock className="w-5 h-5" />,
+          color: getStatusTextColor(status),
+          bg: getStatusStyle(status)
+        };
     }
   };
 
@@ -111,7 +165,7 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = ({
       >
         <div className="flex items-center justify-between p-6 border-b border-gray-700 flex-shrink-0">
           <div className="flex items-center gap-4">
-            <div className={`p-3 rounded-lg ${statusInfo.bg}`}>
+            <div className={`p-3 rounded-lg border ${statusInfo.bg} ${statusInfo.color}`}>
               {statusInfo.icon}
             </div>
             <div>
@@ -208,7 +262,7 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = ({
               <div className="bg-gray-800 rounded-lg p-4">
                 <h3 className="text-lg font-semibold text-white mb-4">测试状态</h3>
                 <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg ${statusInfo.bg}`}>
+                  <div className={`p-2 rounded-lg border ${statusInfo.bg} ${statusInfo.color}`}>
                     {statusInfo.icon}
                   </div>
                   <div>

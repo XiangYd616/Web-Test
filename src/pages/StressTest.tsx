@@ -424,7 +424,7 @@ const StressTest: React.FC = () => {
     }, []);
 
     // 🔧 统一的指标计算函数
-    const calculateMetricsFromData = useCallback((data: TestDataPoint[]) => {
+    const calculateMetricsFromData = useCallback((data: TestDataPoint[]): RealTimeMetrics => {
         if (!data || data.length === 0) {
             return {
                 totalRequests: 0,
@@ -435,6 +435,8 @@ const StressTest: React.FC = () => {
                 peakTPS: 0,
                 throughput: 0,
                 errorRate: 0,
+                activeUsers: 0,
+                timestamp: Date.now(),
                 p95ResponseTime: 0,
                 p99ResponseTime: 0
             };
@@ -504,6 +506,9 @@ const StressTest: React.FC = () => {
         const p95ResponseTime = sortedResponseTimes[p95Index] || averageResponseTime;
         const p99ResponseTime = sortedResponseTimes[p99Index] || averageResponseTime;
 
+        // 计算活跃用户数（取最新数据点的用户数）
+        const activeUsers = data.length > 0 ? data[data.length - 1].activeUsers : 0;
+
         return {
             totalRequests,
             successfulRequests,
@@ -513,6 +518,8 @@ const StressTest: React.FC = () => {
             peakTPS: Math.max(metrics?.peakTPS || 0, currentTPS),
             throughput: averageTPS, // 🔧 修复：使用正确的平均TPS
             errorRate: parseFloat(errorRate.toFixed(2)),
+            activeUsers,
+            timestamp: Date.now(),
             p95ResponseTime: Math.round(p95ResponseTime),
             p99ResponseTime: Math.round(p99ResponseTime)
         };
@@ -529,8 +536,8 @@ const StressTest: React.FC = () => {
                 console.log(`🔄 压力测试数据更新: ${prev.length} -> ${combined.length}`);
 
                 // 🔧 修复：只有在没有后端指标数据时才重新计算
-                let currentMetrics = null;
-                setMetrics(prevMetrics => {
+                let currentMetrics: RealTimeMetrics | null = null;
+                setMetrics((prevMetrics: RealTimeMetrics | null) => {
                     // 如果已有后端提供的指标数据，保持不变
                     if (prevMetrics && prevMetrics.totalRequests > 0 && typeof prevMetrics.currentTPS === 'number') {
                         console.log('📊 保持后端提供的指标数据:', prevMetrics);
@@ -547,7 +554,7 @@ const StressTest: React.FC = () => {
 
                 // 更新结果状态
                 if (currentMetrics) {
-                    setResult(prev => ({
+                    setResult((prev: any) => ({
                         ...prev,
                         metrics: currentMetrics,
                         status: 'running',
@@ -563,6 +570,22 @@ const StressTest: React.FC = () => {
             console.log(`🏁 最终结果数据设置: ${processedPoints.length} 个数据点`);
         }
     }, [processDataPoint, calculateMetricsFromData]);
+
+    // 转换 TestDataPoint 到 StressTestDataPoint
+    const convertToStressTestDataPoint = useCallback((dataPoints: TestDataPoint[]) => {
+        return dataPoints.map(point => ({
+            timestamp: point.timestamp,
+            responseTime: point.responseTime,
+            activeUsers: point.activeUsers,
+            throughput: point.throughput,
+            errorRate: point.errorRate,
+            status: point.status,
+            success: point.success,
+            phase: point.phase === TestPhase.RAMP_UP ? 'rampup' as const :
+                point.phase === TestPhase.RAMP_DOWN ? 'rampdown' as const :
+                    'steady' as const
+        }));
+    }, []);
 
     // 获取测试结果的函数
     const fetchTestResults = useCallback(async (testId: string) => {
@@ -1805,9 +1828,9 @@ const StressTest: React.FC = () => {
                     console.error('❌❌❌ WebSocket连接错误 ❌❌❌:', error);
                     console.error('❌ 错误详情:', {
                         message: error.message,
-                        description: error.description,
-                        context: error.context,
-                        type: error.type
+                        description: (error as any).description,
+                        context: (error as any).context,
+                        type: (error as any).type
                     });
 
 
@@ -2054,7 +2077,7 @@ const StressTest: React.FC = () => {
                         console.log('📊 收到累积指标数据:', data.metrics);
 
                         // 直接使用后端提供的累积指标数据
-                        const updatedMetrics = {
+                        const updatedMetrics: RealTimeMetrics = {
                             totalRequests: data.metrics.totalRequests || 0,
                             successfulRequests: data.metrics.successfulRequests || 0,
                             failedRequests: data.metrics.failedRequests || 0,
@@ -2062,13 +2085,15 @@ const StressTest: React.FC = () => {
                             currentTPS: data.metrics.currentTPS || 0,
                             peakTPS: data.metrics.peakTPS || 0,
                             throughput: data.metrics.throughput || 0, // 🔧 修复：使用后端提供的平均吞吐量
-                            requestsPerSecond: data.metrics.requestsPerSecond || data.metrics.currentTPS || 0,
                             errorRate: data.metrics.errorRate || 0,
+                            activeUsers: data.metrics.activeUsers || 0,
+                            timestamp: Date.now(),
+                            // 可选属性
+                            requestsPerSecond: data.metrics.requestsPerSecond || data.metrics.currentTPS || 0,
                             p50ResponseTime: data.metrics.p50ResponseTime || 0,
                             p90ResponseTime: data.metrics.p90ResponseTime || 0,
                             p95ResponseTime: data.metrics.p95ResponseTime || 0,
-                            p99ResponseTime: data.metrics.p99ResponseTime || 0,
-                            activeUsers: data.metrics.activeUsers || 0
+                            p99ResponseTime: data.metrics.p99ResponseTime || 0
                         };
 
                         console.log('📊 保持后端提供的指标数据:', updatedMetrics);
@@ -2344,7 +2369,7 @@ const StressTest: React.FC = () => {
 
     // 🔧 测试完成检测逻辑 - 基于数据流停止检测测试是否完成
     useEffect(() => {
-        if (!isRunning || !currentTestId || stressTestData.length === 0) return;
+        if (!isRunning || !currentTestId || stressTestData.length === 0) return () => { };
 
         const checkTestCompletion = () => {
             const now = Date.now();
@@ -4113,7 +4138,7 @@ const StressTest: React.FC = () => {
                                                 {isRunning && <span className="ml-2 text-green-400">● 运行中</span>}
                                             </div>
                                             <RealTimeStressChart
-                                                data={stressTestData}
+                                                data={convertToStressTestDataPoint(stressTestData)}
                                                 isRunning={isRunning}
                                                 testConfig={testConfig}
                                                 height={400}

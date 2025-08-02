@@ -1,0 +1,43 @@
+/* 按钮组件专用样式 - CSS模块化 */
+
+/* 基础按钮样式 */
+.button {
+  @apply px-4 py-2 rounded-lg transition-all duration-200 font-medium;
+}
+
+/* 危险操作按钮 */
+.dangerButton {
+  @apply bg-red-600 text-white border border-red-600;
+  @apply hover:bg-red-700 hover:border-red-700;
+  @apply focus:ring-2 focus:ring-red-500 focus:ring-offset-2;
+  @apply shadow-sm hover:shadow-md;
+}
+
+/* 主要操作按钮 */
+.primaryButton {
+  @apply bg-blue-600 text-white border border-blue-600;
+  @apply hover:bg-blue-700 hover:border-blue-700;
+  @apply focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+}
+
+/* 次要操作按钮 */
+.secondaryButton {
+  @apply bg-gray-600 text-white border border-gray-600;
+  @apply hover:bg-gray-700 hover:border-gray-700;
+  @apply focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+}
+
+/* 小尺寸按钮 */
+.smallButton {
+  @apply px-2 py-1 text-sm;
+}
+
+/* 图标按钮 */
+.iconButton {
+  @apply p-2 rounded-lg transition-all duration-200;
+}
+
+/* 删除按钮特殊样式 */
+.deleteButton {
+  composes: button dangerButton iconButton;
+}

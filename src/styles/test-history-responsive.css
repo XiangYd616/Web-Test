@@ -358,6 +358,18 @@
   color: white;
 }
 
+/* 删除按钮特殊样式 */
+button[aria-label*="删除测试记录"] {
+  background-color: #dc2626 !important;
+  color: white !important;
+  border-color: #dc2626 !important;
+}
+
+button[aria-label*="删除测试记录"]:hover {
+  background-color: #b91c1c !important;
+  border-color: #b91c1c !important;
+}
+
 /* 分页响应式优化 */
 .test-pagination-container {
   padding: 1rem 1.5rem;
