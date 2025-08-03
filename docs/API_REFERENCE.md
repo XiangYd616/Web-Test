@@ -2,7 +2,13 @@
 
 ## 🎯 概述
 
-Test Web App 提供完整的 RESTful API 接口，支持所有核心功能的程序化访问。所有API都采用JSON格式进行数据交换，并使用JWT进行身份验证。
+Test Web App 提供完整的 RESTful API 接口，支持所有核心功能的程序化访问。包括测试引擎、数据管理、企业级集成、智能报告系统等。所有API都采用JSON格式进行数据交换，并使用JWT进行身份验证。
+
+### 🆕 最新功能
+- **企业级集成API** - 支持Webhook、Slack、Jenkins等集成
+- **智能报告API** - 多格式报告生成和管理
+- **统一日志API** - 前后端统一日志管理
+- **增强测试API** - 支持批量测试和实时监控
 
 ## 🔐 认证机制
 
@@ -45,7 +51,7 @@ Content-Type: application/json
 
 ### 网站综合测试
 ```http
-POST /api/tests/website
+POST /api/test/website
 Authorization: Bearer <token>
 Content-Type: application/json
 
@@ -56,14 +62,29 @@ Content-Type: application/json
     "timeout": 30000,
     "checkSEO": true,
     "checkPerformance": true,
-    "checkSecurity": true
+    "checkSecurity": true,
+    "enableRealTimeMonitoring": true
+  }
+}
+```
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "data": {
+    "testId": "test-uuid",
+    "status": "running",
+    "progress": 0,
+    "estimatedDuration": 120,
+    "realTimeUrl": "/api/test/test-uuid/realtime"
   }
 }
 ```
 
 ### 压力测试
 ```http
-POST /api/tests/stress
+POST /api/test/stress
 Authorization: Bearer <token>
 Content-Type: application/json
 
@@ -73,7 +94,92 @@ Content-Type: application/json
   "config": {
     "virtualUsers": 100,
     "duration": "5m",
-    "rampUpTime": "30s"
+    "rampUpTime": "30s",
+    "enableRealTimeCharts": true,
+    "dataInterval": "1s"
+  }
+}
+```
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "data": {
+    "testId": "stress-test-uuid",
+    "status": "running",
+    "realTimeDataUrl": "/api/test/stress-test-uuid/realtime",
+    "chartDataUrl": "/api/test/stress-test-uuid/charts"
+  }
+}
+```
+
+### API测试 (增强版)
+```http
+POST /api/test/api-test
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "baseUrl": "https://api.example.com",
+  "endpoints": [
+    {
+      "path": "/users",
+      "method": "GET",
+      "headers": {"Accept": "application/json"},
+      "expectedStatus": 200
+    },
+    {
+      "path": "/users",
+      "method": "POST",
+      "headers": {"Content-Type": "application/json"},
+      "body": {"name": "Test User", "email": "test@example.com"},
+      "expectedStatus": 201
+    }
+  ],
+  "authentication": {
+    "type": "bearer",
+    "token": "your-api-token"
+  },
+  "globalHeaders": [
+    {"key": "User-Agent", "value": "TestWebApp/2.2.0"}
+  ],
+  "config": {
+    "timeout": 30000,
+    "retries": 3,
+    "parallel": true
+  }
+}
+```
+
+### 获取实时测试数据
+```http
+GET /api/test/:testId/realtime
+Authorization: Bearer <token>
+```
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "data": {
+    "testId": "test-uuid",
+    "status": "running",
+    "progress": 45,
+    "currentMetrics": {
+      "responseTime": 150,
+      "tps": 25,
+      "errorRate": 2.5,
+      "activeUsers": 20
+    },
+    "realtimeData": [
+      {
+        "timestamp": "2025-08-03T12:30:00Z",
+        "responseTime": 145,
+        "requests": 8,
+        "errors": 0
+      }
+    ]
   }
 }
 ```
@@ -296,6 +402,168 @@ Content-Type: application/json
 ### 获取监控告警
 ```http
 GET /api/monitoring/alerts?status=active&limit=20
+Authorization: Bearer <token>
+```
+
+## 🔗 企业级集成API
+
+### 获取集成列表
+```http
+GET /api/integrations
+Authorization: Bearer <token>
+```
+
+**查询参数：**
+- `type` - 集成类型 (webhook, slack, email, jenkins, github, gitlab, jira, teams)
+- `enabled` - 启用状态 (true/false)
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "1",
+      "name": "Slack通知",
+      "type": "slack",
+      "config": {
+        "webhookUrl": "https://hooks.slack.com/services/...",
+        "channel": "#testing",
+        "username": "TestBot"
+      },
+      "enabled": true,
+      "createdAt": "2025-08-03T10:00:00Z",
+      "lastUsed": "2025-08-03T12:30:00Z"
+    }
+  ],
+  "total": 1,
+  "supportedTypes": ["webhook", "slack", "email", "jenkins", "github", "gitlab", "jira", "teams"]
+}
+```
+
+### 创建集成
+```http
+POST /api/integrations
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "name": "Jenkins CI/CD",
+  "type": "jenkins",
+  "config": {
+    "serverUrl": "https://jenkins.example.com",
+    "jobName": "website-test",
+    "token": "jenkins-api-token"
+  },
+  "enabled": true
+}
+```
+
+### 更新集成
+```http
+PUT /api/integrations/:id
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "name": "更新的集成名称",
+  "config": {
+    "webhookUrl": "https://new-webhook-url.com"
+  },
+  "enabled": false
+}
+```
+
+### 删除集成
+```http
+DELETE /api/integrations/:id
+Authorization: Bearer <token>
+```
+
+## 📋 智能报告API
+
+### 获取报告列表
+```http
+GET /api/reports
+Authorization: Bearer <token>
+```
+
+**查询参数：**
+- `type` - 报告类型 (performance, security, seo, comprehensive, stress_test, api_test)
+- `status` - 报告状态 (generating, completed, failed)
+- `format` - 报告格式 (pdf, html, json, csv)
+- `page` - 页码 (默认: 1)
+- `limit` - 每页数量 (默认: 10)
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "1",
+      "name": "网站性能报告 - 2025年8月",
+      "type": "performance",
+      "format": "pdf",
+      "status": "completed",
+      "createdAt": "2025-08-03T10:00:00Z",
+      "completedAt": "2025-08-03T10:05:00Z",
+      "fileSize": 2048576,
+      "downloadCount": 5,
+      "config": {
+        "dateRange": "2025-08-01 to 2025-08-31",
+        "includeCharts": true,
+        "includeRecommendations": true
+      }
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 25,
+    "pages": 3
+  },
+  "supportedTypes": ["performance", "security", "seo", "comprehensive", "stress_test", "api_test"],
+  "supportedFormats": ["pdf", "html", "json", "csv"]
+}
+```
+
+### 生成报告
+```http
+POST /api/reports/generate
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "name": "月度性能报告",
+  "type": "performance",
+  "format": "pdf",
+  "config": {
+    "dateRange": "2025-08-01 to 2025-08-31",
+    "includeCharts": true,
+    "includeRecommendations": true,
+    "includeComparison": true
+  }
+}
+```
+
+### 获取报告详情
+```http
+GET /api/reports/:id
+Authorization: Bearer <token>
+```
+
+### 下载报告
+```http
+GET /api/reports/:id/download
+Authorization: Bearer <token>
+```
+
+**响应：** 文件下载流，Content-Type根据报告格式设置
+
+### 删除报告
+```http
+DELETE /api/reports/:id
 Authorization: Bearer <token>
 ```
 
