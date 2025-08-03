@@ -1320,49 +1320,124 @@ const StressTest: React.FC = () => {
         baseline: baselineData
     };
 
-    // 智能测试状态同步逻辑
+    // 🔧 统一的测试状态管理逻辑
+    const updateTestStatus = useCallback((newStatus: TestStatusType, reason?: string) => {
+        console.log('🔄 更新测试状态:', { from: testStatus, to: newStatus, reason });
+
+        // 状态转换验证
+        const isValidTransition = validateStatusTransition(testStatus, newStatus);
+        if (!isValidTransition) {
+            console.warn('⚠️ 无效的状态转换:', { from: testStatus, to: newStatus });
+            return false;
+        }
+
+        setTestStatus(newStatus);
+
+        // 同步更新其他相关状态
+        switch (newStatus) {
+            case 'idle':
+                setIsRunning(false);
+                setIsCancelling(false);
+                setCurrentStatus('IDLE');
+                setStatusMessage('准备开始测试');
+                break;
+            case 'starting':
+                setIsRunning(true);
+                setIsCancelling(false);
+                setCurrentStatus('STARTING');
+                setStatusMessage('正在启动压力测试引擎...');
+                break;
+            case 'running':
+                setIsRunning(true);
+                setIsCancelling(false);
+                setCurrentStatus('RUNNING');
+                setStatusMessage('测试正在运行中...');
+                break;
+            case 'completed':
+                setIsRunning(false);
+                setIsCancelling(false);
+                setCurrentStatus('COMPLETED');
+                setStatusMessage('测试已完成');
+                break;
+            case 'cancelled':
+                setIsRunning(false);
+                setIsCancelling(false);
+                setCurrentStatus('CANCELLED');
+                setStatusMessage('测试已取消');
+                break;
+            case 'failed':
+                setIsRunning(false);
+                setIsCancelling(false);
+                setCurrentStatus('FAILED');
+                setStatusMessage(reason || '测试失败');
+                break;
+        }
+
+        // 保存状态到localStorage
+        localStorage.setItem('currentStressTestStatus', newStatus);
+        return true;
+    }, [testStatus]);
+
+    // 状态转换验证函数
+    const validateStatusTransition = useCallback((from: TestStatusType, to: TestStatusType): boolean => {
+        // 终态保护：已完成、已取消、失败状态不能被覆盖（除非重置为idle）
+        if (['completed', 'cancelled', 'failed'].includes(from) && to !== 'idle') {
+            console.log('🔒 终态保护，阻止状态转换:', { from, to });
+            return false;
+        }
+
+        // 定义有效的状态转换
+        const validTransitions: Record<TestStatusType, TestStatusType[]> = {
+            'idle': ['starting', 'failed'],
+            'starting': ['running', 'failed', 'cancelled'],
+            'running': ['completed', 'cancelled', 'failed'],
+            'completed': ['idle'],
+            'cancelled': ['idle'],
+            'failed': ['idle'],
+            'waiting': ['running', 'failed', 'cancelled'],
+            'timeout': ['idle', 'failed']
+        };
+
+        return validTransitions[from]?.includes(to) || false;
+    }, []);
+
+    // 智能测试状态同步逻辑 - 重构为更清晰的逻辑
     useEffect(() => {
-        setTestStatus(prevStatus => {
-            // 终态保护：已完成、已取消、失败状态不应被覆盖
-            if (['cancelled', 'completed', 'failed'].includes(prevStatus) && !isRunning) {
-                console.log('🔍 保持终态状态，不覆盖:', prevStatus);
-                return prevStatus;
+        // 根据当前状态和条件智能判断应该的状态
+        let targetStatus: TestStatusType = testStatus;
+
+        if (isRunning && currentTestId) {
+            // 测试正在运行
+            if (stressTestData.length > 0) {
+                // 有实时数据，确认为运行状态
+                targetStatus = 'running';
+            } else if (testStatus === 'idle') {
+                // 刚开始，设置为启动状态
+                targetStatus = 'starting';
             }
-
-            let newStatus: TestStatusType = 'idle';
-
-            if (isRunning) {
-
-                newStatus = 'running';
-            } else if (result) {
-                // 有测试结果，智能判断状态
-                if (result.status === 'cancelled') {
-                    newStatus = 'cancelled';
-                } else if (result.status === 'completed' ||
-                    (result.metrics && result.metrics.totalRequests > 0)) {
-                    // 明确完成状态 或 有有效测试结果
-                    newStatus = 'completed';
-                    console.log('🔍 智能判断为完成状态:', {
-                        resultStatus: result.status,
-                        hasMetrics: !!result.metrics,
-                        totalRequests: result.metrics?.totalRequests
-                    });
-                } else {
-                    newStatus = 'failed';
-                }
-            } else if (error && !result) {
-                // 只有在没有结果且有错误时才设置为失败
-                newStatus = 'failed';
+        } else if (!isRunning && result) {
+            // 测试已停止且有结果
+            if (result.status === 'cancelled') {
+                targetStatus = 'cancelled';
+            } else if (result.status === 'completed' ||
+                (result.metrics && result.metrics.totalRequests > 0)) {
+                targetStatus = 'completed';
+            } else if (result.status === 'failed' || error) {
+                targetStatus = 'failed';
             }
+        } else if (!isRunning && error && !result) {
+            // 有错误但没有结果
+            targetStatus = 'failed';
+        } else if (!isRunning && !currentTestId && !result) {
+            // 完全空闲状态
+            targetStatus = 'idle';
+        }
 
-            // 保存状态到localStorage
-            if (newStatus) {
-                localStorage.setItem('currentStressTestStatus', newStatus);
-            }
-
-            return newStatus;
-        });
-    }, [isRunning, result, error]);
+        // 只在状态需要改变时更新
+        if (targetStatus !== testStatus) {
+            updateTestStatus(targetStatus, error || undefined);
+        }
+    }, [isRunning, currentTestId, result, error, stressTestData.length, testStatus, updateTestStatus]);
 
     // 监听后台测试状态变化
     useEffect(() => {
@@ -1510,8 +1585,11 @@ const StressTest: React.FC = () => {
                         }
 
                         setResult(processedResult);
-                        // 检查是否是取消状态，如果是则不覆盖
-                        if (processedResult.status === 'cancelled') {
+                        // 🔧 修复：检查当前状态，如果已经是取消状态则不覆盖
+                        if (testStatus === 'cancelled') {
+                            console.log('🛑 测试已取消，不覆盖取消状态');
+                            // 保持取消状态不变
+                        } else if (processedResult.status === 'cancelled') {
                             setTestStatus('cancelled');
                             setTestProgress('测试已取消');
                         } else {
@@ -1519,8 +1597,18 @@ const StressTest: React.FC = () => {
                             setTestProgress('压力测试完成！');
                         }
                         setIsRunning(false);
-                        // 🔧 修复：延迟清空testId，确保取消请求能正常发送
-                        setTimeout(() => setCurrentTestId(null), 1000);
+                        // 🔧 修复：如果是取消状态，立即清理测试ID；否则延迟清理
+                        if (testStatus === 'cancelled' || processedResult.status === 'cancelled') {
+                            console.log('🧹 测试已取消，立即清理测试ID');
+                            setCurrentTestId(null);
+                            currentTestIdRef.current = null;
+                        } else {
+                            // 延迟清空testId，确保其他请求能正常发送
+                            setTimeout(() => {
+                                setCurrentTestId(null);
+                                currentTestIdRef.current = null;
+                            }, 1000);
+                        }
                         // 记录测试完成统计
                         if (processedResult) {
                             const success = processedResult.success !== false;
@@ -1530,7 +1618,8 @@ const StressTest: React.FC = () => {
                             recordTestCompletion('压力测试', success, score, duration);
 
                             // 更新测试记录 (背景测试)
-                            if (currentRecord) {
+                            // 🔧 修复：如果测试已被取消，不要覆盖取消状态
+                            if (currentRecord && processedResult.status !== 'cancelled') {
                                 (async () => {
                                     try {
                                         await completeRecord(currentRecord.id, {
@@ -1544,6 +1633,8 @@ const StressTest: React.FC = () => {
                                         console.warn('⚠️ 背景测试更新记录失败:', recordError);
                                     }
                                 })();
+                            } else if (currentRecord && processedResult.status === 'cancelled') {
+                                console.log('🛑 测试已取消，跳过完成记录更新');
                             }
                         }
                         break;
@@ -1552,8 +1643,9 @@ const StressTest: React.FC = () => {
                         setError(testInfo.error || '测试失败');
                         setTestStatus('failed');
                         setIsRunning(false);
-                        // 🔧 修复：延迟清空testId，确保取消请求能正常发送
-                        setTimeout(() => setCurrentTestId(null), 1000);
+                        // 🔧 修复：立即清理测试ID
+                        setCurrentTestId(null);
+                        currentTestIdRef.current = null;
 
                         // 更新测试记录为失败状态
                         if (currentRecord) {
@@ -1573,8 +1665,9 @@ const StressTest: React.FC = () => {
                         setTestStatus('cancelled'); // ✅ 修复：使用正确的 cancelled 状态
                         setIsRunning(false);
                         setIsStopping(false);
-                        // 🔧 修复：延迟清空testId，确保取消请求能正常发送
-                        setTimeout(() => setCurrentTestId(null), 1000);
+                        // 🔧 修复：立即清理测试ID
+                        setCurrentTestId(null);
+                        currentTestIdRef.current = null;
 
                         // 更新测试记录为取消状态
                         if (currentRecord) {
@@ -1690,13 +1783,11 @@ const StressTest: React.FC = () => {
     // 重置测试状态（连接错误时使用）
     const resetTestStateOnError = useCallback((reason: string) => {
         console.log('🔄 重置测试状态 (连接错误):', reason);
-        setIsRunning(false);
-        setTestStatus('idle');
-        setCurrentStatus('IDLE');
-        setStatusMessage(reason);
+
+        // 🔧 使用统一状态管理系统
+        updateTestStatus('failed', reason);
         setCurrentTestId(null);
         setIsInRoom(false);
-        setIsCancelling(false);
         setCanSwitchPages(true);
 
         // 清理定时器
@@ -1704,7 +1795,7 @@ const StressTest: React.FC = () => {
             clearTimeout(testTimeoutTimer);
             setTestTimeoutTimer(null);
         }
-    }, [testTimeoutTimer]);
+    }, [testTimeoutTimer, updateTestStatus]);
 
     // 处理测试完成
     const handleTestCompletion = useCallback((testData: any) => {
@@ -1713,17 +1804,15 @@ const StressTest: React.FC = () => {
         // 清理错误状态，确保完成状态不被错误状态覆盖
         setError(null);
 
+        // 🔧 使用统一状态管理系统
         if (testData.status === 'cancelled') {
-            setTestStatus('cancelled');
-            setCurrentStatus('CANCELLED');
-            setStatusMessage('测试已取消');
+            updateTestStatus('cancelled', '测试已取消');
+        } else if (testData.status === 'failed') {
+            updateTestStatus('failed', testData.error || '测试执行失败');
         } else {
-            setTestStatus('completed');
-            setCurrentStatus('COMPLETED');
-            setStatusMessage('测试已完成');
+            updateTestStatus('completed', '测试已完成');
         }
 
-        setIsRunning(false);
         setCurrentTestId(null);
         setIsInRoom(false);
 
@@ -1736,7 +1825,7 @@ const StressTest: React.FC = () => {
         }
 
         setResult(testData);
-    }, []);
+    }, [updateTestStatus]);
 
     // WebSocket连接管理
     useEffect(() => {
@@ -1854,6 +1943,17 @@ const StressTest: React.FC = () => {
                 // 🔧 调试：监听房间加入确认
                 socket.on('room-joined', (data) => {
                     console.log('✅ 房间加入确认:', data);
+                });
+
+                // 🔧 监听WebSocket取消测试确认
+                socket.on('cancel-stress-test-ack', (data) => {
+                    console.log('✅ 收到WebSocket取消确认:', data);
+
+                    if (data.success) {
+                        console.log('🎯 WebSocket取消成功，后端已确认');
+                    } else {
+                        console.warn('⚠️ WebSocket取消失败:', data.message);
+                    }
                 });
 
                 // 统一的压力测试实时数据监听器
@@ -2087,13 +2187,10 @@ const StressTest: React.FC = () => {
                 socket.on('stress-test-status', (data) => {
                     console.log('📊 收到状态更新:', data);
 
-                    // 处理取消状态
+                    // 🔧 使用统一状态管理系统处理状态更新
                     if (data.status === 'cancelled') {
                         console.log('🛑 收到取消状态通知');
-                        setTestStatus('cancelled');
-                        setTestProgress(data.message || '测试已取消');
-                        setIsRunning(false);
-                        setIsCancelling(false);
+                        updateTestStatus('cancelled', data.message || '测试已取消');
                         setCanSwitchPages(true);
                         // 🔧 修复：延迟清空testId，确保取消请求能正常发送
                         setTimeout(() => setCurrentTestId(null), 1000);
@@ -2113,15 +2210,16 @@ const StressTest: React.FC = () => {
                         return;
                     }
 
-                    // ✅ 修复：保护取消状态不被覆盖
-                    setTestStatus(prevStatus => {
-                        if (prevStatus === 'cancelled') {
-                            console.log('🔒 保护取消状态，忽略状态更新:', data.status);
-                            return 'cancelled';
-                        }
-                        return data.status || 'running';
-                    });
+                    // 🔧 使用统一状态管理处理其他状态
+                    if (data.status === 'completed') {
+                        updateTestStatus('completed', data.message);
+                    } else if (data.status === 'failed') {
+                        updateTestStatus('failed', data.message || '测试失败');
+                    } else if (data.status === 'running' && testStatus !== 'running') {
+                        updateTestStatus('running', data.message);
+                    }
 
+                    // 更新进度信息
                     if (data.progress !== undefined) {
                         setTestProgress(`测试进行中... ${Math.round(data.progress)}%`);
                     }
@@ -2140,21 +2238,18 @@ const StressTest: React.FC = () => {
                         return;
                     }
 
-                    // 检查是否是取消状态
+                    // 🔧 使用统一状态管理处理完成状态
                     if (data.results?.status === 'cancelled' || data.status === 'cancelled' || data.results?.cancelled) {
                         console.log('🛑 测试已取消，设置取消状态');
-                        setTestStatus('cancelled');
-                        setTestProgress('测试已取消');
-                        setCurrentStatus('CANCELLED');
-                        setStatusMessage('测试已取消');
+                        updateTestStatus('cancelled', '测试已取消');
+                    } else if (data.results?.status === 'failed' || data.status === 'failed') {
+                        console.log('❌ 测试失败');
+                        updateTestStatus('failed', data.results?.error || '测试执行失败');
                     } else {
                         console.log('✅ 测试正常完成');
-                        setTestStatus('completed');
-                        setTestProgress('压力测试完成！');
-                        setCurrentStatus('COMPLETED');
-                        setStatusMessage('测试已完成');
+                        updateTestStatus('completed', '压力测试完成！');
                     }
-                    setIsRunning(false);
+
                     // 🔧 修复：延迟清空testId，确保不会影响其他操作
                     setTimeout(() => setCurrentTestId(null), 1000);
                     setIsInRoom(false);
@@ -2188,7 +2283,9 @@ const StressTest: React.FC = () => {
                     }
 
                     // 更新测试记录 (WebSocket)
-                    if (currentRecord && data.results) {
+                    // 🔧 修复：如果测试已被取消，不要覆盖取消状态
+                    if (currentRecord && data.results &&
+                        !(data.results?.status === 'cancelled' || data.status === 'cancelled' || data.results?.cancelled)) {
                         (async () => {
                             try {
                                 const success = data.results.success !== false;
@@ -2206,6 +2303,8 @@ const StressTest: React.FC = () => {
                                 console.warn('⚠️ WebSocket更新测试记录失败:', recordError);
                             }
                         })();
+                    } else if (currentRecord && (data.results?.status === 'cancelled' || data.status === 'cancelled' || data.results?.cancelled)) {
+                        console.log('🛑 测试已取消，跳过完成记录更新');
                     }
                 });
 
@@ -2349,7 +2448,15 @@ const StressTest: React.FC = () => {
 
     // 🔧 测试完成检测逻辑 - 基于数据流停止检测测试是否完成
     useEffect(() => {
+        // 🔧 修复：只在测试真正运行且不是终态时才启用自动完成检测
         if (!isRunning || !currentTestId || stressTestData.length === 0) return () => { };
+
+        // 🔧 修复：如果当前状态是终态，不启用自动完成检测
+        const terminalStates = ['completed', 'cancelled', 'failed'];
+        if (terminalStates.includes(testStatus)) {
+            console.log('🔍 当前状态是终态，跳过自动完成检测:', testStatus);
+            return () => { };
+        }
 
         const checkTestCompletion = () => {
             const now = Date.now();
@@ -2358,9 +2465,9 @@ const StressTest: React.FC = () => {
             if (lastDataPoint) {
                 const timeSinceLastData = now - new Date(lastDataPoint.timestamp).getTime();
 
-                // 如果超过10秒没有新数据，认为测试可能已完成
-                if (timeSinceLastData > 10000) {
-                    console.log('🔍 检测到数据流停止，可能测试已完成');
+                // 🔧 修复：增加检测时间到30秒，避免过于激进的完成检测
+                if (timeSinceLastData > 30000) {
+                    console.log('🔍 检测到数据流停止超过30秒，检查测试状态');
 
                     // 检查测试状态
                     fetch(`/api/stress-test/status/${currentTestId}`)
@@ -2380,6 +2487,13 @@ const StressTest: React.FC = () => {
                                         metrics: data.data.metrics
                                     });
                                 }
+                            } else if (data.success && data.data.status === 'cancelled') {
+                                // 🔧 修复：处理取消状态
+                                console.log('✅ 确认测试已取消');
+                                setTestStatus('cancelled');
+                                setTestProgress('测试已取消');
+                                setIsRunning(false);
+                                setCurrentTestId(null);
                             }
                         })
                         .catch(error => {
@@ -2389,13 +2503,13 @@ const StressTest: React.FC = () => {
             }
         };
 
-        // 每5秒检查一次
-        const completionCheckInterval = setInterval(checkTestCompletion, 5000);
+        // 每10秒检查一次，减少检查频率
+        const completionCheckInterval = setInterval(checkTestCompletion, 10000);
 
         return () => {
             clearInterval(completionCheckInterval);
         };
-    }, [isRunning, currentTestId, stressTestData.length]);
+    }, [isRunning, currentTestId, stressTestData.length, testStatus]); // 添加testStatus依赖
 
     // 生成测试ID
     const generateTestId = () => {
@@ -2422,14 +2536,28 @@ const StressTest: React.FC = () => {
             return;
         }
 
-        // 检查是否有活跃的测试ID
+        // 🔧 使用统一状态管理检查是否可以启动新测试
         if (currentTestId || currentTestIdRef.current) {
-            console.warn('⚠️ 检测到活跃的测试ID，防止重复启动:', {
-                currentTestId,
-                currentTestIdRef: currentTestIdRef.current
-            });
-            setError('检测到正在运行的测试，请先取消当前测试');
-            return;
+            // 检查当前测试状态是否为终态
+            const isTerminalState = ['completed', 'cancelled', 'failed'].includes(testStatus);
+
+            if (isTerminalState) {
+                console.log('🧹 检测到终态测试，清理旧测试ID并允许启动新测试:', {
+                    currentTestId,
+                    testStatus,
+                    action: '清理并继续'
+                });
+                setCurrentTestId(null);
+                currentTestIdRef.current = null;
+            } else {
+                console.warn('⚠️ 检测到活跃的测试，防止重复启动:', {
+                    currentTestId,
+                    currentTestIdRef: currentTestIdRef.current,
+                    testStatus
+                });
+                setError('检测到正在运行的测试，请先取消当前测试');
+                return;
+            }
         }
 
         try {
@@ -2440,6 +2568,9 @@ const StressTest: React.FC = () => {
                 testType: testConfig.testType,
                 selectedTemplate: selectedTemplate
             });
+
+            // 🔧 使用统一状态管理设置启动状态
+            updateTestStatus('starting', '正在启动压力测试引擎...');
 
             // 清理之前的状态
             setError(null);
@@ -2470,8 +2601,8 @@ const StressTest: React.FC = () => {
         } catch (error: any) {
             console.error('❌ 启动测试失败:', error);
             setError(error.message || '启动测试失败');
-            setTestStatus('failed');
-            setIsRunning(false);
+            // 🔧 使用统一状态管理设置失败状态
+            updateTestStatus('failed', error.message || '启动测试失败');
         }
     };
 
@@ -2479,12 +2610,12 @@ const StressTest: React.FC = () => {
     const resetTestState = useCallback(() => {
         console.log('🔄 重置所有测试状态...');
 
-        // 重置基本状态
-        setTestStatus('idle');
+        // 🔧 使用统一状态管理重置状态
+        updateTestStatus('idle', '准备开始测试');
+
+        // 重置其他状态
         setTestProgress('');
-        setIsRunning(false);
         setIsStopping(false);
-        setIsCancelling(false);
         setError('');
 
         // 重置数据
@@ -2496,10 +2627,6 @@ const StressTest: React.FC = () => {
         setCurrentTestId(null);
         setCurrentRecordId(null);
         currentTestIdRef.current = '';
-
-        // 重置状态管理
-        setCurrentStatus('IDLE');
-        setStatusMessage('准备开始测试');
 
         // 重置房间状态
         setIsInRoom(false);
@@ -2545,6 +2672,12 @@ const StressTest: React.FC = () => {
             return;
         }
 
+        // 🔧 修复：不要在这里清理测试ID，保留测试ID用于取消操作
+        console.log('🔍 保留测试ID用于取消操作:', {
+            currentTestId,
+            currentTestIdRef: currentTestIdRef.current
+        });
+
         // 显示专业的取消确认对话框
         setShowCancelDialog(true);
     };
@@ -2571,6 +2704,16 @@ const StressTest: React.FC = () => {
                 testStatus
             });
 
+            // 🔧 修复：先发送WebSocket取消事件，再调用后端API
+            if (testIdToCancel && socketRef.current) {
+                console.log('📡 发送WebSocket取消事件...');
+                socketRef.current.emit('cancel-stress-test', {
+                    testId: testIdToCancel,
+                    reason: reason || '用户手动取消',
+                    timestamp: Date.now()
+                });
+            }
+
             // 如果有测试ID，调用后端取消API
             if (testIdToCancel) {
                 console.log('📡 调用后端取消API...');
@@ -2591,7 +2734,10 @@ const StressTest: React.FC = () => {
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
                         },
-                        body: JSON.stringify({ reason: '用户手动取消' })
+                        body: JSON.stringify({
+                            reason: reason || '用户手动取消',
+                            preserveData: preserveData
+                        })
                     });
 
                     console.log('📡 响应状态:', response.status, response.statusText);
@@ -2604,41 +2750,83 @@ const StressTest: React.FC = () => {
                         // 如果后端确认取消成功，立即设置本地状态
                         if (result.success) {
                             console.log('🎯 后端确认取消成功，更新本地状态');
-                            setIsRunning(false);
-                            setTestStatus('cancelled');
-                            setCurrentStatus('CANCELLED');
-                            setStatusMessage('测试已取消');
+
+                            // 🔧 修复：更新测试记录状态
+                            if (currentRecord) {
+                                try {
+                                    await cancelRecord(currentRecord.id, reason || '用户手动取消');
+                                    console.log('✅ 测试记录已标记为取消');
+                                } catch (recordError) {
+                                    console.warn('⚠️ 更新取消记录失败:', recordError);
+                                }
+                            }
                         }
                     } else {
                         const errorText = await response.text();
                         console.warn('⚠️ 后端取消失败:', response.status, errorText);
 
-                        // 即使后端取消失败，也要设置本地状态
+                        // 即使后端取消失败，也要设置本地状态和更新记录
                         console.log('🔄 后端取消失败，但仍设置本地取消状态');
+
+                        // 🔧 修复：即使后端失败也要更新测试记录状态
+                        if (currentRecord) {
+                            try {
+                                await cancelRecord(currentRecord.id, reason || '用户手动取消');
+                                console.log('✅ 测试记录已标记为取消（后端失败但本地成功）');
+                            } catch (recordError) {
+                                console.warn('⚠️ 更新取消记录失败:', recordError);
+                            }
+                        }
                     }
                 } catch (fetchError) {
                     console.error('❌ 网络请求失败:', fetchError);
                 }
             } else {
                 console.warn('⚠️ 没有找到测试ID，无法调用后端取消API');
+
+                // 🔧 修复：即使没有测试ID也要更新测试记录状态
+                if (currentRecord) {
+                    try {
+                        await cancelRecord(currentRecord.id, reason || '用户手动取消');
+                        console.log('✅ 测试记录已标记为取消（无测试ID情况）');
+                    } catch (recordError) {
+                        console.warn('⚠️ 更新取消记录失败:', recordError);
+                    }
+                }
             }
 
-            // 确保本地状态已设置为已取消（防止重复设置）
-            console.log('🔄 确保本地取消状态已设置...');
-            setIsRunning(false);
-            setTestStatus('cancelled');
+            // 🔧 使用统一状态管理设置取消状态
+            console.log('🔄 设置本地取消状态...');
+            updateTestStatus('cancelled', '测试已取消');
             setCanSwitchPages(true);
-            setCurrentStatus('CANCELLED');
-            setStatusMessage('测试已取消');
 
-            // 断开WebSocket连接
-            if (socketRef.current) {
-                console.log('🔌 断开WebSocket连接...');
-                socketRef.current.disconnect();
-            }
+            // 🔧 修复：延迟断开WebSocket连接，确保取消事件已发送
+            setTimeout(() => {
+                if (socketRef.current) {
+                    console.log('🔌 延迟断开WebSocket连接...');
+                    // 先离开测试房间
+                    if (testIdToCancel) {
+                        socketRef.current.emit('leave-stress-test', testIdToCancel);
+                    }
+                    // 然后断开连接
+                    setTimeout(() => {
+                        if (socketRef.current) {
+                            socketRef.current.disconnect();
+                        }
+                    }, 500);
+                }
+            }, 1000);
 
             // 清理实时数据接收
             console.log('🧹 清理测试相关状态...');
+
+            // 🔧 修复：在WebSocket事件发送后再清理测试ID
+            console.log('🧹 延迟清理测试ID，确保取消事件已发送...');
+            setTimeout(() => {
+                console.log('🧹 现在清理测试ID...');
+                setCurrentTestId(null);
+                currentTestIdRef.current = null;
+            }, 2000); // 延迟2秒清理，确保所有取消操作完成
 
             console.log('✅ 取消测试完成');
 
@@ -2655,13 +2843,11 @@ const StressTest: React.FC = () => {
     const handleCancelProgressComplete = () => {
         setShowCancelProgress(false);
         setCancelInProgress(false);
-        setIsCancelling(false);
 
-        // 确保状态正确设置
-        setIsRunning(false);
-        setTestStatus('cancelled');
-        setTestProgress('测试已取消');
+        // 🔧 使用统一状态管理确保取消状态
+        updateTestStatus('cancelled', '测试已取消');
 
+        // 🔧 修复：测试ID已在handleCancelConfirm中清理，这里不需要重复清理
         console.log('✅ 取消进度完成，状态已更新');
     };
 
@@ -2694,7 +2880,7 @@ const StressTest: React.FC = () => {
 
         // 清理测试ID
         setCurrentTestId(null);
-        currentTestIdRef.current = '';
+        currentTestIdRef.current = null;
 
         console.log('✅ 强制取消完成');
     }, []);

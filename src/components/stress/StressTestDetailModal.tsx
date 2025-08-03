@@ -1,6 +1,7 @@
-import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Copy, Download, Settings, TrendingUp, Users, X, XCircle, Zap } from 'lucide-react';
+import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Copy, Download, ExternalLink, Settings, TrendingUp, Users, X, XCircle, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 
 import './StressTestDetailModal.css';
 
@@ -16,6 +17,7 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = ({
   onClose
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
+  const navigate = useNavigate();
 
   // 管理键盘事件（移除页面滚动锁定，允许用户滚动页面）
   useEffect(() => {
@@ -174,6 +176,12 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = ({
     URL.revokeObjectURL(url);
   };
 
+  const goToDetailPage = () => {
+    if (!record) return;
+    navigate(`/stress-test/${record.id}`);
+    onClose(); // 关闭模态框
+  };
+
   const statusInfo = getStatusInfo(record.status);
   const metrics = record.results?.metrics || {};
 
@@ -202,6 +210,14 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = ({
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={goToDetailPage}
+              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+              title="进入详细页面"
+            >
+              <ExternalLink className="w-5 h-5" />
+            </button>
             <button
               type="button"
               onClick={exportData}
@@ -377,8 +393,8 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = ({
                 <div>
                   <h4 className="text-md font-semibold text-white mb-4">标签</h4>
                   <div className="flex flex-wrap gap-2">
-                    {record.tags.map((tag, index) => (
-                      <span key={index} className="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full bg-gray-700 text-gray-300 border border-gray-600">
+                    {record.tags.map((tag: string, index: number) => (
+                      <span key={index} className="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full bg-blue-600/60 text-blue-200 border border-blue-500/50">
                         {tag}
                       </span>
                     ))}

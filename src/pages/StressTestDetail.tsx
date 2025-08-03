@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
+import '../components/stress/StatusLabel.css';
+
 interface StressTestRecord {
   id: string;
   testName: string;
@@ -82,15 +84,40 @@ const StressTestDetail: React.FC = () => {
   const getStatusInfo = (status: string) => {
     switch (status) {
       case 'completed':
-        return { icon: <CheckCircle className="w-5 h-5" />, color: 'text-green-600', bg: 'bg-green-100' };
+        return {
+          icon: <CheckCircle className="w-5 h-5" />,
+          color: 'text-green-600 dark:text-green-100',
+          bg: '!bg-green-100 dark:!bg-green-500',
+          cssClass: 'status-label-completed'
+        };
       case 'failed':
-        return { icon: <XCircle className="w-5 h-5" />, color: 'text-red-600', bg: 'bg-red-100' };
+        return {
+          icon: <XCircle className="w-5 h-5" />,
+          color: 'text-red-600 dark:text-red-100',
+          bg: '!bg-red-100 dark:!bg-red-500',
+          cssClass: 'status-label-failed'
+        };
       case 'running':
-        return { icon: <Clock className="w-5 h-5" />, color: 'text-blue-600', bg: 'bg-blue-100' };
+        return {
+          icon: <Clock className="w-5 h-5" />,
+          color: 'text-blue-600 dark:text-blue-100',
+          bg: '!bg-blue-100 dark:!bg-blue-500',
+          cssClass: 'status-label-running'
+        };
       case 'cancelled':
-        return { icon: <AlertCircle className="w-5 h-5" />, color: 'text-yellow-600', bg: 'bg-yellow-100' };
+        return {
+          icon: <AlertCircle className="w-5 h-5" />,
+          color: 'text-yellow-600 dark:text-yellow-100',
+          bg: '!bg-yellow-100 dark:!bg-yellow-500',
+          cssClass: 'status-label-cancelled'
+        };
       default:
-        return { icon: <Clock className="w-5 h-5" />, color: 'text-gray-600', bg: 'bg-gray-100' };
+        return {
+          icon: <Clock className="w-5 h-5" />,
+          color: 'text-gray-600 dark:text-gray-100',
+          bg: '!bg-gray-100 dark:!bg-gray-500',
+          cssClass: 'status-label-default'
+        };
     }
   };
 
@@ -342,7 +369,7 @@ const StressTestDetail: React.FC = () => {
 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className={`p-3 rounded-lg ${statusInfo.bg}`}>
+              <div className={`p-3 rounded-lg ${statusInfo.bg} ${statusInfo.cssClass}`}>
                 {statusInfo.icon}
               </div>
               <div>
@@ -588,7 +615,7 @@ const StressTestDetail: React.FC = () => {
                         <span className="text-gray-400 block mb-2">标签:</span>
                         <div className="flex flex-wrap gap-1">
                           {record.tags.map((tag: string, index: number) => (
-                            <span key={index} className="px-2 py-1 text-xs bg-gray-700 text-gray-300 rounded">
+                            <span key={index} className="px-2 py-1 text-xs bg-blue-600/60 text-blue-200 border border-blue-500/50 rounded">
                               {tag}
                             </span>
                           ))}
@@ -603,11 +630,11 @@ const StressTestDetail: React.FC = () => {
               <div className="bg-gray-800 rounded-lg p-6">
                 <h4 className="text-lg font-semibold text-white mb-4">测试状态</h4>
                 <div className="flex items-center gap-4">
-                  <div className={`p-3 rounded-lg ${statusInfo.bg}`}>
+                  <div className={`p-3 rounded-lg ${statusInfo.bg} ${statusInfo.cssClass}`}>
                     {statusInfo.icon}
                   </div>
                   <div>
-                    <p className={`text-lg font-medium ${statusInfo.color}`}>
+                    <p className={`text-lg font-medium ${statusInfo.color} ${statusInfo.cssClass}`}>
                       {record.status === 'completed' ? '已完成' :
                         record.status === 'failed' ? '失败' :
                           record.status === 'running' ? '运行中' :
