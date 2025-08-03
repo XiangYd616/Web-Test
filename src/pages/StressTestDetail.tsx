@@ -252,19 +252,12 @@ const StressTestDetail: React.FC = () => {
   const metrics = record.results?.metrics || {};
   let realTimeData = record.results?.realTimeData || [];
 
-  // 如果没有实时数据，生成模拟数据用于展示
-  if (realTimeData.length === 0 && record.status === 'completed') {
-    console.log('生成模拟响应时间数据用于展示');
-    const sampleCount = 100;
-    realTimeData = Array.from({ length: sampleCount }, (_, i) => ({
-      timestamp: Date.now() - (sampleCount - i) * 1000,
-      responseTime: Math.random() * 500 + 50, // 50-550ms的随机响应时间
-      throughput: Math.random() * 100 + 10,
-      activeUsers: Math.floor(Math.random() * 50) + 1,
-      errorRate: Math.random() * 10,
-      success: Math.random() > 0.1 // 90%成功率
-    }));
-  }
+  // 数据验证和清理
+  realTimeData = realTimeData.filter((item: any) =>
+    item &&
+    typeof item === 'object' &&
+    (item.responseTime !== undefined || item.avgResponseTime !== undefined || item.response_time !== undefined)
+  );
 
   // 数据处理函数
   const filterDataByTimeRange = (data: any[]) => {
@@ -295,12 +288,16 @@ const StressTestDetail: React.FC = () => {
   const calculateAverageData = (data: any[]) => {
     if (data.length === 0) return [];
 
-    const sum = data.reduce((acc, item) => acc + (item.responseTime || 0), 0);
+    const sum = data.reduce((acc, item) => {
+      const responseTime = item.responseTime || item.avgResponseTime || item.response_time || 0;
+      return acc + responseTime;
+    }, 0);
     const average = sum / data.length;
 
     return data.map(item => ({
       ...item,
-      averageResponseTime: average
+      avgResponseTime: average,
+      responseTime: item.responseTime || item.avgResponseTime || item.response_time || 0
     }));
   };
 
@@ -310,9 +307,6 @@ const StressTestDetail: React.FC = () => {
 
   // 计算响应时间分布数据
   const calculateResponseTimeDistribution = (data: any[]) => {
-    console.log('计算响应时间分布，数据长度:', data.length);
-    console.log('数据样本:', data.slice(0, 3));
-
     if (data.length === 0) {
       return [
         { range: '0-50ms', count: 0, color: 'bg-green-400' },
@@ -346,16 +340,13 @@ const StressTestDetail: React.FC = () => {
       }
     });
 
-    const result = [
+    return [
       { range: '0-50ms', count: distribution['0-50'], color: 'bg-green-400' },
       { range: '50-100ms', count: distribution['50-100'], color: 'bg-green-300' },
       { range: '100-200ms', count: distribution['100-200'], color: 'bg-yellow-400' },
       { range: '200-500ms', count: distribution['200-500'], color: 'bg-orange-400' },
       { range: '500ms+', count: distribution['500+'], color: 'bg-red-400' }
     ];
-
-    console.log('响应时间分布结果:', result);
-    return result;
   };
 
   // 计算成功率
