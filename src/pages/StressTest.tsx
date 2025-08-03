@@ -1,6 +1,6 @@
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AlertCircle, AlertTriangle, BarChart3, CheckCircle, Clock, Download, FileText, Loader, Play, RotateCcw, Square, TrendingUp, Users, XCircle, Zap } from 'lucide-react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { AdvancedStressTestChart, UnifiedStressTestCharts } from '../components/charts';
@@ -10,6 +10,7 @@ import CancelTestConfirmDialog from '../components/dialogs/CancelTestConfirmDial
 import CancelProgressFeedback from '../components/feedback/CancelProgressFeedback';
 import StressTestHistory from '../components/stress/StressTestHistory';
 import { URLInput } from '../components/testing';
+import { TestPageLayout } from '../components/testing/UnifiedTestingComponents';
 import { AdvancedStressTestConfig as ImportedAdvancedStressTestConfig } from '../hooks/useSimpleTestEngine';
 import { useStressTestRecord } from '../hooks/useStressTestRecord';
 import { useUserStats } from '../hooks/useUserStats';
@@ -84,14 +85,14 @@ const StressTest: React.FC = () => {
 
     // 🔧 简化数据状态管理 - 只使用一个主要数据源
     const [stressTestData, setStressTestData] = useState<TestDataPoint[]>([]);  // 唯一数据源：压力测试实时数据
-    const [finalResultData, setFinalResultData] = useState<TestDataPoint[]>([]);  
+    const [finalResultData, setFinalResultData] = useState<TestDataPoint[]>([]);
     const [metrics, setMetrics] = useState<RealTimeMetrics | null>(null);  // 实时指标
     const [testStatus, setTestStatus] = useState<TestStatusType>('idle');
     const [testProgress, setTestProgress] = useState<string>('');
     const [isRunning, setIsRunning] = useState(false);
     const [isStopping, setIsStopping] = useState(false);
     const [isCancelling, setIsCancelling] = useState(false);
-    const [result, setResult] = useState<any>(null);  
+    const [result, setResult] = useState<any>(null);
 
     // 新的取消功能状态
     const [showCancelDialog, setShowCancelDialog] = useState(false);
@@ -1330,7 +1331,7 @@ const StressTest: React.FC = () => {
             let newStatus: TestStatusType = 'idle';
 
             if (isRunning) {
-                
+
                 newStatus = 'running';
             } else if (result) {
                 // 有测试结果，智能判断状态
