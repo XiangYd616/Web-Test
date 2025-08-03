@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import StressTestDetailModal from './StressTestDetailModal';
 
+import './StatusLabel.css';
 import './StressTestHistory.css';
 
 interface TestRecord {
@@ -294,17 +295,17 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
   const getStatusStyle = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'bg-green-100 dark:bg-green-800/80 border-green-200 dark:border-green-600';
+        return '!bg-green-100 dark:!bg-green-500 !text-green-800 dark:!text-green-100 !border-green-200 dark:!border-green-400';
       case 'failed':
-        return 'bg-red-100 dark:bg-red-800/80 border-red-200 dark:border-red-600';
+        return '!bg-red-100 dark:!bg-red-500 !text-red-800 dark:!text-red-100 !border-red-200 dark:!border-red-400';
       case 'running':
-        return 'bg-blue-100 dark:bg-blue-800/80 border-blue-200 dark:border-blue-600 animate-pulse';
+        return '!bg-blue-100 dark:!bg-blue-500 !text-blue-800 dark:!text-blue-100 !border-blue-200 dark:!border-blue-400 animate-pulse';
       case 'cancelled':
-        return 'bg-yellow-100 dark:bg-yellow-800/80 border-yellow-200 dark:border-yellow-600';
+        return '!bg-yellow-100 dark:!bg-yellow-500 !text-yellow-800 dark:!text-yellow-100 !border-yellow-200 dark:!border-yellow-400';
       case 'pending':
-        return 'bg-yellow-100 dark:bg-yellow-800/80 border-yellow-200 dark:border-yellow-600';
+        return '!bg-yellow-100 dark:!bg-yellow-500 !text-yellow-800 dark:!text-yellow-100 !border-yellow-200 dark:!border-yellow-400';
       default:
-        return 'bg-gray-100 dark:bg-gray-700/80 border-gray-200 dark:border-gray-600';
+        return '!bg-gray-100 dark:!bg-gray-500 !text-gray-800 dark:!text-gray-100 !border-gray-200 dark:!border-gray-400';
     }
   };
 
@@ -1154,7 +1155,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
                       {record.tags && record.tags.length > 0 && (
                         <div className="flex items-center gap-2 mb-3">
                           {record.tags.slice(0, 3).map((tag, index) => (
-                            <span key={index} className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-blue-100 dark:bg-blue-800/30 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-600/30">
+                            <span key={index} className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md bg-blue-100 dark:bg-blue-600/60 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-500/50">
                               {tag}
                             </span>
                           ))}

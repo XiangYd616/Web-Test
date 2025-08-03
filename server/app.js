@@ -422,9 +422,50 @@ function setupWebSocketHandlers(io) {
       });
     });
 
+    // 🔧 添加WebSocket取消测试事件处理
+    socket.on('cancel-stress-test', async (data) => {
+      console.log(`🛑 收到WebSocket取消测试事件:`, { socketId: socket.id, data });
+
+      try {
+        const { testId, reason = '用户手动取消' } = data;
+
+        if (!testId) {
+          console.warn('⚠️ WebSocket取消事件缺少testId');
+          return;
+        }
+
+        // 获取测试引擎实例
+        const { RealStressTestEngine } = require('./services/realStressTestEngine');
+        const stressTestEngine = new RealStressTestEngine();
+        stressTestEngine.io = io;
+
+        // 调用取消测试方法
+        const result = await stressTestEngine.cancelStressTest(testId, reason, true);
+
+        console.log(`🛑 WebSocket取消测试结果:`, { testId, result });
+
+        // 向客户端发送取消确认
+        socket.emit('cancel-stress-test-ack', {
+          testId,
+          success: result.success,
+          message: result.message,
+          timestamp: Date.now()
+        });
+
+      } catch (error) {
+        console.error('❌ WebSocket取消测试失败:', error);
+        socket.emit('cancel-stress-test-ack', {
+          testId: data.testId,
+          success: false,
+          message: error.message || '取消测试失败',
+          timestamp: Date.now()
+        });
+      }
+    });
+
     // 简化的事件监听器 - 只记录关键事件
     socket.onAny((eventName, ...args) => {
-      if (['join-stress-test', 'leave-stress-test'].includes(eventName)) {
+      if (['join-stress-test', 'leave-stress-test', 'cancel-stress-test'].includes(eventName)) {
         console.log(`📥 收到关键事件: ${eventName}`, { socketId: socket.id, data: args[0] });
       }
     });
