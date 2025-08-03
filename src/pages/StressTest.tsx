@@ -3407,22 +3407,9 @@ const StressTest: React.FC = () => {
                         {!isAdvancedMode ? (
                             /* 简化模式 - 快速模板选择 */
                             <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="text-center flex-1">
-                                        <h3 className="text-lg font-semibold text-white mb-1">选择测试强度</h3>
-                                        <p className="text-gray-400 text-xs">根据您的网站类型选择合适的测试模板</p>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={importConfigFromClipboard}
-                                        className="px-3 py-2 text-sm border border-gray-600 text-gray-400 rounded-lg hover:bg-gray-700/50 hover:text-gray-300 transition-colors flex items-center space-x-2"
-                                        title="从剪贴板导入配置"
-                                    >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                        </svg>
-                                        <span>导入配置</span>
-                                    </button>
+                                <div className="text-center mb-4">
+                                    <h3 className="text-lg font-semibold text-white mb-1">选择测试强度</h3>
+                                    <p className="text-gray-400 text-xs">根据您的网站类型选择合适的测试模板</p>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -3517,7 +3504,20 @@ const StressTest: React.FC = () => {
                             <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
                                 {/* 测试配置 */}
                                 <div className="xl:col-span-3 bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-                                    <h3 className="text-xl font-semibold text-white mb-4">高级测试配置</h3>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="text-xl font-semibold text-white">高级测试配置</h3>
+                                        <button
+                                            type="button"
+                                            onClick={importConfigFromClipboard}
+                                            className="px-3 py-2 text-sm border border-gray-600 text-gray-400 rounded-lg hover:bg-gray-700/50 hover:text-gray-300 transition-colors flex items-center space-x-2"
+                                            title="从剪贴板导入配置"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                            </svg>
+                                            <span>导入配置</span>
+                                        </button>
+                                    </div>
 
                                     {/* 测试类型选择 - 移动端优化布局 */}
                                     <div className="mb-4">
