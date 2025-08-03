@@ -1219,6 +1219,37 @@ const StressTest: React.FC = () => {
         }
     };
 
+    // 从剪贴板导入配置
+    const importConfigFromClipboard = async () => {
+        try {
+            const text = await navigator.clipboard.readText();
+            const config = JSON.parse(text);
+
+            // 验证配置格式
+            if (typeof config === 'object' && config !== null) {
+                setTestConfig(prev => ({
+                    ...prev,
+                    ...(config.users && { users: Number(config.users) }),
+                    ...(config.duration && { duration: Number(config.duration) }),
+                    ...(config.rampUp && { rampUp: Number(config.rampUp) }),
+                    ...(config.rampUpTime && { rampUp: Number(config.rampUpTime) }),
+                    ...(config.testType && { testType: config.testType }),
+                    ...(config.method && { method: config.method }),
+                    ...(config.timeout && { timeout: Number(config.timeout) }),
+                    ...(config.thinkTime && { thinkTime: Number(config.thinkTime) }),
+                    ...(config.warmupDuration && { warmupDuration: Number(config.warmupDuration) }),
+                    ...(config.cooldownDuration && { cooldownDuration: Number(config.cooldownDuration) })
+                }));
+                alert('配置导入成功！');
+            } else {
+                alert('剪贴板中的内容不是有效的配置格式');
+            }
+        } catch (error) {
+            console.error('导入配置失败:', error);
+            alert('导入配置失败，请确保剪贴板中包含有效的JSON配置');
+        }
+    };
+
     // 新的状态管理系统监听器
     useEffect(() => {
         console.log('🔄 状态更新:', currentStatus, statusMessage);
@@ -3376,9 +3407,22 @@ const StressTest: React.FC = () => {
                         {!isAdvancedMode ? (
                             /* 简化模式 - 快速模板选择 */
                             <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
-                                <div className="text-center mb-4">
-                                    <h3 className="text-lg font-semibold text-white mb-1">选择测试强度</h3>
-                                    <p className="text-gray-400 text-xs">根据您的网站类型选择合适的测试模板</p>
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="text-center flex-1">
+                                        <h3 className="text-lg font-semibold text-white mb-1">选择测试强度</h3>
+                                        <p className="text-gray-400 text-xs">根据您的网站类型选择合适的测试模板</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={importConfigFromClipboard}
+                                        className="px-3 py-2 text-sm border border-gray-600 text-gray-400 rounded-lg hover:bg-gray-700/50 hover:text-gray-300 transition-colors flex items-center space-x-2"
+                                        title="从剪贴板导入配置"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                        </svg>
+                                        <span>导入配置</span>
+                                    </button>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -3878,7 +3922,20 @@ const StressTest: React.FC = () => {
 
                                     {/* 快速模板 */}
                                     <div className="mt-6">
-                                        <h4 className="text-sm font-medium text-gray-300 mb-3">快速模板</h4>
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h4 className="text-sm font-medium text-gray-300">快速模板</h4>
+                                            <button
+                                                type="button"
+                                                onClick={importConfigFromClipboard}
+                                                className="px-3 py-1 text-xs border border-gray-600 text-gray-400 rounded-lg hover:bg-gray-700/50 hover:text-gray-300 transition-colors flex items-center space-x-1"
+                                                title="从剪贴板导入配置"
+                                            >
+                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                                </svg>
+                                                <span>导入配置</span>
+                                            </button>
+                                        </div>
                                         <div className="space-y-2">
                                             <button
                                                 type="button"
