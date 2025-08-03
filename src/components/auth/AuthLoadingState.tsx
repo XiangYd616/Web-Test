@@ -1,9 +1,6 @@
 import React from 'react';
 import { Loader2, Shield, User, Key, Mail, RefreshCw } from 'lucide-react';
 
-/**
- * 认证加载状态类型
- */
 export enum AuthLoadingType {
   LOGIN = 'login',
   REGISTER = 'register',
@@ -18,9 +15,6 @@ export enum AuthLoadingType {
   UPDATE_PROFILE = 'update_profile'
 }
 
-/**
- * 加载状态消息
- */
 const LOADING_MESSAGES = {
   [AuthLoadingType.LOGIN]: '正在登录...',
   [AuthLoadingType.REGISTER]: '正在注册...',
@@ -35,9 +29,6 @@ const LOADING_MESSAGES = {
   [AuthLoadingType.UPDATE_PROFILE]: '正在更新资料...'
 };
 
-/**
- * 加载状态图标
- */
 const LOADING_ICONS = {
   [AuthLoadingType.LOGIN]: User,
   [AuthLoadingType.REGISTER]: User,
@@ -61,9 +52,6 @@ interface AuthLoadingStateProps {
   overlay?: boolean;
 }
 
-/**
- * 认证加载状态组件
- */
 const AuthLoadingState: React.FC<AuthLoadingStateProps> = ({
   type = AuthLoadingType.LOGIN,
   message,
@@ -105,7 +93,7 @@ const AuthLoadingState: React.FC<AuthLoadingStateProps> = ({
       <div className="relative">
         {/* 旋转的加载器 */}
         <Loader2 className={`${config.spinner} animate-spin text-blue-600`} />
-        
+
         {/* 功能图标（可选） */}
         {showIcon && IconComponent && (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -135,9 +123,6 @@ const AuthLoadingState: React.FC<AuthLoadingStateProps> = ({
   return content;
 };
 
-/**
- * 简化的加载指示器
- */
 export const AuthSpinner: React.FC<{
   size?: 'sm' | 'md' | 'lg';
   className?: string;
@@ -153,9 +138,6 @@ export const AuthSpinner: React.FC<{
   );
 };
 
-/**
- * 内联加载状态
- */
 export const InlineAuthLoading: React.FC<{
   type?: AuthLoadingType;
   message?: string;
@@ -170,21 +152,18 @@ export const InlineAuthLoading: React.FC<{
   );
 };
 
-/**
- * 按钮加载状态
- */
 export const ButtonLoading: React.FC<{
   type?: AuthLoadingType;
   message?: string;
   disabled?: boolean;
   className?: string;
   children?: React.ReactNode;
-}> = ({ 
-  type = AuthLoadingType.LOGIN, 
-  message, 
+}> = ({
+  type = AuthLoadingType.LOGIN,
+  message,
   disabled = true,
   className = "",
-  children 
+  children
 }) => {
   const loadingMessage = message || LOADING_MESSAGES[type];
 
@@ -201,17 +180,14 @@ export const ButtonLoading: React.FC<{
   );
 };
 
-/**
- * 页面级加载状态
- */
 export const PageAuthLoading: React.FC<{
   type?: AuthLoadingType;
   message?: string;
   description?: string;
-}> = ({ 
-  type = AuthLoadingType.VERIFY_TOKEN, 
+}> = ({
+  type = AuthLoadingType.VERIFY_TOKEN,
   message,
-  description 
+  description
 }) => {
   const loadingMessage = message || LOADING_MESSAGES[type];
 
@@ -219,14 +195,14 @@ export const PageAuthLoading: React.FC<{
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="text-center">
         <div className="mb-6">
-          <AuthLoadingState 
-            type={type} 
+          <AuthLoadingState
+            type={type}
             message={loadingMessage}
             size="lg"
             showIcon={true}
           />
         </div>
-        
+
         {description && (
           <p className="text-gray-500 text-sm max-w-md mx-auto">
             {description}
@@ -237,9 +213,6 @@ export const PageAuthLoading: React.FC<{
   );
 };
 
-/**
- * 卡片加载状态
- */
 export const CardAuthLoading: React.FC<{
   type?: AuthLoadingType;
   message?: string;
@@ -247,8 +220,8 @@ export const CardAuthLoading: React.FC<{
 }> = ({ type = AuthLoadingType.LOGIN, message, className = "" }) => {
   return (
     <div className={`bg-white rounded-lg border border-gray-200 shadow-sm ${className}`}>
-      <AuthLoadingState 
-        type={type} 
+      <AuthLoadingState
+        type={type}
         message={message}
         size="md"
         showIcon={true}

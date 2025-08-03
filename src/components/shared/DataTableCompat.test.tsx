@@ -1,7 +1,6 @@
 import React from 'react';
 import DataTableCompat, { Column } from './DataTableCompat';
 
-// 测试数据类型
 interface TestRecord {
   id: string;
   name: string;
@@ -10,14 +9,12 @@ interface TestRecord {
   status: 'active' | 'inactive';
 }
 
-// 测试数据
 const testData: TestRecord[] = [
   { id: '1', name: '张三', age: 25, email: 'zhang@example.com', status: 'active' },
   { id: '2', name: '李四', age: 30, email: 'li@example.com', status: 'inactive' },
   { id: '3', name: '王五', age: 28, email: 'wang@example.com', status: 'active' }
 ];
 
-// 测试列定义
 const testColumns: Column<TestRecord>[] = [
   {
     key: 'name',
@@ -47,10 +44,6 @@ const testColumns: Column<TestRecord>[] = [
   }
 ];
 
-/**
- * DataTableCompat兼容性测试组件
- * 验证兼容层是否正确工作
- */
 const DataTableCompatTest: React.FC = () => {
   const [sortBy, setSortBy] = React.useState<keyof TestRecord>('name');
   const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('asc');
@@ -67,12 +60,12 @@ const DataTableCompatTest: React.FC = () => {
         <h1 className="text-2xl font-bold text-white mb-6">
           DataTable兼容层测试
         </h1>
-        
+
         <div className="space-y-4">
           <h2 className="text-lg font-semibold text-gray-300">
             基础功能测试
           </h2>
-          
+
           <DataTableCompat
             columns={testColumns}
             data={testData}
@@ -82,11 +75,11 @@ const DataTableCompatTest: React.FC = () => {
             rowKey="id"
             className="mb-6"
           />
-          
+
           <h2 className="text-lg font-semibold text-gray-300">
             加载状态测试
           </h2>
-          
+
           <DataTableCompat
             columns={testColumns}
             data={[]}
@@ -94,11 +87,11 @@ const DataTableCompatTest: React.FC = () => {
             rowKey="id"
             className="mb-6"
           />
-          
+
           <h2 className="text-lg font-semibold text-gray-300">
             空状态测试
           </h2>
-          
+
           <DataTableCompat
             columns={testColumns}
             data={[]}
@@ -111,7 +104,7 @@ const DataTableCompatTest: React.FC = () => {
             rowKey="id"
           />
         </div>
-        
+
         <div className="mt-8 p-4 bg-gray-800 rounded-lg">
           <h3 className="text-md font-semibold text-gray-300 mb-2">
             当前排序状态

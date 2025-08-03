@@ -1,7 +1,3 @@
-/**
- * 动态进度条组件
- * 解决内联样式问题，使用CSS类和CSS变量
- */
 
 import React from 'react';
 

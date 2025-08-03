@@ -1,11 +1,8 @@
-/**
- * 优化的压力测试图表组件
- * 统一图表系统，提供高性能的实时数据展示
- */
 
-import { BarChart3, Download, Settings, TrendingUp } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
+import { BarChart3, Download, Settings, TrendingUp } from 'lucide-react';
 import { TestPhase, TestState, type RealTimeMetrics, type TestDataPoint } from '../../services/testStateManager';
+
 import '../../styles/optimized-charts.css';
 
 // 图表配置接口
@@ -46,9 +43,6 @@ const defaultConfig: ChartConfig = {
   showLegend: true
 };
 
-/**
- * 优化的压力测试图表组件
- */
 export const OptimizedStressTestChart: React.FC<OptimizedStressTestChartProps> = ({
   testState,
   testPhase,

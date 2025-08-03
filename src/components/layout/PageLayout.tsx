@@ -8,10 +8,6 @@ interface PageLayoutProps {
   compact?: boolean;
 }
 
-/**
- * 优化的页面布局组件
- * 提供紧凑、响应式的页面布局
- */
 export const PageLayout: React.FC<PageLayoutProps> = ({
   children,
   title,
@@ -56,9 +52,6 @@ interface SectionProps {
   compact?: boolean;
 }
 
-/**
- * 页面区块组件
- */
 export const PageSection: React.FC<SectionProps> = ({
   children,
   title,
@@ -88,9 +81,6 @@ interface GridLayoutProps {
   className?: string;
 }
 
-/**
- * 响应式网格布局组件
- */
 export const GridLayout: React.FC<GridLayoutProps> = ({
   children,
   columns = 2,
@@ -135,9 +125,6 @@ interface FlexLayoutProps {
   className?: string;
 }
 
-/**
- * 弹性布局组件
- */
 export const FlexLayout: React.FC<FlexLayoutProps> = ({
   children,
   direction = 'row',
@@ -147,7 +134,7 @@ export const FlexLayout: React.FC<FlexLayoutProps> = ({
   className = ''
 }) => {
   const getDirection = () => direction === 'row' ? 'flex-row' : 'flex-col';
-  
+
   const getGap = () => {
     switch (gap) {
       case 'sm': return 'gap-2 lg:gap-3';
@@ -188,9 +175,6 @@ export const FlexLayout: React.FC<FlexLayoutProps> = ({
   );
 };
 
-/**
- * 紧凑的卡片组件
- */
 interface CompactCardProps {
   children: React.ReactNode;
   title?: string;
@@ -229,9 +213,6 @@ export const CompactCard: React.FC<CompactCardProps> = ({
   );
 };
 
-/**
- * 响应式按钮组件
- */
 interface ResponsiveButtonProps {
   children: React.ReactNode;
   onClick?: () => void;

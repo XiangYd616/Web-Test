@@ -1,18 +1,7 @@
-import {
-  ArcElement,
-  BarElement,
-  CategoryScale,
-  Chart as ChartJS,
-  Filler,
-  Legend,
-  LinearScale,
-  LineElement,
-  PointElement,
-  Title,
-  Tooltip
-} from 'chart.js';
+import { ArcElement, BarElement, CategoryScale, Chart as ChartJS, Filler, Legend, LinearScale, LineElement, PointElement, Title, Tooltip } from 'chart.js';
 import React from 'react';
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
+
 // CSS样式已迁移到组件库中
 
 ChartJS.register(

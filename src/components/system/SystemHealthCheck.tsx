@@ -24,7 +24,7 @@ const SystemHealthCheck: React.FC<SystemHealthCheckProps> = ({ className = '' })
       try {
         // 模拟健康检查
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
         const healthMetrics: HealthMetric[] = [
           {
             name: '数据库连接',
@@ -62,7 +62,7 @@ const SystemHealthCheck: React.FC<SystemHealthCheckProps> = ({ className = '' })
             icon: <Activity className="w-5 h-5" />
           }
         ];
-        
+
         setMetrics(healthMetrics);
         setLastUpdate(new Date());
       } catch (error) {

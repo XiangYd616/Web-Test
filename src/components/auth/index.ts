@@ -1,6 +1,3 @@
-/**
- * 🔐 认证组件统一导出
- */
 
 export { default as AdminGuard } from './AdminGuard';
 export { default as AuthErrorHandler } from './AuthErrorHandler';

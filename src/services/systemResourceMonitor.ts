@@ -1,8 +1,3 @@
-/**
- * 系统资源监控器
- * 
- * 监控系统资源使用情况，为队列系统提供资源状态信息
- */
 
 export interface SystemResources {
   cpu: {

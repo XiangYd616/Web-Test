@@ -160,7 +160,6 @@ class GlobalSearchService {
         relevance: 0.9
       },
 
-      // 测试功能搜索
       {
         id: 'ssl-check',
         title: 'SSL证书检测',

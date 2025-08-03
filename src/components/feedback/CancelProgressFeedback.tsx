@@ -63,7 +63,7 @@ const CancelProgressFeedback: React.FC<CancelProgressFeedbackProps> = ({
       }
 
       setIsCompleted(true);
-      
+
       // 延迟一下再调用完成回调
       setTimeout(() => {
         onComplete();
@@ -154,12 +154,12 @@ const CancelProgressFeedback: React.FC<CancelProgressFeedbackProps> = ({
               <span>{Math.round(((currentStepIndex + (isCompleted ? 1 : 0)) / steps.length) * 100)}%</span>
             </div>
             <div className="w-full bg-gray-700 rounded-full h-2">
-              <div 
+              <div
                 className={`h-2 rounded-full transition-all duration-500 ${
                   hasError ? 'bg-red-500' : isCompleted ? 'bg-green-500' : 'bg-blue-500'
                 }`}
-                style={{ 
-                  width: `${((currentStepIndex + (isCompleted ? 1 : 0)) / steps.length) * 100}%` 
+                style={{
+                  width: `${((currentStepIndex + (isCompleted ? 1 : 0)) / steps.length) * 100}%`
                 }}
               />
             </div>

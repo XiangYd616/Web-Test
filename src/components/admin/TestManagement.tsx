@@ -1,5 +1,6 @@
-import { Clock, Download, Filter, TestTube, TrendingUp, User } from 'lucide-react';
 import React, { useState } from 'react';
+
+import { Clock, Download, Filter, TestTube, TrendingUp, User } from 'lucide-react';
 
 interface TestRecord {
   id: string;
@@ -15,58 +16,28 @@ interface TestRecord {
 }
 
 const TestManagement: React.FC = () => {
-  const [tests, setTests] = useState<TestRecord[]>([
-    {
-      id: '1',
-      type: 'stress',
-      url: 'https://example.com',
-      user: 'testuser1',
-      status: 'completed',
-      createdAt: '2025-01-15 10:30:00',
-      duration: 120,
-      score: 85,
-      requests: 1200,
-      errors: 15
-    },
-    {
-      id: '2',
-      type: 'content',
-      url: 'https://demo.com',
-      user: 'testuser2',
-      status: 'completed',
-      createdAt: '2025-01-15 09:15:00',
-      duration: 45,
-      score: 92,
-      requests: 1,
-      errors: 0
-    },
-    {
-      id: '3',
-      type: 'api',
-      url: 'https://api.example.com',
-      user: 'admin',
-      status: 'running',
-      createdAt: '2025-01-15 11:00:00',
-      duration: 0,
-      requests: 0,
-      errors: 0
-    },
-    {
-      id: '4',
-      type: 'compatibility',
-      url: 'https://test.com',
-      user: 'testuser1',
-      status: 'failed',
-      createdAt: '2025-01-15 08:45:00',
-      duration: 30,
-      requests: 0,
-      errors: 1
-    }
-  ]);
-
+  const [tests, setTests] = useState<TestRecord[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedType, setSelectedType] = useState<'all' | 'stress' | 'content' | 'compatibility' | 'api'>('all');
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'completed' | 'running' | 'failed'>('all');
   const [dateRange, setDateRange] = useState('today');
+
+  // 加载测试数据
+  useEffect(() => {
+    const loadTests = async () => {
+      try {
+        setLoading(true);
+        const data = await adminService.getTestHistory();
+        setTests(data);
+      } catch (error) {
+        Logger.error('加载测试数据失败', error, { component: 'TestManagement' });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTests();
+  }, []);
 
   const filteredTests = tests.filter(test => {
     const matchesType = selectedType === 'all' || test.type === selectedType;

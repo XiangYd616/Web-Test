@@ -1,12 +1,8 @@
-/**
- * 压力测试指标卡片组件
- * 显示关键性能指标，支持实时更新和阈值警告
- */
 
-import { AlertTriangle, BarChart3, CheckCircle, Clock, TrendingDown, TrendingUp, Users, Zap } from 'lucide-react';
 import React from 'react';
 
-// 临时类型定义
+import { AlertTriangle, BarChart3, CheckCircle, Clock, TrendingDown, TrendingUp, Users, Zap } from 'lucide-react';
+
 interface StressTestMetricsType {
   totalRequests: number;
   successfulRequests: number;

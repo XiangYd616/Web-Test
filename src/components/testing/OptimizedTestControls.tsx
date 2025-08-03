@@ -1,10 +1,6 @@
-/**
- * 优化的测试控制组件
- * 基于状态机的UI控制，提供清晰的用户交互体验
- */
 
-import { AlertCircle, CheckCircle, Loader, Play, RotateCcw, Square, XCircle } from 'lucide-react';
 import React from 'react';
+import { AlertCircle, CheckCircle, Loader, Play, RotateCcw, Square, XCircle } from 'lucide-react';
 import { TestPhase, TestState } from '../../services/testStateManager';
 
 // 控制组件属性接口
@@ -114,9 +110,6 @@ const phaseDescriptions: Record<TestPhase, string> = {
   [TestPhase.CLEANUP]: '清理中...'
 };
 
-/**
- * 优化的测试控制组件
- */
 export const OptimizedTestControls: React.FC<OptimizedTestControlsProps> = ({
   testState,
   testPhase,

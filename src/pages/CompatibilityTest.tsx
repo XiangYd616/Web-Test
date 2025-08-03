@@ -1,29 +1,13 @@
-import {
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Globe,
-  Grid,
-  Loader,
-  Lock,
-  Monitor,
-  Play,
-  RotateCcw,
-  Settings,
-  Smartphone,
-  Square,
-  Tablet,
-  XCircle
-} from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Globe, Grid, Loader, Lock, Monitor, Play, RotateCcw, Settings, Smartphone, Square, Tablet, XCircle } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { AdvancedTestCharts } from '../components/charts';
 import { URLInput } from '../components/testing';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { useUserStats } from '../hooks/useUserStats';
+
 // CSS样式已迁移到组件库中
 // 进度条样式已集成到ProgressBar组件
-// 测试工具样式已集成到TestingTools组件
 
 // 兼容性测试相关类型定义
 type BrowserType = 'chrome' | 'firefox' | 'safari' | 'edge' | 'ie' | 'opera';
@@ -156,7 +140,6 @@ interface CompatibilityResult {
   accessibilityScore?: number;
 }
 
-// 测试历史记录
 interface CompatibilityHistoryItem {
   id: string;
   url: string;
@@ -691,8 +674,6 @@ const CompatibilityTest: React.FC = () => {
       setTestStatus('idle');
     }
   }, [isRunning, results, error, recordTestCompletion]);
-
-
 
   const handleStartTest = async () => {
     // 检查登录状态

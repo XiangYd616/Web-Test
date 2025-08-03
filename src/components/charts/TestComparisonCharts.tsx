@@ -1,27 +1,9 @@
-/**
- * 测试对比分析图表组件 - 支持多次测试结果对比和基线对比
- */
 
-import { BarChart3, Download, GitCompare, Target, TrendingUp } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ComposedChart,
-  Legend,
-  Line,
-  LineChart,
-  PolarAngleAxis,
-  PolarGrid,
-  PolarRadiusAxis, Radar,
-  RadarChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis, YAxis
-} from 'recharts';
+import { BarChart3, Download, GitCompare, Target, TrendingUp } from 'lucide-react';
 
-// 测试结果数据接口
+import { Bar, BarChart, CartesianGrid, ComposedChart, Legend, Line, LineChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+
 interface TestResult {
   id: string;
   name: string;

@@ -1,5 +1,5 @@
-import { Download, Play, RotateCcw, Settings, Share2, Square } from 'lucide-react';
 import React from 'react';
+import { Download, Play, RotateCcw, Settings, Share2, Square } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { Button } from './Button';
 
@@ -36,22 +36,6 @@ interface TestingToolbarProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-/**
- * TestingToolbar 测试工具栏组件
- * 提供统一的测试操作界面
- * 
- * @example
- * ```tsx
- * <TestingToolbar
- *   isRunning={isRunning}
- *   canStart={!isRunning}
- *   canStop={isRunning}
- *   onStart={handleStart}
- *   onStop={handleStop}
- *   onReset={handleReset}
- * />
- * ```
- */
 export const TestingToolbar: React.FC<TestingToolbarProps> = ({
   isRunning = false,
   canStart = true,
@@ -156,9 +140,6 @@ export const TestingToolbar: React.FC<TestingToolbarProps> = ({
   );
 };
 
-/**
- * TestProgress 测试进度组件
- */
 interface TestProgressProps {
   /** 当前步骤 */
   currentStep?: string;
@@ -242,9 +223,6 @@ export const TestProgress: React.FC<TestProgressProps> = ({
   );
 };
 
-/**
- * TestResultSummary 测试结果摘要组件
- */
 interface TestResultSummaryProps {
   /** 测试状态 */
   status: 'success' | 'error' | 'warning' | 'info';

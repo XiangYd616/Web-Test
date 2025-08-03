@@ -59,10 +59,10 @@ describe('Input Component', () => {
   it('handles value changes', () => {
     const handleChange = vi.fn();
     render(<Input onChange={handleChange} />);
-    
+
     const input = screen.getByRole('textbox');
     fireEvent.change(input, { target: { value: 'test value' } });
-    
+
     expect(handleChange).toHaveBeenCalledTimes(1);
     expect(handleChange).toHaveBeenCalledWith(expect.objectContaining({
       target: expect.objectContaining({ value: 'test value' })
@@ -71,12 +71,12 @@ describe('Input Component', () => {
 
   it('renders with prefix and suffix', () => {
     render(
-      <Input 
+      <Input
         prefix={<span data-testid="prefix">$</span>}
         suffix={<span data-testid="suffix">.00</span>}
       />
     );
-    
+
     expect(screen.getByTestId('prefix')).toBeInTheDocument();
     expect(screen.getByTestId('suffix')).toBeInTheDocument();
   });
@@ -109,10 +109,10 @@ describe('Select Component', () => {
   it('handles value selection', () => {
     const handleChange = vi.fn();
     render(<Select options={options} onChange={handleChange} />);
-    
+
     const select = screen.getByRole('combobox');
     fireEvent.change(select, { target: { value: 'option2' } });
-    
+
     expect(handleChange).toHaveBeenCalledTimes(1);
   });
 
@@ -149,10 +149,10 @@ describe('Textarea Component', () => {
   it('handles value changes', () => {
     const handleChange = vi.fn();
     render(<Textarea onChange={handleChange} />);
-    
+
     const textarea = screen.getByRole('textbox');
     fireEvent.change(textarea, { target: { value: 'test content' } });
-    
+
     expect(handleChange).toHaveBeenCalledTimes(1);
   });
 

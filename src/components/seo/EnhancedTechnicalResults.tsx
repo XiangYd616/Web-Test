@@ -1,12 +1,4 @@
-import {
-  AlertTriangle,
-  CheckCircle,
-  FileText,
-  Info,
-  Link,
-  Search,
-  XCircle
-} from 'lucide-react';
+import { AlertTriangle, CheckCircle, FileText, Info, Link, Search, XCircle } from 'lucide-react';
 import React from 'react';
 import { TechnicalSEOResult } from '../../services/realSEOAnalysisEngine';
 

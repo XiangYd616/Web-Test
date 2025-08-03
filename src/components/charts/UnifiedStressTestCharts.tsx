@@ -1,13 +1,9 @@
-/**
- * 统一的压力测试图表容器 - 实现空间复用和智能切换
- */
 
-import { BarChart3, Download, GitCompare, Play, RefreshCw, Settings, Square, TrendingUp } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
+import { BarChart3, Download, GitCompare, Play, RefreshCw, Settings, Square, TrendingUp } from 'lucide-react';
 import EnhancedStressTestCharts from './EnhancedStressTestCharts';
 import TestComparisonCharts from './TestComparisonCharts';
 
-// 测试状态枚举
 export enum TestStatus {
   IDLE = 'idle',
   STARTING = 'starting',
@@ -19,7 +15,6 @@ export enum TestStatus {
   TIMEOUT = 'timeout'
 }
 
-// 测试状态类型
 export type TestStatusType = 'idle' | 'starting' | 'running' | 'completed' | 'failed' | 'cancelled' | 'waiting' | 'timeout';
 
 // 统一的数据接口
@@ -55,7 +50,6 @@ interface UnifiedTestData {
     p999ResponseTime?: number;
   };
 
-  // 测试结果（完成后）
   testResult?: {
     id: string;
     name: string;
@@ -132,7 +126,6 @@ export const UnifiedStressTestCharts: React.FC<UnifiedStressTestChartsProps> = (
     return undefined;
   }, [testStatus, autoSwitch]);
 
-  // 测试阶段定义
   const testPhases = useMemo(() => {
     if (!testConfig) return [];
 

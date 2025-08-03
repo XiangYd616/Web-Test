@@ -340,10 +340,25 @@
 
 .login-content {
   width: 100%;
-  max-width: 400px;
+  max-width: 360px;
   margin: 0 auto;
   position: relative;
   z-index: 10;
+  padding: 0 0.5rem;
+}
+
+/* 大屏幕优化 */
+@media (min-width: 1024px) {
+  .login-content {
+    max-width: 340px;
+  }
+}
+
+/* 中等屏幕优化 */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .login-content {
+    max-width: 350px;
+  }
 }
 
 /* 登录表单样式优化 */
@@ -376,7 +391,7 @@
 /* 登录页面响应式优化 */
 @media (max-width: 640px) {
   .login-content {
-    max-width: 350px;
+    max-width: 320px;
     padding: 0 1rem;
   }
 
@@ -391,15 +406,25 @@
 
 @media (max-width: 480px) {
   .login-content {
-    max-width: 320px;
+    max-width: 300px;
   }
 
   .login-container .p-4 {
-    padding: 1rem;
+    padding: 0.875rem;
   }
 
   .login-container .space-y-4 > * + * {
     margin-top: 0.75rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .login-content {
+    max-width: 280px;
+  }
+
+  .login-container .p-4 {
+    padding: 0.75rem;
   }
 }
 

@@ -1,31 +1,8 @@
-/**
- * 统一安全测试结果展示组件
- * 提供全面的安全分析结果可视化
- */
 
-import {
-  AlertTriangle,
-  Award,
-  CheckCircle,
-  ChevronDown,
-  ChevronRight,
-  Clock,
-  Download,
-  Eye,
-  EyeOff,
-  FileText,
-  Info,
-  Lock,
-  Network,
-  Shield,
-  Target,
-  TrendingUp,
-  Zap
-} from 'lucide-react';
+import { AlertTriangle, Award, CheckCircle, ChevronDown, ChevronRight, Clock, Download, Eye, EyeOff, FileText, Info, Lock, Network, Shield, Target, TrendingUp, Zap } from 'lucide-react';
 import React, { useState } from 'react';
-import {
-  SecurityTestResult
-} from '../../services/unifiedSecurityEngine';
+
+import { SecurityTestResult } from '../../services/unifiedSecurityEngine';
 
 interface UnifiedSecurityResultsProps {
   result: SecurityTestResult;

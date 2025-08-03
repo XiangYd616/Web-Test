@@ -97,7 +97,7 @@ export const Variants: Story = {
 // 带头部和底部
 export const WithHeaderAndFooter: Story = {
   render: () => (
-    <Card 
+    <Card
       header="用户信息"
       footer={
         <div className="flex justify-end space-x-2">
@@ -125,7 +125,7 @@ export const WithHeaderAndFooter: Story = {
 // 带图片的卡片
 export const WithImage: Story = {
   render: () => (
-    <Card 
+    <Card
       image="https://via.placeholder.com/300x200"
       imageAlt="示例图片"
       header="图片卡片"
@@ -226,7 +226,7 @@ export const States: Story = {
 export const ComplexLayout: Story = {
   render: () => (
     <div className="max-w-md">
-      <Card 
+      <Card
         variant="elevated"
         header={
           <div className="flex items-center justify-between">

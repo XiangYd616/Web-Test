@@ -1,7 +1,3 @@
-/**
- * 错误处理工具
- * 将常见错误转换为用户友好的增强错误格式
- */
 
 import { EnhancedError, ErrorSolution } from '../components/security/EnhancedErrorDisplay';
 
@@ -12,9 +8,6 @@ export interface ErrorContext {
   timestamp?: number;
 }
 
-/**
- * 错误模式匹配
- */
 const ERROR_PATTERNS = {
   network: [
     /network error/i,
@@ -58,9 +51,6 @@ const ERROR_PATTERNS = {
   ]
 };
 
-/**
- * 解决方案模板
- */
 const SOLUTION_TEMPLATES: Record<string, ErrorSolution[]> = {
   network: [
     {
@@ -199,9 +189,6 @@ const SOLUTION_TEMPLATES: Record<string, ErrorSolution[]> = {
   ]
 };
 
-/**
- * 确定错误类型
- */
 function determineErrorType(error: Error | string): keyof typeof ERROR_PATTERNS {
   const message = typeof error === 'string' ? error : error.message;
 
@@ -214,9 +201,6 @@ function determineErrorType(error: Error | string): keyof typeof ERROR_PATTERNS 
   return 'network' as const;
 }
 
-/**
- * 生成错误代码
- */
 function generateErrorCode(type: string, message: string): string {
   const timestamp = Date.now().toString(36).slice(-4);
   const typeCode = type.toUpperCase().slice(0, 3);
@@ -224,9 +208,6 @@ function generateErrorCode(type: string, message: string): string {
   return `${typeCode}-${messageHash}-${timestamp}`;
 }
 
-/**
- * 创建快速操作
- */
 function createQuickActions(type: string, context: ErrorContext): Array<{
   label: string;
   action: () => void;
@@ -286,9 +267,6 @@ function createQuickActions(type: string, context: ErrorContext): Array<{
   return actions;
 }
 
-/**
- * 主要的错误转换函数
- */
 export function enhanceError(
   error: Error | string,
   context: ErrorContext = {}
@@ -339,9 +317,6 @@ export function enhanceError(
   };
 }
 
-/**
- * 常见错误的快速创建函数
- */
 export const createCommonErrors = {
   networkError: (url?: string): EnhancedError => enhanceError(
     new Error('网络连接失败，请检查您的网络设置'),

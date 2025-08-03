@@ -1,15 +1,8 @@
 import React, { useState } from 'react';
-import { 
-  Badge, 
-  StatusBadge, 
-  NumberBadge, 
-  DotBadge, 
-  ProgressBadge, 
-  TagBadge 
-} from './Badge';
+import { Star, Heart, Download, Users } from 'lucide-react';
+
 import { Card, CardHeader, CardTitle, CardBody } from './Card';
 import { Button } from './Button';
-import { Star, Heart, Download, Users } from 'lucide-react';
 
 export const BadgeTest: React.FC = () => {
   const [notificationCount, setNotificationCount] = useState(5);
@@ -35,7 +28,7 @@ export const BadgeTest: React.FC = () => {
     <div className="p-8 space-y-8 bg-gray-900 min-h-screen">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-white mb-8">Badge组件测试展示</h1>
-        
+
         {/* 基础徽章 */}
         <section className="mb-12">
           <h2 className="text-xl font-semibold text-white mb-6">基础徽章</h2>
@@ -49,7 +42,7 @@ export const BadgeTest: React.FC = () => {
               <Badge variant="danger">危险</Badge>
               <Badge variant="info">信息</Badge>
             </div>
-            
+
             <div className="flex flex-wrap gap-3">
               <Badge variant="primary" outline>主要轮廓</Badge>
               <Badge variant="success" outline>成功轮廓</Badge>
@@ -83,7 +76,7 @@ export const BadgeTest: React.FC = () => {
               <StatusBadge status="info" />
               <StatusBadge status="loading" />
             </div>
-            
+
             <div className="flex flex-wrap gap-3">
               <StatusBadge status="success" text="测试通过" />
               <StatusBadge status="error" text="测试失败" />
@@ -91,7 +84,7 @@ export const BadgeTest: React.FC = () => {
               <StatusBadge status="pending" text="等待中" />
               <StatusBadge status="loading" text="处理中" />
             </div>
-            
+
             <div className="flex flex-wrap gap-3">
               <StatusBadge status="success" showIcon={false} text="无图标" />
               <StatusBadge status="error" outline text="轮廓样式" />
@@ -111,7 +104,7 @@ export const BadgeTest: React.FC = () => {
                   <NumberBadge count={notificationCount} className="absolute -top-2 -right-2" />
                 </Button>
               </div>
-              
+
               <div className="relative">
                 <Button variant="ghost">
                   <Heart className="w-4 h-4" />
@@ -119,7 +112,7 @@ export const BadgeTest: React.FC = () => {
                   <NumberBadge count={23} variant="danger" className="absolute -top-2 -right-2" />
                 </Button>
               </div>
-              
+
               <div className="relative">
                 <Button variant="ghost">
                   <Download className="w-4 h-4" />
@@ -128,7 +121,7 @@ export const BadgeTest: React.FC = () => {
                 </Button>
               </div>
             </div>
-            
+
             <div className="flex gap-3">
               <Button onClick={addNotification} size="sm">
                 添加通知
@@ -137,7 +130,7 @@ export const BadgeTest: React.FC = () => {
                 清空通知
               </Button>
             </div>
-            
+
             <div className="flex flex-wrap gap-3">
               <NumberBadge count={0} showZero />
               <NumberBadge count={5} />
@@ -171,7 +164,7 @@ export const BadgeTest: React.FC = () => {
                 <span className="text-gray-300">连接中</span>
               </div>
             </div>
-            
+
             <div className="flex flex-wrap items-center gap-4">
               <DotBadge status="success" size="sm" />
               <DotBadge status="warning" size="md" />
@@ -191,13 +184,13 @@ export const BadgeTest: React.FC = () => {
               <ProgressBadge value={90} />
               <ProgressBadge value={100} />
             </div>
-            
+
             <div className="flex flex-wrap gap-3">
               <ProgressBadge value={15} max={20} showValue />
               <ProgressBadge value={8} max={10} showValue />
               <ProgressBadge value={156} max={200} showValue />
             </div>
-            
+
             <div className="flex flex-wrap gap-3">
               <ProgressBadge value={25} variant="info" />
               <ProgressBadge value={50} variant="warning" />
@@ -221,11 +214,11 @@ export const BadgeTest: React.FC = () => {
                 </TagBadge>
               ))}
             </div>
-            
+
             <Button onClick={addTag} size="sm" variant="ghost">
               添加标签
             </Button>
-            
+
             <div className="flex flex-wrap gap-2">
               <TagBadge color="#3b82f6">蓝色标签</TagBadge>
               <TagBadge color="#10b981">绿色标签</TagBadge>
@@ -240,7 +233,7 @@ export const BadgeTest: React.FC = () => {
         <section className="mb-12">
           <h2 className="text-xl font-semibold text-white mb-6">实际应用场景</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
+
             {/* 测试记录卡片 */}
             <Card>
               <CardHeader>

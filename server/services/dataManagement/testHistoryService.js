@@ -61,7 +61,6 @@ class TestHistoryService {
         paramIndex++;
       }
 
-      // 测试类型过滤
       if (testType) {
         const types = Array.isArray(testType) ? testType : [testType];
         whereClause += ` AND test_type = ANY($${paramIndex})`;

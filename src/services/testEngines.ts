@@ -1,7 +1,6 @@
 // 浏览器兼容的测试引擎接口
 // 实际的测试引擎执行将通过API调用后端服务
 
-// 测试引擎接口定义
 export interface TestEngine {
   name: string;
   version: string;
@@ -272,7 +271,6 @@ export class PlaywrightEngine implements TestEngine {
   }
 }
 
-// 测试引擎管理器
 export class TestEngineManager {
   private engines: Map<string, TestEngine> = new Map();
   private lastCheckAllTime = 0;

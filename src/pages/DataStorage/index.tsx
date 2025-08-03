@@ -1,14 +1,7 @@
-import {
-  Activity,
-  BarChart3,
-  Database,
-  Download,
-  FileText
-} from 'lucide-react';
+import { Activity, BarChart3, Database, Download, FileText } from 'lucide-react';
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
-// 组件导入
 import AnalyticsOverview from '../../components/analytics/AnalyticsOverview';
 import ImportExport from '../../components/analytics/ImportExport';
 import RealTimeMonitoring from '../../components/analytics/RealTimeMonitoring';
@@ -16,10 +9,8 @@ import ReportManagement from '../../components/analytics/ReportManagement';
 import { Pagination } from '../../components/shared';
 import { TestResultDisplay } from '../../components/testing';
 
-// 本地组件导入
 import { DataFilters, DataList, DataStats } from './components';
 
-// Hook导入
 import { TestRecord, useDataStorage } from '../../hooks/useDataStorage';
 
 const DataStorage: React.FC = () => {

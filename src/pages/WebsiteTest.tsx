@@ -1,22 +1,4 @@
-import {
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Code,
-  Download,
-  Eye,
-  Gauge,
-  Globe,
-  Loader,
-  Lock,
-  Play,
-  RotateCcw,
-  Search,
-  Share2,
-  Shield,
-  Square,
-  XCircle
-} from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Code, Download, Eye, Gauge, Globe, Loader, Lock, Play, RotateCcw, Search, Share2, Shield, Square, XCircle } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
@@ -24,9 +6,9 @@ import { AdvancedTestCharts } from '../components/charts';
 import { URLInput } from '../components/testing';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { useUserStats } from '../hooks/useUserStats';
+
 // CSS样式已迁移到组件库中
 // 进度条样式已集成到ProgressBar组件
-// 测试工具样式已集成到TestingTools组件
 
 interface WebsiteTestConfig {
   url: string;
@@ -95,7 +77,6 @@ const WebsiteTest: React.FC = () => {
   // 兼容性状态
   const isRunning = testStatus === 'running' || testStatus === 'starting';
 
-  // 测试功能实现
   const runTest = async (testConfig?: any) => {
     // 检查登录状态
     if (!requireLogin()) {
@@ -301,36 +282,7 @@ const WebsiteTest: React.FC = () => {
     }
   };
 
-
-
-  const generateMockMetrics = (testType: string) => {
-    switch (testType) {
-      case 'performance':
-        return {
-          fcp: '1.2s',
-          lcp: '2.4s',
-          cls: '0.05',
-          fid: '12ms',
-          ttfb: '180ms'
-        };
-      case 'seo':
-        return {
-          titleLength: 45,
-          metaDescription: true,
-          headings: 'H1-H6 结构良好',
-          images: '85% 有alt属性'
-        };
-      case 'security':
-        return {
-          https: true,
-          headers: '7/10 安全头部',
-          vulnerabilities: 2,
-          certificates: '有效'
-        };
-      default:
-        return {};
-    }
-  };
+  // 移除模拟数据生成函数 - 使用真实API数据
 
   const generateMockRecommendations = (testType: string) => {
     const recommendations = {

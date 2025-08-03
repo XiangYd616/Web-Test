@@ -1,14 +1,5 @@
-/**
- * 性能测试适配器
- * 提供向后兼容的接口，将旧的性能测试接口适配到新的核心模块
- */
 
-import {
-  PERFORMANCE_CONFIG_PRESETS,
-  PerformanceTestProgress,
-  PerformanceTestResult,
-  UnifiedPerformanceConfig
-} from '../../types/performance';
+import { PERFORMANCE_CONFIG_PRESETS, PerformanceTestProgress, PerformanceTestResult, UnifiedPerformanceConfig } from '../../types/performance';
 import { performanceTestCore } from './performanceTestCore';
 
 // ==================== 兼容性接口定义 ====================
@@ -289,9 +280,6 @@ export class PerformanceTestAdapter {
 
 // ==================== 便捷导出函数 ====================
 
-/**
- * 快速性能测试函数 - 兼容现有代码
- */
 export async function quickPerformanceTest(
   url: string,
   level: 'basic' | 'standard' | 'comprehensive' = 'standard'
@@ -301,9 +289,6 @@ export async function quickPerformanceTest(
   return PerformanceTestAdapter.convertResultToLegacy(result);
 }
 
-/**
- * 获取性能指标函数 - 用于其他测试模块
- */
 export async function getPerformanceMetrics(
   url: string,
   options: {

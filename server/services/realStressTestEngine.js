@@ -588,6 +588,16 @@ class RealStressTestEngine {
   async executeGradualTest(url, users, duration, rampUpTime, method, timeout, thinkTime, results) {
     results.currentPhase = 'gradual';
     const promises = [];
+
+    // 🔧 调试：检查duration值
+    console.log('🔧 executeGradualTest 参数检查:', {
+      duration: duration,
+      'typeof duration': typeof duration,
+      'duration * 1000': duration * 1000,
+      users: users,
+      rampUpTime: rampUpTime
+    });
+
     const progressMonitor = this.startProgressMonitor(results, duration * 1000);
 
     try {
@@ -1177,6 +1187,15 @@ class RealStressTestEngine {
    */
   startProgressMonitor(results, totalDuration) {
     const startTime = Date.now();
+
+    // 🔧 调试：检查totalDuration值
+    console.log('🔧 startProgressMonitor 参数检查:', {
+      testId: results.testId,
+      totalDuration: totalDuration,
+      'typeof totalDuration': typeof totalDuration,
+      'totalDuration / 1000': totalDuration / 1000,
+      startTime: startTime
+    });
 
     const monitor = setInterval(() => {
       // 检查测试是否被取消

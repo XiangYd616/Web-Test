@@ -1,22 +1,18 @@
-/**
- * Google PageSpeed Insights API 集成服务
- * 获取真实的Core Web Vitals和性能数据
- */
 
 export interface PageSpeedMetrics {
   // Core Web Vitals
   lcp: number | null;  // Largest Contentful Paint
   fid: number | null;  // First Input Delay
   cls: number | null;  // Cumulative Layout Shift
-  
+
   // 其他性能指标
   fcp: number | null;  // First Contentful Paint
   ttfb: number | null; // Time to First Byte
   si: number | null;   // Speed Index
-  
+
   // 评分
   performanceScore: number | null;
-  
+
   // 机会和诊断
   opportunities: Array<{
     id: string;
@@ -25,7 +21,7 @@ export interface PageSpeedMetrics {
     savings: number;
     impact: 'high' | 'medium' | 'low';
   }>;
-  
+
   diagnostics: Array<{
     id: string;
     title: string;
@@ -44,7 +40,7 @@ export interface PageSpeedResult {
 class GooglePageSpeedService {
   private readonly API_KEY = process.env.REACT_APP_GOOGLE_PAGESPEED_API_KEY;
   private readonly BASE_URL = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
-  
+
   /**
    * 分析页面性能 (桌面端和移动端)
    */
@@ -85,7 +81,7 @@ class GooglePageSpeedService {
     });
 
     const response = await fetch(`${this.BASE_URL}?${params}`);
-    
+
     if (!response.ok) {
       throw new Error(`PageSpeed API error: ${response.status}`);
     }
@@ -99,25 +95,25 @@ class GooglePageSpeedService {
   private parseMetrics(data: any): PageSpeedMetrics {
     const lighthouse = data.lighthouseResult;
     const audits = lighthouse?.audits || {};
-    
+
     // Core Web Vitals
     const lcp = audits['largest-contentful-paint']?.numericValue || null;
     const fid = audits['max-potential-fid']?.numericValue || null;
     const cls = audits['cumulative-layout-shift']?.numericValue || null;
-    
+
     // 其他性能指标
     const fcp = audits['first-contentful-paint']?.numericValue || null;
     const ttfb = audits['server-response-time']?.numericValue || null;
     const si = audits['speed-index']?.numericValue || null;
-    
+
     // 性能评分
-    const performanceScore = lighthouse?.categories?.performance?.score 
-      ? Math.round(lighthouse.categories.performance.score * 100) 
+    const performanceScore = lighthouse?.categories?.performance?.score
+      ? Math.round(lighthouse.categories.performance.score * 100)
       : null;
 
     // 优化机会
     const opportunities = this.parseOpportunities(audits);
-    
+
     // 诊断信息
     const diagnostics = this.parseDiagnostics(audits);
 

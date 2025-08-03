@@ -1,6 +1,3 @@
-/**
- * 代理服务 - 处理CORS问题和网页抓取
- */
 
 export interface ProxyResponse {
   html: string;
@@ -10,9 +7,6 @@ export interface ProxyResponse {
   loadTime: number;
 }
 
-/**
- * 代理服务类
- */
 export class ProxyService {
   private static instance: ProxyService;
 
@@ -368,8 +362,6 @@ export class ProxyService {
       throw error;
     }
   }
-
-
 
   /**
    * 检查URL是否可访问

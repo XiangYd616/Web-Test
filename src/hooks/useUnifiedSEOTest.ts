@@ -67,7 +67,7 @@ export const useUnifiedSEOTest = () => {
       setLocalResults(null);
       setLocalError(null);
       setLocalProgress({ progress: 0, currentStep: '', isRunning: false });
-      
+
       // 启动在线测试
       return startOnlineTest(config.online);
     } else if (config.mode === 'local' && config.local) {
@@ -75,7 +75,7 @@ export const useUnifiedSEOTest = () => {
       if (onlineIsRunning) {
         await stopOnlineTest();
       }
-      
+
       // 启动本地测试
       return startLocalTest(config.local);
     } else {
@@ -143,14 +143,14 @@ export const useUnifiedSEOTest = () => {
     if (mode !== currentMode) {
       // 停止当前测试
       await stopTest();
-      
+
       // 清除状态
       if (mode === 'online') {
         setLocalResults(null);
         setLocalError(null);
         setLocalProgress({ progress: 0, currentStep: '', isRunning: false });
       }
-      
+
       setCurrentMode(mode);
     }
   }, [currentMode, stopTest]);
@@ -171,13 +171,13 @@ export const useUnifiedSEOTest = () => {
     progress,
     results,
     error,
-    
+
     // 操作方法
     startTest,
     stopTest,
     switchMode,
     resetAll,
-    
+
     // 分离的状态（用于调试或特殊需求）
     online: {
       isRunning: onlineIsRunning,

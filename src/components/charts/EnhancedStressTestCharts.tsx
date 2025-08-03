@@ -1,27 +1,9 @@
-/**
- * 增强的压力测试图表组件 - 支持空间复用、多Y轴、动态缩放等专业功能
- */
 
-import { RotateCcw } from 'lucide-react';
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  Bar,
-  BarChart,
-  Brush,
-  CartesianGrid,
-  Cell,
-  ComposedChart,
-  Legend,
-  Line,
-  Pie,
-  PieChart,
-  ReferenceArea,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis, YAxis
-} from 'recharts';
+import { RotateCcw } from 'lucide-react';
 
-// 测试阶段定义
+import { Bar, BarChart, Brush, CartesianGrid, Cell, ComposedChart, Legend, Line, Pie, PieChart, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+
 interface TestPhase {
   name: string;
   startTime: number;
@@ -44,7 +26,6 @@ interface EnhancedRealTimeData {
   phase?: string;
 }
 
-// 测试结果数据接口
 interface TestResultData {
   timestamp: number;
   responseTime: number;
@@ -70,7 +51,6 @@ interface EnhancedStressTestChartsProps {
   // 实时数据（测试进行中）
   realTimeData?: EnhancedRealTimeData[];
 
-  // 测试结果数据（测试完成后）
   testResultData?: TestResultData[];
 
   // 当前状态
@@ -80,7 +60,6 @@ interface EnhancedStressTestChartsProps {
   // 基线对比数据
   baselineData?: BaselineData[];
 
-  // 测试阶段
   testPhases?: TestPhase[];
 
   // 配置选项

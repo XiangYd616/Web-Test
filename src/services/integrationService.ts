@@ -487,7 +487,7 @@ export class IntegrationService {
         events: ['test.completed', 'system.maintenance'],
         isActive: true,
         secret: 'webhook_secret_key_123',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'X-API-Key': 'internal-monitoring-key'
         },

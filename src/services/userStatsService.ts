@@ -82,7 +82,7 @@ class UserStatsService {
   updateUserStats(userId: string, updates: Partial<UserActivityStats>): void {
     const currentStats = this.getUserStats(userId);
     const updatedStats = { ...currentStats, ...updates };
-    
+
     try {
       localStorage.setItem(`${this.STORAGE_KEY}_${userId}`, JSON.stringify(updatedStats));
     } catch (error) {
@@ -95,10 +95,10 @@ class UserStatsService {
     const stats = this.getUserStats(userId);
     const now = new Date();
     const today = now.toDateString();
-    
+
     // 更新基础统计
     stats.totalTests += 1;
-    
+
     // 检查是否是今天的测试
     if (!stats.lastTestDate || new Date(stats.lastTestDate).toDateString() !== today) {
       stats.testsToday = 1;
@@ -126,9 +126,9 @@ class UserStatsService {
 
     // 更新测试类型统计
     stats.testsByType[testType] = (stats.testsByType[testType] || 0) + 1;
-    
+
     // 更新最常用测试类型
-    const mostUsedType = Object.entries(stats.testsByType).reduce((a, b) => 
+    const mostUsedType = Object.entries(stats.testsByType).reduce((a, b) =>
       stats.testsByType[a[0]] > stats.testsByType[b[0]] ? a : b
     );
     stats.mostUsedTestType = mostUsedType[0];
@@ -141,8 +141,8 @@ class UserStatsService {
       id: `test_${Date.now()}`,
       type: success ? 'test_completed' : 'test_failed',
       title: `${testType}${success ? '完成' : '失败'}`,
-      description: success 
-        ? `成功完成${testType}，评分：${score || 'N/A'}` 
+      description: success
+        ? `成功完成${testType}，评分：${score || 'N/A'}`
         : `${testType}执行失败`,
       timestamp: now.toISOString(),
       metadata: { testType, success, score, duration }
@@ -154,7 +154,7 @@ class UserStatsService {
   // 记录收藏操作
   recordBookmarkAction(userId: string, action: 'add' | 'remove', itemTitle: string): void {
     const stats = this.getUserStats(userId);
-    
+
     if (action === 'add') {
       stats.favoriteTests += 1;
       this.addActivity(userId, {
@@ -176,10 +176,10 @@ class UserStatsService {
   addActivity(userId: string, activity: ActivityItem): void {
     const activities = this.getRecentActivity(userId);
     activities.unshift(activity);
-    
+
     // 只保留最近20条活动
     const recentActivities = activities.slice(0, 20);
-    
+
     try {
       localStorage.setItem(`${this.ACTIVITY_KEY}_${userId}`, JSON.stringify(recentActivities));
     } catch (error) {
@@ -207,11 +207,11 @@ class UserStatsService {
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-    const weekActivities = activities.filter(activity => 
+    const weekActivities = activities.filter(activity =>
       new Date(activity.timestamp) >= oneWeekAgo
     );
 
-    stats.testsThisWeek = weekActivities.filter(activity => 
+    stats.testsThisWeek = weekActivities.filter(activity =>
       activity.type === 'test_completed' || activity.type === 'test_failed'
     ).length;
 
@@ -225,11 +225,11 @@ class UserStatsService {
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
-    const monthActivities = activities.filter(activity => 
+    const monthActivities = activities.filter(activity =>
       new Date(activity.timestamp) >= oneMonthAgo
     );
 
-    stats.testsThisMonth = monthActivities.filter(activity => 
+    stats.testsThisMonth = monthActivities.filter(activity =>
       activity.type === 'test_completed' || activity.type === 'test_failed'
     ).length;
 
@@ -246,7 +246,7 @@ class UserStatsService {
   exportUserStats(userId: string): string {
     const stats = this.getUserStats(userId);
     const activities = this.getRecentActivity(userId);
-    
+
     return JSON.stringify({
       stats,
       activities,

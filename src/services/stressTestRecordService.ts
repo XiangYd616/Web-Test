@@ -1,7 +1,3 @@
-/**
- * 压力测试记录服务
- * 负责压力测试记录的创建、更新、查询和管理
- */
 
 // 取消原因枚举
 export enum CancelReason {
@@ -31,7 +27,7 @@ export interface StressTestRecord {
   id: string;
   testName: string;
   url: string;
-  testType?: 'stress' | 'website' | 'seo' | 'security' | 'performance' | 'api'; // 测试类型
+  testType?: 'stress' | 'website' | 'seo' | 'security' | 'performance' | 'api'; 
   status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
 
   // 时间信息
@@ -58,7 +54,6 @@ export interface StressTestRecord {
   queuePosition?: number;
   estimatedWaitTime?: number;
 
-  // 测试配置
   config: {
     users: number;
     duration: number;
@@ -73,7 +68,6 @@ export interface StressTestRecord {
     body?: string;
   };
 
-  // 测试结果
   results?: {
     metrics: {
       totalRequests: number;

@@ -1,5 +1,6 @@
-import { AlertTriangle, BarChart3, CheckCircle, TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
+import { AlertTriangle, BarChart3, CheckCircle, TrendingDown, TrendingUp } from 'lucide-react';
+
 // CSS样式已迁移到组件库，不再需要外部CSS文件
 
 interface PerformanceAnalysis {

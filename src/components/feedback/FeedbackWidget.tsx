@@ -1,5 +1,5 @@
-import { MessageSquare, Star, ThumbsDown, ThumbsUp, X } from 'lucide-react';
 import React, { useState } from 'react';
+import { MessageSquare, Star, ThumbsDown, ThumbsUp, X } from 'lucide-react';
 import { FeedbackSeverity, FeedbackType, PageType, userFeedbackService } from '../../services/userFeedbackService';
 
 interface FeedbackWidgetProps {
@@ -25,7 +25,7 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ page, className = '' })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!title.trim() || !description.trim()) {
       alert('请填写标题和描述');
       return;

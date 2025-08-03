@@ -1,5 +1,5 @@
-import { Activity, BarChart3, PieChart, TrendingUp } from 'lucide-react';
 import React from 'react';
+import { Activity, BarChart3, PieChart, TrendingUp } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 interface ChartContainerProps {
@@ -23,20 +23,6 @@ interface ChartContainerProps {
   height?: string | number;
 }
 
-/**
- * ChartContainer 图表容器组件
- * 提供统一的图表容器样式和状态处理
- * 
- * @example
- * ```tsx
- * <ChartContainer title="响应时间趋势" type="line">
- *   <YourChartComponent />
- * </ChartContainer>
- * 
- * <ChartContainer loading title="加载中..." />
- * <ChartContainer error errorMessage="数据加载失败" />
- * ```
- */
 export const ChartContainer: React.FC<ChartContainerProps> = ({
   title,
   description,
@@ -113,10 +99,6 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
   );
 };
 
-/**
- * SimpleChart 简单图表占位符组件
- * 用于显示图表占位符或简单的数据可视化
- */
 interface SimpleChartProps {
   /** 图表数据 */
   data?: Array<{ label: string; value: number; color?: string }>;
@@ -203,10 +185,6 @@ export const SimpleChart: React.FC<SimpleChartProps> = ({
   );
 };
 
-/**
- * MetricChart 指标图表组件
- * 用于显示单个指标的趋势
- */
 interface MetricChartProps {
   /** 指标名称 */
   name: string;

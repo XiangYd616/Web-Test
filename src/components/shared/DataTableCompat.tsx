@@ -26,11 +26,6 @@ interface DataTableCompatProps<T> {
   rowKey?: keyof T | ((record: T) => string);
 }
 
-/**
- * DataTable兼容适配层
- * 将原DataTable的API适配到新的Table组件
- * 保持完全的API兼容性，同时提供新Table组件的功能
- */
 function DataTableCompat<T extends Record<string, any>>({
   columns,
   data,

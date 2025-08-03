@@ -1,6 +1,3 @@
-/**
- * 🎨 UI组件统一导出
- */
 
 // 基础UI组件
 export { default as ErrorBoundary } from './ErrorBoundary';
@@ -86,6 +83,5 @@ export {
     ChartContainer, MetricChart, SimpleChart
 } from './Chart';
 
-// 测试工具组件
 export { TestingToolbar, TestProgress, TestResultSummary } from './TestingTools';
 

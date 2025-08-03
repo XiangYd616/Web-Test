@@ -1,7 +1,3 @@
-/**
- * 统一的 API 服务适配器
- * 根据环境自动选择使用远程 API 或本地存储
- */
 
 import type { AuthResponse, LoginCredentials, RegisterData, User } from '../../types/user';
 import { isDesktopEnvironment } from '../../utils/environment';

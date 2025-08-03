@@ -1,20 +1,4 @@
-import {
-  AlertTriangle,
-  BarChart3,
-  CheckCircle,
-  Download,
-  Info,
-  Moon,
-  Play,
-  RefreshCw,
-  Search,
-  Settings,
-  Square,
-  Star,
-  Sun,
-  XCircle,
-  Zap
-} from 'lucide-react';
+import { AlertTriangle, BarChart3, CheckCircle, Download, Info, Moon, Play, RefreshCw, Search, Settings, Square, Star, Sun, XCircle, Zap } from 'lucide-react';
 import React, { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 

@@ -1,45 +1,10 @@
-import {
-  Activity,
-  AlertCircle,
-  AlertTriangle,
-  BarChart3,
-  CheckCircle,
-  Clock,
-  CloudOff,
-  Cpu,
-  Database,
-  Download,
-  Gauge,
-  HardDrive,
-  History,
-  Layers,
-  Lock,
-  Monitor,
-  Network,
-  Pause,
-  Play,
-  RefreshCw,
-  RotateCcw,
-  Save,
-  Search,
-  Server,
-  Settings,
-  Shield,
-  Signal,
-  Square,
-  Target,
-  Timer,
-  TrendingUp,
-  Wifi,
-  WifiOff,
-  XCircle,
-  Zap
-} from 'lucide-react';
+import { Activity, AlertCircle, AlertTriangle, BarChart3, CheckCircle, Clock, CloudOff, Cpu, Database, Download, Gauge, HardDrive, History, Layers, Lock, Monitor, Network, Pause, Play, RefreshCw, RotateCcw, Save, Search, Server, Settings, Shield, Signal, Square, Target, Timer, TrendingUp, Wifi, WifiOff, XCircle, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { TestPageLayout } from '../components/testing/UnifiedTestingComponents';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { useTheme } from '../contexts/ThemeContext';
 import backgroundTestManager from '../services/backgroundTestManager';
+
 // CSS样式已迁移到组件库中
 // 进度条样式已集成到ProgressBar组件
 
@@ -494,7 +459,6 @@ const DatabaseTest: React.FC = () => {
   };
 
   // 加载配置
-
 
   const getScoreColor = (score: number) => {
     if (score >= 90) return 'text-green-400';

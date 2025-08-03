@@ -1,22 +1,5 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Bell,
-  CheckCircle,
-  AlertTriangle,
-  Info,
-  X,
-  Trash2,
-  Check,
-  ExternalLink,
-  Filter,
-  Search,
-  Calendar,
-  Archive,
-  RefreshCw,
-  Download,
-  Settings
-} from 'lucide-react';
 import { useNotifications, NotificationItem } from '../hooks/useNotifications';
 
 const Notifications: React.FC = () => {
@@ -360,11 +343,11 @@ const Notifications: React.FC = () => {
                       aria-label={`选择通知: ${notification.title}`}
                       title={`选择通知: ${notification.title}`}
                     />
-                    
+
                     <div className="flex-shrink-0 mt-1">
                       {getNotificationIcon(notification.type)}
                     </div>
-                    
+
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-2">
                         <h3 className={`text-lg font-medium ${
@@ -381,9 +364,9 @@ const Notifications: React.FC = () => {
                           )}
                         </div>
                       </div>
-                      
+
                       <p className="text-gray-400 mb-3">{notification.message}</p>
-                      
+
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           {notification.category && (
@@ -402,7 +385,7 @@ const Notifications: React.FC = () => {
                             </span>
                           )}
                         </div>
-                        
+
                         <div className="flex items-center space-x-2">
                           {notification.actionUrl && (
                             <Link

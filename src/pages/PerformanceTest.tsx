@@ -1,37 +1,12 @@
-import {
-  AlertTriangle,
-  BarChart3,
-  CheckCircle,
-  Clock,
-  Download,
-  ExternalLink,
-  Gauge,
-  Globe,
-  Image,
-  Loader,
-  Monitor,
-  RotateCcw,
-  Settings,
-  Share2,
-  Smartphone,
-  Square,
-  Timer,
-  TrendingUp,
-  Wifi,
-  XCircle,
-  Zap
-} from 'lucide-react';
+import { AlertTriangle, BarChart3, CheckCircle, Clock, Download, ExternalLink, Gauge, Globe, Image, Loader, Monitor, RotateCcw, Settings, Share2, Smartphone, Square, Timer, TrendingUp, Wifi, XCircle, Zap } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
-import {
-  TestPageLayout
-} from '../components/testing/UnifiedTestingComponents';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { useUserStats } from '../hooks/useUserStats';
 import UnifiedApiService from '../services/api/apiService';
 import { googlePageSpeedService } from '../services/googlePageSpeedService';
+
 // CSS样式已迁移到组件库中
-// 测试工具样式已集成到TestingTools组件
 
 // 性能测试相关类型定义
 type TestMode = 'basic' | 'standard' | 'comprehensive' | 'lighthouse';
@@ -39,8 +14,6 @@ type TestStatusType = 'idle' | 'starting' | 'running' | 'completed' | 'failed';
 type NetworkCondition = 'fast-3g' | 'slow-3g' | '4g' | 'wifi' | 'cable' | 'no-throttling';
 type DeviceType = 'desktop' | 'mobile' | 'tablet' | 'both';
 type TestEngine = 'pagespeed' | 'gtmetrix' | 'webpagetest' | 'lighthouse' | 'local';
-
-
 
 // Core Web Vitals 指标
 interface CoreWebVitals {
@@ -89,7 +62,6 @@ interface PerformanceTestResult {
   reportUrl?: string;
 }
 
-// 测试历史记录
 interface TestHistoryItem {
   id: string;
   url: string;
@@ -684,8 +656,6 @@ const PerformanceTest: React.FC = () => {
     }
   };
 
-
-
   const handleStartTest = async () => {
     if (!testConfig.url) {
       setError('请输入要测试的URL');
@@ -879,16 +849,13 @@ const PerformanceTest: React.FC = () => {
               测试网站
             </h3>
             <div className="space-y-3">
-              <div className="relative">
-                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10">
-                  <Globe className="w-4 h-4 text-gray-400" />
-                </div>
-                <input
-                  type="url"
+              <div className="url-input-container">
+                <URLInput
                   value={testConfig.url}
                   onChange={(e) => setTestConfig(prev => ({ ...prev, url: e.target.value }))}
                   placeholder="输入要测试的网站URL..."
-                  className="performance-url-input w-full pl-10 pr-3 py-2 bg-gray-700/50 border border-gray-600/50 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  className="url-input-full-width"
+                  size="sm"
                 />
               </div>
               <div className="text-xs text-gray-400">

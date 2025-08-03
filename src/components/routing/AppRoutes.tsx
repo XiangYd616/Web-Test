@@ -18,7 +18,11 @@ const NetworkTest = lazy(() => import('../../pages/NetworkTest'));
 const DatabaseTest = lazy(() => import('../../pages/DatabaseTest'));
 const StressTest = lazy(() => import('../../pages/StressTest'));
 const CompatibilityTest = lazy(() => import('../../pages/CompatibilityTest'));
+const ChromeCompatibilityTest = lazy(() => import('../../pages/ChromeCompatibilityTest'));
 const UXTest = lazy(() => import('../../pages/UXTest'));
+
+// 演示和测试页面
+const URLInputDemo = lazy(() => import('../../pages/URLInputDemo'));
 
 // 数据管理相关页面
 const DataStorage = lazy(() => import('../../pages/admin/DataStorage'));
@@ -66,10 +70,7 @@ const ThemeShowcase = lazy(() => import('../../pages/ThemeShowcase'));
 const Subscription = lazy(() => import('../../pages/Subscription'));
 const DownloadDesktop = lazy(() => import('../../pages/DownloadDesktop'));
 
-
-
 // 演示页面
-// const BackgroundTestDemo = lazy(() => import('../../pages/BackgroundTestDemo')); // 已移除
 
 interface LazyPageWrapperProps {
   children: React.ReactNode;
@@ -143,9 +144,21 @@ const AppRoutes: React.FC = () => {
             <CompatibilityTest />
           </LazyPageWrapper>
         } />
+        <Route path="chrome-compatibility-test" element={
+          <LazyPageWrapper>
+            <ChromeCompatibilityTest />
+          </LazyPageWrapper>
+        } />
         <Route path="ux-test" element={
           <LazyPageWrapper>
             <UXTest />
+          </LazyPageWrapper>
+        } />
+
+        {/* 演示页面 */}
+        <Route path="url-input-demo" element={
+          <LazyPageWrapper>
+            <URLInputDemo />
           </LazyPageWrapper>
         } />
 

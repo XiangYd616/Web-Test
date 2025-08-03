@@ -1,15 +1,8 @@
-/**
- * 压力测试记录管理 Hook
- * 提供测试记录的创建、更新、查询等功能
- */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { stressTestQueueManager, type QueueStats } from '../services/stressTestQueueManager';
-import {
-  stressTestRecordService,
-  type StressTestRecord,
-  type TestRecordQuery
-} from '../services/stressTestRecordService';
+
+import { stressTestRecordService, type StressTestRecord, type TestRecordQuery } from '../services/stressTestRecordService';
 
 export interface UseStressTestRecordOptions {
   autoLoad?: boolean;
@@ -442,8 +435,6 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
   const estimateWaitTime = useCallback((queueId: string): number => {
     return stressTestQueueManager.estimateWaitTime(queueId);
   }, []);
-
-
 
   // 删除测试记录
   const deleteRecord = useCallback(async (id: string): Promise<boolean> => {

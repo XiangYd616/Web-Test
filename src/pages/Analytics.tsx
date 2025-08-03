@@ -1,28 +1,6 @@
 // React相关导入
 import React, { useEffect, useState } from 'react';
 
-// 第三方库导入
-import {
-  Activity,
-  AlertTriangle,
-  ArrowDownRight,
-  ArrowUpRight,
-  BarChart3,
-  Brain,
-  ExternalLink,
-  Eye,
-  Info,
-  Lightbulb,
-  Minus,
-  RefreshCw,
-  Search,
-  Shield,
-  Target,
-  TrendingDown,
-  TrendingUp
-} from 'lucide-react';
-
-// 本地服务导入
 import { analyticsService as AdvancedAnalyticsService } from '../services/analytics';
 
 interface AnalyticsInsight {
@@ -165,8 +143,6 @@ const Analytics: React.FC = () => {
   const handleRefresh = () => {
     fetchAnalyticsData();
   };
-
-
 
   const getInsightIcon = (type: string) => {
     switch (type) {

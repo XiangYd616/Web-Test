@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
 import { Lock, Eye, EyeOff, Shield, Star } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 import LoginPrompt from './LoginPrompt';
 
 interface ProtectedFeatureProps {
@@ -34,7 +34,7 @@ const ProtectedFeature: React.FC<ProtectedFeatureProps> = ({
     <div className={`relative ${className}`}>
       {/* 预览内容 */}
       {showPreview && (
-        <div 
+        <div
           className="relative overflow-hidden rounded-xl border border-gray-700/50"
           style={{ height: previewHeight }}
         >
@@ -42,7 +42,7 @@ const ProtectedFeature: React.FC<ProtectedFeatureProps> = ({
           <div className={`${showPreviewContent ? 'blur-sm' : 'blur-md'} transition-all duration-300`}>
             {children}
           </div>
-          
+
           {/* 覆盖层 */}
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-gray-900/20 to-gray-900/80 flex items-center justify-center">
             <div className="text-center p-8 max-w-md">
@@ -50,7 +50,7 @@ const ProtectedFeature: React.FC<ProtectedFeatureProps> = ({
               <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600/20 rounded-full mb-4">
                 <Lock className="w-8 h-8 text-blue-400" />
               </div>
-              
+
               {/* 标题和描述 */}
               <h3 className="text-xl font-bold text-white mb-2">
                 {feature}需要登录
@@ -58,7 +58,7 @@ const ProtectedFeature: React.FC<ProtectedFeatureProps> = ({
               <p className="text-gray-300 mb-6">
                 登录后即可使用完整功能
               </p>
-              
+
               {/* 功能亮点 */}
               <div className="space-y-2 mb-6 text-left">
                 <div className="flex items-center space-x-2 text-sm text-gray-300">
@@ -74,7 +74,7 @@ const ProtectedFeature: React.FC<ProtectedFeatureProps> = ({
                   <span>高级分析和报告</span>
                 </div>
               </div>
-              
+
               {/* 操作按钮 */}
               <div className="space-y-3">
                 <button
@@ -84,7 +84,7 @@ const ProtectedFeature: React.FC<ProtectedFeatureProps> = ({
                   <Lock className="w-5 h-5" />
                   <span>登录/注册使用</span>
                 </button>
-                
+
                 <button
                   onClick={() => setShowPreviewContent(!showPreviewContent)}
                   className="w-full bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
@@ -113,14 +113,14 @@ const ProtectedFeature: React.FC<ProtectedFeatureProps> = ({
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600/20 rounded-full mb-4">
             <Shield className="w-8 h-8 text-blue-400" />
           </div>
-          
+
           <h3 className="text-xl font-bold text-white mb-2">
             {feature}需要登录
           </h3>
           <p className="text-gray-300 mb-6">
             {description}需要登录账户
           </p>
-          
+
           <button
             onClick={() => setShowLoginPrompt(true)}
             className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2 mx-auto"

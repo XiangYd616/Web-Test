@@ -32,10 +32,10 @@ describe('Badge Component', () => {
   it('handles clickable badges', () => {
     const handleClick = vi.fn();
     render(<Badge onClick={handleClick}>Clickable</Badge>);
-    
+
     const badge = screen.getByText('Clickable');
     expect(badge).toHaveClass('badge-clickable');
-    
+
     fireEvent.click(badge);
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
@@ -49,10 +49,10 @@ describe('Badge Component', () => {
   it('handles removable badges', () => {
     const handleRemove = vi.fn();
     render(<Badge onRemove={handleRemove}>Removable</Badge>);
-    
+
     const removeButton = screen.getByRole('button');
     expect(removeButton).toBeInTheDocument();
-    
+
     fireEvent.click(removeButton);
     expect(handleRemove).toHaveBeenCalledTimes(1);
   });

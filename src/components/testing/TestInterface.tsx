@@ -1,9 +1,4 @@
-import {
-  Clock,
-  Play,
-  Square,
-  Target
-} from 'lucide-react';
+import { Clock, Play, Square, Target } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
 import { TestResult, TestType } from '../../services/testing/unifiedTestEngine';
 import { ButtonFeedback } from '../integration/InteractiveFeedback';
@@ -203,8 +198,6 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
       </div>
     );
   };
-
-
 
   const renderResult = () => {
     if (!result) return null;

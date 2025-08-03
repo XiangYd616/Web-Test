@@ -22,7 +22,7 @@ export interface TestCase {
   dependencies?: string[];
 }
 
-export type TestType = 
+export type TestType =
   | 'core-web-vitals'
   | 'lighthouse-audit'
   | 'security-scan'

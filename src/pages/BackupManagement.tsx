@@ -1,21 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Database,
-  Download,
-  Upload,
-  Trash2,
-  RefreshCw,
-  HardDrive,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Settings,
-  Pause,
-  AlertTriangle,
-  FileText,
-  Archive,
-  Shield
-} from 'lucide-react';
+
+import { Database, Download, Upload, Trash2, RefreshCw, HardDrive, CheckCircle, XCircle, Clock, Settings, Pause, AlertTriangle, FileText, Archive, Shield } from 'lucide-react';
 
 interface BackupRecord {
   id: string;
@@ -60,7 +45,6 @@ const BackupManagement: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
-  
 
   useEffect(() => {
     loadBackups();
@@ -177,7 +161,7 @@ const BackupManagement: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type, description: `手动创建的${type === 'full' ? '全量' : '增量'}备份` })
       });
-      
+
       if (response.ok) {
         // 刷新备份列表
         loadBackups();
@@ -191,12 +175,12 @@ const BackupManagement: React.FC = () => {
 
   const deleteBackup = async (backupId: string) => {
     if (!confirm('确定要删除这个备份吗？此操作不可恢复。')) return;
-    
+
     try {
       const response = await fetch(`/api/admin/backups/${backupId}`, {
         method: 'DELETE'
       });
-      
+
       if (response.ok) {
         setBackups(backups.filter(backup => backup.id !== backupId));
       }
@@ -226,12 +210,12 @@ const BackupManagement: React.FC = () => {
 
   const restoreBackup = async (backupId: string) => {
     if (!confirm('确定要恢复这个备份吗？这将覆盖当前数据库。')) return;
-    
+
     try {
       const response = await fetch(`/api/admin/backups/${backupId}/restore`, {
         method: 'POST'
       });
-      
+
       if (response.ok) {
         alert('备份恢复成功！');
       }
@@ -247,7 +231,7 @@ const BackupManagement: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newConfig)
       });
-      
+
       if (response.ok) {
         setConfig(newConfig);
         setShowConfig(false);
@@ -286,7 +270,6 @@ const BackupManagement: React.FC = () => {
   const completedBackups = backups.filter(b => b.status === 'completed');
   const totalSize = completedBackups.reduce((sum, backup) => sum + backup.size, 0);
   const failedBackups = backups.filter(b => b.status === 'failed').length;
-  
 
   if (loading) {
     return (

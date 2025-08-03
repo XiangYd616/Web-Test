@@ -6,7 +6,6 @@ const os = require('os');
 
 const execAsync = promisify(exec);
 
-// 测试引擎基类
 class TestEngine {
   constructor(name) {
     this.name = name;
@@ -928,7 +927,6 @@ class SimpleSecurityEngine extends TestEngine {
   }
 }
 
-// 测试引擎管理器
 class TestEngineManager {
   constructor() {
     this.engines = new Map();

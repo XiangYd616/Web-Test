@@ -1,16 +1,12 @@
 // React相关导入
 import { useEffect } from 'react'
 
-// 本地组件导入
 import AppRoutes from './components/routing/AppRoutes'
 import BackgroundTestNotifications from './components/system/BackgroundTestNotifications'
 import ErrorBoundary from './components/ui/ErrorBoundary'
 
-// Context导入
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
-
-
 
 // 样式文件导入 - 使用统一的主题系统
 // 主题样式已迁移到 theme-config.css 和组件库中

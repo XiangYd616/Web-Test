@@ -71,7 +71,7 @@ export class ReportExporter {
       exportOptions: options,
       exportedAt: new Date().toISOString()
     };
-    
+
     const json = JSON.stringify(data, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
     this.downloadFile(blob, `${result.type}-report-${Date.now()}.json`);
@@ -85,7 +85,7 @@ export class ReportExporter {
 
   private generateHTMLReport(result: TestResult, options: ExportOptions): string {
     const date = new Date(result.timestamp).toLocaleString('zh-CN');
-    
+
     return `
 <!DOCTYPE html>
 <html lang="zh-CN">

@@ -1,10 +1,7 @@
-/**
- * 专业级实时压力测试图表组件
- * 解决耦合问题，提供真实数据展示，保持JMeter风格的专业外观
- */
+
+import React, { useMemo, useState } from 'react';
 
 import { BarChart3, Settings, TrendingUp, Users, Zap } from 'lucide-react';
-import React, { useMemo, useState } from 'react';
 
 // 数据点接口
 interface StressTestDataPoint {
@@ -472,7 +469,6 @@ export const RealTimeStressChart: React.FC<RealTimeStressChartProps> = ({
           </div>
         )}
       </div>
-
 
     </div>
   );

@@ -1,5 +1,5 @@
-import { AlertTriangle, HardDrive, RefreshCw, Wifi } from 'lucide-react';
 import React from 'react';
+import { AlertTriangle, HardDrive, RefreshCw, Wifi } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 
 interface NetworkErrorPromptProps {

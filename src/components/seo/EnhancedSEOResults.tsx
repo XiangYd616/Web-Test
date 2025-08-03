@@ -1,23 +1,4 @@
-import {
-  AlertCircle,
-  AlertTriangle,
-  BarChart3,
-  CheckCircle,
-  Download,
-  ExternalLink,
-  FileText,
-  Globe,
-  Hash,
-  Info,
-  Lightbulb,
-  Shield,
-  Smartphone,
-  TrendingUp,
-  Type,
-  Users,
-  XCircle,
-  Zap
-} from 'lucide-react';
+import { AlertCircle, AlertTriangle, BarChart3, CheckCircle, Download, ExternalLink, FileText, Globe, Hash, Info, Lightbulb, Shield, Smartphone, TrendingUp, Type, Users, XCircle, Zap } from 'lucide-react';
 import React, { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import EnhancedPerformanceResults from './EnhancedPerformanceResults';

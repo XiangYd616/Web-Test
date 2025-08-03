@@ -1,15 +1,4 @@
 import React, { useState } from 'react';
-import { 
-  FileText, 
-  AlertTriangle, 
-  CheckCircle, 
-  XCircle, 
-  TrendingUp, 
-  Download,
-  Eye,
-  ChevronDown,
-  ChevronRight
-} from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 
 interface LocalSEOResultsProps {
@@ -82,19 +71,19 @@ const LocalSEOResults: React.FC<LocalSEOResultsProps> = ({ results, onExport }) 
           <div className="text-2xl font-bold text-blue-600">{results.totalFiles}</div>
           <div className="text-sm text-gray-500">总文件数</div>
         </div>
-        
+
         <div className={`p-4 rounded-lg ${actualTheme === 'dark' ? 'bg-gray-800' : 'bg-white'} border`}>
           <div className="text-2xl font-bold text-green-600">{results.analyzedFiles}</div>
           <div className="text-sm text-gray-500">已分析文件</div>
         </div>
-        
+
         <div className={`p-4 rounded-lg ${actualTheme === 'dark' ? 'bg-gray-800' : 'bg-white'} border`}>
           <div className="text-2xl font-bold text-red-600">
             {results.issues?.length || 0}
           </div>
           <div className="text-sm text-gray-500">发现问题</div>
         </div>
-        
+
         <div className={`p-4 rounded-lg ${actualTheme === 'dark' ? 'bg-gray-800' : 'bg-white'} border`}>
           <div className="text-2xl font-bold text-yellow-600">
             {results.recommendations?.length || 0}
@@ -139,10 +128,10 @@ const LocalSEOResults: React.FC<LocalSEOResultsProps> = ({ results, onExport }) 
           >
             <div className="flex items-center space-x-3">
               <div className="text-2xl">
-                {file.fileType === '.html' ? '🌐' : 
-                 file.fileType === '.xml' ? '📄' : 
-                 file.fileType === '.txt' ? '📝' : 
-                 file.fileType === '.css' ? '🎨' : 
+                {file.fileType === '.html' ? '🌐' :
+                 file.fileType === '.xml' ? '📄' :
+                 file.fileType === '.txt' ? '📝' :
+                 file.fileType === '.css' ? '🎨' :
                  file.fileType === '.js' ? '⚡' : '📄'}
               </div>
               <div>
@@ -152,13 +141,13 @@ const LocalSEOResults: React.FC<LocalSEOResultsProps> = ({ results, onExport }) 
                 </div>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-3">
               <div className={`text-lg font-bold ${getScoreColor(file.score)}`}>
                 {file.score}
               </div>
-              {expandedFiles.has(file.filename) ? 
-                <ChevronDown className="h-5 w-5" /> : 
+              {expandedFiles.has(file.filename) ?
+                <ChevronDown className="h-5 w-5" /> :
                 <ChevronRight className="h-5 w-5" />
               }
             </div>
@@ -181,27 +170,27 @@ const LocalSEOResults: React.FC<LocalSEOResultsProps> = ({ results, onExport }) 
                           <div>链接: {file.analysis.links?.length || 0} 个</div>
                         </div>
                       </div>
-                      
+
                       <div>
                         <h5 className="font-medium mb-2">SEO检查</h5>
                         <div className="space-y-1 text-sm">
                           <div className="flex items-center space-x-2">
-                            {file.analysis.technicalSEO?.canonical ? 
-                              <CheckCircle className="h-4 w-4 text-green-500" /> : 
+                            {file.analysis.technicalSEO?.canonical ?
+                              <CheckCircle className="h-4 w-4 text-green-500" /> :
                               <XCircle className="h-4 w-4 text-red-500" />
                             }
                             <span>Canonical标签</span>
                           </div>
                           <div className="flex items-center space-x-2">
-                            {file.analysis.openGraph && Object.keys(file.analysis.openGraph).length > 0 ? 
-                              <CheckCircle className="h-4 w-4 text-green-500" /> : 
+                            {file.analysis.openGraph && Object.keys(file.analysis.openGraph).length > 0 ?
+                              <CheckCircle className="h-4 w-4 text-green-500" /> :
                               <XCircle className="h-4 w-4 text-red-500" />
                             }
                             <span>Open Graph</span>
                           </div>
                           <div className="flex items-center space-x-2">
-                            {file.analysis.structuredData?.length > 0 ? 
-                              <CheckCircle className="h-4 w-4 text-green-500" /> : 
+                            {file.analysis.structuredData?.length > 0 ?
+                              <CheckCircle className="h-4 w-4 text-green-500" /> :
                               <XCircle className="h-4 w-4 text-red-500" />
                             }
                             <span>结构化数据</span>
@@ -326,7 +315,7 @@ const LocalSEOResults: React.FC<LocalSEOResultsProps> = ({ results, onExport }) 
                     rec.priority === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' :
                     'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
                   }`}>
-                    {rec.priority === 'high' ? '高优先级' : 
+                    {rec.priority === 'high' ? '高优先级' :
                      rec.priority === 'medium' ? '中优先级' : '低优先级'}
                   </div>
                 )}

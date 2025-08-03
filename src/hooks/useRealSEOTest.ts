@@ -1,9 +1,8 @@
 import { useCallback, useRef, useState } from 'react';
 import { RealSEOAnalysisEngine, SEOAnalysisResult } from '../services/realSEOAnalysisEngine';
 
-// 临时性能指标获取函数
 const getPerformanceMetrics = async (url: string, options: any) => {
-  // 临时实现，返回模拟数据
+  
   return {
     loadTime: Math.random() * 3000 + 1000,
     fcp: Math.random() * 2000 + 500,

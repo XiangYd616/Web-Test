@@ -35,7 +35,7 @@ const EnvironmentPrompt: React.FC<EnvironmentPromptProps> = ({
               <strong>桌面版优势:</strong> {desktopBenefit}
             </p>
           </div>
-          
+
           {showDownloadLink && (
             <div className="mt-4 flex items-center space-x-4">
               <a
@@ -45,21 +45,21 @@ const EnvironmentPrompt: React.FC<EnvironmentPromptProps> = ({
                 <Download className="w-4 h-4 mr-2" />
                 下载桌面版
               </a>
-              
+
               <div className="flex items-center text-xs text-amber-600">
                 <Monitor className="w-4 h-4 mr-1" />
                 <span>获得完整功能体验</span>
               </div>
             </div>
           )}
-          
+
           <div className="mt-3 pt-3 border-t border-amber-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center text-xs text-amber-600">
                 <Globe className="w-4 h-4 mr-1" />
                 <span>当前运行在浏览器环境</span>
               </div>
-              
+
               {onDismiss && (
                 <button
                   onClick={onDismiss}

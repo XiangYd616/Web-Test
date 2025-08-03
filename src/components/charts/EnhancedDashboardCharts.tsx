@@ -78,12 +78,12 @@ const EnhancedDashboardCharts: React.FC<EnhancedDashboardChartsProps> = ({ class
 
   const renderBarChart = (data: any[], dataKey: string, color: string) => {
     const maxValue = getMaxValue(data, dataKey);
-    
+
     return (
       <div className="flex items-end space-x-1 h-16">
         {data.map((item, index) => (
           <div key={index} className="flex-1 flex flex-col items-center">
-            <div 
+            <div
               className={`w-full ${color} rounded-t transition-all duration-500 hover:opacity-80`}
               style={{ height: `${(item[dataKey] / maxValue) * 100}%` }}
             ></div>
@@ -115,7 +115,7 @@ const EnhancedDashboardCharts: React.FC<EnhancedDashboardChartsProps> = ({ class
                 {metric.value.toLocaleString()}
               </span>
               <span className={`text-sm font-medium ${
-                metric.trend === 'up' ? 'text-green-600' : 
+                metric.trend === 'up' ? 'text-green-600' :
                 metric.trend === 'down' ? 'text-red-600' : 'text-gray-600'
               }`}>
                 {metric.change > 0 ? '+' : ''}{metric.change}

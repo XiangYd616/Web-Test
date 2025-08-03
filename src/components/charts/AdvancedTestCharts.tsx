@@ -1,28 +1,7 @@
-/**
- * 高级测试图表组件 - 统一展示所有测试结果
- */
 
 import React, { useMemo, useState } from 'react';
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  ComposedChart,
-  Legend,
-  Line,
-  LineChart,
-  Pie,
-  PieChart,
-  PolarAngleAxis,
-  PolarGrid,
-  PolarRadiusAxis, Radar,
-  RadarChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis, YAxis
-} from 'recharts';
 import { TestResult } from '../../services/advancedTestEngine';
+
 // CSS样式已迁移到组件库，不再需要外部CSS文件
 
 interface AdvancedTestChartsProps {

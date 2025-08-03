@@ -1,38 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Button,
-  DeleteButton,
-  IconButton,
-  GhostButton,
-  Card,
-  CardHeader,
-  CardTitle,
-  CardBody,
-  CardFooter,
-  SearchInput,
-  Select,
-  Badge,
-  StatusBadge,
-  ProgressBadge,
-  SimpleCheckbox,
-  ConfirmModal
-} from '../ui';
-import {
-  Activity,
-  BarChart3,
-  CheckCircle,
-  Clock,
-  Download,
-  Eye,
-  RefreshCw,
-  Trash2,
-  XCircle,
-  AlertTriangle
-} from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
-// 测试记录接口
 interface TestRecord {
   id: string;
   testName: string;
@@ -154,12 +123,12 @@ const StressTestHistoryMigrated: React.FC<StressTestHistoryMigratedProps> = ({ c
 
   // 筛选记录
   const filteredRecords = records.filter(record => {
-    const matchesSearch = !searchTerm || 
+    const matchesSearch = !searchTerm ||
       record.testName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       record.url.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesStatus = statusFilter === 'all' || record.status === statusFilter;
-    
+
     return matchesSearch && matchesStatus;
   });
 
@@ -401,8 +370,8 @@ const StressTestHistoryMigrated: React.FC<StressTestHistoryMigratedProps> = ({ c
                           </p>
                         </div>
                         <div className="flex items-center gap-2 ml-4">
-                          <StatusBadge 
-                            status={statusConfig.status} 
+                          <StatusBadge
+                            status={statusConfig.status}
                             text={statusConfig.text}
                           />
                           {record.tags && record.tags.map((tag, index) => (

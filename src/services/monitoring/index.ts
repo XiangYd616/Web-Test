@@ -1,7 +1,3 @@
-/**
- * 📡 统一监控服务入口
- * 整合所有监控相关功能，避免重复和耦合
- */
 
 // 核心类型定义
 export interface MonitoringSite {

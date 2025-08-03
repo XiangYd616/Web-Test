@@ -1,14 +1,8 @@
 import React, { useState } from 'react';
-import { 
-  Modal, 
-  ModalHeader, 
-  ModalBody, 
-  ModalFooter, 
-  ConfirmModal 
-} from './Modal';
+import { AlertTriangle, Info, CheckCircle, Settings } from 'lucide-react';
+
 import { Button, DeleteButton, SecondaryButton } from './Button';
 import { Card, CardHeader, CardTitle, CardBody } from './Card';
-import { AlertTriangle, Info, CheckCircle, Settings } from 'lucide-react';
 
 export const ModalTest: React.FC = () => {
   const [basicModal, setBasicModal] = useState(false);
@@ -35,7 +29,7 @@ export const ModalTest: React.FC = () => {
     <div className="p-8 space-y-8 bg-gray-900 min-h-screen">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-white mb-8">Modal组件测试展示</h1>
-        
+
         {/* 基础模态框 */}
         <section className="mb-12">
           <h2 className="text-xl font-semibold text-white mb-6">基础模态框</h2>
@@ -43,11 +37,11 @@ export const ModalTest: React.FC = () => {
             <Button onClick={() => setBasicModal(true)}>
               基础模态框
             </Button>
-            
+
             <Button onClick={() => setComplexModal(true)} variant="secondary">
               复杂内容模态框
             </Button>
-            
+
             <Button onClick={() => setSettingsModal(true)} variant="outline">
               设置模态框
             </Button>
@@ -78,11 +72,11 @@ export const ModalTest: React.FC = () => {
             <DeleteButton onClick={() => setConfirmModal(true)}>
               危险操作确认
             </DeleteButton>
-            
+
             <Button onClick={() => setWarningModal(true)} className="bg-yellow-600 hover:bg-yellow-700">
               警告确认
             </Button>
-            
+
             <Button onClick={() => setInfoModal(true)} variant="secondary">
               信息确认
             </Button>
@@ -130,7 +124,7 @@ export const ModalTest: React.FC = () => {
               模态框支持键盘导航（ESC关闭、Tab焦点循环）和无障碍功能。
             </p>
           </ModalBody>
-          
+
           <ModalFooter>
             <SecondaryButton onClick={() => setBasicModal(false)}>
               取消
@@ -156,7 +150,7 @@ export const ModalTest: React.FC = () => {
               不同尺寸适用于不同的内容量和使用场景。
             </p>
           </ModalBody>
-          
+
           <ModalFooter>
             <Button onClick={() => setSizeModal(null)}>
               关闭
@@ -213,7 +207,7 @@ export const ModalTest: React.FC = () => {
               </div>
             </div>
           </ModalBody>
-          
+
           <ModalFooter>
             <SecondaryButton onClick={() => setComplexModal(false)}>
               取消
@@ -237,7 +231,7 @@ export const ModalTest: React.FC = () => {
               <span className="text-white font-medium">测试配置</span>
             </div>
           </ModalHeader>
-          
+
           <ModalBody>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -254,7 +248,7 @@ export const ModalTest: React.FC = () => {
               </div>
             </div>
           </ModalBody>
-          
+
           <ModalFooter>
             <SecondaryButton onClick={() => setSettingsModal(false)}>
               取消

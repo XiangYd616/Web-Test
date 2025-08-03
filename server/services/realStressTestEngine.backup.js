@@ -952,8 +952,6 @@ class RealStressTestEngine {
     metrics.lastThroughputUpdate = currentTime;
   }
 
-
-
   /**
    * 更新响应时间统计
    */
@@ -1107,8 +1105,6 @@ class RealStressTestEngine {
     return sortedArray[Math.max(0, index)];
   }
 
-
-
   /**
    * 验证URL格式
    */
@@ -1242,7 +1238,6 @@ class RealStressTestEngine {
         end_time: results.endTime,
         duration: Math.round(results.actualDuration || 0),
 
-        // 测试结果
         results: {
           metrics: results.metrics,
           realTimeData: results.realTimeData,

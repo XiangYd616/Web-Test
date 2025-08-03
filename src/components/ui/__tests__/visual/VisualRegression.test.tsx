@@ -58,12 +58,12 @@ describe('Visual Regression Tests', () => {
           <Card variant="elevated">Elevated Card</Card>
           <Card variant="outlined">Outlined Card</Card>
           <Card variant="filled">Filled Card</Card>
-          
+
           <Card header="Card with Header">Content</Card>
           <Card footer="Card with Footer">Content</Card>
-          
-          <Card 
-            header="Complete Card" 
+
+          <Card
+            header="Complete Card"
             footer="Footer content"
             actions={<Button size="sm">Action</Button>}
           >
@@ -94,15 +94,15 @@ describe('Visual Regression Tests', () => {
           <Input label="With Error" error="This field is required" />
           <Input label="With Help" helpText="Enter your full name" />
           <Input label="Disabled" disabled value="Disabled input" />
-          
-          <Select 
+
+          <Select
             label="Select Input"
             options={[
               { value: '1', label: 'Option 1' },
               { value: '2', label: 'Option 2' }
             ]}
           />
-          
+
           <Textarea label="Textarea" placeholder="Enter description" rows={3} />
         </div>
       );
@@ -148,9 +148,9 @@ describe('Visual Regression Tests', () => {
     it('renders table with selection correctly', () => {
       const { container } = render(
         <div className="p-4">
-          <Table 
-            columns={mockColumns} 
-            data={mockData} 
+          <Table
+            columns={mockColumns}
+            data={mockData}
             selectable
             selectedRows={[mockData[0]]}
           />
@@ -172,25 +172,25 @@ describe('Visual Regression Tests', () => {
             <Badge variant="danger">Danger</Badge>
             <Badge variant="info">Info</Badge>
           </div>
-          
+
           <div className="space-x-2">
             <Badge size="sm">Small</Badge>
             <Badge size="md">Medium</Badge>
             <Badge size="lg">Large</Badge>
           </div>
-          
+
           <div className="space-x-2">
             <StatusBadge status="online">Online</StatusBadge>
             <StatusBadge status="offline">Offline</StatusBadge>
             <StatusBadge status="busy">Busy</StatusBadge>
           </div>
-          
+
           <div className="space-x-2">
             <DotBadge variant="success" />
             <DotBadge variant="warning" />
             <DotBadge variant="danger" />
           </div>
-          
+
           <div className="space-x-2">
             <ProgressBadge value={25} variant="info" />
             <ProgressBadge value={50} variant="warning" />
@@ -212,13 +212,13 @@ describe('Visual Regression Tests', () => {
             <Loading type="dots" />
             <Loading type="pulse" />
           </div>
-          
+
           <div className="space-x-4">
             <LoadingSpinner size="sm" />
             <LoadingSpinner size="md" />
             <LoadingSpinner size="lg" />
           </div>
-          
+
           <div className="space-y-2">
             <LoadingSkeleton variant="text" />
             <LoadingSkeleton variant="rectangular" width="200px" height="100px" />
@@ -258,7 +258,7 @@ describe('Visual Regression Tests', () => {
     it('renders complex component combinations correctly', () => {
       const { container } = render(
         <div className="p-4 space-y-6">
-          <Card 
+          <Card
             header="User Management"
             footer={
               <div className="flex justify-between">
@@ -269,7 +269,7 @@ describe('Visual Regression Tests', () => {
           >
             <div className="space-y-4">
               <Input label="Search" placeholder="Search users..." />
-              <Table 
+              <Table
                 columns={[
                   { key: 'name', title: 'Name' },
                   { key: 'status', title: 'Status' }
@@ -281,7 +281,7 @@ describe('Visual Regression Tests', () => {
               />
             </div>
           </Card>
-          
+
           <Card variant="outlined">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">

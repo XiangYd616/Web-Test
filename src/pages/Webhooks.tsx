@@ -1,23 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Webhook,
-  Plus,
-  Edit,
-  Trash2,
-  Play,
-  Pause,
-  Activity,
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
-  RefreshCw,
-  ExternalLink,
-  Filter,
-  Search,
-  Send,
-  Shield,
-  Globe
-} from 'lucide-react';
 import IntegrationService, { WebhookConfig } from '../services/integrationService';
 
 interface WebhooksProps {}
@@ -29,7 +10,7 @@ const Webhooks: React.FC<WebhooksProps> = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
-  
+
   // 创建Webhook表单状态
   const [newWebhookForm, setNewWebhookForm] = useState({
     name: '',
@@ -81,7 +62,7 @@ const Webhooks: React.FC<WebhooksProps> = () => {
   const filteredWebhooks = webhooks.filter(webhook => {
     const matchesSearch = webhook.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          webhook.url.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filterStatus === 'all' || 
+    const matchesFilter = filterStatus === 'all' ||
                          (filterStatus === 'active' && webhook.isActive) ||
                          (filterStatus === 'inactive' && !webhook.isActive);
     return matchesSearch && matchesFilter;
@@ -111,7 +92,6 @@ const Webhooks: React.FC<WebhooksProps> = () => {
     }
   };
 
-  // 测试Webhook
   const handleTestWebhook = async (webhookId: string) => {
     try {
       // 这里可以调用测试API
@@ -124,8 +104,8 @@ const Webhooks: React.FC<WebhooksProps> = () => {
   // 切换Webhook状态
   const handleToggleWebhook = async (webhookId: string) => {
     try {
-      setWebhooks(prev => prev.map(webhook => 
-        webhook.id === webhookId 
+      setWebhooks(prev => prev.map(webhook =>
+        webhook.id === webhookId
           ? { ...webhook, isActive: !webhook.isActive }
           : webhook
       ));
@@ -312,7 +292,7 @@ const Webhooks: React.FC<WebhooksProps> = () => {
                   <h4 className="font-medium text-white mb-1 flex items-center gap-2">
                     {webhook.name}
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${
-                      webhook.isActive 
+                      webhook.isActive
                         ? 'text-green-400 bg-green-500/10 border-green-500/20'
                         : 'text-gray-400 bg-gray-500/10 border-gray-500/20'
                     }`}>
@@ -428,8 +408,8 @@ const Webhooks: React.FC<WebhooksProps> = () => {
               <Webhook className="w-12 h-12 text-gray-600 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-400 mb-2">没有找到Webhook</h3>
               <p className="text-gray-500 mb-4">
-                {searchQuery || filterStatus !== 'all' 
-                  ? '尝试调整搜索条件或过滤器' 
+                {searchQuery || filterStatus !== 'all'
+                  ? '尝试调整搜索条件或过滤器'
                   : '创建您的第一个Webhook开始接收事件通知'}
               </p>
               {!searchQuery && filterStatus === 'all' && (
@@ -451,7 +431,7 @@ const Webhooks: React.FC<WebhooksProps> = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-gray-800 rounded-xl p-6 w-full max-w-2xl border border-gray-700 max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-semibold text-white mb-4">创建Webhook</h3>
-            
+
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -499,14 +479,14 @@ const Webhooks: React.FC<WebhooksProps> = () => {
                         checked={newWebhookForm.events.includes(event.id)}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setNewWebhookForm(prev => ({ 
-                              ...prev, 
-                              events: [...prev.events, event.id] 
+                            setNewWebhookForm(prev => ({
+                              ...prev,
+                              events: [...prev.events, event.id]
                             }));
                           } else {
-                            setNewWebhookForm(prev => ({ 
-                              ...prev, 
-                              events: prev.events.filter(e => e !== event.id) 
+                            setNewWebhookForm(prev => ({
+                              ...prev,
+                              events: prev.events.filter(e => e !== event.id)
                             }));
                           }
                         }}
@@ -540,12 +520,12 @@ const Webhooks: React.FC<WebhooksProps> = () => {
                     <input
                       type="number" placeholder="请输入数字"
                       value={newWebhookForm.retryPolicy.maxRetries}
-                      onChange={(e) => setNewWebhookForm(prev => ({ 
-                        ...prev, 
-                        retryPolicy: { 
-                          ...prev.retryPolicy, 
-                          maxRetries: parseInt(e.target.value) || 3 
-                        } 
+                      onChange={(e) => setNewWebhookForm(prev => ({
+                        ...prev,
+                        retryPolicy: {
+                          ...prev.retryPolicy,
+                          maxRetries: parseInt(e.target.value) || 3
+                        }
                       }))}
                       min="0"
                       max="10"
@@ -557,12 +537,12 @@ const Webhooks: React.FC<WebhooksProps> = () => {
                     <input
                       type="number" placeholder="请输入数字"
                       value={newWebhookForm.retryPolicy.retryDelay}
-                      onChange={(e) => setNewWebhookForm(prev => ({ 
-                        ...prev, 
-                        retryPolicy: { 
-                          ...prev.retryPolicy, 
-                          retryDelay: parseInt(e.target.value) || 1000 
-                        } 
+                      onChange={(e) => setNewWebhookForm(prev => ({
+                        ...prev,
+                        retryPolicy: {
+                          ...prev.retryPolicy,
+                          retryDelay: parseInt(e.target.value) || 1000
+                        }
                       }))}
                       min="100"
                       max="60000"
@@ -574,12 +554,12 @@ const Webhooks: React.FC<WebhooksProps> = () => {
                     <input
                       type="number" placeholder="请输入数字"
                       value={newWebhookForm.retryPolicy.backoffMultiplier}
-                      onChange={(e) => setNewWebhookForm(prev => ({ 
-                        ...prev, 
-                        retryPolicy: { 
-                          ...prev.retryPolicy, 
-                          backoffMultiplier: parseFloat(e.target.value) || 2 
-                        } 
+                      onChange={(e) => setNewWebhookForm(prev => ({
+                        ...prev,
+                        retryPolicy: {
+                          ...prev.retryPolicy,
+                          backoffMultiplier: parseFloat(e.target.value) || 2
+                        }
                       }))}
                       min="1"
                       max="5"

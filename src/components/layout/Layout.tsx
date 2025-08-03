@@ -1,15 +1,4 @@
-import {
-  Award,
-  Github,
-  Heart,
-  Mail,
-  MapPin,
-  Phone,
-  Shield,
-  Twitter,
-  Users,
-  Zap
-} from 'lucide-react';
+import { Award, Github, Heart, Mail, MapPin, Phone, Shield, Twitter, Users, Zap } from 'lucide-react';
 import React from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import { ModernNavigation } from '../modern';

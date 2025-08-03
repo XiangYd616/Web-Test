@@ -1,20 +1,5 @@
-/**
- * 安全测试结果对比组件
- * 支持多个测试结果的并排对比分析
- */
 
-import {
-  ArrowDown,
-  ArrowUp,
-  Calendar,
-  ChevronDown,
-  ChevronRight,
-  Minus,
-  Shield,
-  TrendingDown,
-  TrendingUp,
-  X
-} from 'lucide-react';
+import { ArrowDown, ArrowUp, Calendar, ChevronDown, ChevronRight, Minus, Shield, TrendingDown, TrendingUp, X } from 'lucide-react';
 import React, { useState } from 'react';
 import { SecurityTestResult } from '../../services/unifiedSecurityEngine';
 

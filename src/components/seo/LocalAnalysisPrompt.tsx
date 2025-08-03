@@ -1,5 +1,5 @@
-import { HardDrive, Info } from 'lucide-react';
 import React from 'react';
+import { HardDrive, Info } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 
 interface LocalAnalysisPromptProps {

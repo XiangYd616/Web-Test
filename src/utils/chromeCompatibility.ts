@@ -1,6 +1,3 @@
-/**
- * Chrome浏览器兼容性检测和修复工具
- */
 
 export class ChromeCompatibilityHelper {
   /**
@@ -138,22 +135,22 @@ export class ChromeCompatibilityHelper {
         display: -ms-grid !important;
         display: grid !important;
       }
-      
+
       .chrome-browser .grid-cols-1 {
         -ms-grid-columns: 1fr !important;
         grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
       }
-      
+
       .chrome-browser .grid-cols-3 {
         -ms-grid-columns: 1fr 1fr 1fr !important;
         grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
       }
-      
+
       .chrome-browser .gap-1 {
         gap: 0.25rem !important;
         grid-gap: 0.25rem !important;
       }
-      
+
       .chrome-browser .gap-2 {
         gap: 0.5rem !important;
         grid-gap: 0.5rem !important;
@@ -173,20 +170,20 @@ export class ChromeCompatibilityHelper {
         display: -ms-flexbox !important;
         display: flex !important;
       }
-      
+
       .chrome-browser .flex-col {
         -webkit-box-orient: vertical !important;
         -webkit-box-direction: normal !important;
         -ms-flex-direction: column !important;
         flex-direction: column !important;
       }
-      
+
       .chrome-browser .items-center {
         -webkit-box-align: center !important;
         -ms-flex-align: center !important;
         align-items: center !important;
       }
-      
+
       .chrome-browser .justify-between {
         -webkit-box-pack: justify !important;
         -ms-flex-pack: justify !important;
@@ -205,31 +202,31 @@ export class ChromeCompatibilityHelper {
       .chrome-browser .border-green-500 {
         border-color: #10b981 !important;
       }
-      
+
       .chrome-browser .border-blue-500 {
         border-color: #3b82f6 !important;
       }
-      
+
       .chrome-browser .border-red-500 {
         border-color: #ef4444 !important;
       }
-      
+
       .chrome-browser .border-purple-500 {
         border-color: #8b5cf6 !important;
       }
-      
+
       .chrome-browser .bg-green-50 {
         background-color: rgba(16, 185, 129, 0.1) !important;
       }
-      
+
       .chrome-browser .bg-blue-50 {
         background-color: rgba(59, 130, 246, 0.1) !important;
       }
-      
+
       .chrome-browser .bg-red-50 {
         background-color: rgba(239, 68, 68, 0.1) !important;
       }
-      
+
       .chrome-browser .bg-purple-50 {
         background-color: rgba(139, 92, 246, 0.1) !important;
       }

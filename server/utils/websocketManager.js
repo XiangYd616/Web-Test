@@ -55,7 +55,6 @@ class WebSocketManager {
       this.leaveRoom(socket, data.room);
     });
 
-    // 测试连接ping/pong
     socket.on('test-ping', (data) => {
       this.handlePing(socket, data);
     });

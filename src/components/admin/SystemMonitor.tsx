@@ -1,15 +1,4 @@
-import {
-  Activity,
-  AlertTriangle,
-  CheckCircle,
-  Cpu,
-  Database,
-  HardDrive,
-  MemoryStick,
-  Monitor,
-  Network,
-  RefreshCw
-} from 'lucide-react';
+import { Activity, AlertTriangle, CheckCircle, Cpu, Database, HardDrive, MemoryStick, Monitor, Network, RefreshCw } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { adminService } from '../../services/adminService';
 import type { SystemMonitor as SystemMonitorType } from '../../types/admin';
@@ -38,7 +27,7 @@ const SystemMonitor: React.FC = () => {
       const data = await adminService.getSystemMonitor();
       setMonitor(data);
     } catch (error) {
-      console.error('加载监控数据失败:', error);
+      Logger.error('加载监控数据失败', error, { component: 'SystemMonitor' });
     } finally {
       setLoading(false);
     }

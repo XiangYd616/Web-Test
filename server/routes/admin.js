@@ -195,4 +195,99 @@ router.get('/logs', asyncHandler(async (req, res) => {
   }
 }));
 
+/**
+ * 获取测试历史记录
+ * GET /api/admin/test-history
+ */
+router.get('/test-history', asyncHandler(async (req, res) => {
+  try {
+    const { page = 1, limit = 20, type, status, user } = req.query;
+    const offset = (page - 1) * limit;
+
+    let whereClause = '';
+    const params = [];
+    let paramIndex = 1;
+
+    const conditions = [];
+
+    if (type) {
+      conditions.push(`test_type = $${paramIndex++}`);
+      params.push(type);
+    }
+
+    if (status) {
+      conditions.push(`status = $${paramIndex++}`);
+      params.push(status);
+    }
+
+    if (user) {
+      conditions.push(`user_id = $${paramIndex++}`);
+      params.push(user);
+    }
+
+    if (conditions.length > 0) {
+      whereClause = 'WHERE ' + conditions.join(' AND ');
+    }
+
+    const testHistoryQuery = `
+      SELECT
+        tr.id,
+        tr.test_type as type,
+        tr.url,
+        tr.status,
+        tr.created_at as "createdAt",
+        tr.updated_at as "updatedAt",
+        tr.duration,
+        tr.score as "overallScore",
+        tr.performance_grade as "performanceGrade",
+        tr.total_requests as "totalRequests",
+        tr.successful_requests as "successfulRequests",
+        tr.failed_requests as "failedRequests",
+        tr.average_response_time as "averageResponseTime",
+        tr.peak_tps as "peakTps",
+        tr.error_rate as "errorRate",
+        u.username as user,
+        u.email as "userEmail"
+      FROM test_results tr
+      LEFT JOIN users u ON tr.user_id = u.id
+      ${whereClause}
+      ORDER BY tr.created_at DESC
+      LIMIT $${paramIndex++} OFFSET $${paramIndex++}
+    `;
+
+    params.push(limit, offset);
+
+    const countQuery = `
+      SELECT COUNT(*) as total
+      FROM test_results tr
+      LEFT JOIN users u ON tr.user_id = u.id
+      ${whereClause}
+    `;
+
+    const [testHistoryResult, countResult] = await Promise.all([
+      query(testHistoryQuery, params.slice(0, -2)), // 移除limit和offset参数用于count查询
+      query(countQuery, params.slice(0, -2))
+    ]);
+
+    const total = parseInt(countResult.rows[0].total);
+
+    res.json({
+      success: true,
+      data: testHistoryResult.rows,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('获取测试历史失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '获取测试历史失败'
+    });
+  }
+}));
+
 module.exports = router;

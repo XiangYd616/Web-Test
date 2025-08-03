@@ -1,23 +1,6 @@
 import React, { useState } from 'react';
-import { 
-  Search, 
-  Filter, 
-  Calendar, 
-  BarChart3, 
-  Download, 
-  RefreshCw,
-  ChevronDown,
-  ChevronUp,
-  X,
-  Database,
-  Globe,
-  Zap,
-  Shield,
-  Code,
-  Eye,
-  Wifi,
-  FileText
-} from 'lucide-react';
+
+import { Search, Filter, Calendar, BarChart3, Download, RefreshCw, ChevronDown, ChevronUp, X, Database, Globe, Zap, Shield, Code, Eye, Wifi, FileText } from 'lucide-react';
 
 interface QueryFilters {
   testType: string;
@@ -290,7 +273,7 @@ const DataQueryPanel: React.FC<DataQueryPanelProps> = ({
                   ))}
                 </div>
               )}
-              
+
               {/* 常用标签 */}
               <div className="flex flex-wrap gap-2">
                 {commonTags.filter(tag => !filters.tags.includes(tag)).map(tag => (

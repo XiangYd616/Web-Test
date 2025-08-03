@@ -1,9 +1,6 @@
 import React from 'react';
 import { AlertTriangle, X, RefreshCw, LogIn } from 'lucide-react';
 
-/**
- * 认证错误类型
- */
 export enum AuthErrorType {
   TOKEN_MISSING = 'TOKEN_MISSING',
   TOKEN_INVALID = 'TOKEN_INVALID',
@@ -18,9 +15,6 @@ export enum AuthErrorType {
   SERVER_ERROR = 'SERVER_ERROR'
 }
 
-/**
- * 错误消息映射
- */
 const ERROR_MESSAGES = {
   [AuthErrorType.TOKEN_MISSING]: '请先登录以访问此功能',
   [AuthErrorType.TOKEN_INVALID]: '登录状态无效，请重新登录',
@@ -35,9 +29,6 @@ const ERROR_MESSAGES = {
   [AuthErrorType.SERVER_ERROR]: '服务器错误，请稍后重试'
 };
 
-/**
- * 用户友好的错误消息
- */
 const FRIENDLY_MESSAGES = {
   [AuthErrorType.TOKEN_MISSING]: '您需要登录才能使用此功能',
   [AuthErrorType.TOKEN_INVALID]: '您的登录状态有问题，建议重新登录',
@@ -52,9 +43,6 @@ const FRIENDLY_MESSAGES = {
   [AuthErrorType.SERVER_ERROR]: '服务暂时不可用，请稍后再试'
 };
 
-/**
- * 建议的解决方案
- */
 const SOLUTIONS = {
   [AuthErrorType.TOKEN_MISSING]: '点击登录按钮进行登录',
   [AuthErrorType.TOKEN_INVALID]: '清除浏览器缓存后重新登录',
@@ -78,9 +66,6 @@ interface AuthErrorHandlerProps {
   className?: string;
 }
 
-/**
- * 认证错误处理组件
- */
 const AuthErrorHandler: React.FC<AuthErrorHandlerProps> = ({
   error,
   onRetry,
@@ -92,8 +77,8 @@ const AuthErrorHandler: React.FC<AuthErrorHandlerProps> = ({
   if (!error) return null;
 
   // 确定错误类型
-  const errorType = Object.values(AuthErrorType).includes(error as AuthErrorType) 
-    ? error as AuthErrorType 
+  const errorType = Object.values(AuthErrorType).includes(error as AuthErrorType)
+    ? error as AuthErrorType
     : AuthErrorType.SERVER_ERROR;
 
   const friendlyMessage = FRIENDLY_MESSAGES[errorType] || error;
@@ -129,7 +114,7 @@ const AuthErrorHandler: React.FC<AuthErrorHandlerProps> = ({
           <p className="text-sm text-red-700 mb-2">
             {friendlyMessage}
           </p>
-          
+
           {showSolution && solution && (
             <p className="text-xs text-red-600 mb-3">
               建议：{solution}
@@ -147,7 +132,7 @@ const AuthErrorHandler: React.FC<AuthErrorHandlerProps> = ({
                 <span>重新登录</span>
               </button>
             )}
-            
+
             {canRetry && onRetry && (
               <button
                 onClick={onRetry}
@@ -174,14 +159,11 @@ const AuthErrorHandler: React.FC<AuthErrorHandlerProps> = ({
   );
 };
 
-/**
- * 解析API错误响应
- */
 export const parseAuthError = (error: any): AuthErrorType => {
   if (typeof error === 'string') {
     // 尝试从错误消息中推断错误类型
     const message = error.toLowerCase();
-    
+
     if (message.includes('token') && message.includes('missing')) {
       return AuthErrorType.TOKEN_MISSING;
     }
@@ -200,7 +182,7 @@ export const parseAuthError = (error: any): AuthErrorType => {
     if (message.includes('network') || message.includes('connection')) {
       return AuthErrorType.NETWORK_ERROR;
     }
-    
+
     return AuthErrorType.SERVER_ERROR;
   }
 
@@ -211,7 +193,7 @@ export const parseAuthError = (error: any): AuthErrorType => {
   if (error?.response?.status === 401) {
     return AuthErrorType.TOKEN_INVALID;
   }
-  
+
   if (error?.response?.status === 403) {
     return AuthErrorType.INSUFFICIENT_PERMISSIONS;
   }
@@ -227,17 +209,11 @@ export const parseAuthError = (error: any): AuthErrorType => {
   return AuthErrorType.SERVER_ERROR;
 };
 
-/**
- * 获取错误的友好消息
- */
 export const getErrorMessage = (error: any): string => {
   const errorType = parseAuthError(error);
   return FRIENDLY_MESSAGES[errorType] || '发生了未知错误';
 };
 
-/**
- * 检查错误是否需要重新登录
- */
 export const shouldRelogin = (error: any): boolean => {
   const errorType = parseAuthError(error);
   return [

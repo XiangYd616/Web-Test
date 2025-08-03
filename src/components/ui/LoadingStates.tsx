@@ -1,5 +1,6 @@
-import { Activity, CheckCircle, Clock, Loader, Target, Zap } from 'lucide-react';
 import React from 'react';
+
+import { Activity, CheckCircle, Clock, Loader, Target, Zap } from 'lucide-react';
 
 // 基础加载组件
 export const BasicLoader: React.FC<{ size?: 'sm' | 'md' | 'lg'; className?: string }> = ({
@@ -184,7 +185,6 @@ export const SkeletonLoader: React.FC<{
   );
 };
 
-// 测试特定的加载状态
 export const TestLoadingStates = {
   // 压力测试加载
   StressTest: ({ progress, stage }: { progress: number; stage: string }) => (

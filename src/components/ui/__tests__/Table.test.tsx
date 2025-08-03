@@ -18,13 +18,13 @@ describe('Table Component', () => {
 
   it('renders with basic data', () => {
     render(<Table columns={mockColumns} data={mockData} />);
-    
+
     // Check headers
     expect(screen.getByText('ID')).toBeInTheDocument();
     expect(screen.getByText('Name')).toBeInTheDocument();
     expect(screen.getByText('Email')).toBeInTheDocument();
     expect(screen.getByText('Status')).toBeInTheDocument();
-    
+
     // Check data
     expect(screen.getByText('John Doe')).toBeInTheDocument();
     expect(screen.getByText('jane@example.com')).toBeInTheDocument();
@@ -34,31 +34,31 @@ describe('Table Component', () => {
   it('handles sorting', () => {
     const handleSort = vi.fn();
     render(
-      <Table 
-        columns={mockColumns} 
-        data={mockData} 
+      <Table
+        columns={mockColumns}
+        data={mockData}
         onSort={handleSort}
         sortBy="name"
         sortOrder="asc"
       />
     );
-    
+
     const nameHeader = screen.getByText('Name');
     fireEvent.click(nameHeader);
-    
+
     expect(handleSort).toHaveBeenCalledWith('name', 'desc');
   });
 
   it('displays sort indicators', () => {
     render(
-      <Table 
-        columns={mockColumns} 
-        data={mockData} 
+      <Table
+        columns={mockColumns}
+        data={mockData}
         sortBy="name"
         sortOrder="asc"
       />
     );
-    
+
     const nameHeader = screen.getByText('Name').closest('th');
     expect(nameHeader).toHaveClass('table-header-sorted');
     expect(nameHeader).toHaveAttribute('aria-sort', 'ascending');
@@ -67,43 +67,43 @@ describe('Table Component', () => {
   it('handles row selection', () => {
     const handleSelectionChange = vi.fn();
     render(
-      <Table 
-        columns={mockColumns} 
-        data={mockData} 
+      <Table
+        columns={mockColumns}
+        data={mockData}
         selectable
         onSelectionChange={handleSelectionChange}
       />
     );
-    
+
     const firstCheckbox = screen.getAllByRole('checkbox')[1]; // Skip header checkbox
     fireEvent.click(firstCheckbox);
-    
+
     expect(handleSelectionChange).toHaveBeenCalledWith([mockData[0]]);
   });
 
   it('handles select all', () => {
     const handleSelectionChange = vi.fn();
     render(
-      <Table 
-        columns={mockColumns} 
-        data={mockData} 
+      <Table
+        columns={mockColumns}
+        data={mockData}
         selectable
         onSelectionChange={handleSelectionChange}
       />
     );
-    
+
     const selectAllCheckbox = screen.getAllByRole('checkbox')[0];
     fireEvent.click(selectAllCheckbox);
-    
+
     expect(handleSelectionChange).toHaveBeenCalledWith(mockData);
   });
 
   it('handles pagination', () => {
     const handlePageChange = vi.fn();
     render(
-      <Table 
-        columns={mockColumns} 
-        data={mockData} 
+      <Table
+        columns={mockColumns}
+        data={mockData}
         pagination={{
           current: 1,
           pageSize: 2,
@@ -112,10 +112,10 @@ describe('Table Component', () => {
         }}
       />
     );
-    
+
     expect(screen.getByText('1')).toBeInTheDocument(); // Current page
     expect(screen.getByText('Next')).toBeInTheDocument();
-    
+
     fireEvent.click(screen.getByText('Next'));
     expect(handlePageChange).toHaveBeenCalledWith(2);
   });
@@ -132,9 +132,9 @@ describe('Table Component', () => {
 
   it('handles custom empty message', () => {
     render(
-      <Table 
-        columns={mockColumns} 
-        data={[]} 
+      <Table
+        columns={mockColumns}
+        data={[]}
         emptyMessage="No users found"
       />
     );
@@ -148,43 +148,43 @@ describe('Table Component', () => {
         <td>{row.email}</td>
       </tr>
     );
-    
+
     render(
-      <Table 
-        columns={mockColumns} 
-        data={mockData} 
+      <Table
+        columns={mockColumns}
+        data={mockData}
         renderRow={customRowRenderer}
       />
     );
-    
+
     expect(screen.getByTestId('custom-row-0')).toBeInTheDocument();
   });
 
   it('handles row click events', () => {
     const handleRowClick = vi.fn();
     render(
-      <Table 
-        columns={mockColumns} 
-        data={mockData} 
+      <Table
+        columns={mockColumns}
+        data={mockData}
         onRowClick={handleRowClick}
       />
     );
-    
+
     const firstRow = screen.getByText('John Doe').closest('tr');
     fireEvent.click(firstRow!);
-    
+
     expect(handleRowClick).toHaveBeenCalledWith(mockData[0], 0);
   });
 
   it('applies custom className', () => {
     render(
-      <Table 
-        columns={mockColumns} 
-        data={mockData} 
+      <Table
+        columns={mockColumns}
+        data={mockData}
         className="custom-table"
       />
     );
-    
+
     expect(screen.getByRole('table')).toHaveClass('custom-table');
   });
 
@@ -193,7 +193,7 @@ describe('Table Component', () => {
       <Table columns={mockColumns} data={mockData} size="sm" />
     );
     expect(screen.getByRole('table')).toHaveClass('table-sm');
-    
+
     rerender(<Table columns={mockColumns} data={mockData} size="lg" />);
     expect(screen.getByRole('table')).toHaveClass('table-lg');
   });

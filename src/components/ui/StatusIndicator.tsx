@@ -1,5 +1,5 @@
-import { AlertTriangle, CheckCircle, Clock, Loader, XCircle } from 'lucide-react';
 import React from 'react';
+import { AlertTriangle, CheckCircle, Clock, Loader, XCircle } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 export type StatusType = 'success' | 'error' | 'warning' | 'pending' | 'loading' | 'info';
@@ -19,17 +19,6 @@ interface StatusIndicatorProps {
   dot?: boolean;
 }
 
-/**
- * StatusIndicator 状态指示器组件
- * 
- * @example
- * ```tsx
- * <StatusIndicator status="success" text="测试通过" />
- * <StatusIndicator status="error" text="测试失败" />
- * <StatusIndicator status="loading" text="测试中..." />
- * <StatusIndicator status="warning" dot />
- * ```
- */
 export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
   status,
   text,
@@ -161,10 +150,6 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
   );
 };
 
-/**
- * TestStatusIndicator 测试状态指示器
- * 专门用于测试状态显示
- */
 interface TestStatusIndicatorProps {
   /** 测试状态 */
   status: 'idle' | 'running' | 'completed' | 'failed' | 'cancelled';
@@ -208,10 +193,6 @@ export const TestStatusIndicator: React.FC<TestStatusIndicatorProps> = ({
   );
 };
 
-/**
- * ConnectionStatusIndicator 连接状态指示器
- * 专门用于连接状态显示
- */
 interface ConnectionStatusIndicatorProps {
   /** 连接状态 */
   status: 'connected' | 'disconnected' | 'connecting' | 'error';

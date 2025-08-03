@@ -86,7 +86,7 @@ export const Table = <T extends Record<string, any>>({
     if (!column.sortable) return;
 
     const field = column.dataIndex || column.key;
-    
+
     if (sortField === field) {
       // 切换排序顺序：升序 -> 降序 -> 无排序
       if (sortOrder === 'ascend') {
@@ -131,9 +131,9 @@ export const Table = <T extends Record<string, any>>({
       result.sort((a, b) => {
         const aValue = a[sortField];
         const bValue = b[sortField];
-        
+
         if (aValue === bValue) return 0;
-        
+
         const comparison = aValue > bValue ? 1 : -1;
         return sortOrder === 'ascend' ? comparison : -comparison;
       });
@@ -145,11 +145,11 @@ export const Table = <T extends Record<string, any>>({
   // 分页数据
   const paginatedData = useMemo(() => {
     if (!pagination) return processedData;
-    
+
     const { current, pageSize } = pagination;
     const start = (current - 1) * pageSize;
     const end = start + pageSize;
-    
+
     return processedData.slice(start, end);
   }, [processedData, pagination]);
 
@@ -192,8 +192,8 @@ export const Table = <T extends Record<string, any>>({
                   }
                 }}
                 checked={
-                  paginatedData.length > 0 && 
-                  paginatedData.every((record, index) => 
+                  paginatedData.length > 0 &&
+                  paginatedData.every((record, index) =>
                     rowSelection.selectedRowKeys?.includes(getRowKey(record, index))
                   )
                 }
@@ -219,7 +219,7 @@ export const Table = <T extends Record<string, any>>({
                 <span>{column.title}</span>
                 {column.sortable && (
                   <div className="flex flex-col">
-                    <ChevronUp 
+                    <ChevronUp
                       className={cn(
                         'w-3 h-3',
                         sortField === (column.dataIndex || column.key) && sortOrder === 'ascend'
@@ -227,7 +227,7 @@ export const Table = <T extends Record<string, any>>({
                           : 'text-gray-400'
                       )}
                     />
-                    <ChevronDown 
+                    <ChevronDown
                       className={cn(
                         'w-3 h-3 -mt-1',
                         sortField === (column.dataIndex || column.key) && sortOrder === 'descend'
@@ -254,7 +254,7 @@ export const Table = <T extends Record<string, any>>({
       return (
         <tbody>
           <tr>
-            <td 
+            <td
               colSpan={columns.length + (rowSelection ? 1 : 0)}
               className={cn(
                 'text-center text-gray-500 dark:text-gray-400',
@@ -275,7 +275,7 @@ export const Table = <T extends Record<string, any>>({
       return (
         <tbody>
           <tr>
-            <td 
+            <td
               colSpan={columns.length + (rowSelection ? 1 : 0)}
               className={cn(
                 'text-center text-gray-500 dark:text-gray-400',
@@ -294,7 +294,7 @@ export const Table = <T extends Record<string, any>>({
         {paginatedData.map((record, index) => {
           const key = getRowKey(record, index);
           const rowProps = onRow?.(record, index) || {};
-          
+
           return (
             <tr
               key={key}
@@ -320,19 +320,19 @@ export const Table = <T extends Record<string, any>>({
                       const currentSelected = rowSelection.selectedRowKeys || [];
                       let newSelected: string[];
                       let newSelectedRows: T[];
-                      
+
                       if (e.target.checked) {
                         newSelected = [...currentSelected, key];
-                        newSelectedRows = [...(rowSelection.selectedRowKeys?.map(k => 
+                        newSelectedRows = [...(rowSelection.selectedRowKeys?.map(k =>
                           paginatedData.find((r, i) => getRowKey(r, i) === k)
                         ).filter(Boolean) || []), record];
                       } else {
                         newSelected = currentSelected.filter(k => k !== key);
-                        newSelectedRows = newSelected.map(k => 
+                        newSelectedRows = newSelected.map(k =>
                           paginatedData.find((r, i) => getRowKey(r, i) === k)
                         ).filter(Boolean) as T[];
                       }
-                      
+
                       rowSelection.onChange?.(newSelected, newSelectedRows);
                     }}
                   />
@@ -341,7 +341,7 @@ export const Table = <T extends Record<string, any>>({
               {columns.map((column) => {
                 const dataIndex = column.dataIndex || column.key;
                 const value = record[dataIndex];
-                
+
                 return (
                   <td
                     key={column.key}
@@ -381,7 +381,7 @@ export const Table = <T extends Record<string, any>>({
           {renderBody()}
         </table>
       </div>
-      
+
       {pagination && (
         <TablePagination
           current={pagination.current}
@@ -434,7 +434,7 @@ const TablePagination: React.FC<TablePaginationProps> = ({
       <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
         显示 {startItem} 到 {endItem} 条，共 {total} 条
       </div>
-      
+
       <div className="flex items-center gap-2">
         {showSizeChanger && (
           <select
@@ -448,7 +448,7 @@ const TablePagination: React.FC<TablePaginationProps> = ({
             <option value={100}>100 条/页</option>
           </select>
         )}
-        
+
         <div className="flex items-center gap-1">
           <button
             onClick={() => handlePageChange(current - 1)}
@@ -457,11 +457,11 @@ const TablePagination: React.FC<TablePaginationProps> = ({
           >
             上一页
           </button>
-          
+
           <span className="px-3 py-1 text-sm text-gray-700 dark:text-gray-300">
             {current} / {totalPages}
           </span>
-          
+
           <button
             onClick={() => handlePageChange(current + 1)}
             disabled={current >= totalPages}
@@ -470,7 +470,7 @@ const TablePagination: React.FC<TablePaginationProps> = ({
             下一页
           </button>
         </div>
-        
+
         {showQuickJumper && (
           <div className="flex items-center gap-2 text-sm">
             <span className="text-gray-700 dark:text-gray-300">跳至</span>

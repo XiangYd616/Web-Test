@@ -254,7 +254,6 @@ export class APITestEngine {
       // 模拟测试延迟
       await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
 
-      // 测试每个端点
       for (const endpoint of config.endpoints) {
         const endpointResult = await this.testEndpoint(config, endpoint);
         result.endpointResults.push(endpointResult);
@@ -557,8 +556,6 @@ export class APITestEngine {
     return result;
   }
 
-
-
   private extractPerformanceData(responseTime: number): any {
     // 在浏览器环境中，我们无法获取详细的网络时序数据
     // 但可以使用 Performance API 获取一些信息
@@ -698,8 +695,6 @@ export class APITestEngine {
         return false;
     }
   }
-
-
 
   private getErrorMessage(statusCode: number): string {
     const messages = {

@@ -1,5 +1,5 @@
-import { AlertTriangle, ArrowLeft, Lock, Shield } from 'lucide-react';
 import React from 'react';
+import { AlertTriangle, ArrowLeft, Lock, Shield } from 'lucide-react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -9,10 +9,6 @@ interface AdminGuardProps {
   showFallback?: boolean;
 }
 
-/**
- * 管理员路由守卫组件
- * 提供严格的管理员权限验证，防止普通用户访问后台管理功能
- */
 const AdminGuard: React.FC<AdminGuardProps> = ({
   children,
   fallbackPath = '/',

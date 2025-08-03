@@ -1,18 +1,4 @@
-import {
-  AlertCircle,
-  AlertTriangle,
-  ArrowLeft,
-  CheckCircle,
-  Clock,
-  Globe,
-  Home,
-  Info,
-  RefreshCw,
-  Server,
-  Shield,
-  WifiOff,
-  XCircle
-} from 'lucide-react';
+import { AlertCircle, AlertTriangle, ArrowLeft, CheckCircle, Clock, Globe, Home, Info, RefreshCw, Server, Shield, WifiOff, XCircle } from 'lucide-react';
 import React from 'react';
 
 // 错误类型定义
@@ -380,7 +366,10 @@ export class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error caught by boundary:', error, errorInfo);
+    Logger.error('Error caught by boundary', error, {
+      component: 'ErrorBoundary',
+      errorInfo: errorInfo.componentStack
+    });
   }
 
   resetError = () => {

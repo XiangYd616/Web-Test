@@ -1,7 +1,3 @@
-/**
- * 浏览器端JWT工具类
- * 提供简单的JWT编码/解码功能（仅用于演示，生产环境应使用服务端验证）
- */
 
 interface JWTHeader {
   alg: string;
@@ -64,7 +60,7 @@ export class BrowserJWT {
 
     const encodedHeader = this.base64UrlEncode(JSON.stringify(header));
     const encodedPayload = this.base64UrlEncode(JSON.stringify(tokenPayload));
-    
+
     // 在浏览器环境中，我们使用简单的签名（仅用于演示）
     const signature = this.base64UrlEncode(`${encodedHeader}.${encodedPayload}.mock_signature`);
 
@@ -102,7 +98,7 @@ export class BrowserJWT {
     }
 
     const now = Math.floor(Date.now() / 1000);
-    
+
     // 检查是否过期
     if (parsed.payload.exp && parsed.payload.exp < now) {
       return false;

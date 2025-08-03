@@ -227,13 +227,13 @@ export const useNotifications = () => {
       id: Date.now().toString(),
       createdAt: new Date()
     };
-    
+
     setNotifications(prev => {
       const updated = [newNotification, ...prev];
       saveNotifications(updated);
       return updated;
     });
-    
+
     return newNotification.id;
   }, [saveNotifications]);
 

@@ -36,7 +36,7 @@ const CancelTestConfirmDialog: React.FC<CancelTestConfirmDialogProps> = ({
   ];
 
   const handleConfirm = () => {
-    const reason = selectedReason === 'other' ? customReason : 
+    const reason = selectedReason === 'other' ? customReason :
                   cancelReasons.find(r => r.value === selectedReason)?.label || '用户取消';
     onConfirm(reason, preserveData);
   };
@@ -103,7 +103,7 @@ const CancelTestConfirmDialog: React.FC<CancelTestConfirmDialogProps> = ({
                 <span className="text-white font-medium">{testProgress.phase}</span>
               </div>
             </div>
-            
+
             {/* 进度条 */}
             <div className="mt-4">
               <div className="flex justify-between text-xs text-gray-400 mb-1">
@@ -111,7 +111,7 @@ const CancelTestConfirmDialog: React.FC<CancelTestConfirmDialogProps> = ({
                 <span>{testProgress.completedRequests} / {testProgress.totalRequests}</span>
               </div>
               <div className="w-full bg-gray-700 rounded-full h-2">
-                <div 
+                <div
                   className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${calculateProgress()}%` }}
                 />
@@ -139,7 +139,7 @@ const CancelTestConfirmDialog: React.FC<CancelTestConfirmDialogProps> = ({
               </label>
             ))}
           </div>
-          
+
           {/* 自定义原因输入 */}
           {selectedReason === 'other' && (
             <div className="mt-3">

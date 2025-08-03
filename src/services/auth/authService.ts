@@ -1,12 +1,4 @@
-import {
-  AuthResponse,
-  ChangePasswordData,
-  CreateUserData,
-  LoginCredentials,
-  RegisterData,
-  UpdateUserData,
-  User
-} from '../../types/user';
+import { AuthResponse, ChangePasswordData, CreateUserData, LoginCredentials, RegisterData, UpdateUserData, User } from '../../types/user';
 import { browserJwt } from '../../utils/browserJwt';
 import { canUseDatabase } from '../../utils/environment';
 
@@ -648,8 +640,6 @@ export class UnifiedAuthService {
       };
     }
   }
-
-
 
   // 用户登出
   logout(): void {

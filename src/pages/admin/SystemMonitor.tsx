@@ -1,11 +1,6 @@
-/**
- * 系统监控页面 - 管理员专用
- * 
- * 显示系统资源使用情况和队列状态
- */
 
-import { Activity, Server, TrendingUp, Users } from 'lucide-react';
 import React from 'react';
+import { Activity, Server, TrendingUp, Users } from 'lucide-react';
 import SystemResourceMonitor from '../../components/system/SystemResourceMonitor';
 import { useStressTestRecord } from '../../hooks/useStressTestRecord';
 

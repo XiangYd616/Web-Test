@@ -1,16 +1,7 @@
 import React, { useState } from 'react';
-import {
-  Button, DeleteButton, IconButton, GhostButton,
-  Card, CardHeader, CardTitle, CardBody, CardFooter,
-  Modal, ModalBody, ModalFooter, ConfirmModal,
-  Input, PasswordInput, SearchInput, Select, Textarea,
-  Badge, StatusBadge, NumberBadge, DotBadge, ProgressBadge,
-  Checkbox, SimpleCheckbox
-} from './index';
-import { 
-  User, Mail, Settings, Search, Download, Trash2, 
-  Eye, Bell, Star, Heart, Globe, Phone 
-} from 'lucide-react';
+
+import { Button, DeleteButton, IconButton, GhostButton, Card, CardHeader, CardTitle, CardBody, CardFooter, Modal, ModalBody, ModalFooter, ConfirmModal, Input, PasswordInput, SearchInput, Select, Textarea, Badge, StatusBadge, NumberBadge, DotBadge, ProgressBadge, Checkbox, SimpleCheckbox } from './index';
+import { User, Mail, Settings, Search, Download, Trash2, Eye, Bell, Star, Heart, Globe, Phone } from 'lucide-react';
 
 export const ComponentLibraryTest: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -49,7 +40,7 @@ export const ComponentLibraryTest: React.FC = () => {
   return (
     <div className="p-8 space-y-12 bg-gray-900 min-h-screen">
       <div className="max-w-6xl mx-auto">
-        
+
         {/* 页面标题 */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-white mb-4">
@@ -73,7 +64,7 @@ export const ComponentLibraryTest: React.FC = () => {
                   <GhostButton>幽灵按钮</GhostButton>
                   <DeleteButton>删除按钮</DeleteButton>
                 </div>
-                
+
                 <div className="flex flex-wrap gap-3">
                   <Button size="sm">小按钮</Button>
                   <Button size="md">中按钮</Button>
@@ -81,24 +72,24 @@ export const ComponentLibraryTest: React.FC = () => {
                   <Button loading>加载中</Button>
                   <Button disabled>禁用按钮</Button>
                 </div>
-                
+
                 <div className="flex flex-wrap gap-3">
-                  <IconButton 
-                    icon={<Settings className="w-4 h-4" />} 
+                  <IconButton
+                    icon={<Settings className="w-4 h-4" />}
                     aria-label="设置"
                   />
-                  <IconButton 
-                    icon={<Search className="w-4 h-4" />} 
+                  <IconButton
+                    icon={<Search className="w-4 h-4" />}
                     variant="secondary"
                     aria-label="搜索"
                   />
-                  <IconButton 
-                    icon={<Download className="w-4 h-4" />} 
+                  <IconButton
+                    icon={<Download className="w-4 h-4" />}
                     variant="outline"
                     aria-label="下载"
                   />
-                  <IconButton 
-                    icon={<Trash2 className="w-4 h-4" />} 
+                  <IconButton
+                    icon={<Trash2 className="w-4 h-4" />}
                     variant="danger"
                     aria-label="删除"
                   />
@@ -168,7 +159,7 @@ export const ComponentLibraryTest: React.FC = () => {
                   value={formData.name}
                   onChange={handleInputChange('name')}
                 />
-                
+
                 <Input
                   label="邮箱"
                   type="email"
@@ -177,14 +168,14 @@ export const ComponentLibraryTest: React.FC = () => {
                   value={formData.email}
                   onChange={handleInputChange('email')}
                 />
-                
+
                 <PasswordInput
                   label="密码"
                   placeholder="请输入密码"
                   value={formData.password}
                   onChange={handleInputChange('password')}
                 />
-                
+
                 <Select
                   label="国家"
                   placeholder="请选择国家"
@@ -193,7 +184,7 @@ export const ComponentLibraryTest: React.FC = () => {
                   onChange={handleInputChange('country')}
                 />
               </div>
-              
+
               <div className="mt-6">
                 <Textarea
                   label="个人简介"
@@ -203,7 +194,7 @@ export const ComponentLibraryTest: React.FC = () => {
                   rows={3}
                 />
               </div>
-              
+
               <div className="mt-6 space-y-3">
                 <Checkbox
                   label="接收邮件通知"
@@ -211,7 +202,7 @@ export const ComponentLibraryTest: React.FC = () => {
                   checked={formData.notifications}
                   onChange={handleCheckboxChange('notifications')}
                 />
-                
+
                 <Checkbox
                   label="订阅新闻邮件"
                   description="获取最新的产品更新和技术资讯"
@@ -243,7 +234,7 @@ export const ComponentLibraryTest: React.FC = () => {
                     <StatusBadge status="loading" text="处理中" />
                   </div>
                 </div>
-                
+
                 <div>
                   <h3 className="text-white font-medium mb-3">数字徽章</h3>
                   <div className="flex flex-wrap items-center gap-6">
@@ -270,7 +261,7 @@ export const ComponentLibraryTest: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div>
                   <h3 className="text-white font-medium mb-3">进度徽章</h3>
                   <div className="flex flex-wrap gap-3">
@@ -322,7 +313,7 @@ export const ComponentLibraryTest: React.FC = () => {
         <section>
           <h2 className="text-2xl font-semibold text-white mb-6">实际应用场景</h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            
+
             {/* 测试记录卡片 */}
             <Card hover>
               <CardHeader>
@@ -356,21 +347,21 @@ export const ComponentLibraryTest: React.FC = () => {
               </CardBody>
               <CardFooter>
                 <div className="flex items-center gap-2">
-                  <IconButton 
-                    icon={<Eye className="w-4 h-4" />} 
-                    variant="ghost" 
+                  <IconButton
+                    icon={<Eye className="w-4 h-4" />}
+                    variant="ghost"
                     size="sm"
                     aria-label="查看详情"
                   />
-                  <IconButton 
-                    icon={<Download className="w-4 h-4" />} 
-                    variant="ghost" 
+                  <IconButton
+                    icon={<Download className="w-4 h-4" />}
+                    variant="ghost"
                     size="sm"
                     aria-label="下载报告"
                   />
-                  <IconButton 
-                    icon={<Trash2 className="w-4 h-4" />} 
-                    variant="danger" 
+                  <IconButton
+                    icon={<Trash2 className="w-4 h-4" />}
+                    variant="danger"
                     size="sm"
                     aria-label="删除记录"
                   />
@@ -399,22 +390,22 @@ export const ComponentLibraryTest: React.FC = () => {
                       <div className="text-gray-400 text-sm">高级开发工程师</div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <span className="text-gray-400">邮箱</span>
                     <span className="text-gray-300">zhang@example.com</span>
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <span className="text-gray-400">手机</span>
                     <span className="text-gray-300">138****8888</span>
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <span className="text-gray-400">未读消息</span>
                     <NumberBadge count={7} />
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <span className="text-gray-400">完成度</span>
                     <ProgressBadge value={85} />
@@ -448,7 +439,7 @@ export const ComponentLibraryTest: React.FC = () => {
               <p className="text-gray-300">
                 这个模态框展示了组件库的集成效果。所有组件都可以在模态框中正常工作。
               </p>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
                   label="测试输入"
@@ -464,7 +455,7 @@ export const ComponentLibraryTest: React.FC = () => {
                   ]}
                 />
               </div>
-              
+
               <div className="flex flex-wrap gap-2">
                 <StatusBadge status="success" text="模态框正常" />
                 <StatusBadge status="info" text="组件集成" />
@@ -472,7 +463,7 @@ export const ComponentLibraryTest: React.FC = () => {
               </div>
             </div>
           </ModalBody>
-          
+
           <ModalFooter>
             <Button variant="ghost" onClick={() => setModalOpen(false)}>
               取消

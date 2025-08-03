@@ -1,26 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Check,
-  Copy,
-  Download,
-  Share2,
-  Heart,
-  ThumbsUp,
-  ThumbsDown,
-  Star,
-  Bookmark,
-  BookmarkCheck,
-  Eye,
-  EyeOff,
-  Volume2,
-  VolumeX,
-  Zap,
-  Sparkles,
-  Target,
-  TrendingUp,
-  Award,
-  Gift
-} from 'lucide-react';
+
+import { Check, Copy, Download, Share2, Heart, ThumbsUp, ThumbsDown, Star, Bookmark, BookmarkCheck, Eye, EyeOff, Volume2, VolumeX, Zap, Sparkles, Target, TrendingUp, Award, Gift } from 'lucide-react';
 
 // 按钮状态反馈组件
 export const ButtonFeedback: React.FC<{
@@ -295,7 +275,7 @@ export const RatingComponent: React.FC<{
       {Array.from({ length: maxRating }, (_, index) => {
         const starValue = index + 1;
         const isFilled = starValue <= (hoverRating || rating);
-        
+
         return (
           <button
             key={index}
@@ -496,7 +476,7 @@ export const FeedbackCollector: React.FC<{
   return (
     <div className={`bg-white border border-gray-200 rounded-lg p-4 shadow-lg ${className}`}>
       <h3 className="font-medium text-gray-900 mb-3">您的反馈</h3>
-      
+
       <div className="mb-3">
         <label className="block text-sm text-gray-700 mb-2">评分</label>
         <RatingComponent rating={rating} onRate={setRating} />

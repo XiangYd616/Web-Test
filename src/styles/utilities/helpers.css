@@ -73,3 +73,106 @@
     @apply bg-gray-900 text-gray-100;
   }
 }
+
+/* ===== URL输入框响应式布局工具类 ===== */
+
+/* URL输入框容器 - 确保占满宽度 */
+.url-input-container {
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* URL输入框包装器 - 处理flex布局 */
+.url-input-wrapper {
+  width: 100%;
+  display: flex;
+  flex: 1;
+  min-width: 0; /* 防止flex项目溢出 */
+}
+
+/* URL输入框本身 */
+.url-input-field {
+  width: 100%;
+  min-width: 0;
+  flex: 1;
+}
+
+/* 响应式URL输入框布局 */
+.url-input-responsive {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+/* 在较大屏幕上，URL输入框可以与按钮并排 */
+@media (min-width: 768px) {
+  .url-input-responsive.with-button {
+    grid-template-columns: 1fr auto;
+    align-items: start;
+  }
+}
+
+/* URL输入框在表单中的布局 */
+.url-input-form-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.url-input-form-group .url-input-field {
+  width: 100%;
+}
+
+/* URL输入框在卡片中的布局 */
+.url-input-card {
+  width: 100%;
+  padding: 1rem;
+}
+
+.url-input-card .url-input-field {
+  width: 100%;
+}
+
+/* 确保在所有容器中都能正确显示 */
+.url-input-full-width {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+
+.url-input-full-width input {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+
+/* 移动端优化 */
+@media (max-width: 640px) {
+  .url-input-container {
+    gap: 0.75rem;
+  }
+
+  .url-input-field {
+    font-size: 16px; /* 防止iOS缩放 */
+  }
+
+  .url-input-responsive {
+    gap: 1rem;
+  }
+}
+
+/* 超小屏幕优化 */
+@media (max-width: 480px) {
+  .url-input-container {
+    padding: 0 0.5rem;
+  }
+
+  .url-input-card {
+    padding: 0.75rem;
+  }
+}

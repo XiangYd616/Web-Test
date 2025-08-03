@@ -137,19 +137,19 @@ export const FullWidth: Story = {
 export const WithIcon: Story = {
   render: () => (
     <div className="flex gap-2">
-      <Button 
+      <Button
         variant="primary"
         icon={<span>🔍</span>}
       >
         搜索
       </Button>
-      <Button 
+      <Button
         variant="secondary"
         icon={<span>📁</span>}
       >
         文件夹
       </Button>
-      <Button 
+      <Button
         variant="success"
         icon={<span>✓</span>}
       >
@@ -223,7 +223,7 @@ export const Accessibility: Story = {
           使用Tab键在按钮间导航，Enter或Space键激活按钮
         </p>
       </div>
-      
+
       <div>
         <h3 className="text-lg font-semibold mb-2">ARIA标签</h3>
         <div className="flex gap-2">

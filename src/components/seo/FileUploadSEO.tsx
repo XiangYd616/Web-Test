@@ -1,5 +1,5 @@
-import { AlertCircle, CheckCircle, Loader, Upload, X } from 'lucide-react';
 import React, { useRef, useState } from 'react';
+import { AlertCircle, CheckCircle, Loader, Upload, X } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 
 interface FileUploadSEOProps {

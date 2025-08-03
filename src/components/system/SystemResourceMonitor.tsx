@@ -1,8 +1,3 @@
-/**
- * 系统资源监控组件
- * 
- * 显示实时的系统资源使用情况
- */
 
 import React, { useState, useEffect } from 'react';
 import { Activity, Cpu, HardDrive, Wifi, AlertTriangle, CheckCircle } from 'lucide-react';
@@ -131,10 +126,10 @@ const SystemResourceMonitor: React.FC<SystemResourceMonitorProps> = ({
 
   useEffect(() => {
     fetchResources();
-    
+
     // 每5秒更新一次
     const interval = setInterval(fetchResources, 5000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -172,7 +167,7 @@ const SystemResourceMonitor: React.FC<SystemResourceMonitorProps> = ({
             <span className="text-sm font-medium">系统资源</span>
           </div>
           <div className="text-xs">
-            CPU: {formatPercentage(resources.cpu.usage)} | 
+            CPU: {formatPercentage(resources.cpu.usage)} |
             内存: {formatPercentage(resources.memory.usage)}
           </div>
         </div>
@@ -205,7 +200,7 @@ const SystemResourceMonitor: React.FC<SystemResourceMonitorProps> = ({
           </div>
           <div className="text-xs text-gray-400">CPU 使用率</div>
           <div className="w-full bg-gray-600 rounded-full h-1.5 mt-2">
-            <div 
+            <div
               className={`h-1.5 rounded-full transition-all duration-300 ${
                 resources.cpu.usage > 85 ? 'bg-red-500' :
                 resources.cpu.usage > 70 ? 'bg-yellow-500' : 'bg-green-500'
@@ -226,7 +221,7 @@ const SystemResourceMonitor: React.FC<SystemResourceMonitorProps> = ({
           </div>
           <div className="text-xs text-gray-400">内存使用率</div>
           <div className="w-full bg-gray-600 rounded-full h-1.5 mt-2">
-            <div 
+            <div
               className={`h-1.5 rounded-full transition-all duration-300 ${
                 resources.memory.usage > 90 ? 'bg-red-500' :
                 resources.memory.usage > 75 ? 'bg-yellow-500' : 'bg-green-500'
@@ -262,7 +257,7 @@ const SystemResourceMonitor: React.FC<SystemResourceMonitorProps> = ({
           </div>
           <div className="text-xs text-gray-400">磁盘使用率</div>
           <div className="w-full bg-gray-600 rounded-full h-1.5 mt-2">
-            <div 
+            <div
               className={`h-1.5 rounded-full transition-all duration-300 ${
                 resources.disk.usage > 95 ? 'bg-red-500' :
                 resources.disk.usage > 85 ? 'bg-yellow-500' : 'bg-green-500'

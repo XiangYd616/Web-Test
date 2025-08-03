@@ -1,27 +1,19 @@
 import React from 'react';
-import { 
-  Card, 
-  CardHeader, 
-  CardBody, 
-  CardFooter, 
-  CardTitle, 
-  CardDescription, 
-  SimpleCard 
-} from './Card';
-import { Button, DeleteButton, IconButton } from './Button';
 import { Eye, Download, Trash2 } from 'lucide-react';
+
+import { Button, DeleteButton, IconButton } from './Button';
 
 export const CardTest: React.FC = () => {
   return (
     <div className="p-8 space-y-8 bg-gray-900 min-h-screen">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-white mb-8">Card组件测试展示</h1>
-        
+
         {/* 基础卡片变体 */}
         <section className="mb-12">
           <h2 className="text-xl font-semibold text-white mb-6">基础卡片变体</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            
+
             {/* 默认卡片 */}
             <Card>
               <CardHeader>
@@ -109,7 +101,7 @@ export const CardTest: React.FC = () => {
         {/* 实际应用场景 */}
         <section className="mb-12">
           <h2 className="text-xl font-semibold text-white mb-6">实际应用场景</h2>
-          
+
           {/* 测试记录卡片 */}
           <div className="space-y-4">
             <Card hover className="transition-all duration-200">
@@ -148,21 +140,21 @@ export const CardTest: React.FC = () => {
               </CardBody>
               <CardFooter>
                 <div className="flex items-center gap-2">
-                  <IconButton 
-                    icon={<Eye className="w-4 h-4" />} 
-                    variant="ghost" 
+                  <IconButton
+                    icon={<Eye className="w-4 h-4" />}
+                    variant="ghost"
                     size="sm"
                     aria-label="查看详情"
                   />
-                  <IconButton 
-                    icon={<Download className="w-4 h-4" />} 
-                    variant="ghost" 
+                  <IconButton
+                    icon={<Download className="w-4 h-4" />}
+                    variant="ghost"
                     size="sm"
                     aria-label="下载报告"
                   />
-                  <IconButton 
-                    icon={<Trash2 className="w-4 h-4" />} 
-                    variant="danger" 
+                  <IconButton
+                    icon={<Trash2 className="w-4 h-4" />}
+                    variant="danger"
                     size="sm"
                     aria-label="删除记录"
                   />
@@ -212,12 +204,12 @@ export const CardTest: React.FC = () => {
               <CardTitle>小内边距</CardTitle>
               <CardDescription>适合紧凑布局</CardDescription>
             </Card>
-            
+
             <Card padding="md">
               <CardTitle>中等内边距</CardTitle>
               <CardDescription>默认推荐大小</CardDescription>
             </Card>
-            
+
             <Card padding="lg">
               <CardTitle>大内边距</CardTitle>
               <CardDescription>适合重要内容</CardDescription>

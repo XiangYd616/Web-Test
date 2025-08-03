@@ -1,14 +1,8 @@
 import React from 'react';
-import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { 
-  User, 
-  Lock, 
-  LogIn, 
-  UserCheck, 
-  Shield,
-  Crown
-} from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+
+import { User, Lock, LogIn, UserCheck, Shield, Crown } from 'lucide-react';
 
 interface AuthStatusIndicatorProps {
   showInSidebar?: boolean;
@@ -70,7 +64,7 @@ const AuthStatusIndicator: React.FC<AuthStatusIndicatorProps> = ({
                 <p className="text-xs text-yellow-400/70">功能受限</p>
               </div>
             </div>
-            
+
             {/* 登录按钮 */}
             <button
               onClick={handleLogin}

@@ -105,13 +105,13 @@ describe('Card Component', () => {
         <button>Action 2</button>
       </div>
     );
-    
+
     render(
       <Card actions={actions}>
         Card with actions
       </Card>
     );
-    
+
     expect(screen.getByTestId('card-actions')).toBeInTheDocument();
     expect(screen.getByText('Action 1')).toBeInTheDocument();
     expect(screen.getByText('Action 2')).toBeInTheDocument();
@@ -128,12 +128,12 @@ describe('Card Component', () => {
         <p>Test content</p>
       </Card>
     );
-    
+
     const card = screen.getByText('Test content').closest('.card');
     const header = screen.getByText('Test Header').closest('.card-header');
     const body = screen.getByText('Test content').closest('.card-body');
     const footer = screen.getByText('Test Footer').closest('.card-footer');
-    
+
     expect(card).toContainElement(header);
     expect(card).toContainElement(body);
     expect(card).toContainElement(footer);

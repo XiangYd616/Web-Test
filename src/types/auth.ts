@@ -1,13 +1,6 @@
-/**
- * 统一认证类型定义
- * 整合所有认证相关的类型，避免重复定义
- */
 
 // ==================== 基础类型 ====================
 
-/**
- * 用户角色枚举
- */
 export enum UserRole {
   ADMIN = 'admin',
   USER = 'user',
@@ -16,9 +9,6 @@ export enum UserRole {
   VIEWER = 'viewer'
 }
 
-/**
- * 用户状态枚举
- */
 export enum UserStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
@@ -26,9 +16,6 @@ export enum UserStatus {
   PENDING = 'pending'
 }
 
-/**
- * 认证状态枚举
- */
 export enum AuthStatus {
   AUTHENTICATED = 'authenticated',
   UNAUTHENTICATED = 'unauthenticated',
@@ -36,9 +23,6 @@ export enum AuthStatus {
   ERROR = 'error'
 }
 
-/**
- * 权限类型
- */
 export interface Permission {
   id: string;
   name: string;
@@ -47,9 +31,6 @@ export interface Permission {
   isSystem?: boolean;
 }
 
-/**
- * 角色类型
- */
 export interface Role {
   id: string;
   name: string;
@@ -61,9 +42,6 @@ export interface Role {
 
 // ==================== 用户相关类型 ====================
 
-/**
- * 用户偏好设置
- */
 export interface UserPreferences {
   theme: 'light' | 'dark' | 'auto';
   language: 'zh-CN' | 'en-US' | 'ja-JP';
@@ -100,9 +78,6 @@ export interface UserPreferences {
   };
 }
 
-/**
- * 用户资料
- */
 export interface UserProfile {
   firstName?: string;
   lastName?: string;
@@ -114,9 +89,6 @@ export interface UserProfile {
   avatar?: string;
 }
 
-/**
- * 统一用户类型
- */
 export interface User {
   id: string;
   username: string;
@@ -149,9 +121,6 @@ export interface User {
 
 // ==================== 认证相关类型 ====================
 
-/**
- * 登录凭据
- */
 export interface LoginCredentials {
   email: string;
   username?: string; // 支持用户名登录（向后兼容）
@@ -160,9 +129,6 @@ export interface LoginCredentials {
   twoFactorCode?: string;
 }
 
-/**
- * 注册数据
- */
 export interface RegisterData {
   username: string;
   email: string;
@@ -173,9 +139,6 @@ export interface RegisterData {
   inviteCode?: string;
 }
 
-/**
- * 认证响应
- */
 export interface AuthResponse {
   success: boolean;
   message: string;
@@ -186,9 +149,6 @@ export interface AuthResponse {
   errors?: Record<string, string>;
 }
 
-/**
- * 用户会话
- */
 export interface UserSession {
   id: string;
   userId: string;
@@ -207,25 +167,16 @@ export interface UserSession {
   };
 }
 
-/**
- * 密码重置请求
- */
 export interface PasswordResetRequest {
   email: string;
 }
 
-/**
- * 密码重置
- */
 export interface PasswordReset {
   token: string;
   newPassword: string;
   confirmPassword: string;
 }
 
-/**
- * 密码修改
- */
 export interface ChangePasswordData {
   currentPassword: string;
   newPassword: string;
@@ -234,9 +185,6 @@ export interface ChangePasswordData {
 
 // ==================== 用户管理类型 ====================
 
-/**
- * 创建用户数据
- */
 export interface CreateUserData {
   username: string;
   email: string;
@@ -248,9 +196,6 @@ export interface CreateUserData {
   metadata?: Record<string, any>;
 }
 
-/**
- * 更新用户数据
- */
 export interface UpdateUserData {
   username?: string;
   email?: string;
@@ -262,9 +207,6 @@ export interface UpdateUserData {
   metadata?: Record<string, any>;
 }
 
-/**
- * 用户过滤器
- */
 export interface UserFilter {
   role?: UserRole | UserRole[];
   status?: UserStatus | UserStatus[];
@@ -277,9 +219,6 @@ export interface UserFilter {
   lastLoginBefore?: string;
 }
 
-/**
- * 用户统计
- */
 export interface UserStats {
   totalUsers: number;
   activeUsers: number;
@@ -292,9 +231,6 @@ export interface UserStats {
 
 // ==================== 认证上下文类型 ====================
 
-/**
- * 认证上下文类型
- */
 export interface AuthContextType {
   // 状态
   user: User | null;
@@ -330,9 +266,6 @@ export interface AuthContextType {
 
 // ==================== 认证检查类型 ====================
 
-/**
- * 认证检查选项
- */
 export interface AuthCheckOptions {
   feature?: string;
   description?: string;
@@ -342,9 +275,6 @@ export interface AuthCheckOptions {
   requiredPermissions?: string[];
 }
 
-/**
- * 认证检查结果
- */
 export interface AuthCheckResult {
   isAuthenticated: boolean;
   hasPermission: boolean;
@@ -356,9 +286,6 @@ export interface AuthCheckResult {
 
 // ==================== API 响应类型 ====================
 
-/**
- * 通用API响应
- */
 export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
@@ -367,9 +294,6 @@ export interface ApiResponse<T = any> {
   errors?: Record<string, string>;
 }
 
-/**
- * 分页响应
- */
 export interface PaginatedResponse<T = any> extends ApiResponse<T> {
   pagination?: {
     page: number;
@@ -383,9 +307,6 @@ export interface PaginatedResponse<T = any> extends ApiResponse<T> {
 
 // ==================== 安全相关类型 ====================
 
-/**
- * 登录尝试记录
- */
 export interface LoginAttempt {
   id: string;
   email: string;
@@ -396,9 +317,6 @@ export interface LoginAttempt {
   timestamp: string;
 }
 
-/**
- * 安全事件
- */
 export interface SecurityEvent {
   id: string;
   userId?: string;
@@ -411,9 +329,6 @@ export interface SecurityEvent {
   metadata?: Record<string, any>;
 }
 
-/**
- * 两步验证设置
- */
 export interface TwoFactorAuth {
   enabled: boolean;
   method: 'totp' | 'sms' | 'email';

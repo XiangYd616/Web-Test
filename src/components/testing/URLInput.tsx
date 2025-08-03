@@ -1,5 +1,5 @@
-import { AlertCircle, AlertTriangle, CheckCircle, Globe, Link, Loader } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
+import { AlertCircle, AlertTriangle, CheckCircle, Globe, Link, Loader } from 'lucide-react';
 import { URLValidationResult, validateUrlEnhanced as validateURL } from '../../utils/enhancedUrlValidator';
 
 interface URLInputProps {

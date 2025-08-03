@@ -1,6 +1,3 @@
-/**
- * 高级数据服务 - 统一管理所有数据操作
- */
 
 export interface DataRecord {
   id: string;
@@ -140,9 +137,6 @@ export interface BatchOperation {
   metadata?: any;
 }
 
-/**
- * 高级数据服务类
- */
 export class AdvancedDataService {
   private baseUrl: string;
   private cache: Map<string, { data: any; timestamp: number }>;

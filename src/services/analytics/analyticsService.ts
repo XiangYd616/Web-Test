@@ -580,7 +580,7 @@ interface AccessibilityViolation { }
 // 为了兼容旧的Analytics页面，添加简化的方法
 export class LegacyAnalyticsService {
   static async getAnalytics(timeRange: string): Promise<any> {
-    // 临时实现，返回兼容的数据格式
+    
     return {
       overview: {
         totalTests: Math.floor(Math.random() * 1000) + 100,

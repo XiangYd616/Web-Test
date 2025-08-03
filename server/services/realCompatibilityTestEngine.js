@@ -143,7 +143,6 @@ class RealCompatibilityTestEngine {
         args: ['--no-sandbox', '--disable-setuid-sandbox']
       });
 
-      // 测试不同设备
       const deviceTests = [];
 
       if (devices.desktop) {

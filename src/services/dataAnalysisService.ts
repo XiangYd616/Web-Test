@@ -1,7 +1,3 @@
-/**
- * 数据分析服务
- * 提供测试数据的统计分析功能
- */
 
 import { format, subDays } from 'date-fns';
 

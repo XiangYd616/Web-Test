@@ -2,10 +2,6 @@ import React, { useState } from 'react';
 import { SimpleURLInput, URLInput } from './index';
 import { Card, CardHeader, CardTitle, CardBody } from './Card';
 
-/**
- * URL输入组件对比演示
- * 展示新旧URL输入组件的差异和改进
- */
 export const URLInputComparison: React.FC = () => {
   const [simpleUrl, setSimpleUrl] = useState('');
   const [advancedUrl, setAdvancedUrl] = useState('');
@@ -17,7 +13,7 @@ export const URLInputComparison: React.FC = () => {
           <h1 className="text-3xl font-bold text-white mb-2">URL输入组件优化</h1>
           <p className="text-gray-400">对比展示优化前后的URL输入组件效果</p>
         </div>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* 简化版URL输入 */}
           <Card>
@@ -35,7 +31,7 @@ export const URLInputComparison: React.FC = () => {
                   label="测试URL"
                   placeholder="输入要进行压力测试的网站URL..."
                 />
-                
+
                 <div className="mt-4 p-3 bg-gray-800/50 rounded-lg">
                   <h4 className="text-sm font-medium text-gray-300 mb-2">特点:</h4>
                   <ul className="text-sm text-gray-400 space-y-1">
@@ -70,7 +66,7 @@ export const URLInputComparison: React.FC = () => {
                   showExternalLink={true}
                   showAutoFix={true}
                 />
-                
+
                 <div className="mt-4 p-3 bg-gray-800/50 rounded-lg">
                   <h4 className="text-sm font-medium text-gray-300 mb-2">特点:</h4>
                   <ul className="text-sm text-gray-400 space-y-1">
@@ -103,7 +99,7 @@ export const URLInputComparison: React.FC = () => {
                   <li>• 不需要复杂验证的场景</li>
                 </ul>
               </div>
-              
+
               <div>
                 <h3 className="text-lg font-medium text-white mb-3">URLInput 适用场景</h3>
                 <ul className="space-y-2 text-sm text-gray-400">
@@ -138,7 +134,7 @@ export const URLInputComparison: React.FC = () => {
 />`}
                 </pre>
               </div>
-              
+
               <div>
                 <h3 className="text-lg font-medium text-white mb-3">URLInput 用法</h3>
                 <pre className="bg-gray-800 p-4 rounded-lg text-sm text-gray-300 overflow-x-auto">

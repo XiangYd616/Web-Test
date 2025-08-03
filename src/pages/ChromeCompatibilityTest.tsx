@@ -1,10 +1,6 @@
-/**
- * Chrome浏览器兼容性测试页面
- * 用于验证和测试Chrome兼容性修复效果
- */
 
-import { AlertTriangle, CheckCircle, Chrome, Info, XCircle } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import { AlertTriangle, CheckCircle, Chrome, Info, XCircle } from 'lucide-react';
 import { TestPageLayout } from '../components/testing/UnifiedTestingComponents';
 import { ChromeCompatibilityHelper } from '../utils/chromeCompatibility';
 

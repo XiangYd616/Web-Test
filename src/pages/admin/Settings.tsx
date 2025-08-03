@@ -1,40 +1,9 @@
-import {
-  AlertTriangle,
-  Archive,
-  Bell,
-  CheckCircle,
-  Clock,
-  Database,
-  Download,
-  FileText,
-  Globe,
-  Info,
-  Lock,
-  Mail,
-  Monitor,
-  Pause,
-  Play,
-  RefreshCw,
-  RotateCcw,
-  Server,
-  Settings,
-  Settings as SettingsIcon,
-  Shield,
-  Trash2,
-  Upload,
-  User
-} from 'lucide-react';
+import { AlertTriangle, Archive, Bell, CheckCircle, Clock, Database, Download, FileText, Globe, Info, Lock, Mail, Monitor, Pause, Play, RefreshCw, RotateCcw, Server, Settings, Settings as SettingsIcon, Shield, Trash2, Upload, User } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { SettingsService } from '../../services/settingsService';
 
-// 导入主题样式
-import '../../styles/dark-theme.css';
-import '../../styles/light-theme.css';
-import '../../styles/theme.css';
-
-// 导入现有组件
 import BackupManagement from '../../components/admin/BackupManagement';
 import SecurityCenter from '../../components/admin/SecurityCenter';
 import SystemSettings from '../../components/admin/SystemSettings';

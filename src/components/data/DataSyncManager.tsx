@@ -1,21 +1,4 @@
-import {
-  AlertCircle,
-  CheckCircle,
-  Clock,
-  Cloud,
-  Database,
-  Edit,
-  FileText,
-  Globe,
-  Play,
-  Plus,
-  RefreshCw,
-  RotateCcw,
-  Trash2,
-  Wifi,
-  WifiOff,
-  X
-} from 'lucide-react';
+import { AlertCircle, CheckCircle, Clock, Cloud, Database, Edit, FileText, Globe, Play, Plus, RefreshCw, RotateCcw, Trash2, Wifi, WifiOff, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 // 定义DataSyncConfig接口

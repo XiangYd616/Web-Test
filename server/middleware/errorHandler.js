@@ -4,6 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const Logger = require('../utils/logger');
 
 /**
  * 异步路由包装器
@@ -128,15 +129,16 @@ const logError = (err, req) => {
 
   fs.appendFile(logPath, logString, (writeErr) => {
     if (writeErr) {
-      console.error('写入错误日志失败:', writeErr);
+      Logger.error('写入错误日志失败', writeErr);
     }
   });
 
-  // 控制台输出
-  console.error(`[${timestamp}] ${err.name}: ${err.message}`);
-  if (process.env.NODE_ENV === 'development') {
-    console.error(err.stack);
-  }
+  // 使用统一日志工具输出
+  Logger.error(`${err.name}: ${err.message}`, err, {
+    method: req.method,
+    url: req.originalUrl,
+    ip: req.ip
+  });
 };
 
 /**
@@ -192,7 +194,7 @@ const handleDatabaseError = (err) => {
  * 捕获未处理的Promise拒绝
  */
 process.on('unhandledRejection', (err, promise) => {
-  console.error('未处理的Promise拒绝:', err.message);
+  Logger.error('未处理的Promise拒绝', err, { type: 'unhandledRejection' });
   logError(err, { method: 'SYSTEM', originalUrl: 'unhandledRejection', ip: 'system' });
 });
 
@@ -200,7 +202,7 @@ process.on('unhandledRejection', (err, promise) => {
  * 捕获未捕获的异常
  */
 process.on('uncaughtException', (err) => {
-  console.error('未捕获的异常:', err.message);
+  Logger.error('未捕获的异常', err, { type: 'uncaughtException' });
 
   // 创建一个模拟的req对象用于日志记录
   const mockReq = {

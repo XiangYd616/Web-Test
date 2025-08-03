@@ -6,25 +6,9 @@ interface ThemeProviderProps {
   defaultTheme?: 'light' | 'dark';
 }
 
-/**
- * 主题提供者组件 - 为整个应用提供主题支持
- * 
- * @example
- * ```tsx
- * import { ThemeProvider } from '@/components/ui';
- * 
- * function App() {
- *   return (
- *     <ThemeProvider defaultTheme="dark">
- *       <YourApp />
- *     </ThemeProvider>
- *   );
- * }
- * ```
- */
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({ 
-  children, 
-  defaultTheme = 'dark' 
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({
+  children,
+  defaultTheme = 'dark'
 }) => {
   return (
     <BaseThemeProvider>

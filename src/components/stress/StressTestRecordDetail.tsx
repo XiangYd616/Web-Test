@@ -1,22 +1,5 @@
-/**
- * 压力测试记录详情组件
- * 显示单个测试记录的详细信息
- */
 
-import {
-  Activity,
-  AlertCircle,
-  BarChart3,
-  CheckCircle,
-  Clock,
-  Download,
-  Globe,
-  Settings,
-  TrendingUp,
-  Users,
-  XCircle,
-  Zap
-} from 'lucide-react';
+import { Activity, AlertCircle, BarChart3, CheckCircle, Clock, Download, Globe, Settings, TrendingUp, Users, XCircle, Zap } from 'lucide-react';
 import React, { useMemo } from 'react';
 import type { StressTestRecord } from '../../services/stressTestRecordService';
 
