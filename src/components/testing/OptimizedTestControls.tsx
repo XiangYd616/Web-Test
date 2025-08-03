@@ -1,7 +1,7 @@
 
-import React from 'react';
 import { AlertCircle, CheckCircle, Loader, Play, RotateCcw, Square, XCircle } from 'lucide-react';
-import { TestPhase, TestState } from '../../services/testStateManager';
+import React from 'react';
+import { TestPhase, TestState } from '../../services/TestStateManager';
 
 // 控制组件属性接口
 export interface OptimizedTestControlsProps {

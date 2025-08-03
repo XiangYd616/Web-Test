@@ -17,7 +17,8 @@ import { useUserStats } from '../hooks/useUserStats';
 import backgroundTestManager from '../services/backgroundTestManager';
 import { systemResourceMonitor } from '../services/systemResourceMonitor';
 import { testEngineManager } from '../services/testEngines';
-import { TestPhase, type RealTimeMetrics, type TestDataPoint } from '../services/testStateManager';
+import { TestPhase, type RealTimeMetrics, type TestDataPoint } from '../services/TestStateManager';
+import '../styles/progress-bar.css';
 import { getTemplateById } from '../utils/testTemplates';
 
 // 本地配置接口，继承导入的配置
@@ -3097,7 +3098,7 @@ const StressTest: React.FC = () => {
                                                                                                                         backgroundTestInfo.progress >= 10 ? 'progress-10' :
                                                                                                                             backgroundTestInfo.progress >= 5 ? 'progress-5' : 'progress-0'
                                                     }`}
-                                                style={{ width: `${backgroundTestInfo.progress || 0}%` }}
+                                                style={{ '--progress-width': `${backgroundTestInfo.progress || 0}%` } as React.CSSProperties}
                                             />
                                         </div>
                                     )}
