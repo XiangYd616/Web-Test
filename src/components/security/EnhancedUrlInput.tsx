@@ -1,17 +1,5 @@
-/**
- * 增强的URL输入组件
- * 提供实时验证、自动修复和智能建议
- */
 
-import {
-  AlertTriangle,
-  CheckCircle,
-  ExternalLink,
-  Globe,
-  HelpCircle,
-  RefreshCw,
-  Zap
-} from 'lucide-react';
+import { AlertTriangle, CheckCircle, ExternalLink, Globe, HelpCircle, RefreshCw, Zap } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { URLValidationResult, validateUrlSync } from '../../utils/enhancedUrlValidator';
 

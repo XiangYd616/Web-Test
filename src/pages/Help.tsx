@@ -1,10 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Search, Book, MessageCircle, Mail, Phone, ChevronRight, Play, Shield, Zap,
-  BarChart3, Code, Users, Clock, Download, Video, Star, ThumbsUp, ThumbsDown,
-  ExternalLink, FileText, HelpCircle, Lightbulb, AlertCircle, CheckCircle,
-  Send, X, Plus, Minus, Filter, Tag, Calendar, User
-} from 'lucide-react';
 import { helpService } from '../services/helpService';
 import { useAuth } from '../contexts/AuthContext';
 

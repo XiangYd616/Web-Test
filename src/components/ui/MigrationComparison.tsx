@@ -1,8 +1,9 @@
 import React from 'react';
+import { ArrowRight, CheckCircle, AlertTriangle, ExternalLink } from 'lucide-react';
+
 import { Card, CardHeader, CardTitle, CardBody } from './Card';
 import { Button } from './Button';
 import { Badge, StatusBadge } from './Badge';
-import { ArrowRight, CheckCircle, AlertTriangle, ExternalLink } from 'lucide-react';
 
 export const MigrationComparison: React.FC = () => {
   const openPage = (url: string) => {
@@ -12,7 +13,7 @@ export const MigrationComparison: React.FC = () => {
   return (
     <div className="p-8 space-y-8 bg-gray-900 min-h-screen">
       <div className="max-w-6xl mx-auto">
-        
+
         {/* 页面标题 */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-white mb-4">
@@ -30,7 +31,7 @@ export const MigrationComparison: React.FC = () => {
 
         {/* 对比卡片 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          
+
           {/* 迁移前 */}
           <Card variant="outlined">
             <CardHeader>
@@ -67,7 +68,7 @@ export const MigrationComparison: React.FC = () => {
                     </li>
                   </ul>
                 </div>
-                
+
                 <div className="space-y-2">
                   <h4 className="font-medium text-white">技术栈</h4>
                   <div className="flex flex-wrap gap-1">
@@ -78,7 +79,7 @@ export const MigrationComparison: React.FC = () => {
                   </div>
                 </div>
 
-                <Button 
+                <Button
                   className="w-full mt-4"
                   variant="outline"
                   onClick={() => openPage('/stress-test')}
@@ -126,7 +127,7 @@ export const MigrationComparison: React.FC = () => {
                     </li>
                   </ul>
                 </div>
-                
+
                 <div className="space-y-2">
                   <h4 className="font-medium text-white">技术栈</h4>
                   <div className="flex flex-wrap gap-1">
@@ -137,7 +138,7 @@ export const MigrationComparison: React.FC = () => {
                   </div>
                 </div>
 
-                <Button 
+                <Button
                   className="w-full mt-4"
                   onClick={() => openPage('/stress-test?migrated')}
                 >
@@ -163,11 +164,11 @@ export const MigrationComparison: React.FC = () => {
                 <h4 className="font-medium text-white mb-2">分析现有组件</h4>
                 <p className="text-sm text-gray-400">识别需要迁移的UI元素</p>
               </div>
-              
+
               <div className="flex items-center justify-center">
                 <ArrowRight className="w-6 h-6 text-gray-400" />
               </div>
-              
+
               <div className="text-center">
                 <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-3 border border-blue-500/30">
                   <span className="text-blue-400 font-bold">2</span>
@@ -175,11 +176,11 @@ export const MigrationComparison: React.FC = () => {
                 <h4 className="font-medium text-white mb-2">替换组件</h4>
                 <p className="text-sm text-gray-400">使用新的组件库替换</p>
               </div>
-              
+
               <div className="flex items-center justify-center">
                 <ArrowRight className="w-6 h-6 text-gray-400" />
               </div>
-              
+
               <div className="text-center">
                 <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-3 border border-green-500/30">
                   <CheckCircle className="w-4 h-4 text-green-400" />
@@ -198,19 +199,19 @@ export const MigrationComparison: React.FC = () => {
           </CardHeader>
           <CardBody>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              
+
               <div className="text-center">
                 <div className="text-3xl font-bold text-green-400 mb-2">100%</div>
                 <div className="text-gray-400 mb-2">CSS冲突解决</div>
                 <div className="text-sm text-gray-500">完全消除样式冲突问题</div>
               </div>
-              
+
               <div className="text-center">
                 <div className="text-3xl font-bold text-blue-400 mb-2">6个</div>
                 <div className="text-gray-400 mb-2">新组件使用</div>
                 <div className="text-sm text-gray-500">Card, Button, Input, Badge等</div>
               </div>
-              
+
               <div className="text-center">
                 <div className="text-3xl font-bold text-purple-400 mb-2">50%</div>
                 <div className="text-gray-400 mb-2">代码减少</div>
@@ -222,7 +223,7 @@ export const MigrationComparison: React.FC = () => {
 
         {/* 具体改进 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-          
+
           <Card>
             <CardHeader>
               <CardTitle>🎨 样式改进</CardTitle>
@@ -291,24 +292,24 @@ export const MigrationComparison: React.FC = () => {
           </CardHeader>
           <CardBody>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="h-auto p-4 flex flex-col gap-2"
                 onClick={() => openPage('/stress-test')}
               >
                 <span className="font-medium">原版本</span>
                 <span className="text-xs text-gray-400">传统CSS实现</span>
               </Button>
-              
-              <Button 
+
+              <Button
                 className="h-auto p-4 flex flex-col gap-2"
                 onClick={() => openPage('/stress-test?migrated')}
               >
                 <span className="font-medium">新版本</span>
                 <span className="text-xs text-gray-300">组件库实现</span>
               </Button>
-              
-              <Button 
+
+              <Button
                 variant="secondary"
                 className="h-auto p-4 flex flex-col gap-2"
                 onClick={() => openPage('/stress-test?test-all')}
@@ -316,8 +317,8 @@ export const MigrationComparison: React.FC = () => {
                 <span className="font-medium">组件测试</span>
                 <span className="text-xs text-gray-400">综合测试页面</span>
               </Button>
-              
-              <Button 
+
+              <Button
                 variant="ghost"
                 className="h-auto p-4 flex flex-col gap-2"
                 onClick={() => openPage('/stress-test?test-nav')}

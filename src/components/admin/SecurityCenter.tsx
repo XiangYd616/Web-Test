@@ -1,5 +1,6 @@
-import { Activity, AlertTriangle, Eye, EyeOff, Key, Lock, Shield, Users } from 'lucide-react';
 import React, { useState } from 'react';
+
+import { Activity, AlertTriangle, Eye, EyeOff, Key, Lock, Shield, Users } from 'lucide-react';
 
 interface SecurityEvent {
   id: string;

@@ -56,8 +56,7 @@ const createPool = () => {
 const connectDB = async () => {
   try {
     const dbPool = createPool();
-    
-    // 测试连接
+
     const client = await dbPool.connect();
     await client.query('SELECT NOW()');
     client.release();

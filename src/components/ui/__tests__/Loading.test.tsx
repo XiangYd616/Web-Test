@@ -127,7 +127,7 @@ describe('LoadingOverlay Component', () => {
         <div>Content</div>
       </LoadingOverlay>
     );
-    
+
     expect(screen.getByTestId('loading-overlay')).toBeInTheDocument();
     expect(screen.getByText('Content')).toBeInTheDocument();
   });
@@ -138,7 +138,7 @@ describe('LoadingOverlay Component', () => {
         <div>Content</div>
       </LoadingOverlay>
     );
-    
+
     const overlay = screen.getByTestId('loading-overlay');
     expect(overlay).toHaveClass('loading-overlay-active');
     expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
@@ -150,7 +150,7 @@ describe('LoadingOverlay Component', () => {
         <div>Content</div>
       </LoadingOverlay>
     );
-    
+
     expect(screen.getByText('Processing...')).toBeInTheDocument();
   });
 
@@ -160,7 +160,7 @@ describe('LoadingOverlay Component', () => {
         <div>Content</div>
       </LoadingOverlay>
     );
-    
+
     expect(screen.getByTestId('loading-dots')).toBeInTheDocument();
   });
 
@@ -170,7 +170,7 @@ describe('LoadingOverlay Component', () => {
         <div>Content</div>
       </LoadingOverlay>
     );
-    
+
     expect(screen.getByTestId('loading-overlay')).toHaveClass('loading-overlay-blur');
   });
 
@@ -180,7 +180,7 @@ describe('LoadingOverlay Component', () => {
         <div>Content</div>
       </LoadingOverlay>
     );
-    
+
     expect(screen.getByTestId('loading-overlay')).toHaveClass('loading-overlay-dark');
   });
 
@@ -190,7 +190,7 @@ describe('LoadingOverlay Component', () => {
         <div>Content</div>
       </LoadingOverlay>
     );
-    
+
     expect(screen.getByTestId('loading-overlay')).toHaveClass('custom-overlay');
   });
 });

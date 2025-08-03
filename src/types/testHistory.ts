@@ -1,8 +1,5 @@
-/**
- * 测试历史相关类型定义
- */
 
-// 测试状态枚举
+
 export enum TestStatus {
   PENDING = 'pending',
   RUNNING = 'running',
@@ -12,7 +9,6 @@ export enum TestStatus {
   TIMEOUT = 'timeout'
 }
 
-// 测试类型枚举
 export enum TestType {
   PERFORMANCE = 'performance',
   SECURITY = 'security',
@@ -25,7 +21,6 @@ export enum TestType {
   NETWORK = 'network'
 }
 
-// 测试优先级
 export enum TestPriority {
   LOW = 'low',
   MEDIUM = 'medium',
@@ -33,7 +28,6 @@ export enum TestPriority {
   CRITICAL = 'critical'
 }
 
-// 测试环境
 export enum TestEnvironment {
   DEVELOPMENT = 'development',
   STAGING = 'staging',
@@ -101,7 +95,6 @@ export interface StressTestConfig extends BaseTestConfig {
   };
 }
 
-// 测试结果详情
 export interface TestResultDetails {
   // 性能指标
   performance?: {
@@ -114,7 +107,7 @@ export interface TestResultDetails {
     speedIndex?: number;
     totalBlockingTime?: number;
   };
-  
+
   // 安全指标
   security?: {
     vulnerabilities?: Array<{
@@ -127,7 +120,7 @@ export interface TestResultDetails {
     headersSecurity?: Record<string, any>;
     certificateInfo?: Record<string, any>;
   };
-  
+
   // SEO指标
   seo?: {
     metaTags?: Record<string, string>;
@@ -137,7 +130,7 @@ export interface TestResultDetails {
     structuredData?: any[];
     socialTags?: Record<string, string>;
   };
-  
+
   // 压力测试指标
   stress?: {
     totalRequests?: number;
@@ -150,7 +143,7 @@ export interface TestResultDetails {
     errorRate?: number;
     concurrentUsers?: number;
   };
-  
+
   // 通用指标
   general?: {
     httpStatus?: number;
@@ -167,7 +160,6 @@ export interface TestResultDetails {
   };
 }
 
-// 测试元数据
 export interface TestMetadata {
   userAgent?: string;
   ipAddress?: string;
@@ -201,45 +193,45 @@ export interface EnhancedTestRecord {
   url: string;
   status: TestStatus;
   priority?: TestPriority;
-  
+
   // 时间信息
   startTime: string;
   endTime?: string;
   duration?: number; // 毫秒
   createdAt: string;
   updatedAt?: string;
-  
+
   // 用户信息
   userId?: string;
   userName?: string;
-  
+
   // 配置信息
   config: BaseTestConfig | PerformanceTestConfig | SecurityTestConfig | SEOTestConfig | StressTestConfig;
-  
+
   // 结果信息
   overallScore?: number;
   results?: TestResultDetails;
   reportPath?: string;
   reportUrl?: string;
-  
+
   // 分类和标签
   tags?: string[];
   category?: string;
   environment?: TestEnvironment;
-  
+
   // 元数据
   metadata?: TestMetadata;
-  
+
   // 关联信息
   parentTestId?: string; // 父测试ID（用于测试套件）
   childTestIds?: string[]; // 子测试ID
   relatedTestIds?: string[]; // 相关测试ID
-  
+
   // 统计信息
   viewCount?: number;
   shareCount?: number;
   bookmarked?: boolean;
-  
+
   // 备注和注释
   notes?: string;
   comments?: Array<{
@@ -249,7 +241,7 @@ export interface EnhancedTestRecord {
     content: string;
     createdAt: string;
   }>;
-  
+
   // 文件附件
   attachments?: Array<{
     id: string;
@@ -261,17 +253,16 @@ export interface EnhancedTestRecord {
   }>;
 }
 
-// 测试历史查询参数
 export interface TestHistoryQuery {
   // 分页
   page?: number;
   limit?: number;
   offset?: number;
-  
+
   // 搜索
   search?: string;
   searchFields?: string[]; // 搜索字段
-  
+
   // 过滤
   testType?: TestType | TestType[];
   status?: TestStatus | TestStatus[];
@@ -280,21 +271,21 @@ export interface TestHistoryQuery {
   tags?: string[];
   category?: string;
   userId?: string;
-  
+
   // 时间范围
   dateFrom?: string;
   dateTo?: string;
   createdAfter?: string;
   createdBefore?: string;
-  
+
   // 分数范围
   minScore?: number;
   maxScore?: number;
-  
+
   // 排序
   sortBy?: 'createdAt' | 'startTime' | 'endTime' | 'duration' | 'overallScore' | 'testName' | 'status';
   sortOrder?: 'asc' | 'desc';
-  
+
   // 包含关联数据
   includeResults?: boolean;
   includeConfig?: boolean;
@@ -303,7 +294,6 @@ export interface TestHistoryQuery {
   includeAttachments?: boolean;
 }
 
-// 测试历史响应
 export interface TestHistoryResponse {
   success: boolean;
   data: {
@@ -335,7 +325,6 @@ export interface TestHistoryResponse {
   error?: string;
 }
 
-// 测试历史统计
 export interface TestHistoryStatistics {
   overview: {
     totalTests: number;
@@ -345,32 +334,32 @@ export interface TestHistoryStatistics {
     averageDuration: number;
     successRate: number;
   };
-  
+
   byType: Array<{
     type: TestType;
     count: number;
     averageScore: number;
     successRate: number;
   }>;
-  
+
   byStatus: Array<{
     status: TestStatus;
     count: number;
     percentage: number;
   }>;
-  
+
   byTimeRange: Array<{
     date: string;
     count: number;
     averageScore: number;
   }>;
-  
+
   topUrls: Array<{
     url: string;
     count: number;
     averageScore: number;
   }>;
-  
+
   recentActivity: Array<{
     date: string;
     testsRun: number;
@@ -402,7 +391,6 @@ export interface BatchOperation {
   };
 }
 
-// 测试比较
 export interface TestComparison {
   baseTest: EnhancedTestRecord;
   compareTests: EnhancedTestRecord[];

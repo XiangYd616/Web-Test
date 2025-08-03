@@ -413,7 +413,6 @@ function setupWebSocketHandlers(io) {
       }
     });
 
-    // 测试连接ping/pong
     socket.on('test-ping', (data) => {
       console.log(`🏓 收到测试ping:`, data);
       socket.emit('test-pong', {

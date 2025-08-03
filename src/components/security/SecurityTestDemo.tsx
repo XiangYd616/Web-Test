@@ -1,7 +1,3 @@
-/**
- * 安全测试功能演示组件
- * 展示增强的URL验证和错误处理功能
- */
 
 import React, { useState } from 'react';
 import { Shield, Zap, CheckCircle, AlertTriangle } from 'lucide-react';
@@ -65,7 +61,7 @@ const SecurityTestDemo: React.FC = () => {
           <Zap className="h-5 w-5 mr-2 text-yellow-400" />
           智能URL验证
         </h2>
-        
+
         <div className="space-y-4">
           <EnhancedUrlInput
             value={url}
@@ -75,7 +71,7 @@ const SecurityTestDemo: React.FC = () => {
             showSuggestions={true}
             autoFix={true}
           />
-          
+
           {/* 验证状态显示 */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-gray-700/50 rounded-lg p-4">
@@ -91,7 +87,7 @@ const SecurityTestDemo: React.FC = () => {
                 {isValid ? '✅ URL格式正确' : '❌ URL格式有误'}
               </p>
             </div>
-            
+
             <div className="bg-gray-700/50 rounded-lg p-4">
               <div className="flex items-center space-x-2 mb-2">
                 <Zap className="h-5 w-5 text-yellow-400" />
@@ -101,7 +97,7 @@ const SecurityTestDemo: React.FC = () => {
                 {validationResult?.autoFixes.length || 0} 项修复建议
               </p>
             </div>
-            
+
             <div className="bg-gray-700/50 rounded-lg p-4">
               <div className="flex items-center space-x-2 mb-2">
                 <Shield className="h-5 w-5 text-blue-400" />
@@ -121,7 +117,7 @@ const SecurityTestDemo: React.FC = () => {
           <AlertTriangle className="h-5 w-5 mr-2 text-red-400" />
           智能错误处理
         </h2>
-        
+
         <div className="space-y-4">
           {/* 错误类型选择 */}
           <div>
@@ -143,7 +139,7 @@ const SecurityTestDemo: React.FC = () => {
               ))}
             </div>
           </div>
-          
+
           {/* 错误显示演示 */}
           {showErrorDemo && (
             <div className="space-y-4">
@@ -156,7 +152,7 @@ const SecurityTestDemo: React.FC = () => {
                   关闭演示
                 </button>
               </div>
-              
+
               <EnhancedErrorDisplay
                 error={selectedError}
                 onDismiss={() => setShowErrorDemo(false)}
@@ -173,7 +169,7 @@ const SecurityTestDemo: React.FC = () => {
       {/* 功能特点说明 */}
       <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <h2 className="text-xl font-semibold text-white mb-4">✨ 功能特点</h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h3 className="text-lg font-medium text-white mb-3">URL验证增强</h3>
@@ -200,7 +196,7 @@ const SecurityTestDemo: React.FC = () => {
               </li>
             </ul>
           </div>
-          
+
           <div>
             <h3 className="text-lg font-medium text-white mb-3">错误处理优化</h3>
             <ul className="space-y-2 text-sm text-gray-300">

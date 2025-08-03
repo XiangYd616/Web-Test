@@ -1,7 +1,3 @@
-/**
- * 浏览器特性检测工具
- * 用于检测浏览器对现代CSS特性的支持情况
- */
 
 // 浏览器信息接口
 interface BrowserInfo {
@@ -32,9 +28,6 @@ interface FeatureSupport {
   avifSupport: boolean;
 }
 
-/**
- * 检测CSS特性支持
- */
 export const detectCSSSupport = (): FeatureSupport => {
   const support: FeatureSupport = {
     cssGrid: false,
@@ -61,50 +54,50 @@ export const detectCSSSupport = (): FeatureSupport => {
     try {
       // CSS Grid
       support.cssGrid = CSS.supports('display', 'grid');
-      
+
       // CSS变量
       support.cssVariables = CSS.supports('color', 'var(--test)');
-      
+
       // backdrop-filter
       support.backdropFilter = CSS.supports('backdrop-filter', 'blur(1px)') ||
                               CSS.supports('-webkit-backdrop-filter', 'blur(1px)');
-      
+
       // Flexbox gap
       support.flexboxGap = CSS.supports('gap', '1rem');
-      
+
       // 容器查询
       support.containerQueries = CSS.supports('container-type', 'inline-size');
-      
+
       // CSS嵌套
       support.cssNesting = CSS.supports('selector(&)', '&:hover');
-      
+
       // CSS层叠层
       support.cssLayers = CSS.supports('@layer', 'base');
-      
+
       // CSS子网格
       support.cssSubgrid = CSS.supports('grid-template-columns', 'subgrid');
-      
+
       // 视口单位
       support.viewportUnits = CSS.supports('width', '100vw');
-      
+
       // sticky定位
       support.stickyPosition = CSS.supports('position', 'sticky');
-      
+
       // clip-path
       support.clipPath = CSS.supports('clip-path', 'circle(50%)');
-      
+
       // CSS滤镜
       support.cssFilters = CSS.supports('filter', 'blur(1px)');
-      
+
       // 3D变换
       support.cssTransforms3d = CSS.supports('transform', 'translateZ(0)');
-      
+
       // CSS动画
       support.cssAnimations = CSS.supports('animation', 'test 1s');
-      
+
       // CSS过渡
       support.cssTransitions = CSS.supports('transition', 'all 0.3s');
-      
+
     } catch (error) {
       console.warn('CSS.supports检测失败:', error);
     }
@@ -119,9 +112,6 @@ export const detectCSSSupport = (): FeatureSupport => {
   return support;
 };
 
-/**
- * 检测图片格式支持
- */
 const detectImageFormats = async (): Promise<{webp: boolean; avif: boolean}> => {
   const formats = { webp: false, avif: false };
 
@@ -146,9 +136,6 @@ const detectImageFormats = async (): Promise<{webp: boolean; avif: boolean}> => 
   return formats;
 };
 
-/**
- * 获取浏览器信息
- */
 export const getBrowserInfo = (): BrowserInfo => {
   const userAgent = navigator.userAgent;
   const browserInfo: BrowserInfo = {
@@ -184,23 +171,14 @@ export const getBrowserInfo = (): BrowserInfo => {
   return browserInfo;
 };
 
-/**
- * 检查是否为移动设备
- */
 export const isMobile = (): boolean => {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 };
 
-/**
- * 检查是否为触摸设备
- */
 export const isTouchDevice = (): boolean => {
   return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 };
 
-/**
- * 获取屏幕信息
- */
 export const getScreenInfo = () => {
   return {
     width: window.screen.width,
@@ -213,9 +191,6 @@ export const getScreenInfo = () => {
   };
 };
 
-/**
- * 生成兼容性报告
- */
 export const generateCompatibilityReport = () => {
   const support = detectCSSSupport();
   const browser = getBrowserInfo();
@@ -232,9 +207,6 @@ export const generateCompatibilityReport = () => {
   };
 };
 
-/**
- * 生成优化建议
- */
 const generateRecommendations = (support: FeatureSupport, browser: BrowserInfo): string[] => {
   const recommendations: string[] = [];
 

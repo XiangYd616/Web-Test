@@ -1,14 +1,4 @@
-import {
-  AlertCircle,
-  CheckCircle,
-  Download,
-  Eye,
-  FileText,
-  Layout,
-  Loader,
-  Settings,
-  Table
-} from 'lucide-react';
+import { AlertCircle, CheckCircle, Download, Eye, FileText, Layout, Loader, Settings, Table } from 'lucide-react';
 import React, { useState } from 'react';
 import { EnhancedReportGenerator, ExportFormat, ReportConfig, ReportData } from '../../services/reportGeneratorService';
 

@@ -113,7 +113,6 @@ class RealAPITestEngine {
       // 创建axios实例
       const apiClient = this.createAPIClient(baseUrl, timeout, headers, auth);
 
-      // 测试每个端点
       for (const endpoint of endpoints) {
         console.log(`🎯 Testing endpoint: ${endpoint.method || 'GET'} ${endpoint.path}`);
 

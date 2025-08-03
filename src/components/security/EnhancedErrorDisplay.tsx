@@ -1,22 +1,7 @@
-/**
- * 增强的错误显示组件
- * 提供详细的错误信息、解决方案和操作建议
- */
 
 import React, { useState } from 'react';
-import {
-  AlertTriangle,
-  ChevronDown,
-  ChevronRight,
-  ExternalLink,
-  HelpCircle,
-  RefreshCw,
-  X,
-  Zap,
-  Shield,
-  Globe,
-  Clock
-} from 'lucide-react';
+
+import { AlertTriangle, ChevronDown, ChevronRight, ExternalLink, HelpCircle, RefreshCw, X, Zap, Shield, Globe, Clock } from 'lucide-react';
 
 export interface ErrorSolution {
   title: string;
@@ -145,7 +130,7 @@ export const EnhancedErrorDisplay: React.FC<EnhancedErrorDisplayProps> = ({
             )}
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-2 flex-shrink-0 ml-3">
           {onRetry && (
             <button
@@ -221,7 +206,7 @@ export const EnhancedErrorDisplay: React.FC<EnhancedErrorDisplayProps> = ({
             {error.solutions.map((solution, index) => {
               const isExpanded = expandedSolution === index;
               const difficulty = DIFFICULTY_LABELS[solution.difficulty];
-              
+
               return (
                 <div key={index} className="bg-gray-700/30 rounded-lg overflow-hidden">
                   <button
@@ -251,7 +236,7 @@ export const EnhancedErrorDisplay: React.FC<EnhancedErrorDisplayProps> = ({
                       </div>
                     </div>
                   </button>
-                  
+
                   {isExpanded && (
                     <div className="px-3 pb-3">
                       <div className="pl-7">
@@ -265,7 +250,7 @@ export const EnhancedErrorDisplay: React.FC<EnhancedErrorDisplayProps> = ({
                             </div>
                           ))}
                         </div>
-                        
+
                         {solution.externalLinks && solution.externalLinks.length > 0 && (
                           <div className="mt-3 pt-3 border-t border-gray-600/50">
                             <h6 className="text-xs font-medium text-gray-400 mb-2">相关资源:</h6>

@@ -1,4 +1,4 @@
-// 测试模板和预设配置服务
+
 export interface TestTemplate {
   id: string;
   name: string;
@@ -67,7 +67,7 @@ export const DEFAULT_TEMPLATES: TestTemplate[] = [
     updatedAt: '2025-01-01T00:00:00Z',
     usage: 1250
   },
-  
+
   // 博客网站模板
   {
     id: 'blog-seo-focused',
@@ -256,7 +256,7 @@ export const INDUSTRY_PRESETS: TestPreset[] = [
     rating: 4.8,
     downloads: 1500
   },
-  
+
   {
     id: 'content-publishing-suite',
     name: '内容发布平台套件',
@@ -341,7 +341,7 @@ export class TestTemplateService {
   static incrementTemplateUsage(templateId: string): void {
     const customTemplates = this.getCustomTemplates();
     const templateIndex = customTemplates.findIndex(t => t.id === templateId);
-    
+
     if (templateIndex !== -1) {
       customTemplates[templateIndex].usage++;
       customTemplates[templateIndex].updatedAt = new Date().toISOString();
@@ -353,12 +353,12 @@ export class TestTemplateService {
   static deleteCustomTemplate(templateId: string): boolean {
     const customTemplates = this.getCustomTemplates();
     const filteredTemplates = customTemplates.filter(t => t.id !== templateId);
-    
+
     if (filteredTemplates.length !== customTemplates.length) {
       localStorage.setItem(this.CUSTOM_TEMPLATES_KEY, JSON.stringify(filteredTemplates));
       return true;
     }
-    
+
     return false;
   }
 
@@ -403,7 +403,7 @@ export class TestTemplateService {
   static getRecommendedTemplates(userHistory: string[] = []): TestTemplate[] {
     // 基于用户历史使用记录推荐相关模板
     const allTemplates = this.getAllTemplates();
-    
+
     if (userHistory.length === 0) {
       return this.getPopularTemplates(5);
     }

@@ -1,39 +1,5 @@
-import {
-  AlertCircle,
-  BarChart3,
-  CheckCircle,
-  Clock,
-  Download,
-  Eye,
-  FileText,
-  Globe,
-  Search,
-  Shield,
-  Trash2,
-  XCircle,
-  Zap
-} from 'lucide-react';
+import { AlertCircle, BarChart3, CheckCircle, Clock, Download, Eye, FileText, Globe, Search, Shield, Trash2, XCircle, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import {
-  EnhancedTestRecord,
-  TestStatus,
-  TestType
-} from '../types/testHistory';
-
-// 兼容性类型（保持向后兼容）
-interface TestRecord extends Partial<EnhancedTestRecord> {
-  id: string;
-  testName: string;
-  testType: TestType;
-  url: string;
-  status: TestStatus;
-  score?: number;
-  duration?: number;
-  startTime: string;
-  endTime?: string;
-  reportPath?: string;
-}
-
 import EnhancedTestHistory from '../components/testHistory/EnhancedTestHistory';
 
 const TestHistory: React.FC = () => {

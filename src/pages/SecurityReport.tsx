@@ -1,21 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Shield,
-  Lock,
-  Eye,
-  EyeOff,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  Info,
-  Settings,
-  Users,
-  Activity,
-  Globe,
-  Server,
-  Database,
-  RefreshCw
-} from 'lucide-react';
 import { currentSecurityConfig, SecurityConfigValidator } from '../config/security';
 import { getRouteName } from '../utils/routeUtils';
 import { useAuth } from '../contexts/AuthContext';
@@ -48,7 +31,7 @@ const SecurityReport: React.FC = () => {
 
   const generateSecurityReport = () => {
     setLoading(true);
-    
+
     // 模拟安全检查
     setTimeout(() => {
       const issues: SecurityIssue[] = [];
@@ -291,7 +274,7 @@ const SecurityReport: React.FC = () => {
                         <div className="flex items-center space-x-2 mb-2">
                           <h3 className="font-medium text-gray-900">{issue.title}</h3>
                           <span className={`px-2 py-1 rounded text-xs font-medium ${getSeverityColor(issue.severity)}`}>
-                            {issue.severity === 'critical' ? '严重' : 
+                            {issue.severity === 'critical' ? '严重' :
                              issue.severity === 'high' ? '高' :
                              issue.severity === 'medium' ? '中' : '低'}
                           </span>

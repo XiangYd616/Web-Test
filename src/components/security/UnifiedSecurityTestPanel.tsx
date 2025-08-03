@@ -1,27 +1,6 @@
-/**
- * 统一安全测试面板 - 重新设计的安全测试界面
- * 提供直观的配置选项和实时的测试进度
- */
 
-import {
-  AlertTriangle,
-  Award,
-  Eye,
-  FileText,
-  Lock,
-  Network,
-  Settings,
-  Shield,
-  Target,
-  Zap
-} from 'lucide-react';
+import { AlertTriangle, Award, Eye, FileText, Lock, Network, Settings, Shield, Target, Zap } from 'lucide-react';
 import React, { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
-import {
-  SecurityTestConfig,
-  SecurityTestResult,
-  TestProgress,
-  unifiedSecurityEngine
-} from '../../services/unifiedSecurityEngine';
 import { URLValidationResult } from '../../utils/enhancedUrlValidator';
 import { createCommonErrors, enhanceError } from '../../utils/errorHandler';
 import EnhancedErrorDisplay, { EnhancedError } from './EnhancedErrorDisplay';
@@ -364,8 +343,6 @@ export const UnifiedSecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, 
         </div>
       </div>
 
-
-
       {/* 进度显示 - 增强可读性 */}
       {progress && (
         <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
@@ -461,7 +438,6 @@ export const UnifiedSecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, 
           </div>
         </div>
       )}
-
 
     </div>
   );

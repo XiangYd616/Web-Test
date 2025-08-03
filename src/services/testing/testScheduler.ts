@@ -1,4 +1,4 @@
-// 测试调度服务
+
 export interface ScheduledTest {
   id: string;
   name: string;
@@ -73,7 +73,6 @@ export interface BatchTestConfig {
   };
 }
 
-// 测试调度管理器
 export class TestScheduler {
   private static schedules: Map<string, ScheduledTest> = new Map();
   private static executions: Map<string, TestExecution> = new Map();

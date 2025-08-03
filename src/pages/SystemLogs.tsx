@@ -1,23 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  FileText,
-  Search,
-  Filter,
-  Download,
-  RefreshCw,
-  Calendar,
-  AlertTriangle,
-  Info,
-  XCircle,
-  CheckCircle,
-  Clock,
-  User,
-  Activity,
-  Database,
-  Shield,
-  Globe,
-  Server
-} from 'lucide-react';
+
+import { FileText, Search, Filter, Download, RefreshCw, Calendar, AlertTriangle, Info, XCircle, CheckCircle, Clock, User, Activity, Database, Shield, Globe, Server } from 'lucide-react';
 
 interface LogEntry {
   id: string;
@@ -55,12 +38,12 @@ const SystemLogs: React.FC = () => {
 
   useEffect(() => {
     loadLogs();
-    
+
     let interval: NodeJS.Timeout;
     if (autoRefresh) {
       interval = setInterval(loadLogs, 10000); // 每10秒刷新
     }
-    
+
     return () => {
       if (interval) clearInterval(interval);
     };
@@ -74,7 +57,7 @@ const SystemLogs: React.FC = () => {
         dateRange: filter.dateRange,
         search: filter.search
       });
-      
+
       const response = await fetch(`/api/admin/logs?${params}`);
       if (response.ok) {
         const data = await response.json();
@@ -189,7 +172,7 @@ const SystemLogs: React.FC = () => {
         search: filter.search,
         format: 'csv'
       });
-      
+
       const response = await fetch(`/api/admin/logs/export?${params}`);
       if (response.ok) {
         const blob = await response.blob();

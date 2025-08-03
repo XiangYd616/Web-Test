@@ -296,7 +296,6 @@ export abstract class UnifiedTestEngine {
   abstract getTestStatus(): 'running' | 'completed' | 'failed' | 'cancelled';
 }
 
-// 测试引擎工厂
 export class TestEngineFactory {
   static createEngine(type: TestType, config: BaseTestConfig, progressCallback?: ProgressCallback): UnifiedTestEngine {
     switch (type) {

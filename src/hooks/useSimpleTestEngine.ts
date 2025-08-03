@@ -322,8 +322,6 @@ export const useAdvancedTestEngine = () => {
     setIsRunning(false);
   }, [stopRealTimeMetrics]);
 
-
-
   const resumeTest = useCallback(() => {
     if (currentTestId.current) {
       (backgroundTestManager as any).resumeTest(currentTestId.current);
@@ -403,7 +401,6 @@ export const useAdvancedTestEngine = () => {
     realTimeMetrics,
     browserCapabilities,
 
-    // 测试控制
     runStressTest: runAdvancedStressTest,
     stopTest,
 

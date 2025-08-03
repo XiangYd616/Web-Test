@@ -1,6 +1,3 @@
-/**
- * 数字格式化工具函数
- */
 
 export const formatNumber = (num: number, decimals: number = 2): string => {
   if (isNaN(num)) return '0';
@@ -9,13 +6,13 @@ export const formatNumber = (num: number, decimals: number = 2): string => {
 
 export const formatBytes = (bytes: number, decimals: number = 2): string => {
   if (bytes === 0) return '0 B';
-  
+
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-  
+
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
+
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 };
 
@@ -29,17 +26,17 @@ export const formatDuration = (milliseconds: number): string => {
   if (milliseconds < 1000) {
     return `${Math.round(milliseconds)}ms`;
   }
-  
+
   const seconds = milliseconds / 1000;
   if (seconds < 60) {
     return `${formatNumber(seconds, 1)}s`;
   }
-  
+
   const minutes = seconds / 60;
   if (minutes < 60) {
     return `${formatNumber(minutes, 1)}m`;
   }
-  
+
   const hours = minutes / 60;
   return `${formatNumber(hours, 1)}h`;
 };
@@ -48,15 +45,15 @@ export const formatLargeNumber = (num: number): string => {
   if (num < 1000) {
     return num.toString();
   }
-  
+
   if (num < 1000000) {
     return `${formatNumber(num / 1000, 1)}K`;
   }
-  
+
   if (num < 1000000000) {
     return `${formatNumber(num / 1000000, 1)}M`;
   }
-  
+
   return `${formatNumber(num / 1000000000, 1)}B`;
 };
 
@@ -76,11 +73,11 @@ export const formatThroughput = (requestsPerSecond: number): string => {
   if (requestsPerSecond < 1) {
     return `${formatNumber(requestsPerSecond, 2)} req/s`;
   }
-  
+
   if (requestsPerSecond < 1000) {
     return `${formatNumber(requestsPerSecond, 1)} req/s`;
   }
-  
+
   return `${formatNumber(requestsPerSecond / 1000, 1)}K req/s`;
 };
 
@@ -114,24 +111,24 @@ export const formatDate = (timestamp: number): string => {
 export const formatRelativeTime = (timestamp: number): string => {
   const now = Date.now();
   const diff = now - timestamp;
-  
+
   const seconds = Math.floor(diff / 1000);
   const minutes = Math.floor(seconds / 60);
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
-  
+
   if (days > 0) {
     return `${days}天前`;
   }
-  
+
   if (hours > 0) {
     return `${hours}小时前`;
   }
-  
+
   if (minutes > 0) {
     return `${minutes}分钟前`;
   }
-  
+
   return `${seconds}秒前`;
 };
 
@@ -147,7 +144,7 @@ export const formatConfidenceInterval = (value: number, margin: number, unit: st
 
 export const formatGrowthRate = (current: number, previous: number): string => {
   if (previous === 0) return 'N/A';
-  
+
   const growth = ((current - previous) / previous) * 100;
   const sign = growth >= 0 ? '+' : '';
   return `${sign}${formatNumber(growth, 1)}%`;

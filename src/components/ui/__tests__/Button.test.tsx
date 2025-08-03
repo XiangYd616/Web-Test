@@ -53,7 +53,7 @@ describe('Button Component', () => {
   it('handles click events', () => {
     const handleClick = vi.fn();
     render(<Button onClick={handleClick}>Click me</Button>);
-    
+
     fireEvent.click(screen.getByRole('button'));
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
@@ -61,7 +61,7 @@ describe('Button Component', () => {
   it('does not trigger click when disabled', () => {
     const handleClick = vi.fn();
     render(<Button onClick={handleClick} disabled>Disabled</Button>);
-    
+
     fireEvent.click(screen.getByRole('button'));
     expect(handleClick).not.toHaveBeenCalled();
   });
@@ -69,7 +69,7 @@ describe('Button Component', () => {
   it('does not trigger click when loading', () => {
     const handleClick = vi.fn();
     render(<Button onClick={handleClick} loading>Loading</Button>);
-    
+
     fireEvent.click(screen.getByRole('button'));
     expect(handleClick).not.toHaveBeenCalled();
   });
@@ -105,11 +105,11 @@ describe('Button Component', () => {
   it('supports keyboard navigation', () => {
     const handleClick = vi.fn();
     render(<Button onClick={handleClick}>Keyboard test</Button>);
-    
+
     const button = screen.getByRole('button');
     fireEvent.keyDown(button, { key: 'Enter' });
     expect(handleClick).toHaveBeenCalledTimes(1);
-    
+
     fireEvent.keyDown(button, { key: ' ' });
     expect(handleClick).toHaveBeenCalledTimes(2);
   });

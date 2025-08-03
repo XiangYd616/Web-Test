@@ -1,7 +1,3 @@
-/**
- * 数据标准化处理管道
- * 统一处理来自不同数据源的测试数据，确保数据格式一致性
- */
 
 import { RealTimeMetrics, TestDataPoint, TestPhase } from './testStateManager';
 
@@ -106,9 +102,6 @@ export interface CleaningOptions {
   fillMissingValues: boolean;
 }
 
-/**
- * 数据标准化处理管道类
- */
 export class DataNormalizationPipeline {
   private validationRules: ValidationRules;
   private cleaningOptions: CleaningOptions;

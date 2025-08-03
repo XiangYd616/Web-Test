@@ -28,7 +28,7 @@ const setViewport = (width: number, height: number) => {
     configurable: true,
     value: height,
   });
-  
+
   // Trigger resize event
   window.dispatchEvent(new Event('resize'));
 };
@@ -54,7 +54,7 @@ describe('Responsive Design Tests', () => {
   describe('Button Responsive Behavior', () => {
     it('adapts button sizes on mobile devices', () => {
       setViewport(viewports.mobile.width, viewports.mobile.height);
-      
+
       const { container } = render(
         <div className="p-4 space-y-2">
           <Button fullWidth>Mobile Full Width</Button>
@@ -65,7 +65,7 @@ describe('Responsive Design Tests', () => {
 
       const fullWidthButton = screen.getByText('Mobile Full Width');
       expect(fullWidthButton).toHaveClass('btn-full-width');
-      
+
       // On mobile, buttons should be more touch-friendly
       const smallButton = screen.getByText('Mobile Small');
       expect(smallButton).toHaveClass('btn-sm');
@@ -73,7 +73,7 @@ describe('Responsive Design Tests', () => {
 
     it('maintains proper spacing on tablet devices', () => {
       setViewport(viewports.tablet.width, viewports.tablet.height);
-      
+
       render(
         <div className="flex flex-wrap gap-2 md:gap-4 p-4">
           <Button>Tablet Button 1</Button>
@@ -84,7 +84,7 @@ describe('Responsive Design Tests', () => {
 
       const buttons = screen.getAllByRole('button');
       expect(buttons).toHaveLength(3);
-      
+
       // Buttons should be properly spaced on tablet
       buttons.forEach(button => {
         expect(button).toBeInTheDocument();
@@ -93,7 +93,7 @@ describe('Responsive Design Tests', () => {
 
     it('displays properly on desktop devices', () => {
       setViewport(viewports.desktop.width, viewports.desktop.height);
-      
+
       render(
         <div className="flex space-x-4 p-4">
           <Button variant="primary">Desktop Primary</Button>
@@ -104,7 +104,7 @@ describe('Responsive Design Tests', () => {
 
       const buttons = screen.getAllByRole('button');
       expect(buttons).toHaveLength(3);
-      
+
       // Desktop should have proper horizontal spacing
       buttons.forEach(button => {
         expect(button).toBeInTheDocument();
@@ -115,7 +115,7 @@ describe('Responsive Design Tests', () => {
   describe('Card Responsive Behavior', () => {
     it('stacks cards vertically on mobile', () => {
       setViewport(viewports.mobile.width, viewports.mobile.height);
-      
+
       const { container } = render(
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
           <Card>Mobile Card 1</Card>
@@ -126,7 +126,7 @@ describe('Responsive Design Tests', () => {
 
       const cards = screen.getAllByText(/Mobile Card/);
       expect(cards).toHaveLength(3);
-      
+
       // On mobile, should use single column layout
       const gridContainer = container.querySelector('.grid');
       expect(gridContainer).toHaveClass('grid-cols-1');
@@ -134,7 +134,7 @@ describe('Responsive Design Tests', () => {
 
     it('displays cards in grid on tablet', () => {
       setViewport(viewports.tablet.width, viewports.tablet.height);
-      
+
       const { container } = render(
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
           <Card>Tablet Card 1</Card>
@@ -146,7 +146,7 @@ describe('Responsive Design Tests', () => {
 
       const cards = screen.getAllByText(/Tablet Card/);
       expect(cards).toHaveLength(4);
-      
+
       // On tablet, should use 2-column layout
       const gridContainer = container.querySelector('.grid');
       expect(gridContainer).toHaveClass('md:grid-cols-2');
@@ -154,7 +154,7 @@ describe('Responsive Design Tests', () => {
 
     it('optimizes card layout for desktop', () => {
       setViewport(viewports.desktop.width, viewports.desktop.height);
-      
+
       const { container } = render(
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
           <Card>Desktop Card 1</Card>
@@ -167,7 +167,7 @@ describe('Responsive Design Tests', () => {
 
       const cards = screen.getAllByText(/Desktop Card/);
       expect(cards).toHaveLength(5);
-      
+
       // On desktop, should use 3+ column layout
       const gridContainer = container.querySelector('.grid');
       expect(gridContainer).toHaveClass('lg:grid-cols-3');
@@ -191,7 +191,7 @@ describe('Responsive Design Tests', () => {
 
     it('becomes horizontally scrollable on mobile', () => {
       setViewport(viewports.mobile.width, viewports.mobile.height);
-      
+
       const { container } = render(
         <div className="overflow-x-auto">
           <Table columns={mockColumns} data={mockData} />
@@ -200,18 +200,18 @@ describe('Responsive Design Tests', () => {
 
       const tableContainer = container.querySelector('.overflow-x-auto');
       expect(tableContainer).toBeInTheDocument();
-      
+
       const table = screen.getByRole('table');
       expect(table).toBeInTheDocument();
     });
 
     it('shows condensed view on tablet', () => {
       setViewport(viewports.tablet.width, viewports.tablet.height);
-      
+
       render(
-        <Table 
+        <Table
           columns={mockColumns.slice(0, 4)} // Show fewer columns on tablet
-          data={mockData} 
+          data={mockData}
           size="sm"
         />
       );
@@ -222,12 +222,12 @@ describe('Responsive Design Tests', () => {
 
     it('displays full table on desktop', () => {
       setViewport(viewports.desktop.width, viewports.desktop.height);
-      
+
       render(<Table columns={mockColumns} data={mockData} />);
 
       const table = screen.getByRole('table');
       expect(table).toBeInTheDocument();
-      
+
       // All columns should be visible on desktop
       mockColumns.forEach(column => {
         expect(screen.getByText(column.title)).toBeInTheDocument();
@@ -238,11 +238,11 @@ describe('Responsive Design Tests', () => {
   describe('Modal Responsive Behavior', () => {
     it('becomes fullscreen on mobile', () => {
       setViewport(viewports.mobile.width, viewports.mobile.height);
-      
+
       render(
-        <Modal 
-          open 
-          onClose={() => {}} 
+        <Modal
+          open
+          onClose={() => {}}
           title="Mobile Modal"
           size="responsive"
         >
@@ -252,7 +252,7 @@ describe('Responsive Design Tests', () => {
 
       const modal = screen.getByTestId('modal');
       expect(modal).toHaveClass('modal-responsive');
-      
+
       // On mobile, modal should take full screen
       const modalContent = screen.getByTestId('modal-content');
       expect(modalContent).toBeInTheDocument();
@@ -260,11 +260,11 @@ describe('Responsive Design Tests', () => {
 
     it('maintains proper size on tablet', () => {
       setViewport(viewports.tablet.width, viewports.tablet.height);
-      
+
       render(
-        <Modal 
-          open 
-          onClose={() => {}} 
+        <Modal
+          open
+          onClose={() => {}}
           title="Tablet Modal"
           size="md"
         >
@@ -278,11 +278,11 @@ describe('Responsive Design Tests', () => {
 
     it('centers properly on desktop', () => {
       setViewport(viewports.desktop.width, viewports.desktop.height);
-      
+
       render(
-        <Modal 
-          open 
-          onClose={() => {}} 
+        <Modal
+          open
+          onClose={() => {}}
           title="Desktop Modal"
           size="lg"
           centered
@@ -299,7 +299,7 @@ describe('Responsive Design Tests', () => {
   describe('Input Responsive Behavior', () => {
     it('optimizes input sizes for mobile', () => {
       setViewport(viewports.mobile.width, viewports.mobile.height);
-      
+
       render(
         <div className="p-4 space-y-4">
           <Input label="Mobile Input" size="lg" />
@@ -310,7 +310,7 @@ describe('Responsive Design Tests', () => {
 
       const inputs = screen.getAllByRole('textbox');
       expect(inputs).toHaveLength(3);
-      
+
       // Mobile inputs should be larger for better touch interaction
       const mobileInput = screen.getByLabelText('Mobile Input');
       expect(mobileInput).toHaveClass('input-lg');
@@ -318,7 +318,7 @@ describe('Responsive Design Tests', () => {
 
     it('maintains standard sizes on desktop', () => {
       setViewport(viewports.desktop.width, viewports.desktop.height);
-      
+
       render(
         <div className="grid grid-cols-2 gap-4 p-4">
           <Input label="Desktop Input 1" />
@@ -328,7 +328,7 @@ describe('Responsive Design Tests', () => {
 
       const inputs = screen.getAllByRole('textbox');
       expect(inputs).toHaveLength(2);
-      
+
       inputs.forEach(input => {
         expect(input).toBeInTheDocument();
       });
@@ -338,7 +338,7 @@ describe('Responsive Design Tests', () => {
   describe('Layout Responsive Behavior', () => {
     it('handles complex responsive layouts', () => {
       setViewport(viewports.mobile.width, viewports.mobile.height);
-      
+
       const { container } = render(
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -347,7 +347,7 @@ describe('Responsive Design Tests', () => {
               <Button fullWidth className="mt-2">Mobile Button</Button>
             </Card>
             <Card className="md:col-span-2">
-              <Table 
+              <Table
                 columns={[
                   { key: 'name', title: 'Name' },
                   { key: 'status', title: 'Status' }
@@ -369,7 +369,7 @@ describe('Responsive Design Tests', () => {
     it('adapts to different orientations', () => {
       // Portrait orientation
       setViewport(375, 667);
-      
+
       const { rerender } = render(
         <div className="flex flex-col md:flex-row gap-4 p-4">
           <Card className="flex-1">Portrait Card 1</Card>
@@ -378,10 +378,10 @@ describe('Responsive Design Tests', () => {
       );
 
       expect(screen.getByText('Portrait Card 1')).toBeInTheDocument();
-      
+
       // Landscape orientation
       setViewport(667, 375);
-      
+
       rerender(
         <div className="flex flex-col md:flex-row gap-4 p-4">
           <Card className="flex-1">Landscape Card 1</Card>
@@ -404,7 +404,7 @@ describe('Responsive Design Tests', () => {
 
       breakpoints.forEach(({ name, width, height }) => {
         setViewport(width, height);
-        
+
         const { container } = render(
           <div className={`
             p-2 sm:p-4 md:p-6 lg:p-8 xl:p-10

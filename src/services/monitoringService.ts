@@ -120,7 +120,7 @@ class MonitoringService {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newSite)
       });
-      
+
       const data = await response.json();
       if (data.success) {
         this.sites.push(data.data);
@@ -150,7 +150,7 @@ class MonitoringService {
       const response = await fetch(`${this.baseUrl}/monitoring/sites/${siteId}`, {
         method: 'DELETE'
       });
-      
+
       if (response.ok) {
         this.sites = this.sites.filter(site => site.id !== siteId);
         return;
@@ -169,7 +169,7 @@ class MonitoringService {
    */
   async checkSite(site: MonitoringSite): Promise<MonitoringData> {
     const startTime = Date.now();
-    
+
     try {
       // 使用fetch进行真实的HTTP请求检查
       const controller = new AbortController();
@@ -182,10 +182,10 @@ class MonitoringService {
       });
 
       clearTimeout(timeoutId);
-      
+
       const responseTime = Date.now() - startTime;
       const status = response.status || 200;
-      
+
       const monitoringData: MonitoringData = {
         timestamp: new Date().toISOString(),
         siteId: site.id,
@@ -207,15 +207,15 @@ class MonitoringService {
       });
 
       this.monitoringData.push(monitoringData);
-      
+
       // 检查告警规则
       this.checkAlerts(site, monitoringData);
-      
+
       return monitoringData;
-      
+
     } catch (error) {
       const responseTime = Date.now() - startTime;
-      
+
       const monitoringData: MonitoringData = {
         timestamp: new Date().toISOString(),
         siteId: site.id,
@@ -238,7 +238,7 @@ class MonitoringService {
       });
 
       this.monitoringData.push(monitoringData);
-      
+
       return monitoringData;
     }
   }
@@ -251,13 +251,13 @@ class MonitoringService {
       // 在真实环境中，这需要后端服务来检查SSL证书
       // 这里提供一个模拟实现
       const hostname = new URL(url).hostname;
-      
+
       // 模拟SSL检查结果
       const expiryDate = new Date();
       expiryDate.setDate(expiryDate.getDate() + Math.random() * 365 + 30); // 30-395天后过期
-      
+
       const daysUntilExpiry = Math.floor((expiryDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-      
+
       return {
         valid: daysUntilExpiry > 0,
         expiryDate: expiryDate.toISOString(),
@@ -278,11 +278,11 @@ class MonitoringService {
 
     this.monitoringInterval = setInterval(async () => {
       const enabledSites = this.sites.filter(site => site.enabled);
-      
+
       for (const site of enabledSites) {
         try {
           await this.checkSite(site);
-          
+
           // 检查SSL证书（每小时检查一次）
           if (Math.random() < 0.1) { // 10%概率检查SSL
             const sslInfo = await this.checkSSLCertificate(site.url);
@@ -294,7 +294,7 @@ class MonitoringService {
         } catch (error) {
           console.error(`Error checking site ${site.url}:`, error);
         }
-        
+
         // 避免同时发送太多请求
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
@@ -316,11 +316,11 @@ class MonitoringService {
    */
   getMonitoringData(siteId?: string, limit: number = 50): MonitoringData[] {
     let data = this.monitoringData;
-    
+
     if (siteId) {
       data = data.filter(d => d.siteId === siteId);
     }
-    
+
     return data
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       .slice(0, limit);
@@ -332,11 +332,11 @@ class MonitoringService {
   getMonitoringStats(): MonitoringStats {
     const totalSites = this.sites.length;
     const onlineSites = this.sites.filter(site => site.status === 'online').length;
-    const avgResponseTime = totalSites > 0 
-      ? this.sites.reduce((sum, site) => sum + site.responseTime, 0) / totalSites 
+    const avgResponseTime = totalSites > 0
+      ? this.sites.reduce((sum, site) => sum + site.responseTime, 0) / totalSites
       : 0;
-    const totalUptime = totalSites > 0 
-      ? this.sites.reduce((sum, site) => sum + site.uptime, 0) / totalSites 
+    const totalUptime = totalSites > 0
+      ? this.sites.reduce((sum, site) => sum + site.uptime, 0) / totalSites
       : 0;
     const activeAlerts = this.sites.reduce((sum, site) => sum + site.alerts, 0);
     const validCertificates = this.sites.filter(site => site.certificateValid).length;
@@ -368,13 +368,13 @@ class MonitoringService {
    * 私有方法：检查告警规则
    */
   private checkAlerts(site: MonitoringSite, data: MonitoringData): void {
-    const siteAlerts = this.alertRules.filter(rule => 
+    const siteAlerts = this.alertRules.filter(rule =>
       rule.siteId === site.id && rule.enabled
     );
 
     for (const alert of siteAlerts) {
       let shouldAlert = false;
-      
+
       switch (alert.condition) {
         case 'response_time':
           shouldAlert = this.evaluateCondition(data.responseTime, alert.operator, alert.threshold);

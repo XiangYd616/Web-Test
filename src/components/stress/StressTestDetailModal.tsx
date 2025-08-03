@@ -1,20 +1,7 @@
-import {
-  AlertCircle,
-  BarChart3,
-  Calendar,
-  CheckCircle,
-  Clock,
-  Copy,
-  Download,
-  Settings,
-  TrendingUp,
-  Users,
-  X,
-  XCircle,
-  Zap
-} from 'lucide-react';
+import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Copy, Download, Settings, TrendingUp, Users, X, XCircle, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+
 import './StressTestDetailModal.css';
 
 interface StressTestDetailModalProps {
@@ -123,11 +110,52 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = ({
     return new Date(dateString).toLocaleString('zh-CN');
   };
 
-  const formatDuration = (seconds: number) => {
-    if (seconds < 60) return `${seconds}秒`;
+  // 🔧 修复：使用与历史记录页面相同的持续时间计算逻辑
+  const formatDuration = (record: any) => {
+    // 对于运行中的测试，不显示时长
+    if (record.status === 'running' || record.status === 'pending') {
+      return '-';
+    }
+
+    // 优先使用 duration
+    let seconds = record.duration;
+
+    // 如果没有duration，尝试从results.metrics获取
+    if ((!seconds || seconds <= 0) && record.results?.metrics?.duration) {
+      seconds = record.results.metrics.duration;
+    }
+
+    // 如果还是没有，尝试从results.summary获取
+    if ((!seconds || seconds <= 0) && record.results?.summary?.duration) {
+      seconds = record.results.summary.duration;
+    }
+
+    // 尝试从results直接获取
+    if ((!seconds || seconds <= 0) && record.results?.duration) {
+      seconds = record.results.duration;
+    }
+
+    // 尝试从actualDuration获取（如果存在）
+    if ((!seconds || seconds <= 0) && record.actualDuration) {
+      seconds = record.actualDuration;
+    }
+
+    // 最后尝试计算时间差（仅对已完成的测试）
+    if ((!seconds || seconds <= 0) && record.startTime && record.endTime) {
+      const start = new Date(record.startTime).getTime();
+      const end = new Date(record.endTime).getTime();
+      seconds = Math.floor((end - start) / 1000);
+    }
+
+    if (!seconds || seconds <= 0) return '-';
+
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return `${minutes}分${remainingSeconds}秒`;
+    if (minutes > 0) {
+      return `${minutes}分${remainingSeconds}秒`;
+    } else {
+      return `${remainingSeconds}秒`;
+    }
   };
 
   const copyToClipboard = (text: string) => {
@@ -241,7 +269,7 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = ({
                     <Clock className="w-4 h-4 text-green-400" />
                     <span className="text-sm text-gray-400">持续时间</span>
                   </div>
-                  <p className="text-white font-medium">{formatDuration(record.duration || 0)}</p>
+                  <p className="text-white font-medium">{formatDuration(record)}</p>
                 </div>
                 <div className="bg-gray-800 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
@@ -253,9 +281,18 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = ({
                 <div className="bg-gray-800 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Zap className="w-4 h-4 text-yellow-400" />
-                    <span className="text-sm text-gray-400">总体评分</span>
+                    <span className="text-sm text-gray-400">错误率</span>
                   </div>
-                  <p className="text-white font-medium">{record.overallScore || '-'}</p>
+                  <p className="text-white font-medium">
+                    {(() => {
+                      const errorRate = record.results?.metrics?.errorRate ||
+                        record.errorRate ||
+                        (record.results?.metrics?.failedRequests && record.results?.metrics?.totalRequests
+                          ? ((record.results.metrics.failedRequests / record.results.metrics.totalRequests) * 100)
+                          : 0);
+                      return errorRate > 0 ? `${errorRate.toFixed(2)}%` : '0%';
+                    })()}
+                  </p>
                 </div>
               </div>
 
@@ -284,32 +321,70 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = ({
           {activeTab === 'metrics' && (
             <div className="space-y-6">
               <h3 className="text-lg font-semibold text-white">性能指标</h3>
+
+              {/* 所有指标统一显示 */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="bg-gray-800 rounded-lg p-4">
                   <h4 className="text-sm text-gray-400 mb-2">总请求数</h4>
-                  <p className="text-2xl font-bold text-white">{metrics.totalRequests || 0}</p>
+                  <p className="text-2xl font-bold text-white">{record.totalRequests || metrics.totalRequests || 0}</p>
                 </div>
                 <div className="bg-gray-800 rounded-lg p-4">
                   <h4 className="text-sm text-gray-400 mb-2">成功请求</h4>
-                  <p className="text-2xl font-bold text-green-400">{metrics.successfulRequests || 0}</p>
+                  <p className="text-2xl font-bold text-green-400">{record.successfulRequests || metrics.successfulRequests || 0}</p>
                 </div>
                 <div className="bg-gray-800 rounded-lg p-4">
                   <h4 className="text-sm text-gray-400 mb-2">失败请求</h4>
-                  <p className="text-2xl font-bold text-red-400">{metrics.failedRequests || 0}</p>
+                  <p className="text-2xl font-bold text-red-400">{record.failedRequests || metrics.failedRequests || 0}</p>
                 </div>
                 <div className="bg-gray-800 rounded-lg p-4">
                   <h4 className="text-sm text-gray-400 mb-2">平均响应时间</h4>
-                  <p className="text-2xl font-bold text-blue-400">{metrics.averageResponseTime || 0}ms</p>
+                  <p className="text-2xl font-bold text-blue-400">{record.averageResponseTime || metrics.averageResponseTime || 0}ms</p>
                 </div>
                 <div className="bg-gray-800 rounded-lg p-4">
                   <h4 className="text-sm text-gray-400 mb-2">峰值TPS</h4>
-                  <p className="text-2xl font-bold text-purple-400">{metrics.peakTPS || 0}</p>
+                  <p className="text-2xl font-bold text-purple-400">{record.peakTps || metrics.peakTPS || 0}</p>
                 </div>
                 <div className="bg-gray-800 rounded-lg p-4">
                   <h4 className="text-sm text-gray-400 mb-2">错误率</h4>
-                  <p className="text-2xl font-bold text-yellow-400">{(metrics.errorRate || 0).toFixed(2)}%</p>
+                  <p className="text-2xl font-bold text-yellow-400">{((record.errorRate || metrics.errorRate || 0)).toFixed(2)}%</p>
                 </div>
+                {metrics.minResponseTime && (
+                  <div className="bg-gray-800 rounded-lg p-4">
+                    <h4 className="text-sm text-gray-400 mb-2">最小响应时间</h4>
+                    <p className="text-2xl font-bold text-green-400">{metrics.minResponseTime}ms</p>
+                  </div>
+                )}
+                {metrics.maxResponseTime && (
+                  <div className="bg-gray-800 rounded-lg p-4">
+                    <h4 className="text-sm text-gray-400 mb-2">最大响应时间</h4>
+                    <p className="text-2xl font-bold text-red-400">{metrics.maxResponseTime}ms</p>
+                  </div>
+                )}
+                {record.performanceGrade && (
+                  <div className="bg-gray-800 rounded-lg p-4">
+                    <h4 className="text-sm text-gray-400 mb-2">性能等级</h4>
+                    <p className={`text-2xl font-bold ${record.performanceGrade.startsWith('A') ? 'text-green-400' :
+                      record.performanceGrade.startsWith('B') ? 'text-blue-400' :
+                        record.performanceGrade.startsWith('C') ? 'text-yellow-400' :
+                          'text-red-400'
+                      }`}>{record.performanceGrade}</p>
+                  </div>
+                )}
               </div>
+
+              {/* 标签显示 */}
+              {record.tags && record.tags.length > 0 && (
+                <div>
+                  <h4 className="text-md font-semibold text-white mb-4">标签</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {record.tags.map((tag, index) => (
+                      <span key={index} className="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full bg-gray-700 text-gray-300 border border-gray-600">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

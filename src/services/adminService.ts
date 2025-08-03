@@ -1,27 +1,27 @@
 // 后台管理服务 - 真实API实现
 
 import type {
-  SystemStats,
-  AdminUser,
-  UserFilter,
-  UserBulkAction,
-  TestManagement,
-  TestFilter,
-  SystemConfig,
-  ActivityLog,
   ActivityFilter,
-  SystemMonitor,
+  ActivityLog,
+  AdminApiResponse,
+  AdminUser,
   BackupInfo,
   PermissionGroup,
-  AdminApiResponse
+  SystemConfig,
+  SystemMonitor,
+  SystemStats,
+  TestFilter,
+  TestManagement,
+  UserBulkAction,
+  UserFilter
 } from '../types/admin';
-import type { User, CreateUserData, UpdateUserData } from '../types/user';
+import type { CreateUserData, UpdateUserData, User } from '../types/user';
 
 class AdminService {
   private static instance: AdminService;
   private baseURL = '/api/admin';
 
-  private constructor() {}
+  private constructor() { }
 
   static getInstance(): AdminService {
     if (!AdminService.instance) {
@@ -96,6 +96,10 @@ class AdminService {
 
   async getSystemMonitor(): Promise<SystemMonitor> {
     return this.apiRequest<SystemMonitor>('/monitor');
+  }
+
+  async getTestHistory(): Promise<any[]> {
+    return this.apiRequest<any[]>('/test-history');
   }
 
   // ==================== 用户管理 ====================
@@ -601,8 +605,6 @@ class AdminService {
       };
     }
   }
-
-
 
   // ==================== 权限管理 ====================
 

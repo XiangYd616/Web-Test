@@ -1,21 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Settings,
-  Save,
-  RefreshCw,
-  Globe,
-  Shield,
-  Mail,
-  Database,
-  Server,
-  Monitor,
-  AlertTriangle,
-  CheckCircle,
-  Info,
-  Lock,
-  Clock,
-  HardDrive
-} from 'lucide-react';
 import type { SystemConfig } from '../../types/admin';
 
 const SystemSettings: React.FC = () => {
@@ -108,11 +91,11 @@ const SystemSettings: React.FC = () => {
   const handleSave = async () => {
     setSaving(true);
     setSaveStatus('idle');
-    
+
     try {
       // 模拟保存配置
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       setSaveStatus('success');
       setTimeout(() => setSaveStatus('idle'), 3000);
     } catch (error) {
@@ -125,7 +108,7 @@ const SystemSettings: React.FC = () => {
 
   const handleTestEmail = async () => {
     setTestingEmail(true);
-    
+
     try {
       // 模拟发送测试邮件
       await new Promise(resolve => setTimeout(resolve, 2000));
@@ -216,7 +199,7 @@ const SystemSettings: React.FC = () => {
             {activeTab === 'general' && (
               <div className="space-y-6">
                 <h3 className="text-lg font-medium text-gray-900">常规设置</h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -511,7 +494,7 @@ const SystemSettings: React.FC = () => {
             {activeTab === 'security' && (
               <div className="space-y-6">
                 <h3 className="text-lg font-medium text-gray-900">安全设置</h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -634,7 +617,7 @@ const SystemSettings: React.FC = () => {
                     <span>{testingEmail ? '发送中...' : '测试邮件'}</span>
                   </button>
                 </div>
-                
+
                 <div className="flex items-center mb-6">
                   <input
                     type="checkbox"
@@ -740,7 +723,7 @@ const SystemSettings: React.FC = () => {
             {activeTab === 'backup' && (
               <div className="space-y-6">
                 <h3 className="text-lg font-medium text-gray-900">备份设置</h3>
-                
+
                 <div className="flex items-center mb-6">
                   <input
                     type="checkbox"

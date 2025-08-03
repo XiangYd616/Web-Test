@@ -1,10 +1,7 @@
-/**
- * 优化的实时压力测试图表组件
- * 解决性能问题，支持大数据量显示
- */
+
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { BarChart3, Settings, TrendingUp } from 'lucide-react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 // 数据点接口
 interface DataPoint {

@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
+import { Card, CardBody, CardHeader, CardTitle } from './Card';
 import { URLInput } from './URLInput';
-import { Card, CardHeader, CardTitle, CardBody } from './Card';
 
-/**
- * URL输入组件测试页面
- * 展示不同配置下的URL输入组件效果
- */
 export const URLInputTest: React.FC = () => {
   const [basicUrl, setBasicUrl] = useState('');
   const [validatedUrl, setValidatedUrl] = useState('');
   const [compactUrl, setCompactUrl] = useState('');
   const [disabledUrl, setDisabledUrl] = useState('https://example.com');
+  const [responsiveUrl, setResponsiveUrl] = useState('');
+  const [fullWidthUrl, setFullWidthUrl] = useState('');
 
   const handleValidationChange = (isValid: boolean, url?: string) => {
     console.log('URL验证结果:', { isValid, url });
@@ -20,7 +18,7 @@ export const URLInputTest: React.FC = () => {
     <div className="p-6 space-y-6 bg-gray-900 min-h-screen">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold text-white mb-6">URL输入组件测试</h1>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* 基础URL输入 */}
           <Card>
@@ -102,6 +100,83 @@ export const URLInputTest: React.FC = () => {
                 />
                 <div className="text-sm text-gray-400">
                   当前值: {disabledUrl}
+                </div>
+              </div>
+            </CardBody>
+          </Card>
+        </div>
+
+        {/* 响应式布局演示 */}
+        <div className="grid grid-cols-1 gap-6 mt-6">
+          {/* 全宽度URL输入 */}
+          <Card>
+            <CardHeader>
+              <CardTitle>全宽度响应式URL输入</CardTitle>
+            </CardHeader>
+            <CardBody>
+              <div className="url-input-container">
+                <URLInput
+                  value={fullWidthUrl}
+                  onChange={(e) => setFullWidthUrl(e.target.value)}
+                  placeholder="这个URL输入框会占满整个容器宽度..."
+                  enableValidation={true}
+                  className="url-input-full-width"
+                />
+                <div className="text-sm text-gray-400 mt-2">
+                  演示：URL输入框占满整个容器宽度，在不同屏幕尺寸下自适应
+                </div>
+              </div>
+            </CardBody>
+          </Card>
+
+          {/* 与按钮并排的响应式布局 */}
+          <Card>
+            <CardHeader>
+              <CardTitle>与按钮并排的响应式布局</CardTitle>
+            </CardHeader>
+            <CardBody>
+              <div className="url-input-responsive with-button">
+                <div className="url-input-wrapper">
+                  <URLInput
+                    value={responsiveUrl}
+                    onChange={(e) => setResponsiveUrl(e.target.value)}
+                    placeholder="在大屏幕上与按钮并排，小屏幕上堆叠..."
+                    enableValidation={true}
+                    className="url-input-field"
+                  />
+                </div>
+                <button
+                  type="button"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors whitespace-nowrap"
+                >
+                  开始测试
+                </button>
+              </div>
+              <div className="text-sm text-gray-400 mt-2">
+                演示：在桌面端URL输入框与按钮并排显示，在移动端垂直堆叠
+              </div>
+            </CardBody>
+          </Card>
+
+          {/* 表单组布局 */}
+          <Card>
+            <CardHeader>
+              <CardTitle>表单组布局</CardTitle>
+            </CardHeader>
+            <CardBody>
+              <div className="url-input-form-group">
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  网站URL *
+                </label>
+                <URLInput
+                  value={basicUrl}
+                  onChange={(e) => setBasicUrl(e.target.value)}
+                  placeholder="请输入要测试的网站URL..."
+                  enableValidation={true}
+                  required
+                />
+                <div className="text-xs text-gray-500 mt-1">
+                  请输入完整的网站地址，包括协议（http://或https://）
                 </div>
               </div>
             </CardBody>

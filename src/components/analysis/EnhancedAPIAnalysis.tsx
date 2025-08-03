@@ -86,7 +86,7 @@ export const EnhancedAPIAnalysis: React.FC<EnhancedAPIAnalysisProps> = ({ result
           </div>
           <div className="mt-2 text-sm font-medium text-gray-900">总体评分</div>
         </div>
-        
+
         <div className="text-center">
           <div className="flex items-center justify-center mb-2">
             <Zap className="w-5 h-5 text-blue-500 mr-1" />
@@ -94,7 +94,7 @@ export const EnhancedAPIAnalysis: React.FC<EnhancedAPIAnalysisProps> = ({ result
           </div>
           <div className="text-sm text-gray-600">性能表现</div>
         </div>
-        
+
         <div className="text-center">
           <div className="flex items-center justify-center mb-2">
             <Shield className="w-5 h-5 text-green-500 mr-1" />
@@ -102,7 +102,7 @@ export const EnhancedAPIAnalysis: React.FC<EnhancedAPIAnalysisProps> = ({ result
           </div>
           <div className="text-sm text-gray-600">可靠性</div>
         </div>
-        
+
         <div className="text-center">
           <div className="flex items-center justify-center mb-2">
             <Shield className="w-5 h-5 text-purple-500 mr-1" />
@@ -120,22 +120,22 @@ export const EnhancedAPIAnalysis: React.FC<EnhancedAPIAnalysisProps> = ({ result
             <div className="text-lg font-bold text-gray-900">{analysis.metrics.averageResponseTime}ms</div>
             <div className="text-xs text-gray-600">平均响应时间</div>
           </div>
-          
+
           <div className="text-center p-3 bg-gray-50 rounded-lg">
             <div className="text-lg font-bold text-gray-900">{analysis.metrics.successRate.toFixed(1)}%</div>
             <div className="text-xs text-gray-600">成功率</div>
           </div>
-          
+
           <div className="text-center p-3 bg-gray-50 rounded-lg">
             <div className="text-lg font-bold text-gray-900">{analysis.metrics.totalRequests}</div>
             <div className="text-xs text-gray-600">总请求数</div>
           </div>
-          
+
           <div className="text-center p-3 bg-gray-50 rounded-lg">
             <div className="text-lg font-bold text-gray-900">{formatBytes(analysis.metrics.dataTransferred)}</div>
             <div className="text-xs text-gray-600">数据传输</div>
           </div>
-          
+
           <div className="text-center p-3 bg-gray-50 rounded-lg">
             <div className="text-lg font-bold text-gray-900">{analysis.metrics.errorRate.toFixed(1)}%</div>
             <div className="text-xs text-gray-600">错误率</div>
@@ -242,7 +242,7 @@ export const EnhancedAPIAnalysis: React.FC<EnhancedAPIAnalysisProps> = ({ result
                       recommendation.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
                       'bg-green-100 text-green-800'
                     }`}>
-                      {recommendation.priority === 'high' ? '高优先级' : 
+                      {recommendation.priority === 'high' ? '高优先级' :
                        recommendation.priority === 'medium' ? '中优先级' : '低优先级'}
                     </span>
                   </div>

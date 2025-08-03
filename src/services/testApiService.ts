@@ -1,6 +1,3 @@
-/**
- * 测试API服务 - 处理各种测试相关的API调用
- */
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 

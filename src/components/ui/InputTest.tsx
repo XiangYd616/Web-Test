@@ -1,15 +1,8 @@
 import React, { useState } from 'react';
-import { 
-  Input, 
-  PasswordInput, 
-  SearchInput, 
-  NumberInput, 
-  Textarea, 
-  Select 
-} from './Input';
+import { User, Mail, Phone, Globe, Settings } from 'lucide-react';
+
 import { Button } from './Button';
 import { Card, CardHeader, CardTitle, CardBody } from './Card';
-import { User, Mail, Phone, Globe, Settings } from 'lucide-react';
 
 export const InputTest: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -33,7 +26,7 @@ export const InputTest: React.FC = () => {
       ...prev,
       [field]: e.target.value
     }));
-    
+
     // 清除错误
     if (errors[field]) {
       setErrors(prev => ({
@@ -45,14 +38,14 @@ export const InputTest: React.FC = () => {
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!formData.name) newErrors.name = '姓名不能为空';
     if (!formData.email) newErrors.email = '邮箱不能为空';
     else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = '邮箱格式不正确';
     if (!formData.password) newErrors.password = '密码不能为空';
     else if (formData.password.length < 6) newErrors.password = '密码至少6位';
     if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = '密码不一致';
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -84,7 +77,7 @@ export const InputTest: React.FC = () => {
     <div className="p-8 space-y-8 bg-gray-900 min-h-screen">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-white mb-8">Input组件测试展示</h1>
-        
+
         {/* 基础输入框 */}
         <section className="mb-12">
           <h2 className="text-xl font-semibold text-white mb-6">基础输入框</h2>
@@ -94,13 +87,13 @@ export const InputTest: React.FC = () => {
               placeholder="请输入内容"
               description="这是一个默认样式的输入框"
             />
-            
+
             <Input
               label="填充样式"
               variant="filled"
               placeholder="填充样式输入框"
             />
-            
+
             <Input
               label="轮廓样式"
               variant="outlined"
@@ -128,7 +121,7 @@ export const InputTest: React.FC = () => {
               leftIcon={<User className="h-4 w-4" />}
               placeholder="请输入用户名"
             />
-            
+
             <Input
               label="邮箱地址"
               leftIcon={<Mail className="h-4 w-4" />}
@@ -146,19 +139,19 @@ export const InputTest: React.FC = () => {
               label="正常状态"
               placeholder="正常输入框"
             />
-            
+
             <Input
               label="错误状态"
               placeholder="错误输入框"
               error="这是错误信息"
             />
-            
+
             <Input
               label="成功状态"
               placeholder="成功输入框"
               success="验证通过"
             />
-            
+
             <Input
               label="加载状态"
               placeholder="加载中..."
@@ -176,7 +169,7 @@ export const InputTest: React.FC = () => {
               placeholder="请输入密码"
               description="密码将被安全加密"
             />
-            
+
             <SearchInput
               label="搜索输入"
               placeholder="搜索测试记录..."
@@ -185,7 +178,7 @@ export const InputTest: React.FC = () => {
               onSearch={(value) => alert(`搜索: ${value}`)}
               onClear={() => setSearchValue('')}
             />
-            
+
             <NumberInput
               label="数字输入"
               placeholder="请输入数字"
@@ -193,7 +186,7 @@ export const InputTest: React.FC = () => {
               max={100}
               step={1}
             />
-            
+
             <Input
               label="禁用状态"
               placeholder="禁用的输入框"
@@ -212,7 +205,7 @@ export const InputTest: React.FC = () => {
               description="支持多行文本输入"
               rows={4}
             />
-            
+
             <div className="space-y-4">
               <Select
                 label="国家选择"
@@ -220,7 +213,7 @@ export const InputTest: React.FC = () => {
                 options={countryOptions}
                 description="选择您所在的国家"
               />
-              
+
               <Select
                 label="测试类型"
                 placeholder="请选择测试类型"
@@ -250,7 +243,7 @@ export const InputTest: React.FC = () => {
                     error={errors.name}
                     required
                   />
-                  
+
                   <Input
                     label="邮箱"
                     type="email"
@@ -261,7 +254,7 @@ export const InputTest: React.FC = () => {
                     error={errors.email}
                     required
                   />
-                  
+
                   <PasswordInput
                     label="密码"
                     placeholder="请输入密码"
@@ -271,7 +264,7 @@ export const InputTest: React.FC = () => {
                     description="密码至少6位"
                     required
                   />
-                  
+
                   <PasswordInput
                     label="确认密码"
                     placeholder="请再次输入密码"
@@ -280,7 +273,7 @@ export const InputTest: React.FC = () => {
                     error={errors.confirmPassword}
                     required
                   />
-                  
+
                   <Input
                     label="手机号"
                     type="tel"
@@ -289,7 +282,7 @@ export const InputTest: React.FC = () => {
                     value={formData.phone}
                     onChange={handleInputChange('phone')}
                   />
-                  
+
                   <Input
                     label="个人网站"
                     type="url"
@@ -298,7 +291,7 @@ export const InputTest: React.FC = () => {
                     value={formData.website}
                     onChange={handleInputChange('website')}
                   />
-                  
+
                   <NumberInput
                     label="年龄"
                     placeholder="请输入年龄"
@@ -307,7 +300,7 @@ export const InputTest: React.FC = () => {
                     value={formData.age}
                     onChange={handleInputChange('age')}
                   />
-                  
+
                   <Select
                     label="国家"
                     placeholder="请选择国家"
@@ -316,7 +309,7 @@ export const InputTest: React.FC = () => {
                     onChange={handleInputChange('country')}
                   />
                 </div>
-                
+
                 <Textarea
                   label="个人简介"
                   placeholder="请简单介绍一下自己..."
@@ -324,7 +317,7 @@ export const InputTest: React.FC = () => {
                   onChange={handleInputChange('bio')}
                   rows={4}
                 />
-                
+
                 <div className="flex justify-end gap-3">
                   <Button type="button" variant="ghost">
                     取消

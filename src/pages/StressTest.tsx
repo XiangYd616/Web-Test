@@ -1,6 +1,7 @@
-/* cSpell:ignore cooldown rampup rampdown */
-import { AlertCircle, AlertTriangle, BarChart3, CheckCircle, Clock, Download, FileText, Loader, Play, RotateCcw, Square, TrendingUp, Users, XCircle, Zap } from 'lucide-react';
+
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { AlertCircle, AlertTriangle, BarChart3, CheckCircle, Clock, Download, FileText, Loader, Play, RotateCcw, Square, TrendingUp, Users, XCircle, Zap } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { AdvancedStressTestChart, UnifiedStressTestCharts } from '../components/charts';
 import { RealTimeStressChart } from '../components/charts/RealTimeStressChart';
@@ -9,9 +10,6 @@ import CancelTestConfirmDialog from '../components/dialogs/CancelTestConfirmDial
 import CancelProgressFeedback from '../components/feedback/CancelProgressFeedback';
 import StressTestHistory from '../components/stress/StressTestHistory';
 import { URLInput } from '../components/testing';
-import {
-    TestPageLayout
-} from '../components/testing/UnifiedTestingComponents';
 import { AdvancedStressTestConfig as ImportedAdvancedStressTestConfig } from '../hooks/useSimpleTestEngine';
 import { useStressTestRecord } from '../hooks/useStressTestRecord';
 import { useUserStats } from '../hooks/useUserStats';
@@ -19,9 +17,6 @@ import backgroundTestManager from '../services/backgroundTestManager';
 import { systemResourceMonitor } from '../services/systemResourceMonitor';
 import { testEngineManager } from '../services/testEngines';
 import { TestPhase, type RealTimeMetrics, type TestDataPoint } from '../services/testStateManager';
-// CSS样式已迁移到组件库中
-// 图表样式已集成到Chart组件
-// 测试工具样式已集成到TestingTools组件
 import { getTemplateById } from '../utils/testTemplates';
 
 // 本地配置接口，继承导入的配置
@@ -32,10 +27,11 @@ interface StressTestConfig extends ImportedAdvancedStressTestConfig {
 // 生命周期压力测试配置接口 - 直接使用 StressTestConfig
 type LifecycleStressTestConfig = StressTestConfig;
 
-
-
 const StressTest: React.FC = () => {
     console.log('🔍 StressTest 组件开始渲染');
+
+    // 路由状态检查
+    const location = useLocation();
 
     // 登录检查
     const {
@@ -53,7 +49,6 @@ const StressTest: React.FC = () => {
     const { recordTestCompletion } = useUserStats();
     console.log('🔍 useUserStats 完成');
 
-    // 测试记录管理
     const {
         currentRecord,
         startRecording,
@@ -87,21 +82,16 @@ const StressTest: React.FC = () => {
         cooldownDuration: 5,
     });
 
-
-
-
-
-
     // 🔧 简化数据状态管理 - 只使用一个主要数据源
     const [stressTestData, setStressTestData] = useState<TestDataPoint[]>([]);  // 唯一数据源：压力测试实时数据
-    const [finalResultData, setFinalResultData] = useState<TestDataPoint[]>([]);  // 测试结果聚合数据
+    const [finalResultData, setFinalResultData] = useState<TestDataPoint[]>([]);  
     const [metrics, setMetrics] = useState<RealTimeMetrics | null>(null);  // 实时指标
     const [testStatus, setTestStatus] = useState<TestStatusType>('idle');
     const [testProgress, setTestProgress] = useState<string>('');
     const [isRunning, setIsRunning] = useState(false);
     const [isStopping, setIsStopping] = useState(false);
     const [isCancelling, setIsCancelling] = useState(false);
-    const [result, setResult] = useState<any>(null);  // 测试结果对象
+    const [result, setResult] = useState<any>(null);  
 
     // 新的取消功能状态
     const [showCancelDialog, setShowCancelDialog] = useState(false);
@@ -110,7 +100,6 @@ const StressTest: React.FC = () => {
 
     const [error, setError] = useState<string>('');
 
-    // 测试超时定时器
     const [testTimeoutTimer, setTestTimeoutTimer] = useState<NodeJS.Timeout | null>(null);
 
     // 统一的生命周期管理器 - 集成队列系统
@@ -257,8 +246,6 @@ const StressTest: React.FC = () => {
                 return testId;
             },
 
-
-
             cancelTest: async (reason: string) => {
                 console.log('🔄 生命周期管理器取消测试:', reason);
                 setCurrentStatus('CANCELLING');
@@ -398,6 +385,15 @@ const StressTest: React.FC = () => {
 
     // 标签页状态
     const [activeTab, setActiveTab] = useState<'test' | 'history'>('test');
+
+    // 处理从详细页面返回时的状态
+    useEffect(() => {
+        if (location.state && (location.state as any).activeTab) {
+            setActiveTab((location.state as any).activeTab);
+            // 清除状态，避免重复触发
+            window.history.replaceState({}, document.title);
+        }
+    }, [location.state]);
 
     // 统一的数据处理函数
     const processDataPoint = useCallback((rawPoint: any, isRealTime: boolean = true): TestDataPoint => {
@@ -739,7 +735,6 @@ const StressTest: React.FC = () => {
         }
     }, [currentTestId]);
 
-    // 测试记录ID状态
     const [currentRecordId, setCurrentRecordId] = useState<string | null>(null);
 
     // 实时数据状态
@@ -749,11 +744,6 @@ const StressTest: React.FC = () => {
     const [joinedRooms, setJoinedRooms] = useState<Set<string>>(new Set());
 
     const dataCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-
-
-
-
 
     // 启动真实的压力测试
     const startRealStressTest = async () => {
@@ -777,7 +767,6 @@ const StressTest: React.FC = () => {
         // 🔧 修复：不要在测试开始时清空testId！这会导致WebSocket数据无法匹配
         // setCurrentTestId(null);
         setCurrentRecordId(null); // 重置记录ID
-
 
         // 创建测试记录 - 使用新的历史记录API
         let recordId: string | null = null;
@@ -847,7 +836,7 @@ const StressTest: React.FC = () => {
             console.log('🔑 前端生成测试ID:', realTestId);
             console.log('⏳ 等待后端确认后再加入WebSocket房间');
 
-            // 发送真实的压力测试请求
+            // 发送真实的压力测试请求 - 使用统一的配置格式
             const response = await fetch('/api/test/stress', {
                 method: 'POST',
                 headers: {
@@ -860,15 +849,14 @@ const StressTest: React.FC = () => {
                     url: testConfig.url.trim(),
                     testId: realTestId, // 传递真正的测试ID
                     recordId: recordId, // 单独传递记录ID
-                    options: {
-                        users: testConfig.users,
-                        duration: testConfig.duration,
-                        rampUpTime: testConfig.rampUp,
-                        testType: testConfig.testType,
-                        method: testConfig.method,
-                        timeout: testConfig.timeout,
-                        thinkTime: testConfig.thinkTime
-                    }
+                    // 🔧 修复：直接发送配置参数，不使用options包装
+                    users: testConfig.users,
+                    duration: testConfig.duration,
+                    rampUpTime: testConfig.rampUp,
+                    testType: testConfig.testType,
+                    method: testConfig.method,
+                    timeout: testConfig.timeout,
+                    thinkTime: testConfig.thinkTime
                 })
             });
 
@@ -1342,7 +1330,7 @@ const StressTest: React.FC = () => {
             let newStatus: TestStatusType = 'idle';
 
             if (isRunning) {
-                // 测试正在运行
+                
                 newStatus = 'running';
             } else if (result) {
                 // 有测试结果，智能判断状态
@@ -1814,8 +1802,6 @@ const StressTest: React.FC = () => {
                     console.log('🔌 WebSocket连接断开:', reason);
                     setIsInRoom(false);
 
-
-
                     // 如果有正在运行的测试，标记为可能失败
                     if (isRunning && currentTestIdRef.current) {
                         console.log('⚠️ 测试运行中WebSocket断开，可能需要重置状态');
@@ -1833,8 +1819,6 @@ const StressTest: React.FC = () => {
                         type: (error as any).type
                     });
 
-
-
                     // 如果有正在运行的测试，检查是否需要重置
                     if (isRunning && currentTestIdRef.current) {
                         console.log('⚠️ 测试运行中连接错误，检查测试状态');
@@ -1845,8 +1829,6 @@ const StressTest: React.FC = () => {
                 // 重连成功处理
                 socket.on('reconnect', (attemptNumber) => {
                     console.log(`🔄 WebSocket重连成功 (尝试 ${attemptNumber})`);
-
-
 
                     // 重连后检查测试状态
                     if (isRunning && currentTestIdRef.current) {
@@ -1880,8 +1862,6 @@ const StressTest: React.FC = () => {
                         hasResponseTime: data.responseTime !== undefined,
                         dataKeys: Object.keys(data)
                     });
-
-
 
                     // 🔧 统一的实时数据处理逻辑
                     if (data.timestamp && data.responseTime !== undefined) {
@@ -2274,8 +2254,6 @@ const StressTest: React.FC = () => {
             // 记录已加入的房间
             setJoinedRooms(prev => new Set([...prev, testId]));
 
-
-
             console.log('✅ 房间加入请求已发送:', `stress-test-${testId}`);
         } else {
             console.warn('⚠️ 无法加入房间:', {
@@ -2454,6 +2432,12 @@ const StressTest: React.FC = () => {
 
         try {
             console.log('🎯 开始压力测试:', testConfig.url);
+            console.log('🔧 当前测试配置:', {
+                users: testConfig.users,
+                duration: testConfig.duration,
+                testType: testConfig.testType,
+                selectedTemplate: selectedTemplate
+            });
 
             // 清理之前的状态
             setError(null);
@@ -2822,8 +2806,6 @@ const StressTest: React.FC = () => {
     return (
         <TestPageLayout className="space-y-3 dark-page-scrollbar compact-layout">
 
-
-
             {/* 美化的页面标题和控制 */}
             <div className="relative overflow-hidden bg-gradient-to-br from-gray-800/90 via-gray-800/80 to-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-2xl">
                 {/* 背景装饰 */}
@@ -2971,8 +2953,6 @@ const StressTest: React.FC = () => {
                                                 测试进行中
                                             </span>
                                         </div>
-
-
 
                                         <button
                                             type="button"
@@ -3203,10 +3183,6 @@ const StressTest: React.FC = () => {
                                 )}
                             </div>
                         )}
-
-
-
-
 
                         {/* 主要配置区域 */}
                         {!isAdvancedMode ? (
@@ -3587,9 +3563,6 @@ const StressTest: React.FC = () => {
                                             </div>
                                         </div>
                                     )}
-
-
-
 
                                 </div>
 
@@ -4035,8 +4008,6 @@ const StressTest: React.FC = () => {
                                     </div>
                                 )}
 
-
-
                                 {/* 性能评估 */}
                                 <div className="bg-gray-700/50 rounded-lg p-3">
                                     <h4 className="text-sm font-semibold text-white mb-3 flex items-center">
@@ -4085,8 +4056,6 @@ const StressTest: React.FC = () => {
                                 </div>
                             </div>
                         )}
-
-
 
                         {/* 统一压力测试图表 - 空间复用 */}
                         {useUnifiedCharts ? (

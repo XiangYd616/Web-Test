@@ -66,11 +66,11 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
   children,
   ...props
 }) => (
-  <div 
+  <div
     className={cn(
       'mb-4 pb-3 border-b border-gray-700/30',
       className
-    )} 
+    )}
     {...props}
   >
     {children}
@@ -102,11 +102,11 @@ export const CardFooter: React.FC<CardFooterProps> = ({
   children,
   ...props
 }) => (
-  <div 
+  <div
     className={cn(
       'mt-4 pt-4 border-t border-gray-700/30 flex items-center justify-between',
       className
-    )} 
+    )}
     {...props}
   >
     {children}
@@ -125,11 +125,11 @@ export const CardTitle: React.FC<CardTitleProps> = ({
   children,
   ...props
 }) => (
-  <Component 
+  <Component
     className={cn(
       'text-lg font-semibold text-white leading-tight',
       className
-    )} 
+    )}
     {...props}
   >
     {children}
@@ -146,11 +146,11 @@ export const CardDescription: React.FC<CardDescriptionProps> = ({
   children,
   ...props
 }) => (
-  <p 
+  <p
     className={cn(
       'text-sm text-gray-400 leading-relaxed',
       className
-    )} 
+    )}
     {...props}
   >
     {children}

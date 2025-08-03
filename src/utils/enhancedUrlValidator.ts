@@ -1,7 +1,3 @@
-/**
- * 增强的URL验证工具
- * 提供实时验证、自动修复和智能建议功能
- */
 
 export interface URLValidationResult {
   isValid: boolean;
@@ -34,9 +30,6 @@ const DEFAULT_OPTIONS: URLValidationOptions = {
   timeout: 5000
 };
 
-/**
- * 常见的URL错误模式和修复建议
- */
 const URL_PATTERNS = {
   // 缺少协议
   missingProtocol: /^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.[a-zA-Z]{2,}(\/.*)?$/,
@@ -57,9 +50,6 @@ const URL_PATTERNS = {
   }
 };
 
-/**
- * 安全相关的检查
- */
 const SECURITY_CHECKS = {
   suspiciousDomains: [
     'bit.ly', 'tinyurl.com', 't.co', 'goo.gl', 'ow.ly',
@@ -74,9 +64,6 @@ const SECURITY_CHECKS = {
   } as { [key: string]: string }
 };
 
-/**
- * 自动修复URL
- */
 export function autoFixUrl(url: string): { fixed: string; fixes: string[] } {
   let fixed = url.trim();
   const fixes: string[] = [];
@@ -111,9 +98,6 @@ export function autoFixUrl(url: string): { fixed: string; fixes: string[] } {
   return { fixed, fixes };
 }
 
-/**
- * 验证URL格式
- */
 export function validateUrlFormat(url: string): { isValid: boolean; error?: string; urlObj?: URL } {
   try {
     const urlObj = new URL(url);
@@ -126,9 +110,6 @@ export function validateUrlFormat(url: string): { isValid: boolean; error?: stri
   }
 }
 
-/**
- * 安全检查
- */
 export function performSecurityChecks(urlObj: URL): string[] {
   const notes: string[] = [];
 
@@ -160,9 +141,6 @@ export function performSecurityChecks(urlObj: URL): string[] {
   return notes;
 }
 
-/**
- * 生成智能建议
- */
 export function generateSuggestions(urlObj: URL, options: URLValidationOptions): string[] {
   const suggestions: string[] = [];
 
@@ -189,9 +167,6 @@ export function generateSuggestions(urlObj: URL, options: URLValidationOptions):
   return suggestions;
 }
 
-/**
- * 主要的增强URL验证函数
- */
 export async function validateUrlEnhanced(
   url: string,
   options: URLValidationOptions = {}
@@ -269,9 +244,6 @@ export async function validateUrlEnhanced(
   return result;
 }
 
-/**
- * 同步版本的URL验证（仅基本检查）
- */
 export function validateUrlSync(url: string, options: URLValidationOptions = {}): URLValidationResult {
   const opts = { ...DEFAULT_OPTIONS, ...options };
   const result: URLValidationResult = {

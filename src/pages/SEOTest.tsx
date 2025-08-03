@@ -1,19 +1,4 @@
-import {
-  AlertCircle,
-  CheckCircle,
-  Clock,
-  Eye,
-  Globe,
-  HardDrive,
-  Loader,
-  Search,
-  Settings,
-  Shield,
-  Smartphone,
-  Square,
-  XCircle,
-  Zap
-} from 'lucide-react';
+import { AlertCircle, CheckCircle, Clock, Eye, Globe, HardDrive, Loader, Search, Settings, Shield, Smartphone, Square, XCircle, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import EnhancedSEOResults from '../components/seo/EnhancedSEOResults';
@@ -21,11 +6,9 @@ import FileUploadSEO from '../components/seo/FileUploadSEO';
 import LocalSEOResults from '../components/seo/LocalSEOResults';
 import NetworkErrorPrompt from '../components/seo/NetworkErrorPrompt';
 import { URLInput } from '../components/testing';
-import {
-  TestPageLayout
-} from '../components/testing/UnifiedTestingComponents';
 import type { SEOTestMode } from '../hooks/useUnifiedSEOTest';
 import { useUnifiedSEOTest } from '../hooks/useUnifiedSEOTest';
+
 // CSS样式已迁移到组件库中
 
 type TestMode = 'standard' | 'comprehensive';
@@ -95,7 +78,6 @@ const SEOTest: React.FC = () => {
     checkKeywordDensity: false,
   });
 
-
   const [testStatus, setTestStatus] = useState<TestStatusType>('idle');
   const [error, setError] = useState('');
   const [seoTestMode, setSeoTestMode] = useState<SEOTestMode>('online');
@@ -120,8 +102,6 @@ const SEOTest: React.FC = () => {
       }
     }
   }, [isRunning, testStatus, results, testError]);
-
-
 
   // 扩展的SEO检测项目 - 包含核心和高级检测功能
   const seoTests = [
@@ -182,7 +162,7 @@ const SEOTest: React.FC = () => {
       key: 'checkImageOptimization',
       name: '图片优化',
       description: '检查图片Alt标签、尺寸、格式优化',
-      icon: Globe, // 临时使用，稍后会更新
+      icon: Globe, 
       color: 'purple',
       estimatedTime: '15-25秒',
       priority: 'medium',
@@ -192,7 +172,7 @@ const SEOTest: React.FC = () => {
       key: 'checkInternalLinking',
       name: '内链结构',
       description: '分析内部链接结构和锚文本优化',
-      icon: Globe, // 临时使用，稍后会更新
+      icon: Globe, 
       color: 'indigo',
       estimatedTime: '20-30秒',
       priority: 'medium',
@@ -202,7 +182,7 @@ const SEOTest: React.FC = () => {
       key: 'checkSchemaMarkup',
       name: '结构化数据',
       description: '检查Schema.org标记和富摘要',
-      icon: Globe, // 临时使用，稍后会更新
+      icon: Globe, 
       color: 'teal',
       estimatedTime: '15-20秒',
       priority: 'medium',
@@ -212,7 +192,7 @@ const SEOTest: React.FC = () => {
       key: 'checkSocialMedia',
       name: '社交媒体',
       description: '检查Open Graph和Twitter Card标签',
-      icon: Globe, // 临时使用，稍后会更新
+      icon: Globe, 
       color: 'cyan',
       estimatedTime: '10-15秒',
       priority: 'low',
@@ -239,8 +219,6 @@ const SEOTest: React.FC = () => {
       category: 'advanced'
     }
   ];
-
-
 
   const handleStartTest = async () => {
     // 检查登录状态
@@ -756,16 +734,19 @@ const SEOTest: React.FC = () => {
       <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <div className="space-y-4">
           {seoTestMode === 'online' ? (
-            <div>
+            <div className="url-input-form-group">
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 网站URL
               </label>
-              <URLInput
-                value={testConfig.url}
-                onChange={(url) => setTestConfig(prev => ({ ...prev, url }))}
-                placeholder="请输入要分析的网站URL，例如：https://example.com"
-                disabled={isRunning}
-              />
+              <div className="url-input-container">
+                <URLInput
+                  value={testConfig.url}
+                  onChange={(url) => setTestConfig(prev => ({ ...prev, url }))}
+                  placeholder="请输入要分析的网站URL，例如：https://example.com"
+                  disabled={isRunning}
+                  className="url-input-full-width"
+                />
+              </div>
               <div className="mt-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
                 <div className="flex items-start space-x-2">
                   <AlertCircle className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
@@ -809,8 +790,6 @@ const SEOTest: React.FC = () => {
           </div>
         </div>
       </div>
-
-
 
       {/* 检测项目选择 */}
       <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">

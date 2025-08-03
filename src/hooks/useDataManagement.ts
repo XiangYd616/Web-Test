@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { DataBackup, DataQuery, DataRecord, advancedDataManager } from '../services/advancedDataService';
 
-// 临时扩展服务方法
 const extendedDataManager = {
   ...advancedDataManager,
   getSyncConfig: async (): Promise<DataSyncConfig> => {
-    // 临时实现
+    
     return {
       id: 'default',
       name: 'Default Sync',
@@ -22,11 +21,11 @@ const extendedDataManager = {
     };
   },
   updateSyncConfig: async (config: DataSyncConfig): Promise<DataSyncConfig> => {
-    // 临时实现
+    
     return config;
   },
   createRecord: async (type: string, data: any, metadata?: any): Promise<DataRecord> => {
-    // 临时实现
+    
     const validType = ['test', 'user', 'report', 'log', 'config'].includes(type) ? type as any : 'test';
     return {
       id: Date.now().toString(),
@@ -43,7 +42,7 @@ const extendedDataManager = {
     };
   },
   updateRecord: async (id: string, data: any, metadata?: any): Promise<DataRecord> => {
-    // 临时实现
+    
     return {
       id,
       type: 'test',
@@ -59,24 +58,23 @@ const extendedDataManager = {
     };
   },
   deleteRecord: async (id: string): Promise<boolean> => {
-    // 临时实现
+    
     return true;
   },
   queryData: async (query: any): Promise<{ data: any[], total: number }> => {
-    // 临时实现
+    
     return { data: [], total: 0 };
   },
   importData: async (file: File, config: any): Promise<{ taskId: string }> => {
-    // 临时实现
+    
     return { taskId: 'temp-' + Date.now() };
   },
   validateData: async (query: any): Promise<{ isValid: boolean, errors: any[] }> => {
-    // 临时实现
+    
     return { isValid: true, errors: [] };
   }
 };
 
-// 临时类型定义，直到这些类型被正式添加到服务中
 interface DataAnalytics {
   summary: {
     totalRecords: number;

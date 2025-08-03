@@ -1,23 +1,4 @@
-import {
-  Activity,
-  AlertTriangle,
-  BarChart3,
-  CheckCircle,
-  Clock,
-  Cloud,
-  Download,
-  Globe,
-  MapPin,
-  Play,
-  Router,
-  Server,
-  Signal,
-  Square,
-  Upload,
-  Wifi,
-  XCircle,
-  Zap
-} from 'lucide-react';
+import { Activity, AlertTriangle, BarChart3, CheckCircle, Clock, Cloud, Download, Globe, MapPin, Play, Router, Server, Signal, Square, Upload, Wifi, XCircle, Zap } from 'lucide-react';
 import React, { useState } from 'react';
 import { TestPageLayout } from '../components/testing/UnifiedTestingComponents';
 

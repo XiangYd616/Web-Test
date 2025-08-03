@@ -1,6 +1,3 @@
-/**
- * 📊 监控组件统一导出
- */
 
 // 实际存在的监控组件
 export { default as RealTimeMonitoringDashboard } from './RealTimeMonitoringDashboard';

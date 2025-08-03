@@ -1,15 +1,4 @@
 import React from 'react';
-import { 
-  TrendingUp, 
-  Zap, 
-  Clock, 
-  Smartphone, 
-  AlertTriangle, 
-  CheckCircle, 
-  XCircle,
-  Info,
-  Lightbulb
-} from 'lucide-react';
 import { PerformanceResult } from '../../services/realSEOAnalysisEngine';
 
 interface EnhancedPerformanceResultsProps {
@@ -108,23 +97,23 @@ const EnhancedPerformanceResults: React.FC<EnhancedPerformanceResultsProps> = ({
           <Zap className="w-5 h-5 mr-2 text-yellow-400" />
           基础指标
         </h3>
-        
+
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center">
             <div className="text-2xl font-bold text-white">{formatTime(results.loadTime)}</div>
             <div className="text-sm text-gray-400">加载时间</div>
           </div>
-          
+
           <div className="text-center">
             <div className="text-2xl font-bold text-white">{formatTime(results.firstContentfulPaint)}</div>
             <div className="text-sm text-gray-400">FCP</div>
           </div>
-          
+
           <div className="text-center">
             <div className="text-2xl font-bold text-white">{formatSize(results.pageSize)}</div>
             <div className="text-sm text-gray-400">页面大小</div>
           </div>
-          
+
           <div className="text-center">
             <div className="text-2xl font-bold text-white">{results.requests}</div>
             <div className="text-sm text-gray-400">请求数</div>
@@ -139,7 +128,7 @@ const EnhancedPerformanceResults: React.FC<EnhancedPerformanceResultsProps> = ({
             <Lightbulb className="w-5 h-5 mr-2 text-green-400" />
             优化建议
           </h3>
-          
+
           <div className="space-y-3">
             {results.opportunities.slice(0, 5).map((opportunity, index) => (
               <div key={index} className="flex items-start space-x-3 p-3 bg-gray-700/30 rounded-lg">
@@ -169,7 +158,7 @@ const EnhancedPerformanceResults: React.FC<EnhancedPerformanceResultsProps> = ({
             <AlertTriangle className="w-5 h-5 mr-2 text-red-400" />
             发现的问题
           </h3>
-          
+
           <div className="space-y-2">
             {results.issues.map((issue, index) => (
               <div key={index} className="flex items-start space-x-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
@@ -188,12 +177,12 @@ const EnhancedPerformanceResults: React.FC<EnhancedPerformanceResultsProps> = ({
           <div className="text-sm text-blue-300">
             {results.pageSpeedData ? (
               <span>
-                <strong>数据来源：</strong>Google PageSpeed Insights API - 
+                <strong>数据来源：</strong>Google PageSpeed Insights API -
                 提供真实的Core Web Vitals数据和专业优化建议
               </span>
             ) : (
               <span>
-                <strong>数据来源：</strong>基础性能分析 - 
+                <strong>数据来源：</strong>基础性能分析 -
                 基于页面加载时间和资源分析的估算数据
               </span>
             )}

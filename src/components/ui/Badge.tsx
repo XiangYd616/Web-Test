@@ -1,6 +1,7 @@
 import React from 'react';
-import { cn } from '../../utils/cn';
 import { CheckCircle, XCircle, AlertTriangle, Clock, Loader, Info } from 'lucide-react';
+
+import { cn } from '../../utils/cn';
 
 // Badge组件
 interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
@@ -135,7 +136,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
       {...props}
     >
       {showIcon && (
-        <Icon 
+        <Icon
           className={cn(
             'flex-shrink-0',
             size === 'xs' && 'w-2.5 h-2.5',
@@ -244,7 +245,7 @@ export const ProgressBadge: React.FC<ProgressBadgeProps> = ({
   ...props
 }) => {
   const percentage = Math.round((value / max) * 100);
-  
+
   // 根据进度自动选择颜色
   const getVariant = () => {
     if (variant !== 'primary') return variant;
@@ -254,9 +255,9 @@ export const ProgressBadge: React.FC<ProgressBadgeProps> = ({
     return 'danger';
   };
 
-  const displayText = showPercentage 
-    ? `${percentage}%` 
-    : showValue 
+  const displayText = showPercentage
+    ? `${percentage}%`
+    : showValue
       ? `${value}/${max}`
       : percentage.toString();
 

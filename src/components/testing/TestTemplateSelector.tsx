@@ -1,13 +1,4 @@
-import {
-  Bookmark,
-  BookmarkCheck,
-  Clock,
-  Plus,
-  Search,
-  Star,
-  Tag,
-  TrendingUp
-} from 'lucide-react';
+import { Bookmark, BookmarkCheck, Clock, Plus, Search, Star, Tag, TrendingUp } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { TestTemplate, TestTemplateService } from '../../services/testTemplates';
 
@@ -76,7 +67,6 @@ const TestTemplateSelector: React.FC<TestTemplateSelectorProps> = ({
       filtered = filtered.filter(t => t.category === selectedCategory);
     }
 
-    // 测试类型过滤
     if (selectedTestType !== 'all') {
       filtered = filtered.filter(t => t.testType === selectedTestType);
     }

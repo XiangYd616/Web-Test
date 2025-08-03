@@ -1,4 +1,4 @@
-// 测试相关类型定义
+
 
 export type TestType = 'performance' | 'content' | 'security' | 'api' | 'stress' | 'compatibility';
 
@@ -211,7 +211,6 @@ export interface SimpleSecurityTestConfig {
   checkSQLInjection: boolean;
 }
 
-// 测试引擎状态
 export interface TestEngineStatus {
   k6: TestEngine;
   lighthouse: TestEngine;

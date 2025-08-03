@@ -1,14 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Lock, 
-  User, 
-  ArrowRight, 
-  Shield, 
-  Star,
-  X,
-  LogIn
-} from 'lucide-react';
+
+import { Lock, User, ArrowRight, Shield, Star, X, LogIn } from 'lucide-react';
 
 interface LoginPromptProps {
   isOpen: boolean;
@@ -17,9 +10,9 @@ interface LoginPromptProps {
   description?: string;
 }
 
-const LoginPrompt: React.FC<LoginPromptProps> = ({ 
-  isOpen, 
-  onClose, 
+const LoginPrompt: React.FC<LoginPromptProps> = ({
+  isOpen,
+  onClose,
   feature = "此功能",
   description = "使用高级测试功能"
 }) => {

@@ -832,7 +832,6 @@ class RealDatabaseTestEngine {
         }
       }
 
-      // 测试恢复时间
       const recoveryStart = Date.now();
       await new Promise(resolve => setTimeout(resolve, 5000)); // 等待5秒
 

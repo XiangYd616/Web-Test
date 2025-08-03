@@ -232,7 +232,6 @@ const HTML5_FEATURES = {
   }
 };
 
-// 测试超时配置
 const TIMEOUT_CONFIG = {
   pageLoad: 30000,      // 页面加载超时
   navigation: 10000,    // 导航超时

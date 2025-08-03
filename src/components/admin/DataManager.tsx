@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Database, Download, Upload, Trash2, RefreshCw, AlertTriangle } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { AlertTriangle, Database, Download, RefreshCw, Trash2, Upload } from 'lucide-react';
+import Logger from '../../utils/logger';
 
 interface DataManagerProps {
   className?: string;
@@ -25,17 +26,17 @@ const DataManager: React.FC<DataManagerProps> = ({ className = '' }) => {
     // 模拟加载数据统计
     const loadStats = async () => {
       setLoading(true);
-      
+
       // 模拟API调用
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       setStats({
         totalRecords: Math.floor(Math.random() * 10000) + 1000,
         totalSize: `${(Math.random() * 500 + 100).toFixed(1)} MB`,
         lastBackup: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toLocaleDateString(),
         status: Math.random() > 0.8 ? 'warning' : 'healthy'
       });
-      
+
       setLoading(false);
     };
 
@@ -43,18 +44,18 @@ const DataManager: React.FC<DataManagerProps> = ({ className = '' }) => {
   }, []);
 
   const handleBackup = async () => {
-    // 模拟备份操作
-    console.log('开始备份数据...');
+    Logger.userAction('data_backup_started', undefined, { component: 'DataManager' });
+    // TODO: 实现真实的备份功能
   };
 
   const handleRestore = async () => {
-    // 模拟恢复操作
-    console.log('开始恢复数据...');
+    Logger.userAction('data_restore_started', undefined, { component: 'DataManager' });
+    // TODO: 实现真实的恢复功能
   };
 
   const handleCleanup = async () => {
-    // 模拟清理操作
-    console.log('开始清理数据...');
+    Logger.userAction('data_cleanup_started', undefined, { component: 'DataManager' });
+    // TODO: 实现真实的清理功能
   };
 
   const getStatusColor = (status: string) => {

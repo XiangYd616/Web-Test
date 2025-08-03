@@ -1,23 +1,6 @@
-import {
-  Activity,
-  AlertTriangle,
-  Bell,
-  CheckCircle,
-  Clock,
-  Edit,
-  Eye,
-  EyeOff,
-  Globe,
-  Pause,
-  Play,
-  Plus,
-  Trash2,
-  TrendingUp,
-  Zap
-} from 'lucide-react';
+import { Activity, AlertTriangle, Bell, CheckCircle, Clock, Edit, Eye, EyeOff, Globe, Pause, Play, Plus, Trash2, TrendingUp, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
-// 临时类型定义，直到服务实现完成
 interface MonitoringTarget {
   id: string;
   name: string;
@@ -52,7 +35,7 @@ interface Alert {
 }
 
 // 使用真实的监控服务实例
-// 临时监控服务类
+
 class RealTimeMonitoringService {
   private static instance: RealTimeMonitoringService | null = null;
   private eventListeners: Map<string, Function[]> = new Map();
@@ -93,7 +76,6 @@ class RealTimeMonitoringService {
     }
   }
 
-  // 临时数据存储
   private targets: MonitoringTarget[] = [];
   private isMonitoring: boolean = false;
 
@@ -103,7 +85,7 @@ class RealTimeMonitoringService {
   }
 
   getStats(): MonitoringStats | null {
-    // 临时返回模拟数据
+    
     return {
       responseTime: 150,
       uptime: 99.5,
@@ -119,7 +101,7 @@ class RealTimeMonitoringService {
   }
 
   getAlerts(): Alert[] {
-    // 临时返回空数组，实际实现时应该从后端获取
+    
     return [];
   }
 

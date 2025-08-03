@@ -1,22 +1,4 @@
-import {
-  BarChart3,
-  ChevronRight,
-  Code,
-  Crown,
-  Database,
-  GitBranch,
-  Globe,
-  Home,
-  Key,
-  Link2,
-  Monitor,
-  Package,
-  Search,
-  Settings,
-  Shield,
-  TestTube,
-  Zap
-} from 'lucide-react';
+import { BarChart3, ChevronRight, Code, Crown, Database, GitBranch, Globe, Home, Key, Link2, Monitor, Package, Search, Settings, Shield, TestTube, Zap } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -654,7 +636,6 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
                     );
                   })}
                 </div>
-
 
               </>
             );

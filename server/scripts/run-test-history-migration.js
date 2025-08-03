@@ -30,7 +30,6 @@ async function runMigration() {
     // 创建连接池
     pool = new Pool(dbConfig);
 
-    // 测试连接
     console.log('🔌 测试数据库连接...');
     const client = await pool.connect();
     const result = await client.query('SELECT NOW() as current_time');
@@ -141,7 +140,7 @@ async function verifyMigration(pool) {
 
 async function showMigrationStats(pool) {
   try {
-    // 测试历史记录统计
+    
     const historyStats = await pool.query(`
       SELECT 
         COUNT(*) as total_records,

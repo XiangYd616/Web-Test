@@ -9,7 +9,7 @@ describe('Modal Component', () => {
         <div>Modal content</div>
       </Modal>
     );
-    
+
     expect(screen.getByTestId('modal')).toBeInTheDocument();
     expect(screen.getByText('Modal content')).toBeInTheDocument();
   });
@@ -20,7 +20,7 @@ describe('Modal Component', () => {
         <div>Modal content</div>
       </Modal>
     );
-    
+
     expect(screen.queryByTestId('modal')).not.toBeInTheDocument();
   });
 
@@ -30,7 +30,7 @@ describe('Modal Component', () => {
         <div>Modal content</div>
       </Modal>
     );
-    
+
     expect(screen.getByText('Test Modal')).toBeInTheDocument();
     expect(screen.getByText('Test Modal').closest('.modal-header')).toBeInTheDocument();
   });
@@ -42,13 +42,13 @@ describe('Modal Component', () => {
         <button>Save</button>
       </div>
     );
-    
+
     render(
       <Modal open onClose={() => {}} footer={footer}>
         <div>Modal content</div>
       </Modal>
     );
-    
+
     expect(screen.getByTestId('modal-footer')).toBeInTheDocument();
     expect(screen.getByText('Cancel')).toBeInTheDocument();
     expect(screen.getByText('Save')).toBeInTheDocument();
@@ -61,10 +61,10 @@ describe('Modal Component', () => {
         <div>Modal content</div>
       </Modal>
     );
-    
+
     const closeButton = screen.getByRole('button', { name: /close/i });
     fireEvent.click(closeButton);
-    
+
     expect(handleClose).toHaveBeenCalledTimes(1);
   });
 
@@ -75,10 +75,10 @@ describe('Modal Component', () => {
         <div>Modal content</div>
       </Modal>
     );
-    
+
     const overlay = screen.getByTestId('modal-overlay');
     fireEvent.click(overlay);
-    
+
     expect(handleClose).toHaveBeenCalledTimes(1);
   });
 
@@ -89,10 +89,10 @@ describe('Modal Component', () => {
         <div>Modal content</div>
       </Modal>
     );
-    
+
     const overlay = screen.getByTestId('modal-overlay');
     fireEvent.click(overlay);
-    
+
     expect(handleClose).not.toHaveBeenCalled();
   });
 
@@ -103,9 +103,9 @@ describe('Modal Component', () => {
         <div>Modal content</div>
       </Modal>
     );
-    
+
     fireEvent.keyDown(document, { key: 'Escape' });
-    
+
     expect(handleClose).toHaveBeenCalledTimes(1);
   });
 
@@ -116,14 +116,14 @@ describe('Modal Component', () => {
       </Modal>
     );
     expect(screen.getByTestId('modal-content')).toHaveClass('modal-sm');
-    
+
     rerender(
       <Modal open onClose={() => {}} size="lg">
         <div>Large modal</div>
       </Modal>
     );
     expect(screen.getByTestId('modal-content')).toHaveClass('modal-lg');
-    
+
     rerender(
       <Modal open onClose={() => {}} size="xl">
         <div>Extra large modal</div>
@@ -139,7 +139,7 @@ describe('Modal Component', () => {
       </Modal>
     );
     expect(screen.getByTestId('modal')).toHaveClass('modal-success');
-    
+
     rerender(
       <Modal open onClose={() => {}} variant="warning">
         <div>Warning modal</div>
@@ -154,7 +154,7 @@ describe('Modal Component', () => {
         <div>Fullscreen modal</div>
       </Modal>
     );
-    
+
     expect(screen.getByTestId('modal')).toHaveClass('modal-fullscreen');
   });
 
@@ -164,7 +164,7 @@ describe('Modal Component', () => {
         <div>Centered modal</div>
       </Modal>
     );
-    
+
     expect(screen.getByTestId('modal')).toHaveClass('modal-centered');
   });
 
@@ -174,7 +174,7 @@ describe('Modal Component', () => {
         <div>Scrollable modal</div>
       </Modal>
     );
-    
+
     expect(screen.getByTestId('modal-content')).toHaveClass('modal-scrollable');
   });
 
@@ -184,7 +184,7 @@ describe('Modal Component', () => {
         <div>Custom modal</div>
       </Modal>
     );
-    
+
     expect(screen.getByTestId('modal')).toHaveClass('custom-modal');
   });
 
@@ -194,7 +194,7 @@ describe('Modal Component', () => {
         <div>Loading modal</div>
       </Modal>
     );
-    
+
     expect(screen.getByTestId('modal-loading')).toBeInTheDocument();
   });
 
@@ -204,7 +204,7 @@ describe('Modal Component', () => {
         <div>Modal content</div>
       </Modal>
     );
-    
+
     expect(document.body).toHaveClass('modal-open');
   });
 
@@ -214,15 +214,15 @@ describe('Modal Component', () => {
         <div>Modal content</div>
       </Modal>
     );
-    
+
     expect(document.body).toHaveClass('modal-open');
-    
+
     rerender(
       <Modal open={false} onClose={() => {}}>
         <div>Modal content</div>
       </Modal>
     );
-    
+
     expect(document.body).not.toHaveClass('modal-open');
   });
 
@@ -232,7 +232,7 @@ describe('Modal Component', () => {
         <input data-testid="modal-input" />
       </Modal>
     );
-    
+
     // Modal should trap focus within itself
     const modalContent = screen.getByTestId('modal-content');
     expect(modalContent).toHaveAttribute('tabIndex', '-1');
@@ -245,13 +245,13 @@ describe('Modal Component', () => {
         <button>Custom Action</button>
       </div>
     );
-    
+
     render(
       <Modal open onClose={() => {}} header={customHeader}>
         <div>Modal content</div>
       </Modal>
     );
-    
+
     expect(screen.getByTestId('custom-header')).toBeInTheDocument();
     expect(screen.getByText('Custom Header')).toBeInTheDocument();
     expect(screen.getByText('Custom Action')).toBeInTheDocument();

@@ -1,5 +1,6 @@
-import { ChevronDown, ChevronUp, SortAsc } from 'lucide-react';
 import React from 'react';
+import { ChevronDown, ChevronUp, SortAsc } from 'lucide-react';
+
 import '../../styles/data-table.css';
 
 export interface Column<T> {

@@ -63,9 +63,6 @@ export interface ExportOptions {
   watermark?: string;
 }
 
-/**
- * 增强的报告生成器服务
- */
 export class ReportGeneratorService {
   private templates: Map<string, any> = new Map();
   private cache: Map<string, any> = new Map();
@@ -81,13 +78,13 @@ export class ReportGeneratorService {
     try {
       const reportId = this.generateReportId();
       const template = this.getTemplate(config.template);
-      
+
       // 处理数据
       const processedData = this.processReportData(data);
-      
+
       // 生成报告内容
       const reportContent = await this.buildReportContent(processedData, config, template);
-      
+
       // 缓存报告
       this.cache.set(reportId, {
         content: reportContent,
@@ -95,7 +92,7 @@ export class ReportGeneratorService {
         data: processedData,
         generatedAt: new Date().toISOString()
       });
-      
+
       return reportId;
     } catch (error) {
       console.error('Failed to generate report:', error);
@@ -325,7 +322,7 @@ export class ReportGeneratorService {
     return `<section class="metrics">
       <h2>关键指标</h2>
       <div class="metrics-grid">
-        ${Object.entries(data.metrics || {}).map(([key, value]) => 
+        ${Object.entries(data.metrics || {}).map(([key, value]) =>
           `<div class="metric"><span class="label">${key}</span><span class="value">${value}</span></div>`
         ).join('')}
       </div>
@@ -404,7 +401,7 @@ export class ReportGeneratorService {
       ${report.content}
     </body>
     </html>`;
-    
+
     return new Blob([htmlContent], { type: 'text/html' });
   }
 

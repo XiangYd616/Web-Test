@@ -24,16 +24,16 @@ const CICDDemo: React.FC = () => {
   const runPipeline = async () => {
     setIsRunning(true);
     setCurrentStep(0);
-    
+
     // 重置所有步骤
     const resetSteps = steps.map(step => ({ ...step, status: 'pending' as const, duration: undefined as number | undefined, logs: undefined as string[] | undefined }));
     setSteps(resetSteps);
 
     for (let i = 0; i < steps.length; i++) {
       setCurrentStep(i);
-      
+
       // 更新当前步骤为运行中
-      setSteps(prev => prev.map((step, index) => 
+      setSteps(prev => prev.map((step, index) =>
         index === i ? { ...step, status: 'running' } : step
       ));
 
@@ -43,7 +43,7 @@ const CICDDemo: React.FC = () => {
 
       // 模拟成功/失败（90%成功率）
       const success = Math.random() > 0.1;
-      
+
       // 模拟日志
       const logs = [
         `开始执行 ${steps[i].name}...`,
@@ -51,9 +51,9 @@ const CICDDemo: React.FC = () => {
         success ? `✓ ${steps[i].name} 执行成功` : `✗ ${steps[i].name} 执行失败`
       ];
 
-      setSteps(prev => prev.map((step, index) => 
-        index === i ? { 
-          ...step, 
+      setSteps(prev => prev.map((step, index) =>
+        index === i ? {
+          ...step,
           status: success ? 'success' : 'failed',
           duration: Math.round(duration),
           logs

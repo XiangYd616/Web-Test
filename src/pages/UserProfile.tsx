@@ -1,21 +1,4 @@
-import {
-  AlertCircle,
-  Calendar,
-  Camera,
-  CheckCircle,
-  Clock,
-  Edit,
-  Github,
-  Globe,
-  Key,
-  Linkedin,
-  Loader,
-  Save,
-  Trash2,
-  Twitter,
-  User,
-  X
-} from 'lucide-react';
+import { AlertCircle, Calendar, Camera, CheckCircle, Clock, Edit, Github, Globe, Key, Linkedin, Loader, Save, Trash2, Twitter, User, X } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -41,7 +24,6 @@ const UserProfilePage: React.FC = () => {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
 
   // 表单数据
   const [formData, setFormData] = useState<UpdateProfileData>({});

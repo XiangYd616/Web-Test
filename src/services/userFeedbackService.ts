@@ -1,7 +1,3 @@
-/**
- * 用户反馈收集服务
- * 用于收集用户对重新设计页面的反馈和使用数据
- */
 
 // 反馈类型枚举
 export enum FeedbackType {
@@ -90,9 +86,6 @@ export interface PagePerformanceMetrics {
   networkRequests: number;
 }
 
-/**
- * 用户反馈服务类
- */
 export class UserFeedbackService {
   private static instance: UserFeedbackService;
   private feedbackQueue: UserFeedback[] = [];
@@ -129,7 +122,7 @@ export class UserFeedbackService {
       };
 
       this.feedbackQueue.push(completeFeedback);
-      
+
       // 立即提交高优先级反馈
       if (feedback.severity === FeedbackSeverity.HIGH || feedback.severity === FeedbackSeverity.CRITICAL) {
         await this.submitQueuedFeedback();
@@ -167,7 +160,7 @@ export class UserFeedbackService {
       if ('performance' in window) {
         const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
         const paint = performance.getEntriesByType('paint');
-        
+
         const metrics: PagePerformanceMetrics = {
           sessionId: this.sessionId,
           page,
@@ -352,10 +345,10 @@ export class UserFeedbackService {
     try {
       // 这里应该调用实际的API端点
       console.log('Submitting feedback:', this.feedbackQueue);
-      
+
       // 模拟API调用
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       // 清空队列
       this.feedbackQueue = [];
     } catch (error) {

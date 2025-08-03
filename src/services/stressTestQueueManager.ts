@@ -1,7 +1,3 @@
-/**
- * 压力测试队列管理器
- * 负责管理压力测试的排队、调度和资源分配
- */
 
 import { stressTestRecordService } from './stressTestRecordService';
 import { systemResourceMonitor } from './systemResourceMonitor';
@@ -13,15 +9,15 @@ export interface QueuedTest {
   url: string;
   config: any;
   priority: 'high' | 'normal' | 'low';
-  testType?: 'stress' | 'website' | 'seo' | 'security' | 'performance' | 'api'; // 测试类型
+  testType?: 'stress' | 'website' | 'seo' | 'security' | 'performance' | 'api'; 
   userId?: string;
   queuedAt: Date;
-  startTime?: Date; // 测试开始时间
+  startTime?: Date; 
   estimatedDuration: number; // 预估测试时长（秒）
   retryCount: number;
   maxRetries: number;
   status: 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled';
-  progress?: number; // 测试进度 (0-100)
+  progress?: number; 
   onProgress?: (progress: number, message: string) => void;
   onComplete?: (result: any) => void;
   onError?: (error: Error) => void;
@@ -350,7 +346,6 @@ class StressTestQueueManager {
       const result = await response.json();
       console.log(`✅ 压力测试API调用成功: ${test.testName}`, result);
 
-      // 测试已经在后端异步执行，这里等待完成
       await this.waitForTestCompletion(test);
 
     } catch (error) {

@@ -29,8 +29,7 @@ async function initializeDatabase() {
   try {
     // 创建连接池
     pool = new Pool(dbConfig);
-    
-    // 测试连接
+
     console.log('🔌 测试数据库连接...');
     const client = await pool.connect();
     const result = await client.query('SELECT NOW() as current_time, version() as version');

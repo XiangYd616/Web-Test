@@ -196,8 +196,7 @@ class CacheAnalytics {
     try {
       const stats = cacheService.getStats();
       const redis = redisConnection.getClient();
-      
-      // 测试响应时间
+
       const responseTimes = [];
       for (let i = 0; i < 10; i++) {
         const start = Date.now();

@@ -1,20 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  CheckCircle,
-  AlertTriangle,
-  XCircle,
-  Clock,
-  Server,
-  Database,
-  Wifi,
-  Shield,
-  Activity,
-  RefreshCw,
-  Settings,
-  Monitor,
-  Zap,
-  Globe
-} from 'lucide-react';
+
+import { CheckCircle, AlertTriangle, XCircle, Clock, Server, Database, Wifi, Shield, Activity, RefreshCw, Settings, Monitor, Zap, Globe } from 'lucide-react';
 
 interface SystemCheck {
   id: string;
@@ -127,19 +113,19 @@ const SystemStatus: React.FC = () => {
 
   const refreshStatus = async () => {
     setIsRefreshing(true);
-    
+
     // 模拟检查过程
     setChecks(prev => prev.map(check => ({ ...check, status: 'checking' as const })));
-    
+
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
+
     // 恢复状态
     setChecks(prev => prev.map(check => ({
       ...check,
       status: check.id === 'backend' ? 'warning' as const : 'healthy' as const,
       lastCheck: '刚刚'
     })));
-    
+
     setIsRefreshing(false);
   };
 
@@ -229,7 +215,7 @@ const SystemStatus: React.FC = () => {
         <div className="p-6 border-b border-gray-700/50">
           <h2 className="text-xl font-semibold text-white">系统组件状态</h2>
         </div>
-        
+
         <div className="divide-y divide-gray-700/50">
           {checks.map((check) => (
             <div key={check.id} className={`p-6 border-l-4 ${getStatusColor(check.status)}`}>
@@ -265,7 +251,7 @@ const SystemStatus: React.FC = () => {
             </div>
             <p className="text-gray-300">React 18 + TypeScript</p>
           </div>
-          
+
           <div className="bg-gray-700/30 rounded-lg p-4">
             <div className="flex items-center gap-3 mb-2">
               <Zap className="w-5 h-5 text-yellow-400" />
@@ -273,7 +259,7 @@ const SystemStatus: React.FC = () => {
             </div>
             <p className="text-gray-300">Vite 4.5.14</p>
           </div>
-          
+
           <div className="bg-gray-700/30 rounded-lg p-4">
             <div className="flex items-center gap-3 mb-2">
               <Activity className="w-5 h-5 text-green-400" />

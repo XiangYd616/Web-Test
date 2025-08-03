@@ -49,8 +49,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     setTheme(newTheme);
   };
 
-
-
   // 应用主题到document
   useEffect(() => {
     const root = document.documentElement;

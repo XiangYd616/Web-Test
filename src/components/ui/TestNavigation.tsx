@@ -2,16 +2,8 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardBody } from './Card';
 import { Button } from './Button';
 import { Badge, StatusBadge } from './Badge';
-import { 
-  Layout, 
-  Square, 
-  MessageSquare, 
-  Type, 
-  Award, 
-  Layers,
-  ExternalLink,
-  CheckCircle
-} from 'lucide-react';
+
+import { Layout, Square, MessageSquare, Type, Award, Layers, ExternalLink, CheckCircle } from 'lucide-react';
 
 export const TestNavigation: React.FC = () => {
   const testPages = [
@@ -69,7 +61,7 @@ export const TestNavigation: React.FC = () => {
   return (
     <div className="p-8 space-y-8 bg-gray-900 min-h-screen">
       <div className="max-w-6xl mx-auto">
-        
+
         {/* 页面标题 */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-white mb-4">
@@ -78,7 +70,7 @@ export const TestNavigation: React.FC = () => {
           <p className="text-gray-400 text-lg mb-6">
             全面测试所有组件的功能和集成效果
           </p>
-          
+
           {/* 总体状态 */}
           <div className="flex justify-center gap-4">
             <StatusBadge status="success" text="所有组件已完成" />
@@ -125,17 +117,17 @@ export const TestNavigation: React.FC = () => {
                         </div>
                         <CardTitle className="text-lg">{page.name}</CardTitle>
                       </div>
-                      <StatusBadge 
-                        status={page.status === 'complete' ? 'success' : 'pending'} 
+                      <StatusBadge
+                        status={page.status === 'complete' ? 'success' : 'pending'}
                         text={page.status === 'complete' ? '已完成' : '开发中'}
                         size="sm"
                       />
                     </div>
                   </CardHeader>
-                  
+
                   <CardBody>
                     <p className="text-gray-300 mb-4">{page.description}</p>
-                    
+
                     <div className="space-y-3">
                       <div>
                         <h4 className="text-sm font-medium text-gray-400 mb-2">核心特性</h4>
@@ -149,9 +141,9 @@ export const TestNavigation: React.FC = () => {
                       </div>
                     </div>
                   </CardBody>
-                  
+
                   <CardBody className="pt-0">
-                    <Button 
+                    <Button
                       className="w-full"
                       onClick={() => openTestPage(page.url)}
                     >
@@ -169,7 +161,7 @@ export const TestNavigation: React.FC = () => {
         <section className="mb-12">
           <h2 className="text-2xl font-semibold text-white mb-6">📖 测试指南</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
+
             <Card>
               <CardHeader>
                 <CardTitle>🎯 测试重点</CardTitle>
@@ -183,7 +175,7 @@ export const TestNavigation: React.FC = () => {
                       <div className="text-gray-400 text-sm">确保所有组件功能正常工作</div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
                     <div>
@@ -191,7 +183,7 @@ export const TestNavigation: React.FC = () => {
                       <div className="text-gray-400 text-sm">检查组件样式是否统一协调</div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
                     <div>
@@ -199,7 +191,7 @@ export const TestNavigation: React.FC = () => {
                       <div className="text-gray-400 text-sm">测试悬停、点击、键盘导航等</div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
                     <div>
@@ -226,7 +218,7 @@ export const TestNavigation: React.FC = () => {
                       <div className="text-gray-400 text-sm">逐个测试每个组件的功能</div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start gap-3">
                     <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
                       2
@@ -236,7 +228,7 @@ export const TestNavigation: React.FC = () => {
                       <div className="text-gray-400 text-sm">测试组件之间的协作效果</div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start gap-3">
                     <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
                       3
@@ -246,7 +238,7 @@ export const TestNavigation: React.FC = () => {
                       <div className="text-gray-400 text-sm">在实际应用场景中验证</div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start gap-3">
                     <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
                       4

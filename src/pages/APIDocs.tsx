@@ -1,16 +1,6 @@
 import React, { useState } from 'react';
-import {
-  Copy,
-  Key,
-  Zap,
-  Globe,
-  BarChart3,
-  CheckCircle,
-  AlertTriangle,
-  Play,
-  Download,
-  Github
-} from 'lucide-react';
+
+import { Copy, Key, Zap, Globe, BarChart3, CheckCircle, AlertTriangle, Play, Download, Github } from 'lucide-react';
 
 interface APIEndpoint {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -187,7 +177,7 @@ const APIDocs: React.FC = () => {
             {activeSection === 'getting-started' && (
               <div className="p-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">快速开始</h2>
-                
+
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-3">基础信息</h3>
@@ -255,7 +245,7 @@ const APIDocs: React.FC = () => {
             {activeSection === 'authentication' && (
               <div className="p-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">身份验证</h2>
-                
+
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-3">Bearer Token认证</h3>
@@ -308,7 +298,7 @@ const APIDocs: React.FC = () => {
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">
                   {activeSection === 'performance' ? '性能测试 API' : '监控管理 API'}
                 </h2>
-                
+
                 <div className="space-y-8">
                   {apiEndpoints[activeSection]?.map((endpoint, index) => (
                     <div key={index} className="border border-gray-200 rounded-lg">
@@ -408,7 +398,7 @@ const APIDocs: React.FC = () => {
             {activeSection === 'sdks' && (
               <div className="p-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">SDK 下载</h2>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {[
                     { name: 'JavaScript/Node.js', icon: '🟨', version: 'v1.2.0' },

@@ -1,5 +1,6 @@
-import { AlertTriangle, CheckCircle, Info, X, XCircle } from 'lucide-react';
 import React, { createContext, ReactNode, useCallback, useContext, useState } from 'react';
+
+import { AlertTriangle, CheckCircle, Info, X, XCircle } from 'lucide-react';
 
 export interface Notification {
   id: string;

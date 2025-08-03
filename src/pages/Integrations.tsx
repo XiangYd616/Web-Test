@@ -1,33 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Package,
-  Key,
-  Webhook,
-  Settings,
-  Plus,
-  Activity,
-  BarChart3,
-  Clock,
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
-  RefreshCw,
-  ExternalLink,
-  Copy,
-  Edit,
-  Trash2,
-  Eye,
-  EyeOff,
-  Zap,
-  Globe,
-  Shield,
-  Code
-} from 'lucide-react';
-import IntegrationService, { 
-  APIKey, 
-  WebhookConfig, 
-  ThirdPartyIntegration, 
-  IntegrationStats 
+
+import { Package, Key, Webhook, Settings, Plus, Activity, BarChart3, Clock, CheckCircle, XCircle, AlertTriangle, RefreshCw, ExternalLink, Copy, Edit, Trash2, Eye, EyeOff, Zap, Globe, Shield, Code } from 'lucide-react';
+import IntegrationService, {
+  APIKey,
+  WebhookConfig,
+  ThirdPartyIntegration,
+  IntegrationStats
 } from '../services/integrationService';
 
 interface IntegrationsProps {}
@@ -36,13 +14,13 @@ const Integrations: React.FC<IntegrationsProps> = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'api-keys' | 'webhooks' | 'third-party'>('overview');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // 数据状态
   const [stats, setStats] = useState<IntegrationStats | null>(null);
   const [apiKeys, setApiKeys] = useState<APIKey[]>([]);
   const [webhooks, setWebhooks] = useState<WebhookConfig[]>([]);
   const [thirdPartyIntegrations, setThirdPartyIntegrations] = useState<ThirdPartyIntegration[]>([]);
-  
+
   // UI状态
   const [showCreateAPIKey, setShowCreateAPIKey] = useState(false);
   const [showCreateWebhook, setShowCreateWebhook] = useState(false);
@@ -284,7 +262,7 @@ const Integrations: React.FC<IntegrationsProps> = () => {
               <Zap className="w-5 h-5 text-yellow-400" />
               快速操作
             </h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <button
                 onClick={() => setActiveTab('api-keys')}
@@ -353,7 +331,7 @@ const Integrations: React.FC<IntegrationsProps> = () => {
                     </div>
                     <div className="flex items-center space-x-2">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium border ${
-                        apiKey.isActive 
+                        apiKey.isActive
                           ? 'text-green-400 bg-green-500/10 border-green-500/20'
                           : 'text-gray-400 bg-gray-500/10 border-gray-500/20'
                       }`}>
@@ -479,7 +457,7 @@ const Integrations: React.FC<IntegrationsProps> = () => {
                     </div>
                     <div className="flex items-center space-x-2">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium border ${
-                        webhook.isActive 
+                        webhook.isActive
                           ? 'text-green-400 bg-green-500/10 border-green-500/20'
                           : 'text-gray-400 bg-gray-500/10 border-gray-500/20'
                       }`}>

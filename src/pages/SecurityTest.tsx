@@ -1,5 +1,5 @@
-import { Search, Shield, XCircle } from 'lucide-react';
 import React, { useRef, useState } from 'react';
+import { Search, Shield, XCircle } from 'lucide-react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import SecurityTestComparison from '../components/security/SecurityTestComparison';
 import { SecurityTestHistory } from '../components/security/SecurityTestHistory';
@@ -8,6 +8,7 @@ import { UnifiedSecurityTestPanel } from '../components/security/UnifiedSecurity
 import { TestPageLayout } from '../components/testing/UnifiedTestingComponents';
 import { useUserStats } from '../hooks/useUserStats';
 import { SecurityTestResult, TestProgress } from '../services/unifiedSecurityEngine';
+
 // CSS样式已迁移到组件库中
 
 const SecurityTest: React.FC = () => {

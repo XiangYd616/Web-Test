@@ -1,12 +1,6 @@
 import { useEffect, useState } from 'react';
 import { loadCSS, loadPageCSS, loadComponentCSS, preloadPageCSS } from '../utils/cssLoader';
 
-/**
- * 用于动态加载CSS的React Hook
- * @param cssPath CSS文件路径
- * @param options 加载选项
- * @returns 加载状态
- */
 export const useCSS = (
   cssPath: string,
   options: {
@@ -57,12 +51,6 @@ export const useCSS = (
   return { loading, loaded, error, load };
 };
 
-/**
- * 用于加载页面特定CSS的Hook
- * @param pageName 页面名称
- * @param options 加载选项
- * @returns 加载状态和控制函数
- */
 export const usePageCSS = (
   pageName: string,
   options: {
@@ -117,12 +105,6 @@ export const usePageCSS = (
   return { loading, loaded, error, load };
 };
 
-/**
- * 用于加载组件特定CSS的Hook
- * @param componentName 组件名称
- * @param options 加载选项
- * @returns 加载状态和控制函数
- */
 export const useComponentCSS = (
   componentName: string,
   options: {
@@ -172,11 +154,6 @@ export const useComponentCSS = (
   return { loading, loaded, error, load };
 };
 
-/**
- * 用于路由级别CSS加载的Hook
- * @param routeName 路由名称
- * @returns 加载状态
- */
 export const useRouteCSS = (routeName: string) => {
   const { loading, loaded, error } = usePageCSS(routeName, {
     immediate: true,

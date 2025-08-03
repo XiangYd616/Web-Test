@@ -1,7 +1,3 @@
-/**
- * 后台测试管理器 - 管理所有正在运行的测试任务
- * 支持页面切换时测试继续运行
- */
 
 export interface TestInfo {
   id: string;

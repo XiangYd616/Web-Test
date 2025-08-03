@@ -102,11 +102,11 @@ class EnhancedErrorBoundary extends Component<Props, State> {
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
                 <AlertTriangle className="h-6 w-6 text-red-600" />
               </div>
-              
+
               <h2 className="text-lg font-semibold text-gray-900 mb-2">
                 页面出现错误
               </h2>
-              
+
               <p className="text-sm text-gray-600 mb-6">
                 抱歉，页面遇到了意外错误。您可以尝试刷新页面或返回首页。
               </p>

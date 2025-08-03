@@ -1,15 +1,4 @@
-import {
-  AlertCircle,
-  AlertTriangle,
-  CheckCircle,
-  Eye,
-  Info,
-  Lock,
-  Shield,
-  TrendingDown,
-  TrendingUp,
-  XCircle
-} from 'lucide-react';
+import { AlertCircle, AlertTriangle, CheckCircle, Eye, Info, Lock, Shield, TrendingDown, TrendingUp, XCircle } from 'lucide-react';
 import React from 'react';
 
 interface SecurityAnalysisResult {

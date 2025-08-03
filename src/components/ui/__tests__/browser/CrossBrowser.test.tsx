@@ -58,7 +58,7 @@ const mockBrowserEnvironments = {
 // Helper function to mock browser environment
 const mockBrowser = (browserName: keyof typeof mockBrowserEnvironments) => {
   const browser = mockBrowserEnvironments[browserName];
-  
+
   // Mock navigator.userAgent
   Object.defineProperty(navigator, 'userAgent', {
     writable: true,
@@ -277,10 +277,10 @@ describe('Cross-Browser Compatibility Tests', () => {
   describe('Modal Cross-Browser Tests', () => {
     it('handles modal rendering across browsers', () => {
       const browsers = ['chrome', 'firefox', 'safari', 'edge'];
-      
+
       browsers.forEach(browser => {
         restoreBrowser = mockBrowser(browser as keyof typeof mockBrowserEnvironments);
-        
+
         render(
           <Modal open onClose={() => {}} title={`${browser} Modal`}>
             <p>Modal content for {browser}</p>
@@ -289,7 +289,7 @@ describe('Cross-Browser Compatibility Tests', () => {
 
         expect(screen.getByText(`${browser} Modal`)).toBeInTheDocument();
         expect(screen.getByText(`Modal content for ${browser}`)).toBeInTheDocument();
-        
+
         if (restoreBrowser) {
           restoreBrowser();
           restoreBrowser = null;
@@ -301,16 +301,16 @@ describe('Cross-Browser Compatibility Tests', () => {
   describe('Event Handling Cross-Browser Tests', () => {
     it('handles click events consistently across browsers', () => {
       const browsers = ['chrome', 'firefox', 'safari', 'edge'];
-      
+
       browsers.forEach(browser => {
         restoreBrowser = mockBrowser(browser as keyof typeof mockBrowserEnvironments);
-        
+
         const handleClick = vi.fn();
         render(<Button onClick={handleClick}>{browser} Button</Button>);
-        
+
         fireEvent.click(screen.getByText(`${browser} Button`));
         expect(handleClick).toHaveBeenCalledTimes(1);
-        
+
         if (restoreBrowser) {
           restoreBrowser();
           restoreBrowser = null;
@@ -320,17 +320,17 @@ describe('Cross-Browser Compatibility Tests', () => {
 
     it('handles keyboard events consistently across browsers', () => {
       const browsers = ['chrome', 'firefox', 'safari', 'edge'];
-      
+
       browsers.forEach(browser => {
         restoreBrowser = mockBrowser(browser as keyof typeof mockBrowserEnvironments);
-        
+
         const handleClick = vi.fn();
         render(<Button onClick={handleClick}>{browser} Button</Button>);
-        
+
         const button = screen.getByText(`${browser} Button`);
         fireEvent.keyDown(button, { key: 'Enter' });
         expect(handleClick).toHaveBeenCalledTimes(1);
-        
+
         if (restoreBrowser) {
           restoreBrowser();
           restoreBrowser = null;

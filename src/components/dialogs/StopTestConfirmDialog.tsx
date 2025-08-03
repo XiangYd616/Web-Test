@@ -61,7 +61,7 @@ export const StopTestConfirmDialog: React.FC<StopTestConfirmDialogProps> = ({
           {/* 当前测试信息 */}
           <div className="bg-gray-700/50 rounded-lg p-4 space-y-3">
             <h4 className="text-sm font-medium text-gray-300">当前测试状态</h4>
-            
+
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div className="flex items-center space-x-2">
                 <Clock className="w-4 h-4 text-blue-400" />
@@ -70,7 +70,7 @@ export const StopTestConfirmDialog: React.FC<StopTestConfirmDialogProps> = ({
                   <p className="text-white font-medium">{formatDuration(testDuration)}</p>
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 <Database className="w-4 h-4 text-green-400" />
                 <div>

@@ -1,9 +1,5 @@
-/**
- * 统一的测试状态管理器
- * 解决压力测试中的状态冲突和数据流混乱问题
- */
 
-// 测试状态枚举
+
 export enum TestState {
   IDLE = 'idle',
   STARTING = 'starting',
@@ -13,7 +9,6 @@ export enum TestState {
   CANCELLED = 'cancelled'
 }
 
-// 测试阶段枚举
 export enum TestPhase {
   INITIALIZATION = 'initialization',
   RAMP_UP = 'ramp-up',
@@ -29,7 +24,6 @@ export enum DataSource {
   BACKGROUND_MANAGER = 'background-manager'
 }
 
-// 测试配置接口
 export interface TestConfig {
   url: string;
   users: number;
@@ -80,7 +74,6 @@ export interface RealTimeMetrics {
   maxResponseTime?: number;
 }
 
-// 测试数据点接口
 export interface TestDataPoint {
   timestamp: number;
   responseTime: number;
@@ -94,7 +87,7 @@ export interface TestDataPoint {
   errorType?: string;
   connectionTime?: number;
   dnsTime?: number;
-  // 测试ID字段
+  
   testId?: string;
 }
 
@@ -115,9 +108,6 @@ export interface StateManagerConfig {
   enableLogging: boolean;
 }
 
-/**
- * 测试状态管理器类
- */
 export class TestStateManager {
   private state: TestState = TestState.IDLE;
   private phase: TestPhase = TestPhase.INITIALIZATION;

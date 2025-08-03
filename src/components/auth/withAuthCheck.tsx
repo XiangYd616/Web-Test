@@ -83,7 +83,7 @@ export function withAuthCheck<P extends object>(
 export function useAuthCheck(options: WithAuthCheckOptions = {}) {
   const { isAuthenticated } = useAuth();
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
-  
+
   const {
     feature = "此功能",
     description = "使用此功能",

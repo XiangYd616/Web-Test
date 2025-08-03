@@ -34,7 +34,6 @@ const realUXTestEngine = new RealUXTestEngine();
 const realAPITestEngine = new RealAPITestEngine();
 const testHistoryService = new TestHistoryService();
 
-
 // 配置文件上传
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -56,6 +55,71 @@ const upload = multer({
 });
 
 const router = express.Router();
+
+/**
+ * 压力测试配置验证函数
+ */
+function validateStressTestConfig(config) {
+  const errors = [];
+  const warnings = [];
+
+  // 验证用户数
+  if (typeof config.users !== 'number' || config.users < 1) {
+    errors.push('用户数必须是大于0的数字');
+  } else if (config.users > 100) {
+    errors.push('用户数不能超过100');
+  } else if (config.users > 50) {
+    warnings.push('用户数较高，可能会消耗大量系统资源');
+  }
+
+  // 验证测试时长
+  if (typeof config.duration !== 'number' || config.duration < 1) {
+    errors.push('测试时长必须是大于0的数字');
+  } else if (config.duration > 300) {
+    errors.push('测试时长不能超过300秒');
+  } else if (config.duration > 120) {
+    warnings.push('测试时长较长，建议分批进行测试');
+  }
+
+  // 验证加压时间
+  if (typeof config.rampUpTime !== 'number' || config.rampUpTime < 0) {
+    errors.push('加压时间必须是非负数字');
+  } else if (config.rampUpTime >= config.duration) {
+    errors.push('加压时间不能大于或等于测试时长');
+  }
+
+  // 验证测试类型
+  const validTestTypes = ['gradual', 'stress', 'spike', 'load'];
+  if (!validTestTypes.includes(config.testType)) {
+    errors.push(`测试类型必须是以下之一: ${validTestTypes.join(', ')}`);
+  }
+
+  // 验证HTTP方法
+  const validMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'];
+  if (!validMethods.includes(config.method)) {
+    errors.push(`HTTP方法必须是以下之一: ${validMethods.join(', ')}`);
+  }
+
+  // 验证超时时间
+  if (typeof config.timeout !== 'number' || config.timeout < 1) {
+    errors.push('超时时间必须是大于0的数字');
+  } else if (config.timeout > 60) {
+    errors.push('超时时间不能超过60秒');
+  }
+
+  // 验证思考时间
+  if (typeof config.thinkTime !== 'number' || config.thinkTime < 0) {
+    errors.push('思考时间必须是非负数字');
+  } else if (config.thinkTime > 10) {
+    warnings.push('思考时间较长，可能会影响测试效率');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    warnings
+  };
+}
 
 // ==================== 测试引擎状态检查端点 ====================
 
@@ -733,8 +797,6 @@ router.get('/history/:recordId', optionalAuth, asyncHandler(async (req, res) => 
   }
 }));
 
-
-
 /**
  * 开始测试 - 更新状态为运行中
  * POST /api/test/history/:recordId/start
@@ -1125,7 +1187,7 @@ router.get('/stress/status/:testId', optionalAuth, asyncHandler(async (req, res)
     const status = await realStressTestEngine.getTestStatus(testId);
 
     if (!status) {
-      // 测试不存在或已完成，尝试从测试历史中获取结果
+      
       try {
         // 查询测试历史记录
         const historyQuery = `
@@ -1160,7 +1222,7 @@ router.get('/stress/status/:testId', optionalAuth, asyncHandler(async (req, res)
                   currentTPS: testRecord.peak_tps || 0,
                   peakTPS: testRecord.peak_tps || 0,
                   errorRate: testRecord.error_rate || 0,
-                  activeUsers: 0 // 测试完成后活跃用户为0
+                  activeUsers: 0 
                 },
                 realTimeData: realTimeData,
                 results: testRecord.results ?
@@ -1389,7 +1451,19 @@ router.post('/stress/cleanup-all', adminAuth, asyncHandler(async (req, res) => {
  * POST /api/test/stress
  */
 router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
-  const { url, testId: providedTestId, recordId, options = {} } = req.body;
+  const {
+    url,
+    testId: providedTestId,
+    recordId,
+    // 直接从请求体中提取配置参数
+    users,
+    duration,
+    rampUpTime,
+    testType,
+    method,
+    timeout,
+    thinkTime
+  } = req.body;
 
   // URL验证已由中间件完成，可以直接使用验证后的URL
   const validatedURL = req.validatedURL.url.toString();
@@ -1397,6 +1471,50 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
 
   // 🔧 修复：如果前端没有提供testId，自动生成一个
   const testId = providedTestId || `stress_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+  // 🔧 修复：统一配置处理 - 使用直接参数和合理的默认值
+  const testConfig = {
+    users: users || 10,
+    duration: duration || 30,
+    rampUpTime: rampUpTime || 5,
+    testType: testType || 'gradual',
+    method: method || 'GET',
+    timeout: timeout || 10,
+    thinkTime: thinkTime || 1
+  };
+
+  // 🔧 添加配置验证
+  const configValidation = validateStressTestConfig(testConfig);
+  if (!configValidation.isValid) {
+    console.error('❌ 压力测试配置验证失败:', {
+      testId,
+      url: validatedURL,
+      errors: configValidation.errors,
+      receivedConfig: testConfig,
+      originalParams: { users, duration, rampUpTime, testType, method, timeout, thinkTime }
+    });
+    return res.status(400).json({
+      success: false,
+      message: '配置参数无效',
+      errors: configValidation.errors,
+      warnings: configValidation.warnings,
+      receivedConfig: testConfig,
+      validationDetails: {
+        users: { received: users, type: typeof users, valid: typeof users === 'number' && users > 0 },
+        duration: { received: duration, type: typeof duration, valid: typeof duration === 'number' && duration > 0 },
+        testType: { received: testType, valid: ['gradual', 'stress', 'spike', 'load'].includes(testType) }
+      }
+    });
+  }
+
+  // 记录配置验证警告
+  if (configValidation.warnings.length > 0) {
+    console.warn('⚠️ 压力测试配置警告:', {
+      testId,
+      warnings: configValidation.warnings,
+      config: testConfig
+    });
+  }
 
   try {
     console.log('🚀 收到压力测试请求:', {
@@ -1406,8 +1524,22 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
       recordId: recordId,
       hasPreGeneratedTestId: !!providedTestId,
       hasRecordId: !!recordId,
-      testIdAndRecordIdSeparate: testId !== recordId,
-      options: options
+      testIdAndRecordIdSeparate: testId !== recordId
+    });
+
+    // 🔧 详细记录最终配置和验证结果
+    console.log('✅ 压力测试配置验证通过:', {
+      config: testConfig,
+      validation: {
+        isValid: configValidation.isValid,
+        warningsCount: configValidation.warnings.length,
+        warnings: configValidation.warnings
+      },
+      source: {
+        users: users ? 'request' : 'default',
+        duration: duration ? 'request' : 'default',
+        testType: testType ? 'request' : 'default'
+      }
     });
 
     // 1. 处理测试记录
@@ -1417,17 +1549,9 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
           // 如果前端传递了记录ID，更新现有记录状态为running
           await testHistoryService.updateTestRecord(recordId, {
             status: 'running',
-            config: {
-              users: options.users || 10,
-              duration: options.duration || 30,
-              rampUpTime: options.rampUpTime || 5,
-              testType: options.testType || 'gradual',
-              method: options.method || 'GET',
-              timeout: options.timeout || 10,
-              thinkTime: options.thinkTime || 1
-            }
+            config: testConfig
           });
-          console.log('✅ 测试记录已更新为运行中状态:', recordId);
+          console.log('✅ 测试记录已更新为运行中状态:', recordId, '配置:', testConfig);
         } else {
           // 如果没有记录ID，创建新记录
           const testRecord = await testHistoryService.createTestRecord({
@@ -1436,18 +1560,10 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
             url: validatedURL,
             status: 'running',
             userId: req.user.id,
-            config: {
-              users: options.users || 10,
-              duration: options.duration || 30,
-              rampUpTime: options.rampUpTime || 5,
-              testType: options.testType || 'gradual',
-              method: options.method || 'GET',
-              timeout: options.timeout || 10,
-              thinkTime: options.thinkTime || 1
-            }
+            config: testConfig
           });
           testRecordId = testRecord.data.id;
-          console.log('✅ 测试记录已创建(运行中状态):', testRecordId);
+          console.log('✅ 测试记录已创建(运行中状态):', testRecordId, '配置:', testConfig);
         }
 
         // 广播测试记录状态更新到测试历史页面
@@ -1474,7 +1590,7 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
       hasTestId: !!testId,
       userId: req.user?.id,
       recordId: testRecordId,
-      optionsKeys: Object.keys(options)
+      configKeys: Object.keys(testConfig)
     });
 
     // ✅ 关键修复：立即返回响应，不等待测试完成
@@ -1486,7 +1602,7 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
         testId: testId,
         status: 'starting',
         url: validatedURL,
-        config: options,
+        config: testConfig,
         recordId: testRecordId
       }
     });
@@ -1497,7 +1613,7 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
         console.log('🚀 异步执行压力测试:', testId);
 
         const testResult = await realStressTestEngine.runStressTest(validatedURL, {
-          ...options,
+          ...testConfig,
           testId: testId, // 传递预生成的testId
           userId: req.user?.id,
           recordId: testRecordId // 传递数据库记录ID
@@ -3082,8 +3198,6 @@ router.delete('/:testId', authMiddleware, asyncHandler(async (req, res) => {
   }
 }));
 
-
-
 /**
  * 获取测试引擎状态
  * GET /api/test-engines/:engine/status
@@ -3171,15 +3285,5 @@ router.get('/:engine/status', asyncHandler(async (req, res) => {
     });
   }
 }));
-
-
-
-
-
-
-
-
-
-
 
 module.exports = router;

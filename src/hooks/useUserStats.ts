@@ -20,7 +20,7 @@ export const useUserStats = () => {
       // 计算周和月统计
       userStatsService.calculateWeekStats(user.id);
       userStatsService.calculateMonthStats(user.id);
-      
+
       // 重新获取更新后的统计数据
       const updatedStats = userStatsService.getUserStats(user.id);
       setStats(updatedStats);
@@ -44,9 +44,9 @@ export const useUserStats = () => {
 
   // 记录测试完成
   const recordTestCompletion = useCallback((
-    testType: string, 
-    success: boolean, 
-    score?: number, 
+    testType: string,
+    success: boolean,
+    score?: number,
     duration?: number
   ) => {
     if (!user?.id) return;

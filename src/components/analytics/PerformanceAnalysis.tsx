@@ -1,31 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar
-} from 'recharts';
-import {
-  TrendingUp,
-  TrendingDown,
-  Minus,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Zap,
-  Eye,
-  Gauge
-} from 'lucide-react';
 import { dataAnalysisService, PerformanceAnalysis } from '../../services/dataAnalysisService';
 
 interface MetricCardProps {
@@ -219,8 +192,8 @@ const PerformanceAnalysisComponent: React.FC = () => {
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={performanceData.performanceScores}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis 
-                dataKey="date" 
+              <XAxis
+                dataKey="date"
                 stroke="#9CA3AF"
                 fontSize={12}
                 tickFormatter={(value) => new Date(value).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}

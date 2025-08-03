@@ -1,7 +1,3 @@
-/**
- * 压力测试队列状态组件
- * 显示队列统计信息和当前排队状态
- */
 
 import React from 'react';
 import { Clock, Users, TrendingUp, AlertCircle, CheckCircle, XCircle } from 'lucide-react';

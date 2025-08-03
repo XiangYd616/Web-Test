@@ -1,23 +1,5 @@
-/**
- * 性能测试核心模块
- * 统一的性能检测引擎，供所有测试模块使用
- */
 
-import {
-  CacheAnalysis,
-  CompressionAnalysis,
-  CoreWebVitals,
-  PageSpeedMetrics,
-  PERFORMANCE_CONFIG_PRESETS,
-  PerformanceIssue,
-  PerformanceRecommendation,
-  PerformanceTestCallback,
-  PerformanceTestOptions,
-  PerformanceTestProgress,
-  PerformanceTestResult,
-  ResourceAnalysis,
-  UnifiedPerformanceConfig
-} from '../../types/performance';
+import { CacheAnalysis, CompressionAnalysis, CoreWebVitals, PageSpeedMetrics, PERFORMANCE_CONFIG_PRESETS, PerformanceIssue, PerformanceRecommendation, PerformanceTestCallback, PerformanceTestOptions, PerformanceTestProgress, PerformanceTestResult, ResourceAnalysis, UnifiedPerformanceConfig } from '../../types/performance';
 
 export class PerformanceTestCore {
   private activeTests = new Map<string, any>();

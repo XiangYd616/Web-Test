@@ -2,18 +2,8 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardBody } from './Card';
 import { Button } from './Button';
 import { Badge, StatusBadge } from './Badge';
-import { 
-  ArrowRight, 
-  CheckCircle, 
-  AlertTriangle, 
-  ExternalLink,
-  Search,
-  Shield,
-  Timer,
-  BarChart3,
-  Zap,
-  Globe
-} from 'lucide-react';
+
+import { ArrowRight, CheckCircle, AlertTriangle, ExternalLink, Search, Shield, Timer, BarChart3, Zap, Globe } from 'lucide-react';
 
 export const TestPageMigrationComparison: React.FC = () => {
   const openPage = (url: string) => {
@@ -90,7 +80,7 @@ export const TestPageMigrationComparison: React.FC = () => {
   return (
     <div className="p-8 space-y-8 bg-gray-900 min-h-screen">
       <div className="max-w-6xl mx-auto">
-        
+
         {/* 页面标题 */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-white mb-4">
@@ -118,19 +108,19 @@ export const TestPageMigrationComparison: React.FC = () => {
                 <div className="text-gray-400 mb-2">已迁移页面</div>
                 <div className="text-sm text-gray-500">100%完成</div>
               </div>
-              
+
               <div>
                 <div className="text-3xl font-bold text-blue-400 mb-2">20+</div>
                 <div className="text-gray-400 mb-2">组件使用</div>
                 <div className="text-sm text-gray-500">Card, Button, Input等</div>
               </div>
-              
+
               <div>
                 <div className="text-3xl font-bold text-purple-400 mb-2">0</div>
                 <div className="text-gray-400 mb-2">CSS冲突</div>
                 <div className="text-sm text-gray-500">完全解决</div>
               </div>
-              
+
               <div>
                 <div className="text-3xl font-bold text-yellow-400 mb-2">60%</div>
                 <div className="text-gray-400 mb-2">代码减少</div>
@@ -148,7 +138,7 @@ export const TestPageMigrationComparison: React.FC = () => {
               <Card key={page.id} hover>
                 <CardBody>
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    
+
                     {/* 页面信息 */}
                     <div className="lg:col-span-1">
                       <div className="flex items-center gap-3 mb-4">
@@ -166,7 +156,7 @@ export const TestPageMigrationComparison: React.FC = () => {
                     {/* 迁移前后对比 */}
                     <div className="lg:col-span-2">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        
+
                         {/* 迁移前 */}
                         <div className="p-4 border border-red-500/30 rounded-lg bg-red-500/5">
                           <div className="flex items-center gap-2 mb-3">
@@ -191,9 +181,9 @@ export const TestPageMigrationComparison: React.FC = () => {
                               代码重复
                             </li>
                           </ul>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
+                          <Button
+                            variant="outline"
+                            size="sm"
                             className="w-full"
                             onClick={() => openPage(page.originalUrl)}
                           >
@@ -216,8 +206,8 @@ export const TestPageMigrationComparison: React.FC = () => {
                               </li>
                             ))}
                           </ul>
-                          <Button 
-                            size="sm" 
+                          <Button
+                            size="sm"
                             className="w-full"
                             onClick={() => openPage(page.migratedUrl)}
                           >
@@ -241,7 +231,7 @@ export const TestPageMigrationComparison: React.FC = () => {
           </CardHeader>
           <CardBody>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              
+
               {/* 技术改进 */}
               <div>
                 <h4 className="font-medium text-white mb-4">技术改进</h4>
@@ -342,7 +332,7 @@ export const TestPageMigrationComparison: React.FC = () => {
                 <Globe className="w-5 h-5" />
                 <span className="text-sm">测试导航</span>
               </Button>
-              
+
               <Button
                 variant="ghost"
                 className="h-auto p-4 flex flex-col items-center gap-2"
@@ -351,7 +341,7 @@ export const TestPageMigrationComparison: React.FC = () => {
                 <Zap className="w-5 h-5" />
                 <span className="text-sm">综合测试</span>
               </Button>
-              
+
               <Button
                 variant="ghost"
                 className="h-auto p-4 flex flex-col items-center gap-2"
@@ -360,7 +350,7 @@ export const TestPageMigrationComparison: React.FC = () => {
                 <ArrowRight className="w-5 h-5" />
                 <span className="text-sm">迁移对比</span>
               </Button>
-              
+
               <Button
                 variant="ghost"
                 className="h-auto p-4 flex flex-col items-center gap-2"
@@ -369,7 +359,7 @@ export const TestPageMigrationComparison: React.FC = () => {
                 <CheckCircle className="w-5 h-5" />
                 <span className="text-sm">Card测试</span>
               </Button>
-              
+
               <Button
                 variant="ghost"
                 className="h-auto p-4 flex flex-col items-center gap-2"

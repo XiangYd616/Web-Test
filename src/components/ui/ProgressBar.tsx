@@ -20,16 +20,6 @@ interface ProgressBarProps {
   striped?: boolean;
 }
 
-/**
- * ProgressBar 进度条组件
- * 
- * @example
- * ```tsx
- * <ProgressBar value={75} variant="success" showPercentage />
- * <ProgressBar value={45} variant="warning" label="加载中..." />
- * <ProgressBar value={90} variant="primary" size="lg" animated />
- * ```
- */
 export const ProgressBar: React.FC<ProgressBarProps> = ({
   value,
   variant = 'primary',
@@ -105,9 +95,6 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   );
 };
 
-/**
- * CircularProgressBar 圆形进度条组件
- */
 interface CircularProgressBarProps {
   /** 进度值 (0-100) */
   value: number;
@@ -184,9 +171,6 @@ export const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
   );
 };
 
-/**
- * SteppedProgressBar 步骤进度条组件
- */
 interface SteppedProgressBarProps {
   /** 当前步骤 (从0开始) */
   currentStep: number;

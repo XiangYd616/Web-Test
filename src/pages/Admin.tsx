@@ -1,22 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Users,
-  TestTube,
-  Settings,
-  Activity,
-  Shield,
-  Database,
-  Monitor,
-  AlertTriangle,
-  TrendingUp,
-  Clock,
-  Server,
-  HardDrive,
-  Cpu,
-  MemoryStick,
-  Network,
-  BarChart3
-} from 'lucide-react';
 import { adminService } from '../services/adminService';
 import type { SystemStats, SystemMonitor } from '../types/admin';
 import UserManagement from '../components/admin/UserManagement';
@@ -34,7 +16,7 @@ const Admin: React.FC = () => {
 
   useEffect(() => {
     loadDashboardData();
-    
+
     // 每30秒更新一次监控数据
     const interval = setInterval(loadMonitorData, 30000);
     return () => clearInterval(interval);
@@ -47,7 +29,7 @@ const Admin: React.FC = () => {
         adminService.getSystemStats(),
         adminService.getSystemMonitor()
       ]);
-      
+
       setStats(statsData);
       setMonitor(monitorData);
     } catch (error) {

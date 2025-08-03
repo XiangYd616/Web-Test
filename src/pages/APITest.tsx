@@ -1,27 +1,4 @@
-import {
-  BarChart3,
-  CheckCircle,
-  Clock,
-  Code,
-  Database,
-  Download,
-  Eye,
-  EyeOff,
-  FileText,
-  Globe,
-  Key,
-  Loader,
-  Lock,
-  Play,
-  Plus,
-  RotateCcw,
-  Settings,
-  Shield,
-  Square,
-  Trash2,
-  XCircle,
-  Zap
-} from 'lucide-react';
+import { BarChart3, CheckCircle, Clock, Code, Database, Download, Eye, EyeOff, FileText, Globe, Key, Loader, Lock, Play, Plus, RotateCcw, Settings, Shield, Square, Trash2, XCircle, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { URLInput } from '../components/testing';
@@ -29,6 +6,7 @@ import { ProgressBar } from '../components/ui/ProgressBar';
 import { useUserStats } from '../hooks/useUserStats';
 import backgroundTestManager from '../services/backgroundTestManager';
 import type { APIEndpoint, APITestConfig } from '../services/testing/apiTestEngine';
+
 // CSS样式已迁移到组件库中
 // 进度条样式已集成到ProgressBar组件
 
@@ -89,7 +67,6 @@ const APITest: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'basic' | 'auth' | 'headers' | 'environment' | 'advanced'>('basic');
   const [showAuthPassword, setShowAuthPassword] = useState(false);
-
 
   const [globalHeaders, setGlobalHeaders] = useState<Array<{ key: string, value: string, enabled: boolean }>>([
     { key: 'Content-Type', value: 'application/json', enabled: true },

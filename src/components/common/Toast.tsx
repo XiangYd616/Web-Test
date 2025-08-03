@@ -57,11 +57,11 @@ export const showToast = {
   error: (message: string, options?: ToastOptions) => {
     toast.error(message, { ...errorConfig, ...options });
   },
-  
+
   loading: (message: string, options?: ToastOptions) => {
     return toast.loading(message, { ...toastConfig, ...options });
   },
-  
+
   promise: <T,>(
     promise: Promise<T>,
     messages: {
@@ -73,15 +73,15 @@ export const showToast = {
   ) => {
     return toast.promise(promise, messages, { ...toastConfig, ...options });
   },
-  
+
   custom: (message: string, options?: ToastOptions) => {
     toast(message, { ...toastConfig, ...options });
   },
-  
+
   dismiss: (toastId?: string) => {
     toast.dismiss(toastId);
   },
-  
+
   remove: (toastId?: string) => {
     toast.remove(toastId);
   }

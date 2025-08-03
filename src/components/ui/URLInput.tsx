@@ -1,5 +1,5 @@
-import { AlertCircle, CheckCircle, Globe, ExternalLink, Zap } from 'lucide-react';
 import React, { forwardRef, useCallback, useEffect, useState } from 'react';
+import { AlertCircle, CheckCircle, ExternalLink, Globe, Zap } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { Input } from './Input';
 
@@ -27,10 +27,6 @@ interface URLInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>
   className?: string;
 }
 
-/**
- * 优化的URL输入组件
- * 提供URL验证、自动修复、协议建议等功能
- */
 export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
   value = '',
   onChange,
@@ -64,7 +60,7 @@ export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
       // 尝试自动添加协议
       let testUrl = url;
       let needsProtocol = false;
-      
+
       if (!url.match(/^https?:\/\//)) {
         testUrl = `https://${url}`;
         needsProtocol = true;
@@ -72,18 +68,18 @@ export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
 
       // 验证URL格式
       const urlObj = new URL(testUrl);
-      
+
       // 检查是否是有效的域名格式
       if (urlObj.hostname && urlObj.hostname.includes('.')) {
         setIsValid(true);
         setCorrectedUrl(testUrl);
-        
+
         if (needsProtocol && showProtocolSuggestion) {
           setSuggestion(`建议使用完整URL: ${testUrl}`);
         } else {
           setSuggestion('');
         }
-        
+
         onValidationChange?.(true, testUrl);
       } else {
         throw new Error('Invalid hostname');
@@ -91,7 +87,7 @@ export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
     } catch {
       setIsValid(false);
       setCorrectedUrl('');
-      
+
       if (showProtocolSuggestion && !url.match(/^https?:\/\//)) {
         const suggestedUrl = `https://${url}`;
         setSuggestion(`尝试添加协议: ${suggestedUrl}`);
@@ -99,7 +95,7 @@ export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
       } else {
         setSuggestion('请输入有效的URL格式（如：https://example.com）');
       }
-      
+
       onValidationChange?.(false);
     }
   }, [autoAddProtocol, showProtocolSuggestion, onValidationChange]);
@@ -107,7 +103,7 @@ export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
   // 防抖验证
   useEffect(() => {
     if (!enableValidation) return;
-    
+
     const timer = setTimeout(() => {
       validateURL(value);
     }, 300);
@@ -136,7 +132,7 @@ export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
   // 确定右侧图标
   const getRightIcon = () => {
     const icons = [];
-    
+
     // 验证状态图标
     if (enableValidation && isValid !== null) {
       if (isValid) {
@@ -182,7 +178,7 @@ export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
 
     if (icons.length === 0) return undefined;
     if (icons.length === 1) return icons[0];
-    
+
     return (
       <div className="flex items-center space-x-1">
         {icons}
@@ -195,7 +191,7 @@ export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
     if (!enableValidation || isValid === null) {
       return {};
     }
-    
+
     if (isValid) {
       return {
         success: 'URL格式正确'
@@ -208,33 +204,36 @@ export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
   };
 
   return (
-    <div className={cn('space-y-2', className)}>
-      <Input
-        ref={ref}
-        type="url"
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        leftIcon={<Globe className="w-4 h-4 text-gray-400" />}
-        rightIcon={getRightIcon()}
-        size={size}
-        disabled={disabled}
-        {...getStatusProps()}
-        {...props}
-      />
-      
+    <div className={cn('w-full space-y-2', className)}>
+      <div className="w-full">
+        <Input
+          ref={ref}
+          type="url"
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          leftIcon={<Globe className="w-4 h-4 text-gray-400" />}
+          rightIcon={getRightIcon()}
+          size={size}
+          disabled={disabled}
+          className="w-full"
+          {...getStatusProps()}
+          {...props}
+        />
+      </div>
+
       {/* 建议提示 */}
       {suggestion && enableValidation && (
-        <div className="flex items-center justify-between p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-          <div className="flex items-center space-x-2">
+        <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+          <div className="flex items-center space-x-2 min-w-0 flex-1">
             <AlertCircle className="w-4 h-4 text-blue-400 flex-shrink-0" />
-            <span className="text-sm text-blue-300">{suggestion}</span>
+            <span className="text-sm text-blue-300 break-words">{suggestion}</span>
           </div>
           {correctedUrl && correctedUrl !== value && (
             <button
               type="button"
               onClick={applySuggestion}
-              className="px-3 py-1 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-sm rounded transition-colors flex-shrink-0"
+              className="px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-sm rounded transition-colors flex-shrink-0 w-full sm:w-auto text-center"
             >
               应用
             </button>

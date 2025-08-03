@@ -1,7 +1,3 @@
-/**
- * 真实的SEO分析引擎
- * 实现完整的SEO检测和分析功能
- */
 
 import { ProxyResponse, proxyService } from './proxyService';
 
@@ -161,7 +157,7 @@ export interface PerformanceResult {
   issues: string[];
 
   // 新增：真实PageSpeed数据
-  pageSpeedData?: any; // 临时类型，替代PageSpeedResult
+  pageSpeedData?: any; 
 
   // 新增：详细的优化建议
   opportunities: Array<{
@@ -286,9 +282,6 @@ export interface PageMetadata {
   lastModified: string;
 }
 
-/**
- * 真实SEO分析引擎类
- */
 export class RealSEOAnalysisEngine {
   private abortController: AbortController | null = null;
 
@@ -897,8 +890,6 @@ export class RealSEOAnalysisEngine {
     let accessible = false;
     let urls = 0;
 
-
-
     // 检查HTML中的sitemap链接
     const sitemapLinks = dom.querySelectorAll('link[rel="sitemap"]');
     const sitemapUrls: string[] = [];
@@ -945,8 +936,6 @@ export class RealSEOAnalysisEngine {
 
     return { exists, accessible, urls, issues };
   }
-
-
 
   /**
    * 判断是否为搜索引擎网站
@@ -1950,7 +1939,7 @@ export class RealSEOAnalysisEngine {
     // 获取真实的PageSpeed Insights数据
     let pageSpeedData: any | undefined;
     try {
-      // 临时注释掉PageSpeed API调用
+      
       // pageSpeedData = await googlePageSpeedService.analyzePageSpeed(url);
     } catch (error) {
       console.warn('Failed to get PageSpeed data:', error);
@@ -2076,8 +2065,6 @@ export class RealSEOAnalysisEngine {
     return { lcp, fid, cls, overall };
   }
 
-
-
   /**
    * 计算基础性能评分 - 只基于真实数据
    */
@@ -2110,10 +2097,6 @@ export class RealSEOAnalysisEngine {
 
     return Math.max(score, 0);
   }
-
-
-
-
 
   /**
    * 分析资源优化情况

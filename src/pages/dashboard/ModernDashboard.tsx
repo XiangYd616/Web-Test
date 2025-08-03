@@ -1,21 +1,7 @@
-import {
-  Activity,
-  AlertTriangle,
-  BarChart3,
-  CheckCircle,
-  Clock,
-  Download,
-  Globe,
-  TestTube
-} from 'lucide-react';
+import { Activity, AlertTriangle, BarChart3, CheckCircle, Clock, Download, Globe, TestTube } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-// Layout is provided by the router, no need to import
-import {
-  ModernDoughnutChart,
-  ModernLineChart,
-  chartColors
-} from '../../components/modern/ModernChart';
 import { useTheme } from '../../contexts/ThemeContext';
+
 // CSS样式已迁移到组件库和主题配置中
 
 const ModernDashboard: React.FC = () => {
@@ -122,7 +108,6 @@ const ModernDashboard: React.FC = () => {
     ]
   };
 
-  // 测试类型分布圆环图数据 - 结合项目实际需要
   const doughnutData = {
     labels: ['性能测试', '安全扫描', '兼容性测试', 'API测试'],
     datasets: [

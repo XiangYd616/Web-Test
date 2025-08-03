@@ -1,6 +1,3 @@
-/**
- * 📊 图表组件统一导出
- */
 
 export { default as AdvancedTestCharts } from './AdvancedTestCharts';
 export { default as EnhancedDashboardCharts } from './EnhancedDashboardCharts';

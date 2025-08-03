@@ -1,21 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Key,
-  Plus,
-  Copy,
-  Eye,
-  EyeOff,
-  Edit,
-  Trash2,
-  Shield,
-  Activity,
-  Clock,
-  AlertTriangle,
-  CheckCircle,
-  RefreshCw,
-  Filter,
-  Search
-} from 'lucide-react';
 import IntegrationService, { APIKey } from '../services/integrationService';
 
 interface APIKeysProps {}
@@ -28,7 +11,7 @@ const APIKeys: React.FC<APIKeysProps> = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
-  
+
   // 创建API密钥表单状态
   const [newKeyForm, setNewKeyForm] = useState({
     name: '',
@@ -62,7 +45,7 @@ const APIKeys: React.FC<APIKeysProps> = () => {
   const filteredAPIKeys = apiKeys.filter(key => {
     const matchesSearch = key.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          key.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filterStatus === 'all' || 
+    const matchesFilter = filterStatus === 'all' ||
                          (filterStatus === 'active' && key.isActive) ||
                          (filterStatus === 'inactive' && !key.isActive);
     return matchesSearch && matchesFilter;
@@ -291,7 +274,7 @@ const APIKeys: React.FC<APIKeysProps> = () => {
                   <h4 className="font-medium text-white mb-1 flex items-center gap-2">
                     {apiKey.name}
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${
-                      apiKey.isActive 
+                      apiKey.isActive
                         ? 'text-green-400 bg-green-500/10 border-green-500/20'
                         : 'text-gray-400 bg-gray-500/10 border-gray-500/20'
                     }`}>
@@ -401,8 +384,8 @@ const APIKeys: React.FC<APIKeysProps> = () => {
               <Key className="w-12 h-12 text-gray-600 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-400 mb-2">没有找到API密钥</h3>
               <p className="text-gray-500 mb-4">
-                {searchQuery || filterStatus !== 'all' 
-                  ? '尝试调整搜索条件或过滤器' 
+                {searchQuery || filterStatus !== 'all'
+                  ? '尝试调整搜索条件或过滤器'
                   : '创建您的第一个API密钥开始使用'}
               </p>
               {!searchQuery && filterStatus === 'all' && (
@@ -424,7 +407,7 @@ const APIKeys: React.FC<APIKeysProps> = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-gray-800 rounded-xl p-6 w-full max-w-md border border-gray-700">
             <h3 className="text-lg font-semibold text-white mb-4">创建API密钥</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">名称</label>
@@ -458,14 +441,14 @@ const APIKeys: React.FC<APIKeysProps> = () => {
                         checked={newKeyForm.permissions.includes(permission)}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setNewKeyForm(prev => ({ 
-                              ...prev, 
-                              permissions: [...prev.permissions, permission] 
+                            setNewKeyForm(prev => ({
+                              ...prev,
+                              permissions: [...prev.permissions, permission]
                             }));
                           } else {
-                            setNewKeyForm(prev => ({ 
-                              ...prev, 
-                              permissions: prev.permissions.filter(p => p !== permission) 
+                            setNewKeyForm(prev => ({
+                              ...prev,
+                              permissions: prev.permissions.filter(p => p !== permission)
                             }));
                           }
                         }}

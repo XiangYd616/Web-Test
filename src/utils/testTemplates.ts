@@ -178,7 +178,7 @@ export const getTemplatesByDifficulty = (difficulty: TestTemplate['difficulty'])
 
 export const searchTemplates = (query: string): TestTemplate[] => {
   const lowercaseQuery = query.toLowerCase();
-  return stressTestTemplates.filter(template => 
+  return stressTestTemplates.filter(template =>
     template.name.toLowerCase().includes(lowercaseQuery) ||
     template.description.toLowerCase().includes(lowercaseQuery) ||
     template.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery))
@@ -188,7 +188,7 @@ export const searchTemplates = (query: string): TestTemplate[] => {
 export const getRecommendedTemplates = (userLevel: 'beginner' | 'intermediate' | 'advanced'): TestTemplate[] => {
   const levelOrder = { beginner: 1, intermediate: 2, advanced: 3 };
   const userLevelValue = levelOrder[userLevel];
-  
+
   return stressTestTemplates.filter(template => {
     const templateLevelValue = levelOrder[template.difficulty];
     return templateLevelValue <= userLevelValue + 1; // 允许稍微高一级的模板

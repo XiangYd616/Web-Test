@@ -1,21 +1,5 @@
-/**
- * 安全测试历史记录组件
- * 显示用户的安全测试历史和结果对比
- */
 
-import {
-  Calendar,
-  ChevronDown,
-  ChevronRight,
-  Clock,
-  Eye,
-  RefreshCw,
-  Search,
-  Shield,
-  Trash2,
-  TrendingDown,
-  TrendingUp
-} from 'lucide-react';
+import { Calendar, ChevronDown, ChevronRight, Clock, Eye, RefreshCw, Search, Shield, Trash2, TrendingDown, TrendingUp } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { SecurityTestResult } from '../../services/unifiedSecurityEngine';
 

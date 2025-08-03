@@ -1,22 +1,5 @@
-/**
- * 本地文件SEO分析引擎
- * 专门处理本地HTML文件的SEO分析，绕过CORS限制
- */
 
-import {
-  AccessibilityResult,
-  ContentQualityResult,
-  MobileFriendlyResult,
-  PageMetadata,
-  PerformanceResult,
-  SecurityResult,
-  SEOAnalysisResult,
-  SEOIssue,
-  SEORecommendation,
-  SocialMediaResult,
-  StructuredDataResult,
-  TechnicalSEOResult
-} from './realSEOAnalysisEngine';
+import { AccessibilityResult, ContentQualityResult, MobileFriendlyResult, PageMetadata, PerformanceResult, SecurityResult, SEOAnalysisResult, SEOIssue, SEORecommendation, SocialMediaResult, StructuredDataResult, TechnicalSEOResult } from './realSEOAnalysisEngine';
 
 export interface LocalSEOConfig {
   files: File[];
@@ -32,9 +15,6 @@ export interface LocalSEOConfig {
   depth?: 'basic' | 'standard' | 'comprehensive';
 }
 
-/**
- * 本地文件SEO分析引擎类
- */
 export class LocalSEOAnalysisEngine {
   private abortController: AbortController | null = null;
 

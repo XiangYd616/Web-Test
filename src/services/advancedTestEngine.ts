@@ -1,6 +1,3 @@
-/**
- * 高级测试引擎 - 统一管理所有测试工具
- */
 
 import backgroundTestManager from './backgroundTestManager';
 import { testAPI } from './testApiService';

@@ -1,24 +1,6 @@
 import React, { useState } from 'react';
-import {
-  GitBranch,
-  Code,
-  Settings,
-  Play,
-  Copy,
-  CheckCircle,
-  ExternalLink,
-  Webhook,
-  Key,
-  Shield,
-  Zap,
-  Clock,
-  AlertTriangle,
-  Book,
-  Download,
-  Terminal,
-  Globe,
-  Layers
-} from 'lucide-react';
+
+import { GitBranch, Code, Settings, Play, Copy, CheckCircle, ExternalLink, Webhook, Key, Shield, Zap, Clock, AlertTriangle, Book, Download, Terminal, Globe, Layers } from 'lucide-react';
 
 const CICDIntegration: React.FC = () => {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);

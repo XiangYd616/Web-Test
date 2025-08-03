@@ -1,33 +1,7 @@
-import {
-  Activity,
-  ArrowRight,
-  BarChart3,
-  Bell,
-  Book,
-  Clock,
-  Code,
-  Download,
-  Globe,
-  HelpCircle,
-  Home,
-  Key,
-  Lock,
-  Monitor,
-  Play,
-  Search,
-  Settings,
-  Shield,
-  TestTube,
-  TrendingUp,
-  Upload,
-  User,
-  X,
-  Zap
-} from 'lucide-react';
+import { Activity, ArrowRight, BarChart3, Bell, Book, Clock, Code, Download, Globe, HelpCircle, Home, Key, Lock, Monitor, Play, Search, Settings, Shield, TestTube, TrendingUp, Upload, User, X, Zap } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// 临时类型定义
 interface SearchResult {
   id: string;
   title: string;
@@ -39,7 +13,6 @@ interface SearchResult {
   category?: string;
 }
 
-// 临时搜索服务
 const globalSearchService = {
   search: async (query: string, options?: { limit?: number }): Promise<SearchResult[]> => {
     // 模拟搜索结果
