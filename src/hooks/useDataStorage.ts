@@ -2,10 +2,12 @@ import { useCallback, useEffect, useState } from 'react';
 
 export interface TestRecord {
   id: string;
+  testName?: string; // 添加测试名称字段
   testType: string;
   url?: string;
   status: 'completed' | 'failed' | 'running';
   overallScore?: number;
+  score?: number; // 添加score字段作为overallScore的别名
   startTime: string;
   endTime?: string;
   timestamp?: string; // 添加timestamp字段
@@ -17,6 +19,7 @@ export interface TestRecord {
   config?: any;
   scores?: any;
   recommendations?: string[];
+  reportPath?: string; // 添加报告路径字段
   savedAt: string;
 }
 

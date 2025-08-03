@@ -1,6 +1,7 @@
 import { AlertCircle, BarChart3, CheckCircle, Clock, Download, Eye, FileText, Globe, Search, Shield, Trash2, XCircle, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import EnhancedTestHistory from '../components/testHistory/EnhancedTestHistory';
+import { TestRecord } from '../hooks/useDataStorage';
 
 const TestHistory: React.FC = () => {
   // 使用增强的测试历史组件

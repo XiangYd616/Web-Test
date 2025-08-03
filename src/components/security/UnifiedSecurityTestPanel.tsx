@@ -1,6 +1,7 @@
 
 import { AlertTriangle, Award, Eye, FileText, Lock, Network, Settings, Shield, Target, Zap } from 'lucide-react';
 import React, { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
+import { SecurityTestConfig, SecurityTestResult, TestProgress, unifiedSecurityEngine } from '../../services/unifiedSecurityEngine';
 import { URLValidationResult } from '../../utils/enhancedUrlValidator';
 import { createCommonErrors, enhanceError } from '../../utils/errorHandler';
 import EnhancedErrorDisplay, { EnhancedError } from './EnhancedErrorDisplay';

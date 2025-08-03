@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { AlertTriangle, CheckCircle, Clock, Gauge, Minus, TrendingDown, TrendingUp, Zap } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { CartesianGrid, Line, LineChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { dataAnalysisService, PerformanceAnalysis } from '../../services/dataAnalysisService';
 
 interface MetricCardProps {
@@ -292,11 +294,10 @@ const PerformanceAnalysisComponent: React.FC = () => {
                       {url.url}
                     </td>
                     <td className="py-3 px-4">
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        url.avgScore >= 80 ? 'bg-green-500/20 text-green-400' :
-                        url.avgScore >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
-                        'bg-red-500/20 text-red-400'
-                      }`}>
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${url.avgScore >= 80 ? 'bg-green-500/20 text-green-400' :
+                          url.avgScore >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
+                            'bg-red-500/20 text-red-400'
+                        }`}>
                         {url.avgScore.toFixed(1)}
                       </span>
                     </td>
@@ -310,11 +311,10 @@ const PerformanceAnalysisComponent: React.FC = () => {
                         ) : (
                           <Minus className="w-4 h-4 text-gray-400" />
                         )}
-                        <span className={`text-xs ${
-                          url.trend === 'improving' ? 'text-green-400' :
-                          url.trend === 'declining' ? 'text-red-400' :
-                          'text-gray-400'
-                        }`}>
+                        <span className={`text-xs ${url.trend === 'improving' ? 'text-green-400' :
+                            url.trend === 'declining' ? 'text-red-400' :
+                              'text-gray-400'
+                          }`}>
                           {url.trend === 'improving' ? '改善' : url.trend === 'declining' ? '下降' : '稳定'}
                         </span>
                       </div>

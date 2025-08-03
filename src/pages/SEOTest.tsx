@@ -6,6 +6,7 @@ import FileUploadSEO from '../components/seo/FileUploadSEO';
 import LocalSEOResults from '../components/seo/LocalSEOResults';
 import NetworkErrorPrompt from '../components/seo/NetworkErrorPrompt';
 import { URLInput } from '../components/testing';
+import { TestPageLayout } from '../components/testing/UnifiedTestingComponents';
 import type { SEOTestMode } from '../hooks/useUnifiedSEOTest';
 import { useUnifiedSEOTest } from '../hooks/useUnifiedSEOTest';
 
@@ -162,7 +163,7 @@ const SEOTest: React.FC = () => {
       key: 'checkImageOptimization',
       name: '图片优化',
       description: '检查图片Alt标签、尺寸、格式优化',
-      icon: Globe, 
+      icon: Globe,
       color: 'purple',
       estimatedTime: '15-25秒',
       priority: 'medium',
@@ -172,7 +173,7 @@ const SEOTest: React.FC = () => {
       key: 'checkInternalLinking',
       name: '内链结构',
       description: '分析内部链接结构和锚文本优化',
-      icon: Globe, 
+      icon: Globe,
       color: 'indigo',
       estimatedTime: '20-30秒',
       priority: 'medium',
@@ -182,7 +183,7 @@ const SEOTest: React.FC = () => {
       key: 'checkSchemaMarkup',
       name: '结构化数据',
       description: '检查Schema.org标记和富摘要',
-      icon: Globe, 
+      icon: Globe,
       color: 'teal',
       estimatedTime: '15-20秒',
       priority: 'medium',
@@ -192,7 +193,7 @@ const SEOTest: React.FC = () => {
       key: 'checkSocialMedia',
       name: '社交媒体',
       description: '检查Open Graph和Twitter Card标签',
-      icon: Globe, 
+      icon: Globe,
       color: 'cyan',
       estimatedTime: '10-15秒',
       priority: 'low',

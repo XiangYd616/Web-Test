@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { AlertTriangle, CheckCircle, Database, Globe, Mail, Monitor, Save, Server, Shield } from 'lucide-react';
+import React, { useState } from 'react';
 import type { SystemConfig } from '../../types/admin';
 
 const SystemSettings: React.FC = () => {
@@ -178,11 +179,10 @@ const SystemSettings: React.FC = () => {
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                    activeTab === tab.id
-                      ? 'bg-primary-100 text-primary-700 border-r-2 border-primary-500'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
+                  className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === tab.id
+                    ? 'bg-primary-100 text-primary-700 border-r-2 border-primary-500'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    }`}
                 >
                   <Icon className="w-5 h-5 mr-3" />
                   {tab.name}

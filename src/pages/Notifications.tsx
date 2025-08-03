@@ -1,6 +1,7 @@
+import { AlertTriangle, Bell, Check, CheckCircle, ExternalLink, Info, RefreshCw, Search, Trash2, X } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useNotifications, NotificationItem } from '../hooks/useNotifications';
+import { NotificationItem, useNotifications } from '../hooks/useNotifications';
 
 const Notifications: React.FC = () => {
   const {
@@ -53,7 +54,7 @@ const Notifications: React.FC = () => {
     if (filter.status === 'read' && !notification.read) return false;
     if (filter.status === 'unread' && notification.read) return false;
     if (filter.search && !notification.title.toLowerCase().includes(filter.search.toLowerCase()) &&
-        !notification.message.toLowerCase().includes(filter.search.toLowerCase())) return false;
+      !notification.message.toLowerCase().includes(filter.search.toLowerCase())) return false;
     return true;
   });
 
@@ -328,9 +329,8 @@ const Notifications: React.FC = () => {
             filteredNotifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`relative border-l-4 ${getPriorityColor(notification.priority)} ${
-                  !notification.read ? 'bg-blue-500/5' : ''
-                }`}
+                className={`relative border-l-4 ${getPriorityColor(notification.priority)} ${!notification.read ? 'bg-blue-500/5' : ''
+                  }`}
               >
                 <div className="p-6 hover:bg-gray-700/30 transition-colors">
                   <div className="flex items-start space-x-4">
@@ -350,9 +350,8 @@ const Notifications: React.FC = () => {
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-2">
-                        <h3 className={`text-lg font-medium ${
-                          !notification.read ? 'text-white' : 'text-gray-300'
-                        }`}>
+                        <h3 className={`text-lg font-medium ${!notification.read ? 'text-white' : 'text-gray-300'
+                          }`}>
                           {notification.title}
                         </h3>
                         <div className="flex items-center space-x-2">
@@ -375,13 +374,12 @@ const Notifications: React.FC = () => {
                             </span>
                           )}
                           {notification.priority && notification.priority !== 'low' && (
-                            <span className={`px-2 py-1 text-xs rounded ${
-                              notification.priority === 'urgent' ? 'bg-red-500/20 text-red-400' :
+                            <span className={`px-2 py-1 text-xs rounded ${notification.priority === 'urgent' ? 'bg-red-500/20 text-red-400' :
                               notification.priority === 'high' ? 'bg-orange-500/20 text-orange-400' :
-                              'bg-yellow-500/20 text-yellow-400'
-                            }`}>
+                                'bg-yellow-500/20 text-yellow-400'
+                              }`}>
                               {notification.priority === 'urgent' ? '紧急' :
-                               notification.priority === 'high' ? '高' : '中'}
+                                notification.priority === 'high' ? '高' : '中'}
                             </span>
                           )}
                         </div>
