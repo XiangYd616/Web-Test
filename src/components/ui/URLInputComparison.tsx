@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
+import { Card, CardBody, CardHeader, CardTitle } from './Card';
 import { SimpleURLInput, URLInput } from './index';
-import { Card, CardHeader, CardTitle, CardBody } from './Card';
 
 export const URLInputComparison: React.FC = () => {
   const [simpleUrl, setSimpleUrl] = useState('');
@@ -124,7 +124,7 @@ export const URLInputComparison: React.FC = () => {
               <div>
                 <h3 className="text-lg font-medium text-white mb-3">SimpleURLInput 用法</h3>
                 <pre className="bg-gray-800 p-4 rounded-lg text-sm text-gray-300 overflow-x-auto">
-{`import { SimpleURLInput } from '@/components/ui';
+                  {`import { SimpleURLInput } from '../components/ui';
 
 <SimpleURLInput
   value={url}
@@ -138,7 +138,7 @@ export const URLInputComparison: React.FC = () => {
               <div>
                 <h3 className="text-lg font-medium text-white mb-3">URLInput 用法</h3>
                 <pre className="bg-gray-800 p-4 rounded-lg text-sm text-gray-300 overflow-x-auto">
-{`import { URLInput } from '@/components/ui';
+                  {`import { URLInput } from '../components/ui';
 
 <URLInput
   value={url}
