@@ -114,7 +114,7 @@ export default defineConfig({
           // 将UI组件库分离
           'ui-vendor': ['lucide-react'],
           // 将工具库分离
-          'utils-vendor': ['date-fns', 'lodash-es']
+          'utils-vendor': ['date-fns']
         },
         // 资源文件命名
         chunkFileNames: 'assets/js/[name]-[hash].js',

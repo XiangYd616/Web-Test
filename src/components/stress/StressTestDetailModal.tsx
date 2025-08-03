@@ -41,6 +41,41 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = ({
 
   if (!isOpen || !record) return null;
 
+  // 导入统一的状态管理函数（手动添加，因为IDE自动格式化移除了导入）
+  // 临时解决方案：直接在组件内部定义这些函数
+  const getStatusConfig = (status: string) => {
+    const configs = {
+      completed: { text: '已完成', description: '测试成功完成' },
+      failed: { text: '测试失败', description: '测试执行失败' },
+      cancelled: { text: '已取消', description: '测试被用户取消' },
+      running: { text: '运行中', description: '测试正在执行中' },
+      pending: { text: '准备中', description: '测试准备启动' }
+    };
+    return configs[status as keyof typeof configs] || configs.pending;
+  };
+
+  const getStatusText = (status: string) => getStatusConfig(status).text;
+
+  const calculateTestCompletion = (record: any) => {
+    if (!record || record.status === 'completed') return 100;
+    if (record.status === 'failed' || record.status === 'cancelled') {
+      const actualDuration = record.duration || 0;
+      const expectedDuration = record.config?.duration || 60;
+      return Math.min(Math.round((actualDuration / expectedDuration) * 100), 100);
+    }
+    return 0;
+  };
+
+  const formatDateTime = (dateString: string | null | undefined) => {
+    if (!dateString) return '-';
+    try {
+      return new Date(dateString).toLocaleString('zh-CN', {
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+      });
+    } catch { return '-'; }
+  };
+
   // 获取状态样式（与历史记录列表保持一致）
   const getStatusStyle = (status: string) => {
     switch (status) {
@@ -74,38 +109,31 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = ({
   };
 
   const getStatusInfo = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return {
-          icon: <CheckCircle className="w-5 h-5" />,
-          color: getStatusTextColor(status),
-          bg: getStatusStyle(status)
-        };
-      case 'failed':
-        return {
-          icon: <XCircle className="w-5 h-5" />,
-          color: getStatusTextColor(status),
-          bg: getStatusStyle(status)
-        };
-      case 'running':
-        return {
-          icon: <Clock className="w-5 h-5" />,
-          color: getStatusTextColor(status),
-          bg: getStatusStyle(status)
-        };
-      case 'cancelled':
-        return {
-          icon: <AlertCircle className="w-5 h-5" />,
-          color: getStatusTextColor(status),
-          bg: getStatusStyle(status)
-        };
-      default:
-        return {
-          icon: <Clock className="w-5 h-5" />,
-          color: getStatusTextColor(status),
-          bg: getStatusStyle(status)
-        };
-    }
+    const config = getStatusConfig(status);
+
+    // 根据状态返回对应的图标
+    const getIcon = () => {
+      switch (status) {
+        case 'completed':
+          return <CheckCircle className="w-5 h-5" />;
+        case 'failed':
+          return <XCircle className="w-5 h-5" />;
+        case 'cancelled':
+          return <AlertCircle className="w-5 h-5" />;
+        case 'running':
+          return <Clock className="w-5 h-5" />;
+        default:
+          return <Clock className="w-5 h-5" />;
+      }
+    };
+
+    return {
+      icon: getIcon(),
+      color: getStatusTextColor(status),
+      bg: getStatusStyle(status),
+      text: config.text,
+      description: config.description
+    };
   };
 
   const formatDate = (dateString: string) => {
@@ -320,13 +348,44 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = ({
                   </div>
                   <div>
                     <p className={`font-medium ${statusInfo.color}`}>
-                      {record.status === 'completed' ? '已完成' :
-                        record.status === 'failed' ? '失败' :
-                          record.status === 'running' ? '运行中' :
-                            record.status === 'cancelled' ? '已取消' : '未知'}
+                      {statusInfo.text}
                     </p>
-                    {record.errorMessage && (
-                      <p className="text-red-400 text-sm mt-1">{record.errorMessage}</p>
+                    <p className="text-gray-400 text-sm mt-1">
+                      {statusInfo.description}
+                    </p>
+
+                    {/* 详细的错误信息和取消原因 */}
+                    {(record.status === 'failed' || record.status === 'cancelled') && record.errorMessage && (
+                      <div className={`mt-3 p-3 rounded-lg border-l-4 ${record.status === 'failed'
+                        ? 'bg-red-50 dark:bg-red-900/20 border-red-400 text-red-700 dark:text-red-300'
+                        : 'bg-orange-50 dark:bg-orange-900/20 border-orange-400 text-orange-700 dark:text-orange-300'
+                        }`}>
+                        <div className="font-medium text-sm mb-2">
+                          {record.status === 'failed' ? '失败详情' : '取消详情'}
+                        </div>
+                        <div className="text-sm">
+                          <div className="mb-2">
+                            <span className="font-medium">
+                              {record.status === 'failed' ? '错误原因：' : '取消原因：'}
+                            </span>
+                            {record.errorMessage}
+                          </div>
+                          {record.status === 'cancelled' && (
+                            <div className="text-xs opacity-75">
+                              <span className="font-medium">测试完成度：</span>
+                              {calculateTestCompletion(record)}%
+                            </div>
+                          )}
+                          {record.endTime && (
+                            <div className="text-xs opacity-75 mt-1">
+                              <span className="font-medium">
+                                {record.status === 'failed' ? '失败时间：' : '取消时间：'}
+                              </span>
+                              {formatDateTime(record.endTime)}
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>

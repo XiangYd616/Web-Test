@@ -1,7 +1,9 @@
 import { AlertTriangle, BarChart3, CheckCircle, Clock, Download, ExternalLink, Gauge, Globe, Image, Loader, Monitor, RotateCcw, Settings, Share2, Smartphone, Square, Timer, TrendingUp, Wifi, XCircle, Zap } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
+import { TestPageLayout } from '../components/testing/UnifiedTestingComponents';
 import { ProgressBar } from '../components/ui/ProgressBar';
+import { URLInput } from '../components/ui/URLInput';
 import { useUserStats } from '../hooks/useUserStats';
 import UnifiedApiService from '../services/api/apiService';
 import { googlePageSpeedService } from '../services/googlePageSpeedService';
@@ -852,7 +854,7 @@ const PerformanceTest: React.FC = () => {
               <div className="url-input-container">
                 <URLInput
                   value={testConfig.url}
-                  onChange={(e) => setTestConfig(prev => ({ ...prev, url: e.target.value }))}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestConfig(prev => ({ ...prev, url: e.target.value }))}
                   placeholder="输入要测试的网站URL..."
                   className="url-input-full-width"
                   size="sm"

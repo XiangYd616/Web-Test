@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { Activity, AlertTriangle, CheckCircle, Edit, ExternalLink, Filter, Globe, Pause, Play, Plus, RefreshCw, Search, Send, Shield, Trash2, Webhook, XCircle } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import IntegrationService, { WebhookConfig } from '../services/integrationService';
 
-interface WebhooksProps {}
+interface WebhooksProps { }
 
 const Webhooks: React.FC<WebhooksProps> = () => {
   const [webhooks, setWebhooks] = useState<WebhookConfig[]>([]);
@@ -61,10 +62,10 @@ const Webhooks: React.FC<WebhooksProps> = () => {
   // 过滤Webhook
   const filteredWebhooks = webhooks.filter(webhook => {
     const matchesSearch = webhook.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         webhook.url.toLowerCase().includes(searchQuery.toLowerCase());
+      webhook.url.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filterStatus === 'all' ||
-                         (filterStatus === 'active' && webhook.isActive) ||
-                         (filterStatus === 'inactive' && !webhook.isActive);
+      (filterStatus === 'active' && webhook.isActive) ||
+      (filterStatus === 'inactive' && !webhook.isActive);
     return matchesSearch && matchesFilter;
   });
 
@@ -291,11 +292,10 @@ const Webhooks: React.FC<WebhooksProps> = () => {
                 <div>
                   <h4 className="font-medium text-white mb-1 flex items-center gap-2">
                     {webhook.name}
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${
-                      webhook.isActive
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${webhook.isActive
                         ? 'text-green-400 bg-green-500/10 border-green-500/20'
                         : 'text-gray-400 bg-gray-500/10 border-gray-500/20'
-                    }`}>
+                      }`}>
                       {webhook.isActive ? '活跃' : '禁用'}
                     </span>
                   </h4>
@@ -325,7 +325,7 @@ const Webhooks: React.FC<WebhooksProps> = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => {/* 编辑功能 */}}
+                    onClick={() => {/* 编辑功能 */ }}
                     className="p-2 text-gray-400 hover:text-blue-400 transition-colors"
                     title="编辑"
                   >

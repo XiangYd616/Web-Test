@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { adminService } from '../services/adminService';
-import type { SystemStats, SystemMonitor } from '../types/admin';
-import UserManagement from '../components/admin/UserManagement';
-import SystemMonitorComponent from '../components/admin/SystemMonitor';
-import TestManagement from '../components/admin/TestManagement';
-import SystemSettings from '../components/admin/SystemSettings';
+import { Activity, BarChart3, Clock, Cpu, Database, HardDrive, MemoryStick, Monitor, Network, Server, Settings, Shield, TestTube, TrendingUp, Users } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import BackupManagement from '../components/admin/BackupManagement';
 import SecurityCenter from '../components/admin/SecurityCenter';
+import SystemMonitorComponent from '../components/admin/SystemMonitor';
+import SystemSettings from '../components/admin/SystemSettings';
+import TestManagement from '../components/admin/TestManagement';
+import UserManagement from '../components/admin/UserManagement';
+import { adminService } from '../services/adminService';
+import type { SystemMonitor, SystemStats } from '../types/admin';
 
 const Admin: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -106,11 +107,10 @@ const Admin: React.FC = () => {
                 <Clock className="w-4 h-4" />
                 <span>系统运行时间: {stats ? formatUptime(stats.system.uptime) : '--'}</span>
               </div>
-              <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                monitor && monitor.metrics.application.errorRate < 5
+              <div className={`px-3 py-1 rounded-full text-xs font-medium ${monitor && monitor.metrics.application.errorRate < 5
                   ? 'bg-green-500/20 text-green-300 border border-green-500/30'
                   : 'bg-red-500/20 text-red-300 border border-red-500/30'
-              }`}>
+                }`}>
                 {monitor && monitor.metrics.application.errorRate < 5 ? '系统正常' : '系统异常'}
               </div>
             </div>
@@ -129,11 +129,10 @@ const Admin: React.FC = () => {
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
-                    activeTab === tab.id
+                  className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${activeTab === tab.id
                       ? 'bg-blue-600/20 text-blue-300 border border-blue-500/30 shadow-lg'
                       : 'text-gray-300 hover:bg-gray-700/50 hover:text-white border border-transparent'
-                  }`}
+                    }`}
                 >
                   <Icon className="w-5 h-5 mr-3" />
                   {tab.name}
@@ -145,190 +144,189 @@ const Admin: React.FC = () => {
 
         {/* 主内容区 */}
         <div className="flex-1">
-            {activeTab === 'dashboard' && (
-              <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-white">系统概览</h2>
+          {activeTab === 'dashboard' && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-white">系统概览</h2>
 
-                {/* 统计卡片 */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg shadow-lg border border-gray-700/50 p-6 hover:shadow-xl transition-all duration-300">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <div className="bg-blue-500/20 p-3 rounded-lg border border-blue-500/30">
-                          <Users className="w-8 h-8 text-blue-400" />
-                        </div>
-                      </div>
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-300">总用户数</p>
-                        <p className="text-2xl font-bold text-white">{stats?.users.total.toLocaleString()}</p>
-                        <p className="text-sm text-green-400">
-                          <TrendingUp className="w-4 h-4 inline mr-1" />
-                          +{stats?.users.growthRate}%
-                        </p>
+              {/* 统计卡片 */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg shadow-lg border border-gray-700/50 p-6 hover:shadow-xl transition-all duration-300">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <div className="bg-blue-500/20 p-3 rounded-lg border border-blue-500/30">
+                        <Users className="w-8 h-8 text-blue-400" />
                       </div>
                     </div>
-                  </div>
-
-                  <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg shadow-lg border border-gray-700/50 p-6 hover:shadow-xl transition-all duration-300">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <div className="bg-green-500/20 p-3 rounded-lg border border-green-500/30">
-                          <TestTube className="w-8 h-8 text-green-400" />
-                        </div>
-                      </div>
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-300">总测试数</p>
-                        <p className="text-2xl font-bold text-white">{stats?.tests.total.toLocaleString()}</p>
-                        <p className="text-sm text-blue-400">今日: {stats?.tests.todayCount}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg shadow-lg border border-gray-700/50 p-6 hover:shadow-xl transition-all duration-300">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <div className="bg-purple-500/20 p-3 rounded-lg border border-purple-500/30">
-                          <Server className="w-8 h-8 text-purple-400" />
-                        </div>
-                      </div>
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-300">成功率</p>
-                        <p className="text-2xl font-bold text-white">{stats?.performance.successRate.toFixed(1)}%</p>
-                        <p className="text-sm text-gray-300">平均响应: {stats?.tests.averageResponseTime}s</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg shadow-lg border border-gray-700/50 p-6 hover:shadow-xl transition-all duration-300">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <div className="bg-orange-500/20 p-3 rounded-lg border border-orange-500/30">
-                          <Activity className="w-8 h-8 text-orange-400" />
-                        </div>
-                      </div>
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-300">活跃用户</p>
-                        <p className="text-2xl font-bold text-white">{monitor?.metrics.application.activeUsers}</p>
-                        <p className="text-sm text-gray-300">运行中测试: {monitor?.metrics.application.runningTests}</p>
-                      </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-300">总用户数</p>
+                      <p className="text-2xl font-bold text-white">{stats?.users.total.toLocaleString()}</p>
+                      <p className="text-sm text-green-400">
+                        <TrendingUp className="w-4 h-4 inline mr-1" />
+                        +{stats?.users.growthRate}%
+                      </p>
                     </div>
                   </div>
                 </div>
 
-                {/* 系统资源监控 */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg shadow-lg border border-gray-700/50 p-6">
-                    <h3 className="text-lg font-medium text-white mb-4">系统资源</h3>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <Cpu className="w-5 h-5 text-blue-400 mr-2" />
-                          <span className="text-sm font-medium text-gray-300">CPU 使用率</span>
-                        </div>
-                        <div className="flex items-center">
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(monitor?.metrics.cpu.usage || 0)}`}>
-                            {monitor?.metrics.cpu.usage.toFixed(1)}%
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <MemoryStick className="w-5 h-5 text-green-400 mr-2" />
-                          <span className="text-sm font-medium text-gray-300">内存使用率</span>
-                        </div>
-                        <div className="flex items-center">
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(monitor?.metrics.memory.usage || 0)}`}>
-                            {monitor?.metrics.memory.usage.toFixed(1)}%
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <HardDrive className="w-5 h-5 text-purple-400 mr-2" />
-                          <span className="text-sm font-medium text-gray-300">磁盘使用率</span>
-                        </div>
-                        <div className="flex items-center">
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(monitor?.metrics.disk.usage || 0)}`}>
-                            {monitor?.metrics.disk.usage.toFixed(1)}%
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <Network className="w-5 h-5 text-orange-400 mr-2" />
-                          <span className="text-sm font-medium text-gray-300">网络连接</span>
-                        </div>
-                        <div className="flex items-center">
-                          <span className="text-sm text-gray-300">
-                            {monitor?.metrics.network.connections} 连接
-                          </span>
-                        </div>
+                <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg shadow-lg border border-gray-700/50 p-6 hover:shadow-xl transition-all duration-300">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <div className="bg-green-500/20 p-3 rounded-lg border border-green-500/30">
+                        <TestTube className="w-8 h-8 text-green-400" />
                       </div>
                     </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-300">总测试数</p>
+                      <p className="text-2xl font-bold text-white">{stats?.tests.total.toLocaleString()}</p>
+                      <p className="text-sm text-blue-400">今日: {stats?.tests.todayCount}</p>
+                    </div>
                   </div>
+                </div>
 
-                  <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg shadow-lg border border-gray-700/50 p-6">
-                    <h3 className="text-lg font-medium text-white mb-4">应用状态</h3>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-gray-300">数据库连接</span>
-                        <span className="text-sm text-gray-300">{monitor?.metrics.database.connections} / 100</span>
+                <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg shadow-lg border border-gray-700/50 p-6 hover:shadow-xl transition-all duration-300">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <div className="bg-purple-500/20 p-3 rounded-lg border border-purple-500/30">
+                        <Server className="w-8 h-8 text-purple-400" />
                       </div>
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-300">成功率</p>
+                      <p className="text-2xl font-bold text-white">{stats?.performance.successRate.toFixed(1)}%</p>
+                      <p className="text-sm text-gray-300">平均响应: {stats?.tests.averageResponseTime}s</p>
+                    </div>
+                  </div>
+                </div>
 
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-gray-300">查询平均时间</span>
-                        <span className="text-sm text-gray-300">{monitor?.metrics.database.queryTime.toFixed(2)}ms</span>
+                <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg shadow-lg border border-gray-700/50 p-6 hover:shadow-xl transition-all duration-300">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <div className="bg-orange-500/20 p-3 rounded-lg border border-orange-500/30">
+                        <Activity className="w-8 h-8 text-orange-400" />
                       </div>
+                    </div>
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-gray-300">活跃用户</p>
+                      <p className="text-2xl font-bold text-white">{monitor?.metrics.application.activeUsers}</p>
+                      <p className="text-sm text-gray-300">运行中测试: {monitor?.metrics.application.runningTests}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-gray-300">数据库大小</span>
-                        <span className="text-sm text-gray-300">{formatBytes(monitor?.metrics.database.size || 0)}</span>
+              {/* 系统资源监控 */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg shadow-lg border border-gray-700/50 p-6">
+                  <h3 className="text-lg font-medium text-white mb-4">系统资源</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <Cpu className="w-5 h-5 text-blue-400 mr-2" />
+                        <span className="text-sm font-medium text-gray-300">CPU 使用率</span>
                       </div>
+                      <div className="flex items-center">
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(monitor?.metrics.cpu.usage || 0)}`}>
+                          {monitor?.metrics.cpu.usage.toFixed(1)}%
+                        </span>
+                      </div>
+                    </div>
 
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-gray-300">错误率</span>
-                        <span className={`text-sm font-medium ${
-                          (monitor?.metrics.application.errorRate || 0) < 5 ? 'text-green-400' : 'text-red-400'
-                        }`}>
-                          {monitor?.metrics.application.errorRate.toFixed(2)}%
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <MemoryStick className="w-5 h-5 text-green-400 mr-2" />
+                        <span className="text-sm font-medium text-gray-300">内存使用率</span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(monitor?.metrics.memory.usage || 0)}`}>
+                          {monitor?.metrics.memory.usage.toFixed(1)}%
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <HardDrive className="w-5 h-5 text-purple-400 mr-2" />
+                        <span className="text-sm font-medium text-gray-300">磁盘使用率</span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(monitor?.metrics.disk.usage || 0)}`}>
+                          {monitor?.metrics.disk.usage.toFixed(1)}%
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <Network className="w-5 h-5 text-orange-400 mr-2" />
+                        <span className="text-sm font-medium text-gray-300">网络连接</span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-sm text-gray-300">
+                          {monitor?.metrics.network.connections} 连接
                         </span>
                       </div>
                     </div>
                   </div>
                 </div>
+
+                <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg shadow-lg border border-gray-700/50 p-6">
+                  <h3 className="text-lg font-medium text-white mb-4">应用状态</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-300">数据库连接</span>
+                      <span className="text-sm text-gray-300">{monitor?.metrics.database.connections} / 100</span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-300">查询平均时间</span>
+                      <span className="text-sm text-gray-300">{monitor?.metrics.database.queryTime.toFixed(2)}ms</span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-300">数据库大小</span>
+                      <span className="text-sm text-gray-300">{formatBytes(monitor?.metrics.database.size || 0)}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-300">错误率</span>
+                      <span className={`text-sm font-medium ${(monitor?.metrics.application.errorRate || 0) < 5 ? 'text-green-400' : 'text-red-400'
+                        }`}>
+                        {monitor?.metrics.application.errorRate.toFixed(2)}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {activeTab === 'users' && <UserManagement />}
+          {activeTab === 'users' && <UserManagement />}
 
-            {activeTab === 'tests' && <TestManagement />}
+          {activeTab === 'tests' && <TestManagement />}
 
-            {activeTab === 'monitor' && <SystemMonitorComponent />}
+          {activeTab === 'monitor' && <SystemMonitorComponent />}
 
-            {activeTab === 'logs' && (
-              <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg shadow-lg border border-gray-700/50 p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">活动日志</h3>
-                <p className="text-gray-300">活动日志功能已移除</p>
-              </div>
-            )}
+          {activeTab === 'logs' && (
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg shadow-lg border border-gray-700/50 p-6">
+              <h3 className="text-lg font-semibold text-white mb-4">活动日志</h3>
+              <p className="text-gray-300">活动日志功能已移除</p>
+            </div>
+          )}
 
-            {activeTab === 'settings' && <SystemSettings />}
+          {activeTab === 'settings' && <SystemSettings />}
 
-            {activeTab === 'backup' && <BackupManagement />}
+          {activeTab === 'backup' && <BackupManagement />}
 
-            {activeTab === 'security' && <SecurityCenter />}
+          {activeTab === 'security' && <SecurityCenter />}
 
-            {(activeTab !== 'dashboard' &&
-              activeTab !== 'users' &&
-              activeTab !== 'tests' &&
-              activeTab !== 'monitor' &&
-              activeTab !== 'logs' &&
-              activeTab !== 'settings' &&
-              activeTab !== 'backup' &&
-              activeTab !== 'security') && (
+          {(activeTab !== 'dashboard' &&
+            activeTab !== 'users' &&
+            activeTab !== 'tests' &&
+            activeTab !== 'monitor' &&
+            activeTab !== 'logs' &&
+            activeTab !== 'settings' &&
+            activeTab !== 'backup' &&
+            activeTab !== 'security') && (
               <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg shadow-lg border border-gray-700/50 p-6">
                 <div className="text-center py-12">
                   <div className="text-gray-400 mb-4">

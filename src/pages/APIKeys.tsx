@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { Activity, AlertTriangle, CheckCircle, Clock, Copy, Edit, Eye, EyeOff, Filter, Key, Plus, RefreshCw, Search, Shield, Trash2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import IntegrationService, { APIKey } from '../services/integrationService';
 
-interface APIKeysProps {}
+interface APIKeysProps { }
 
 const APIKeys: React.FC<APIKeysProps> = () => {
   const [apiKeys, setApiKeys] = useState<APIKey[]>([]);
@@ -44,10 +45,10 @@ const APIKeys: React.FC<APIKeysProps> = () => {
   // 过滤API密钥
   const filteredAPIKeys = apiKeys.filter(key => {
     const matchesSearch = key.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         key.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      key.description?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filterStatus === 'all' ||
-                         (filterStatus === 'active' && key.isActive) ||
-                         (filterStatus === 'inactive' && !key.isActive);
+      (filterStatus === 'active' && key.isActive) ||
+      (filterStatus === 'inactive' && !key.isActive);
     return matchesSearch && matchesFilter;
   });
 
@@ -173,7 +174,7 @@ const APIKeys: React.FC<APIKeysProps> = () => {
             onClick={fetchAPIKeys}
             disabled={loading}
             className="flex items-center space-x-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50"
-           type="button">
+            type="button">
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             <span>刷新</span>
           </button>
@@ -273,11 +274,10 @@ const APIKeys: React.FC<APIKeysProps> = () => {
                 <div>
                   <h4 className="font-medium text-white mb-1 flex items-center gap-2">
                     {apiKey.name}
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${
-                      apiKey.isActive
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${apiKey.isActive
                         ? 'text-green-400 bg-green-500/10 border-green-500/20'
                         : 'text-gray-400 bg-gray-500/10 border-gray-500/20'
-                    }`}>
+                      }`}>
                       {apiKey.isActive ? '活跃' : '禁用'}
                     </span>
                   </h4>
@@ -287,7 +287,7 @@ const APIKeys: React.FC<APIKeysProps> = () => {
                 <div className="flex items-center space-x-2">
                   <button
                     type="button"
-            onClick={() => {/* 编辑功能 */}}
+                    onClick={() => {/* 编辑功能 */ }}
                     className="p-2 text-gray-400 hover:text-blue-400 transition-colors"
                     title="编辑"
                   >
@@ -295,7 +295,7 @@ const APIKeys: React.FC<APIKeysProps> = () => {
                   </button>
                   <button
                     type="button"
-            onClick={() => handleDeleteAPIKey(apiKey.id)}
+                    onClick={() => handleDeleteAPIKey(apiKey.id)}
                     className="p-2 text-gray-400 hover:text-red-400 transition-colors"
                     title="删除"
                   >
@@ -313,7 +313,7 @@ const APIKeys: React.FC<APIKeysProps> = () => {
                     </code>
                     <button
                       type="button"
-            onClick={() => toggleKeyVisibility(apiKey.id)}
+                      onClick={() => toggleKeyVisibility(apiKey.id)}
                       className="p-2 text-gray-400 hover:text-white transition-colors"
                       title={visibleKeys.has(apiKey.id) ? '隐藏' : '显示'}
                     >
@@ -321,7 +321,7 @@ const APIKeys: React.FC<APIKeysProps> = () => {
                     </button>
                     <button
                       type="button"
-            onClick={() => copyToClipboard(apiKey.key)}
+                      onClick={() => copyToClipboard(apiKey.key)}
                       className="p-2 text-gray-400 hover:text-white transition-colors"
                       title="复制"
                     >
@@ -391,7 +391,7 @@ const APIKeys: React.FC<APIKeysProps> = () => {
               {!searchQuery && filterStatus === 'all' && (
                 <button
                   type="button"
-            onClick={() => setShowCreateModal(true)}
+                  onClick={() => setShowCreateModal(true)}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   创建API密钥
@@ -476,7 +476,7 @@ const APIKeys: React.FC<APIKeysProps> = () => {
             <div className="flex items-center justify-end space-x-3 mt-6">
               <button
                 type="button"
-            onClick={() => setShowCreateModal(false)}
+                onClick={() => setShowCreateModal(false)}
                 className="px-4 py-2 text-gray-300 hover:text-white transition-colors"
               >
                 取消
@@ -485,7 +485,7 @@ const APIKeys: React.FC<APIKeysProps> = () => {
                 onClick={handleCreateAPIKey}
                 disabled={!newKeyForm.name || newKeyForm.permissions.length === 0}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-               type="button">
+                type="button">
                 创建密钥
               </button>
             </div>

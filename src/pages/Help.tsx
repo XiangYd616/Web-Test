@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { helpService } from '../services/helpService';
+import { BarChart3, Book, ChevronRight, Clock, Code, Download, FileText, Filter, HelpCircle, Mail, MessageCircle, Phone, Play, Search, Send, Shield, Tag, ThumbsDown, ThumbsUp, Users, Video, Zap } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { helpService } from '../services/helpService';
 
 interface FAQItem {
   id: string;
@@ -549,11 +550,10 @@ const Help: React.FC = () => {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
-                  activeTab === tab.id
+                className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${activeTab === tab.id
                     ? 'bg-blue-600 text-white'
                     : 'text-gray-300 hover:bg-gray-600/50'
-                }`}
+                  }`}
               >
                 <tab.icon className="w-4 h-4" />
                 <span className="text-sm">{tab.name}</span>
@@ -617,7 +617,7 @@ const Help: React.FC = () => {
                           </div>
                           <span className={`px-2 py-1 text-xs rounded-full border ${getDifficultyColor(guide.difficulty)}`}>
                             {guide.difficulty === 'beginner' ? '初级' :
-                             guide.difficulty === 'intermediate' ? '中级' : '高级'}
+                              guide.difficulty === 'intermediate' ? '中级' : '高级'}
                           </span>
                         </div>
                         {guide.videoUrl && (
@@ -695,9 +695,8 @@ const Help: React.FC = () => {
                       </div>
                     </div>
                     <ChevronRight
-                      className={`w-5 h-5 text-gray-400 transition-transform ${
-                        expandedFAQ === faq.id ? 'rotate-90' : ''
-                      }`}
+                      className={`w-5 h-5 text-gray-400 transition-transform ${expandedFAQ === faq.id ? 'rotate-90' : ''
+                        }`}
                     />
                   </button>
                   {expandedFAQ === faq.id && (
@@ -913,7 +912,7 @@ const Help: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-300 mb-2">反馈类型</label>
                   <select
                     value={feedbackData.type}
-                    onChange={(e) => setFeedbackData({...feedbackData, type: e.target.value as any})}
+                    onChange={(e) => setFeedbackData({ ...feedbackData, type: e.target.value as any })}
                     title="选择反馈类型"
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500"
                     required
@@ -930,7 +929,7 @@ const Help: React.FC = () => {
                   <input
                     type="text"
                     value={feedbackData.title}
-                    onChange={(e) => setFeedbackData({...feedbackData, title: e.target.value})}
+                    onChange={(e) => setFeedbackData({ ...feedbackData, title: e.target.value })}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500"
                     placeholder="请简要描述您的问题或建议"
                     required
@@ -941,7 +940,7 @@ const Help: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-300 mb-2">详细描述</label>
                   <textarea
                     value={feedbackData.description}
-                    onChange={(e) => setFeedbackData({...feedbackData, description: e.target.value})}
+                    onChange={(e) => setFeedbackData({ ...feedbackData, description: e.target.value })}
                     rows={4}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500"
                     placeholder="请详细描述您遇到的问题或建议..."
@@ -954,7 +953,7 @@ const Help: React.FC = () => {
                   <input
                     type="email"
                     value={feedbackData.email}
-                    onChange={(e) => setFeedbackData({...feedbackData, email: e.target.value})}
+                    onChange={(e) => setFeedbackData({ ...feedbackData, email: e.target.value })}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500"
                     placeholder="your@email.com"
                     required
@@ -965,7 +964,7 @@ const Help: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-300 mb-2">优先级</label>
                   <select
                     value={feedbackData.priority}
-                    onChange={(e) => setFeedbackData({...feedbackData, priority: e.target.value as any})}
+                    onChange={(e) => setFeedbackData({ ...feedbackData, priority: e.target.value as any })}
                     title="选择优先级"
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500"
                   >

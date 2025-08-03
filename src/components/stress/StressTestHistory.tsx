@@ -1,8 +1,14 @@
-import { Activity, AlertCircle, BarChart3, CheckCircle, Clock, Download, ExternalLink, Eye, RefreshCw, Search, Trash2, XCircle } from 'lucide-react';
+import { Activity, BarChart3, Download, ExternalLink, Eye, RefreshCw, Search, Trash2 } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import {
+  calculateTestCompletion,
+  getStatusConfig,
+  getStatusStyleClasses,
+  getStatusText
+} from '../../utils/testStatusUtils';
 import StressTestDetailModal from './StressTestDetailModal';
 
 import './StatusLabel.css';
@@ -291,22 +297,9 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
   const startRecord = totalRecords === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const endRecord = Math.min(currentPage * pageSize, totalRecords);
 
-  // 获取状态样式和内联样式
+  // 获取状态样式（使用统一的状态管理）
   const getStatusStyle = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return '!bg-green-100 dark:!bg-green-500 !text-green-800 dark:!text-green-100 !border-green-200 dark:!border-green-400';
-      case 'failed':
-        return '!bg-red-100 dark:!bg-red-500 !text-red-800 dark:!text-red-100 !border-red-200 dark:!border-red-400';
-      case 'running':
-        return '!bg-blue-100 dark:!bg-blue-500 !text-blue-800 dark:!text-blue-100 !border-blue-200 dark:!border-blue-400 animate-pulse';
-      case 'cancelled':
-        return '!bg-yellow-100 dark:!bg-yellow-500 !text-yellow-800 dark:!text-yellow-100 !border-yellow-200 dark:!border-yellow-400';
-      case 'pending':
-        return '!bg-yellow-100 dark:!bg-yellow-500 !text-yellow-800 dark:!text-yellow-100 !border-yellow-200 dark:!border-yellow-400';
-      default:
-        return '!bg-gray-100 dark:!bg-gray-500 !text-gray-800 dark:!text-gray-100 !border-gray-200 dark:!border-gray-400';
-    }
+    return `!${getStatusStyleClasses(status)}`;
   };
 
   // 获取状态文字颜色CSS类（高specificity）
@@ -327,22 +320,17 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
     }
   };
 
-  // 获取状态图标
+  // 获取状态图标（使用统一的状态管理）
   const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return <CheckCircle className="w-4 h-4" />;
-      case 'failed':
-        return <XCircle className="w-4 h-4" />;
-      case 'running':
-        return <Activity className="w-4 h-4 animate-pulse" />;
-      case 'cancelled':
-        return <AlertCircle className="w-4 h-4" />;
-      case 'pending':
-        return <Clock className="w-4 h-4" />;
-      default:
-        return <Clock className="w-4 h-4" />;
-    }
+    const config = getStatusConfig(status);
+    const IconComponent = config.icon;
+    const isAnimated = status === 'running';
+
+    return (
+      <IconComponent
+        className={`w-4 h-4 ${isAnimated ? 'animate-pulse' : ''}`}
+      />
+    );
   };
 
   // 格式化时间
@@ -998,11 +986,11 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
                 className="w-full pl-4 pr-12 py-2.5 text-sm border border-gray-600/40 rounded-lg bg-gray-700/50 backdrop-blur-sm text-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 appearance-none bg-no-repeat bg-right bg-[length:14px_14px] bg-[position:right_16px_center] bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQiIGhlaWdodD0iMTQiIHZpZXdCb3g9IjAgMCAxNCAxNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTMuNSA1LjI1TDcgOC43NUwxMC41IDUuMjUiIHN0cm9rZT0iIzlDQTNBRiIgc3Ryb2tlLXdpZHRoPSIxLjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K')]"
               >
                 <option value="all">全部状态</option>
-                <option value="completed">已完成</option>
-                <option value="failed">已失败</option>
-                <option value="running">运行中</option>
-                <option value="cancelled">已取消</option>
-                <option value="pending">准备中</option>
+                <option value="completed">{getStatusText('completed')}</option>
+                <option value="failed">{getStatusText('failed')}</option>
+                <option value="running">{getStatusText('running')}</option>
+                <option value="cancelled">{getStatusText('cancelled')}</option>
+                <option value="pending">{getStatusText('pending')}</option>
               </select>
             </div>
 
@@ -1131,20 +1119,34 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
                         <span
                           className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${getStatusStyle(record.status)} ${getStatusTextColorClass(record.status)}`}
                           role="status"
-                          aria-label={`测试状态: ${record.status === 'completed' ? '已完成' :
-                            record.status === 'failed' ? '已失败' :
-                              record.status === 'running' ? '运行中' :
-                                record.status === 'cancelled' ? '已取消' :
-                                  record.status === 'pending' ? '准备中' : '未知'}`}
+                          aria-label={`测试状态: ${getStatusText(record.status)}`}
                         >
                           {getStatusIcon(record.status)}
-                          {record.status === 'completed' ? '已完成' :
-                            record.status === 'failed' ? '已失败' :
-                              record.status === 'running' ? '运行中' :
-                                record.status === 'cancelled' ? '已取消' :
-                                  record.status === 'pending' ? '准备中' : '未知'}
+                          {getStatusText(record.status)}
                         </span>
                       </div>
+
+                      {/* 错误信息和取消原因显示 */}
+                      {(record.status === 'failed' || record.status === 'cancelled') && record.errorMessage && (
+                        <div className="mb-3">
+                          <div className={`text-xs px-3 py-2 rounded-lg border-l-4 ${record.status === 'failed'
+                            ? 'bg-red-50 dark:bg-red-900/20 border-red-400 text-red-700 dark:text-red-300'
+                            : 'bg-orange-50 dark:bg-orange-900/20 border-orange-400 text-orange-700 dark:text-orange-300'
+                            }`}>
+                            <div className="font-medium mb-1">
+                              {record.status === 'failed' ? '失败原因' : '取消原因'}
+                            </div>
+                            <div className="text-xs opacity-90">
+                              {record.errorMessage}
+                            </div>
+                            {record.status === 'cancelled' && (
+                              <div className="text-xs opacity-75 mt-1">
+                                完成度: {calculateTestCompletion(record)}%
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
 
                       {/* 第二行：URL */}
                       <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 truncate">

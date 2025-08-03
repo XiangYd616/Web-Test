@@ -22,7 +22,7 @@ const ChromeCompatibilityTest = lazy(() => import('../../pages/ChromeCompatibili
 const UXTest = lazy(() => import('../../pages/UXTest'));
 
 // 演示和测试页面
-const URLInputDemo = lazy(() => import('../../pages/URLInputDemo'));
+// URLInputDemo 已删除
 
 // 数据管理相关页面
 const DataStorage = lazy(() => import('../../pages/admin/DataStorage'));
@@ -66,7 +66,7 @@ const ScheduledTasks = lazy(() => import('../../pages/ScheduledTasks'));
 // 其他功能
 const UnifiedSettings = lazy(() => import('../../pages/UnifiedSettings'));
 const Help = lazy(() => import('../../pages/Help'));
-const ThemeShowcase = lazy(() => import('../../pages/ThemeShowcase'));
+// ThemeShowcase 已删除
 const Subscription = lazy(() => import('../../pages/Subscription'));
 const DownloadDesktop = lazy(() => import('../../pages/DownloadDesktop'));
 
@@ -155,12 +155,7 @@ const AppRoutes: React.FC = () => {
           </LazyPageWrapper>
         } />
 
-        {/* 演示页面 */}
-        <Route path="url-input-demo" element={
-          <LazyPageWrapper>
-            <URLInputDemo />
-          </LazyPageWrapper>
-        } />
+        {/* URLInputDemo 已删除 */}
 
         {/* 公开的测试历史查看 */}
         <Route path="test-history" element={
@@ -206,11 +201,7 @@ const AppRoutes: React.FC = () => {
             <APIDocs />
           </LazyPageWrapper>
         } />
-        <Route path="theme-showcase" element={
-          <LazyPageWrapper>
-            <ThemeShowcase />
-          </LazyPageWrapper>
-        } />
+        {/* ThemeShowcase 已删除 */}
         <Route path="download-desktop" element={
           <LazyPageWrapper>
             <DownloadDesktop />

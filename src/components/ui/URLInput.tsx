@@ -1,5 +1,5 @@
-import React, { forwardRef, useCallback, useEffect, useState } from 'react';
 import { AlertCircle, CheckCircle, ExternalLink, Globe, Zap } from 'lucide-react';
+import React, { forwardRef, useCallback, useEffect, useState } from 'react';
 import { cn } from '../../utils/cn';
 import { Input } from './Input';
 
@@ -102,7 +102,7 @@ export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
 
   // 防抖验证
   useEffect(() => {
-    if (!enableValidation) return;
+    if (!enableValidation) return undefined;
 
     const timer = setTimeout(() => {
       validateURL(value);

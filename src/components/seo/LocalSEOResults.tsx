@@ -1,3 +1,4 @@
+import { AlertTriangle, CheckCircle, ChevronDown, ChevronRight, Download, Eye, FileText, TrendingUp, XCircle } from 'lucide-react';
 import React, { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 
@@ -129,10 +130,10 @@ const LocalSEOResults: React.FC<LocalSEOResultsProps> = ({ results, onExport }) 
             <div className="flex items-center space-x-3">
               <div className="text-2xl">
                 {file.fileType === '.html' ? '🌐' :
-                 file.fileType === '.xml' ? '📄' :
-                 file.fileType === '.txt' ? '📝' :
-                 file.fileType === '.css' ? '🎨' :
-                 file.fileType === '.js' ? '⚡' : '📄'}
+                  file.fileType === '.xml' ? '📄' :
+                    file.fileType === '.txt' ? '📝' :
+                      file.fileType === '.css' ? '🎨' :
+                        file.fileType === '.js' ? '⚡' : '📄'}
               </div>
               <div>
                 <div className="font-medium">{file.filename}</div>
@@ -268,11 +269,10 @@ const LocalSEOResults: React.FC<LocalSEOResultsProps> = ({ results, onExport }) 
         results.issues?.map((issue: any, index: number) => (
           <div
             key={index}
-            className={`p-4 rounded-lg border-l-4 ${
-              issue.severity === 'high' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' :
-              issue.severity === 'medium' ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' :
-              'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-            } ${actualTheme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}
+            className={`p-4 rounded-lg border-l-4 ${issue.severity === 'high' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' :
+                issue.severity === 'medium' ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20' :
+                  'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+              } ${actualTheme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}
           >
             <div className="flex items-start space-x-3">
               {getSeverityIcon(issue.severity)}
@@ -310,13 +310,12 @@ const LocalSEOResults: React.FC<LocalSEOResultsProps> = ({ results, onExport }) 
                   {rec.description || rec.message}
                 </div>
                 {rec.priority && (
-                  <div className={`inline-block px-2 py-1 rounded text-xs mt-2 ${
-                    rec.priority === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' :
-                    rec.priority === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' :
-                    'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
-                  }`}>
+                  <div className={`inline-block px-2 py-1 rounded text-xs mt-2 ${rec.priority === 'high' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' :
+                      rec.priority === 'medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' :
+                        'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+                    }`}>
                     {rec.priority === 'high' ? '高优先级' :
-                     rec.priority === 'medium' ? '中优先级' : '低优先级'}
+                      rec.priority === 'medium' ? '中优先级' : '低优先级'}
                   </div>
                 )}
               </div>

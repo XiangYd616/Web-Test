@@ -27,7 +27,7 @@ const SystemMonitor: React.FC = () => {
       const data = await adminService.getSystemMonitor();
       setMonitor(data);
     } catch (error) {
-      Logger.error('加载监控数据失败', error, { component: 'SystemMonitor' });
+      console.error('加载监控数据失败', error);
     } finally {
       setLoading(false);
     }

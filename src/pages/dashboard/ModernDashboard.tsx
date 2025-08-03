@@ -1,5 +1,6 @@
 import { Activity, AlertTriangle, BarChart3, CheckCircle, Clock, Download, Globe, TestTube } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import { ModernDoughnutChart, ModernLineChart } from '../../components/modern/ModernChart';
 import { useTheme } from '../../contexts/ThemeContext';
 
 // CSS样式已迁移到组件库和主题配置中
@@ -94,13 +95,13 @@ const ModernDashboard: React.FC = () => {
         label: '测试次数',
         data: [120, 190, 300, 500, 200, 300, 450],
         backgroundColor: [
-          chartColors.primary,
-          chartColors.success,
-          chartColors.warning,
-          chartColors.error,
-          chartColors.info,
-          chartColors.purple,
-          chartColors.cyan
+          '#3B82F6',
+          '#10B981',
+          '#F59E0B',
+          '#EF4444',
+          '#6366F1',
+          '#8B5CF6',
+          '#06B6D4'
         ],
         borderRadius: 8,
         borderSkipped: false

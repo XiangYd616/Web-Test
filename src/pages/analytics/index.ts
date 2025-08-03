@@ -1,6 +1,6 @@
 // 📊 分析页面统一导出
 export { default as Analytics } from '../Analytics';
-export { default as Performance } from '../Performance';
+export { default as Performance } from '../PerformanceTest';
 export { default as Reports } from '../Reports';
 export { default as SecurityReport } from '../SecurityReport';
 export { default as StressTestReport } from '../StressTestReport';

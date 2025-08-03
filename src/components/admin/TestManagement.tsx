@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { adminService } from '../../services/adminService';
 
 import { Clock, Download, Filter, TestTube, TrendingUp, User } from 'lucide-react';
 
@@ -30,7 +31,7 @@ const TestManagement: React.FC = () => {
         const data = await adminService.getTestHistory();
         setTests(data);
       } catch (error) {
-        Logger.error('加载测试数据失败', error, { component: 'TestManagement' });
+        console.error('加载测试数据失败', error);
       } finally {
         setLoading(false);
       }
