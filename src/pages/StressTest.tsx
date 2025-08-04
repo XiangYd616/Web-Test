@@ -4051,7 +4051,7 @@ const StressTest: React.FC = () => {
                                     </div>
 
                                     {/* 代理设置 - 独立区域 */}
-                                    <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4">
+                                    <div className="mt-4 bg-gray-800/80 backdrop-blur-sm rounded-xl border-2 border-blue-500/30 p-4">
                                         <div className="flex items-center mb-3">
                                             <Globe className="w-4 h-4 text-blue-400 mr-2" />
                                             <h4 className="text-base font-semibold text-white">代理设置</h4>
