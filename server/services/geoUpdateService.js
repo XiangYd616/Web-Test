@@ -16,9 +16,9 @@ class GeoUpdateService {
     this.lastUpdateTime = null;
     this.updateInterval = 7 * 24 * 60 * 60 * 1000; // 7天
     this.config = {
-      enabled: process.env.GEO_AUTO_UPDATE !== 'false', // 默认启用
+      enabled: process.env.GEO_AUTO_UPDATE !== 'false' && !!process.env.MAXMIND_LICENSE_KEY, // 有许可证密钥时才启用
       schedule: process.env.GEO_UPDATE_SCHEDULE || '0 2 * * 3', // 每周三凌晨2点
-      checkOnStartup: process.env.GEO_CHECK_STARTUP !== 'false', // 启动时检查
+      checkOnStartup: process.env.GEO_CHECK_STARTUP !== 'false' && !!process.env.MAXMIND_LICENSE_KEY, // 有许可证密钥时才启动检查
       maxRetries: 3,
       retryDelay: 60000 // 1分钟
     };
@@ -31,6 +31,13 @@ class GeoUpdateService {
    */
   init() {
     console.log('🔄 初始化 GeoLite2 自动更新服务...');
+
+    if (!process.env.MAXMIND_LICENSE_KEY) {
+      console.log('⚠️  未设置 MAXMIND_LICENSE_KEY，地理位置自动更新已禁用');
+      console.log('💡 获取许可证密钥：https://www.maxmind.com/en/geolite2/signup');
+      console.log('🔧 设置方法：在 .env 文件中添加 MAXMIND_LICENSE_KEY=your_key');
+      return;
+    }
 
     if (!this.config.enabled) {
       console.log('⏸️  自动更新已禁用');
