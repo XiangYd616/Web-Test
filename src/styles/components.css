@@ -232,3 +232,11 @@
 .table-grid-mixed-1 { grid-template-columns: auto 1fr; }
 .table-grid-mixed-2 { grid-template-columns: auto 1fr auto; }
 .table-grid-mixed-3 { grid-template-columns: auto 1fr auto auto; }
+
+/* ===== 动态进度条 ===== */
+.progress-bar-dynamic {
+  background-color: #3b82f6;
+  height: 0.5rem;
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
