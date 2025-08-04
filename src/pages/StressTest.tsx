@@ -141,7 +141,18 @@ const StressTest: React.FC = () => {
                             },
                             body: JSON.stringify({
                                 ...config,
-                                recordId: recordId
+                                recordId: recordId,
+                                // 🌐 代理设置
+                                proxy: config.proxy?.enabled ? {
+                                    enabled: true,
+                                    type: config.proxy.type || 'http',
+                                    host: config.proxy.host || '',
+                                    port: config.proxy.port || 8080,
+                                    username: config.proxy.username || '',
+                                    password: config.proxy.password || ''
+                                } : {
+                                    enabled: false
+                                }
                             })
                         });
 
@@ -190,7 +201,18 @@ const StressTest: React.FC = () => {
                                 warmupDuration: config.warmupDuration,
                                 cooldownDuration: config.cooldownDuration,
                                 headers: config.headers,
-                                body: config.body
+                                body: config.body,
+                                // 🌐 代理设置
+                                proxy: config.proxy?.enabled ? {
+                                    enabled: true,
+                                    type: config.proxy.type || 'http',
+                                    host: config.proxy.host || '',
+                                    port: config.proxy.port || 8080,
+                                    username: config.proxy.username || '',
+                                    password: config.proxy.password || ''
+                                } : {
+                                    enabled: false
+                                }
                             }
                         }, 'high'); // 压力测试使用高优先级
 
@@ -215,7 +237,18 @@ const StressTest: React.FC = () => {
                     },
                     body: JSON.stringify({
                         ...config,
-                        recordId: recordId
+                        recordId: recordId,
+                        // 🌐 代理设置
+                        proxy: config.proxy?.enabled ? {
+                            enabled: true,
+                            type: config.proxy.type || 'http',
+                            host: config.proxy.host || '',
+                            port: config.proxy.port || 8080,
+                            username: config.proxy.username || '',
+                            password: config.proxy.password || ''
+                        } : {
+                            enabled: false
+                        }
                     })
                 });
 
@@ -869,7 +902,18 @@ const StressTest: React.FC = () => {
                         timeout: testConfig.timeout,
                         thinkTime: testConfig.thinkTime,
                         warmupDuration: testConfig.warmupDuration,
-                        cooldownDuration: testConfig.cooldownDuration
+                        cooldownDuration: testConfig.cooldownDuration,
+                        // 🌐 代理设置
+                        proxy: testConfig.proxy?.enabled ? {
+                            enabled: true,
+                            type: testConfig.proxy.type || 'http',
+                            host: testConfig.proxy.host || '',
+                            port: testConfig.proxy.port || 8080,
+                            username: testConfig.proxy.username || '',
+                            password: testConfig.proxy.password || ''
+                        } : {
+                            enabled: false
+                        }
                     },
                     tags: ['stress-test', 'automated'],
                     environment: 'production'
@@ -934,7 +978,18 @@ const StressTest: React.FC = () => {
                     testType: testConfig.testType,
                     method: testConfig.method,
                     timeout: testConfig.timeout,
-                    thinkTime: testConfig.thinkTime
+                    thinkTime: testConfig.thinkTime,
+                    // 🌐 代理设置
+                    proxy: testConfig.proxy?.enabled ? {
+                        enabled: true,
+                        type: testConfig.proxy.type || 'http',
+                        host: testConfig.proxy.host || '',
+                        port: testConfig.proxy.port || 8080,
+                        username: testConfig.proxy.username || '',
+                        password: testConfig.proxy.password || ''
+                    } : {
+                        enabled: false
+                    }
                 })
             });
 
@@ -3361,6 +3416,48 @@ const StressTest: React.FC = () => {
         }
     };
 
+    // 测试代理连接
+    const testProxyConnection = async () => {
+        if (!testConfig.proxy?.enabled || !testConfig.proxy?.host) {
+            alert('请先配置代理设置');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/test/proxy-test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(localStorage.getItem('auth_token') ? {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    } : {})
+                },
+                body: JSON.stringify({
+                    proxy: {
+                        enabled: true,
+                        type: testConfig.proxy.type || 'http',
+                        host: testConfig.proxy.host,
+                        port: testConfig.proxy.port || 8080,
+                        username: testConfig.proxy.username || '',
+                        password: testConfig.proxy.password || ''
+                    },
+                    testUrl: 'https://httpbin.org/ip' // 用于测试代理的简单URL
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert(`代理连接测试成功！\n代理IP: ${result.proxyIp || '未知'}\n响应时间: ${result.responseTime || 0}ms`);
+            } else {
+                alert(`代理连接测试失败：${result.message || '未知错误'}`);
+            }
+        } catch (error) {
+            console.error('代理测试失败:', error);
+            alert(`代理连接测试失败：${error instanceof Error ? error.message : '网络错误'}`);
+        }
+    };
+
     return (
         <TestPageLayout className="space-y-3 dark-page-scrollbar compact-layout">
 
@@ -4188,13 +4285,23 @@ const StressTest: React.FC = () => {
                                                         </div>
                                                     </div>
 
-                                                    {/* 代理状态提示 */}
+                                                    {/* 代理状态提示和测试 */}
                                                     <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
-                                                        <div className="flex items-center space-x-2">
-                                                            <Shield className="w-4 h-4 text-blue-400" />
-                                                            <span className="text-blue-300 text-xs">
-                                                                代理已启用 - 所有测试请求将通过代理服务器发送
-                                                            </span>
+                                                        <div className="flex items-center justify-between">
+                                                            <div className="flex items-center space-x-2">
+                                                                <Shield className="w-4 h-4 text-blue-400" />
+                                                                <span className="text-blue-300 text-xs">
+                                                                    代理已启用 - 所有测试请求将通过代理服务器发送
+                                                                </span>
+                                                            </div>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => testProxyConnection()}
+                                                                className="px-2 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+                                                                title="测试代理连接"
+                                                            >
+                                                                测试连接
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 </div>

@@ -3280,4 +3280,125 @@ router.get('/:engine/status', asyncHandler(async (req, res) => {
   }
 }));
 
+/**
+ * 代理连接测试
+ * POST /api/test/proxy-test
+ */
+router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
+  const { proxy, testUrl = 'https://httpbin.org/ip' } = req.body;
+
+  // 验证代理配置
+  if (!proxy || !proxy.enabled) {
+    return res.status(400).json({
+      success: false,
+      message: '代理配置无效或未启用'
+    });
+  }
+
+  if (!proxy.host) {
+    return res.status(400).json({
+      success: false,
+      message: '代理地址不能为空'
+    });
+  }
+
+  try {
+    const startTime = Date.now();
+
+    // 构建代理URL
+    const proxyType = proxy.type || 'http';
+    const proxyPort = proxy.port || 8080;
+    let proxyUrl;
+
+    if (proxy.username && proxy.password) {
+      // 带认证的代理
+      proxyUrl = `${proxyType}://${proxy.username}:${proxy.password}@${proxy.host}:${proxyPort}`;
+    } else {
+      // 无认证的代理
+      proxyUrl = `${proxyType}://${proxy.host}:${proxyPort}`;
+    }
+
+    console.log(`🌐 测试代理连接: ${proxy.host}:${proxyPort}`);
+
+    // 使用 node-fetch 或 axios 通过代理发送请求
+    const fetch = require('node-fetch');
+    const { HttpsProxyAgent } = require('https-proxy-agent');
+    const { HttpProxyAgent } = require('http-proxy-agent');
+
+    // 根据代理类型选择代理代理
+    let agent;
+    if (proxyType === 'https') {
+      agent = new HttpsProxyAgent(proxyUrl);
+    } else {
+      agent = new HttpProxyAgent(proxyUrl);
+    }
+
+    // 发送测试请求
+    const response = await fetch(testUrl, {
+      method: 'GET',
+      agent: agent,
+      timeout: 10000, // 10秒超时
+      headers: {
+        'User-Agent': 'Test-Web-Proxy-Test/1.0'
+      }
+    });
+
+    const responseTime = Date.now() - startTime;
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const responseData = await response.json();
+
+    // 从响应中提取代理IP（如果可用）
+    let proxyIp = '未知';
+    if (responseData && responseData.origin) {
+      proxyIp = responseData.origin;
+    }
+
+    console.log(`✅ 代理连接测试成功: ${proxy.host}:${proxyPort}, 响应时间: ${responseTime}ms`);
+
+    res.json({
+      success: true,
+      message: '代理连接测试成功',
+      proxyIp: proxyIp,
+      responseTime: responseTime,
+      proxyConfig: {
+        host: proxy.host,
+        port: proxyPort,
+        type: proxyType
+      },
+      testUrl: testUrl,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('❌ 代理连接测试失败:', error);
+
+    let errorMessage = '代理连接失败';
+    if (error.code === 'ECONNREFUSED') {
+      errorMessage = '无法连接到代理服务器，请检查代理地址和端口';
+    } else if (error.code === 'ETIMEDOUT') {
+      errorMessage = '代理连接超时，请检查网络连接';
+    } else if (error.code === 'ENOTFOUND') {
+      errorMessage = '无法解析代理服务器地址';
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+
+    res.status(500).json({
+      success: false,
+      message: errorMessage,
+      error: error.code || 'PROXY_TEST_FAILED',
+      proxyConfig: {
+        host: proxy.host,
+        port: proxy.port || 8080,
+        type: proxy.type || 'http'
+      },
+      timestamp: new Date().toISOString()
+    });
+  }
+}));
+
 module.exports = router;
