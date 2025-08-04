@@ -10,6 +10,7 @@ import {
 } from '../../utils/testStatusUtils';
 import StressTestDetailModal from './StressTestDetailModal';
 
+import '../../styles/pagination.css';
 import './StatusLabel.css';
 import './StressTestHistory.css';
 
@@ -138,11 +139,12 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
 
       if (data.success) {
         const { tests = [], pagination = {} } = data.data;
-        const { total = 0, page = 1, pageSize: returnedPageSize = 10 } = pagination;
+        const { total = 0, page = 1 } = pagination;
         setRecords(tests);
         setTotalRecords(total);
         setCurrentPage(page);
-        setPageSize(returnedPageSize);
+        // 🔧 修复：不要用后端返回的pageSize覆盖用户选择的值
+        // setPageSize(returnedPageSize); // 移除这行，保持用户选择的pageSize
       } else {
         console.error('加载测试记录失败:', data.message);
         setRecords([]);
@@ -1235,12 +1237,12 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
                       id="pageSize"
                       value={pageSize}
                       onChange={(e) => changePageSize(Number(e.target.value))}
-                      className="px-3 py-1.5 text-sm border border-gray-600 rounded-md bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[70px]"
+                      className="px-3 py-1.5 text-sm border border-gray-600 rounded-md bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[70px] pagination-select"
                     >
-                      <option value={5} className="bg-gray-700 text-white">5 条</option>
-                      <option value={10} className="bg-gray-700 text-white">10 条</option>
-                      <option value={20} className="bg-gray-700 text-white">20 条</option>
-                      <option value={50} className="bg-gray-700 text-white">50 条</option>
+                      <option value={5}>5 条</option>
+                      <option value={10}>10 条</option>
+                      <option value={20}>20 条</option>
+                      <option value={50}>50 条</option>
                     </select>
                   </div>
                 </div>
