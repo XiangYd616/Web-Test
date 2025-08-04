@@ -4371,50 +4371,50 @@ const StressTest: React.FC = () => {
                                             )}
                                         </div>
                                     ) : (
-                                        <div className="bg-gray-900/50 rounded-lg p-6 h-80 flex items-center justify-center">
-                                            <div className="text-center max-w-lg">
-                                                <TrendingUp className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                                                <div className="text-gray-300 font-medium text-xl mb-2">专业压力测试监控</div>
-                                                <div className="text-gray-500 text-base mb-6">
+                                        <div className="bg-gray-900/50 rounded-lg p-8 min-h-[500px] flex items-center justify-center">
+                                            <div className="text-center max-w-2xl w-full">
+                                                <TrendingUp className="w-20 h-20 text-gray-400 mx-auto mb-6" />
+                                                <div className="text-gray-300 font-medium text-2xl mb-3">专业压力测试监控</div>
+                                                <div className="text-gray-500 text-lg mb-8">
                                                     开始测试后将显示实时性能数据
                                                 </div>
 
                                                 {/* 功能预览 */}
-                                                <div className="bg-gray-800/50 rounded-lg p-4 text-sm">
-                                                    <div className="text-gray-300 font-medium mb-3">监控功能预览</div>
-                                                    <div className="grid grid-cols-2 gap-4 text-left">
-                                                        <div className="space-y-2">
-                                                            <div className="flex items-center space-x-2 text-gray-400">
-                                                                <BarChart3 className="w-4 h-4 text-blue-400" />
+                                                <div className="bg-gray-800/50 rounded-lg p-6 text-base">
+                                                    <div className="text-gray-300 font-medium mb-6 text-lg">监控功能预览</div>
+                                                    <div className="grid grid-cols-2 gap-6 text-left">
+                                                        <div className="space-y-4">
+                                                            <div className="flex items-center space-x-3 text-gray-400">
+                                                                <BarChart3 className="w-5 h-5 text-blue-400" />
                                                                 <span>实时请求统计</span>
                                                             </div>
-                                                            <div className="flex items-center space-x-2 text-gray-400">
-                                                                <Clock className="w-4 h-4 text-yellow-400" />
+                                                            <div className="flex items-center space-x-3 text-gray-400">
+                                                                <Clock className="w-5 h-5 text-yellow-400" />
                                                                 <span>响应时间监控</span>
                                                             </div>
-                                                            <div className="flex items-center space-x-2 text-gray-400">
-                                                                <TrendingUp className="w-4 h-4 text-purple-400" />
+                                                            <div className="flex items-center space-x-3 text-gray-400">
+                                                                <TrendingUp className="w-5 h-5 text-purple-400" />
                                                                 <span>TPS性能指标</span>
                                                             </div>
                                                         </div>
-                                                        <div className="space-y-2">
-                                                            <div className="flex items-center space-x-2 text-gray-400">
-                                                                <CheckCircle className="w-4 h-4 text-green-400" />
+                                                        <div className="space-y-4">
+                                                            <div className="flex items-center space-x-3 text-gray-400">
+                                                                <CheckCircle className="w-5 h-5 text-green-400" />
                                                                 <span>成功率分析</span>
                                                             </div>
-                                                            <div className="flex items-center space-x-2 text-gray-400">
-                                                                <AlertTriangle className="w-4 h-4 text-red-400" />
+                                                            <div className="flex items-center space-x-3 text-gray-400">
+                                                                <AlertTriangle className="w-5 h-5 text-red-400" />
                                                                 <span>错误率监控</span>
                                                             </div>
-                                                            <div className="flex items-center space-x-2 text-gray-400">
-                                                                <Zap className="w-4 h-4 text-blue-400" />
+                                                            <div className="flex items-center space-x-3 text-gray-400">
+                                                                <Zap className="w-5 h-5 text-blue-400" />
                                                                 <span>WebSocket实时数据</span>
                                                             </div>
                                                         </div>
                                                     </div>
 
-                                                    <div className="mt-4 pt-4 border-t border-gray-700">
-                                                        <div className="text-xs text-gray-500">
+                                                    <div className="mt-6 pt-6 border-t border-gray-700">
+                                                        <div className="text-sm text-gray-500">
                                                             💡 提示：配置测试参数并点击"开始测试"来启动实时监控
                                                         </div>
                                                     </div>
