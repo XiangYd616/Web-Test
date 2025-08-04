@@ -1187,7 +1187,7 @@ router.get('/stress/status/:testId', optionalAuth, asyncHandler(async (req, res)
     const status = await realStressTestEngine.getTestStatus(testId);
 
     if (!status) {
-      
+
       try {
         // 查询测试历史记录
         const historyQuery = `
@@ -1222,7 +1222,7 @@ router.get('/stress/status/:testId', optionalAuth, asyncHandler(async (req, res)
                   currentTPS: testRecord.peak_tps || 0,
                   peakTPS: testRecord.peak_tps || 0,
                   errorRate: testRecord.error_rate || 0,
-                  activeUsers: 0 
+                  activeUsers: 0
                 },
                 realTimeData: realTimeData,
                 results: testRecord.results ?
@@ -1239,22 +1239,11 @@ router.get('/stress/status/:testId', optionalAuth, asyncHandler(async (req, res)
         console.error('查询测试历史失败:', historyError);
       }
 
-      // 如果没有找到历史记录，返回默认的完成状态
-      return res.json({
-        success: true,
-        data: {
-          status: 'completed',
-          message: '测试已完成或不存在',
-          progress: 100,
-          realTimeMetrics: {
-            totalRequests: 0,
-            successfulRequests: 0,
-            failedRequests: 0,
-            averageResponseTime: 0,
-            currentTPS: 0,
-            activeUsers: 0
-          }
-        }
+      // 如果没有找到历史记录，返回404而不是默认完成状态
+      return res.status(404).json({
+        success: false,
+        message: '测试不存在',
+        data: null
       });
     }
 
@@ -1640,17 +1629,18 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
             const successfulRequests = metrics.successfulRequests || 0;
             const failedRequests = metrics.failedRequests || 0;
 
-            // 智能状态判断逻辑
+            // 🔧 修复：严格按照原始状态设置，不允许覆盖取消状态
             let finalStatus = 'failed'; // 默认为失败
 
             if (responseData.status === 'cancelled') {
-              // 明确的取消状态
+              // 🔒 取消状态不可覆盖，直接使用
               finalStatus = 'cancelled';
+              console.log('🔒 保持取消状态，不允许覆盖');
             } else if (responseData.status === 'completed') {
               // 明确的完成状态
               finalStatus = 'completed';
             } else if (responseData.metrics && responseData.metrics.totalRequests > 0) {
-              // 有有效的测试结果，认为是成功完成
+              // 只有在非取消状态时，才基于测试结果判断为完成
               finalStatus = 'completed';
               console.log('📊 基于测试结果判断为完成状态:', {
                 totalRequests: responseData.metrics.totalRequests,

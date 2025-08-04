@@ -1,13 +1,16 @@
 
 
 export enum TestStatus {
-  PENDING = 'pending',
+  IDLE = 'idle',
+  STARTING = 'starting',
   RUNNING = 'running',
   COMPLETED = 'completed',
-  FAILED = 'failed',
   CANCELLED = 'cancelled',
-  TIMEOUT = 'timeout'
+  FAILED = 'failed'
 }
+
+// 类型别名，用于与其他模块兼容 - 简化版本
+export type TestStatusType = 'idle' | 'starting' | 'running' | 'completed' | 'cancelled' | 'failed';
 
 export enum TestType {
   PERFORMANCE = 'performance',

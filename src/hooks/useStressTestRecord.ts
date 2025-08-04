@@ -133,8 +133,8 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
     try {
       setError(null);
 
-      // 状态验证
-      if (testData.status && !['pending', 'running'].includes(testData.status)) {
+      // 状态验证 - 更新为简化状态
+      if (testData.status && !['idle', 'starting', 'running'].includes(testData.status)) {
         throw new Error(`创建记录时状态无效: ${testData.status}`);
       }
 
@@ -367,7 +367,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
       // 首先创建测试记录
       const record = await createRecord({
         ...testData,
-        status: 'pending'
+        status: 'idle' // 🔧 简化：使用idle作为初始状态
       });
 
       // 然后加入队列

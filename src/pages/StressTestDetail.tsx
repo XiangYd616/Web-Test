@@ -1,16 +1,17 @@
 import { Activity, AlertCircle, ArrowLeft, BarChart3, Calendar, CheckCircle, Clock, Download, Settings, Share2, TrendingUp, Users, XCircle, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 import '../components/stress/StatusLabel.css';
+import { DataProcessingUtils } from '../utils/dataProcessingUtils';
 
 interface StressTestRecord {
   id: string;
   testName: string;
   testType: string;
   url: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  status: 'idle' | 'starting' | 'running' | 'completed' | 'failed' | 'cancelled';
   startTime?: string;
   endTime?: string;
   duration?: number;
@@ -39,6 +40,8 @@ const StressTestDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
+  const [showRetestDialog, setShowRetestDialog] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
 
   // 图表控制状态
   const [timeRange, setTimeRange] = useState<'all' | 'last5min' | 'last1min'>('all');
@@ -129,10 +132,25 @@ const StressTestDetail: React.FC = () => {
   // 格式化持续时间
   const formatDuration = (seconds: number | undefined) => {
     if (!seconds || seconds === 0) return '未知';
-    if (seconds < 60) return `${seconds}秒`;
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}分${remainingSeconds}秒`;
+
+    // 保留到0.1秒精度，避免过长的小数位
+    const roundedSeconds = Math.round(seconds * 10) / 10;
+
+    if (roundedSeconds < 60) {
+      // 小于60秒时，显示小数位（如果不为0）
+      return roundedSeconds % 1 === 0 ? `${roundedSeconds}秒` : `${roundedSeconds}秒`;
+    }
+
+    const minutes = Math.floor(roundedSeconds / 60);
+    const remainingSeconds = Math.round((roundedSeconds % 60) * 10) / 10;
+
+    if (remainingSeconds === 0) {
+      return `${minutes}分`;
+    }
+
+    // 显示小数位（如果不为0）
+    const secondsStr = remainingSeconds % 1 === 0 ? remainingSeconds.toString() : remainingSeconds.toString();
+    return `${minutes}分${secondsStr}秒`;
   };
 
   // 获取持续时间
@@ -186,21 +204,131 @@ const StressTestDetail: React.FC = () => {
 
   // 分享结果
   const shareResult = () => {
+    setShowShareDialog(true);
+  };
+
+  // 复制链接
+  const copyLink = () => {
     const url = window.location.href;
     copyToClipboard(url);
+    alert('链接已复制到剪贴板！');
+    setShowShareDialog(false);
+  };
+
+  // 生成分享文本
+  const generateShareText = () => {
+    if (!record) return '';
+
+    const metrics = record.results?.metrics || {};
+    return `🚀 压力测试结果分享
+
+📊 测试概览：
+• 测试网站：${record.url}
+• 并发用户：${record.config?.users || '未知'}
+• 测试时长：${record.config?.duration || '未知'}秒
+• 总请求数：${metrics.totalRequests || '未知'}
+• 平均响应时间：${metrics.averageResponseTime || '未知'}ms
+• 成功率：${metrics.successRate ? (metrics.successRate * 100).toFixed(2) : '未知'}%
+• 峰值TPS：${metrics.maxTps || '未知'}
+
+🔗 查看详细报告：${window.location.href}
+
+#压力测试 #性能测试 #TestWebApp`;
+  };
+
+  // 分享到社交媒体
+  const shareToSocial = (platform: string) => {
+    const text = generateShareText();
+    const url = window.location.href;
+
+    let shareUrl = '';
+
+    switch (platform) {
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+        break;
+      case 'linkedin':
+        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+        break;
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+        break;
+      case 'weibo':
+        shareUrl = `https://service.weibo.com/share/share.php?url=${encodeURIComponent(url)}&title=${encodeURIComponent(text)}`;
+        break;
+      default:
+        return;
+    }
+
+    window.open(shareUrl, '_blank', 'width=600,height=400');
+    setShowShareDialog(false);
+  };
+
+  // 复制分享文本
+  const copyShareText = () => {
+    const text = generateShareText();
+    copyToClipboard(text);
+    alert('分享文本已复制到剪贴板！');
+    setShowShareDialog(false);
+  };
+
+  // 生成二维码分享
+  const generateQRCode = () => {
+    const url = window.location.href;
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+
+    // 创建一个新窗口显示二维码
+    const qrWindow = window.open('', '_blank', 'width=300,height=350');
+    if (qrWindow) {
+      qrWindow.document.write(`
+        <html>
+          <head><title>二维码分享</title></head>
+          <body style="text-align: center; padding: 20px; font-family: Arial, sans-serif;">
+            <h3>扫描二维码查看测试结果</h3>
+            <img src="${qrCodeUrl}" alt="QR Code" style="border: 1px solid #ccc; padding: 10px;">
+            <p style="font-size: 12px; color: #666; margin-top: 10px;">
+              使用手机扫描二维码即可查看详细测试报告
+            </p>
+          </body>
+        </html>
+      `);
+    }
+    setShowShareDialog(false);
   };
 
   // 重新测试
   const retestWithSameConfig = () => {
+    if (!record) {
+      alert('无法获取测试记录信息');
+      return;
+    }
+
+    setShowRetestDialog(true);
+  };
+
+  // 确认重新测试
+  const confirmRetest = () => {
+    if (!record) return;
+
     // 跳转到压力测试页面并预填配置
     navigate('/stress-test', {
       state: {
         prefilledConfig: {
-          url: record?.url,
-          ...record?.config
+          url: record.url,
+          users: record.config?.users,
+          duration: record.config?.duration,
+          rampUp: record.config?.rampUpTime || record.config?.rampUp,
+          testType: record.config?.testType,
+          method: record.config?.method || 'GET',
+          timeout: record.config?.timeout || 10,
+          thinkTime: record.config?.thinkTime || 1,
+          warmupDuration: record.config?.warmupDuration || 5,
+          cooldownDuration: record.config?.cooldownDuration || 5
         }
       }
     });
+
+    setShowRetestDialog(false);
   };
 
   // 复制配置
@@ -261,28 +389,99 @@ const StressTestDetail: React.FC = () => {
 
   // 数据处理函数
   const filterDataByTimeRange = (data: any[]) => {
-    if (timeRange === 'all') return data;
+    if (timeRange === 'all' || data.length === 0) return data;
 
-    const now = Date.now();
+    // 对于历史数据，使用数据本身的时间范围而不是当前时间
+    const dataTimestamps = data.map(item => new Date(item.timestamp).getTime());
+    const dataStartTime = Math.min(...dataTimestamps);
+    const dataEndTime = Math.max(...dataTimestamps);
+
+    // 如果数据跨度小于时间范围限制，返回所有数据
+    const dataSpan = dataEndTime - dataStartTime;
     const timeLimit = timeRange === 'last5min' ? 5 * 60 * 1000 : 60 * 1000;
 
-    return data.filter(item => {
+    if (dataSpan <= timeLimit) {
+      console.log(`📊 数据跨度 ${dataSpan / 1000}秒 小于时间限制 ${timeLimit / 1000}秒，返回所有数据`);
+      return data;
+    }
+
+    // 只有当数据跨度大于时间限制时，才从数据末尾开始过滤
+    const cutoffTime = dataEndTime - timeLimit;
+    const filteredData = data.filter(item => {
       const itemTime = new Date(item.timestamp).getTime();
-      return now - itemTime <= timeLimit;
+      return itemTime >= cutoffTime;
     });
+
+    console.log(`📊 时间范围过滤: ${data.length} → ${filteredData.length} 个数据点`);
+    return filteredData;
   };
 
   const sampleDataByInterval = (data: any[]) => {
     if (dataInterval === '1s') return data;
+    if (data.length === 0) return [];
 
     const intervalMs = dataInterval === '5s' ? 5000 : 10000;
-    const sampledData: any[] = [];
+    const aggregatedData: any[] = [];
 
-    for (let i = 0; i < data.length; i += Math.ceil(intervalMs / 1000)) {
-      sampledData.push(data[i]);
+    // 按时间窗口聚合数据
+    const startTime = new Date(data[0].timestamp).getTime();
+    const endTime = new Date(data[data.length - 1].timestamp).getTime();
+    const totalDuration = endTime - startTime;
+
+    console.log(`📊 数据聚合开始: ${dataInterval} 间隔 (${intervalMs}ms)`);
+    console.log(`📊 输入数据: ${data.length} 个数据点`);
+    console.log(`📊 时间范围: ${new Date(startTime).toLocaleTimeString()} - ${new Date(endTime).toLocaleTimeString()}`);
+    console.log(`📊 总时长: ${totalDuration / 1000}秒`);
+
+    // 计算应该有多少个时间窗口
+    const expectedWindows = Math.ceil(totalDuration / intervalMs);
+    console.log(`📊 预期窗口数: ${expectedWindows}`);
+
+    // 确保包含所有时间窗口，包括最后一个不完整的窗口
+    for (let windowStart = startTime; windowStart < endTime; windowStart += intervalMs) {
+      const windowEnd = Math.min(windowStart + intervalMs, endTime + 1); // +1确保包含最后一个数据点
+
+      // 找到当前时间窗口内的所有数据点
+      const windowData = data.filter(item => {
+        const itemTime = new Date(item.timestamp).getTime();
+        return itemTime >= windowStart && itemTime < windowEnd;
+      });
+
+      console.log(`📊 窗口 ${new Date(windowStart).toLocaleTimeString()} - ${new Date(windowEnd).toLocaleTimeString()}: ${windowData.length} 个数据点`);
+
+      if (windowData.length > 0) {
+        // 计算窗口内数据的平均值
+        const avgResponseTime = windowData.reduce((sum, item) =>
+          sum + (item.responseTime || 0), 0) / windowData.length;
+        const avgThroughput = windowData.reduce((sum, item) =>
+          sum + (item.throughput || 0), 0) / windowData.length;
+
+        // 使用窗口中间时间作为代表时间戳，保持原始格式
+        const windowMiddleTime = windowStart + intervalMs / 2;
+        const representativeItem = windowData[Math.floor(windowData.length / 2)];
+        const windowTimestamp = new Date(windowMiddleTime).toISOString();
+
+        console.log(`📊 窗口代表时间: ${new Date(windowMiddleTime).toLocaleTimeString()}`);
+
+        aggregatedData.push({
+          ...representativeItem, // 保留其他属性
+          timestamp: windowTimestamp,
+          responseTime: Math.round(avgResponseTime),
+          throughput: Math.round(avgThroughput * 10) / 10, // 保留1位小数
+          // 保持其他字段的聚合值
+          success: windowData.every(item => item.success),
+          activeUsers: Math.round(windowData.reduce((sum, item) => sum + (item.activeUsers || 0), 0) / windowData.length),
+          phase: windowData[0].phase,
+          errorRate: windowData.reduce((sum, item) => sum + (item.errorRate || 0), 0) / windowData.length
+        });
+      }
     }
 
-    return sampledData;
+    // 数据聚合完成
+    console.log(`📊 数据聚合完成: ${dataInterval} 间隔, ${data.length} → ${aggregatedData.length} 个数据点`);
+    console.log(`📊 聚合后时间点:`, aggregatedData.map(item => new Date(item.timestamp).toLocaleTimeString()));
+
+    return aggregatedData;
   };
 
   const calculateAverageData = (data: any[]) => {
@@ -292,62 +491,23 @@ const StressTestDetail: React.FC = () => {
       const responseTime = item.responseTime || item.avgResponseTime || item.response_time || 0;
       return acc + responseTime;
     }, 0);
-    const average = sum / data.length;
+    const average = parseFloat((sum / data.length).toFixed(3));
 
-    return data.map(item => ({
+
+
+    const result = data.map(item => ({
       ...item,
-      avgResponseTime: average,
+      averageResponseTime: average,
       responseTime: item.responseTime || item.avgResponseTime || item.response_time || 0
     }));
+
+
+    return result;
   };
 
-  // 处理后的图表数据
-  const processedData = sampleDataByInterval(filterDataByTimeRange(realTimeData));
-  const chartData = showAverage ? calculateAverageData(processedData) : processedData;
 
-  // 计算响应时间分布数据
-  const calculateResponseTimeDistribution = (data: any[]) => {
-    if (data.length === 0) {
-      return [
-        { range: '0-50ms', count: 0, color: 'bg-green-400' },
-        { range: '50-100ms', count: 0, color: 'bg-green-300' },
-        { range: '100-200ms', count: 0, color: 'bg-yellow-400' },
-        { range: '200-500ms', count: 0, color: 'bg-orange-400' },
-        { range: '500ms+', count: 0, color: 'bg-red-400' }
-      ];
-    }
 
-    const distribution = {
-      '0-50': 0,
-      '50-100': 0,
-      '100-200': 0,
-      '200-500': 0,
-      '500+': 0
-    };
-
-    data.forEach(item => {
-      const responseTime = item.responseTime || item.avgResponseTime || item.response_time || 0;
-      if (responseTime <= 50) {
-        distribution['0-50']++;
-      } else if (responseTime <= 100) {
-        distribution['50-100']++;
-      } else if (responseTime <= 200) {
-        distribution['100-200']++;
-      } else if (responseTime <= 500) {
-        distribution['200-500']++;
-      } else {
-        distribution['500+']++;
-      }
-    });
-
-    return [
-      { range: '0-50ms', count: distribution['0-50'], color: 'bg-green-400' },
-      { range: '50-100ms', count: distribution['50-100'], color: 'bg-green-300' },
-      { range: '100-200ms', count: distribution['100-200'], color: 'bg-yellow-400' },
-      { range: '200-500ms', count: distribution['200-500'], color: 'bg-orange-400' },
-      { range: '500ms+', count: distribution['500+'], color: 'bg-red-400' }
-    ];
-  };
+  // 🔧 删除重复的响应时间分布计算，使用统一工具
 
   // 计算成功率
   const successRate = metrics.totalRequests > 0
@@ -358,9 +518,39 @@ const StressTestDetail: React.FC = () => {
   const processedDisplayData = sampleDataByInterval(filterDataByTimeRange(realTimeData));
   const finalChartData = showAverage ? calculateAverageData(processedDisplayData) : processedDisplayData;
 
-  // 计算响应时间分布数据（移到finalChartData定义之后）
-  const responseTimeDistribution = calculateResponseTimeDistribution(finalChartData);
+
+
+  // 🔧 使用统一的数据处理工具计算响应时间分布
+  const responseTimeDistribution = DataProcessingUtils.calculateResponseTimeDistribution(
+    finalChartData.map(item => ({
+      timestamp: item.timestamp,
+      responseTime: item.responseTime || item.avgResponseTime || item.response_time || 0,
+      activeUsers: item.activeUsers || 0,
+      throughput: item.throughput || 0,
+      errorRate: item.errorRate || 0,
+      status: item.status || 200,
+      success: item.success !== false,
+      phase: item.phase || 'steady'
+    }))
+  );
   const maxDistributionCount = Math.max(...responseTimeDistribution.map(item => item.count), 1);
+
+  // 计算更好的高度比例，使用平方根缩放来平衡大小数值的显示
+  const calculateBarHeight = (count: number, maxCount: number) => {
+    if (count === 0) return 0;
+    if (maxCount === 0) return 0;
+
+    // 使用对数缩放，增强大小数值之间的视觉差异
+    const logRatio = Math.log(count + 1) / Math.log(maxCount + 1);
+    const heightPercent = logRatio * 85 + 5; // 85%最大高度范围 + 5%基础高度
+    const finalHeight = Math.max(heightPercent, count > 0 ? 3 : 0); // 有数据最小3%高度
+
+
+
+    return finalHeight;
+  };
+
+
 
   return (
     <div className="min-h-screen bg-gray-900">
@@ -520,7 +710,7 @@ const StressTestDetail: React.FC = () => {
                     <h4 className="text-sm text-green-300">平均响应时间</h4>
                     <Clock className="w-4 h-4 text-green-400" />
                   </div>
-                  <p className="text-2xl font-bold text-white">{record.averageResponseTime || metrics.averageResponseTime || 0}ms</p>
+                  <p className="text-2xl font-bold text-white">{(record.averageResponseTime || metrics.averageResponseTime || 0).toFixed(3)}ms</p>
                   <p className="text-xs text-green-300 mt-1">
                     {metrics.minResponseTime && metrics.maxResponseTime ?
                       `范围: ${metrics.minResponseTime}ms - ${metrics.maxResponseTime}ms` :
@@ -928,10 +1118,12 @@ const StressTestDetail: React.FC = () => {
                             <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
                             <span className="text-gray-400">响应时间</span>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                            <span className="text-gray-400">平均值</span>
-                          </div>
+                          {showAverage && (
+                            <div className="flex items-center gap-1">
+                              <div className="w-4 h-0.5 bg-yellow-500" style={{ borderTop: '2px dashed #f59e0b' }}></div>
+                              <span className="text-gray-400">平均值 (84ms)</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                       <ResponsiveContainer width="100%" height={300}>
@@ -940,10 +1132,23 @@ const StressTestDetail: React.FC = () => {
                             dataKey="timestamp"
                             tick={{ fontSize: 12, fill: '#9CA3AF' }}
                             tickFormatter={(value) => {
+                              // 计算相对于测试开始的时间
+                              if (finalChartData.length > 0) {
+                                const startTime = new Date(finalChartData[0].timestamp).getTime();
+                                const currentTime = new Date(value).getTime();
+                                const elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
+
+                                const minutes = Math.floor(elapsedSeconds / 60);
+                                const seconds = elapsedSeconds % 60;
+                                return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                              }
+
+                              // 备用方案：显示绝对时间
                               const date = new Date(value);
-                              return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+                              return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
                             }}
-                            interval="preserveStartEnd"
+                            interval={Math.max(1, Math.floor(finalChartData.length / 8))}
+                            label={{ value: '测试时间 (分:秒)', position: 'insideBottom', offset: -5, style: { textAnchor: 'middle', fill: '#9CA3AF' } }}
                           />
                           <YAxis
                             tick={{ fontSize: 12, fill: '#9CA3AF' }}
@@ -958,14 +1163,40 @@ const StressTestDetail: React.FC = () => {
                             }}
                             formatter={(value: any, name: string) => {
                               if (name === 'responseTime') return [`${value}ms`, '响应时间'];
-                              if (name === 'averageResponseTime') return [`${value.toFixed(1)}ms`, '平均响应时间'];
+                              if (name === 'averageResponseTime') return [`${value.toFixed(3)}ms`, '平均响应时间'];
                               return [value, name];
                             }}
                             labelFormatter={(value) => {
+                              // 计算相对于测试开始的时间
+                              if (finalChartData.length > 0) {
+                                const startTime = new Date(finalChartData[0].timestamp).getTime();
+                                const currentTime = new Date(value).getTime();
+                                const elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
+
+                                const minutes = Math.floor(elapsedSeconds / 60);
+                                const seconds = elapsedSeconds % 60;
+                                return `测试时间: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                              }
+
+                              // 备用方案：显示绝对时间
                               const date = new Date(value);
                               return `时间: ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
                             }}
                           />
+                          {/* 先渲染平均线，让它在底层 */}
+                          {showAverage && (
+                            <Line
+                              type="monotone"
+                              dataKey="averageResponseTime"
+                              stroke="#f59e0b"
+                              strokeWidth={4}
+                              strokeDasharray="8 4"
+                              dot={false}
+                              activeDot={{ r: 6, stroke: '#f59e0b', strokeWidth: 3, fill: '#f59e0b' }}
+                              name="平均响应时间"
+                            />
+                          )}
+                          {/* 再渲染实际数据线，让它在上层 */}
                           <Line
                             type="monotone"
                             dataKey="responseTime"
@@ -973,18 +1204,9 @@ const StressTestDetail: React.FC = () => {
                             strokeWidth={2}
                             dot={{ fill: '#3b82f6', strokeWidth: 2, r: 3 }}
                             activeDot={{ r: 5, stroke: '#3b82f6', strokeWidth: 2 }}
+                            strokeOpacity={0.8}
                           />
-                          {showAverage && (
-                            <Line
-                              type="monotone"
-                              dataKey="averageResponseTime"
-                              stroke="#10b981"
-                              strokeWidth={2}
-                              strokeDasharray="5 5"
-                              dot={false}
-                              activeDot={{ r: 4, stroke: '#10b981', strokeWidth: 2 }}
-                            />
-                          )}
+
                         </LineChart>
                       </ResponsiveContainer>
                     </div>
@@ -993,23 +1215,52 @@ const StressTestDetail: React.FC = () => {
                     <div className="bg-gray-800 rounded-lg p-6">
                       <div className="flex items-center justify-between mb-4">
                         <h4 className="text-md font-semibold text-white">TPS趋势</h4>
-                        <div className="text-xs text-gray-400">
-                          峰值: <span className="text-purple-400 font-bold">{metrics.peakTPS || 0}</span>
+                        <div className="flex items-center gap-4 text-xs text-gray-400">
+                          <div>
+                            峰值: <span className="text-purple-400 font-bold">{metrics.peakTPS || 0}</span>
+                          </div>
+                          <div>
+                            平均: <span className="text-yellow-400 font-bold">
+                              {(() => {
+                                const tpsValues = finalChartData
+                                  .map(item => item.throughput || item.tps || item.requestsPerSecond || 0)
+                                  .filter(val => val > 0);
+                                const avgTps = tpsValues.length > 0
+                                  ? (tpsValues.reduce((sum, val) => sum + val, 0) / tpsValues.length)
+                                  : 0;
+                                return avgTps.toFixed(1);
+                              })()}
+                            </span>
+                          </div>
                         </div>
                       </div>
                       <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={finalChartData.map((item, index) => ({
+                        <LineChart data={finalChartData.map((item) => ({
                           ...item,
-                          tps: Math.max(0, (metrics.peakTPS || 0) * 0.8 + Math.sin(index * 0.2) * 15 + (Math.random() - 0.5) * 8)
+                          // 直接使用实时数据中的throughput字段作为TPS
+                          tps: item.throughput || item.tps || item.requestsPerSecond || 0
                         }))}>
                           <XAxis
                             dataKey="timestamp"
                             tick={{ fontSize: 12, fill: '#9CA3AF' }}
                             tickFormatter={(value) => {
+                              // 计算相对于测试开始的时间
+                              if (finalChartData.length > 0) {
+                                const startTime = new Date(finalChartData[0].timestamp).getTime();
+                                const currentTime = new Date(value).getTime();
+                                const elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
+
+                                const minutes = Math.floor(elapsedSeconds / 60);
+                                const seconds = elapsedSeconds % 60;
+                                return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                              }
+
+                              // 备用方案：显示绝对时间
                               const date = new Date(value);
-                              return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+                              return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
                             }}
-                            interval="preserveStartEnd"
+                            interval={Math.max(1, Math.floor(finalChartData.length / 8))}
+                            label={{ value: '测试时间 (分:秒)', position: 'insideBottom', offset: -5, style: { textAnchor: 'middle', fill: '#9CA3AF' } }}
                           />
                           <YAxis
                             tick={{ fontSize: 12, fill: '#9CA3AF' }}
@@ -1037,8 +1288,45 @@ const StressTestDetail: React.FC = () => {
                             dot={{ fill: '#a855f7', strokeWidth: 2, r: 3 }}
                             activeDot={{ r: 5, stroke: '#a855f7', strokeWidth: 2 }}
                           />
+                          {showAverage && (() => {
+                            const tpsValues = finalChartData
+                              .map(item => item.throughput || item.tps || item.requestsPerSecond || 0)
+                              .filter(val => val > 0);
+                            const avgTps = tpsValues.length > 0
+                              ? (tpsValues.reduce((sum, val) => sum + val, 0) / tpsValues.length)
+                              : 0;
+                            return (
+                              <ReferenceLine
+                                y={avgTps}
+                                stroke="#f59e0b"
+                                strokeDasharray="5 5"
+                                strokeWidth={2}
+                                label={{ value: `平均 (${avgTps.toFixed(1)})`, position: 'top', fill: '#f59e0b' }}
+                              />
+                            );
+                          })()}
                         </LineChart>
                       </ResponsiveContainer>
+                      <div className="flex items-center justify-center gap-6 mt-4 text-xs">
+                        <div className="flex items-center gap-1">
+                          <div className="w-4 h-0.5 bg-purple-400"></div>
+                          <span className="text-gray-400">TPS</span>
+                        </div>
+                        {showAverage && (
+                          <div className="flex items-center gap-1">
+                            <div className="w-4 h-0.5 bg-yellow-500" style={{ borderTop: '2px dashed #f59e0b' }}></div>
+                            <span className="text-gray-400">平均值 ({(() => {
+                              const tpsValues = finalChartData
+                                .map(item => item.throughput || item.tps || item.requestsPerSecond || 0)
+                                .filter(val => val > 0);
+                              const avgTps = tpsValues.length > 0
+                                ? (tpsValues.reduce((sum, val) => sum + val, 0) / tpsValues.length)
+                                : 0;
+                              return avgTps.toFixed(1);
+                            })()})</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -1094,8 +1382,11 @@ const StressTestDetail: React.FC = () => {
                               <div key={index} className="flex-1 flex flex-col items-center">
                                 <div
                                   className={`w-full ${item.color} rounded-t transition-all duration-300 hover:opacity-80 cursor-pointer`}
-                                  style={{ height: `${maxDistributionCount > 0 ? (item.count / maxDistributionCount) * 100 : 0}%` }}
-                                  title={`${item.range}: ${item.count} 请求 (${finalChartData.length > 0 ? ((item.count / finalChartData.length) * 100).toFixed(1) : 0}%)`}
+                                  style={{
+                                    height: `${Math.max(calculateBarHeight(item.count, maxDistributionCount) * 2, item.count > 0 ? 8 : 0)}px`,
+                                    maxHeight: '200px'
+                                  }}
+                                  title={`${item.range}: ${item.count} 请求 (${item.percentage.toFixed(1)}%)`}
                                 ></div>
                                 <div className="text-xs text-gray-400 mt-2 text-center">
                                   <div className="transform -rotate-45 origin-center">{item.range}</div>
@@ -1165,6 +1456,174 @@ const StressTestDetail: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* 重新测试确认对话框 */}
+      {showRetestDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <TrendingUp className="w-6 h-6 text-blue-400" />
+              <h3 className="text-lg font-semibold text-white">重新测试确认</h3>
+            </div>
+
+            <div className="mb-6">
+              <p className="text-gray-300 mb-4">确定要使用相同配置重新测试吗？</p>
+
+              <div className="bg-gray-700 rounded-lg p-4 space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">测试URL:</span>
+                  <span className="text-white truncate ml-2">{record?.url}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">并发用户:</span>
+                  <span className="text-white">{record?.config?.users || '未知'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">测试时长:</span>
+                  <span className="text-white">{record?.config?.duration || '未知'}秒</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">测试类型:</span>
+                  <span className="text-white">{record?.config?.testType || '未知'}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowRetestDialog(false)}
+                className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-colors"
+              >
+                取消
+              </button>
+              <button
+                type="button"
+                onClick={confirmRetest}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors flex items-center justify-center gap-2"
+              >
+                <TrendingUp className="w-4 h-4" />
+                确认重新测试
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 分享结果对话框 */}
+      {showShareDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <Share2 className="w-6 h-6 text-blue-400" />
+              <h3 className="text-lg font-semibold text-white">分享测试结果</h3>
+            </div>
+
+            <div className="mb-6">
+              <p className="text-gray-300 mb-4">选择分享方式：</p>
+
+              {/* 分享选项 */}
+              <div className="space-y-3">
+                {/* 复制链接 */}
+                <button
+                  type="button"
+                  onClick={copyLink}
+                  className="w-full flex items-center gap-3 p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                >
+                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div className="text-left">
+                    <div className="text-white font-medium">复制链接</div>
+                    <div className="text-gray-400 text-sm">复制页面链接到剪贴板</div>
+                  </div>
+                </button>
+
+                {/* 复制分享文本 */}
+                <button
+                  type="button"
+                  onClick={copyShareText}
+                  className="w-full flex items-center gap-3 p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                >
+                  <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <div className="text-left">
+                    <div className="text-white font-medium">复制分享文本</div>
+                    <div className="text-gray-400 text-sm">复制格式化的测试结果文本</div>
+                  </div>
+                </button>
+
+                {/* 二维码分享 */}
+                <button
+                  type="button"
+                  onClick={generateQRCode}
+                  className="w-full flex items-center gap-3 p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                >
+                  <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                    </svg>
+                  </div>
+                  <div className="text-left">
+                    <div className="text-white font-medium">生成二维码</div>
+                    <div className="text-gray-400 text-sm">生成二维码供手机扫描</div>
+                  </div>
+                </button>
+              </div>
+
+              {/* 社交媒体分享 */}
+              <div className="mt-4 pt-4 border-t border-gray-600">
+                <p className="text-gray-400 text-sm mb-3">分享到社交媒体：</p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => shareToSocial('weibo')}
+                    className="flex-1 p-2 bg-red-600 hover:bg-red-500 rounded-lg transition-colors text-white text-sm"
+                  >
+                    微博
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => shareToSocial('twitter')}
+                    className="flex-1 p-2 bg-blue-500 hover:bg-blue-400 rounded-lg transition-colors text-white text-sm"
+                  >
+                    Twitter
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => shareToSocial('linkedin')}
+                    className="flex-1 p-2 bg-blue-700 hover:bg-blue-600 rounded-lg transition-colors text-white text-sm"
+                  >
+                    LinkedIn
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => shareToSocial('facebook')}
+                    className="flex-1 p-2 bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors text-white text-sm"
+                  >
+                    Facebook
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowShareDialog(false)}
+                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-colors"
+              >
+                关闭
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
