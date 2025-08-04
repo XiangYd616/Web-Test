@@ -4127,88 +4127,66 @@ const StressTest: React.FC = () => {
                                                 </div>
                                             </div>
 
-                                            {/* 核心性能指标 */}
-                                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
-                                                <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 lg:p-4 text-center">
-                                                    <div className="text-lg sm:text-2xl lg:text-3xl font-bold text-blue-400 mb-1 sm:mb-2">
-                                                        {metrics?.currentTPS || result?.metrics?.currentTPS || 0}
-                                                    </div>
-                                                    <div className="text-xs sm:text-sm text-gray-400">当前TPS</div>
-                                                </div>
-                                                <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 lg:p-4 text-center">
-                                                    <div className="text-lg sm:text-2xl lg:text-3xl font-bold text-green-400 mb-1 sm:mb-2">
-                                                        {metrics?.averageResponseTime || result?.metrics?.averageResponseTime || 0}ms
-                                                    </div>
-                                                    <div className="text-xs sm:text-sm text-gray-400">平均响应时间</div>
-                                                </div>
-                                                <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 lg:p-4 text-center">
-                                                    <div className="text-lg sm:text-2xl lg:text-3xl font-bold text-yellow-400 mb-1 sm:mb-2">
-                                                        {metrics?.activeUsers || result?.metrics?.activeUsers || 0}
-                                                    </div>
-                                                    <div className="text-xs sm:text-sm text-gray-400">活跃用户</div>
-                                                </div>
-                                                <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 lg:p-4 text-center">
-                                                    <div className="text-lg sm:text-2xl lg:text-3xl font-bold text-red-400 mb-1 sm:mb-2">
-                                                        {(() => {
-                                                            const errorRate = metrics?.errorRate || result?.metrics?.errorRate || 0;
-                                                            return typeof errorRate === 'string' ? errorRate : errorRate.toFixed(1);
-                                                        })()}%
-                                                    </div>
-                                                    <div className="text-xs sm:text-sm text-gray-400">错误率</div>
-                                                </div>
-                                            </div>
+                                            {/* 统一性能监控面板 */}
+                                            <div className="bg-gray-800/50 rounded-lg p-3 sm:p-4">
+                                                <h4 className="text-sm sm:text-base font-semibold text-white mb-3 sm:mb-4 flex items-center">
+                                                    <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-400" />
+                                                    实时性能监控
+                                                </h4>
 
-                                            {/* 详细性能分析 */}
-                                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
-                                                {/* 响应时间分布 */}
-                                                <div className="bg-gray-800/50 rounded-lg p-3 sm:p-4">
-                                                    <h4 className="text-sm sm:text-base font-semibold text-white mb-3 sm:mb-4 flex items-center">
-                                                        <Clock className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-orange-400" />
-                                                        响应时间分布
-                                                    </h4>
-                                                    <div className="grid grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
-                                                        <div className="flex justify-between py-1 sm:py-2">
-                                                            <span className="text-gray-400">P50:</span>
-                                                            <span className="text-green-400 font-medium">{result?.metrics?.p50ResponseTime || metrics?.p50ResponseTime || 0}ms</span>
+                                                {/* 核心指标 - 紧凑布局 */}
+                                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+                                                    <div className="text-center">
+                                                        <div className="text-xl sm:text-2xl font-bold text-blue-400">
+                                                            {metrics?.currentTPS || result?.metrics?.currentTPS || 0}
                                                         </div>
-                                                        <div className="flex justify-between py-1 sm:py-2">
-                                                            <span className="text-gray-400">P90:</span>
-                                                            <span className="text-yellow-400 font-medium">{result?.metrics?.p90ResponseTime || metrics?.p90ResponseTime || 0}ms</span>
+                                                        <div className="text-xs text-gray-400">当前TPS</div>
+                                                    </div>
+                                                    <div className="text-center">
+                                                        <div className="text-xl sm:text-2xl font-bold text-green-400">
+                                                            {result?.metrics?.p95ResponseTime || metrics?.p95ResponseTime || 0}ms
                                                         </div>
-                                                        <div className="flex justify-between py-1 sm:py-2">
-                                                            <span className="text-gray-400">P95:</span>
-                                                            <span className="text-orange-400 font-medium">{result?.metrics?.p95ResponseTime || metrics?.p95ResponseTime || 0}ms</span>
+                                                        <div className="text-xs text-gray-400">P95响应时间</div>
+                                                    </div>
+                                                    <div className="text-center">
+                                                        <div className="text-xl sm:text-2xl font-bold text-yellow-400">
+                                                            {result?.metrics?.totalRequests || metrics?.totalRequests || 0}
                                                         </div>
-                                                        <div className="flex justify-between py-1 sm:py-2">
-                                                            <span className="text-gray-400">P99:</span>
-                                                            <span className="text-red-400 font-medium">{result?.metrics?.p99ResponseTime || metrics?.p99ResponseTime || 0}ms</span>
+                                                        <div className="text-xs text-gray-400">总请求数</div>
+                                                    </div>
+                                                    <div className="text-center">
+                                                        <div className="text-xl sm:text-2xl font-bold text-red-400">
+                                                            {(() => {
+                                                                const errorRate = metrics?.errorRate || result?.metrics?.errorRate || 0;
+                                                                return typeof errorRate === 'string' ? errorRate : errorRate.toFixed(1);
+                                                            })()}%
                                                         </div>
+                                                        <div className="text-xs text-gray-400">错误率</div>
                                                     </div>
                                                 </div>
 
-                                                {/* 吞吐量分析 */}
-                                                <div className="bg-gray-800/50 rounded-lg p-3 sm:p-4">
-                                                    <h4 className="text-sm sm:text-base font-semibold text-white mb-3 sm:mb-4 flex items-center">
-                                                        <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-400" />
-                                                        吞吐量分析
-                                                    </h4>
-                                                    <div className="grid grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
-                                                        <div className="flex justify-between py-1 sm:py-2">
-                                                            <span className="text-gray-400">峰值TPS:</span>
-                                                            <span className="text-green-400 font-medium">{result?.metrics?.peakTPS || metrics?.peakTPS || 0}</span>
-                                                        </div>
-                                                        <div className="flex justify-between py-1 sm:py-2">
-                                                            <span className="text-gray-400">平均TPS:</span>
-                                                            <span className="text-blue-400 font-medium">{result?.metrics?.throughput || metrics?.throughput || 0}</span>
-                                                        </div>
-                                                        <div className="flex justify-between py-1 sm:py-2">
-                                                            <span className="text-gray-400">总请求:</span>
-                                                            <span className="text-purple-400 font-medium">{result?.metrics?.totalRequests || metrics?.totalRequests || 0}</span>
-                                                        </div>
-                                                        <div className="flex justify-between py-1 sm:py-2">
-                                                            <span className="text-gray-400">成功请求:</span>
-                                                            <span className="text-green-400 font-medium">{result?.metrics?.successfulRequests || metrics?.successfulRequests || 0}</span>
-                                                        </div>
+                                                {/* 详细数据 - 单行紧凑显示 */}
+                                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 text-xs sm:text-sm">
+                                                    <div className="flex justify-between py-1">
+                                                        <span className="text-gray-400">峰值TPS:</span>
+                                                        <span className="text-green-400 font-medium">{result?.metrics?.peakTPS || metrics?.peakTPS || 0}</span>
+                                                    </div>
+                                                    <div className="flex justify-between py-1">
+                                                        <span className="text-gray-400">P50响应:</span>
+                                                        <span className="text-blue-400 font-medium">{result?.metrics?.p50ResponseTime || metrics?.p50ResponseTime || 0}ms</span>
+                                                    </div>
+                                                    <div className="flex justify-between py-1">
+                                                        <span className="text-gray-400">成功率:</span>
+                                                        <span className="text-green-400 font-medium">
+                                                            {result?.metrics?.totalRequests ?
+                                                                (((result?.metrics?.successfulRequests || 0) / result.metrics.totalRequests * 100).toFixed(1)) :
+                                                                '100.0'
+                                                            }%
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex justify-between py-1">
+                                                        <span className="text-gray-400">活跃用户:</span>
+                                                        <span className="text-purple-400 font-medium">{metrics?.activeUsers || result?.metrics?.activeUsers || 0}</span>
                                                     </div>
                                                 </div>
                                             </div>
