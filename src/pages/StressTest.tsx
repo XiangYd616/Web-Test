@@ -4035,57 +4035,149 @@ const StressTest: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    {/* 测试状态显示区域 */}
-                                    {isRunning ? (
-                                        <div className="bg-gray-900/50 rounded-lg p-4 h-80 flex items-center justify-center">
-                                            <div className="text-center max-w-md">
-                                                <div className="w-16 h-16 mx-auto mb-4 relative">
-                                                    <div className="w-16 h-16 border-4 border-gray-600 rounded-full"></div>
-                                                    <div className="absolute top-0 left-0 w-16 h-16 border-4 border-blue-500 rounded-full animate-spin border-t-transparent border-r-transparent"></div>
+                                    {/* 高级模式监控面板 */}
+                                    {(isRunning || stressTestData.length > 0 || result) ? (
+                                        <div className="bg-gray-900/50 rounded-lg p-4 space-y-4">
+                                            {/* 实时状态指示器 */}
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center space-x-3">
+                                                    {isRunning ? (
+                                                        <>
+                                                            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                                                            <span className="text-green-400 font-medium">测试进行中</span>
+                                                        </>
+                                                    ) : result ? (
+                                                        <>
+                                                            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                                            <span className="text-blue-400 font-medium">测试已完成</span>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                                            <span className="text-yellow-400 font-medium">数据分析中</span>
+                                                        </>
+                                                    )}
                                                 </div>
-                                                <div className="text-white font-medium text-lg mb-2">压力测试进行中</div>
-                                                <div className="text-gray-400 text-base mb-4">
-                                                    {realTimeData.length === 0 ? '正在初始化监控数据...' : '等待更多数据...'}
+                                                <div className="text-xs text-gray-400">
+                                                    数据点: {stressTestData.length}
                                                 </div>
+                                            </div>
 
-                                                {/* 详细状态信息 */}
-                                                <div className="bg-gray-800/50 rounded-lg p-4 text-sm">
-                                                    <div className="grid grid-cols-2 gap-4 text-left">
-                                                        <div>
-                                                            <div className="text-gray-300 font-medium mb-2">测试配置</div>
-                                                            <div className="text-gray-400 space-y-1">
-                                                                <div>目标用户: {testConfig.users}</div>
-                                                                <div>测试时长: {testConfig.duration}秒</div>
-                                                                <div>加压时间: {testConfig.rampUp}秒</div>
-                                                            </div>
+                                            {/* 核心性能指标 */}
+                                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                                                <div className="bg-gray-800/50 rounded-lg p-3 text-center">
+                                                    <div className="text-2xl font-bold text-blue-400">
+                                                        {metrics?.currentTPS || result?.metrics?.currentTPS || 0}
+                                                    </div>
+                                                    <div className="text-xs text-gray-400">当前TPS</div>
+                                                </div>
+                                                <div className="bg-gray-800/50 rounded-lg p-3 text-center">
+                                                    <div className="text-2xl font-bold text-green-400">
+                                                        {metrics?.averageResponseTime || result?.metrics?.averageResponseTime || 0}ms
+                                                    </div>
+                                                    <div className="text-xs text-gray-400">平均响应时间</div>
+                                                </div>
+                                                <div className="bg-gray-800/50 rounded-lg p-3 text-center">
+                                                    <div className="text-2xl font-bold text-yellow-400">
+                                                        {metrics?.activeUsers || result?.metrics?.activeUsers || 0}
+                                                    </div>
+                                                    <div className="text-xs text-gray-400">活跃用户</div>
+                                                </div>
+                                                <div className="bg-gray-800/50 rounded-lg p-3 text-center">
+                                                    <div className="text-2xl font-bold text-red-400">
+                                                        {(() => {
+                                                            const errorRate = metrics?.errorRate || result?.metrics?.errorRate || 0;
+                                                            return typeof errorRate === 'string' ? errorRate : errorRate.toFixed(1);
+                                                        })()}%
+                                                    </div>
+                                                    <div className="text-xs text-gray-400">错误率</div>
+                                                </div>
+                                            </div>
+
+                                            {/* 详细性能分析 */}
+                                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                                {/* 响应时间分布 */}
+                                                <div className="bg-gray-800/50 rounded-lg p-3">
+                                                    <h4 className="text-sm font-semibold text-white mb-3 flex items-center">
+                                                        <Clock className="w-4 h-4 mr-2 text-orange-400" />
+                                                        响应时间分布
+                                                    </h4>
+                                                    <div className="grid grid-cols-2 gap-2 text-xs">
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-400">P50:</span>
+                                                            <span className="text-green-400">{result?.metrics?.p50ResponseTime || metrics?.p50ResponseTime || 0}ms</span>
                                                         </div>
-                                                        <div>
-                                                            <div className="text-gray-300 font-medium mb-2">实时状态</div>
-                                                            <div className="text-gray-400 space-y-1">
-                                                                <div>数据点: {stressTestData.length}</div>
-                                                                <div>WebSocket: {socketRef.current?.connected ? '✅ 已连接' : '❌ 未连接'}</div>
-                                                                <div>测试ID: {currentTestId ? currentTestId.slice(-8) : '生成中...'}</div>
-                                                            </div>
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-400">P90:</span>
+                                                            <span className="text-yellow-400">{result?.metrics?.p90ResponseTime || metrics?.p90ResponseTime || 0}ms</span>
+                                                        </div>
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-400">P95:</span>
+                                                            <span className="text-orange-400">{result?.metrics?.p95ResponseTime || metrics?.p95ResponseTime || 0}ms</span>
+                                                        </div>
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-400">P99:</span>
+                                                            <span className="text-red-400">{result?.metrics?.p99ResponseTime || metrics?.p99ResponseTime || 0}ms</span>
                                                         </div>
                                                     </div>
+                                                </div>
 
-                                                    <div className="mt-4 pt-4 border-t border-gray-700">
-                                                        <div className="text-gray-300 font-medium mb-2">当前进度</div>
-                                                        <div className="text-blue-300">{testProgress || '正在启动测试引擎...'}</div>
-                                                        {metrics && (
-                                                            <div className="mt-2 text-xs text-gray-400">
-                                                                已收集 {metrics.totalRequests || 0} 个请求数据
-                                                            </div>
-                                                        )}
+                                                {/* 吞吐量分析 */}
+                                                <div className="bg-gray-800/50 rounded-lg p-3">
+                                                    <h4 className="text-sm font-semibold text-white mb-3 flex items-center">
+                                                        <BarChart3 className="w-4 h-4 mr-2 text-blue-400" />
+                                                        吞吐量分析
+                                                    </h4>
+                                                    <div className="grid grid-cols-2 gap-2 text-xs">
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-400">峰值TPS:</span>
+                                                            <span className="text-green-400">{result?.metrics?.peakTPS || metrics?.peakTPS || 0}</span>
+                                                        </div>
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-400">平均TPS:</span>
+                                                            <span className="text-blue-400">{result?.metrics?.throughput || metrics?.throughput || 0}</span>
+                                                        </div>
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-400">总请求:</span>
+                                                            <span className="text-purple-400">{result?.metrics?.totalRequests || metrics?.totalRequests || 0}</span>
+                                                        </div>
+                                                        <div className="flex justify-between">
+                                                            <span className="text-gray-400">成功请求:</span>
+                                                            <span className="text-green-400">{result?.metrics?.successfulRequests || metrics?.successfulRequests || 0}</span>
+                                                        </div>
                                                     </div>
+                                                </div>
+                                            </div>
+
+                                            {/* 测试进度和状态 */}
+                                            <div className="bg-gray-800/50 rounded-lg p-3">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <span className="text-sm font-medium text-gray-300">测试进度</span>
+                                                    <span className="text-xs text-gray-400">
+                                                        {isRunning ? '进行中' : result ? '已完成' : '准备中'}
+                                                    </span>
+                                                </div>
+                                                {isRunning && (
+                                                    <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+                                                        <div
+                                                            className="progress-bar-dynamic"
+                                                            style={{
+                                                                '--progress': `${Math.min(100, (stressTestData.length / (testConfig.duration || 1)) * 100)}%`,
+                                                                width: `var(--progress)`
+                                                            } as React.CSSProperties}
+                                                        ></div>
+                                                    </div>
+                                                )}
+                                                <div className="text-xs text-gray-400">
+                                                    {testProgress || (isRunning ? '正在收集性能数据...' : '等待开始测试')}
                                                 </div>
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="bg-gray-900/50 rounded-lg p-4 h-80 flex items-center justify-center">
+                                        <div className="bg-gray-900/50 rounded-lg p-6 h-80 flex items-center justify-center">
                                             <div className="text-center max-w-lg">
                                                 <TrendingUp className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                                                <div className="text-gray-400 font-medium text-lg mb-2">专业级压力测试监控</div>
+                                                <div className="text-gray-300 font-medium text-xl mb-2">专业压力测试监控</div>
                                                 <div className="text-gray-500 text-base mb-6">
                                                     开始测试后将显示实时性能数据
                                                 </div>
