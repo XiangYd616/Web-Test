@@ -4102,30 +4102,7 @@ const StressTest: React.FC = () => {
                                     {/* 高级模式监控面板 */}
                                     {(isRunning || stressTestData.length > 0 || result) ? (
                                         <div className="bg-gray-900/50 rounded-lg p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4 lg:space-y-6 min-h-[300px] sm:min-h-[400px] lg:min-h-[500px]">
-                                            {/* 实时状态指示器 */}
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center space-x-2 sm:space-x-3">
-                                                    {isRunning ? (
-                                                        <>
-                                                            <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full animate-pulse"></div>
-                                                            <span className="text-green-400 font-medium text-sm sm:text-base">测试进行中</span>
-                                                        </>
-                                                    ) : result ? (
-                                                        <>
-                                                            <div className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full"></div>
-                                                            <span className="text-blue-400 font-medium text-sm sm:text-base">测试已完成</span>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <div className="w-2 h-2 sm:w-3 sm:h-3 bg-yellow-500 rounded-full"></div>
-                                                            <span className="text-yellow-400 font-medium text-sm sm:text-base">数据分析中</span>
-                                                        </>
-                                                    )}
-                                                </div>
-                                                <div className="text-xs sm:text-sm text-gray-400">
-                                                    数据点: {stressTestData.length}
-                                                </div>
-                                            </div>
+
 
 
 
@@ -4292,55 +4269,15 @@ const StressTest: React.FC = () => {
                                                     )}
                                                 </div>
                                             )}
+
                                         </div>
                                     ) : (
-                                        <div className="bg-gray-900/50 rounded-lg p-4 sm:p-6 lg:p-8 min-h-[300px] sm:min-h-[400px] lg:min-h-[500px] flex items-center justify-center">
-                                            <div className="text-center max-w-sm sm:max-w-lg lg:max-w-2xl w-full">
-                                                <TrendingUp className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 text-gray-400 mx-auto mb-4 sm:mb-6" />
-                                                <div className="text-gray-300 font-medium text-lg sm:text-xl lg:text-2xl mb-2 sm:mb-3">专业压力测试监控</div>
-                                                <div className="text-gray-500 text-sm sm:text-base lg:text-lg mb-6 sm:mb-8">
-                                                    开始测试后将显示实时性能数据
-                                                </div>
-
-                                                {/* 功能预览 */}
-                                                <div className="bg-gray-800/50 rounded-lg p-3 sm:p-4 lg:p-6 text-sm sm:text-base">
-                                                    <div className="text-gray-300 font-medium mb-4 sm:mb-6 text-base sm:text-lg">监控功能预览</div>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 text-left">
-                                                        <div className="space-y-2 sm:space-y-3 lg:space-y-4">
-                                                            <div className="flex items-center space-x-2 sm:space-x-3 text-gray-400">
-                                                                <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
-                                                                <span>实时请求统计</span>
-                                                            </div>
-                                                            <div className="flex items-center space-x-2 sm:space-x-3 text-gray-400">
-                                                                <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
-                                                                <span>响应时间监控</span>
-                                                            </div>
-                                                            <div className="flex items-center space-x-2 sm:space-x-3 text-gray-400">
-                                                                <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
-                                                                <span>TPS性能指标</span>
-                                                            </div>
-                                                        </div>
-                                                        <div className="space-y-2 sm:space-y-3 lg:space-y-4">
-                                                            <div className="flex items-center space-x-2 sm:space-x-3 text-gray-400">
-                                                                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
-                                                                <span>成功率分析</span>
-                                                            </div>
-                                                            <div className="flex items-center space-x-2 sm:space-x-3 text-gray-400">
-                                                                <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-red-400" />
-                                                                <span>错误率监控</span>
-                                                            </div>
-                                                            <div className="flex items-center space-x-2 sm:space-x-3 text-gray-400">
-                                                                <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
-                                                                <span>WebSocket实时数据</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-700">
-                                                        <div className="text-xs sm:text-sm text-gray-500">
-                                                            💡 提示：配置测试参数并点击"开始测试"来启动实时监控
-                                                        </div>
-                                                    </div>
+                                        <div className="bg-gray-900/50 rounded-lg p-4 sm:p-6 lg:p-8 min-h-[200px] flex items-center justify-center">
+                                            <div className="text-center">
+                                                <TrendingUp className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                                                <div className="text-gray-300 font-medium text-xl mb-2">高级压力测试</div>
+                                                <div className="text-gray-500 text-sm">
+                                                    配置测试参数并开始测试
                                                 </div>
                                             </div>
                                         </div>
