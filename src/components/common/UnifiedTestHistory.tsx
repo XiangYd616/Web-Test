@@ -50,6 +50,14 @@ export const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showFiltersPanel, setShowFiltersPanel] = useState(false);
 
+  // 分页状态
+  const [pagination, setPagination] = useState({
+    total: 0,
+    totalPages: 0,
+    hasNext: false,
+    hasPrev: false
+  });
+
   // 查询参数
   const [query, setQuery] = useState<TestHistoryQuery>({
     page: 1,
@@ -97,6 +105,15 @@ export const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
         const data = await response.json();
         if (data.success) {
           setTestHistory(data.data.tests || []);
+          // 更新分页信息
+          if (data.data.pagination) {
+            setPagination({
+              total: data.data.pagination.total || 0,
+              totalPages: data.data.pagination.totalPages || 0,
+              hasNext: data.data.pagination.hasNext || false,
+              hasPrev: data.data.pagination.hasPrev || false
+            });
+          }
         }
       }
     } catch (error) {
@@ -198,6 +215,16 @@ export const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
   const handleStatusFilter = (status: string) => {
     setStatusFilter(status);
     setQuery(prev => ({ ...prev, page: 1 }));
+  };
+
+  // 处理分页
+  const handlePageChange = (page: number) => {
+    setQuery(prev => ({ ...prev, page }));
+  };
+
+  // 处理每页显示数量变化
+  const handlePageSizeChange = (limit: number) => {
+    setQuery(prev => ({ ...prev, limit, page: 1 }));
   };
 
   // 处理测试查看
@@ -483,6 +510,57 @@ export const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* 分页组件 */}
+      {!loading && testHistory.length > 0 && pagination.totalPages > 1 && (
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-gray-800/50 border border-gray-700/50 rounded-lg">
+          {/* 分页信息 */}
+          <div className="flex items-center gap-4 text-sm text-gray-400">
+            <span>
+              显示 {((query.page - 1) * query.limit) + 1}-{Math.min(query.page * query.limit, pagination.total)} 条，共 {pagination.total} 条记录
+            </span>
+            <div className="flex items-center gap-2">
+              <label htmlFor="unified-pageSize" className="text-sm text-gray-300">每页显示:</label>
+              <select
+                id="unified-pageSize"
+                value={query.limit}
+                onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+                className="px-3 py-1.5 text-sm border border-gray-600 rounded-md bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[70px]"
+              >
+                <option value={5} className="bg-gray-700 text-white">5 条</option>
+                <option value={10} className="bg-gray-700 text-white">10 条</option>
+                <option value={20} className="bg-gray-700 text-white">20 条</option>
+                <option value={50} className="bg-gray-700 text-white">50 条</option>
+              </select>
+            </div>
+          </div>
+
+          {/* 分页控制 */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => handlePageChange(query.page - 1)}
+              disabled={!pagination.hasPrev}
+              className="px-3 py-1.5 text-sm border border-gray-600 rounded-md bg-gray-700 text-white hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              上一页
+            </button>
+
+            <span className="px-3 py-1.5 text-sm text-gray-300">
+              第 {query.page} / {pagination.totalPages} 页
+            </span>
+
+            <button
+              type="button"
+              onClick={() => handlePageChange(query.page + 1)}
+              disabled={!pagination.hasNext}
+              className="px-3 py-1.5 text-sm border border-gray-600 rounded-md bg-gray-700 text-white hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              下一页
+            </button>
+          </div>
         </div>
       )}
     </div>

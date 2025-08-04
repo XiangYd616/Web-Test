@@ -125,16 +125,16 @@ const Pagination: React.FC<PaginationProps> = ({
       <div className="flex items-center space-x-4">
         {/* 每页显示数量 */}
         {showSizeChanger && onPageSizeChange && (
-          <div className="flex items-center space-x-2 text-sm text-gray-400">
+          <div className="flex items-center space-x-2 text-sm text-gray-300">
             <span>每页显示:</span>
             <select
               value={pageSize}
               onChange={(e) => handlePageSizeChange(parseInt(e.target.value))}
-              className="px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-1.5 bg-gray-700 border border-gray-600 rounded-md text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[70px]"
               aria-label="选择每页显示数量"
             >
               {pageSizeOptions.map(size => (
-                <option key={size} value={size}>{size}</option>
+                <option key={size} value={size} className="bg-gray-700 text-white">{size} 条</option>
               ))}
             </select>
           </div>
