@@ -246,7 +246,7 @@ class MetricsCalculator {
  * HTTP请求工具类
  */
 class HttpClient {
-  static async makeRequest(url, method = 'GET', timeout = CONSTANTS.TIMEOUTS.DEFAULT_REQUEST, testId = null) {
+  static async makeRequest(url, method = 'GET', timeout = CONSTANTS.TIMEOUTS.DEFAULT_REQUEST, testId = null, proxyConfig = null) {
     return new Promise((resolve) => {
       // 检查取消状态
       if (testId && RealStressTestEngine.shouldStopTest(testId)) {
@@ -261,8 +261,16 @@ class HttpClient {
       }
 
       const urlObj = new URL(url);
-      const client = urlObj.protocol === 'https:' ? https : http;
       const startTime = Date.now();
+
+      // 如果配置了代理，使用代理发送请求
+      if (proxyConfig && proxyConfig.enabled) {
+        this.makeProxyRequest(url, method, timeout, proxyConfig, startTime, resolve);
+        return;
+      }
+
+      // 原有的直接请求逻辑
+      const client = urlObj.protocol === 'https:' ? https : http;
 
       const options = {
         hostname: urlObj.hostname,
@@ -327,6 +335,92 @@ class HttpClient {
 
       req.end();
     });
+  }
+
+  /**
+   * 使用代理发送请求
+   */
+  static makeProxyRequest(url, method, timeout, proxyConfig, startTime, resolve) {
+    try {
+      const fetch = require('node-fetch');
+      const { HttpsProxyAgent } = require('https-proxy-agent');
+      const { HttpProxyAgent } = require('http-proxy-agent');
+      const AbortController = require('abort-controller');
+
+      // 构建代理URL
+      const proxyType = proxyConfig.type || 'http';
+      const proxyPort = proxyConfig.port || 8080;
+      let proxyUrl;
+
+      if (proxyConfig.username && proxyConfig.password) {
+        proxyUrl = `${proxyType}://${proxyConfig.username}:${proxyConfig.password}@${proxyConfig.host}:${proxyPort}`;
+      } else {
+        proxyUrl = `${proxyType}://${proxyConfig.host}:${proxyPort}`;
+      }
+
+      // 根据目标URL协议选择合适的代理agent
+      let agent;
+      const isHttpsTarget = url.startsWith('https://');
+
+      if (isHttpsTarget) {
+        agent = new HttpsProxyAgent(proxyUrl);
+      } else {
+        agent = new HttpProxyAgent(proxyUrl);
+      }
+
+      // 设置超时控制
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+      }, timeout);
+
+      // 发送代理请求
+      fetch(url, {
+        method: method.toUpperCase(),
+        agent: agent,
+        signal: controller.signal,
+        headers: {
+          'User-Agent': CONSTANTS.HTTP.USER_AGENT,
+          ...CONSTANTS.HTTP.DEFAULT_HEADERS
+        }
+      }).then(response => {
+        clearTimeout(timeoutId);
+        const responseTime = Date.now() - startTime;
+
+        // 读取响应数据以计算大小
+        return response.text().then(data => {
+          resolve({
+            success: response.ok,
+            statusCode: response.status,
+            responseTime: responseTime,
+            data: data.length,
+            headers: response.headers.raw(),
+            proxy: true // 标记这是通过代理的请求
+          });
+        });
+      }).catch(error => {
+        clearTimeout(timeoutId);
+        const responseTime = Date.now() - startTime;
+
+        resolve({
+          success: false,
+          statusCode: 0,
+          responseTime: responseTime,
+          error: error.message,
+          proxy: true
+        });
+      });
+
+    } catch (error) {
+      const responseTime = Date.now() - startTime;
+      resolve({
+        success: false,
+        statusCode: 0,
+        responseTime: responseTime,
+        error: `代理配置错误: ${error.message}`,
+        proxy: true
+      });
+    }
   }
 }
 
@@ -476,15 +570,15 @@ class RealStressTestEngine {
    * 执行测试 - 根据测试类型选择执行策略
    */
   async executeTest(url, config, results) {
-    const { testType, users, duration, rampUpTime, method, timeout, thinkTime } = config;
+    const { testType, users, duration, rampUpTime, method, timeout, thinkTime, proxy } = config;
 
     Logger.info(`执行 ${testType} 类型的压力测试...`);
 
     const testStrategies = {
-      [CONSTANTS.TEST_TYPES.GRADUAL]: () => this.executeGradualTest(url, users, duration, rampUpTime, method, timeout, thinkTime, results),
-      [CONSTANTS.TEST_TYPES.SPIKE]: () => this.executeSpikeTest(url, users, duration, method, timeout, thinkTime, results),
-      [CONSTANTS.TEST_TYPES.CONSTANT]: () => this.executeConstantTest(url, users, duration, method, timeout, thinkTime, results),
-      [CONSTANTS.TEST_TYPES.STRESS]: () => this.executeStressLimitTest(url, users, duration, rampUpTime, method, timeout, thinkTime, results)
+      [CONSTANTS.TEST_TYPES.GRADUAL]: () => this.executeGradualTest(url, users, duration, rampUpTime, method, timeout, thinkTime, results, proxy),
+      [CONSTANTS.TEST_TYPES.SPIKE]: () => this.executeSpikeTest(url, users, duration, method, timeout, thinkTime, results, proxy),
+      [CONSTANTS.TEST_TYPES.CONSTANT]: () => this.executeConstantTest(url, users, duration, method, timeout, thinkTime, results, proxy),
+      [CONSTANTS.TEST_TYPES.STRESS]: () => this.executeStressLimitTest(url, users, duration, rampUpTime, method, timeout, thinkTime, results, proxy)
     };
 
     const strategy = testStrategies[testType] || testStrategies[CONSTANTS.TEST_TYPES.GRADUAL];
@@ -585,7 +679,7 @@ class RealStressTestEngine {
   /**
    * 渐进式测试 - 逐步增加用户数
    */
-  async executeGradualTest(url, users, duration, rampUpTime, method, timeout, thinkTime, results) {
+  async executeGradualTest(url, users, duration, rampUpTime, method, timeout, thinkTime, results, proxyConfig) {
     results.currentPhase = 'gradual';
     const promises = [];
 
@@ -610,7 +704,7 @@ class RealStressTestEngine {
 
         if (userDuration > 0) {
           const userPromise = this.scheduleVirtualUser(
-            url, userDuration, method, timeout, thinkTime, results, userStartDelay
+            url, userDuration, method, timeout, thinkTime, results, userStartDelay, proxyConfig
           );
           promises.push(userPromise);
         }
@@ -625,7 +719,7 @@ class RealStressTestEngine {
   /**
    * 峰值测试 - 快速启动所有用户
    */
-  async executeSpikeTest(url, users, duration, method, timeout, thinkTime, results) {
+  async executeSpikeTest(url, users, duration, method, timeout, thinkTime, results, proxyConfig) {
     results.currentPhase = 'spike';
     const promises = [];
     const progressMonitor = this.startProgressMonitor(results, duration * 1000);
@@ -635,7 +729,7 @@ class RealStressTestEngine {
       for (let i = 0; i < users; i++) {
         const userStartDelay = (i * 1000) / users;
         const userPromise = this.scheduleVirtualUser(
-          url, duration * 1000, method, timeout, thinkTime, results, userStartDelay
+          url, duration * 1000, method, timeout, thinkTime, results, userStartDelay, proxyConfig
         );
         promises.push(userPromise);
       }
@@ -649,7 +743,7 @@ class RealStressTestEngine {
   /**
    * 恒定负载测试 - 立即启动所有用户
    */
-  async executeConstantTest(url, users, duration, method, timeout, thinkTime, results) {
+  async executeConstantTest(url, users, duration, method, timeout, thinkTime, results, proxyConfig) {
     results.currentPhase = 'constant';
     const promises = [];
     const progressMonitor = this.startProgressMonitor(results, duration * 1000);
@@ -658,7 +752,7 @@ class RealStressTestEngine {
       // 立即启动所有用户
       for (let i = 0; i < users; i++) {
         const userPromise = this.scheduleVirtualUser(
-          url, duration * 1000, method, timeout, thinkTime, results, 0
+          url, duration * 1000, method, timeout, thinkTime, results, 0, proxyConfig
         );
         promises.push(userPromise);
       }
@@ -672,7 +766,7 @@ class RealStressTestEngine {
   /**
    * 压力极限测试 - 分阶段增加用户数
    */
-  async executeStressLimitTest(url, users, duration, rampUpTime, method, timeout, thinkTime, results) {
+  async executeStressLimitTest(url, users, duration, rampUpTime, method, timeout, thinkTime, results, proxyConfig) {
     results.currentPhase = 'stress-limit';
     const promises = [];
     const progressMonitor = this.startProgressMonitor(results, duration * 1000);
@@ -693,7 +787,7 @@ class RealStressTestEngine {
 
           if (userDuration > 0) {
             const userPromise = this.scheduleVirtualUser(
-              url, userDuration, method, timeout, thinkTime, results, userStartDelay
+              url, userDuration, method, timeout, thinkTime, results, userStartDelay, proxyConfig
             );
             promises.push(userPromise);
           }
@@ -709,11 +803,11 @@ class RealStressTestEngine {
   /**
    * 调度虚拟用户
    */
-  scheduleVirtualUser(url, duration, method, timeout, thinkTime, results, startDelay) {
+  scheduleVirtualUser(url, duration, method, timeout, thinkTime, results, startDelay, proxyConfig) {
     return new Promise((resolve) => {
       const timer = setTimeout(() => {
         results.metrics.activeUsers++;
-        this.runVirtualUser(url, duration, method, timeout, thinkTime, results)
+        this.runVirtualUser(url, duration, method, timeout, thinkTime, results, proxyConfig)
           .then(() => {
             results.metrics.activeUsers--;
             resolve();
@@ -732,7 +826,7 @@ class RealStressTestEngine {
   /**
    * 运行虚拟用户
    */
-  async runVirtualUser(url, duration, method, timeout, thinkTime, results) {
+  async runVirtualUser(url, duration, method, timeout, thinkTime, results, proxyConfig) {
     const userId = Math.random().toString(36).substr(2, 9);
     const endTime = Date.now() + duration;
     const userResults = { requests: 0, successes: 0, failures: 0 };
@@ -755,7 +849,7 @@ class RealStressTestEngine {
           break;
         }
 
-        const response = await HttpClient.makeRequest(url, method, timeout * 1000, results.testId);
+        const response = await HttpClient.makeRequest(url, method, timeout * 1000, results.testId, proxyConfig);
         const responseTime = Date.now() - requestStart;
 
         // 检查响应是否表明测试已取消
