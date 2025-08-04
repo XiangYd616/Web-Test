@@ -27,8 +27,8 @@ export interface StressTestRecord {
   id: string;
   testName: string;
   url: string;
-  testType?: 'stress' | 'website' | 'seo' | 'security' | 'performance' | 'api'; 
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  testType?: 'stress' | 'website' | 'seo' | 'security' | 'performance' | 'api';
+  status: 'idle' | 'starting' | 'running' | 'completed' | 'failed' | 'cancelled';
 
   // 时间信息
   startTime: string;
@@ -218,7 +218,7 @@ class StressTestRecordService {
         id: testData.id || this.generateId(),
         testName: testData.testName || `压力测试 - ${new URL(testData.url!).hostname}`,
         url: testData.url!,
-        status: testData.status || 'pending',
+        status: testData.status || 'idle',
         startTime: testData.startTime || new Date().toISOString(),
         createdAt: testData.createdAt || new Date().toISOString(),
         config: testData.config!,
@@ -441,7 +441,7 @@ class StressTestRecordService {
   async setTestPending(id: string, reason?: string): Promise<StressTestRecord> {
     try {
       const updates: Partial<StressTestRecord> = {
-        status: 'pending',
+        status: 'idle', // 🔧 简化：使用idle作为等待状态
         updatedAt: new Date().toISOString(),
         waitingReason: reason
       };
@@ -523,7 +523,7 @@ class StressTestRecordService {
   ): Promise<StressTestRecord> {
     try {
       const updates: Partial<StressTestRecord> = {
-        status: 'pending',
+        status: 'idle', // 🔧 简化：使用idle作为中断状态
         interruptedAt: new Date().toISOString(),
         interruptReason,
         waitingReason: `测试已中断: ${interruptReason}`,

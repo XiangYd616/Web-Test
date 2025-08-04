@@ -1,8 +1,8 @@
-import { Activity, AlertCircle, AlertTriangle, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Activity, AlertCircle, CheckCircle, Pause, Play, XCircle } from 'lucide-react';
 import React from 'react';
 
-// 测试状态类型
-export type TestStatus = 'completed' | 'failed' | 'cancelled' | 'running' | 'pending' | 'timeout';
+// 测试状态类型 - 简化版本
+export type TestStatus = 'idle' | 'starting' | 'running' | 'completed' | 'cancelled' | 'failed';
 
 // 状态配置接口
 export interface StatusConfig {
@@ -16,6 +16,22 @@ export interface StatusConfig {
 
 // 统一的状态配置
 export const STATUS_CONFIG: Record<TestStatus, StatusConfig> = {
+  idle: {
+    text: '空闲',
+    icon: Pause,
+    bgColor: 'bg-gray-100 dark:bg-gray-500',
+    textColor: 'text-gray-800 dark:text-gray-100',
+    borderColor: 'border-gray-200 dark:border-gray-400',
+    description: '测试未开始'
+  },
+  starting: {
+    text: '启动中',
+    icon: Play,
+    bgColor: 'bg-blue-100 dark:bg-blue-500',
+    textColor: 'text-blue-800 dark:text-blue-100',
+    borderColor: 'border-blue-200 dark:border-blue-400',
+    description: '测试正在启动'
+  },
   completed: {
     text: '已完成',
     icon: CheckCircle,
@@ -47,28 +63,12 @@ export const STATUS_CONFIG: Record<TestStatus, StatusConfig> = {
     textColor: 'text-blue-800 dark:text-blue-100',
     borderColor: 'border-blue-200 dark:border-blue-400',
     description: '测试正在执行中'
-  },
-  pending: {
-    text: '准备中',
-    icon: Clock,
-    bgColor: 'bg-yellow-100 dark:bg-yellow-500',
-    textColor: 'text-yellow-800 dark:text-yellow-100',
-    borderColor: 'border-yellow-200 dark:border-yellow-400',
-    description: '测试准备启动'
-  },
-  timeout: {
-    text: '超时',
-    icon: AlertTriangle,
-    bgColor: 'bg-red-100 dark:bg-red-500',
-    textColor: 'text-red-800 dark:text-red-100',
-    borderColor: 'border-red-200 dark:border-red-400',
-    description: '测试执行超时'
   }
 };
 
 // 获取状态配置
 export const getStatusConfig = (status: string): StatusConfig => {
-  return STATUS_CONFIG[status as TestStatus] || STATUS_CONFIG.pending;
+  return STATUS_CONFIG[status as TestStatus] || STATUS_CONFIG.idle;
 };
 
 // 获取状态文本

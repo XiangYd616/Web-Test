@@ -1,5 +1,5 @@
+import { AlertCircle, CheckCircle, Loader2, Square } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { Square, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
 interface CancelProgressFeedbackProps {
   isVisible: boolean;
@@ -108,8 +108,8 @@ const CancelProgressFeedback: React.FC<CancelProgressFeedbackProps> = ({
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-gray-800 rounded-xl shadow-2xl max-w-md w-full mx-4 border border-gray-700">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999]">
+      <div className="bg-gray-800 rounded-xl shadow-2xl max-w-md w-full mx-4 border border-gray-700 max-h-[90vh] overflow-y-auto">
         {/* 头部 */}
         <div className="flex items-center space-x-3 p-6 border-b border-gray-700">
           <div className="p-2 bg-red-500/20 rounded-lg">
@@ -155,9 +155,8 @@ const CancelProgressFeedback: React.FC<CancelProgressFeedbackProps> = ({
             </div>
             <div className="w-full bg-gray-700 rounded-full h-2">
               <div
-                className={`h-2 rounded-full transition-all duration-500 ${
-                  hasError ? 'bg-red-500' : isCompleted ? 'bg-green-500' : 'bg-blue-500'
-                }`}
+                className={`h-2 rounded-full transition-all duration-500 ${hasError ? 'bg-red-500' : isCompleted ? 'bg-green-500' : 'bg-blue-500'
+                  }`}
                 style={{
                   width: `${((currentStepIndex + (isCompleted ? 1 : 0)) / steps.length) * 100}%`
                 }}

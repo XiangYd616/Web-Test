@@ -3,9 +3,7 @@ import { AlertCircle, AlertTriangle, BarChart3, CheckCircle, Clock, Download, Fi
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
-import { AdvancedStressTestChart, UnifiedStressTestCharts } from '../components/charts';
-import { RealTimeStressChart } from '../components/charts/RealTimeStressChart';
-import type { TestStatusType } from '../components/charts/UnifiedStressTestCharts';
+import { AdvancedStressTestChart, EnhancedStressTestCharts as UnifiedStressTestCharts } from '../components/charts';
 import CancelTestConfirmDialog from '../components/dialogs/CancelTestConfirmDialog';
 import CancelProgressFeedback from '../components/feedback/CancelProgressFeedback';
 import StressTestHistory from '../components/stress/StressTestHistory';
@@ -19,6 +17,7 @@ import { systemResourceMonitor } from '../services/systemResourceMonitor';
 import { testEngineManager } from '../services/testEngines';
 import { TestPhase, type RealTimeMetrics, type TestDataPoint } from '../services/TestStateManager';
 import '../styles/progress-bar.css';
+import type { TestStatusType } from '../types/testHistory';
 import { getTemplateById } from '../utils/testTemplates';
 
 // 本地配置接口，继承导入的配置
@@ -30,8 +29,6 @@ interface StressTestConfig extends ImportedAdvancedStressTestConfig {
 type LifecycleStressTestConfig = StressTestConfig;
 
 const StressTest: React.FC = () => {
-    console.log('🔍 StressTest 组件开始渲染');
-
     // 路由状态检查
     const location = useLocation();
 
@@ -45,11 +42,8 @@ const StressTest: React.FC = () => {
         description: "使用压力测试功能"
     });
 
-    console.log('🔍 useAuthCheck 完成');
-
     // 用户统计
     const { recordTestCompletion } = useUserStats();
-    console.log('🔍 useUserStats 完成');
 
     const {
         currentRecord,
@@ -69,7 +63,6 @@ const StressTest: React.FC = () => {
     } = useStressTestRecord({
         autoLoad: false // 不自动加载，由历史组件管理
     });
-    console.log('🔍 useStressTestRecord 完成');
 
     const [testConfig, setTestConfig] = useState<StressTestConfig>({
         url: '', // 用户自定义测试URL
@@ -109,7 +102,6 @@ const StressTest: React.FC = () => {
         // 创建统一的生命周期管理器
         return {
             startTest: async (config: any) => {
-                console.log('🔄 生命周期管理器启动测试:', config);
                 setCurrentStatus('STARTING');
                 setStatusMessage('正在检查系统资源和队列状态...');
 
@@ -119,10 +111,8 @@ const StressTest: React.FC = () => {
                         testName: `压力测试 - ${new URL(config.url).hostname}`,
                         url: config.url,
                         config: config,
-                        status: 'pending'
+                        status: 'idle' // 🔧 简化：使用idle作为初始状态
                     });
-
-                    console.log('✅ 测试记录已创建:', recordId);
                     setCurrentRecordId(recordId);
 
                     // 检查是否需要排队
@@ -131,7 +121,6 @@ const StressTest: React.FC = () => {
 
                     if (canStartImmediately) {
                         // 可以立即启动
-                        console.log('🚀 系统资源充足，立即启动测试');
                         setCurrentStatus('STARTING');
                         setStatusMessage('正在启动压力测试引擎...');
 
@@ -153,21 +142,16 @@ const StressTest: React.FC = () => {
                         }
 
                         const result = await response.json();
-                        console.log('✅ 测试立即启动成功:', result);
 
                         // 🔧 修复：提取testId并设置状态
                         const testId = result.testId || result.data?.testId;
                         if (testId) {
                             setCurrentTestId(testId);
-                            console.log('🔑 立即启动设置测试ID:', testId);
 
                             // 立即尝试加入WebSocket房间
                             const socket = socketRef.current;
                             if (socket && socket.connected) {
-                                console.log('🏠 立即启动后加入WebSocket房间:', testId);
                                 joinWebSocketRoom(testId);
-                            } else {
-                                console.log('⚠️ WebSocket未连接，等待连接后加入房间');
                             }
 
                             // 启动测试超时检查
@@ -177,7 +161,6 @@ const StressTest: React.FC = () => {
                         return result;
                     } else {
                         // 需要排队
-                        console.log('📋 系统繁忙，测试加入队列');
                         setCurrentStatus('PENDING');
                         setStatusMessage('测试已加入队列，等待执行...');
 
@@ -203,7 +186,6 @@ const StressTest: React.FC = () => {
                             }
                         }, 'high'); // 压力测试使用高优先级
 
-                        console.log('✅ 测试已加入队列:', queueId);
                         return recordId;
                     }
 
@@ -234,7 +216,6 @@ const StressTest: React.FC = () => {
                 }
 
                 const result = await response.json();
-                console.log('✅ 测试直接启动成功:', result);
 
                 setCurrentStatus('WAITING');
                 setStatusMessage('等待测试开始...');
@@ -242,14 +223,13 @@ const StressTest: React.FC = () => {
                 const testId = result.testId || result.data?.testId || recordId;
                 if (testId) {
                     setCurrentTestId(testId);
-                    console.log('🔑 设置测试ID:', testId);
                 }
 
                 return testId;
             },
 
             cancelTest: async (reason: string) => {
-                console.log('🔄 生命周期管理器取消测试:', reason);
+
                 setCurrentStatus('CANCELLING');
                 setStatusMessage('正在取消测试...');
 
@@ -265,21 +245,14 @@ const StressTest: React.FC = () => {
                         const lastDataPoint = stressTestData[stressTestData.length - 1];
                         if (lastDataPoint && lastDataPoint.testId) {
                             testIdToCancel = lastDataPoint.testId;
-                            console.log('🔧 从WebSocket数据中恢复testId:', testIdToCancel);
+
                         }
                     }
 
-                    console.log('🔍 取消测试ID检查:', {
-                        testIdToCancel,
-                        currentTestIdRef: currentTestIdRef.current,
-                        currentTestId,
-                        stressTestDataLength: stressTestData.length,
-                        isRunning,
-                        testStatus
-                    });
+
 
                     if (testIdToCancel) {
-                        console.log('🛑 调用后端取消API:', testIdToCancel);
+
 
                         try {
                             const response = await fetch(`/api/test/stress/cancel/${testIdToCancel}`, {
@@ -388,12 +361,55 @@ const StressTest: React.FC = () => {
     // 标签页状态
     const [activeTab, setActiveTab] = useState<'test' | 'history'>('test');
 
-    // 处理从详细页面返回时的状态
+    // 用于跟踪是否已经显示过预填配置提示
+    const hasShownPrefilledAlert = useRef(false);
+
+    // 处理从详细页面返回时的状态和预填配置
     useEffect(() => {
-        if (location.state && (location.state as any).activeTab) {
-            setActiveTab((location.state as any).activeTab);
-            // 清除状态，避免重复触发
-            window.history.replaceState({}, document.title);
+        if (location.state) {
+            const state = location.state as any;
+
+            // 处理标签页状态
+            if (state.activeTab) {
+                setActiveTab(state.activeTab);
+            }
+
+            // 处理预填配置
+            if (state.prefilledConfig) {
+                const config = state.prefilledConfig;
+
+                setTestConfig(prev => ({
+                    ...prev,
+                    ...(config.url && { url: config.url }),
+                    ...(config.users && { users: Number(config.users) }),
+                    ...(config.duration && { duration: Number(config.duration) }),
+                    ...(config.rampUp && { rampUp: Number(config.rampUp) }),
+                    ...(config.rampUpTime && { rampUp: Number(config.rampUpTime) }),
+                    ...(config.testType && { testType: config.testType }),
+                    ...(config.method && { method: config.method }),
+                    ...(config.timeout && { timeout: Number(config.timeout) }),
+                    ...(config.thinkTime && { thinkTime: Number(config.thinkTime) }),
+                    ...(config.warmupDuration && { warmupDuration: Number(config.warmupDuration) }),
+                    ...(config.cooldownDuration && { cooldownDuration: Number(config.cooldownDuration) })
+                }));
+
+                // 如果有预填配置，切换到测试标签页
+                setActiveTab('test');
+
+                // 立即清除状态，避免重复触发
+                window.history.replaceState({}, document.title);
+
+                // 显示提示信息（只显示一次）
+                if (!hasShownPrefilledAlert.current) {
+                    hasShownPrefilledAlert.current = true;
+                    setTimeout(() => {
+                        alert('已应用之前的测试配置，您可以直接开始测试或修改配置后再测试。');
+                    }, 100);
+                }
+            } else {
+                // 如果没有预填配置，也清除状态
+                window.history.replaceState({}, document.title);
+            }
         }
     }, [location.state]);
 
@@ -560,7 +576,33 @@ const StressTest: React.FC = () => {
                     }));
                 }
 
-                return combined.length > 1000 ? combined.slice(-800) : combined;
+                // 🔧 修复：更宽松的数据保留策略，确保完整测试数据不被截断
+                const testDurationSeconds = testConfig.duration || 30;
+                const totalTestTime = testDurationSeconds + (testConfig.rampUp || 0) +
+                    (testConfig.warmupDuration || 0) + (testConfig.cooldownDuration || 0);
+
+                // 根据测试总时长和用户数计算合理的数据点上限
+                const expectedDataPoints = totalTestTime * testConfig.users * 3; // 每用户每秒最多3个数据点
+                const maxDataPoints = Math.max(expectedDataPoints, 5000); // 至少保留5000个数据点
+
+                console.log('📊 数据保留策略:', {
+                    testDuration: testDurationSeconds,
+                    totalTestTime,
+                    users: testConfig.users,
+                    expectedDataPoints,
+                    maxDataPoints,
+                    currentDataPoints: combined.length
+                });
+
+                // 只有当数据点数量远超预期时才进行裁剪（更宽松的条件）
+                if (combined.length > maxDataPoints * 1.5) { // 超过预期50%才裁剪
+                    const keepPoints = Math.floor(maxDataPoints * 0.9); // 保留90%的数据
+                    console.log(`📊 数据点过多（${combined.length} > ${maxDataPoints * 1.5}），裁剪至 ${keepPoints} 个数据点`);
+                    return combined.slice(-keepPoints);
+                }
+
+                console.log('📊 保留所有数据点:', combined.length);
+                return combined;
             });
         } else {
             // 最终结果：设置为独立的聚合数据，用于测试结果视图
@@ -569,19 +611,21 @@ const StressTest: React.FC = () => {
         }
     }, [processDataPoint, calculateMetricsFromData]);
 
-    // 转换 TestDataPoint 到 StressTestDataPoint
-    const convertToStressTestDataPoint = useCallback((dataPoints: TestDataPoint[]) => {
+    // 🔧 修复：转换 TestDataPoint 到 EnhancedRealTimeData 格式
+    const convertToEnhancedRealTimeData = useCallback((dataPoints: TestDataPoint[]) => {
         return dataPoints.map(point => ({
-            timestamp: point.timestamp,
+            timestamp: typeof point.timestamp === 'string' ? new Date(point.timestamp).getTime() : point.timestamp,
             responseTime: point.responseTime,
-            activeUsers: point.activeUsers,
-            throughput: point.throughput,
-            errorRate: point.errorRate,
             status: point.status,
             success: point.success,
-            phase: point.phase === TestPhase.RAMP_UP ? 'rampup' as const :
-                point.phase === TestPhase.RAMP_DOWN ? 'rampdown' as const :
-                    'steady' as const
+            activeUsers: point.activeUsers,
+            throughput: point.throughput,
+            errorType: point.errorType,
+            connectionTime: point.connectionTime || 30,
+            dnsTime: point.dnsTime || 15,
+            phase: point.phase === TestPhase.RAMP_UP ? 'rampup' :
+                point.phase === TestPhase.RAMP_DOWN ? 'rampdown' :
+                    'steady'
         }));
     }, []);
 
@@ -655,8 +699,8 @@ const StressTest: React.FC = () => {
                 if (savedTestId && savedTestStatus) {
                     console.log('🔍 检测到保存的测试状态:', { savedTestId, savedTestStatus });
 
-                    // 如果状态是运行中，检查后端是否真的在运行
-                    if (savedTestStatus === 'running' || savedTestStatus === 'starting') {
+                    // 如果状态是运行中或已完成，检查后端状态
+                    if (savedTestStatus === 'running' || savedTestStatus === 'starting' || savedTestStatus === 'completed') {
                         try {
                             const response = await fetch(`/api/test/stress/status/${savedTestId}`, {
                                 headers: {
@@ -694,21 +738,49 @@ const StressTest: React.FC = () => {
                                     console.log('🧹 后端测试状态异常，清理本地状态');
                                     localStorage.removeItem('currentStressTestId');
                                     localStorage.removeItem('currentStressTestStatus');
+
+                                    // 🔧 修复：重置React状态
+                                    setTestStatus('idle');
+                                    setIsRunning(false);
+                                    setCurrentStatus('IDLE');
+                                    setStatusMessage('准备开始测试');
+                                    setTestProgress('');
                                 }
                             } else {
                                 console.log('🧹 无法获取测试状态，清理本地状态');
                                 localStorage.removeItem('currentStressTestId');
                                 localStorage.removeItem('currentStressTestStatus');
+
+                                // 🔧 修复：重置React状态
+                                setTestStatus('idle');
+                                setIsRunning(false);
+                                setCurrentStatus('IDLE');
+                                setStatusMessage('准备开始测试');
+                                setTestProgress('');
                             }
                         } catch (error) {
                             console.warn('⚠️ 检查测试状态失败:', error);
                             localStorage.removeItem('currentStressTestId');
                             localStorage.removeItem('currentStressTestStatus');
+
+                            // 🔧 修复：重置React状态
+                            setTestStatus('idle');
+                            setIsRunning(false);
+                            setCurrentStatus('IDLE');
+                            setStatusMessage('准备开始测试');
+                            setTestProgress('');
                         }
                     } else {
                         // 如果状态不是运行中，清理保存的状态
                         localStorage.removeItem('currentStressTestId');
                         localStorage.removeItem('currentStressTestStatus');
+
+                        // 🔧 修复：重置React状态
+                        setTestStatus('idle');
+                        setIsRunning(false);
+                        setCurrentStatus('IDLE');
+                        setStatusMessage('准备开始测试');
+                        setTestProgress('');
                     }
                 }
             } catch (error) {
@@ -721,13 +793,9 @@ const StressTest: React.FC = () => {
 
     // 同步currentTestId到ref
     useEffect(() => {
-        console.log('🔑🔑🔑 currentTestId 更新 🔑🔑🔑:', {
-            oldValue: currentTestIdRef.current,
-            newValue: currentTestId,
-            timestamp: Date.now()
-        });
+
         currentTestIdRef.current = currentTestId || '';
-        console.log('🔄 同步测试ID到ref:', currentTestId);
+
 
         // 保存测试ID到localStorage
         if (currentTestId) {
@@ -760,7 +828,7 @@ const StressTest: React.FC = () => {
         }
 
         setError('');
-        setTestStatus('starting');
+        updateTestStatus('starting', '正在初始化压力测试...');
         setTestProgress('正在初始化压力测试...');
         setStressTestData([]);  // 🔧 清理唯一数据源
         setMetrics(null);
@@ -783,7 +851,7 @@ const StressTest: React.FC = () => {
                     testName: `压力测试 - ${new URL(testConfig.url.trim()).hostname}`,
                     testType: 'stress',
                     url: testConfig.url.trim(),
-                    status: 'pending',
+                    status: 'idle', // 🔧 简化：使用idle作为初始状态
                     config: {
                         users: testConfig.users,
                         duration: testConfig.duration,
@@ -902,7 +970,7 @@ const StressTest: React.FC = () => {
                 }
 
                 // 设置测试状态
-                setTestStatus('running');
+                updateTestStatus('running', '压力测试正在运行...');
                 setTestProgress('压力测试正在运行...');
 
                 // 启动定期数据检查和状态同步
@@ -918,9 +986,8 @@ const StressTest: React.FC = () => {
                                 // 检查状态同步
                                 if (serverStatus === 'completed' && testStatus === 'running') {
                                     console.log('🔄 状态同步：服务器显示已完成，但前端仍显示运行中，更新状态...');
-                                    setTestStatus('completed');
+                                    updateTestStatus('completed', '压力测试完成！');
                                     setTestProgress('压力测试完成！');
-                                    setIsRunning(false);
                                     setCurrentTestId(null);
 
                                     // 设置结果数据
@@ -937,9 +1004,8 @@ const StressTest: React.FC = () => {
 
                                 if (serverStatus === 'cancelled' && testStatus !== 'cancelled') {
                                     console.log('🔄 状态同步：服务器显示已取消，更新状态...');
-                                    setTestStatus('cancelled');
+                                    updateTestStatus('cancelled', '测试已取消');
                                     setTestProgress('测试已取消');
-                                    setIsRunning(false);
                                     setCurrentTestId(null);
                                     return;
                                 }
@@ -1025,14 +1091,14 @@ const StressTest: React.FC = () => {
                 };
 
                 setResult({ ...data.data, metrics: processedMetrics });
-                // 检查是否是取消状态，如果是则不覆盖
+                // 🔧 使用统一状态管理，状态转换验证会自动处理终态保护
                 if (data.data.status === 'cancelled') {
-                    setTestStatus('cancelled');
+                    updateTestStatus('cancelled', '测试已取消');
                     setTestProgress('测试已取消');
                     // 🔧 修复：取消状态时延迟清空testId
                     setTimeout(() => setCurrentTestId(null), 1000);
                 } else {
-                    setTestStatus('completed');
+                    updateTestStatus('completed', '压力测试完成！');
                     setTestProgress('压力测试完成！');
                     // 完成状态可以立即清空testId
                     setCurrentTestId(null);
@@ -1255,29 +1321,45 @@ const StressTest: React.FC = () => {
         console.log('🔄 状态更新:', currentStatus, statusMessage);
 
         // 将新的状态映射到旧的状态系统，保持兼容性
+        // 🔧 简化状态映射 - 将服务器状态映射到简化的前端状态
         const statusMapping: Record<string, TestStatusType> = {
             'IDLE': 'idle',
-            'PREPARING': 'running',
-            'WAITING': 'running',
-            'STARTING': 'running',
+            'PREPARING': 'starting',     // 准备阶段映射到启动中
+            'WAITING': 'starting',       // 等待阶段映射到启动中
+            'STARTING': 'starting',
             'RUNNING': 'running',
-            'COMPLETING': 'running',
+            'COMPLETING': 'running',     // 完成阶段仍算运行中
             'COMPLETED': 'completed',
-            'FAILING': 'running',
+            'FAILING': 'running',        // 失败过程中仍算运行中
             'FAILED': 'failed',
-            'CANCELLING': 'running',
+            'CANCELLING': 'running',     // 取消过程中仍算运行中
             'CANCELLED': 'cancelled',
-            'TIMEOUT': 'failed'
+            'TIMEOUT': 'failed'          // 超时归类为失败
         };
 
         const mappedStatus = statusMapping[currentStatus] || 'idle';
         setTestStatus(mappedStatus);
-        setTestProgress(statusMessage);
 
-        // 根据状态更新运行状态
+        // 🔧 修复：只有在真正需要重置时才清空testProgress
+        if (currentStatus === 'IDLE' && !['completed', 'cancelled', 'failed'].includes(testStatus)) {
+            setTestProgress('');
+        } else if (currentStatus !== 'IDLE') {
+            setTestProgress(statusMessage);
+        }
+        // 保持完成状态的testProgress不被清空
+
+        // 🔧 修复：根据testStatus和currentStatus双重检查更新运行状态
         const runningStates = ['PREPARING', 'WAITING', 'STARTING', 'RUNNING', 'COMPLETING', 'FAILING', 'CANCELLING'];
-        setIsRunning(runningStates.includes(currentStatus));
+        const shouldBeRunning = runningStates.includes(currentStatus) &&
+            !['completed', 'cancelled', 'failed'].includes(testStatus);
+
+        // 🔧 强制修复：确保终态时isRunning为false
+        const finalShouldBeRunning = ['completed', 'cancelled', 'failed'].includes(testStatus) ? false : shouldBeRunning;
+
+        setIsRunning(finalShouldBeRunning);
         setIsCancelling(currentStatus === 'CANCELLING');
+
+
     }, [currentStatus, statusMessage]);
 
     // 监听生命周期管理器的状态变化 - 已修复并启用
@@ -1389,6 +1471,8 @@ const StressTest: React.FC = () => {
                 setIsCancelling(false);
                 setCurrentStatus('COMPLETED');
                 setStatusMessage('测试已完成');
+                setTestProgress('压力测试完成！'); // 🔧 修复：同步更新testProgress
+                setCanSwitchPages(true); // 允许切换页面
                 break;
             case 'cancelled':
                 setIsRunning(false);
@@ -1418,15 +1502,14 @@ const StressTest: React.FC = () => {
         }
 
         // 定义有效的状态转换
+        // 🔧 简化状态转换逻辑 - 只保留核心状态
         const validTransitions: Record<TestStatusType, TestStatusType[]> = {
-            'idle': ['starting', 'failed'],
+            'idle': ['starting', 'failed', 'completed'], // 允许从idle直接转换到completed
             'starting': ['running', 'failed', 'cancelled'],
             'running': ['completed', 'cancelled', 'failed'],
             'completed': ['idle'],
             'cancelled': ['idle'],
-            'failed': ['idle'],
-            'waiting': ['running', 'failed', 'cancelled'],
-            'timeout': ['idle', 'failed']
+            'failed': ['idle']
         };
 
         return validTransitions[from]?.includes(to) || false;
@@ -1478,8 +1561,11 @@ const StressTest: React.FC = () => {
                     case 'testProgress':
                         setBackgroundTestInfo(testInfo);
                         setTestProgress(testInfo.currentStep);
-                        setTestStatus('running');
-                        setIsRunning(true);
+                        // 🔧 修复：只有在非终态时才设置为running
+                        if (!['completed', 'cancelled', 'failed'].includes(testStatus)) {
+                            setTestStatus('running');
+                            setIsRunning(true);
+                        }
 
                         // 更新实时数据 - 简化版本
                         if (testInfo.realTimeData) {
@@ -1650,7 +1736,7 @@ const StressTest: React.FC = () => {
 
                             // 更新测试记录 (背景测试)
                             // 🔧 修复：如果测试已被取消，不要覆盖取消状态
-                            if (currentRecord && processedResult.status !== 'cancelled') {
+                            if (currentRecord && processedResult.status !== 'cancelled' && testStatus !== 'cancelled') {
                                 (async () => {
                                     try {
                                         await completeRecord(currentRecord.id, {
@@ -1734,9 +1820,12 @@ const StressTest: React.FC = () => {
         if (stressTest) {
             setCurrentTestId(stressTest.id);
             setBackgroundTestInfo(stressTest);
-            setTestStatus('running');
-            setTestProgress(stressTest.currentStep);
-            setIsRunning(true);
+            // 🔧 修复：只有在非终态时才设置为running
+            if (!['completed', 'cancelled', 'failed'].includes(testStatus)) {
+                setTestStatus('running');
+                setTestProgress(stressTest.currentStep);
+                setIsRunning(true);
+            }
         }
 
         return unsubscribe;
@@ -1924,8 +2013,29 @@ const StressTest: React.FC = () => {
                     console.log('🔌 WebSocket连接断开:', reason);
                     setIsInRoom(false);
 
-                    // 如果有正在运行的测试，标记为可能失败
-                    if (isRunning && currentTestIdRef.current) {
+                    // 🔧 修复：WebSocket断开时不要自动假设测试完成
+                    if (reason === 'io server disconnect') {
+                        console.log('🔍 服务器主动断开连接，检查测试状态', {
+                            isRunning,
+                            hasData: stressTestData.length > 0,
+                            currentTestId: currentTestIdRef.current,
+                            testStatus,
+                            isCancelling
+                        });
+
+                        // 🚫 移除自动完成逻辑 - 不要在WebSocket断开时自动设置为completed
+                        // 让服务器端的状态更新来决定最终状态
+                        console.log('⚠️ WebSocket断开，等待服务器状态更新，不自动设置为完成状态');
+
+                        // 如果正在取消，保持取消状态
+                        if (isCancelling || testStatus === 'cancelled') {
+                            console.log('🛑 测试正在取消或已取消，保持取消状态');
+                            setTestStatus('cancelled');
+                            setTestProgress('测试已取消');
+                            setIsRunning(false);
+                        }
+                    } else if (isRunning && currentTestIdRef.current) {
+                        // 其他原因的断开，标记为可能失败
                         console.log('⚠️ 测试运行中WebSocket断开，可能需要重置状态');
                         setStatusMessage('连接断开，正在尝试重连...');
                     }
@@ -1959,22 +2069,7 @@ const StressTest: React.FC = () => {
                     }
                 });
 
-                // 添加通用事件监听器来调试所有接收到的事件
-                socket.onAny((eventName, ...args) => {
-                    if (eventName.includes('stress') || eventName.includes('test') || eventName.includes('data')) {
-                        console.log('🎯 收到事件:', eventName, '数据:', args);
-                    }
-                });
 
-                // 🔧 调试：监听所有WebSocket事件
-                socket.onAny((eventName, ...args) => {
-                    console.log(`🔍 收到WebSocket事件: ${eventName}`, args);
-                });
-
-                // 🔧 调试：监听房间加入确认
-                socket.on('room-joined', (data) => {
-                    console.log('✅ 房间加入确认:', data);
-                });
 
                 // 🔧 监听WebSocket取消测试确认
                 socket.on('cancel-stress-test-ack', (data) => {
@@ -1996,6 +2091,35 @@ const StressTest: React.FC = () => {
                         dataKeys: Object.keys(data)
                     });
 
+                    // 🔧 修复：如果当前没有testId但接收到实时数据，尝试恢复测试状态
+                    const currentTestIdValue = currentTestIdRef.current;
+                    if (!currentTestIdValue && data.timestamp && data.responseTime !== undefined) {
+                        console.log('🔧 检测到实时数据但没有testId，尝试恢复测试状态...');
+
+                        // 通过API查询当前运行的测试来恢复testId
+                        fetch('/api/test/status')
+                            .then(response => response.json())
+                            .then(statusData => {
+                                if (statusData.success && statusData.data && statusData.data.testId) {
+                                    console.log('✅ 从API恢复testId:', statusData.data.testId);
+                                    setCurrentTestId(statusData.data.testId);
+                                    currentTestIdRef.current = statusData.data.testId;
+
+                                    // 恢复测试状态
+                                    // 🔧 修复：只有在非终态时才恢复为running状态
+                                    if (!['completed', 'cancelled', 'failed'].includes(testStatus)) {
+                                        setIsRunning(true);
+                                        setTestStatus('running');
+                                        setCurrentStatus('RUNNING');
+                                        setStatusMessage('测试正在运行中...');
+                                    }
+                                }
+                            })
+                            .catch(error => {
+                                console.warn('⚠️ 恢复testId失败:', error);
+                            });
+                    }
+
                     // 🔧 统一的实时数据处理逻辑
                     if (data.timestamp && data.responseTime !== undefined) {
                         console.log('📈 处理实时数据点:', data);
@@ -2005,9 +2129,14 @@ const StressTest: React.FC = () => {
 
                         // 更新状态为运行中
                         setCurrentStatus((prevStatus: string) => {
-                            if (prevStatus === 'WAITING' || prevStatus === 'STARTING') {
+                            if (prevStatus === 'WAITING' || prevStatus === 'STARTING' || prevStatus === 'IDLE') {
                                 console.log('🎯 接收到实时数据，更新状态为RUNNING');
                                 setStatusMessage('测试正在运行中...');
+                                setIsRunning(true);
+                                // 🔧 修复：只有在非终态时才设置为running
+                                if (!['completed', 'cancelled', 'failed'].includes(testStatus)) {
+                                    setTestStatus('running');
+                                }
                                 return 'RUNNING';
                             }
                             return prevStatus;
@@ -2137,13 +2266,7 @@ const StressTest: React.FC = () => {
                         console.log('📊 收到直接指标数据:', metricsData);
                     }
 
-                    // 🔧 修复：添加调试日志查看metricsData内容
-                    console.log('🔍 检查指标数据:', {
-                        hasMetricsData: !!metricsData,
-                        metricsData: metricsData,
-                        hasValidTotalRequests: metricsData?.totalRequests > 0,
-                        realTimeDataLength: realTimeData.length
-                    });
+
 
                     if (metricsData && metricsData.totalRequests > 0) {
                         const updatedMetrics = {
@@ -2163,7 +2286,16 @@ const StressTest: React.FC = () => {
 
                     // 更新进度
                     if (data.progress !== undefined) {
-                        setTestProgress(`测试进行中... ${Math.round(data.progress)}%`);
+                        const progressPercent = Math.round(data.progress);
+                        setTestProgress(`测试进行中... ${progressPercent}%`);
+
+                        // 🔧 简单粗暴的修复：进度达到99%直接完成
+                        if (progressPercent >= 99) {
+                            console.log('🔧 进度达到99%，直接完成测试');
+                            setTimeout(() => {
+                                updateTestStatus('completed', '测试已完成');
+                            }, 1000); // 1秒后直接完成
+                        }
                     }
                 });
 
@@ -2182,7 +2314,21 @@ const StressTest: React.FC = () => {
 
                     // 更新进度百分比
                     if (data.progress !== undefined) {
-                        setTestProgress(`测试进行中... ${Math.round(data.progress)}%`);
+                        const progressPercent = Math.round(data.progress);
+                        setTestProgress(`测试进行中... ${progressPercent}%`);
+
+                        // 🔧 简单粗暴的修复：进度达到99%直接完成 - 增加取消状态检查
+                        if (progressPercent >= 99) {
+                            console.log('🔧 进度达到99%，检查是否可以完成测试');
+                            setTimeout(() => {
+                                // 🔧 修复：检查是否正在取消，如果是则不设置完成状态
+                                if (testStatus !== 'cancelled' && !isCancelling) {
+                                    updateTestStatus('completed', '测试已完成');
+                                } else {
+                                    console.log('🛑 正在取消中，不设置完成状态');
+                                }
+                            }, 1000);
+                        }
                     }
 
                     // 🔧 关键修复：处理累积指标数据
@@ -2241,7 +2387,7 @@ const StressTest: React.FC = () => {
                         return;
                     }
 
-                    // 🔧 使用统一状态管理处理其他状态
+                    // 🔧 使用统一状态管理处理其他状态 - 状态转换验证会自动处理终态保护
                     if (data.status === 'completed') {
                         updateTestStatus('completed', data.message);
                     } else if (data.status === 'failed') {
@@ -2258,27 +2404,30 @@ const StressTest: React.FC = () => {
 
                 // 压力测试完成
                 socket.on('stress-test-complete', (data) => {
-                    console.log('✅ 测试完成:', data);
+                    console.log('✅ 收到测试完成事件:', data);
 
-                    // 检查testId是否匹配
-                    if (data.testId !== currentTestIdRef.current) {
-                        console.warn('⚠️ 收到的完成事件testId不匹配:', {
+                    // 🔧 修复：放宽testId匹配条件，避免因ID不匹配导致状态不更新
+                    if (data.testId && currentTestIdRef.current && data.testId !== currentTestIdRef.current) {
+                        console.warn('⚠️ testId不匹配，但仍处理完成事件:', {
                             received: data.testId,
                             current: currentTestIdRef.current
                         });
-                        return;
+                        // 不return，继续处理完成事件
                     }
 
-                    // 🔧 使用统一状态管理处理完成状态
+                    // 🔧 使用统一状态管理处理完成状态 - 状态转换验证会自动处理终态保护
                     if (data.results?.status === 'cancelled' || data.status === 'cancelled' || data.results?.cancelled) {
-                        console.log('🛑 测试已取消，设置取消状态');
+                        console.log('🛑 服务器返回取消状态，设置取消状态');
                         updateTestStatus('cancelled', '测试已取消');
+                        setTestProgress('测试已取消');
                     } else if (data.results?.status === 'failed' || data.status === 'failed') {
                         console.log('❌ 测试失败');
                         updateTestStatus('failed', data.results?.error || '测试执行失败');
+                        setTestProgress('测试失败');
                     } else {
                         console.log('✅ 测试正常完成');
                         updateTestStatus('completed', '压力测试完成！');
+                        setTestProgress('压力测试完成！'); // 确保testProgress被设置
                     }
 
                     // 🔧 修复：延迟清空testId，确保不会影响其他操作
@@ -2286,13 +2435,7 @@ const StressTest: React.FC = () => {
                     setIsInRoom(false);
                     setResult(data.results);
 
-                    // 调试：检查接收到的指标数据
-                    console.log('🔍 测试完成 - 检查指标数据:', {
-                        hasResults: !!data.results,
-                        hasMetrics: !!data.results?.metrics,
-                        metricsData: data.results?.metrics,
-                        fullData: data
-                    });
+
 
                     if (data.results?.metrics) {
                         console.log('✅ 设置最终指标:', data.results.metrics);
@@ -2316,7 +2459,8 @@ const StressTest: React.FC = () => {
                     // 更新测试记录 (WebSocket)
                     // 🔧 修复：如果测试已被取消，不要覆盖取消状态
                     if (currentRecord && data.results &&
-                        !(data.results?.status === 'cancelled' || data.status === 'cancelled' || data.results?.cancelled)) {
+                        !(data.results?.status === 'cancelled' || data.status === 'cancelled' || data.results?.cancelled) &&
+                        testStatus !== 'cancelled') { // 🔧 新增：检查前端状态，如果已取消则不更新
                         (async () => {
                             try {
                                 const success = data.results.success !== false;
@@ -2398,7 +2542,7 @@ const StressTest: React.FC = () => {
 
     // ✅ 根本性修复：简化房间管理逻辑，只要有testId和WebSocket连接就加入房间
     useEffect(() => {
-        console.log('🔍 简化房间加入条件检查:', {
+        console.log('🔍 房间加入条件检查:', {
             currentTestId: currentTestId,
             socketConnected: socketRef.current?.connected,
             shouldJoinRoom: !!(currentTestId && socketRef.current?.connected)
@@ -2428,7 +2572,7 @@ const StressTest: React.FC = () => {
         }
 
         return undefined;
-    }, [currentTestId, joinWebSocketRoom]); // 移除testStatus依赖，简化触发条件
+    }, [currentTestId, joinWebSocketRoom]);
 
     // 组件卸载时离开房间
     useEffect(() => {
@@ -2496,14 +2640,46 @@ const StressTest: React.FC = () => {
             if (lastDataPoint) {
                 const timeSinceLastData = now - new Date(lastDataPoint.timestamp).getTime();
 
-                // 🔧 修复：增加检测时间到30秒，避免过于激进的完成检测
-                if (timeSinceLastData > 30000) {
-                    console.log('🔍 检测到数据流停止超过30秒，检查测试状态');
+                // 🔧 修复：根据测试配置动态调整检测时间
+                const testDuration = testConfig.duration || 30;
+                const detectionTimeout = Math.min(testDuration * 0.2, 15000); // 测试时长的20%，最多15秒
+
+                console.log('🔍 数据流检测:', {
+                    timeSinceLastData: timeSinceLastData / 1000 + '秒',
+                    detectionTimeout: detectionTimeout / 1000 + '秒',
+                    testDuration: testDuration + '秒'
+                });
+
+                if (timeSinceLastData > detectionTimeout) {
+                    console.log(`🔍 检测到数据流停止超过${detectionTimeout / 1000}秒，检查测试状态`);
 
                     // 检查测试状态
                     fetch(`/api/stress-test/status/${currentTestId}`)
-                        .then(response => response.json())
+                        .then(response => {
+                            if (response.status === 404) {
+                                // 测试不存在，可能已被清理，检查当前状态决定如何处理
+                                console.log('🔍 测试状态不存在，检查当前状态:', testStatus);
+                                if (testStatus === 'cancelled' || isCancelling) {
+                                    console.log('✅ 保持取消状态');
+                                    setTestStatus('cancelled');
+                                    setTestProgress('测试已取消');
+                                    setIsRunning(false);
+                                    setCurrentTestId(null);
+                                } else {
+                                    // 只有在非取消状态时才设置为完成
+                                    console.log('✅ 设置为完成状态');
+                                    setTestStatus('completed');
+                                    setTestProgress('压力测试完成！');
+                                    setIsRunning(false);
+                                    setCurrentTestId(null);
+                                }
+                                return null;
+                            }
+                            return response.json();
+                        })
                         .then(data => {
+                            if (!data) return; // 404情况已处理
+
                             if (data.success && data.data.status === 'completed') {
                                 console.log('✅ 确认测试已完成');
                                 setTestStatus('completed');
@@ -2534,11 +2710,40 @@ const StressTest: React.FC = () => {
             }
         };
 
-        // 每10秒检查一次，减少检查频率
-        const completionCheckInterval = setInterval(checkTestCompletion, 10000);
+        // 🔧 修复：更频繁的检查，确保及时检测到测试完成
+        const completionCheckInterval = setInterval(checkTestCompletion, 2000); // 每2秒检查一次
+
+        // 🔧 新增：基于测试配置的主动完成检测
+        const expectedTestDuration = (testConfig.duration || 30) + (testConfig.rampUp || 0) +
+            (testConfig.warmupDuration || 0) + (testConfig.cooldownDuration || 0);
+
+        // 使用第一个数据点的时间戳作为测试开始时间的估算
+        const testStartTime = stressTestData.length > 0 ?
+            (typeof stressTestData[0].timestamp === 'string' ?
+                new Date(stressTestData[0].timestamp).getTime() :
+                stressTestData[0].timestamp) :
+            Date.now();
+
+        const expectedEndTime = testStartTime + (expectedTestDuration * 1000) + 15000; // 额外15秒缓冲
+
+        const checkExpectedCompletion = () => {
+            const now = Date.now();
+            if (now > expectedEndTime && isRunning && currentTestId) {
+                console.log('🕐 测试已超过预期结束时间，主动检查状态', {
+                    now: new Date(now).toLocaleTimeString(),
+                    expectedEndTime: new Date(expectedEndTime).toLocaleTimeString(),
+                    testStartTime: new Date(testStartTime).toLocaleTimeString(),
+                    expectedDuration: expectedTestDuration + '秒'
+                });
+                checkTestCompletion();
+            }
+        };
+
+        const expectedCompletionIntervalId = setInterval(checkExpectedCompletion, 3000); // 每3秒检查预期完成时间
 
         return () => {
             clearInterval(completionCheckInterval);
+            clearInterval(expectedCompletionIntervalId);
         };
     }, [isRunning, currentTestId, stressTestData.length, testStatus]); // 添加testStatus依赖
 
@@ -2864,10 +3069,13 @@ const StressTest: React.FC = () => {
         } catch (error: any) {
             console.error('❌ 取消测试失败:', error);
             setError(error.message || '取消测试失败');
-        } finally {
+
+            // 🔧 修复：只有在出错时才立即清理状态，成功时让进度组件处理
             setIsCancelling(false);
             setCancelInProgress(false);
+            setShowCancelProgress(false);
         }
+        // 🔧 修复：移除finally块，让取消进度组件控制状态清理
     };
 
     // 处理取消进度完成
@@ -2915,6 +3123,125 @@ const StressTest: React.FC = () => {
 
         console.log('✅ 强制取消完成');
     }, []);
+
+    // 动态进度计算函数
+    const calculateTestProgress = useCallback(() => {
+        const now = Date.now();
+        let progress = 0;
+        let timeInfo = '';
+        let estimatedRemaining = '';
+
+        switch (testStatus) {
+            case 'idle':
+                progress = 0;
+                timeInfo = '准备开始测试';
+                break;
+
+            case 'starting':
+                progress = 5;
+                timeInfo = '正在启动测试引擎...';
+                break;
+
+            case 'running':
+                if (result?.startTime) {
+                    const startTime = new Date(result.startTime).getTime();
+                    const elapsed = Math.max(0, (now - startTime) / 1000); // 已运行秒数
+                    const totalDuration = testConfig.duration + (testConfig.rampUp || 0) +
+                        (testConfig.warmupDuration || 0) + (testConfig.cooldownDuration || 0);
+
+                    // 进度从5%到95%，避免在运行中显示100%
+                    const timeProgress = Math.min(elapsed / totalDuration, 1);
+                    progress = Math.min(5 + (timeProgress * 90), 95);
+
+                    timeInfo = `已运行 ${Math.floor(elapsed)}秒`;
+
+                    if (timeProgress < 1) {
+                        const remaining = Math.max(0, totalDuration - elapsed);
+                        estimatedRemaining = `预计剩余 ${Math.floor(remaining)}秒`;
+                    }
+                } else {
+                    // 没有开始时间，使用数据点数量估算
+                    const dataPoints = stressTestData.length;
+                    const estimatedTotal = testConfig.users * testConfig.duration;
+                    const dataProgress = Math.min(dataPoints / Math.max(estimatedTotal, 1), 1);
+                    progress = Math.min(5 + (dataProgress * 90), 95);
+                    timeInfo = `已收集 ${dataPoints} 个数据点`;
+                }
+                break;
+
+            case 'completed':
+                progress = 100;
+                if (result?.startTime && result?.endTime) {
+                    const duration = Math.floor((new Date(result.endTime).getTime() - new Date(result.startTime).getTime()) / 1000);
+                    timeInfo = `测试完成，总用时 ${duration}秒`;
+                } else if (result?.startTime) {
+                    const duration = Math.floor((now - new Date(result.startTime).getTime()) / 1000);
+                    timeInfo = `测试完成，总用时 ${duration}秒`;
+                } else {
+                    timeInfo = '测试已完成';
+                }
+                break;
+
+            case 'cancelled':
+                // 保持当前进度，不回退到0
+                if (result?.startTime) {
+                    const startTime = new Date(result.startTime).getTime();
+                    const elapsed = Math.max(0, (now - startTime) / 1000);
+                    const totalDuration = testConfig.duration + (testConfig.rampUp || 0) +
+                        (testConfig.warmupDuration || 0) + (testConfig.cooldownDuration || 0);
+                    const timeProgress = Math.min(elapsed / totalDuration, 1);
+                    progress = Math.min(5 + (timeProgress * 90), 95);
+                    timeInfo = `测试已取消，运行了 ${Math.floor(elapsed)}秒`;
+                } else {
+                    progress = Math.max(5, stressTestData.length > 0 ? 30 : 5);
+                    timeInfo = '测试已取消';
+                }
+                break;
+
+            case 'failed':
+                // 保持当前进度
+                if (result?.startTime) {
+                    const startTime = new Date(result.startTime).getTime();
+                    const elapsed = Math.max(0, (now - startTime) / 1000);
+                    progress = Math.min(5 + ((elapsed / testConfig.duration) * 90), 95);
+                    timeInfo = `测试失败，运行了 ${Math.floor(elapsed)}秒`;
+                } else {
+                    progress = 5;
+                    timeInfo = '测试启动失败';
+                }
+                break;
+
+            default:
+                progress = 0;
+                timeInfo = '未知状态';
+        }
+
+        return {
+            progress: Math.round(progress),
+            timeInfo,
+            estimatedRemaining
+        };
+    }, [testStatus, testConfig, result, stressTestData.length]);
+
+    // 定期更新进度条（用于动态显示）
+    useEffect(() => {
+        let intervalId: NodeJS.Timeout;
+
+        // 只在测试运行中时启动定时器
+        if (testStatus === 'running') {
+            intervalId = setInterval(() => {
+                // 强制重新渲染以更新进度条
+                // 这会触发calculateTestProgress的重新计算
+                setTestProgress(prev => prev); // 触发重新渲染
+            }, 1000); // 每秒更新一次
+        }
+
+        return () => {
+            if (intervalId) {
+                clearInterval(intervalId);
+            }
+        };
+    }, [testStatus]);
 
     // 导出数据处理函数
     const handleExportData = (data: any) => {
@@ -3164,7 +3491,7 @@ const StressTest: React.FC = () => {
                                         <Loader className="w-3 h-3 animate-spin text-blue-400" />
                                         <span className="text-xs text-blue-300 font-medium">正在启动...</span>
                                     </div>
-                                ) : testStatus === 'running' || isRunning ? (
+                                ) : testStatus === 'running' ? (
                                     <div className="flex items-center space-x-2">
                                         <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-md">
                                             <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
@@ -3172,6 +3499,8 @@ const StressTest: React.FC = () => {
                                                 测试进行中
                                             </span>
                                         </div>
+
+
 
                                         <button
                                             type="button"
@@ -3251,7 +3580,11 @@ const StressTest: React.FC = () => {
                                             <span>重新测试</span>
                                         </button>
                                     </div>
-                                ) : null}
+                                ) : (
+                                    <div className="px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg">
+                                        <span className="text-sm text-red-300">未知状态: {testStatus}</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -3276,83 +3609,88 @@ const StressTest: React.FC = () => {
                             </div>
 
                             {/* 集成的测试进度显示 */}
-                            {(testProgress || backgroundTestInfo) && (
+                            {(testProgress || backgroundTestInfo || testStatus !== 'idle' || ['completed', 'cancelled', 'failed'].includes(testStatus)) && (
                                 <div className="mt-4 pt-4 border-t border-gray-700/50">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <div className="flex items-center space-x-2">
-                                            <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                                            <span className="text-sm font-medium text-white">测试进行中</span>
-                                        </div>
-                                        {backgroundTestInfo && (
-                                            <span className="text-sm text-blue-300 font-medium">
-                                                {Math.round(backgroundTestInfo.progress || 0)}%
-                                            </span>
-                                        )}
-                                    </div>
+                                    {(() => {
+                                        const progressData = calculateTestProgress();
+                                        return (
+                                            <>
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <div className="flex items-center space-x-2">
+                                                        <div className={`w-2 h-2 rounded-full ${testStatus === 'running' ? 'bg-blue-400 animate-pulse' :
+                                                            testStatus === 'completed' ? 'bg-green-400' :
+                                                                testStatus === 'cancelled' ? 'bg-yellow-400' :
+                                                                    testStatus === 'failed' ? 'bg-red-400' :
+                                                                        'bg-gray-400'
+                                                            }`}></div>
+                                                        <span className="text-sm font-medium text-white">
+                                                            {testStatus === 'running' ? '测试进行中' :
+                                                                testStatus === 'completed' ? '测试已完成' :
+                                                                    testStatus === 'cancelled' ? '测试已取消' :
+                                                                        testStatus === 'failed' ? '测试失败' :
+                                                                            testStatus === 'starting' ? '正在启动' : '测试状态'}
+                                                        </span>
+                                                    </div>
+                                                    <span className="text-sm text-blue-300 font-medium">
+                                                        {progressData.progress}%
+                                                    </span>
+                                                </div>
 
-                                    {/* 进度条 */}
-                                    {backgroundTestInfo && (
-                                        <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
-                                            <div
-                                                className={`test-progress-dynamic h-2 rounded-full transition-all duration-300 ${backgroundTestInfo.progress >= 100 ? 'progress-100' :
-                                                    backgroundTestInfo.progress >= 95 ? 'progress-95' :
-                                                        backgroundTestInfo.progress >= 90 ? 'progress-90' :
-                                                            backgroundTestInfo.progress >= 85 ? 'progress-85' :
-                                                                backgroundTestInfo.progress >= 80 ? 'progress-80' :
-                                                                    backgroundTestInfo.progress >= 75 ? 'progress-75' :
-                                                                        backgroundTestInfo.progress >= 70 ? 'progress-70' :
-                                                                            backgroundTestInfo.progress >= 65 ? 'progress-65' :
-                                                                                backgroundTestInfo.progress >= 60 ? 'progress-60' :
-                                                                                    backgroundTestInfo.progress >= 55 ? 'progress-55' :
-                                                                                        backgroundTestInfo.progress >= 50 ? 'progress-50' :
-                                                                                            backgroundTestInfo.progress >= 45 ? 'progress-45' :
-                                                                                                backgroundTestInfo.progress >= 40 ? 'progress-40' :
-                                                                                                    backgroundTestInfo.progress >= 35 ? 'progress-35' :
-                                                                                                        backgroundTestInfo.progress >= 30 ? 'progress-30' :
-                                                                                                            backgroundTestInfo.progress >= 25 ? 'progress-25' :
-                                                                                                                backgroundTestInfo.progress >= 20 ? 'progress-20' :
-                                                                                                                    backgroundTestInfo.progress >= 15 ? 'progress-15' :
-                                                                                                                        backgroundTestInfo.progress >= 10 ? 'progress-10' :
-                                                                                                                            backgroundTestInfo.progress >= 5 ? 'progress-5' : 'progress-0'
-                                                    }`}
-                                                style={{ '--progress-width': `${backgroundTestInfo.progress || 0}%` } as React.CSSProperties}
-                                            />
-                                        </div>
-                                    )}
+                                                {/* 动态进度条 - 始终显示 */}
+                                                <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+                                                    <div
+                                                        className={`test-progress-dynamic h-2 rounded-full transition-all duration-300 ${progressData.progress >= 100 ? 'progress-100' :
+                                                            progressData.progress >= 95 ? 'progress-95' :
+                                                                progressData.progress >= 90 ? 'progress-90' :
+                                                                    progressData.progress >= 85 ? 'progress-85' :
+                                                                        progressData.progress >= 80 ? 'progress-80' :
+                                                                            progressData.progress >= 75 ? 'progress-75' :
+                                                                                progressData.progress >= 70 ? 'progress-70' :
+                                                                                    progressData.progress >= 65 ? 'progress-65' :
+                                                                                        progressData.progress >= 60 ? 'progress-60' :
+                                                                                            progressData.progress >= 55 ? 'progress-55' :
+                                                                                                progressData.progress >= 50 ? 'progress-50' :
+                                                                                                    progressData.progress >= 45 ? 'progress-45' :
+                                                                                                        progressData.progress >= 40 ? 'progress-40' :
+                                                                                                            progressData.progress >= 35 ? 'progress-35' :
+                                                                                                                progressData.progress >= 30 ? 'progress-30' :
+                                                                                                                    progressData.progress >= 25 ? 'progress-25' :
+                                                                                                                        progressData.progress >= 20 ? 'progress-20' :
+                                                                                                                            progressData.progress >= 15 ? 'progress-15' :
+                                                                                                                                progressData.progress >= 10 ? 'progress-10' :
+                                                                                                                                    progressData.progress >= 5 ? 'progress-5' : 'progress-0'
+                                                            }`}
+                                                        style={{ width: `${progressData.progress}%` }}
+                                                    />
+                                                </div>
 
-                                    {/* 进度描述 */}
-                                    {(testProgress || backgroundTestInfo?.status) && (
-                                        <div className="text-xs text-gray-400 mb-2">
-                                            {backgroundTestInfo?.status || testProgress}
-                                        </div>
-                                    )}
+                                                {/* 进度描述 */}
+                                                <div className="text-xs text-gray-400 mb-2">
+                                                    {progressData.timeInfo}
+                                                </div>
 
-                                    {/* 测试时间信息 */}
-                                    {backgroundTestInfo && backgroundTestInfo.startTime && (
-                                        <div className="flex items-center space-x-3 text-xs text-gray-400 mb-2">
-                                            <div className="flex items-center space-x-1">
-                                                <Clock className="w-3 h-3" />
-                                                <span>开始: {new Date(backgroundTestInfo.startTime).toLocaleTimeString()}</span>
-                                            </div>
-                                            <span>•</span>
-                                            <span>
-                                                运行: {Math.floor((Date.now() - new Date(backgroundTestInfo.startTime).getTime()) / 1000)}秒
-                                            </span>
-                                        </div>
-                                    )}
+                                                {/* 预计剩余时间 */}
+                                                {progressData.estimatedRemaining && (
+                                                    <div className="text-xs text-blue-300 mb-2">
+                                                        {progressData.estimatedRemaining}
+                                                    </div>
+                                                )}
 
-                                    {/* 后台运行提示 */}
-                                    {testStatus === 'running' && canSwitchPages && (
-                                        <div className="mt-2 p-2 bg-green-500/10 border border-green-500/20 rounded-md">
-                                            <div className="flex items-center space-x-1.5">
-                                                <CheckCircle className="w-3 h-3 text-green-400" />
-                                                <span className="text-xs text-green-300 font-medium">后台运行模式</span>
-                                            </div>
-                                            <p className="text-xs text-green-200 mt-0.5">
-                                                测试正在后台运行，您可以自由切换到其他页面，测试不会中断。
-                                            </p>
-                                        </div>
-                                    )}
+                                                {/* 后台运行提示 */}
+                                                {testStatus === 'running' && canSwitchPages && (
+                                                    <div className="mt-2 p-2 bg-green-500/10 border border-green-500/20 rounded-md">
+                                                        <div className="flex items-center space-x-1.5">
+                                                            <CheckCircle className="w-3 h-3 text-green-400" />
+                                                            <span className="text-xs text-green-300 font-medium">后台运行模式</span>
+                                                        </div>
+                                                        <p className="text-xs text-green-200 mt-0.5">
+                                                            测试正在后台运行，您可以自由切换到其他页面，测试不会中断。
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </>
+                                        );
+                                    })()}
                                 </div>
                             )}
 
@@ -4053,7 +4391,7 @@ const StressTest: React.FC = () => {
                                     </div>
                                     <div className="text-center p-3 bg-orange-500/20 rounded-lg border border-orange-500/30">
                                         <div className="text-xl font-bold text-orange-400">
-                                            {result?.metrics?.averageResponseTime || metrics?.averageResponseTime || 0}ms
+                                            {(result?.metrics?.averageResponseTime || metrics?.averageResponseTime || 0).toFixed(3)}ms
                                         </div>
                                         <div className="text-xs text-orange-300">平均响应时间</div>
                                     </div>
@@ -4321,12 +4659,10 @@ const StressTest: React.FC = () => {
                                     </div>
                                 </div>
                                 <UnifiedStressTestCharts
-                                    testStatus={testStatus}
-                                    testData={unifiedTestData}
-                                    testConfig={testConfig}
+                                    realTimeData={convertToEnhancedRealTimeData(unifiedTestData.realTimeData)}
+                                    isRunning={testStatus === 'running'}
+                                    testCompleted={testStatus === 'completed'}
                                     height={500}
-                                    onExportData={handleExportData}
-                                    onSaveAsBaseline={handleSaveAsBaseline}
                                 />
                             </div>
                         ) : (
@@ -4363,12 +4699,23 @@ const StressTest: React.FC = () => {
                                                 实时数据图表 (数据点: {stressTestData.length})
                                                 {isRunning && <span className="ml-2 text-green-400">● 运行中</span>}
                                             </div>
-                                            <RealTimeStressChart
-                                                data={convertToStressTestDataPoint(stressTestData)}
-                                                isRunning={isRunning}
-                                                testConfig={testConfig}
-                                                height={400}
-                                            />
+                                            {(() => {
+                                                const enhancedData = convertToEnhancedRealTimeData(stressTestData);
+                                                console.log('🔧 调试：传递给图表的数据:', {
+                                                    originalData: stressTestData.slice(0, 2),
+                                                    enhancedData: enhancedData.slice(0, 2),
+                                                    isRunning,
+                                                    testCompleted: !isRunning && (result || testStatus === 'completed')
+                                                });
+                                                return (
+                                                    <UnifiedStressTestCharts
+                                                        realTimeData={enhancedData}
+                                                        isRunning={isRunning}
+                                                        testCompleted={!isRunning && (result || testStatus === 'completed')}
+                                                        height={400}
+                                                    />
+                                                );
+                                            })()}
                                         </div>
                                     ) : isRunning ? (
                                         /* 测试运行中但还没有数据时的占位图表 */
@@ -4386,27 +4733,7 @@ const StressTest: React.FC = () => {
                                                     <div className="text-gray-500 text-xs mb-4">
                                                         数据点: {stressTestData.length} | WebSocket: {socketRef.current?.connected ? '已连接' : '未连接'}
                                                     </div>
-                                                    {/* 临时调试按钮 */}
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            // 添加模拟数据点用于测试
-                                                            const mockDataPoint = {
-                                                                timestamp: Date.now(),
-                                                                responseTime: Math.random() * 200 + 50,
-                                                                activeUsers: testConfig.users,
-                                                                throughput: Math.random() * 10 + 5,
-                                                                errorRate: Math.random() * 5,
-                                                                success: true
-                                                            };
-                                                            // 🔧 使用统一的数据更新函数
-                                                            updateChartData([mockDataPoint], true);
-                                                            console.log('🧪 添加模拟数据点:', mockDataPoint);
-                                                        }}
-                                                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm"
-                                                    >
-                                                        🧪 添加测试数据
-                                                    </button>
+
                                                 </div>
                                             </div>
                                         </div>
@@ -4537,11 +4864,48 @@ const StressTest: React.FC = () => {
                 onCancel={handleCancelDialogClose}
                 onConfirm={handleCancelConfirm}
                 testProgress={isRunning ? {
-                    duration: Math.floor((Date.now() - (result?.startTime ? new Date(result.startTime).getTime() : Date.now())) / 1000),
+                    duration: (() => {
+                        // 🔧 修复：正确计算运行时长
+                        if (result?.startTime) {
+                            return Math.floor((Date.now() - new Date(result.startTime).getTime()) / 1000);
+                        }
+                        // 如果没有startTime，使用第一个数据点的时间戳
+                        if (stressTestData.length > 0) {
+                            const firstDataTime = typeof stressTestData[0].timestamp === 'string'
+                                ? new Date(stressTestData[0].timestamp).getTime()
+                                : stressTestData[0].timestamp;
+                            return Math.floor((Date.now() - firstDataTime) / 1000);
+                        }
+                        // 都没有的话，返回0
+                        return 0;
+                    })(),
                     completedRequests: stressTestData.length,
-                    totalRequests: testConfig.users * testConfig.duration,
+                    // 🔧 修复：保留请求数显示，但进度计算改为基于时间
+                    totalRequests: (() => {
+                        const currentDuration = Math.floor((Date.now() - (result?.startTime ? new Date(result.startTime).getTime() : Date.now())) / 1000);
+                        const completedRequests = stressTestData.length;
+
+                        // 如果测试刚开始（前10秒），使用理论估算
+                        if (currentDuration < 10 || completedRequests < 20) {
+                            // 理论值：每个用户每秒大约1个请求
+                            return Math.round(testConfig.users * testConfig.duration);
+                        }
+
+                        // 测试进行中，基于当前实际TPS估算
+                        const currentTPS = completedRequests / currentDuration;
+                        const estimatedTotal = Math.round(currentTPS * testConfig.duration);
+
+                        // 确保估算值合理：不能小于已完成的请求数
+                        return Math.max(estimatedTotal, completedRequests);
+                    })(),
                     currentUsers: testConfig.users,
-                    phase: testProgress || '运行中'
+                    // 🔧 新增：添加总测试时长，用于基于时间的进度计算
+                    totalDuration: testConfig.duration,
+                    // 🔧 修复：显示更合适的阶段信息，而不是包含百分比的testProgress
+                    phase: currentStatus === 'RUNNING' ? '压力测试运行中' :
+                        currentStatus === 'STARTING' ? '测试启动中' :
+                            currentStatus === 'WAITING' ? '等待开始' :
+                                '运行中'
                 } : undefined}
                 isLoading={cancelInProgress}
             />

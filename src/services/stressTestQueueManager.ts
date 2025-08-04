@@ -9,15 +9,15 @@ export interface QueuedTest {
   url: string;
   config: any;
   priority: 'high' | 'normal' | 'low';
-  testType?: 'stress' | 'website' | 'seo' | 'security' | 'performance' | 'api'; 
+  testType?: 'stress' | 'website' | 'seo' | 'security' | 'performance' | 'api';
   userId?: string;
   queuedAt: Date;
-  startTime?: Date; 
+  startTime?: Date;
   estimatedDuration: number; // 预估测试时长（秒）
   retryCount: number;
   maxRetries: number;
   status: 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled';
-  progress?: number; 
+  progress?: number;
   onProgress?: (progress: number, message: string) => void;
   onComplete?: (result: any) => void;
   onError?: (error: Error) => void;
@@ -133,7 +133,7 @@ class StressTestQueueManager {
     // 更新测试记录状态为准备中（排队等待）
     try {
       await stressTestRecordService.updateTestRecord(testData.recordId, {
-        status: 'pending',
+        status: 'idle', // 🔧 简化：使用idle作为排队状态
         waitingReason: `排队等待执行 (队列位置: ${this.getQueuePosition(queuedTest.id)})`,
         updatedAt: new Date().toISOString()
       });

@@ -880,9 +880,22 @@ class RealStressTestEngine {
 
     results.realTimeData.push(dataPoint);
 
-    // 限制实时数据数组大小
-    if (results.realTimeData.length > 1000) {
-      results.realTimeData.shift();
+    // 🔧 修复：动态计算数据点限制，确保完整测试数据不被截断
+    const testDurationSeconds = results.config?.duration || 30;
+    const userCount = results.config?.users || 1;
+    const rampUpTime = results.config?.rampUpTime || 0;
+
+    // 计算预期的总数据点数：测试时长 × 用户数 × 每用户每秒平均请求数
+    const totalTestTime = testDurationSeconds + rampUpTime + 30; // 额外30秒缓冲
+    const expectedDataPoints = totalTestTime * userCount * 3; // 每用户每秒最多3个数据点
+    const maxDataPoints = Math.max(expectedDataPoints, 5000); // 至少保留5000个数据点
+
+    // 只有在数据点数量远超预期时才进行截断（保留策略更宽松）
+    if (results.realTimeData.length > maxDataPoints * 1.5) {
+      // 删除最早的25%数据，而不是逐个删除
+      const removeCount = Math.floor(results.realTimeData.length * 0.25);
+      results.realTimeData.splice(0, removeCount);
+      Logger.info(`数据点过多，删除最早的 ${removeCount} 个数据点，当前保留: ${results.realTimeData.length}`);
     }
 
     // 广播实时数据
@@ -1122,6 +1135,12 @@ class RealStressTestEngine {
       }
 
       Logger.info(`✅ 压力测试 ${testId} 已成功取消`);
+
+      // 🔧 修复：延迟清理取消状态，确保前端有时间查询到正确状态
+      setTimeout(() => {
+        this.removeTestStatus(testId);
+        Logger.debug(`已清理取消的测试状态: ${testId}`);
+      }, 60000); // 60秒后清理，给前端足够时间查询状态
 
       return {
         success: true,

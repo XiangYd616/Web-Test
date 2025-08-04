@@ -144,7 +144,7 @@ export interface TestManagement {
   url: string;
   userId: string;
   username: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
+  status: 'idle' | 'starting' | 'running' | 'completed' | 'failed' | 'cancelled';
   createdAt: string;
   completedAt?: string;
   duration?: number;

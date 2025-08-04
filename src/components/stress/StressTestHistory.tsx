@@ -2,7 +2,6 @@ import { Activity, BarChart3, Download, ExternalLink, Eye, RefreshCw, Search, Tr
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { useTheme } from '../../contexts/ThemeContext';
 import {
   calculateTestCompletion,
   getStatusConfig,
@@ -19,7 +18,7 @@ interface TestRecord {
   testName: string;
   testType: string;
   url: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  status: 'idle' | 'starting' | 'running' | 'completed' | 'failed' | 'cancelled';
   startTime?: string;
   endTime?: string;
   duration?: number;
@@ -45,66 +44,13 @@ interface StressTestHistoryProps {
 }
 
 const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' }) => {
-  // 开发环境下显示组件测试
-  if (process.env.NODE_ENV === 'development') {
-    if (window.location.search.includes('test-card')) {
-      const { CardTest } = require('../ui/CardTest');
-      return <CardTest />;
-    }
-    if (window.location.search.includes('test-modal')) {
-      const { ModalTest } = require('../ui/ModalTest');
-      return <ModalTest />;
-    }
-    if (window.location.search.includes('test-input')) {
-      const { InputTest } = require('../ui/InputTest');
-      return <InputTest />;
-    }
-    if (window.location.search.includes('test-badge')) {
-      const { BadgeTest } = require('../ui/BadgeTest');
-      return <BadgeTest />;
-    }
-    if (window.location.search.includes('test-all')) {
-      const { ComponentLibraryTest } = require('../ui/ComponentLibraryTest');
-      return <ComponentLibraryTest />;
-    }
-    if (window.location.search.includes('test-nav')) {
-      const { TestNavigation } = require('../ui/TestNavigation');
-      return <TestNavigation />;
-    }
-    if (window.location.search.includes('migrated')) {
-      const StressTestHistoryMigrated = require('./StressTestHistoryMigrated').default;
-      return <StressTestHistoryMigrated />;
-    }
-    if (window.location.search.includes('migration-compare')) {
-      const { MigrationComparison } = require('../ui/MigrationComparison');
-      return <MigrationComparison />;
-    }
-    if (window.location.search.includes('seo-migrated')) {
-      const SEOTestMigrated = require('../../pages/SEOTestMigrated').default;
-      return <SEOTestMigrated />;
-    }
-    if (window.location.search.includes('security-migrated')) {
-      const SecurityTestMigrated = require('../../pages/SecurityTestMigrated').default;
-      return <SecurityTestMigrated />;
-    }
-    if (window.location.search.includes('performance-migrated')) {
-      const PerformanceTestMigrated = require('../../pages/PerformanceTestMigrated').default;
-      return <PerformanceTestMigrated />;
-    }
-    if (window.location.search.includes('test-pages-migration')) {
-      const { TestPageMigrationComparison } = require('../ui/TestPageMigrationComparison');
-      return <TestPageMigrationComparison />;
-    }
-  }
+
 
   // 路由导航
   const navigate = useNavigate();
 
   // 认证状态
-  const { isAuthenticated, user } = useAuth();
-
-  // 主题钩子
-  const { actualTheme } = useTheme();
+  const { isAuthenticated } = useAuth();
 
   // 状态管理
   const [records, setRecords] = useState<TestRecord[]>([]);
@@ -313,8 +259,10 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
         return 'status-label-running';
       case 'cancelled':
         return 'status-label-cancelled';
-      case 'pending':
-        return 'status-label-pending';
+      case 'idle':
+        return 'status-label-idle';
+      case 'starting':
+        return 'status-label-starting';
       default:
         return 'status-label-default';
     }
@@ -351,7 +299,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
   // 格式化持续时间
   const formatDuration = (record: TestRecord) => {
     // 🔧 修复：对于运行中的测试，不显示时长，避免显示配置时长造成混淆
-    if (record.status === 'running' || record.status === 'pending') {
+    if (record.status === 'running' || record.status === 'starting') { // 🔧 简化：使用starting替代pending
       return '-';
     }
 
@@ -990,7 +938,8 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
                 <option value="failed">{getStatusText('failed')}</option>
                 <option value="running">{getStatusText('running')}</option>
                 <option value="cancelled">{getStatusText('cancelled')}</option>
-                <option value="pending">{getStatusText('pending')}</option>
+                <option value="idle">{getStatusText('idle')}</option>
+                <option value="starting">{getStatusText('starting')}</option>
               </select>
             </div>
 
