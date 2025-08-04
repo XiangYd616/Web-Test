@@ -3416,12 +3416,35 @@ const StressTest: React.FC = () => {
         }
     };
 
+    // 获取国旗emoji
+    const getCountryFlag = (countryCode?: string): string => {
+        if (!countryCode) return '🌍';
+
+        // 将国家代码转换为国旗emoji
+        const codePoints = countryCode
+            .toUpperCase()
+            .split('')
+            .map(char => 127397 + char.charCodeAt(0));
+
+        return String.fromCodePoint(...codePoints);
+    };
+
     // 代理测试状态
     const [proxyTestStatus, setProxyTestStatus] = useState<{
         testing: boolean;
         result: 'success' | 'error' | null;
         message: string;
-        details?: { proxyServer?: string; proxyIp?: string; responseTime?: number };
+        details?: {
+            proxyIp?: string;
+            location?: {
+                country?: string;
+                countryCode?: string;
+                region?: string;
+                city?: string;
+                timezone?: string;
+            };
+            responseTime?: number;
+        };
     }>({
         testing: false,
         result: null,
@@ -3475,8 +3498,8 @@ const StressTest: React.FC = () => {
                     result: 'success',
                     message: '代理连接测试成功',
                     details: {
-                        proxyServer: result.proxyServer || `${testConfig.proxy.host}:${testConfig.proxy.port || 8080}`,
                         proxyIp: result.proxyIp,
+                        location: result.location,
                         responseTime: result.responseTime
                     }
                 });
@@ -4389,11 +4412,19 @@ const StressTest: React.FC = () => {
                                                                     <span>{proxyTestStatus.message}</span>
                                                                     {proxyTestStatus.details && (
                                                                         <div className="flex flex-col space-y-1 text-gray-400">
-                                                                            {proxyTestStatus.details.proxyServer && (
-                                                                                <span>代理服务器: {proxyTestStatus.details.proxyServer}</span>
+                                                                            {proxyTestStatus.details.location && (
+                                                                                <div className="flex items-center space-x-2">
+                                                                                    <span className="text-lg">
+                                                                                        {getCountryFlag(proxyTestStatus.details.location.countryCode)}
+                                                                                    </span>
+                                                                                    <span>
+                                                                                        {proxyTestStatus.details.location.region || proxyTestStatus.details.location.country}
+                                                                                        {proxyTestStatus.details.location.city && `/${proxyTestStatus.details.location.city}`}
+                                                                                    </span>
+                                                                                </div>
                                                                             )}
                                                                             {proxyTestStatus.details.proxyIp && (
-                                                                                <span>出口IP: {proxyTestStatus.details.proxyIp}</span>
+                                                                                <span>{proxyTestStatus.details.proxyIp}</span>
                                                                             )}
                                                                             <span>响应时间: {proxyTestStatus.details.responseTime}ms</span>
                                                                         </div>
