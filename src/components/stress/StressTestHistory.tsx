@@ -1230,17 +1230,17 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
                     显示 {startRecord}-{endRecord} 条，共 {totalRecords} 条记录
                   </span>
                   <div className="flex items-center gap-2">
-                    <label htmlFor="pageSize" className="text-sm">每页显示:</label>
+                    <label htmlFor="pageSize" className="text-sm text-gray-300">每页显示:</label>
                     <select
                       id="pageSize"
                       value={pageSize}
                       onChange={(e) => changePageSize(Number(e.target.value))}
-                      className="px-2 py-1 text-sm border border-gray-600/40 rounded bg-gray-700/30 backdrop-blur-sm text-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
+                      className="px-3 py-1.5 text-sm border border-gray-600 rounded-md bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[70px]"
                     >
-                      <option value={5}>5</option>
-                      <option value={10}>10</option>
-                      <option value={20}>20</option>
-                      <option value={50}>50</option>
+                      <option value={5} className="bg-gray-700 text-white">5 条</option>
+                      <option value={10} className="bg-gray-700 text-white">10 条</option>
+                      <option value={20} className="bg-gray-700 text-white">20 条</option>
+                      <option value={50} className="bg-gray-700 text-white">50 条</option>
                     </select>
                   </div>
                 </div>

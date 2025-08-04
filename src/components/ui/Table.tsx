@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { ChevronUp, ChevronDown, Search, Filter, MoreHorizontal } from 'lucide-react';
+import { ChevronDown, ChevronUp, Filter } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
 import { cn } from '../../utils/cn';
 
 // 表格列定义接口
@@ -437,16 +437,19 @@ const TablePagination: React.FC<TablePaginationProps> = ({
 
       <div className="flex items-center gap-2">
         {showSizeChanger && (
-          <select
-            value={pageSize}
-            onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-            className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-          >
-            <option value={10}>10 条/页</option>
-            <option value={20}>20 条/页</option>
-            <option value={50}>50 条/页</option>
-            <option value={100}>100 条/页</option>
-          </select>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-gray-700 dark:text-gray-300">每页显示:</span>
+            <select
+              value={pageSize}
+              onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+              className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[70px]"
+            >
+              <option value={10} className="dark:bg-gray-700 dark:text-white">10 条</option>
+              <option value={20} className="dark:bg-gray-700 dark:text-white">20 条</option>
+              <option value={50} className="dark:bg-gray-700 dark:text-white">50 条</option>
+              <option value={100} className="dark:bg-gray-700 dark:text-white">100 条</option>
+            </select>
+          </div>
         )}
 
         <div className="flex items-center gap-1">
