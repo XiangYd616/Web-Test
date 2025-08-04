@@ -3280,6 +3280,13 @@ router.get('/:engine/status', asyncHandler(async (req, res) => {
   }
 }));
 
+// IP地理位置缓存 - 避免重复查询
+const ipLocationCache = new Map();
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24小时缓存
+
+// 引入地理位置服务
+const geoLocationService = require('../services/geoLocationService');
+
 /**
  * 代理连接测试
  * POST /api/test/proxy-test
@@ -3357,26 +3364,17 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
       proxyIp = responseData.origin;
     }
 
-    // 查询IP地理位置信息
+    // 查询IP地理位置信息（使用 MaxMind 或 API 备选）
     let locationInfo = null;
     if (proxyIp && proxyIp !== '未知') {
       try {
-        // 使用免费的IP地理位置API
-        const geoResponse = await fetch(`http://ip-api.com/json/${proxyIp}?fields=status,country,countryCode,region,city,timezone`);
-        if (geoResponse.ok) {
-          const geoData = await geoResponse.json();
-          if (geoData.status === 'success') {
-            locationInfo = {
-              country: geoData.country,
-              countryCode: geoData.countryCode,
-              region: geoData.region,
-              city: geoData.city,
-              timezone: geoData.timezone
-            };
-          }
+        locationInfo = await geoLocationService.getLocation(proxyIp);
+        if (locationInfo) {
+          console.log(`📍 IP ${proxyIp} 位置: ${locationInfo.country}/${locationInfo.region} (${locationInfo.source})`);
         }
       } catch (geoError) {
-        console.warn('获取IP地理位置信息失败:', geoError);
+        console.warn('获取IP地理位置信息失败:', geoError.message);
+        // 地理位置查询失败不影响代理测试结果
       }
     }
 
@@ -3423,6 +3421,27 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
       timestamp: new Date().toISOString()
     });
   }
+}));
+
+/**
+ * 地理位置服务状态
+ * GET /api/test/geo-status
+ */
+router.get('/geo-status', optionalAuth, asyncHandler(async (req, res) => {
+  const status = geoLocationService.getStatus();
+
+  res.json({
+    success: true,
+    status: status,
+    message: status.useLocalDB ?
+      'MaxMind 本地数据库已启用' :
+      'API 查询模式（建议下载本地数据库）',
+    recommendations: status.useLocalDB ? [] : [
+      '运行 npm run download-geodb 下载本地数据库',
+      '设置 MAXMIND_LICENSE_KEY 环境变量',
+      '重启服务器以启用本地查询'
+    ]
+  });
 }));
 
 module.exports = router;
