@@ -3416,12 +3416,34 @@ const StressTest: React.FC = () => {
         }
     };
 
+    // 代理测试状态
+    const [proxyTestStatus, setProxyTestStatus] = useState<{
+        testing: boolean;
+        result: 'success' | 'error' | null;
+        message: string;
+        details?: { proxyServer?: string; proxyIp?: string; responseTime?: number };
+    }>({
+        testing: false,
+        result: null,
+        message: ''
+    });
+
     // 测试代理连接
     const testProxyConnection = async () => {
         if (!testConfig.proxy?.enabled || !testConfig.proxy?.host) {
-            alert('请先配置代理设置');
+            setProxyTestStatus({
+                testing: false,
+                result: 'error',
+                message: '请先配置代理设置'
+            });
             return;
         }
+
+        setProxyTestStatus({
+            testing: true,
+            result: null,
+            message: '正在测试代理连接...'
+        });
 
         try {
             const response = await fetch('/api/test/proxy-test', {
@@ -3448,13 +3470,47 @@ const StressTest: React.FC = () => {
             const result = await response.json();
 
             if (result.success) {
-                alert(`代理连接测试成功！\n代理IP: ${result.proxyIp || '未知'}\n响应时间: ${result.responseTime || 0}ms`);
+                setProxyTestStatus({
+                    testing: false,
+                    result: 'success',
+                    message: '代理连接测试成功',
+                    details: {
+                        proxyServer: result.proxyServer || `${testConfig.proxy.host}:${testConfig.proxy.port || 8080}`,
+                        proxyIp: result.proxyIp,
+                        responseTime: result.responseTime
+                    }
+                });
+                // 成功状态不自动清除，让用户手动查看
             } else {
-                alert(`代理连接测试失败：${result.message || '未知错误'}`);
+                setProxyTestStatus({
+                    testing: false,
+                    result: 'error',
+                    message: result.message || '代理连接测试失败'
+                });
+                // 错误状态5秒后自动清除
+                setTimeout(() => {
+                    setProxyTestStatus({
+                        testing: false,
+                        result: null,
+                        message: ''
+                    });
+                }, 5000);
             }
         } catch (error) {
             console.error('代理测试失败:', error);
-            alert(`代理连接测试失败：${error instanceof Error ? error.message : '网络错误'}`);
+            setProxyTestStatus({
+                testing: false,
+                result: 'error',
+                message: error instanceof Error ? error.message : '网络连接错误'
+            });
+            // 错误状态5秒后自动清除
+            setTimeout(() => {
+                setProxyTestStatus({
+                    testing: false,
+                    result: null,
+                    message: ''
+                });
+            }, 5000);
         }
     };
 
@@ -4287,7 +4343,7 @@ const StressTest: React.FC = () => {
 
                                                     {/* 代理状态提示和测试 */}
                                                     <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
-                                                        <div className="flex items-center justify-between">
+                                                        <div className="flex items-center justify-between mb-2">
                                                             <div className="flex items-center space-x-2">
                                                                 <Shield className="w-4 h-4 text-blue-400" />
                                                                 <span className="text-blue-300 text-xs">
@@ -4297,12 +4353,67 @@ const StressTest: React.FC = () => {
                                                             <button
                                                                 type="button"
                                                                 onClick={() => testProxyConnection()}
-                                                                className="px-2 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+                                                                disabled={proxyTestStatus.testing}
+                                                                className={`px-2 py-1 text-xs rounded transition-colors ${proxyTestStatus.testing
+                                                                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                                                                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                                                                    }`}
                                                                 title="测试代理连接"
                                                             >
-                                                                测试连接
+                                                                {proxyTestStatus.testing ? '测试中...' : '测试连接'}
                                                             </button>
                                                         </div>
+
+                                                        {/* 代理测试结果显示 */}
+                                                        {(proxyTestStatus.result || proxyTestStatus.testing) && (
+                                                            <div className={`flex items-center justify-between text-xs p-2 rounded ${proxyTestStatus.result === 'success'
+                                                                ? 'bg-green-500/10 border border-green-500/30 text-green-300'
+                                                                : proxyTestStatus.result === 'error'
+                                                                    ? 'bg-red-500/10 border border-red-500/30 text-red-300'
+                                                                    : 'bg-blue-500/10 border border-blue-500/30 text-blue-300'
+                                                                }`}>
+                                                                <div className="flex items-center space-x-2">
+                                                                    {proxyTestStatus.testing && (
+                                                                        <div className="animate-spin w-3 h-3 border border-blue-400 border-t-transparent rounded-full"></div>
+                                                                    )}
+                                                                    {proxyTestStatus.result === 'success' && (
+                                                                        <svg className="w-3 h-3 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                                        </svg>
+                                                                    )}
+                                                                    {proxyTestStatus.result === 'error' && (
+                                                                        <svg className="w-3 h-3 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                                                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                                        </svg>
+                                                                    )}
+                                                                    <span>{proxyTestStatus.message}</span>
+                                                                    {proxyTestStatus.details && (
+                                                                        <div className="flex flex-col space-y-1 text-gray-400">
+                                                                            {proxyTestStatus.details.proxyServer && (
+                                                                                <span>代理服务器: {proxyTestStatus.details.proxyServer}</span>
+                                                                            )}
+                                                                            {proxyTestStatus.details.proxyIp && (
+                                                                                <span>出口IP: {proxyTestStatus.details.proxyIp}</span>
+                                                                            )}
+                                                                            <span>响应时间: {proxyTestStatus.details.responseTime}ms</span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                {/* 关闭按钮 - 只在成功状态显示 */}
+                                                                {proxyTestStatus.result === 'success' && (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => setProxyTestStatus({ testing: false, result: null, message: '' })}
+                                                                        className="ml-2 text-gray-400 hover:text-gray-200 transition-colors"
+                                                                        title="关闭"
+                                                                    >
+                                                                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                                        </svg>
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             )}
