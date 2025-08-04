@@ -395,7 +395,12 @@ class HttpClient {
             responseTime: responseTime,
             data: data.length,
             headers: response.headers.raw(),
-            proxy: true // 标记这是通过代理的请求
+            proxy: true, // 标记这是通过代理的请求
+            proxyInfo: {
+              host: proxyConfig.host,
+              port: proxyConfig.port,
+              type: proxyConfig.type || 'http'
+            }
           });
         });
       }).catch(error => {

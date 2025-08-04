@@ -3287,6 +3287,7 @@ const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24小时缓存
 // 引入地理位置服务
 const geoLocationService = require('../services/geoLocationService');
 const geoUpdateService = require('../services/geoUpdateService');
+const ProxyValidator = require('../services/proxyValidator');
 
 /**
  * 获取代理故障排除提示
@@ -3595,6 +3596,42 @@ router.put('/geo-config', optionalAuth, asyncHandler(async (req, res) => {
     res.status(500).json({
       success: false,
       message: '配置更新失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 代理分析接口
+ * POST /api/test/proxy-analyze
+ */
+router.post('/proxy-analyze', optionalAuth, asyncHandler(async (req, res) => {
+  try {
+    const { proxy } = req.body;
+
+    if (!proxy || !proxy.host) {
+      return res.status(400).json({
+        success: false,
+        message: '缺少代理配置信息'
+      });
+    }
+
+    console.log('🔍 开始分析代理配置:', `${proxy.host}:${proxy.port}`);
+
+    const validator = new ProxyValidator();
+    const analysis = await validator.analyzeProxy(proxy);
+
+    res.json({
+      success: true,
+      message: '代理分析完成',
+      analysis: analysis
+    });
+
+  } catch (error) {
+    console.error('代理分析失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '代理分析失败',
       error: error.message
     });
   }
