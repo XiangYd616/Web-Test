@@ -266,6 +266,10 @@ const startServer = async () => {
     global.testHistoryService = new TestHistoryService();
     console.log('✅ 测试历史服务初始化成功');
 
+    // 初始化地理位置自动更新服务
+    const geoUpdateService = require('./services/geoUpdateService');
+    console.log('✅ 地理位置自动更新服务初始化成功');
+
     // 设置WebSocket事件处理
     setupWebSocketHandlers(io);
 
@@ -288,6 +292,14 @@ const startServer = async () => {
       console.log(`🏥 健康检查: http://localhost:${PORT}/health`);
       console.log(`🌍 环境: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🔌 WebSocket服务已启动`);
+
+      // 显示地理位置服务状态
+      const geoUpdateService = require('./services/geoUpdateService');
+      const geoStatus = geoUpdateService.getStatus();
+      console.log(`🗺️  地理位置自动更新: ${geoStatus.enabled ? '已启用' : '已禁用'}`);
+      if (geoStatus.enabled) {
+        console.log(`📅 更新计划: ${geoStatus.schedule}`);
+      }
     });
 
     // 优雅关闭

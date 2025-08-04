@@ -30,22 +30,33 @@ export MAXMIND_LICENSE_KEY=your_license_key_here
 
 # 或者在 .env 文件中添加
 MAXMIND_LICENSE_KEY=your_license_key_here
+
+# 可选配置
+GEO_AUTO_UPDATE=true                    # 启用自动更新 (默认: true)
+GEO_UPDATE_SCHEDULE="0 2 * * 3"        # 更新计划 (默认: 每周三凌晨2点)
+GEO_CHECK_STARTUP=true                  # 启动时检查 (默认: true)
+TZ=Asia/Shanghai                        # 时区设置
 ```
 
-### 4. 下载数据库
+### 4. 启动服务器
 
 ```bash
-# 下载 GeoLite2 数据库
+npm start
+```
+
+**程序会自动：**
+- 🔍 检查是否需要下载数据库
+- 📥 自动下载缺失的数据库文件
+- ⏰ 设置定时更新任务
+- 🔄 在后台保持数据库最新
+
+**手动操作（可选）：**
+```bash
+# 手动下载数据库
 npm run download-geodb
 
 # 检查数据库状态
 npm run geodb-status
-```
-
-### 5. 重启服务器
-
-```bash
-npm start
 ```
 
 ## 📊 功能特性

@@ -3286,6 +3286,7 @@ const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24小时缓存
 
 // 引入地理位置服务
 const geoLocationService = require('../services/geoLocationService');
+const geoUpdateService = require('../services/geoUpdateService');
 
 /**
  * 代理连接测试
@@ -3428,20 +3429,81 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
  * GET /api/test/geo-status
  */
 router.get('/geo-status', optionalAuth, asyncHandler(async (req, res) => {
-  const status = geoLocationService.getStatus();
+  const geoStatus = geoLocationService.getStatus();
+  const updateStatus = geoUpdateService.getStatus();
 
   res.json({
     success: true,
-    status: status,
-    message: status.useLocalDB ?
+    geoService: geoStatus,
+    autoUpdate: updateStatus,
+    message: geoStatus.useLocalDB ?
       'MaxMind 本地数据库已启用' :
       'API 查询模式（建议下载本地数据库）',
-    recommendations: status.useLocalDB ? [] : [
-      '运行 npm run download-geodb 下载本地数据库',
-      '设置 MAXMIND_LICENSE_KEY 环境变量',
-      '重启服务器以启用本地查询'
-    ]
+    recommendations: geoStatus.useLocalDB ?
+      (updateStatus.enabled ? [] : ['启用自动更新以保持数据库最新']) :
+      [
+        '设置 MAXMIND_LICENSE_KEY 环境变量',
+        '手动触发数据库下载',
+        '启用自动更新'
+      ]
   });
+}));
+
+/**
+ * 手动触发地理位置数据库更新
+ * POST /api/test/geo-update
+ */
+router.post('/geo-update', optionalAuth, asyncHandler(async (req, res) => {
+  try {
+    console.log('🎯 收到手动更新请求');
+    const success = await geoUpdateService.triggerUpdate();
+
+    res.json({
+      success: success,
+      message: success ? '数据库更新成功' : '数据库更新失败',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('手动更新失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '更新过程中发生错误',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 配置自动更新设置
+ * PUT /api/test/geo-config
+ */
+router.put('/geo-config', optionalAuth, asyncHandler(async (req, res) => {
+  try {
+    const { enabled, schedule } = req.body;
+
+    if (typeof enabled === 'boolean') {
+      geoUpdateService.setEnabled(enabled);
+    }
+
+    if (schedule && typeof schedule === 'string') {
+      geoUpdateService.setSchedule(schedule);
+    }
+
+    const status = geoUpdateService.getStatus();
+
+    res.json({
+      success: true,
+      message: '配置更新成功',
+      status: status
+    });
+  } catch (error) {
+    console.error('配置更新失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '配置更新失败',
+      error: error.message
+    });
+  }
 }));
 
 module.exports = router;
