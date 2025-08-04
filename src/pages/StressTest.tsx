@@ -1,5 +1,5 @@
 
-import { AlertCircle, AlertTriangle, BarChart3, CheckCircle, Clock, Download, FileText, Loader, Play, RotateCcw, Square, TrendingUp, Users, XCircle, Zap } from 'lucide-react';
+import { AlertCircle, AlertTriangle, BarChart3, CheckCircle, Clock, Download, FileText, Globe, Loader, Play, RotateCcw, Shield, Square, TrendingUp, Users, XCircle, Zap } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
@@ -22,7 +22,15 @@ import { getTemplateById } from '../utils/testTemplates';
 
 // 本地配置接口，继承导入的配置
 interface StressTestConfig extends ImportedAdvancedStressTestConfig {
-    // 可以添加额外的本地配置
+    // 代理设置
+    proxy?: {
+        enabled: boolean;
+        type: 'http' | 'https' | 'socks5';
+        host: string;
+        port: number;
+        username?: string;
+        password?: string;
+    };
 }
 
 // 生命周期压力测试配置接口 - 直接使用 StressTestConfig
@@ -4272,13 +4280,166 @@ const StressTest: React.FC = () => {
 
                                         </div>
                                     ) : (
-                                        <div className="bg-gray-900/50 rounded-lg p-4 sm:p-6 lg:p-8 min-h-[200px] flex items-center justify-center">
-                                            <div className="text-center">
-                                                <TrendingUp className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                                                <div className="text-gray-300 font-medium text-xl mb-2">高级压力测试</div>
-                                                <div className="text-gray-500 text-sm">
-                                                    配置测试参数并开始测试
+                                        <div className="bg-gray-900/50 rounded-lg p-4 sm:p-6">
+                                            <div className="flex items-center mb-4">
+                                                <Globe className="w-5 h-5 text-blue-400 mr-2" />
+                                                <h4 className="text-lg font-semibold text-white">代理设置</h4>
+                                            </div>
+
+                                            <div className="space-y-4">
+                                                {/* 启用代理开关 */}
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center space-x-2">
+                                                        <span className="text-gray-300 text-sm">启用代理</span>
+                                                        <div className="text-xs text-gray-500">(可选)</div>
+                                                    </div>
+                                                    <label className="relative inline-flex items-center cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={testConfig.proxy?.enabled || false}
+                                                            onChange={(e) => setTestConfig(prev => ({
+                                                                ...prev,
+                                                                proxy: {
+                                                                    ...prev.proxy,
+                                                                    enabled: e.target.checked
+                                                                }
+                                                            }))}
+                                                            className="sr-only peer"
+                                                            aria-label="启用代理"
+                                                        />
+                                                        <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                                    </label>
                                                 </div>
+
+                                                {/* 代理配置 */}
+                                                {testConfig.proxy?.enabled && (
+                                                    <div className="space-y-3 pl-4 border-l-2 border-blue-500/30">
+                                                        {/* 代理类型 */}
+                                                        <div>
+                                                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                                代理类型
+                                                            </label>
+                                                            <select
+                                                                value={testConfig.proxy?.type || 'http'}
+                                                                onChange={(e) => setTestConfig(prev => ({
+                                                                    ...prev,
+                                                                    proxy: {
+                                                                        ...prev.proxy,
+                                                                        type: e.target.value as 'http' | 'https' | 'socks5'
+                                                                    }
+                                                                }))}
+                                                                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                aria-label="选择代理类型"
+                                                            >
+                                                                <option value="http">HTTP</option>
+                                                                <option value="https">HTTPS</option>
+                                                                <option value="socks5">SOCKS5</option>
+                                                            </select>
+                                                        </div>
+
+                                                        {/* 代理地址 */}
+                                                        <div className="grid grid-cols-3 gap-2">
+                                                            <div className="col-span-2">
+                                                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                                    代理地址
+                                                                </label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={testConfig.proxy?.host || ''}
+                                                                    onChange={(e) => setTestConfig(prev => ({
+                                                                        ...prev,
+                                                                        proxy: {
+                                                                            ...prev.proxy,
+                                                                            host: e.target.value
+                                                                        }
+                                                                    }))}
+                                                                    placeholder="127.0.0.1"
+                                                                    className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                                    端口
+                                                                </label>
+                                                                <input
+                                                                    type="number"
+                                                                    value={testConfig.proxy?.port || ''}
+                                                                    onChange={(e) => setTestConfig(prev => ({
+                                                                        ...prev,
+                                                                        proxy: {
+                                                                            ...prev.proxy,
+                                                                            port: parseInt(e.target.value) || 8080
+                                                                        }
+                                                                    }))}
+                                                                    placeholder="8080"
+                                                                    className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                />
+                                                            </div>
+                                                        </div>
+
+                                                        {/* 认证信息 */}
+                                                        <div className="grid grid-cols-2 gap-2">
+                                                            <div>
+                                                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                                    用户名 (可选)
+                                                                </label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={testConfig.proxy?.username || ''}
+                                                                    onChange={(e) => setTestConfig(prev => ({
+                                                                        ...prev,
+                                                                        proxy: {
+                                                                            ...prev.proxy,
+                                                                            username: e.target.value
+                                                                        }
+                                                                    }))}
+                                                                    placeholder="用户名"
+                                                                    className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                                    密码 (可选)
+                                                                </label>
+                                                                <input
+                                                                    type="password"
+                                                                    value={testConfig.proxy?.password || ''}
+                                                                    onChange={(e) => setTestConfig(prev => ({
+                                                                        ...prev,
+                                                                        proxy: {
+                                                                            ...prev.proxy,
+                                                                            password: e.target.value
+                                                                        }
+                                                                    }))}
+                                                                    placeholder="密码"
+                                                                    className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                />
+                                                            </div>
+                                                        </div>
+
+                                                        {/* 代理状态提示 */}
+                                                        <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
+                                                            <div className="flex items-center space-x-2">
+                                                                <Shield className="w-4 h-4 text-blue-400" />
+                                                                <span className="text-blue-300 text-xs">
+                                                                    代理已启用 - 所有测试请求将通过代理服务器发送
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* 未启用代理时的提示 */}
+                                                {!testConfig.proxy?.enabled && (
+                                                    <div className="bg-gray-700/30 rounded-lg p-3">
+                                                        <div className="flex items-center space-x-2">
+                                                            <Globe className="w-4 h-4 text-gray-400" />
+                                                            <span className="text-gray-400 text-xs">
+                                                                直连模式 - 测试请求将直接发送到目标服务器
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     )}
