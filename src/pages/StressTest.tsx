@@ -4696,26 +4696,27 @@ const StressTest: React.FC = () => {
                                     {(stressTestData && stressTestData.length > 0) ? (
                                         <div>
                                             <div className="mb-2 text-sm text-gray-400">
-                                                实时数据图表 (数据点: {stressTestData.length})
+                                                传统图表模式 (数据点: {stressTestData.length})
                                                 {isRunning && <span className="ml-2 text-green-400">● 运行中</span>}
                                             </div>
-                                            {(() => {
-                                                const enhancedData = convertToEnhancedRealTimeData(stressTestData);
-                                                console.log('🔧 调试：传递给图表的数据:', {
-                                                    originalData: stressTestData.slice(0, 2),
-                                                    enhancedData: enhancedData.slice(0, 2),
-                                                    isRunning,
-                                                    testCompleted: !isRunning && (result || testStatus === 'completed')
-                                                });
-                                                return (
-                                                    <UnifiedStressTestCharts
-                                                        realTimeData={enhancedData}
-                                                        isRunning={isRunning}
-                                                        testCompleted={!isRunning && (result || testStatus === 'completed')}
-                                                        height={400}
-                                                    />
-                                                );
-                                            })()}
+                                            <AdvancedStressTestChart
+                                                data={stressTestData.map((point: any) => ({
+                                                    time: new Date(point.timestamp).toLocaleTimeString(),
+                                                    timestamp: point.timestamp,
+                                                    responseTime: point.responseTime,
+                                                    throughput: point.rps || point.throughput,
+                                                    errors: point.errors,
+                                                    users: point.users,
+                                                    p95ResponseTime: point.p95ResponseTime,
+                                                    errorRate: point.errorRate,
+                                                    phase: point.phase || 'steady'
+                                                }))}
+                                                showAdvancedMetrics={false}
+                                                height={400}
+                                                theme="dark"
+                                                interactive={true}
+                                                realTime={testStatus === 'running'}
+                                            />
                                         </div>
                                     ) : isRunning ? (
                                         /* 测试运行中但还没有数据时的占位图表 */
@@ -4788,30 +4789,7 @@ const StressTest: React.FC = () => {
                                     )}
                                 </div>
 
-                                {/* 高级测试图表 */}
-                                {(stressTestData.length > 0 || result) && (
-                                    <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-                                        <h3 className="text-lg font-semibold text-white mb-4">性能趋势图表</h3>
-                                        <AdvancedStressTestChart
-                                            data={stressTestData.map((point: any) => ({
-                                                time: new Date(point.timestamp).toLocaleTimeString(),
-                                                timestamp: point.timestamp,
-                                                responseTime: point.responseTime,
-                                                throughput: point.rps || point.throughput,
-                                                errors: point.errors,
-                                                users: point.users,
-                                                p95ResponseTime: point.p95ResponseTime,
-                                                errorRate: point.errorRate,
-                                                phase: point.phase || 'steady'
-                                            }))}
-                                            showAdvancedMetrics={true}
-                                            height={350}
-                                            theme="dark"
-                                            interactive={true}
-                                            realTime={testStatus === 'running'}
-                                        />
-                                    </div>
-                                )}
+
 
                             </>
                         )}
