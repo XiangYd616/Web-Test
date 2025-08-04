@@ -22,7 +22,7 @@ class GeoUpdateService {
       maxRetries: 3,
       retryDelay: 60000 // 1分钟
     };
-    
+
     this.init();
   }
 
@@ -31,7 +31,7 @@ class GeoUpdateService {
    */
   init() {
     console.log('🔄 初始化 GeoLite2 自动更新服务...');
-    
+
     if (!this.config.enabled) {
       console.log('⏸️  自动更新已禁用');
       return;
@@ -44,7 +44,7 @@ class GeoUpdateService {
 
     // 设置定时任务
     this.scheduleUpdates();
-    
+
     console.log('✅ GeoLite2 自动更新服务已启动');
     console.log(`📅 更新计划: ${this.config.schedule}`);
   }
@@ -81,11 +81,11 @@ class GeoUpdateService {
     }
 
     this.lastUpdateCheck = new Date();
-    
+
     try {
       // 检查是否需要更新
       const needsUpdate = await this.needsUpdate();
-      
+
       if (needsUpdate) {
         console.log('📥 检测到需要更新数据库');
         return await this.performUpdate();
@@ -105,7 +105,7 @@ class GeoUpdateService {
   async needsUpdate() {
     const dataDir = path.join(__dirname, '../data');
     const cityDbPath = path.join(dataDir, 'GeoLite2-City.mmdb');
-    
+
     // 如果数据库文件不存在，需要下载
     if (!fs.existsSync(cityDbPath)) {
       console.log('📂 未找到数据库文件，需要下载');
@@ -115,7 +115,7 @@ class GeoUpdateService {
     // 检查文件修改时间
     const stats = fs.statSync(cityDbPath);
     const fileAge = Date.now() - stats.mtime.getTime();
-    
+
     if (fileAge > this.updateInterval) {
       console.log(`📅 数据库文件过期 (${Math.floor(fileAge / (24 * 60 * 60 * 1000))} 天前)，需要更新`);
       return true;
@@ -145,16 +145,16 @@ class GeoUpdateService {
     while (retries < this.config.maxRetries) {
       try {
         console.log(`🚀 开始更新 GeoLite2 数据库 (尝试 ${retries + 1}/${this.config.maxRetries})`);
-        
+
         const success = await this.downloader.downloadAll();
-        
+
         if (success) {
           this.lastUpdateTime = new Date();
           console.log('✅ GeoLite2 数据库更新成功');
-          
+
           // 通知地理位置服务重新加载
           this.notifyGeoService();
-          
+
           this.isUpdating = false;
           return true;
         } else {
@@ -163,7 +163,7 @@ class GeoUpdateService {
       } catch (error) {
         retries++;
         console.error(`❌ 更新失败 (尝试 ${retries}/${this.config.maxRetries}):`, error.message);
-        
+
         if (retries < this.config.maxRetries) {
           console.log(`⏳ ${this.config.retryDelay / 1000} 秒后重试...`);
           await this.sleep(this.config.retryDelay);
@@ -205,7 +205,7 @@ class GeoUpdateService {
   getStatus() {
     const dataDir = path.join(__dirname, '../data');
     const cityDbPath = path.join(dataDir, 'GeoLite2-City.mmdb');
-    
+
     let dbInfo = null;
     if (fs.existsSync(cityDbPath)) {
       const stats = fs.statSync(cityDbPath);
@@ -225,8 +225,55 @@ class GeoUpdateService {
       lastUpdateTime: this.lastUpdateTime,
       database: dbInfo,
       hasLicenseKey: !!process.env.MAXMIND_LICENSE_KEY,
-      nextUpdate: this.updateTask ? this.updateTask.nextDate() : null
+      nextUpdate: this.updateTask ? this.getNextUpdateTime() : null
     };
+  }
+
+  /**
+   * 获取下次更新时间（简化实现）
+   */
+  getNextUpdateTime() {
+    if (!this.updateTask) return null;
+
+    try {
+      // 简化实现：基于当前时间和更新间隔估算
+      const now = new Date();
+      const schedule = this.config.schedule; // "0 2 * * 3" (每周三凌晨2点)
+
+      // 解析 cron 表达式 "0 2 * * 3"
+      const parts = schedule.split(' ');
+      if (parts.length >= 5) {
+        const minute = parseInt(parts[0]) || 0;
+        const hour = parseInt(parts[1]) || 2;
+        const dayOfWeek = parseInt(parts[4]); // 3 = 周三
+
+        if (!isNaN(dayOfWeek)) {
+          // 计算下一个指定星期几的时间
+          const nextDate = new Date(now);
+          const currentDay = nextDate.getDay();
+          const daysUntilNext = (dayOfWeek - currentDay + 7) % 7;
+
+          if (daysUntilNext === 0 && (now.getHours() > hour || (now.getHours() === hour && now.getMinutes() >= minute))) {
+            // 今天已经过了执行时间，计算下周
+            nextDate.setDate(nextDate.getDate() + 7);
+          } else {
+            nextDate.setDate(nextDate.getDate() + daysUntilNext);
+          }
+
+          nextDate.setHours(hour, minute, 0, 0);
+          return nextDate;
+        }
+      }
+
+      // 默认返回明天同一时间
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      return tomorrow;
+
+    } catch (error) {
+      console.warn('计算下次更新时间失败:', error.message);
+      return null;
+    }
   }
 
   /**
@@ -234,7 +281,7 @@ class GeoUpdateService {
    */
   setEnabled(enabled) {
     this.config.enabled = enabled;
-    
+
     if (enabled) {
       this.scheduleUpdates();
       console.log('✅ 自动更新已启用');
