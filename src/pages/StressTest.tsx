@@ -3444,6 +3444,8 @@ const StressTest: React.FC = () => {
                 timezone?: string;
             };
             responseTime?: number;
+            errorCode?: string;
+            troubleshooting?: string[];
         };
     }>({
         testing: false,
@@ -3508,7 +3510,11 @@ const StressTest: React.FC = () => {
                 setProxyTestStatus({
                     testing: false,
                     result: 'error',
-                    message: result.message || '代理连接测试失败'
+                    message: result.message || '代理连接测试失败',
+                    details: {
+                        errorCode: result.error,
+                        troubleshooting: result.troubleshooting
+                    }
                 });
                 // 错误状态5秒后自动清除
                 setTimeout(() => {
