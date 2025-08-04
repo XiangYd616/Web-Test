@@ -1223,6 +1223,13 @@ const StressTest: React.FC = () => {
 
     // 渐进式信息披露状态
     const [isAdvancedMode, setIsAdvancedMode] = useState(false);
+
+    // 对比分析相关状态
+    const [showComparison, setShowComparison] = useState(false);
+    const [comparisonData, setComparisonData] = useState<any[]>([]);
+    const [selectedBaseline, setSelectedBaseline] = useState<string>('');
+    const [comparisonMode, setComparisonMode] = useState<'historical' | 'baseline' | 'realtime'>('historical');
+    const [historicalTests, setHistoricalTests] = useState<any[]>([]);
     const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
     const [hasAutoSelectedTemplate, setHasAutoSelectedTemplate] = useState(false);
 
@@ -3276,6 +3283,60 @@ const StressTest: React.FC = () => {
         alert('基线数据已保存');
     };
 
+    // 获取历史测试数据用于对比
+    const fetchHistoricalTests = async () => {
+        try {
+            const response = await fetch('/api/test/stress/history?limit=10&sortBy=created_at&sortOrder=desc');
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    setHistoricalTests(data.data.tests || []);
+                }
+            }
+        } catch (error) {
+            console.error('获取历史测试数据失败:', error);
+        }
+    };
+
+    // 计算对比分析数据
+    const calculateComparison = (currentData: any, baselineData: any) => {
+        if (!currentData || !baselineData) return null;
+
+        const current = currentData.metrics || currentData;
+        const baseline = baselineData.metrics || baselineData;
+
+        return {
+            responseTime: {
+                current: current.averageResponseTime || 0,
+                baseline: baseline.averageResponseTime || 0,
+                change: ((current.averageResponseTime || 0) - (baseline.averageResponseTime || 0)),
+                changePercent: baseline.averageResponseTime ?
+                    (((current.averageResponseTime || 0) - (baseline.averageResponseTime || 0)) / (baseline.averageResponseTime || 1)) * 100 : 0
+            },
+            throughput: {
+                current: current.throughput || current.currentTPS || 0,
+                baseline: baseline.throughput || baseline.currentTPS || 0,
+                change: ((current.throughput || current.currentTPS || 0) - (baseline.throughput || baseline.currentTPS || 0)),
+                changePercent: (baseline.throughput || baseline.currentTPS) ?
+                    (((current.throughput || current.currentTPS || 0) - (baseline.throughput || baseline.currentTPS || 0)) / ((baseline.throughput || baseline.currentTPS) || 1)) * 100 : 0
+            },
+            errorRate: {
+                current: current.errorRate || 0,
+                baseline: baseline.errorRate || 0,
+                change: ((current.errorRate || 0) - (baseline.errorRate || 0)),
+                changePercent: baseline.errorRate ?
+                    (((current.errorRate || 0) - (baseline.errorRate || 0)) / (baseline.errorRate || 1)) * 100 : 0
+            },
+            p95ResponseTime: {
+                current: current.p95ResponseTime || 0,
+                baseline: baseline.p95ResponseTime || 0,
+                change: ((current.p95ResponseTime || 0) - (baseline.p95ResponseTime || 0)),
+                changePercent: baseline.p95ResponseTime ?
+                    (((current.p95ResponseTime || 0) - (baseline.p95ResponseTime || 0)) / (baseline.p95ResponseTime || 1)) * 100 : 0
+            }
+        };
+    };
+
     const handleExportReport = (format: 'json' | 'csv' | 'html' | 'pdf' = 'json') => {
         if (!result) {
             alert('没有测试结果可导出');
@@ -4172,6 +4233,137 @@ const StressTest: React.FC = () => {
                                                     {testProgress || (isRunning ? '正在收集性能数据...' : '等待开始测试')}
                                                 </div>
                                             </div>
+
+                                            {/* 对比分析功能 */}
+                                            {(result || !isRunning) && (
+                                                <div className="bg-gray-800/50 rounded-lg p-3">
+                                                    <div className="flex items-center justify-between mb-3">
+                                                        <h4 className="text-sm font-semibold text-white flex items-center">
+                                                            <BarChart3 className="w-4 h-4 mr-2 text-purple-400" />
+                                                            性能对比分析
+                                                        </h4>
+                                                        <button
+                                                            onClick={() => {
+                                                                setShowComparison(!showComparison);
+                                                                if (!showComparison) {
+                                                                    fetchHistoricalTests();
+                                                                }
+                                                            }}
+                                                            className="text-xs px-2 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors"
+                                                        >
+                                                            {showComparison ? '隐藏对比' : '开启对比'}
+                                                        </button>
+                                                    </div>
+
+                                                    {showComparison && (
+                                                        <div className="space-y-3">
+                                                            {/* 对比模式选择 */}
+                                                            <div className="flex space-x-2">
+                                                                <button
+                                                                    onClick={() => setComparisonMode('historical')}
+                                                                    className={`text-xs px-2 py-1 rounded transition-colors ${comparisonMode === 'historical'
+                                                                            ? 'bg-blue-600 text-white'
+                                                                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                                                        }`}
+                                                                >
+                                                                    历史对比
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => setComparisonMode('baseline')}
+                                                                    className={`text-xs px-2 py-1 rounded transition-colors ${comparisonMode === 'baseline'
+                                                                            ? 'bg-blue-600 text-white'
+                                                                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                                                        }`}
+                                                                >
+                                                                    基线对比
+                                                                </button>
+                                                            </div>
+
+                                                            {/* 历史测试选择 */}
+                                                            {comparisonMode === 'historical' && (
+                                                                <div>
+                                                                    <select
+                                                                        value={selectedBaseline}
+                                                                        onChange={(e) => setSelectedBaseline(e.target.value)}
+                                                                        className="w-full text-xs px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white"
+                                                                    >
+                                                                        <option value="">选择历史测试...</option>
+                                                                        {historicalTests.map((test) => (
+                                                                            <option key={test.id} value={test.id}>
+                                                                                {new Date(test.created_at).toLocaleDateString()} - {test.url}
+                                                                            </option>
+                                                                        ))}
+                                                                    </select>
+                                                                </div>
+                                                            )}
+
+                                                            {/* 基线数据显示 */}
+                                                            {comparisonMode === 'baseline' && baselineData && (
+                                                                <div className="text-xs text-gray-400">
+                                                                    基线: {baselineData.name}
+                                                                </div>
+                                                            )}
+
+                                                            {/* 对比结果显示 */}
+                                                            {(() => {
+                                                                let comparisonResult = null;
+
+                                                                if (comparisonMode === 'baseline' && baselineData && result) {
+                                                                    comparisonResult = calculateComparison(result, baselineData);
+                                                                } else if (comparisonMode === 'historical' && selectedBaseline && result) {
+                                                                    const selectedTest = historicalTests.find(t => t.id === selectedBaseline);
+                                                                    if (selectedTest) {
+                                                                        comparisonResult = calculateComparison(result, selectedTest);
+                                                                    }
+                                                                }
+
+                                                                if (comparisonResult) {
+                                                                    return (
+                                                                        <div className="grid grid-cols-2 gap-2 text-xs">
+                                                                            <div className="space-y-1">
+                                                                                <div className="flex justify-between">
+                                                                                    <span className="text-gray-400">响应时间:</span>
+                                                                                    <span className={comparisonResult.responseTime.changePercent > 0 ? 'text-red-400' : 'text-green-400'}>
+                                                                                        {comparisonResult.responseTime.changePercent > 0 ? '+' : ''}{comparisonResult.responseTime.changePercent.toFixed(1)}%
+                                                                                    </span>
+                                                                                </div>
+                                                                                <div className="flex justify-between">
+                                                                                    <span className="text-gray-400">吞吐量:</span>
+                                                                                    <span className={comparisonResult.throughput.changePercent > 0 ? 'text-green-400' : 'text-red-400'}>
+                                                                                        {comparisonResult.throughput.changePercent > 0 ? '+' : ''}{comparisonResult.throughput.changePercent.toFixed(1)}%
+                                                                                    </span>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div className="space-y-1">
+                                                                                <div className="flex justify-between">
+                                                                                    <span className="text-gray-400">错误率:</span>
+                                                                                    <span className={comparisonResult.errorRate.changePercent > 0 ? 'text-red-400' : 'text-green-400'}>
+                                                                                        {comparisonResult.errorRate.changePercent > 0 ? '+' : ''}{comparisonResult.errorRate.changePercent.toFixed(1)}%
+                                                                                    </span>
+                                                                                </div>
+                                                                                <div className="flex justify-between">
+                                                                                    <span className="text-gray-400">P95响应:</span>
+                                                                                    <span className={comparisonResult.p95ResponseTime.changePercent > 0 ? 'text-red-400' : 'text-green-400'}>
+                                                                                        {comparisonResult.p95ResponseTime.changePercent > 0 ? '+' : ''}{comparisonResult.p95ResponseTime.changePercent.toFixed(1)}%
+                                                                                    </span>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                }
+
+                                                                return (
+                                                                    <div className="text-xs text-gray-500 text-center py-2">
+                                                                        {comparisonMode === 'baseline' && !baselineData && '请先设置基线数据'}
+                                                                        {comparisonMode === 'historical' && !selectedBaseline && '请选择历史测试进行对比'}
+                                                                        {!result && '等待测试完成后进行对比'}
+                                                                    </div>
+                                                                );
+                                                            })()}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
                                     ) : (
                                         <div className="bg-gray-900/50 rounded-lg p-6 h-80 flex items-center justify-center">
