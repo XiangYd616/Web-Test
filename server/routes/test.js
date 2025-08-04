@@ -601,8 +601,10 @@ router.post('/history/batch', authMiddleware, asyncHandler(async (req, res) => {
 
 // 共享的历史记录处理函数
 async function handleTestHistory(req, res) {
-  const { page = 1, limit = 10, type, status, sortBy = 'created_at', sortOrder = 'desc' } = req.query;
-  const offset = (page - 1) * limit;
+  // 🔧 修复：支持前端发送的pageSize参数，同时兼容limit参数
+  const { page = 1, limit, pageSize, type, status, sortBy = 'created_at', sortOrder = 'desc' } = req.query;
+  const actualLimit = pageSize || limit || 10; // 优先使用pageSize，然后是limit，最后默认10
+  const offset = (page - 1) * actualLimit;
 
   let whereClause = '';
   const params = [];
@@ -621,7 +623,7 @@ async function handleTestHistory(req, res) {
         tests: [],
         pagination: {
           page: parseInt(page),
-          limit: parseInt(limit),
+          limit: parseInt(actualLimit),
           total: 0,
           totalPages: 0,
           hasNext: false,
@@ -658,7 +660,7 @@ async function handleTestHistory(req, res) {
        ${whereClause}
        ORDER BY ${sortField} ${sortDirection}
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
-      [...params, parseInt(limit), offset]
+      [...params, parseInt(actualLimit), offset]
     );
 
     // 获取总数
@@ -678,9 +680,11 @@ async function handleTestHistory(req, res) {
         tests: formattedTests,
         pagination: {
           page: parseInt(page),
-          limit: parseInt(limit),
+          limit: parseInt(actualLimit),
           total,
-          totalPages: Math.ceil(total / limit)
+          totalPages: Math.ceil(total / actualLimit),
+          hasNext: (parseInt(page) * parseInt(actualLimit)) < total,
+          hasPrev: parseInt(page) > 1
         }
       }
     });
