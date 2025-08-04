@@ -3357,13 +3357,36 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
       proxyIp = responseData.origin;
     }
 
+    // 查询IP地理位置信息
+    let locationInfo = null;
+    if (proxyIp && proxyIp !== '未知') {
+      try {
+        // 使用免费的IP地理位置API
+        const geoResponse = await fetch(`http://ip-api.com/json/${proxyIp}?fields=status,country,countryCode,region,city,timezone`);
+        if (geoResponse.ok) {
+          const geoData = await geoResponse.json();
+          if (geoData.status === 'success') {
+            locationInfo = {
+              country: geoData.country,
+              countryCode: geoData.countryCode,
+              region: geoData.region,
+              city: geoData.city,
+              timezone: geoData.timezone
+            };
+          }
+        }
+      } catch (geoError) {
+        console.warn('获取IP地理位置信息失败:', geoError);
+      }
+    }
+
     console.log(`✅ 代理连接测试成功: ${proxy.host}:${proxyPort}, 响应时间: ${responseTime}ms`);
 
     res.json({
       success: true,
       message: '代理连接测试成功',
-      proxyServer: `${proxy.host}:${proxyPort}`, // 显示配置的代理服务器
       proxyIp: proxyIp, // 实际的出口IP
+      location: locationInfo, // 地理位置信息
       responseTime: responseTime,
       proxyConfig: {
         host: proxy.host,
