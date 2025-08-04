@@ -3362,7 +3362,8 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
     res.json({
       success: true,
       message: '代理连接测试成功',
-      proxyIp: proxyIp,
+      proxyServer: `${proxy.host}:${proxyPort}`, // 显示配置的代理服务器
+      proxyIp: proxyIp, // 实际的出口IP
       responseTime: responseTime,
       proxyConfig: {
         host: proxy.host,
