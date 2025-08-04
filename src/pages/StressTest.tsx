@@ -3453,6 +3453,45 @@ const StressTest: React.FC = () => {
         message: ''
     });
 
+    // 代理分析功能
+    const analyzeProxy = async () => {
+        if (!testConfig.proxy?.enabled || !testConfig.proxy?.host) {
+            alert('请先配置代理设置');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/test/proxy-analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    proxy: testConfig.proxy
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                const { validation, recommendation } = result.analysis;
+
+                let message = `代理分析结果:\n\n`;
+                message += `代理类型: ${validation.proxyType}\n`;
+                message += `服务器可访问: ${validation.accessible ? '是' : '否'}\n`;
+                message += `推荐模式: ${recommendation.mode === 'client' ? '客户端测试' : '服务器端测试'}\n\n`;
+                message += `建议:\n${validation.suggestion.join('\n')}`;
+
+                alert(message);
+            } else {
+                alert(`代理分析失败: ${result.message}`);
+            }
+        } catch (error) {
+            console.error('代理分析失败:', error);
+            alert('代理分析失败，请检查网络连接');
+        }
+    };
+
     // 测试代理连接
     const testProxyConnection = async () => {
         if (!testConfig.proxy?.enabled || !testConfig.proxy?.host) {
