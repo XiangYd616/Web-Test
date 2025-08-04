@@ -3289,6 +3289,63 @@ const geoLocationService = require('../services/geoLocationService');
 const geoUpdateService = require('../services/geoUpdateService');
 
 /**
+ * 获取代理故障排除提示
+ */
+function getTroubleshootingTips(errorCode) {
+  const tips = {
+    'TIMEOUT': [
+      '检查代理服务器是否在线',
+      '尝试增加超时时间',
+      '检查网络连接是否稳定',
+      '确认代理服务器负载不高'
+    ],
+    'CONNECTION_REFUSED': [
+      '确认代理服务器地址和端口正确',
+      '检查代理服务器是否启动',
+      '确认防火墙没有阻止连接',
+      '验证代理服务器配置'
+    ],
+    'DNS_ERROR': [
+      '检查代理服务器主机名拼写',
+      '尝试使用IP地址代替域名',
+      '检查DNS服务器设置',
+      '确认网络连接正常'
+    ],
+    'CONNECTION_RESET': [
+      '检查代理服务器是否需要认证',
+      '确认代理服务器配置正确',
+      '尝试重启代理服务器',
+      '检查代理服务器日志'
+    ],
+    'HOST_UNREACHABLE': [
+      '检查网络连接',
+      '确认路由配置正确',
+      '检查防火墙设置',
+      '尝试ping代理服务器'
+    ],
+    'PROXY_AUTH_REQUIRED': [
+      '检查用户名和密码是否正确',
+      '确认代理服务器认证方式',
+      '检查账户是否被锁定',
+      '联系代理服务器管理员'
+    ],
+    'PROXY_FORBIDDEN': [
+      '检查代理服务器访问权限',
+      '确认IP地址是否在白名单中',
+      '检查代理服务器配置',
+      '联系代理服务器管理员'
+    ]
+  };
+
+  return tips[errorCode] || [
+    '检查代理服务器配置',
+    '确认网络连接正常',
+    '查看服务器日志获取更多信息',
+    '联系技术支持'
+  ];
+}
+
+/**
  * 代理连接测试
  * POST /api/test/proxy-test
  */
@@ -3328,28 +3385,43 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
 
     console.log(`🌐 测试代理连接: ${proxy.host}:${proxyPort}`);
 
-    // 使用 node-fetch 或 axios 通过代理发送请求
+    // 使用 node-fetch 通过代理发送请求
     const fetch = require('node-fetch');
     const { HttpsProxyAgent } = require('https-proxy-agent');
     const { HttpProxyAgent } = require('http-proxy-agent');
+    const AbortController = require('abort-controller');
 
-    // 根据代理类型选择代理代理
+    // 根据目标URL协议选择合适的代理agent
     let agent;
-    if (proxyType === 'https') {
+    const isHttpsTarget = testUrl.startsWith('https://');
+
+    if (isHttpsTarget) {
+      // HTTPS目标使用HttpsProxyAgent
       agent = new HttpsProxyAgent(proxyUrl);
     } else {
+      // HTTP目标使用HttpProxyAgent
       agent = new HttpProxyAgent(proxyUrl);
     }
+
+    // 设置超时控制（node-fetch v2兼容方式）
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, 10000); // 10秒超时
 
     // 发送测试请求
     const response = await fetch(testUrl, {
       method: 'GET',
       agent: agent,
-      timeout: 10000, // 10秒超时
+      signal: controller.signal,
       headers: {
-        'User-Agent': 'Test-Web-Proxy-Test/1.0'
+        'User-Agent': 'Test-Web-Proxy-Test/1.0',
+        'Accept': 'application/json, text/plain, */*'
       }
     });
+
+    // 清除超时定时器
+    clearTimeout(timeoutId);
 
     const responseTime = Date.now() - startTime;
 
@@ -3400,26 +3472,48 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
     console.error('❌ 代理连接测试失败:', error);
 
     let errorMessage = '代理连接失败';
-    if (error.code === 'ECONNREFUSED') {
-      errorMessage = '无法连接到代理服务器，请检查代理地址和端口';
+    let errorCode = error.code || 'PROXY_TEST_FAILED';
+
+    // 详细的错误分类和用户友好的错误信息
+    if (error.name === 'AbortError') {
+      errorMessage = '代理连接超时（10秒），请检查代理服务器状态';
+      errorCode = 'TIMEOUT';
+    } else if (error.code === 'ECONNREFUSED') {
+      errorMessage = '无法连接到代理服务器，请检查代理地址和端口是否正确';
+      errorCode = 'CONNECTION_REFUSED';
     } else if (error.code === 'ETIMEDOUT') {
-      errorMessage = '代理连接超时，请检查网络连接';
+      errorMessage = '代理连接超时，请检查网络连接和代理服务器状态';
+      errorCode = 'TIMEOUT';
     } else if (error.code === 'ENOTFOUND') {
-      errorMessage = '无法解析代理服务器地址';
+      errorMessage = '无法解析代理服务器地址，请检查主机名是否正确';
+      errorCode = 'DNS_ERROR';
+    } else if (error.code === 'ECONNRESET') {
+      errorMessage = '代理服务器重置了连接，可能需要认证或服务器繁忙';
+      errorCode = 'CONNECTION_RESET';
+    } else if (error.code === 'EHOSTUNREACH') {
+      errorMessage = '无法到达代理服务器，请检查网络连接';
+      errorCode = 'HOST_UNREACHABLE';
+    } else if (error.message && error.message.includes('407')) {
+      errorMessage = '代理服务器需要认证，请检查用户名和密码';
+      errorCode = 'PROXY_AUTH_REQUIRED';
+    } else if (error.message && error.message.includes('403')) {
+      errorMessage = '代理服务器拒绝访问，请检查权限设置';
+      errorCode = 'PROXY_FORBIDDEN';
     } else if (error.message) {
-      errorMessage = error.message;
+      errorMessage = `代理测试失败: ${error.message}`;
     }
 
     res.status(500).json({
       success: false,
       message: errorMessage,
-      error: error.code || 'PROXY_TEST_FAILED',
+      error: errorCode,
       proxyConfig: {
         host: proxy.host,
         port: proxy.port || 8080,
         type: proxy.type || 'http'
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      troubleshooting: getTroubleshootingTips(errorCode)
     });
   }
 }));

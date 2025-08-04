@@ -30,6 +30,7 @@
     "docker:run": "docker run -p 3001:3001 testweb-api"
   },
   "dependencies": {
+    "abort-controller": "^3.0.0",
     "axios": "^1.10.0",
     "bcryptjs": "^2.4.3",
     "bull": "^4.12.2",
