@@ -3908,9 +3908,9 @@ const StressTest: React.FC = () => {
                             </div>
                         ) : (
                             /* 高级模式 - 原有的详细配置 */
-                            <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
                                 {/* 测试配置 */}
-                                <div className="xl:col-span-3 bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+                                <div className="xl:col-span-2 bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
                                     <div className="flex items-center justify-between mb-4">
                                         <h3 className="text-xl font-semibold text-white">高级测试配置</h3>
                                         <button
@@ -3929,7 +3929,7 @@ const StressTest: React.FC = () => {
                                     {/* 测试类型选择 - 移动端优化布局 */}
                                     <div className="mb-4">
                                         <h4 className="text-lg font-medium text-white mb-3">测试类型</h4>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                        <div className="grid grid-cols-2 gap-3">
                                             {/* 梯度加压 */}
                                             <div
                                                 className={`border-2 rounded-lg p-4 sm:p-3 cursor-pointer transition-all min-h-[60px] ${testConfig.testType === 'gradual'
@@ -4280,13 +4280,13 @@ const StressTest: React.FC = () => {
 
                                         </div>
                                     ) : (
-                                        <div className="bg-gray-900/50 rounded-lg p-4 sm:p-6">
-                                            <div className="flex items-center mb-4">
-                                                <Globe className="w-5 h-5 text-blue-400 mr-2" />
-                                                <h4 className="text-lg font-semibold text-white">代理设置</h4>
+                                        <div className="bg-gray-900/50 rounded-lg p-4">
+                                            <div className="flex items-center mb-3">
+                                                <Globe className="w-4 h-4 text-blue-400 mr-2" />
+                                                <h4 className="text-base font-semibold text-white">代理设置</h4>
                                             </div>
 
-                                            <div className="space-y-4">
+                                            <div className="space-y-3">
                                                 {/* 启用代理开关 */}
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center space-x-2">
@@ -4313,10 +4313,10 @@ const StressTest: React.FC = () => {
 
                                                 {/* 代理配置 */}
                                                 {testConfig.proxy?.enabled && (
-                                                    <div className="space-y-3 pl-4 border-l-2 border-blue-500/30">
+                                                    <div className="space-y-2 pl-3 border-l-2 border-blue-500/30">
                                                         {/* 代理类型 */}
                                                         <div>
-                                                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                            <label className="block text-xs font-medium text-gray-300 mb-1">
                                                                 代理类型
                                                             </label>
                                                             <select
@@ -4340,7 +4340,7 @@ const StressTest: React.FC = () => {
                                                         {/* 代理地址 */}
                                                         <div className="grid grid-cols-3 gap-2">
                                                             <div className="col-span-2">
-                                                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                                <label className="block text-xs font-medium text-gray-300 mb-1">
                                                                     代理地址
                                                                 </label>
                                                                 <input
@@ -4358,7 +4358,7 @@ const StressTest: React.FC = () => {
                                                                 />
                                                             </div>
                                                             <div>
-                                                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                                <label className="block text-xs font-medium text-gray-300 mb-1">
                                                                     端口
                                                                 </label>
                                                                 <input
@@ -4380,7 +4380,7 @@ const StressTest: React.FC = () => {
                                                         {/* 认证信息 */}
                                                         <div className="grid grid-cols-2 gap-2">
                                                             <div>
-                                                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                                <label className="block text-xs font-medium text-gray-300 mb-1">
                                                                     用户名 (可选)
                                                                 </label>
                                                                 <input
@@ -4398,7 +4398,7 @@ const StressTest: React.FC = () => {
                                                                 />
                                                             </div>
                                                             <div>
-                                                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                                <label className="block text-xs font-medium text-gray-300 mb-1">
                                                                     密码 (可选)
                                                                 </label>
                                                                 <input
