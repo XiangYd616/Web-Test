@@ -4098,85 +4098,85 @@ const StressTest: React.FC = () => {
 
                                     {/* 高级模式监控面板 */}
                                     {(isRunning || stressTestData.length > 0 || result) ? (
-                                        <div className="bg-gray-900/50 rounded-lg p-6 space-y-6 min-h-[500px]">
+                                        <div className="bg-gray-900/50 rounded-lg p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4 lg:space-y-6 min-h-[300px] sm:min-h-[400px] lg:min-h-[500px]">
                                             {/* 实时状态指示器 */}
                                             <div className="flex items-center justify-between">
-                                                <div className="flex items-center space-x-3">
+                                                <div className="flex items-center space-x-2 sm:space-x-3">
                                                     {isRunning ? (
                                                         <>
-                                                            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                                                            <span className="text-green-400 font-medium">测试进行中</span>
+                                                            <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-500 rounded-full animate-pulse"></div>
+                                                            <span className="text-green-400 font-medium text-sm sm:text-base">测试进行中</span>
                                                         </>
                                                     ) : result ? (
                                                         <>
-                                                            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                                                            <span className="text-blue-400 font-medium">测试已完成</span>
+                                                            <div className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-500 rounded-full"></div>
+                                                            <span className="text-blue-400 font-medium text-sm sm:text-base">测试已完成</span>
                                                         </>
                                                     ) : (
                                                         <>
-                                                            <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                                                            <span className="text-yellow-400 font-medium">数据分析中</span>
+                                                            <div className="w-2 h-2 sm:w-3 sm:h-3 bg-yellow-500 rounded-full"></div>
+                                                            <span className="text-yellow-400 font-medium text-sm sm:text-base">数据分析中</span>
                                                         </>
                                                     )}
                                                 </div>
-                                                <div className="text-xs text-gray-400">
+                                                <div className="text-xs sm:text-sm text-gray-400">
                                                     数据点: {stressTestData.length}
                                                 </div>
                                             </div>
 
                                             {/* 核心性能指标 */}
-                                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                                                <div className="bg-gray-800/50 rounded-lg p-4 text-center">
-                                                    <div className="text-3xl font-bold text-blue-400 mb-2">
+                                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
+                                                <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 lg:p-4 text-center">
+                                                    <div className="text-lg sm:text-2xl lg:text-3xl font-bold text-blue-400 mb-1 sm:mb-2">
                                                         {metrics?.currentTPS || result?.metrics?.currentTPS || 0}
                                                     </div>
-                                                    <div className="text-sm text-gray-400">当前TPS</div>
+                                                    <div className="text-xs sm:text-sm text-gray-400">当前TPS</div>
                                                 </div>
-                                                <div className="bg-gray-800/50 rounded-lg p-4 text-center">
-                                                    <div className="text-3xl font-bold text-green-400 mb-2">
+                                                <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 lg:p-4 text-center">
+                                                    <div className="text-lg sm:text-2xl lg:text-3xl font-bold text-green-400 mb-1 sm:mb-2">
                                                         {metrics?.averageResponseTime || result?.metrics?.averageResponseTime || 0}ms
                                                     </div>
-                                                    <div className="text-sm text-gray-400">平均响应时间</div>
+                                                    <div className="text-xs sm:text-sm text-gray-400">平均响应时间</div>
                                                 </div>
-                                                <div className="bg-gray-800/50 rounded-lg p-4 text-center">
-                                                    <div className="text-3xl font-bold text-yellow-400 mb-2">
+                                                <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 lg:p-4 text-center">
+                                                    <div className="text-lg sm:text-2xl lg:text-3xl font-bold text-yellow-400 mb-1 sm:mb-2">
                                                         {metrics?.activeUsers || result?.metrics?.activeUsers || 0}
                                                     </div>
-                                                    <div className="text-sm text-gray-400">活跃用户</div>
+                                                    <div className="text-xs sm:text-sm text-gray-400">活跃用户</div>
                                                 </div>
-                                                <div className="bg-gray-800/50 rounded-lg p-4 text-center">
-                                                    <div className="text-3xl font-bold text-red-400 mb-2">
+                                                <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 lg:p-4 text-center">
+                                                    <div className="text-lg sm:text-2xl lg:text-3xl font-bold text-red-400 mb-1 sm:mb-2">
                                                         {(() => {
                                                             const errorRate = metrics?.errorRate || result?.metrics?.errorRate || 0;
                                                             return typeof errorRate === 'string' ? errorRate : errorRate.toFixed(1);
                                                         })()}%
                                                     </div>
-                                                    <div className="text-sm text-gray-400">错误率</div>
+                                                    <div className="text-xs sm:text-sm text-gray-400">错误率</div>
                                                 </div>
                                             </div>
 
                                             {/* 详细性能分析 */}
-                                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
                                                 {/* 响应时间分布 */}
-                                                <div className="bg-gray-800/50 rounded-lg p-4">
-                                                    <h4 className="text-base font-semibold text-white mb-4 flex items-center">
-                                                        <Clock className="w-5 h-5 mr-2 text-orange-400" />
+                                                <div className="bg-gray-800/50 rounded-lg p-3 sm:p-4">
+                                                    <h4 className="text-sm sm:text-base font-semibold text-white mb-3 sm:mb-4 flex items-center">
+                                                        <Clock className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-orange-400" />
                                                         响应时间分布
                                                     </h4>
-                                                    <div className="grid grid-cols-2 gap-3 text-sm">
-                                                        <div className="flex justify-between py-2">
+                                                    <div className="grid grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
+                                                        <div className="flex justify-between py-1 sm:py-2">
                                                             <span className="text-gray-400">P50:</span>
                                                             <span className="text-green-400 font-medium">{result?.metrics?.p50ResponseTime || metrics?.p50ResponseTime || 0}ms</span>
                                                         </div>
-                                                        <div className="flex justify-between py-2">
+                                                        <div className="flex justify-between py-1 sm:py-2">
                                                             <span className="text-gray-400">P90:</span>
                                                             <span className="text-yellow-400 font-medium">{result?.metrics?.p90ResponseTime || metrics?.p90ResponseTime || 0}ms</span>
                                                         </div>
-                                                        <div className="flex justify-between py-2">
+                                                        <div className="flex justify-between py-1 sm:py-2">
                                                             <span className="text-gray-400">P95:</span>
                                                             <span className="text-orange-400 font-medium">{result?.metrics?.p95ResponseTime || metrics?.p95ResponseTime || 0}ms</span>
                                                         </div>
-                                                        <div className="flex justify-between py-2">
+                                                        <div className="flex justify-between py-1 sm:py-2">
                                                             <span className="text-gray-400">P99:</span>
                                                             <span className="text-red-400 font-medium">{result?.metrics?.p99ResponseTime || metrics?.p99ResponseTime || 0}ms</span>
                                                         </div>
@@ -4184,25 +4184,25 @@ const StressTest: React.FC = () => {
                                                 </div>
 
                                                 {/* 吞吐量分析 */}
-                                                <div className="bg-gray-800/50 rounded-lg p-4">
-                                                    <h4 className="text-base font-semibold text-white mb-4 flex items-center">
-                                                        <BarChart3 className="w-5 h-5 mr-2 text-blue-400" />
+                                                <div className="bg-gray-800/50 rounded-lg p-3 sm:p-4">
+                                                    <h4 className="text-sm sm:text-base font-semibold text-white mb-3 sm:mb-4 flex items-center">
+                                                        <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-400" />
                                                         吞吐量分析
                                                     </h4>
-                                                    <div className="grid grid-cols-2 gap-3 text-sm">
-                                                        <div className="flex justify-between py-2">
+                                                    <div className="grid grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
+                                                        <div className="flex justify-between py-1 sm:py-2">
                                                             <span className="text-gray-400">峰值TPS:</span>
                                                             <span className="text-green-400 font-medium">{result?.metrics?.peakTPS || metrics?.peakTPS || 0}</span>
                                                         </div>
-                                                        <div className="flex justify-between py-2">
+                                                        <div className="flex justify-between py-1 sm:py-2">
                                                             <span className="text-gray-400">平均TPS:</span>
                                                             <span className="text-blue-400 font-medium">{result?.metrics?.throughput || metrics?.throughput || 0}</span>
                                                         </div>
-                                                        <div className="flex justify-between py-2">
+                                                        <div className="flex justify-between py-1 sm:py-2">
                                                             <span className="text-gray-400">总请求:</span>
                                                             <span className="text-purple-400 font-medium">{result?.metrics?.totalRequests || metrics?.totalRequests || 0}</span>
                                                         </div>
-                                                        <div className="flex justify-between py-2">
+                                                        <div className="flex justify-between py-1 sm:py-2">
                                                             <span className="text-gray-400">成功请求:</span>
                                                             <span className="text-green-400 font-medium">{result?.metrics?.successfulRequests || metrics?.successfulRequests || 0}</span>
                                                         </div>
@@ -4211,15 +4211,15 @@ const StressTest: React.FC = () => {
                                             </div>
 
                                             {/* 测试进度和状态 */}
-                                            <div className="bg-gray-800/50 rounded-lg p-4">
-                                                <div className="flex items-center justify-between mb-3">
-                                                    <span className="text-base font-medium text-gray-300">测试进度</span>
-                                                    <span className="text-sm text-gray-400">
+                                            <div className="bg-gray-800/50 rounded-lg p-3 sm:p-4">
+                                                <div className="flex items-center justify-between mb-2 sm:mb-3">
+                                                    <span className="text-sm sm:text-base font-medium text-gray-300">测试进度</span>
+                                                    <span className="text-xs sm:text-sm text-gray-400">
                                                         {isRunning ? '进行中' : result ? '已完成' : '准备中'}
                                                     </span>
                                                 </div>
                                                 {isRunning && (
-                                                    <div className="w-full bg-gray-700 rounded-full h-3 mb-3">
+                                                    <div className="w-full bg-gray-700 rounded-full h-2 sm:h-3 mb-2 sm:mb-3">
                                                         <div
                                                             className="progress-bar-dynamic"
                                                             style={{
@@ -4229,55 +4229,59 @@ const StressTest: React.FC = () => {
                                                         ></div>
                                                     </div>
                                                 )}
-                                                <div className="text-sm text-gray-400">
+                                                <div className="text-xs sm:text-sm text-gray-400">
                                                     {testProgress || (isRunning ? '正在收集性能数据...' : '等待开始测试')}
                                                 </div>
                                             </div>
 
                                             {/* 对比分析功能 */}
                                             {(result || !isRunning) && (
-                                                <div className="bg-gray-800/50 rounded-lg p-4">
-                                                    <div className="flex items-center justify-between mb-4">
-                                                        <h4 className="text-base font-semibold text-white flex items-center">
-                                                            <BarChart3 className="w-5 h-5 mr-2 text-purple-400" />
-                                                            性能对比分析
+                                                <div className="bg-gray-800/50 rounded-lg p-3 sm:p-4">
+                                                    <div className="flex items-center justify-between mb-3 sm:mb-4">
+                                                        <h4 className="text-sm sm:text-base font-semibold text-white flex items-center">
+                                                            <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-purple-400" />
+                                                            <span className="hidden sm:inline">性能对比分析</span>
+                                                            <span className="sm:hidden">对比分析</span>
                                                         </h4>
                                                         <button
+                                                            type="button"
                                                             onClick={() => {
                                                                 setShowComparison(!showComparison);
                                                                 if (!showComparison) {
                                                                     fetchHistoricalTests();
                                                                 }
                                                             }}
-                                                            className="text-xs px-2 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors"
+                                                            className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 bg-purple-600 hover:bg-purple-700 text-white rounded transition-colors"
                                                         >
-                                                            {showComparison ? '隐藏对比' : '开启对比'}
+                                                            {showComparison ? '隐藏' : '开启'}
                                                         </button>
                                                     </div>
 
                                                     {showComparison && (
-                                                        <div className="space-y-4">
+                                                        <div className="space-y-3 sm:space-y-4">
                                                             {/* 对比模式选择 */}
-                                                            <div className="flex space-x-3">
+                                                            <div className="flex space-x-2 sm:space-x-3">
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => setComparisonMode('historical')}
-                                                                    className={`text-sm px-3 py-2 rounded transition-colors ${comparisonMode === 'historical'
+                                                                    className={`text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 rounded transition-colors ${comparisonMode === 'historical'
                                                                         ? 'bg-blue-600 text-white'
                                                                         : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                                                                         }`}
                                                                 >
-                                                                    历史对比
+                                                                    <span className="hidden sm:inline">历史对比</span>
+                                                                    <span className="sm:hidden">历史</span>
                                                                 </button>
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => setComparisonMode('baseline')}
-                                                                    className={`text-sm px-3 py-2 rounded transition-colors ${comparisonMode === 'baseline'
+                                                                    className={`text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 rounded transition-colors ${comparisonMode === 'baseline'
                                                                         ? 'bg-blue-600 text-white'
                                                                         : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                                                                         }`}
                                                                 >
-                                                                    基线对比
+                                                                    <span className="hidden sm:inline">基线对比</span>
+                                                                    <span className="sm:hidden">基线</span>
                                                                 </button>
                                                             </div>
 
@@ -4287,7 +4291,7 @@ const StressTest: React.FC = () => {
                                                                     <select
                                                                         value={selectedBaseline}
                                                                         onChange={(e) => setSelectedBaseline(e.target.value)}
-                                                                        className="w-full text-sm px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                                                                        className="w-full text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 bg-gray-700 border border-gray-600 rounded text-white"
                                                                         title="选择历史测试进行对比"
                                                                     >
                                                                         <option value="">选择历史测试...</option>
@@ -4302,7 +4306,7 @@ const StressTest: React.FC = () => {
 
                                                             {/* 基线数据显示 */}
                                                             {comparisonMode === 'baseline' && baselineData && (
-                                                                <div className="text-sm text-gray-400 bg-gray-700/30 rounded p-2">
+                                                                <div className="text-xs sm:text-sm text-gray-400 bg-gray-700/30 rounded p-2">
                                                                     基线: {baselineData.name}
                                                                 </div>
                                                             )}
@@ -4322,9 +4326,9 @@ const StressTest: React.FC = () => {
 
                                                                 if (comparisonResult) {
                                                                     return (
-                                                                        <div className="bg-gray-700/30 rounded-lg p-3">
-                                                                            <div className="grid grid-cols-2 gap-4 text-sm">
-                                                                                <div className="space-y-3">
+                                                                        <div className="bg-gray-700/30 rounded-lg p-2 sm:p-3">
+                                                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm">
+                                                                                <div className="space-y-2 sm:space-y-3">
                                                                                     <div className="flex justify-between py-1">
                                                                                         <span className="text-gray-400">响应时间:</span>
                                                                                         <span className={`font-medium ${comparisonResult.responseTime.changePercent > 0 ? 'text-red-400' : 'text-green-400'}`}>
@@ -4338,7 +4342,7 @@ const StressTest: React.FC = () => {
                                                                                         </span>
                                                                                     </div>
                                                                                 </div>
-                                                                                <div className="space-y-3">
+                                                                                <div className="space-y-2 sm:space-y-3">
                                                                                     <div className="flex justify-between py-1">
                                                                                         <span className="text-gray-400">错误率:</span>
                                                                                         <span className={`font-medium ${comparisonResult.errorRate.changePercent > 0 ? 'text-red-400' : 'text-green-400'}`}>
@@ -4371,50 +4375,50 @@ const StressTest: React.FC = () => {
                                             )}
                                         </div>
                                     ) : (
-                                        <div className="bg-gray-900/50 rounded-lg p-8 min-h-[500px] flex items-center justify-center">
-                                            <div className="text-center max-w-2xl w-full">
-                                                <TrendingUp className="w-20 h-20 text-gray-400 mx-auto mb-6" />
-                                                <div className="text-gray-300 font-medium text-2xl mb-3">专业压力测试监控</div>
-                                                <div className="text-gray-500 text-lg mb-8">
+                                        <div className="bg-gray-900/50 rounded-lg p-4 sm:p-6 lg:p-8 min-h-[300px] sm:min-h-[400px] lg:min-h-[500px] flex items-center justify-center">
+                                            <div className="text-center max-w-sm sm:max-w-lg lg:max-w-2xl w-full">
+                                                <TrendingUp className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 text-gray-400 mx-auto mb-4 sm:mb-6" />
+                                                <div className="text-gray-300 font-medium text-lg sm:text-xl lg:text-2xl mb-2 sm:mb-3">专业压力测试监控</div>
+                                                <div className="text-gray-500 text-sm sm:text-base lg:text-lg mb-6 sm:mb-8">
                                                     开始测试后将显示实时性能数据
                                                 </div>
 
                                                 {/* 功能预览 */}
-                                                <div className="bg-gray-800/50 rounded-lg p-6 text-base">
-                                                    <div className="text-gray-300 font-medium mb-6 text-lg">监控功能预览</div>
-                                                    <div className="grid grid-cols-2 gap-6 text-left">
-                                                        <div className="space-y-4">
-                                                            <div className="flex items-center space-x-3 text-gray-400">
-                                                                <BarChart3 className="w-5 h-5 text-blue-400" />
+                                                <div className="bg-gray-800/50 rounded-lg p-3 sm:p-4 lg:p-6 text-sm sm:text-base">
+                                                    <div className="text-gray-300 font-medium mb-4 sm:mb-6 text-base sm:text-lg">监控功能预览</div>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:gap-6 text-left">
+                                                        <div className="space-y-2 sm:space-y-3 lg:space-y-4">
+                                                            <div className="flex items-center space-x-2 sm:space-x-3 text-gray-400">
+                                                                <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
                                                                 <span>实时请求统计</span>
                                                             </div>
-                                                            <div className="flex items-center space-x-3 text-gray-400">
-                                                                <Clock className="w-5 h-5 text-yellow-400" />
+                                                            <div className="flex items-center space-x-2 sm:space-x-3 text-gray-400">
+                                                                <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
                                                                 <span>响应时间监控</span>
                                                             </div>
-                                                            <div className="flex items-center space-x-3 text-gray-400">
-                                                                <TrendingUp className="w-5 h-5 text-purple-400" />
+                                                            <div className="flex items-center space-x-2 sm:space-x-3 text-gray-400">
+                                                                <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />
                                                                 <span>TPS性能指标</span>
                                                             </div>
                                                         </div>
-                                                        <div className="space-y-4">
-                                                            <div className="flex items-center space-x-3 text-gray-400">
-                                                                <CheckCircle className="w-5 h-5 text-green-400" />
+                                                        <div className="space-y-2 sm:space-y-3 lg:space-y-4">
+                                                            <div className="flex items-center space-x-2 sm:space-x-3 text-gray-400">
+                                                                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
                                                                 <span>成功率分析</span>
                                                             </div>
-                                                            <div className="flex items-center space-x-3 text-gray-400">
-                                                                <AlertTriangle className="w-5 h-5 text-red-400" />
+                                                            <div className="flex items-center space-x-2 sm:space-x-3 text-gray-400">
+                                                                <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-red-400" />
                                                                 <span>错误率监控</span>
                                                             </div>
-                                                            <div className="flex items-center space-x-3 text-gray-400">
-                                                                <Zap className="w-5 h-5 text-blue-400" />
+                                                            <div className="flex items-center space-x-2 sm:space-x-3 text-gray-400">
+                                                                <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
                                                                 <span>WebSocket实时数据</span>
                                                             </div>
                                                         </div>
                                                     </div>
 
-                                                    <div className="mt-6 pt-6 border-t border-gray-700">
-                                                        <div className="text-sm text-gray-500">
+                                                    <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-700">
+                                                        <div className="text-xs sm:text-sm text-gray-500">
                                                             💡 提示：配置测试参数并点击"开始测试"来启动实时监控
                                                         </div>
                                                     </div>
