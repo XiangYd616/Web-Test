@@ -4127,67 +4127,56 @@ const StressTest: React.FC = () => {
                                                 </div>
                                             </div>
 
-                                            {/* 统一性能监控面板 */}
+                                            {/* 实时性能图表 */}
                                             <div className="bg-gray-800/50 rounded-lg p-3 sm:p-4">
                                                 <h4 className="text-sm sm:text-base font-semibold text-white mb-3 sm:mb-4 flex items-center">
-                                                    <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-blue-400" />
-                                                    实时性能监控
+                                                    <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-400" />
+                                                    实时性能趋势
                                                 </h4>
 
-                                                {/* 核心指标 - 紧凑布局 */}
-                                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-                                                    <div className="text-center">
-                                                        <div className="text-xl sm:text-2xl font-bold text-blue-400">
-                                                            {metrics?.currentTPS || result?.metrics?.currentTPS || 0}
+                                                {/* 简化的实时图表区域 */}
+                                                <div className="h-48 sm:h-64 bg-gray-900/50 rounded-lg p-4 flex items-center justify-center">
+                                                    {stressTestData.length > 0 ? (
+                                                        <div className="w-full h-full">
+                                                            {/* 简单的数据点可视化 */}
+                                                            <div className="flex items-end justify-between h-full space-x-1">
+                                                                {stressTestData.slice(-20).map((point, index) => {
+                                                                    const maxThroughput = Math.max(...stressTestData.map(d => d.throughput), 1);
+                                                                    const height = Math.max(10, (point.throughput / maxThroughput) * 100);
+                                                                    return (
+                                                                        <div
+                                                                            key={index}
+                                                                            className="bg-blue-500 rounded-t opacity-70 hover:opacity-100 transition-opacity"
+                                                                            style={{
+                                                                                height: `${height}%`,
+                                                                                minHeight: '4px',
+                                                                                width: `${100 / 20}%`
+                                                                            }}
+                                                                            title={`TPS: ${point.throughput}, 响应时间: ${point.responseTime}ms`}
+                                                                        />
+                                                                    );
+                                                                })}
+                                                            </div>
+
+                                                            {/* 图表标签 */}
+                                                            <div className="flex justify-between mt-2 text-xs text-gray-400">
+                                                                <span>TPS趋势</span>
+                                                                <span>最近20个数据点</span>
+                                                            </div>
                                                         </div>
-                                                        <div className="text-xs text-gray-400">当前TPS</div>
-                                                    </div>
-                                                    <div className="text-center">
-                                                        <div className="text-xl sm:text-2xl font-bold text-green-400">
-                                                            {result?.metrics?.p95ResponseTime || metrics?.p95ResponseTime || 0}ms
+                                                    ) : (
+                                                        <div className="text-center">
+                                                            <BarChart3 className="w-12 h-12 text-gray-500 mx-auto mb-3" />
+                                                            <div className="text-gray-400 text-sm">
+                                                                {isRunning ? '等待数据...' : '开始测试后显示实时图表'}
+                                                            </div>
                                                         </div>
-                                                        <div className="text-xs text-gray-400">P95响应时间</div>
-                                                    </div>
-                                                    <div className="text-center">
-                                                        <div className="text-xl sm:text-2xl font-bold text-yellow-400">
-                                                            {result?.metrics?.totalRequests || metrics?.totalRequests || 0}
-                                                        </div>
-                                                        <div className="text-xs text-gray-400">总请求数</div>
-                                                    </div>
-                                                    <div className="text-center">
-                                                        <div className="text-xl sm:text-2xl font-bold text-red-400">
-                                                            {(() => {
-                                                                const errorRate = metrics?.errorRate || result?.metrics?.errorRate || 0;
-                                                                return typeof errorRate === 'string' ? errorRate : errorRate.toFixed(1);
-                                                            })()}%
-                                                        </div>
-                                                        <div className="text-xs text-gray-400">错误率</div>
-                                                    </div>
+                                                    )}
                                                 </div>
 
-                                                {/* 详细数据 - 单行紧凑显示 */}
-                                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 text-xs sm:text-sm">
-                                                    <div className="flex justify-between py-1">
-                                                        <span className="text-gray-400">峰值TPS:</span>
-                                                        <span className="text-green-400 font-medium">{result?.metrics?.peakTPS || metrics?.peakTPS || 0}</span>
-                                                    </div>
-                                                    <div className="flex justify-between py-1">
-                                                        <span className="text-gray-400">P50响应:</span>
-                                                        <span className="text-blue-400 font-medium">{result?.metrics?.p50ResponseTime || metrics?.p50ResponseTime || 0}ms</span>
-                                                    </div>
-                                                    <div className="flex justify-between py-1">
-                                                        <span className="text-gray-400">成功率:</span>
-                                                        <span className="text-green-400 font-medium">
-                                                            {result?.metrics?.totalRequests ?
-                                                                (((result?.metrics?.successfulRequests || 0) / result.metrics.totalRequests * 100).toFixed(1)) :
-                                                                '100.0'
-                                                            }%
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex justify-between py-1">
-                                                        <span className="text-gray-400">活跃用户:</span>
-                                                        <span className="text-purple-400 font-medium">{metrics?.activeUsers || result?.metrics?.activeUsers || 0}</span>
-                                                    </div>
+                                                {/* 图表说明 */}
+                                                <div className="mt-3 text-xs text-gray-500 text-center">
+                                                    💡 实时显示TPS变化趋势，鼠标悬停查看详细数据
                                                 </div>
                                             </div>
 
