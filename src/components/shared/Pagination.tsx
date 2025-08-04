@@ -130,11 +130,18 @@ const Pagination: React.FC<PaginationProps> = ({
             <select
               value={pageSize}
               onChange={(e) => handlePageSizeChange(parseInt(e.target.value))}
-              className="px-3 py-1.5 bg-gray-700 border border-gray-600 rounded-md text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[70px]"
+              className="px-3 py-1.5 bg-gray-700 border border-gray-600 rounded-md text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[70px] appearance-none cursor-pointer"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                backgroundPosition: 'right 0.5rem center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: '1.5em 1.5em',
+                paddingRight: '2.5rem'
+              }}
               aria-label="选择每页显示数量"
             >
               {pageSizeOptions.map(size => (
-                <option key={size} value={size} className="bg-gray-700 text-white">{size} 条</option>
+                <option key={size} value={size}>{size} 条</option>
               ))}
             </select>
           </div>
