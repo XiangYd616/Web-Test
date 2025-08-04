@@ -4049,7 +4049,8 @@ const StressTest: React.FC = () => {
                                                     type="number"
                                                     value={testConfig.users}
                                                     onChange={(e) => setTestConfig((prev: StressTestConfig) => ({ ...prev, users: parseInt(e.target.value) || 0 }))}
-                                                    className="w-full pl-16 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    className="w-full pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    style={{ paddingLeft: '2.5rem' }}
                                                     min="1"
                                                     max="1000"
                                                     placeholder="用户数"
@@ -4068,7 +4069,8 @@ const StressTest: React.FC = () => {
                                                     type="number"
                                                     value={testConfig.duration}
                                                     onChange={(e) => setTestConfig((prev: StressTestConfig) => ({ ...prev, duration: parseInt(e.target.value) || 0 }))}
-                                                    className="w-full pl-16 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    className="w-full pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    style={{ paddingLeft: '2.5rem' }}
                                                     min="10"
                                                     max="3600"
                                                     placeholder="时长"
@@ -4087,7 +4089,8 @@ const StressTest: React.FC = () => {
                                                     type="number"
                                                     value={testConfig.rampUp}
                                                     onChange={(e) => setTestConfig((prev: StressTestConfig) => ({ ...prev, rampUp: parseInt(e.target.value) || 0 }))}
-                                                    className="w-full pl-16 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    className="w-full pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    style={{ paddingLeft: '2.5rem' }}
                                                     min="1"
                                                     max="300"
                                                     placeholder="加压时间"
