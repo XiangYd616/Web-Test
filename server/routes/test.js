@@ -3430,12 +3430,12 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
-    const responseData = await response.json();
+    const testResponseData = await response.json();
 
     // 从响应中提取代理IP（如果可用）
     let proxyIp = '未知';
-    if (responseData && responseData.origin) {
-      proxyIp = responseData.origin;
+    if (testResponseData && testResponseData.origin) {
+      proxyIp = testResponseData.origin;
     }
 
     console.log(`✅ 代理连接测试成功: ${proxy.host}:${proxyPort}, 响应时间: ${responseTime}ms`);
