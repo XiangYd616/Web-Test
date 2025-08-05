@@ -41,11 +41,8 @@ const StressTestDetail = lazy(() => import('../../pages/StressTestDetail'));
 const StressTestReport = lazy(() => import('../../pages/StressTestReport'));
 const SecurityReport = lazy(() => import('../../pages/SecurityReport'));
 
-// 系统管理
+// 系统管理 - 只保留Admin页面，其他管理功能都在Admin内部
 const Admin = lazy(() => import('../../pages/Admin'));
-const SystemStatus = lazy(() => import('../../pages/SystemStatus'));
-const SystemLogs = lazy(() => import('../../pages/SystemLogs'));
-const BackupManagement = lazy(() => import('../../pages/BackupManagement'));
 
 // 用户相关
 const UserProfile = lazy(() => import('../../pages/UserProfile'));
@@ -332,7 +329,7 @@ const AppRoutes: React.FC = () => {
         </LazyPageWrapper>
       } />
 
-      {/* 系统管理 - 需要管理员权限 */}
+      {/* 系统管理 - 只保留Admin页面，所有管理功能都在Admin内部 */}
       <Route path="admin" element={
         <AdminGuard>
           <LazyPageWrapper>
@@ -340,27 +337,11 @@ const AppRoutes: React.FC = () => {
           </LazyPageWrapper>
         </AdminGuard>
       } />
-      <Route path="system-status" element={
-        <AdminGuard>
-          <LazyPageWrapper>
-            <SystemStatus />
-          </LazyPageWrapper>
-        </AdminGuard>
-      } />
-      <Route path="system-logs" element={
-        <AdminGuard>
-          <LazyPageWrapper>
-            <SystemLogs />
-          </LazyPageWrapper>
-        </AdminGuard>
-      } />
-      <Route path="backup-management" element={
-        <AdminGuard>
-          <LazyPageWrapper>
-            <BackupManagement />
-          </LazyPageWrapper>
-        </AdminGuard>
-      } />
+
+      {/* 重定向旧的管理员页面到Admin页面 */}
+      <Route path="system-status" element={<Navigate to="/admin" replace />} />
+      <Route path="system-logs" element={<Navigate to="/admin" replace />} />
+      <Route path="backup-management" element={<Navigate to="/admin" replace />} />
     </Routes>
   );
 };
