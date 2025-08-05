@@ -3351,7 +3351,7 @@ function getTroubleshootingTips(errorCode) {
  * POST /api/test/proxy-test
  */
 router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
-  const { proxy, testUrl = 'http://httpbin.org/ip', fastTest = true } = req.body;
+  const { proxy, testUrl = 'http://icanhazip.com', fastTest = true } = req.body;
 
   // 验证代理配置
   if (!proxy || !proxy.enabled) {
@@ -3408,7 +3408,7 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
       controller.abort();
-    }, 5000); // 5秒超时，提高响应速度
+    }, 3000); // 3秒超时，更快的响应
 
     // 发送测试请求
     const response = await fetch(testUrl, {
