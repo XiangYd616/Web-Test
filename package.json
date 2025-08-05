@@ -44,6 +44,7 @@
     "env:check": "node scripts/check-env-config.cjs",
     "env:validate": "cd server && npm run validate-env",
     "env:separation": "node scripts/validate-env-separation.cjs",
+    "env:report": "node scripts/env-usage-report.cjs",
     "port:check": "node scripts/port-config.cjs",
     "clean": "rimraf dist dist-electron node_modules/.cache",
     "clean:all": "rimraf dist dist-electron node_modules"

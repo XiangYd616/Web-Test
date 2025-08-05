@@ -38,15 +38,15 @@ export function getSecurityConfig(): SecurityConfig {
     enableAccessLogging: isProduction,
 
     // 认证安全配置
-    maxLoginAttempts: parseInt(process.env.REACT_APP_MAX_LOGIN_ATTEMPTS || '5'),
-    lockoutDuration: parseInt(process.env.REACT_APP_LOCKOUT_DURATION || '15'), // 15分钟
-    sessionTimeout: parseInt(process.env.REACT_APP_SESSION_TIMEOUT || '86400000'), // 24小时
+    maxLoginAttempts: parseInt(import.meta.env.VITE_MAX_LOGIN_ATTEMPTS || '5'),
+    lockoutDuration: parseInt(import.meta.env.VITE_LOCKOUT_DURATION || '15'), // 15分钟
+    sessionTimeout: parseInt(import.meta.env.VITE_SESSION_TIMEOUT || '86400000'), // 24小时
     requireStrongPassword: isProduction,
 
     // API安全配置
     enableRateLimiting: true,
-    apiRateLimit: parseInt(process.env.REACT_APP_API_RATE_LIMIT || '100'),
-    adminApiRateLimit: parseInt(process.env.REACT_APP_ADMIN_API_RATE_LIMIT || '50'),
+    apiRateLimit: parseInt(import.meta.env.VITE_API_RATE_LIMIT || '100'),
+    adminApiRateLimit: parseInt(import.meta.env.VITE_ADMIN_API_RATE_LIMIT || '50'),
 
     // 内容安全配置
     enableCSP: isProduction,
