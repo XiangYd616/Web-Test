@@ -3527,7 +3527,8 @@ const StressTest: React.FC = () => {
                         username: testConfig.proxy.username || '',
                         password: testConfig.proxy.password || ''
                     },
-                    testUrl: 'https://httpbin.org/ip' // 用于测试代理的简单URL
+                    testUrl: 'http://httpbin.org/ip', // 使用HTTP进行快速测试
+                    fastTest: true
                 })
             });
 
