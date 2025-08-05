@@ -76,11 +76,18 @@ class RealK6Engine {
       duration = '30s',
       rampUpTime = '10s',
       testType = 'load',
-      thresholds = {}
+      thresholds = {},
+      proxy = null,
+      timeout = 30
     } = config;
 
     console.log(`🚀 Starting k6 stress test: ${url}`);
     console.log(`📊 Config: ${vus} VUs, ${duration} duration, ${rampUpTime} ramp-up`);
+
+    // 🌐 代理配置日志
+    if (proxy && proxy.enabled) {
+      console.log(`🌐 Using proxy: ${proxy.type}://${proxy.host}:${proxy.port}`);
+    }
 
     try {
       // 生成k6测试脚本
@@ -90,14 +97,17 @@ class RealK6Engine {
         duration,
         rampUpTime,
         testType,
-        thresholds
+        thresholds,
+        proxy,
+        timeout
       });
 
       // 执行k6测试
       const result = await this.executeK6Test(scriptPath, {
         vus,
         duration,
-        rampUpTime
+        rampUpTime,
+        proxy
       });
 
       // 清理临时文件
@@ -114,7 +124,21 @@ class RealK6Engine {
    * 生成k6测试脚本
    */
   async generateK6Script(config) {
-    const { url, testType, thresholds } = config;
+    const { url, testType, thresholds, proxy, timeout = 30 } = config;
+
+    // 🌐 构建代理配置
+    let proxyConfig = '';
+    if (proxy && proxy.enabled) {
+      const proxyUrl = proxy.username && proxy.password
+        ? `${proxy.type}://${proxy.username}:${proxy.password}@${proxy.host}:${proxy.port}`
+        : `${proxy.type}://${proxy.host}:${proxy.port}`;
+
+      proxyConfig = `
+// 代理配置
+const proxyUrl = '${proxyUrl}';
+console.log('🌐 Using proxy:', proxyUrl.replace(/\\/\\/.*:.*@/, '//***:***@'));
+`;
+    }
 
     const script = `
 import http from 'k6/http';
@@ -123,6 +147,9 @@ import { Rate } from 'k6/metrics';
 
 // 自定义指标
 const errorRate = new Rate('errors');
+const successRate = new Rate('success');
+
+${proxyConfig}
 
 export const options = {
   stages: [
@@ -132,27 +159,59 @@ export const options = {
   ],
   thresholds: {
     http_req_duration: ['p(95)<${thresholds.responseTime || 5000}'],
-    http_req_failed: ['rate<${thresholds.errorRate || 0.9}'],
-    errors: ['rate<${thresholds.errorRate || 0.9}'],
+    http_req_failed: ['rate<${(thresholds.errorRate || 90) / 100}'],
+    errors: ['rate<${(thresholds.errorRate || 90) / 100}'],
+    success: ['rate>0.1'], // 至少10%的请求成功
     ...${JSON.stringify(thresholds.custom || {})}
   },
+  // 🕐 超时配置
+  timeout: '${timeout}s',
+  // 🌐 代理配置（如果启用）
+  ${proxy && proxy.enabled ? `
+  // k6会自动使用环境变量中的代理设置
+  ` : ''}
 };
 
 export default function() {
-  const response = http.get('${url}', {
+  // 🌐 构建请求参数
+  const params = {
     headers: {
       'User-Agent': 'TestWebApp-k6/1.0',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+      'Cache-Control': 'no-cache',
     },
-  });
-  
-  const result = check(response, {
+    timeout: '${timeout}s',
+  };
+
+  let response;
+  try {
+    response = http.get('${url}', params);
+  } catch (error) {
+    console.error('Request failed:', error);
+    errorRate.add(1);
+    successRate.add(0);
+    return;
+  }
+
+  // 📊 检查响应
+  const checks = check(response, {
     'status is 200': (r) => r.status === 200,
-    'response time < ${thresholds.responseTime || 500}ms': (r) => r.timings.duration < ${thresholds.responseTime || 500},
-    'content size > 0': (r) => r.body.length > 0,
+    'status is not 0': (r) => r.status !== 0,
+    'response time < ${timeout * 1000}ms': (r) => r.timings.duration < ${timeout * 1000},
+    'content received': (r) => r.body && r.body.length > 0,
   });
-  
-  errorRate.add(!result);
-  
+
+  // 📈 记录指标
+  const isSuccess = checks && response.status === 200;
+  errorRate.add(!isSuccess);
+  successRate.add(isSuccess);
+
+  // 🐛 调试信息
+  if (!isSuccess) {
+    console.log(\`❌ Request failed: status=\${response.status}, duration=\${response.timings.duration}ms, size=\${response.body ? response.body.length : 0}\`);
+  }
+
   // 根据测试类型调整请求间隔
   ${this.getTestTypeLogic(testType)}
 }
@@ -221,11 +280,28 @@ export function setup() {
         scriptPath
       ];
 
+      // 🌐 设置代理环境变量
+      const env = { ...process.env };
+      if (options.proxy && options.proxy.enabled) {
+        const proxyUrl = options.proxy.username && options.proxy.password
+          ? `${options.proxy.type}://${options.proxy.username}:${options.proxy.password}@${options.proxy.host}:${options.proxy.port}`
+          : `${options.proxy.type}://${options.proxy.host}:${options.proxy.port}`;
+
+        // 设置k6代理环境变量
+        env.HTTP_PROXY = proxyUrl;
+        env.HTTPS_PROXY = proxyUrl;
+        env.http_proxy = proxyUrl;
+        env.https_proxy = proxyUrl;
+
+        console.log(`🌐 Setting proxy environment variables: ${proxyUrl.replace(/\/\/.*:.*@/, '//***:***@')}`);
+      }
+
       console.log(`🎯 Executing: k6 ${args.join(' ')}`);
 
       const k6Process = spawn('k6', args, {
         stdio: ['pipe', 'pipe', 'pipe'],
-        cwd: process.cwd()
+        cwd: process.cwd(),
+        env: env // 🌐 传递包含代理配置的环境变量
       });
 
       let stdout = '';

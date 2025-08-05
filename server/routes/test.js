@@ -1439,224 +1439,7 @@ router.post('/stress/cleanup-all', adminAuth, asyncHandler(async (req, res) => {
   }
 }));
 
-/**
- * 客户端代理请求 - 绕过CORS限制
- * GET /api/proxy
- */
-router.get('/proxy', asyncHandler(async (req, res) => {
-  const { url } = req.query;
-  const targetMethod = req.headers['x-target-method'] || 'GET';
-  const targetURL = req.headers['x-target-url'] || url;
 
-  if (!targetURL) {
-    return res.status(400).json({
-      success: false,
-      message: '缺少目标URL参数'
-    });
-  }
-
-  try {
-    console.log(`🔄 代理请求: ${targetMethod} ${targetURL}`);
-
-    // 构建请求选项
-    const requestOptions = {
-      method: targetMethod,
-      headers: {
-        'User-Agent': 'Test-Web-Client-Proxy/1.0',
-        'Accept': '*/*'
-      }
-    };
-
-    // 如果是POST/PUT等方法，转发请求体
-    if (['POST', 'PUT', 'PATCH'].includes(targetMethod.toUpperCase())) {
-      requestOptions.body = JSON.stringify(req.body);
-      requestOptions.headers['Content-Type'] = 'application/json';
-    }
-
-    const response = await fetch(targetURL, requestOptions);
-    const responseText = await response.text();
-
-    // 设置CORS头
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Target-URL, X-Target-Method');
-
-    // 转发响应
-    res.status(response.status);
-    res.set('Content-Type', response.headers.get('content-type') || 'text/plain');
-    res.send(responseText);
-
-  } catch (error) {
-    console.error('代理请求失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '代理请求失败',
-      error: error.message
-    });
-  }
-}));
-
-/**
- * 客户端直连代理请求 - 绕过所有代理设置
- * GET /api/proxy/direct
- */
-router.get('/proxy/direct', asyncHandler(async (req, res) => {
-  const { url } = req.query;
-  const targetMethod = req.headers['x-target-method'] || 'GET';
-  const targetURL = req.headers['x-target-url'] || url;
-
-  if (!targetURL) {
-    return res.status(400).json({
-      success: false,
-      message: '缺少目标URL参数'
-    });
-  }
-
-  try {
-    console.log(`🔗 直连请求: ${targetMethod} ${targetURL}`);
-
-    // 构建直连请求选项（不使用任何代理）
-    const requestOptions = {
-      method: targetMethod,
-      headers: {
-        'User-Agent': 'Test-Web-Direct-Client/1.0',
-        'Accept': '*/*'
-      },
-      // 明确不使用代理的配置
-      agent: false
-    };
-
-    // 如果是POST/PUT等方法，转发请求体
-    if (['POST', 'PUT', 'PATCH'].includes(targetMethod.toUpperCase())) {
-      requestOptions.body = JSON.stringify(req.body);
-      requestOptions.headers['Content-Type'] = 'application/json';
-    }
-
-    const response = await fetch(targetURL, requestOptions);
-    const responseText = await response.text();
-
-    // 设置CORS头
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Target-URL, X-Target-Method, X-Direct-Mode');
-
-    // 转发响应
-    res.status(response.status);
-    res.set('Content-Type', response.headers.get('content-type') || 'text/plain');
-    res.send(responseText);
-
-  } catch (error) {
-    console.error('直连请求失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '直连请求失败',
-      error: error.message
-    });
-  }
-}));
-
-/**
- * 客户端直连代理请求 - POST方法
- * POST /api/proxy/direct
- */
-router.post('/proxy/direct', asyncHandler(async (req, res) => {
-  const { url } = req.query;
-  const targetMethod = req.headers['x-target-method'] || 'POST';
-  const targetURL = req.headers['x-target-url'] || url;
-
-  if (!targetURL) {
-    return res.status(400).json({
-      success: false,
-      message: '缺少目标URL参数'
-    });
-  }
-
-  try {
-    console.log(`🔗 直连POST请求: ${targetMethod} ${targetURL}`);
-
-    const requestOptions = {
-      method: targetMethod,
-      headers: {
-        'User-Agent': 'Test-Web-Direct-Client/1.0',
-        'Content-Type': 'application/json',
-        'Accept': '*/*'
-      },
-      body: JSON.stringify(req.body),
-      agent: false // 不使用代理
-    };
-
-    const response = await fetch(targetURL, requestOptions);
-    const responseText = await response.text();
-
-    // 设置CORS头
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Target-URL, X-Target-Method, X-Direct-Mode');
-
-    res.status(response.status);
-    res.set('Content-Type', response.headers.get('content-type') || 'text/plain');
-    res.send(responseText);
-
-  } catch (error) {
-    console.error('直连POST请求失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '直连请求失败',
-      error: error.message
-    });
-  }
-}));
-
-/**
- * 客户端代理请求 - POST方法
- * POST /api/proxy
- */
-router.post('/proxy', asyncHandler(async (req, res) => {
-  const { url } = req.query;
-  const targetMethod = req.headers['x-target-method'] || 'POST';
-  const targetURL = req.headers['x-target-url'] || url;
-
-  if (!targetURL) {
-    return res.status(400).json({
-      success: false,
-      message: '缺少目标URL参数'
-    });
-  }
-
-  try {
-    console.log(`🔄 代理POST请求: ${targetMethod} ${targetURL}`);
-
-    const requestOptions = {
-      method: targetMethod,
-      headers: {
-        'User-Agent': 'Test-Web-Client-Proxy/1.0',
-        'Content-Type': 'application/json',
-        'Accept': '*/*'
-      },
-      body: JSON.stringify(req.body)
-    };
-
-    const response = await fetch(targetURL, requestOptions);
-    const responseText = await response.text();
-
-    // 设置CORS头
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Target-URL, X-Target-Method');
-
-    res.status(response.status);
-    res.set('Content-Type', response.headers.get('content-type') || 'text/plain');
-    res.send(responseText);
-
-  } catch (error) {
-    console.error('代理POST请求失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '代理请求失败',
-      error: error.message
-    });
-  }
-}));
 
 /**
  * 压力测试
@@ -1674,7 +1457,9 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
     testType,
     method,
     timeout,
-    thinkTime
+    thinkTime,
+    // 🌐 代理配置
+    proxy
   } = req.body;
 
   // URL验证已由中间件完成，可以直接使用验证后的URL
@@ -1692,8 +1477,32 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
     testType: testType || 'gradual',
     method: method || 'GET',
     timeout: timeout || 10,
-    thinkTime: thinkTime || 1
+    thinkTime: thinkTime || 1,
+    // 🌐 代理配置
+    proxy: proxy || null
   };
+
+  // 🔧 调试：记录接收到的配置参数
+  console.log('🔧 后端接收到的测试配置:', {
+    testId,
+    url: validatedURL,
+    receivedParams: { users, duration, rampUpTime, testType, method, timeout, thinkTime, proxy },
+    finalConfig: testConfig,
+    durationCheck: {
+      received: duration,
+      type: typeof duration,
+      final: testConfig.duration,
+      expectedMs: testConfig.duration * 1000
+    },
+    // 🌐 代理配置日志
+    proxyConfig: proxy ? {
+      enabled: proxy.enabled,
+      type: proxy.type,
+      host: proxy.host,
+      port: proxy.port,
+      hasAuth: !!(proxy.username && proxy.password)
+    } : null
+  });
 
   // 🔧 添加配置验证
   const configValidation = validateStressTestConfig(testConfig);

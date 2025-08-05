@@ -515,24 +515,24 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
     return undefined;
   };
 
-  // 获取错误率
+  // 获取错误率 - 使用统一的计算逻辑
   const getErrorRate = (record: TestRecord) => {
-    // 优先使用顶层的 errorRate
+    // 优先使用已计算的错误率
     if (record.errorRate !== undefined && record.errorRate !== null) {
       return record.errorRate;
     }
 
     // 尝试从 results.metrics 获取
-    if (record.results?.metrics?.errorRate !== undefined) {
+    if (record.results?.metrics?.errorRate !== undefined && record.results?.metrics?.errorRate !== null) {
       return record.results.metrics.errorRate;
     }
 
     // 尝试从 results.summary 获取
-    if (record.results?.summary?.errorRate !== undefined) {
+    if (record.results?.summary?.errorRate !== undefined && record.results?.summary?.errorRate !== null) {
       return record.results.summary.errorRate;
     }
 
-    // 尝试计算：失败请求数 / 总请求数
+    // 从失败请求数和总请求数计算
     const failed = record.failedRequests || record.results?.metrics?.failedRequests || 0;
     const total = getTotalRequests(record);
 
@@ -1067,14 +1067,29 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
                         <h3 className="text-lg font-medium text-gray-900 dark:text-white truncate">
                           {record.testName}
                         </h3>
-                        <span
-                          className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${getStatusStyle(record.status)} ${getStatusTextColorClass(record.status)}`}
-                          role="status"
-                          aria-label={`测试状态: ${getStatusText(record.status)}`}
-                        >
-                          {getStatusIcon(record.status)}
-                          {getStatusText(record.status)}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${getStatusStyle(record.status)} ${getStatusTextColorClass(record.status)}`}
+                            role="status"
+                            aria-label={`测试状态: ${getStatusText(record.status)}`}
+                          >
+                            {getStatusIcon(record.status)}
+                            {getStatusText(record.status)}
+                          </span>
+
+                          {/* 代理使用标识 */}
+                          {record.config?.proxy?.enabled && (
+                            <span
+                              className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border bg-purple-100 dark:bg-purple-600/60 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-500/50"
+                              title={`代理: ${record.config.proxy.type?.toUpperCase() || 'HTTP'} - ${record.config.proxy.host}:${record.config.proxy.port || 8080}`}
+                            >
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
+                              </svg>
+                              代理
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       {/* 错误信息和取消原因显示 */}

@@ -108,6 +108,29 @@ const StressTestDetail: React.FC = () => {
   const [showRetestDialog, setShowRetestDialog] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
 
+  // 统一的错误率计算函数
+  const calculateErrorRate = (record: StressTestRecord | null, metrics: any = {}) => {
+    if (!record) return 0;
+
+    // 优先使用已计算的错误率
+    if (record.errorRate !== undefined && record.errorRate !== null) {
+      return record.errorRate;
+    }
+    if (metrics.errorRate !== undefined && metrics.errorRate !== null) {
+      return metrics.errorRate;
+    }
+
+    // 从失败请求数和总请求数计算
+    const failed = record.failedRequests || metrics.failedRequests || 0;
+    const total = record.totalRequests || metrics.totalRequests || 0;
+
+    if (total > 0) {
+      return (failed / total) * 100;
+    }
+
+    return 0;
+  };
+
   // 图表控制状态
   const [timeRange, setTimeRange] = useState<'all' | 'last5min' | 'last1min'>('all');
   const [dataInterval, setDataInterval] = useState<'1s' | '5s' | '10s'>('1s');
@@ -947,7 +970,7 @@ const StressTestDetail: React.FC = () => {
                         <div className="text-right">
                           <span className="text-lg font-bold text-red-400">{metrics.failedRequests || 0}</span>
                           <span className="text-xs text-gray-500 ml-2">
-                            ({((metrics.failedRequests || 0) / (metrics.totalRequests || 1) * 100).toFixed(1)}%)
+                            ({calculateErrorRate(record, metrics).toFixed(1)}%)
                           </span>
                         </div>
                       </div>
@@ -980,7 +1003,7 @@ const StressTestDetail: React.FC = () => {
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-gray-400">错误率</span>
-                        <span className="text-lg font-bold text-yellow-400">{(metrics.errorRate || 0).toFixed(2)}%</span>
+                        <span className="text-lg font-bold text-yellow-400">{calculateErrorRate(record, metrics).toFixed(2)}%</span>
                       </div>
                     </div>
                   </div>

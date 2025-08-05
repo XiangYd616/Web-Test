@@ -493,6 +493,12 @@ class RealStressTestEngine {
 
     Logger.info(`启动压力测试: ${url}`, { testId, config: testConfig });
 
+    // 🌐 如果配置了代理，优先使用k6引擎
+    if (testConfig.proxy && testConfig.proxy.enabled) {
+      Logger.info(`🌐 检测到代理配置，使用k6引擎执行压力测试`);
+      return await this.runWithK6Engine(url, testConfig, testId);
+    }
+
     try {
       // 验证参数
       Validator.validateConfig(testConfig);
@@ -1965,6 +1971,100 @@ class RealStressTestEngine {
       Logger.error('❌ 清理测试房间时发生错误:', error);
       throw error;
     }
+  }
+
+  /**
+   * 🌐 使用k6引擎执行代理压力测试
+   */
+  async runWithK6Engine(url, config, testId) {
+    try {
+      Logger.info(`🌐 使用k6引擎执行代理压力测试: ${testId}`);
+
+      // 导入k6引擎
+      const { RealK6Engine } = require('./realK6Engine');
+      const k6Engine = new RealK6Engine();
+
+      // 检查k6是否可用
+      const isAvailable = await k6Engine.checkAvailability();
+      if (!isAvailable) {
+        Logger.warn('k6引擎不可用，尝试安装...');
+        const installed = await k6Engine.install();
+        if (!installed) {
+          throw new Error('k6引擎安装失败，无法执行代理压力测试');
+        }
+      }
+
+      // 转换配置格式为k6引擎格式
+      const k6Config = {
+        url: url,
+        vus: config.users || 10,
+        duration: `${config.duration || 30}s`,
+        rampUpTime: `${config.rampUpTime || 5}s`,
+        testType: config.testType || 'load',
+        timeout: config.timeout || 30,
+        proxy: config.proxy,
+        thresholds: {
+          responseTime: (config.timeout || 30) * 1000, // 转换为毫秒
+          errorRate: 90 // 90%错误率阈值
+        }
+      };
+
+      Logger.info(`🎯 k6配置:`, k6Config);
+
+      // 执行k6测试
+      const k6Results = await k6Engine.runStressTest(k6Config);
+
+      // 转换k6结果为标准格式
+      const standardResults = this.convertK6Results(k6Results, testId, url, config);
+
+      Logger.info(`✅ k6代理压力测试完成: ${testId}`);
+      return { success: true, data: standardResults };
+
+    } catch (error) {
+      Logger.error(`❌ k6代理压力测试失败: ${testId}`, error);
+      return this.handleTestFailure(testId, error);
+    }
+  }
+
+  /**
+   * 转换k6结果为标准格式
+   */
+  convertK6Results(k6Results, testId, url, config) {
+    const now = new Date().toISOString();
+    const metrics = k6Results.metrics || {};
+
+    return {
+      testId: testId,
+      url: url,
+      config: config,
+      startTime: now,
+      endTime: now,
+      duration: (config.duration || 30) * 1000, // 转换为毫秒
+      status: k6Results.success ? 'completed' : 'failed',
+      summary: {
+        totalRequests: metrics.totalRequests || 0,
+        successfulRequests: metrics.successfulRequests || 0,
+        failedRequests: metrics.failedRequests || 0,
+        averageResponseTime: metrics.averageResponseTime || 0,
+        minResponseTime: metrics.minResponseTime || 0,
+        maxResponseTime: metrics.maxResponseTime || 0,
+        p95ResponseTime: metrics.p95ResponseTime || 0,
+        requestsPerSecond: metrics.requestsPerSecond || 0,
+        errorRate: metrics.errorRate || 0,
+        throughput: metrics.throughput || 0,
+        // 🌐 代理相关指标
+        proxyUsed: true,
+        dataReceived: metrics.dataReceived || 0,
+        dataSent: metrics.dataSent || 0,
+        activeUsers: metrics.activeUsers || config.users || 0
+      },
+      engine: 'k6',
+      proxyUsed: true,
+      proxyConfig: config.proxy,
+      // 🐛 调试信息
+      rawK6Output: k6Results.rawOutput,
+      k6Metrics: metrics
+    };
   }
 }
 
