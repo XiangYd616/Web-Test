@@ -6,8 +6,6 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   plugins: [
     react({
-      // 启用React Fast Refresh
-      fastRefresh: true,
       // 优化JSX运行时
       jsxRuntime: 'automatic'
     })

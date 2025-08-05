@@ -1440,6 +1440,225 @@ router.post('/stress/cleanup-all', adminAuth, asyncHandler(async (req, res) => {
 }));
 
 /**
+ * 客户端代理请求 - 绕过CORS限制
+ * GET /api/proxy
+ */
+router.get('/proxy', asyncHandler(async (req, res) => {
+  const { url } = req.query;
+  const targetMethod = req.headers['x-target-method'] || 'GET';
+  const targetURL = req.headers['x-target-url'] || url;
+
+  if (!targetURL) {
+    return res.status(400).json({
+      success: false,
+      message: '缺少目标URL参数'
+    });
+  }
+
+  try {
+    console.log(`🔄 代理请求: ${targetMethod} ${targetURL}`);
+
+    // 构建请求选项
+    const requestOptions = {
+      method: targetMethod,
+      headers: {
+        'User-Agent': 'Test-Web-Client-Proxy/1.0',
+        'Accept': '*/*'
+      }
+    };
+
+    // 如果是POST/PUT等方法，转发请求体
+    if (['POST', 'PUT', 'PATCH'].includes(targetMethod.toUpperCase())) {
+      requestOptions.body = JSON.stringify(req.body);
+      requestOptions.headers['Content-Type'] = 'application/json';
+    }
+
+    const response = await fetch(targetURL, requestOptions);
+    const responseText = await response.text();
+
+    // 设置CORS头
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Target-URL, X-Target-Method');
+
+    // 转发响应
+    res.status(response.status);
+    res.set('Content-Type', response.headers.get('content-type') || 'text/plain');
+    res.send(responseText);
+
+  } catch (error) {
+    console.error('代理请求失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '代理请求失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 客户端直连代理请求 - 绕过所有代理设置
+ * GET /api/proxy/direct
+ */
+router.get('/proxy/direct', asyncHandler(async (req, res) => {
+  const { url } = req.query;
+  const targetMethod = req.headers['x-target-method'] || 'GET';
+  const targetURL = req.headers['x-target-url'] || url;
+
+  if (!targetURL) {
+    return res.status(400).json({
+      success: false,
+      message: '缺少目标URL参数'
+    });
+  }
+
+  try {
+    console.log(`🔗 直连请求: ${targetMethod} ${targetURL}`);
+
+    // 构建直连请求选项（不使用任何代理）
+    const requestOptions = {
+      method: targetMethod,
+      headers: {
+        'User-Agent': 'Test-Web-Direct-Client/1.0',
+        'Accept': '*/*'
+      },
+      // 明确不使用代理的配置
+      agent: false
+    };
+
+    // 如果是POST/PUT等方法，转发请求体
+    if (['POST', 'PUT', 'PATCH'].includes(targetMethod.toUpperCase())) {
+      requestOptions.body = JSON.stringify(req.body);
+      requestOptions.headers['Content-Type'] = 'application/json';
+    }
+
+    const response = await fetch(targetURL, requestOptions);
+    const responseText = await response.text();
+
+    // 设置CORS头
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Target-URL, X-Target-Method, X-Direct-Mode');
+
+    // 转发响应
+    res.status(response.status);
+    res.set('Content-Type', response.headers.get('content-type') || 'text/plain');
+    res.send(responseText);
+
+  } catch (error) {
+    console.error('直连请求失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '直连请求失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 客户端直连代理请求 - POST方法
+ * POST /api/proxy/direct
+ */
+router.post('/proxy/direct', asyncHandler(async (req, res) => {
+  const { url } = req.query;
+  const targetMethod = req.headers['x-target-method'] || 'POST';
+  const targetURL = req.headers['x-target-url'] || url;
+
+  if (!targetURL) {
+    return res.status(400).json({
+      success: false,
+      message: '缺少目标URL参数'
+    });
+  }
+
+  try {
+    console.log(`🔗 直连POST请求: ${targetMethod} ${targetURL}`);
+
+    const requestOptions = {
+      method: targetMethod,
+      headers: {
+        'User-Agent': 'Test-Web-Direct-Client/1.0',
+        'Content-Type': 'application/json',
+        'Accept': '*/*'
+      },
+      body: JSON.stringify(req.body),
+      agent: false // 不使用代理
+    };
+
+    const response = await fetch(targetURL, requestOptions);
+    const responseText = await response.text();
+
+    // 设置CORS头
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Target-URL, X-Target-Method, X-Direct-Mode');
+
+    res.status(response.status);
+    res.set('Content-Type', response.headers.get('content-type') || 'text/plain');
+    res.send(responseText);
+
+  } catch (error) {
+    console.error('直连POST请求失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '直连请求失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 客户端代理请求 - POST方法
+ * POST /api/proxy
+ */
+router.post('/proxy', asyncHandler(async (req, res) => {
+  const { url } = req.query;
+  const targetMethod = req.headers['x-target-method'] || 'POST';
+  const targetURL = req.headers['x-target-url'] || url;
+
+  if (!targetURL) {
+    return res.status(400).json({
+      success: false,
+      message: '缺少目标URL参数'
+    });
+  }
+
+  try {
+    console.log(`🔄 代理POST请求: ${targetMethod} ${targetURL}`);
+
+    const requestOptions = {
+      method: targetMethod,
+      headers: {
+        'User-Agent': 'Test-Web-Client-Proxy/1.0',
+        'Content-Type': 'application/json',
+        'Accept': '*/*'
+      },
+      body: JSON.stringify(req.body)
+    };
+
+    const response = await fetch(targetURL, requestOptions);
+    const responseText = await response.text();
+
+    // 设置CORS头
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Target-URL, X-Target-Method');
+
+    res.status(response.status);
+    res.set('Content-Type', response.headers.get('content-type') || 'text/plain');
+    res.send(responseText);
+
+  } catch (error) {
+    console.error('代理POST请求失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '代理请求失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
  * 压力测试
  * POST /api/test/stress
  */
@@ -3347,7 +3566,199 @@ function getTroubleshootingTips(errorCode) {
 }
 
 /**
- * 代理连接测试
+ * 代理延迟测试（通过代理获取出口IP，然后ping出口IP）
+ * POST /api/test/proxy-latency
+ */
+router.post('/proxy-latency', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
+  const { proxy, testUrl = 'http://httpbin.org/ip' } = req.body;
+
+  // 验证代理配置
+  if (!proxy || !proxy.enabled) {
+    return res.status(400).json({
+      success: false,
+      message: '代理配置无效或未启用'
+    });
+  }
+
+  if (!proxy.host) {
+    return res.status(400).json({
+      success: false,
+      message: '代理地址不能为空'
+    });
+  }
+
+  const startTime = Date.now();
+
+  try {
+    const proxyType = proxy.type || 'http';
+    const proxyPort = proxy.port || 8080;
+    let proxyUrl;
+
+    // 构建代理URL
+    if (proxy.username && proxy.password) {
+      proxyUrl = `${proxyType}://${proxy.username}:${proxy.password}@${proxy.host}:${proxyPort}`;
+    } else {
+      proxyUrl = `${proxyType}://${proxy.host}:${proxyPort}`;
+    }
+
+    console.log(`🌐 通过代理获取出口IP: ${proxy.host}:${proxyPort}`);
+
+    // 使用代理访问测试网站获取出口IP
+    const fetch = require('node-fetch');
+    const { HttpsProxyAgent } = require('https-proxy-agent');
+    const { HttpProxyAgent } = require('http-proxy-agent');
+    const AbortController = require('abort-controller');
+
+    // 根据目标URL协议选择合适的代理agent
+    let agent;
+    const isHttpsTarget = testUrl.startsWith('https://');
+
+    if (isHttpsTarget) {
+      agent = new HttpsProxyAgent(proxyUrl);
+    } else {
+      agent = new HttpProxyAgent(proxyUrl);
+    }
+
+    // 设置超时控制
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, 5000); // 5秒超时
+
+    // 通过代理发送请求获取出口IP
+    const response = await fetch(testUrl, {
+      method: 'GET',
+      agent: agent,
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Test-Web-Proxy-Latency-Test/1.0',
+        'Accept': 'application/json, text/plain, */*'
+      }
+    });
+
+    clearTimeout(timeoutId);
+    const proxyResponseTime = Date.now() - startTime;
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const responseData = await response.json();
+
+    // 从响应中提取出口IP
+    let exitIp = '未知';
+    if (responseData && responseData.origin) {
+      exitIp = responseData.origin;
+    }
+
+    console.log(`✅ 通过代理获取到出口IP: ${exitIp}`);
+
+    // 获取出口IP的地理位置信息
+    let locationInfo = null;
+    if (exitIp && exitIp !== '未知') {
+      try {
+        locationInfo = await geoLocationService.getLocation(exitIp);
+        if (locationInfo) {
+          console.log(`📍 出口IP ${exitIp} 位置: ${locationInfo.country}/${locationInfo.region}`);
+        }
+      } catch (geoError) {
+        console.warn('获取出口IP地理位置信息失败:', geoError.message);
+      }
+    }
+
+    // 测试到出口IP的延迟（关键步骤）
+    let networkLatency = null;
+    if (exitIp && exitIp !== '未知') {
+      try {
+        console.log(`🔍 测试到出口IP ${exitIp} 的网络延迟...`);
+        const ping = require('ping');
+        const pingResult = await ping.promise.probe(exitIp, {
+          timeout: 5,
+          extra: process.platform === 'win32' ? ['-n', '4'] : ['-c', '4'] // ping 4次取平均值
+        });
+
+        if (pingResult.alive) {
+          // 处理不同平台的ping结果
+          const avgTime = pingResult.avg || pingResult.time || pingResult.min;
+          networkLatency = Math.round(parseFloat(avgTime) || 0);
+          console.log(`📊 到出口IP的网络延迟: ${networkLatency}ms`);
+        } else {
+          console.log(`⚠️ 无法ping通出口IP ${exitIp}`);
+        }
+      } catch (pingError) {
+        console.warn('ping测试失败:', pingError.message);
+      }
+    }
+
+    const totalTime = Date.now() - startTime;
+
+    const responseResult = {
+      success: true,
+      message: '代理延迟测试成功',
+      exitIp: exitIp, // 代理出口IP
+      location: locationInfo, // 出口IP地理位置信息
+      proxyResponseTime: proxyResponseTime, // 通过代理访问的响应时间
+      networkLatency: networkLatency, // 到出口IP的网络延迟（主要指标）
+      latency: networkLatency || proxyResponseTime, // 优先显示网络延迟
+      proxyConfig: {
+        host: proxy.host,
+        port: proxyPort,
+        type: proxyType
+      },
+      testUrl: testUrl,
+      timestamp: new Date().toISOString(),
+      totalTestTime: totalTime
+    };
+
+    res.json(responseResult);
+
+  } catch (error) {
+    const totalTime = Date.now() - startTime;
+    console.error('❌ 代理延迟测试失败:', error);
+
+    let errorMessage = '代理延迟测试失败';
+    let errorCode = 'PROXY_LATENCY_TEST_FAILED';
+
+    if (error.code === 'ENOTFOUND') {
+      errorMessage = '无法解析代理服务器地址，请检查主机名';
+      errorCode = 'PROXY_HOST_NOT_FOUND';
+    } else if (error.code === 'ECONNREFUSED') {
+      errorMessage = '代理服务器拒绝连接，请检查端口和防火墙设置';
+      errorCode = 'PROXY_CONNECTION_REFUSED';
+    } else if (error.code === 'ETIMEDOUT') {
+      errorMessage = '连接代理服务器超时，请检查网络连接';
+      errorCode = 'PROXY_CONNECTION_TIMEOUT';
+    } else if (error.message && error.message.includes('407')) {
+      errorMessage = '代理服务器需要身份验证，请检查用户名和密码';
+      errorCode = 'PROXY_AUTH_REQUIRED';
+    } else if (error.message) {
+      errorMessage = `代理延迟测试失败: ${error.message}`;
+    }
+
+    res.status(500).json({
+      success: false,
+      message: errorMessage,
+      error: errorCode,
+      proxyConfig: {
+        host: proxy.host,
+        port: proxy.port || 8080,
+        type: proxy.type || 'http'
+      },
+      timestamp: new Date().toISOString(),
+      totalTestTime: totalTime,
+      troubleshooting: [
+        '检查代理服务器地址和端口是否正确',
+        '确认代理服务器正常工作',
+        '检查代理认证信息（如果需要）',
+        '验证本地网络连接',
+        '确认防火墙设置允许代理连接'
+      ]
+    });
+  }
+}));
+
+/**
+ * 代理连接测试（原有功能保留）
  * POST /api/test/proxy-test
  */
 router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (req, res) => {
