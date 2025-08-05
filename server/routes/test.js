@@ -3438,27 +3438,14 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
       proxyIp = responseData.origin;
     }
 
-    // 查询IP地理位置信息（使用 MaxMind 或 API 备选）
-    let locationInfo = null;
-    if (proxyIp && proxyIp !== '未知') {
-      try {
-        locationInfo = await geoLocationService.getLocation(proxyIp);
-        if (locationInfo) {
-          console.log(`📍 IP ${proxyIp} 位置: ${locationInfo.country}/${locationInfo.region} (${locationInfo.source})`);
-        }
-      } catch (geoError) {
-        console.warn('获取IP地理位置信息失败:', geoError.message);
-        // 地理位置查询失败不影响代理测试结果
-      }
-    }
-
     console.log(`✅ 代理连接测试成功: ${proxy.host}:${proxyPort}, 响应时间: ${responseTime}ms`);
 
-    res.json({
+    // 立即返回响应，不等待地理位置查询
+    const responseData = {
       success: true,
       message: '代理连接测试成功',
       proxyIp: proxyIp, // 实际的出口IP
-      location: locationInfo, // 地理位置信息
+      location: null, // 地理位置信息将异步获取
       responseTime: responseTime,
       proxyConfig: {
         host: proxy.host,
@@ -3467,7 +3454,24 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
       },
       testUrl: testUrl,
       timestamp: new Date().toISOString()
-    });
+    };
+
+    res.json(responseData);
+
+    // 异步查询地理位置信息（不阻塞响应）
+    if (proxyIp && proxyIp !== '未知') {
+      setImmediate(async () => {
+        try {
+          const locationInfo = await geoLocationService.getLocation(proxyIp);
+          if (locationInfo) {
+            console.log(`📍 IP ${proxyIp} 位置: ${locationInfo.country}/${locationInfo.region} (${locationInfo.source})`);
+            // 可以考虑通过WebSocket或其他方式推送给前端
+          }
+        } catch (geoError) {
+          console.warn('获取IP地理位置信息失败:', geoError.message);
+        }
+      });
+    }
 
   } catch (error) {
     console.error('❌ 代理连接测试失败:', error);
