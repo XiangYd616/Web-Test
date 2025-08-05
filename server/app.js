@@ -50,7 +50,7 @@ const app = express();
 const http = require('http');
 const { Server } = require('socket.io');
 
-const PORT = parseInt(process.env.PORT || process.env.API_PORT || process.env.APP_PORT) || 3001;
+const PORT = parseInt(process.env.PORT) || 3001;
 const HOST = process.env.HOST || 'localhost';
 const APP_NAME = process.env.APP_NAME || 'Test Web App';
 const APP_VERSION = process.env.APP_VERSION || '1.0.0';
