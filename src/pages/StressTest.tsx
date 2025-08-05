@@ -3464,16 +3464,23 @@ const StressTest: React.FC = () => {
 
                     progress = Math.min(phaseProgress, 100);
 
-                    // 更详细的时间信息
+                    // 🔧 改进：更精确的时间信息显示
+                    const formatTime = (seconds: number) => {
+                        const mins = Math.floor(seconds / 60);
+                        const secs = Math.floor(seconds % 60);
+                        const ms = Math.floor((seconds % 1) * 10); // 显示到0.1秒
+                        return mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')}.${ms}` : `${secs}.${ms}秒`;
+                    };
+
                     if (elapsed < totalDuration) {
                         const remaining = Math.max(0, totalDuration - elapsed);
-                        timeInfo = `${currentPhase} - 已运行 ${Math.floor(elapsed)}秒`;
-                        estimatedRemaining = `预计剩余 ${Math.floor(remaining)}秒`;
+                        timeInfo = `${currentPhase} - 已运行 ${formatTime(elapsed)}`;
+                        estimatedRemaining = `预计剩余 ${formatTime(remaining)}`;
                     } else {
-                        const overtime = Math.floor(elapsed - totalDuration);
-                        timeInfo = `${currentPhase} - 已运行 ${Math.floor(elapsed)}秒`;
+                        const overtime = elapsed - totalDuration;
+                        timeInfo = `${currentPhase} - 已运行 ${formatTime(elapsed)}`;
                         if (overtime > 0) {
-                            estimatedRemaining = `已超时 ${overtime}秒`;
+                            estimatedRemaining = `已超时 ${formatTime(overtime)}`;
                         }
                     }
                 } else {
@@ -3491,7 +3498,13 @@ const StressTest: React.FC = () => {
                             const totalDuration = testConfig.duration + (testConfig.rampUp || 0);
                             const timeProgress = Math.min(elapsed / totalDuration, 1);
                             progress = 5 + (timeProgress * 95);
-                            timeInfo = `已运行 ${Math.floor(elapsed)}秒 (${dataPoints} 数据点)`;
+                            const formatTime = (seconds: number) => {
+                                const mins = Math.floor(seconds / 60);
+                                const secs = Math.floor(seconds % 60);
+                                const ms = Math.floor((seconds % 1) * 10);
+                                return mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')}.${ms}` : `${secs}.${ms}秒`;
+                            };
+                            timeInfo = `已运行 ${formatTime(elapsed)} (${dataPoints} 数据点)`;
                         } else {
                             progress = 5 + (dataProgress * 95);
                             timeInfo = `已收集 ${dataPoints} 个数据点`;
@@ -3505,19 +3518,27 @@ const StressTest: React.FC = () => {
 
             case 'completed':
                 progress = 100;
+                // 🔧 改进：完成状态也使用精确时间格式
+                const formatCompletedTime = (seconds: number) => {
+                    const mins = Math.floor(seconds / 60);
+                    const secs = Math.floor(seconds % 60);
+                    const ms = Math.floor((seconds % 1) * 10);
+                    return mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')}.${ms}` : `${secs}.${ms}秒`;
+                };
+
                 if (result?.startTime && result?.endTime) {
-                    const duration = Math.floor((new Date(result.endTime).getTime() - new Date(result.startTime).getTime()) / 1000);
-                    timeInfo = `测试完成，总用时 ${duration}秒`;
+                    const duration = (new Date(result.endTime).getTime() - new Date(result.startTime).getTime()) / 1000;
+                    timeInfo = `测试完成，总用时 ${formatCompletedTime(duration)}`;
                 } else if (result?.startTime) {
-                    const duration = Math.floor((now - new Date(result.startTime).getTime()) / 1000);
-                    timeInfo = `测试完成，总用时 ${duration}秒`;
+                    const duration = (now - new Date(result.startTime).getTime()) / 1000;
+                    timeInfo = `测试完成，总用时 ${formatCompletedTime(duration)}`;
                 } else {
                     timeInfo = '测试已完成';
                 }
                 break;
 
             case 'cancelled':
-                // 🔧 修复：保持实际运行进度，基于真实时间计算
+                // 🔧 修复：保持实际运行进度，基于真实时间计算，使用精确时间格式
                 if (result?.startTime) {
                     const startTime = new Date(result.startTime).getTime();
                     const elapsed = Math.max(0, (now - startTime) / 1000);
@@ -3525,7 +3546,14 @@ const StressTest: React.FC = () => {
                         (testConfig.warmupDuration || 0) + (testConfig.cooldownDuration || 0);
                     const timeProgress = Math.min(elapsed / totalDuration, 1);
                     progress = 5 + (timeProgress * 95); // 基于实际时间的真实进度
-                    timeInfo = `测试已取消，运行了 ${Math.floor(elapsed)}秒`;
+
+                    const formatCancelledTime = (seconds: number) => {
+                        const mins = Math.floor(seconds / 60);
+                        const secs = Math.floor(seconds % 60);
+                        const ms = Math.floor((seconds % 1) * 10);
+                        return mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')}.${ms}` : `${secs}.${ms}秒`;
+                    };
+                    timeInfo = `测试已取消，运行了 ${formatCancelledTime(elapsed)}`;
                 } else {
                     progress = Math.max(5, stressTestData.length > 0 ? 30 : 5);
                     timeInfo = '测试已取消';
@@ -3533,7 +3561,7 @@ const StressTest: React.FC = () => {
                 break;
 
             case 'failed':
-                // 🔧 修复：保持实际运行进度，基于真实时间计算
+                // 🔧 修复：保持实际运行进度，基于真实时间计算，使用精确时间格式
                 if (result?.startTime) {
                     const startTime = new Date(result.startTime).getTime();
                     const elapsed = Math.max(0, (now - startTime) / 1000);
@@ -3541,7 +3569,14 @@ const StressTest: React.FC = () => {
                         (testConfig.warmupDuration || 0) + (testConfig.cooldownDuration || 0);
                     const timeProgress = Math.min(elapsed / totalDuration, 1);
                     progress = 5 + (timeProgress * 95); // 基于实际时间的真实进度
-                    timeInfo = `测试失败，运行了 ${Math.floor(elapsed)}秒`;
+
+                    const formatFailedTime = (seconds: number) => {
+                        const mins = Math.floor(seconds / 60);
+                        const secs = Math.floor(seconds % 60);
+                        const ms = Math.floor((seconds % 1) * 10);
+                        return mins > 0 ? `${mins}:${secs.toString().padStart(2, '0')}.${ms}` : `${secs}.${ms}秒`;
+                    };
+                    timeInfo = `测试失败，运行了 ${formatFailedTime(elapsed)}`;
                 } else {
                     progress = 5;
                     timeInfo = '测试启动失败';
@@ -3560,7 +3595,7 @@ const StressTest: React.FC = () => {
         };
     }, [testStatus, testConfig, result, stressTestData.length]);
 
-    // 定期更新进度条（用于动态显示）
+    // 定期更新进度条（用于动态显示）- 🔧 提高更新频率以显示精确时间
     useEffect(() => {
         let intervalId: NodeJS.Timeout;
 
@@ -3570,7 +3605,7 @@ const StressTest: React.FC = () => {
                 // 强制重新渲染以更新进度条
                 // 这会触发calculateTestProgress的重新计算
                 setTestProgress(prev => prev); // 触发重新渲染
-            }, 1000); // 每秒更新一次
+            }, 100); // 🔧 改进：每100毫秒更新一次，提供更精确的时间显示
         }
 
         return () => {
