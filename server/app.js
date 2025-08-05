@@ -10,7 +10,8 @@ const compression = require('compression');
 const morgan = require('morgan');
 const path = require('path');
 const fs = require('fs');
-require('dotenv').config();
+// 加载后端专用环境变量配置
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 // 导入路由
 const authRoutes = require('./routes/auth');

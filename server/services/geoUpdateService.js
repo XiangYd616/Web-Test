@@ -3,8 +3,7 @@ const path = require('path');
 const cron = require('node-cron');
 const GeoDBDownloader = require('../scripts/download-geodb');
 
-// 确保从正确的位置加载 .env 文件
-require('dotenv').config({ path: path.join(__dirname, '../.env') });
+// 环境变量已在主应用中加载，无需重复加载
 
 /**
  * MaxMind GeoLite2 数据库自动更新服务
