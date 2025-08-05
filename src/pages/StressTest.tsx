@@ -3466,8 +3466,8 @@ const StressTest: React.FC = () => {
     useEffect(() => {
         let intervalId: NodeJS.Timeout;
 
-        // 在测试运行中时启动定时器，完成状态下也保持一段时间的更新
-        if (testStatus === 'running' || (testStatus === 'completed' && result)) {
+        // 在测试运行中时启动定时器，完成状态下永久保持更新
+        if (testStatus === 'running' || ['completed', 'cancelled', 'failed'].includes(testStatus)) {
             intervalId = setInterval(() => {
                 // 强制重新渲染以更新进度条
                 // 这会触发calculateTestProgress的重新计算
@@ -3482,12 +3482,18 @@ const StressTest: React.FC = () => {
         };
     }, [testStatus, result]);
 
-    // 确保测试完成后进度条保持显示
+    // 确保测试完成后进度条永久保持显示
     useEffect(() => {
-        if (testStatus === 'completed' && result && !testProgress) {
-            setTestProgress('测试已完成');
+        // 为所有完成状态确保有进度信息
+        if (['completed', 'cancelled', 'failed'].includes(testStatus) && (result || metrics) && !testProgress) {
+            const statusMessages = {
+                completed: '测试已完成',
+                cancelled: '测试已取消',
+                failed: '测试失败'
+            };
+            setTestProgress(statusMessages[testStatus as keyof typeof statusMessages]);
         }
-    }, [testStatus, result, testProgress]);
+    }, [testStatus, result, metrics, testProgress]);
 
     // 导出数据处理函数
     const handleExportData = (data: any) => {
@@ -4126,8 +4132,8 @@ const StressTest: React.FC = () => {
                                 />
                             </div>
 
-                            {/* 集成的测试进度显示 - 修复完成后进度条消失问题 */}
-                            {(testProgress || backgroundTestInfo || testStatus !== 'idle' || ['completed', 'cancelled', 'failed'].includes(testStatus) || result) && (
+                            {/* 集成的测试进度显示 - 永久保持显示直到重置 */}
+                            {(testProgress || backgroundTestInfo || testStatus !== 'idle' || result || metrics) && (
                                 <div className="mt-4 pt-4 border-t border-gray-700/50">
                                     {(() => {
                                         const progressData = calculateTestProgress();
@@ -4154,7 +4160,7 @@ const StressTest: React.FC = () => {
                                                     </span>
                                                 </div>
 
-                                                {/* 动态进度条 - 始终显示 */}
+                                                {/* 动态进度条 - 测试完成后永久显示 */}
                                                 <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
                                                     <div
                                                         className={`test-progress-dynamic h-2 rounded-full transition-all duration-300 ${progressData.progress >= 100 ? 'progress-100' :
