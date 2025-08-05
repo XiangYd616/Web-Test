@@ -34,25 +34,10 @@ class GeoUpdateService {
   init() {
     console.log('🔄 初始化 GeoLite2 自动更新服务...');
 
-    // 调试：检查环境变量
     const licenseKey = process.env.MAXMIND_LICENSE_KEY;
-    console.log('🔍 调试信息：');
-    console.log(`   当前文件位置: ${__filename}`);
-    console.log(`   服务目录: ${__dirname}`);
-    console.log(`   .env 文件路径: ${path.join(__dirname, '../.env')}`);
-    console.log(`   .env 文件存在: ${fs.existsSync(path.join(__dirname, '../.env'))}`);
-    console.log(`   MAXMIND_LICENSE_KEY 存在: ${!!licenseKey}`);
-    if (licenseKey) {
-      console.log(`   密钥长度: ${licenseKey.length} 字符`);
-      console.log(`   密钥前缀: ${licenseKey.substring(0, 8)}...`);
-    }
 
     if (!licenseKey) {
       console.log('⚠️  未设置 MAXMIND_LICENSE_KEY，地理位置自动更新已禁用');
-      console.log('💡 获取许可证密钥：https://www.maxmind.com/en/geolite2/signup');
-      console.log('🔧 设置方法：在 .env 文件中添加 MAXMIND_LICENSE_KEY=your_key');
-      console.log('📁 当前工作目录:', process.cwd());
-      console.log('📄 .env 文件路径:', path.join(process.cwd(), '.env'));
       return;
     }
 
@@ -147,7 +132,6 @@ class GeoUpdateService {
 
     // 检查许可证密钥是否可用
     if (!process.env.MAXMIND_LICENSE_KEY) {
-      console.log('⚠️  未设置许可证密钥，跳过更新检查');
       return false;
     }
 
