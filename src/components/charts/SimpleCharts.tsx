@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
 import { format } from 'date-fns';
+import React, { useMemo, useState } from 'react';
 
 import { Area, AreaChart, Bar, BarChart, Brush, CartesianGrid, Cell, ComposedChart, Funnel, FunnelChart, LabelList, Legend, Line, LineChart, Pie, PieChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
@@ -63,10 +63,40 @@ export const AdvancedStressTestChart: React.FC<AdvancedStressTestChartProps> = (
       });
     }
 
-    return filteredData.map(item => ({
-      ...item,
-      time: typeof item.time === 'number' ? format(new Date(item.time), 'HH:mm:ss') : item.time
-    }));
+    // 🔧 修复：使用相对时间显示，基于过滤后数据的实际时间范围
+    if (filteredData.length === 0) {
+      return [];
+    }
+
+    // 使用过滤后数据的第一个时间点作为相对时间的起点
+    const startTime = filteredData[0].timestamp || new Date(filteredData[0].time).getTime();
+
+    // 如果数据被时间范围过滤了，需要计算实际的测试开始时间偏移
+    let testStartOffset = 0;
+    if (timeRange !== 'all' && data && data.length > 0) {
+      // 原始数据的第一个时间点
+      const originalStartTime = data[0].timestamp || new Date(data[0].time).getTime();
+      // 过滤后数据相对于原始数据的时间偏移
+      testStartOffset = (startTime - originalStartTime) / 1000;
+    }
+
+    return filteredData.map(item => {
+      const currentTime = item.timestamp || new Date(item.time).getTime();
+      const elapsedSeconds = (currentTime - startTime) / 1000 + testStartOffset;
+
+      const minutes = Math.floor(elapsedSeconds / 60);
+      const seconds = Math.floor(elapsedSeconds % 60);
+      const ms = Math.floor((elapsedSeconds % 1) * 100);
+
+      const relativeTime = minutes > 0 ?
+        `${minutes}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}` :
+        `${seconds}.${ms.toString().padStart(2, '0')}`;
+
+      return {
+        ...item,
+        time: relativeTime
+      };
+    });
   }, [data, timeRange]);
 
   const colors = {
@@ -1385,7 +1415,7 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
         activeUsers: group.activeUsers,
         phase: group.phase
       }))
-      .slice(-60); // 只保留最近60秒的数据
+      .slice(-250); // 🔧 修复：保留250个数据点，平衡性能和完整性
   }, [realTimeData]);
 
   return (
