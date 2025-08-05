@@ -164,9 +164,6 @@
       "dist/",
       "coverage/",
       "logs/"
-    ],
-    "env": {
-      "NODE_ENV": "development"
-    }
+    ]
   }
 }
