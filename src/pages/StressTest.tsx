@@ -4179,7 +4179,11 @@ const StressTest: React.FC = () => {
                                             测试 <span className="text-blue-300 font-medium">{testConfig.duration}</span> 秒，
                                             采用 <span className="text-blue-300 font-medium">
                                                 {testConfig.testType === 'gradual' ? '梯度加压' :
-                                                    testConfig.testType === 'spike' ? '峰值冲击' : '恒定负载'}
+                                                    testConfig.testType === 'spike' ? '峰值冲击' :
+                                                        testConfig.testType === 'constant' ? '恒定负载' :
+                                                            testConfig.testType === 'stress' ? '压力极限' :
+                                                                testConfig.testType === 'load' ? '负载测试' :
+                                                                    testConfig.testType === 'volume' ? '容量测试' : '未知类型'}
                                             </span> 模式
                                         </div>
                                     </div>
@@ -4402,6 +4406,62 @@ const StressTest: React.FC = () => {
                                                             }`}
                                                     >
                                                         {testConfig.testType === 'stress' && (
+                                                            <div className="w-2 h-2 sm:w-1.5 sm:h-1.5 bg-white rounded-full"></div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* 负载测试 */}
+                                            <div
+                                                className={`border-2 rounded-lg p-4 sm:p-3 cursor-pointer transition-all min-h-[60px] ${testConfig.testType === 'load'
+                                                    ? 'border-orange-500 bg-orange-500/10'
+                                                    : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
+                                                    }`}
+                                                onClick={() => setTestConfig((prev: StressTestConfig) => ({ ...prev, testType: 'load' }))}
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center space-x-3 sm:space-x-2">
+                                                        <div className="w-10 h-10 sm:w-8 sm:h-8 bg-orange-500/20 rounded-lg flex items-center justify-center">
+                                                            <Users className="w-5 h-5 sm:w-4 sm:h-4 text-orange-400" />
+                                                        </div>
+                                                        <h5 className="font-medium text-white text-base sm:text-sm">负载测试</h5>
+                                                    </div>
+                                                    <div
+                                                        className={`w-5 h-5 sm:w-4 sm:h-4 rounded-full border-2 transition-all flex items-center justify-center ${testConfig.testType === 'load'
+                                                            ? 'border-orange-500 bg-orange-500'
+                                                            : 'border-gray-500 bg-gray-700/50'
+                                                            }`}
+                                                    >
+                                                        {testConfig.testType === 'load' && (
+                                                            <div className="w-2 h-2 sm:w-1.5 sm:h-1.5 bg-white rounded-full"></div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* 容量测试 */}
+                                            <div
+                                                className={`border-2 rounded-lg p-4 sm:p-3 cursor-pointer transition-all min-h-[60px] ${testConfig.testType === 'volume'
+                                                    ? 'border-yellow-500 bg-yellow-500/10'
+                                                    : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
+                                                    }`}
+                                                onClick={() => setTestConfig((prev: StressTestConfig) => ({ ...prev, testType: 'volume' }))}
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center space-x-3 sm:space-x-2">
+                                                        <div className="w-10 h-10 sm:w-8 sm:h-8 bg-yellow-500/20 rounded-lg flex items-center justify-center">
+                                                            <BarChart3 className="w-5 h-5 sm:w-4 sm:h-4 text-yellow-400" />
+                                                        </div>
+                                                        <h5 className="font-medium text-white text-base sm:text-sm">容量测试</h5>
+                                                    </div>
+                                                    <div
+                                                        className={`w-5 h-5 sm:w-4 sm:h-4 rounded-full border-2 transition-all flex items-center justify-center ${testConfig.testType === 'volume'
+                                                            ? 'border-yellow-500 bg-yellow-500'
+                                                            : 'border-gray-500 bg-gray-700/50'
+                                                            }`}
+                                                    >
+                                                        {testConfig.testType === 'volume' && (
                                                             <div className="w-2 h-2 sm:w-1.5 sm:h-1.5 bg-white rounded-full"></div>
                                                         )}
                                                     </div>
@@ -4942,7 +5002,10 @@ const StressTest: React.FC = () => {
                                                 <span className="text-white font-medium">
                                                     {testConfig.testType === 'gradual' ? '梯度加压' :
                                                         testConfig.testType === 'spike' ? '峰值测试' :
-                                                            testConfig.testType === 'constant' ? '恒定负载' : '压力极限'}
+                                                            testConfig.testType === 'constant' ? '恒定负载' :
+                                                                testConfig.testType === 'stress' ? '压力极限' :
+                                                                    testConfig.testType === 'load' ? '负载测试' :
+                                                                        testConfig.testType === 'volume' ? '容量测试' : '未知类型'}
                                                 </span>
                                             </div>
                                         </div>
@@ -5291,7 +5354,10 @@ const StressTest: React.FC = () => {
                                                 <div className="text-lg font-bold text-cyan-400">
                                                     {testConfig.testType === 'gradual' ? '梯度加压' :
                                                         testConfig.testType === 'spike' ? '峰值测试' :
-                                                            testConfig.testType === 'constant' ? '恒定负载' : '压力极限'}
+                                                            testConfig.testType === 'constant' ? '恒定负载' :
+                                                                testConfig.testType === 'stress' ? '压力极限' :
+                                                                    testConfig.testType === 'load' ? '负载测试' :
+                                                                        testConfig.testType === 'volume' ? '容量测试' : '未知类型'}
                                                 </div>
                                                 <div className="text-xs text-gray-400">测试类型</div>
                                             </div>
