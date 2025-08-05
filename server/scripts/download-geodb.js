@@ -25,7 +25,7 @@ class GeoDBDownloader {
     this.licenseKey = process.env.MAXMIND_LICENSE_KEY;
     this.dataDir = path.join(__dirname, '../data');
     this.baseUrl = 'https://download.maxmind.com/app/geoip_download';
-    
+
     // 确保数据目录存在
     if (!fs.existsSync(this.dataDir)) {
       fs.mkdirSync(this.dataDir, { recursive: true });
@@ -44,21 +44,21 @@ class GeoDBDownloader {
 
     const url = `${this.baseUrl}?edition_id=${edition}&license_key=${this.licenseKey}&suffix=tar.gz`;
     const outputPath = path.join(this.dataDir, filename);
-    
+
     console.log(`📥 下载 ${edition}...`);
-    
+
     try {
       // 下载压缩文件
       const tempFile = path.join(this.dataDir, `${edition}.tar.gz`);
       await this.downloadFile(url, tempFile);
-      
+
       // 解压文件
       console.log(`📦 解压 ${edition}...`);
       await this.extractDatabase(tempFile, outputPath, edition);
-      
+
       // 删除临时文件
       fs.unlinkSync(tempFile);
-      
+
       console.log(`✅ ${edition} 下载完成: ${outputPath}`);
       return true;
     } catch (error) {
@@ -68,40 +68,79 @@ class GeoDBDownloader {
   }
 
   /**
-   * 下载文件
+   * 下载文件（带重试机制）
    */
-  async downloadFile(url, outputPath) {
+  async downloadFile(url, outputPath, retries = 3) {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        console.log(`📥 下载尝试 ${attempt}/${retries}: ${url}`);
+        await this.downloadFileOnce(url, outputPath);
+        console.log(`✅ 下载成功: ${outputPath}`);
+        return;
+      } catch (error) {
+        console.log(`❌ 下载失败 (尝试 ${attempt}/${retries}): ${error.message}`);
+
+        if (attempt === retries) {
+          throw error;
+        }
+
+        // 等待后重试
+        const delay = attempt * 5000; // 5秒, 10秒, 15秒
+        console.log(`⏳ ${delay / 1000} 秒后重试...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  /**
+   * 单次下载文件
+   */
+  async downloadFileOnce(url, outputPath) {
     return new Promise((resolve, reject) => {
       const client = url.startsWith('https:') ? https : http;
-      
+
       const request = client.get(url, (response) => {
         if (response.statusCode === 302 || response.statusCode === 301) {
           // 处理重定向
-          return this.downloadFile(response.headers.location, outputPath)
+          return this.downloadFileOnce(response.headers.location, outputPath)
             .then(resolve)
             .catch(reject);
         }
-        
+
         if (response.statusCode !== 200) {
           reject(new Error(`HTTP ${response.statusCode}: ${response.statusMessage}`));
           return;
         }
-        
+
+        // 显示下载进度
+        const totalSize = parseInt(response.headers['content-length']) || 0;
+        let downloadedSize = 0;
+
         const fileStream = fs.createWriteStream(outputPath);
+
+        response.on('data', (chunk) => {
+          downloadedSize += chunk.length;
+          if (totalSize > 0) {
+            const progress = Math.round((downloadedSize / totalSize) * 100);
+            process.stdout.write(`\r📊 下载进度: ${progress}% (${Math.round(downloadedSize / 1024 / 1024)}MB/${Math.round(totalSize / 1024 / 1024)}MB)`);
+          }
+        });
+
         response.pipe(fileStream);
-        
+
         fileStream.on('finish', () => {
+          console.log(''); // 换行
           fileStream.close();
           resolve();
         });
-        
+
         fileStream.on('error', reject);
       });
-      
+
       request.on('error', reject);
-      request.setTimeout(30000, () => {
+      request.setTimeout(180000, () => { // 增加到3分钟
         request.destroy();
-        reject(new Error('下载超时'));
+        reject(new Error('下载超时 (3分钟)'));
       });
     });
   }
@@ -111,14 +150,14 @@ class GeoDBDownloader {
    */
   async extractDatabase(tarFile, outputPath, edition) {
     const tar = require('tar');
-    
+
     return new Promise((resolve, reject) => {
       // 解压到临时目录
       const tempDir = path.join(this.dataDir, 'temp');
       if (!fs.existsSync(tempDir)) {
         fs.mkdirSync(tempDir);
       }
-      
+
       tar.extract({
         file: tarFile,
         cwd: tempDir
@@ -129,22 +168,22 @@ class GeoDBDownloader {
           reject(new Error('未找到解压的数据库目录'));
           return;
         }
-        
+
         const mmdbFile = fs.readdirSync(path.join(tempDir, extractedDir))
           .find(file => file.endsWith('.mmdb'));
-        
+
         if (!mmdbFile) {
           reject(new Error('未找到 .mmdb 数据库文件'));
           return;
         }
-        
+
         // 移动文件到目标位置
         const sourcePath = path.join(tempDir, extractedDir, mmdbFile);
         fs.renameSync(sourcePath, outputPath);
-        
+
         // 清理临时目录
         fs.rmSync(tempDir, { recursive: true, force: true });
-        
+
         resolve();
       }).catch(reject);
     });
@@ -155,23 +194,23 @@ class GeoDBDownloader {
    */
   async downloadAll() {
     console.log('🌍 开始下载 MaxMind GeoLite2 数据库...');
-    
+
     const databases = [
       { edition: 'GeoLite2-City', filename: 'GeoLite2-City.mmdb' },
       { edition: 'GeoLite2-Country', filename: 'GeoLite2-Country.mmdb' }
     ];
-    
+
     let successCount = 0;
-    
+
     for (const db of databases) {
       const success = await this.downloadDatabase(db.edition, db.filename);
       if (success) {
         successCount++;
       }
     }
-    
+
     console.log(`\n📊 下载完成: ${successCount}/${databases.length} 个数据库`);
-    
+
     if (successCount > 0) {
       console.log('\n✅ 地理位置数据库已准备就绪！');
       console.log('🚀 重启服务器以使用本地数据库查询');
@@ -179,7 +218,7 @@ class GeoDBDownloader {
       console.log('\n❌ 所有数据库下载失败');
       console.log('💡 请检查许可证密钥和网络连接');
     }
-    
+
     return successCount > 0;
   }
 
@@ -191,9 +230,9 @@ class GeoDBDownloader {
       { name: 'GeoLite2-City', file: 'GeoLite2-City.mmdb' },
       { name: 'GeoLite2-Country', file: 'GeoLite2-Country.mmdb' }
     ];
-    
+
     console.log('📋 数据库状态检查:');
-    
+
     for (const db of databases) {
       const filePath = path.join(this.dataDir, db.file);
       if (fs.existsSync(filePath)) {
@@ -211,9 +250,9 @@ class GeoDBDownloader {
 // 命令行使用
 if (require.main === module) {
   const downloader = new GeoDBDownloader();
-  
+
   const command = process.argv[2];
-  
+
   switch (command) {
     case 'download':
       downloader.downloadAll();
