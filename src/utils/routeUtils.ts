@@ -47,11 +47,8 @@ export const routes: RouteInfo[] = [
   { path: '/settings', name: '设置', icon: 'Settings', requiresAuth: true },
   { path: '/subscription', name: '订阅管理', icon: 'CreditCard', requiresAuth: true },
 
-  // 系统管理 - 需要管理员权限
+  // 系统管理 - 只保留Admin页面，所有管理功能都在Admin内部
   { path: '/admin', name: '管理后台', icon: 'Shield', requiresAuth: true, requiresAdmin: true },
-  { path: '/system-status', name: '系统状态', icon: 'Activity', requiresAuth: true, requiresAdmin: true },
-  { path: '/system-logs', name: '系统日志', icon: 'FileText', requiresAuth: true, requiresAdmin: true },
-  { path: '/backup-management', name: '备份管理', icon: 'Archive', requiresAuth: true, requiresAdmin: true },
 
   // 帮助和文档 - 公开访问
   { path: '/help', name: '帮助中心', icon: 'HelpCircle', requiresAuth: false },
