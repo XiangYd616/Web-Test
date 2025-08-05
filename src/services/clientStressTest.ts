@@ -120,6 +120,12 @@ export class ClientStressTestEngine {
       case 'stress':
         await this.executeStressTest(config);
         break;
+      case 'load':
+        await this.executeLoadTest(config);
+        break;
+      case 'volume':
+        await this.executeVolumeTest(config);
+        break;
       default:
         throw new Error(`不支持的测试类型: ${testType}`);
     }
@@ -197,9 +203,56 @@ export class ClientStressTestEngine {
   }
 
   /**
+   * 负载测试 - 模拟真实用户行为
+   */
+  private async executeLoadTest(config: ClientTestConfig): Promise<void> {
+    const { users, duration } = config;
+
+    console.log(`📊 负载测试: ${users}个用户，持续${duration}秒，模拟真实用户行为`);
+
+    // 分批启动用户，模拟真实场景
+    const batchSize = Math.max(1, Math.floor(users / 5)); // 分5批启动
+    const batchInterval = 2000; // 每批间隔2秒
+
+    for (let batch = 0; batch < 5 && this.isRunning; batch++) {
+      const batchUsers = Math.min(batchSize, users - batch * batchSize);
+
+      setTimeout(() => {
+        for (let i = 0; i < batchUsers && this.isRunning; i++) {
+          // 添加随机延迟模拟真实用户
+          setTimeout(() => {
+            if (this.isRunning) {
+              this.startVirtualUser(config, duration * 1000);
+            }
+          }, Math.random() * 1000);
+        }
+      }, batch * batchInterval);
+    }
+
+    await this.waitForTestCompletion(duration * 1000 + 10000); // 额外10秒缓冲
+  }
+
+  /**
+   * 容量测试 - 大量数据处理测试
+   */
+  private async executeVolumeTest(config: ClientTestConfig): Promise<void> {
+    const { users, duration } = config;
+
+    console.log(`📦 容量测试: ${users}个用户，持续${duration}秒，大量数据处理`);
+
+    // 立即启动所有用户，但增加请求频率
+    for (let i = 0; i < users && this.isRunning; i++) {
+      // 容量测试：更高频率的请求
+      this.startVirtualUser(config, duration * 1000, true); // 传递高频模式标志
+    }
+
+    await this.waitForTestCompletion(duration * 1000);
+  }
+
+  /**
    * 启动虚拟用户
    */
-  private startVirtualUser(config: ClientTestConfig, duration: number): void {
+  private startVirtualUser(config: ClientTestConfig, duration: number, highFrequency: boolean = false): void {
     const endTime = Date.now() + duration;
 
     const runUser = async () => {
@@ -222,8 +275,11 @@ export class ClientStressTestEngine {
         this.activeRequests--;
         this.updateProgress();
 
-        // 思考时间（根据优化模式调整）
-        if (this.optimized) {
+        // 思考时间（根据模式调整）
+        if (highFrequency) {
+          // 容量测试模式：极短思考时间，高频请求
+          await this.sleep(Math.random() * 50 + 10);
+        } else if (this.optimized) {
           // 高性能模式：更短的思考时间
           await this.sleep(Math.random() * 200 + 50);
         } else {
