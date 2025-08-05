@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface LocalStressTestConfig {
   url: string;
@@ -57,13 +57,15 @@ export const useLocalStressTest = () => {
   const [systemUsage, setSystemUsage] = useState<SystemUsage | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isAvailable, setIsAvailable] = useState(false);
-  
+
   const cleanupFunctions = useRef<(() => void)[]>([]);
 
   // 检查是否在Electron环境中
   useEffect(() => {
     const checkAvailability = () => {
-      if (typeof window !== 'undefined' && window.environment?.localStressTest) {
+      if (typeof window !== 'undefined' &&
+        window.environment?.localStressTest &&
+        typeof window.environment.localStressTest.start === 'function') {
         setIsAvailable(true);
         console.log('🚀 本地压力测试功能可用');
       } else {
@@ -121,7 +123,7 @@ export const useLocalStressTest = () => {
 
   // 定期更新系统使用情况
   useEffect(() => {
-    if (!isAvailable || !isRunning) return;
+    if (!isAvailable || !isRunning || !window.environment?.localStressTest?.getSystemUsage) return;
 
     const updateSystemUsage = async () => {
       try {
@@ -148,12 +150,16 @@ export const useLocalStressTest = () => {
       throw new Error('测试已在运行中');
     }
 
+    if (!window.environment?.localStressTest?.start) {
+      throw new Error('本地压力测试API不可用');
+    }
+
     try {
       setError(null);
       console.log('🚀 启动本地压力测试:', config);
-      
+
       const result = await window.environment.localStressTest.start(config);
-      
+
       if (!result.success) {
         throw new Error(result.error);
       }
@@ -174,10 +180,14 @@ export const useLocalStressTest = () => {
       throw new Error('本地压力测试功能仅在桌面应用中可用');
     }
 
+    if (!window.environment?.localStressTest?.stop) {
+      throw new Error('本地压力测试API不可用');
+    }
+
     try {
       console.log('🛑 停止本地压力测试');
       const result = await window.environment.localStressTest.stop();
-      
+
       if (!result.success) {
         throw new Error(result.error);
       }
@@ -194,7 +204,7 @@ export const useLocalStressTest = () => {
    * 获取当前测试状态
    */
   const getStatus = useCallback(async () => {
-    if (!isAvailable) {
+    if (!isAvailable || !window.environment?.localStressTest?.getStatus) {
       return null;
     }
 
@@ -249,7 +259,7 @@ export const useLocalStressTest = () => {
     if (!results) return null;
 
     const { responseTimes, successRate, throughput, duration } = results;
-    
+
     if (responseTimes.length === 0) return null;
 
     // 计算百分位数
@@ -279,14 +289,14 @@ export const useLocalStressTest = () => {
     results,
     systemUsage,
     error,
-    
+
     // 方法
     startTest,
     stopTest,
     getStatus,
     getRecommendedConfig,
     getPerformanceMetrics,
-    
+
     // 清理函数
     cleanup: () => {
       cleanupFunctions.current.forEach(cleanup => cleanup());
