@@ -58,6 +58,9 @@ const StressTest: React.FC = () => {
     // 用户统计
     const { recordTestCompletion } = useUserStats();
 
+    // 本地压力测试（桌面版专用）
+    const localStressTest = useLocalStressTest();
+
     const {
         currentRecord,
         startRecording,
@@ -121,6 +124,10 @@ const StressTest: React.FC = () => {
     const [error, setError] = useState<string>('');
 
     const [testTimeoutTimer, setTestTimeoutTimer] = useState<NodeJS.Timeout | null>(null);
+
+    // 本地测试模式状态
+    const [useLocalTest, setUseLocalTest] = useState(false);
+    const [localTestRecommendation, setLocalTestRecommendation] = useState<string>('');
 
     // 统一的生命周期管理器 - 集成队列系统
     const [lifecycleManager] = useState<any>(() => {
@@ -2911,6 +2918,11 @@ const StressTest: React.FC = () => {
             return;
         }
 
+        // 如果选择本地测试且可用，使用本地测试引擎
+        if (useLocalTest && localStressTest.isAvailable) {
+            return handleStartLocalTest();
+        }
+
         // 防止重复启动测试
         if (isRunning || currentStatus === 'STARTING' || currentStatus === 'RUNNING') {
             console.warn('⚠️ 测试已在运行中，防止重复启动');
@@ -2997,6 +3009,60 @@ const StressTest: React.FC = () => {
         }
     };
 
+    // 本地压力测试处理函数
+    const handleStartLocalTest = async () => {
+        try {
+            setError('');
+            setCurrentStatus('STARTING');
+            setStatusMessage('正在启动本地压力测试...');
+
+            // 获取推荐配置
+            const recommended = localStressTest.getRecommendedConfig(testConfig.users);
+
+            // 合并配置
+            const localConfig = {
+                url: testConfig.url,
+                users: testConfig.users,
+                duration: testConfig.duration,
+                testType: testConfig.testType as 'load' | 'stress' | 'spike' | 'volume',
+                rampUp: testConfig.rampUp,
+                thinkTime: testConfig.thinkTime,
+                method: testConfig.method,
+                timeout: testConfig.timeout,
+                ...recommended
+            };
+
+            console.log('🚀 启动本地压力测试:', localConfig);
+
+            // 启动本地测试
+            await localStressTest.startTest(localConfig);
+
+            setCurrentStatus('RUNNING');
+            setStatusMessage('本地压力测试正在运行...');
+            setIsRunning(true);
+
+        } catch (error: any) {
+            console.error('❌ 启动本地测试失败:', error);
+            setError(error.message || '启动本地测试失败');
+            setCurrentStatus('FAILED');
+            setStatusMessage('本地测试启动失败');
+        }
+    };
+
+    // 停止本地测试
+    const handleStopLocalTest = async () => {
+        try {
+            setStatusMessage('正在停止本地测试...');
+            await localStressTest.stopTest();
+            setCurrentStatus('COMPLETED');
+            setStatusMessage('本地测试已停止');
+            setIsRunning(false);
+        } catch (error: any) {
+            console.error('❌ 停止本地测试失败:', error);
+            setError(error.message || '停止本地测试失败');
+        }
+    };
+
     // 完整的重置函数
     const resetTestState = useCallback(() => {
         console.log('🔄 重置所有测试状态...');
@@ -3048,13 +3114,20 @@ const StressTest: React.FC = () => {
             testStatus,
             isCancelling,
             stressTestDataLength: stressTestData.length,
-            lastDataPoint: stressTestData[stressTestData.length - 1]
+            lastDataPoint: stressTestData[stressTestData.length - 1],
+            useLocalTest,
+            localTestRunning: localStressTest.isRunning
         });
 
         // 防止重复取消
         if (isCancelling || cancelInProgress) {
             console.log('⚠️ 正在取消中，忽略重复请求');
             return;
+        }
+
+        // 如果是本地测试，直接停止
+        if (useLocalTest && localStressTest.isRunning) {
+            return handleStopLocalTest();
         }
 
         // 检查是否有正在运行的测试
@@ -4348,6 +4421,52 @@ const StressTest: React.FC = () => {
                                             </div>
                                         </div>
                                     </div>
+
+                                    {/* 本地测试选项（桌面版专用） */}
+                                    {localStressTest.isAvailable && (
+                                        <div className="mb-4 p-4 bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-center space-x-2">
+                                                    <Zap className="w-5 h-5 text-purple-400" />
+                                                    <h4 className="text-lg font-medium text-white">本地压力测试</h4>
+                                                    <span className="px-2 py-1 bg-purple-500/20 text-purple-300 text-xs rounded-full">桌面版专用</span>
+                                                </div>
+                                                <label className="relative inline-flex items-center cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={useLocalTest}
+                                                        onChange={(e) => setUseLocalTest(e.target.checked)}
+                                                        className="sr-only peer"
+                                                    />
+                                                    <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                                </label>
+                                            </div>
+                                            <div className="text-sm text-gray-300 mb-3">
+                                                使用您的本地计算机资源进行压力测试，突破服务器限制，支持更高并发数和更长测试时间。
+                                            </div>
+                                            {useLocalTest && (
+                                                <div className="grid grid-cols-2 gap-3 text-xs">
+                                                    <div className="bg-green-500/10 border border-green-500/20 rounded p-2">
+                                                        <div className="text-green-400 font-medium">✅ 优势</div>
+                                                        <div className="text-gray-300 mt-1">
+                                                            • 无并发限制<br />
+                                                            • 使用本地资源<br />
+                                                            • 更高性能
+                                                        </div>
+                                                    </div>
+                                                    <div className="bg-blue-500/10 border border-blue-500/20 rounded p-2">
+                                                        <div className="text-blue-400 font-medium">📊 推荐配置</div>
+                                                        <div className="text-gray-300 mt-1">
+                                                            {(() => {
+                                                                const rec = localStressTest.getRecommendedConfig(testConfig.users);
+                                                                return `最大用户: ${rec.users || testConfig.users}`;
+                                                            })()}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
 
                                     {/* 测试类型选择 - 移动端优化布局 */}
                                     <div className="mb-4">

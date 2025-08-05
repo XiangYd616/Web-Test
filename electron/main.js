@@ -37,7 +37,7 @@ function createWindow() {
   // 窗口准备好后显示
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
-    
+
     // 如果是开发环境，聚焦到窗口
     if (isDev) {
       mainWindow.webContents.focus();
@@ -91,7 +91,7 @@ function createMenu() {
                 { name: '所有文件', extensions: ['*'] }
               ]
             });
-            
+
             if (!result.canceled) {
               mainWindow.webContents.send('menu-export-report', result.filePath);
             }
@@ -246,7 +246,9 @@ app.on('activate', () => {
 
 // 导入桌面版专用模块
 const LocalDatabase = require('./modules/database');
+const LocalStressTestEngine = require('./modules/localStressTest');
 const localDB = new LocalDatabase();
+const stressTestEngine = new LocalStressTestEngine();
 
 // 应用启动时初始化数据库
 app.whenReady().then(async () => {
@@ -318,6 +320,58 @@ ipcMain.handle('db-export', async (event, format, exportPath) => {
 
 ipcMain.handle('db-stats', async () => {
   return await localDB.getStats();
+});
+
+// 本地压力测试相关IPC处理
+ipcMain.handle('stress-test-start', async (event, config) => {
+  try {
+    await stressTestEngine.startTest(config);
+    return { success: true, testId: stressTestEngine.testId };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('stress-test-stop', async () => {
+  try {
+    await stressTestEngine.stopTest();
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('stress-test-status', async () => {
+  return stressTestEngine.getResults();
+});
+
+ipcMain.handle('stress-test-system-usage', async () => {
+  return stressTestEngine.getSystemUsage();
+});
+
+// 转发压力测试事件到渲染进程
+stressTestEngine.on('testStarted', (data) => {
+  if (mainWindow) {
+    mainWindow.webContents.send('stress-test-started', data);
+  }
+});
+
+stressTestEngine.on('testUpdate', (data) => {
+  if (mainWindow) {
+    mainWindow.webContents.send('stress-test-update', data);
+  }
+});
+
+stressTestEngine.on('testCompleted', (data) => {
+  if (mainWindow) {
+    mainWindow.webContents.send('stress-test-completed', data);
+  }
+});
+
+stressTestEngine.on('testError', (data) => {
+  if (mainWindow) {
+    mainWindow.webContents.send('stress-test-error', data);
+  }
 });
 
 // 防止多个实例
