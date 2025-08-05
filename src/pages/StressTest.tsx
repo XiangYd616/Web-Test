@@ -1432,13 +1432,18 @@ const StressTest: React.FC = () => {
         const mappedStatus = statusMapping[currentStatus] || 'idle';
         setTestStatus(mappedStatus);
 
-        // 🔧 修复：只有在真正需要重置时才清空testProgress
+        // 🔧 修复：只有在真正需要重置时才清空testProgress，保持完成状态的进度显示
         if (currentStatus === 'IDLE' && !['completed', 'cancelled', 'failed'].includes(testStatus)) {
             setTestProgress('');
         } else if (currentStatus !== 'IDLE') {
             setTestProgress(statusMessage);
+        } else if (['completed', 'cancelled', 'failed'].includes(testStatus)) {
+            // 保持完成状态的testProgress不被清空，确保进度条持续显示
+            if (!testProgress) {
+                setTestProgress(testStatus === 'completed' ? '测试已完成' :
+                    testStatus === 'cancelled' ? '测试已取消' : '测试失败');
+            }
         }
-        // 保持完成状态的testProgress不被清空
 
         // 🔧 修复：根据testStatus和currentStatus双重检查更新运行状态
         const runningStates = ['PREPARING', 'WAITING', 'STARTING', 'RUNNING', 'COMPLETING', 'FAILING', 'CANCELLING'];
@@ -3458,8 +3463,8 @@ const StressTest: React.FC = () => {
     useEffect(() => {
         let intervalId: NodeJS.Timeout;
 
-        // 只在测试运行中时启动定时器
-        if (testStatus === 'running') {
+        // 在测试运行中时启动定时器，完成状态下也保持一段时间的更新
+        if (testStatus === 'running' || (testStatus === 'completed' && result)) {
             intervalId = setInterval(() => {
                 // 强制重新渲染以更新进度条
                 // 这会触发calculateTestProgress的重新计算
@@ -3472,7 +3477,14 @@ const StressTest: React.FC = () => {
                 clearInterval(intervalId);
             }
         };
-    }, [testStatus]);
+    }, [testStatus, result]);
+
+    // 确保测试完成后进度条保持显示
+    useEffect(() => {
+        if (testStatus === 'completed' && result && !testProgress) {
+            setTestProgress('测试已完成');
+        }
+    }, [testStatus, result, testProgress]);
 
     // 导出数据处理函数
     const handleExportData = (data: any) => {
@@ -4111,8 +4123,8 @@ const StressTest: React.FC = () => {
                                 />
                             </div>
 
-                            {/* 集成的测试进度显示 */}
-                            {(testProgress || backgroundTestInfo || testStatus !== 'idle' || ['completed', 'cancelled', 'failed'].includes(testStatus)) && (
+                            {/* 集成的测试进度显示 - 修复完成后进度条消失问题 */}
+                            {(testProgress || backgroundTestInfo || testStatus !== 'idle' || ['completed', 'cancelled', 'failed'].includes(testStatus) || result) && (
                                 <div className="mt-4 pt-4 border-t border-gray-700/50">
                                     {(() => {
                                         const progressData = calculateTestProgress();
