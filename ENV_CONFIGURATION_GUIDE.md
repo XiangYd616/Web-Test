@@ -10,9 +10,9 @@
 ```
 
 **包含配置：**
-- 数据库连接 (`DATABASE_URL`)
 - 前端API地址 (`VITE_API_URL`)
-- CORS配置 (`CORS_ORIGIN`)
+- 前端安全配置 (`VITE_*`)
+- 缓存配置 (`REDIS_*`)
 - 全局环境设置
 
 ### **server/.env** - 后端专用配置
@@ -23,6 +23,7 @@
 ```
 
 **包含配置：**
+- 数据库连接 (`DATABASE_URL`, `DB_*`)
 - MaxMind许可证 (`MAXMIND_LICENSE_KEY`)
 - JWT密钥 (`JWT_SECRET`)
 - 邮件配置 (`SMTP_*`)
@@ -38,13 +39,12 @@
 # 前端和全局配置
 # ===========================================
 
-# 数据库配置
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/testweb_dev
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=testweb_dev
-DB_USER=postgres
-DB_PASSWORD=postgres
+# 前端API配置
+VITE_API_URL=http://localhost:3001/api
+
+# 缓存配置
+REDIS_HOST=localhost
+REDIS_PORT=6379
 
 # 前端配置
 VITE_API_URL=http://localhost:3001

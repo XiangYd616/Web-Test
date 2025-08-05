@@ -20,7 +20,7 @@ class EnvSeparationValidator {
    */
   validate() {
     console.log('🔍 环境变量分离验证');
-    console.log('=' .repeat(50));
+    console.log('='.repeat(50));
 
     // 解析配置文件
     const rootEnv = this.parseEnvFile('.env');
@@ -33,16 +33,16 @@ class EnvSeparationValidator {
 
     // 检查重复配置
     this.checkDuplicates(rootEnv, serverEnv);
-    
+
     // 检查配置分类
     this.checkConfigCategories(rootEnv, serverEnv);
-    
+
     // 检查前端配置
     this.checkFrontendConfig(rootEnv, serverEnv);
-    
+
     // 检查后端配置
     this.checkBackendConfig(rootEnv, serverEnv);
-    
+
     // 生成报告
     this.generateReport();
   }
@@ -58,13 +58,13 @@ class EnvSeparationValidator {
 
     const content = fs.readFileSync(filePath, 'utf8');
     const config = {};
-    
+
     content.split('\n').forEach((line, index) => {
       line = line.trim();
-      
+
       // 跳过注释和空行
       if (!line || line.startsWith('#')) return;
-      
+
       const match = line.match(/^([A-Z_][A-Z0-9_]*)\s*=\s*(.*)$/);
       if (match) {
         const [, key, value] = match;
@@ -75,7 +75,7 @@ class EnvSeparationValidator {
         };
       }
     });
-    
+
     return config;
   }
 
@@ -84,11 +84,11 @@ class EnvSeparationValidator {
    */
   checkDuplicates(rootEnv, serverEnv) {
     console.log('🔄 检查重复配置...');
-    
+
     const rootKeys = Object.keys(rootEnv);
     const serverKeys = Object.keys(serverEnv);
     const duplicates = rootKeys.filter(key => serverKeys.includes(key));
-    
+
     if (duplicates.length > 0) {
       duplicates.forEach(key => {
         this.issues.push(`❌ 重复配置: ${key}`);
@@ -106,24 +106,24 @@ class EnvSeparationValidator {
    */
   checkConfigCategories(rootEnv, serverEnv) {
     console.log('\n📋 检查配置分类...');
-    
+
     // 应该在根目录的配置
     const frontendConfigs = [
       'VITE_', 'REACT_APP_', 'FRONTEND_', 'VITE_DEV_PORT'
     ];
-    
+
     // 应该在 server 目录的配置
     const backendConfigs = [
-      'JWT_', 'BCRYPT_', 'SESSION_', 'SMTP_', 'MAXMIND_', 'GEO_'
+      'JWT_', 'BCRYPT_', 'SESSION_', 'SMTP_', 'MAXMIND_', 'GEO_', 'DATABASE_', 'DB_'
     ];
-    
+
     // 检查前端配置是否在后端文件中
     Object.keys(serverEnv).forEach(key => {
       if (frontendConfigs.some(prefix => key.startsWith(prefix))) {
         this.issues.push(`❌ 前端配置在后端文件中: ${key} (server/.env:${serverEnv[key].line})`);
       }
     });
-    
+
     // 检查后端配置是否在前端文件中
     Object.keys(rootEnv).forEach(key => {
       if (backendConfigs.some(prefix => key.startsWith(prefix))) {
@@ -137,10 +137,10 @@ class EnvSeparationValidator {
    */
   checkFrontendConfig(rootEnv, serverEnv) {
     console.log('\n🌐 检查前端配置...');
-    
+
     // 必需的前端配置
     const requiredFrontend = ['VITE_API_URL', 'VITE_DEV_PORT'];
-    
+
     requiredFrontend.forEach(key => {
       if (!rootEnv[key]) {
         this.warnings.push(`⚠️  缺少前端配置: ${key}`);
@@ -148,7 +148,7 @@ class EnvSeparationValidator {
         console.log(`✅ ${key}: ${rootEnv[key].value}`);
       }
     });
-    
+
     // 检查前端配置是否在后端文件中
     Object.keys(serverEnv).forEach(key => {
       if (key.startsWith('VITE_') || key.startsWith('REACT_APP_')) {
@@ -162,10 +162,10 @@ class EnvSeparationValidator {
    */
   checkBackendConfig(rootEnv, serverEnv) {
     console.log('\n🔧 检查后端配置...');
-    
+
     // 必需的后端配置
     const requiredBackend = ['JWT_SECRET', 'PORT'];
-    
+
     requiredBackend.forEach(key => {
       if (!serverEnv[key]) {
         this.warnings.push(`⚠️  缺少后端配置: ${key}`);
@@ -173,10 +173,10 @@ class EnvSeparationValidator {
         console.log(`✅ ${key}: ${serverEnv[key].value.substring(0, 10)}...`);
       }
     });
-    
+
     // 检查敏感配置是否在前端文件中
     const sensitiveConfigs = ['JWT_SECRET', 'SESSION_SECRET', 'BCRYPT_ROUNDS'];
-    
+
     sensitiveConfigs.forEach(key => {
       if (rootEnv[key]) {
         this.issues.push(`❌ 敏感配置在前端文件中: ${key}`);
@@ -189,40 +189,41 @@ class EnvSeparationValidator {
    */
   generateReport() {
     console.log('\n📋 验证报告');
-    console.log('=' .repeat(50));
-    
+    console.log('='.repeat(50));
+
     if (this.issues.length === 0 && this.warnings.length === 0) {
       console.log('✅ 环境变量分离完全正确！');
       return;
     }
-    
+
     if (this.issues.length > 0) {
       console.log('\n❌ 发现的问题:');
       this.issues.forEach(issue => console.log(`   ${issue}`));
     }
-    
+
     if (this.warnings.length > 0) {
       console.log('\n⚠️  警告:');
       this.warnings.forEach(warning => console.log(`   ${warning}`));
     }
-    
+
     if (this.suggestions.length > 0) {
       console.log('\n💡 建议:');
       this.suggestions.forEach(suggestion => console.log(`   ${suggestion}`));
     }
-    
+
     console.log('\n📋 配置分离规范:');
     console.log('   根目录 .env:');
     console.log('     • 前端配置 (VITE_*, REACT_APP_*)');
-    console.log('     • 数据库连接 (DATABASE_URL, DB_*)');
-    console.log('     • 全局配置 (PORT, CORS_ORIGIN)');
+    console.log('     • 缓存配置 (REDIS_*)');
+    console.log('     • 全局配置 (CORS_ORIGIN)');
     console.log('     • API配置 (GOOGLE_*, GTMETRIX_*)');
     console.log('');
     console.log('   server/.env:');
+    console.log('     • 数据库连接 (DATABASE_URL, DB_*)');
     console.log('     • 后端专用配置 (JWT_*, SESSION_*)');
     console.log('     • 安全配置 (BCRYPT_*, MAXMIND_*)');
     console.log('     • 邮件配置 (SMTP_*)');
-    console.log('     • 服务配置 (GEO_*, RATE_LIMIT_*)');
+    console.log('     • 服务配置 (GEO_*, RATE_LIMIT_*, PORT)');
   }
 }
 
