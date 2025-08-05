@@ -81,13 +81,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   testEngine: {
     // Playwright集成
     runPlaywrightTest: (config) => ipcRenderer.invoke('test-playwright', config),
-    
+
     // K6集成
     runK6Test: (script, config) => ipcRenderer.invoke('test-k6', script, config),
-    
+
     // 本地数据库测试
     runDatabaseTest: (config) => ipcRenderer.invoke('test-database', config),
-    
+
     // 系统级性能测试
     runSystemTest: (config) => ipcRenderer.invoke('test-system', config)
   },
@@ -153,7 +153,33 @@ contextBridge.exposeInMainWorld('environment', {
   platform: process.platform,
   arch: process.arch,
   nodeVersion: process.version,
-  electronVersion: process.versions.electron
+  electronVersion: process.versions.electron,
+
+  // 本地压力测试API（桌面版专用）
+  localStressTest: {
+    start: (config) => ipcRenderer.invoke('stress-test-start', config),
+    stop: () => ipcRenderer.invoke('stress-test-stop'),
+    getStatus: () => ipcRenderer.invoke('stress-test-status'),
+    getSystemUsage: () => ipcRenderer.invoke('stress-test-system-usage'),
+
+    // 事件监听
+    onTestStarted: (callback) => {
+      ipcRenderer.on('stress-test-started', (_, data) => callback(data));
+      return () => ipcRenderer.removeAllListeners('stress-test-started');
+    },
+    onTestUpdate: (callback) => {
+      ipcRenderer.on('stress-test-update', (_, data) => callback(data));
+      return () => ipcRenderer.removeAllListeners('stress-test-update');
+    },
+    onTestCompleted: (callback) => {
+      ipcRenderer.on('stress-test-completed', (_, data) => callback(data));
+      return () => ipcRenderer.removeAllListeners('stress-test-completed');
+    },
+    onTestError: (callback) => {
+      ipcRenderer.on('stress-test-error', (_, data) => callback(data));
+      return () => ipcRenderer.removeAllListeners('stress-test-error');
+    }
+  }
 });
 
 // 开发环境特殊处理
