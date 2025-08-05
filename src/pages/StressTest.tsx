@@ -31,6 +31,10 @@ interface StressTestConfig extends ImportedAdvancedStressTestConfig {
         username?: string;
         password?: string;
     };
+    // 测试模式设置
+    testMode?: 'server' | 'client';
+    // 客户端代理设置
+    clientUseProxy?: boolean;
 }
 
 // 生命周期压力测试配置接口 - 直接使用 StressTestConfig
@@ -83,6 +87,18 @@ const StressTest: React.FC = () => {
         thinkTime: 1,
         warmupDuration: 5,
         cooldownDuration: 5,
+        headers: {},
+        body: '',
+        proxy: {
+            enabled: false,
+            type: 'http',
+            host: '',
+            port: 8080,
+            username: '',
+            password: ''
+        },
+        testMode: 'server', // 默认使用服务器端测试
+        clientUseProxy: true // 默认使用系统代理
     });
 
     // 🔧 简化数据状态管理 - 只使用一个主要数据源
@@ -2819,6 +2835,71 @@ const StressTest: React.FC = () => {
         return `stress_${timestamp}_${random}`;
     };
 
+    // 客户端压力测试
+    const startClientStressTest = async () => {
+        console.log('💻 启动客户端压力测试');
+        updateTestStatus('running', '正在执行客户端压力测试...');
+        setIsRunning(true);
+
+        const clientTest = new ClientStressTestEngine();
+
+        // 设置进度回调
+        clientTest.onProgress = (data) => {
+            setStressTestData(prev => [...prev, {
+                timestamp: Date.now(),
+                responseTime: data.averageResponseTime || 0,
+                activeUsers: data.activeUsers || 0,
+                throughput: data.throughput || 0,
+                errorRate: data.errorRate || 0,
+                success: true
+            }]);
+
+            setMetrics({
+                totalRequests: data.totalRequests || 0,
+                successfulRequests: data.successfulRequests || 0,
+                failedRequests: data.failedRequests || 0,
+                averageResponseTime: data.averageResponseTime || 0,
+                minResponseTime: data.minResponseTime || 0,
+                maxResponseTime: data.maxResponseTime || 0,
+                throughput: data.throughput || 0,
+                errorRate: data.errorRate || 0,
+                successRate: data.successRate || 0,
+                activeUsers: data.activeUsers || 0,
+                timestamp: Date.now()
+            });
+        };
+
+        try {
+            const testId = await clientTest.startTest({
+                url: testConfig.url.startsWith('http') ? testConfig.url : `https://${testConfig.url}`,
+                users: testConfig.users,
+                duration: testConfig.duration,
+                testType: testConfig.testType,
+                method: testConfig.method,
+                timeout: testConfig.timeout,
+                headers: testConfig.headers,
+                body: testConfig.body,
+                optimized: true, // 默认启用高性能优化
+                useProxy: testConfig.clientUseProxy !== false // 代理设置
+            });
+
+            // 等待测试完成
+            const result = await new Promise((resolve) => {
+                clientTest.onComplete = resolve;
+            });
+
+            setResult(result);
+            updateTestStatus('completed', '客户端压力测试完成！');
+            console.log('✅ 客户端压力测试完成:', result);
+        } catch (error: any) {
+            console.error('❌ 客户端压力测试失败:', error);
+            setError(error.message || '客户端压力测试失败');
+            updateTestStatus('failed', '客户端压力测试失败');
+        } finally {
+            setIsRunning(false);
+        }
+    };
+
     const handleStartTest = async () => {
         // 检查登录状态 - 要求登录
         if (!requireLogin()) {
@@ -2867,9 +2948,18 @@ const StressTest: React.FC = () => {
                 users: testConfig.users,
                 duration: testConfig.duration,
                 testType: testConfig.testType,
+                testMode: testConfig.testMode,
                 selectedTemplate: selectedTemplate
             });
 
+            // 根据测试模式选择不同的执行方式
+            if (testConfig.testMode === 'client') {
+                // 客户端测试模式
+                await startClientStressTest();
+                return;
+            }
+
+            // 服务器端测试模式（默认）
             // 🔧 使用统一状态管理设置启动状态
             updateTestStatus('starting', '正在启动压力测试引擎...');
 
@@ -3416,17 +3506,37 @@ const StressTest: React.FC = () => {
         }
     };
 
-    // 获取国旗emoji
-    const getCountryFlag = (countryCode?: string): string => {
-        if (!countryCode) return '🌍';
+    // 获取国家标识 - 兼容性最佳方案
+    const getCountryFlag = (countryCode?: string) => {
+        if (!countryCode) {
+            return <span className="text-gray-400 text-sm">🌐</span>;
+        }
 
-        // 将国家代码转换为国旗emoji
-        const codePoints = countryCode
-            .toUpperCase()
-            .split('')
-            .map(char => 127397 + char.charCodeAt(0));
+        const code = countryCode.toUpperCase().trim();
+        if (code.length !== 2) {
+            return <span className="text-gray-400 text-sm">🌐</span>;
+        }
 
-        return String.fromCodePoint(...codePoints);
+        // 国家/地区名称映射
+        const countryNames: { [key: string]: string } = {
+            'KR': '韩国', 'US': '美国', 'CN': '中国', 'JP': '日本', 'GB': '英国',
+            'DE': '德国', 'FR': '法国', 'CA': '加拿大', 'AU': '澳洲', 'IN': '印度',
+            'BR': '巴西', 'RU': '俄国', 'IT': '意大利', 'ES': '西班牙', 'NL': '荷兰',
+            'SG': '新加坡', 'HK': '香港特别行政区', 'MO': '澳门特别行政区', 'TW': '台湾地区', 'TH': '泰国', 'MY': '马来'
+        };
+
+        const countryName = countryNames[code] || code;
+
+        return (
+            <span className="inline-flex items-center space-x-1">
+                <span className="text-blue-400 font-mono text-xs bg-blue-900/20 px-1 rounded">
+                    {code}
+                </span>
+                <span className="text-gray-300 text-xs">
+                    {countryName}
+                </span>
+            </span>
+        );
     };
 
     // 代理测试状态
@@ -3434,9 +3544,10 @@ const StressTest: React.FC = () => {
         testing: boolean;
         result: 'success' | 'error' | null;
         message: string;
+        error?: string;
         details?: {
             proxyIp?: string;
-            location?: {
+            location?: string | {
                 country?: string;
                 countryCode?: string;
                 region?: string;
@@ -3444,6 +3555,8 @@ const StressTest: React.FC = () => {
                 timezone?: string;
             };
             responseTime?: number;
+            networkLatency?: number;
+            proxyResponseTime?: number;
             errorCode?: string;
             troubleshooting?: string[];
         };
@@ -3492,6 +3605,81 @@ const StressTest: React.FC = () => {
         }
     };
 
+    // 检测客户端IP（根据代理设置使用不同方式）
+    const detectClientProxy = async () => {
+        const isUsingProxy = testConfig.clientUseProxy !== false;
+
+        setProxyTestStatus({
+            testing: true,
+            result: null,
+            message: isUsingProxy ? '正在检测浏览器IP...' : '正在检测服务器直连IP...'
+        });
+
+        try {
+            const startTime = Date.now();
+            let response, data;
+
+            if (isUsingProxy) {
+                // 使用浏览器代理设置检测
+                const testUrl = 'https://httpbin.org/ip';
+                response = await fetch(testUrl);
+                data = await response.json();
+            } else {
+                // 使用服务器直连检测
+                const testUrl = 'https://httpbin.org/ip';
+                const directProxyUrl = `/api/test/proxy/direct?url=${encodeURIComponent(testUrl)}`;
+                response = await fetch(directProxyUrl, {
+                    headers: {
+                        'X-Target-URL': testUrl,
+                        'X-Target-Method': 'GET',
+                        'X-Direct-Mode': 'true'
+                    }
+                });
+                data = await response.json();
+            }
+
+            const responseTime = Date.now() - startTime;
+
+            // 获取地理位置信息
+            let locationInfo = '';
+            try {
+                const geoResponse = await fetch(`/api/test/geo-location?ip=${data.origin}`);
+                const geoData = await geoResponse.json();
+                if (geoData.success) {
+                    locationInfo = `${geoData.country} ${geoData.city}`;
+                }
+            } catch (geoError) {
+                console.log('地理位置检测失败:', geoError);
+            }
+
+            setProxyTestStatus({
+                testing: false,
+                result: 'success',
+                message: isUsingProxy ? '浏览器IP检测完成' : '服务器直连IP检测完成',
+                details: {
+                    proxyIp: data.origin,
+                    responseTime: responseTime,
+                    location: locationInfo
+                }
+            });
+        } catch (error) {
+            console.error('IP检测失败:', error);
+            setProxyTestStatus({
+                testing: false,
+                result: 'error',
+                message: isUsingProxy ? '无法检测浏览器IP' : '无法检测服务器直连IP',
+                error: error instanceof Error ? error.message : String(error)
+            });
+            setTimeout(() => {
+                setProxyTestStatus({
+                    testing: false,
+                    result: null,
+                    message: ''
+                });
+            }, 5000);
+        }
+    };
+
     // 测试代理连接
     const testProxyConnection = async () => {
         if (!testConfig.proxy?.enabled || !testConfig.proxy?.host) {
@@ -3506,11 +3694,11 @@ const StressTest: React.FC = () => {
         setProxyTestStatus({
             testing: true,
             result: null,
-            message: '正在测试代理连接...'
+            message: '正在测试代理延迟...'
         });
 
         try {
-            const response = await fetch('/api/test/proxy-test', {
+            const response = await fetch('/api/test/proxy-latency', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -3526,9 +3714,7 @@ const StressTest: React.FC = () => {
                         port: testConfig.proxy.port || 8080,
                         username: testConfig.proxy.username || '',
                         password: testConfig.proxy.password || ''
-                    },
-                    testUrl: 'http://httpbin.org/ip', // 使用HTTP进行快速测试
-                    fastTest: true
+                    }
                 })
             });
 
@@ -3538,11 +3724,13 @@ const StressTest: React.FC = () => {
                 setProxyTestStatus({
                     testing: false,
                     result: 'success',
-                    message: '代理连接测试成功',
+                    message: '代理延迟测试成功',
                     details: {
-                        proxyIp: result.proxyIp,
+                        proxyIp: result.exitIp,
                         location: result.location,
-                        responseTime: result.responseTime
+                        responseTime: result.latency,
+                        networkLatency: result.networkLatency,
+                        proxyResponseTime: result.proxyResponseTime
                     }
                 });
                 // 成功状态不自动清除，让用户手动查看
@@ -4091,6 +4279,67 @@ const StressTest: React.FC = () => {
                                         </button>
                                     </div>
 
+                                    {/* 测试模式选择 - 切换按钮 */}
+                                    <div className="mb-4">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h4 className="text-lg font-medium text-white">测试模式</h4>
+
+                                            {/* 切换按钮 */}
+                                            <div className="relative">
+                                                <div className="flex items-center bg-gray-700/50 rounded-full p-1">
+                                                    {/* 服务器端选项 */}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setTestConfig((prev: StressTestConfig) => ({ ...prev, testMode: 'server' }))}
+                                                        className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${testConfig.testMode === 'server'
+                                                            ? 'bg-blue-600 text-white shadow-lg'
+                                                            : 'text-gray-300 hover:text-white'
+                                                            }`}
+                                                    >
+                                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fillRule="evenodd" d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L7.586 10 5.293 7.707a1 1 0 010-1.414zM11 12a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
+                                                        </svg>
+                                                        <span>服务器端</span>
+                                                    </button>
+
+                                                    {/* 客户端选项 */}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setTestConfig((prev: StressTestConfig) => ({ ...prev, testMode: 'client' }))}
+                                                        className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${testConfig.testMode === 'client'
+                                                            ? 'bg-green-600 text-white shadow-lg'
+                                                            : 'text-gray-300 hover:text-white'
+                                                            }`}
+                                                    >
+                                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+                                                        </svg>
+                                                        <span>客户端</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* 模式说明 */}
+                                        <div className="p-3 bg-gray-700/30 rounded-lg border border-gray-600/50">
+                                            <div className="flex items-start space-x-3">
+                                                <div className={`w-2 h-2 rounded-full mt-2 ${testConfig.testMode === 'server' ? 'bg-blue-400' : 'bg-green-400'}`}></div>
+                                                <div>
+                                                    <div className="text-sm font-medium text-white mb-1">
+                                                        {testConfig.testMode === 'server' ? '🖥️ 服务器端测试' : '💻 客户端测试'}
+                                                    </div>
+                                                    <div className="text-xs text-gray-400">
+                                                        {testConfig.testMode === 'server' ? (
+                                                            <>请求从服务器发送，性能更稳定，支持大并发</>
+                                                        ) : (
+                                                            <>请求从您的浏览器发送，使用您的网络环境和IP地址，已启用高性能优化</>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     {/* 测试类型选择 - 移动端优化布局 */}
                                     <div className="mb-4">
                                         <h4 className="text-lg font-medium text-white mb-3">测试类型</h4>
@@ -4272,244 +4521,474 @@ const StressTest: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    {/* 代理设置 - 独立区域 */}
-                                    <div className="mt-4 bg-gray-800/80 backdrop-blur-sm rounded-xl border-2 border-blue-500/30 p-4">
-                                        <div className="flex items-center mb-3">
-                                            <Globe className="w-4 h-4 text-blue-400 mr-2" />
-                                            <h4 className="text-base font-semibold text-white">代理设置</h4>
-                                        </div>
-
-                                        <div className="space-y-3">
-                                            {/* 启用代理开关 */}
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center space-x-2">
-                                                    <span className="text-gray-300 text-sm">启用代理</span>
-                                                    <div className="text-xs text-gray-500">(可选)</div>
+                                    {/* 代理设置 - 仅在服务器端模式显示 */}
+                                    {testConfig.testMode === 'server' && (
+                                        <div className="mt-4 bg-gray-800/80 backdrop-blur-sm rounded-xl border-2 border-blue-500/30 p-4">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-center">
+                                                    <Globe className="w-4 h-4 text-blue-400 mr-2" />
+                                                    <h4 className="text-base font-semibold text-white">代理设置</h4>
                                                 </div>
-                                                <label className="relative inline-flex items-center cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={testConfig.proxy?.enabled || false}
-                                                        onChange={(e) => setTestConfig(prev => ({
-                                                            ...prev,
-                                                            proxy: {
-                                                                ...prev.proxy,
-                                                                enabled: e.target.checked
-                                                            }
-                                                        }))}
-                                                        className="sr-only peer"
-                                                        aria-label="启用代理"
-                                                    />
-                                                    <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                                                </label>
+                                                <div className="text-xs text-gray-400">
+                                                    服务器端模式
+                                                </div>
                                             </div>
 
-                                            {/* 代理配置 */}
-                                            {testConfig.proxy?.enabled && (
-                                                <div className="space-y-2 pl-3 border-l-2 border-blue-500/30">
-                                                    {/* 代理类型 */}
-                                                    <div>
-                                                        <label className="block text-xs font-medium text-gray-300 mb-1">
-                                                            代理类型
-                                                        </label>
-                                                        <select
-                                                            value={testConfig.proxy?.type || 'http'}
+                                            {/* 服务器端模式说明 */}
+                                            <div className="mb-3 p-2 rounded-lg border bg-blue-500/10 border-blue-500/30">
+                                                <div className="text-xs text-gray-300">
+                                                    <span className="font-medium text-blue-300">🖥️ 服务器端模式：</span>
+                                                    使用下方配置的代理设置发送测试请求
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-3">
+                                                {/* 启用代理开关 */}
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center space-x-2">
+                                                        <span className="text-gray-300 text-sm">启用代理</span>
+                                                        <div className="text-xs text-gray-500">(可选)</div>
+                                                    </div>
+                                                    <label className="relative inline-flex items-center cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={testConfig.proxy?.enabled || false}
                                                             onChange={(e) => setTestConfig(prev => ({
                                                                 ...prev,
                                                                 proxy: {
                                                                     ...prev.proxy,
-                                                                    type: e.target.value as 'http' | 'https' | 'socks5'
+                                                                    enabled: e.target.checked
                                                                 }
                                                             }))}
-                                                            className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                            aria-label="选择代理类型"
-                                                        >
-                                                            <option value="http">HTTP</option>
-                                                            <option value="https">HTTPS</option>
-                                                            <option value="socks5">SOCKS5</option>
-                                                        </select>
-                                                    </div>
+                                                            className="sr-only peer"
+                                                            aria-label="启用代理"
+                                                        />
+                                                        <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                                    </label>
+                                                </div>
 
-                                                    {/* 代理地址 */}
-                                                    <div className="grid grid-cols-3 gap-2">
-                                                        <div className="col-span-2">
-                                                            <label className="block text-xs font-medium text-gray-300 mb-1">
-                                                                代理地址
-                                                            </label>
-                                                            <input
-                                                                type="text"
-                                                                value={testConfig.proxy?.host || ''}
-                                                                onChange={(e) => setTestConfig(prev => ({
-                                                                    ...prev,
-                                                                    proxy: {
-                                                                        ...prev.proxy,
-                                                                        host: e.target.value
-                                                                    }
-                                                                }))}
-                                                                placeholder="127.0.0.1"
-                                                                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                            />
-                                                        </div>
+                                                {/* 代理配置 */}
+                                                {testConfig.proxy?.enabled && (
+                                                    <div className="space-y-2 pl-3 border-l-2 border-blue-500/30">
+                                                        {/* 代理类型 */}
                                                         <div>
                                                             <label className="block text-xs font-medium text-gray-300 mb-1">
-                                                                端口
+                                                                代理类型
                                                             </label>
-                                                            <input
-                                                                type="number"
-                                                                value={testConfig.proxy?.port || ''}
+                                                            <select
+                                                                value={testConfig.proxy?.type || 'http'}
                                                                 onChange={(e) => setTestConfig(prev => ({
                                                                     ...prev,
                                                                     proxy: {
                                                                         ...prev.proxy,
-                                                                        port: parseInt(e.target.value) || 8080
+                                                                        type: e.target.value as 'http' | 'https' | 'socks5'
                                                                     }
                                                                 }))}
-                                                                placeholder="8080"
-                                                                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                            />
-                                                        </div>
-                                                    </div>
-
-                                                    {/* 认证信息 */}
-                                                    <div className="grid grid-cols-2 gap-2">
-                                                        <div>
-                                                            <label className="block text-xs font-medium text-gray-300 mb-1">
-                                                                用户名 (可选)
-                                                            </label>
-                                                            <input
-                                                                type="text"
-                                                                value={testConfig.proxy?.username || ''}
-                                                                onChange={(e) => setTestConfig(prev => ({
-                                                                    ...prev,
-                                                                    proxy: {
-                                                                        ...prev.proxy,
-                                                                        username: e.target.value
-                                                                    }
-                                                                }))}
-                                                                placeholder="用户名"
-                                                                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                            />
-                                                        </div>
-                                                        <div>
-                                                            <label className="block text-xs font-medium text-gray-300 mb-1">
-                                                                密码 (可选)
-                                                            </label>
-                                                            <input
-                                                                type="password"
-                                                                value={testConfig.proxy?.password || ''}
-                                                                onChange={(e) => setTestConfig(prev => ({
-                                                                    ...prev,
-                                                                    proxy: {
-                                                                        ...prev.proxy,
-                                                                        password: e.target.value
-                                                                    }
-                                                                }))}
-                                                                placeholder="密码"
-                                                                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                            />
-                                                        </div>
-                                                    </div>
-
-                                                    {/* 代理状态提示和测试 */}
-                                                    <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
-                                                        <div className="flex items-center justify-between mb-2">
-                                                            <div className="flex items-center space-x-2">
-                                                                <Shield className="w-4 h-4 text-blue-400" />
-                                                                <span className="text-blue-300 text-xs">
-                                                                    代理已启用 - 所有测试请求将通过代理服务器发送
-                                                                </span>
-                                                            </div>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => testProxyConnection()}
-                                                                disabled={proxyTestStatus.testing}
-                                                                className={`px-2 py-1 text-xs rounded transition-colors ${proxyTestStatus.testing
-                                                                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                                                                    : 'bg-blue-600 hover:bg-blue-700 text-white'
-                                                                    }`}
-                                                                title="测试代理连接"
+                                                                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                aria-label="选择代理类型"
                                                             >
-                                                                {proxyTestStatus.testing ? '测试中...' : '测试连接'}
-                                                            </button>
+                                                                <option value="http">HTTP</option>
+                                                                <option value="https">HTTPS</option>
+                                                                <option value="socks5">SOCKS5</option>
+                                                            </select>
                                                         </div>
 
-                                                        {/* 代理测试结果显示 */}
-                                                        {(proxyTestStatus.result || proxyTestStatus.testing) && (
-                                                            <div className={`flex items-center justify-between text-xs p-2 rounded ${proxyTestStatus.result === 'success'
-                                                                ? 'bg-green-500/10 border border-green-500/30 text-green-300'
-                                                                : proxyTestStatus.result === 'error'
-                                                                    ? 'bg-red-500/10 border border-red-500/30 text-red-300'
-                                                                    : 'bg-blue-500/10 border border-blue-500/30 text-blue-300'
-                                                                }`}>
+                                                        {/* 代理地址 */}
+                                                        <div className="grid grid-cols-3 gap-2">
+                                                            <div className="col-span-2">
+                                                                <label className="block text-xs font-medium text-gray-300 mb-1">
+                                                                    代理地址
+                                                                </label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={testConfig.proxy?.host || ''}
+                                                                    onChange={(e) => setTestConfig(prev => ({
+                                                                        ...prev,
+                                                                        proxy: {
+                                                                            ...prev.proxy,
+                                                                            host: e.target.value
+                                                                        }
+                                                                    }))}
+                                                                    placeholder="127.0.0.1"
+                                                                    className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-xs font-medium text-gray-300 mb-1">
+                                                                    端口
+                                                                </label>
+                                                                <input
+                                                                    type="number"
+                                                                    value={testConfig.proxy?.port || ''}
+                                                                    onChange={(e) => setTestConfig(prev => ({
+                                                                        ...prev,
+                                                                        proxy: {
+                                                                            ...prev.proxy,
+                                                                            port: parseInt(e.target.value) || 8080
+                                                                        }
+                                                                    }))}
+                                                                    placeholder="8080"
+                                                                    className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                />
+                                                            </div>
+                                                        </div>
+
+                                                        {/* 认证信息 */}
+                                                        <div className="grid grid-cols-2 gap-2">
+                                                            <div>
+                                                                <label className="block text-xs font-medium text-gray-300 mb-1">
+                                                                    用户名 (可选)
+                                                                </label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={testConfig.proxy?.username || ''}
+                                                                    onChange={(e) => setTestConfig(prev => ({
+                                                                        ...prev,
+                                                                        proxy: {
+                                                                            ...prev.proxy,
+                                                                            username: e.target.value
+                                                                        }
+                                                                    }))}
+                                                                    placeholder="用户名"
+                                                                    className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-xs font-medium text-gray-300 mb-1">
+                                                                    密码 (可选)
+                                                                </label>
+                                                                <input
+                                                                    type="password"
+                                                                    value={testConfig.proxy?.password || ''}
+                                                                    onChange={(e) => setTestConfig(prev => ({
+                                                                        ...prev,
+                                                                        proxy: {
+                                                                            ...prev.proxy,
+                                                                            password: e.target.value
+                                                                        }
+                                                                    }))}
+                                                                    placeholder="密码"
+                                                                    className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                />
+                                                            </div>
+                                                        </div>
+
+                                                        {/* 代理状态提示和测试 */}
+                                                        <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
+                                                            <div className="flex items-center justify-between mb-2">
                                                                 <div className="flex items-center space-x-2">
-                                                                    {proxyTestStatus.testing && (
-                                                                        <div className="animate-spin w-3 h-3 border border-blue-400 border-t-transparent rounded-full"></div>
-                                                                    )}
-                                                                    {proxyTestStatus.result === 'success' && (
-                                                                        <svg className="w-3 h-3 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                                                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                                                        </svg>
-                                                                    )}
-                                                                    {proxyTestStatus.result === 'error' && (
-                                                                        <svg className="w-3 h-3 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                                                                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                                                                        </svg>
-                                                                    )}
-                                                                    <span>{proxyTestStatus.message}</span>
-                                                                    {proxyTestStatus.details && (
-                                                                        <div className="flex flex-col space-y-1 text-gray-400">
-                                                                            {proxyTestStatus.details.location && (
-                                                                                <div className="flex items-center space-x-2">
-                                                                                    <span className="text-lg">
-                                                                                        {getCountryFlag(proxyTestStatus.details.location.countryCode)}
-                                                                                    </span>
-                                                                                    <span>
-                                                                                        {proxyTestStatus.details.location.region || proxyTestStatus.details.location.country}
-                                                                                        {proxyTestStatus.details.location.city && `/${proxyTestStatus.details.location.city}`}
-                                                                                    </span>
+                                                                    <Shield className="w-4 h-4 text-blue-400" />
+                                                                    <span className="text-blue-300 text-xs">
+                                                                        代理已启用 - 服务器端测试请求将通过代理发送
+                                                                    </span>
+                                                                </div>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => testProxyConnection()}
+                                                                    disabled={proxyTestStatus.testing}
+                                                                    className={`px-2 py-1 text-xs rounded transition-colors ${proxyTestStatus.testing
+                                                                        ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                                                                        : 'bg-blue-600 hover:bg-blue-700 text-white'
+                                                                        }`}
+                                                                    title="测试代理连接"
+                                                                >
+                                                                    {proxyTestStatus.testing ? '测试中...' : '测试连接'}
+                                                                </button>
+                                                            </div>
+
+                                                            {/* 代理测试结果显示 */}
+                                                            {(proxyTestStatus.result || proxyTestStatus.testing) && (
+                                                                <div className={`flex items-center justify-between text-xs p-2 rounded ${proxyTestStatus.result === 'success'
+                                                                    ? 'bg-green-500/10 border border-green-500/30 text-green-300'
+                                                                    : proxyTestStatus.result === 'error'
+                                                                        ? 'bg-red-500/10 border border-red-500/30 text-red-300'
+                                                                        : 'bg-blue-500/10 border border-blue-500/30 text-blue-300'
+                                                                    }`}>
+                                                                    <div className="flex items-center space-x-2">
+                                                                        {proxyTestStatus.testing && (
+                                                                            <div className="animate-spin w-3 h-3 border border-blue-400 border-t-transparent rounded-full"></div>
+                                                                        )}
+
+                                                                        {proxyTestStatus.result === 'error' && (
+                                                                            <svg className="w-3 h-3 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                                                                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                                            </svg>
+                                                                        )}
+                                                                        <div className="flex flex-col space-y-2">
+                                                                            <div className="flex items-center space-x-2">
+                                                                                <span className="font-medium">{proxyTestStatus.message}</span>
+                                                                                {proxyTestStatus.result === 'success' && (
+                                                                                    <svg className="w-3 h-3 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                                                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                                                    </svg>
+                                                                                )}
+                                                                            </div>
+                                                                            {proxyTestStatus.details && (
+                                                                                <div className="space-y-2 text-sm text-gray-300">
+                                                                                    {/* 位置和出口IP - 横向排列 */}
+                                                                                    <div className="flex items-center space-x-4 flex-wrap">
+                                                                                        {/* 地理位置信息 */}
+                                                                                        {proxyTestStatus.details.location && (
+                                                                                            <div className="flex items-center space-x-1">
+                                                                                                <span className="text-gray-400">位置:</span>
+                                                                                                <div className="flex items-center space-x-1">
+                                                                                                    {getCountryFlag(proxyTestStatus.details.location.countryCode)}
+                                                                                                    <span>
+                                                                                                        {(() => {
+                                                                                                            const location = proxyTestStatus.details.location;
+                                                                                                            const country = location.country;
+                                                                                                            const region = location.region;
+                                                                                                            const city = location.city;
+
+                                                                                                            // 优先显示具体的地区和城市，避免显示重复的国家代码
+                                                                                                            if (region && city) {
+                                                                                                                return `${region}/${city}`;
+                                                                                                            } else if (region) {
+                                                                                                                return region;
+                                                                                                            } else if (city) {
+                                                                                                                return city;
+                                                                                                            } else if (country) {
+                                                                                                                return country;
+                                                                                                            } else {
+                                                                                                                return '未知位置';
+                                                                                                            }
+                                                                                                        })()}
+                                                                                                    </span>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        )}
+
+                                                                                        {/* 出口IP */}
+                                                                                        {proxyTestStatus.details.proxyIp && (
+                                                                                            <div className="flex items-center space-x-1">
+                                                                                                <span className="text-gray-400">出口IP:</span>
+                                                                                                <span className="font-mono text-blue-300">{proxyTestStatus.details.proxyIp}</span>
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </div>
+
+                                                                                    {/* 延迟信息 - 横向排列 */}
+                                                                                    {(proxyTestStatus.details.responseTime || proxyTestStatus.details.proxyResponseTime) && (
+                                                                                        <div className="flex items-center space-x-4 flex-wrap">
+                                                                                            {proxyTestStatus.details.responseTime && (
+                                                                                                <div className="flex items-center space-x-1">
+                                                                                                    <span className="text-gray-400">延迟:</span>
+                                                                                                    <span className="text-green-300 font-medium">{proxyTestStatus.details.responseTime}ms</span>
+                                                                                                </div>
+                                                                                            )}
+
+                                                                                            {proxyTestStatus.details.proxyResponseTime && (
+                                                                                                <div className="flex items-center space-x-1">
+                                                                                                    <span className="text-gray-400">响应:</span>
+                                                                                                    <span className="text-yellow-300">{proxyTestStatus.details.proxyResponseTime}ms</span>
+                                                                                                </div>
+                                                                                            )}
+
+                                                                                            {proxyTestStatus.details.networkLatency && proxyTestStatus.details.networkLatency !== proxyTestStatus.details.responseTime && (
+                                                                                                <div className="flex items-center space-x-1">
+                                                                                                    <span className="text-gray-400">网络:</span>
+                                                                                                    <span className="text-blue-300">{proxyTestStatus.details.networkLatency}ms</span>
+                                                                                                </div>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    )}
+
+                                                                                    {/* 错误信息 */}
+                                                                                    {proxyTestStatus.result === 'error' && proxyTestStatus.details?.errorCode && (
+                                                                                        <div className="flex items-center space-x-2">
+                                                                                            <span className="text-gray-400 w-16">错误:</span>
+                                                                                            <span className="text-red-300 font-mono text-xs">{proxyTestStatus.details.errorCode}</span>
+                                                                                        </div>
+                                                                                    )}
+
+                                                                                    {/* 故障排除建议 */}
+                                                                                    {proxyTestStatus.result === 'error' && proxyTestStatus.details?.troubleshooting && (
+                                                                                        <div className="mt-2 pt-2 border-t border-gray-600">
+                                                                                            <div className="text-xs text-gray-400 mb-1">排查建议:</div>
+                                                                                            <ul className="text-xs text-gray-300 space-y-1">
+                                                                                                {proxyTestStatus.details.troubleshooting.slice(0, 3).map((tip, index) => (
+                                                                                                    <li key={index} className="flex items-start space-x-2">
+                                                                                                        <span className="text-gray-500 mt-0.5">•</span>
+                                                                                                        <span>{tip}</span>
+                                                                                                    </li>
+                                                                                                ))}
+                                                                                            </ul>
+                                                                                        </div>
+                                                                                    )}
                                                                                 </div>
                                                                             )}
-                                                                            {proxyTestStatus.details.proxyIp && (
-                                                                                <span>{proxyTestStatus.details.proxyIp}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    {/* 关闭按钮 - 只在成功状态显示 */}
+                                                                    {proxyTestStatus.result === 'success' && (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => setProxyTestStatus({ testing: false, result: null, message: '' })}
+                                                                            className="ml-2 text-gray-400 hover:text-gray-200 transition-colors"
+                                                                            title="关闭"
+                                                                        >
+                                                                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                                                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                                            </svg>
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* 未启用代理时的提示 */}
+                                                {!testConfig.proxy?.enabled && (
+                                                    <div className="rounded-lg p-3 bg-gray-700/30">
+                                                        <div className="flex items-center space-x-2">
+                                                            <Globe className="w-4 h-4 text-gray-400" />
+                                                            <span className="text-gray-400 text-xs">
+                                                                🖥️ 直连模式 - 测试请求将直接发送到目标服务器
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* 客户端模式代理设置 */}
+                                    {testConfig.testMode === 'client' && (
+                                        <div className="mt-4 bg-green-500/10 backdrop-blur-sm rounded-xl border-2 border-green-500/30 p-4">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-center">
+                                                    <Globe className="w-4 h-4 text-green-400 mr-2" />
+                                                    <h4 className="text-base font-semibold text-white">代理设置</h4>
+                                                </div>
+                                                <div className="text-xs text-gray-400">
+                                                    客户端模式
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-3">
+                                                {/* 客户端代理开关 */}
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center space-x-2">
+                                                        <span className="text-gray-300 text-sm">使用系统代理</span>
+                                                        <div className="text-xs text-gray-500">(自动检测)</div>
+                                                    </div>
+                                                    <label className="relative inline-flex items-center cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={testConfig.clientUseProxy !== false}
+                                                            onChange={(e) => setTestConfig(prev => ({
+                                                                ...prev,
+                                                                clientUseProxy: e.target.checked
+                                                            }))}
+                                                            className="sr-only peer"
+                                                            aria-label="使用系统代理"
+                                                        />
+                                                        <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                                                    </label>
+                                                </div>
+                                                {/* 代理状态显示 */}
+                                                <div className={`border rounded-lg p-3 ${testConfig.clientUseProxy
+                                                    ? 'bg-green-500/10 border-green-500/30'
+                                                    : 'bg-gray-500/10 border-gray-500/30'
+                                                    }`}>
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <div className="flex items-center space-x-2">
+                                                            <Shield className={`w-4 h-4 ${testConfig.clientUseProxy ? 'text-green-400' : 'text-gray-400'}`} />
+                                                            <span className={`text-xs ${testConfig.clientUseProxy ? 'text-green-300' : 'text-gray-300'}`}>
+                                                                {testConfig.clientUseProxy ? (
+                                                                    <>💻 使用浏览器代理设置</>
+                                                                ) : (
+                                                                    <>🔗 服务器直连模式</>
+                                                                )}
+                                                            </span>
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => detectClientProxy()}
+                                                            disabled={proxyTestStatus.testing}
+                                                            className={`px-2 py-1 text-xs rounded transition-colors ${proxyTestStatus.testing
+                                                                ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                                                                : testConfig.clientUseProxy
+                                                                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                                                                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                                                                }`}
+                                                            title={testConfig.clientUseProxy ? "检测浏览器IP" : "检测服务器直连IP"}
+                                                        >
+                                                            {proxyTestStatus.testing ? '检测中...' :
+                                                                testConfig.clientUseProxy ? '检测浏览器IP' : '检测服务器直连IP'}
+                                                        </button>
+                                                    </div>
+
+                                                    {/* 代理检测结果显示 */}
+                                                    {(proxyTestStatus.result || proxyTestStatus.testing) && (
+                                                        <div className={`flex items-center justify-between text-xs p-2 rounded ${proxyTestStatus.result === 'success'
+                                                            ? 'bg-green-500/10 border border-green-500/30 text-green-300'
+                                                            : proxyTestStatus.result === 'error'
+                                                                ? 'bg-red-500/10 border border-red-500/30 text-red-300'
+                                                                : 'bg-blue-500/10 border border-blue-500/30 text-blue-300'
+                                                            }`}>
+                                                            <div className="flex items-center space-x-2">
+                                                                {proxyTestStatus.testing && (
+                                                                    <div className="animate-spin w-3 h-3 border border-green-400 border-t-transparent rounded-full"></div>
+                                                                )}
+                                                                <div className="flex flex-col space-y-2">
+                                                                    <div className="flex items-center space-x-2">
+                                                                        <span className="font-medium">{proxyTestStatus.message}</span>
+                                                                        {proxyTestStatus.result === 'success' && (
+                                                                            <svg className="w-3 h-3 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                                                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                                            </svg>
+                                                                        )}
+                                                                    </div>
+                                                                    {proxyTestStatus.details?.proxyIp && (
+                                                                        <div className="space-y-1">
+                                                                            <div className="flex items-center space-x-2">
+                                                                                <span className="text-gray-400">当前IP:</span>
+                                                                                <span className="font-mono text-green-300">{proxyTestStatus.details.proxyIp}</span>
+                                                                            </div>
+                                                                            {proxyTestStatus.details.responseTime && (
+                                                                                <div className="flex items-center space-x-2">
+                                                                                    <span className="text-gray-400">延迟:</span>
+                                                                                    <span className="text-yellow-300">{proxyTestStatus.details.responseTime}ms</span>
+                                                                                </div>
                                                                             )}
-                                                                            <span>响应时间: {proxyTestStatus.details.responseTime}ms</span>
+                                                                            {proxyTestStatus.details.location && typeof proxyTestStatus.details.location === 'string' && (
+                                                                                <div className="flex items-center space-x-2">
+                                                                                    <span className="text-gray-400">位置:</span>
+                                                                                    <span className="text-blue-300">{proxyTestStatus.details.location}</span>
+                                                                                </div>
+                                                                            )}
                                                                         </div>
                                                                     )}
                                                                 </div>
-                                                                {/* 关闭按钮 - 只在成功状态显示 */}
-                                                                {proxyTestStatus.result === 'success' && (
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => setProxyTestStatus({ testing: false, result: null, message: '' })}
-                                                                        className="ml-2 text-gray-400 hover:text-gray-200 transition-colors"
-                                                                        title="关闭"
-                                                                    >
-                                                                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                                                                        </svg>
-                                                                    </button>
-                                                                )}
                                                             </div>
+                                                            {proxyTestStatus.result === 'success' && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setProxyTestStatus({ testing: false, result: null, message: '' })}
+                                                                    className="ml-2 text-gray-400 hover:text-gray-200 transition-colors"
+                                                                    title="关闭"
+                                                                >
+                                                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                                    </svg>
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    )}
+
+                                                    <div className={`mt-2 text-xs ${testConfig.clientUseProxy ? 'text-green-400' : 'text-gray-400'}`}>
+                                                        {testConfig.clientUseProxy ? (
+                                                            <>✓ 浏览器会自动使用您的系统代理配置（如果有）</>
+                                                        ) : (
+                                                            <>⚡ 通过服务器直连，绕过所有代理设置</>
                                                         )}
                                                     </div>
                                                 </div>
-                                            )}
-
-                                            {/* 未启用代理时的提示 */}
-                                            {!testConfig.proxy?.enabled && (
-                                                <div className="bg-gray-700/30 rounded-lg p-3">
-                                                    <div className="flex items-center space-x-2">
-                                                        <Globe className="w-4 h-4 text-gray-400" />
-                                                        <span className="text-gray-400 text-xs">
-                                                            直连模式 - 测试请求将直接发送到目标服务器
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            )}
+                                            </div>
                                         </div>
-                                    </div>
-
-
+                                    )}
 
                                 </div>
 

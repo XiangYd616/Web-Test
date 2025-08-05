@@ -24,7 +24,7 @@ const dbConfig = {
   max: parseInt(process.env.DB_MAX_CONNECTIONS) || 20, // 最大连接数
   idleTimeoutMillis: parseInt(process.env.DB_IDLE_TIMEOUT) || 30000, // 空闲超时
   connectionTimeoutMillis: parseInt(process.env.DB_CONNECTION_TIMEOUT) || 2000, // 连接超时
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  ssl: false
 };
 
 /**
@@ -33,7 +33,7 @@ const dbConfig = {
 const createPool = () => {
   if (!pool) {
     pool = new Pool(dbConfig);
-    
+
     // 连接池事件监听
     pool.on('connect', (client) => {
       console.log('🔗 新的数据库连接已建立');
@@ -60,12 +60,12 @@ const connectDB = async () => {
     const client = await dbPool.connect();
     await client.query('SELECT NOW()');
     client.release();
-    
+
     console.log(`✅ 数据库连接成功: ${dbConfig.host}:${dbConfig.port}/${dbConfig.database}`);
-    
+
     // 初始化数据库表
     await initializeTables();
-    
+
     return dbPool;
   } catch (error) {
     console.error('❌ 数据库连接失败:', error.message);
@@ -105,15 +105,15 @@ const getPool = () => {
 const query = async (text, params = []) => {
   const dbPool = getPool();
   const start = Date.now();
-  
+
   try {
     const result = await dbPool.query(text, params);
     const duration = Date.now() - start;
-    
+
     if (process.env.NODE_ENV === 'development') {
       console.log('📊 SQL查询:', { text, duration: `${duration}ms`, rows: result.rowCount });
     }
-    
+
     return result;
   } catch (error) {
     console.error('❌ SQL查询错误:', { text, error: error.message });
@@ -201,7 +201,7 @@ const closeConnection = async () => {
 const transaction = async (callback) => {
   const dbPool = getPool();
   const client = await dbPool.connect();
-  
+
   try {
     await client.query('BEGIN');
     const result = await callback(client);
