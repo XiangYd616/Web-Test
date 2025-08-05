@@ -3438,13 +3438,13 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
       proxyIp = testResponseData.origin;
     }
 
-    console.log(`✅ 代理连接测试成功: ${proxy.host}:${proxyPort}, 通过代理响应时间: ${responseTime}ms`);
+    console.log(`✅ 代理连接测试成功: ${proxy.host}:${proxyPort}, 获取到代理IP: ${proxyIp}`);
 
-    // 测试到代理IP的直接延迟
-    let directLatency = null;
+    // 测试到代理IP的直接延迟（这才是关键指标）
+    let networkLatency = null;
     if (proxyIp && proxyIp !== '未知') {
       try {
-        console.log(`🔍 测试到代理IP ${proxyIp} 的直接延迟...`);
+        console.log(`🔍 测试到代理IP ${proxyIp} 的网络延迟...`);
         const ping = require('ping');
         const pingResult = await ping.promise.probe(proxyIp, {
           timeout: 3,
@@ -3452,8 +3452,8 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
         });
 
         if (pingResult.alive) {
-          directLatency = Math.round(parseFloat(pingResult.avg));
-          console.log(`📊 到代理IP的直接延迟: ${directLatency}ms`);
+          networkLatency = Math.round(parseFloat(pingResult.avg));
+          console.log(`📊 网络延迟: ${networkLatency}ms`);
         } else {
           console.log(`⚠️ 无法ping通代理IP ${proxyIp}`);
         }
@@ -3468,8 +3468,9 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
       message: '代理连接测试成功',
       proxyIp: proxyIp, // 实际的出口IP
       location: null, // 地理位置信息将异步获取
-      responseTime: responseTime, // 通过代理的完整响应时间
-      directLatency: directLatency, // 到代理IP的直接延迟
+      responseTime: networkLatency || responseTime, // 优先显示网络延迟，否则显示完整时间
+      networkLatency: networkLatency, // 到代理IP的网络延迟（主要指标）
+      fullResponseTime: responseTime, // 完整响应时间（仅供参考）
       proxyConfig: {
         host: proxy.host,
         port: proxyPort,
