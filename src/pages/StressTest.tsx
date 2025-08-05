@@ -9,6 +9,7 @@ import CancelProgressFeedback from '../components/feedback/CancelProgressFeedbac
 import StressTestHistory from '../components/stress/StressTestHistory';
 import { URLInput } from '../components/testing';
 import { TestPageLayout } from '../components/testing/UnifiedTestingComponents';
+import { useLocalStressTest } from '../hooks/useLocalStressTest';
 import { AdvancedStressTestConfig as ImportedAdvancedStressTestConfig } from '../hooks/useSimpleTestEngine';
 import { useStressTestRecord } from '../hooks/useStressTestRecord';
 import { useUserStats } from '../hooks/useUserStats';
