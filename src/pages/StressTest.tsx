@@ -2853,8 +2853,8 @@ const StressTest: React.FC = () => {
                 throughput: data.throughput || 0,
                 errorRate: data.errorRate || 0,
                 success: true,
-                status: 'success' as const,
-                phase: TestPhase.RUNNING
+                status: 200,
+                phase: TestPhase.STEADY_STATE
             }]);
 
             setMetrics({
@@ -2862,9 +2862,8 @@ const StressTest: React.FC = () => {
                 successfulRequests: data.successfulRequests || 0,
                 failedRequests: data.failedRequests || 0,
                 averageResponseTime: data.averageResponseTime || 0,
-                minResponseTime: data.minResponseTime || 0,
-                maxResponseTime: data.maxResponseTime || 0,
-                throughput: data.throughput || 0,
+                currentTPS: data.throughput || 0,
+                peakTPS: data.throughput || 0,
                 errorRate: data.errorRate || 0,
                 activeUsers: data.activeUsers || 0,
                 timestamp: Date.now()
