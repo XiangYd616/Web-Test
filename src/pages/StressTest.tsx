@@ -3385,26 +3385,76 @@ const StressTest: React.FC = () => {
                 if (result?.startTime) {
                     const startTime = new Date(result.startTime).getTime();
                     const elapsed = Math.max(0, (now - startTime) / 1000); // 已运行秒数
-                    const totalDuration = testConfig.duration + (testConfig.rampUp || 0) +
-                        (testConfig.warmupDuration || 0) + (testConfig.cooldownDuration || 0);
 
-                    // 进度从5%到95%，避免在运行中显示100%
-                    const timeProgress = Math.min(elapsed / totalDuration, 1);
-                    progress = Math.min(5 + (timeProgress * 90), 95);
+                    // 🔧 改进：更精确的阶段划分和进度计算
+                    const rampUpDuration = testConfig.rampUp || 0;
+                    const mainTestDuration = testConfig.duration;
+                    const warmupDuration = testConfig.warmupDuration || 0;
+                    const cooldownDuration = testConfig.cooldownDuration || 0;
+                    const totalDuration = rampUpDuration + mainTestDuration + warmupDuration + cooldownDuration;
 
-                    timeInfo = `已运行 ${Math.floor(elapsed)}秒`;
+                    // 计算当前阶段和进度
+                    let currentPhase = '';
+                    let phaseProgress = 0;
 
-                    if (timeProgress < 1) {
+                    if (elapsed <= rampUpDuration) {
+                        // 加压阶段：5% - 20%
+                        currentPhase = '加压阶段';
+                        phaseProgress = 5 + (elapsed / rampUpDuration) * 15;
+                    } else if (elapsed <= rampUpDuration + mainTestDuration) {
+                        // 主测试阶段：20% - 90%
+                        currentPhase = '主测试阶段';
+                        const mainElapsed = elapsed - rampUpDuration;
+                        phaseProgress = 20 + (mainElapsed / mainTestDuration) * 70;
+                    } else if (elapsed <= rampUpDuration + mainTestDuration + cooldownDuration) {
+                        // 冷却阶段：90% - 100%
+                        currentPhase = '冷却阶段';
+                        const cooldownElapsed = elapsed - rampUpDuration - mainTestDuration;
+                        phaseProgress = 90 + (cooldownElapsed / Math.max(cooldownDuration, 1)) * 10;
+                    } else {
+                        // 超时阶段
+                        currentPhase = '超时运行';
+                        phaseProgress = 100;
+                    }
+
+                    progress = Math.min(phaseProgress, 100);
+
+                    // 更详细的时间信息
+                    if (elapsed < totalDuration) {
                         const remaining = Math.max(0, totalDuration - elapsed);
+                        timeInfo = `${currentPhase} - 已运行 ${Math.floor(elapsed)}秒`;
                         estimatedRemaining = `预计剩余 ${Math.floor(remaining)}秒`;
+                    } else {
+                        const overtime = Math.floor(elapsed - totalDuration);
+                        timeInfo = `${currentPhase} - 已运行 ${Math.floor(elapsed)}秒`;
+                        if (overtime > 0) {
+                            estimatedRemaining = `已超时 ${overtime}秒`;
+                        }
                     }
                 } else {
-                    // 没有开始时间，使用数据点数量估算
+                    // 没有开始时间，使用数据点数量估算，但也要基于时间
                     const dataPoints = stressTestData.length;
                     const estimatedTotal = testConfig.users * testConfig.duration;
                     const dataProgress = Math.min(dataPoints / Math.max(estimatedTotal, 1), 1);
-                    progress = Math.min(5 + (dataProgress * 90), 95);
-                    timeInfo = `已收集 ${dataPoints} 个数据点`;
+
+                    // 如果有实时数据，尝试从最新数据点获取时间信息
+                    if (stressTestData.length > 0) {
+                        const latestData = stressTestData[stressTestData.length - 1];
+                        const testStartTime = stressTestData[0]?.timestamp;
+                        if (testStartTime && latestData.timestamp) {
+                            const elapsed = (new Date(latestData.timestamp).getTime() - new Date(testStartTime).getTime()) / 1000;
+                            const totalDuration = testConfig.duration + (testConfig.rampUp || 0);
+                            const timeProgress = Math.min(elapsed / totalDuration, 1);
+                            progress = 5 + (timeProgress * 95);
+                            timeInfo = `已运行 ${Math.floor(elapsed)}秒 (${dataPoints} 数据点)`;
+                        } else {
+                            progress = 5 + (dataProgress * 95);
+                            timeInfo = `已收集 ${dataPoints} 个数据点`;
+                        }
+                    } else {
+                        progress = 5 + (dataProgress * 95);
+                        timeInfo = `已收集 ${dataPoints} 个数据点`;
+                    }
                 }
                 break;
 
@@ -3422,14 +3472,14 @@ const StressTest: React.FC = () => {
                 break;
 
             case 'cancelled':
-                // 保持当前进度，不回退到0
+                // 🔧 修复：保持实际运行进度，基于真实时间计算
                 if (result?.startTime) {
                     const startTime = new Date(result.startTime).getTime();
                     const elapsed = Math.max(0, (now - startTime) / 1000);
                     const totalDuration = testConfig.duration + (testConfig.rampUp || 0) +
                         (testConfig.warmupDuration || 0) + (testConfig.cooldownDuration || 0);
                     const timeProgress = Math.min(elapsed / totalDuration, 1);
-                    progress = Math.min(5 + (timeProgress * 90), 95);
+                    progress = 5 + (timeProgress * 95); // 基于实际时间的真实进度
                     timeInfo = `测试已取消，运行了 ${Math.floor(elapsed)}秒`;
                 } else {
                     progress = Math.max(5, stressTestData.length > 0 ? 30 : 5);
@@ -3438,11 +3488,14 @@ const StressTest: React.FC = () => {
                 break;
 
             case 'failed':
-                // 保持当前进度
+                // 🔧 修复：保持实际运行进度，基于真实时间计算
                 if (result?.startTime) {
                     const startTime = new Date(result.startTime).getTime();
                     const elapsed = Math.max(0, (now - startTime) / 1000);
-                    progress = Math.min(5 + ((elapsed / testConfig.duration) * 90), 95);
+                    const totalDuration = testConfig.duration + (testConfig.rampUp || 0) +
+                        (testConfig.warmupDuration || 0) + (testConfig.cooldownDuration || 0);
+                    const timeProgress = Math.min(elapsed / totalDuration, 1);
+                    progress = 5 + (timeProgress * 95); // 基于实际时间的真实进度
                     timeInfo = `测试失败，运行了 ${Math.floor(elapsed)}秒`;
                 } else {
                     progress = 5;
