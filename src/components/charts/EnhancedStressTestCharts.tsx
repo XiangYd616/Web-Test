@@ -270,15 +270,17 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
         second: '2-digit'
       });
     } else {
-      // 显示相对时间 (M:SS)
+      // 🔧 改进：显示相对时间，提高到0.01秒精度 (M:SS.CC)
       if (processedData.length > 0) {
         const startTime = new Date(processedData[0].timestamp).getTime();
         const currentTime = new Date(value).getTime();
-        const elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
+        const elapsedSeconds = (currentTime - startTime) / 1000; // 保留小数
 
         const minutes = Math.floor(elapsedSeconds / 60);
-        const seconds = elapsedSeconds % 60;
-        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        const seconds = Math.floor(elapsedSeconds % 60);
+        const ms = Math.floor((elapsedSeconds % 1) * 100); // 0.01秒精度
+
+        return minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}` : `${seconds}.${ms.toString().padStart(2, '0')}`;
       }
       return new Date(value).toLocaleTimeString();
     }
