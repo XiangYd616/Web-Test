@@ -48,7 +48,9 @@ const CONSTANTS = {
     GRADUAL: 'gradual',
     SPIKE: 'spike',
     CONSTANT: 'constant',
-    STRESS: 'stress'
+    STRESS: 'stress',
+    LOAD: 'load',
+    VOLUME: 'volume'
   }
 };
 
@@ -583,7 +585,9 @@ class RealStressTestEngine {
       [CONSTANTS.TEST_TYPES.GRADUAL]: () => this.executeGradualTest(url, users, duration, rampUpTime, method, timeout, thinkTime, results, proxy),
       [CONSTANTS.TEST_TYPES.SPIKE]: () => this.executeSpikeTest(url, users, duration, method, timeout, thinkTime, results, proxy),
       [CONSTANTS.TEST_TYPES.CONSTANT]: () => this.executeConstantTest(url, users, duration, method, timeout, thinkTime, results, proxy),
-      [CONSTANTS.TEST_TYPES.STRESS]: () => this.executeStressLimitTest(url, users, duration, rampUpTime, method, timeout, thinkTime, results, proxy)
+      [CONSTANTS.TEST_TYPES.STRESS]: () => this.executeStressLimitTest(url, users, duration, rampUpTime, method, timeout, thinkTime, results, proxy),
+      [CONSTANTS.TEST_TYPES.LOAD]: () => this.executeLoadTest(url, users, duration, rampUpTime, method, timeout, thinkTime, results, proxy),
+      [CONSTANTS.TEST_TYPES.VOLUME]: () => this.executeVolumeTest(url, users, duration, method, timeout, thinkTime, results, proxy)
     };
 
     const strategy = testStrategies[testType] || testStrategies[CONSTANTS.TEST_TYPES.GRADUAL];
@@ -796,6 +800,72 @@ class RealStressTestEngine {
             );
             promises.push(userPromise);
           }
+        }
+      }
+
+      await Promise.all(promises);
+    } finally {
+      this.clearProgressMonitor(progressMonitor);
+    }
+  }
+
+  /**
+   * 负载测试 - 模拟真实用户行为
+   */
+  async executeLoadTest(url, users, duration, rampUpTime, method, timeout, thinkTime, results, proxyConfig) {
+    results.currentPhase = 'load';
+    const promises = [];
+    const progressMonitor = this.startProgressMonitor(results, duration * 1000);
+
+    try {
+      // 分批启动用户，模拟真实场景
+      const batchCount = 5;
+      const usersPerBatch = Math.ceil(users / batchCount);
+      const batchInterval = 2000; // 每批间隔2秒
+
+      for (let batch = 0; batch < batchCount; batch++) {
+        const batchUsers = Math.min(usersPerBatch, users - batch * usersPerBatch);
+        const batchStartDelay = batch * batchInterval;
+
+        for (let i = 0; i < batchUsers; i++) {
+          // 在批次内添加随机延迟，模拟真实用户行为
+          const userStartDelay = batchStartDelay + Math.random() * 1000;
+          const userDuration = (duration * 1000) - userStartDelay;
+
+          if (userDuration > 0) {
+            const userPromise = this.scheduleVirtualUser(
+              url, userDuration, method, timeout, thinkTime * 1.5, results, userStartDelay, proxyConfig
+            );
+            promises.push(userPromise);
+          }
+        }
+      }
+
+      await Promise.all(promises);
+    } finally {
+      this.clearProgressMonitor(progressMonitor);
+    }
+  }
+
+  /**
+   * 容量测试 - 大量数据处理测试
+   */
+  async executeVolumeTest(url, users, duration, method, timeout, thinkTime, results, proxyConfig) {
+    results.currentPhase = 'volume';
+    const promises = [];
+    const progressMonitor = this.startProgressMonitor(results, duration * 1000);
+
+    try {
+      // 立即启动所有用户，使用更短的思考时间以增加请求频率
+      for (let i = 0; i < users; i++) {
+        const userStartDelay = (i * 50); // 每50ms启动一个用户
+        const userDuration = (duration * 1000) - userStartDelay;
+
+        if (userDuration > 0) {
+          const userPromise = this.scheduleVirtualUser(
+            url, userDuration, method, timeout, Math.max(thinkTime * 0.1, 50), results, userStartDelay, proxyConfig
+          );
+          promises.push(userPromise);
         }
       }
 
