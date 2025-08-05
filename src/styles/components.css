@@ -5,6 +5,7 @@
   background: var(--card-background);
   box-shadow: var(--card-shadow, 0 25px 50px -12px rgba(0, 0, 0, 0.25));
   border-color: var(--border-color);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border-radius: 0.75rem;
   border: 1px solid;
@@ -14,6 +15,7 @@
   background: var(--error-background);
   border-color: var(--error-border);
   color: var(--error-text);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border: 1px solid;
   border-radius: 1rem;
@@ -153,6 +155,7 @@
 
 /* ===== 工具类 ===== */
 .backdrop-blur-xl {
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
 }
 

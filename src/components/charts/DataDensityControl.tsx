@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { Settings, Zap, BarChart3, TrendingUp, Info } from 'lucide-react';
+import { BarChart3, Info, Settings, TrendingUp, Zap } from 'lucide-react';
+import React, { useCallback, useState } from 'react';
 
 interface DataDensityControlProps {
   totalDataPoints: number;
@@ -68,20 +68,19 @@ const DataDensityControl: React.FC<DataDensityControlProps> = ({
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             {/* 性能状态指示器 */}
-            <div className={`px-2 py-1 rounded text-xs font-medium ${
-              performance.level === 'excellent' ? 'bg-green-500/20 text-green-300' :
+            <div className={`px-2 py-1 rounded text-xs font-medium ${performance.level === 'excellent' ? 'bg-green-500/20 text-green-300' :
               performance.level === 'good' ? 'bg-blue-500/20 text-blue-300' :
-              performance.level === 'fair' ? 'bg-yellow-500/20 text-yellow-300' :
-              'bg-red-500/20 text-red-300'
-            }`}>
+                performance.level === 'fair' ? 'bg-yellow-500/20 text-yellow-300' :
+                  'bg-red-500/20 text-red-300'
+              }`}>
               {performance.level === 'excellent' ? '优秀' :
-               performance.level === 'good' ? '良好' :
-               performance.level === 'fair' ? '一般' : '需优化'}
+                performance.level === 'good' ? '良好' :
+                  performance.level === 'fair' ? '一般' : '需优化'}
             </div>
-            
+
             {/* 优化开关 */}
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -92,9 +91,10 @@ const DataDensityControl: React.FC<DataDensityControlProps> = ({
               />
               <span className="text-sm text-gray-300">启用优化</span>
             </label>
-            
+
             {/* 展开按钮 */}
             <button
+              type="button"
               onClick={() => setIsExpanded(!isExpanded)}
               className="p-1 text-gray-400 hover:text-white transition-colors"
               title="展开高级设置"
@@ -108,16 +108,16 @@ const DataDensityControl: React.FC<DataDensityControlProps> = ({
         <div className="mt-3 flex gap-2 flex-wrap">
           {presetConfigs.map((preset) => (
             <button
+              type="button"
               key={preset.name}
               onClick={() => {
                 onMaxDataPointsChange(preset.maxPoints);
                 onSamplingStrategyChange(preset.strategy);
               }}
-              className={`px-3 py-1 rounded text-xs transition-colors ${
-                maxDataPoints === preset.maxPoints && samplingStrategy === preset.strategy
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-              }`}
+              className={`px-3 py-1 rounded text-xs transition-colors ${maxDataPoints === preset.maxPoints && samplingStrategy === preset.strategy
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
               title={preset.description}
             >
               {preset.name}
@@ -131,10 +131,11 @@ const DataDensityControl: React.FC<DataDensityControlProps> = ({
         <div className="border-t border-gray-700/50 p-4 space-y-4">
           {/* 最大数据点设置 */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="max-data-points" className="block text-sm font-medium text-gray-300 mb-2">
               最大数据点: {maxDataPoints.toLocaleString()}
             </label>
             <input
+              id="max-data-points"
               type="range"
               min="100"
               max="5000"
@@ -142,6 +143,7 @@ const DataDensityControl: React.FC<DataDensityControlProps> = ({
               value={maxDataPoints}
               onChange={(e) => onMaxDataPointsChange(parseInt(e.target.value))}
               className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+              aria-label={`最大数据点设置，当前值: ${maxDataPoints.toLocaleString()}`}
             />
             <div className="flex justify-between text-xs text-gray-500 mt-1">
               <span>100</span>
@@ -160,13 +162,13 @@ const DataDensityControl: React.FC<DataDensityControlProps> = ({
                 { value: 'importance', label: '重要性', desc: '基于数据特征选择' }
               ].map((strategy) => (
                 <button
+                  type="button"
                   key={strategy.value}
                   onClick={() => onSamplingStrategyChange(strategy.value as any)}
-                  className={`p-2 rounded text-xs transition-colors ${
-                    samplingStrategy === strategy.value
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  }`}
+                  className={`p-2 rounded text-xs transition-colors ${samplingStrategy === strategy.value
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }`}
                   title={strategy.desc}
                 >
                   {strategy.label}
@@ -197,9 +199,8 @@ const DataDensityControl: React.FC<DataDensityControlProps> = ({
                 </div>
                 <div>
                   <div className="text-gray-500">缓存</div>
-                  <div className={`font-medium ${
-                    performanceStats.cacheHit ? 'text-green-400' : 'text-gray-400'
-                  }`}>
+                  <div className={`font-medium ${performanceStats.cacheHit ? 'text-green-400' : 'text-gray-400'
+                    }`}>
                     {performanceStats.cacheHit ? '命中' : '未命中'}
                   </div>
                 </div>
