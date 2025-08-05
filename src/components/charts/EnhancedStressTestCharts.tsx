@@ -124,23 +124,33 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
     if (realTimeData && realTimeData.length > 0) {
       // 使用实时数据（用于实时监控视图）
       sourceData = realTimeData;
-      console.log('📊 EnhancedStressTestCharts 使用实时数据:', sourceData.length, '个数据点', sourceData.slice(0, 2));
+      // 只在数据量变化时打印日志
+      if (realTimeData.length % 100 === 0 || realTimeData.length < 10) {
+        console.log('📊 EnhancedStressTestCharts 使用实时数据:', sourceData.length, '个数据点');
+      }
     } else if (testResultData && testResultData.length > 0) {
       // 使用测试结果数据（用于测试结果视图）
       sourceData = testResultData;
       console.log('📊 EnhancedStressTestCharts 使用测试结果数据:', sourceData.length, '个数据点');
     } else {
-      console.log('⚠️ EnhancedStressTestCharts 没有可用数据', { realTimeData: realTimeData?.length, testResultData: testResultData?.length });
+      // 减少空数据警告的频率，只在组件首次渲染时打印
+      if (realTimeData?.length === 0 && testResultData?.length === 0) {
+        // 静默处理，不打印警告
+      }
     }
 
     if (!sourceData || sourceData.length === 0) {
-      console.log('❌ EnhancedStressTestCharts 返回空数据');
       return [];
     }
 
     const step = densityControl === 'low' ? 5 : densityControl === 'medium' ? 2 : 1;
     const filtered = sourceData.filter((_, index) => index % step === 0);
-    console.log('📊 EnhancedStressTestCharts 处理后数据:', filtered.length, '个数据点');
+
+    // 只在数据量变化时打印处理结果
+    if (filtered.length % 50 === 0 || filtered.length < 10) {
+      console.log('📊 EnhancedStressTestCharts 处理后数据:', filtered.length, '个数据点');
+    }
+
     return filtered;
   }, [realTimeData, testResultData, densityControl]);
 

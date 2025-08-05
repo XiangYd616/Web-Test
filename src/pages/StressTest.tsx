@@ -5705,6 +5705,7 @@ const StressTest: React.FC = () => {
                                     realTimeData={convertToEnhancedRealTimeData(unifiedTestData.realTimeData)}
                                     isRunning={testStatus === 'running'}
                                     testCompleted={testStatus === 'completed'}
+                                    currentMetrics={unifiedTestData.currentMetrics}
                                     height={500}
                                 />
                             </div>
