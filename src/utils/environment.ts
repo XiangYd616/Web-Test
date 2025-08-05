@@ -23,10 +23,10 @@ export const isDesktopEnvironment = () => {
 };
 
 // 检查是否在开发环境中
-export const isDevelopment = process.env.NODE_ENV === 'development';
+export const isDevelopment = import.meta.env.MODE === 'development';
 
 // 检查是否在生产环境中
-export const isProduction = process.env.NODE_ENV === 'production';
+export const isProduction = import.meta.env.MODE === 'production';
 
 export const canUseDatabase = isNode || isElectron;
 

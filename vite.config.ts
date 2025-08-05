@@ -40,7 +40,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: parseInt(process.env.FRONTEND_PORT || process.env.VITE_DEV_PORT || '5174'),
+    port: parseInt(process.env.VITE_DEV_PORT || '5174'),
     host: true,
     open: false,
     cors: true,
@@ -55,7 +55,7 @@ export default defineConfig({
     proxy: {
       // 代理API请求到后端服务器
       '/api': {
-        target: `http://localhost:${process.env.API_PORT || process.env.PORT || '3001'}`,
+        target: `http://localhost:${process.env.PORT || '3001'}`,
         changeOrigin: true,
         secure: false,
       },
@@ -70,7 +70,7 @@ export default defineConfig({
     middlewareMode: false
   },
   preview: {
-    port: parseInt(process.env.FRONTEND_PORT || process.env.VITE_DEV_PORT || '5174'),
+    port: parseInt(process.env.VITE_DEV_PORT || '5174'),
     host: true,
     cors: true
   },
