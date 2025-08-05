@@ -2719,6 +2719,51 @@ const StressTest: React.FC = () => {
         };
     }, []);
 
+    // 🔧 强制测试完成检测逻辑 - 解决测试卡住问题
+    useEffect(() => {
+        // 只在测试运行中且有数据时检查
+        if (!isRunning || testStatus !== 'running' || stressTestData.length === 0) return;
+
+        const checkForceCompletion = () => {
+            const now = Date.now();
+            const lastDataPoint = stressTestData[stressTestData.length - 1];
+
+            if (!lastDataPoint || !result?.startTime) return;
+
+            // 计算预期的测试结束时间
+            const startTime = new Date(result.startTime).getTime();
+            const expectedDuration = (testConfig.duration + (testConfig.rampUp || 0) +
+                (testConfig.warmupDuration || 0) + (testConfig.cooldownDuration || 0)) * 1000;
+            const expectedEndTime = startTime + expectedDuration;
+
+            // 检查最后数据点的时间
+            const lastDataTime = new Date(lastDataPoint.timestamp).getTime();
+            const timeSinceLastData = now - lastDataTime;
+
+            console.log('🔍 强制完成检测:', {
+                now: new Date(now).toLocaleTimeString(),
+                expectedEndTime: new Date(expectedEndTime).toLocaleTimeString(),
+                lastDataTime: new Date(lastDataTime).toLocaleTimeString(),
+                timeSinceLastData: Math.floor(timeSinceLastData / 1000) + '秒',
+                shouldComplete: now > expectedEndTime && timeSinceLastData > 10000
+            });
+
+            // 如果当前时间超过预期结束时间，且最后数据超过10秒，强制完成
+            if (now > expectedEndTime && timeSinceLastData > 10000) {
+                console.log('🔧 强制完成测试：时间已到且数据流停止');
+                setTestStatus('completed');
+                setTestProgress('压力测试完成！');
+                setIsRunning(false);
+                setTimeout(() => setCurrentTestId(null), 2000);
+            }
+        };
+
+        // 每5秒检查一次
+        const forceCheckInterval = setInterval(checkForceCompletion, 5000);
+
+        return () => clearInterval(forceCheckInterval);
+    }, [isRunning, testStatus, stressTestData.length, result?.startTime, testConfig]);
+
     // 🔧 测试完成检测逻辑 - 基于数据流停止检测测试是否完成
     useEffect(() => {
         // 🔧 修复：只在测试真正运行且不是终态时才启用自动完成检测
