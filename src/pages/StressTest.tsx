@@ -13,6 +13,7 @@ import { AdvancedStressTestConfig as ImportedAdvancedStressTestConfig } from '..
 import { useStressTestRecord } from '../hooks/useStressTestRecord';
 import { useUserStats } from '../hooks/useUserStats';
 import backgroundTestManager from '../services/backgroundTestManager';
+import { ClientStressTestEngine } from '../services/clientStressTest';
 import { systemResourceMonitor } from '../services/systemResourceMonitor';
 import { testEngineManager } from '../services/testEngines';
 import { TestPhase, type RealTimeMetrics, type TestDataPoint } from '../services/TestStateManager';
@@ -2844,14 +2845,16 @@ const StressTest: React.FC = () => {
         const clientTest = new ClientStressTestEngine();
 
         // 设置进度回调
-        clientTest.onProgress = (data) => {
+        clientTest.onProgress = (data: any) => {
             setStressTestData(prev => [...prev, {
                 timestamp: Date.now(),
                 responseTime: data.averageResponseTime || 0,
                 activeUsers: data.activeUsers || 0,
                 throughput: data.throughput || 0,
                 errorRate: data.errorRate || 0,
-                success: true
+                success: true,
+                status: 'success' as const,
+                phase: TestPhase.RUNNING
             }]);
 
             setMetrics({
@@ -2863,7 +2866,6 @@ const StressTest: React.FC = () => {
                 maxResponseTime: data.maxResponseTime || 0,
                 throughput: data.throughput || 0,
                 errorRate: data.errorRate || 0,
-                successRate: data.successRate || 0,
                 activeUsers: data.activeUsers || 0,
                 timestamp: Date.now()
             });
@@ -2879,8 +2881,7 @@ const StressTest: React.FC = () => {
                 timeout: testConfig.timeout,
                 headers: testConfig.headers,
                 body: testConfig.body,
-                optimized: true, // 默认启用高性能优化
-                useProxy: testConfig.clientUseProxy !== false // 代理设置
+                optimized: true // 默认启用高性能优化
             });
 
             // 等待测试完成
@@ -3506,38 +3507,7 @@ const StressTest: React.FC = () => {
         }
     };
 
-    // 获取国家标识 - 兼容性最佳方案
-    const getCountryFlag = (countryCode?: string) => {
-        if (!countryCode) {
-            return <span className="text-gray-400 text-sm">🌐</span>;
-        }
 
-        const code = countryCode.toUpperCase().trim();
-        if (code.length !== 2) {
-            return <span className="text-gray-400 text-sm">🌐</span>;
-        }
-
-        // 国家/地区名称映射
-        const countryNames: { [key: string]: string } = {
-            'KR': '韩国', 'US': '美国', 'CN': '中国', 'JP': '日本', 'GB': '英国',
-            'DE': '德国', 'FR': '法国', 'CA': '加拿大', 'AU': '澳洲', 'IN': '印度',
-            'BR': '巴西', 'RU': '俄国', 'IT': '意大利', 'ES': '西班牙', 'NL': '荷兰',
-            'SG': '新加坡', 'HK': '香港特别行政区', 'MO': '澳门特别行政区', 'TW': '台湾地区', 'TH': '泰国', 'MY': '马来'
-        };
-
-        const countryName = countryNames[code] || code;
-
-        return (
-            <span className="inline-flex items-center space-x-1">
-                <span className="text-blue-400 font-mono text-xs bg-blue-900/20 px-1 rounded">
-                    {code}
-                </span>
-                <span className="text-gray-300 text-xs">
-                    {countryName}
-                </span>
-            </span>
-        );
-    };
 
     // 代理测试状态
     const [proxyTestStatus, setProxyTestStatus] = useState<{
@@ -3605,38 +3575,21 @@ const StressTest: React.FC = () => {
         }
     };
 
-    // 检测客户端IP（根据代理设置使用不同方式）
+    // 检测客户端IP
     const detectClientProxy = async () => {
-        const isUsingProxy = testConfig.clientUseProxy !== false;
-
         setProxyTestStatus({
             testing: true,
             result: null,
-            message: isUsingProxy ? '正在检测浏览器IP...' : '正在检测服务器直连IP...'
+            message: '正在检测当前IP...'
         });
 
         try {
             const startTime = Date.now();
-            let response, data;
 
-            if (isUsingProxy) {
-                // 使用浏览器代理设置检测
-                const testUrl = 'https://httpbin.org/ip';
-                response = await fetch(testUrl);
-                data = await response.json();
-            } else {
-                // 使用服务器直连检测
-                const testUrl = 'https://httpbin.org/ip';
-                const directProxyUrl = `/api/test/proxy/direct?url=${encodeURIComponent(testUrl)}`;
-                response = await fetch(directProxyUrl, {
-                    headers: {
-                        'X-Target-URL': testUrl,
-                        'X-Target-Method': 'GET',
-                        'X-Direct-Mode': 'true'
-                    }
-                });
-                data = await response.json();
-            }
+            // 使用浏览器默认设置检测
+            const testUrl = 'https://httpbin.org/ip';
+            const response = await fetch(testUrl);
+            const data = await response.json();
 
             const responseTime = Date.now() - startTime;
 
@@ -3655,7 +3608,7 @@ const StressTest: React.FC = () => {
             setProxyTestStatus({
                 testing: false,
                 result: 'success',
-                message: isUsingProxy ? '浏览器IP检测完成' : '服务器直连IP检测完成',
+                message: 'IP检测完成',
                 details: {
                     proxyIp: data.origin,
                     responseTime: responseTime,
@@ -3667,7 +3620,7 @@ const StressTest: React.FC = () => {
             setProxyTestStatus({
                 testing: false,
                 result: 'error',
-                message: isUsingProxy ? '无法检测浏览器IP' : '无法检测服务器直连IP',
+                message: '无法检测当前IP',
                 error: error instanceof Error ? error.message : String(error)
             });
             setTimeout(() => {
@@ -4726,27 +4679,11 @@ const StressTest: React.FC = () => {
                                                                                             <div className="flex items-center space-x-1">
                                                                                                 <span className="text-gray-400">位置:</span>
                                                                                                 <div className="flex items-center space-x-1">
-                                                                                                    {getCountryFlag(proxyTestStatus.details.location.countryCode)}
+                                                                                                    <span className="text-gray-400 text-sm">🌐</span>
                                                                                                     <span>
-                                                                                                        {(() => {
-                                                                                                            const location = proxyTestStatus.details.location;
-                                                                                                            const country = location.country;
-                                                                                                            const region = location.region;
-                                                                                                            const city = location.city;
-
-                                                                                                            // 优先显示具体的地区和城市，避免显示重复的国家代码
-                                                                                                            if (region && city) {
-                                                                                                                return `${region}/${city}`;
-                                                                                                            } else if (region) {
-                                                                                                                return region;
-                                                                                                            } else if (city) {
-                                                                                                                return city;
-                                                                                                            } else if (country) {
-                                                                                                                return country;
-                                                                                                            } else {
-                                                                                                                return '未知位置';
-                                                                                                            }
-                                                                                                        })()}
+                                                                                                        {typeof proxyTestStatus.details.location === 'string'
+                                                                                                            ? proxyTestStatus.details.location
+                                                                                                            : '未知位置'}
                                                                                                     </span>
                                                                                                 </div>
                                                                                             </div>
