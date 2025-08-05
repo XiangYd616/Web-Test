@@ -1,5 +1,5 @@
 
-import { AlertCircle, AlertTriangle, BarChart3, CheckCircle, Clock, Download, FileText, Globe, Loader, Play, RotateCcw, Shield, Square, TrendingUp, Users, XCircle, Zap } from 'lucide-react';
+import { AlertCircle, AlertTriangle, BarChart3, CheckCircle, Clock, Download, FileText, Globe, Loader, Play, RotateCcw, Settings, Shield, Square, TrendingUp, Users, XCircle, Zap } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
@@ -4161,7 +4161,7 @@ const StressTest: React.FC = () => {
                                                                                                                                 progressData.progress >= 10 ? 'progress-10' :
                                                                                                                                     progressData.progress >= 5 ? 'progress-5' : 'progress-0'
                                                             }`}
-                                                        style={{ width: `${progressData.progress}%` }}
+                                                        style={{ '--progress-width': `${progressData.progress}%` } as React.CSSProperties}
                                                     />
                                                 </div>
 
@@ -4438,6 +4438,7 @@ const StressTest: React.FC = () => {
                                                         checked={useLocalTest}
                                                         onChange={(e) => setUseLocalTest(e.target.checked)}
                                                         className="sr-only peer"
+                                                        aria-label="启用本地压力测试"
                                                     />
                                                     <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
                                                 </label>
@@ -4654,16 +4655,16 @@ const StressTest: React.FC = () => {
                                                 </span>
                                             </label>
                                             <div className="relative">
-                                                <Users className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                                                <Users className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                                                 <input
                                                     type="number"
                                                     value={testConfig.users}
                                                     onChange={(e) => setTestConfig((prev: StressTestConfig) => ({ ...prev, users: parseInt(e.target.value) || 0 }))}
                                                     className="w-full pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                    style={{ paddingLeft: '2.5rem' }}
+                                                    style={{ paddingLeft: '2rem' }}
                                                     min={getRecommendedConfig(testConfig.testType).users.min}
                                                     max={getRecommendedConfig(testConfig.testType).users.max}
-                                                    placeholder={`${getRecommendedConfig(testConfig.testType).users.min}-${getRecommendedConfig(testConfig.testType).users.max}`}
+                                                    placeholder="输入用户数"
                                                 />
                                             </div>
                                             <div className="text-xs text-gray-500 mt-1">
@@ -4680,16 +4681,16 @@ const StressTest: React.FC = () => {
                                                 </span>
                                             </label>
                                             <div className="relative">
-                                                <Clock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                                                <Clock className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                                                 <input
                                                     type="number"
                                                     value={testConfig.duration}
                                                     onChange={(e) => setTestConfig((prev: StressTestConfig) => ({ ...prev, duration: parseInt(e.target.value) || 0 }))}
                                                     className="w-full pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                    style={{ paddingLeft: '2.5rem' }}
+                                                    style={{ paddingLeft: '2rem' }}
                                                     min={getRecommendedConfig(testConfig.testType).duration.min}
                                                     max={getRecommendedConfig(testConfig.testType).duration.max}
-                                                    placeholder={`${getRecommendedConfig(testConfig.testType).duration.min}-${getRecommendedConfig(testConfig.testType).duration.max}`}
+                                                    placeholder="输入时长(秒)"
                                                 />
                                             </div>
                                             <div className="text-xs text-gray-500 mt-1">
@@ -4706,13 +4707,13 @@ const StressTest: React.FC = () => {
                                                 </span>
                                             </label>
                                             <div className="relative">
-                                                <TrendingUp className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                                                <TrendingUp className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                                                 <input
                                                     type="number"
                                                     value={testConfig.rampUp}
                                                     onChange={(e) => setTestConfig((prev: StressTestConfig) => ({ ...prev, rampUp: parseInt(e.target.value) || 0 }))}
                                                     className="w-full pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                    style={{ paddingLeft: '2.5rem' }}
+                                                    style={{ paddingLeft: '2rem' }}
                                                     min={getRecommendedConfig(testConfig.testType).rampUp.min}
                                                     max={getRecommendedConfig(testConfig.testType).rampUp.max}
                                                     placeholder={`${getRecommendedConfig(testConfig.testType).rampUp.min}-${getRecommendedConfig(testConfig.testType).rampUp.max}`}
@@ -5173,24 +5174,55 @@ const StressTest: React.FC = () => {
 
                                 </div>
 
-                                {/* 右侧控制面板 */}
+                                {/* 右侧控制面板 - 改进版 */}
                                 <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-                                    <h3 className="text-lg font-semibold text-white mb-4">测试控制</h3>
+                                    {/* 控制面板标题 */}
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h3 className="text-lg font-semibold text-white flex items-center">
+                                            <Settings className="w-5 h-5 mr-2 text-blue-400" />
+                                            测试控制
+                                        </h3>
+                                        <div className="flex items-center space-x-2">
+                                            <div className={`w-2 h-2 rounded-full ${testConfig.url.trim() && testConfig.users > 0 && testConfig.duration > 0
+                                                ? 'bg-green-400' : 'bg-yellow-400'
+                                                }`}></div>
+                                            <span className="text-xs text-gray-400">
+                                                {testConfig.url.trim() && testConfig.users > 0 && testConfig.duration > 0
+                                                    ? '配置完成' : '配置中'}
+                                            </span>
+                                        </div>
+                                    </div>
 
-                                    {/* 当前配置摘要 */}
+                                    {/* 当前配置摘要 - 改进版 */}
                                     <div className="bg-gray-700/30 rounded-lg p-4 mb-4">
-                                        <div className="space-y-2 text-sm">
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-400">并发用户:</span>
-                                                <span className="text-white font-medium">{testConfig.users} 个</span>
+                                        <div className="grid grid-cols-1 gap-3">
+                                            {/* 核心参数 */}
+                                            <div className="grid grid-cols-3 gap-3 text-center">
+                                                <div className="bg-gray-600/30 rounded-lg p-3">
+                                                    <div className="text-lg font-bold text-white">{testConfig.users}</div>
+                                                    <div className="text-xs text-gray-400">并发用户</div>
+                                                </div>
+                                                <div className="bg-gray-600/30 rounded-lg p-3">
+                                                    <div className="text-lg font-bold text-white">{testConfig.duration}s</div>
+                                                    <div className="text-xs text-gray-400">测试时长</div>
+                                                </div>
+                                                <div className="bg-gray-600/30 rounded-lg p-3">
+                                                    <div className="text-lg font-bold text-white">{testConfig.rampUp}s</div>
+                                                    <div className="text-xs text-gray-400">加压时间</div>
+                                                </div>
                                             </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-400">测试时长:</span>
-                                                <span className="text-white font-medium">{testConfig.duration} 秒</span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-400">测试类型:</span>
-                                                <span className="text-white font-medium">
+
+                                            {/* 测试类型 */}
+                                            <div className="flex items-center justify-between pt-2 border-t border-gray-600/50">
+                                                <span className="text-gray-400 text-sm">测试类型:</span>
+                                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${testConfig.testType === 'gradual' ? 'bg-blue-500/20 text-blue-300' :
+                                                    testConfig.testType === 'spike' ? 'bg-red-500/20 text-red-300' :
+                                                        testConfig.testType === 'constant' ? 'bg-green-500/20 text-green-300' :
+                                                            testConfig.testType === 'stress' ? 'bg-purple-500/20 text-purple-300' :
+                                                                testConfig.testType === 'load' ? 'bg-orange-500/20 text-orange-300' :
+                                                                    testConfig.testType === 'volume' ? 'bg-yellow-500/20 text-yellow-300' :
+                                                                        'bg-gray-500/20 text-gray-300'
+                                                    }`}>
                                                     {testConfig.testType === 'gradual' ? '梯度加压' :
                                                         testConfig.testType === 'spike' ? '峰值测试' :
                                                             testConfig.testType === 'constant' ? '恒定负载' :
@@ -5298,74 +5330,129 @@ const StressTest: React.FC = () => {
                                         </div>
                                     )}
 
-                                    {/* 快速模板 */}
+                                    {/* 快速模板 - 改进版 */}
                                     <div className="mt-6">
                                         <div className="flex items-center justify-between mb-3">
-                                            <h4 className="text-sm font-medium text-gray-300">快速模板</h4>
+                                            <h4 className="text-sm font-medium text-gray-300 flex items-center">
+                                                <Zap className="w-4 h-4 mr-2 text-yellow-400" />
+                                                快速模板
+                                            </h4>
                                             <button
                                                 type="button"
                                                 onClick={importConfigFromClipboard}
-                                                className="px-3 py-1 text-xs border border-gray-600 text-gray-400 rounded-lg hover:bg-gray-700/50 hover:text-gray-300 transition-colors flex items-center space-x-1"
+                                                className="px-2 py-1 text-xs border border-gray-600 text-gray-400 rounded-md hover:bg-gray-700/50 hover:text-gray-300 transition-colors flex items-center space-x-1"
                                                 title="从剪贴板导入配置"
                                             >
-                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                                </svg>
-                                                <span>导入配置</span>
+                                                <FileText className="w-3 h-3" />
+                                                <span>导入</span>
                                             </button>
                                         </div>
                                         <div className="space-y-2">
+                                            {/* 轻量测试 */}
                                             <button
                                                 type="button"
                                                 onClick={() => applyTemplate('light-load')}
-                                                className="w-full px-3 py-2 text-sm border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors text-left flex items-center justify-between"
+                                                className={`w-full p-3 text-sm border rounded-lg transition-all text-left ${selectedTemplate === 'light-load'
+                                                    ? 'border-green-500 bg-green-500/10 text-green-300'
+                                                    : 'border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:border-green-400'
+                                                    }`}
                                             >
-                                                <div className="flex items-center space-x-2">
-                                                    <span className="text-green-400">●</span>
-                                                    <span>轻量测试</span>
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center space-x-2">
+                                                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                                        <span className="font-medium">轻量测试</span>
+                                                    </div>
+                                                    <span className="text-xs bg-gray-600/50 px-2 py-1 rounded">5用户/30秒</span>
                                                 </div>
-                                                <span className="text-xs text-gray-500">5用户/30秒</span>
+                                                <div className="text-xs text-gray-400 mt-1">适合小型网站初次测试</div>
                                             </button>
+
+                                            {/* 中等负载 */}
                                             <button
                                                 type="button"
                                                 onClick={() => applyTemplate('medium-load')}
-                                                className="w-full px-3 py-2 text-sm border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors text-left flex items-center justify-between"
+                                                className={`w-full p-3 text-sm border rounded-lg transition-all text-left ${selectedTemplate === 'medium-load'
+                                                    ? 'border-yellow-500 bg-yellow-500/10 text-yellow-300'
+                                                    : 'border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:border-yellow-400'
+                                                    }`}
                                             >
-                                                <div className="flex items-center space-x-2">
-                                                    <span className="text-yellow-400">●</span>
-                                                    <span>中等负载</span>
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center space-x-2">
+                                                        <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                                                        <span className="font-medium">中等负载</span>
+                                                        <span className="text-xs bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded">推荐</span>
+                                                    </div>
+                                                    <span className="text-xs bg-gray-600/50 px-2 py-1 rounded">20用户/60秒</span>
                                                 </div>
-                                                <span className="text-xs text-gray-500">20用户/60秒</span>
+                                                <div className="text-xs text-gray-400 mt-1">适合企业网站常规测试</div>
                                             </button>
+
+                                            {/* 重负载 */}
                                             <button
                                                 type="button"
                                                 onClick={() => applyTemplate('heavy-load')}
-                                                className="w-full px-3 py-2 text-sm border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors text-left flex items-center justify-between"
+                                                className={`w-full p-3 text-sm border rounded-lg transition-all text-left ${selectedTemplate === 'heavy-load'
+                                                    ? 'border-red-500 bg-red-500/10 text-red-300'
+                                                    : 'border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:border-red-400'
+                                                    }`}
                                             >
-                                                <div className="flex items-center space-x-2">
-                                                    <span className="text-red-400">●</span>
-                                                    <span>重负载</span>
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center space-x-2">
+                                                        <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                                                        <span className="font-medium">重负载</span>
+                                                        <span className="text-xs bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded">专业</span>
+                                                    </div>
+                                                    <span className="text-xs bg-gray-600/50 px-2 py-1 rounded">50用户/120秒</span>
                                                 </div>
-                                                <span className="text-xs text-gray-500">50用户/120秒</span>
+                                                <div className="text-xs text-gray-400 mt-1">适合大型网站压力测试</div>
                                             </button>
                                         </div>
                                     </div>
 
-                                    {/* 测试引擎状态 */}
+                                    {/* 测试引擎状态 - 改进版 */}
                                     <div className="mt-6">
-                                        <h4 className="text-sm font-medium text-gray-300 mb-3">引擎状态</h4>
-                                        <div className="space-y-2 text-sm">
-                                            <div className="flex items-center space-x-2">
-                                                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                                                <span className="text-gray-300">真实网络测试</span>
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                                <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                                                <span className="text-gray-300">准确性能指标</span>
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                                <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                                                <span className="text-gray-300">实时错误检测</span>
+                                        <h4 className="text-sm font-medium text-gray-300 mb-3 flex items-center">
+                                            <Globe className="w-4 h-4 mr-2 text-green-400" />
+                                            引擎状态
+                                        </h4>
+                                        <div className="bg-gray-700/30 rounded-lg p-3">
+                                            <div className="space-y-3 text-sm">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center space-x-2">
+                                                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                                        <span className="text-gray-300">真实网络测试</span>
+                                                    </div>
+                                                    <CheckCircle className="w-4 h-4 text-green-400" />
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center space-x-2">
+                                                        <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                                                        <span className="text-gray-300">准确性能指标</span>
+                                                    </div>
+                                                    <CheckCircle className="w-4 h-4 text-blue-400" />
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center space-x-2">
+                                                        <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                                                        <span className="text-gray-300">实时错误检测</span>
+                                                    </div>
+                                                    <CheckCircle className="w-4 h-4 text-purple-400" />
+                                                </div>
+
+                                                {/* 引擎信息 */}
+                                                <div className="pt-2 border-t border-gray-600/50">
+                                                    <div className="flex items-center justify-between text-xs">
+                                                        <span className="text-gray-400">引擎版本:</span>
+                                                        <span className="text-gray-300 font-mono">v2.1.0</span>
+                                                    </div>
+                                                    <div className="flex items-center justify-between text-xs mt-1">
+                                                        <span className="text-gray-400">连接状态:</span>
+                                                        <span className="text-green-300 flex items-center space-x-1">
+                                                            <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                                                            <span>已连接</span>
+                                                        </span>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

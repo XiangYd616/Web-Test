@@ -23,7 +23,7 @@ const UXTest = lazy(() => import('../../pages/UXTest'));
 
 // 演示和测试页面
 // URLInputDemo 已删除
-const LocalStressTestDemo = lazy(() => import('../../pages/LocalStressTestDemo'));
+// LocalStressTestDemo 已删除
 
 // 数据管理相关页面
 const DataStorage = lazy(() => import('../../pages/admin/DataStorage'));
@@ -205,11 +205,7 @@ const AppRoutes: React.FC = () => {
             <DownloadDesktop />
           </LazyPageWrapper>
         } />
-        <Route path="local-stress-test-demo" element={
-          <LazyPageWrapper>
-            <LocalStressTestDemo />
-          </LazyPageWrapper>
-        } />
+
 
       </Route>
 

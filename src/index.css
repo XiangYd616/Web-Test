@@ -17,6 +17,9 @@
 /* 响应式样式导入 */
 @import './styles/mobile.css';
 
+/* 组件样式导入 */
+@import './styles/progress-bar.css';
+
 /* 基础重置 - 直接在这里定义 */
 * {
   margin: 0;
