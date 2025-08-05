@@ -1078,7 +1078,8 @@ const StressTest: React.FC = () => {
                                     console.log('🔄 状态同步：服务器显示已完成，但前端仍显示运行中，更新状态...');
                                     updateTestStatus('completed', '压力测试完成！');
                                     setTestProgress('压力测试完成！');
-                                    setCurrentTestId(null);
+                                    // 🔧 修复：延迟清空testId，避免状态被重置
+                                    setTimeout(() => setCurrentTestId(null), 2000);
 
                                     // 设置结果数据
                                     if (statusData.data.realTimeMetrics || statusData.data.metrics) {
@@ -1190,8 +1191,8 @@ const StressTest: React.FC = () => {
                 } else {
                     updateTestStatus('completed', '压力测试完成！');
                     setTestProgress('压力测试完成！');
-                    // 完成状态可以立即清空testId
-                    setCurrentTestId(null);
+                    // 🔧 修复：延迟清空testId，避免状态被重置
+                    setTimeout(() => setCurrentTestId(null), 2000);
                 }
                 setIsRunning(false);
 
@@ -1639,8 +1640,8 @@ const StressTest: React.FC = () => {
         } else if (!isRunning && error && !result) {
             // 有错误但没有结果
             targetStatus = 'failed';
-        } else if (!isRunning && !currentTestId && !result) {
-            // 完全空闲状态
+        } else if (!isRunning && !currentTestId && !result && !['completed', 'cancelled', 'failed'].includes(testStatus)) {
+            // 完全空闲状态 - 但不重置已完成的状态
             targetStatus = 'idle';
         }
 
@@ -2768,7 +2769,8 @@ const StressTest: React.FC = () => {
                                     setTestStatus('completed');
                                     setTestProgress('压力测试完成！');
                                     setIsRunning(false);
-                                    setCurrentTestId(null);
+                                    // 🔧 修复：延迟清空testId，避免状态被重置
+                                    setTimeout(() => setCurrentTestId(null), 2000);
                                 }
                                 return null;
                             }
@@ -2782,7 +2784,8 @@ const StressTest: React.FC = () => {
                                 setTestStatus('completed');
                                 setTestProgress('压力测试完成！');
                                 setIsRunning(false);
-                                setCurrentTestId(null);
+                                // 🔧 修复：延迟清空testId，避免状态被重置
+                                setTimeout(() => setCurrentTestId(null), 2000);
 
                                 // 设置最终结果
                                 if (data.data.metrics) {
