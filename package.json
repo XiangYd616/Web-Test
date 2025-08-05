@@ -79,6 +79,7 @@
     "node-fetch": "^3.3.2",
     "pdf-lib": "^1.17.1",
     "pg": "^8.16.0",
+    "ping": "^0.4.4",
     "playwright": "^1.53.0",
     "rate-limiter-flexible": "^7.1.1",
     "react": "^18.2.0",
@@ -97,7 +98,6 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
-    "cross-env": "^7.0.3",
     "@types/cheerio": "^0.22.35",
     "@types/compression": "^1.8.1",
     "@types/cors": "^2.8.19",
@@ -115,6 +115,7 @@
     "autoprefixer": "^10.4.16",
     "concurrently": "^9.2.0",
     "connect-history-api-fallback": "^2.0.0",
+    "cross-env": "^7.0.3",
     "electron": "^32.2.6",
     "electron-builder": "^25.1.8",
     "eslint": "^8.57.0",
