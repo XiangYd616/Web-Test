@@ -3535,6 +3535,8 @@ const StressTest: React.FC = () => {
         message: ''
     });
 
+
+
     // 根据测试类型获取推荐配置
     const getRecommendedConfig = (testType: string) => {
         const configs = {
@@ -3583,6 +3585,8 @@ const StressTest: React.FC = () => {
             rampUp: recommended.rampUp.recommended
         }));
     };
+
+
 
     // 代理分析功能
     const analyzeProxy = async () => {
