@@ -23,10 +23,10 @@ const CONSTANTS = {
     DEBUG: 3
   },
   LIMITS: {
-    MAX_CONCURRENT_USERS: Math.min(1000, os.cpus().length * 50),
-    MAX_DURATION: 600, // 10分钟
-    MAX_ERRORS: 100,
-    MAX_RESPONSE_TIMES: 10000
+    MAX_CONCURRENT_USERS: Number.MAX_SAFE_INTEGER, // 无限制
+    MAX_DURATION: Number.MAX_SAFE_INTEGER, // 无时间限制
+    MAX_ERRORS: Number.MAX_SAFE_INTEGER, // 无错误数量限制
+    MAX_RESPONSE_TIMES: Number.MAX_SAFE_INTEGER // 无响应时间记录限制
   },
   TIMEOUTS: {
     DEFAULT_REQUEST: 10000, // 10秒
@@ -51,6 +51,45 @@ const CONSTANTS = {
     STRESS: 'stress',
     LOAD: 'load',
     VOLUME: 'volume'
+  },
+  // 针对不同测试类型的优化配置 - 无并发限制
+  TEST_TYPE_CONFIGS: {
+    gradual: {
+      timeout: 15000,        // 15秒超时，观察慢响应
+      thinkTime: 2000,       // 2秒思考时间，模拟真实用户
+      maxConcurrent: Number.MAX_SAFE_INTEGER, // 无限制
+      description: '梯度加压测试 - 观察性能变化趋势'
+    },
+    spike: {
+      timeout: 8000,         // 8秒超时，快速检测峰值响应
+      thinkTime: 500,        // 0.5秒思考时间，快速冲击
+      maxConcurrent: Number.MAX_SAFE_INTEGER, // 无限制
+      description: '峰值测试 - 快速高并发冲击'
+    },
+    constant: {
+      timeout: 12000,        // 12秒超时，稳定性测试
+      thinkTime: 1500,       // 1.5秒思考时间，稳定负载
+      maxConcurrent: Number.MAX_SAFE_INTEGER, // 无限制
+      description: '恒定负载测试 - 长期稳定性验证'
+    },
+    stress: {
+      timeout: 20000,        // 20秒超时，允许系统在压力下响应
+      thinkTime: 1000,       // 1秒思考时间，持续压力
+      maxConcurrent: Number.MAX_SAFE_INTEGER, // 无限制
+      description: '压力极限测试 - 寻找系统瓶颈'
+    },
+    load: {
+      timeout: 18000,        // 18秒超时，真实场景可能较慢
+      thinkTime: 3000,       // 3秒思考时间，模拟真实用户行为
+      maxConcurrent: Number.MAX_SAFE_INTEGER, // 无限制
+      description: '负载测试 - 模拟真实用户场景'
+    },
+    volume: {
+      timeout: 6000,         // 6秒超时，快速处理大量请求
+      thinkTime: 200,        // 0.2秒思考时间，高频请求
+      maxConcurrent: Number.MAX_SAFE_INTEGER, // 无限制
+      description: '容量测试 - 大数据高频处理'
+    }
   }
 };
 
@@ -571,6 +610,30 @@ class RealStressTestEngine {
     });
 
     return results;
+  }
+
+  /**
+   * 根据测试类型优化配置参数 - 无限制版本
+   */
+  optimizeConfigForTestType(config) {
+    const testType = config.testType || CONSTANTS.TEST_TYPES.GRADUAL;
+    const typeConfig = CONSTANTS.TEST_TYPE_CONFIGS[testType] || CONSTANTS.TEST_TYPE_CONFIGS.gradual;
+
+    // 创建优化后的配置 - 不限制用户数
+    const optimizedConfig = {
+      ...config,
+      // 使用测试类型特定的超时时间
+      timeout: Math.max(config.timeout || 10, typeConfig.timeout / 1000), // 转换为秒
+      // 使用测试类型特定的思考时间
+      thinkTime: Math.max(config.thinkTime || 1, typeConfig.thinkTime / 1000), // 转换为秒
+      // 不限制用户数 - 使用用户输入的值
+      users: config.users || 10
+    };
+
+    Logger.info(`🔧 配置优化 [${testType}]: 超时=${optimizedConfig.timeout}s, 思考时间=${optimizedConfig.thinkTime}s, 用户数=${optimizedConfig.users} (无限制)`);
+    Logger.debug(`📝 ${typeConfig.description}`);
+
+    return optimizedConfig;
   }
 
   /**
