@@ -43,6 +43,7 @@
     "ci:check": "npm run type-check && npm run lint && npm run build",
     "env:check": "node scripts/check-env-config.cjs",
     "env:validate": "cd server && npm run validate-env",
+    "env:separation": "node scripts/validate-env-separation.cjs",
     "port:check": "node scripts/port-config.cjs",
     "clean": "rimraf dist dist-electron node_modules/.cache",
     "clean:all": "rimraf dist dist-electron node_modules"
