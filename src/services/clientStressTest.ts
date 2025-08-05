@@ -5,10 +5,10 @@
 
 interface ClientTestConfig {
   url: string;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   users: number;
   duration: number; // 秒
-  testType: 'gradual' | 'spike' | 'constant' | 'stress';
+  testType: 'gradual' | 'spike' | 'constant' | 'stress' | 'load' | 'volume';
   timeout: number; // 秒
   headers?: Record<string, string>;
   body?: string;
@@ -45,8 +45,8 @@ export class ClientStressTestEngine {
   private processingQueue = false;
   private optimized = true; // 默认启用优化
   private useProxy = true; // 默认使用系统代理
-  private onProgress?: (progress: TestProgress) => void;
-  private onComplete?: (results: TestResult[]) => void;
+  public onProgress?: (progress: TestProgress) => void;
+  public onComplete?: (results: TestResult[]) => void;
 
   /**
    * 开始压力测试
