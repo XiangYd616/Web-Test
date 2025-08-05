@@ -93,18 +93,20 @@ const OptimizedPerformanceChart: React.FC<OptimizedPerformanceChartProps> = ({
     return values.reduce((sum, val) => sum + val, 0) / values.length;
   }, [optimizedData.data, dataKey, showAverage]);
 
-  // 优化的时间格式化函数
+  // 🔧 改进：优化的时间格式化函数，提高到0.01秒精度
   const formatTime = useCallback((value: any) => {
     if (!optimizedData.data.length) return '';
 
     try {
       const startTime = new Date(optimizedData.data[0].timestamp).getTime();
       const currentTime = new Date(value).getTime();
-      const elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
+      const elapsedSeconds = (currentTime - startTime) / 1000; // 保留小数
 
       const minutes = Math.floor(elapsedSeconds / 60);
-      const seconds = elapsedSeconds % 60;
-      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      const seconds = Math.floor(elapsedSeconds % 60);
+      const ms = Math.floor((elapsedSeconds % 1) * 100); // 0.01秒精度
+
+      return minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}` : `${seconds}.${ms.toString().padStart(2, '0')}`;
     } catch {
       const date = new Date(value);
       return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
@@ -121,18 +123,21 @@ const OptimizedPerformanceChart: React.FC<OptimizedPerformanceChartProps> = ({
     return [value, name];
   }, [dataKey]);
 
-  // 优化的标签格式化
+  // 🔧 改进：优化的标签格式化，提高到0.1秒精度
   const formatLabel = useCallback((value: any) => {
     if (!optimizedData.data.length) return '';
 
     try {
       const startTime = new Date(optimizedData.data[0].timestamp).getTime();
       const currentTime = new Date(value).getTime();
-      const elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
+      const elapsedSeconds = (currentTime - startTime) / 1000; // 保留小数
 
       const minutes = Math.floor(elapsedSeconds / 60);
-      const seconds = elapsedSeconds % 60;
-      return `测试时间: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+      const seconds = Math.floor(elapsedSeconds % 60);
+      const ms = Math.floor((elapsedSeconds % 1) * 100); // 0.01秒精度
+
+      const timeStr = minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}` : `${seconds}.${ms.toString().padStart(2, '0')}`;
+      return `测试时间: ${timeStr}`;
     } catch {
       const date = new Date(value);
       return `时间: ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;

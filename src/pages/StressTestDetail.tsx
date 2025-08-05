@@ -1275,15 +1275,17 @@ const StressTestDetail: React.FC = () => {
                             dataKey="timestamp"
                             tick={{ fontSize: 12, fill: '#9CA3AF' }}
                             tickFormatter={(value) => {
-                              // 计算相对于测试开始的时间
+                              // 🔧 改进：计算相对于测试开始的时间，提高到0.01秒精度
                               if (finalChartData.length > 0) {
                                 const startTime = new Date(finalChartData[0].timestamp).getTime();
                                 const currentTime = new Date(value).getTime();
-                                const elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
+                                const elapsedSeconds = (currentTime - startTime) / 1000; // 保留小数
 
                                 const minutes = Math.floor(elapsedSeconds / 60);
-                                const seconds = elapsedSeconds % 60;
-                                return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                                const seconds = Math.floor(elapsedSeconds % 60);
+                                const ms = Math.floor((elapsedSeconds % 1) * 100); // 0.01秒精度
+
+                                return minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}` : `${seconds}.${ms.toString().padStart(2, '0')}`;
                               }
 
                               // 备用方案：显示绝对时间
@@ -1310,15 +1312,18 @@ const StressTestDetail: React.FC = () => {
                               return [value, name];
                             }}
                             labelFormatter={(value) => {
-                              // 计算相对于测试开始的时间
+                              // 🔧 改进：计算相对于测试开始的时间，提高到0.01秒精度
                               if (finalChartData.length > 0) {
                                 const startTime = new Date(finalChartData[0].timestamp).getTime();
                                 const currentTime = new Date(value).getTime();
-                                const elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
+                                const elapsedSeconds = (currentTime - startTime) / 1000; // 保留小数
 
                                 const minutes = Math.floor(elapsedSeconds / 60);
-                                const seconds = elapsedSeconds % 60;
-                                return `测试时间: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                                const seconds = Math.floor(elapsedSeconds % 60);
+                                const ms = Math.floor((elapsedSeconds % 1) * 100); // 0.01秒精度
+
+                                const timeStr = minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}` : `${seconds}.${ms.toString().padStart(2, '0')}`;
+                                return `测试时间: ${timeStr}`;
                               }
 
                               // 备用方案：显示绝对时间
@@ -1387,15 +1392,17 @@ const StressTestDetail: React.FC = () => {
                             dataKey="timestamp"
                             tick={{ fontSize: 12, fill: '#9CA3AF' }}
                             tickFormatter={(value) => {
-                              // 计算相对于测试开始的时间
+                              // 🔧 改进：计算相对于测试开始的时间，提高到0.01秒精度
                               if (finalChartData.length > 0) {
                                 const startTime = new Date(finalChartData[0].timestamp).getTime();
                                 const currentTime = new Date(value).getTime();
-                                const elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
+                                const elapsedSeconds = (currentTime - startTime) / 1000; // 保留小数
 
                                 const minutes = Math.floor(elapsedSeconds / 60);
-                                const seconds = elapsedSeconds % 60;
-                                return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                                const seconds = Math.floor(elapsedSeconds % 60);
+                                const ms = Math.floor((elapsedSeconds % 1) * 100); // 0.01秒精度
+
+                                return minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}` : `${seconds}.${ms.toString().padStart(2, '0')}`;
                               }
 
                               // 备用方案：显示绝对时间
