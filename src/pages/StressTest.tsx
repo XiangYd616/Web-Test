@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { AdvancedStressTestChart, EnhancedStressTestCharts as UnifiedStressTestCharts } from '../components/charts';
+import UnifiedExportButton from '../components/common/UnifiedExportButton';
 import CancelTestConfirmDialog from '../components/dialogs/CancelTestConfirmDialog';
 import CancelProgressFeedback from '../components/feedback/CancelProgressFeedback';
 import StressTestHistory from '../components/stress/StressTestHistory';
@@ -20,6 +21,7 @@ import { testEngineManager } from '../services/testEngines';
 import { TestPhase, type RealTimeMetrics, type TestDataPoint } from '../services/TestStateManager';
 import '../styles/progress-bar.css';
 import type { TestStatusType } from '../types/testHistory';
+import ExportUtils from '../utils/exportUtils';
 import { getTemplateById } from '../utils/testTemplates';
 
 // 本地配置接口，继承导入的配置
@@ -5457,18 +5459,37 @@ const StressTest: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    {/* 导出功能 */}
+                                    {/* 导出功能 - 统一组件 */}
                                     {result && (
                                         <div className="mt-6">
-                                            <h4 className="text-sm font-medium text-gray-300 mb-3">导出报告</h4>
-                                            <button
-                                                type="button"
-                                                onClick={() => handleExportReport('json')}
-                                                className="w-full px-3 py-2 text-sm border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center space-x-2"
-                                            >
-                                                <Download className="w-4 h-4" />
-                                                <span>导出 JSON</span>
-                                            </button>
+                                            <h4 className="text-sm font-medium text-gray-300 mb-3 flex items-center">
+                                                <Download className="w-4 h-4 mr-2 text-blue-400" />
+                                                导出报告
+                                            </h4>
+                                            <UnifiedExportButton
+                                                data={{
+                                                    filename: `stress-test-${Date.now()}`,
+                                                    data: {
+                                                        testConfig,
+                                                        result,
+                                                        metrics,
+                                                        realTimeData: stressTestData
+                                                    },
+                                                    metadata: {
+                                                        title: '压力测试报告',
+                                                        description: `对 ${testConfig.url} 的压力测试结果`,
+                                                        timestamp: new Date().toISOString(),
+                                                        version: '2.1.0'
+                                                    }
+                                                }}
+                                                formats={['json', 'csv', 'html']}
+                                                onExport={(format, data) => {
+                                                    ExportUtils.exportStressTestData(data.data, format);
+                                                }}
+                                                className="w-full"
+                                                size="sm"
+                                                variant="outline"
+                                            />
                                         </div>
                                     )}
                                 </div>
@@ -5480,26 +5501,30 @@ const StressTest: React.FC = () => {
                             <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4">
                                 <div className="flex justify-between items-center mb-4">
                                     <h3 className="text-lg font-semibold text-white">测试结果</h3>
-                                    <div className="flex space-x-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => handleExportReport('json')}
-                                            className="px-2 py-1 border border-gray-600 text-gray-300 rounded text-xs hover:bg-gray-700/50 transition-colors flex items-center space-x-1"
-                                            title="导出JSON数据"
-                                        >
-                                            <Download className="w-3 h-3" />
-                                            <span>JSON</span>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => handleExportReport('csv')}
-                                            className="px-2 py-1 border border-gray-600 text-gray-300 rounded text-xs hover:bg-gray-700/50 transition-colors flex items-center space-x-1"
-                                            title="导出CSV数据"
-                                        >
-                                            <FileText className="w-3 h-3" />
-                                            <span>CSV</span>
-                                        </button>
-                                    </div>
+                                    <UnifiedExportButton
+                                        data={{
+                                            filename: `stress-test-result-${Date.now()}`,
+                                            data: {
+                                                testConfig,
+                                                result,
+                                                metrics,
+                                                realTimeData: stressTestData
+                                            },
+                                            metadata: {
+                                                title: '压力测试结果',
+                                                description: `对 ${testConfig.url} 的压力测试结果`,
+                                                timestamp: new Date().toISOString(),
+                                                version: '2.1.0'
+                                            }
+                                        }}
+                                        formats={['json', 'csv', 'html']}
+                                        onExport={(format: string, data: any) => {
+                                            ExportUtils.exportStressTestData(data.data, format);
+                                        }}
+                                        size="sm"
+                                        variant="outline"
+                                        showDropdown={true}
+                                    />
                                 </div>
 
                                 {/* 主要性能指标卡片 */}

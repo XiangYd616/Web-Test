@@ -1,4 +1,4 @@
-import { AlertTriangle, BarChart3, CheckCircle, Clock, Download, ExternalLink, Gauge, Globe, Image, Loader, Monitor, RotateCcw, Settings, Share2, Smartphone, Square, Timer, TrendingUp, Wifi, XCircle, Zap } from 'lucide-react';
+import { AlertTriangle, BarChart3, CheckCircle, Clock, ExternalLink, Gauge, Globe, Image, Loader, Monitor, RotateCcw, Settings, Share2, Smartphone, Square, Timer, TrendingUp, Wifi, XCircle, Zap } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { TestPageLayout } from '../components/testing/UnifiedTestingComponents';
@@ -1280,23 +1280,26 @@ const PerformanceTest: React.FC = () => {
                 查看详细报告
               </a>
             )}
-            <button
-              type="button"
-              onClick={() => {
-                const data = JSON.stringify(results, null, 2);
-                const blob = new Blob([data], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `performance-test-${results.id}.json`;
-                a.click();
-                URL.revokeObjectURL(url);
+            <UnifiedExportButton
+              data={{
+                filename: `performance-test-${results.id}`,
+                data: results,
+                metadata: {
+                  title: '性能测试报告',
+                  description: `对 ${results.url} 的性能测试结果`,
+                  timestamp: new Date().toISOString(),
+                  version: '2.1.0'
+                }
               }}
-              className="inline-flex items-center px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm"
-            >
-              <Download className="w-3 h-3 mr-1.5" />
-              导出结果
-            </button>
+              formats={['json', 'csv']}
+              onExport={(format: string, data: any) => {
+                ExportUtils.exportPerformanceTestData(data.data, format);
+              }}
+              size="sm"
+              variant="primary"
+              showDropdown={false}
+              defaultFormat="json"
+            />
             <button
               type="button"
               onClick={() => {
