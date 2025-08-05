@@ -3,11 +3,12 @@
  * 检查必要的环境变量是否正确配置
  */
 
-require('dotenv').config();
+// 加载后端环境变量配置
+require('dotenv').config({ path: require('path').join(__dirname, '../.env') });
 
 const requiredVars = [
   'DB_HOST',
-  'DB_PORT', 
+  'DB_PORT',
   'DB_NAME',
   'DB_USER',
   'DB_PASSWORD',
@@ -42,7 +43,7 @@ const securityChecks = [
 
 function validateEnvironment() {
   console.log('🔍 验证环境变量配置...\n');
-  
+
   let hasErrors = false;
   let hasWarnings = false;
 
@@ -90,7 +91,7 @@ function validateEnvironment() {
     database: process.env.DB_NAME,
     user: process.env.DB_USER
   };
-  
+
   Object.entries(dbConfig).forEach(([key, value]) => {
     console.log(`   ${key}: ${value}`);
   });
@@ -139,7 +140,7 @@ function validateEnvironment() {
   console.log('- 生产环境请确保使用强密码和安全的JWT密钥');
   console.log('- 定期检查和更新安全配置');
   console.log('- 监控日志文件以发现潜在问题');
-  
+
   return !hasErrors;
 }
 
