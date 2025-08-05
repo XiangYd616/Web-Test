@@ -4534,13 +4534,7 @@ const StressTest: React.FC = () => {
                                                 </div>
                                             </div>
 
-                                            {/* 服务器端模式说明 */}
-                                            <div className="mb-3 p-2 rounded-lg border bg-blue-500/10 border-blue-500/30">
-                                                <div className="text-xs text-gray-300">
-                                                    <span className="font-medium text-blue-300">🖥️ 服务器端模式：</span>
-                                                    使用下方配置的代理设置发送测试请求
-                                                </div>
-                                            </div>
+
 
                                             <div className="space-y-3">
                                                 {/* 启用代理开关 */}
