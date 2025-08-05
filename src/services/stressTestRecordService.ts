@@ -66,6 +66,14 @@ export interface StressTestRecord {
     cooldownDuration?: number;
     headers?: Record<string, string>;
     body?: string;
+    proxy?: {
+      enabled: boolean;
+      type?: string;
+      host?: string;
+      port?: number;
+      username?: string;
+      password?: string;
+    };
   };
 
   results?: {

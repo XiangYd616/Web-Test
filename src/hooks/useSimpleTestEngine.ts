@@ -19,6 +19,14 @@ export interface AdvancedStressTestConfig {
     type: 'basic' | 'bearer' | 'api-key';
     credentials: Record<string, string>;
   };
+  proxy?: {
+    enabled: boolean;
+    type?: 'http' | 'https' | 'socks5';
+    host?: string;
+    port?: number;
+    username?: string;
+    password?: string;
+  };
   scenarios?: TestScenario[];
   thresholds?: TestThresholds;
   regions?: string[];

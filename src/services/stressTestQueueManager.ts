@@ -7,7 +7,27 @@ export interface QueuedTest {
   recordId: string;
   testName: string;
   url: string;
-  config: any;
+  config: {
+    users: number;
+    duration: number;
+    rampUpTime: number;
+    testType: 'gradual' | 'spike' | 'constant' | 'step';
+    method: string;
+    timeout: number;
+    thinkTime: number;
+    warmupDuration?: number;
+    cooldownDuration?: number;
+    headers?: Record<string, string>;
+    body?: string;
+    proxy?: {
+      enabled: boolean;
+      type?: string;
+      host?: string;
+      port?: number;
+      username?: string;
+      password?: string;
+    };
+  };
   priority: 'high' | 'normal' | 'low';
   testType?: 'stress' | 'website' | 'seo' | 'security' | 'performance' | 'api';
   userId?: string;
