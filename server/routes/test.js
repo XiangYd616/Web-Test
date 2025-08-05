@@ -3440,6 +3440,19 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
 
     console.log(`✅ 代理连接测试成功: ${proxy.host}:${proxyPort}, 获取到代理IP: ${proxyIp}`);
 
+    // 查询IP地理位置信息（本地数据库查询，很快）
+    let locationInfo = null;
+    if (proxyIp && proxyIp !== '未知') {
+      try {
+        locationInfo = await geoLocationService.getLocation(proxyIp);
+        if (locationInfo) {
+          console.log(`📍 IP ${proxyIp} 位置: ${locationInfo.country}/${locationInfo.region} (${locationInfo.source})`);
+        }
+      } catch (geoError) {
+        console.warn('获取IP地理位置信息失败:', geoError.message);
+      }
+    }
+
     // 测试到代理IP的直接延迟（这才是关键指标）
     let networkLatency = null;
     if (proxyIp && proxyIp !== '未知') {
@@ -3462,15 +3475,13 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
       }
     }
 
-    // 立即返回响应，不等待地理位置查询
     const responseData = {
       success: true,
       message: '代理连接测试成功',
       proxyIp: proxyIp, // 实际的出口IP
-      location: null, // 地理位置信息将异步获取
-      responseTime: networkLatency || responseTime, // 优先显示网络延迟，否则显示完整时间
+      location: locationInfo, // 地理位置信息（辅助显示，不影响延迟）
+      responseTime: networkLatency || responseTime, // 优先显示网络延迟
       networkLatency: networkLatency, // 到代理IP的网络延迟（主要指标）
-      fullResponseTime: responseTime, // 完整响应时间（仅供参考）
       proxyConfig: {
         host: proxy.host,
         port: proxyPort,
@@ -3481,21 +3492,6 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
     };
 
     res.json(responseData);
-
-    // 异步查询地理位置信息（不阻塞响应）
-    if (proxyIp && proxyIp !== '未知') {
-      setImmediate(async () => {
-        try {
-          const locationInfo = await geoLocationService.getLocation(proxyIp);
-          if (locationInfo) {
-            console.log(`📍 IP ${proxyIp} 位置: ${locationInfo.country}/${locationInfo.region} (${locationInfo.source})`);
-            // 可以考虑通过WebSocket或其他方式推送给前端
-          }
-        } catch (geoError) {
-          console.warn('获取IP地理位置信息失败:', geoError.message);
-        }
-      });
-    }
 
   } catch (error) {
     console.error('❌ 代理连接测试失败:', error);
