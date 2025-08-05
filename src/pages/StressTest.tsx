@@ -3535,6 +3535,55 @@ const StressTest: React.FC = () => {
         message: ''
     });
 
+    // 根据测试类型获取推荐配置
+    const getRecommendedConfig = (testType: string) => {
+        const configs = {
+            gradual: {
+                users: { min: 5, max: 100, recommended: 20, description: '逐步增加负载' },
+                duration: { min: 60, max: 600, recommended: 180, description: '需要足够时间观察爬坡过程' },
+                rampUp: { min: 10, max: 120, recommended: 30, description: '缓慢加压时间' }
+            },
+            spike: {
+                users: { min: 10, max: 200, recommended: 50, description: '瞬间高并发冲击' },
+                duration: { min: 30, max: 300, recommended: 60, description: '短时间高强度测试' },
+                rampUp: { min: 1, max: 10, recommended: 5, description: '快速启动时间' }
+            },
+            constant: {
+                users: { min: 5, max: 150, recommended: 30, description: '稳定持续负载' },
+                duration: { min: 60, max: 1200, recommended: 300, description: '长时间稳定性测试' },
+                rampUp: { min: 5, max: 30, recommended: 10, description: '快速达到目标负载' }
+            },
+            stress: {
+                users: { min: 20, max: 500, recommended: 100, description: '高强度压力测试' },
+                duration: { min: 120, max: 600, recommended: 240, description: '充分的压力测试时间' },
+                rampUp: { min: 15, max: 60, recommended: 30, description: '分阶段加压' }
+            },
+            load: {
+                users: { min: 10, max: 200, recommended: 40, description: '模拟真实用户负载' },
+                duration: { min: 180, max: 1800, recommended: 600, description: '长时间真实场景测试' },
+                rampUp: { min: 20, max: 120, recommended: 60, description: '模拟用户逐步进入' }
+            },
+            volume: {
+                users: { min: 50, max: 1000, recommended: 200, description: '大量数据处理测试' },
+                duration: { min: 60, max: 600, recommended: 120, description: '高频请求测试' },
+                rampUp: { min: 5, max: 20, recommended: 10, description: '快速达到最大容量' }
+            }
+        };
+        return configs[testType as keyof typeof configs] || configs.gradual;
+    };
+
+    // 智能调整配置参数
+    const adjustConfigForTestType = (testType: string) => {
+        const recommended = getRecommendedConfig(testType);
+        setTestConfig(prev => ({
+            ...prev,
+            testType: testType as any,
+            users: recommended.users.recommended,
+            duration: recommended.duration.recommended,
+            rampUp: recommended.rampUp.recommended
+        }));
+    };
+
     // 代理分析功能
     const analyzeProxy = async () => {
         if (!testConfig.proxy?.enabled || !testConfig.proxy?.host) {
@@ -4306,7 +4355,7 @@ const StressTest: React.FC = () => {
                                                     ? 'border-green-500 bg-green-500/10'
                                                     : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
                                                     }`}
-                                                onClick={() => setTestConfig((prev: StressTestConfig) => ({ ...prev, testType: 'gradual' }))}
+                                                onClick={() => adjustConfigForTestType('gradual')}
                                             >
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center space-x-3 sm:space-x-2">
@@ -4334,7 +4383,7 @@ const StressTest: React.FC = () => {
                                                     ? 'border-blue-500 bg-blue-500/10'
                                                     : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
                                                     }`}
-                                                onClick={() => setTestConfig((prev: StressTestConfig) => ({ ...prev, testType: 'spike' }))}
+                                                onClick={() => adjustConfigForTestType('spike')}
                                             >
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center space-x-3 sm:space-x-2">
@@ -4362,7 +4411,7 @@ const StressTest: React.FC = () => {
                                                     ? 'border-purple-500 bg-purple-500/10'
                                                     : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
                                                     }`}
-                                                onClick={() => setTestConfig((prev: StressTestConfig) => ({ ...prev, testType: 'constant' }))}
+                                                onClick={() => adjustConfigForTestType('constant')}
                                             >
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center space-x-3 sm:space-x-2">
@@ -4390,7 +4439,7 @@ const StressTest: React.FC = () => {
                                                     ? 'border-red-500 bg-red-500/10'
                                                     : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
                                                     }`}
-                                                onClick={() => setTestConfig((prev: StressTestConfig) => ({ ...prev, testType: 'stress' }))}
+                                                onClick={() => adjustConfigForTestType('stress')}
                                             >
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center space-x-3 sm:space-x-2">
@@ -4418,7 +4467,7 @@ const StressTest: React.FC = () => {
                                                     ? 'border-orange-500 bg-orange-500/10'
                                                     : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
                                                     }`}
-                                                onClick={() => setTestConfig((prev: StressTestConfig) => ({ ...prev, testType: 'load' }))}
+                                                onClick={() => adjustConfigForTestType('load')}
                                             >
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center space-x-3 sm:space-x-2">
@@ -4446,7 +4495,7 @@ const StressTest: React.FC = () => {
                                                     ? 'border-yellow-500 bg-yellow-500/10'
                                                     : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
                                                     }`}
-                                                onClick={() => setTestConfig((prev: StressTestConfig) => ({ ...prev, testType: 'volume' }))}
+                                                onClick={() => adjustConfigForTestType('volume')}
                                             >
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center space-x-3 sm:space-x-2">
@@ -4476,6 +4525,9 @@ const StressTest: React.FC = () => {
                                         <div>
                                             <label className="block text-sm font-medium text-gray-300 mb-2">
                                                 并发用户数
+                                                <span className="text-xs text-gray-500 ml-2">
+                                                    (推荐: {getRecommendedConfig(testConfig.testType).users.recommended})
+                                                </span>
                                             </label>
                                             <div className="relative">
                                                 <Users className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -4485,10 +4537,13 @@ const StressTest: React.FC = () => {
                                                     onChange={(e) => setTestConfig((prev: StressTestConfig) => ({ ...prev, users: parseInt(e.target.value) || 0 }))}
                                                     className="w-full pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                     style={{ paddingLeft: '2.5rem' }}
-                                                    min="1"
-                                                    max="1000"
-                                                    placeholder="用户数"
+                                                    min={getRecommendedConfig(testConfig.testType).users.min}
+                                                    max={getRecommendedConfig(testConfig.testType).users.max}
+                                                    placeholder={`${getRecommendedConfig(testConfig.testType).users.min}-${getRecommendedConfig(testConfig.testType).users.max}`}
                                                 />
+                                            </div>
+                                            <div className="text-xs text-gray-500 mt-1">
+                                                {getRecommendedConfig(testConfig.testType).users.description}
                                             </div>
                                         </div>
 
@@ -4496,6 +4551,9 @@ const StressTest: React.FC = () => {
                                         <div>
                                             <label className="block text-sm font-medium text-gray-300 mb-2">
                                                 测试时长 (秒)
+                                                <span className="text-xs text-gray-500 ml-2">
+                                                    (推荐: {getRecommendedConfig(testConfig.testType).duration.recommended})
+                                                </span>
                                             </label>
                                             <div className="relative">
                                                 <Clock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -4505,10 +4563,13 @@ const StressTest: React.FC = () => {
                                                     onChange={(e) => setTestConfig((prev: StressTestConfig) => ({ ...prev, duration: parseInt(e.target.value) || 0 }))}
                                                     className="w-full pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                     style={{ paddingLeft: '2.5rem' }}
-                                                    min="10"
-                                                    max="3600"
-                                                    placeholder="时长"
+                                                    min={getRecommendedConfig(testConfig.testType).duration.min}
+                                                    max={getRecommendedConfig(testConfig.testType).duration.max}
+                                                    placeholder={`${getRecommendedConfig(testConfig.testType).duration.min}-${getRecommendedConfig(testConfig.testType).duration.max}`}
                                                 />
+                                            </div>
+                                            <div className="text-xs text-gray-500 mt-1">
+                                                {getRecommendedConfig(testConfig.testType).duration.description}
                                             </div>
                                         </div>
 
@@ -4516,6 +4577,9 @@ const StressTest: React.FC = () => {
                                         <div>
                                             <label className="block text-sm font-medium text-gray-300 mb-2">
                                                 加压时间 (秒)
+                                                <span className="text-xs text-gray-500 ml-2">
+                                                    (推荐: {getRecommendedConfig(testConfig.testType).rampUp.recommended})
+                                                </span>
                                             </label>
                                             <div className="relative">
                                                 <TrendingUp className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -4525,10 +4589,38 @@ const StressTest: React.FC = () => {
                                                     onChange={(e) => setTestConfig((prev: StressTestConfig) => ({ ...prev, rampUp: parseInt(e.target.value) || 0 }))}
                                                     className="w-full pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                     style={{ paddingLeft: '2.5rem' }}
-                                                    min="1"
-                                                    max="300"
-                                                    placeholder="加压时间"
+                                                    min={getRecommendedConfig(testConfig.testType).rampUp.min}
+                                                    max={getRecommendedConfig(testConfig.testType).rampUp.max}
+                                                    placeholder={`${getRecommendedConfig(testConfig.testType).rampUp.min}-${getRecommendedConfig(testConfig.testType).rampUp.max}`}
                                                 />
+                                            </div>
+                                            <div className="text-xs text-gray-500 mt-1">
+                                                {getRecommendedConfig(testConfig.testType).rampUp.description}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* 配置优化提示 */}
+                                    <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                                        <div className="flex items-start space-x-2">
+                                            <div className="w-4 h-4 text-blue-400 mt-0.5">💡</div>
+                                            <div className="text-sm text-blue-300">
+                                                <div className="font-medium mb-1">
+                                                    {testConfig.testType === 'gradual' ? '梯度加压测试建议' :
+                                                        testConfig.testType === 'spike' ? '峰值测试建议' :
+                                                            testConfig.testType === 'constant' ? '恒定负载测试建议' :
+                                                                testConfig.testType === 'stress' ? '压力极限测试建议' :
+                                                                    testConfig.testType === 'load' ? '负载测试建议' :
+                                                                        testConfig.testType === 'volume' ? '容量测试建议' : '测试建议'}
+                                                </div>
+                                                <div className="text-xs text-blue-200">
+                                                    {testConfig.testType === 'gradual' ? '适合观察系统性能随负载变化的趋势，建议使用较长的测试时间和缓慢的加压过程' :
+                                                        testConfig.testType === 'spike' ? '模拟突发流量，建议使用中等用户数和较短的测试时间' :
+                                                            testConfig.testType === 'constant' ? '验证系统稳定性，建议使用适中的用户数和较长的测试时间' :
+                                                                testConfig.testType === 'stress' ? '找到系统极限，建议使用较高的用户数和充分的测试时间' :
+                                                                    testConfig.testType === 'load' ? '模拟真实用户场景，建议使用较长的测试时间和缓慢的用户增长' :
+                                                                        testConfig.testType === 'volume' ? '测试大数据处理能力，建议使用大量用户和较短的思考时间' : '选择合适的测试类型'}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
