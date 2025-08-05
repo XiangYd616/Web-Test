@@ -29,8 +29,8 @@
   right: 0 !important;
   bottom: 0 !important;
   background-color: rgba(0, 0, 0, 0.5) !important;
-  backdrop-filter: blur(4px) !important;
   -webkit-backdrop-filter: blur(4px) !important;
+  backdrop-filter: blur(4px) !important;
 }
 
 /* 模态窗口主体 */
@@ -81,4 +81,50 @@ html.dark .stress-test-modal-content,
 .stress-test-modal-content .modal-body {
   overflow-y: auto !important;
   flex: 1 !important;
+}
+
+/* 性能优化样式 */
+/* 启用硬件加速 */
+.stress-test-modal-container,
+.stress-test-modal-backdrop,
+.stress-test-modal-content {
+  will-change: transform, opacity !important;
+  -webkit-transform: translateZ(0) !important;
+  transform: translateZ(0) !important;
+}
+
+/* 优化滚动性能 */
+.stress-test-modal-content .modal-body {
+  scroll-behavior: smooth !important;
+}
+
+/* 优化网格布局性能 */
+.stress-test-modal-content .grid {
+  contain: layout style !important;
+}
+
+/* 优化图表容器性能 */
+.stress-test-modal-content .bg-gray-800 {
+  contain: layout style paint !important;
+  transform: translateZ(0) !important;
+}
+
+/* 减少重绘和重排 */
+.stress-test-modal-content .transition-colors {
+  will-change: color, background-color !important;
+}
+
+/* 优化标签页切换动画 */
+.stress-test-modal-content .flex.border-b button {
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out !important;
+  will-change: color, background-color !important;
+}
+
+/* 加载状态优化 */
+.stress-test-modal-loading {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 16rem !important;
+  color: rgb(156, 163, 175) !important; /* gray-400 */
 }

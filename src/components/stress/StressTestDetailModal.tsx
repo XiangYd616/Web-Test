@@ -11,13 +11,28 @@ interface StressTestDetailModalProps {
   onClose: () => void;
 }
 
-const StressTestDetailModal: React.FC<StressTestDetailModalProps> = ({
+const StressTestDetailModal: React.FC<StressTestDetailModalProps> = React.memo(({
   record,
   isOpen,
   onClose
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
+  const [isDataReady, setIsDataReady] = useState(false);
   const navigate = useNavigate();
+
+  // 优化数据准备状态，避免在数据未准备好时渲染复杂内容
+  React.useEffect(() => {
+    if (isOpen && record) {
+      // 使用setTimeout确保数据在下一个事件循环中准备好
+      const timer = setTimeout(() => {
+        setIsDataReady(true);
+      }, 0);
+      return () => clearTimeout(timer);
+    } else {
+      setIsDataReady(false);
+    }
+    return undefined;
+  }, [isOpen, record]);
 
   // 管理键盘事件（移除页面滚动锁定，允许用户滚动页面）
   useEffect(() => {
@@ -54,7 +69,7 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = ({
     return configs[status as keyof typeof configs] || configs.pending;
   };
 
-  const getStatusText = (status: string) => getStatusConfig(status).text;
+
 
   const calculateTestCompletion = (record: any) => {
     if (!record || record.status === 'completed') return 100;
@@ -188,11 +203,12 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = ({
     }
   };
 
-  const copyToClipboard = (text: string) => {
+  // 使用useCallback优化事件处理函数，避免子组件不必要的重新渲染
+  const copyToClipboard = React.useCallback((text: string) => {
     navigator.clipboard.writeText(text);
-  };
+  }, []);
 
-  const exportData = () => {
+  const exportData = React.useCallback(() => {
     if (!record) return;
     const dataStr = JSON.stringify(record, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -202,16 +218,214 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = ({
     link.download = `stress-test-${record.id}.json`;
     link.click();
     URL.revokeObjectURL(url);
-  };
+  }, [record]);
 
-  const goToDetailPage = () => {
+  const goToDetailPage = React.useCallback(() => {
     if (!record) return;
     navigate(`/stress-test/${record.id}`);
     onClose(); // 关闭模态框
-  };
+  }, [record, navigate, onClose]);
 
-  const statusInfo = getStatusInfo(record.status);
-  const metrics = record.results?.metrics || {};
+  // 使用useMemo优化状态信息计算，避免每次渲染都重新计算
+  const statusInfo = React.useMemo(() => getStatusInfo(record.status), [record.status]);
+  const metrics = React.useMemo(() => record.results?.metrics || {}, [record.results?.metrics]);
+
+  // 优化错误率计算，避免每次渲染都重新计算
+  const errorRate = React.useMemo(() => {
+    const rate = record.results?.metrics?.errorRate ||
+      record.errorRate ||
+      (record.results?.metrics?.failedRequests && record.results?.metrics?.totalRequests
+        ? ((record.results.metrics.failedRequests / record.results.metrics.totalRequests) * 100)
+        : 0);
+    return rate > 0 ? `${rate.toFixed(2)}%` : '0%';
+  }, [record.results?.metrics?.errorRate, record.errorRate, record.results?.metrics?.failedRequests, record.results?.metrics?.totalRequests]);
+
+  // 优化格式化的持续时间计算
+  const formattedDuration = React.useMemo(() => formatDuration(record), [record]);
+
+  // 优化格式化的日期计算
+  const formattedDate = React.useMemo(() => formatDate(record.startTime || record.createdAt), [record.startTime, record.createdAt]);
+
+  // 优化标签页切换处理函数，添加防抖避免快速切换
+  const handleTabChange = React.useCallback((tabId: string) => {
+    // 使用requestAnimationFrame确保在下一帧更新，避免阻塞当前渲染
+    requestAnimationFrame(() => {
+      setActiveTab(tabId);
+    });
+  }, []);
+
+  // 创建优化的标签页内容组件
+  const TabContent = React.useMemo(() => {
+    switch (activeTab) {
+      case 'overview':
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-gray-800 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Calendar className="w-4 h-4 text-blue-400" />
+                  <span className="text-sm text-gray-400">开始时间</span>
+                </div>
+                <p className="text-white font-medium">{formattedDate}</p>
+              </div>
+              <div className="bg-gray-800 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Clock className="w-4 h-4 text-green-400" />
+                  <span className="text-sm text-gray-400">持续时间</span>
+                </div>
+                <p className="text-white font-medium">{formattedDuration}</p>
+              </div>
+              <div className="bg-gray-800 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Users className="w-4 h-4 text-purple-400" />
+                  <span className="text-sm text-gray-400">并发用户</span>
+                </div>
+                <p className="text-white font-medium">{record.config?.users || '-'}</p>
+              </div>
+              <div className="bg-gray-800 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Zap className="w-4 h-4 text-yellow-400" />
+                  <span className="text-sm text-gray-400">错误率</span>
+                </div>
+                <p className="text-white font-medium">{errorRate}</p>
+              </div>
+            </div>
+
+            <div className="bg-gray-800 rounded-lg p-4">
+              <h3 className="text-lg font-semibold text-white mb-4">测试状态</h3>
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg border ${statusInfo.bg} ${statusInfo.color}`}>
+                  {statusInfo.icon}
+                </div>
+                <div>
+                  <p className={`font-medium ${statusInfo.color}`}>
+                    {statusInfo.text}
+                  </p>
+                  <p className="text-gray-400 text-sm mt-1">
+                    {statusInfo.description}
+                  </p>
+
+                  {/* 详细的错误信息和取消原因 */}
+                  {(record.status === 'failed' || record.status === 'cancelled') && record.errorMessage && (
+                    <div className={`mt-3 p-3 rounded-lg border-l-4 ${record.status === 'failed'
+                      ? 'bg-red-50 dark:bg-red-900/20 border-red-400 text-red-700 dark:text-red-300'
+                      : 'bg-orange-50 dark:bg-orange-900/20 border-orange-400 text-orange-700 dark:text-orange-300'
+                      }`}>
+                      <div className="font-medium text-sm mb-2">
+                        {record.status === 'failed' ? '失败详情' : '取消详情'}
+                      </div>
+                      <div className="text-sm">
+                        <div className="mb-2">
+                          <span className="font-medium">
+                            {record.status === 'failed' ? '错误原因：' : '取消原因：'}
+                          </span>
+                          {record.errorMessage}
+                        </div>
+                        {record.status === 'cancelled' && (
+                          <div className="text-xs opacity-75">
+                            <span className="font-medium">测试完成度：</span>
+                            {calculateTestCompletion(record)}%
+                          </div>
+                        )}
+                        {record.endTime && (
+                          <div className="text-xs opacity-75 mt-1">
+                            <span className="font-medium">
+                              {record.status === 'failed' ? '失败时间：' : '取消时间：'}
+                            </span>
+                            {formatDateTime(record.endTime)}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      case 'metrics':
+        return (
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold text-white">性能指标</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="bg-gray-800 rounded-lg p-4">
+                <h4 className="text-sm text-gray-400 mb-2">总请求数</h4>
+                <p className="text-2xl font-bold text-white">{record.totalRequests || metrics.totalRequests || 0}</p>
+              </div>
+              <div className="bg-gray-800 rounded-lg p-4">
+                <h4 className="text-sm text-gray-400 mb-2">成功请求</h4>
+                <p className="text-2xl font-bold text-green-400">{record.successfulRequests || metrics.successfulRequests || 0}</p>
+              </div>
+              <div className="bg-gray-800 rounded-lg p-4">
+                <h4 className="text-sm text-gray-400 mb-2">失败请求</h4>
+                <p className="text-2xl font-bold text-red-400">{record.failedRequests || metrics.failedRequests || 0}</p>
+              </div>
+              <div className="bg-gray-800 rounded-lg p-4">
+                <h4 className="text-sm text-gray-400 mb-2">平均响应时间</h4>
+                <p className="text-2xl font-bold text-blue-400">{record.averageResponseTime || metrics.averageResponseTime || 0}ms</p>
+              </div>
+              <div className="bg-gray-800 rounded-lg p-4">
+                <h4 className="text-sm text-gray-400 mb-2">峰值TPS</h4>
+                <p className="text-2xl font-bold text-purple-400">{record.peakTps || metrics.peakTPS || 0}</p>
+              </div>
+              <div className="bg-gray-800 rounded-lg p-4">
+                <h4 className="text-sm text-gray-400 mb-2">错误率</h4>
+                <p className="text-2xl font-bold text-yellow-400">{((record.errorRate || metrics.errorRate || 0)).toFixed(2)}%</p>
+              </div>
+              {metrics.minResponseTime && (
+                <div className="bg-gray-800 rounded-lg p-4">
+                  <h4 className="text-sm text-gray-400 mb-2">最小响应时间</h4>
+                  <p className="text-2xl font-bold text-green-400">{metrics.minResponseTime}ms</p>
+                </div>
+              )}
+              {metrics.maxResponseTime && (
+                <div className="bg-gray-800 rounded-lg p-4">
+                  <h4 className="text-sm text-gray-400 mb-2">最大响应时间</h4>
+                  <p className="text-2xl font-bold text-red-400">{metrics.maxResponseTime}ms</p>
+                </div>
+              )}
+              {record.performanceGrade && (
+                <div className="bg-gray-800 rounded-lg p-4">
+                  <h4 className="text-sm text-gray-400 mb-2">性能等级</h4>
+                  <p className={`text-2xl font-bold ${record.performanceGrade.startsWith('A') ? 'text-green-400' :
+                    record.performanceGrade.startsWith('B') ? 'text-blue-400' :
+                      record.performanceGrade.startsWith('C') ? 'text-yellow-400' :
+                        'text-red-400'
+                    }`}>{record.performanceGrade}</p>
+                </div>
+              )}
+            </div>
+
+            {/* 标签显示 */}
+            {record.tags && record.tags.length > 0 && (
+              <div>
+                <h4 className="text-md font-semibold text-white mb-4">标签</h4>
+                <div className="flex flex-wrap gap-2">
+                  {record.tags.map((tag: string, index: number) => (
+                    <span key={index} className="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full bg-blue-600/60 text-blue-200 border border-blue-500/50">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      case 'config':
+        return (
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold text-white">测试配置</h3>
+            <div className="bg-gray-800 rounded-lg p-4">
+              <pre className="text-gray-300 text-sm overflow-x-auto">
+                {JSON.stringify(record.config, null, 2)}
+              </pre>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  }, [activeTab, formattedDate, formattedDuration, errorRate, statusInfo, record, metrics]);
 
   // 使用React Portal确保模态窗口渲染到document.body，避免父容器样式影响
   const modalContent = (
@@ -284,7 +498,7 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = ({
               <button
                 type="button"
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabChange(tab.id)}
                 className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors ${activeTab === tab.id
                   ? 'text-blue-400 border-b-2 border-blue-400'
                   : 'text-gray-400 hover:text-white'
@@ -298,179 +512,9 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = ({
         </div>
 
         <div className="flex-1 p-6 overflow-y-auto modal-body">
-          {activeTab === 'overview' && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-gray-800 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Calendar className="w-4 h-4 text-blue-400" />
-                    <span className="text-sm text-gray-400">开始时间</span>
-                  </div>
-                  <p className="text-white font-medium">{formatDate(record.startTime || record.createdAt)}</p>
-                </div>
-                <div className="bg-gray-800 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Clock className="w-4 h-4 text-green-400" />
-                    <span className="text-sm text-gray-400">持续时间</span>
-                  </div>
-                  <p className="text-white font-medium">{formatDuration(record)}</p>
-                </div>
-                <div className="bg-gray-800 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Users className="w-4 h-4 text-purple-400" />
-                    <span className="text-sm text-gray-400">并发用户</span>
-                  </div>
-                  <p className="text-white font-medium">{record.config?.users || '-'}</p>
-                </div>
-                <div className="bg-gray-800 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Zap className="w-4 h-4 text-yellow-400" />
-                    <span className="text-sm text-gray-400">错误率</span>
-                  </div>
-                  <p className="text-white font-medium">
-                    {(() => {
-                      const errorRate = record.results?.metrics?.errorRate ||
-                        record.errorRate ||
-                        (record.results?.metrics?.failedRequests && record.results?.metrics?.totalRequests
-                          ? ((record.results.metrics.failedRequests / record.results.metrics.totalRequests) * 100)
-                          : 0);
-                      return errorRate > 0 ? `${errorRate.toFixed(2)}%` : '0%';
-                    })()}
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-gray-800 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-white mb-4">测试状态</h3>
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg border ${statusInfo.bg} ${statusInfo.color}`}>
-                    {statusInfo.icon}
-                  </div>
-                  <div>
-                    <p className={`font-medium ${statusInfo.color}`}>
-                      {statusInfo.text}
-                    </p>
-                    <p className="text-gray-400 text-sm mt-1">
-                      {statusInfo.description}
-                    </p>
-
-                    {/* 详细的错误信息和取消原因 */}
-                    {(record.status === 'failed' || record.status === 'cancelled') && record.errorMessage && (
-                      <div className={`mt-3 p-3 rounded-lg border-l-4 ${record.status === 'failed'
-                        ? 'bg-red-50 dark:bg-red-900/20 border-red-400 text-red-700 dark:text-red-300'
-                        : 'bg-orange-50 dark:bg-orange-900/20 border-orange-400 text-orange-700 dark:text-orange-300'
-                        }`}>
-                        <div className="font-medium text-sm mb-2">
-                          {record.status === 'failed' ? '失败详情' : '取消详情'}
-                        </div>
-                        <div className="text-sm">
-                          <div className="mb-2">
-                            <span className="font-medium">
-                              {record.status === 'failed' ? '错误原因：' : '取消原因：'}
-                            </span>
-                            {record.errorMessage}
-                          </div>
-                          {record.status === 'cancelled' && (
-                            <div className="text-xs opacity-75">
-                              <span className="font-medium">测试完成度：</span>
-                              {calculateTestCompletion(record)}%
-                            </div>
-                          )}
-                          {record.endTime && (
-                            <div className="text-xs opacity-75 mt-1">
-                              <span className="font-medium">
-                                {record.status === 'failed' ? '失败时间：' : '取消时间：'}
-                              </span>
-                              {formatDateTime(record.endTime)}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'metrics' && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-white">性能指标</h3>
-
-              {/* 所有指标统一显示 */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="bg-gray-800 rounded-lg p-4">
-                  <h4 className="text-sm text-gray-400 mb-2">总请求数</h4>
-                  <p className="text-2xl font-bold text-white">{record.totalRequests || metrics.totalRequests || 0}</p>
-                </div>
-                <div className="bg-gray-800 rounded-lg p-4">
-                  <h4 className="text-sm text-gray-400 mb-2">成功请求</h4>
-                  <p className="text-2xl font-bold text-green-400">{record.successfulRequests || metrics.successfulRequests || 0}</p>
-                </div>
-                <div className="bg-gray-800 rounded-lg p-4">
-                  <h4 className="text-sm text-gray-400 mb-2">失败请求</h4>
-                  <p className="text-2xl font-bold text-red-400">{record.failedRequests || metrics.failedRequests || 0}</p>
-                </div>
-                <div className="bg-gray-800 rounded-lg p-4">
-                  <h4 className="text-sm text-gray-400 mb-2">平均响应时间</h4>
-                  <p className="text-2xl font-bold text-blue-400">{record.averageResponseTime || metrics.averageResponseTime || 0}ms</p>
-                </div>
-                <div className="bg-gray-800 rounded-lg p-4">
-                  <h4 className="text-sm text-gray-400 mb-2">峰值TPS</h4>
-                  <p className="text-2xl font-bold text-purple-400">{record.peakTps || metrics.peakTPS || 0}</p>
-                </div>
-                <div className="bg-gray-800 rounded-lg p-4">
-                  <h4 className="text-sm text-gray-400 mb-2">错误率</h4>
-                  <p className="text-2xl font-bold text-yellow-400">{((record.errorRate || metrics.errorRate || 0)).toFixed(2)}%</p>
-                </div>
-                {metrics.minResponseTime && (
-                  <div className="bg-gray-800 rounded-lg p-4">
-                    <h4 className="text-sm text-gray-400 mb-2">最小响应时间</h4>
-                    <p className="text-2xl font-bold text-green-400">{metrics.minResponseTime}ms</p>
-                  </div>
-                )}
-                {metrics.maxResponseTime && (
-                  <div className="bg-gray-800 rounded-lg p-4">
-                    <h4 className="text-sm text-gray-400 mb-2">最大响应时间</h4>
-                    <p className="text-2xl font-bold text-red-400">{metrics.maxResponseTime}ms</p>
-                  </div>
-                )}
-                {record.performanceGrade && (
-                  <div className="bg-gray-800 rounded-lg p-4">
-                    <h4 className="text-sm text-gray-400 mb-2">性能等级</h4>
-                    <p className={`text-2xl font-bold ${record.performanceGrade.startsWith('A') ? 'text-green-400' :
-                      record.performanceGrade.startsWith('B') ? 'text-blue-400' :
-                        record.performanceGrade.startsWith('C') ? 'text-yellow-400' :
-                          'text-red-400'
-                      }`}>{record.performanceGrade}</p>
-                  </div>
-                )}
-              </div>
-
-              {/* 标签显示 */}
-              {record.tags && record.tags.length > 0 && (
-                <div>
-                  <h4 className="text-md font-semibold text-white mb-4">标签</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {record.tags.map((tag: string, index: number) => (
-                      <span key={index} className="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full bg-blue-600/60 text-blue-200 border border-blue-500/50">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'config' && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-white">测试配置</h3>
-              <div className="bg-gray-800 rounded-lg p-4">
-                <pre className="text-gray-300 text-sm overflow-x-auto">
-                  {JSON.stringify(record.config, null, 2)}
-                </pre>
-              </div>
+          {isDataReady ? TabContent : (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-gray-400">加载中...</div>
             </div>
           )}
         </div>
@@ -480,6 +524,6 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = ({
 
   // 使用React Portal将模态窗口渲染到document.body，确保不受父容器样式影响
   return createPortal(modalContent, document.body);
-};
+});
 
 export default StressTestDetailModal;

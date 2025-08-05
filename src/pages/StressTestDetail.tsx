@@ -6,6 +6,71 @@ import { Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YA
 import '../components/stress/StatusLabel.css';
 import { DataProcessingUtils } from '../utils/dataProcessingUtils';
 
+// 智能数据采样函数 - 移到组件外部避免 hooks 顺序问题
+const intelligentSampling = (data: any[], maxPoints: number) => {
+  if (data.length <= maxPoints) return data;
+
+  // 自适应采样 - 保留重要数据点
+  const result: any[] = [];
+  const step = data.length / maxPoints;
+
+  // 始终保留第一个和最后一个点
+  result.push(data[0]);
+
+  // 计算数据变化率来确定重要性
+  const importanceScores: number[] = new Array(data.length).fill(0);
+
+  for (let i = 1; i < data.length - 1; i++) {
+    const prev = data[i - 1];
+    const curr = data[i];
+    const next = data[i + 1];
+
+    // 计算响应时间变化率
+    const responseTimeChange = Math.abs(
+      (curr.responseTime || 0) - (prev.responseTime || 0)
+    ) + Math.abs(
+      (next.responseTime || 0) - (curr.responseTime || 0)
+    );
+
+    // 计算吞吐量变化率
+    const throughputChange = Math.abs(
+      (curr.throughput || curr.tps || 0) - (prev.throughput || prev.tps || 0)
+    ) + Math.abs(
+      (next.throughput || next.tps || 0) - (curr.throughput || curr.tps || 0)
+    );
+
+    // 综合重要性分数
+    importanceScores[i] = responseTimeChange * 0.6 + throughputChange * 0.4;
+  }
+
+  // 边界点设为高重要性
+  importanceScores[0] = Math.max(...importanceScores) * 1.5;
+  importanceScores[importanceScores.length - 1] = Math.max(...importanceScores) * 1.5;
+
+  // 选择重要数据点
+  const selectedIndices = new Set<number>();
+  selectedIndices.add(0);
+  selectedIndices.add(data.length - 1);
+
+  // 均匀采样基础点
+  for (let i = 1; i < maxPoints - 1; i++) {
+    const index = Math.floor(i * step);
+    selectedIndices.add(index);
+  }
+
+  // 添加高重要性点（保留20%的关键点）
+  const sortedByImportance = importanceScores
+    .map((score, index) => ({ score, index }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, Math.floor(maxPoints * 0.2));
+
+  sortedByImportance.forEach(item => selectedIndices.add(item.index));
+
+  // 转换为排序数组并提取数据
+  const sortedIndices = Array.from(selectedIndices).sort((a, b) => a - b);
+  return sortedIndices.map(index => data[index]);
+};
+
 interface StressTestRecord {
   id: string;
   testName: string;
@@ -47,6 +112,12 @@ const StressTestDetail: React.FC = () => {
   const [timeRange, setTimeRange] = useState<'all' | 'last5min' | 'last1min'>('all');
   const [dataInterval, setDataInterval] = useState<'1s' | '5s' | '10s'>('1s');
   const [showAverage, setShowAverage] = useState(true);
+
+  // 数据优化控制状态
+  const [maxDataPoints, setMaxDataPoints] = useState(1000);
+  const [samplingStrategy, setSamplingStrategy] = useState<'uniform' | 'adaptive' | 'importance'>('adaptive');
+  const [enableOptimization, setEnableOptimization] = useState(true);
+  const [optimizationStats, setOptimizationStats] = useState<any>(null);
 
   // 获取测试详情
   useEffect(() => {
@@ -346,46 +417,9 @@ const StressTestDetail: React.FC = () => {
     window.open(record.url, '_blank');
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-400">加载测试详情中...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !record) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <XCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-white mb-2">加载失败</h2>
-          <p className="text-gray-400 mb-4">{error}</p>
-          <button
-            type="button"
-            onClick={() => navigate('/stress-test', { state: { activeTab: 'history' } })}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            返回压力测试
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const statusInfo = getStatusInfo(record.status);
-  const metrics = record.results?.metrics || {};
-  let realTimeData = record.results?.realTimeData || [];
-
-  // 数据验证和清理
-  realTimeData = realTimeData.filter((item: any) =>
-    item &&
-    typeof item === 'object' &&
-    (item.responseTime !== undefined || item.avgResponseTime !== undefined || item.response_time !== undefined)
-  );
+  // 获取数据 - 确保在早期返回之前调用所有 hooks
+  let realTimeData = record?.results?.realTimeData || [];
+  const metrics = record?.results?.metrics || {};
 
   // 数据处理函数
   const filterDataByTimeRange = (data: any[]) => {
@@ -437,50 +471,38 @@ const StressTestDetail: React.FC = () => {
     const expectedWindows = Math.ceil(totalDuration / intervalMs);
     console.log(`📊 预期窗口数: ${expectedWindows}`);
 
-    // 确保包含所有时间窗口，包括最后一个不完整的窗口
     for (let windowStart = startTime; windowStart < endTime; windowStart += intervalMs) {
-      const windowEnd = Math.min(windowStart + intervalMs, endTime + 1); // +1确保包含最后一个数据点
+      const windowEnd = Math.min(windowStart + intervalMs, endTime);
 
-      // 找到当前时间窗口内的所有数据点
       const windowData = data.filter(item => {
         const itemTime = new Date(item.timestamp).getTime();
         return itemTime >= windowStart && itemTime < windowEnd;
       });
 
-      console.log(`📊 窗口 ${new Date(windowStart).toLocaleTimeString()} - ${new Date(windowEnd).toLocaleTimeString()}: ${windowData.length} 个数据点`);
-
       if (windowData.length > 0) {
-        // 计算窗口内数据的平均值
+        // 计算窗口内的平均值
         const avgResponseTime = windowData.reduce((sum, item) =>
-          sum + (item.responseTime || 0), 0) / windowData.length;
+          sum + (item.responseTime || item.avgResponseTime || item.response_time || 0), 0) / windowData.length;
         const avgThroughput = windowData.reduce((sum, item) =>
-          sum + (item.throughput || 0), 0) / windowData.length;
-
-        // 使用窗口中间时间作为代表时间戳，保持原始格式
-        const windowMiddleTime = windowStart + intervalMs / 2;
-        const representativeItem = windowData[Math.floor(windowData.length / 2)];
-        const windowTimestamp = new Date(windowMiddleTime).toISOString();
-
-        console.log(`📊 窗口代表时间: ${new Date(windowMiddleTime).toLocaleTimeString()}`);
+          sum + (item.throughput || item.tps || item.requestsPerSecond || 0), 0) / windowData.length;
+        const avgActiveUsers = windowData.reduce((sum, item) =>
+          sum + (item.activeUsers || 0), 0) / windowData.length;
+        const avgErrorRate = windowData.reduce((sum, item) =>
+          sum + (item.errorRate || 0), 0) / windowData.length;
 
         aggregatedData.push({
-          ...representativeItem, // 保留其他属性
-          timestamp: windowTimestamp,
-          responseTime: Math.round(avgResponseTime),
-          throughput: Math.round(avgThroughput * 10) / 10, // 保留1位小数
-          // 保持其他字段的聚合值
-          success: windowData.every(item => item.success),
-          activeUsers: Math.round(windowData.reduce((sum, item) => sum + (item.activeUsers || 0), 0) / windowData.length),
-          phase: windowData[0].phase,
-          errorRate: windowData.reduce((sum, item) => sum + (item.errorRate || 0), 0) / windowData.length
+          timestamp: new Date(windowStart + intervalMs / 2).toISOString(), // 使用窗口中点时间
+          responseTime: avgResponseTime,
+          throughput: avgThroughput,
+          activeUsers: Math.round(avgActiveUsers),
+          errorRate: avgErrorRate,
+          // 保留其他字段
+          ...windowData[0]
         });
       }
     }
 
-    // 数据聚合完成
-    console.log(`📊 数据聚合完成: ${dataInterval} 间隔, ${data.length} → ${aggregatedData.length} 个数据点`);
-    console.log(`📊 聚合后时间点:`, aggregatedData.map(item => new Date(item.timestamp).toLocaleTimeString()));
-
+    console.log(`📊 数据聚合完成: ${data.length} → ${aggregatedData.length} 个数据点`);
     return aggregatedData;
   };
 
@@ -493,32 +515,37 @@ const StressTestDetail: React.FC = () => {
     }, 0);
     const average = parseFloat((sum / data.length).toFixed(3));
 
-
-
-    const result = data.map(item => ({
+    return data.map(item => ({
       ...item,
-      averageResponseTime: average,
-      responseTime: item.responseTime || item.avgResponseTime || item.response_time || 0
+      averageResponseTime: average
     }));
-
-
-    return result;
   };
-
-
-
-  // 🔧 删除重复的响应时间分布计算，使用统一工具
 
   // 计算成功率
   const successRate = metrics.totalRequests > 0
     ? (metrics.successfulRequests || 0) / metrics.totalRequests
     : 0;
 
-  // 处理真实数据
-  const processedDisplayData = sampleDataByInterval(filterDataByTimeRange(realTimeData));
-  const finalChartData = showAverage ? calculateAverageData(processedDisplayData) : processedDisplayData;
+  // 使用useMemo优化数据处理
+  const processedDisplayData = React.useMemo(() => {
+    console.log('🔄 重新处理数据，原始数据点:', realTimeData.length);
+    const filtered = filterDataByTimeRange(realTimeData);
+    let sampled = sampleDataByInterval(filtered);
 
+    // 如果启用优化且数据点仍然过多，进行智能采样
+    if (enableOptimization && sampled.length > maxDataPoints) {
+      sampled = intelligentSampling(sampled, maxDataPoints);
+      console.log('🎯 智能采样:', filtered.length, '→', sampled.length, `(目标: ${maxDataPoints})`);
+    } else {
+      console.log('📊 数据处理完成:', filtered.length, '→', sampled.length);
+    }
 
+    return sampled;
+  }, [realTimeData, timeRange, dataInterval, enableOptimization, maxDataPoints]);
+
+  const finalChartData = React.useMemo(() => {
+    return showAverage ? calculateAverageData(processedDisplayData) : processedDisplayData;
+  }, [processedDisplayData, showAverage]);
 
   // 🔧 使用统一的数据处理工具计算响应时间分布
   const responseTimeDistribution = DataProcessingUtils.calculateResponseTimeDistribution(
@@ -545,10 +572,47 @@ const StressTestDetail: React.FC = () => {
     const heightPercent = logRatio * 85 + 5; // 85%最大高度范围 + 5%基础高度
     const finalHeight = Math.max(heightPercent, count > 0 ? 3 : 0); // 有数据最小3%高度
 
-
-
     return finalHeight;
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-400">加载测试详情中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !record) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <XCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-white mb-2">加载失败</h2>
+          <p className="text-gray-400 mb-4">{error}</p>
+          <button
+            type="button"
+            onClick={() => navigate('/stress-test', { state: { activeTab: 'history' } })}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            返回压力测试
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const statusInfo = getStatusInfo(record.status);
+
+  // 数据验证和清理
+  realTimeData = realTimeData.filter((item: any) =>
+    item &&
+    typeof item === 'object' &&
+    (item.responseTime !== undefined || item.avgResponseTime !== undefined || item.response_time !== undefined)
+  );
 
 
 
@@ -1105,6 +1169,85 @@ const StressTestDetail: React.FC = () => {
                 </div>
               </div>
 
+              {/* 数据密度控制面板 */}
+              <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <BarChart3 className="w-5 h-5 text-blue-400" />
+                    <div>
+                      <div className="text-white font-medium">数据密度控制</div>
+                      <div className="text-xs text-gray-400">
+                        {finalChartData.length.toLocaleString()} / {realTimeData.length.toLocaleString()} 数据点
+                        {realTimeData.length > finalChartData.length && (
+                          <span className="ml-2 px-2 py-0.5 bg-blue-600/20 text-blue-300 rounded text-xs">
+                            {(realTimeData.length / finalChartData.length).toFixed(1)}x 压缩
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <div className={`px-2 py-1 rounded text-xs font-medium ${finalChartData.length <= 500 ? 'bg-green-500/20 text-green-300' :
+                      finalChartData.length <= 1000 ? 'bg-blue-500/20 text-blue-300' :
+                        finalChartData.length <= 2000 ? 'bg-yellow-500/20 text-yellow-300' :
+                          'bg-red-500/20 text-red-300'
+                      }`}>
+                      {finalChartData.length <= 500 ? '优秀' :
+                        finalChartData.length <= 1000 ? '良好' :
+                          finalChartData.length <= 2000 ? '一般' : '需优化'}
+                    </div>
+
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={enableOptimization}
+                        onChange={(e) => setEnableOptimization(e.target.checked)}
+                        className="rounded"
+                      />
+                      <span className="text-sm text-gray-300">启用优化</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* 快速预设 */}
+                <div className="flex gap-2 flex-wrap">
+                  {[
+                    { name: '高性能', maxPoints: 500, description: '最佳性能，适合实时监控' },
+                    { name: '平衡', maxPoints: 1000, description: '性能与细节的平衡' },
+                    { name: '详细', maxPoints: 2000, description: '更多细节，适合分析' },
+                    { name: '完整', maxPoints: 5000, description: '最大细节，可能影响性能' }
+                  ].map((preset) => (
+                    <button
+                      key={preset.name}
+                      onClick={() => setMaxDataPoints(preset.maxPoints)}
+                      className={`px-3 py-1 rounded text-xs transition-colors ${maxDataPoints === preset.maxPoints
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        }`}
+                      title={preset.description}
+                    >
+                      {preset.name}
+                    </button>
+                  ))}
+                </div>
+
+                {/* 性能警告 */}
+                {finalChartData.length > 2000 && (
+                  <div className="mt-3 bg-yellow-500/10 border border-yellow-500/20 rounded p-3">
+                    <div className="flex items-start gap-2">
+                      <Zap className="w-4 h-4 text-yellow-400 mt-0.5" />
+                      <div className="text-xs">
+                        <div className="text-yellow-400 font-medium">性能建议</div>
+                        <div className="text-gray-300 mt-1">
+                          当前数据点较多({finalChartData.length.toLocaleString()})，建议启用优化或选择"高性能"预设以提升渲染性能。
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {finalChartData.length > 0 ? (
                 <>
                   {/* 主要性能图表 */}
@@ -1162,7 +1305,7 @@ const StressTestDetail: React.FC = () => {
                               color: '#fff'
                             }}
                             formatter={(value: any, name: string) => {
-                              if (name === 'responseTime') return [`${value}ms`, '响应时间'];
+                              if (name === 'responseTime') return [`${typeof value === 'number' ? value.toFixed(3) : value}ms`, '响应时间'];
                               if (name === 'averageResponseTime') return [`${value.toFixed(3)}ms`, '平均响应时间'];
                               return [value, name];
                             }}
@@ -1228,7 +1371,7 @@ const StressTestDetail: React.FC = () => {
                                 const avgTps = tpsValues.length > 0
                                   ? (tpsValues.reduce((sum, val) => sum + val, 0) / tpsValues.length)
                                   : 0;
-                                return avgTps.toFixed(1);
+                                return avgTps.toFixed(3);
                               })()}
                             </span>
                           </div>
@@ -1273,7 +1416,7 @@ const StressTestDetail: React.FC = () => {
                               borderRadius: '8px',
                               color: '#fff'
                             }}
-                            formatter={(value: any) => [`${value.toFixed(1)}`, 'TPS']}
+                            formatter={(value: any) => [`${typeof value === 'number' ? value.toFixed(3) : value}`, 'TPS']}
                             labelFormatter={(value) => {
                               const date = new Date(value);
                               return `时间: ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
@@ -1301,7 +1444,7 @@ const StressTestDetail: React.FC = () => {
                                 stroke="#f59e0b"
                                 strokeDasharray="5 5"
                                 strokeWidth={2}
-                                label={{ value: `平均 (${avgTps.toFixed(1)})`, position: 'top', fill: '#f59e0b' }}
+                                label={{ value: `平均 (${avgTps.toFixed(3)})`, position: 'top', fill: '#f59e0b' }}
                               />
                             );
                           })()}
@@ -1322,7 +1465,7 @@ const StressTestDetail: React.FC = () => {
                               const avgTps = tpsValues.length > 0
                                 ? (tpsValues.reduce((sum, val) => sum + val, 0) / tpsValues.length)
                                 : 0;
-                              return avgTps.toFixed(1);
+                              return avgTps.toFixed(3);
                             })()})</span>
                           </div>
                         )}
