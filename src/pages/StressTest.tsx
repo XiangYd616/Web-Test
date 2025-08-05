@@ -3130,6 +3130,7 @@ const StressTest: React.FC = () => {
         setTestProgress('');
         setIsStopping(false);
         setError('');
+        setBackgroundTestInfo(null); // 🔧 修复：重置后台测试信息
 
         // 重置数据
         setStressTestData([]);  // 🔧 清理唯一数据源
