@@ -4,7 +4,7 @@
  */
 
 const express = require('express');
-const { query, transaction } = require('../config/database');
+const { query, transaction, pool } = require('../config/database');
 const { authMiddleware } = require('../middleware/auth');
 const { asyncHandler } = require('../middleware/errorHandler');
 const DataManagementService = require('../services/dataManagement');
@@ -12,7 +12,7 @@ const DataManagementService = require('../services/dataManagement');
 const router = express.Router();
 
 // 初始化数据管理服务
-const dataManagementService = new DataManagementService();
+const dataManagementService = new DataManagementService(pool);
 
 /**
  * 获取导出任务列表

@@ -3,14 +3,14 @@
  * 整合测试历史、数据导入导出、统计分析等功能
  */
 
-const TestHistoryService = require('./testHistoryService');
+const TestHistoryService = require('../TestHistoryService');
 const DataExportService = require('./dataExportService');
 const DataImportService = require('./dataImportService');
 const StatisticsService = require('./statisticsService');
 const winston = require('winston');
 
 class DataManagementService {
-  constructor() {
+  constructor(dbPool) {
     this.logger = winston.createLogger({
       level: 'info',
       format: winston.format.combine(
@@ -24,7 +24,7 @@ class DataManagementService {
     });
 
     // 初始化子服务
-    this.testHistory = new TestHistoryService();
+    this.testHistory = new TestHistoryService(dbPool);
     this.dataExport = new DataExportService();
     this.dataImport = new DataImportService();
     this.statistics = new StatisticsService();
@@ -58,7 +58,7 @@ class DataManagementService {
       context,
       timestamp: new Date().toISOString()
     });
-    
+
     return {
       success: false,
       error: errorMessage,
@@ -83,17 +83,17 @@ class DataManagementService {
    */
   validateRequest(data, requiredFields = []) {
     const errors = [];
-    
+
     for (const field of requiredFields) {
       if (!data[field]) {
         errors.push(`Missing required field: ${field}`);
       }
     }
-    
+
     if (errors.length > 0) {
       throw new Error(`Validation failed: ${errors.join(', ')}`);
     }
-    
+
     return true;
   }
 
@@ -104,7 +104,7 @@ class DataManagementService {
     const page = Math.max(1, parseInt(query.page) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(query.limit) || 20));
     const offset = (page - 1) * limit;
-    
+
     return { page, limit, offset };
   }
 
@@ -113,10 +113,10 @@ class DataManagementService {
    */
   processSortParams(query, allowedFields = ['created_at']) {
     const sortBy = allowedFields.includes(query.sortBy) ? query.sortBy : 'created_at';
-    const sortOrder = ['asc', 'desc'].includes(query.sortOrder?.toLowerCase()) 
-      ? query.sortOrder.toLowerCase() 
+    const sortOrder = ['asc', 'desc'].includes(query.sortOrder?.toLowerCase())
+      ? query.sortOrder.toLowerCase()
       : 'desc';
-    
+
     return { sortBy, sortOrder };
   }
 
@@ -125,7 +125,7 @@ class DataManagementService {
    */
   processFilterParams(query) {
     const filters = {};
-    
+
     // 时间范围过滤
     if (query.dateFrom) {
       filters.dateFrom = new Date(query.dateFrom);
@@ -133,22 +133,22 @@ class DataManagementService {
     if (query.dateTo) {
       filters.dateTo = new Date(query.dateTo);
     }
-    
+
     // 搜索过滤
     if (query.search) {
       filters.search = query.search.trim();
     }
-    
+
     // 类型过滤
     if (query.type) {
       filters.type = Array.isArray(query.type) ? query.type : [query.type];
     }
-    
+
     // 状态过滤
     if (query.status) {
       filters.status = Array.isArray(query.status) ? query.status : [query.status];
     }
-    
+
     return filters;
   }
 
@@ -158,41 +158,41 @@ class DataManagementService {
   buildWhereClause(filters, params = [], startIndex = 1) {
     let whereClause = 'WHERE 1=1';
     let paramIndex = startIndex;
-    
+
     // 时间范围
     if (filters.dateFrom) {
       whereClause += ` AND created_at >= $${paramIndex}`;
       params.push(filters.dateFrom);
       paramIndex++;
     }
-    
+
     if (filters.dateTo) {
       whereClause += ` AND created_at <= $${paramIndex}`;
       params.push(filters.dateTo);
       paramIndex++;
     }
-    
+
     // 搜索
     if (filters.search) {
       whereClause += ` AND (test_name ILIKE $${paramIndex} OR url ILIKE $${paramIndex})`;
       params.push(`%${filters.search}%`);
       paramIndex++;
     }
-    
+
     // 类型过滤
     if (filters.type && filters.type.length > 0) {
       whereClause += ` AND test_type = ANY($${paramIndex})`;
       params.push(filters.type);
       paramIndex++;
     }
-    
+
     // 状态过滤
     if (filters.status && filters.status.length > 0) {
       whereClause += ` AND status = ANY($${paramIndex})`;
       params.push(filters.status);
       paramIndex++;
     }
-    
+
     return { whereClause, paramIndex };
   }
 
@@ -220,7 +220,7 @@ class DataManagementService {
    */
   formatRecord(record) {
     if (!record) return null;
-    
+
     return {
       ...record,
       // 确保数据类型正确
@@ -244,7 +244,7 @@ class DataManagementService {
   parseJsonField(field) {
     if (!field) return null;
     if (typeof field === 'object') return field;
-    
+
     try {
       return JSON.parse(field);
     } catch (error) {
@@ -258,7 +258,7 @@ class DataManagementService {
    */
   generatePaginationInfo(page, limit, total) {
     const totalPages = Math.ceil(total / limit);
-    
+
     return {
       page,
       limit,
@@ -278,13 +278,13 @@ class DataManagementService {
     try {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
-      
+
       const result = await this.executeQuery(
         'DELETE FROM test_history WHERE created_at < $1 AND status IN ($2, $3)',
         [cutoffDate, 'failed', 'cancelled'],
         'Data cleanup'
       );
-      
+
       this.logger.info(`Cleaned up ${result.rowCount} old records`);
       return this.handleSuccess({ deletedCount: result.rowCount }, 'Data cleanup completed');
     } catch (error) {
@@ -298,7 +298,7 @@ class DataManagementService {
   async healthCheck() {
     try {
       const result = await this.executeQuery('SELECT 1 as health_check', [], 'Health check');
-      
+
       if (result.rows.length > 0) {
         return this.handleSuccess({ status: 'healthy' }, 'Database connection is healthy');
       } else {

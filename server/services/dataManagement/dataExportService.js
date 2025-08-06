@@ -52,7 +52,7 @@ class DataExportService {
 
       // 获取数据
       const { query } = require('../../config/database');
-      
+
       let whereClause = 'WHERE user_id = $1';
       const params = [userId];
       let paramIndex = 2;
@@ -183,15 +183,15 @@ class DataExportService {
 
       // 获取所有字段
       const fields = Object.keys(data[0]);
-      
+
       // 生成CSV头部
       const csvHeader = fields.join(',');
-      
+
       // 生成CSV数据行
       const csvRows = data.map(row => {
         return fields.map(field => {
           let value = row[field];
-          
+
           // 处理特殊值
           if (value === null || value === undefined) {
             value = '';
@@ -200,18 +200,21 @@ class DataExportService {
           } else {
             value = String(value);
           }
-          
+
           // 转义CSV特殊字符
           if (value.includes(',') || value.includes('"') || value.includes('\n')) {
             value = `"${value.replace(/"/g, '""')}"`;
           }
-          
+
           return value;
         }).join(',');
       });
 
       const csvContent = [csvHeader, ...csvRows].join('\n');
-      await fs.writeFile(filepath, csvContent, 'utf8');
+      // 🔧 修复中文乱码：添加UTF-8 BOM头
+      const BOM = '\uFEFF';
+      const csvWithBOM = BOM + csvContent;
+      await fs.writeFile(filepath, csvWithBOM, 'utf8');
 
       const stats = await fs.stat(filepath);
       return { size: stats.size };
@@ -231,10 +234,10 @@ class DataExportService {
       // 为了简化，暂时使用CSV格式
       const csvPath = filepath.replace('.xlsx', '.csv');
       const result = await this.exportToCSV(data, csvPath);
-      
+
       // 重命名文件
       await fs.rename(csvPath, filepath);
-      
+
       return result;
 
     } catch (error) {
@@ -282,7 +285,7 @@ class DataExportService {
     try {
       // 这里应该从数据库获取任务信息
       // 验证用户权限后删除文件
-      
+
       return {
         success: true,
         message: '导出文件已删除'
@@ -301,7 +304,7 @@ class DataExportService {
     try {
       // 这里应该从数据库获取任务信息
       // 验证用户权限后返回文件路径
-      
+
       return {
         success: true,
         data: {
@@ -330,7 +333,7 @@ class DataExportService {
       for (const file of files) {
         const filepath = path.join(this.exportDir, file);
         const stats = await fs.stat(filepath);
-        
+
         if (stats.mtime < cutoffDate) {
           await fs.unlink(filepath);
           deletedCount++;
@@ -362,11 +365,11 @@ class DataExportService {
    */
   formatFileSize(bytes) {
     if (bytes === 0) return '0 Bytes';
-    
+
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
+
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
@@ -375,19 +378,19 @@ class DataExportService {
    */
   validateExportOptions(options) {
     const errors = [];
-    
+
     if (options.format && !['json', 'csv', 'xlsx'].includes(options.format.toLowerCase())) {
       errors.push('不支持的导出格式');
     }
-    
+
     if (options.dateFrom && options.dateTo && new Date(options.dateFrom) > new Date(options.dateTo)) {
       errors.push('开始日期不能晚于结束日期');
     }
-    
+
     if (errors.length > 0) {
       throw new Error(`参数验证失败: ${errors.join(', ')}`);
     }
-    
+
     return true;
   }
 }

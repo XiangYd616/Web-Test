@@ -2,12 +2,14 @@ import { Activity, BarChart3, Download, ExternalLink, Eye, RefreshCw, Search, Tr
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import ExportUtils from '../../utils/exportUtils';
 import {
   calculateTestCompletion,
   getStatusConfig,
   getStatusStyleClasses,
   getStatusText
 } from '../../utils/testStatusUtils';
+import ExportModal from '../common/ExportModal';
 import StressTestDetailModal from './StressTestDetailModal';
 
 import '../../styles/pagination.css';
@@ -86,12 +88,23 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
   // 请求去重和缓存
   const requestCacheRef = useRef<Map<string, Promise<any>>>(new Map());
   const lastRequestParamsRef = useRef<string>('');
+  const cacheTimestampRef = useRef<Map<string, number>>(new Map());
 
   // 加载测试记录（支持分页和筛选）
   const loadTestRecords = async (params: LoadTestRecordsParams = {}) => {
     try {
       // 生成请求参数的唯一标识
       const requestKey = JSON.stringify(params);
+
+      // 清理过期缓存（30秒）
+      const cacheExpiry = 30 * 1000;
+      const now = Date.now();
+      for (const [key, timestamp] of cacheTimestampRef.current.entries()) {
+        if (now - timestamp > cacheExpiry) {
+          requestCacheRef.current.delete(key);
+          cacheTimestampRef.current.delete(key);
+        }
+      }
 
       // 如果参数相同，避免重复请求
       if (requestKey === lastRequestParamsRef.current && requestCacheRef.current.has(requestKey)) {
@@ -108,6 +121,9 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
 
       setLoading(true);
       lastRequestParamsRef.current = requestKey;
+
+      // 记录缓存时间戳
+      cacheTimestampRef.current.set(requestKey, Date.now());
 
       // 构建查询参数
       const queryParams = new URLSearchParams();
@@ -128,7 +144,11 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
         }
       }).then(async (response) => {
         if (response.status === 429) {
-          throw new Error('请求过于频繁，请稍后再试');
+          const retryAfter = response.headers.get('Retry-After') || '60';
+          throw new Error(`请求过于频繁，请${retryAfter}秒后再试`);
+        }
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         return response.json();
       });
@@ -189,7 +209,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
         sortBy: sortBy,
         sortOrder: sortOrder
       });
-    }, isInitialLoadRef.current ? 0 : 300); // 初始加载无延迟，后续有防抖
+    }, isInitialLoadRef.current ? 0 : 800); // 增加防抖时间到800ms
   };
 
   // 初始加载
@@ -214,12 +234,15 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
     }
   }, [currentPage]);
 
-  // 清理定时器
+  // 清理定时器和缓存
   useEffect(() => {
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
+      // 清理缓存
+      requestCacheRef.current.clear();
+      cacheTimestampRef.current.clear();
     };
   }, []);
 
@@ -719,16 +742,25 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
     }
   };
 
-  // 导出记录
-  const exportRecord = (record: TestRecord) => {
-    const dataStr = JSON.stringify(record, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `test-record-${record.id}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
+  // 导出模态框状态
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+
+  // 打开导出模态框
+  const openExportModal = (record: TestRecord) => {
+    setSelectedRecord(record);
+    setIsExportModalOpen(true);
+  };
+
+  // 处理导出
+  const handleExport = async (exportType: string, data: any) => {
+    try {
+      await ExportUtils.exportByType(exportType, data);
+      setIsExportModalOpen(false);
+      setSelectedRecord(null);
+    } catch (error) {
+      console.error('导出失败:', error);
+      alert('导出失败，请重试');
+    }
   };
 
   // 分页控制函数
@@ -1203,7 +1235,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
                       </button>
                       <button
                         type="button"
-                        onClick={() => exportRecord(record)}
+                        onClick={() => openExportModal(record)}
                         aria-label={`导出测试记录: ${record.testName}`}
                         className="test-record-action-button p-2 text-gray-400 hover:text-green-400 hover:bg-gray-700/50 border border-gray-600/30 hover:border-green-500/50 rounded-lg transition-all duration-200 backdrop-blur-sm"
                         title="导出记录"
@@ -1336,6 +1368,27 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
           setIsDetailModalOpen(false);
           setSelectedRecord(null);
         }}
+      />
+
+      {/* 导出模态框 */}
+      <ExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => {
+          setIsExportModalOpen(false);
+          setSelectedRecord(null);
+        }}
+        data={{
+          testConfig: selectedRecord?.config || {},
+          result: selectedRecord?.results || {},
+          metrics: selectedRecord?.results?.metrics || {},
+          realTimeData: (selectedRecord as any)?.realTimeData || [],
+          logs: (selectedRecord as any)?.logs || [],
+          errors: (selectedRecord as any)?.errors || []
+        }}
+        testType="stress"
+        testId={selectedRecord?.id}
+        testName={selectedRecord?.testName}
+        onExport={handleExport}
       />
     </div>
   );

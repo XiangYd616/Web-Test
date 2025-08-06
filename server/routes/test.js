@@ -5,7 +5,7 @@
 const express = require('express');
 const { query } = require('../config/database');
 const { authMiddleware, optionalAuth, adminAuth } = require('../middleware/auth');
-const { testRateLimiter } = require('../middleware/rateLimiter');
+const { testRateLimiter, historyRateLimiter } = require('../middleware/rateLimiter');
 const { asyncHandler } = require('../middleware/errorHandler');
 const { validateURLMiddleware, validateAPIURLMiddleware } = require('../middleware/urlValidator');
 const cacheMiddleware = require('../middleware/cache');
@@ -18,7 +18,7 @@ const { RealCompatibilityTestEngine } = require('../services/realCompatibilityTe
 const { RealUXTestEngine } = require('../services/realUXTestEngine');
 const { RealAPITestEngine } = require('../services/realAPITestEngine');
 const securityTestStorage = require('../services/securityTestStorage');
-const TestHistoryService = require('../services/dataManagement/testHistoryService');
+const TestHistoryService = require('../services/TestHistoryService');
 // const enhancedTestHistoryService = require('../services/enhancedTestHistoryService'); // 已移除，功能迁移到 dataManagement
 
 const multer = require('multer');
@@ -32,7 +32,7 @@ const realSecurityTestEngine = new RealSecurityTestEngine();
 const realCompatibilityTestEngine = new RealCompatibilityTestEngine();
 const realUXTestEngine = new RealUXTestEngine();
 const realAPITestEngine = new RealAPITestEngine();
-const testHistoryService = new TestHistoryService();
+const testHistoryService = new TestHistoryService(require('../config/database').pool);
 
 // 配置文件上传
 const storage = multer.memoryStorage();
@@ -506,7 +506,7 @@ router.get('/', asyncHandler(async (req, res) => {
  * 获取测试历史记录
  * GET /api/test/history
  */
-router.get('/history', optionalAuth, asyncHandler(async (req, res) => {
+router.get('/history', optionalAuth, historyRateLimiter, asyncHandler(async (req, res) => {
   return handleTestHistory(req, res);
 }));
 
@@ -557,7 +557,7 @@ router.get('/statistics', optionalAuth, asyncHandler(async (req, res) => {
         COUNT(CASE WHEN test_type = 'seo' THEN 1 END) as seo_tests,
         AVG(duration) as avg_duration,
         AVG(overall_score) as avg_score
-      FROM test_history
+      FROM test_sessions
       ${whereClause}
     `, params);
 
@@ -652,40 +652,26 @@ async function handleTestHistory(req, res) {
   const sortDirection = sortOrder.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
 
   try {
-    // 获取测试记录 - 使用正确的表名和字段
-    const testsResult = await query(
-      `SELECT id, test_name, test_type, url, status, start_time, end_time,
-              duration, config, results, created_at, updated_at, overall_score
-       FROM test_history
-       ${whereClause}
-       ORDER BY ${sortField} ${sortDirection}
-       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
-      [...params, parseInt(actualLimit), offset]
-    );
+    // 使用新的TestHistoryService获取测试历史
+    const result = await testHistoryService.getTestHistory(req.user.id, type, {
+      page: parseInt(page),
+      limit: parseInt(actualLimit),
+      status: status,
+      sortBy: sortField,
+      sortOrder: sortDirection.toUpperCase()
+    });
 
-    // 获取总数
-    const countResult = await query(
-      `SELECT COUNT(*) as total FROM test_history ${whereClause}`,
-      params
-    );
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
 
-    const total = parseInt(countResult.rows[0].total);
-
-    // 格式化测试记录
-    const formattedTests = testsResult.rows.map(test => testHistoryService.formatTestRecord(test));
+    const { tests, pagination } = result.data;
 
     res.json({
       success: true,
       data: {
-        tests: formattedTests,
-        pagination: {
-          page: parseInt(page),
-          limit: parseInt(actualLimit),
-          total,
-          totalPages: Math.ceil(total / actualLimit),
-          hasNext: (parseInt(page) * parseInt(actualLimit)) < total,
-          hasPrev: parseInt(page) > 1
-        }
+        tests,
+        pagination
       }
     });
   } catch (error) {
@@ -731,7 +717,7 @@ router.put('/history/:recordId', authMiddleware, asyncHandler(async (req, res) =
   try {
     // 验证记录所有权
     const existingRecord = await query(
-      'SELECT id FROM test_history WHERE id = $1 AND user_id = $2',
+      'SELECT id FROM test_sessions WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
       [recordId, req.user.id]
     );
 
@@ -932,7 +918,7 @@ router.delete('/history/:recordId', authMiddleware, asyncHandler(async (req, res
 
   try {
     const result = await query(
-      'DELETE FROM test_history WHERE id = $1 AND user_id = $2',
+      'UPDATE test_sessions SET deleted_at = CURRENT_TIMESTAMP WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
       [recordId, req.user.id]
     );
 

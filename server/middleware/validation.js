@@ -1,0 +1,239 @@
+/**
+ * 验证中间件
+ * 提供常用的请求参数验证功能
+ */
+
+/**
+ * 验证测试类型
+ */
+const validateTestType = (req, res, next) => {
+  const { testType } = req.query;
+  const validTestTypes = [
+    'stress', 
+    'security', 
+    'api', 
+    'performance', 
+    'compatibility', 
+    'seo', 
+    'accessibility'
+  ];
+
+  if (testType && !validTestTypes.includes(testType)) {
+    return res.status(400).json({
+      success: false,
+      error: `无效的测试类型。支持的类型: ${validTestTypes.join(', ')}`
+    });
+  }
+
+  next();
+};
+
+/**
+ * 验证分页参数
+ */
+const validatePagination = (req, res, next) => {
+  const { page, limit } = req.query;
+
+  // 验证页码
+  if (page !== undefined) {
+    const pageNum = parseInt(page);
+    if (isNaN(pageNum) || pageNum < 1) {
+      return res.status(400).json({
+        success: false,
+        error: '页码必须是大于0的整数'
+      });
+    }
+    req.query.page = pageNum;
+  }
+
+  // 验证每页数量
+  if (limit !== undefined) {
+    const limitNum = parseInt(limit);
+    if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) {
+      return res.status(400).json({
+        success: false,
+        error: '每页数量必须是1-100之间的整数'
+      });
+    }
+    req.query.limit = limitNum;
+  }
+
+  next();
+};
+
+/**
+ * 验证排序参数
+ */
+const validateSorting = (req, res, next) => {
+  const { sortBy, sortOrder } = req.query;
+  
+  const validSortFields = [
+    'created_at', 
+    'updated_at', 
+    'start_time', 
+    'end_time', 
+    'duration', 
+    'overall_score',
+    'test_name'
+  ];
+  
+  const validSortOrders = ['ASC', 'DESC', 'asc', 'desc'];
+
+  if (sortBy && !validSortFields.includes(sortBy)) {
+    return res.status(400).json({
+      success: false,
+      error: `无效的排序字段。支持的字段: ${validSortFields.join(', ')}`
+    });
+  }
+
+  if (sortOrder && !validSortOrders.includes(sortOrder)) {
+    return res.status(400).json({
+      success: false,
+      error: `无效的排序方向。支持: ASC, DESC`
+    });
+  }
+
+  next();
+};
+
+/**
+ * 验证UUID格式
+ */
+const validateUUID = (paramName) => {
+  return (req, res, next) => {
+    const value = req.params[paramName];
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    
+    if (!uuidRegex.test(value)) {
+      return res.status(400).json({
+        success: false,
+        error: `无效的${paramName}格式`
+      });
+    }
+    
+    next();
+  };
+};
+
+/**
+ * 验证日期范围
+ */
+const validateDateRange = (req, res, next) => {
+  const { dateFrom, dateTo } = req.query;
+
+  if (dateFrom) {
+    const fromDate = new Date(dateFrom);
+    if (isNaN(fromDate.getTime())) {
+      return res.status(400).json({
+        success: false,
+        error: '开始日期格式无效'
+      });
+    }
+    req.query.dateFrom = fromDate;
+  }
+
+  if (dateTo) {
+    const toDate = new Date(dateTo);
+    if (isNaN(toDate.getTime())) {
+      return res.status(400).json({
+        success: false,
+        error: '结束日期格式无效'
+      });
+    }
+    req.query.dateTo = toDate;
+  }
+
+  // 验证日期范围逻辑
+  if (dateFrom && dateTo && new Date(dateFrom) > new Date(dateTo)) {
+    return res.status(400).json({
+      success: false,
+      error: '开始日期不能晚于结束日期'
+    });
+  }
+
+  next();
+};
+
+/**
+ * 验证搜索参数
+ */
+const validateSearch = (req, res, next) => {
+  const { search } = req.query;
+
+  if (search !== undefined) {
+    // 清理搜索字符串
+    const cleanSearch = search.trim();
+    
+    if (cleanSearch.length > 100) {
+      return res.status(400).json({
+        success: false,
+        error: '搜索关键词不能超过100个字符'
+      });
+    }
+    
+    req.query.search = cleanSearch;
+  }
+
+  next();
+};
+
+/**
+ * 验证状态参数
+ */
+const validateStatus = (req, res, next) => {
+  const { status } = req.query;
+  const validStatuses = ['pending', 'running', 'completed', 'failed', 'cancelled'];
+
+  if (status && !validStatuses.includes(status)) {
+    return res.status(400).json({
+      success: false,
+      error: `无效的状态。支持的状态: ${validStatuses.join(', ')}`
+    });
+  }
+
+  next();
+};
+
+/**
+ * 验证时间范围参数
+ */
+const validateTimeRange = (req, res, next) => {
+  const { timeRange } = req.query;
+
+  if (timeRange !== undefined) {
+    const timeRangeNum = parseInt(timeRange);
+    if (isNaN(timeRangeNum) || timeRangeNum < 1 || timeRangeNum > 365) {
+      return res.status(400).json({
+        success: false,
+        error: '时间范围必须是1-365之间的整数（天数）'
+      });
+    }
+    req.query.timeRange = timeRangeNum;
+  }
+
+  next();
+};
+
+/**
+ * 组合验证中间件
+ */
+const validateTestHistoryQuery = [
+  validateTestType,
+  validatePagination,
+  validateSorting,
+  validateDateRange,
+  validateSearch,
+  validateStatus
+];
+
+module.exports = {
+  validateTestType,
+  validatePagination,
+  validateSorting,
+  validateUUID,
+  validateDateRange,
+  validateSearch,
+  validateStatus,
+  validateTimeRange,
+  validateTestHistoryQuery
+};
