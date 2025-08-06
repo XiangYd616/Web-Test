@@ -10,7 +10,7 @@ const { authMiddleware } = require('../middleware/auth');
 // const { validateTestType, validatePagination, validateSorting, validateSearch, validateStatus, validateUUID } = require('../middleware/validation');
 
 // 初始化服务
-const testHistoryService = new TestHistoryService(require('../config/database').pool);
+const testHistoryService = new TestHistoryService(require('../config/database').getPool());
 
 /**
  * GET /api/test/history
