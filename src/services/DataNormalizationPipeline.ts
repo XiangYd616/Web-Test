@@ -195,21 +195,9 @@ export class DataNormalizationPipeline {
         return result;
       }
 
-      // 处理实时数据数组
+      // 处理实时数据数组 - 使用优化的映射函数
       if (rawData.data.realTimeData && Array.isArray(rawData.data.realTimeData)) {
-        const normalizedDataPoints = rawData.data.realTimeData
-          .map(point => this.normalizeDataPoint({
-            timestamp: point.timestamp || Date.now(),
-            responseTime: point.responseTime || 0,
-            activeUsers: point.activeUsers || 0,
-            throughput: point.throughput || 0,
-            errorRate: point.success === false ? 100 : 0,
-            status: point.success === false ? 500 : 200,
-            success: point.success ?? true,
-            phase: this.normalizePhase(point.phase)
-          }))
-          .filter(point => this.validateDataPoint(point));
-
+        const normalizedDataPoints = this.batchNormalizeDataPoints(rawData.data.realTimeData);
         if (normalizedDataPoints.length > 0) {
           result.dataPoints = normalizedDataPoints;
         }
@@ -251,21 +239,9 @@ export class DataNormalizationPipeline {
     const result: { dataPoints?: TestDataPoint[]; metrics?: RealTimeMetrics } = {};
 
     try {
-      // 处理实时数据数组
+      // 处理实时数据数组 - 使用优化的映射函数
       if (rawData.realTimeData && Array.isArray(rawData.realTimeData)) {
-        const normalizedDataPoints = rawData.realTimeData
-          .map(point => this.normalizeDataPoint({
-            timestamp: point.timestamp || Date.now(),
-            responseTime: point.responseTime || 0,
-            activeUsers: point.activeUsers || 0,
-            throughput: point.throughput || point.rps || 0,
-            errorRate: point.success === false ? 100 : 0,
-            status: point.success === false ? 500 : 200,
-            success: point.success ?? true,
-            phase: this.normalizePhase(point.phase)
-          }))
-          .filter(point => this.validateDataPoint(point));
-
+        const normalizedDataPoints = this.batchNormalizeDataPoints(rawData.realTimeData);
         if (normalizedDataPoints.length > 0) {
           result.dataPoints = normalizedDataPoints;
         }
@@ -496,6 +472,44 @@ export class DataNormalizationPipeline {
     }
 
     return filled;
+  }
+
+  /**
+   * 批量标准化数据点 - 优化性能，减少重复映射
+   */
+  private batchNormalizeDataPoints(rawPoints: any[]): TestDataPoint[] {
+    const normalizedPoints: TestDataPoint[] = [];
+
+    for (const point of rawPoints) {
+      const normalizedPoint = this.normalizeDataPoint({
+        timestamp: point.timestamp || Date.now(),
+        responseTime: point.responseTime || 0,
+        activeUsers: point.activeUsers || 0,
+        throughput: point.throughput || point.rps || 0,
+        errorRate: point.success === false ? 100 : 0,
+        status: point.success === false ? 500 : 200,
+        success: point.success ?? true,
+        phase: this.normalizePhase(point.phase)
+      });
+
+      if (this.validateDataPoint(normalizedPoint)) {
+        normalizedPoints.push(normalizedPoint);
+      }
+    }
+
+    return normalizedPoints;
+  }
+
+  /**
+   * 验证数据点
+   */
+  private validateDataPoint(point: TestDataPoint): boolean {
+    return (
+      typeof point.timestamp === 'number' &&
+      point.timestamp > 0 &&
+      typeof point.responseTime === 'number' &&
+      point.responseTime >= 0
+    );
   }
 }
 

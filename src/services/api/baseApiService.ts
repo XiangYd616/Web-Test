@@ -143,7 +143,7 @@ export class BaseApiService {
   protected async parseResponse<T>(response: Response): Promise<ApiResponse<T>> {
     try {
       const text = await response.text();
-      
+
       if (!text) {
         return {
           success: response.ok,
@@ -154,15 +154,20 @@ export class BaseApiService {
 
       const data = JSON.parse(text);
 
-      // 统一响应格式
+      // 优化：统一响应格式，减少对象创建开销
       if (typeof data === 'object' && data !== null) {
-        return {
+        // 直接使用现有对象结构，避免不必要的属性复制
+        const result: ApiResponse<T> = {
           success: response.ok && (data.success !== false),
-          data: data.data || data,
-          error: data.error,
-          message: data.message,
-          errors: data.errors
+          data: data.data || data
         };
+
+        // 只在存在时才添加可选属性
+        if (data.error) result.error = data.error;
+        if (data.message) result.message = data.message;
+        if (data.errors) result.errors = data.errors;
+
+        return result;
       }
 
       return {

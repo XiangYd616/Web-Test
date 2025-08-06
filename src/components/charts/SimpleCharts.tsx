@@ -1397,25 +1397,42 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
       group.activeUsers = Math.max(group.activeUsers, point.activeUsers);
     });
 
-    // 转换为图表数据
-    return Array.from(groupedData.values())
-      .sort((a, b) => a.timestamp - b.timestamp)
-      .map(group => ({
+    // 优化：转换为图表数据，减少重复计算
+    const sortedGroups = Array.from(groupedData.values()).sort((a, b) => a.timestamp - b.timestamp);
+    const chartData = [];
+
+    for (const group of sortedGroups) {
+      const hasResponseTimes = group.responseTimes.length > 0;
+      const totalRequests = group.successes + group.failures;
+
+      // 预计算统计值，避免重复计算
+      let avgResponseTime = 0;
+      let maxResponseTime = 0;
+      let minResponseTime = 0;
+
+      if (hasResponseTimes) {
+        const sum = group.responseTimes.reduce((acc, time) => acc + time, 0);
+        avgResponseTime = Math.round(sum / group.responseTimes.length);
+        maxResponseTime = Math.max(...group.responseTimes);
+        minResponseTime = Math.min(...group.responseTimes);
+      }
+
+      chartData.push({
         time: format(new Date(group.timestamp), 'HH:mm:ss'),
         timestamp: group.timestamp,
-        responseTime: group.responseTimes.length > 0 ?
-          Math.round(group.responseTimes.reduce((sum: number, time: number) => sum + time, 0) / group.responseTimes.length) : 0,
-        maxResponseTime: group.responseTimes.length > 0 ? Math.max(...group.responseTimes) : 0,
-        minResponseTime: group.responseTimes.length > 0 ? Math.min(...group.responseTimes) : 0,
-        throughput: group.successes + group.failures,
-        successRate: group.responseTimes.length > 0 ?
-          Math.round((group.successes / (group.successes + group.failures)) * 100) : 100,
-        errorRate: group.responseTimes.length > 0 ?
-          Math.round((group.failures / (group.successes + group.failures)) * 100) : 0,
+        responseTime: avgResponseTime,
+        maxResponseTime,
+        minResponseTime,
+        throughput: totalRequests,
+        successRate: totalRequests > 0 ? Math.round((group.successes / totalRequests) * 100) : 100,
+        errorRate: totalRequests > 0 ? Math.round((group.failures / totalRequests) * 100) : 0,
         activeUsers: group.activeUsers,
         phase: group.phase
-      }))
-      .slice(-250); // 🔧 修复：保留250个数据点，平衡性能和完整性
+      });
+    }
+
+    // 只保留最后250个数据点，提高渲染性能
+    return chartData.slice(-250);
   }, [realTimeData]);
 
   return (
