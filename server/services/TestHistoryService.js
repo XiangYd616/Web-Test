@@ -571,36 +571,36 @@ class TestHistoryService {
   }
 
   /**
-   * 格式化测试记录
+   * 格式化测试记录 - 保持数据库字段名，避免不必要的映射
    */
   formatTestRecord(row) {
     if (!row) return null;
 
     return {
       id: row.id,
-      testName: row.test_name,
-      testType: row.test_type,
+      test_name: row.test_name,
+      test_type: row.test_type,
       url: row.url,
       status: row.status,
-      userId: row.user_id,
-      startTime: row.start_time,
-      endTime: row.end_time,
+      user_id: row.user_id,
+      start_time: row.start_time,
+      end_time: row.end_time,
       duration: row.duration,
-      overallScore: row.overall_score,
+      overall_score: row.overall_score,
       grade: row.grade,
-      totalIssues: row.total_issues,
-      criticalIssues: row.critical_issues,
-      majorIssues: row.major_issues,
-      minorIssues: row.minor_issues,
+      total_issues: row.total_issues,
+      critical_issues: row.critical_issues,
+      major_issues: row.major_issues,
+      minor_issues: row.minor_issues,
       warnings: row.warnings,
       config: typeof row.config === 'string' ? JSON.parse(row.config) : row.config,
       environment: row.environment,
       tags: Array.isArray(row.tags) ? row.tags : (row.tags ? JSON.parse(row.tags) : []),
       description: row.description,
       notes: row.notes,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
-      deletedAt: row.deleted_at
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      deleted_at: row.deleted_at
     };
   }
 
