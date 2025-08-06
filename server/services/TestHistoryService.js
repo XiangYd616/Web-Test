@@ -6,8 +6,9 @@
 const { Pool } = require('pg');
 
 class TestHistoryService {
-  constructor(dbPool) {
-    this.db = dbPool;
+  constructor(dbModule) {
+    // 使用数据库配置模块，它有query方法
+    this.db = dbModule;
   }
 
   /**

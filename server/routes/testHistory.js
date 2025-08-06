@@ -9,8 +9,16 @@ const TestHistoryService = require('../services/TestHistoryService');
 const { authMiddleware } = require('../middleware/auth');
 // const { validateTestType, validatePagination, validateSorting, validateSearch, validateStatus, validateUUID } = require('../middleware/validation');
 
-// 初始化服务
-const testHistoryService = new TestHistoryService(require('../config/database').getPool());
+// 延迟初始化服务，使用数据库配置模块的query方法
+let testHistoryService = null;
+
+const getTestHistoryService = () => {
+  if (!testHistoryService) {
+    // 使用数据库配置模块的query方法，而不是连接池对象
+    testHistoryService = new TestHistoryService(require('../config/database'));
+  }
+  return testHistoryService;
+};
 
 /**
  * GET /api/test/history
@@ -38,7 +46,7 @@ router.get('/', authMiddleware, async (req, res) => {
       });
     }
 
-    const result = await testHistoryService.getTestHistory(userId, testType, {
+    const result = await getTestHistoryService().getTestHistory(userId, testType, {
       page: parseInt(page),
       limit: parseInt(limit),
       search,
@@ -75,7 +83,7 @@ router.get('/detailed', authMiddleware, async (req, res) => {
       });
     }
 
-    const result = await testHistoryService.getDetailedTestHistory(userId, testType, {
+    const result = await getTestHistoryService().getDetailedTestHistory(userId, testType, {
       page: parseInt(page),
       limit: parseInt(limit)
     });
@@ -108,7 +116,7 @@ router.get('/:sessionId', authMiddleware, async (req, res) => {
       });
     }
 
-    const result = await testHistoryService.getTestDetails(sessionId, userId);
+    const result = await getTestHistoryService().getTestDetails(sessionId, userId);
     res.json(result);
   } catch (error) {
     console.error('获取测试详情失败:', error);
@@ -136,7 +144,7 @@ router.post('/stress', authMiddleware, async (req, res) => {
       });
     }
 
-    const result = await testHistoryService.createStressTestResult(userId, {
+    const result = await getTestHistoryService().createStressTestResult(userId, {
       testName,
       url,
       config: config || {},
@@ -174,7 +182,7 @@ router.post('/security', authMiddleware, async (req, res) => {
       });
     }
 
-    const result = await testHistoryService.createSecurityTestResult(userId, {
+    const result = await getTestHistoryService().createSecurityTestResult(userId, {
       testName,
       url,
       config: config || {},
@@ -213,7 +221,7 @@ router.delete('/:sessionId', authMiddleware, async (req, res) => {
       });
     }
 
-    const result = await testHistoryService.deleteTestSession(sessionId, userId);
+    const result = await getTestHistoryService().deleteTestSession(sessionId, userId);
 
     if (result.success) {
       res.json(result);
@@ -256,7 +264,7 @@ router.delete('/batch', authMiddleware, async (req, res) => {
       });
     }
 
-    const result = await testHistoryService.batchDeleteTestSessions(sessionIds, userId);
+    const result = await getTestHistoryService().batchDeleteTestSessions(sessionIds, userId);
     res.json(result);
   } catch (error) {
     console.error('批量删除测试记录失败:', error);
@@ -285,7 +293,7 @@ router.get('/statistics', authMiddleware, async (req, res) => {
       });
     }
 
-    const result = await testHistoryService.getTestStatistics(userId, timeRangeNum);
+    const result = await getTestHistoryService().getTestStatistics(userId, timeRangeNum);
     res.json(result);
   } catch (error) {
     console.error('获取测试统计失败:', error);
@@ -322,7 +330,7 @@ router.get('/export', authMiddleware, async (req, res) => {
     }
 
     // 获取数据（不分页，获取所有数据）
-    const result = await testHistoryService.getDetailedTestHistory(userId, testType, {
+    const result = await getTestHistoryService().getDetailedTestHistory(userId, testType, {
       page: 1,
       limit: 10000 // 设置一个较大的限制
     });
