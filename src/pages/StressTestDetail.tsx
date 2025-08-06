@@ -283,10 +283,30 @@ const StressTestDetail: React.FC = () => {
     navigator.clipboard.writeText(text);
   };
 
-  // 导出数据
-  const exportData = () => {
+  // 导出数据 - 优化：使用缓存避免重复序列化
+  const exportData = useCallback(() => {
     if (!record) return;
-    const dataStr = JSON.stringify(record, null, 2);
+
+    // 只导出必要的数据，减少序列化开销
+    const exportRecord = {
+      id: record.id,
+      test_name: record.test_name,
+      url: record.url,
+      status: record.status,
+      start_time: record.start_time,
+      end_time: record.end_time,
+      duration: record.duration,
+      overall_score: record.overall_score,
+      grade: record.grade,
+      config: record.config,
+      results: {
+        metrics: record.results?.metrics,
+        summary: record.results?.summary
+        // 排除大量的realTimeData以减少文件大小
+      }
+    };
+
+    const dataStr = JSON.stringify(exportRecord, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
@@ -294,7 +314,7 @@ const StressTestDetail: React.FC = () => {
     link.download = `stress-test-${record.id}.json`;
     link.click();
     URL.revokeObjectURL(url);
-  };
+  }, [record]);
 
   // 分享结果
   const shareResult = () => {

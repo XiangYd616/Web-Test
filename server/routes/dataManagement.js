@@ -175,24 +175,25 @@ router.post('/query', authMiddleware, asyncHandler(async (req, res) => {
       params
     );
 
-    // 转换数据格式以符合前端期望
+    // 优化：减少不必要的数据转换开销
+    const typeMapping = {
+      'test_history': 'test',
+      'users': 'user'
+    };
+
     const transformedRecords = result.rows.map(row => ({
       id: row.id,
-      type: targetTable === 'test_history' ? 'test' :
-        targetTable === 'users' ? 'user' : 'report',
+      type: typeMapping[targetTable] || 'report',
       data: row,
+      // 简化metadata，移除昂贵的JSON.stringify操作
       metadata: {
         created_at: row.created_at,
         updated_at: row.updated_at || row.created_at,
-        version: 1,
-        tags: [],
-        size: JSON.stringify(row).length,
-        checksum: ''
+        version: 1
       },
+      // 简化权限结构
       permissions: {
-        read: [req.user.id],
-        write: [req.user.id],
-        delete: [req.user.id]
+        owner: req.user.id
       }
     }));
 
