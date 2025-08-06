@@ -20,7 +20,7 @@ router.get('/stats', asyncHandler(async (req, res) => {
   try {
     const [usersResult, testsResult, activeUsersResult] = await Promise.all([
       query('SELECT COUNT(*) as total FROM users'),
-      query('SELECT COUNT(*) as total FROM test_results'),
+      query('SELECT COUNT(*) as total FROM test_sessions WHERE deleted_at IS NULL'),
       query('SELECT COUNT(*) as total FROM users WHERE last_login >= NOW() - INTERVAL \'30 days\'')
     ]);
 
@@ -231,27 +231,27 @@ router.get('/test-history', asyncHandler(async (req, res) => {
 
     const testHistoryQuery = `
       SELECT
-        tr.id,
-        tr.test_type as type,
-        tr.url,
-        tr.status,
-        tr.created_at as "createdAt",
-        tr.updated_at as "updatedAt",
-        tr.duration,
-        tr.score as "overallScore",
-        tr.performance_grade as "performanceGrade",
-        tr.total_requests as "totalRequests",
-        tr.successful_requests as "successfulRequests",
-        tr.failed_requests as "failedRequests",
-        tr.average_response_time as "averageResponseTime",
-        tr.peak_tps as "peakTps",
-        tr.error_rate as "errorRate",
+        ts.id,
+        ts.test_type as type,
+        ts.url,
+        ts.status,
+        ts.created_at as "createdAt",
+        ts.updated_at as "updatedAt",
+        ts.duration,
+        ts.overall_score as "overallScore",
+        ts.grade as "performanceGrade",
+        ts.total_issues as "totalIssues",
+        ts.critical_issues as "criticalIssues",
+        ts.major_issues as "majorIssues",
+        ts.minor_issues as "minorIssues",
+        ts.environment,
+        ts.tags,
         u.username as user,
         u.email as "userEmail"
-      FROM test_results tr
-      LEFT JOIN users u ON tr.user_id = u.id
-      ${whereClause}
-      ORDER BY tr.created_at DESC
+      FROM test_sessions ts
+      LEFT JOIN users u ON ts.user_id = u.id
+      ${whereClause ? whereClause + ' AND ts.deleted_at IS NULL' : 'WHERE ts.deleted_at IS NULL'}
+      ORDER BY ts.created_at DESC
       LIMIT $${paramIndex++} OFFSET $${paramIndex++}
     `;
 
@@ -259,9 +259,9 @@ router.get('/test-history', asyncHandler(async (req, res) => {
 
     const countQuery = `
       SELECT COUNT(*) as total
-      FROM test_results tr
-      LEFT JOIN users u ON tr.user_id = u.id
-      ${whereClause}
+      FROM test_sessions ts
+      LEFT JOIN users u ON ts.user_id = u.id
+      ${whereClause ? whereClause + ' AND ts.deleted_at IS NULL' : 'WHERE ts.deleted_at IS NULL'}
     `;
 
     const [testHistoryResult, countResult] = await Promise.all([

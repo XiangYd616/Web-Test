@@ -9,7 +9,7 @@ const { query } = require('../server/config/database');
 async function checkDatabase() {
   try {
     console.log('🔍 检查数据库连接...');
-    
+
     // 检查数据库连接
     const connectionTest = await query('SELECT NOW() as current_time');
     console.log('✅ 数据库连接正常:', connectionTest.rows[0].current_time);
@@ -35,14 +35,15 @@ async function checkDatabase() {
 
     // 检查现有记录数量
     console.log('\n📊 检查现有记录...');
-    const recordCount = await query('SELECT COUNT(*) as count FROM test_history');
+    const recordCount = await query('SELECT COUNT(*) as count FROM test_sessions WHERE deleted_at IS NULL');
     console.log(`✅ 当前记录数量: ${recordCount.rows[0].count}`);
 
     // 检查最近的记录
     const recentRecords = await query(`
-      SELECT id, test_name, test_type, status, created_at 
-      FROM test_history 
-      ORDER BY created_at DESC 
+      SELECT id, test_name, test_type, status, created_at
+      FROM test_sessions
+      WHERE deleted_at IS NULL
+      ORDER BY created_at DESC
       LIMIT 5
     `);
 
@@ -65,13 +66,13 @@ async function checkDatabase() {
 async function testAPI() {
   try {
     console.log('\n🌐 测试API端点...');
-    
+
     const fetch = (await import('node-fetch')).default;
-    
+
     // 测试测试历史API
     const response = await fetch('http://localhost:3001/api/test/history');
     const data = await response.json();
-    
+
     console.log('✅ API响应:', {
       status: response.status,
       success: data.success,
@@ -87,14 +88,14 @@ async function testAPI() {
 
 async function main() {
   console.log('🚀 开始检查数据库和API状态...\n');
-  
+
   const dbOk = await checkDatabase();
   const apiOk = await testAPI();
-  
+
   console.log('\n📊 检查结果:');
   console.log(`  数据库: ${dbOk ? '✅ 正常' : '❌ 异常'}`);
   console.log(`  API: ${apiOk ? '✅ 正常' : '❌ 异常'}`);
-  
+
   if (dbOk && apiOk) {
     console.log('\n🎉 系统状态正常，可以进行压力测试！');
   } else {

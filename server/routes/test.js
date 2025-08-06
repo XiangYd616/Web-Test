@@ -12,26 +12,29 @@ const cacheMiddleware = require('../middleware/cache');
 
 // 导入测试引擎类
 const { RealTestEngine } = require('../services/realTestEngine');
-const { RealStressTestEngine, createGlobalInstance } = require('../services/realStressTestEngine');
+const { RealStressTestEngine } = require('../services/realStressTestEngine');
 const RealSecurityTestEngine = require('../services/realSecurityTestEngine'); // 直接导出
 const { RealCompatibilityTestEngine } = require('../services/realCompatibilityTestEngine');
 const { RealUXTestEngine } = require('../services/realUXTestEngine');
 const { RealAPITestEngine } = require('../services/realAPITestEngine');
 const securityTestStorage = require('../services/securityTestStorage');
 const TestHistoryService = require('../services/TestHistoryService');
+const userTestManager = require('../services/UserTestManager');
 // const enhancedTestHistoryService = require('../services/enhancedTestHistoryService'); // 已移除，功能迁移到 dataManagement
 
 const multer = require('multer');
 const path = require('path');
 
-// 创建测试引擎实例
+// 创建测试引擎实例（简化架构）
 const realTestEngine = new RealTestEngine();
-// 🔧 修复：使用全局实例确保WebSocket和API使用同一个引擎
-const realStressTestEngine = createGlobalInstance();
+// 🔧 重构：移除全局实例，压力测试现在通过UserTestManager管理
+// const realStressTestEngine = createGlobalInstance(); // 已移除
 const realSecurityTestEngine = new RealSecurityTestEngine();
 const realCompatibilityTestEngine = new RealCompatibilityTestEngine();
 const realUXTestEngine = new RealUXTestEngine();
 const realAPITestEngine = new RealAPITestEngine();
+
+// 🔧 统一使用本地TestHistoryService实例
 const testHistoryService = new TestHistoryService(require('../config/database').pool);
 
 // 配置文件上传
@@ -601,6 +604,23 @@ router.post('/history/batch', authMiddleware, asyncHandler(async (req, res) => {
 
 // 共享的历史记录处理函数
 async function handleTestHistory(req, res) {
+  // 详细的请求日志
+  console.log('🔍 [TEST HISTORY] 收到请求:', {
+    method: req.method,
+    url: req.url,
+    originalUrl: req.originalUrl,
+    query: req.query,
+    headers: {
+      'user-agent': req.headers['user-agent']?.substring(0, 50) + '...',
+      'authorization': req.headers['authorization'] ? 'Bearer ***' : 'none',
+      'content-type': req.headers['content-type'],
+      'origin': req.headers['origin'],
+      'referer': req.headers['referer']
+    },
+    user: req.user ? { id: req.user.id, username: req.user.username } : null,
+    timestamp: new Date().toISOString()
+  });
+
   // 🔧 修复：支持前端发送的pageSize参数，同时兼容limit参数
   const { page = 1, limit, pageSize, type, status, sortBy = 'created_at', sortOrder = 'desc' } = req.query;
   const actualLimit = pageSize || limit || 10; // 优先使用pageSize，然后是limit，最后默认10
@@ -652,8 +672,8 @@ async function handleTestHistory(req, res) {
   const sortDirection = sortOrder.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
 
   try {
-    // 使用新的TestHistoryService获取测试历史
-    const result = await testHistoryService.getTestHistory(req.user.id, type, {
+    // 使用本地TestHistoryService获取测试历史
+    const result = await testHistoryService.getTestHistory(req.user?.id, type, {
       page: parseInt(page),
       limit: parseInt(actualLimit),
       status: status,
@@ -1019,32 +1039,32 @@ router.get('/stats', authMiddleware, asyncHandler(async (req, res) => {
     const statsResult = await query(
       `SELECT
          COUNT(*) as total_tests,
-         COUNT(*) FILTER (WHERE status = 'success') as successful_tests,
-         COUNT(*) FILTER (WHERE status = 'error') as failed_tests,
+         COUNT(*) FILTER (WHERE status = 'completed') as successful_tests,
+         COUNT(*) FILTER (WHERE status = 'failed') as failed_tests,
          COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '30 days') as tests_last_30_days,
-         type,
+         test_type,
          COUNT(*) as count
-       FROM test_results
-       WHERE user_id = $1
-       GROUP BY type`,
+       FROM test_sessions
+       WHERE user_id = $1 AND deleted_at IS NULL
+       GROUP BY test_type`,
       [req.user.id]
     );
 
     const totalResult = await query(
       `SELECT
          COUNT(*) as total_tests,
-         COUNT(*) FILTER (WHERE status = 'success') as successful_tests,
-         COUNT(*) FILTER (WHERE status = 'error') as failed_tests,
+         COUNT(*) FILTER (WHERE status = 'completed') as successful_tests,
+         COUNT(*) FILTER (WHERE status = 'failed') as failed_tests,
          COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '30 days') as tests_last_30_days
-       FROM test_results
-       WHERE user_id = $1`,
+       FROM test_sessions
+       WHERE user_id = $1 AND deleted_at IS NULL`,
       [req.user.id]
     );
 
     const byType = {};
     statsResult.rows.forEach(row => {
-      if (row.type) {
-        byType[row.type] = parseInt(row.count);
+      if (row.test_type) {
+        byType[row.test_type] = parseInt(row.count);
       }
     });
 
@@ -1082,22 +1102,19 @@ router.get('/:testId', authMiddleware, asyncHandler(async (req, res) => {
   const { testId } = req.params;
 
   try {
-    const result = await query(
-      `SELECT * FROM test_results
-       WHERE id = $1 AND user_id = $2`,
-      [testId, req.user.id]
-    );
+    // 使用本地TestHistoryService获取测试详情
+    const result = await testHistoryService.getTestDetails(testId, req.user.id);
 
-    if (result.rows.length === 0) {
+    if (!result.success) {
       return res.status(404).json({
         success: false,
-        message: '测试结果不存在'
+        message: result.error || '测试结果不存在'
       });
     }
 
     res.json({
       success: true,
-      data: result.rows[0]
+      data: result.data
     });
   } catch (error) {
     console.error('获取测试结果失败:', error);
@@ -1173,8 +1190,8 @@ router.get('/stress/status/:testId', optionalAuth, asyncHandler(async (req, res)
   const { testId } = req.params;
 
   try {
-    // 获取测试的实时状态
-    const status = await realStressTestEngine.getTestStatus(testId);
+    // 🔧 重构：从用户测试管理器获取测试状态
+    const status = userTestManager.getUserTestStatus(req.user?.id, testId);
 
     if (!status) {
 
@@ -1275,7 +1292,9 @@ router.post('/stress/cancel/:testId', authMiddleware, asyncHandler(async (req, r
       userId: req.user?.id
     });
 
-    const result = await realStressTestEngine.cancelStressTest(testId, reason, preserveData);
+    // 🔧 重构：使用用户测试管理器停止测试
+    await userTestManager.stopUserTest(req.user?.id, testId);
+    const result = { success: true, message: '测试已取消' };
 
     if (result.success) {
       // 记录取消操作到用户活动日志
@@ -1318,7 +1337,9 @@ router.post('/stress/stop/:testId', authMiddleware, asyncHandler(async (req, res
   try {
     console.log(`🛑 收到停止压力测试请求(向后兼容): ${testId}`);
 
-    const result = await realStressTestEngine.cancelStressTest(testId);
+    // 🔧 重构：使用用户测试管理器停止测试
+    await userTestManager.stopUserTest(req.user?.id, testId);
+    const result = { success: true, message: '测试已停止' };
 
     if (result.success) {
       res.json({
@@ -1348,10 +1369,12 @@ router.post('/stress/stop/:testId', authMiddleware, asyncHandler(async (req, res
  */
 router.get('/stress/running', optionalAuth, asyncHandler(async (req, res) => {
   try {
-    console.log('📊 获取所有运行中的压力测试');
+    console.log('📊 获取用户运行中的压力测试');
 
-    const runningTests = realStressTestEngine.getAllRunningTests();
-    const runningCount = realStressTestEngine.getRunningTestsCount();
+    // 🔧 重构：获取用户测试管理器的统计信息
+    const stats = userTestManager.getStats();
+    const runningTests = []; // 简化实现，不返回具体测试列表
+    const runningCount = stats.totalTests;
 
     console.log(`📊 当前运行中的测试数量: ${runningCount}`);
 
@@ -1381,36 +1404,17 @@ router.post('/stress/cleanup-all', adminAuth, asyncHandler(async (req, res) => {
   try {
     console.log('🧹 管理员强制清理所有运行中的测试');
 
-    const runningTests = realStressTestEngine.getAllRunningTests();
-    const cleanupResults = [];
+    // 🔧 重构：清理所有用户测试
+    const stats = userTestManager.getStats();
+    userTestManager.cleanup();
 
-    // 逐个取消所有运行中的测试
-    for (const test of runningTests) {
-      try {
-        const result = await realStressTestEngine.cancelStressTest(
-          test.testId,
-          '管理员强制清理',
-          true
-        );
-        cleanupResults.push({
-          testId: test.testId,
-          success: result.success,
-          message: result.message
-        });
-      } catch (error) {
-        cleanupResults.push({
-          testId: test.testId,
-          success: false,
-          message: error.message
-        });
-      }
-    }
+    const cleanupResults = [{ success: true, message: '所有测试已清理' }];
 
     res.json({
       success: true,
-      message: `已清理 ${runningTests.length} 个运行中的测试`,
+      message: `已清理 ${stats.totalTests} 个运行中的测试`,
       data: {
-        cleanedCount: runningTests.length,
+        cleanedCount: stats.totalTests,
         results: cleanupResults,
         timestamp: new Date().toISOString()
       }
@@ -1619,7 +1623,10 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
       try {
         console.log('🚀 异步执行压力测试:', testId);
 
-        const testResult = await realStressTestEngine.runStressTest(validatedURL, {
+        // 🔧 重构：使用用户测试管理器创建测试实例
+        const testEngine = userTestManager.createUserTest(req.user?.id, testId);
+
+        const testResult = await testEngine.runStressTest(validatedURL, {
           ...testConfig,
           testId: testId, // 传递预生成的testId
           userId: req.user?.id,
@@ -2632,70 +2639,120 @@ router.post('/performance/save', optionalAuth, asyncHandler(async (req, res) => 
   try {
     console.log(`💾 Saving performance test result:`, result.testId);
 
-    // 准备保存到数据库的数据
-    const testData = {
-      id: result.testId || `perf_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      user_id: userId || req.user?.id,
+    const sessionId = result.testId || `perf_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const actualUserId = userId || req.user?.id;
+
+    // 准备主表数据
+    const sessionData = {
+      id: sessionId,
+      user_id: actualUserId,
+      test_name: result.testName || `性能测试 - ${new Date().toLocaleString()}`,
+      test_type: 'performance',
       url: result.url,
-      type: 'performance',
-      status: 'success',
+      status: 'completed',
       start_time: new Date(result.timestamp),
       end_time: new Date(),
-      duration: result.duration || 0,
-      config: JSON.stringify(result.config || {}),
-      results: JSON.stringify(result),
-      summary: `性能评分: ${result.overallScore}/100, 等级: ${result.grade}`,
-      score: result.overallScore || 0,
-      metrics: JSON.stringify({
-        loadTime: result.pageSpeed?.loadTime || 0,
-        lcp: result.coreWebVitals?.lcp || 0,
-        fid: result.coreWebVitals?.fid || 0,
-        cls: result.coreWebVitals?.cls || 0
-      }),
-      tags: JSON.stringify([`grade:${result.grade}`, `level:${result.config?.level || 'standard'}`]),
-      category: 'performance_test',
-      priority: result.overallScore < 60 ? 'high' : result.overallScore < 80 ? 'medium' : 'low',
-      created_at: new Date(),
-      updated_at: new Date()
+      duration: Math.floor((result.duration || 0) / 1000), // 转换为秒
+      overall_score: result.overallScore || 0,
+      grade: result.grade || 'F',
+      config: result.config || {},
+      environment: 'production',
+      tags: [`grade:${result.grade}`, `level:${result.config?.level || 'standard'}`],
+      description: `性能评分: ${result.overallScore}/100, 等级: ${result.grade}`
     };
 
-    // 保存到数据库
-    const insertQuery = `
-      INSERT INTO test_results (
-        id, user_id, url, type, status, start_time, end_time, duration,
-        config, results, summary, score, metrics, tags, category, priority,
-        created_at, updated_at
+    // 插入主表数据
+    const sessionInsertQuery = `
+      INSERT INTO test_sessions (
+        id, user_id, test_name, test_type, url, status, start_time, end_time, duration,
+        overall_score, grade, config, environment, tags, description, created_at, updated_at
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
       )
       ON CONFLICT (id) DO UPDATE SET
         status = EXCLUDED.status,
         end_time = EXCLUDED.end_time,
         duration = EXCLUDED.duration,
-        results = EXCLUDED.results,
-        summary = EXCLUDED.summary,
-        score = EXCLUDED.score,
-        metrics = EXCLUDED.metrics,
+        overall_score = EXCLUDED.overall_score,
+        grade = EXCLUDED.grade,
         updated_at = EXCLUDED.updated_at
       RETURNING id
     `;
 
-    const values = [
-      testData.id, testData.user_id, testData.url, testData.type, testData.status,
-      testData.start_time, testData.end_time, testData.duration, testData.config,
-      testData.results, testData.summary, testData.score, testData.metrics,
-      testData.tags, testData.category, testData.priority, testData.created_at,
-      testData.updated_at
+    const sessionValues = [
+      sessionData.id, sessionData.user_id, sessionData.test_name, sessionData.test_type,
+      sessionData.url, sessionData.status, sessionData.start_time, sessionData.end_time,
+      sessionData.duration, sessionData.overall_score, sessionData.grade,
+      JSON.stringify(sessionData.config), sessionData.environment,
+      JSON.stringify(sessionData.tags), sessionData.description,
+      new Date(), new Date()
     ];
 
-    const saveResult = await query(insertQuery, values);
+    await query(sessionInsertQuery, sessionValues);
 
-    console.log(`✅ Performance test result saved:`, testData.id);
+    // 插入性能测试详情数据
+    const performanceData = {
+      session_id: sessionId,
+      first_contentful_paint: result.coreWebVitals?.fcp || 0,
+      largest_contentful_paint: result.coreWebVitals?.lcp || 0,
+      first_input_delay: result.coreWebVitals?.fid || 0,
+      cumulative_layout_shift: result.coreWebVitals?.cls || 0,
+      time_to_interactive: result.pageSpeed?.tti || 0,
+      speed_index: result.pageSpeed?.speedIndex || 0,
+      total_blocking_time: result.pageSpeed?.tbt || 0,
+      dom_content_loaded: result.pageSpeed?.domContentLoaded || 0,
+      load_event_end: result.pageSpeed?.loadTime || 0,
+      total_page_size: result.resourceAnalysis?.totalSize || 0,
+      image_size: result.resourceAnalysis?.imageSize || 0,
+      css_size: result.resourceAnalysis?.cssSize || 0,
+      js_size: result.resourceAnalysis?.jsSize || 0,
+      font_size: result.resourceAnalysis?.fontSize || 0,
+      dns_lookup_time: result.networkTiming?.dnsLookup || 0,
+      tcp_connect_time: result.networkTiming?.tcpConnect || 0,
+      ssl_handshake_time: result.networkTiming?.sslHandshake || 0,
+      server_response_time: result.networkTiming?.serverResponse || 0
+    };
+
+    const performanceInsertQuery = `
+      INSERT INTO performance_test_details (
+        session_id, first_contentful_paint, largest_contentful_paint, first_input_delay,
+        cumulative_layout_shift, time_to_interactive, speed_index, total_blocking_time,
+        dom_content_loaded, load_event_end, total_page_size, image_size, css_size,
+        js_size, font_size, dns_lookup_time, tcp_connect_time, ssl_handshake_time,
+        server_response_time, created_at
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
+      )
+      ON CONFLICT (session_id) DO UPDATE SET
+        first_contentful_paint = EXCLUDED.first_contentful_paint,
+        largest_contentful_paint = EXCLUDED.largest_contentful_paint,
+        first_input_delay = EXCLUDED.first_input_delay,
+        cumulative_layout_shift = EXCLUDED.cumulative_layout_shift,
+        time_to_interactive = EXCLUDED.time_to_interactive,
+        speed_index = EXCLUDED.speed_index
+    `;
+
+    const performanceValues = [
+      performanceData.session_id, performanceData.first_contentful_paint,
+      performanceData.largest_contentful_paint, performanceData.first_input_delay,
+      performanceData.cumulative_layout_shift, performanceData.time_to_interactive,
+      performanceData.speed_index, performanceData.total_blocking_time,
+      performanceData.dom_content_loaded, performanceData.load_event_end,
+      performanceData.total_page_size, performanceData.image_size,
+      performanceData.css_size, performanceData.js_size, performanceData.font_size,
+      performanceData.dns_lookup_time, performanceData.tcp_connect_time,
+      performanceData.ssl_handshake_time, performanceData.server_response_time,
+      new Date()
+    ];
+
+    await query(performanceInsertQuery, performanceValues);
+
+    console.log(`✅ Performance test result saved:`, sessionId);
 
     res.json({
       success: true,
       message: '性能测试结果已保存',
-      testId: testData.id
+      testId: sessionId
     });
 
   } catch (error) {
@@ -3181,8 +3238,9 @@ router.delete('/:testId', authMiddleware, asyncHandler(async (req, res) => {
   const { testId } = req.params;
 
   try {
+    // 使用软删除方式删除测试记录
     const result = await query(
-      'DELETE FROM test_results WHERE id = $1 AND user_id = $2',
+      'UPDATE test_sessions SET deleted_at = CURRENT_TIMESTAMP WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL',
       [testId, req.user.id]
     );
 

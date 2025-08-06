@@ -499,12 +499,68 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
 
   // 开始记录测试
   const startRecording = useCallback(async (testData: Partial<StressTestRecord>): Promise<string> => {
-    const record = await createRecord({
-      ...testData,
-      status: 'running',
-      startTime: new Date().toISOString()
-    });
-    return record.id;
+    // 检查是否有认证令牌
+    const authToken = localStorage.getItem('auth_token');
+    if (!authToken) {
+      // 如果没有认证令牌，生成一个本地ID并跳过服务器记录
+      const localId = `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      console.warn('⚠️ 未登录用户，跳过服务器记录创建，使用本地ID:', localId);
+
+      // 创建本地记录
+      const localRecord: StressTestRecord = {
+        id: localId,
+        testName: testData.testName || '未命名测试',
+        url: testData.url || '',
+        status: 'running',
+        startTime: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        config: testData.config || {},
+        testId: testData.testId,
+        userId: 'local',
+        tags: testData.tags || [],
+        environment: testData.environment || 'development'
+      };
+
+      // 更新本地状态
+      setRecords(prev => [localRecord, ...prev]);
+      setCurrentRecord(localRecord);
+
+      return localId;
+    }
+
+    // 如果有认证令牌，正常创建服务器记录
+    try {
+      const record = await createRecord({
+        ...testData,
+        status: 'running',
+        startTime: new Date().toISOString()
+      });
+      return record.id;
+    } catch (error: any) {
+      // 如果服务器记录创建失败，回退到本地记录
+      console.warn('⚠️ 服务器记录创建失败，回退到本地记录:', error.message);
+
+      const localId = `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const localRecord: StressTestRecord = {
+        id: localId,
+        testName: testData.testName || '未命名测试',
+        url: testData.url || '',
+        status: 'running',
+        startTime: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        config: testData.config || {},
+        testId: testData.testId,
+        userId: 'local',
+        tags: testData.tags || [],
+        environment: testData.environment || 'development'
+      };
+
+      // 更新本地状态
+      setRecords(prev => [localRecord, ...prev]);
+      setCurrentRecord(localRecord);
+
+      return localId;
+    }
   }, [createRecord]);
 
   // 更新测试进度

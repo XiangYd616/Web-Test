@@ -482,6 +482,32 @@ class RealStressTestEngine {
     this.maxConcurrentUsers = CONSTANTS.LIMITS.MAX_CONCURRENT_USERS;
     this.runningTests = new Map(); // 存储正在运行的测试状态
     this.globalTimers = new Map(); // 全局定时器跟踪
+
+    // 🔧 重构：添加回调支持
+    this.progressCallback = null;
+    this.completionCallback = null;
+    this.errorCallback = null;
+  }
+
+  /**
+   * 设置进度回调
+   */
+  setProgressCallback(callback) {
+    this.progressCallback = callback;
+  }
+
+  /**
+   * 设置完成回调
+   */
+  setCompletionCallback(callback) {
+    this.completionCallback = callback;
+  }
+
+  /**
+   * 设置错误回调
+   */
+  setErrorCallback(callback) {
+    this.errorCallback = callback;
   }
 
   /**
@@ -717,7 +743,12 @@ class RealStressTestEngine {
       finalProcessedAt: new Date().toISOString()
     });
 
-    // 发送WebSocket完成事件
+    // 🔧 重构：调用完成回调
+    if (this.completionCallback) {
+      this.completionCallback(results);
+    }
+
+    // 发送WebSocket完成事件（保留兼容性）
     this.broadcastTestComplete(testId, results);
 
     // 保存最终测试结果
@@ -741,6 +772,11 @@ class RealStressTestEngine {
    */
   handleTestFailure(testId, error) {
     Logger.error(`测试失败: ${testId}`, error);
+
+    // 🔧 重构：调用错误回调
+    if (this.errorCallback) {
+      this.errorCallback(error);
+    }
 
     // 清理资源
     this.cleanupTest(testId);
@@ -1682,15 +1718,14 @@ class RealStressTestEngine {
    * 广播进度更新 - 需要外部实现
    */
   broadcastProgress(testId, progressData) {
-    // 这个方法需要在外部实现WebSocket广播逻辑
-    if (global.io) {
-      // 🔧 修复：确保发送完整的指标数据，包含testId
+    // 🔧 重构：使用回调而不是全局WebSocket
+    if (this.progressCallback) {
       const completeProgressData = {
         testId,
         ...progressData
       };
 
-      console.log('📡 广播进度更新:', {
+      console.log('📡 发送进度更新:', {
         testId,
         progress: progressData.progress,
         hasMetrics: !!progressData.metrics,
@@ -1700,7 +1735,7 @@ class RealStressTestEngine {
         throughput: progressData.metrics?.throughput
       });
 
-      global.io.to(`stress-test-${testId}`).emit('progress', completeProgressData);
+      this.progressCallback(completeProgressData);
     }
   }
 
@@ -1820,13 +1855,18 @@ class RealStressTestEngine {
           Logger.info(`保存取消的测试记录: ${testId}`);
 
           // 调用测试历史服务保存取消状态
-          if (global.testHistoryService) {
-            await global.testHistoryService.cancelTest(
+          const TestHistoryService = require('../TestHistoryService');
+          const testHistoryService = new TestHistoryService(require('../../config/database').pool);
+
+          try {
+            await testHistoryService.cancelTest(
               testStatus.recordId,
               results.cancelReason || '用户手动取消',
               testStatus.userId
             );
             Logger.info(`取消记录保存成功: ${testId}`);
+          } catch (error) {
+            Logger.error(`调用测试历史服务失败: ${testId}`, error);
           }
         } catch (error) {
           Logger.error(`保存取消记录失败: ${testId}`, error);
@@ -1837,7 +1877,10 @@ class RealStressTestEngine {
       Logger.info(`保存最终测试结果: ${testId}`);
 
       // 调用测试历史服务保存完成状态
-      if (global.testHistoryService) {
+      const TestHistoryService = require('../TestHistoryService');
+      const testHistoryService = new TestHistoryService(require('../../config/database').pool);
+
+      try {
         const finalResults = {
           results: results.metrics,
           overallScore: this.calculateOverallScore(results),
@@ -1851,12 +1894,14 @@ class RealStressTestEngine {
           realTimeData: results.realTimeData
         };
 
-        await global.testHistoryService.completeTest(
+        await testHistoryService.completeTest(
           testStatus.recordId,
           finalResults,
           testStatus.userId
         );
         Logger.info(`测试结果保存完成: ${testId}`);
+      } catch (error) {
+        Logger.error(`调用测试历史服务失败: ${testId}`, error);
       }
     } catch (error) {
       Logger.error(`保存测试结果失败: ${testId}`, error);

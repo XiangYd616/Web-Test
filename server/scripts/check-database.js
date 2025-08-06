@@ -71,7 +71,7 @@ async function checkDatabase() {
 
 async function checkTables(pool) {
   const expectedTables = [
-    'users', 'user_preferences', 'test_results', 'activity_logs',
+    'users', 'user_preferences', 'test_sessions', 'activity_logs',
     'monitoring_sites', 'monitoring_results', 'data_tasks',
     'test_templates', 'system_settings', 'notifications'
   ];
@@ -129,7 +129,7 @@ async function checkIndexes(pool) {
 }
 
 async function checkDataStats(pool) {
-  const tables = ['users', 'test_results', 'monitoring_sites', 'activity_logs', 'data_tasks'];
+  const tables = ['users', 'test_sessions', 'monitoring_sites', 'activity_logs', 'data_tasks'];
 
   for (const table of tables) {
     try {

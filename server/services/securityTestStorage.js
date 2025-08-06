@@ -14,71 +14,127 @@ class SecurityTestStorage {
     try {
       console.log('💾 保存安全测试结果到数据库:', testResult.id);
 
-      const testId = testResult.id || uuidv4();
+      const sessionId = testResult.id || uuidv4();
       const now = new Date();
 
-      // 准备数据
-      const testData = {
-        id: testId,
+      // 准备主表数据
+      const sessionData = {
+        id: sessionId,
         user_id: userId,
+        test_name: testResult.testName || `安全测试 - ${new URL(testResult.url).hostname}`,
+        test_type: 'security',
         url: testResult.url,
-        type: 'security',
         status: this.mapTestStatus(testResult.status),
         start_time: testResult.timestamp ? new Date(testResult.timestamp) : now,
         end_time: now,
-        duration: testResult.duration || 0,
-        config: JSON.stringify(testResult.config || {}),
-        results: JSON.stringify(this.sanitizeResults(testResult)),
-        summary: this.generateSummary(testResult),
-        score: testResult.overallScore || testResult.securityScore || 0,
-        metrics: JSON.stringify(testResult.statistics || {}),
+        duration: Math.floor((testResult.duration || 0) / 1000), // 转换为秒
+        overall_score: testResult.overallScore || testResult.securityScore || 0,
+        grade: this.calculateGrade(testResult.overallScore || testResult.securityScore || 0),
+        total_issues: testResult.statistics?.totalChecks || 0,
+        critical_issues: testResult.statistics?.criticalIssues || 0,
+        major_issues: testResult.statistics?.majorIssues || 0,
+        minor_issues: testResult.statistics?.minorIssues || 0,
+        config: testResult.config || {},
+        environment: 'production',
         tags: this.extractTags(testResult),
-        category: 'security_scan',
-        priority: this.determinePriority(testResult),
-        created_at: now,
-        updated_at: now
+        description: this.generateSummary(testResult)
       };
 
-      // 插入到数据库
-      const insertQuery = `
-        INSERT INTO test_results (
-          id, user_id, url, type, status, start_time, end_time, duration,
-          config, results, summary, score, metrics, tags, category, priority,
-          created_at, updated_at
+      // 插入主表
+      const sessionInsertQuery = `
+        INSERT INTO test_sessions (
+          id, user_id, test_name, test_type, url, status, start_time, end_time, duration,
+          overall_score, grade, total_issues, critical_issues, major_issues, minor_issues,
+          config, environment, tags, description, created_at, updated_at
         ) VALUES (
-          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21
         )
         ON CONFLICT (id) DO UPDATE SET
           status = EXCLUDED.status,
           end_time = EXCLUDED.end_time,
           duration = EXCLUDED.duration,
-          results = EXCLUDED.results,
-          summary = EXCLUDED.summary,
-          score = EXCLUDED.score,
-          metrics = EXCLUDED.metrics,
+          overall_score = EXCLUDED.overall_score,
+          grade = EXCLUDED.grade,
+          total_issues = EXCLUDED.total_issues,
+          critical_issues = EXCLUDED.critical_issues,
+          major_issues = EXCLUDED.major_issues,
+          minor_issues = EXCLUDED.minor_issues,
           updated_at = EXCLUDED.updated_at
         RETURNING id
       `;
 
-      const values = [
-        testData.id, testData.user_id, testData.url, testData.type, testData.status,
-        testData.start_time, testData.end_time, testData.duration, testData.config,
-        testData.results, testData.summary, testData.score, testData.metrics,
-        testData.tags, testData.category, testData.priority, testData.created_at,
-        testData.updated_at
+      const sessionValues = [
+        sessionData.id, sessionData.user_id, sessionData.test_name, sessionData.test_type,
+        sessionData.url, sessionData.status, sessionData.start_time, sessionData.end_time,
+        sessionData.duration, sessionData.overall_score, sessionData.grade,
+        sessionData.total_issues, sessionData.critical_issues, sessionData.major_issues,
+        sessionData.minor_issues, JSON.stringify(sessionData.config), sessionData.environment,
+        JSON.stringify(sessionData.tags), sessionData.description, now, now
       ];
 
-      const result = await query(insertQuery, values);
-      
+      await query(sessionInsertQuery, sessionValues);
+
+      // 准备安全测试详情数据
+      const securityData = {
+        session_id: sessionId,
+        security_score: testResult.overallScore || testResult.securityScore || 0,
+        ssl_score: testResult.sslScore || 0,
+        header_security_score: testResult.headerSecurityScore || 0,
+        authentication_score: testResult.authenticationScore || 0,
+        vulnerabilities_total: testResult.statistics?.totalVulnerabilities || 0,
+        vulnerabilities_critical: testResult.statistics?.criticalVulnerabilities || 0,
+        vulnerabilities_high: testResult.statistics?.highVulnerabilities || 0,
+        vulnerabilities_medium: testResult.statistics?.mediumVulnerabilities || 0,
+        vulnerabilities_low: testResult.statistics?.lowVulnerabilities || 0,
+        sql_injection_found: testResult.vulnerabilities?.sqlInjection || 0,
+        xss_vulnerabilities: testResult.vulnerabilities?.xss || 0,
+        csrf_vulnerabilities: testResult.vulnerabilities?.csrf || 0,
+        https_enforced: testResult.securityFeatures?.httpsEnforced || false,
+        hsts_enabled: testResult.securityFeatures?.hstsEnabled || false,
+        csrf_protection: testResult.securityFeatures?.csrfProtection || false
+      };
+
+      // 插入安全测试详情
+      const securityInsertQuery = `
+        INSERT INTO security_test_details (
+          session_id, security_score, ssl_score, header_security_score, authentication_score,
+          vulnerabilities_total, vulnerabilities_critical, vulnerabilities_high,
+          vulnerabilities_medium, vulnerabilities_low, sql_injection_found,
+          xss_vulnerabilities, csrf_vulnerabilities, https_enforced, hsts_enabled,
+          csrf_protection, created_at
+        ) VALUES (
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
+        )
+        ON CONFLICT (session_id) DO UPDATE SET
+          security_score = EXCLUDED.security_score,
+          ssl_score = EXCLUDED.ssl_score,
+          vulnerabilities_total = EXCLUDED.vulnerabilities_total,
+          vulnerabilities_critical = EXCLUDED.vulnerabilities_critical,
+          vulnerabilities_high = EXCLUDED.vulnerabilities_high
+      `;
+
+      const securityValues = [
+        securityData.session_id, securityData.security_score, securityData.ssl_score,
+        securityData.header_security_score, securityData.authentication_score,
+        securityData.vulnerabilities_total, securityData.vulnerabilities_critical,
+        securityData.vulnerabilities_high, securityData.vulnerabilities_medium,
+        securityData.vulnerabilities_low, securityData.sql_injection_found,
+        securityData.xss_vulnerabilities, securityData.csrf_vulnerabilities,
+        securityData.https_enforced, securityData.hsts_enabled,
+        securityData.csrf_protection, now
+      ];
+
+      await query(securityInsertQuery, securityValues);
+
       // 记录活动日志
-      await this.logActivity(userId, 'security_test_saved', testId, {
+      await this.logActivity(userId, 'security_test_saved', sessionId, {
         url: testResult.url,
-        score: testData.score,
-        duration: testData.duration
+        score: sessionData.overall_score,
+        duration: sessionData.duration
       });
 
-      console.log('✅ 安全测试结果已保存到数据库:', testId);
-      return { success: true, testId: testId };
+      console.log('✅ 安全测试结果已保存到数据库:', sessionId);
+      return { success: true, testId: sessionId };
 
     } catch (error) {
       console.error('❌ 保存安全测试结果失败:', error);
@@ -101,7 +157,7 @@ class SecurityTestStorage {
         dateTo = null
       } = options;
 
-      let whereClause = "WHERE type = 'security'";
+      let whereClause = "WHERE test_type = 'security' AND deleted_at IS NULL";
       const queryParams = [];
       let paramIndex = 1;
 
@@ -132,15 +188,16 @@ class SecurityTestStorage {
         paramIndex++;
       }
 
+      // 使用安全测试历史视图
       const selectQuery = `
-        SELECT 
-          id, user_id, url, status, start_time, end_time, duration,
-          score, summary, tags, category, priority, created_at, updated_at,
-          (results->>'overallScore')::numeric as overall_score,
-          (results->>'riskLevel') as risk_level,
-          (results->'statistics'->>'totalChecks')::integer as total_checks,
-          (results->'statistics'->>'failedChecks')::integer as failed_checks
-        FROM test_results 
+        SELECT
+          id, user_id, test_name, url, status, start_time, end_time, duration,
+          overall_score, grade, total_issues, critical_issues, major_issues, minor_issues,
+          environment, tags, description, created_at, updated_at,
+          security_score, ssl_score, vulnerabilities_total, vulnerabilities_critical,
+          vulnerabilities_high, sql_injection_found, xss_vulnerabilities, csrf_vulnerabilities,
+          https_enforced, hsts_enabled, csrf_protection
+        FROM security_test_history
         ${whereClause}
         ORDER BY ${sortBy} ${sortOrder}
         LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
@@ -151,7 +208,7 @@ class SecurityTestStorage {
       const result = await query(selectQuery, queryParams);
 
       // 获取总数
-      const countQuery = `SELECT COUNT(*) as total FROM test_results ${whereClause}`;
+      const countQuery = `SELECT COUNT(*) as total FROM test_sessions ${whereClause}`;
       const countResult = await query(countQuery, queryParams.slice(0, -2));
 
       return {
@@ -176,7 +233,7 @@ class SecurityTestStorage {
    */
   async getSecurityTestResult(testId, userId = null) {
     try {
-      let whereClause = "WHERE id = $1 AND type = 'security'";
+      let whereClause = "WHERE id = $1 AND test_type = 'security' AND deleted_at IS NULL";
       const queryParams = [testId];
 
       if (userId) {
@@ -184,8 +241,9 @@ class SecurityTestStorage {
         queryParams.push(userId);
       }
 
+      // 使用安全测试历史视图获取完整信息
       const selectQuery = `
-        SELECT * FROM test_results ${whereClause}
+        SELECT * FROM security_test_history ${whereClause}
       `;
 
       const result = await query(selectQuery, queryParams);
@@ -195,14 +253,25 @@ class SecurityTestStorage {
       }
 
       const testResult = result.rows[0];
-      
+
       return {
         success: true,
         data: {
           ...this.formatTestRecord(testResult),
           config: testResult.config,
-          results: testResult.results,
-          metrics: testResult.metrics
+          securityDetails: {
+            securityScore: testResult.security_score,
+            sslScore: testResult.ssl_score,
+            vulnerabilitiesTotal: testResult.vulnerabilities_total,
+            vulnerabilitiesCritical: testResult.vulnerabilities_critical,
+            vulnerabilitiesHigh: testResult.vulnerabilities_high,
+            sqlInjectionFound: testResult.sql_injection_found,
+            xssVulnerabilities: testResult.xss_vulnerabilities,
+            csrfVulnerabilities: testResult.csrf_vulnerabilities,
+            httpsEnforced: testResult.https_enforced,
+            hstsEnabled: testResult.hsts_enabled,
+            csrfProtection: testResult.csrf_protection
+          }
         }
       };
 
@@ -217,7 +286,7 @@ class SecurityTestStorage {
    */
   async deleteSecurityTestResult(testId, userId = null) {
     try {
-      let whereClause = "WHERE id = $1 AND type = 'security'";
+      let whereClause = "WHERE id = $1 AND test_type = 'security' AND deleted_at IS NULL";
       const queryParams = [testId];
 
       if (userId) {
@@ -225,7 +294,8 @@ class SecurityTestStorage {
         queryParams.push(userId);
       }
 
-      const deleteQuery = `DELETE FROM test_results ${whereClause} RETURNING id`;
+      // 使用软删除
+      const deleteQuery = `UPDATE test_sessions SET deleted_at = CURRENT_TIMESTAMP ${whereClause} RETURNING id`;
       const result = await query(deleteQuery, queryParams);
 
       if (result.rows.length === 0) {
@@ -248,7 +318,7 @@ class SecurityTestStorage {
    */
   async getSecurityTestStatistics(userId = null, days = 30) {
     try {
-      let whereClause = "WHERE type = 'security' AND created_at >= NOW() - INTERVAL '30 days'";
+      let whereClause = "WHERE test_type = 'security' AND deleted_at IS NULL AND created_at >= NOW() - INTERVAL '30 days'";
       const queryParams = [];
 
       if (userId) {
@@ -257,16 +327,16 @@ class SecurityTestStorage {
       }
 
       const statsQuery = `
-        SELECT 
+        SELECT
           COUNT(*) as total_tests,
-          COUNT(CASE WHEN status = 'success' THEN 1 END) as successful_tests,
-          COUNT(CASE WHEN status = 'error' THEN 1 END) as failed_tests,
-          AVG(score) as average_score,
+          COUNT(CASE WHEN status = 'completed' THEN 1 END) as successful_tests,
+          COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed_tests,
+          AVG(overall_score) as average_score,
           AVG(duration) as average_duration,
-          COUNT(CASE WHEN score < 60 THEN 1 END) as low_score_tests,
-          COUNT(CASE WHEN score >= 60 AND score < 80 THEN 1 END) as medium_score_tests,
-          COUNT(CASE WHEN score >= 80 THEN 1 END) as high_score_tests
-        FROM test_results ${whereClause}
+          COUNT(CASE WHEN overall_score < 60 THEN 1 END) as low_score_tests,
+          COUNT(CASE WHEN overall_score >= 60 AND overall_score < 80 THEN 1 END) as medium_score_tests,
+          COUNT(CASE WHEN overall_score >= 80 THEN 1 END) as high_score_tests
+        FROM test_sessions ${whereClause}
       `;
 
       const result = await query(statsQuery, queryParams);
@@ -301,8 +371,8 @@ class SecurityTestStorage {
    */
   mapTestStatus(status) {
     const statusMap = {
-      'completed': 'success',
-      'failed': 'error',
+      'completed': 'completed',
+      'failed': 'failed',
       'running': 'running',
       'pending': 'pending',
       'cancelled': 'cancelled'
@@ -311,16 +381,30 @@ class SecurityTestStorage {
   }
 
   /**
+   * 计算等级
+   */
+  calculateGrade(score) {
+    if (score >= 95) return 'A+';
+    if (score >= 90) return 'A';
+    if (score >= 85) return 'B+';
+    if (score >= 80) return 'B';
+    if (score >= 75) return 'C+';
+    if (score >= 70) return 'C';
+    if (score >= 60) return 'D';
+    return 'F';
+  }
+
+  /**
    * 清理结果数据
    */
   sanitizeResults(testResult) {
     // 移除敏感信息和过大的数据
     const sanitized = { ...testResult };
-    
+
     // 移除可能包含敏感信息的字段
     delete sanitized.config;
     delete sanitized.rawData;
-    
+
     return sanitized;
   }
 
@@ -332,7 +416,7 @@ class SecurityTestStorage {
     const riskLevel = testResult.riskLevel || 'unknown';
     const totalChecks = testResult.statistics?.totalChecks || 0;
     const failedChecks = testResult.statistics?.failedChecks || 0;
-    
+
     return `安全评分: ${score}/100, 风险等级: ${riskLevel}, 检查项: ${totalChecks}, 失败: ${failedChecks}`;
   }
 
@@ -341,17 +425,17 @@ class SecurityTestStorage {
    */
   extractTags(testResult) {
     const tags = [];
-    
+
     if (testResult.riskLevel) {
       tags.push(`risk:${testResult.riskLevel}`);
     }
-    
+
     if (testResult.overallScore >= 80) {
       tags.push('high-score');
     } else if (testResult.overallScore < 60) {
       tags.push('low-score');
     }
-    
+
     return tags;
   }
 
@@ -361,7 +445,7 @@ class SecurityTestStorage {
   determinePriority(testResult) {
     const score = testResult.overallScore || testResult.securityScore || 0;
     const riskLevel = testResult.riskLevel;
-    
+
     if (riskLevel === 'critical' || score < 40) {
       return 'urgent';
     } else if (riskLevel === 'high' || score < 60) {
@@ -379,20 +463,27 @@ class SecurityTestStorage {
   formatTestRecord(row) {
     return {
       id: row.id,
-      testName: `安全测试 - ${new URL(row.url).hostname}`,
+      testName: row.test_name || `安全测试 - ${new URL(row.url).hostname}`,
       testType: 'security',
       url: row.url,
       status: row.status,
-      score: parseFloat(row.score) || 0,
+      score: parseFloat(row.overall_score) || 0,
+      grade: row.grade,
       duration: parseInt(row.duration) || 0,
       startTime: row.start_time?.toISOString(),
       endTime: row.end_time?.toISOString(),
-      summary: row.summary,
-      tags: row.tags || [],
-      priority: row.priority,
-      riskLevel: row.risk_level,
-      totalChecks: row.total_checks,
-      failedChecks: row.failed_checks,
+      description: row.description,
+      tags: Array.isArray(row.tags) ? row.tags : (row.tags ? JSON.parse(row.tags) : []),
+      environment: row.environment,
+      totalIssues: row.total_issues || 0,
+      criticalIssues: row.critical_issues || 0,
+      majorIssues: row.major_issues || 0,
+      minorIssues: row.minor_issues || 0,
+      securityScore: row.security_score,
+      sslScore: row.ssl_score,
+      vulnerabilitiesTotal: row.vulnerabilities_total,
+      vulnerabilitiesCritical: row.vulnerabilities_critical,
+      vulnerabilitiesHigh: row.vulnerabilities_high,
       createdAt: row.created_at?.toISOString(),
       updatedAt: row.updated_at?.toISOString()
     };
@@ -412,7 +503,7 @@ class SecurityTestStorage {
       `;
 
       const description = this.getActionDescription(action, metadata);
-      
+
       await query(logQuery, [
         userId,
         action,
@@ -437,7 +528,7 @@ class SecurityTestStorage {
       'security_test_saved': `保存了安全测试结果，评分: ${metadata.score}`,
       'security_test_deleted': '删除了安全测试结果'
     };
-    
+
     return descriptions[action] || action;
   }
 }

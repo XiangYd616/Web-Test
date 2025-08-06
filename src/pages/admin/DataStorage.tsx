@@ -37,7 +37,7 @@ const DataStorage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedRecord, setSelectedRecord] = useState<TestRecord | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [sortBy, setSortBy] = useState<'date' | 'score' | 'type' | 'status'>('date');
+  const [sortBy, setSortBy] = useState<'created_at' | 'overall_score' | 'test_type' | 'status'>('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   const [filters, setFilters] = useState<FilterOptions>({
@@ -541,9 +541,9 @@ const DataStorage: React.FC = () => {
                         aria-label="选择排序方式"
                         title="选择数据排序的方式"
                       >
-                        <option value="date">时间</option>
-                        <option value="score">分数</option>
-                        <option value="type">类型</option>
+                        <option value="created_at">创建时间</option>
+                        <option value="overall_score">总体评分</option>
+                        <option value="test_type">测试类型</option>
                         <option value="status">状态</option>
                       </select>
                       <button

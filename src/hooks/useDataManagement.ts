@@ -4,7 +4,7 @@ import { DataBackup, DataQuery, DataRecord, advancedDataManager } from '../servi
 const extendedDataManager = {
   ...advancedDataManager,
   getSyncConfig: async (): Promise<DataSyncConfig> => {
-    
+
     return {
       id: 'default',
       name: 'Default Sync',
@@ -21,11 +21,11 @@ const extendedDataManager = {
     };
   },
   updateSyncConfig: async (config: DataSyncConfig): Promise<DataSyncConfig> => {
-    
+
     return config;
   },
   createRecord: async (type: string, data: any, metadata?: any): Promise<DataRecord> => {
-    
+
     const validType = ['test', 'user', 'report', 'log', 'config'].includes(type) ? type as any : 'test';
     return {
       id: Date.now().toString(),
@@ -42,7 +42,7 @@ const extendedDataManager = {
     };
   },
   updateRecord: async (id: string, data: any, metadata?: any): Promise<DataRecord> => {
-    
+
     return {
       id,
       type: 'test',
@@ -58,19 +58,19 @@ const extendedDataManager = {
     };
   },
   deleteRecord: async (id: string): Promise<boolean> => {
-    
+
     return true;
   },
   queryData: async (query: any): Promise<{ data: any[], total: number }> => {
-    
+
     return { data: [], total: 0 };
   },
   importData: async (file: File, config: any): Promise<{ taskId: string }> => {
-    
+
     return { taskId: 'temp-' + Date.now() };
   },
   validateData: async (query: any): Promise<{ isValid: boolean, errors: any[] }> => {
-    
+
     return { isValid: true, errors: [] };
   }
 };
@@ -185,7 +185,7 @@ export const useDataManagement = (): UseDataManagementReturn => {
       limit: 50
     },
     sort: {
-      field: 'createdAt',
+      field: 'created_at',
       order: 'desc'
     }
   });

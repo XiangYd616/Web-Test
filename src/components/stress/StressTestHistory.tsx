@@ -61,7 +61,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [dateFilter, setDateFilter] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<'createdAt' | 'duration' | 'score'>('createdAt');
+  const [sortBy, setSortBy] = useState<'created_at' | 'duration' | 'start_time' | 'status'>('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedRecords, setSelectedRecords] = useState<Set<string>>(new Set());
 
@@ -127,11 +127,13 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
 
       // 构建查询参数
       const queryParams = new URLSearchParams();
+      queryParams.append('type', 'stress'); // 指定测试类型为压力测试
       if (params.page) queryParams.append('page', params.page.toString());
       if (params.pageSize) queryParams.append('pageSize', params.pageSize.toString());
       if (params.search) queryParams.append('search', params.search);
       if (params.status && params.status !== 'all') queryParams.append('status', params.status);
       if (params.dateFilter && params.dateFilter !== 'all') queryParams.append('dateFilter', params.dateFilter);
+
       if (params.sortBy) queryParams.append('sortBy', params.sortBy);
       if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
 
@@ -177,7 +179,15 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
       }, 5000);
 
     } catch (error) {
-      console.error('加载测试记录失败:', error);
+      // 🔧 改进错误处理，提供更详细的错误信息
+      console.error('加载测试记录失败:', {
+        error,
+        errorType: typeof error,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : undefined,
+        errorString: String(error)
+      });
+
       setRecords([]);
       setTotalRecords(0);
 
@@ -1004,14 +1014,15 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
               <div className="flex gap-2">
                 <select
                   value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as 'createdAt' | 'duration' | 'score')}
+                  onChange={(e) => setSortBy(e.target.value as 'created_at' | 'duration' | 'start_time' | 'status')}
                   aria-label="选择排序方式"
                   title="选择测试记录的排序方式"
                   className="flex-1 pl-4 pr-12 py-2.5 text-sm border border-gray-600/40 rounded-lg bg-gray-700/50 backdrop-blur-sm text-white focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200 appearance-none bg-no-repeat bg-right bg-[length:14px_14px] bg-[position:right_16px_center] bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTQiIGhlaWdodD0iMTQiIHZpZXdCb3g9IjAgMCAxNCAxNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTMuNSA1LjI1TDcgOC43NUwxMC41IDUuMjUiIHN0cm9rZT0iIzlDQTNBRiIgc3Ryb2tlLXdpZHRoPSIxLjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K')]"
                 >
-                  <option value="createdAt">创建时间</option>
+                  <option value="created_at">创建时间</option>
+                  <option value="start_time">开始时间</option>
                   <option value="duration">测试时长</option>
-                  <option value="score">性能评分</option>
+                  <option value="status">状态</option>
                 </select>
                 <button
                   type="button"

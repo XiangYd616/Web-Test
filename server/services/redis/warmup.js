@@ -56,7 +56,7 @@ class CacheWarmup {
     }
 
     this.logger.info('开始缓存预热...');
-    
+
     try {
       const results = await Promise.allSettled([
         this.warmupPopularUrls(),
@@ -69,7 +69,7 @@ class CacheWarmup {
       const failed = results.filter(r => r.status === 'rejected').length;
 
       this.logger.info(`缓存预热完成: ${successful} 成功, ${failed} 失败`);
-      
+
       if (failed > 0) {
         results.forEach((result, index) => {
           if (result.status === 'rejected') {
@@ -95,32 +95,32 @@ class CacheWarmup {
 
     try {
       this.logger.info('预热热门URL...');
-      
+
       // 查询最近测试频率最高的URL
       const popularUrlsQuery = `
-        SELECT 
+        SELECT
           url,
           COUNT(*) as test_count,
           MAX(created_at) as last_test
-        FROM test_results 
-        WHERE created_at > NOW() - INTERVAL '7 days'
-        GROUP BY url 
-        ORDER BY test_count DESC, last_test DESC 
+        FROM test_sessions
+        WHERE created_at > NOW() - INTERVAL '7 days' AND deleted_at IS NULL
+        GROUP BY url
+        ORDER BY test_count DESC, last_test DESC
         LIMIT $1
       `;
-      
+
       const result = await query(popularUrlsQuery, [this.warmupConfig.popularUrls.limit]);
-      
+
       if (result.rows && result.rows.length > 0) {
         await cacheService.set(
           keys.warmup.popular(),
           result.rows,
-          { 
+          {
             ttl: this.warmupConfig.popularUrls.ttl,
             type: 'warmup'
           }
         );
-        
+
         this.logger.info(`预热热门URL完成: ${result.rows.length} 个URL`);
       }
     } catch (error) {
@@ -139,34 +139,34 @@ class CacheWarmup {
 
     try {
       this.logger.info('预热最近测试...');
-      
+
       // 查询最近的测试结果
       const recentTestsQuery = `
-        SELECT 
+        SELECT
           id,
           url,
           test_type,
           status,
-          score,
+          overall_score as score,
           created_at
-        FROM test_results 
-        WHERE created_at > NOW() - INTERVAL '24 hours'
-        ORDER BY created_at DESC 
+        FROM test_sessions
+        WHERE created_at > NOW() - INTERVAL '24 hours' AND deleted_at IS NULL
+        ORDER BY created_at DESC
         LIMIT $1
       `;
-      
+
       const result = await query(recentTestsQuery, [this.warmupConfig.recentTests.limit]);
-      
+
       if (result.rows && result.rows.length > 0) {
         await cacheService.set(
           keys.warmup.recent(),
           result.rows,
-          { 
+          {
             ttl: this.warmupConfig.recentTests.ttl,
             type: 'warmup'
           }
         );
-        
+
         this.logger.info(`预热最近测试完成: ${result.rows.length} 个测试`);
       }
     } catch (error) {
@@ -185,7 +185,7 @@ class CacheWarmup {
 
     try {
       this.logger.info('预热系统配置...');
-      
+
       // 预热系统设置
       const systemSettings = {
         features: {
@@ -212,12 +212,12 @@ class CacheWarmup {
       await cacheService.set(
         keys.config.settings(),
         systemSettings,
-        { 
+        {
           ttl: this.warmupConfig.systemConfig.ttl,
           type: 'config'
         }
       );
-      
+
       this.logger.info('预热系统配置完成');
     } catch (error) {
       this.logger.error('预热系统配置失败:', error);
@@ -235,22 +235,23 @@ class CacheWarmup {
 
     try {
       this.logger.info('预热用户会话...');
-      
+
       // 查询最近活跃的用户
       const activeUsersQuery = `
-        SELECT DISTINCT 
+        SELECT DISTINCT
           user_id,
           MAX(created_at) as last_activity
-        FROM test_results 
-        WHERE user_id IS NOT NULL 
+        FROM test_sessions
+        WHERE user_id IS NOT NULL
           AND created_at > NOW() - INTERVAL '24 hours'
-        GROUP BY user_id 
-        ORDER BY last_activity DESC 
+          AND deleted_at IS NULL
+        GROUP BY user_id
+        ORDER BY last_activity DESC
         LIMIT $1
       `;
-      
+
       const result = await query(activeUsersQuery, [this.warmupConfig.userSessions.limit]);
-      
+
       if (result.rows && result.rows.length > 0) {
         // 为每个活跃用户预热基础信息
         const warmupPromises = result.rows.map(async (user) => {
@@ -259,14 +260,14 @@ class CacheWarmup {
             await cacheService.set(
               keys.db.user(user.user_id),
               userStats,
-              { 
+              {
                 ttl: this.warmupConfig.userSessions.ttl,
                 type: 'session'
               }
             );
           }
         });
-        
+
         await Promise.allSettled(warmupPromises);
         this.logger.info(`预热用户会话完成: ${result.rows.length} 个用户`);
       }
@@ -282,17 +283,17 @@ class CacheWarmup {
   async getUserStats(userId) {
     try {
       const statsQuery = `
-        SELECT 
+        SELECT
           COUNT(*) as total_tests,
           COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_tests,
           COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed_tests,
-          AVG(CASE WHEN score IS NOT NULL THEN score END) as avg_score,
+          AVG(CASE WHEN overall_score IS NOT NULL THEN overall_score END) as avg_score,
           MAX(created_at) as last_test,
           MIN(created_at) as first_test
-        FROM test_results 
-        WHERE user_id = $1
+        FROM test_sessions
+        WHERE user_id = $1 AND deleted_at IS NULL
       `;
-      
+
       const result = await query(statsQuery, [userId]);
       return result.rows[0] || null;
     } catch (error) {
@@ -306,7 +307,7 @@ class CacheWarmup {
    */
   startScheduledWarmup(interval = 3600000) { // 1小时
     this.logger.info(`启动定期预热任务，间隔: ${interval}ms`);
-    
+
     this.warmupInterval = setInterval(async () => {
       try {
         await this.startWarmup();
@@ -337,10 +338,10 @@ class CacheWarmup {
 
     try {
       this.logger.info(`预热URL: ${url}`);
-      
+
       const warmupPromises = testTypes.map(async (testType) => {
         const cacheKey = keys.api[testType](url, { prewarmed: true });
-        
+
         // 检查是否已有缓存
         const exists = await cacheService.exists(cacheKey);
         if (!exists) {
@@ -352,7 +353,7 @@ class CacheWarmup {
           );
         }
       });
-      
+
       await Promise.all(warmupPromises);
       this.logger.info(`URL预热完成: ${url}`);
       return true;
@@ -374,7 +375,7 @@ class CacheWarmup {
         lastWarmup: new Date().toISOString(),
         config: this.warmupConfig
       };
-      
+
       return stats;
     } catch (error) {
       this.logger.error('获取预热统计失败:', error);

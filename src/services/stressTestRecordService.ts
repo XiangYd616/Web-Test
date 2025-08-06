@@ -222,18 +222,16 @@ class StressTestRecordService {
    */
   async createTestRecord(testData: Partial<StressTestRecord>): Promise<StressTestRecord> {
     try {
-      const record: StressTestRecord = {
-        id: testData.id || this.generateId(),
-        testName: testData.testName || `压力测试 - ${new URL(testData.url!).hostname}`,
+      // 准备后端API期望的数据格式
+      const apiData = {
+        testName: testData.testName || `压力测试 - ${this.getHostnameFromUrl(testData.url!) || '未知'}`,
+        testType: 'stress',
         url: testData.url!,
-        status: testData.status || 'idle',
-        startTime: testData.startTime || new Date().toISOString(),
-        createdAt: testData.createdAt || new Date().toISOString(),
-        config: testData.config!,
-        testId: testData.testId,
-        userId: testData.userId,
+        status: testData.status || 'pending',
+        config: testData.config || {},
+        environment: testData.environment || 'production',
         tags: testData.tags || [],
-        environment: testData.environment || 'development'
+        description: `压力测试 - ${this.getHostnameFromUrl(testData.url!) || '未知'}`
       };
 
       // 保存到后端
@@ -245,7 +243,7 @@ class StressTestRecordService {
             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
           } : {})
         },
-        body: JSON.stringify(record)
+        body: JSON.stringify(apiData)
       });
 
       const data = await response.json();
@@ -253,7 +251,23 @@ class StressTestRecordService {
         throw new Error(data.message || '创建测试记录失败');
       }
 
-      return data.data;
+      // 将后端返回的数据转换为前端期望的格式
+      const backendRecord = data.data;
+      const record: StressTestRecord = {
+        id: backendRecord.id,
+        testName: backendRecord.testName,
+        url: backendRecord.url || testData.url!,
+        status: backendRecord.status,
+        startTime: backendRecord.startTime || backendRecord.createdAt,
+        createdAt: backendRecord.createdAt,
+        config: backendRecord.config || testData.config!,
+        testId: testData.testId,
+        userId: backendRecord.userId,
+        tags: backendRecord.tags || [],
+        environment: backendRecord.environment || 'production'
+      };
+
+      return record;
     } catch (error) {
       console.error('创建测试记录失败:', error);
       throw error;
@@ -415,7 +429,29 @@ class StressTestRecordService {
         updates.actualDuration = Math.round((endTime - startTime) / 1000);
       }
 
-      // 调用后端取消API而不是通用更新API
+      // 如果是本地记录，直接更新本地存储
+      if (id.startsWith('local_')) {
+        if (!currentRecord) {
+          throw new Error('本地记录不存在');
+        }
+
+        const updatedRecord: StressTestRecord = {
+          ...currentRecord,
+          ...updates
+        };
+
+        // 更新本地存储
+        const localRecords = this.getLocalRecords();
+        const index = localRecords.findIndex(r => r.id === id);
+        if (index !== -1) {
+          localRecords[index] = updatedRecord;
+          this.saveLocalRecords(localRecords);
+        }
+
+        return updatedRecord;
+      }
+
+      // 服务器记录，调用后端取消API
       const response = await fetch(`${this.baseUrl}/history/${id}/cancel`, {
         method: 'POST',
         headers: {
@@ -602,6 +638,17 @@ class StressTestRecordService {
    */
   async getTestRecord(id: string): Promise<StressTestRecord> {
     try {
+      // 如果是本地记录，从本地存储获取
+      if (id.startsWith('local_')) {
+        const localRecords = this.getLocalRecords();
+        const record = localRecords.find(r => r.id === id);
+        if (!record) {
+          throw new Error('本地记录不存在');
+        }
+        return record;
+      }
+
+      // 服务器记录，调用API
       const response = await fetch(`${this.baseUrl}/history/${id}`, {
         headers: {
           ...(localStorage.getItem('auth_token') ? {
@@ -649,6 +696,20 @@ class StressTestRecordService {
    */
   private generateId(): string {
     return `stress_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  /**
+   * 安全地从URL获取主机名
+   */
+  private getHostnameFromUrl(url: string): string {
+    if (!url || url.trim() === '') {
+      return '';
+    }
+    try {
+      return new URL(url).hostname;
+    } catch {
+      return url; // 如果URL无效，返回原始字符串
+    }
   }
 
   /**

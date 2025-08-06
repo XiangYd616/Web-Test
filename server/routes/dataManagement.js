@@ -114,11 +114,11 @@ router.post('/query', authMiddleware, asyncHandler(async (req, res) => {
     if (!targetTable && type) {
       // 将前端的type映射到数据库表名
       const typeToTable = {
-        'test': 'test_history',
+        'test': 'test_sessions',
         'user': 'users',
-        'report': 'test_results'
+        'report': 'test_sessions'
       };
-      targetTable = typeToTable[type] || 'test_history';
+      targetTable = typeToTable[type] || 'test_sessions';
     }
 
     // 默认查询test_history表
@@ -126,17 +126,12 @@ router.post('/query', authMiddleware, asyncHandler(async (req, res) => {
       targetTable = 'test_history';
     }
 
-    // 映射前端的sortBy字段到数据库字段
-    const sortFieldMap = {
-      'createdAt': 'created_at',
-      'updatedAt': 'updated_at',
-      'startTime': 'start_time',
-      'endTime': 'end_time'
-    };
-    const dbSortField = sortFieldMap[sortBy] || sortBy;
+    // 验证sortBy字段（前端应该直接发送数据库字段名）
+    const validSortFields = ['created_at', 'updated_at', 'start_time', 'end_time', 'status', 'test_type'];
+    const dbSortField = validSortFields.includes(sortBy) ? sortBy : 'created_at';
 
     // 基本的安全检查
-    const allowedTables = ['test_history', 'users', 'test_results'];
+    const allowedTables = ['test_sessions', 'users'];
     if (!allowedTables.includes(targetTable)) {
       return res.status(400).json({
         success: false,
@@ -149,10 +144,12 @@ router.post('/query', authMiddleware, asyncHandler(async (req, res) => {
     let paramIndex = 1;
 
     // 添加用户过滤（确保用户只能查看自己的数据）
-    if (targetTable === 'test_history' || targetTable === 'test_results') {
+    if (targetTable === 'test_sessions') {
       whereClause += ` AND user_id = $${paramIndex}`;
       params.push(req.user.id);
       paramIndex++;
+      // 添加软删除过滤
+      whereClause += ' AND deleted_at IS NULL';
     }
 
     // 应用过滤器
@@ -185,8 +182,8 @@ router.post('/query', authMiddleware, asyncHandler(async (req, res) => {
         targetTable === 'users' ? 'user' : 'report',
       data: row,
       metadata: {
-        createdAt: row.created_at,
-        updatedAt: row.updated_at || row.created_at,
+        created_at: row.created_at,
+        updated_at: row.updated_at || row.created_at,
         version: 1,
         tags: [],
         size: JSON.stringify(row).length,

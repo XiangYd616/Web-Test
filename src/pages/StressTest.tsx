@@ -24,6 +24,18 @@ import '../styles/progress-bar.css';
 import type { TestStatusType } from '../types/testHistory';
 import { getTemplateById } from '../utils/testTemplates';
 
+// 工具函数：安全地从URL获取主机名
+const getHostnameFromUrl = (url: string): string => {
+    if (!url || url.trim() === '') {
+        return '';
+    }
+    try {
+        return new URL(url).hostname;
+    } catch {
+        return url; // 如果URL无效，返回原始字符串
+    }
+};
+
 // 本地配置接口，继承导入的配置
 interface StressTestConfig extends ImportedAdvancedStressTestConfig {
     // 代理设置
@@ -5993,7 +6005,7 @@ const StressTest: React.FC = () => {
                 }}
                 testType="stress"
                 testId={currentTestId || undefined}
-                testName={`压力测试-${testConfig.url ? new URL(testConfig.url).hostname : '未知'}`}
+                testName={`压力测试-${getHostnameFromUrl(testConfig.url) || '未知'}`}
                 onExport={handleExport}
             />
         </TestPageLayout >
