@@ -28,7 +28,7 @@ router.get('/', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.id;
     const {
-      testType,
+      type: testType,  // 前端传递的是 type 参数
       page = 1,
       limit = 20,
       search = '',
