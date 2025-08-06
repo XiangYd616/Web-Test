@@ -71,11 +71,14 @@ class TestHistoryService {
 
     params.push(limit, offset);
 
-    // 获取总数
+    // 获取总数（使用相同的WHERE条件，但不包括LIMIT和OFFSET参数）
+    const countWhereConditions = whereConditions.slice(); // 复制WHERE条件
+    const countParams = params.slice(0, -2); // 移除LIMIT和OFFSET参数
+
     const countQuery = `
       SELECT COUNT(*) as total
-      FROM test_sessions 
-      WHERE ${whereConditions.slice(0, -2).join(' AND ')}
+      FROM test_sessions
+      WHERE ${countWhereConditions.join(' AND ')}
     `;
 
     try {
@@ -83,12 +86,12 @@ class TestHistoryService {
         query: query.replace(/\s+/g, ' ').trim(),
         params,
         countQuery: countQuery.replace(/\s+/g, ' ').trim(),
-        countParams: params.slice(0, -2)
+        countParams: countParams
       });
 
       const [dataResult, countResult] = await Promise.all([
         this.db.query(query, params),
-        this.db.query(countQuery, params.slice(0, -2))
+        this.db.query(countQuery, countParams)
       ]);
 
       const total = parseInt(countResult.rows[0].total);

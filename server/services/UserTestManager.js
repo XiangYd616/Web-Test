@@ -79,11 +79,24 @@ class UserTestManager {
     });
 
     // 设置完成回调
-    testEngine.setCompletionCallback((results) => {
+    testEngine.setCompletionCallback(async (results) => {
       this.sendToUser(userId, 'test-completed', {
         testId,
         results
       });
+
+      // 🔧 保存测试结果到数据库
+      try {
+        await this.saveTestResults(userId, testId, results);
+        Logger.info(`测试结果已保存到数据库: ${userId}/${testId}`);
+      } catch (error) {
+        Logger.error(`保存测试结果失败: ${userId}/${testId}`, error);
+        // 发送保存失败通知
+        this.sendToUser(userId, 'test-save-error', {
+          testId,
+          error: error.message
+        });
+      }
 
       // 测试完成后清理实例
       this.cleanupUserTest(userId, testId);
@@ -222,6 +235,174 @@ class UserTestManager {
     this.userSockets.clear();
 
     Logger.info('用户测试管理器清理完成');
+  }
+
+  /**
+   * 保存测试结果到数据库
+   */
+  async saveTestResults(userId, testId, results) {
+    try {
+      // 导入TestHistoryService
+      const TestHistoryService = require('./TestHistoryService');
+      const dbModule = require('../config/database');
+      const testHistoryService = new TestHistoryService(dbModule);
+
+      // 根据测试类型确定保存方式
+      const testType = this.getTestTypeFromId(testId);
+
+      if (testType === 'stress') {
+        // 保存压力测试结果
+        await this.saveStressTestResults(testHistoryService, userId, testId, results);
+      } else {
+        // 保存其他类型测试结果
+        await this.saveGenericTestResults(testHistoryService, userId, testId, results, testType);
+      }
+
+      Logger.info(`测试结果保存成功: ${testId}`);
+    } catch (error) {
+      Logger.error(`保存测试结果失败: ${testId}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * 从测试ID中提取测试类型
+   */
+  getTestTypeFromId(testId) {
+    // 假设testId格式为 "stress_timestamp_random" 或类似
+    if (testId.startsWith('stress_')) return 'stress';
+    if (testId.startsWith('security_')) return 'security';
+    if (testId.startsWith('performance_')) return 'performance';
+    if (testId.startsWith('api_')) return 'api';
+    if (testId.startsWith('seo_')) return 'seo';
+    if (testId.startsWith('accessibility_')) return 'accessibility';
+    if (testId.startsWith('compatibility_')) return 'compatibility';
+
+    // 默认返回stress
+    return 'stress';
+  }
+
+  /**
+   * 保存压力测试结果
+   */
+  async saveStressTestResults(testHistoryService, userId, testId, results) {
+    // 创建主表记录
+    const testRecord = await testHistoryService.createTestRecord({
+      testName: results.testName || `压力测试 - ${new URL(results.url).hostname}`,
+      testType: 'stress',
+      url: results.url,
+      userId: userId,
+      status: 'completed',
+      config: results.config || {},
+      environment: 'production',
+      tags: ['stress', 'performance'],
+      description: `压力测试完成，总请求数: ${results.metrics?.totalRequests || 0}`
+    });
+
+    if (!testRecord.success) {
+      throw new Error('创建测试记录失败');
+    }
+
+    // 更新测试记录为完成状态
+    await testHistoryService.updateTestRecord(testRecord.data.id, {
+      status: 'completed',
+      endTime: new Date(),
+      duration: Math.floor((results.actualDuration || 0) / 1000),
+      results: results.metrics,
+      overallScore: this.calculateOverallScore(results),
+      grade: this.calculateGrade(results),
+      totalIssues: results.metrics?.errors?.length || 0,
+      criticalIssues: results.metrics?.failedRequests || 0,
+      majorIssues: 0,
+      minorIssues: 0
+    });
+
+    Logger.info(`压力测试结果已保存: ${testRecord.data.id}`);
+  }
+
+  /**
+   * 保存通用测试结果
+   */
+  async saveGenericTestResults(testHistoryService, userId, testId, results, testType) {
+    // 创建主表记录
+    const testRecord = await testHistoryService.createTestRecord({
+      testName: results.testName || `${testType}测试`,
+      testType: testType,
+      url: results.url,
+      userId: userId,
+      status: 'completed',
+      config: results.config || {},
+      environment: 'production',
+      tags: [testType],
+      description: `${testType}测试完成`
+    });
+
+    if (!testRecord.success) {
+      throw new Error('创建测试记录失败');
+    }
+
+    // 更新测试记录为完成状态
+    await testHistoryService.updateTestRecord(testRecord.data.id, {
+      status: 'completed',
+      endTime: new Date(),
+      duration: Math.floor((results.duration || 0) / 1000),
+      results: results,
+      overallScore: results.score || results.overallScore || 0,
+      grade: results.grade || 'C',
+      totalIssues: results.issues?.length || 0,
+      criticalIssues: results.criticalIssues || 0,
+      majorIssues: results.majorIssues || 0,
+      minorIssues: results.minorIssues || 0
+    });
+
+    Logger.info(`${testType}测试结果已保存: ${testRecord.data.id}`);
+  }
+
+  /**
+   * 计算总体评分
+   */
+  calculateOverallScore(results) {
+    if (!results.metrics) return 0;
+
+    const { totalRequests, successfulRequests, averageResponseTime, errorRate } = results.metrics;
+
+    let score = 100;
+
+    // 根据成功率扣分
+    const successRate = totalRequests > 0 ? (successfulRequests / totalRequests) * 100 : 0;
+    score = score * (successRate / 100);
+
+    // 根据响应时间扣分
+    if (averageResponseTime > 1000) {
+      score *= 0.8; // 响应时间超过1秒，扣20%
+    } else if (averageResponseTime > 500) {
+      score *= 0.9; // 响应时间超过500ms，扣10%
+    }
+
+    // 根据错误率扣分
+    if (errorRate > 10) {
+      score *= 0.7; // 错误率超过10%，扣30%
+    } else if (errorRate > 5) {
+      score *= 0.85; // 错误率超过5%，扣15%
+    }
+
+    return Math.max(0, Math.round(score));
+  }
+
+  /**
+   * 计算等级
+   */
+  calculateGrade(results) {
+    const score = this.calculateOverallScore(results);
+
+    if (score >= 95) return 'A+';
+    if (score >= 90) return 'A';
+    if (score >= 85) return 'B+';
+    if (score >= 80) return 'B';
+    if (score >= 75) return 'C+';
+    if (score >= 70) return 'C';
+    if (score >= 60) return 'D';
+    return 'F';
   }
 }
 
