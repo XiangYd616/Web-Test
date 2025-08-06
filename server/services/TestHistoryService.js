@@ -37,10 +37,12 @@ class TestHistoryService {
       paramIndex++;
     }
 
-    // 添加测试类型过滤条件
-    whereConditions.push(`test_type = $${paramIndex}`);
-    params.push(testType);
-    paramIndex++;
+    // 添加测试类型过滤条件（只有当testType有值时才添加）
+    if (testType) {
+      whereConditions.push(`test_type = $${paramIndex}`);
+      params.push(testType);
+      paramIndex++;
+    }
 
     // 搜索条件
     if (search) {
