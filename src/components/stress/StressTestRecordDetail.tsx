@@ -147,7 +147,7 @@ const StressTestRecordDetail: React.FC<StressTestRecordDetailProps> = ({
           </div>
           <div>
             <h2 className="text-xl font-semibold text-white mb-1">
-              {record.testName}
+              {record.test_name}
             </h2>
             <div className="flex items-center gap-3">
               <div className={`flex items-center gap-2 px-3 py-1 rounded-full border text-sm font-medium ${getStatusStyle(record.status)}`}>

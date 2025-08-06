@@ -173,9 +173,9 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = React.memo((
     }
 
     // 最后尝试计算时间差（仅对已完成的测试）
-    if ((!seconds || seconds <= 0) && record.startTime && record.endTime) {
-      const start = new Date(record.startTime).getTime();
-      const end = new Date(record.endTime).getTime();
+    if ((!seconds || seconds <= 0) && record.start_time && record.end_time) {
+      const start = new Date(record.start_time).getTime();
+      const end = new Date(record.end_time).getTime();
       seconds = Math.floor((end - start) / 1000);
     }
 
@@ -268,7 +268,7 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = React.memo((
   const formattedDuration = React.useMemo(() => record ? formatDuration(record) : '-', [record]);
 
   // 优化格式化的日期计算
-  const formattedDate = React.useMemo(() => record ? formatDate(record.startTime || record.createdAt) : '-', [record?.startTime, record?.createdAt]);
+  const formattedDate = React.useMemo(() => record ? formatDate(record.start_time || record.created_at) : '-', [record?.start_time, record?.created_at]);
 
   // 优化标签页切换处理函数，添加防抖避免快速切换
   const handleTabChange = React.useCallback((tabId: string) => {
@@ -353,12 +353,12 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = React.memo((
                             {calculateTestCompletion(record)}%
                           </div>
                         )}
-                        {record.endTime && (
+                        {record.end_time && (
                           <div className="text-xs opacity-75 mt-1">
                             <span className="font-medium">
                               {record.status === 'failed' ? '失败时间：' : '取消时间：'}
                             </span>
-                            {formatDateTime(record.endTime)}
+                            {formatDateTime(record.end_time)}
                           </div>
                         )}
                       </div>
@@ -608,7 +608,7 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = React.memo((
               {statusInfo.icon}
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-white">{record.testName}</h2>
+              <h2 className="text-xl font-semibold text-white">{record.test_name}</h2>
               <p className="text-gray-400 text-sm">{record.url}</p>
             </div>
           </div>

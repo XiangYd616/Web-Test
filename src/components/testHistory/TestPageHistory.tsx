@@ -3,10 +3,10 @@
  * 基于压力测试历史的设计，适配所有测试类型
  */
 
-import { BarChart3, Calendar, Eye, MoreHorizontal, RefreshCw, Search, Star, Trash2 } from 'lucide-react';
+import { BarChart3, Calendar, Eye, MoreHorizontal, RefreshCw, Search, Star } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface TestRecord {
   id: string;
@@ -35,7 +35,7 @@ export const TestPageHistory: React.FC<TestPageHistoryProps> = ({
 }) => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  
+
   // 状态管理
   const [records, setRecords] = useState<TestRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,7 +88,7 @@ export const TestPageHistory: React.FC<TestPageHistoryProps> = ({
       }
 
       const data = await response.json();
-      
+
       if (data.success) {
         setRecords(data.data.tests || []);
         setTotalRecords(data.data.pagination?.total || 0);
@@ -155,7 +155,7 @@ export const TestPageHistory: React.FC<TestPageHistoryProps> = ({
         activeTab: 'test',
         prefilledConfig: {
           url: record.url,
-          testName: `${record.testName} - 重新运行`
+          testName: `${record.test_name} - 重新运行`
         }
       }
     });
@@ -308,7 +308,7 @@ export const TestPageHistory: React.FC<TestPageHistoryProps> = ({
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
                         <h3 className="text-lg font-medium text-white truncate">
-                          {record.testName}
+                          {record.test_name}
                         </h3>
                         <p className="text-sm text-gray-400 truncate mt-1">
                           {record.url}
@@ -316,15 +316,15 @@ export const TestPageHistory: React.FC<TestPageHistoryProps> = ({
                         <div className="flex items-center gap-4 mt-2 text-sm text-gray-400">
                           <span className="flex items-center gap-1">
                             <Calendar className="w-4 h-4" />
-                            {formatTime(record.createdAt)}
+                            {formatTime(record.created_at)}
                           </span>
                           {record.duration && (
                             <span>耗时: {Math.round(record.duration)}秒</span>
                           )}
-                          {record.overallScore && (
+                          {record.overall_score && (
                             <span className="flex items-center gap-1 text-yellow-400">
                               <Star className="w-4 h-4" />
-                              {record.overallScore}分
+                              {record.overall_score}分
                             </span>
                           )}
                         </div>
@@ -346,7 +346,7 @@ export const TestPageHistory: React.FC<TestPageHistoryProps> = ({
                     >
                       <Eye className="w-4 h-4" />
                     </button>
-                    
+
                     {record.status === 'completed' && (
                       <button
                         onClick={() => handleRerunTest(record)}
@@ -376,7 +376,7 @@ export const TestPageHistory: React.FC<TestPageHistoryProps> = ({
             <div className="text-sm text-gray-400">
               显示 {Math.min((currentPage - 1) * pageSize + 1, totalRecords)} - {Math.min(currentPage * pageSize, totalRecords)} 条，共 {totalRecords} 条记录
             </div>
-            
+
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
@@ -385,11 +385,11 @@ export const TestPageHistory: React.FC<TestPageHistoryProps> = ({
               >
                 上一页
               </button>
-              
+
               <span className="px-3 py-2 text-sm text-gray-300">
                 第 {currentPage} 页，共 {Math.ceil(totalRecords / pageSize)} 页
               </span>
-              
+
               <button
                 onClick={() => setCurrentPage(prev => prev + 1)}
                 disabled={currentPage >= Math.ceil(totalRecords / pageSize)}
