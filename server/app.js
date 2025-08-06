@@ -140,8 +140,9 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // API路由
 app.use('/api/auth', authRoutes);
+// 🔧 修复：更具体的路由必须在更通用的路由之前注册
+app.use('/api/test/history', testHistoryRoutes); // 新的测试历史API - 必须在 /api/test 之前
 app.use('/api/test', testRoutes);
-app.use('/api/test/history', testHistoryRoutes); // 新的测试历史API
 app.use('/api/seo', seoRoutes); // SEO测试API - 解决CORS问题
 app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
@@ -264,11 +265,9 @@ const startServer = async () => {
     await connectDB();
     console.log('✅ 数据库连接成功');
 
-    // 初始化测试历史服务
-    const TestHistoryService = require('./services/TestHistoryService');
-    const { pool } = require('./config/database');
-    global.testHistoryService = new TestHistoryService(pool);
-    console.log('✅ 测试历史服务初始化成功');
+    // 🔧 移除全局测试历史服务，改为各模块使用本地实例
+    // 这样可以避免全局状态的复杂性，让每个模块都有独立的服务实例
+    console.log('✅ 测试历史服务将在各模块中独立初始化');
 
     // 初始化地理位置自动更新服务
     const geoUpdateService = require('./services/geoUpdateService');
@@ -335,35 +334,31 @@ function setupWebSocketHandlers(io) {
       timestamp: new Date().toISOString()
     });
 
-    // 加入压力测试房间
-    socket.on('join-stress-test', (testId) => {
-      console.log(`🔥🔥🔥 收到 join-stress-test 事件 🔥🔥🔥`, { testId, socketId: socket.id });
+    // 🔧 重构：简化的用户测试连接
+    socket.on('join-stress-test', (data) => {
+      const { testId, userId } = data;
+      console.log(`🔥 用户连接测试: ${userId}/${testId}`, { socketId: socket.id });
 
-      const roomName = `stress-test-${testId}`;
-      socket.join(roomName);
-      console.log(`📊📊📊 客户端 ${socket.id} 加入压力测试房间: ${testId} 📊📊📊`);
+      // 🔧 重构：注册用户WebSocket连接
+      const userTestManager = require('./services/UserTestManager');
+      userTestManager.registerUserSocket(userId, socket);
 
-      // 检查房间中的客户端数量
-      const room = io.sockets.adapter.rooms.get(roomName);
-      const clientCount = room ? room.size : 0;
-      console.log(`📊 房间 ${roomName} 当前客户端数量: ${clientCount}`);
+      // 存储userId到socket对象，用于断开连接时清理
+      socket.userId = userId;
 
-      // 发送房间加入确认
+      // 发送连接确认
       const confirmData = {
         testId,
-        roomName: roomName,
+        userId,
         clientId: socket.id,
-        clientCount: clientCount,
         timestamp: Date.now()
       };
 
-      console.log(`🚀🚀🚀 准备发送房间加入确认 🚀🚀🚀`, confirmData);
       socket.emit('room-joined', confirmData);
-      console.log(`✅✅✅ 房间加入确认已发送给客户端 ${socket.id} ✅✅✅`);
+      console.log(`✅ 用户测试连接确认: ${userId}/${testId}`);
 
-      // 🆕 检查是否有正在运行或已完成的测试，发送当前状态
-      // 使用全局的压力测试引擎实例
-      const currentTest = global.stressTestEngine ? global.stressTestEngine.getTestStatus(testId) : null;
+      // 🔧 重构：检查用户测试状态
+      const currentTest = userTestManager.getUserTestStatus(userId, testId);
 
       if (currentTest) {
         console.log(`📤 向新加入的客户端发送当前测试状态:`, {
@@ -489,6 +484,14 @@ function setupWebSocketHandlers(io) {
     // 处理断开连接
     socket.on('disconnect', () => {
       console.log(`🔌 WebSocket客户端断开连接: ${socket.id}`);
+
+      // 🔧 重构：清理用户WebSocket连接
+      // 注意：这里我们不知道具体的userId，所以需要在连接时存储
+      // 实际实现中可以在socket对象上存储userId
+      if (socket.userId) {
+        const userTestManager = require('./services/UserTestManager');
+        userTestManager.unregisterUserSocket(socket.userId);
+      }
     });
   });
 

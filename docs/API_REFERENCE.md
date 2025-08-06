@@ -186,32 +186,121 @@ Authorization: Bearer <token>
 
 ### 获取测试历史
 ```http
-GET /api/test-history?page=1&limit=20&type=website
+GET /api/test/history?page=1&limit=20&testType=security
+Authorization: Bearer <token>
+```
+
+**查询参数：**
+- `page` (可选): 页码，默认为1
+- `limit` (可选): 每页记录数，默认为20
+- `testType` (可选): 测试类型 (stress, security, api, performance, compatibility, seo, accessibility)
+- `status` (可选): 测试状态 (pending, running, completed, failed, cancelled)
+- `search` (可选): 搜索关键词
+- `dateFrom` (可选): 开始日期
+- `dateTo` (可选): 结束日期
+
+**响应示例：**
+```json
+{
+  "success": true,
+  "data": {
+    "tests": [
+      {
+        "id": "uuid",
+        "testName": "安全测试 - example.com",
+        "testType": "security",
+        "url": "https://example.com",
+        "status": "completed",
+        "overallScore": 85.5,
+        "grade": "B+",
+        "duration": 120,
+        "totalIssues": 5,
+        "criticalIssues": 1,
+        "majorIssues": 2,
+        "minorIssues": 2,
+        "environment": "production",
+        "tags": ["security", "automated"],
+        "description": "安全评分: 85.5/100, 等级: B+",
+        "startTime": "2025-08-06T10:00:00Z",
+        "endTime": "2025-08-06T10:02:00Z",
+        "createdAt": "2025-08-06T10:00:00Z",
+        "updatedAt": "2025-08-06T10:02:00Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 20,
+      "total": 100,
+      "totalPages": 5,
+      "hasNext": true,
+      "hasPrev": false
+    }
+  }
+}
+```
+
+### 获取测试详情
+```http
+GET /api/test/{testId}
+Authorization: Bearer <token>
+```
+
+**响应示例（安全测试）：**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "testName": "安全测试 - example.com",
+    "testType": "security",
+    "url": "https://example.com",
+    "status": "completed",
+    "overallScore": 85.5,
+    "grade": "B+",
+    "duration": 120,
+    "totalIssues": 5,
+    "criticalIssues": 1,
+    "majorIssues": 2,
+    "minorIssues": 2,
+    "environment": "production",
+    "tags": ["security", "automated"],
+    "description": "安全评分: 85.5/100, 等级: B+",
+    "config": {
+      "level": "standard",
+      "timeout": 30000
+    },
+    "securityDetails": {
+      "securityScore": 85.5,
+      "sslScore": 90.0,
+      "vulnerabilitiesTotal": 5,
+      "vulnerabilitiesCritical": 1,
+      "vulnerabilitiesHigh": 2,
+      "sqlInjectionFound": 0,
+      "xssVulnerabilities": 1,
+      "csrfVulnerabilities": 1,
+      "httpsEnforced": true,
+      "hstsEnabled": true,
+      "csrfProtection": true
+    },
+    "startTime": "2025-08-06T10:00:00Z",
+    "endTime": "2025-08-06T10:02:00Z",
+    "createdAt": "2025-08-06T10:00:00Z",
+    "updatedAt": "2025-08-06T10:02:00Z"
+  }
+}
+```
+
+### 删除测试记录
+```http
+DELETE /api/test/{testId}
 Authorization: Bearer <token>
 ```
 
 **响应示例：**
 ```json
 {
-  "tests": [
-    {
-      "id": "uuid",
-      "testName": "网站综合测试",
-      "testType": "website",
-      "url": "https://example.com",
-      "status": "completed",
-      "overallScore": 85.5,
-      "startTime": "2025-06-22T10:00:00Z",
-      "endTime": "2025-06-22T10:05:00Z",
-      "results": {...}
-    }
-  ],
-  "pagination": {
-    "total": 100,
-    "page": 1,
-    "limit": 20,
-    "pages": 5
-  }
+  "success": true,
+  "message": "测试结果已删除"
 }
 ```
 
@@ -232,7 +321,7 @@ Content-Type: application/json
   },
   "limit": 50,
   "offset": 0,
-  "sortBy": "createdAt",
+  "sortBy": "created_at",
   "sortOrder": "desc"
 }
 ```

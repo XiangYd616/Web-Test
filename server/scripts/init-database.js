@@ -93,7 +93,7 @@ async function verifyTables(pool) {
   const expectedTables = [
     'users',
     'user_preferences',
-    'test_results',
+    'test_sessions',
     'activity_logs',
     'monitoring_sites',
     'monitoring_results',

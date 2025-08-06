@@ -13,16 +13,18 @@ const STATIC_ASSETS = [
   // 添加其他静态资源
 ];
 
-// 需要缓存的 API 路径
+// 🚨 重要：测试工具不应该缓存API请求！
+// 测试工具需要实时数据，缓存会影响测试结果的准确性
+// 只缓存静态资源，完全不拦截API请求
 const API_CACHE_PATTERNS = [
-  /^\/api\/.*$/,
+  // 空数组 - 不缓存任何API请求
 ];
 
 // 检测是否为开发环境
 function isDevelopment() {
   return location.hostname === 'localhost' ||
-         location.hostname === '127.0.0.1' ||
-         location.port === '5174';
+    location.hostname === '127.0.0.1' ||
+    location.port === '5174';
 }
 
 // 安装事件 - 缓存静态资源
@@ -57,15 +59,15 @@ self.addEventListener('install', (event) => {
 // 激活事件 - 清理旧缓存
 self.addEventListener('activate', (event) => {
   console.log('[SW] Activating Service Worker');
-  
+
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
-            if (cacheName !== STATIC_CACHE_NAME && 
-                cacheName !== DYNAMIC_CACHE_NAME &&
-                cacheName.startsWith('test-web-app-')) {
+            if (cacheName !== STATIC_CACHE_NAME &&
+              cacheName !== DYNAMIC_CACHE_NAME &&
+              cacheName.startsWith('test-web-app-')) {
               console.log('[SW] Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             }
@@ -91,19 +93,26 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 开发环境特殊处理 - 大幅减少拦截
+  // 🚨 重要：测试工具需要实时网络数据，完全不拦截API请求
+  // 测试工具的核心功能依赖实时网络请求，缓存会影响测试结果准确性
+  if (isAPIRequest(request)) {
+    return; // 让浏览器直接处理所有API请求，无论开发还是生产环境
+  }
+
+  // 开发环境特殊处理 - 只处理静态资源
   if (isDevelopment()) {
-    // 在开发环境中，只处理明确需要缓存的静态资源
-    if (!isStaticAsset(request) ||
-        url.pathname.includes('/@vite/') ||
-        url.pathname.includes('/@fs/') ||
-        url.pathname.includes('/@id/') ||
-        url.pathname.includes('/__vite_ping') ||
-        url.pathname.includes('/node_modules/') ||
-        url.pathname.includes('/src/') ||
-        url.searchParams.has('import') ||
-        url.searchParams.has('t') ||
-        request.headers.get('accept')?.includes('text/x-component')) {
+    // 在开发环境中，跳过API请求和开发相关的请求
+    if (isAPIRequest(request) ||
+      !isStaticAsset(request) ||
+      url.pathname.includes('/@vite/') ||
+      url.pathname.includes('/@fs/') ||
+      url.pathname.includes('/@id/') ||
+      url.pathname.includes('/__vite_ping') ||
+      url.pathname.includes('/node_modules/') ||
+      url.pathname.includes('/src/') ||
+      url.searchParams.has('import') ||
+      url.searchParams.has('t') ||
+      request.headers.get('accept')?.includes('text/x-component')) {
       return; // 让浏览器直接处理这些请求
     }
   }
@@ -120,11 +129,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 处理 API 请求
-  if (isAPIRequest(request)) {
-    event.respondWith(handleAPIRequest(request));
-    return;
-  }
+  // 🚨 API请求已在前面完全跳过，这里不会执行到
+  // if (isAPIRequest(request)) {
+  //   event.respondWith(handleAPIRequest(request));
+  //   return;
+  // }
 
   // 其他请求使用网络优先策略
   event.respondWith(handleOtherRequest(request));
@@ -142,25 +151,25 @@ async function handleNavigationRequest(request) {
 
     // 缓存未命中，从网络获取
     const networkResponse = await fetch(request);
-    
+
     // 缓存成功的响应
     if (networkResponse.ok) {
       const cache = await caches.open(DYNAMIC_CACHE_NAME);
       cache.put(request, networkResponse.clone());
     }
-    
+
     return networkResponse;
   } catch (error) {
     console.error('[SW] Navigation request failed:', error);
-    
+
     // 返回离线页面或缓存的首页
-    const fallbackResponse = await caches.match('/') || 
-                             await caches.match('/index.html');
-    
+    const fallbackResponse = await caches.match('/') ||
+      await caches.match('/index.html');
+
     if (fallbackResponse) {
       return fallbackResponse;
     }
-    
+
     // 返回基本的离线页面
     return new Response(`
       <!DOCTYPE html>
@@ -226,12 +235,12 @@ async function handleStaticAssetRequest(request) {
     }
 
     const networkResponse = await fetch(request);
-    
+
     if (networkResponse.ok) {
       const cache = await caches.open(STATIC_CACHE_NAME);
       cache.put(request, networkResponse.clone());
     }
-    
+
     return networkResponse;
   } catch (error) {
     console.error('[SW] Static asset request failed:', error);
@@ -243,17 +252,17 @@ async function handleStaticAssetRequest(request) {
 async function handleAPIRequest(request) {
   try {
     const networkResponse = await fetch(request);
-    
+
     // 只缓存 GET 请求的成功响应
     if (request.method === 'GET' && networkResponse.ok) {
       const cache = await caches.open(DYNAMIC_CACHE_NAME);
       cache.put(request, networkResponse.clone());
     }
-    
+
     return networkResponse;
   } catch (error) {
     console.error('[SW] API request failed, trying cache:', error);
-    
+
     // 网络失败，尝试从缓存获取
     if (request.method === 'GET') {
       const cachedResponse = await caches.match(request);
@@ -262,7 +271,7 @@ async function handleAPIRequest(request) {
         return cachedResponse;
       }
     }
-    
+
     throw error;
   }
 }
@@ -279,9 +288,9 @@ async function handleOtherRequest(request) {
       // 对于开发环境的特殊请求，返回一个简单的响应而不是抛出错误
       const url = new URL(request.url);
       if (url.pathname.includes('.tsx') ||
-          url.pathname.includes('.ts') ||
-          url.pathname.includes('.jsx') ||
-          url.pathname.includes('.js')) {
+        url.pathname.includes('.ts') ||
+        url.pathname.includes('.jsx') ||
+        url.pathname.includes('.js')) {
         return new Response('// Development mode - file not found', {
           status: 404,
           headers: { 'Content-Type': 'application/javascript' }
@@ -310,7 +319,7 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
-  
+
   if (event.data && event.data.type === 'GET_VERSION') {
     event.ports[0].postMessage({ version: CACHE_NAME });
   }

@@ -95,17 +95,23 @@ export interface TestHistory {
   testName: string;
   testType: TestType;
   url: string;
-  status: 'completed' | 'failed' | 'cancelled';
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
   score: number;
-  duration: number;
+  grade?: string;
+  duration: number; // 秒
   startTime: string;
   endTime: string;
   userId?: string;
-  reportPath?: string;
-  reportGenerated?: boolean;
-  metrics: Record<string, any>;
-  errors: string[];
-  warnings: string[];
+  totalIssues?: number;
+  criticalIssues?: number;
+  majorIssues?: number;
+  minorIssues?: number;
+  warnings?: number;
+  environment?: string;
+  tags?: string[];
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface TestFilter {

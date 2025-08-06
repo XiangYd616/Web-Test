@@ -230,11 +230,11 @@ class DataManagementService {
       config: this.parseJsonField(record.config),
       results: this.parseJsonField(record.results),
       metadata: this.parseJsonField(record.metadata),
-      // 格式化时间
-      createdAt: record.created_at,
-      updatedAt: record.updated_at,
-      startTime: record.start_time,
-      endTime: record.end_time
+      // 保持数据库字段名
+      created_at: record.created_at,
+      updated_at: record.updated_at,
+      start_time: record.start_time,
+      end_time: record.end_time
     };
   }
 

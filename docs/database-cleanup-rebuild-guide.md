@@ -22,7 +22,7 @@ psql -d your_database -f server/scripts/cleanup-all-old-database-files.sql
 ```
 
 这个脚本会删除：
-- ❌ 所有旧的测试相关表 (`test_history`, `test_results`, 等)
+- ❌ 所有旧的测试相关表（如果存在的话，新架构使用 `test_sessions` 和详情表）
 - ❌ 所有监控相关表 (`monitoring_sites`, `monitoring_results`, 等)
 - ❌ 所有数据管理相关表 (`data_tasks`, `export_tasks`, 等)
 - ❌ 所有系统配置相关表 (`system_settings`, `app_settings`, 等)

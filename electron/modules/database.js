@@ -15,27 +15,27 @@ class LocalDatabase {
       // 获取用户数据目录
       const userDataPath = app.getPath('userData');
       const dbDir = path.join(userDataPath, 'database');
-      
+
       // 确保数据库目录存在
       await fs.ensureDir(dbDir);
-      
+
       this.dbPath = path.join(dbDir, 'testweb.db');
-      
+
       // 创建数据库连接
       this.db = new Database(this.dbPath);
-      
+
       // 设置数据库选项
       this.db.pragma('journal_mode = WAL');
       this.db.pragma('synchronous = NORMAL');
       this.db.pragma('cache_size = 1000000');
       this.db.pragma('temp_store = memory');
-      
+
       // 创建表结构
       await this.createTables();
-      
+
       this.isInitialized = true;
       console.log('本地数据库初始化成功:', this.dbPath);
-      
+
       return { success: true, path: this.dbPath };
     } catch (error) {
       console.error('数据库初始化失败:', error);
@@ -59,25 +59,58 @@ class LocalDatabase {
         last_login DATETIME,
         preferences TEXT DEFAULT '{}'
       )`,
-      
-      // 测试结果表
-      `CREATE TABLE IF NOT EXISTS test_results (
+
+      // 测试会话主表
+      `CREATE TABLE IF NOT EXISTS test_sessions (
         id TEXT PRIMARY KEY,
         user_id TEXT NOT NULL,
+        test_name TEXT NOT NULL,
         test_type TEXT NOT NULL,
-        url TEXT NOT NULL,
-        config TEXT DEFAULT '{}',
+        url TEXT,
         status TEXT DEFAULT 'pending',
-        results TEXT DEFAULT '{}',
-        error_message TEXT,
-        duration REAL,
-        response_time REAL,
+        start_time DATETIME,
+        end_time DATETIME,
+        duration INTEGER, -- 秒
+        overall_score REAL,
+        grade TEXT,
+        total_issues INTEGER DEFAULT 0,
+        critical_issues INTEGER DEFAULT 0,
+        major_issues INTEGER DEFAULT 0,
+        minor_issues INTEGER DEFAULT 0,
+        warnings INTEGER DEFAULT 0,
+        config TEXT DEFAULT '{}',
+        environment TEXT DEFAULT 'production',
+        tags TEXT DEFAULT '[]',
+        description TEXT,
+        notes TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        completed_at DATETIME,
+        deleted_at DATETIME,
         FOREIGN KEY (user_id) REFERENCES users (id)
       )`,
-      
+
+      // 安全测试详情表
+      `CREATE TABLE IF NOT EXISTS security_test_details (
+        session_id TEXT PRIMARY KEY,
+        security_score REAL,
+        ssl_score REAL,
+        header_security_score REAL,
+        authentication_score REAL,
+        vulnerabilities_total INTEGER DEFAULT 0,
+        vulnerabilities_critical INTEGER DEFAULT 0,
+        vulnerabilities_high INTEGER DEFAULT 0,
+        vulnerabilities_medium INTEGER DEFAULT 0,
+        vulnerabilities_low INTEGER DEFAULT 0,
+        sql_injection_found INTEGER DEFAULT 0,
+        xss_vulnerabilities INTEGER DEFAULT 0,
+        csrf_vulnerabilities INTEGER DEFAULT 0,
+        https_enforced BOOLEAN DEFAULT 0,
+        hsts_enabled BOOLEAN DEFAULT 0,
+        csrf_protection BOOLEAN DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (session_id) REFERENCES test_sessions (id) ON DELETE CASCADE
+      )`,
+
       // 测试模板表
       `CREATE TABLE IF NOT EXISTS test_templates (
         id TEXT PRIMARY KEY,
@@ -92,7 +125,7 @@ class LocalDatabase {
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users (id)
       )`,
-      
+
       // 活动日志表
       `CREATE TABLE IF NOT EXISTS activity_logs (
         id TEXT PRIMARY KEY,
@@ -107,7 +140,7 @@ class LocalDatabase {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users (id)
       )`,
-      
+
       // 系统配置表
       `CREATE TABLE IF NOT EXISTS system_config (
         key TEXT PRIMARY KEY,
@@ -116,7 +149,7 @@ class LocalDatabase {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )`,
-      
+
       // 报告表
       `CREATE TABLE IF NOT EXISTS reports (
         id TEXT PRIMARY KEY,

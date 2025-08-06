@@ -18,7 +18,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
       limit: 50
     },
     sort: {
-      field: 'createdAt',
+      field: 'created_at',
       order: 'desc'
     }
   });
@@ -306,7 +306,7 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
                       <label htmlFor="sort-field-select" className="block text-sm font-medium text-gray-300 mb-2">排序方式</label>
                       <select
                         id="sort-field-select"
-                        value={query.sort?.field || 'createdAt'}
+                        value={query.sort?.field || 'created_at'}
                         onChange={(e) => handleFilterChange({
                           sort: {
                             field: e.target.value,
@@ -316,10 +316,10 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
                         className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-3 py-2"
                         aria-label="选择排序方式"
                       >
-                        <option value="createdAt">创建时间</option>
-                        <option value="updatedAt">更新时间</option>
-                        <option value="type">数据类型</option>
-                        <option value="size">文件大小</option>
+                        <option value="created_at">创建时间</option>
+                        <option value="updated_at">更新时间</option>
+                        <option value="test_type">数据类型</option>
+                        <option value="status">状态</option>
                       </select>
                     </div>
 

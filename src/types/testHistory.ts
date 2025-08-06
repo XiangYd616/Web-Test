@@ -50,13 +50,95 @@ export interface TestSession {
   updatedAt: string;
   startTime?: string;
   endTime?: string;
-  duration?: number;
+  duration?: number; // 秒
   config?: any;
   overallScore?: number;
-  performanceGrade?: string;
+  grade?: string; // A+, A, B+, B, C+, C, D, F
+  totalIssues?: number;
+  criticalIssues?: number;
+  majorIssues?: number;
+  minorIssues?: number;
+  warnings?: number;
   environment: string;
   tags: string[];
+  description?: string;
+  notes?: string;
   deletedAt?: string;
+}
+
+// 安全测试详情
+export interface SecurityTestDetails {
+  sessionId: string;
+  securityScore?: number;
+  sslScore?: number;
+  headerSecurityScore?: number;
+  authenticationScore?: number;
+  vulnerabilitiesTotal?: number;
+  vulnerabilitiesCritical?: number;
+  vulnerabilitiesHigh?: number;
+  vulnerabilitiesMedium?: number;
+  vulnerabilitiesLow?: number;
+  sqlInjectionFound?: number;
+  xssVulnerabilities?: number;
+  csrfVulnerabilities?: number;
+  httpsEnforced?: boolean;
+  hstsEnabled?: boolean;
+  csrfProtection?: boolean;
+}
+
+// 性能测试详情
+export interface PerformanceTestDetails {
+  sessionId: string;
+  firstContentfulPaint?: number;
+  largestContentfulPaint?: number;
+  firstInputDelay?: number;
+  cumulativeLayoutShift?: number;
+  timeToInteractive?: number;
+  speedIndex?: number;
+  totalBlockingTime?: number;
+  domContentLoaded?: number;
+  loadEventEnd?: number;
+  totalPageSize?: number;
+  imageSize?: number;
+  cssSize?: number;
+  jsSize?: number;
+  fontSize?: number;
+  dnsLookupTime?: number;
+  tcpConnectTime?: number;
+  sslHandshakeTime?: number;
+  serverResponseTime?: number;
+}
+
+// 压力测试详情
+export interface StressTestDetails {
+  sessionId: string;
+  concurrentUsers?: number;
+  rampUpTime?: number;
+  testDuration?: number;
+  thinkTime?: number;
+  tpsPeak?: number;
+  tpsAverage?: number;
+  totalRequests?: number;
+  successfulRequests?: number;
+  failedRequests?: number;
+  responseTimeAvg?: number;
+  responseTimeMin?: number;
+  responseTimeMax?: number;
+  responseTimeP50?: number;
+  responseTimeP90?: number;
+  responseTimeP95?: number;
+  responseTimeP99?: number;
+  errorRate?: number;
+  timeoutErrors?: number;
+  connectionErrors?: number;
+  serverErrors?: number;
+  clientErrors?: number;
+  cpuUsageAvg?: number;
+  cpuUsageMax?: number;
+  memoryUsageAvg?: number;
+  memoryUsageMax?: number;
+  bytesSent?: number;
+  bytesReceived?: number;
 }
 
 export interface TestHistoryQuery {
@@ -84,6 +166,20 @@ export interface TestHistoryResponse {
       hasPrev: boolean;
     };
   };
+}
+
+// 详细测试结果（包含详情数据）
+export interface DetailedTestResult extends TestSession {
+  securityDetails?: SecurityTestDetails;
+  performanceDetails?: PerformanceTestDetails;
+  stressDetails?: StressTestDetails;
+  // 可以根据需要添加其他测试类型的详情
+}
+
+// 测试详情响应
+export interface TestDetailsResponse {
+  success: boolean;
+  data: DetailedTestResult;
 }
 
 export interface TestStatistics {

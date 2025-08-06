@@ -25,9 +25,21 @@ class TestHistoryService {
     } = options;
 
     const offset = (page - 1) * limit;
-    let whereConditions = ['user_id = $1', 'test_type = $2', 'deleted_at IS NULL'];
-    let params = [userId, testType];
-    let paramIndex = 3;
+    let whereConditions = ['deleted_at IS NULL'];
+    let params = [];
+    let paramIndex = 1;
+
+    // 如果有用户ID，添加用户过滤条件
+    if (userId) {
+      whereConditions.push(`user_id = $${paramIndex}`);
+      params.push(userId);
+      paramIndex++;
+    }
+
+    // 添加测试类型过滤条件
+    whereConditions.push(`test_type = $${paramIndex}`);
+    params.push(testType);
+    paramIndex++;
 
     // 搜索条件
     if (search) {
@@ -66,6 +78,13 @@ class TestHistoryService {
     `;
 
     try {
+      console.log('🔍 [TestHistoryService] 执行查询:', {
+        query: query.replace(/\s+/g, ' ').trim(),
+        params,
+        countQuery: countQuery.replace(/\s+/g, ' ').trim(),
+        countParams: params.slice(0, -2)
+      });
+
       const [dataResult, countResult] = await Promise.all([
         this.db.query(query, params),
         this.db.query(countQuery, params.slice(0, -2))
@@ -89,10 +108,18 @@ class TestHistoryService {
         }
       };
     } catch (error) {
-      console.error('获取测试历史失败:', error);
+      console.error('❌ [TestHistoryService] 获取测试历史失败:', {
+        error: error.message,
+        stack: error.stack,
+        code: error.code,
+        detail: error.detail,
+        query: query?.replace(/\s+/g, ' ').trim(),
+        params
+      });
       return {
         success: false,
-        error: '获取测试历史失败'
+        error: '获取测试历史失败',
+        details: error.message
       };
     }
   }
@@ -133,7 +160,7 @@ class TestHistoryService {
 
     try {
       const result = await this.db.query(query, [userId, limit, offset]);
-      
+
       return {
         success: true,
         data: {
@@ -167,7 +194,7 @@ class TestHistoryService {
 
     try {
       const sessionResult = await this.db.query(sessionQuery, [sessionId, userId]);
-      
+
       if (sessionResult.rows.length === 0) {
         return {
           success: false,
@@ -227,6 +254,74 @@ class TestHistoryService {
         success: false,
         error: '获取测试详情失败'
       };
+    }
+  }
+
+  /**
+   * 创建通用测试记录（用于前端API调用）
+   */
+  async createTestRecord(testData) {
+    const {
+      testName,
+      testType,
+      url,
+      userId,
+      config = {},
+      status = 'pending',
+      environment = 'production',
+      tags = [],
+      description = ''
+    } = testData;
+
+    // 验证必需字段
+    if (!testName || !testType || !userId) {
+      throw new Error('缺少必需字段: testName, testType, userId');
+    }
+
+    // 验证测试类型
+    const validTestTypes = ['stress', 'security', 'api', 'performance', 'compatibility', 'seo', 'accessibility'];
+    if (!validTestTypes.includes(testType)) {
+      throw new Error(`无效的测试类型: ${testType}`);
+    }
+
+    try {
+      const sessionId = `${testType}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      // 插入主表记录
+      const insertQuery = `
+        INSERT INTO test_sessions (
+          id, user_id, test_name, test_type, url, status, start_time,
+          config, environment, tags, description, created_at, updated_at
+        ) VALUES (
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
+        ) RETURNING *
+      `;
+
+      const values = [
+        sessionId,
+        userId,
+        testName,
+        testType,
+        url || null,
+        status,
+        new Date(),
+        JSON.stringify(config),
+        environment,
+        tags,
+        description,
+        new Date(),
+        new Date()
+      ];
+
+      const result = await this.db.query(insertQuery, values);
+
+      return {
+        success: true,
+        data: this.formatTestRecord(result.rows[0])
+      };
+    } catch (error) {
+      console.error('创建测试记录失败:', error);
+      throw new Error(`创建测试记录失败: ${error.message}`);
     }
   }
 
@@ -292,7 +387,7 @@ class TestHistoryService {
 
     try {
       const checkResult = await this.db.query(checkQuery, [sessionId, userId]);
-      
+
       if (checkResult.rows.length === 0) {
         return {
           success: false,
@@ -361,6 +456,40 @@ class TestHistoryService {
   }
 
   /**
+   * 格式化测试记录
+   */
+  formatTestRecord(row) {
+    if (!row) return null;
+
+    return {
+      id: row.id,
+      testName: row.test_name,
+      testType: row.test_type,
+      url: row.url,
+      status: row.status,
+      userId: row.user_id,
+      startTime: row.start_time,
+      endTime: row.end_time,
+      duration: row.duration,
+      overallScore: row.overall_score,
+      grade: row.grade,
+      totalIssues: row.total_issues,
+      criticalIssues: row.critical_issues,
+      majorIssues: row.major_issues,
+      minorIssues: row.minor_issues,
+      warnings: row.warnings,
+      config: typeof row.config === 'string' ? JSON.parse(row.config) : row.config,
+      environment: row.environment,
+      tags: Array.isArray(row.tags) ? row.tags : (row.tags ? JSON.parse(row.tags) : []),
+      description: row.description,
+      notes: row.notes,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      deletedAt: row.deleted_at
+    };
+  }
+
+  /**
    * 获取测试统计信息
    */
   async getTestStatistics(userId, timeRange = 30) {
@@ -382,7 +511,7 @@ class TestHistoryService {
 
     try {
       const result = await this.db.query(query, [userId]);
-      
+
       return {
         success: true,
         data: result.rows

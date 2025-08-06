@@ -133,7 +133,7 @@ const initializeTables = async () => {
       SELECT COUNT(*) as count
       FROM information_schema.tables
       WHERE table_schema = 'public'
-      AND table_name IN ('users', 'test_results', 'monitoring_sites')
+      AND table_name IN ('users', 'test_sessions', 'monitoring_sites')
     `);
 
     const tableCount = parseInt(tablesResult.rows[0].count);

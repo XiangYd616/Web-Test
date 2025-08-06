@@ -35,35 +35,149 @@ CREATE INDEX idx_users_role ON users(role);
 CREATE INDEX idx_users_status ON users(status);
 ```
 
-#### 2. 测试历史表 (test_history)
+#### 2. 测试会话主表 (test_sessions)
 ```sql
-CREATE TABLE test_history (
+CREATE TABLE test_sessions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     test_name VARCHAR(255) NOT NULL,
-    test_type VARCHAR(100) NOT NULL,
-    url TEXT NOT NULL,
-    config JSONB DEFAULT '{}',
-    status VARCHAR(50) DEFAULT 'pending',
-    start_time TIMESTAMP DEFAULT NOW(),
+    test_type VARCHAR(100) NOT NULL CHECK (test_type IN ('stress', 'security', 'api', 'performance', 'compatibility', 'seo', 'accessibility')),
+    url TEXT,
+    status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'running', 'completed', 'failed', 'cancelled')),
+    start_time TIMESTAMP,
     end_time TIMESTAMP,
-    duration INTEGER, -- 毫秒
-    results JSONB,
+    duration INTEGER, -- 秒
     overall_score DECIMAL(5,2),
+    grade VARCHAR(5), -- A+, A, B+, B, C+, C, D, F
+    total_issues INTEGER DEFAULT 0,
+    critical_issues INTEGER DEFAULT 0,
+    major_issues INTEGER DEFAULT 0,
+    minor_issues INTEGER DEFAULT 0,
+    warnings INTEGER DEFAULT 0,
+    config JSONB DEFAULT '{}',
+    environment VARCHAR(50) DEFAULT 'production',
     tags TEXT[],
+    description TEXT,
+    notes TEXT,
     created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    updated_at TIMESTAMP DEFAULT NOW(),
+    deleted_at TIMESTAMP
 );
 
 -- 索引
-CREATE INDEX idx_test_history_user_id ON test_history(user_id);
-CREATE INDEX idx_test_history_test_type ON test_history(test_type);
-CREATE INDEX idx_test_history_status ON test_history(status);
-CREATE INDEX idx_test_history_created_at ON test_history(created_at);
-CREATE INDEX idx_test_history_url ON test_history USING gin(to_tsvector('english', url));
+CREATE INDEX idx_test_sessions_user_id ON test_sessions(user_id);
+CREATE INDEX idx_test_sessions_test_type ON test_sessions(test_type);
+CREATE INDEX idx_test_sessions_status ON test_sessions(status);
+CREATE INDEX idx_test_sessions_created_at ON test_sessions(created_at);
+CREATE INDEX idx_test_sessions_deleted_at ON test_sessions(deleted_at);
+CREATE INDEX idx_test_sessions_url ON test_sessions USING gin(to_tsvector('english', url));
+CREATE INDEX idx_test_sessions_tags ON test_sessions USING gin(tags);
 ```
 
-#### 3. 用户偏好表 (user_preferences)
+#### 3. 安全测试详情表 (security_test_details)
+```sql
+CREATE TABLE security_test_details (
+    session_id UUID PRIMARY KEY REFERENCES test_sessions(id) ON DELETE CASCADE,
+    security_score DECIMAL(5,2),
+    ssl_score DECIMAL(5,2),
+    header_security_score DECIMAL(5,2),
+    authentication_score DECIMAL(5,2),
+    vulnerabilities_total INTEGER DEFAULT 0,
+    vulnerabilities_critical INTEGER DEFAULT 0,
+    vulnerabilities_high INTEGER DEFAULT 0,
+    vulnerabilities_medium INTEGER DEFAULT 0,
+    vulnerabilities_low INTEGER DEFAULT 0,
+    sql_injection_found INTEGER DEFAULT 0,
+    xss_vulnerabilities INTEGER DEFAULT 0,
+    csrf_vulnerabilities INTEGER DEFAULT 0,
+    https_enforced BOOLEAN DEFAULT false,
+    hsts_enabled BOOLEAN DEFAULT false,
+    csrf_protection BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+#### 4. 性能测试详情表 (performance_test_details)
+```sql
+CREATE TABLE performance_test_details (
+    session_id UUID PRIMARY KEY REFERENCES test_sessions(id) ON DELETE CASCADE,
+    first_contentful_paint INTEGER, -- 毫秒
+    largest_contentful_paint INTEGER, -- 毫秒
+    first_input_delay INTEGER, -- 毫秒
+    cumulative_layout_shift DECIMAL(5,3),
+    time_to_interactive INTEGER, -- 毫秒
+    speed_index INTEGER,
+    total_blocking_time INTEGER, -- 毫秒
+    dom_content_loaded INTEGER, -- 毫秒
+    load_event_end INTEGER, -- 毫秒
+    total_page_size BIGINT, -- 字节
+    image_size BIGINT, -- 字节
+    css_size BIGINT, -- 字节
+    js_size BIGINT, -- 字节
+    font_size BIGINT, -- 字节
+    dns_lookup_time INTEGER, -- 毫秒
+    tcp_connect_time INTEGER, -- 毫秒
+    ssl_handshake_time INTEGER, -- 毫秒
+    server_response_time INTEGER, -- 毫秒
+    created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+#### 5. 压力测试详情表 (stress_test_details)
+```sql
+CREATE TABLE stress_test_details (
+    session_id UUID PRIMARY KEY REFERENCES test_sessions(id) ON DELETE CASCADE,
+    concurrent_users INTEGER,
+    ramp_up_time INTEGER, -- 秒
+    test_duration INTEGER, -- 秒
+    think_time INTEGER, -- 毫秒
+    tps_peak DECIMAL(10,2),
+    tps_average DECIMAL(10,2),
+    total_requests BIGINT,
+    successful_requests BIGINT,
+    failed_requests BIGINT,
+    response_time_avg INTEGER, -- 毫秒
+    response_time_min INTEGER, -- 毫秒
+    response_time_max INTEGER, -- 毫秒
+    response_time_p50 INTEGER, -- 毫秒
+    response_time_p90 INTEGER, -- 毫秒
+    response_time_p95 INTEGER, -- 毫秒
+    response_time_p99 INTEGER, -- 毫秒
+    error_rate DECIMAL(5,2), -- 百分比
+    timeout_errors INTEGER,
+    connection_errors INTEGER,
+    server_errors INTEGER,
+    client_errors INTEGER,
+    cpu_usage_avg DECIMAL(5,2), -- 百分比
+    cpu_usage_max DECIMAL(5,2), -- 百分比
+    memory_usage_avg BIGINT, -- 字节
+    memory_usage_max BIGINT, -- 字节
+    bytes_sent BIGINT,
+    bytes_received BIGINT,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+#### 6. 测试文件资源表 (test_artifacts)
+```sql
+CREATE TABLE test_artifacts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    session_id UUID NOT NULL REFERENCES test_sessions(id) ON DELETE CASCADE,
+    artifact_type VARCHAR(50) NOT NULL, -- screenshot, report, log, etc.
+    file_name VARCHAR(255) NOT NULL,
+    file_path TEXT NOT NULL,
+    file_size BIGINT,
+    mime_type VARCHAR(100),
+    description TEXT,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- 索引
+CREATE INDEX idx_test_artifacts_session_id ON test_artifacts(session_id);
+CREATE INDEX idx_test_artifacts_type ON test_artifacts(artifact_type);
+```
+
+#### 7. 用户偏好表 (user_preferences)
 ```sql
 CREATE TABLE user_preferences (
     id SERIAL PRIMARY KEY,
@@ -282,8 +396,8 @@ FOR VALUES FROM ('2025-06-01') TO ('2025-07-01');
 ### 查询优化
 ```sql
 -- 使用EXPLAIN分析查询计划
-EXPLAIN ANALYZE SELECT * FROM test_history 
-WHERE user_id = $1 AND test_type = $2 
+EXPLAIN ANALYZE SELECT * FROM test_sessions
+WHERE user_id = $1 AND test_type = $2 AND deleted_at IS NULL
 ORDER BY created_at DESC LIMIT 20;
 
 -- 使用部分索引优化特定查询
@@ -313,8 +427,9 @@ GRANT SELECT ON ALL TABLES IN SCHEMA public TO readonly_user;
 ### 数据清理
 ```sql
 -- 清理过期的测试记录（保留30天）
-DELETE FROM test_history 
-WHERE created_at < NOW() - INTERVAL '30 days';
+UPDATE test_sessions
+SET deleted_at = NOW()
+WHERE created_at < NOW() - INTERVAL '30 days' AND deleted_at IS NULL;
 
 -- 清理过期的监控结果（保留90天）
 DELETE FROM monitoring_results 
@@ -324,7 +439,11 @@ WHERE checked_at < NOW() - INTERVAL '90 days';
 ### 统计信息更新
 ```sql
 -- 更新表统计信息
-ANALYZE test_history;
+ANALYZE test_sessions;
+ANALYZE security_test_details;
+ANALYZE performance_test_details;
+ANALYZE stress_test_details;
+ANALYZE test_artifacts;
 ANALYZE monitoring_results;
 ANALYZE monitoring_sites;
 ```
