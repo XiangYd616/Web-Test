@@ -3,18 +3,18 @@ import { format, subDays } from 'date-fns';
 
 export interface TestRecord {
   id: string;
-  testType: string;
+  test_type: string;
   url?: string;
   status: 'completed' | 'failed' | 'running';
-  overallScore?: number;
-  startTime: string;
-  endTime?: string;
-  actualDuration?: number;
+  overall_score?: number;
+  start_time: string;
+  end_time?: string;
+  duration?: number;
   results?: any;
   config?: any;
   scores?: any;
   recommendations?: string[];
-  savedAt: string;
+  created_at: string;
 }
 
 export interface AnalyticsData {
@@ -58,31 +58,17 @@ export class DataAnalysisService {
   private baseUrl = 'http://localhost:3001/api';
 
   /**
-   * 处理测试数据
+   * 处理测试数据 - 直接使用数据库字段名，避免不必要的映射
    */
   async processTestData(testRecords: any[], dateRange: number = 30): Promise<AnalyticsData> {
     try {
-      // 转换数据库字段到前端期望的字段
-      const normalizedRecords = testRecords.map(record => ({
-        id: record.id,
-        testType: record.test_type || record.testType,
-        url: record.url,
-        status: record.status,
-        overallScore: record.overall_score || record.overallScore,
-        startTime: record.start_time || record.startTime,
-        endTime: record.end_time || record.endTime,
-        actualDuration: record.duration || record.actualDuration,
-        results: record.results,
-        config: record.config,
-        scores: record.scores,
-        recommendations: record.recommendations,
-        savedAt: record.created_at || record.savedAt
-      }));
+      // 直接使用数据库字段，无需转换
+      const normalizedRecords = testRecords;
 
       // 过滤指定时间范围内的数据
       const cutoffDate = subDays(new Date(), dateRange);
       const filteredRecords = normalizedRecords.filter(record =>
-        new Date(record.startTime || record.savedAt) >= cutoffDate
+        new Date(record.start_time || record.created_at) >= cutoffDate
       );
 
       return this.analyzeTestData(filteredRecords);
@@ -113,30 +99,13 @@ export class DataAnalysisService {
       // 处理API返回的数据结构
       const testRecords: TestRecord[] = data.data.tests || data.data || [];
 
-      // 转换数据库字段到前端期望的字段
-      const normalizedRecords = testRecords.map(record => {
-        const dbRecord = record as any; // 类型断言以访问数据库字段
-        return {
-          id: record.id,
-          testType: dbRecord.test_type || record.testType,
-          url: record.url,
-          status: record.status,
-          overallScore: dbRecord.overall_score || record.overallScore,
-          startTime: dbRecord.start_time || record.startTime,
-          endTime: dbRecord.end_time || record.endTime,
-          actualDuration: dbRecord.duration || record.actualDuration,
-          results: record.results,
-          config: record.config,
-          scores: record.scores,
-          recommendations: record.recommendations,
-          savedAt: dbRecord.created_at || record.savedAt
-        };
-      });
+      // 直接使用数据库字段，无需转换
+      const normalizedRecords = testRecords;
 
       // 过滤指定时间范围内的数据
       const cutoffDate = subDays(new Date(), dateRange);
       const filteredRecords = normalizedRecords.filter(record =>
-        new Date(record.startTime || record.savedAt) >= cutoffDate
+        new Date((record as any).start_time || (record as any).created_at) >= cutoffDate
       );
 
       return this.analyzeTestData(filteredRecords);
@@ -147,23 +116,23 @@ export class DataAnalysisService {
   }
 
   /**
-   * 分析测试数据
+   * 分析测试数据 - 使用数据库字段名
    */
-  private analyzeTestData(records: TestRecord[]): AnalyticsData {
+  private analyzeTestData(records: any[]): AnalyticsData {
     const totalTests = records.length;
     const completedTests = records.filter(r => r.status === 'completed');
     const successRate = totalTests > 0 ? (completedTests.length / totalTests) * 100 : 0;
 
     // 计算平均分数
-    const scoredTests = records.filter(r => r.overallScore !== undefined);
+    const scoredTests = records.filter(r => r.overall_score !== undefined);
     const averageScore = scoredTests.length > 0
-      ? scoredTests.reduce((sum, r) => sum + (r.overallScore || 0), 0) / scoredTests.length
+      ? scoredTests.reduce((sum, r) => sum + (r.overall_score || 0), 0) / scoredTests.length
       : 0;
 
     // 按类型统计
     const testsByType: { [key: string]: number } = {};
     records.forEach(record => {
-      const type = record.testType || 'unknown';
+      const type = record.test_type || 'unknown';
       testsByType[type] = (testsByType[type] || 0) + 1;
     });
 
@@ -188,7 +157,7 @@ export class DataAnalysisService {
 
     // 最近活动
     const recentActivity = records
-      .sort((a, b) => new Date(b.startTime || b.savedAt).getTime() - new Date(a.startTime || a.savedAt).getTime())
+      .sort((a, b) => new Date(b.start_time || b.created_at).getTime() - new Date(a.start_time || a.created_at).getTime())
       .slice(0, 10);
 
     return {
@@ -219,7 +188,7 @@ export class DataAnalysisService {
 
     // 统计每日数据
     records.forEach(record => {
-      const date = format(new Date(record.startTime || record.savedAt), 'yyyy-MM-dd');
+      const date = format(new Date(record.start_time || record.created_at), 'yyyy-MM-dd');
       if (dailyStats[date]) {
         dailyStats[date].count++;
         if (record.status === 'completed') {
@@ -248,8 +217,8 @@ export class DataAnalysisService {
     };
 
     records.forEach(record => {
-      if (record.overallScore !== undefined) {
-        const score = record.overallScore;
+      if (record.overall_score !== undefined) {
+        const score = record.overall_score;
         if (score <= 20) distribution['0-20']++;
         else if (score <= 40) distribution['21-40']++;
         else if (score <= 60) distribution['41-60']++;
@@ -275,9 +244,9 @@ export class DataAnalysisService {
 
     // 收集每日分数数据
     records.forEach(record => {
-      const date = format(new Date(record.startTime || record.savedAt), 'yyyy-MM-dd');
-      if (trends[date] && record.overallScore !== undefined) {
-        trends[date].scores.push(record.overallScore);
+      const date = format(new Date(record.start_time || record.created_at), 'yyyy-MM-dd');
+      if (trends[date] && record.overall_score !== undefined) {
+        trends[date].scores.push(record.overall_score);
         trends[date].count++;
       }
     });
@@ -303,8 +272,8 @@ export class DataAnalysisService {
           urlStats[record.url] = { count: 0, scores: [] };
         }
         urlStats[record.url].count++;
-        if (record.overallScore !== undefined) {
-          urlStats[record.url].scores.push(record.overallScore);
+        if (record.overall_score !== undefined) {
+          urlStats[record.url].scores.push(record.overall_score);
         }
       }
     });
@@ -392,7 +361,7 @@ export class DataAnalysisService {
 
     // 收集分数数据
     records.forEach(record => {
-      const date = format(new Date(record.startTime || record.savedAt), 'yyyy-MM-dd');
+      const date = format(new Date(record.start_time || record.created_at), 'yyyy-MM-dd');
       if (scores[date] && record.scores) {
         if (record.scores.performance) scores[date].performance.push(record.scores.performance);
         if (record.scores.seo) scores[date].seo.push(record.scores.seo);
@@ -469,12 +438,12 @@ export class DataAnalysisService {
     const urlStats: { [key: string]: { scores: number[]; dates: string[] } } = {};
 
     records.forEach(record => {
-      if (record.url && record.overallScore !== undefined) {
+      if (record.url && record.overall_score !== undefined) {
         if (!urlStats[record.url]) {
           urlStats[record.url] = { scores: [], dates: [] };
         }
-        urlStats[record.url].scores.push(record.overallScore);
-        urlStats[record.url].dates.push(record.startTime || record.savedAt);
+        urlStats[record.url].scores.push(record.overall_score);
+        urlStats[record.url].dates.push(record.start_time || record.created_at);
       }
     });
 
