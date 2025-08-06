@@ -2,25 +2,20 @@ import { useCallback, useEffect, useState } from 'react';
 
 export interface TestRecord {
   id: string;
-  testName?: string; // 添加测试名称字段
-  testType: string;
+  test_name?: string; // 测试名称字段
+  test_type: string;
   url?: string;
   status: 'completed' | 'failed' | 'running';
-  overallScore?: number;
-  score?: number; // 添加score字段作为overallScore的别名
-  startTime: string;
-  endTime?: string;
-  timestamp?: string; // 添加timestamp字段
-  createdAt?: string; // 添加createdAt字段
-  completedAt?: string; // 添加completedAt字段
+  overall_score?: number;
+  start_time: string;
+  end_time?: string;
   duration?: number; // 持续时间（秒）
-  actualDuration?: number;
   results?: any;
   config?: any;
   scores?: any;
   recommendations?: string[];
-  reportPath?: string; // 添加报告路径字段
-  savedAt: string;
+  created_at: string;
+  updated_at?: string;
 }
 
 export interface FilterOptions {

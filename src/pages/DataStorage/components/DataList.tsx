@@ -65,7 +65,7 @@ const DataList: React.FC<DataListProps> = ({
 
   const columns: Column<TestRecord>[] = [
     {
-      key: 'testType',
+      key: 'test_type',
       title: '测试类型',
       sortable: true,
       width: '120px',
@@ -203,9 +203,9 @@ const DataList: React.FC<DataListProps> = ({
       columns={columns}
       data={records}
       loading={loading}
-      sortBy={(sortBy === 'type' ? 'testType' :
-        sortBy === 'score' ? 'overallScore' :
-          sortBy === 'date' ? 'startTime' : 'id') as keyof TestRecord}
+      sortBy={(sortBy === 'type' ? 'test_type' :
+        sortBy === 'score' ? 'overall_score' :
+          sortBy === 'date' ? 'start_time' : 'id') as keyof TestRecord}
       sortOrder={sortOrder}
       onSort={handleSort}
       emptyText="没有找到匹配的测试记录"

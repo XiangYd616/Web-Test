@@ -869,7 +869,7 @@ const StressTestDetail: React.FC = () => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-400">测试类型:</span>
-                      <span className="text-white capitalize">{record.testType}</span>
+                      <span className="text-white capitalize">{record.test_type}</span>
                     </div>
                     {record.config?.duration && (
                       <div className="flex justify-between">

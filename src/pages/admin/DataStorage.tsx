@@ -601,19 +601,19 @@ const DataStorage: React.FC = () => {
                     <li key={record.id} className="bg-gray-700/30 rounded-lg p-4 border border-gray-600/50">
                       <article className="flex items-start justify-between">
                         <div className="flex items-start space-x-4">
-                          {getTestTypeIcon(record.testType)}
+                          {getTestTypeIcon(record.test_type)}
 
                           <div className="flex-1">
                             <header className="flex items-center space-x-3 mb-2">
                               <h4 className="text-lg font-semibold text-white">
-                                {getTestTypeLabel(record.testType)}
+                                {getTestTypeLabel(record.test_type)}
                               </h4>
                               <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(record.status)}`}>
                                 {getStatusLabel(record.status)}
                               </span>
-                              {record.overallScore && (
-                                <span className={`text-sm font-bold ${getScoreColor(record.overallScore)}`}>
-                                  {Math.round(record.overallScore)}分
+                              {record.overall_score && (
+                                <span className={`text-sm font-bold ${getScoreColor(record.overall_score)}`}>
+                                  {Math.round(record.overall_score)}分
                                 </span>
                               )}
                             </header>
