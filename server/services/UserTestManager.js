@@ -4,16 +4,22 @@
  */
 
 const { RealStressTestEngine } = require('./realStressTestEngine');
-const Logger = require('./logger');
+// 暂时使用console.log替代Logger
+const Logger = {
+  info: (msg, meta) => console.log(`[INFO] ${msg}`, meta || ''),
+  warn: (msg, meta) => console.warn(`[WARN] ${msg}`, meta || ''),
+  error: (msg, error, meta) => console.error(`[ERROR] ${msg}`, error || '', meta || ''),
+  debug: (msg, meta) => console.log(`[DEBUG] ${msg}`, meta || '')
+};
 
 class UserTestManager {
   constructor() {
     // 用户测试实例映射: userId -> { testId -> testEngine }
     this.userTests = new Map();
-    
+
     // WebSocket连接映射: userId -> socket
     this.userSockets = new Map();
-    
+
     Logger.info('用户测试管理器初始化完成');
   }
 
@@ -54,7 +60,7 @@ class UserTestManager {
     }
 
     const userTests = this.userTests.get(userId);
-    
+
     // 如果测试已存在，返回现有实例
     if (userTests.has(testId)) {
       Logger.info(`返回现有测试实例: ${userId}/${testId}`);
@@ -63,7 +69,7 @@ class UserTestManager {
 
     // 创建新的测试引擎实例
     const testEngine = new RealStressTestEngine();
-    
+
     // 设置进度回调，直接推送给用户
     testEngine.setProgressCallback((progress) => {
       this.sendToUser(userId, 'test-progress', {
@@ -78,7 +84,7 @@ class UserTestManager {
         testId,
         results
       });
-      
+
       // 测试完成后清理实例
       this.cleanupUserTest(userId, testId);
     });
@@ -89,14 +95,14 @@ class UserTestManager {
         testId,
         error: error.message
       });
-      
+
       // 错误后清理实例
       this.cleanupUserTest(userId, testId);
     });
 
     userTests.set(testId, testEngine);
     Logger.info(`创建新测试实例: ${userId}/${testId}`);
-    
+
     return testEngine;
   }
 
@@ -122,7 +128,7 @@ class UserTestManager {
 
     await testEngine.stopTest(testId);
     this.cleanupUserTest(userId, testId);
-    
+
     Logger.info(`用户测试已停止: ${userId}/${testId}`);
   }
 
@@ -133,13 +139,13 @@ class UserTestManager {
     const userTests = this.userTests.get(userId);
     if (userTests) {
       userTests.delete(testId);
-      
+
       // 如果用户没有其他测试，清理用户映射
       if (userTests.size === 0) {
         this.userTests.delete(userId);
       }
     }
-    
+
     Logger.info(`清理测试实例: ${userId}/${testId}`);
   }
 
@@ -157,7 +163,7 @@ class UserTestManager {
           Logger.error(`停止测试失败: ${userId}/${testId}`, error);
         }
       }
-      
+
       this.userTests.delete(userId);
       Logger.info(`清理用户所有测试: ${userId}`);
     }
@@ -182,7 +188,7 @@ class UserTestManager {
   getStats() {
     const totalUsers = this.userTests.size;
     let totalTests = 0;
-    
+
     for (const userTests of this.userTests.values()) {
       totalTests += userTests.size;
     }
@@ -199,7 +205,7 @@ class UserTestManager {
    */
   cleanup() {
     Logger.info('开始清理用户测试管理器...');
-    
+
     // 停止所有测试
     for (const [userId, userTests] of this.userTests) {
       for (const [testId, testEngine] of userTests) {
@@ -214,7 +220,7 @@ class UserTestManager {
     // 清理所有映射
     this.userTests.clear();
     this.userSockets.clear();
-    
+
     Logger.info('用户测试管理器清理完成');
   }
 }
