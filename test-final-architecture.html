@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>最终架构测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .section {
+            background-color: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #2563eb;
+        }
+        .log {
+            background-color: #111;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+        .success { color: #4ade80; }
+        .error { color: #f87171; }
+        .warning { color: #fbbf24; }
+        .important { color: #fbbf24; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>🎉 最终架构测试</h1>
+    
+    <div class="section">
+        <h2>重构完成总结</h2>
+        <p class="important">✅ 架构重构已完成！</p>
+        <ul>
+            <li>✅ 移除了全局压力测试引擎实例</li>
+            <li>✅ 创建了UserTestManager用户测试管理器</li>
+            <li>✅ 简化了WebSocket通信协议</li>
+            <li>✅ 基于用户ID的状态管理</li>
+            <li>✅ 添加了回调机制支持</li>
+            <li>✅ 修复了TestHistoryService缺失方法</li>
+            <li>✅ 更新了前端WebSocket协议</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>完整功能测试</h2>
+        <button onclick="testCompleteFlow()">测试完整流程</button>
+        <button onclick="testWebSocketProtocol()">测试WebSocket协议</button>
+        <button onclick="testAPIEndpoints()">测试API端点</button>
+        <button onclick="clearLog()">清空日志</button>
+        <div id="testLog" class="log"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('testLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : type === 'important' ? 'important' : '';
+            logElement.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('testLog').innerHTML = '';
+        }
+
+        async function testCompleteFlow() {
+            log('🧪 测试完整的用户测试流程...', 'important');
+            
+            // 模拟用户数据
+            const mockUser = {
+                id: 'test-user-' + Date.now(),
+                username: 'test-user',
+                email: 'test@example.com'
+            };
+            
+            // 存储模拟用户数据
+            localStorage.setItem('user_data', JSON.stringify(mockUser));
+            localStorage.setItem('auth_token', 'mock-token-' + Date.now());
+            
+            log(`👤 模拟用户: ${mockUser.username} (${mockUser.id})`, 'info');
+
+            try {
+                // 1. 测试API历史记录
+                log('\n1️⃣ 测试API历史记录...', 'info');
+                
+                const historyResponse = await fetch('/api/test/history?type=stress&page=1&pageSize=5', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    }
+                });
+
+                if (historyResponse.ok) {
+                    const historyData = await historyResponse.json();
+                    log(`✅ 历史记录API正常: ${historyData.data?.tests?.length || 0} 条记录`, 'success');
+                } else {
+                    log(`❌ 历史记录API失败: ${historyResponse.status}`, 'error');
+                }
+
+                // 2. 测试WebSocket连接
+                log('\n2️⃣ 测试WebSocket连接...', 'info');
+                
+                const socket = io();
+                
+                socket.on('connect', () => {
+                    log(`✅ WebSocket连接成功: ${socket.id}`, 'success');
+                    
+                    // 测试新的协议格式
+                    const testId = 'flow-test-' + Date.now();
+                    socket.emit('join-stress-test', {
+                        testId: testId,
+                        userId: mockUser.id
+                    });
+                    
+                    log(`📡 发送连接请求: ${testId}`, 'info');
+                });
+
+                socket.on('room-joined', (data) => {
+                    log(`✅ 连接确认: ${data.testId}`, 'success');
+                    log(`👤 用户ID: ${data.userId}`, 'info');
+                    log(`🆔 客户端ID: ${data.clientId}`, 'info');
+                });
+
+                socket.on('test-progress', (data) => {
+                    log(`📊 进度更新: ${data.testId} - ${data.progress || 0}%`, 'info');
+                });
+
+                socket.on('test-completed', (data) => {
+                    log(`✅ 测试完成: ${data.testId}`, 'success');
+                });
+
+                socket.on('test-error', (data) => {
+                    log(`❌ 测试错误: ${data.testId} - ${data.error}`, 'error');
+                });
+
+                // 3. 测试压力测试启动
+                setTimeout(async () => {
+                    log('\n3️⃣ 测试压力测试启动...', 'info');
+                    
+                    try {
+                        const testConfig = {
+                            url: 'https://httpbin.org/delay/1',
+                            users: 2,
+                            duration: 5,
+                            rampUpTime: 1,
+                            testType: 'gradual',
+                            method: 'GET',
+                            timeout: 5,
+                            thinkTime: 1
+                        };
+
+                        const startResponse = await fetch('/api/test/stress', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                            },
+                            body: JSON.stringify(testConfig)
+                        });
+
+                        if (startResponse.ok) {
+                            const startData = await startResponse.json();
+                            log(`✅ 压力测试启动成功: ${startData.testId}`, 'success');
+                            
+                            // 测试状态查询
+                            setTimeout(async () => {
+                                try {
+                                    const statusResponse = await fetch(`/api/test/stress/status/${startData.testId}`, {
+                                        headers: {
+                                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                                        }
+                                    });
+
+                                    if (statusResponse.ok) {
+                                        const statusData = await statusResponse.json();
+                                        log(`✅ 状态查询成功: ${statusData.data?.status || 'unknown'}`, 'success');
+                                    } else {
+                                        log(`❌ 状态查询失败: ${statusResponse.status}`, 'error');
+                                    }
+                                } catch (error) {
+                                    log(`❌ 状态查询异常: ${error.message}`, 'error');
+                                }
+                            }, 2000);
+
+                        } else {
+                            const errorData = await startResponse.text();
+                            log(`❌ 压力测试启动失败: ${startResponse.status}`, 'error');
+                            log(`📄 错误响应: ${errorData}`, 'error');
+                        }
+
+                    } catch (error) {
+                        log(`❌ 压力测试异常: ${error.message}`, 'error');
+                    }
+                }, 1000);
+
+                // 清理连接
+                setTimeout(() => {
+                    socket.disconnect();
+                    log(`🔌 WebSocket连接已断开`, 'info');
+                    log(`\n🎉 完整流程测试完成！`, 'important');
+                }, 10000);
+
+            } catch (error) {
+                log(`❌ 完整流程测试异常: ${error.message}`, 'error');
+            }
+        }
+
+        async function testWebSocketProtocol() {
+            log('🌐 测试WebSocket协议...', 'important');
+            
+            const mockUserId = 'ws-protocol-test-' + Date.now();
+            const testId = 'protocol-test-' + Date.now();
+            
+            try {
+                const socket = io();
+                
+                socket.on('connect', () => {
+                    log(`✅ WebSocket连接: ${socket.id}`, 'success');
+                    
+                    // 测试新协议格式
+                    socket.emit('join-stress-test', {
+                        testId: testId,
+                        userId: mockUserId
+                    });
+                    
+                    log(`📡 新协议格式发送: { testId: "${testId}", userId: "${mockUserId}" }`, 'info');
+                });
+
+                socket.on('room-joined', (data) => {
+                    log(`✅ 协议测试成功!`, 'success');
+                    log(`📋 返回数据: ${JSON.stringify(data)}`, 'info');
+                    
+                    setTimeout(() => {
+                        socket.disconnect();
+                        log(`🔌 协议测试完成`, 'info');
+                    }, 2000);
+                });
+
+                socket.on('connect_error', (error) => {
+                    log(`❌ WebSocket连接错误: ${error.message}`, 'error');
+                });
+
+            } catch (error) {
+                log(`❌ WebSocket协议测试异常: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAPIEndpoints() {
+            log('🔌 测试API端点...', 'important');
+            
+            const endpoints = [
+                { name: '测试历史', url: '/api/test/history?type=stress&page=1&pageSize=1' },
+                { name: '运行中测试', url: '/api/test/stress/running' },
+                { name: '健康检查', url: '/api/health' }
+            ];
+
+            for (const endpoint of endpoints) {
+                try {
+                    log(`\n🧪 测试: ${endpoint.name}`, 'info');
+                    
+                    const response = await fetch(endpoint.url, {
+                        headers: {
+                            ...(localStorage.getItem('auth_token') ? {
+                                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                            } : {})
+                        }
+                    });
+
+                    if (response.ok) {
+                        log(`✅ ${endpoint.name} 正常: ${response.status}`, 'success');
+                    } else {
+                        log(`❌ ${endpoint.name} 失败: ${response.status}`, 'error');
+                    }
+
+                } catch (error) {
+                    log(`❌ ${endpoint.name} 异常: ${error.message}`, 'error');
+                }
+            }
+            
+            log(`\n🔌 API端点测试完成`, 'info');
+        }
+
+        // 页面加载时显示说明
+        window.onload = function() {
+            log('🌐 最终架构测试工具已加载', 'important');
+            log('🎉 重构完成的功能:', 'info');
+            log('   1. 用户级测试管理', 'info');
+            log('   2. 简化的WebSocket协议', 'info');
+            log('   3. 回调机制支持', 'info');
+            log('   4. 完善的错误处理', 'info');
+            log('   5. 统一的API接口', 'info');
+            log('\n🧪 点击按钮开始测试', 'info');
+        };
+    </script>
+    
+    <!-- Socket.IO客户端 -->
+    <script src="/socket.io/socket.io.js"></script>
+</body>
+</html>

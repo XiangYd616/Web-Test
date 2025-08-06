@@ -2107,17 +2107,39 @@ const StressTest: React.FC = () => {
 
                 // ✅ 监听测试完成事件 (简化版，主要处理在下面的完整监听器中)
 
-                // ✅ 监听测试错误事件
-                socket.on('stress-test-error', (data: any) => {
+                // 🔧 重构：监听新的事件名称
+                socket.on('test-progress', (data: any) => {
+                    console.log('📊 收到测试进度:', data);
+                    if (data.testId === currentTestIdRef.current) {
+                        // 处理进度更新
+                        if (data.progress !== undefined) {
+                            setProgress(data.progress);
+                        }
+                        if (data.metrics) {
+                            setMetrics(data.metrics);
+                        }
+                    }
+                });
+
+                socket.on('test-completed', (data: any) => {
+                    console.log('✅ 收到测试完成事件:', data);
+                    if (data.testId === currentTestIdRef.current) {
+                        setCurrentStatus('COMPLETED');
+                        setStatusMessage('测试已完成');
+                        if (data.results) {
+                            // 处理测试结果
+                            console.log('📊 测试结果:', data.results);
+                        }
+                    }
+                });
+
+                socket.on('test-error', (data: any) => {
                     console.log('❌ 收到测试错误事件:', data);
                     if (data.testId === currentTestIdRef.current) {
                         setCurrentStatus('FAILED');
                         setStatusMessage('测试失败: ' + data.error);
                         console.error('❌ 压力测试失败:', data);
                     }
-
-                    // 房间加入成功，不需要额外的ping验证
-                    console.log('🎯 房间加入成功，开始接收实时数据');
                 });
 
                 // 监听测试ping响应
@@ -2664,12 +2686,28 @@ const StressTest: React.FC = () => {
 
         if (socket && socket.connected && testId) {
             console.log('🏠 加入WebSocket房间:', testId);
-            socket.emit('join-stress-test', testId);
+
+            // 🔧 重构：发送新的协议格式
+            let userId = 'anonymous-' + Date.now();
+            try {
+                const userData = localStorage.getItem('user_data');
+                if (userData) {
+                    const user = JSON.parse(userData);
+                    userId = user.id || userId;
+                }
+            } catch (error) {
+                console.warn('获取用户ID失败，使用匿名ID:', error);
+            }
+
+            socket.emit('join-stress-test', {
+                testId: testId,
+                userId: userId
+            });
 
             // 记录已加入的房间
             setJoinedRooms(prev => new Set([...prev, testId]));
 
-            console.log('✅ 房间加入请求已发送:', `stress-test-${testId}`);
+            console.log('✅ 房间加入请求已发送:', { testId, userId });
         } else {
             console.warn('⚠️ 无法加入房间:', {
                 hasSocket: !!socket,

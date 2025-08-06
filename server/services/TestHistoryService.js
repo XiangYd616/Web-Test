@@ -326,6 +326,115 @@ class TestHistoryService {
   }
 
   /**
+   * 更新测试记录
+   */
+  async updateTestRecord(recordId, updateData) {
+    try {
+      const {
+        status,
+        endTime,
+        duration,
+        results,
+        config,
+        overallScore,
+        grade,
+        totalIssues,
+        criticalIssues,
+        majorIssues,
+        minorIssues
+      } = updateData;
+
+      // 构建更新字段
+      const updateFields = [];
+      const updateValues = [];
+      let paramIndex = 1;
+
+      if (status !== undefined) {
+        updateFields.push(`status = $${paramIndex++}`);
+        updateValues.push(status);
+      }
+
+      if (endTime !== undefined) {
+        updateFields.push(`end_time = $${paramIndex++}`);
+        updateValues.push(endTime);
+      }
+
+      if (duration !== undefined) {
+        updateFields.push(`duration = $${paramIndex++}`);
+        updateValues.push(duration);
+      }
+
+      if (results !== undefined) {
+        updateFields.push(`results = $${paramIndex++}`);
+        updateValues.push(JSON.stringify(results));
+      }
+
+      if (config !== undefined) {
+        updateFields.push(`config = $${paramIndex++}`);
+        updateValues.push(JSON.stringify(config));
+      }
+
+      if (overallScore !== undefined) {
+        updateFields.push(`overall_score = $${paramIndex++}`);
+        updateValues.push(overallScore);
+      }
+
+      if (grade !== undefined) {
+        updateFields.push(`grade = $${paramIndex++}`);
+        updateValues.push(grade);
+      }
+
+      if (totalIssues !== undefined) {
+        updateFields.push(`total_issues = $${paramIndex++}`);
+        updateValues.push(totalIssues);
+      }
+
+      if (criticalIssues !== undefined) {
+        updateFields.push(`critical_issues = $${paramIndex++}`);
+        updateValues.push(criticalIssues);
+      }
+
+      if (majorIssues !== undefined) {
+        updateFields.push(`major_issues = $${paramIndex++}`);
+        updateValues.push(majorIssues);
+      }
+
+      if (minorIssues !== undefined) {
+        updateFields.push(`minor_issues = $${paramIndex++}`);
+        updateValues.push(minorIssues);
+      }
+
+      // 添加更新时间
+      updateFields.push(`updated_at = $${paramIndex++}`);
+      updateValues.push(new Date().toISOString());
+
+      // 添加记录ID
+      updateValues.push(recordId);
+
+      const query = `
+        UPDATE test_sessions
+        SET ${updateFields.join(', ')}
+        WHERE id = $${paramIndex} AND deleted_at IS NULL
+        RETURNING *
+      `;
+
+      const result = await this.db.query(query, updateValues);
+
+      if (result.rows.length === 0) {
+        throw new Error('测试记录不存在或已被删除');
+      }
+
+      return {
+        success: true,
+        data: this.formatTestRecord(result.rows[0])
+      };
+    } catch (error) {
+      console.error('更新测试记录失败:', error);
+      throw new Error(`更新测试记录失败: ${error.message}`);
+    }
+  }
+
+  /**
    * 创建压力测试记录
    */
   async createStressTestResult(userId, testData) {
