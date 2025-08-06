@@ -25,6 +25,7 @@ const adminRoutes = require('./routes/admin');
 // 导入中间件
 // const { authMiddleware } = require('./middleware/auth'); // 已移除，不再需要
 const dataManagementRoutes = require('./routes/dataManagement');
+const testHistoryRoutes = require('./routes/testHistory');
 const monitoringRoutes = require('./routes/monitoring');
 const reportRoutes = require('./routes/reports');
 const integrationRoutes = require('./routes/integrations');
@@ -43,8 +44,7 @@ const { connectDB, testConnection } = require('./config/database');
 const redisConnection = require('./services/redis/connection');
 const cacheMonitoring = require('./services/redis/monitoring');
 
-// 导入测试历史服务
-const TestHistoryService = require('./services/dataManagement/testHistoryService');
+// 导入测试历史服务将在启动时动态加载
 
 const app = express();
 const http = require('http');
@@ -141,6 +141,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // API路由
 app.use('/api/auth', authRoutes);
 app.use('/api/test', testRoutes);
+app.use('/api/test/history', testHistoryRoutes); // 新的测试历史API
 app.use('/api/seo', seoRoutes); // SEO测试API - 解决CORS问题
 app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
@@ -264,7 +265,9 @@ const startServer = async () => {
     console.log('✅ 数据库连接成功');
 
     // 初始化测试历史服务
-    global.testHistoryService = new TestHistoryService();
+    const TestHistoryService = require('./services/TestHistoryService');
+    const { pool } = require('./config/database');
+    global.testHistoryService = new TestHistoryService(pool);
     console.log('✅ 测试历史服务初始化成功');
 
     // 初始化地理位置自动更新服务

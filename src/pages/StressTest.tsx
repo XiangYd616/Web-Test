@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { AdvancedStressTestChart, EnhancedStressTestCharts as UnifiedStressTestCharts } from '../components/charts';
-import UnifiedExportButton from '../components/common/UnifiedExportButton';
+import ExportModal from '../components/common/ExportModal';
 import CancelTestConfirmDialog from '../components/dialogs/CancelTestConfirmDialog';
 import CancelProgressFeedback from '../components/feedback/CancelProgressFeedback';
 import StressTestHistory from '../components/stress/StressTestHistory';
@@ -15,13 +15,13 @@ import { AdvancedStressTestConfig as ImportedAdvancedStressTestConfig } from '..
 import { useStressTestRecord } from '../hooks/useStressTestRecord';
 import { useUserStats } from '../hooks/useUserStats';
 import backgroundTestManager from '../services/backgroundTestManager';
+import ExportUtils from '../utils/exportUtils';
 
 import { systemResourceMonitor } from '../services/systemResourceMonitor';
 import { testEngineManager } from '../services/testEngines';
 import { TestPhase, type RealTimeMetrics, type TestDataPoint } from '../services/TestStateManager';
 import '../styles/progress-bar.css';
 import type { TestStatusType } from '../types/testHistory';
-import ExportUtils from '../utils/exportUtils';
 import { getTemplateById } from '../utils/testTemplates';
 
 // 本地配置接口，继承导入的配置
@@ -3595,23 +3595,18 @@ const StressTest: React.FC = () => {
         }
     }, [testStatus, result, metrics, testProgress]);
 
-    // 导出数据处理函数
-    const handleExportData = (data: any) => {
-        const exportData = {
-            testConfig,
-            testResult: data.testResult,
-            realTimeData: stressTestData,  // 🔧 使用统一的stressTestData
-            metrics: data.currentMetrics || metrics,
-            exportTime: new Date().toISOString()
-        };
+    // 导出模态框状态
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
-        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `stress-test-${Date.now()}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
+    // 处理导出
+    const handleExport = async (exportType: string, data: any) => {
+        try {
+            await ExportUtils.exportByType(exportType, data);
+            setIsExportModalOpen(false);
+        } catch (error) {
+            console.error('导出失败:', error);
+            alert('导出失败，请重试');
+        }
     };
 
     // 设置基线数据
@@ -5434,30 +5429,13 @@ const StressTest: React.FC = () => {
                                                 <Download className="w-4 h-4 mr-2 text-blue-400" />
                                                 导出报告
                                             </h4>
-                                            <UnifiedExportButton
-                                                data={{
-                                                    filename: `stress-test-${Date.now()}`,
-                                                    data: {
-                                                        testConfig,
-                                                        result,
-                                                        metrics,
-                                                        realTimeData: stressTestData
-                                                    },
-                                                    metadata: {
-                                                        title: '压力测试报告',
-                                                        description: `对 ${testConfig.url} 的压力测试结果`,
-                                                        timestamp: new Date().toISOString(),
-                                                        version: '2.1.0'
-                                                    }
-                                                }}
-                                                formats={['json', 'csv', 'html']}
-                                                onExport={(format, data) => {
-                                                    ExportUtils.exportStressTestData(data.data, format);
-                                                }}
-                                                className="w-full"
-                                                size="sm"
-                                                variant="outline"
-                                            />
+                                            <button
+                                                onClick={() => setIsExportModalOpen(true)}
+                                                className="w-full px-3 py-2 text-sm border border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:text-white rounded-lg transition-colors flex items-center justify-center space-x-2"
+                                            >
+                                                <Download className="w-4 h-4" />
+                                                <span>导出</span>
+                                            </button>
                                         </div>
                                     )}
                                 </div>
@@ -5469,30 +5447,14 @@ const StressTest: React.FC = () => {
                             <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4">
                                 <div className="flex justify-between items-center mb-4">
                                     <h3 className="text-lg font-semibold text-white">测试结果</h3>
-                                    <UnifiedExportButton
-                                        data={{
-                                            filename: `stress-test-result-${Date.now()}`,
-                                            data: {
-                                                testConfig,
-                                                result,
-                                                metrics,
-                                                realTimeData: stressTestData
-                                            },
-                                            metadata: {
-                                                title: '压力测试结果',
-                                                description: `对 ${testConfig.url} 的压力测试结果`,
-                                                timestamp: new Date().toISOString(),
-                                                version: '2.1.0'
-                                            }
-                                        }}
-                                        formats={['json', 'csv', 'html']}
-                                        onExport={(format: string, data: any) => {
-                                            ExportUtils.exportStressTestData(data.data, format);
-                                        }}
-                                        size="sm"
-                                        variant="outline"
-                                        showDropdown={true}
-                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsExportModalOpen(true)}
+                                        className="px-3 py-2 text-sm border border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:text-white rounded-lg transition-colors flex items-center space-x-2"
+                                    >
+                                        <Download className="w-4 h-4" />
+                                        <span>导出</span>
+                                    </button>
                                 </div>
 
                                 {/* 主要性能指标卡片 */}
@@ -6017,6 +5979,22 @@ const StressTest: React.FC = () => {
                 isVisible={showCancelProgress}
                 onComplete={handleCancelProgressComplete}
                 testId={currentTestId || undefined}
+            />
+
+            {/* 导出模态框 */}
+            <ExportModal
+                isOpen={isExportModalOpen}
+                onClose={() => setIsExportModalOpen(false)}
+                data={{
+                    testConfig,
+                    result,
+                    metrics,
+                    realTimeData: stressTestData
+                }}
+                testType="stress"
+                testId={currentTestId || undefined}
+                testName={`压力测试-${testConfig.url ? new URL(testConfig.url).hostname : '未知'}`}
+                onExport={handleExport}
             />
         </TestPageLayout >
     );

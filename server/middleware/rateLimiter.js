@@ -23,7 +23,7 @@ const rateLimiter = rateLimit({
       url: req.originalUrl,
       limit: 100
     }, req);
-    
+
     res.status(429).json({
       success: false,
       message: '请求过于频繁，请稍后再试',
@@ -48,7 +48,7 @@ const strictRateLimiter = rateLimit({
       url: req.originalUrl,
       limit: 5
     }, req);
-    
+
     res.status(429).json({
       success: false,
       message: '敏感操作请求过于频繁，请稍后再试',
@@ -74,7 +74,7 @@ const loginRateLimiter = rateLimit({
       email: req.body.email,
       attempts: req.rateLimit.totalHits
     }, req);
-    
+
     res.status(429).json({
       success: false,
       message: '登录尝试过于频繁，请15分钟后再试',
@@ -98,7 +98,7 @@ const registerRateLimiter = rateLimit({
       ip: req.ip,
       email: req.body.email
     }, req);
-    
+
     res.status(429).json({
       success: false,
       message: '注册请求过于频繁，请1小时后再试',
@@ -123,7 +123,7 @@ const testRateLimiter = rateLimit({
       url: req.originalUrl,
       user: req.user ? req.user.id : 'anonymous'
     }, req);
-    
+
     res.status(429).json({
       success: false,
       message: '测试请求过于频繁，请稍后再试',
@@ -147,10 +147,35 @@ const uploadRateLimiter = rateLimit({
       ip: req.ip,
       user: req.user ? req.user.id : 'anonymous'
     }, req);
-    
+
     res.status(429).json({
       success: false,
       message: '文件上传过于频繁，请稍后再试',
+      retryAfter: Math.round(req.rateLimit.resetTime / 1000)
+    });
+  }
+});
+
+/**
+ * 历史记录查询速率限制（更宽松）
+ */
+const historyRateLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5分钟
+  max: 50, // 限制每个IP在5分钟内最多50次历史查询
+  message: {
+    success: false,
+    message: '历史记录查询过于频繁，请稍后再试'
+  },
+  handler: (req, res) => {
+    securityLogger('history_rate_limit_exceeded', {
+      ip: req.ip,
+      url: req.originalUrl,
+      user: req.user ? req.user.id : 'anonymous'
+    }, req);
+
+    res.status(429).json({
+      success: false,
+      message: '历史记录查询过于频繁，请稍后再试',
       retryAfter: Math.round(req.rateLimit.resetTime / 1000)
     });
   }
@@ -185,7 +210,7 @@ const dynamicRateLimiter = (options = {}) => {
         role: req.user ? req.user.role : 'anonymous',
         url: req.originalUrl
       }, req);
-      
+
       res.status(429).json({
         success: false,
         message: '请求过于频繁，请稍后再试',
@@ -201,24 +226,24 @@ const dynamicRateLimiter = (options = {}) => {
 const ipWhitelist = (whitelist = []) => {
   return (req, res, next) => {
     const clientIP = req.ip || req.connection.remoteAddress;
-    
+
     // 开发环境跳过检查
     if (process.env.NODE_ENV === 'development') {
       return next();
     }
-    
+
     if (whitelist.length > 0 && !whitelist.includes(clientIP)) {
       securityLogger('ip_not_whitelisted', {
         ip: clientIP,
         url: req.originalUrl
       }, req);
-      
+
       return res.status(403).json({
         success: false,
         message: 'IP地址不在白名单中'
       });
     }
-    
+
     next();
   };
 };
@@ -230,6 +255,7 @@ module.exports = {
   registerRateLimiter,
   testRateLimiter,
   uploadRateLimiter,
+  historyRateLimiter,
   dynamicRateLimiter,
   ipWhitelist
 };

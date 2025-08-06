@@ -323,8 +323,8 @@ export class ReportGeneratorService {
       <h2>关键指标</h2>
       <div class="metrics-grid">
         ${Object.entries(data.metrics || {}).map(([key, value]) =>
-          `<div class="metric"><span class="label">${key}</span><span class="value">${value}</span></div>`
-        ).join('')}
+      `<div class="metric"><span class="label">${key}</span><span class="value">${value}</span></div>`
+    ).join('')}
       </div>
     </section>`;
   }
@@ -411,9 +411,11 @@ export class ReportGeneratorService {
   }
 
   private async exportToCSV(report: any, options: ExportOptions): Promise<Blob> {
-    // CSV导出逻辑
+    // 🔧 修复中文乱码：添加UTF-8 BOM头
+    const BOM = '\uFEFF';
     const csvContent = 'CSV export not implemented yet';
-    return new Blob([csvContent], { type: 'text/csv' });
+    const csvWithBOM = BOM + csvContent;
+    return new Blob([csvWithBOM], { type: 'text/csv;charset=utf-8' });
   }
 
   private async exportToXLSX(report: any, options: ExportOptions): Promise<Blob> {

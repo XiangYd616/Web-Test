@@ -38,6 +38,69 @@ export enum TestEnvironment {
   LOCAL = 'local'
 }
 
+// 新增：主从表设计相关类型
+export interface TestSession {
+  id: string;
+  userId: string;
+  testName: string;
+  testType: TestType;
+  url?: string;
+  status: TestStatusType;
+  createdAt: string;
+  updatedAt: string;
+  startTime?: string;
+  endTime?: string;
+  duration?: number;
+  config?: any;
+  overallScore?: number;
+  performanceGrade?: string;
+  environment: string;
+  tags: string[];
+  deletedAt?: string;
+}
+
+export interface TestHistoryQuery {
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  testType?: TestType | TestType[];
+  status?: string;
+  search?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+export interface TestHistoryResponse {
+  success: boolean;
+  data: {
+    tests: TestSession[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    };
+  };
+}
+
+export interface TestStatistics {
+  totalTests: number;
+  completedTests: number;
+  failedTests: number;
+  averageScore: number;
+  testsByType: Record<TestType, number>;
+}
+
+export interface BatchOperationResult {
+  success: boolean;
+  processed: number;
+  failed: number;
+  errors?: string[];
+}
+
 // 基础测试配置
 export interface BaseTestConfig {
   timeout?: number;

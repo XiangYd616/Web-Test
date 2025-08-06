@@ -2,6 +2,8 @@ import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Copy, Download, E
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
+import ExportUtils from '../../utils/exportUtils';
+import ExportModal from '../common/ExportModal';
 
 import './StressTestDetailModal.css';
 
@@ -222,22 +224,24 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = React.memo((
     return undefined;
   }, [isOpen, onClose]);
 
+  // 导出模态框状态
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+
   // 使用useCallback优化事件处理函数，避免子组件不必要的重新渲染
   const copyToClipboard = React.useCallback((text: string) => {
     navigator.clipboard.writeText(text);
   }, []);
 
-  const exportData = React.useCallback(() => {
-    if (!record) return;
-    const dataStr = JSON.stringify(record, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `stress-test-${record.id}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-  }, [record]);
+  // 处理导出
+  const handleExport = React.useCallback(async (exportType: string, data: any) => {
+    try {
+      await ExportUtils.exportByType(exportType, data);
+      setIsExportModalOpen(false);
+    } catch (error) {
+      console.error('导出失败:', error);
+      alert('导出失败，请重试');
+    }
+  }, []);
 
   const goToDetailPage = React.useCallback(() => {
     if (!record) return;
@@ -619,7 +623,7 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = React.memo((
             </button>
             <button
               type="button"
-              onClick={exportData}
+              onClick={() => setIsExportModalOpen(true)}
               className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
               title="导出数据"
             >
@@ -680,7 +684,27 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = React.memo((
   );
 
   // 使用React Portal将模态窗口渲染到document.body，确保不受父容器样式影响
-  return createPortal(modalContent, document.body);
+  return (
+    <>
+      {createPortal(modalContent, document.body)}
+      <ExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        data={{
+          testConfig: record?.config || {},
+          result: record?.results || {},
+          metrics: record?.results?.metrics || {},
+          realTimeData: record?.realTimeData || [],
+          logs: record?.logs || [],
+          errors: record?.errors || []
+        }}
+        testType="stress"
+        testId={record?.id}
+        testName={record?.testName || record?.name}
+        onExport={handleExport}
+      />
+    </>
+  );
 });
 
 export default StressTestDetailModal;

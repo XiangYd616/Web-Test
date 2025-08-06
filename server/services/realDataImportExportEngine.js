@@ -17,7 +17,7 @@ class RealDataImportExportEngine {
     this.maxFileSize = 50 * 1024 * 1024; // 50MB
     this.tempDir = path.join(process.cwd(), 'temp');
     this.outputDir = path.join(process.cwd(), 'exports');
-    
+
     this.initDirectories();
   }
 
@@ -120,7 +120,7 @@ class RealDataImportExportEngine {
 
       // 验证数据结构
       const validationResult = await this.validateImportData(data, type);
-      
+
       if (!validationResult.valid) {
         return {
           success: false,
@@ -164,11 +164,11 @@ class RealDataImportExportEngine {
    */
   async fetchDataForExport(type, options) {
     const { dateRange, includeDeleted, filters, userId } = options;
-    
+
     // 这里需要根据实际的数据模型来获取数据
     const TestHistory = require('../models/TestHistory');
     const User = require('../models/User');
-    
+
     let data = {};
 
     switch (type) {
@@ -208,7 +208,7 @@ class RealDataImportExportEngine {
    */
   async exportUsers(requestUserId, includeDeleted) {
     const User = require('../models/User');
-    
+
     const whereClause = {};
     if (!includeDeleted) {
       whereClause.deletedAt = null;
@@ -228,16 +228,16 @@ class RealDataImportExportEngine {
    */
   async exportTests(dateRange, filters, userId) {
     const TestHistory = require('../models/TestHistory');
-    
+
     const whereClause = {};
     if (userId) whereClause.userId = userId;
-    
+
     if (dateRange.start) {
       whereClause.startTime = {
         [require('sequelize').Op.gte]: new Date(dateRange.start)
       };
     }
-    
+
     if (dateRange.end) {
       whereClause.endTime = {
         [require('sequelize').Op.lte]: new Date(dateRange.end)
@@ -269,11 +269,11 @@ class RealDataImportExportEngine {
     // 这里应该从报告表获取数据
     // 暂时返回测试历史中有报告的记录
     const TestHistory = require('../models/TestHistory');
-    
+
     const whereClause = {
       reportGenerated: true
     };
-    
+
     if (userId) whereClause.userId = userId;
 
     const reports = await TestHistory.findAll({
@@ -307,7 +307,7 @@ class RealDataImportExportEngine {
   async exportToJSON(data, filePath) {
     const jsonData = JSON.stringify(data, null, 2);
     await fs.writeFile(filePath, jsonData, 'utf8');
-    
+
     const stats = await fs.stat(filePath);
     return {
       fileSize: stats.size,
@@ -321,21 +321,28 @@ class RealDataImportExportEngine {
   async exportToCSV(data, filePath) {
     // 如果数据是对象，需要展平
     let records = Array.isArray(data) ? data : this.flattenDataForCSV(data);
-    
+
     if (records.length === 0) {
       throw new Error('No data to export');
     }
 
     // 获取所有字段
     const headers = Object.keys(records[0]);
-    
+
     const csvWriter = createCsvWriter({
       path: filePath,
-      header: headers.map(h => ({ id: h, title: h }))
+      header: headers.map(h => ({ id: h, title: h })),
+      // 🔧 修复中文乱码：添加UTF-8 BOM头
+      encoding: 'utf8'
     });
 
     await csvWriter.writeRecords(records);
-    
+
+    // 🔧 修复中文乱码：手动添加BOM头
+    const originalContent = await fs.readFile(filePath, 'utf8');
+    const BOM = '\uFEFF';
+    await fs.writeFile(filePath, BOM + originalContent, 'utf8');
+
     const stats = await fs.stat(filePath);
     return {
       fileSize: stats.size,
@@ -348,7 +355,7 @@ class RealDataImportExportEngine {
    */
   async exportToXLSX(data, filePath) {
     const workbook = XLSX.utils.book_new();
-    
+
     if (Array.isArray(data)) {
       const worksheet = XLSX.utils.json_to_sheet(data);
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');
@@ -363,7 +370,7 @@ class RealDataImportExportEngine {
     }
 
     XLSX.writeFile(workbook, filePath);
-    
+
     const stats = await fs.stat(filePath);
     return {
       fileSize: stats.size,
@@ -392,10 +399,10 @@ class RealDataImportExportEngine {
           doc.addPage();
           yPosition = 100;
         }
-        
+
         doc.text(`Record ${index + 1}:`, 100, yPosition);
         yPosition += 20;
-        
+
         Object.keys(item).forEach(key => {
           if (yPosition > 700) {
             doc.addPage();
@@ -404,7 +411,7 @@ class RealDataImportExportEngine {
           doc.text(`  ${key}: ${item[key]}`, 120, yPosition);
           yPosition += 15;
         });
-        
+
         yPosition += 10;
       });
     } else {
@@ -414,20 +421,20 @@ class RealDataImportExportEngine {
           doc.addPage();
           yPosition = 100;
         }
-        
+
         doc.fontSize(16).text(section.toUpperCase(), 100, yPosition);
         yPosition += 30;
-        
+
         if (Array.isArray(data[section])) {
           data[section].forEach((item, index) => {
             if (yPosition > 700) {
               doc.addPage();
               yPosition = 100;
             }
-            
+
             doc.fontSize(12).text(`${section} ${index + 1}:`, 120, yPosition);
             yPosition += 20;
-            
+
             Object.keys(item).slice(0, 5).forEach(key => { // 限制字段数量
               if (yPosition > 700) {
                 doc.addPage();
@@ -436,11 +443,11 @@ class RealDataImportExportEngine {
               doc.text(`  ${key}: ${item[key]}`, 140, yPosition);
               yPosition += 15;
             });
-            
+
             yPosition += 10;
           });
         }
-        
+
         yPosition += 20;
       });
     }
@@ -459,7 +466,7 @@ class RealDataImportExportEngine {
           reject(error);
         }
       });
-      
+
       stream.on('error', reject);
     });
   }
@@ -495,7 +502,7 @@ class RealDataImportExportEngine {
     return new Promise((resolve, reject) => {
       const results = [];
       const stream = require('fs').createReadStream(filePath);
-      
+
       stream
         .pipe(csv())
         .on('data', (data) => results.push(data))
@@ -529,10 +536,10 @@ class RealDataImportExportEngine {
 
     // 根据类型验证数据结构
     const requiredFields = this.getRequiredFields(type);
-    
+
     data.forEach((record, index) => {
       const recordErrors = [];
-      
+
       requiredFields.forEach(field => {
         if (!record.hasOwnProperty(field) || record[field] === null || record[field] === '') {
           recordErrors.push(`Missing required field: ${field}`);
@@ -573,7 +580,7 @@ class RealDataImportExportEngine {
    */
   async executeImport(data, type, options) {
     const { skipDuplicates, updateExisting, userId } = options;
-    
+
     let processedRecords = 0;
     let skippedRecords = 0;
     let updatedRecords = 0;
@@ -622,7 +629,7 @@ class RealDataImportExportEngine {
   async validateFile(filePath, format) {
     try {
       const stats = await fs.stat(filePath);
-      
+
       if (stats.size > this.maxFileSize) {
         throw new Error(`File size exceeds maximum limit of ${this.maxFileSize / 1024 / 1024}MB`);
       }
@@ -650,7 +657,7 @@ class RealDataImportExportEngine {
    */
   flattenDataForCSV(data) {
     const records = [];
-    
+
     Object.keys(data).forEach(key => {
       if (Array.isArray(data[key])) {
         data[key].forEach(item => {
@@ -672,12 +679,12 @@ class RealDataImportExportEngine {
     try {
       const files = await fs.readdir(this.tempDir);
       const now = Date.now();
-      
+
       for (const file of files) {
         const filePath = path.join(this.tempDir, file);
         const stats = await fs.stat(filePath);
         const ageHours = (now - stats.mtime.getTime()) / (1000 * 60 * 60);
-        
+
         if (ageHours > olderThanHours) {
           await fs.unlink(filePath);
           console.log(`Cleaned up temp file: ${file}`);
