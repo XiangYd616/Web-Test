@@ -8,7 +8,10 @@ const puppeteer = require('puppeteer');
 const SQLInjectionAnalyzer = require('./analyzers/SQLInjectionAnalyzer');
 const XSSAnalyzer = require('./analyzers/XSSAnalyzer');
 const SSLAnalyzer = require('./analyzers/SSLAnalyzer');
+const AdvancedSSLAnalyzer = require('./analyzers/AdvancedSSLAnalyzer');
 const SecurityHeadersAnalyzer = require('./analyzers/SecurityHeadersAnalyzer');
+const AdvancedSecurityHeadersAnalyzer = require('./analyzers/AdvancedSecurityHeadersAnalyzer');
+const SecurityRiskAssessment = require('./utils/SecurityRiskAssessment');
 
 class SecurityAnalyzer {
   constructor(options = {}) {
@@ -19,15 +22,18 @@ class SecurityAnalyzer {
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       ...options
     };
-    
+
     this.browser = null;
     this.page = null;
-    
+
     // 分析器实例
     this.sqlInjectionAnalyzer = new SQLInjectionAnalyzer();
     this.xssAnalyzer = new XSSAnalyzer();
     this.sslAnalyzer = new SSLAnalyzer();
+    this.advancedSSLAnalyzer = new AdvancedSSLAnalyzer();
     this.securityHeadersAnalyzer = new SecurityHeadersAnalyzer();
+    this.advancedSecurityHeadersAnalyzer = new AdvancedSecurityHeadersAnalyzer();
+    this.riskAssessment = new SecurityRiskAssessment();
   }
 
   /**
@@ -35,13 +41,13 @@ class SecurityAnalyzer {
    */
   async analyze(url, config = {}) {
     const startTime = Date.now();
-    
+
     try {
       console.log(`🔒 开始安全分析: ${url}`);
-      
+
       // 初始化浏览器
       await this.initBrowser();
-      
+
       // 发送进度更新
       if (config.onProgress) {
         config.onProgress({
@@ -50,10 +56,10 @@ class SecurityAnalyzer {
           message: '加载页面...'
         });
       }
-      
+
       // 加载页面
       await this.loadPage(url);
-      
+
       // 执行各项安全检测
       const results = {
         url,
@@ -69,7 +75,7 @@ class SecurityAnalyzer {
         scores: null,
         recommendations: []
       };
-      
+
       // SQL注入检测
       if (config.onProgress) {
         config.onProgress({
@@ -78,7 +84,7 @@ class SecurityAnalyzer {
           message: '检测SQL注入漏洞...'
         });
       }
-      
+
       try {
         const sqlResults = await this.sqlInjectionAnalyzer.analyze(this.page, url);
         results.details.sqlInjection = sqlResults;
@@ -87,7 +93,7 @@ class SecurityAnalyzer {
         console.warn('SQL注入检测失败:', error.message);
         results.details.sqlInjection = { error: error.message };
       }
-      
+
       // XSS检测
       if (config.onProgress) {
         config.onProgress({
@@ -96,7 +102,7 @@ class SecurityAnalyzer {
           message: '检测XSS漏洞...'
         });
       }
-      
+
       try {
         const xssResults = await this.xssAnalyzer.analyze(this.page, url);
         results.details.xss = xssResults;
@@ -105,7 +111,7 @@ class SecurityAnalyzer {
         console.warn('XSS检测失败:', error.message);
         results.details.xss = { error: error.message };
       }
-      
+
       // SSL/TLS检测
       if (config.onProgress) {
         config.onProgress({
@@ -114,16 +120,34 @@ class SecurityAnalyzer {
           message: '检测SSL/TLS安全性...'
         });
       }
-      
+
       try {
-        const sslResults = await this.sslAnalyzer.analyze(url);
-        results.details.ssl = sslResults;
-        results.vulnerabilities.push(...sslResults.vulnerabilities);
+        // 使用高级SSL分析器进行深度分析
+        const advancedSSLResults = await this.advancedSSLAnalyzer.analyze(url);
+        results.details.ssl = advancedSSLResults;
+        results.vulnerabilities.push(...advancedSSLResults.vulnerabilities);
+
+        // 如果高级分析失败，回退到基础SSL分析
+        if (!advancedSSLResults || advancedSSLResults.vulnerabilities.length === 0) {
+          const basicSSLResults = await this.sslAnalyzer.analyze(url);
+          results.details.sslBasic = basicSSLResults;
+          if (basicSSLResults.vulnerabilities) {
+            results.vulnerabilities.push(...basicSSLResults.vulnerabilities);
+          }
+        }
       } catch (error) {
         console.warn('SSL/TLS检测失败:', error.message);
-        results.details.ssl = { error: error.message };
+
+        // 尝试基础SSL分析作为备用
+        try {
+          const basicSSLResults = await this.sslAnalyzer.analyze(url);
+          results.details.ssl = basicSSLResults;
+          results.vulnerabilities.push(...basicSSLResults.vulnerabilities);
+        } catch (fallbackError) {
+          results.details.ssl = { error: error.message, fallbackError: fallbackError.message };
+        }
       }
-      
+
       // 安全头检测
       if (config.onProgress) {
         config.onProgress({
@@ -132,16 +156,34 @@ class SecurityAnalyzer {
           message: '检测安全头配置...'
         });
       }
-      
+
       try {
-        const headerResults = await this.securityHeadersAnalyzer.analyze(url);
-        results.details.headers = headerResults;
-        results.vulnerabilities.push(...headerResults.vulnerabilities);
+        // 使用高级安全头分析器进行深度分析
+        const advancedHeaderResults = await this.advancedSecurityHeadersAnalyzer.analyze(url);
+        results.details.headers = advancedHeaderResults;
+        results.vulnerabilities.push(...advancedHeaderResults.vulnerabilities);
+
+        // 如果高级分析失败，回退到基础安全头分析
+        if (!advancedHeaderResults || advancedHeaderResults.vulnerabilities.length === 0) {
+          const basicHeaderResults = await this.securityHeadersAnalyzer.analyze(url);
+          results.details.headersBasic = basicHeaderResults;
+          if (basicHeaderResults.vulnerabilities) {
+            results.vulnerabilities.push(...basicHeaderResults.vulnerabilities);
+          }
+        }
       } catch (error) {
         console.warn('安全头检测失败:', error.message);
-        results.details.headers = { error: error.message };
+
+        // 尝试基础安全头分析作为备用
+        try {
+          const basicHeaderResults = await this.securityHeadersAnalyzer.analyze(url);
+          results.details.headers = basicHeaderResults;
+          results.vulnerabilities.push(...basicHeaderResults.vulnerabilities);
+        } catch (fallbackError) {
+          results.details.headers = { error: error.message, fallbackError: fallbackError.message };
+        }
       }
-      
+
       if (config.onProgress) {
         config.onProgress({
           percentage: 90,
@@ -149,20 +191,23 @@ class SecurityAnalyzer {
           message: '计算安全评分...'
         });
       }
-      
+
       // 计算分析时间
       results.analysisTime = Date.now() - startTime;
-      
+
       // 计算评分
       results.scores = this.calculateScores(results);
-      
+
       // 生成建议
       results.recommendations = this.generateRecommendations(results);
-      
-      console.log(`✅ 安全分析完成: ${url} - 总评分: ${results.scores.overall.score}`);
-      
+
+      // 执行风险评估
+      results.riskAssessment = this.riskAssessment.assessSecurityRisk(results);
+
+      console.log(`✅ 安全分析完成: ${url} - 总评分: ${results.scores.overall.score} - 风险等级: ${results.riskAssessment.overallRiskLevel}`);
+
       return results;
-      
+
     } catch (error) {
       console.error(`❌ 安全分析失败: ${url}`, error);
       throw error;
@@ -190,21 +235,21 @@ class SecurityAnalyzer {
           '--allow-running-insecure-content'
         ]
       });
-      
+
       this.page = await this.browser.newPage();
-      
+
       // 设置视口
       await this.page.setViewport(this.options.viewport);
-      
+
       // 设置用户代理
       await this.page.setUserAgent(this.options.userAgent);
-      
+
       // 设置超时
       this.page.setDefaultTimeout(this.options.timeout);
-      
+
       // 忽略HTTPS错误以进行SSL测试
       await this.page.setIgnoreHTTPSErrors(true);
-      
+
       console.log('✅ 浏览器初始化完成');
     } catch (error) {
       console.error('❌ 浏览器初始化失败:', error);
@@ -222,12 +267,12 @@ class SecurityAnalyzer {
         waitUntil: this.options.waitUntil,
         timeout: this.options.timeout
       });
-      
+
       // 注意：对于安全测试，我们不检查响应状态，因为可能需要测试错误页面
-      
+
       // 等待页面稳定
       await this.page.waitForTimeout(2000);
-      
+
       console.log('✅ 页面加载完成');
     } catch (error) {
       console.error('❌ 页面加载失败:', error);
@@ -261,22 +306,22 @@ class SecurityAnalyzer {
         weight: 0.15
       }
     };
-    
+
     // 计算各模块等级
     Object.keys(scores).forEach(key => {
       scores[key].grade = this.getGrade(scores[key].score);
     });
-    
+
     // 计算总分
     const totalScore = Object.values(scores).reduce((sum, category) => {
       return sum + (category.score * category.weight);
     }, 0);
-    
+
     scores.overall = {
       score: Math.round(totalScore),
       grade: this.getGrade(Math.round(totalScore))
     };
-    
+
     return scores;
   }
 
@@ -287,14 +332,14 @@ class SecurityAnalyzer {
     if (!moduleResults || moduleResults.error) {
       return 50; // 检测失败给中等分数
     }
-    
+
     const vulnerabilities = moduleResults.vulnerabilities || [];
     if (vulnerabilities.length === 0) {
       return 100; // 无漏洞
     }
-    
+
     let score = 100;
-    
+
     vulnerabilities.forEach(vuln => {
       switch (vuln.severity) {
         case 'critical':
@@ -311,7 +356,7 @@ class SecurityAnalyzer {
           break;
       }
     });
-    
+
     return Math.max(0, score);
   }
 
@@ -322,11 +367,11 @@ class SecurityAnalyzer {
     if (!sslResults || sslResults.error) {
       return 50;
     }
-    
+
     if (!sslResults.summary.httpsEnabled) {
       return 0; // 未启用HTTPS
     }
-    
+
     return this.calculateModuleScore(sslResults);
   }
 
@@ -337,8 +382,14 @@ class SecurityAnalyzer {
     if (!headerResults || headerResults.error) {
       return 50;
     }
-    
-    return headerResults.summary.securityScore || this.calculateModuleScore(headerResults);
+
+    // 如果是高级分析结果，使用其评分
+    if (headerResults.securityScore !== undefined) {
+      return headerResults.securityScore;
+    }
+
+    // 否则使用传统评分方法
+    return headerResults.summary?.securityScore || this.calculateModuleScore(headerResults);
   }
 
   /**
@@ -357,7 +408,7 @@ class SecurityAnalyzer {
    */
   generateRecommendations(results) {
     const recommendations = [];
-    
+
     // 收集所有漏洞的建议
     results.vulnerabilities.forEach(vuln => {
       if (vuln.recommendation) {
@@ -372,7 +423,7 @@ class SecurityAnalyzer {
         });
       }
     });
-    
+
     // 添加通用安全建议
     if (results.scores.overall.score < 80) {
       recommendations.push({
@@ -383,7 +434,7 @@ class SecurityAnalyzer {
         impact: 'high'
       });
     }
-    
+
     // 按优先级排序
     return recommendations.sort((a, b) => {
       const priorityOrder = { 'critical': 0, 'high': 1, 'medium': 2, 'low': 3 };
@@ -437,12 +488,12 @@ class SecurityAnalyzer {
         await this.page.close();
         this.page = null;
       }
-      
+
       if (this.browser) {
         await this.browser.close();
         this.browser = null;
       }
-      
+
       console.log('✅ 资源清理完成');
     } catch (error) {
       console.error('❌ 资源清理失败:', error);

@@ -7,14 +7,15 @@ class ScoreCalculator {
   constructor() {
     // 各模块权重配置
     this.weights = {
-      meta: 0.25,           // Meta标签权重 25%
-      content: 0.25,        // 内容质量权重 25%
-      performance: 0.20,    // 性能权重 20%
+      meta: 0.20,           // Meta标签权重 20%
+      content: 0.20,        // 基础内容权重 20%
+      contentQuality: 0.20, // 内容质量权重 20%
+      performance: 0.15,    // 性能权重 15%
       structuredData: 0.10, // 结构化数据权重 10%
       links: 0.10,          // 链接权重 10%
-      mobile: 0.10          // 移动端优化权重 10%
+      mobile: 0.05          // 移动端优化权重 5%
     };
-    
+
     // 评级阈值
     this.gradeThresholds = {
       'A+': 95,
@@ -35,16 +36,17 @@ class ScoreCalculator {
     const scores = {
       meta: this.calculateMetaScore(analysisResults.meta),
       content: this.calculateContentScore(analysisResults.content),
+      contentQuality: this.calculateContentQualityScore(analysisResults.contentQuality),
       performance: this.calculatePerformanceScore(analysisResults.performance),
       structuredData: this.calculateStructuredDataScore(analysisResults.structuredData),
       links: this.calculateLinksScore(analysisResults.links),
       mobile: this.calculateMobileScore(analysisResults.mobile)
     };
-    
+
     // 计算综合评分
     const overallScore = this.calculateOverallScore(scores);
     const grade = this.getGrade(overallScore);
-    
+
     return {
       ...scores,
       overall: {
@@ -60,11 +62,11 @@ class ScoreCalculator {
    */
   calculateMetaScore(metaAnalysis) {
     if (!metaAnalysis) return { score: 0, grade: 'F', details: {} };
-    
+
     let score = 0;
     let maxScore = 0;
     const details = {};
-    
+
     // Title评分 (40%)
     maxScore += 40;
     if (metaAnalysis.title?.exists && !metaAnalysis.title?.isEmpty) {
@@ -81,7 +83,7 @@ class ScoreCalculator {
     } else {
       details.title = { score: 0, status: 'missing' };
     }
-    
+
     // Description评分 (30%)
     maxScore += 30;
     if (metaAnalysis.description?.exists && !metaAnalysis.description?.isEmpty) {
@@ -98,7 +100,7 @@ class ScoreCalculator {
     } else {
       details.description = { score: 0, status: 'missing' };
     }
-    
+
     // Open Graph评分 (15%)
     maxScore += 15;
     if (metaAnalysis.openGraph?.exists) {
@@ -112,7 +114,7 @@ class ScoreCalculator {
     } else {
       details.openGraph = { score: 0, status: 'missing' };
     }
-    
+
     // Canonical评分 (10%)
     maxScore += 10;
     if (metaAnalysis.canonical?.exists && metaAnalysis.canonical?.isValid) {
@@ -124,7 +126,7 @@ class ScoreCalculator {
     } else {
       details.canonical = { score: 0, status: 'missing' };
     }
-    
+
     // Viewport评分 (5%)
     maxScore += 5;
     if (metaAnalysis.viewport?.exists && metaAnalysis.viewport?.isResponsive) {
@@ -136,7 +138,7 @@ class ScoreCalculator {
     } else {
       details.viewport = { score: 0, status: 'missing' };
     }
-    
+
     const finalScore = Math.round((score / maxScore) * 100);
     return {
       score: finalScore,
@@ -150,11 +152,11 @@ class ScoreCalculator {
    */
   calculateContentScore(contentAnalysis) {
     if (!contentAnalysis) return { score: 0, grade: 'F', details: {} };
-    
+
     let score = 0;
     let maxScore = 0;
     const details = {};
-    
+
     // 内容长度评分 (30%)
     maxScore += 30;
     if (contentAnalysis.textContent?.isOptimalLength) {
@@ -167,7 +169,7 @@ class ScoreCalculator {
       score += 8;
       details.length = { score: 8, status: 'poor' };
     }
-    
+
     // 标题结构评分 (25%)
     maxScore += 25;
     if (contentAnalysis.headingStructure?.hasH1 && !contentAnalysis.headingStructure?.hasMultipleH1) {
@@ -184,7 +186,7 @@ class ScoreCalculator {
     } else {
       details.headings = { score: 0, status: 'missing' };
     }
-    
+
     // 图片优化评分 (20%)
     maxScore += 20;
     if (contentAnalysis.images?.hasProperAltTexts) {
@@ -197,7 +199,7 @@ class ScoreCalculator {
       score += 5;
       details.images = { score: 5, status: 'poor' };
     }
-    
+
     // 关键词优化评分 (15%)
     maxScore += 15;
     if (contentAnalysis.keywords?.isOptimalDensity && !contentAnalysis.keywords?.isKeywordStuffing) {
@@ -210,7 +212,7 @@ class ScoreCalculator {
       score += 3;
       details.keywords = { score: 3, status: 'poor' };
     }
-    
+
     // 可读性评分 (10%)
     maxScore += 10;
     if (contentAnalysis.readability?.isEasyToRead) {
@@ -223,7 +225,7 @@ class ScoreCalculator {
       score += 2;
       details.readability = { score: 2, status: 'poor' };
     }
-    
+
     const finalScore = Math.round((score / maxScore) * 100);
     return {
       score: finalScore,
@@ -233,14 +235,111 @@ class ScoreCalculator {
   }
 
   /**
+   * 计算内容质量评分
+   */
+  calculateContentQualityScore(contentQualityAnalysis) {
+    if (!contentQualityAnalysis) return { score: 0, grade: 'F', details: {} };
+
+    let score = 0;
+    let maxScore = 0;
+    const details = {};
+
+    // 内容深度评分 (25%)
+    maxScore += 25;
+    if (contentQualityAnalysis.contentDepth?.hasAdequateDepth) {
+      score += Math.round(contentQualityAnalysis.contentDepth.depthScore * 0.25);
+      details.depth = {
+        score: Math.round(contentQualityAnalysis.contentDepth.depthScore * 0.25),
+        status: contentQualityAnalysis.contentDepth.depthScore >= 80 ? 'excellent' : 'good'
+      };
+    } else {
+      score += 5;
+      details.depth = { score: 5, status: 'poor' };
+    }
+
+    // 用户参与度评分 (20%)
+    maxScore += 20;
+    if (contentQualityAnalysis.userEngagement?.isEngaging) {
+      score += Math.round(contentQualityAnalysis.userEngagement.engagementScore * 0.20);
+      details.engagement = {
+        score: Math.round(contentQualityAnalysis.userEngagement.engagementScore * 0.20),
+        status: contentQualityAnalysis.userEngagement.engagementScore >= 80 ? 'excellent' : 'good'
+      };
+    } else {
+      score += 4;
+      details.engagement = { score: 4, status: 'poor' };
+    }
+
+    // 专业性评分 (20%)
+    maxScore += 20;
+    if (contentQualityAnalysis.expertiseSignals?.showsExpertise) {
+      score += Math.round(contentQualityAnalysis.expertiseSignals.expertiseScore * 0.20);
+      details.expertise = {
+        score: Math.round(contentQualityAnalysis.expertiseSignals.expertiseScore * 0.20),
+        status: contentQualityAnalysis.expertiseSignals.expertiseScore >= 80 ? 'excellent' : 'good'
+      };
+    } else {
+      score += 4;
+      details.expertise = { score: 4, status: 'poor' };
+    }
+
+    // 主题相关性评分 (15%)
+    maxScore += 15;
+    if (contentQualityAnalysis.topicalRelevance?.isTopicallyFocused) {
+      score += Math.round(contentQualityAnalysis.topicalRelevance.topicalFocus * 15);
+      details.relevance = {
+        score: Math.round(contentQualityAnalysis.topicalRelevance.topicalFocus * 15),
+        status: contentQualityAnalysis.topicalRelevance.topicalFocus >= 0.8 ? 'excellent' : 'good'
+      };
+    } else {
+      score += 3;
+      details.relevance = { score: 3, status: 'poor' };
+    }
+
+    // 可操作性评分 (10%)
+    maxScore += 10;
+    if (contentQualityAnalysis.actionability?.isActionable) {
+      score += Math.round(contentQualityAnalysis.actionability.actionabilityScore * 0.10);
+      details.actionability = {
+        score: Math.round(contentQualityAnalysis.actionability.actionabilityScore * 0.10),
+        status: contentQualityAnalysis.actionability.actionabilityScore >= 80 ? 'excellent' : 'good'
+      };
+    } else {
+      score += 2;
+      details.actionability = { score: 2, status: 'poor' };
+    }
+
+    // 内容完整性评分 (10%)
+    maxScore += 10;
+    if (contentQualityAnalysis.contentCompleteness?.isComplete) {
+      score += Math.round(contentQualityAnalysis.contentCompleteness.coverageScore * 0.10);
+      details.completeness = {
+        score: Math.round(contentQualityAnalysis.contentCompleteness.coverageScore * 0.10),
+        status: contentQualityAnalysis.contentCompleteness.coverageScore >= 80 ? 'excellent' : 'good'
+      };
+    } else {
+      score += 2;
+      details.completeness = { score: 2, status: 'poor' };
+    }
+
+    const finalScore = Math.round((score / maxScore) * 100);
+    return {
+      score: finalScore,
+      grade: this.getGrade(finalScore),
+      details,
+      overallQuality: contentQualityAnalysis.overallQuality || finalScore
+    };
+  }
+
+  /**
    * 计算性能评分
    */
   calculatePerformanceScore(performanceAnalysis) {
     if (!performanceAnalysis) return { score: 0, grade: 'F', details: {} };
-    
+
     // 直接使用性能分析器的评分
     const score = performanceAnalysis.score || 0;
-    
+
     return {
       score,
       grade: this.getGrade(score),
@@ -266,11 +365,11 @@ class ScoreCalculator {
    */
   calculateStructuredDataScore(structuredDataAnalysis) {
     if (!structuredDataAnalysis) return { score: 0, grade: 'F', details: {} };
-    
+
     // 这里需要实现结构化数据的评分逻辑
     // 暂时返回基础评分
     const score = 75; // 默认评分
-    
+
     return {
       score,
       grade: this.getGrade(score),
@@ -283,11 +382,11 @@ class ScoreCalculator {
    */
   calculateLinksScore(linkAnalysis) {
     if (!linkAnalysis) return { score: 0, grade: 'F', details: {} };
-    
+
     // 这里需要实现链接分析的评分逻辑
     // 暂时返回基础评分
     const score = 80; // 默认评分
-    
+
     return {
       score,
       grade: this.getGrade(score),
@@ -300,11 +399,11 @@ class ScoreCalculator {
    */
   calculateMobileScore(mobileAnalysis) {
     if (!mobileAnalysis) return { score: 0, grade: 'F', details: {} };
-    
+
     // 这里需要实现移动端优化的评分逻辑
     // 暂时返回基础评分
     const score = 85; // 默认评分
-    
+
     return {
       score,
       grade: this.getGrade(score),
@@ -318,14 +417,14 @@ class ScoreCalculator {
   calculateOverallScore(scores) {
     let weightedSum = 0;
     let totalWeight = 0;
-    
+
     Object.keys(this.weights).forEach(key => {
       if (scores[key] && typeof scores[key].score === 'number') {
         weightedSum += scores[key].score * this.weights[key];
         totalWeight += this.weights[key];
       }
     });
-    
+
     return totalWeight > 0 ? Math.round(weightedSum / totalWeight) : 0;
   }
 
