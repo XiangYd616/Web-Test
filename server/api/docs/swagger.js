@@ -25,7 +25,7 @@ const options = {
     },
     servers: [
       {
-        url: process.env.NODE_ENV === 'production' 
+        url: process.env.NODE_ENV === 'production'
           ? 'https://api.testweb.com/api/v1'
           : 'http://localhost:3001/api/v1',
         description: process.env.NODE_ENV === 'production' ? '生产环境' : '开发环境'
@@ -80,7 +80,7 @@ const options = {
             }
           }
         },
-        
+
         // 错误响应格式
         ErrorResponse: {
           type: 'object',
@@ -110,7 +110,7 @@ const options = {
             }
           }
         },
-        
+
         // 分页响应格式
         PaginatedResponse: {
           allOf: [
@@ -161,7 +161,7 @@ const options = {
             }
           ]
         },
-        
+
         // 用户模型
         User: {
           type: 'object',
@@ -219,7 +219,7 @@ const options = {
             }
           }
         },
-        
+
         // 测试结果模型
         TestResult: {
           type: 'object',
@@ -302,7 +302,7 @@ const options = {
             }
           }
         },
-        
+
         // 登录请求
         LoginRequest: {
           type: 'object',
@@ -319,7 +319,7 @@ const options = {
             }
           }
         },
-        
+
         // 注册请求
         RegisterRequest: {
           type: 'object',
@@ -355,7 +355,7 @@ const options = {
             }
           }
         },
-        
+
         // 启动测试请求
         StartTestRequest: {
           type: 'object',
@@ -416,7 +416,9 @@ const options = {
   },
   apis: [
     './server/api/v1/routes/*.js', // 路由文件路径
-    './server/api/v1/index.js'     // 主API文件
+    './server/api/v1/index.js',    // 主API文件
+    './server/routes/*.js',        // 主要路由文件
+    './server/api/docs/*.js'       // API文档定义
   ]
 };
 
