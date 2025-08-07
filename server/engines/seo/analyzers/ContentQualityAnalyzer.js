@@ -1098,6 +1098,250 @@ class ContentQualityAnalyzer {
 
     return suggestions;
   }
+  /**
+   * 分析内容原创性
+   */
+  analyzeOriginality(content) {
+    // 高级原创性检测
+    const duplicatePatterns = [
+      /复制.*粘贴/gi,
+      /转载.*来源/gi,
+      /摘自.*网站/gi,
+      /来源.*网络/gi,
+      /引用.*文章/gi,
+      /转自.*公众号/gi
+    ];
+
+    const commonPhrases = [
+      /众所周知/gi,
+      /据说/gi,
+      /有人说/gi,
+      /网上说/gi,
+      /据报道/gi,
+      /据了解/gi,
+      /据悉/gi
+    ];
+
+    let originalityScore = 100;
+    let issues = [];
+    let duplicateCount = 0;
+    let commonPhraseCount = 0;
+
+    // 检测明显的复制标识
+    duplicatePatterns.forEach(pattern => {
+      const matches = content.match(pattern);
+      if (matches) {
+        duplicateCount += matches.length;
+        originalityScore -= matches.length * 15;
+        issues.push(`检测到${matches.length}处可能的复制内容标识`);
+      }
+    });
+
+    // 检测常见套话
+    commonPhrases.forEach(pattern => {
+      const matches = content.match(pattern);
+      if (matches) {
+        commonPhraseCount += matches.length;
+        originalityScore -= matches.length * 5;
+      }
+    });
+
+    if (commonPhraseCount > 5) {
+      issues.push('内容中包含过多常见套话，缺乏独特性');
+    }
+
+    // 检测内容重复度
+    const sentences = content.split(/[。！？.!?]/).filter(s => s.trim().length > 10);
+    const uniqueSentences = new Set(sentences.map(s => s.trim().toLowerCase()));
+    const repetitionRate = sentences.length > 0 ? 1 - (uniqueSentences.size / sentences.length) : 0;
+
+    if (repetitionRate > 0.3) {
+      originalityScore -= repetitionRate * 30;
+      issues.push('内容重复度较高，建议增加多样性');
+    }
+
+    // 检测内容深度
+    const technicalTerms = content.match(/[A-Z]{2,}|[a-z]+[A-Z][a-z]+|\d+%|\d+px|\d+em/g) || [];
+    const depthScore = Math.min(technicalTerms.length / 10, 1) * 20;
+    originalityScore += depthScore;
+
+    return {
+      score: Math.max(0, Math.min(100, originalityScore)),
+      duplicateCount,
+      commonPhraseCount,
+      repetitionRate: Math.round(repetitionRate * 100),
+      technicalTermsCount: technicalTerms.length,
+      issues,
+      suggestions: this.generateOriginalitySuggestions(originalityScore, duplicateCount, commonPhraseCount, repetitionRate)
+    };
+  }
+
+  /**
+   * 生成原创性建议
+   */
+  generateOriginalitySuggestions(score, duplicateCount, commonPhraseCount, repetitionRate) {
+    const suggestions = [];
+
+    if (score < 60) {
+      suggestions.push('内容原创性需要大幅提升');
+    }
+
+    if (duplicateCount > 0) {
+      suggestions.push('避免直接复制其他来源的内容');
+      suggestions.push('如需引用，请注明来源并添加自己的分析');
+    }
+
+    if (commonPhraseCount > 5) {
+      suggestions.push('减少使用常见套话，增加独特表达');
+      suggestions.push('用具体数据和案例替代模糊表述');
+    }
+
+    if (repetitionRate > 0.3) {
+      suggestions.push('避免重复表达，增加内容多样性');
+      suggestions.push('使用同义词和不同句式表达相同观点');
+    }
+
+    if (score >= 80) {
+      suggestions.push('内容原创性良好，继续保持');
+    }
+
+    return suggestions;
+  }
+
+  /**
+   * 分析内容深度和专业性
+   */
+  analyzeContentDepth(content, $) {
+    const analysis = {
+      wordCount: content.length,
+      paragraphCount: content.split(/\n\s*\n/).length,
+      averageParagraphLength: 0,
+      technicalTerms: [],
+      dataPoints: [],
+      citations: [],
+      depth: 'shallow'
+    };
+
+    // 计算平均段落长度
+    const paragraphs = content.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+    analysis.averageParagraphLength = paragraphs.length > 0 ?
+      Math.round(content.length / paragraphs.length) : 0;
+
+    // 检测技术术语
+    const techPatterns = [
+      /API|SDK|HTTP|HTTPS|JSON|XML|CSS|HTML|JavaScript|Python|Java|React|Vue|Angular/gi,
+      /数据库|算法|架构|框架|接口|协议|加密|安全|性能|优化/gi,
+      /机器学习|人工智能|大数据|云计算|区块链|物联网/gi
+    ];
+
+    techPatterns.forEach(pattern => {
+      const matches = content.match(pattern) || [];
+      analysis.technicalTerms.push(...matches);
+    });
+
+    // 检测数据点
+    const dataPatterns = [
+      /\d+%/g,
+      /\d+倍/g,
+      /\d+万/g,
+      /\d+亿/g,
+      /\d+年/g,
+      /\$\d+/g
+    ];
+
+    dataPatterns.forEach(pattern => {
+      const matches = content.match(pattern) || [];
+      analysis.dataPoints.push(...matches);
+    });
+
+    // 检测引用和来源
+    const citationPatterns = [
+      /根据.*研究/gi,
+      /.*报告显示/gi,
+      /.*数据表明/gi,
+      /来源：/gi,
+      /参考：/gi
+    ];
+
+    citationPatterns.forEach(pattern => {
+      const matches = content.match(pattern) || [];
+      analysis.citations.push(...matches);
+    });
+
+    // 判断内容深度
+    const depthScore = this.calculateDepthScore(analysis);
+    if (depthScore >= 80) analysis.depth = 'deep';
+    else if (depthScore >= 60) analysis.depth = 'medium';
+    else analysis.depth = 'shallow';
+
+    analysis.depthScore = depthScore;
+    analysis.suggestions = this.generateDepthSuggestions(analysis);
+
+    return analysis;
+  }
+
+  /**
+   * 计算内容深度评分
+   */
+  calculateDepthScore(analysis) {
+    let score = 0;
+
+    // 字数评分 (30%)
+    if (analysis.wordCount >= 2000) score += 30;
+    else if (analysis.wordCount >= 1000) score += 20;
+    else if (analysis.wordCount >= 500) score += 10;
+
+    // 技术术语评分 (25%)
+    const uniqueTerms = new Set(analysis.technicalTerms.map(t => t.toLowerCase()));
+    if (uniqueTerms.size >= 10) score += 25;
+    else if (uniqueTerms.size >= 5) score += 15;
+    else if (uniqueTerms.size >= 2) score += 8;
+
+    // 数据点评分 (25%)
+    if (analysis.dataPoints.length >= 10) score += 25;
+    else if (analysis.dataPoints.length >= 5) score += 15;
+    else if (analysis.dataPoints.length >= 2) score += 8;
+
+    // 引用评分 (20%)
+    if (analysis.citations.length >= 5) score += 20;
+    else if (analysis.citations.length >= 2) score += 12;
+    else if (analysis.citations.length >= 1) score += 6;
+
+    return Math.min(100, score);
+  }
+
+  /**
+   * 生成深度分析建议
+   */
+  generateDepthSuggestions(analysis) {
+    const suggestions = [];
+
+    if (analysis.wordCount < 500) {
+      suggestions.push('内容长度偏短，建议增加更多详细信息');
+    }
+
+    if (analysis.technicalTerms.length < 3) {
+      suggestions.push('增加相关的专业术语和概念');
+    }
+
+    if (analysis.dataPoints.length < 3) {
+      suggestions.push('添加具体的数据和统计信息');
+    }
+
+    if (analysis.citations.length === 0) {
+      suggestions.push('引用权威来源和研究报告');
+    }
+
+    if (analysis.averageParagraphLength > 200) {
+      suggestions.push('段落过长，建议分解为更小的段落');
+    }
+
+    if (analysis.depthScore >= 80) {
+      suggestions.push('内容深度和专业性良好');
+    }
+
+    return suggestions;
+  }
 }
 
 module.exports = ContentQualityAnalyzer;

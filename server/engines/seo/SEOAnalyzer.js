@@ -274,7 +274,32 @@ class SEOAnalyzer {
    */
   async analyzeContentQuality(pageData) {
     const analyzer = new ContentQualityAnalyzer();
-    return await analyzer.analyze(pageData);
+    const basicAnalysis = await analyzer.analyze(pageData);
+
+    // 添加高级内容分析
+    const content = pageData.$ ? pageData.$('body').text() : pageData.content || '';
+
+    // 原创性分析
+    const originality = analyzer.analyzeOriginality(content);
+
+    // 内容深度分析
+    const depth = analyzer.analyzeContentDepth(content, pageData.$);
+
+    return {
+      ...basicAnalysis,
+      originality,
+      depth,
+      advanced: {
+        hasOriginalityIssues: originality.score < 70,
+        hasDepthIssues: depth.depthScore < 60,
+        overallQualityScore: Math.round((basicAnalysis.overallScore + originality.score + depth.depthScore) / 3),
+        recommendations: [
+          ...basicAnalysis.recommendations || [],
+          ...originality.suggestions,
+          ...depth.suggestions
+        ]
+      }
+    };
   }
 
   /**

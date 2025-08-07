@@ -8,6 +8,7 @@ const puppeteer = require('puppeteer');
 const CoreWebVitalsAnalyzer = require('./analyzers/CoreWebVitalsAnalyzer');
 const ResourceAnalyzer = require('./analyzers/ResourceAnalyzer');
 const AdvancedPerformanceAnalyzer = require('./analyzers/AdvancedPerformanceAnalyzer');
+const RealTimePerformanceMonitor = require('./monitors/RealTimePerformanceMonitor');
 
 class PerformanceAnalyzer {
   constructor(options = {}) {
@@ -26,6 +27,7 @@ class PerformanceAnalyzer {
     this.coreWebVitalsAnalyzer = new CoreWebVitalsAnalyzer();
     this.resourceAnalyzer = new ResourceAnalyzer();
     this.advancedAnalyzer = new AdvancedPerformanceAnalyzer();
+    this.realTimeMonitor = new RealTimePerformanceMonitor();
   }
 
   /**
@@ -126,12 +128,53 @@ class PerformanceAnalyzer {
       console.log(`✅ 性能分析完成: ${url} - 总评分: ${results.scores.overall.score}`);
 
       return results;
-
     } catch (error) {
-      console.error(`❌ 性能分析失败: ${url}`, error);
+      console.error('性能分析失败:', error);
       throw error;
-    } finally {
-      await this.cleanup();
+    }
+  }
+
+  /**
+   * 启动实时性能监控
+   */
+  async startRealTimeMonitoring(config) {
+    return await this.realTimeMonitor.startMonitoring(config);
+  }
+
+  /**
+   * 停止实时性能监控
+   */
+  async stopRealTimeMonitoring(monitorId) {
+    return await this.realTimeMonitor.stopMonitoring(monitorId);
+  }
+
+  /**
+   * 获取性能趋势分析
+   */
+  getPerformanceTrends(monitorId, timeRange) {
+    return this.realTimeMonitor.getPerformanceTrends(monitorId, timeRange);
+  }
+
+  /**
+   * 获取监控状态
+   */
+  getMonitoringStatus(monitorId) {
+    return this.realTimeMonitor.getMonitoringStatus(monitorId);
+  }
+
+  /**
+   * 获取所有监控任务
+   */
+  getAllMonitors() {
+    return this.realTimeMonitor.getAllMonitors();
+  }
+
+  /**
+   * 清理资源
+   */
+  async cleanup() {
+    if (this.realTimeMonitor) {
+      await this.realTimeMonitor.cleanup();
     }
   }
 
