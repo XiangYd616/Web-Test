@@ -462,7 +462,4 @@ class CompatibilityEngine {
   }
 }
 
-// 创建单例实例
-const compatibilityEngine = new CompatibilityEngine();
-
-module.exports = compatibilityEngine;
+module.exports = CompatibilityEngine;
