@@ -1235,6 +1235,7 @@ const SEOTest: React.FC = () => {
               </div>
             )}
           </>
+        )}
       </UnifiedTestPageWithHistory>
     </TestPageLayout>
   );
