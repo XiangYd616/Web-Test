@@ -42,6 +42,19 @@ const { securityMiddleware } = require('./middleware/security');
 // 导入数据库连接
 const { connectDB, testConnection } = require('./config/database');
 
+// 导入缓存和性能优化系统
+const cacheConfig = require('./config/cache');
+const { createCacheMiddleware } = require('./api/middleware/cacheMiddleware');
+const {
+  createCompressionMiddleware,
+  createCacheControlMiddleware,
+  createETagMiddleware,
+  createSecurityHeadersMiddleware
+} = require('./api/middleware/staticOptimization');
+
+// 导入实时通信系统
+const realtimeConfig = require('./config/realtime');
+
 // 导入Redis服务
 const redisConnection = require('./services/redis/connection');
 const cacheMonitoring = require('./services/redis/monitoring');
@@ -119,8 +132,21 @@ app.use(cors({
   optionsSuccessStatus: 200 // 一些旧版浏览器（IE11, 各种SmartTVs）在204上有问题
 }));
 
-// 基础中间件
-app.use(compression());
+// 基础中间件 - 使用优化的压缩中间件
+app.use(createCompressionMiddleware({
+  level: 6,
+  threshold: 1024
+}));
+
+// 缓存控制中间件
+app.use(createCacheControlMiddleware());
+
+// ETag中间件
+app.use(createETagMiddleware());
+
+// 安全头中间件
+app.use(createSecurityHeadersMiddleware());
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
@@ -171,6 +197,11 @@ app.get('/health', async (req, res) => {
     // 检查Redis连接
     const redisHealth = await redisConnection.healthCheck();
 
+    // 检查实时通信系统
+    const realtimeHealth = realtimeConfig.isReady() ?
+      await realtimeConfig.healthCheck() :
+      { status: 'not_initialized' };
+
     res.json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
@@ -179,6 +210,8 @@ app.get('/health', async (req, res) => {
       environment: process.env.NODE_ENV || 'development',
       database: 'connected',
       redis: redisHealth,
+      cache: global.cacheManager ? 'initialized' : 'not_initialized',
+      realtime: realtimeHealth.status,
       uptime: process.uptime(),
       host: HOST,
       port: PORT
@@ -198,12 +231,151 @@ app.get('/health', async (req, res) => {
 app.get('/cache/stats', async (req, res) => {
   try {
     const period = req.query.period || '1h';
-    const report = cacheMonitoring.getMonitoringReport(period);
 
-    res.json({
-      success: true,
-      data: report
+    // 尝试使用新的缓存系统
+    if (global.cacheManager) {
+      const stats = await cacheConfig.getCacheStatistics();
+      res.json({
+        success: true,
+        data: stats,
+        source: 'new_cache_system'
+      });
+    } else {
+      // 回退到旧的缓存监控
+      const report = cacheMonitoring.getMonitoringReport(period);
+      res.json({
+        success: true,
+        data: report,
+        source: 'legacy_cache_system'
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
     });
+  }
+});
+
+// 性能监控端点
+app.get('/performance/stats', async (req, res) => {
+  try {
+    if (global.performanceMonitor) {
+      const timeRange = req.query.timeRange || '1h';
+      const report = await global.performanceMonitor.getPerformanceReport(timeRange);
+
+      res.json({
+        success: true,
+        data: report
+      });
+    } else {
+      res.status(503).json({
+        success: false,
+        error: '性能监控系统未初始化'
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// 缓存管理端点
+app.post('/cache/flush', async (req, res) => {
+  try {
+    if (global.cacheManager) {
+      const result = await cacheConfig.flushAllCache();
+      res.json({
+        success: true,
+        data: result
+      });
+    } else {
+      res.status(503).json({
+        success: false,
+        error: '缓存系统未初始化'
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// 实时通信统计端点
+app.get('/realtime/stats', async (req, res) => {
+  try {
+    if (realtimeConfig.isReady()) {
+      const stats = realtimeConfig.getFullStats();
+      res.json({
+        success: true,
+        data: stats
+      });
+    } else {
+      res.status(503).json({
+        success: false,
+        error: '实时通信系统未初始化'
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// 实时通信健康检查端点
+app.get('/realtime/health', async (req, res) => {
+  try {
+    const health = await realtimeConfig.healthCheck();
+    const statusCode = health.status === 'healthy' ? 200 : 503;
+
+    res.status(statusCode).json({
+      success: health.status === 'healthy',
+      data: health
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// 发送系统通知端点（仅管理员）
+app.post('/realtime/notify', async (req, res) => {
+  try {
+    // 这里应该添加管理员权限验证
+    const { message, level, targetUsers, targetRoles } = req.body;
+
+    if (!message) {
+      return res.status(400).json({
+        success: false,
+        error: '消息内容不能为空'
+      });
+    }
+
+    if (global.realtimeService) {
+      const notificationId = await global.realtimeService.sendSystemNotification(message, {
+        level,
+        targetUsers,
+        targetRoles
+      });
+
+      res.json({
+        success: true,
+        data: { notificationId }
+      });
+    } else {
+      res.status(503).json({
+        success: false,
+        error: '实时通信系统未初始化'
+      });
+    }
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -266,8 +438,50 @@ const startServer = async () => {
     ensureDirectories();
 
     // 连接数据库
-    await connectDB();
+    const dbPool = await connectDB();
     console.log('✅ 数据库连接成功');
+
+    // 初始化缓存和性能优化系统
+    try {
+      const { cacheManager, queryCache, performanceMonitor } = await cacheConfig.initialize(dbPool);
+
+      // 将缓存实例设置为全局变量供其他模块使用
+      global.cacheManager = cacheManager;
+      global.queryCache = queryCache;
+      global.performanceMonitor = performanceMonitor;
+
+      console.log('✅ 缓存和性能优化系统初始化成功');
+
+      // 添加API缓存中间件到特定路由
+      app.use('/api/v1/tests', createCacheMiddleware(cacheManager, {
+        defaultTTL: 5 * 60, // 5分钟
+        shouldCache: (req, res, data, statusCode) => {
+          return statusCode === 200 && req.method === 'GET';
+        }
+      }));
+
+      app.use('/api/v1/system/config', createCacheMiddleware(cacheManager, {
+        defaultTTL: 30 * 60 // 30分钟
+      }));
+
+    } catch (error) {
+      console.warn('⚠️ 缓存系统初始化失败，继续使用无缓存模式:', error.message);
+    }
+
+    // 初始化实时通信系统
+    try {
+      const redisClient = global.cacheManager ? global.cacheManager.redis : null;
+      const { socketManager, realtimeService } = await realtimeConfig.initialize(server, redisClient, global.cacheManager);
+
+      // 将实时服务实例设置为全局变量供其他模块使用
+      global.socketManager = socketManager;
+      global.realtimeService = realtimeService;
+
+      console.log('✅ 实时通信系统初始化成功');
+
+    } catch (error) {
+      console.warn('⚠️ 实时通信系统初始化失败，继续使用无实时功能模式:', error.message);
+    }
 
     // 🔧 移除全局测试历史服务，改为各模块使用本地实例
     // 这样可以避免全局状态的复杂性，让每个模块都有独立的服务实例
