@@ -5,6 +5,7 @@
 const fs = require('fs');
 const path = require('path');
 const Logger = require('../utils/logger');
+const ErrorNotificationHelper = require('../utils/ErrorNotificationHelper');
 
 /**
  * 异步路由包装器
@@ -14,6 +15,9 @@ const asyncHandler = (fn) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
 };
+
+// 创建全局错误通知助手
+const globalErrorNotifier = new ErrorNotificationHelper('System');
 
 /**
  * 全局错误处理中间件
@@ -90,18 +94,32 @@ const errorHandler = (err, req, res, next) => {
   const statusCode = error.statusCode || err.statusCode || 500;
   const message = error.message || '服务器内部错误';
 
-  // 标准化错误响应格式
+  // 获取错误分类和建议
+  const errorCategory = globalErrorNotifier.getErrorCategory(error);
+  const errorSeverity = globalErrorNotifier.getErrorSeverity(error);
+  const isRetryable = globalErrorNotifier.isRetryableError(error);
+  const suggestions = globalErrorNotifier.getErrorSuggestions(error);
+
+  // 标准化错误响应格式 (符合OpenAPI规范)
   const response = {
     success: false,
-    message,
-    code: error.code || err.code || statusCode,
-    timestamp: new Date().toISOString(),
-    path: req.originalUrl,
-    method: req.method,
-    ...(process.env.NODE_ENV === 'development' && {
-      stack: err.stack,
-      details: err
-    })
+    error: {
+      code: error.code || err.code || `HTTP_${statusCode}`,
+      message,
+      details: {
+        path: req.originalUrl,
+        method: req.method,
+        timestamp: new Date().toISOString(),
+        category: errorCategory,
+        severity: errorSeverity
+      },
+      retryable: isRetryable,
+      suggestions,
+      ...(process.env.NODE_ENV === 'development' && {
+        stack: err.stack,
+        originalError: err
+      })
+    }
   };
 
   res.status(statusCode).json(response);

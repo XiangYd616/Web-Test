@@ -1,5 +1,9 @@
 /**
  * 测试路由
+ * @swagger
+ * tags:
+ *   name: Tests
+ *   description: 测试引擎API - 支持SEO、性能、安全、API、兼容性、可访问性、压力测试
  */
 
 const express = require('express');
@@ -1640,8 +1644,64 @@ router.post('/stress/cleanup-all', adminAuth, asyncHandler(async (req, res) => {
 
 
 /**
- * 压力测试
- * POST /api/test/stress
+ * @swagger
+ * /api/test/stress:
+ *   post:
+ *     tags: [Tests]
+ *     summary: 启动压力测试
+ *     description: 对指定URL进行压力测试，模拟高并发访问以评估系统性能
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - url
+ *             properties:
+ *               url:
+ *                 type: string
+ *                 format: uri
+ *                 description: 要测试的URL
+ *                 example: "https://example.com"
+ *               concurrentUsers:
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 1000
+ *                 default: 10
+ *                 description: 并发用户数
+ *               duration:
+ *                 type: integer
+ *                 minimum: 10
+ *                 maximum: 300
+ *                 default: 60
+ *                 description: 测试持续时间(秒)
+ *               rampUpTime:
+ *                 type: integer
+ *                 minimum: 0
+ *                 maximum: 60
+ *                 default: 10
+ *                 description: 用户增长时间(秒)
+ *     responses:
+ *       200:
+ *         description: 压力测试成功启动
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/TestResponse'
+ *                 - type: object
+ *                   properties:
+ *                     results:
+ *                       $ref: '#/components/schemas/LoadTestResults'
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       401:
+ *         description: 需要认证
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
  */
 router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
   const {
@@ -2190,8 +2250,52 @@ router.delete('/security/:testId', optionalAuth, asyncHandler(async (req, res) =
 }));
 
 /**
- * 性能测试 - 主接口
- * POST /api/test/performance
+ * @swagger
+ * /api/test/performance:
+ *   post:
+ *     tags: [Tests]
+ *     summary: 启动性能测试
+ *     description: 对指定URL进行性能分析，包括Core Web Vitals、资源加载、网络性能等
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - url
+ *             properties:
+ *               url:
+ *                 type: string
+ *                 format: uri
+ *                 description: 要测试的URL
+ *                 example: "https://example.com"
+ *               device:
+ *                 type: string
+ *                 enum: [desktop, mobile, tablet]
+ *                 default: "desktop"
+ *               throttling:
+ *                 type: string
+ *                 enum: [none, slow-3g, fast-3g]
+ *                 default: "none"
+ *     responses:
+ *       200:
+ *         description: 性能测试成功启动
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/TestResponse'
+ *                 - type: object
+ *                   properties:
+ *                     results:
+ *                       $ref: '#/components/schemas/PerformanceResults'
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
  */
 router.post('/performance',
   optionalAuth,
@@ -3261,8 +3365,61 @@ router.post('/ux', optionalAuth, testRateLimiter, asyncHandler(async (req, res) 
 }));
 
 /**
- * SEO测试 - 统一路由
- * POST /api/test/seo
+ * @swagger
+ * /api/test/seo:
+ *   post:
+ *     tags: [Tests]
+ *     summary: 启动SEO测试
+ *     description: 对指定URL进行全面的SEO分析，包括Meta标签、内容质量、性能、结构化数据等
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - url
+ *             properties:
+ *               url:
+ *                 type: string
+ *                 format: uri
+ *                 description: 要测试的URL
+ *                 example: "https://example.com"
+ *               options:
+ *                 type: object
+ *                 properties:
+ *                   timeout:
+ *                     type: integer
+ *                     description: 超时时间(毫秒)
+ *                     default: 30000
+ *                   device:
+ *                     type: string
+ *                     enum: [desktop, mobile]
+ *                     default: "desktop"
+ *                   forceRefresh:
+ *                     type: boolean
+ *                     description: 强制刷新，不使用缓存
+ *                     default: false
+ *     responses:
+ *       200:
+ *         description: SEO测试成功启动
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/TestResponse'
+ *                 - type: object
+ *                   properties:
+ *                     results:
+ *                       $ref: '#/components/schemas/SEOResults'
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       429:
+ *         description: 请求频率限制
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
  */
 router.post('/seo', optionalAuth, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
   const { url, options = {} } = req.body;

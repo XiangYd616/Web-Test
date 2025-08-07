@@ -6,36 +6,56 @@
 const RealStressTestEngine = require('../../services/realStressTestEngine');
 const { getPool } = require('../../config/database');
 const Logger = require('../../utils/logger');
+const EngineCache = require('../../utils/cache/EngineCache');
+const ErrorNotificationHelper = require('../../utils/ErrorNotificationHelper');
 
 class LoadTestEngine {
   constructor() {
     this.stressEngine = null;
     this.isRunning = false;
+    this.cache = new EngineCache('LoadTest');
+    this.errorNotifier = new ErrorNotificationHelper('LoadTest');
   }
 
   /**
    * 启动压力测试
    */
   async startTest(testId, url, config = {}) {
+    const startTime = Date.now();
+    this.startTime = startTime;
+
     try {
       Logger.info('启动压力测试', { testId, url, engine: 'LoadTest' });
-      
+
       // 更新测试状态为运行中
       await this.updateTestStatus(testId, 'running', { started_at: new Date() });
-      
+
       // 发送初始进度
       await this.sendProgress(testId, {
         percentage: 0,
         stage: 'initializing',
         message: '初始化压力测试引擎...'
       });
-      
+
       // 创建压力测试引擎实例
       this.stressEngine = new RealStressTestEngine();
       this.isRunning = true;
-      
+
+      // 检查缓存（压力测试通常不缓存，但可以缓存配置）
+      let cachedConfig = null;
+      if (!config.forceRefresh) {
+        cachedConfig = await this.cache.getCachedEngineConfig('default');
+        if (cachedConfig) {
+          Logger.info('使用缓存的压力测试配置', { testId });
+          config = { ...cachedConfig, ...config };
+        }
+      }
+
       // 设置进度回调
       const progressCallback = (progress) => {
+        // 缓存测试进度
+        this.cache.cacheTestProgress(testId, progress);
+
         this.sendProgress(testId, {
           percentage: progress.progress || 0,
           stage: progress.stage || 'testing',
@@ -43,23 +63,28 @@ class LoadTestEngine {
           metrics: progress.metrics
         });
       };
-      
+
       // 执行压力测试
       const testResults = await this.stressEngine.runStressTest(testId, url, {
         ...config,
         progressCallback
       });
-      
+
+      // 缓存测试配置（如果成功）
+      if (testResults && !cachedConfig) {
+        await this.cache.cacheEngineConfig('default', config);
+      }
+
       // 发送分析完成进度
       await this.sendProgress(testId, {
         percentage: 95,
         stage: 'saving',
         message: '保存分析结果...'
       });
-      
+
       // 保存结果
       await this.saveResults(testId, testResults);
-      
+
       // 更新测试状态为完成
       await this.updateTestStatus(testId, 'completed', {
         completed_at: new Date(),
@@ -71,39 +96,43 @@ class LoadTestEngine {
         failed_checks: this.calculateFailedChecks(testResults),
         warnings: this.calculateWarnings(testResults)
       });
-      
+
       // 发送完成进度
       await this.sendProgress(testId, {
         percentage: 100,
         stage: 'completed',
         message: '压力测试完成'
       });
-      
+
       const summary = this.createSummary(testResults);
-      
+
       // 发送测试完成通知
       await this.sendTestComplete(testId, summary);
-      
+
       Logger.info('压力测试完成', { testId, score: testResults.overallScore || 0, engine: 'LoadTest' });
-      
+
       return {
         success: true,
         testId,
         results: summary
       };
-      
+
     } catch (error) {
       Logger.error('压力测试失败', error, { testId, engine: 'LoadTest' });
-      
+
       // 更新测试状态为失败
       await this.updateTestStatus(testId, 'failed', {
         completed_at: new Date(),
         error_message: error.message
       });
-      
-      // 发送测试失败通知
-      await this.sendTestFailed(testId, error);
-      
+
+      // 发送详细的错误通知
+      const errorContext = this.errorNotifier.createErrorContext(testId, url, config, {
+        stage: 'load_testing',
+        duration: Date.now() - startTime
+      });
+      await this.errorNotifier.sendTestFailedNotification(testId, error, errorContext);
+
       throw error;
     } finally {
       this.isRunning = false;
@@ -120,18 +149,18 @@ class LoadTestEngine {
   async stopTest(testId) {
     try {
       Logger.info('停止压力测试', { testId, engine: 'LoadTest' });
-      
+
       if (this.stressEngine) {
         await this.stressEngine.stopTest?.(testId);
       }
-      
+
       this.isRunning = false;
-      
+
       // 更新测试状态为已取消
       await this.updateTestStatus(testId, 'cancelled', {
         completed_at: new Date()
       });
-      
+
       return { success: true, message: '测试已停止' };
     } catch (error) {
       Logger.error('停止压力测试失败', error, { testId, engine: 'LoadTest' });
@@ -227,7 +256,7 @@ class LoadTestEngine {
         timestamp: new Date().toISOString(),
         retryable: this.isRetryableError(error)
       };
-      
+
       if (global.realtimeService) {
         await global.realtimeService.notifyTestFailed(testId, errorInfo);
       }
@@ -298,6 +327,37 @@ class LoadTestEngine {
   isRetryableError(error) {
     const retryableErrors = ['TIMEOUT', 'NETWORK_ERROR', 'CONNECTION_REFUSED'];
     return retryableErrors.includes(error.code);
+  }
+
+  /**
+   * 检查引擎健康状态
+   */
+  async healthCheck() {
+    try {
+      // 简单的健康检查
+      const testEngine = new RealStressTestEngine();
+      await testEngine.cleanup?.();
+
+      return {
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        version: '1.0.0',
+        capabilities: [
+          'load-testing',
+          'stress-testing',
+          'performance-metrics',
+          'concurrent-users-simulation'
+        ],
+        realtime: !!global.realtimeService,
+        cache: this.cache.isCacheAvailable()
+      };
+    } catch (error) {
+      return {
+        status: 'unhealthy',
+        error: error.message,
+        timestamp: new Date().toISOString()
+      };
+    }
   }
 }
 
