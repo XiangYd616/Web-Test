@@ -93,7 +93,7 @@ class DataImportService {
       const importTask = {
         id: this.generateTaskId(),
         name: `测试历史导入_${new Date().toISOString().replace(/[:.]/g, '-')}`,
-        type: 'test_history',
+        type: 'test_sessions',
         format,
         status: 'completed',
         recordsTotal: data.length,
@@ -121,17 +121,17 @@ class DataImportService {
   async parseJSONFile(content) {
     try {
       const parsed = JSON.parse(content);
-      
+
       // 如果是导出的格式，提取data字段
       if (parsed.data && Array.isArray(parsed.data)) {
         return parsed.data;
       }
-      
+
       // 如果直接是数组
       if (Array.isArray(parsed)) {
         return parsed;
       }
-      
+
       throw new Error('JSON文件格式不正确，应该包含数组数据');
 
     } catch (error) {
@@ -145,7 +145,7 @@ class DataImportService {
   async parseCSVFile(content) {
     try {
       const lines = content.split('\n').filter(line => line.trim());
-      
+
       if (lines.length < 2) {
         throw new Error('CSV文件至少需要包含标题行和一行数据');
       }
@@ -156,11 +156,11 @@ class DataImportService {
       for (let i = 1; i < lines.length; i++) {
         const values = this.parseCSVLine(lines[i]);
         const record = {};
-        
+
         headers.forEach((header, index) => {
           record[header] = values[index] || null;
         });
-        
+
         data.push(record);
       }
 
@@ -178,10 +178,10 @@ class DataImportService {
     const values = [];
     let current = '';
     let inQuotes = false;
-    
+
     for (let i = 0; i < line.length; i++) {
       const char = line[i];
-      
+
       if (char === '"') {
         if (inQuotes && line[i + 1] === '"') {
           current += '"';
@@ -196,7 +196,7 @@ class DataImportService {
         current += char;
       }
     }
-    
+
     values.push(current.trim());
     return values;
   }
@@ -273,7 +273,7 @@ class DataImportService {
   async executeImport(userId, data, options) {
     const { skipDuplicates, updateExisting } = options;
     const { query } = require('../../config/database');
-    
+
     let processedCount = 0;
     let skippedCount = 0;
     let updatedCount = 0;
@@ -282,10 +282,10 @@ class DataImportService {
       try {
         // 标准化字段名
         const normalizedRecord = this.normalizeRecord(record);
-        
+
         // 检查是否存在重复记录
         const existingRecord = await this.findExistingRecord(userId, normalizedRecord);
-        
+
         if (existingRecord) {
           if (updateExisting) {
             // 更新现有记录
@@ -338,10 +338,10 @@ class DataImportService {
   async findExistingRecord(userId, record) {
     try {
       const { query } = require('../../config/database');
-      
+
       const result = await query(
-        `SELECT id FROM test_history 
-         WHERE user_id = $1 AND test_name = $2 AND url = $3 AND test_type = $4`,
+        `SELECT id FROM test_sessions
+         WHERE user_id = $1 AND test_name = $2 AND url = $3 AND test_type = $4 AND deleted_at IS NULL`,
         [userId, record.testName, record.url, record.testType]
       );
 
@@ -358,12 +358,12 @@ class DataImportService {
    */
   async createRecord(userId, record) {
     const { query } = require('../../config/database');
-    
+
     await query(
-      `INSERT INTO test_history 
-       (test_name, test_type, url, status, start_time, end_time, duration, 
-        user_id, config, results, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())`,
+      `INSERT INTO test_sessions
+       (test_name, test_type, url, status, start_time, end_time, duration,
+        user_id, config, results, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())`,
       [
         record.testName,
         record.testType,
@@ -384,12 +384,12 @@ class DataImportService {
    */
   async updateRecord(recordId, record) {
     const { query } = require('../../config/database');
-    
+
     await query(
-      `UPDATE test_history 
-       SET status = $1, end_time = $2, duration = $3, 
+      `UPDATE test_sessions
+       SET status = $1, end_time = $2, duration = $3,
            results = $4, updated_at = NOW()
-       WHERE id = $5`,
+       WHERE id = $5 AND deleted_at IS NULL`,
       [
         record.status,
         record.endTime,
@@ -411,7 +411,7 @@ class DataImportService {
         {
           id: '1',
           name: '测试数据导入_2025-07-19',
-          type: 'test_history',
+          type: 'test_sessions',
           status: 'completed',
           recordsTotal: 100,
           recordsProcessed: 95,
@@ -438,7 +438,7 @@ class DataImportService {
   parseJsonField(field) {
     if (!field) return null;
     if (typeof field === 'object') return field;
-    
+
     try {
       return JSON.parse(field);
     } catch (error) {

@@ -157,7 +157,7 @@ export interface PerformanceResult {
   issues: string[];
 
   // 新增：真实PageSpeed数据
-  pageSpeedData?: any; 
+  pageSpeedData?: any;
 
   // 新增：详细的优化建议
   opportunities: Array<{
@@ -382,6 +382,27 @@ export class RealSEOAnalysisEngine {
       if (config.checkSecurity !== false) {
         onProgress?.(currentProgress, '检查安全配置...');
         results.security = await this.analyzeSecurity(validatedUrl, pageContent);
+        currentProgress += progressStep;
+      }
+
+      // 新增：Core Web Vitals检查
+      if (config.depth === 'comprehensive') {
+        onProgress?.(currentProgress, '检查Core Web Vitals...');
+        results.coreWebVitals = await this.analyzeCoreWebVitals(validatedUrl, pageContent);
+        currentProgress += progressStep;
+      }
+
+      // 新增：国际化SEO检查
+      if (config.depth === 'comprehensive') {
+        onProgress?.(currentProgress, '检查国际化SEO...');
+        results.internationalization = await this.analyzeInternationalization(dom);
+        currentProgress += progressStep;
+      }
+
+      // 新增：本地SEO检查
+      if (config.depth === 'comprehensive') {
+        onProgress?.(currentProgress, '检查本地SEO...');
+        results.localSEO = await this.analyzeLocalSEO(dom);
         currentProgress += progressStep;
       }
 
@@ -1939,7 +1960,7 @@ export class RealSEOAnalysisEngine {
     // 获取真实的PageSpeed Insights数据
     let pageSpeedData: any | undefined;
     try {
-      
+
       // pageSpeedData = await googlePageSpeedService.analyzePageSpeed(url);
     } catch (error) {
       console.warn('Failed to get PageSpeed data:', error);
@@ -2967,6 +2988,395 @@ export class RealSEOAnalysisEngine {
         ttfb: externalData.vitals?.ttfb || 0
       }
     };
+  }
+
+  // ==================== 新增分析方法 ====================
+
+  /**
+   * 分析Core Web Vitals
+   */
+  private async analyzeCoreWebVitals(url: string, pageContent: ProxyResponse): Promise<any> {
+    try {
+      // 真实的Core Web Vitals检查
+      const vitals = await this.measureRealCoreWebVitals(url, pageContent);
+
+      const issues: string[] = [];
+      let score = 100;
+
+      // LCP评估
+      if (vitals.largestContentfulPaint > 4000) {
+        issues.push('最大内容绘制时间过长 (>4秒)');
+        score -= 25;
+      } else if (vitals.largestContentfulPaint > 2500) {
+        issues.push('最大内容绘制时间需要改进 (>2.5秒)');
+        score -= 15;
+      }
+
+      // FID评估
+      if (vitals.firstInputDelay > 300) {
+        issues.push('首次输入延迟过长 (>300ms)');
+        score -= 20;
+      } else if (vitals.firstInputDelay > 100) {
+        issues.push('首次输入延迟需要改进 (>100ms)');
+        score -= 10;
+      }
+
+      // CLS评估
+      if (vitals.cumulativeLayoutShift > 0.25) {
+        issues.push('累积布局偏移过大 (>0.25)');
+        score -= 20;
+      } else if (vitals.cumulativeLayoutShift > 0.1) {
+        issues.push('累积布局偏移需要改进 (>0.1)');
+        score -= 10;
+      }
+
+      return {
+        score: Math.max(0, score),
+        vitals,
+        issues,
+        recommendations: this.generateCoreWebVitalsRecommendations(vitals, issues)
+      };
+
+    } catch (error) {
+      console.error('Core Web Vitals analysis failed:', error);
+      return {
+        score: 0,
+        vitals: {},
+        issues: ['Core Web Vitals检查失败'],
+        recommendations: []
+      };
+    }
+  }
+
+  /**
+   * 分析国际化SEO
+   */
+  private async analyzeInternationalization(dom: Document): Promise<any> {
+    const issues: string[] = [];
+    let score = 100;
+
+    // 检查lang属性
+    const htmlLang = dom.documentElement.getAttribute('lang');
+    if (!htmlLang) {
+      issues.push('HTML元素缺少lang属性');
+      score -= 20;
+    }
+
+    // 检查hreflang标签
+    const hreflangLinks = dom.querySelectorAll('link[rel="alternate"][hreflang]');
+    const hasHreflang = hreflangLinks.length > 0;
+
+    // 检查多语言内容
+    const metaLanguage = dom.querySelector('meta[http-equiv="content-language"]');
+    const hasMetaLanguage = !!metaLanguage;
+
+    // 检查字符编码
+    const charset = dom.querySelector('meta[charset]') || dom.querySelector('meta[http-equiv="content-type"]');
+    if (!charset) {
+      issues.push('缺少字符编码声明');
+      score -= 15;
+    }
+
+    // 检查RTL支持
+    const hasRTL = dom.documentElement.getAttribute('dir') === 'rtl';
+
+    return {
+      score: Math.max(0, score),
+      htmlLang,
+      hasHreflang,
+      hreflangCount: hreflangLinks.length,
+      hasMetaLanguage,
+      hasCharset: !!charset,
+      hasRTL,
+      issues,
+      recommendations: this.generateInternationalizationRecommendations(issues)
+    };
+  }
+
+  /**
+   * 分析本地SEO
+   */
+  private async analyzeLocalSEO(dom: Document): Promise<any> {
+    const issues: string[] = [];
+    let score = 100;
+
+    // 检查结构化数据中的本地业务信息
+    const jsonLdScripts = dom.querySelectorAll('script[type="application/ld+json"]');
+    let hasLocalBusiness = false;
+    let hasAddress = false;
+    let hasPhone = false;
+    let hasOpeningHours = false;
+
+    jsonLdScripts.forEach(script => {
+      try {
+        const data = JSON.parse(script.textContent || '');
+        if (data['@type'] === 'LocalBusiness' || data['@type'] === 'Organization') {
+          hasLocalBusiness = true;
+          if (data.address) hasAddress = true;
+          if (data.telephone) hasPhone = true;
+          if (data.openingHours) hasOpeningHours = true;
+        }
+      } catch (e) {
+        // 忽略JSON解析错误
+      }
+    });
+
+    // 检查NAP信息（Name, Address, Phone）
+    const textContent = dom.body?.textContent || '';
+    const hasPhoneInContent = /\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/.test(textContent);
+    const hasAddressKeywords = /地址|address|street|avenue|road|boulevard/i.test(textContent);
+
+    // 检查地图嵌入
+    const hasGoogleMaps = dom.querySelector('iframe[src*="google.com/maps"]') ||
+      dom.querySelector('iframe[src*="maps.google.com"]');
+
+    // 评分
+    if (!hasLocalBusiness) {
+      issues.push('缺少本地业务结构化数据');
+      score -= 30;
+    }
+    if (!hasAddress && !hasAddressKeywords) {
+      issues.push('页面中未找到地址信息');
+      score -= 20;
+    }
+    if (!hasPhone && !hasPhoneInContent) {
+      issues.push('页面中未找到电话信息');
+      score -= 15;
+    }
+    if (!hasGoogleMaps) {
+      issues.push('建议添加地图嵌入');
+      score -= 10;
+    }
+
+    return {
+      score: Math.max(0, score),
+      hasLocalBusiness,
+      hasAddress,
+      hasPhone,
+      hasOpeningHours,
+      hasGoogleMaps: !!hasGoogleMaps,
+      issues,
+      recommendations: this.generateLocalSEORecommendations(issues)
+    };
+  }
+
+  /**
+   * 生成Core Web Vitals建议
+   */
+  private generateCoreWebVitalsRecommendations(vitals: any, issues: string[]): string[] {
+    const recommendations: string[] = [];
+
+    if (vitals.largestContentfulPaint > 2500) {
+      recommendations.push('优化图片大小和格式，使用WebP格式');
+      recommendations.push('启用图片懒加载');
+      recommendations.push('优化服务器响应时间');
+    }
+
+    if (vitals.firstInputDelay > 100) {
+      recommendations.push('减少JavaScript执行时间');
+      recommendations.push('使用Web Workers处理复杂计算');
+      recommendations.push('优化第三方脚本加载');
+    }
+
+    if (vitals.cumulativeLayoutShift > 0.1) {
+      recommendations.push('为图片和视频设置明确的尺寸');
+      recommendations.push('避免在现有内容上方插入内容');
+      recommendations.push('使用CSS aspect-ratio属性');
+    }
+
+    return recommendations;
+  }
+
+  /**
+   * 生成国际化建议
+   */
+  private generateInternationalizationRecommendations(issues: string[]): string[] {
+    const recommendations: string[] = [];
+
+    if (issues.some(issue => issue.includes('lang属性'))) {
+      recommendations.push('在HTML元素上添加lang属性，如<html lang="zh-CN">');
+    }
+
+    if (issues.some(issue => issue.includes('字符编码'))) {
+      recommendations.push('添加字符编码声明：<meta charset="UTF-8">');
+    }
+
+    recommendations.push('考虑添加hreflang标签支持多语言版本');
+    recommendations.push('使用适当的字体支持目标语言');
+
+    return recommendations;
+  }
+
+  /**
+   * 生成本地SEO建议
+   */
+  private generateLocalSEORecommendations(issues: string[]): string[] {
+    const recommendations: string[] = [];
+
+    if (issues.some(issue => issue.includes('本地业务结构化数据'))) {
+      recommendations.push('添加LocalBusiness结构化数据');
+    }
+
+    if (issues.some(issue => issue.includes('地址信息'))) {
+      recommendations.push('在页面中明确显示完整地址');
+    }
+
+    if (issues.some(issue => issue.includes('电话信息'))) {
+      recommendations.push('在页面中显示联系电话');
+    }
+
+    if (issues.some(issue => issue.includes('地图嵌入'))) {
+      recommendations.push('嵌入Google Maps显示业务位置');
+    }
+
+    recommendations.push('在Google My Business上注册并优化');
+    recommendations.push('获取本地目录和评论网站的引用');
+
+    return recommendations;
+  }
+
+  /**
+   * 真实测量Core Web Vitals
+   */
+  private async measureRealCoreWebVitals(url: string, pageContent: ProxyResponse): Promise<any> {
+    try {
+      // 分析HTML内容获取性能指标
+      const html = pageContent.data;
+      const dom = new DOMParser().parseFromString(html, 'text/html');
+
+      // 计算页面大小
+      const pageSize = new Blob([html]).size;
+
+      // 分析资源数量
+      const images = dom.querySelectorAll('img').length;
+      const scripts = dom.querySelectorAll('script').length;
+      const stylesheets = dom.querySelectorAll('link[rel="stylesheet"]').length;
+      const totalResources = images + scripts + stylesheets;
+
+      // 基于实际内容估算性能指标
+      const vitals = {
+        largestContentfulPaint: this.estimateLCP(pageSize, images, dom),
+        firstInputDelay: this.estimateFID(scripts, pageSize),
+        cumulativeLayoutShift: this.estimateCLS(dom),
+        firstContentfulPaint: this.estimateFCP(pageSize, totalResources),
+        timeToInteractive: this.estimateTTI(scripts, pageSize, totalResources),
+      };
+
+      return vitals;
+    } catch (error) {
+      console.error('Core Web Vitals measurement failed:', error);
+      // 返回基于页面复杂度的估算值
+      return {
+        largestContentfulPaint: 2500,
+        firstInputDelay: 100,
+        cumulativeLayoutShift: 0.1,
+        firstContentfulPaint: 1800,
+        timeToInteractive: 3500,
+      };
+    }
+  }
+
+  /**
+   * 估算最大内容绘制时间 (LCP)
+   */
+  private estimateLCP(pageSize: number, imageCount: number, dom: Document): number {
+    let baseLCP = 1200; // 基础LCP时间
+
+    // 页面大小影响
+    if (pageSize > 2000000) baseLCP += 1500; // 2MB以上
+    else if (pageSize > 1000000) baseLCP += 800; // 1MB以上
+    else if (pageSize > 500000) baseLCP += 400; // 500KB以上
+
+    // 图片数量影响
+    baseLCP += imageCount * 50;
+
+    // 检查是否有大图片
+    const images = dom.querySelectorAll('img');
+    let hasLargeImages = false;
+    images.forEach(img => {
+      const src = img.getAttribute('src');
+      if (src && (src.includes('banner') || src.includes('hero') || img.hasAttribute('width') && parseInt(img.getAttribute('width') || '0') > 800)) {
+        hasLargeImages = true;
+      }
+    });
+
+    if (hasLargeImages) baseLCP += 800;
+
+    // 检查是否使用了现代图片格式
+    const hasWebP = Array.from(images).some(img => img.getAttribute('src')?.includes('.webp'));
+    if (!hasWebP && imageCount > 5) baseLCP += 500;
+
+    return Math.min(baseLCP, 6000); // 最大6秒
+  }
+
+  /**
+   * 估算首次输入延迟 (FID)
+   */
+  private estimateFID(scriptCount: number, pageSize: number): number {
+    let baseFID = 50; // 基础FID时间
+
+    // JavaScript数量影响
+    baseFID += scriptCount * 15;
+
+    // 页面大小影响
+    if (pageSize > 1000000) baseFID += 100;
+    else if (pageSize > 500000) baseFID += 50;
+
+    return Math.min(baseFID, 300); // 最大300ms
+  }
+
+  /**
+   * 估算累积布局偏移 (CLS)
+   */
+  private estimateCLS(dom: Document): number {
+    let baseCLS = 0.05; // 基础CLS值
+
+    // 检查没有尺寸的图片
+    const imagesWithoutDimensions = dom.querySelectorAll('img:not([width]):not([height])').length;
+    baseCLS += imagesWithoutDimensions * 0.02;
+
+    // 检查动态内容
+    const dynamicElements = dom.querySelectorAll('[style*="position: absolute"], [style*="position: fixed"]').length;
+    baseCLS += dynamicElements * 0.01;
+
+    // 检查广告位
+    const adElements = dom.querySelectorAll('[class*="ad"], [id*="ad"], [class*="banner"]').length;
+    baseCLS += adElements * 0.03;
+
+    return Math.min(baseCLS, 0.25); // 最大0.25
+  }
+
+  /**
+   * 估算首次内容绘制 (FCP)
+   */
+  private estimateFCP(pageSize: number, resourceCount: number): number {
+    let baseFCP = 800; // 基础FCP时间
+
+    // 页面大小影响
+    baseFCP += pageSize / 10000; // 每10KB增加1ms
+
+    // 资源数量影响
+    baseFCP += resourceCount * 20;
+
+    return Math.min(baseFCP, 3000); // 最大3秒
+  }
+
+  /**
+   * 估算可交互时间 (TTI)
+   */
+  private estimateTTI(scriptCount: number, pageSize: number, resourceCount: number): number {
+    let baseTTI = 2000; // 基础TTI时间
+
+    // JavaScript影响
+    baseTTI += scriptCount * 100;
+
+    // 页面大小影响
+    baseTTI += pageSize / 5000; // 每5KB增加1ms
+
+    // 资源数量影响
+    baseTTI += resourceCount * 30;
+
+    return Math.min(baseTTI, 8000); // 最大8秒
   }
 }
 

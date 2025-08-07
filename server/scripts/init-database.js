@@ -41,7 +41,7 @@ async function initializeDatabase() {
 
     // 读取并执行SQL脚本
     console.log('📜 读取数据库初始化脚本...');
-    const sqlPath = path.join(__dirname, 'fix-database.sql');
+    const sqlPath = path.join(__dirname, 'master-detail-test-history-schema.sql');
 
     if (!fs.existsSync(sqlPath)) {
       throw new Error(`SQL脚本文件不存在: ${sqlPath}`);

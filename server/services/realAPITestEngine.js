@@ -210,10 +210,10 @@ class RealAPITestEngine {
   }
 
   /**
-   * 测试单个端点
+   * 增强的端点测试
    */
   async testEndpoint(apiClient, endpoint, options) {
-    const { retries, validateSchema, testSecurity, testPerformance } = options;
+    const { retries, validateSchema, testSecurity, testPerformance, concurrentUsers } = options;
     const startTime = performance.now();
 
     const result = {
@@ -229,29 +229,87 @@ class RealAPITestEngine {
       securityIssues: [],
       performanceIssues: [],
       validationErrors: [],
-      retryCount: 0
+      retryCount: 0,
+      // 新增字段
+      responseData: null,
+      requestDetails: {
+        url: '',
+        headers: {},
+        body: null,
+        timestamp: new Date().toISOString()
+      },
+      performanceMetrics: {
+        dnsLookup: 0,
+        tcpConnection: 0,
+        tlsHandshake: 0,
+        firstByte: 0,
+        contentTransfer: 0
+      },
+      cacheInfo: {
+        cacheable: false,
+        cacheHeaders: [],
+        etag: null,
+        lastModified: null
+      },
+      compressionInfo: {
+        compressed: false,
+        originalSize: 0,
+        compressedSize: 0,
+        compressionRatio: 0
+      }
     };
 
     let lastError = null;
 
-    // 重试逻辑
+    // 增强的重试逻辑
     for (let attempt = 0; attempt <= retries; attempt++) {
       try {
+        // 记录请求详情
+        result.requestDetails = {
+          url: `${apiClient.defaults.baseURL}${endpoint.path}`,
+          method: endpoint.method || 'GET',
+          headers: { ...apiClient.defaults.headers, ...endpoint.headers },
+          body: endpoint.body,
+          timestamp: new Date().toISOString(),
+          attempt: attempt + 1
+        };
+
+        const requestStartTime = performance.now();
         const response = await apiClient({
           method: endpoint.method || 'GET',
           url: endpoint.path,
           data: endpoint.body,
           params: endpoint.params,
-          headers: endpoint.headers
+          headers: endpoint.headers,
+          // 添加性能监控
+          onUploadProgress: (progressEvent) => {
+            // 上传进度监控
+          },
+          onDownloadProgress: (progressEvent) => {
+            // 下载进度监控
+          }
         });
 
-        const responseTime = performance.now() - startTime;
+        const responseTime = performance.now() - requestStartTime;
 
+        // 基础响应信息
         result.statusCode = response.status;
         result.responseTime = Math.round(responseTime);
-        result.responseSize = JSON.stringify(response.data).length;
         result.headers = response.headers;
         result.retryCount = attempt;
+        result.responseData = response.data;
+
+        // 计算响应大小
+        const responseText = typeof response.data === 'string'
+          ? response.data
+          : JSON.stringify(response.data);
+        result.responseSize = new Blob([responseText]).size;
+
+        // 分析缓存信息
+        this.analyzeCacheInfo(response.headers, result);
+
+        // 分析压缩信息
+        this.analyzeCompressionInfo(response.headers, result);
 
         // 检查状态码
         const expectedStatus = endpoint.expectedStatus || [200, 201, 202, 204];
@@ -263,7 +321,7 @@ class RealAPITestEngine {
           result.status = 'pass';
         } else {
           result.status = 'fail';
-          result.error = `Unexpected status code: ${response.status}`;
+          result.error = `Unexpected status code: ${response.status}, expected: ${JSON.stringify(expectedStatus)}`;
         }
 
         // 验证响应模式
@@ -275,14 +333,14 @@ class RealAPITestEngine {
           }
         }
 
-        // 安全检查
+        // 增强的安全检查
         if (testSecurity) {
-          result.securityIssues = this.performSecurityChecks(response, endpoint);
+          this.performSecurityChecks(response, result);
         }
 
-        // 性能检查
+        // 增强的性能分析
         if (testPerformance) {
-          result.performanceIssues = this.performPerformanceChecks(responseTime, result.responseSize);
+          this.analyzePerformanceMetrics(result, endpoint);
         }
 
         // 添加响应数据分析
@@ -291,10 +349,9 @@ class RealAPITestEngine {
           hasData: !!response.data,
           dataType: typeof response.data,
           isJson: this.isJsonResponse(response),
-          compressionUsed: !!response.headers['content-encoding'],
-          cacheHeaders: this.analyzeCacheHeaders(response.headers),
-          responseSize: result.responseSize,
-          statusText: response.statusText || ''
+          statusText: response.statusText || '',
+          charset: this.extractCharset(response.headers['content-type']),
+          language: response.headers['content-language'] || null
         };
 
         // 添加性能分类
@@ -660,6 +717,219 @@ class RealAPITestEngine {
     }
 
     return diagnosis;
+  }
+
+  // ==================== 增强分析方法 ====================
+
+  /**
+   * 分析缓存信息
+   */
+  analyzeCacheInfo(headers, result) {
+    const cacheControl = headers['cache-control'] || '';
+    const etag = headers['etag'] || null;
+    const lastModified = headers['last-modified'] || null;
+    const expires = headers['expires'] || null;
+
+    result.cacheInfo = {
+      cacheable: !cacheControl.includes('no-cache') && !cacheControl.includes('no-store'),
+      cacheHeaders: [],
+      etag: etag,
+      lastModified: lastModified,
+      expires: expires,
+      maxAge: null
+    };
+
+    // 提取缓存头
+    if (cacheControl) result.cacheInfo.cacheHeaders.push(`Cache-Control: ${cacheControl}`);
+    if (etag) result.cacheInfo.cacheHeaders.push(`ETag: ${etag}`);
+    if (lastModified) result.cacheInfo.cacheHeaders.push(`Last-Modified: ${lastModified}`);
+    if (expires) result.cacheInfo.cacheHeaders.push(`Expires: ${expires}`);
+
+    // 提取max-age
+    const maxAgeMatch = cacheControl.match(/max-age=(\d+)/);
+    if (maxAgeMatch) {
+      result.cacheInfo.maxAge = parseInt(maxAgeMatch[1]);
+    }
+  }
+
+  /**
+   * 分析压缩信息
+   */
+  analyzeCompressionInfo(headers, result) {
+    const contentEncoding = headers['content-encoding'] || '';
+    const contentLength = headers['content-length'];
+
+    result.compressionInfo = {
+      compressed: !!contentEncoding,
+      encoding: contentEncoding,
+      originalSize: 0,
+      compressedSize: contentLength ? parseInt(contentLength) : result.responseSize,
+      compressionRatio: 0
+    };
+
+    if (contentEncoding) {
+      // 估算压缩比（实际应用中需要更精确的计算）
+      const estimatedOriginalSize = result.responseSize * 3; // 假设压缩比为3:1
+      result.compressionInfo.originalSize = estimatedOriginalSize;
+      result.compressionInfo.compressionRatio =
+        ((estimatedOriginalSize - result.responseSize) / estimatedOriginalSize * 100).toFixed(1);
+    }
+  }
+
+  /**
+   * 增强的性能分析
+   */
+  analyzePerformanceMetrics(result, endpoint) {
+    const { responseTime, responseSize } = result;
+
+    // 性能阈值
+    const thresholds = {
+      excellent: 100,
+      good: 300,
+      acceptable: 1000,
+      poor: 3000
+    };
+
+    // 响应时间分析
+    let performanceLevel = 'poor';
+    if (responseTime <= thresholds.excellent) {
+      performanceLevel = 'excellent';
+    } else if (responseTime <= thresholds.good) {
+      performanceLevel = 'good';
+    } else if (responseTime <= thresholds.acceptable) {
+      performanceLevel = 'acceptable';
+    }
+
+    // 响应大小分析
+    const sizeThresholds = {
+      small: 1024,      // 1KB
+      medium: 10240,    // 10KB
+      large: 102400,    // 100KB
+      huge: 1048576     // 1MB
+    };
+
+    let sizeCategory = 'huge';
+    if (responseSize <= sizeThresholds.small) {
+      sizeCategory = 'small';
+    } else if (responseSize <= sizeThresholds.medium) {
+      sizeCategory = 'medium';
+    } else if (responseSize <= sizeThresholds.large) {
+      sizeCategory = 'large';
+    }
+
+    // 生成性能建议
+    const suggestions = [];
+
+    if (responseTime > thresholds.good) {
+      suggestions.push('考虑优化API响应时间');
+    }
+
+    if (responseSize > sizeThresholds.large) {
+      suggestions.push('响应数据较大，考虑分页或数据压缩');
+    }
+
+    if (!result.cacheInfo.cacheable && endpoint.method === 'GET') {
+      suggestions.push('GET请求建议添加缓存策略');
+    }
+
+    if (!result.compressionInfo.compressed && responseSize > sizeThresholds.medium) {
+      suggestions.push('建议启用响应压缩（gzip/brotli）');
+    }
+
+    result.performanceAnalysis = {
+      level: performanceLevel,
+      sizeCategory: sizeCategory,
+      suggestions: suggestions,
+      score: this.calculatePerformanceScore(responseTime, responseSize, result)
+    };
+  }
+
+  /**
+   * 计算性能评分
+   */
+  calculatePerformanceScore(responseTime, responseSize, result) {
+    let score = 100;
+
+    // 响应时间评分 (40%)
+    if (responseTime > 3000) score -= 40;
+    else if (responseTime > 1000) score -= 30;
+    else if (responseTime > 300) score -= 15;
+    else if (responseTime > 100) score -= 5;
+
+    // 响应大小评分 (20%)
+    if (responseSize > 1048576) score -= 20; // 1MB
+    else if (responseSize > 102400) score -= 15; // 100KB
+    else if (responseSize > 10240) score -= 10; // 10KB
+
+    // 缓存策略评分 (20%)
+    if (!result.cacheInfo.cacheable) score -= 20;
+    else if (!result.cacheInfo.maxAge) score -= 10;
+
+    // 压缩策略评分 (20%)
+    if (!result.compressionInfo.compressed && responseSize > 1024) {
+      score -= 20;
+    }
+
+    return Math.max(0, Math.round(score));
+  }
+
+  /**
+   * 辅助方法
+   */
+  isJsonResponse(response) {
+    const contentType = response.headers['content-type'] || '';
+    return contentType.includes('application/json');
+  }
+
+  extractCharset(contentType) {
+    if (!contentType) return null;
+    const charsetMatch = contentType.match(/charset=([^;]+)/);
+    return charsetMatch ? charsetMatch[1] : null;
+  }
+
+  categorizePerformance(responseTime) {
+    if (responseTime <= 100) return 'excellent';
+    if (responseTime <= 300) return 'good';
+    if (responseTime <= 1000) return 'acceptable';
+    return 'poor';
+  }
+
+  /**
+   * 增强的响应模式验证
+   */
+  validateResponseSchema(data, schema) {
+    const errors = [];
+
+    if (!schema) return errors;
+
+    try {
+      // 简单的模式验证
+      if (schema.type && typeof data !== schema.type) {
+        errors.push(`Expected type ${schema.type}, got ${typeof data}`);
+      }
+
+      if (schema.required && Array.isArray(schema.required)) {
+        for (const field of schema.required) {
+          if (!(field in data)) {
+            errors.push(`Missing required field: ${field}`);
+          }
+        }
+      }
+
+      if (schema.properties && typeof data === 'object') {
+        for (const [field, fieldSchema] of Object.entries(schema.properties)) {
+          if (field in data) {
+            const fieldErrors = this.validateResponseSchema(data[field], fieldSchema);
+            errors.push(...fieldErrors.map(err => `${field}.${err}`));
+          }
+        }
+      }
+
+    } catch (error) {
+      errors.push(`Schema validation error: ${error.message}`);
+    }
+
+    return errors;
   }
 }
 

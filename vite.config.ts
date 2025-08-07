@@ -86,23 +86,13 @@ export default defineConfig({
     assetsInlineLimit: 4096,
     rollupOptions: {
       external: [
-        'fs',
-        'path',
         'electron',
         'sqlite3',
-        'better-sqlite3',
-        'playwright',
-        'playwright-core',
-        'chromium-bidi',
-        'cheerio',
-        'pg',
         'pg-native',
-        'pg-pool',
-        'pg-cursor',
+        'crypto',
         'jsonwebtoken',
-        'jws',
-        'bcryptjs',
-        'util'
+        'jwa',
+        'jws'
       ],
       output: {
         // 代码分割策略
@@ -132,46 +122,22 @@ export default defineConfig({
           return 'assets/[ext]/[name]-[hash].[ext]';
         },
         globals: {
-          'fs': 'fs',
-          'path': 'path',
           'electron': 'electron',
           'sqlite3': 'sqlite3',
-          'better-sqlite3': 'Database',
-          'playwright': 'playwright',
-          'playwright-core': 'playwright',
-          'chromium-bidi': 'chromium-bidi',
-          'cheerio': 'cheerio',
-          'pg': 'pg',
-          'pg-native': 'pg-native',
-          'pg-pool': 'pg-pool',
-          'pg-cursor': 'pg-cursor',
-          'jsonwebtoken': 'jsonwebtoken',
-          'jws': 'jws',
-          'bcryptjs': 'bcryptjs',
-          'util': 'util'
+          'pg-native': 'pg-native'
         }
       }
     },
   },
   optimizeDeps: {
     exclude: [
-      'fs',
-      'path',
       'electron',
       'sqlite3',
-      'better-sqlite3',
-      'playwright',
-      'playwright-core',
-      'chromium-bidi',
-      'cheerio',
-      'pg',
       'pg-native',
-      'pg-pool',
-      'pg-cursor',
+      'crypto',
       'jsonwebtoken',
-      'jws',
-      'bcryptjs',
-      'util'
+      'jwa',
+      'jws'
     ],
   },
   define: {

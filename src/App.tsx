@@ -8,6 +8,10 @@ import ErrorBoundary from './components/ui/ErrorBoundary'
 import { AuthProvider } from './contexts/AuthContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 
+// 导入统一错误处理
+import './services/apiErrorInterceptor'
+import './services/errorService'
+
 // 样式文件导入 - 使用统一的主题系统
 // 主题样式已迁移到 theme-config.css 和组件库中
 

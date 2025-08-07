@@ -660,9 +660,10 @@ const StressTest: React.FC = () => {
                 const totalTestTime = testDurationSeconds + (testConfig.rampUp || 0) +
                     (testConfig.warmupDuration || 0) + (testConfig.cooldownDuration || 0);
 
-                // 根据测试总时长和用户数计算合理的数据点上限
-                const expectedDataPoints = totalTestTime * testConfig.users * 3; // 每用户每秒最多3个数据点
-                const maxDataPoints = Math.max(expectedDataPoints, 5000); // 至少保留5000个数据点
+                // 根据测试总时长计算合理的数据点上限 (0.1秒间隔 = 每秒10个数据点)
+                const dataPointsPerSecond = 10; // 0.1秒间隔 = 每秒10个数据点
+                const expectedDataPoints = totalTestTime * dataPointsPerSecond; // 基于时间间隔计算
+                const maxDataPoints = Math.max(expectedDataPoints, 50000); // 提高到50000个数据点以支持高精度
 
                 console.log('📊 数据保留策略:', {
                     testDuration: testDurationSeconds,
@@ -2110,14 +2111,47 @@ const StressTest: React.FC = () => {
                 // 🔧 重构：监听新的事件名称
                 socket.on('test-progress', (data: any) => {
                     console.log('📊 收到测试进度:', data);
+                    console.log('🔍 测试进度数据详情:', {
+                        testId: data.testId,
+                        currentTestId: currentTestIdRef.current,
+                        progress: data.progress,
+                        hasMetrics: !!data.metrics,
+                        metricsKeys: data.metrics ? Object.keys(data.metrics) : [],
+                        metrics: data.metrics
+                    });
+
                     if (data.testId === currentTestIdRef.current) {
                         // 处理进度更新
                         if (data.progress !== undefined) {
-                            setProgress(data.progress);
+                            setTestProgress(`${data.progress}%`);
                         }
                         if (data.metrics) {
                             setMetrics(data.metrics);
+
+                            // 🔧 修复：将指标数据转换为图表数据点
+                            const dataPoint = {
+                                timestamp: Date.now(),
+                                responseTime: data.metrics.avgResponseTime || data.metrics.averageResponseTime || 0,
+                                throughput: data.metrics.currentTPS || data.metrics.throughput || 0,
+                                activeUsers: data.metrics.activeUsers || 0,
+                                successRate: data.metrics.successRate || 100,
+                                errorRate: data.metrics.errorRate || 0,
+                                errors: data.metrics.errors || 0,
+                                totalRequests: data.metrics.totalRequests || 0,
+                                successfulRequests: data.metrics.successfulRequests || 0,
+                                failedRequests: data.metrics.failedRequests || 0
+                            };
+
+                            console.log('🎯 添加图表数据点:', dataPoint);
+                            updateChartData([dataPoint], true);
+                        } else {
+                            console.log('⚠️ test-progress 事件没有 metrics 数据');
                         }
+                    } else {
+                        console.log('⚠️ test-progress 事件的 testId 不匹配:', {
+                            received: data.testId,
+                            expected: currentTestIdRef.current
+                        });
                     }
                 });
 
@@ -5794,11 +5828,23 @@ const StressTest: React.FC = () => {
                                     </div>
                                 </div>
                                 <UnifiedStressTestCharts
-                                    realTimeData={convertToEnhancedRealTimeData(unifiedTestData.realTimeData)}
+                                    realTimeData={(() => {
+                                        const convertedData = convertToEnhancedRealTimeData(unifiedTestData.realTimeData);
+                                        console.log('🎯 图表数据传递检查:', {
+                                            原始数据长度: unifiedTestData.realTimeData.length,
+                                            转换后数据长度: convertedData.length,
+                                            测试状态: testStatus,
+                                            是否运行中: testStatus === 'running',
+                                            是否完成: testStatus === 'completed',
+                                            样本数据: convertedData.slice(0, 2)
+                                        });
+                                        return convertedData;
+                                    })()}
                                     isRunning={testStatus === 'running'}
                                     testCompleted={testStatus === 'completed'}
                                     currentMetrics={unifiedTestData.currentMetrics}
                                     height={500}
+                                    dataPointDensity="medium"
                                 />
                             </div>
                         ) : (

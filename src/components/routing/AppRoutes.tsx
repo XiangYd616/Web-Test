@@ -48,6 +48,9 @@ const Admin = lazy(() => import('../../pages/Admin'));
 // 用户相关
 const UserProfile = lazy(() => import('../../pages/UserProfile'));
 const UserBookmarks = lazy(() => import('../../pages/UserBookmarks'));
+
+// 测试和优化
+const TestOptimizations = lazy(() => import('../../pages/TestOptimizations'));
 const Notifications = lazy(() => import('../../pages/Notifications'));
 
 // 集成和配置
@@ -150,6 +153,13 @@ const AppRoutes: React.FC = () => {
         <Route path="ux-test" element={
           <LazyPageWrapper>
             <UXTest />
+          </LazyPageWrapper>
+        } />
+
+        {/* 测试优化页面 */}
+        <Route path="test-optimizations" element={
+          <LazyPageWrapper>
+            <TestOptimizations />
           </LazyPageWrapper>
         } />
 

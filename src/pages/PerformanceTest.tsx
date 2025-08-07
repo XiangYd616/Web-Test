@@ -736,586 +736,640 @@ const PerformanceTest: React.FC = () => {
     }));
   };
 
+  // 历史记录处理
+  const handleTestSelect = (test: any) => {
+    // 加载历史测试结果
+    if (test.results) {
+      setResults(test.results);
+    }
+  };
+
+  const handleTestRerun = (test: any) => {
+    // 重新运行历史测试
+    if (test.config) {
+      setTestConfig(test.config);
+      // 可以选择是否立即开始测试
+    }
+  };
+
   // 移除强制登录检查，允许未登录用户查看页面
   // 在使用功能时才提示登录
 
   return (
-    <TestPageLayout className="space-y-3 dark-page-scrollbar compact-layout"
-    >
-      {/* 页面标题和控制 */}
-      <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-3">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-          <div>
-            <h2 className="text-xl font-bold text-white">性能测试</h2>
-            <p className="text-gray-300 text-sm">全面分析网站性能表现和优化建议</p>
-          </div>
-
-          {/* 模式切换 */}
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center bg-gray-700/50 rounded-md p-0.5">
-              <button
-                type="button"
-                onClick={() => setIsAdvancedMode(false)}
-                className={`px-2 py-1 text-xs font-medium rounded transition-all ${!isAdvancedMode
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-gray-300 hover:text-white'
-                  }`}
-              >
-                快速模式
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsAdvancedMode(true)}
-                className={`px-2 py-1 text-xs font-medium rounded transition-all ${isAdvancedMode
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-gray-300 hover:text-white'
-                  }`}
-              >
-                高级模式
-              </button>
+    <TestPageLayout className="space-y-3 dark-page-scrollbar compact-layout">
+      <UnifiedTestPageWithHistory
+        testType="performance"
+        testTypeName="性能测试"
+        testIcon={Zap}
+        onTestSelect={handleTestSelect}
+        onTestRerun={handleTestRerun}
+        additionalComponents={LoginPromptComponent}
+      >
+        {/* 页面标题和控制 */}
+        <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-3">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            <div>
+              <h2 className="text-xl font-bold text-white">性能测试</h2>
+              <p className="text-gray-300 text-sm">全面分析网站性能表现和优化建议</p>
             </div>
 
-            {/* 测试状态和控制按钮 */}
+            {/* 模式切换 */}
             <div className="flex items-center space-x-2">
-              {testStatus === 'idle' ? (
+              <div className="flex items-center bg-gray-700/50 rounded-md p-0.5">
                 <button
                   type="button"
-                  onClick={handleStartTest}
-                  disabled={!testConfig.url}
-                  className={`flex items-center space-x-1.5 px-4 py-2 rounded-md text-sm font-medium transition-all ${!testConfig.url
-                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                    : 'bg-green-600 hover:bg-green-700 text-white'
+                  onClick={() => setIsAdvancedMode(false)}
+                  className={`px-2 py-1 text-xs font-medium rounded transition-all ${!isAdvancedMode
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-gray-300 hover:text-white'
                     }`}
                 >
-                  <Gauge className="w-4 h-4" />
-                  <span>开始测试</span>
+                  快速模式
                 </button>
-              ) : testStatus === 'starting' ? (
-                <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-blue-500/20 border border-blue-500/30 rounded-md">
-                  <Loader className="w-3 h-3 animate-spin text-blue-400" />
-                  <span className="text-xs text-blue-300 font-medium">正在启动...</span>
-                </div>
-              ) : testStatus === 'running' || isRunning ? (
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-md">
-                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-xs text-green-300 font-medium">测试中</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleStopTest}
-                    className="flex items-center space-x-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors text-xs"
-                  >
-                    <Square className="w-3 h-3" />
-                    <span>停止</span>
-                  </button>
-                </div>
-              ) : testStatus === 'completed' ? (
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-md">
-                    <CheckCircle className="w-3 h-3 text-green-400" />
-                    <span className="text-xs text-green-300 font-medium">测试完成</span>
-                  </div>
+                <button
+                  type="button"
+                  onClick={() => setIsAdvancedMode(true)}
+                  className={`px-2 py-1 text-xs font-medium rounded transition-all ${isAdvancedMode
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-gray-300 hover:text-white'
+                    }`}
+                >
+                  高级模式
+                </button>
+              </div>
+
+              {/* 测试状态和控制按钮 */}
+              <div className="flex items-center space-x-2">
+                {testStatus === 'idle' ? (
                   <button
                     type="button"
                     onClick={handleStartTest}
                     disabled={!testConfig.url}
-                    className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${!testConfig.url
+                    className={`flex items-center space-x-1.5 px-4 py-2 rounded-md text-sm font-medium transition-all ${!testConfig.url
                       ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                      : 'bg-blue-600 hover:bg-blue-700 text-white'
+                      : 'bg-green-600 hover:bg-green-700 text-white'
                       }`}
                   >
-                    <RotateCcw className="w-3 h-3" />
-                    <span>重新测试</span>
+                    <Gauge className="w-4 h-4" />
+                    <span>开始测试</span>
                   </button>
-                </div>
-              ) : testStatus === 'failed' ? (
-                <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-red-500/20 border border-red-500/30 rounded-md">
-                  <XCircle className="w-3 h-3 text-red-400" />
-                  <span className="text-xs text-red-300 font-medium">测试失败</span>
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 内容区域 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-        {/* 左侧：URL输入和配置 */}
-        <div className="lg:col-span-2 space-y-3">
-          {/* URL输入 */}
-          <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
-            <h3 className="text-base font-semibold text-white mb-3 flex items-center">
-              <Globe className="w-4 h-4 mr-2 text-blue-400" />
-              测试网站
-            </h3>
-            <div className="space-y-3">
-              <div className="url-input-container">
-                <URLInput
-                  value={testConfig.url}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestConfig(prev => ({ ...prev, url: e.target.value }))}
-                  placeholder="输入要测试的网站URL..."
-                  className="url-input-full-width"
-                  size="sm"
-                />
-              </div>
-              <div className="text-xs text-gray-400">
-                示例：https://www.example.com
-              </div>
-            </div>
-          </div>
-
-          {/* 测试引擎选择 */}
-          <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
-            <h3 className="text-base font-semibold text-white mb-3 flex items-center">
-              <Settings className="w-4 h-4 mr-2 text-purple-400" />
-              测试引擎
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
-              {[
-                { id: 'pagespeed', name: 'PageSpeed', icon: '🚀', description: 'Google PageSpeed Insights' },
-                { id: 'gtmetrix', name: 'GTmetrix', icon: '📊', description: 'GTmetrix 性能分析' },
-                { id: 'webpagetest', name: 'WebPageTest', icon: '🌐', description: 'WebPageTest 详细分析' },
-                { id: 'lighthouse', name: 'Lighthouse', icon: '💡', description: 'Chrome Lighthouse' },
-                { id: 'local', name: '本地测试', icon: '🏠', description: '本地性能分析' }
-              ].map((engine) => (
-                <button
-                  key={engine.id}
-                  type="button"
-                  onClick={() => setSelectedEngine(engine.id as TestEngine)}
-                  className={`p-2 rounded-md border transition-all text-center ${selectedEngine === engine.id
-                    ? 'border-purple-500 bg-purple-500/20'
-                    : 'border-gray-600/50 bg-gray-700/30 hover:border-gray-500'
-                    }`}
-                >
-                  <div className="text-lg mb-0.5">{engine.icon}</div>
-                  <div className="text-xs font-medium text-white">{engine.name}</div>
-                  <div className="text-xs text-gray-400 mt-0.5 leading-tight">{engine.description}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 快速模式 - 测试模式选择 */}
-          {!isAdvancedMode && (
-            <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
-              <h3 className="text-base font-semibold text-white mb-3 flex items-center">
-                <Zap className="w-4 h-4 mr-2 text-yellow-400" />
-                测试模式
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {quickTemplates.map((mode) => {
-                  const IconComponent = mode.icon;
-                  const isSelected = testConfig.mode === mode.config.mode;
-                  return (
-                    <button
-                      key={mode.id}
-                      type="button"
-                      onClick={() => setTestConfig(prev => ({ ...prev, ...mode.config }))}
-                      className={`p-3 rounded-md border transition-all text-left ${isSelected
-                        ? 'border-blue-500 bg-blue-500/20'
-                        : 'border-gray-600/50 bg-gray-700/30 hover:border-gray-500'
-                        }`}
-                    >
-                      <div className="flex items-start space-x-2.5">
-                        <IconComponent className={`w-5 h-5 mt-0.5 ${mode.color === 'blue' ? 'text-blue-400' :
-                          mode.color === 'green' ? 'text-green-400' :
-                            mode.color === 'purple' ? 'text-purple-400' :
-                              'text-orange-400'
-                          }`} />
-                        <div className="flex-1">
-                          <h4 className="text-sm font-medium text-white">{mode.name}</h4>
-                          <p className="text-xs text-gray-400 mt-0.5">{mode.description}</p>
-                          <div className="flex items-center mt-1.5 text-xs text-gray-500">
-                            <Clock className="w-3 h-3 mr-1" />
-                            {mode.duration}
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* 高级模式 - 详细配置 */}
-          {isAdvancedMode && (
-            <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                <Settings className="w-5 h-5 mr-2 text-purple-400" />
-                测试配置
-              </h3>
-
-              {/* 设备选择 */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-300 mb-3">测试设备</label>
-                <div className="flex space-x-3">
-                  {[
-                    { value: 'desktop', label: '桌面端', icon: Monitor },
-                    { value: 'mobile', label: '移动端', icon: Smartphone },
-                    { value: 'both', label: '双端测试', icon: Gauge }
-                  ].map(({ value, label, icon: Icon }) => (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => setTestConfig(prev => ({ ...prev, device: value as any }))}
-                      className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-all ${testConfig.device === value
-                        ? 'border-blue-500 bg-blue-500/20 text-blue-300'
-                        : 'border-gray-600/50 bg-gray-700/30 text-gray-400 hover:border-gray-500'
-                        }`}
-                    >
-                      <Icon className="w-4 h-4" />
-                      <span className="text-sm font-medium">{label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* 检测项目 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-3">检测项目</label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {performanceTests.map((test) => {
-                    const IconComponent = test.icon;
-                    const isEnabled = testConfig[test.key as keyof PerformanceTestConfig] as boolean;
-                    return (
-                      <div
-                        key={test.key}
-                        className={`p-3 rounded-lg border transition-all ${isEnabled
-                          ? 'border-blue-500/50 bg-blue-500/10'
-                          : 'border-gray-600/50 bg-gray-700/30'
-                          }`}
-                      >
-                        <label className="flex items-start space-x-3 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={isEnabled}
-                            onChange={() => handleTestTypeChange(test.key as keyof PerformanceTestConfig)}
-                            className="mt-1 w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
-                          />
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2">
-                              <IconComponent className={`w-4 h-4 ${test.color === 'blue' ? 'text-blue-400' :
-                                test.color === 'green' ? 'text-green-400' :
-                                  test.color === 'yellow' ? 'text-yellow-400' :
-                                    test.color === 'purple' ? 'text-purple-400' :
-                                      test.color === 'indigo' ? 'text-indigo-400' :
-                                        'text-gray-400'
-                                }`} />
-                              <span className="text-sm font-medium text-white">{test.name}</span>
-                            </div>
-                            <p className="text-xs text-gray-400 mt-1">{test.description}</p>
-                            <div className="flex items-center mt-1 text-xs text-gray-500">
-                              <Clock className="w-3 h-3 mr-1" />
-                              {test.estimatedTime}
-                            </div>
-                          </div>
-                        </label>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* 右侧：测试状态和进度 */}
-        <div className="space-y-3">
-          {/* 测试进度 */}
-          {(isRunning || testStatus === 'running') && (
-            <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
-              <h3 className="text-base font-semibold text-white mb-3 flex items-center">
-                <Gauge className="w-4 h-4 mr-2 text-green-400" />
-                测试进度
-              </h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-300">整体进度</span>
-                  <span className="text-white font-medium">{progress}%</span>
-                </div>
-                <ProgressBar
-                  value={progress}
-                  variant="primary"
-                  size="sm"
-                  animated
-                />
-                {testProgress && (
-                  <div className="text-xs text-gray-400">
-                    {testProgress}
+                ) : testStatus === 'starting' ? (
+                  <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-blue-500/20 border border-blue-500/30 rounded-md">
+                    <Loader className="w-3 h-3 animate-spin text-blue-400" />
+                    <span className="text-xs text-blue-300 font-medium">正在启动...</span>
                   </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* 错误显示 */}
-          {error && (
-            <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3">
-              <div className="flex items-start space-x-2">
-                <XCircle className="w-4 h-4 text-red-400 mt-0.5" />
-                <div>
-                  <h4 className="text-red-300 font-medium text-sm">测试失败</h4>
-                  <p className="text-red-200 text-xs mt-0.5">{error}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 测试提示 */}
-          <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
-            <h3 className="text-base font-semibold text-white mb-3 flex items-center">
-              <Image className="w-4 h-4 mr-2 text-blue-400" />
-              测试说明
-            </h3>
-            <div className="space-y-2 text-xs text-gray-300">
-              <div className="flex items-start space-x-1.5">
-                <CheckCircle className="w-3 h-3 text-green-400 mt-0.5" />
-                <span>支持HTTP和HTTPS网站</span>
-              </div>
-              <div className="flex items-start space-x-1.5">
-                <CheckCircle className="w-3 h-3 text-green-400 mt-0.5" />
-                <span>自动检测移动端适配</span>
-              </div>
-              <div className="flex items-start space-x-1.5">
-                <CheckCircle className="w-3 h-3 text-green-400 mt-0.5" />
-                <span>提供详细优化建议</span>
-              </div>
-              <div className="flex items-start space-x-1.5">
-                <AlertTriangle className="w-3 h-3 text-yellow-400 mt-0.5" />
-                <span>测试时间根据网站复杂度而定</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 测试历史 */}
-      {testHistory.length > 0 && (
-        <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
-          <h3 className="text-base font-semibold text-white mb-3 flex items-center">
-            <Clock className="w-4 h-4 mr-2 text-blue-400" />
-            测试历史
-          </h3>
-          <div className="space-y-2">
-            {testHistory.slice(0, 5).map((item) => (
-              <div key={item.id} className="flex items-center justify-between p-2.5 bg-gray-700/50 rounded-md">
-                <div className="flex items-center space-x-2.5">
-                  <div className={`w-1.5 h-1.5 rounded-full ${item.status === 'completed' ? 'bg-green-400' : 'bg-red-400'}`}></div>
-                  <div>
-                    <div className="text-white text-xs font-medium truncate max-w-xs">{item.url}</div>
-                    <div className="text-gray-400 text-xs">{new Date(item.timestamp).toLocaleString()}</div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="text-right">
-                    <div className={`text-xs font-medium ${item.overallScore >= 90 ? 'text-green-400' :
-                      item.overallScore >= 70 ? 'text-yellow-400' : 'text-red-400'}`}>
-                      {item.overallScore}分
+                ) : testStatus === 'running' || isRunning ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-md">
+                      <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                      <span className="text-xs text-green-300 font-medium">测试中</span>
                     </div>
-                    <div className="text-xs text-gray-400">{item.engine}</div>
+                    <button
+                      type="button"
+                      onClick={handleStopTest}
+                      className="flex items-center space-x-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors text-xs"
+                    >
+                      <Square className="w-3 h-3" />
+                      <span>停止</span>
+                    </button>
                   </div>
-                </div>
+                ) : testStatus === 'completed' ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-md">
+                      <CheckCircle className="w-3 h-3 text-green-400" />
+                      <span className="text-xs text-green-300 font-medium">测试完成</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleStartTest}
+                      disabled={!testConfig.url}
+                      className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${!testConfig.url
+                        ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                        : 'bg-blue-600 hover:bg-blue-700 text-white'
+                        }`}
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                      <span>重新测试</span>
+                    </button>
+                  </div>
+                ) : testStatus === 'failed' ? (
+                  <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-red-500/20 border border-red-500/30 rounded-md">
+                    <XCircle className="w-3 h-3 text-red-400" />
+                    <span className="text-xs text-red-300 font-medium">测试失败</span>
+                  </div>
+                ) : null}
               </div>
-            ))}
+            </div>
           </div>
         </div>
-      )}
 
-      {/* 测试结果 */}
-      {results && testStatus === 'completed' && (
-        <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
-          <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-            <BarChart3 className="w-5 h-5 mr-2 text-green-400" />
-            测试结果
-          </h3>
-
-          {/* 总体评分 */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="text-center">
-              <div className={`text-3xl font-bold mb-1 ${results.overallScore >= 90 ? 'text-green-400' :
-                results.overallScore >= 70 ? 'text-yellow-400' :
-                  'text-red-400'
-                }`}>
-                {results.overallScore}
-              </div>
-              <div className="text-gray-300 text-xs">总体评分</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-blue-400 mb-1">{(results.metrics.loadTime / 1000).toFixed(1)}s</div>
-              <div className="text-gray-300 text-xs">加载时间</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-purple-400 mb-1">{(results.metrics.pageSize / 1024).toFixed(1)}KB</div>
-              <div className="text-gray-300 text-xs">页面大小</div>
-            </div>
-            <div className="text-center">
-              <div className="text-xl font-bold text-orange-400 mb-1">{results.metrics.requests}</div>
-              <div className="text-gray-300 text-xs">请求数量</div>
-            </div>
-          </div>
-
-          {/* Core Web Vitals */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-            <div className="bg-gray-700/50 rounded-md p-3">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-gray-300 text-xs">FCP (首次内容绘制)</span>
-                <span className={`text-xs font-medium ${results.coreWebVitals.fcp < 1800 ? 'text-green-400' :
-                  results.coreWebVitals.fcp < 3000 ? 'text-yellow-400' :
-                    'text-red-400'
-                  }`}>
-                  {(results.coreWebVitals.fcp / 1000).toFixed(1)}s
-                </span>
-              </div>
-              <ProgressBar
-                value={Math.min(100, (3000 - results.coreWebVitals.fcp) / 3000 * 100)}
-                variant={results.coreWebVitals.fcp < 1800 ? 'success' :
-                  results.coreWebVitals.fcp < 3000 ? 'warning' : 'danger'}
-                size="sm"
-              />
-            </div>
-            <div className="bg-gray-700/50 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-300 text-sm">LCP (最大内容绘制)</span>
-                <span className={`text-sm font-medium ${results.coreWebVitals.lcp < 2500 ? 'text-green-400' :
-                  results.coreWebVitals.lcp < 4000 ? 'text-yellow-400' :
-                    'text-red-400'
-                  }`}>
-                  {(results.coreWebVitals.lcp / 1000).toFixed(1)}s
-                </span>
-              </div>
-              <ProgressBar
-                value={Math.min(100, (4000 - results.coreWebVitals.lcp) / 4000 * 100)}
-                variant={results.coreWebVitals.lcp < 2500 ? 'success' :
-                  results.coreWebVitals.lcp < 4000 ? 'warning' : 'danger'}
-                size="md"
-              />
-            </div>
-            <div className="bg-gray-700/50 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-300 text-sm">CLS (累积布局偏移)</span>
-                <span className={`text-sm font-medium ${results.coreWebVitals.cls < 0.1 ? 'text-green-400' :
-                  results.coreWebVitals.cls < 0.25 ? 'text-yellow-400' :
-                    'text-red-400'
-                  }`}>
-                  {results.coreWebVitals.cls.toFixed(3)}
-                </span>
-              </div>
-              <ProgressBar
-                value={Math.min(100, (0.25 - results.coreWebVitals.cls) / 0.25 * 100)}
-                variant={results.coreWebVitals.cls < 0.1 ? 'success' :
-                  results.coreWebVitals.cls < 0.25 ? 'warning' : 'danger'}
-                size="md"
-              />
-            </div>
-          </div>
-
-          {/* 优化建议和诊断 */}
-          {(results.opportunities.length > 0 || results.diagnostics.length > 0) && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-              {/* 优化建议 */}
-              {results.opportunities.length > 0 && (
-                <div>
-                  <h4 className="text-lg font-semibold text-white mb-4">优化建议</h4>
-                  <div className="space-y-3">
-                    {results.opportunities.slice(0, 5).map((opportunity) => (
-                      <div key={opportunity.id} className="bg-gray-700/50 rounded-lg p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h5 className="text-white font-medium">{opportunity.title}</h5>
-                            <p className="text-gray-400 text-sm mt-1">{opportunity.description}</p>
-                          </div>
-                          <div className={`px-2 py-1 rounded text-xs font-medium ${opportunity.impact === 'high' ? 'bg-red-500/20 text-red-400' :
-                            opportunity.impact === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
-                              'bg-blue-500/20 text-blue-400'
-                            }`}>
-                            {opportunity.impact === 'high' ? '高' : opportunity.impact === 'medium' ? '中' : '低'}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* 诊断信息 */}
-              {results.diagnostics.length > 0 && (
-                <div>
-                  <h4 className="text-lg font-semibold text-white mb-4">诊断信息</h4>
-                  <div className="space-y-3">
-                    {results.diagnostics.slice(0, 5).map((diagnostic) => (
-                      <div key={diagnostic.id} className="bg-gray-700/50 rounded-lg p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h5 className="text-white font-medium">{diagnostic.title}</h5>
-                            <p className="text-gray-400 text-sm mt-1">{diagnostic.description}</p>
-                          </div>
-                          <div className={`px-2 py-1 rounded text-xs font-medium ${diagnostic.severity === 'error' ? 'bg-red-500/20 text-red-400' :
-                            diagnostic.severity === 'warning' ? 'bg-yellow-500/20 text-yellow-400' :
-                              'bg-blue-500/20 text-blue-400'
-                            }`}>
-                            {diagnostic.severity === 'error' ? '错误' : diagnostic.severity === 'warning' ? '警告' : '信息'}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* 操作按钮 */}
-          <div className="flex flex-wrap gap-2 mt-6 pt-4 border-t border-gray-700/50">
-            {results.reportUrl && (
-              <a
-                href={results.reportUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
-              >
-                <ExternalLink className="w-3 h-3 mr-1.5" />
-                查看详细报告
-              </a>
-            )}
-            <UnifiedExportButton
-              data={{
-                filename: `performance-test-${results.id}`,
-                data: results,
-                metadata: {
-                  title: '性能测试报告',
-                  description: `对 ${results.url} 的性能测试结果`,
-                  timestamp: new Date().toISOString(),
-                  version: '2.1.0'
-                }
-              }}
-              formats={['json', 'csv']}
-              onExport={(format: string, data: any) => {
-                ExportUtils.exportPerformanceTestData(data.data, format);
-              }}
-              size="sm"
-              variant="primary"
-              showDropdown={false}
-              defaultFormat="json"
-            />
+        {/* 标签页导航 */}
+        <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50">
+          <div className="flex border-b border-gray-700/50">
             <button
               type="button"
-              onClick={() => {
-                const text = `性能测试结果 - ${results.url}\n总分: ${results.overallScore}\n加载时间: ${(results.metrics.loadTime / 1000).toFixed(1)}s\n测试引擎: ${results.engine}`;
-                navigator.clipboard.writeText(text);
-              }}
-              className="inline-flex items-center px-3 py-1.5 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors text-sm"
+              onClick={() => setActiveTab('test')}
+              className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors ${activeTab === 'test'
+                ? 'text-blue-400 border-b-2 border-blue-400 bg-blue-500/10'
+                : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+                }`}
             >
-              <Share2 className="w-3 h-3 mr-1.5" />
-              复制结果
+              <Zap className="w-4 h-4" />
+              性能测试
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('history')}
+              className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors ${activeTab === 'history'
+                ? 'text-blue-400 border-b-2 border-blue-400 bg-blue-500/10'
+                : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+                }`}
+            >
+              <History className="w-4 h-4" />
+              测试历史
             </button>
           </div>
         </div>
-      )}
-      {/* 登录提示组件 */}
-      {LoginPromptComponent}
+
+        {/* 标签页内容 */}
+        {activeTab === 'test' && (
+          <>
+            {/* 内容区域 */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+              {/* 左侧：URL输入和配置 */}
+              <div className="lg:col-span-2 space-y-3">
+                {/* URL输入 */}
+                <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
+                  <h3 className="text-base font-semibold text-white mb-3 flex items-center">
+                    <Globe className="w-4 h-4 mr-2 text-blue-400" />
+                    测试网站
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="url-input-container">
+                      <URLInput
+                        value={testConfig.url}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTestConfig(prev => ({ ...prev, url: e.target.value }))}
+                        placeholder="输入要测试的网站URL..."
+                        className="url-input-full-width"
+                        size="sm"
+                      />
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      示例：https://www.example.com
+                    </div>
+                  </div>
+                </div>
+
+                {/* 测试引擎选择 */}
+                <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
+                  <h3 className="text-base font-semibold text-white mb-3 flex items-center">
+                    <Settings className="w-4 h-4 mr-2 text-purple-400" />
+                    测试引擎
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+                    {[
+                      { id: 'pagespeed', name: 'PageSpeed', icon: '🚀', description: 'Google PageSpeed Insights' },
+                      { id: 'gtmetrix', name: 'GTmetrix', icon: '📊', description: 'GTmetrix 性能分析' },
+                      { id: 'webpagetest', name: 'WebPageTest', icon: '🌐', description: 'WebPageTest 详细分析' },
+                      { id: 'lighthouse', name: 'Lighthouse', icon: '💡', description: 'Chrome Lighthouse' },
+                      { id: 'local', name: '本地测试', icon: '🏠', description: '本地性能分析' }
+                    ].map((engine) => (
+                      <button
+                        key={engine.id}
+                        type="button"
+                        onClick={() => setSelectedEngine(engine.id as TestEngine)}
+                        className={`p-2 rounded-md border transition-all text-center ${selectedEngine === engine.id
+                          ? 'border-purple-500 bg-purple-500/20'
+                          : 'border-gray-600/50 bg-gray-700/30 hover:border-gray-500'
+                          }`}
+                      >
+                        <div className="text-lg mb-0.5">{engine.icon}</div>
+                        <div className="text-xs font-medium text-white">{engine.name}</div>
+                        <div className="text-xs text-gray-400 mt-0.5 leading-tight">{engine.description}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 快速模式 - 测试模式选择 */}
+                {!isAdvancedMode && (
+                  <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
+                    <h3 className="text-base font-semibold text-white mb-3 flex items-center">
+                      <Zap className="w-4 h-4 mr-2 text-yellow-400" />
+                      测试模式
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {quickTemplates.map((mode) => {
+                        const IconComponent = mode.icon;
+                        const isSelected = testConfig.mode === mode.config.mode;
+                        return (
+                          <button
+                            key={mode.id}
+                            type="button"
+                            onClick={() => setTestConfig(prev => ({ ...prev, ...mode.config }))}
+                            className={`p-3 rounded-md border transition-all text-left ${isSelected
+                              ? 'border-blue-500 bg-blue-500/20'
+                              : 'border-gray-600/50 bg-gray-700/30 hover:border-gray-500'
+                              }`}
+                          >
+                            <div className="flex items-start space-x-2.5">
+                              <IconComponent className={`w-5 h-5 mt-0.5 ${mode.color === 'blue' ? 'text-blue-400' :
+                                mode.color === 'green' ? 'text-green-400' :
+                                  mode.color === 'purple' ? 'text-purple-400' :
+                                    'text-orange-400'
+                                }`} />
+                              <div className="flex-1">
+                                <h4 className="text-sm font-medium text-white">{mode.name}</h4>
+                                <p className="text-xs text-gray-400 mt-0.5">{mode.description}</p>
+                                <div className="flex items-center mt-1.5 text-xs text-gray-500">
+                                  <Clock className="w-3 h-3 mr-1" />
+                                  {mode.duration}
+                                </div>
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* 高级模式 - 详细配置 */}
+                {isAdvancedMode && (
+                  <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                      <Settings className="w-5 h-5 mr-2 text-purple-400" />
+                      测试配置
+                    </h3>
+
+                    {/* 设备选择 */}
+                    <div className="mb-6">
+                      <label className="block text-sm font-medium text-gray-300 mb-3">测试设备</label>
+                      <div className="flex space-x-3">
+                        {[
+                          { value: 'desktop', label: '桌面端', icon: Monitor },
+                          { value: 'mobile', label: '移动端', icon: Smartphone },
+                          { value: 'both', label: '双端测试', icon: Gauge }
+                        ].map(({ value, label, icon: Icon }) => (
+                          <button
+                            key={value}
+                            type="button"
+                            onClick={() => setTestConfig(prev => ({ ...prev, device: value as any }))}
+                            className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-all ${testConfig.device === value
+                              ? 'border-blue-500 bg-blue-500/20 text-blue-300'
+                              : 'border-gray-600/50 bg-gray-700/30 text-gray-400 hover:border-gray-500'
+                              }`}
+                          >
+                            <Icon className="w-4 h-4" />
+                            <span className="text-sm font-medium">{label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 检测项目 */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-3">检测项目</label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {performanceTests.map((test) => {
+                          const IconComponent = test.icon;
+                          const isEnabled = testConfig[test.key as keyof PerformanceTestConfig] as boolean;
+                          return (
+                            <div
+                              key={test.key}
+                              className={`p-3 rounded-lg border transition-all ${isEnabled
+                                ? 'border-blue-500/50 bg-blue-500/10'
+                                : 'border-gray-600/50 bg-gray-700/30'
+                                }`}
+                            >
+                              <label className="flex items-start space-x-3 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={isEnabled}
+                                  onChange={() => handleTestTypeChange(test.key as keyof PerformanceTestConfig)}
+                                  className="mt-1 w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+                                />
+                                <div className="flex-1">
+                                  <div className="flex items-center space-x-2">
+                                    <IconComponent className={`w-4 h-4 ${test.color === 'blue' ? 'text-blue-400' :
+                                      test.color === 'green' ? 'text-green-400' :
+                                        test.color === 'yellow' ? 'text-yellow-400' :
+                                          test.color === 'purple' ? 'text-purple-400' :
+                                            test.color === 'indigo' ? 'text-indigo-400' :
+                                              'text-gray-400'
+                                      }`} />
+                                    <span className="text-sm font-medium text-white">{test.name}</span>
+                                  </div>
+                                  <p className="text-xs text-gray-400 mt-1">{test.description}</p>
+                                  <div className="flex items-center mt-1 text-xs text-gray-500">
+                                    <Clock className="w-3 h-3 mr-1" />
+                                    {test.estimatedTime}
+                                  </div>
+                                </div>
+                              </label>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 右侧：测试状态和进度 */}
+              <div className="space-y-3">
+                {/* 测试进度 */}
+                {(isRunning || testStatus === 'running') && (
+                  <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
+                    <h3 className="text-base font-semibold text-white mb-3 flex items-center">
+                      <Gauge className="w-4 h-4 mr-2 text-green-400" />
+                      测试进度
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-300">整体进度</span>
+                        <span className="text-white font-medium">{progress}%</span>
+                      </div>
+                      <ProgressBar
+                        value={progress}
+                        variant="primary"
+                        size="sm"
+                        animated
+                      />
+                      {testProgress && (
+                        <div className="text-xs text-gray-400">
+                          {testProgress}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* 错误显示 */}
+                {error && (
+                  <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3">
+                    <div className="flex items-start space-x-2">
+                      <XCircle className="w-4 h-4 text-red-400 mt-0.5" />
+                      <div>
+                        <h4 className="text-red-300 font-medium text-sm">测试失败</h4>
+                        <p className="text-red-200 text-xs mt-0.5">{error}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 测试提示 */}
+                <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
+                  <h3 className="text-base font-semibold text-white mb-3 flex items-center">
+                    <Image className="w-4 h-4 mr-2 text-blue-400" />
+                    测试说明
+                  </h3>
+                  <div className="space-y-2 text-xs text-gray-300">
+                    <div className="flex items-start space-x-1.5">
+                      <CheckCircle className="w-3 h-3 text-green-400 mt-0.5" />
+                      <span>支持HTTP和HTTPS网站</span>
+                    </div>
+                    <div className="flex items-start space-x-1.5">
+                      <CheckCircle className="w-3 h-3 text-green-400 mt-0.5" />
+                      <span>自动检测移动端适配</span>
+                    </div>
+                    <div className="flex items-start space-x-1.5">
+                      <CheckCircle className="w-3 h-3 text-green-400 mt-0.5" />
+                      <span>提供详细优化建议</span>
+                    </div>
+                    <div className="flex items-start space-x-1.5">
+                      <AlertTriangle className="w-3 h-3 text-yellow-400 mt-0.5" />
+                      <span>测试时间根据网站复杂度而定</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 测试历史 */}
+            {testHistory.length > 0 && (
+              <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
+                <h3 className="text-base font-semibold text-white mb-3 flex items-center">
+                  <Clock className="w-4 h-4 mr-2 text-blue-400" />
+                  测试历史
+                </h3>
+                <div className="space-y-2">
+                  {testHistory.slice(0, 5).map((item) => (
+                    <div key={item.id} className="flex items-center justify-between p-2.5 bg-gray-700/50 rounded-md">
+                      <div className="flex items-center space-x-2.5">
+                        <div className={`w-1.5 h-1.5 rounded-full ${item.status === 'completed' ? 'bg-green-400' : 'bg-red-400'}`}></div>
+                        <div>
+                          <div className="text-white text-xs font-medium truncate max-w-xs">{item.url}</div>
+                          <div className="text-gray-400 text-xs">{new Date(item.timestamp).toLocaleString()}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="text-right">
+                          <div className={`text-xs font-medium ${item.overallScore >= 90 ? 'text-green-400' :
+                            item.overallScore >= 70 ? 'text-yellow-400' : 'text-red-400'}`}>
+                            {item.overallScore}分
+                          </div>
+                          <div className="text-xs text-gray-400">{item.engine}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 测试结果 */}
+            {results && testStatus === 'completed' && (
+              <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                  <BarChart3 className="w-5 h-5 mr-2 text-green-400" />
+                  测试结果
+                </h3>
+
+                {/* 总体评分 */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="text-center">
+                    <div className={`text-3xl font-bold mb-1 ${results.overallScore >= 90 ? 'text-green-400' :
+                      results.overallScore >= 70 ? 'text-yellow-400' :
+                        'text-red-400'
+                      }`}>
+                      {results.overallScore}
+                    </div>
+                    <div className="text-gray-300 text-xs">总体评分</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-blue-400 mb-1">{(results.metrics.loadTime / 1000).toFixed(1)}s</div>
+                    <div className="text-gray-300 text-xs">加载时间</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-purple-400 mb-1">{(results.metrics.pageSize / 1024).toFixed(1)}KB</div>
+                    <div className="text-gray-300 text-xs">页面大小</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-orange-400 mb-1">{results.metrics.requests}</div>
+                    <div className="text-gray-300 text-xs">请求数量</div>
+                  </div>
+                </div>
+
+                {/* Core Web Vitals */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+                  <div className="bg-gray-700/50 rounded-md p-3">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-gray-300 text-xs">FCP (首次内容绘制)</span>
+                      <span className={`text-xs font-medium ${results.coreWebVitals.fcp < 1800 ? 'text-green-400' :
+                        results.coreWebVitals.fcp < 3000 ? 'text-yellow-400' :
+                          'text-red-400'
+                        }`}>
+                        {(results.coreWebVitals.fcp / 1000).toFixed(1)}s
+                      </span>
+                    </div>
+                    <ProgressBar
+                      value={Math.min(100, (3000 - results.coreWebVitals.fcp) / 3000 * 100)}
+                      variant={results.coreWebVitals.fcp < 1800 ? 'success' :
+                        results.coreWebVitals.fcp < 3000 ? 'warning' : 'danger'}
+                      size="sm"
+                    />
+                  </div>
+                  <div className="bg-gray-700/50 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-gray-300 text-sm">LCP (最大内容绘制)</span>
+                      <span className={`text-sm font-medium ${results.coreWebVitals.lcp < 2500 ? 'text-green-400' :
+                        results.coreWebVitals.lcp < 4000 ? 'text-yellow-400' :
+                          'text-red-400'
+                        }`}>
+                        {(results.coreWebVitals.lcp / 1000).toFixed(1)}s
+                      </span>
+                    </div>
+                    <ProgressBar
+                      value={Math.min(100, (4000 - results.coreWebVitals.lcp) / 4000 * 100)}
+                      variant={results.coreWebVitals.lcp < 2500 ? 'success' :
+                        results.coreWebVitals.lcp < 4000 ? 'warning' : 'danger'}
+                      size="md"
+                    />
+                  </div>
+                  <div className="bg-gray-700/50 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-gray-300 text-sm">CLS (累积布局偏移)</span>
+                      <span className={`text-sm font-medium ${results.coreWebVitals.cls < 0.1 ? 'text-green-400' :
+                        results.coreWebVitals.cls < 0.25 ? 'text-yellow-400' :
+                          'text-red-400'
+                        }`}>
+                        {results.coreWebVitals.cls.toFixed(3)}
+                      </span>
+                    </div>
+                    <ProgressBar
+                      value={Math.min(100, (0.25 - results.coreWebVitals.cls) / 0.25 * 100)}
+                      variant={results.coreWebVitals.cls < 0.1 ? 'success' :
+                        results.coreWebVitals.cls < 0.25 ? 'warning' : 'danger'}
+                      size="md"
+                    />
+                  </div>
+                </div>
+
+                {/* 优化建议和诊断 */}
+                {(results.opportunities.length > 0 || results.diagnostics.length > 0) && (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+                    {/* 优化建议 */}
+                    {results.opportunities.length > 0 && (
+                      <div>
+                        <h4 className="text-lg font-semibold text-white mb-4">优化建议</h4>
+                        <div className="space-y-3">
+                          {results.opportunities.slice(0, 5).map((opportunity) => (
+                            <div key={opportunity.id} className="bg-gray-700/50 rounded-lg p-4">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <h5 className="text-white font-medium">{opportunity.title}</h5>
+                                  <p className="text-gray-400 text-sm mt-1">{opportunity.description}</p>
+                                </div>
+                                <div className={`px-2 py-1 rounded text-xs font-medium ${opportunity.impact === 'high' ? 'bg-red-500/20 text-red-400' :
+                                  opportunity.impact === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
+                                    'bg-blue-500/20 text-blue-400'
+                                  }`}>
+                                  {opportunity.impact === 'high' ? '高' : opportunity.impact === 'medium' ? '中' : '低'}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 诊断信息 */}
+                    {results.diagnostics.length > 0 && (
+                      <div>
+                        <h4 className="text-lg font-semibold text-white mb-4">诊断信息</h4>
+                        <div className="space-y-3">
+                          {results.diagnostics.slice(0, 5).map((diagnostic) => (
+                            <div key={diagnostic.id} className="bg-gray-700/50 rounded-lg p-4">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <h5 className="text-white font-medium">{diagnostic.title}</h5>
+                                  <p className="text-gray-400 text-sm mt-1">{diagnostic.description}</p>
+                                </div>
+                                <div className={`px-2 py-1 rounded text-xs font-medium ${diagnostic.severity === 'error' ? 'bg-red-500/20 text-red-400' :
+                                  diagnostic.severity === 'warning' ? 'bg-yellow-500/20 text-yellow-400' :
+                                    'bg-blue-500/20 text-blue-400'
+                                  }`}>
+                                  {diagnostic.severity === 'error' ? '错误' : diagnostic.severity === 'warning' ? '警告' : '信息'}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 操作按钮 */}
+                <div className="flex flex-wrap gap-2 mt-6 pt-4 border-t border-gray-700/50">
+                  {results.reportUrl && (
+                    <a
+                      href={results.reportUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
+                    >
+                      <ExternalLink className="w-3 h-3 mr-1.5" />
+                      查看详细报告
+                    </a>
+                  )}
+                  <UnifiedExportButton
+                    data={{
+                      filename: `performance-test-${results.id}`,
+                      data: results,
+                      metadata: {
+                        title: '性能测试报告',
+                        description: `对 ${results.url} 的性能测试结果`,
+                        timestamp: new Date().toISOString(),
+                        version: '2.1.0'
+                      }
+                    }}
+                    formats={['json', 'csv']}
+                    onExport={(format: string, data: any) => {
+                      ExportUtils.exportPerformanceTestData(data.data, format);
+                    }}
+                    size="sm"
+                    variant="primary"
+                    showDropdown={false}
+                    defaultFormat="json"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const text = `性能测试结果 - ${results.url}\n总分: ${results.overallScore}\n加载时间: ${(results.metrics.loadTime / 1000).toFixed(1)}s\n测试引擎: ${results.engine}`;
+                      navigator.clipboard.writeText(text);
+                    }}
+                    className="inline-flex items-center px-3 py-1.5 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors text-sm"
+                  >
+                    <Share2 className="w-3 h-3 mr-1.5" />
+                    复制结果
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+      </UnifiedTestPageWithHistory>
     </TestPageLayout>
   );
 };

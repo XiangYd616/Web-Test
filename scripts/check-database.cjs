@@ -14,21 +14,21 @@ async function checkDatabase() {
     const connectionTest = await query('SELECT NOW() as current_time');
     console.log('✅ 数据库连接正常:', connectionTest.rows[0].current_time);
 
-    // 检查test_history表结构
-    console.log('\n📋 检查test_history表结构...');
+    // 检查test_sessions表结构
+    console.log('\n📋 检查test_sessions表结构...');
     const tableStructure = await query(`
-      SELECT column_name, data_type, is_nullable, column_default 
-      FROM information_schema.columns 
-      WHERE table_name = 'test_history' 
+      SELECT column_name, data_type, is_nullable, column_default
+      FROM information_schema.columns
+      WHERE table_name = 'test_sessions'
       ORDER BY ordinal_position
     `);
 
     if (tableStructure.rows.length === 0) {
-      console.log('❌ test_history表不存在');
+      console.log('❌ test_sessions表不存在');
       return false;
     }
 
-    console.log('✅ test_history表结构:');
+    console.log('✅ test_sessions表结构:');
     tableStructure.rows.forEach(row => {
       console.log(`  - ${row.column_name}: ${row.data_type} (nullable: ${row.is_nullable})`);
     });
