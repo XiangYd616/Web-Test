@@ -486,7 +486,4 @@ class SEOEngine {
   }
 }
 
-// 创建单例实例
-const seoEngine = new SEOEngine();
-
-module.exports = seoEngine;
+module.exports = SEOEngine;

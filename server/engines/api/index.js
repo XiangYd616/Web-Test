@@ -467,7 +467,4 @@ class APIEngine {
   }
 }
 
-// 创建单例实例
-const apiEngine = new APIEngine();
-
-module.exports = apiEngine;
+module.exports = APIEngine;

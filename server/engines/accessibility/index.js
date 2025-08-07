@@ -440,7 +440,4 @@ class AccessibilityEngine {
   }
 }
 
-// 创建单例实例
-const accessibilityEngine = new AccessibilityEngine();
-
-module.exports = accessibilityEngine;
+module.exports = AccessibilityEngine;

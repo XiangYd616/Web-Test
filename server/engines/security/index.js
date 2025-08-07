@@ -448,7 +448,4 @@ class SecurityEngine {
   }
 }
 
-// 创建单例实例
-const securityEngine = new SecurityEngine();
-
-module.exports = securityEngine;
+module.exports = SecurityEngine;

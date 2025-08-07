@@ -428,7 +428,4 @@ class PerformanceEngine {
   }
 }
 
-// 创建单例实例
-const performanceEngine = new PerformanceEngine();
-
-module.exports = performanceEngine;
+module.exports = PerformanceEngine;
