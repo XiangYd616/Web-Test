@@ -93,11 +93,17 @@ class AccessibilityAnalyzer {
 
       // 色彩对比度分析
       try {
-        await this.colorContrastAnalyzer.injectAnalysisFunctions(page);
-        results.colorContrast = await this.colorContrastAnalyzer.analyze(page);
+        // 使用新的综合分析方法
+        results.colorContrast = await this.colorContrastAnalyzer.analyzeColorContrast(url, config.colorContrastOptions);
       } catch (error) {
         console.warn('色彩对比度分析失败:', error.message);
-        results.colorContrast = { error: error.message };
+        // 回退到原有方法
+        try {
+          await this.colorContrastAnalyzer.injectAnalysisFunctions(page);
+          results.colorContrast = await this.colorContrastAnalyzer.analyze(page);
+        } catch (fallbackError) {
+          results.colorContrast = { error: fallbackError.message };
+        }
       }
 
       // 发送进度更新

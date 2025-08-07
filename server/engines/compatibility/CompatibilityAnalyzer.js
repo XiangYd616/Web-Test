@@ -8,6 +8,7 @@ const BrowserManager = require('./managers/BrowserManager');
 const ScreenshotComparator = require('./analyzers/ScreenshotComparator');
 const CSSFeatureDetector = require('./analyzers/CSSFeatureDetector');
 const ResponsiveDesignAnalyzer = require('./analyzers/ResponsiveDesignAnalyzer');
+const CSSJavaScriptCompatibilityAnalyzer = require('./analyzers/CSSJavaScriptCompatibilityAnalyzer');
 
 class CompatibilityAnalyzer {
   constructor(options = {}) {
@@ -25,6 +26,7 @@ class CompatibilityAnalyzer {
     this.screenshotComparator = new ScreenshotComparator(this.options.screenshot);
     this.cssFeatureDetector = new CSSFeatureDetector();
     this.responsiveDesignAnalyzer = new ResponsiveDesignAnalyzer();
+    this.cssJsCompatibilityAnalyzer = new CSSJavaScriptCompatibilityAnalyzer();
 
     // 测试结果存储
     this.testResults = new Map();
@@ -122,6 +124,20 @@ class CompatibilityAnalyzer {
       // 响应式设计分析
       if (analysisConfig.responsiveDesign !== false) {
         results.responsiveDesign = await this.responsiveDesignAnalyzer.analyzeResponsiveDesign(url, config.responsiveOptions);
+      }
+
+      // 发送进度更新
+      if (config.onProgress) {
+        config.onProgress({
+          percentage: 80,
+          stage: 'css_js_compatibility',
+          message: '分析CSS和JavaScript兼容性...'
+        });
+      }
+
+      // CSS和JavaScript兼容性分析
+      if (analysisConfig.cssJsCompatibility !== false) {
+        results.cssJsCompatibility = await this.cssJsCompatibilityAnalyzer.analyzeCompatibility(url, config.cssJsOptions);
       }
 
       // 发送进度更新

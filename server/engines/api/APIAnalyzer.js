@@ -8,6 +8,7 @@ const TestCaseManager = require('./managers/TestCaseManager');
 const HTTPClient = require('./clients/HTTPClient');
 const APITestAutomation = require('./automation/APITestAutomation');
 const APIPerformanceTester = require('./performance/APIPerformanceTester');
+const APIDocumentationGenerator = require('./documentation/APIDocumentationGenerator');
 
 class APIAnalyzer {
   constructor(options = {}) {
@@ -23,6 +24,7 @@ class APIAnalyzer {
     this.httpClient = new HTTPClient(this.options);
     this.automation = new APITestAutomation();
     this.performanceTester = new APIPerformanceTester();
+    this.documentationGenerator = new APIDocumentationGenerator();
 
     // 分析结果
     this.analysisResults = {
@@ -853,6 +855,42 @@ class APIAnalyzer {
    */
   onPerformanceTestEvent(eventName, callback) {
     this.performanceTester.on(eventName, callback);
+  }
+
+  /**
+   * 生成API文档
+   */
+  async generateAPIDocumentation(testResults, options = {}) {
+    return await this.documentationGenerator.generateAPIDocumentation(testResults, options);
+  }
+
+  /**
+   * 生成OpenAPI规范
+   */
+  async generateOpenAPISpec(testResults, options = {}) {
+    const documentation = await this.documentationGenerator.generateAPIDocumentation(testResults, options);
+    return documentation.openApiSpec;
+  }
+
+  /**
+   * 生成测试报告
+   */
+  async generateTestReport(testResults, options = {}) {
+    const documentation = await this.documentationGenerator.generateAPIDocumentation(testResults, options);
+    return documentation.testReport;
+  }
+
+  /**
+   * 导出文档
+   */
+  async exportDocumentation(testResults, options = {}) {
+    const documentation = await this.documentationGenerator.generateAPIDocumentation(testResults, options);
+
+    if (options.outputDir && options.formats) {
+      return await this.documentationGenerator.exportDocumentation(documentation, options);
+    }
+
+    return documentation;
   }
 
   /**
