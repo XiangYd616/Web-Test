@@ -1369,6 +1369,7 @@ const PerformanceTest: React.FC = () => {
               </div>
             )}
           </>
+        )}
       </UnifiedTestPageWithHistory>
     </TestPageLayout>
   );

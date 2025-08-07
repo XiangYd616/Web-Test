@@ -1,5 +1,5 @@
 import { History } from 'lucide-react';
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import { TestPageHistory } from '../testHistory/TestPageHistory';
 
 interface UnifiedTestPageWithHistoryProps {
@@ -139,8 +139,8 @@ export const UnifiedTestPageWithHistory: React.FC<UnifiedTestPageWithHistoryProp
         {/* 测试标签页内容 */}
         <div
           className={`transition-all duration-300 ease-in-out ${activeTab === 'test'
-              ? 'opacity-100 translate-y-0 pointer-events-auto'
-              : 'opacity-0 translate-y-2 pointer-events-none absolute inset-0'
+            ? 'opacity-100 translate-y-0 pointer-events-auto'
+            : 'opacity-0 translate-y-2 pointer-events-none absolute inset-0'
             }`}
         >
           {children}
@@ -149,8 +149,8 @@ export const UnifiedTestPageWithHistory: React.FC<UnifiedTestPageWithHistoryProp
         {/* 历史标签页内容 */}
         <div
           className={`transition-all duration-300 ease-in-out ${activeTab === 'history'
-              ? 'opacity-100 translate-y-0 pointer-events-auto'
-              : 'opacity-0 translate-y-2 pointer-events-none absolute inset-0'
+            ? 'opacity-100 translate-y-0 pointer-events-auto'
+            : 'opacity-0 translate-y-2 pointer-events-none absolute inset-0'
             }`}
         >
           <TestPageHistory

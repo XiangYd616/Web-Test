@@ -2,7 +2,7 @@ import { CheckCircle, Eye, Keyboard, Loader, Palette, RotateCcw, Shield, Square,
 import React, { useCallback, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { TestPageLayout } from '../components/testing/UnifiedTestingComponents';
-import UnifiedTestPageWithHistory from '../components/testing/UnifiedTestPageWithHistory';
+import { UnifiedTestPageWithHistory } from '../components/testing/UnifiedTestPageWithHistory';
 import { URLInput } from '../components/ui/URLInput';
 import { useUserStats } from '../hooks/useUserStats';
 import UnifiedApiService from '../services/api/apiService';
@@ -340,10 +340,10 @@ const AccessibilityTest: React.FC = () => {
                   onClick={handleStartTest}
                   disabled={!config.url}
                   className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition-all duration-200 ${!config.url
-                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                      : isAuthenticated
-                        ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-700 hover:to-purple-800'
-                        : 'bg-yellow-600 hover:bg-yellow-700 text-white border border-yellow-500/30'
+                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    : isAuthenticated
+                      ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-700 hover:to-purple-800'
+                      : 'bg-yellow-600 hover:bg-yellow-700 text-white border border-yellow-500/30'
                     }`}
                 >
                   <Users className="w-4 h-4" />
@@ -471,8 +471,8 @@ const AccessibilityTest: React.FC = () => {
                   type="button"
                   onClick={() => setConfig(prev => ({ ...prev, testLevel: level }))}
                   className={`p-3 rounded-lg border transition-all ${config.testLevel === level
-                      ? 'border-purple-500/50 bg-purple-500/10 text-purple-300'
-                      : 'border-gray-600/50 bg-gray-700/30 text-gray-300 hover:border-purple-500/30'
+                    ? 'border-purple-500/50 bg-purple-500/10 text-purple-300'
+                    : 'border-gray-600/50 bg-gray-700/30 text-gray-300 hover:border-purple-500/30'
                     }`}
                 >
                   <div className="text-center">
@@ -505,8 +505,8 @@ const AccessibilityTest: React.FC = () => {
                   <div
                     key={category.key}
                     className={`p-4 rounded-lg border transition-all cursor-pointer ${isEnabled
-                        ? 'border-purple-500/50 bg-purple-500/10'
-                        : 'border-gray-600/50 bg-gray-700/30 hover:border-purple-500/30'
+                      ? 'border-purple-500/50 bg-purple-500/10'
+                      : 'border-gray-600/50 bg-gray-700/30 hover:border-purple-500/30'
                       }`}
                     onClick={() => setConfig(prev => ({
                       ...prev,
@@ -527,8 +527,8 @@ const AccessibilityTest: React.FC = () => {
                         <p className="text-xs text-gray-400 mt-1">{category.desc}</p>
                       </div>
                       <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${isEnabled
-                          ? 'border-purple-500 bg-purple-500'
-                          : 'border-gray-500'
+                        ? 'border-purple-500 bg-purple-500'
+                        : 'border-gray-500'
                         }`}>
                         {isEnabled && <CheckCircle className="w-3 h-3 text-white" />}
                       </div>

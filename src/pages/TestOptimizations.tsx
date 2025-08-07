@@ -3,12 +3,12 @@
  * 展示和测试所有的性能优化和用户体验改进
  */
 
-import React, { useState, useEffect } from 'react';
-import { Play, BarChart3, Users, Zap, CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import { AlertCircle, BarChart3, CheckCircle, Clock, Play, Users, Zap } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { SmartTooltip, useSmartNotification } from '../components/ui/EnhancedUX';
+import { useLoadingState } from '../components/ui/LoadingStates';
 import { usePerformanceOptimization } from '../hooks/usePerformanceOptimization';
-import { EnhancedNotification, SmartTooltip, useSmartNotification } from '../components/ui/EnhancedUX';
-import { LoadingStates, useLoadingState } from '../components/ui/LoadingStates';
-import { createTestRunner, TestResult, PerformanceTestResult, UXTestResult } from '../utils/testUtils';
+import { createTestRunner, PerformanceTestResult, TestResult, UXTestResult } from '../utils/testUtils';
 
 interface TestResults {
   performance: PerformanceTestResult[];
@@ -21,7 +21,7 @@ const TestOptimizations: React.FC = () => {
   const [testResults, setTestResults] = useState<TestResults | null>(null);
   const [isRunningTests, setIsRunningTests] = useState(false);
   const [selectedTab, setSelectedTab] = useState<'performance' | 'ux' | 'api'>('performance');
-  
+
   const { metrics, measureRenderTime, getOptimizationSuggestions, applyOptimizations } = usePerformanceOptimization();
   const { showSuccess, showError, showInfo } = useSmartNotification();
   const loadingState = useLoadingState();
@@ -30,7 +30,7 @@ const TestOptimizations: React.FC = () => {
     // 测量页面渲染时间
     const renderMeasure = measureRenderTime('TestOptimizations');
     renderMeasure.start();
-    
+
     // 模拟组件渲染完成
     setTimeout(() => {
       renderMeasure.end();
@@ -43,14 +43,14 @@ const TestOptimizations: React.FC = () => {
   const runTestSuite = async () => {
     setIsRunningTests(true);
     loadingState.setLoading('正在运行测试套件...');
-    
+
     try {
       const testRunner = createTestRunner();
       const results = await testRunner.runFullTestSuite();
-      
+
       setTestResults(results);
       loadingState.setSuccess('测试完成');
-      
+
       showSuccess(
         '测试套件完成',
         `性能测试: ${results.summary.performance.passed}/${results.summary.performance.total} 通过`
@@ -80,7 +80,7 @@ const TestOptimizations: React.FC = () => {
   const renderMetricCard = (title: string, value: number, unit: string, threshold: number, icon: React.ReactNode) => {
     const isGood = value <= threshold;
     const percentage = Math.min((value / threshold) * 100, 100);
-    
+
     return (
       <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
         <div className="flex items-center justify-between mb-4">
@@ -93,14 +93,13 @@ const TestOptimizations: React.FC = () => {
             </h3>
           </div>
           <SmartTooltip content={`阈值: ${threshold}${unit}`}>
-            <div className={`px-2 py-1 rounded text-xs font-medium ${
-              isGood ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-            }`}>
+            <div className={`px-2 py-1 rounded text-xs font-medium ${isGood ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              }`}>
               {isGood ? '良好' : '需优化'}
             </div>
           </SmartTooltip>
         </div>
-        
+
         <div className="space-y-2">
           <div className="flex items-baseline">
             <span className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -110,16 +109,15 @@ const TestOptimizations: React.FC = () => {
               {unit}
             </span>
           </div>
-          
+
           <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
             <div
-              className={`h-2 rounded-full transition-all duration-300 ${
-                isGood ? 'bg-green-500' : 'bg-red-500'
-              }`}
+              className={`h-2 rounded-full transition-all duration-300 ${isGood ? 'bg-green-500' : 'bg-red-500'
+                }`}
               style={{ width: `${Math.min(percentage, 100)}%` }}
             />
           </div>
-          
+
           <p className="text-xs text-gray-600 dark:text-gray-400">
             {percentage.toFixed(1)}% of threshold
           </p>
@@ -135,7 +133,7 @@ const TestOptimizations: React.FC = () => {
     if (!testResults) return null;
 
     const currentResults = testResults[selectedTab];
-    
+
     return (
       <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
@@ -143,7 +141,7 @@ const TestOptimizations: React.FC = () => {
             测试结果
           </h3>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-700">
@@ -169,9 +167,9 @@ const TestOptimizations: React.FC = () => {
                     {result.name || result.metric || result.component}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                    {result.value !== undefined ? `${result.value.toFixed(2)} ${result.unit || 'ms'}` : 
-                     result.duration !== undefined ? `${result.duration.toFixed(2)} ms` : 
-                     result.responseTime !== undefined ? `${result.responseTime.toFixed(2)} ms` : 'N/A'}
+                    {result.value !== undefined ? `${result.value.toFixed(2)} ${result.unit || 'ms'}` :
+                      result.duration !== undefined ? `${result.duration.toFixed(2)} ms` :
+                        result.responseTime !== undefined ? `${result.responseTime.toFixed(2)} ms` : 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                     {result.threshold && `阈值: ${result.threshold} ${result.unit || 'ms'}`}
@@ -220,7 +218,7 @@ const TestOptimizations: React.FC = () => {
             <Play className="w-4 h-4 mr-2" />
             {isRunningTests ? '运行中...' : '运行测试套件'}
           </button>
-          
+
           <button
             onClick={handleApplyOptimizations}
             className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
@@ -289,7 +287,7 @@ const TestOptimizations: React.FC = () => {
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
               详细测试结果
             </h2>
-            
+
             {/* 标签页 */}
             <div className="mb-4">
               <nav className="flex space-x-8">
@@ -301,11 +299,10 @@ const TestOptimizations: React.FC = () => {
                   <button
                     key={key}
                     onClick={() => setSelectedTab(key as any)}
-                    className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg ${
-                      selectedTab === key
+                    className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg ${selectedTab === key
                         ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
                         : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-                    }`}
+                      }`}
                   >
                     <Icon className="w-4 h-4 mr-2" />
                     {label}
