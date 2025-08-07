@@ -1431,8 +1431,11 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
       });
     }
 
-    // 只保留最后250个数据点，提高渲染性能
-    return chartData.slice(-250);
+    // 根据密度控制数据点数量
+    const step = getDataPointStep();
+    const maxPoints = dataPointDensity === 'low' ? 100 : dataPointDensity === 'medium' ? 250 : 500;
+    const filteredData = chartData.filter((_, index) => index % step === 0);
+    return filteredData.slice(-maxPoints);
   }, [realTimeData]);
 
   return (

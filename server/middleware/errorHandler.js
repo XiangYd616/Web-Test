@@ -90,13 +90,17 @@ const errorHandler = (err, req, res, next) => {
   const statusCode = error.statusCode || err.statusCode || 500;
   const message = error.message || '服务器内部错误';
 
-  // 开发环境返回详细错误信息
+  // 标准化错误响应格式
   const response = {
     success: false,
     message,
+    code: error.code || err.code || statusCode,
+    timestamp: new Date().toISOString(),
+    path: req.originalUrl,
+    method: req.method,
     ...(process.env.NODE_ENV === 'development' && {
       stack: err.stack,
-      error: err
+      details: err
     })
   };
 
@@ -164,11 +168,13 @@ const validationError = (errors) => {
  * 自定义错误类
  */
 class AppError extends Error {
-  constructor(message, statusCode = 500, isOperational = true) {
+  constructor(message, statusCode = 500, isOperational = true, code = null) {
     super(message);
     this.statusCode = statusCode;
     this.isOperational = isOperational;
+    this.code = code;
     this.name = this.constructor.name;
+    this.timestamp = new Date().toISOString();
 
     Error.captureStackTrace(this, this.constructor);
   }

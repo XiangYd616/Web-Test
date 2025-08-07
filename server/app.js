@@ -30,6 +30,8 @@ const monitoringRoutes = require('./routes/monitoring');
 const reportRoutes = require('./routes/reports');
 const integrationRoutes = require('./routes/integrations');
 const cacheRoutes = require('./routes/cache');
+const errorRoutes = require('./routes/errorRoutes');
+const performanceRoutes = require('./routes/performanceRoutes');
 
 // 导入中间件
 const { errorHandler } = require('./middleware/errorHandler');
@@ -157,6 +159,8 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/system', require('./routes/system'));
 app.use('/api/integrations', integrationRoutes);
 app.use('/api/cache', cacheRoutes);
+app.use('/api/errors', errorRoutes);
+app.use('/api/performance', performanceRoutes);
 
 // 健康检查端点
 app.get('/health', async (req, res) => {

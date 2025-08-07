@@ -16,24 +16,24 @@ const dbConfig = {
 
 async function checkTableStructure() {
   const pool = new Pool(dbConfig);
-  
+
   try {
-    console.log('🔍 检查test_history表的实际结构...');
-    
+    console.log('🔍 检查test_sessions表的实际结构...');
+
     // 检查表结构
     const result = await pool.query(`
-      SELECT column_name, data_type, is_nullable, column_default 
-      FROM information_schema.columns 
-      WHERE table_name = 'test_history' 
+      SELECT column_name, data_type, is_nullable, column_default
+      FROM information_schema.columns
+      WHERE table_name = 'test_sessions'
       ORDER BY ordinal_position
     `);
 
     if (result.rows.length === 0) {
-      console.log('❌ test_history表不存在');
+      console.log('❌ test_sessions表不存在');
       return;
     }
 
-    console.log('✅ test_history表字段:');
+    console.log('✅ test_sessions表字段:');
     result.rows.forEach((row, index) => {
       console.log(`  ${index + 1}. ${row.column_name}: ${row.data_type} (nullable: ${row.is_nullable})`);
     });
@@ -42,22 +42,23 @@ async function checkTableStructure() {
     const hasDuration = result.rows.some(row => row.column_name === 'duration');
     console.log(`\n🔍 duration字段存在: ${hasDuration ? '✅ 是' : '❌ 否'}`);
 
-    // 如果没有duration字段，尝试添加
+    // duration字段在test_sessions表中应该已经存在
     if (!hasDuration) {
-      console.log('\n⚡ 尝试添加duration字段...');
-      await pool.query('ALTER TABLE test_history ADD COLUMN duration INTEGER');
-      console.log('✅ duration字段添加成功');
+      console.log('\n⚠️ test_sessions表缺少duration字段，这可能表示表结构不完整');
+    } else {
+      console.log('\n✅ duration字段存在');
     }
 
     // 检查现有记录
-    const recordCount = await pool.query('SELECT COUNT(*) as count FROM test_history');
+    const recordCount = await pool.query('SELECT COUNT(*) as count FROM test_sessions WHERE deleted_at IS NULL');
     console.log(`\n📊 当前记录数量: ${recordCount.rows[0].count}`);
 
     // 显示最近的记录
     const recentRecords = await pool.query(`
-      SELECT id, test_name, test_type, status, created_at 
-      FROM test_history 
-      ORDER BY created_at DESC 
+      SELECT id, test_name, test_type, status, created_at
+      FROM test_sessions
+      WHERE deleted_at IS NULL
+      ORDER BY created_at DESC
       LIMIT 3
     `);
 

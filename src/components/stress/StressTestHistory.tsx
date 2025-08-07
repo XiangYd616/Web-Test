@@ -9,7 +9,9 @@ import {
   getStatusStyleClasses,
   getStatusText
 } from '../../utils/testStatusUtils';
+import { DeleteConfirmDialog } from '../common/DeleteConfirmDialog';
 import ExportModal from '../common/ExportModal';
+import { showToast } from '../common/Toast';
 import StressTestDetailModal from './StressTestDetailModal';
 
 import '../../styles/pagination.css';
@@ -73,6 +75,20 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
   // 详情模态框状态
   const [selectedRecord, setSelectedRecord] = useState<TestRecord | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  // 删除确认对话框状态
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean;
+    type: 'single' | 'batch';
+    recordId?: string;
+    recordName?: string;
+    recordNames?: string[];
+    isLoading: boolean;
+  }>({
+    isOpen: false,
+    type: 'single',
+    isLoading: false
+  });
 
   // API接口参数类型
   interface LoadTestRecordsParams {
@@ -582,15 +598,67 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
     return `${rate.toFixed(1)}%`;
   };
 
-  // 删除记录
-  const deleteRecord = async (recordId: string) => {
-    // 找到要删除的记录信息
+  // 打开单个删除确认对话框
+  const openDeleteDialog = (recordId: string) => {
     const recordToDelete = records.find(r => r.id === recordId);
     const recordName = recordToDelete ? recordToDelete.testName : '测试记录';
 
-    if (!confirm(`确定要删除"${recordName}"吗？\n\n此操作无法撤销，删除后将无法恢复该测试记录的所有数据。`)) {
+    setDeleteDialog({
+      isOpen: true,
+      type: 'single',
+      recordId,
+      recordName,
+      isLoading: false
+    });
+  };
+
+  // 打开批量删除确认对话框
+  const openBatchDeleteDialog = () => {
+    if (selectedRecords.size === 0) {
+      showToast.error('请先选择要删除的记录');
       return;
     }
+
+    const recordsToDelete = records.filter(r => selectedRecords.has(r.id));
+    const recordNames = recordsToDelete.map(r => r.testName);
+
+    setDeleteDialog({
+      isOpen: true,
+      type: 'batch',
+      recordNames,
+      isLoading: false
+    });
+  };
+
+  // 关闭删除对话框
+  const closeDeleteDialog = () => {
+    setDeleteDialog(prev => ({ ...prev, isOpen: false }));
+  };
+
+  // 确认删除操作
+  const confirmDelete = async () => {
+    if (!deleteDialog.isOpen) return;
+
+    setDeleteDialog(prev => ({ ...prev, isLoading: true }));
+
+    try {
+      if (deleteDialog.type === 'single' && deleteDialog.recordId) {
+        await deleteRecord(deleteDialog.recordId);
+      } else if (deleteDialog.type === 'batch') {
+        await batchDeleteRecords();
+      }
+      closeDeleteDialog();
+    } catch (error) {
+      console.error('删除操作失败:', error);
+    } finally {
+      setDeleteDialog(prev => ({ ...prev, isLoading: false }));
+    }
+  };
+
+  // 执行单个删除
+  const deleteRecord = async (recordId: string) => {
+    const recordToDelete = records.find(r => r.id === recordId);
+    const recordName = recordToDelete ? recordToDelete.testName : '测试记录';
 
     try {
       console.log('🗑️ 开始删除测试记录:', recordId);
@@ -634,7 +702,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
         setTotalRecords(prev => Math.max(0, prev - 1));
 
         // 显示成功消息
-        alert(`✅ "${recordName}" 已成功删除`);
+        showToast.success(`"${recordName}" 已成功删除`);
 
         // 如果当前页没有记录了，且不是第一页，则跳转到上一页
         if (records.length === 1 && currentPage > 1) {
@@ -648,7 +716,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
     } catch (error) {
       console.error('❌ 删除记录失败:', error);
       const errorMessage = error instanceof Error ? error.message : '删除失败，请稍后重试';
-      alert(`❌ 删除失败: ${errorMessage}`);
+      showToast.error(`删除失败: ${errorMessage}`);
     }
   };
 
@@ -669,50 +737,58 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
     try {
       console.log('🗑️ 开始批量删除测试记录:', Array.from(selectedRecords));
 
-      const deletePromises = Array.from(selectedRecords).map(async (recordId) => {
-        const response = await fetch(`/api/test/history/${recordId}`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(localStorage.getItem('auth_token') ? {
-              'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-            } : {})
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error(`删除记录 ${recordId} 失败: ${response.status}`);
-        }
-
-        const data = await response.json();
-        if (!data.success) {
-          throw new Error(`删除记录 ${recordId} 失败: ${data.message}`);
-        }
-
-        return recordId;
+      // 使用真正的批量删除API
+      const response = await fetch('/api/test/history/batch', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(localStorage.getItem('auth_token') ? {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          } : {})
+        },
+        body: JSON.stringify({
+          sessionIds: Array.from(selectedRecords)
+        })
       });
 
-      const deletedIds = await Promise.all(deletePromises);
+      if (!response.ok) {
+        if (response.status === 429) {
+          throw new Error('请求过于频繁，请稍后再试');
+        } else if (response.status === 404) {
+          throw new Error('部分测试记录不存在或已被删除');
+        } else if (response.status === 403) {
+          throw new Error('没有权限删除这些记录');
+        } else {
+          throw new Error(`批量删除失败 (${response.status})`);
+        }
+      }
 
-      console.log('✅ 批量删除成功:', deletedIds);
+      const data = await response.json();
 
-      // 从本地状态中移除记录
-      setRecords(prev => prev.filter(r => !selectedRecords.has(r.id)));
-      setTotalRecords(prev => Math.max(0, prev - selectedRecords.size));
-      setSelectedRecords(new Set());
+      if (data.success) {
+        const deletedCount = data.data?.deletedCount || selectedRecords.size;
+        console.log('✅ 批量删除成功:', { deletedCount, requestedCount: selectedRecords.size });
 
-      alert(`✅ 成功删除 ${deletedIds.length} 条记录`);
+        // 从本地状态中移除记录
+        setRecords(prev => prev.filter(r => !selectedRecords.has(r.id)));
+        setTotalRecords(prev => Math.max(0, prev - selectedRecords.size));
+        setSelectedRecords(new Set());
 
-      // 如果当前页没有记录了，且不是第一页，则跳转到上一页
-      const remainingRecords = records.filter(r => !selectedRecords.has(r.id));
-      if (remainingRecords.length === 0 && currentPage > 1) {
-        setCurrentPage(prev => prev - 1);
+        showToast.success(`成功删除 ${deletedCount} 条记录`);
+
+        // 如果当前页没有记录了，且不是第一页，则跳转到上一页
+        const remainingRecords = records.filter(r => !selectedRecords.has(r.id));
+        if (remainingRecords.length === 0 && currentPage > 1) {
+          setCurrentPage(prev => prev - 1);
+        }
+      } else {
+        throw new Error(data.error || '批量删除失败');
       }
 
     } catch (error) {
       console.error('❌ 批量删除失败:', error);
       const errorMessage = error instanceof Error ? error.message : '批量删除失败，请稍后重试';
-      alert(`❌ 批量删除失败: ${errorMessage}`);
+      showToast.error(`批量删除失败: ${errorMessage}`);
     }
   };
 
@@ -910,7 +986,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
               <>
                 <button
                   type="button"
-                  onClick={batchDeleteRecords}
+                  onClick={openBatchDeleteDialog}
                   disabled={loading}
                   aria-label={`批量删除 ${selectedRecords.size} 条记录`}
                   title={`删除选中的 ${selectedRecords.size} 条测试记录`}
@@ -1255,7 +1331,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
                       </button>
                       <button
                         type="button"
-                        onClick={() => deleteRecord(record.id)}
+                        onClick={() => openDeleteDialog(record.id)}
                         aria-label={`删除测试记录: ${record.testName}`}
                         className="delete-record-button p-2 text-white border border-red-600 hover:border-red-700 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
                         style={{
@@ -1400,6 +1476,22 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
         testId={selectedRecord?.id}
         testName={selectedRecord?.testName}
         onExport={handleExport}
+      />
+
+      {/* 删除确认对话框 */}
+      <DeleteConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={closeDeleteDialog}
+        onConfirm={confirmDelete}
+        title={deleteDialog.type === 'single' ? '删除测试记录' : '批量删除测试记录'}
+        message={
+          deleteDialog.type === 'single'
+            ? `确定要删除测试记录 "${deleteDialog.recordName}" 吗？`
+            : `确定要删除选中的 ${selectedRecords.size} 条测试记录吗？`
+        }
+        itemNames={deleteDialog.type === 'single' ? [deleteDialog.recordName || ''] : deleteDialog.recordNames || []}
+        isLoading={deleteDialog.isLoading}
+        type={deleteDialog.type}
       />
     </div>
   );

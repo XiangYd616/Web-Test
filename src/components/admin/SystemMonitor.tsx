@@ -1,4 +1,4 @@
-import { Activity, AlertTriangle, CheckCircle, Cpu, Database, HardDrive, MemoryStick, Monitor, Network, RefreshCw, Shield } from 'lucide-react';
+import { Activity, AlertTriangle, CheckCircle, Cpu, Database, Eye, HardDrive, MemoryStick, Monitor, Network, RefreshCw, Shield, StopCircle } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { adminService } from '../../services/adminService';
 import type { SystemMonitor as SystemMonitorType } from '../../types/admin';

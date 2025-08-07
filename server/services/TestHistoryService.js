@@ -4,6 +4,7 @@
  */
 
 const { Pool } = require('pg');
+const { v4: uuidv4 } = require('uuid');
 
 class TestHistoryService {
   constructor(dbModule) {
@@ -291,7 +292,8 @@ class TestHistoryService {
     }
 
     try {
-      const sessionId = `${testType}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      // 生成符合数据库UUID类型的ID
+      const sessionId = uuidv4();
 
       // 插入主表记录
       const insertQuery = `

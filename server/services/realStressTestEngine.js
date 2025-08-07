@@ -31,7 +31,7 @@ const CONSTANTS = {
   TIMEOUTS: {
     DEFAULT_REQUEST: 10000, // 10秒
     CANCEL_CHECK_INTERVAL: 100, // 100ms
-    PROGRESS_UPDATE_INTERVAL: 1000, // 1秒
+    PROGRESS_UPDATE_INTERVAL: 100, // 0.1秒 (100ms) - 平衡精度与性能
     CLEANUP_DELAY: 30000 // 30秒
   },
   HTTP: {
@@ -130,27 +130,120 @@ class Logger {
 }
 
 /**
- * 验证工具类
+ * 增强的验证工具类
  */
 class Validator {
-  static validateUrl(url) {
+  static async validateUrl(url) {
     try {
       const urlObj = new URL(url);
-      return ['http:', 'https:'].includes(urlObj.protocol);
-    } catch {
-      return false;
+
+      // 基础协议检查
+      if (!['http:', 'https:'].includes(urlObj.protocol)) {
+        throw new Error('仅支持 HTTP 和 HTTPS 协议');
+      }
+
+      // 端口检查
+      const port = urlObj.port || (urlObj.protocol === 'https:' ? 443 : 80);
+      if (port < 1 || port > 65535) {
+        throw new Error('端口号无效');
+      }
+
+      // 主机名检查
+      if (!urlObj.hostname || urlObj.hostname.length === 0) {
+        throw new Error('主机名无效');
+      }
+
+      // 检查是否为本地地址（可选的安全检查）
+      const isLocalhost = ['localhost', '127.0.0.1', '::1'].includes(urlObj.hostname);
+      const isPrivateIP = /^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.)/.test(urlObj.hostname);
+
+      if (isLocalhost || isPrivateIP) {
+        Logger.warn(`检测到本地或私有网络地址: ${urlObj.hostname}`);
+      }
+
+      return true;
+    } catch (error) {
+      throw new Error(`URL验证失败: ${error.message}`);
     }
   }
 
   static validateConfig(config) {
-    const { users, duration } = config;
+    const { users, duration, rampUpTime, timeout, testType, thinkTime } = config;
 
+    // 用户数验证
+    if (!users || users < 1) {
+      throw new Error('用户数必须大于0');
+    }
     if (users > CONSTANTS.LIMITS.MAX_CONCURRENT_USERS) {
       throw new Error(`用户数不能超过 ${CONSTANTS.LIMITS.MAX_CONCURRENT_USERS}`);
     }
 
+    // 持续时间验证
+    if (!duration || duration < 1) {
+      throw new Error('测试时长必须大于0秒');
+    }
     if (duration > CONSTANTS.LIMITS.MAX_DURATION) {
       throw new Error(`测试时长不能超过 ${CONSTANTS.LIMITS.MAX_DURATION} 秒`);
+    }
+
+    // 爬坡时间验证
+    if (rampUpTime && (rampUpTime < 0 || rampUpTime > duration)) {
+      throw new Error('爬坡时间不能为负数或超过测试总时长');
+    }
+
+    // 超时时间验证
+    if (timeout && (timeout < 1 || timeout > 300)) {
+      throw new Error('超时时间必须在1-300秒之间');
+    }
+
+    // 测试类型验证
+    const validTestTypes = ['load', 'stress', 'spike', 'volume'];
+    if (testType && !validTestTypes.includes(testType)) {
+      throw new Error(`无效的测试类型，支持: ${validTestTypes.join(', ')}`);
+    }
+
+    // 思考时间验证
+    if (thinkTime && (thinkTime < 0 || thinkTime > 60)) {
+      throw new Error('思考时间必须在0-60秒之间');
+    }
+
+    // 资源合理性检查
+    const estimatedMemory = users * 0.5; // 每用户约0.5MB内存
+    if (estimatedMemory > 1024) { // 超过1GB
+      Logger.warn(`预估内存使用: ${estimatedMemory.toFixed(1)}MB，可能影响系统性能`);
+    }
+
+    // 负载合理性检查
+    const estimatedRPS = users / (thinkTime || 1);
+    if (estimatedRPS > 1000) {
+      Logger.warn(`预估请求速率: ${estimatedRPS.toFixed(1)} RPS，请确保目标服务器能够承受`);
+    }
+
+    return true;
+  }
+
+  static validateProxyConfig(proxyConfig) {
+    if (!proxyConfig || !proxyConfig.enabled) {
+      return true;
+    }
+
+    const { host, port, username, password, type } = proxyConfig;
+
+    if (!host || !port) {
+      throw new Error('代理配置缺少主机或端口');
+    }
+
+    if (port < 1 || port > 65535) {
+      throw new Error('代理端口号无效');
+    }
+
+    const validTypes = ['http', 'https', 'socks4', 'socks5'];
+    if (type && !validTypes.includes(type)) {
+      throw new Error(`无效的代理类型，支持: ${validTypes.join(', ')}`);
+    }
+
+    if (username && !password) {
+      throw new Error('代理用户名需要配套密码');
     }
 
     return true;
@@ -519,17 +612,26 @@ class RealStressTestEngine {
 
     Logger.info(`启动压力测试: ${url}`, { testId, config: testConfig });
 
-    // 🌐 如果配置了代理，优先使用k6引擎
-    if (testConfig.proxy && testConfig.proxy.enabled) {
-      Logger.info(`🌐 检测到代理配置，使用k6引擎执行压力测试`);
-      return await this.runWithK6Engine(url, testConfig, testId);
-    }
-
     try {
-      // 验证参数
+      // 增强的参数验证
+      await Validator.validateUrl(url);
       Validator.validateConfig(testConfig);
-      if (!Validator.validateUrl(url)) {
-        throw new Error('无效的URL格式');
+
+      // 验证代理配置（如果有）
+      if (testConfig.proxy) {
+        Validator.validateProxyConfig(testConfig.proxy);
+      }
+
+      // 🌐 如果配置了代理，优先使用k6引擎
+      if (testConfig.proxy && testConfig.proxy.enabled) {
+        Logger.info(`🌐 检测到代理配置，使用k6引擎执行压力测试`);
+        return await this.runWithK6Engine(url, testConfig, testId);
+      }
+
+      // 检查系统资源
+      const resourceCheck = this.checkSystemResources(testConfig);
+      if (!resourceCheck.canProceed) {
+        throw new Error(`系统资源不足: ${resourceCheck.reason}`);
       }
 
       // 初始化测试结果
@@ -555,10 +657,57 @@ class RealStressTestEngine {
   }
 
   /**
+   * 检查系统资源
+   */
+  checkSystemResources(config) {
+    const { users, duration } = config;
+
+    // 估算资源需求
+    const estimatedMemoryMB = users * 0.5; // 每用户约0.5MB
+    const estimatedCPU = users * 0.1; // 每用户约0.1%CPU
+
+    // 获取系统信息（简化版本）
+    const totalMemoryMB = process.memoryUsage().heapTotal / 1024 / 1024;
+    const availableMemoryMB = totalMemoryMB * 0.7; // 假设70%可用
+
+    // 检查内存
+    if (estimatedMemoryMB > availableMemoryMB) {
+      return {
+        canProceed: false,
+        reason: `预估内存需求 ${estimatedMemoryMB.toFixed(1)}MB 超过可用内存 ${availableMemoryMB.toFixed(1)}MB`
+      };
+    }
+
+    // 检查并发限制
+    if (users > CONSTANTS.LIMITS.MAX_CONCURRENT_USERS) {
+      return {
+        canProceed: false,
+        reason: `用户数 ${users} 超过系统限制 ${CONSTANTS.LIMITS.MAX_CONCURRENT_USERS}`
+      };
+    }
+
+    // 检查测试时长合理性
+    if (duration > CONSTANTS.LIMITS.MAX_DURATION) {
+      return {
+        canProceed: false,
+        reason: `测试时长 ${duration}秒 超过系统限制 ${CONSTANTS.LIMITS.MAX_DURATION}秒`
+      };
+    }
+
+    return {
+      canProceed: true,
+      estimatedResources: {
+        memoryMB: estimatedMemoryMB,
+        cpuPercent: estimatedCPU
+      }
+    };
+  }
+
+  /**
    * 生成测试ID
    */
   generateTestId(preGeneratedTestId) {
-    const testId = preGeneratedTestId || `stress_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const testId = preGeneratedTestId || `stress_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 
     if (!preGeneratedTestId) {
       Logger.warn('没有收到预生成的testId，使用引擎生成的testId:', testId);
@@ -768,14 +917,27 @@ class RealStressTestEngine {
   }
 
   /**
-   * 处理测试失败
+   * 增强的错误处理
    */
   handleTestFailure(testId, error) {
     Logger.error(`测试失败: ${testId}`, error);
 
+    // 分类错误类型
+    const errorType = this.classifyError(error);
+    const errorDetails = {
+      type: errorType,
+      message: error.message,
+      timestamp: new Date().toISOString(),
+      testId: testId,
+      stack: error.stack
+    };
+
+    // 根据错误类型决定是否重试
+    const shouldRetry = this.shouldRetryOnError(errorType, error);
+
     // 🔧 重构：调用错误回调
     if (this.errorCallback) {
-      this.errorCallback(error);
+      this.errorCallback(error, errorDetails);
     }
 
     // 清理资源
@@ -784,8 +946,66 @@ class RealStressTestEngine {
     return {
       success: false,
       error: error.message,
-      data: { testId, error: error.message }
+      errorType: errorType,
+      shouldRetry: shouldRetry,
+      data: {
+        testId,
+        error: error.message,
+        errorDetails: errorDetails
+      }
     };
+  }
+
+  /**
+   * 错误分类
+   */
+  classifyError(error) {
+    const message = error.message.toLowerCase();
+
+    if (message.includes('timeout') || message.includes('etimedout')) {
+      return 'timeout';
+    }
+    if (message.includes('network') || message.includes('enotfound') || message.includes('econnrefused')) {
+      return 'network';
+    }
+    if (message.includes('memory') || message.includes('heap')) {
+      return 'memory';
+    }
+    if (message.includes('validation') || message.includes('invalid')) {
+      return 'validation';
+    }
+    if (message.includes('permission') || message.includes('unauthorized')) {
+      return 'permission';
+    }
+    if (message.includes('rate limit') || message.includes('too many requests')) {
+      return 'rate_limit';
+    }
+
+    return 'unknown';
+  }
+
+  /**
+   * 判断是否应该重试
+   */
+  shouldRetryOnError(errorType, error) {
+    const retryableErrors = ['timeout', 'network', 'rate_limit'];
+    const nonRetryableErrors = ['validation', 'permission', 'memory'];
+
+    if (nonRetryableErrors.includes(errorType)) {
+      return false;
+    }
+
+    if (retryableErrors.includes(errorType)) {
+      return true;
+    }
+
+    // 对于未知错误，检查具体消息
+    const message = error.message.toLowerCase();
+    if (message.includes('temporary') || message.includes('retry')) {
+      return true;
+    }
+
+    return false;
   }
 
   // ==================== 测试执行策略 ====================
@@ -1159,10 +1379,11 @@ class RealStressTestEngine {
     const userCount = results.config?.users || 1;
     const rampUpTime = results.config?.rampUpTime || 0;
 
-    // 计算预期的总数据点数：测试时长 × 用户数 × 每用户每秒平均请求数
+    // 计算预期的总数据点数：测试时长 × 每秒数据点数 (0.1秒间隔 = 10个数据点/秒)
     const totalTestTime = testDurationSeconds + rampUpTime + 30; // 额外30秒缓冲
-    const expectedDataPoints = totalTestTime * userCount * 3; // 每用户每秒最多3个数据点
-    const maxDataPoints = Math.max(expectedDataPoints, 5000); // 至少保留5000个数据点
+    const dataPointsPerSecond = 10; // 0.1秒间隔 = 每秒10个数据点
+    const expectedDataPoints = totalTestTime * dataPointsPerSecond; // 基于时间间隔计算
+    const maxDataPoints = Math.max(expectedDataPoints, 50000); // 提高到50000个数据点以支持高精度
 
     // 只有在数据点数量远超预期时才进行截断（保留策略更宽松）
     if (results.realTimeData.length > maxDataPoints * 1.5) {
@@ -1855,8 +2076,8 @@ class RealStressTestEngine {
           Logger.info(`保存取消的测试记录: ${testId}`);
 
           // 调用测试历史服务保存取消状态
-          const TestHistoryService = require('../TestHistoryService');
-          const testHistoryService = new TestHistoryService(require('../../config/database').pool);
+          const TestHistoryService = require('./TestHistoryService');
+          const testHistoryService = new TestHistoryService(require('../config/database'));
 
           try {
             await testHistoryService.cancelTest(
@@ -1877,8 +2098,8 @@ class RealStressTestEngine {
       Logger.info(`保存最终测试结果: ${testId}`);
 
       // 调用测试历史服务保存完成状态
-      const TestHistoryService = require('../TestHistoryService');
-      const testHistoryService = new TestHistoryService(require('../../config/database').pool);
+      const TestHistoryService = require('./TestHistoryService');
+      const testHistoryService = new TestHistoryService(require('../config/database'));
 
       try {
         const finalResults = {

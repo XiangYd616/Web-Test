@@ -2,16 +2,19 @@ import { AuthResponse, ChangePasswordData, CreateUserData, LoginCredentials, Reg
 import { browserJwt } from '../../utils/browserJwt';
 import { canUseDatabase } from '../../utils/environment';
 
-// 只在可以使用数据库的环境中导入相关模块
-let jwt: any, bcrypt: any, userDao: any;
-if (canUseDatabase) {
-  try {
-    jwt = require('jsonwebtoken');
-    bcrypt = require('bcryptjs');
-    const userDaoModule = require('../dao/userDao');
-    userDao = userDaoModule.userDao;
-  } catch (error) {
-    console.warn('数据库模块不可用，将使用浏览器模式');
+// 动态导入数据库模块（避免前端构建时的依赖问题）
+let jwt: any, userDao: any;
+
+async function loadServerModules() {
+  if (canUseDatabase && typeof window === 'undefined') {
+    try {
+      // 只在Node.js环境中动态导入
+      jwt = await import('jsonwebtoken');
+      const userDaoModule = await import('../dao/userDao');
+      userDao = userDaoModule.userDao;
+    } catch (error) {
+      console.warn('数据库模块不可用，将使用浏览器模式');
+    }
   }
 }
 
@@ -38,6 +41,8 @@ export class UnifiedAuthService {
     if (this.isInitialized) return;
 
     try {
+      // 加载服务器模块（仅在Node.js环境中）
+      await loadServerModules();
       // 在浏览器环境中，尝试从本地存储恢复用户状态
       if (isBrowser || isElectron) {
         const token = localStorage.getItem(this.TOKEN_KEY);
@@ -89,7 +94,17 @@ export class UnifiedAuthService {
       const secret = process.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
       const expiresIn = process.env.JWT_EXPIRES_IN || '24h';
 
-      return jwt.sign(
+      return jwt.default?.sign ? jwt.default.sign(
+        {
+          sub: user.id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+          iat: Math.floor(Date.now() / 1000),
+        },
+        secret,
+        { expiresIn }
+      ) : jwt.sign(
         {
           sub: user.id,
           username: user.username,
@@ -118,7 +133,15 @@ export class UnifiedAuthService {
       const secret = process.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
       const expiresIn = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
 
-      return jwt.sign(
+      return jwt.default?.sign ? jwt.default.sign(
+        {
+          sub: user.id,
+          type: 'refresh',
+          iat: Math.floor(Date.now() / 1000),
+        },
+        secret,
+        { expiresIn }
+      ) : jwt.sign(
         {
           sub: user.id,
           type: 'refresh',
@@ -815,9 +838,9 @@ export class UnifiedAuthService {
         };
       }
 
-      if (isNode) {
-        // 在 Node.js 环境中更新数据库密码
-        const passwordHash = await bcrypt.hash(data.newPassword, 12);
+      if (isNode && userDao) {
+        // 在 Node.js 环境中，通过 API 调用更新密码
+        // 注意：密码哈希应该在后端处理
         await userDao.updateUser(this.currentUser.id, {
           metadata: { ...this.currentUser.metadata, passwordUpdatedAt: new Date().toISOString() }
         });

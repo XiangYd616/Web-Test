@@ -653,6 +653,22 @@ const CompatibilityTest: React.FC = () => {
   // 状态管理
   const [testStatus, setTestStatus] = useState<'idle' | 'starting' | 'running' | 'completed' | 'failed'>('idle');
 
+  // 历史记录处理
+  const handleTestSelect = (test: any) => {
+    // 加载历史测试结果
+    if (test.results) {
+      setResults(test.results);
+    }
+  };
+
+  const handleTestRerun = (test: any) => {
+    // 重新运行历史测试
+    if (test.config) {
+      setConfig(test.config);
+      // 可以选择是否立即开始测试
+    }
+  };
+
   // 监听测试状态变化
   useEffect(() => {
     if (isRunning) {
@@ -793,365 +809,339 @@ const CompatibilityTest: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4 dark-page-scrollbar">
-      {/* 页面标题 */}
-      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-2xl font-bold text-white">兼容性测试</h2>
-            <p className="text-gray-300 mt-1">检测网站在不同浏览器和设备上的兼容性</p>
-          </div>
-          <div className="flex items-center space-x-2">
-            {testStatus === 'idle' ? (
-              <button
-                type="button"
-                onClick={handleStartTest}
-                disabled={!config.url}
-                className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition-all duration-200 ${!config.url
-                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                  : isAuthenticated
-                    ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-700 hover:to-purple-800'
-                    : 'bg-yellow-600 hover:bg-yellow-700 text-white border border-yellow-500/30'
-                  }`}
-              >
-                {isAuthenticated ? (
-                  <Play className="w-4 h-4" />
-                ) : (
-                  <Lock className="w-4 h-4" />
-                )}
-                <span>开始测试</span>
-              </button>
-            ) : testStatus === 'starting' ? (
-              <div className="flex items-center space-x-2 px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-lg">
-                <Loader className="w-4 h-4 animate-spin text-purple-400" />
-                <span className="text-sm text-purple-300 font-medium">正在启动...</span>
-              </div>
-            ) : testStatus === 'running' ? (
-              <div className="flex items-center space-x-3">
+    <TestPageLayout className="space-y-3 dark-page-scrollbar compact-layout">
+      <UnifiedTestPageWithHistory
+        testType="compatibility"
+        testTypeName="兼容性测试"
+        testIcon={Grid}
+        onTestSelect={handleTestSelect}
+        onTestRerun={handleTestRerun}
+        additionalComponents={LoginPromptComponent}
+      >
+        {/* 页面标题 */}
+        <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-2xl font-bold text-white">兼容性测试</h2>
+              <p className="text-gray-300 mt-1">检测网站在不同浏览器和设备上的兼容性</p>
+            </div>
+            <div className="flex items-center space-x-2">
+              {testStatus === 'idle' ? (
+                <button
+                  type="button"
+                  onClick={handleStartTest}
+                  disabled={!config.url}
+                  className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition-all duration-200 ${!config.url
+                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    : isAuthenticated
+                      ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-700 hover:to-purple-800'
+                      : 'bg-yellow-600 hover:bg-yellow-700 text-white border border-yellow-500/30'
+                    }`}
+                >
+                  {isAuthenticated ? (
+                    <Play className="w-4 h-4" />
+                  ) : (
+                    <Lock className="w-4 h-4" />
+                  )}
+                  <span>开始测试</span>
+                </button>
+              ) : testStatus === 'starting' ? (
                 <div className="flex items-center space-x-2 px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-lg">
-                  <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
-                  <span className="text-sm text-purple-300 font-medium">
-                    测试进行中 {Math.round(progress)}%
+                  <Loader className="w-4 h-4 animate-spin text-purple-400" />
+                  <span className="text-sm text-purple-300 font-medium">正在启动...</span>
+                </div>
+              ) : testStatus === 'running' ? (
+                <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2 px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-lg">
+                    <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-sm text-purple-300 font-medium">
+                      测试进行中 {Math.round(progress)}%
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleStopTest}
+                    className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center space-x-1"
+                  >
+                    <Square className="w-3 h-3" />
+                    <span className="text-sm">停止</span>
+                  </button>
+                  <div className="flex items-center space-x-1 px-2 py-1 bg-green-500/10 border border-green-500/20 rounded text-xs text-green-300">
+                    <Clock className="w-3 h-3" />
+                    <span>可切换页面</span>
+                  </div>
+                </div>
+              ) : testStatus === 'completed' ? (
+                <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    <span className="text-sm text-green-300 font-medium">测试完成</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      clearResults();
+                      clearError();
+                      setTestStatus('idle');
+                    }}
+                    className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-200 flex items-center space-x-2"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    <span>重新测试</span>
+                  </button>
+                </div>
+              ) : testStatus === 'failed' ? (
+                <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg">
+                    <XCircle className="w-4 h-4 text-red-400" />
+                    <span className="text-sm text-red-300 font-medium">测试失败</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      clearError();
+                      setTestStatus('idle');
+                    }}
+                    className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-200 flex items-center space-x-2"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    <span>重试</span>
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          </div>
+
+          {/* URL输入 */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              测试URL
+            </label>
+            <URLInput
+              value={config.url}
+              onChange={(url) => setConfig(prev => ({ ...prev, url }))}
+              placeholder="https://www.example.com"
+              enableReachabilityCheck={false}
+            />
+          </div>
+
+          {/* 详细进度显示 */}
+          {(currentStep || isRunning) && (
+            <div className="mt-4 space-y-3">
+              {/* 当前步骤 */}
+              <div className="p-4 bg-purple-500/10 border border-purple-500/20 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-sm font-medium text-purple-300">测试进度</h4>
+                  <span className="text-sm text-purple-200">
+                    {Math.round(progress)}%
                   </span>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleStopTest}
-                  className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center space-x-1"
-                >
-                  <Square className="w-3 h-3" />
-                  <span className="text-sm">停止</span>
-                </button>
-                <div className="flex items-center space-x-1 px-2 py-1 bg-green-500/10 border border-green-500/20 rounded text-xs text-green-300">
-                  <Clock className="w-3 h-3" />
-                  <span>可切换页面</span>
+
+                {/* 进度条 */}
+                <div className="mb-3">
+                  <ProgressBar
+                    value={progress}
+                    variant="primary"
+                    size="md"
+                    animated
+                  />
+                </div>
+
+                <p className="text-sm text-purple-300">{currentStep}</p>
+
+                {/* 测试阶段和预计时间 */}
+                <div className="flex items-center justify-between mt-2 text-xs text-purple-200">
+                  <div className="flex items-center space-x-2">
+                    <Clock className="w-3 h-3" />
+                    <span>阶段: {testPhase}</span>
+                  </div>
+                  {estimatedTimeRemaining > 0 && (
+                    <span>
+                      预计剩余: {Math.ceil(estimatedTimeRemaining / 1000)}秒
+                    </span>
+                  )}
                 </div>
               </div>
-            ) : testStatus === 'completed' ? (
-              <div className="flex items-center space-x-2">
-                <div className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
-                  <CheckCircle className="w-4 h-4 text-green-400" />
-                  <span className="text-sm text-green-300 font-medium">测试完成</span>
+
+              {/* 后台运行提示 */}
+              {testStatus === 'running' && (
+                <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    <span className="text-sm text-green-300 font-medium">后台运行模式</span>
+                  </div>
+                  <p className="text-xs text-green-200 mt-1">
+                    测试正在后台运行，您可以自由切换到其他页面，测试不会中断。
+                  </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    clearResults();
-                    clearError();
-                    setTestStatus('idle');
-                  }}
-                  className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-200 flex items-center space-x-2"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  <span>重新测试</span>
-                </button>
+              )}
+            </div>
+          )}
+
+          {/* 错误显示 */}
+          {error && (
+            <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+              <div className="flex items-center space-x-2 mb-2">
+                <XCircle className="w-4 h-4 text-red-400" />
+                <span className="text-sm font-medium text-red-300">测试错误</span>
               </div>
-            ) : testStatus === 'failed' ? (
-              <div className="flex items-center space-x-2">
-                <div className="flex items-center space-x-2 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg">
-                  <XCircle className="w-4 h-4 text-red-400" />
-                  <span className="text-sm text-red-300 font-medium">测试失败</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    clearError();
-                    setTestStatus('idle');
-                  }}
-                  className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-200 flex items-center space-x-2"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  <span>重试</span>
-                </button>
-              </div>
-            ) : null}
-          </div>
+              <p className="text-sm text-red-300">{error}</p>
+            </div>
+          )}
         </div>
 
-        {/* URL输入 */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            测试URL
-          </label>
-          <URLInput
-            value={config.url}
-            onChange={(url) => setConfig(prev => ({ ...prev, url }))}
-            placeholder="https://www.example.com"
-            enableReachabilityCheck={false}
-          />
-        </div>
-
-        {/* 详细进度显示 */}
-        {(currentStep || isRunning) && (
-          <div className="mt-4 space-y-3">
-            {/* 当前步骤 */}
-            <div className="p-4 bg-purple-500/10 border border-purple-500/20 rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-medium text-purple-300">测试进度</h4>
-                <span className="text-sm text-purple-200">
-                  {Math.round(progress)}%
-                </span>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* 测试配置 */}
+          <div className="lg:col-span-1">
+            <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+              <div className="flex items-center mb-4">
+                <Settings className="w-5 h-5 text-gray-300 mr-2" />
+                <h3 className="text-lg font-semibold text-white">测试配置</h3>
               </div>
 
-              {/* 进度条 */}
-              <div className="mb-3">
-                <ProgressBar
-                  value={progress}
-                  variant="primary"
-                  size="md"
-                  animated
-                />
-              </div>
-
-              <p className="text-sm text-purple-300">{currentStep}</p>
-
-              {/* 测试阶段和预计时间 */}
-              <div className="flex items-center justify-between mt-2 text-xs text-purple-200">
-                <div className="flex items-center space-x-2">
-                  <Clock className="w-3 h-3" />
-                  <span>阶段: {testPhase}</span>
-                </div>
-                {estimatedTimeRemaining > 0 && (
-                  <span>
-                    预计剩余: {Math.ceil(estimatedTimeRemaining / 1000)}秒
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* 后台运行提示 */}
-            {testStatus === 'running' && (
-              <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="w-4 h-4 text-green-400" />
-                  <span className="text-sm text-green-300 font-medium">后台运行模式</span>
-                </div>
-                <p className="text-xs text-green-200 mt-1">
-                  测试正在后台运行，您可以自由切换到其他页面，测试不会中断。
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* 错误显示 */}
-        {error && (
-          <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
-            <div className="flex items-center space-x-2 mb-2">
-              <XCircle className="w-4 h-4 text-red-400" />
-              <span className="text-sm font-medium text-red-300">测试错误</span>
-            </div>
-            <p className="text-sm text-red-300">{error}</p>
-          </div>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* 测试配置 */}
-        <div className="lg:col-span-1">
-          <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-            <div className="flex items-center mb-4">
-              <Settings className="w-5 h-5 text-gray-300 mr-2" />
-              <h3 className="text-lg font-semibold text-white">测试配置</h3>
-            </div>
-
-            <div className="space-y-4">
-              {/* 测试引擎选择 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  测试引擎
-                </label>
-                <select
-                  value={selectedEngine}
-                  onChange={(e) => setSelectedEngine(e.target.value as CompatibilityEngine)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  aria-label="选择测试引擎"
-                >
-                  <option value="caniuse">Can I Use 数据库</option>
-                  <option value="browserstack">BrowserStack 实时测试</option>
-                  <option value="feature-detection">特性检测引擎</option>
-                  <option value="local">本地兼容性分析</option>
-                </select>
-                <p className="text-xs text-gray-400 mt-1">
-                  {selectedEngine === 'caniuse' && '基于 Can I Use 数据库进行兼容性分析'}
-                  {selectedEngine === 'browserstack' && '使用 BrowserStack 进行真实浏览器测试'}
-                  {selectedEngine === 'feature-detection' && '通过特性检测分析兼容性'}
-                  {selectedEngine === 'local' && '本地分析，无需网络连接'}
-                </p>
-              </div>
-
-              {/* 设备类型 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  设备类型
-                </label>
-                <div className="space-y-2">
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={config.checkDesktop}
-                      onChange={(e) => setConfig(prev => ({ ...prev, checkDesktop: e.target.checked }))}
-                      className="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-gray-700"
-                    />
-                    <Monitor className="w-4 h-4 ml-2 mr-1 text-gray-300" />
-                    <span className="text-sm text-gray-300">桌面端</span>
+              <div className="space-y-4">
+                {/* 测试引擎选择 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    测试引擎
                   </label>
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={config.checkTablet}
-                      onChange={(e) => setConfig(prev => ({ ...prev, checkTablet: e.target.checked }))}
-                      className="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-gray-700"
-                    />
-                    <Tablet className="w-4 h-4 ml-2 mr-1 text-gray-300" />
-                    <span className="text-sm text-gray-300">平板端</span>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={config.checkMobile}
-                      onChange={(e) => setConfig(prev => ({ ...prev, checkMobile: e.target.checked }))}
-                      className="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-gray-700"
-                    />
-                    <Smartphone className="w-4 h-4 ml-2 mr-1 text-gray-300" />
-                    <span className="text-sm text-gray-300">移动端</span>
-                  </label>
+                  <select
+                    value={selectedEngine}
+                    onChange={(e) => setSelectedEngine(e.target.value as CompatibilityEngine)}
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    aria-label="选择测试引擎"
+                  >
+                    <option value="caniuse">Can I Use 数据库</option>
+                    <option value="browserstack">BrowserStack 实时测试</option>
+                    <option value="feature-detection">特性检测引擎</option>
+                    <option value="local">本地兼容性分析</option>
+                  </select>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {selectedEngine === 'caniuse' && '基于 Can I Use 数据库进行兼容性分析'}
+                    {selectedEngine === 'browserstack' && '使用 BrowserStack 进行真实浏览器测试'}
+                    {selectedEngine === 'feature-detection' && '通过特性检测分析兼容性'}
+                    {selectedEngine === 'local' && '本地分析，无需网络连接'}
+                  </p>
                 </div>
-              </div>
 
-              {/* 浏览器选择 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  浏览器
-                </label>
-                <div className="space-y-2">
-                  {['Chrome', 'Firefox', 'Safari', 'Edge'].map(browser => (
-                    <label key={browser} className="flex items-center">
+                {/* 设备类型 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    设备类型
+                  </label>
+                  <div className="space-y-2">
+                    <label className="flex items-center">
                       <input
                         type="checkbox"
-                        checked={config.browsers.includes(browser)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setConfig(prev => ({ ...prev, browsers: [...prev.browsers, browser] }));
-                          } else {
-                            setConfig(prev => ({ ...prev, browsers: prev.browsers.filter(b => b !== browser) }));
-                          }
-                        }}
+                        checked={config.checkDesktop}
+                        onChange={(e) => setConfig(prev => ({ ...prev, checkDesktop: e.target.checked }))}
                         className="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-gray-700"
                       />
-                      <Globe className="w-4 h-4 ml-2 mr-1 text-gray-300" />
-                      <span className="text-sm text-gray-300">{browser}</span>
+                      <Monitor className="w-4 h-4 ml-2 mr-1 text-gray-300" />
+                      <span className="text-sm text-gray-300">桌面端</span>
                     </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* 可访问性检查 */}
-              <div>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={config.checkAccessibility}
-                    onChange={(e) => setConfig(prev => ({ ...prev, checkAccessibility: e.target.checked }))}
-                    className="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-gray-700"
-                  />
-                  <span className="ml-2 text-sm text-gray-300">可访问性检查</span>
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 测试结果 */}
-        <div className="lg:col-span-2">
-          <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">测试结果</h3>
-
-            {!results && !isRunning ? (
-              <div className="flex items-center justify-center h-64 text-gray-400">
-                <div className="text-center">
-                  <Monitor className="w-12 h-12 mx-auto mb-4 text-gray-500" />
-                  <p>点击"开始测试"查看兼容性结果</p>
-                </div>
-              </div>
-            ) : results ? (
-              <div className="space-y-6">
-                {/* 总体评分 */}
-                <div className={`text-center p-6 rounded-lg border ${getScoreBg(results.overallScore)}`}>
-                  <div className={`text-4xl font-bold ${getScoreColor(results.overallScore)}`}>
-                    {Math.round(results.overallScore)}
-                  </div>
-                  <div className="text-sm text-gray-300 mt-1">总体兼容性评分</div>
-                  <div className="text-xs text-gray-400 mt-2">
-                    测试时间: {results.duration ? `${results.duration.toFixed(1)}秒` : '未知'}
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={config.checkTablet}
+                        onChange={(e) => setConfig(prev => ({ ...prev, checkTablet: e.target.checked }))}
+                        className="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-gray-700"
+                      />
+                      <Tablet className="w-4 h-4 ml-2 mr-1 text-gray-300" />
+                      <span className="text-sm text-gray-300">平板端</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={config.checkMobile}
+                        onChange={(e) => setConfig(prev => ({ ...prev, checkMobile: e.target.checked }))}
+                        className="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-gray-700"
+                      />
+                      <Smartphone className="w-4 h-4 ml-2 mr-1 text-gray-300" />
+                      <span className="text-sm text-gray-300">移动端</span>
+                    </label>
                   </div>
                 </div>
 
-                {/* 浏览器兼容性详情 */}
-                <div className="bg-gray-700/30 rounded-lg p-6">
-                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                    <Globe className="w-5 h-5 mr-2" />
-                    浏览器兼容性详情
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {Object.entries((results as any)?.browserCompatibility || {}).map(([browser, score]) => (
-                      <div key={browser} className="bg-gray-700/50 rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium text-gray-300">{browser}</span>
-                          <span className={`text-sm font-bold ${getScoreColor(Number(score))}`}>
-                            {Math.round(Number(score))}
-                          </span>
-                        </div>
-                        <ProgressBar
-                          value={Math.max(0, Math.min(100, Number(score)))}
-                          variant={getProgressVariant(Number(score))}
-                          size="md"
+                {/* 浏览器选择 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    浏览器
+                  </label>
+                  <div className="space-y-2">
+                    {['Chrome', 'Firefox', 'Safari', 'Edge'].map(browser => (
+                      <label key={browser} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={config.browsers.includes(browser)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setConfig(prev => ({ ...prev, browsers: [...prev.browsers, browser] }));
+                            } else {
+                              setConfig(prev => ({ ...prev, browsers: prev.browsers.filter(b => b !== browser) }));
+                            }
+                          }}
+                          className="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-gray-700"
                         />
-                      </div>
+                        <Globe className="w-4 h-4 ml-2 mr-1 text-gray-300" />
+                        <span className="text-sm text-gray-300">{browser}</span>
+                      </label>
                     ))}
                   </div>
                 </div>
 
-                {/* 设备兼容性 */}
-                <div className="bg-gray-700/30 rounded-lg p-6">
-                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                    <Monitor className="w-5 h-5 mr-2" />
-                    设备兼容性
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {Object.entries((results as any)?.deviceCompatibility || {}).map(([device, score]) => {
-                      const DeviceIcon = device === 'desktop' ? Monitor :
-                        device === 'tablet' ? Tablet : Smartphone;
-                      return (
-                        <div key={device} className="bg-gray-700/50 rounded-lg p-4">
+                {/* 可访问性检查 */}
+                <div>
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={config.checkAccessibility}
+                      onChange={(e) => setConfig(prev => ({ ...prev, checkAccessibility: e.target.checked }))}
+                      className="rounded border-gray-600 text-purple-600 focus:ring-purple-500 bg-gray-700"
+                    />
+                    <span className="ml-2 text-sm text-gray-300">可访问性检查</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 测试结果 */}
+          <div className="lg:col-span-2">
+            <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+              <h3 className="text-lg font-semibold text-white mb-4">测试结果</h3>
+
+              {!results && !isRunning ? (
+                <div className="flex items-center justify-center h-64 text-gray-400">
+                  <div className="text-center">
+                    <Monitor className="w-12 h-12 mx-auto mb-4 text-gray-500" />
+                    <p>点击"开始测试"查看兼容性结果</p>
+                  </div>
+                </div>
+              ) : results ? (
+                <div className="space-y-6">
+                  {/* 总体评分 */}
+                  <div className={`text-center p-6 rounded-lg border ${getScoreBg(results.overallScore)}`}>
+                    <div className={`text-4xl font-bold ${getScoreColor(results.overallScore)}`}>
+                      {Math.round(results.overallScore)}
+                    </div>
+                    <div className="text-sm text-gray-300 mt-1">总体兼容性评分</div>
+                    <div className="text-xs text-gray-400 mt-2">
+                      测试时间: {results.duration ? `${results.duration.toFixed(1)}秒` : '未知'}
+                    </div>
+                  </div>
+
+                  {/* 浏览器兼容性详情 */}
+                  <div className="bg-gray-700/30 rounded-lg p-6">
+                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                      <Globe className="w-5 h-5 mr-2" />
+                      浏览器兼容性详情
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {Object.entries((results as any)?.browserCompatibility || {}).map(([browser, score]) => (
+                        <div key={browser} className="bg-gray-700/50 rounded-lg p-4">
                           <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center">
-                              <DeviceIcon className="w-4 h-4 mr-2 text-gray-400" />
-                              <span className="text-sm font-medium text-gray-300">
-                                {device === 'desktop' ? '桌面端' :
-                                  device === 'tablet' ? '平板端' : '移动端'}
-                              </span>
-                            </div>
+                            <span className="text-sm font-medium text-gray-300">{browser}</span>
                             <span className={`text-sm font-bold ${getScoreColor(Number(score))}`}>
                               {Math.round(Number(score))}
                             </span>
@@ -1162,296 +1152,328 @@ const CompatibilityTest: React.FC = () => {
                             size="md"
                           />
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* 兼容性问题 */}
-                {results.issues && results.issues.length > 0 && (
-                  <div className="bg-gray-700/30 rounded-lg p-6">
-                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                      <AlertTriangle className="w-5 h-5 mr-2 text-yellow-500" />
-                      发现的兼容性问题
-                    </h3>
-                    <div className="space-y-3">
-                      {results.issues.slice(0, 10).map((issue: any, index: number) => (
-                        <div key={index} className={`p-3 rounded-lg border-l-4 ${issue.severity === 'high' ? 'bg-red-900/20 border-red-500' :
-                          issue.severity === 'medium' ? 'bg-yellow-900/20 border-yellow-500' :
-                            'bg-blue-900/20 border-blue-500'
-                          }`}>
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-2 mb-1">
-                                <span className="text-sm font-medium text-white">{issue.type}</span>
-                                {issue.browser && (
-                                  <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">
-                                    {issue.browser}
-                                  </span>
-                                )}
-                                {issue.device && (
-                                  <span className="text-xs bg-gray-600 text-gray-300 px-2 py-1 rounded">
-                                    {issue.device}
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-sm text-gray-300">{issue.description}</p>
-                            </div>
-                            <span className={`text-xs px-2 py-1 rounded ${issue.severity === 'high' ? 'bg-red-600 text-white' :
-                              issue.severity === 'medium' ? 'bg-yellow-600 text-white' :
-                                'bg-blue-600 text-white'
-                              }`}>
-                              {issue.severity === 'high' ? '严重' :
-                                issue.severity === 'medium' ? '中等' : '轻微'}
-                            </span>
-                          </div>
-                        </div>
                       ))}
-                      {results.issues.length > 10 && (
-                        <div className="text-center text-sm text-gray-400">
-                          还有 {results.issues.length - 10} 个问题未显示...
-                        </div>
-                      )}
                     </div>
                   </div>
-                )}
 
-                {/* 优化建议 */}
-                {results.recommendations && results.recommendations.length > 0 && (
+                  {/* 设备兼容性 */}
                   <div className="bg-gray-700/30 rounded-lg p-6">
                     <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                      <CheckCircle className="w-5 h-5 mr-2 text-green-500" />
-                      优化建议
+                      <Monitor className="w-5 h-5 mr-2" />
+                      设备兼容性
                     </h3>
-                    <div className="space-y-3">
-                      {results.recommendations.slice(0, 8).map((recommendation: any, index: number) => (
-                        <div key={index} className="bg-gray-700/30 rounded-lg p-4">
-                          <div className="flex items-start justify-between mb-2">
-                            <h4 className="text-sm font-medium text-white">
-                              {typeof recommendation === 'string' ? recommendation : recommendation.title}
-                            </h4>
-                            {recommendation.priority && (
-                              <span className={`text-xs px-2 py-1 rounded ${recommendation.priority === 'high' ? 'bg-red-600 text-white' :
-                                recommendation.priority === 'medium' ? 'bg-yellow-600 text-white' :
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {Object.entries((results as any)?.deviceCompatibility || {}).map(([device, score]) => {
+                        const DeviceIcon = device === 'desktop' ? Monitor :
+                          device === 'tablet' ? Tablet : Smartphone;
+                        return (
+                          <div key={device} className="bg-gray-700/50 rounded-lg p-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center">
+                                <DeviceIcon className="w-4 h-4 mr-2 text-gray-400" />
+                                <span className="text-sm font-medium text-gray-300">
+                                  {device === 'desktop' ? '桌面端' :
+                                    device === 'tablet' ? '平板端' : '移动端'}
+                                </span>
+                              </div>
+                              <span className={`text-sm font-bold ${getScoreColor(Number(score))}`}>
+                                {Math.round(Number(score))}
+                              </span>
+                            </div>
+                            <ProgressBar
+                              value={Math.max(0, Math.min(100, Number(score)))}
+                              variant={getProgressVariant(Number(score))}
+                              size="md"
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* 兼容性问题 */}
+                  {results.issues && results.issues.length > 0 && (
+                    <div className="bg-gray-700/30 rounded-lg p-6">
+                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                        <AlertTriangle className="w-5 h-5 mr-2 text-yellow-500" />
+                        发现的兼容性问题
+                      </h3>
+                      <div className="space-y-3">
+                        {results.issues.slice(0, 10).map((issue: any, index: number) => (
+                          <div key={index} className={`p-3 rounded-lg border-l-4 ${issue.severity === 'high' ? 'bg-red-900/20 border-red-500' :
+                            issue.severity === 'medium' ? 'bg-yellow-900/20 border-yellow-500' :
+                              'bg-blue-900/20 border-blue-500'
+                            }`}>
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-2 mb-1">
+                                  <span className="text-sm font-medium text-white">{issue.type}</span>
+                                  {issue.browser && (
+                                    <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">
+                                      {issue.browser}
+                                    </span>
+                                  )}
+                                  {issue.device && (
+                                    <span className="text-xs bg-gray-600 text-gray-300 px-2 py-1 rounded">
+                                      {issue.device}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-sm text-gray-300">{issue.description}</p>
+                              </div>
+                              <span className={`text-xs px-2 py-1 rounded ${issue.severity === 'high' ? 'bg-red-600 text-white' :
+                                issue.severity === 'medium' ? 'bg-yellow-600 text-white' :
                                   'bg-blue-600 text-white'
                                 }`}>
-                                {recommendation.priority === 'high' ? '高优先级' :
-                                  recommendation.priority === 'medium' ? '中优先级' : '低优先级'}
+                                {issue.severity === 'high' ? '严重' :
+                                  issue.severity === 'medium' ? '中等' : '轻微'}
                               </span>
+                            </div>
+                          </div>
+                        ))}
+                        {results.issues.length > 10 && (
+                          <div className="text-center text-sm text-gray-400">
+                            还有 {results.issues.length - 10} 个问题未显示...
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 优化建议 */}
+                  {results.recommendations && results.recommendations.length > 0 && (
+                    <div className="bg-gray-700/30 rounded-lg p-6">
+                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                        <CheckCircle className="w-5 h-5 mr-2 text-green-500" />
+                        优化建议
+                      </h3>
+                      <div className="space-y-3">
+                        {results.recommendations.slice(0, 8).map((recommendation: any, index: number) => (
+                          <div key={index} className="bg-gray-700/30 rounded-lg p-4">
+                            <div className="flex items-start justify-between mb-2">
+                              <h4 className="text-sm font-medium text-white">
+                                {typeof recommendation === 'string' ? recommendation : recommendation.title}
+                              </h4>
+                              {recommendation.priority && (
+                                <span className={`text-xs px-2 py-1 rounded ${recommendation.priority === 'high' ? 'bg-red-600 text-white' :
+                                  recommendation.priority === 'medium' ? 'bg-yellow-600 text-white' :
+                                    'bg-blue-600 text-white'
+                                  }`}>
+                                  {recommendation.priority === 'high' ? '高优先级' :
+                                    recommendation.priority === 'medium' ? '中优先级' : '低优先级'}
+                                </span>
+                              )}
+                            </div>
+                            {recommendation.description && (
+                              <p className="text-xs text-gray-300 mb-2">{recommendation.description}</p>
+                            )}
+                            {(recommendation.effort || recommendation.impact) && (
+                              <div className="flex items-center space-x-4 text-xs text-gray-400">
+                                {recommendation.effort && (
+                                  <span>工作量: {recommendation.effort === 'high' ? '高' : recommendation.effort === 'medium' ? '中' : '低'}</span>
+                                )}
+                                {recommendation.impact && (
+                                  <span>影响: {recommendation.impact === 'high' ? '高' : recommendation.impact === 'medium' ? '中' : '低'}</span>
+                                )}
+                              </div>
                             )}
                           </div>
-                          {recommendation.description && (
-                            <p className="text-xs text-gray-300 mb-2">{recommendation.description}</p>
-                          )}
-                          {(recommendation.effort || recommendation.impact) && (
-                            <div className="flex items-center space-x-4 text-xs text-gray-400">
-                              {recommendation.effort && (
-                                <span>工作量: {recommendation.effort === 'high' ? '高' : recommendation.effort === 'medium' ? '中' : '低'}</span>
-                              )}
-                              {recommendation.impact && (
-                                <span>影响: {recommendation.impact === 'high' ? '高' : recommendation.impact === 'medium' ? '中' : '低'}</span>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* 兼容性矩阵 */}
-                {results.compatibilityMatrix && Object.keys(results.compatibilityMatrix).length > 0 && (
-                  <div className="bg-gray-700/30 rounded-lg p-6">
-                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                      <Grid className="w-5 h-5 mr-2 text-blue-500" />
-                      兼容性矩阵
-                    </h3>
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="border-b border-gray-600">
-                            <th className="text-left text-gray-300 py-2 px-3">特性</th>
-                            {config.targetBrowsers.slice(0, 5).map((browser, index) => (
-                              <th key={index} className="text-center text-gray-300 py-2 px-3">
-                                {browser.browser} {browser.version}
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {Object.entries(results.compatibilityMatrix).slice(0, 8).map(([feature, browsers]: [string, any], index) => (
-                            <tr key={index} className="border-b border-gray-700">
-                              <td className="text-gray-300 py-2 px-3 font-medium">{feature}</td>
-                              {config.targetBrowsers.slice(0, 5).map((browser, browserIndex) => {
-                                const support = browsers[browser.browser];
-                                return (
-                                  <td key={browserIndex} className="text-center py-2 px-3">
-                                    <span className={`inline-block w-3 h-3 rounded-full ${support?.support === 'yes' ? 'bg-green-500' :
-                                      support?.support === 'partial' ? 'bg-yellow-500' :
-                                        support?.support === 'no' ? 'bg-red-500' : 'bg-gray-500'
-                                      }`} title={support?.notes || support?.support || 'unknown'}></span>
-                                  </td>
-                                );
-                              })}
+                  {/* 兼容性矩阵 */}
+                  {results.compatibilityMatrix && Object.keys(results.compatibilityMatrix).length > 0 && (
+                    <div className="bg-gray-700/30 rounded-lg p-6">
+                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
+                        <Grid className="w-5 h-5 mr-2 text-blue-500" />
+                        兼容性矩阵
+                      </h3>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b border-gray-600">
+                              <th className="text-left text-gray-300 py-2 px-3">特性</th>
+                              {config.targetBrowsers.slice(0, 5).map((browser, index) => (
+                                <th key={index} className="text-center text-gray-300 py-2 px-3">
+                                  {browser.browser} {browser.version}
+                                </th>
+                              ))}
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                      <div className="mt-3 flex items-center space-x-4 text-xs text-gray-400">
-                        <div className="flex items-center space-x-1">
-                          <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-                          <span>完全支持</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <span className="w-3 h-3 bg-yellow-500 rounded-full"></span>
-                          <span>部分支持</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <span className="w-3 h-3 bg-red-500 rounded-full"></span>
-                          <span>不支持</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <span className="w-3 h-3 bg-gray-500 rounded-full"></span>
-                          <span>未知</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* 测试指标 */}
-                <div>
-                  <h4 className="text-md font-medium text-white mb-3">测试指标</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="p-3 bg-gray-700/50 rounded-lg text-center">
-                      <div className="text-lg font-bold text-white">{results.duration?.toFixed(1) || 0}s</div>
-                      <div className="text-xs text-gray-400">测试时长</div>
-                    </div>
-                    <div className="p-3 bg-gray-700/50 rounded-lg text-center">
-                      <div className="text-lg font-bold text-white">{results.findings?.length || 0}</div>
-                      <div className="text-xs text-gray-400">发现问题</div>
-                    </div>
-                    <div className="p-3 bg-gray-700/50 rounded-lg text-center">
-                      <div className="text-lg font-bold text-white">{results.recommendations?.length || 0}</div>
-                      <div className="text-xs text-gray-400">优化建议</div>
-                    </div>
-                    <div className="p-3 bg-gray-700/50 rounded-lg text-center">
-                      <div className="text-lg font-bold text-white">{results.engine || 'auto'}</div>
-                      <div className="text-xs text-gray-400">测试引擎</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 问题和建议 */}
-                {results.findings && results.findings.length > 0 && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h4 className="text-md font-medium text-white mb-3">发现的问题</h4>
-                      <div className="space-y-2">
-                        {results.findings.slice(0, 5).map((finding: any, index: number) => (
-                          <div key={index} className="flex items-start space-x-2 p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
-                            <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5" />
-                            <div>
-                              <p className="text-sm font-medium text-red-300">{finding.title}</p>
-                              <p className="text-xs text-red-400">{finding.description}</p>
-                            </div>
+                          </thead>
+                          <tbody>
+                            {Object.entries(results.compatibilityMatrix).slice(0, 8).map(([feature, browsers]: [string, any], index) => (
+                              <tr key={index} className="border-b border-gray-700">
+                                <td className="text-gray-300 py-2 px-3 font-medium">{feature}</td>
+                                {config.targetBrowsers.slice(0, 5).map((browser, browserIndex) => {
+                                  const support = browsers[browser.browser];
+                                  return (
+                                    <td key={browserIndex} className="text-center py-2 px-3">
+                                      <span className={`inline-block w-3 h-3 rounded-full ${support?.support === 'yes' ? 'bg-green-500' :
+                                        support?.support === 'partial' ? 'bg-yellow-500' :
+                                          support?.support === 'no' ? 'bg-red-500' : 'bg-gray-500'
+                                        }`} title={support?.notes || support?.support || 'unknown'}></span>
+                                    </td>
+                                  );
+                                })}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                        <div className="mt-3 flex items-center space-x-4 text-xs text-gray-400">
+                          <div className="flex items-center space-x-1">
+                            <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+                            <span>完全支持</span>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="text-md font-medium text-white mb-3">优化建议</h4>
-                      <div className="space-y-2">
-                        {results.recommendations?.slice(0, 5).map((rec: any, index: number) => (
-                          <div key={index} className="flex items-start space-x-2 p-3 bg-blue-500/20 border border-blue-500/30 rounded-lg">
-                            <CheckCircle className="w-4 h-4 text-blue-400 mt-0.5" />
-                            <p className="text-sm text-blue-300">{typeof rec === 'string' ? rec : rec.description || rec.title || String(rec)}</p>
+                          <div className="flex items-center space-x-1">
+                            <span className="w-3 h-3 bg-yellow-500 rounded-full"></span>
+                            <span>部分支持</span>
                           </div>
-                        ))}
+                          <div className="flex items-center space-x-1">
+                            <span className="w-3 h-3 bg-red-500 rounded-full"></span>
+                            <span>不支持</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <span className="w-3 h-3 bg-gray-500 rounded-full"></span>
+                            <span>未知</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            ) : null}
-          </div>
-        </div>
-      </div>
+                  )}
 
-      {/* 高级兼容性图表 */}
-      {results && (
-        <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-          <AdvancedTestCharts
-            results={{
-              id: Date.now().toString(),
-              testType: 'compatibility',
-              url: config.url,
-              timestamp: new Date().toISOString(),
-              duration: results.duration || 0,
-              status: 'completed' as const,
-              overallScore: results.overallScore,
-              metrics: {
-                overallScore: results.overallScore,
-                browserCompatibility: results.browserCompatibility,
-                deviceCompatibility: results.deviceCompatibility,
-                accessibilityScore: results.accessibilityScore
-              },
-              findings: (results.findings || []).map(f => ({
-                ...f,
-                title: f.type,
-                recommendation: f.impact
-              })),
-              recommendations: results.recommendations?.map(rec => rec.title || rec.description || String(rec)) || [],
-              engine: results.engine || 'auto',
-              config: config as any
-            }}
-            testType="compatibility"
-            theme="dark"
-            height={400}
-            interactive={true}
-            showComparison={testHistory.length > 1}
-          />
-        </div>
-      )}
-
-      {/* 兼容性测试历史 */}
-      {testHistory.length > 0 && (
-        <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">测试历史</h3>
-          <div className="space-y-3">
-            {testHistory.slice(0, 5).map((test) => (
-              <div key={test.id} className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <div className={`w-3 h-3 rounded-full ${test.status === 'completed' ? 'bg-green-500' : 'bg-red-500'
-                    }`} />
+                  {/* 测试指标 */}
                   <div>
-                    <div className="text-sm font-medium text-white">{test.url}</div>
+                    <h4 className="text-md font-medium text-white mb-3">测试指标</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="p-3 bg-gray-700/50 rounded-lg text-center">
+                        <div className="text-lg font-bold text-white">{results.duration?.toFixed(1) || 0}s</div>
+                        <div className="text-xs text-gray-400">测试时长</div>
+                      </div>
+                      <div className="p-3 bg-gray-700/50 rounded-lg text-center">
+                        <div className="text-lg font-bold text-white">{results.findings?.length || 0}</div>
+                        <div className="text-xs text-gray-400">发现问题</div>
+                      </div>
+                      <div className="p-3 bg-gray-700/50 rounded-lg text-center">
+                        <div className="text-lg font-bold text-white">{results.recommendations?.length || 0}</div>
+                        <div className="text-xs text-gray-400">优化建议</div>
+                      </div>
+                      <div className="p-3 bg-gray-700/50 rounded-lg text-center">
+                        <div className="text-lg font-bold text-white">{results.engine || 'auto'}</div>
+                        <div className="text-xs text-gray-400">测试引擎</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 问题和建议 */}
+                  {results.findings && results.findings.length > 0 && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <h4 className="text-md font-medium text-white mb-3">发现的问题</h4>
+                        <div className="space-y-2">
+                          {results.findings.slice(0, 5).map((finding: any, index: number) => (
+                            <div key={index} className="flex items-start space-x-2 p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
+                              <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5" />
+                              <div>
+                                <p className="text-sm font-medium text-red-300">{finding.title}</p>
+                                <p className="text-xs text-red-400">{finding.description}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="text-md font-medium text-white mb-3">优化建议</h4>
+                        <div className="space-y-2">
+                          {results.recommendations?.slice(0, 5).map((rec: any, index: number) => (
+                            <div key={index} className="flex items-start space-x-2 p-3 bg-blue-500/20 border border-blue-500/30 rounded-lg">
+                              <CheckCircle className="w-4 h-4 text-blue-400 mt-0.5" />
+                              <p className="text-sm text-blue-300">{typeof rec === 'string' ? rec : rec.description || rec.title || String(rec)}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+
+        {/* 高级兼容性图表 */}
+        {results && (
+          <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+            <AdvancedTestCharts
+              results={{
+                id: Date.now().toString(),
+                testType: 'compatibility',
+                url: config.url,
+                timestamp: new Date().toISOString(),
+                duration: results.duration || 0,
+                status: 'completed' as const,
+                overallScore: results.overallScore,
+                metrics: {
+                  overallScore: results.overallScore,
+                  browserCompatibility: results.browserCompatibility,
+                  deviceCompatibility: results.deviceCompatibility,
+                  accessibilityScore: results.accessibilityScore
+                },
+                findings: (results.findings || []).map(f => ({
+                  ...f,
+                  title: f.type,
+                  recommendation: f.impact
+                })),
+                recommendations: results.recommendations?.map(rec => rec.title || rec.description || String(rec)) || [],
+                engine: results.engine || 'auto',
+                config: config as any
+              }}
+              testType="compatibility"
+              theme="dark"
+              height={400}
+              interactive={true}
+              showComparison={testHistory.length > 1}
+            />
+          </div>
+        )}
+
+        {/* 兼容性测试历史 */}
+        {testHistory.length > 0 && (
+          <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+            <h3 className="text-lg font-semibold text-white mb-4">测试历史</h3>
+            <div className="space-y-3">
+              {testHistory.slice(0, 5).map((test) => (
+                <div key={test.id} className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-3 h-3 rounded-full ${test.status === 'completed' ? 'bg-green-500' : 'bg-red-500'
+                      }`} />
+                    <div>
+                      <div className="text-sm font-medium text-white">{test.url}</div>
+                      <div className="text-xs text-gray-400">
+                        {new Date(test.timestamp).toLocaleString()}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className={`px-2 py-1 rounded text-xs font-medium ${test.overallScore >= 80 ? 'bg-green-500/20 text-green-400' :
+                      test.overallScore >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
+                        'bg-red-500/20 text-red-400'
+                      }`}>
+                      {Math.round(test.overallScore)}分
+                    </div>
                     <div className="text-xs text-gray-400">
-                      {new Date(test.timestamp).toLocaleString()}
+                      {test.findings?.length || test.criticalIssues} 问题
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <div className={`px-2 py-1 rounded text-xs font-medium ${test.overallScore >= 80 ? 'bg-green-500/20 text-green-400' :
-                    test.overallScore >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
-                      'bg-red-500/20 text-red-400'
-                    }`}>
-                    {Math.round(test.overallScore)}分
-                  </div>
-                  <div className="text-xs text-gray-400">
-                    {test.findings?.length || test.criticalIssues} 问题
-                  </div>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      )}
-
-      {/* 登录提示组件 */}
-      {LoginPromptComponent}
-    </div>
+        )}
+      </UnifiedTestPageWithHistory>
+    </TestPageLayout>
   );
 };
 

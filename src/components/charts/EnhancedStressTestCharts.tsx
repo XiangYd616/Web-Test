@@ -121,6 +121,17 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
     // 明确区分数据源：实时数据用于实时监控，测试结果数据用于结果视图
     let sourceData: any[] = [];
 
+    console.log('🎯 EnhancedStressTestCharts 数据处理开始:', {
+      chartType,
+      realTimeDataLength: realTimeData?.length || 0,
+      testResultDataLength: testResultData?.length || 0,
+      densityControl,
+      isRunning,
+      testCompleted,
+      realTimeDataSample: realTimeData?.slice(0, 2),
+      testResultDataSample: testResultData?.slice(0, 2)
+    });
+
     if (realTimeData && realTimeData.length > 0) {
       // 使用实时数据（用于实时监控视图）
       sourceData = realTimeData;
@@ -134,25 +145,25 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
       console.log('📊 EnhancedStressTestCharts 使用测试结果数据:', sourceData.length, '个数据点');
     } else {
       // 减少空数据警告的频率，只在组件首次渲染时打印
-      if (realTimeData?.length === 0 && testResultData?.length === 0) {
-        // 静默处理，不打印警告
-      }
+      console.log('⚠️ EnhancedStressTestCharts: 没有可用数据');
     }
 
     if (!sourceData || sourceData.length === 0) {
+      console.log('❌ EnhancedStressTestCharts: 返回空数据');
       return [];
     }
 
+    // 根据密度控制设置采样步长
     const step = densityControl === 'low' ? 5 : densityControl === 'medium' ? 2 : 1;
     const filtered = sourceData.filter((_, index) => index % step === 0);
 
     // 只在数据量变化时打印处理结果
     if (filtered.length % 50 === 0 || filtered.length < 10) {
-      console.log('📊 EnhancedStressTestCharts 处理后数据:', filtered.length, '个数据点');
+      console.log('📊 EnhancedStressTestCharts 处理后数据:', filtered.length, '个数据点', filtered.slice(0, 2));
     }
 
     return filtered;
-  }, [realTimeData, testResultData, densityControl]);
+  }, [realTimeData, testResultData, densityControl, chartType, isRunning, testCompleted]);
 
   // 响应时间分布数据
   const responseTimeDistribution = useMemo(() => {
@@ -473,7 +484,23 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
   return (
     <div className="space-y-4">
       {/* 简化的控制面板 - 移除重复的图表类型按钮 */}
-      <div className="flex flex-wrap items-center justify-end gap-4 p-3 bg-gray-800/30 rounded-lg">
+      <div className="flex flex-wrap items-center justify-between gap-4 p-3 bg-gray-800/30 rounded-lg">
+        {/* 数据统计信息 */}
+        <div className="flex items-center gap-4 text-sm text-gray-400">
+          <span>
+            数据点: {processedData.length.toLocaleString()}
+            {densityControl !== 'high' && (
+              <span className="text-gray-500">
+                / {(realTimeData.length + testResultData.length).toLocaleString()}
+              </span>
+            )}
+          </span>
+          {densityControl !== 'high' && (
+            <span className="px-2 py-1 bg-blue-600/20 text-blue-300 rounded text-xs">
+              {densityControl === 'low' ? '1/5 采样' : '1/2 采样'}
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-2">
           {/* 🔧 新增：时间显示模式切换按钮 */}
           <button
@@ -512,21 +539,33 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
       </div>
 
       {/* 图表区域 */}
-      <div className="bg-gray-800/50 rounded-lg p-4" style={{ height: `${height}px` }}>
-        <ResponsiveContainer width="100%" height="100%">
-          {(() => {
-            switch (chartType) {
-              case 'realtime':
-                return renderRealTimeChart();
-              case 'distribution':
-                return renderDistributionChart();
-              case 'results':
-                return renderRealTimeChart();
-              default:
-                return renderRealTimeChart();
-            }
-          })()}
-        </ResponsiveContainer>
+      <div className="bg-gray-800/50 rounded-lg p-4" style={{ height: `${height}px`, minHeight: '400px' }}>
+        {processedData.length === 0 ? (
+          <div className="flex items-center justify-center h-full text-gray-400">
+            <div className="text-center">
+              <div className="text-lg mb-2">📊 等待数据...</div>
+              <div className="text-sm">
+                {isRunning ? '测试正在运行中，数据即将显示' : '暂无测试数据'}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            {(() => {
+              console.log('🎯 渲染图表:', { chartType, dataLength: processedData.length });
+              switch (chartType) {
+                case 'realtime':
+                  return renderRealTimeChart();
+                case 'distribution':
+                  return renderDistributionChart();
+                case 'results':
+                  return renderRealTimeChart();
+                default:
+                  return renderRealTimeChart();
+              }
+            })()}
+          </ResponsiveContainer>
+        )}
       </div>
 
       {/* 错误分布图 */}

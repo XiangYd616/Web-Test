@@ -505,685 +505,737 @@ const SEOTest: React.FC = () => {
     `;
   };
 
+  // 历史记录处理
+  const handleTestSelect = (test: any) => {
+    // 加载历史测试结果
+    if (test.results) {
+      setResults(test.results);
+    }
+  };
+
+  const handleTestRerun = (test: any) => {
+    // 重新运行历史测试
+    if (test.config) {
+      setTestConfig(test.config);
+      // 可以选择是否立即开始测试
+    }
+  };
+
   // 移除强制登录检查，允许未登录用户查看页面
   // 在使用功能时才提示登录
 
   return (
-    <TestPageLayout className="space-y-3 dark-page-scrollbar compact-layout"
-    >
-      {/* 页面标题和控制 */}
-      <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-3">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-          <div>
-            <h2 className="text-xl font-bold text-white">SEO综合分析</h2>
-            <p className="text-gray-300 text-sm">全面分析网站SEO状况，发现关键问题和优化机会</p>
-          </div>
-
-          <div className="flex items-center space-x-2">
-
-            {/* 测试状态和控制按钮 */}
-            <div className="flex items-center space-x-2">
-              {testStatus === 'idle' ? (
-                <button
-                  type="button"
-                  onClick={handleStartTest}
-                  disabled={
-                    seoTestMode === 'online'
-                      ? !testConfig.url
-                      : uploadedFiles.length === 0
-                  }
-                  className={`flex items-center space-x-1.5 px-4 py-2 rounded-md text-sm font-medium transition-all ${(seoTestMode === 'online' ? !testConfig.url : uploadedFiles.length === 0)
-                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-700 text-white'
-                    }`}
-                >
-                  <Search className="w-4 h-4" />
-                  <span>
-                    {seoTestMode === 'online' ? '开始分析' : '开始本地分析'}
-                  </span>
-                </button>
-              ) : testStatus === 'starting' ? (
-                <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-blue-500/20 border border-blue-500/30 rounded-md">
-                  <Loader className="w-3 h-3 animate-spin text-blue-400" />
-                  <span className="text-xs text-blue-300 font-medium">正在启动...</span>
-                </div>
-              ) : testStatus === 'running' || isRunning ? (
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-md">
-                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-xs text-green-300 font-medium">分析中</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleStopTest}
-                    className="flex items-center space-x-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors text-xs"
-                  >
-                    <Square className="w-3 h-3" />
-                    <span>停止</span>
-                  </button>
-                </div>
-              ) : testStatus === 'completed' ? (
-                <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-md">
-                  <CheckCircle className="w-3 h-3 text-green-400" />
-                  <span className="text-xs text-green-300 font-medium">分析完成</span>
-                </div>
-              ) : testStatus === 'failed' ? (
-                <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-red-500/20 border border-red-500/30 rounded-md">
-                  <XCircle className="w-3 h-3 text-red-400" />
-                  <span className="text-xs text-red-300 font-medium">分析失败</span>
-                </div>
-              ) : null}
-
-              {/* 完成状态操作按钮 - 独立区域 */}
-              {testStatus === 'completed' && (
-                <div className="flex items-center space-x-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setError('');
-                      setTestStatus('idle');
-                    }}
-                    className="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 rounded-lg text-blue-300 transition-colors font-medium"
-                  >
-                    新测试
-                  </button>
-                  {seoTestMode === 'online' && (
-                    <button
-                      type="button"
-                      onClick={handleSwitchToLocalAnalysis}
-                      className="px-3 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 rounded-lg text-green-300 transition-colors font-medium"
-                    >
-                      切换本地分析
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {/* 失败状态操作按钮 - 独立区域 */}
-              {testStatus === 'failed' && (
-                <div className="flex items-center space-x-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setError('');
-                      setTestStatus('idle');
-                      handleStartTest();
-                    }}
-                    className="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 rounded-lg text-blue-300 transition-colors font-medium"
-                  >
-                    重新测试
-                  </button>
-                  {seoTestMode === 'online' && (
-                    <button
-                      type="button"
-                      onClick={handleSwitchToLocalAnalysis}
-                      className="px-3 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 rounded-lg text-green-300 transition-colors font-medium"
-                    >
-                      切换本地分析
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 测试模式选择 */}
-      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-3">
-              选择分析模式
-            </label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* 在线URL分析 */}
-              <div
-                className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${seoTestMode === 'online'
-                  ? 'border-blue-500 bg-blue-500/10'
-                  : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
-                  }`}
-                onClick={() => handleModeSwitch('online')}
-              >
-                <div className="flex items-center space-x-3">
-                  <Globe className={`w-6 h-6 ${seoTestMode === 'online' ? 'text-blue-400' : 'text-gray-400'}`} />
-                  <div>
-                    <div className={`font-medium ${seoTestMode === 'online' ? 'text-blue-300' : 'text-gray-300'}`}>
-                      在线网站分析
-                    </div>
-                    <div className="text-sm text-gray-400 mt-1">
-                      输入URL分析在线网站
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 本地文件分析 */}
-              <div
-                className={`p-4 rounded-lg border-2 cursor-pointer transition-all relative ${seoTestMode === 'local'
-                  ? 'border-green-500 bg-green-500/10'
-                  : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
-                  }`}
-                onClick={() => handleModeSwitch('local')}
-              >
-                {/* 推荐标签 */}
-                <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-                  推荐
-                </div>
-                <div className="flex items-center space-x-3">
-                  <HardDrive className={`w-6 h-6 ${seoTestMode === 'local' ? 'text-green-400' : 'text-gray-400'}`} />
-                  <div>
-                    <div className={`font-medium ${seoTestMode === 'local' ? 'text-green-300' : 'text-gray-300'}`}>
-                      本地文件分析 ⚡
-                    </div>
-                    <div className="text-sm text-gray-400 mt-1">
-                      上传HTML文件，不受网络限制
-                    </div>
-                    <div className="text-xs text-green-400 mt-1 font-medium">
-                      ✓ 更快速 ✓ 更准确 ✓ 更稳定
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 模式状态提示 */}
-          <div className="mt-4 space-y-3">
-            <div className="p-3 rounded-lg border border-gray-600/50 bg-gray-700/30">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  {seoTestMode === 'online' ? (
-                    <Globe className="w-4 h-4 text-blue-400" />
-                  ) : (
-                    <HardDrive className="w-4 h-4 text-green-400" />
-                  )}
-                  <span className="text-sm text-gray-300">
-                    当前模式: {seoTestMode === 'online' ? '在线网站分析' : '本地文件分析'}
-                  </span>
-                </div>
-                <div className="text-sm text-gray-400">
-                  {seoTestMode === 'online'
-                    ? (testConfig.url ? '✓ URL已输入' : '请输入URL')
-                    : (uploadedFiles.length > 0 ? `✓ 已上传${uploadedFiles.length}个文件` : '请上传HTML文件')
-                  }
-                </div>
-              </div>
-            </div>
-
-            {/* 本地分析优势提示 */}
-            {seoTestMode === 'online' && (
-              <div className="p-3 rounded-lg border border-green-500/30 bg-green-500/10">
-                <div className="flex items-start space-x-2">
-                  <div className="text-green-400 text-lg">💡</div>
-                  <div>
-                    <div className="text-sm text-green-300 font-medium mb-1">
-                      遇到网络问题？试试本地文件分析！
-                    </div>
-                    <div className="text-xs text-green-400">
-                      本地分析不受网络限制，分析速度更快，结果更准确。只需上传HTML文件即可开始。
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* 输入区域 */}
-      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-        <div className="space-y-4">
-          {seoTestMode === 'online' ? (
-            <div className="url-input-form-group">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                网站URL
-              </label>
-              <div className="url-input-container">
-                <URLInput
-                  value={testConfig.url}
-                  onChange={(url) => setTestConfig(prev => ({ ...prev, url }))}
-                  placeholder="请输入要分析的网站URL，例如：https://example.com"
-                  disabled={isRunning}
-                  className="url-input-full-width"
-                />
-              </div>
-              <div className="mt-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                <div className="flex items-start space-x-2">
-                  <AlertCircle className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                  <div className="text-sm text-blue-300">
-                    <div className="font-medium mb-1">使用说明</div>
-                    <div className="text-blue-200 space-y-1">
-                      <div>• 本工具只分析真实的网站内容，不提供模拟数据</div>
-                      <div>• 由于浏览器安全限制，某些网站可能无法直接分析</div>
-                      <div>• 建议测试支持CORS的网站或您自己的网站</div>
-                      <div>• 推荐测试网站：httpbin.org、公开API测试网站</div>
-                      <div>• 如果遇到访问问题，请尝试其他网站或稍后重试</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            /* 本地文件上传 */
+    <TestPageLayout className="space-y-3 dark-page-scrollbar compact-layout">
+      {/* 使用统一的测试页面组件 */}
+      <UnifiedTestPageWithHistory
+        testType="seo"
+        testTypeName="SEO测试"
+        testIcon={Search}
+        onTestSelect={handleTestSelect}
+        onTestRerun={handleTestRerun}
+        additionalComponents={LoginPromptComponent}
+      >
+        {/* 页面标题和控制 */}
+        <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-3">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
             <div>
-              <FileUploadSEO
-                onAnalysisComplete={() => { }}
-                isAnalyzing={isRunning}
-                onFileUpload={handleLocalFileUpload}
-              />
+              <h2 className="text-xl font-bold text-white">SEO综合分析</h2>
+              <p className="text-gray-300 text-sm">全面分析网站SEO状况，发现关键问题和优化机会</p>
             </div>
-          )}
 
-          {/* 关键词输入 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              目标关键词 <span className="text-gray-500">(可选)</span>
-            </label>
-            <input
-              type="text"
-              value={testConfig.keywords}
-              onChange={(e) => setTestConfig(prev => ({ ...prev, keywords: e.target.value }))}
-              placeholder="请输入关键词，多个关键词用逗号分隔"
-              disabled={isRunning}
-              className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* 检测项目选择 */}
-      <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-4">
-            <h3 className="text-lg font-semibold text-white">选择检测项目</h3>
-
-            {/* 分类切换 */}
-            <div className="flex items-center bg-gray-700/50 rounded-lg p-1">
-              <button
-                type="button"
-                onClick={() => setShowAdvanced(false)}
-                disabled={isRunning}
-                className={`px-3 py-1 text-xs rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${!showAdvanced
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
-                  }`}
-              >
-                核心项目
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowAdvanced(true)}
-                disabled={isRunning}
-                className={`px-3 py-1 text-xs rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${showAdvanced
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
-                  }`}
-              >
-                全部项目
-              </button>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <div className="text-sm text-gray-400">
-              已选 {seoTests.filter(test => testConfig[test.key as keyof SEOTestConfig]).length}/{seoTests.length} 项
-            </div>
             <div className="flex items-center space-x-2">
-              <button
-                type="button"
-                onClick={() => {
-                  const visibleTests = showAdvanced ? seoTests : seoTests.filter(test => test.category === 'core');
-                  const allEnabled = visibleTests.every(test => testConfig[test.key as keyof SEOTestConfig]);
-                  const newConfig = { ...testConfig };
-                  visibleTests.forEach(test => {
-                    newConfig[test.key as keyof SEOTestConfig] = !allEnabled as any;
-                  });
-                  setTestConfig(newConfig);
-                }}
-                disabled={isRunning}
-                className="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {(() => {
-                  const visibleTests = showAdvanced ? seoTests : seoTests.filter(test => test.category === 'core');
-                  return visibleTests.every(test => testConfig[test.key as keyof SEOTestConfig]) ? '全不选' : '全选';
-                })()}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  const newConfig = { ...testConfig };
-                  seoTests.forEach(test => {
-                    newConfig[test.key as keyof SEOTestConfig] = (test.priority === 'high') as any;
-                  });
-                  setTestConfig(newConfig);
-                }}
-                disabled={isRunning}
-                className="px-3 py-1 text-xs bg-green-600 hover:bg-green-700 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                推荐项
-              </button>
+
+              {/* 测试状态和控制按钮 */}
+              <div className="flex items-center space-x-2">
+                {testStatus === 'idle' ? (
+                  <button
+                    type="button"
+                    onClick={handleStartTest}
+                    disabled={
+                      seoTestMode === 'online'
+                        ? !testConfig.url
+                        : uploadedFiles.length === 0
+                    }
+                    className={`flex items-center space-x-1.5 px-4 py-2 rounded-md text-sm font-medium transition-all ${(seoTestMode === 'online' ? !testConfig.url : uploadedFiles.length === 0)
+                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                      : 'bg-blue-600 hover:bg-blue-700 text-white'
+                      }`}
+                  >
+                    <Search className="w-4 h-4" />
+                    <span>
+                      {seoTestMode === 'online' ? '开始分析' : '开始本地分析'}
+                    </span>
+                  </button>
+                ) : testStatus === 'starting' ? (
+                  <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-blue-500/20 border border-blue-500/30 rounded-md">
+                    <Loader className="w-3 h-3 animate-spin text-blue-400" />
+                    <span className="text-xs text-blue-300 font-medium">正在启动...</span>
+                  </div>
+                ) : testStatus === 'running' || isRunning ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-md">
+                      <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                      <span className="text-xs text-green-300 font-medium">分析中</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleStopTest}
+                      className="flex items-center space-x-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors text-xs"
+                    >
+                      <Square className="w-3 h-3" />
+                      <span>停止</span>
+                    </button>
+                  </div>
+                ) : testStatus === 'completed' ? (
+                  <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-md">
+                    <CheckCircle className="w-3 h-3 text-green-400" />
+                    <span className="text-xs text-green-300 font-medium">分析完成</span>
+                  </div>
+                ) : testStatus === 'failed' ? (
+                  <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-red-500/20 border border-red-500/30 rounded-md">
+                    <XCircle className="w-3 h-3 text-red-400" />
+                    <span className="text-xs text-red-300 font-medium">分析失败</span>
+                  </div>
+                ) : null}
+
+                {/* 完成状态操作按钮 - 独立区域 */}
+                {testStatus === 'completed' && (
+                  <div className="flex items-center space-x-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setError('');
+                        setTestStatus('idle');
+                      }}
+                      className="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 rounded-lg text-blue-300 transition-colors font-medium"
+                    >
+                      新测试
+                    </button>
+                    {seoTestMode === 'online' && (
+                      <button
+                        type="button"
+                        onClick={handleSwitchToLocalAnalysis}
+                        className="px-3 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 rounded-lg text-green-300 transition-colors font-medium"
+                      >
+                        切换本地分析
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* 失败状态操作按钮 - 独立区域 */}
+                {testStatus === 'failed' && (
+                  <div className="flex items-center space-x-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setError('');
+                        setTestStatus('idle');
+                        handleStartTest();
+                      }}
+                      className="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 rounded-lg text-blue-300 transition-colors font-medium"
+                    >
+                      重新测试
+                    </button>
+                    {seoTestMode === 'online' && (
+                      <button
+                        type="button"
+                        onClick={handleSwitchToLocalAnalysis}
+                        className="px-3 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/30 rounded-lg text-green-300 transition-colors font-medium"
+                      >
+                        切换本地分析
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* 核心项目 */}
-        {(!showAdvanced || showAdvanced) && (
-          <div className="space-y-6">
-            {!showAdvanced && (
-              <div>
-                <h4 className="text-sm font-medium text-gray-300 mb-3 flex items-center space-x-2">
-                  <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-                  <span>核心检测项目 (推荐)</span>
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {seoTests.filter(test => test.category === 'core').map((test) => {
-                    const IconComponent = test.icon;
-                    const isEnabled = testConfig[test.key as keyof SEOTestConfig] as boolean;
+        {/* 标签页导航 */}
+        <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50">
+          <div className="flex border-b border-gray-700/50">
+            <button
+              onClick={() => setActiveTab('test')}
+              className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors ${activeTab === 'test'
+                ? 'text-blue-400 border-b-2 border-blue-400 bg-blue-500/10'
+                : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+                }`}
+            >
+              <Search className="w-4 h-4" />
+              SEO测试
+            </button>
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`flex items-center gap-2 px-6 py-3 text-sm font-medium transition-colors ${activeTab === 'history'
+                ? 'text-blue-400 border-b-2 border-blue-400 bg-blue-500/10'
+                : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+                }`}
+            >
+              <History className="w-4 h-4" />
+              测试历史
+            </button>
+          </div>
+        </div>
 
-                    return (
-                      <button
-                        key={test.key}
-                        type="button"
-                        onClick={() => handleTestTypeChange(test.key as keyof SEOTestConfig)}
-                        disabled={isRunning}
-                        className={`w-full p-4 rounded-lg border transition-all duration-200 text-left ${isEnabled
-                          ? `border-${test.color}-500 bg-${test.color}-500/10 hover:bg-${test.color}-500/15`
-                          : 'border-gray-600 bg-gray-700/30 hover:bg-gray-700/50 hover:border-gray-500'
-                          } ${isRunning
-                            ? 'opacity-50 cursor-not-allowed'
-                            : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'
-                          }`}
-                      >
-                        <div className="flex items-start space-x-3">
-                          <div
-                            className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${isEnabled
-                              ? `border-${test.color}-500 bg-${test.color}-500`
-                              : 'border-gray-500'
-                              }`}
-                          >
-                            {isEnabled && <CheckCircle className="w-3 h-3 text-white" />}
+        {/* 标签页内容 */}
+        {activeTab === 'test' && (
+          <>
+            {/* 测试模式选择 */}
+            <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-3">
+                    选择分析模式
+                  </label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* 在线URL分析 */}
+                    <div
+                      className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${seoTestMode === 'online'
+                        ? 'border-blue-500 bg-blue-500/10'
+                        : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
+                        }`}
+                      onClick={() => handleModeSwitch('online')}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <Globe className={`w-6 h-6 ${seoTestMode === 'online' ? 'text-blue-400' : 'text-gray-400'}`} />
+                        <div>
+                          <div className={`font-medium ${seoTestMode === 'online' ? 'text-blue-300' : 'text-gray-300'}`}>
+                            在线网站分析
                           </div>
-
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center space-x-2 mb-1">
-                              <IconComponent className={`w-4 h-4 ${isEnabled ? `text-${test.color}-400` : 'text-gray-400'}`} />
-                              <span className={`font-medium text-sm ${isEnabled ? `text-${test.color}-300` : 'text-gray-300'}`}>
-                                {test.name}
-                              </span>
-                              {test.priority === 'high' && (
-                                <span className="px-1.5 py-0.5 text-xs bg-blue-500/20 text-blue-300 rounded">
-                                  推荐
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-xs text-gray-400 mb-2">{test.description}</p>
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center space-x-1">
-                                <Clock className="w-3 h-3 text-gray-500" />
-                                <span className="text-xs text-gray-500">{test.estimatedTime}</span>
-                              </div>
-                              {isEnabled && (
-                                <div className="flex items-center space-x-1">
-                                  <CheckCircle className="w-3 h-3 text-green-400" />
-                                  <span className="text-xs text-green-400">已选择</span>
-                                </div>
-                              )}
-                            </div>
+                          <div className="text-sm text-gray-400 mt-1">
+                            输入URL分析在线网站
                           </div>
                         </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+                      </div>
+                    </div>
 
-            {/* 全部项目 */}
-            {showAdvanced && (
-              <div className="space-y-6">
-                {/* 核心项目组 */}
-                <div>
-                  <h4 className="text-sm font-medium text-gray-300 mb-3 flex items-center space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-                    <span>核心检测项目</span>
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {seoTests.filter(test => test.category === 'core').map((test) => {
-                      const IconComponent = test.icon;
-                      const isEnabled = testConfig[test.key as keyof SEOTestConfig] as boolean;
-
-                      return (
-                        <button
-                          key={test.key}
-                          type="button"
-                          onClick={() => handleTestTypeChange(test.key as keyof SEOTestConfig)}
-                          disabled={isRunning}
-                          className={`w-full p-4 rounded-lg border transition-all duration-200 text-left ${isEnabled
-                            ? `border-${test.color}-500 bg-${test.color}-500/10 hover:bg-${test.color}-500/15`
-                            : 'border-gray-600 bg-gray-700/30 hover:bg-gray-700/50 hover:border-gray-500'
-                            } ${isRunning
-                              ? 'opacity-50 cursor-not-allowed'
-                              : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'
-                            }`}
-                        >
-                          <div className="flex items-start space-x-3">
-                            <div
-                              className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${isEnabled
-                                ? `border-${test.color}-500 bg-${test.color}-500`
-                                : 'border-gray-500'
-                                }`}
-                            >
-                              {isEnabled && <CheckCircle className="w-3 h-3 text-white" />}
-                            </div>
-
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center space-x-2 mb-1">
-                                <IconComponent className={`w-4 h-4 ${isEnabled ? `text-${test.color}-400` : 'text-gray-400'}`} />
-                                <span className={`font-medium text-sm ${isEnabled ? `text-${test.color}-300` : 'text-gray-300'}`}>
-                                  {test.name}
-                                </span>
-                                {test.priority === 'high' && (
-                                  <span className="px-1.5 py-0.5 text-xs bg-blue-500/20 text-blue-300 rounded">
-                                    推荐
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-xs text-gray-400 mb-2">{test.description}</p>
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-1">
-                                  <Clock className="w-3 h-3 text-gray-500" />
-                                  <span className="text-xs text-gray-500">{test.estimatedTime}</span>
-                                </div>
-                                {isEnabled && (
-                                  <div className="flex items-center space-x-1">
-                                    <CheckCircle className="w-3 h-3 text-green-400" />
-                                    <span className="text-xs text-green-400">已选择</span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
+                    {/* 本地文件分析 */}
+                    <div
+                      className={`p-4 rounded-lg border-2 cursor-pointer transition-all relative ${seoTestMode === 'local'
+                        ? 'border-green-500 bg-green-500/10'
+                        : 'border-gray-600 bg-gray-700/30 hover:border-gray-500'
+                        }`}
+                      onClick={() => handleModeSwitch('local')}
+                    >
+                      {/* 推荐标签 */}
+                      <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                        推荐
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <HardDrive className={`w-6 h-6 ${seoTestMode === 'local' ? 'text-green-400' : 'text-gray-400'}`} />
+                        <div>
+                          <div className={`font-medium ${seoTestMode === 'local' ? 'text-green-300' : 'text-gray-300'}`}>
+                            本地文件分析 ⚡
                           </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* 高级项目组 */}
-                <div>
-                  <h4 className="text-sm font-medium text-gray-300 mb-3 flex items-center space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-purple-400"></div>
-                    <span>高级检测项目</span>
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {seoTests.filter(test => test.category === 'advanced').map((test) => {
-                      const IconComponent = test.icon;
-                      const isEnabled = testConfig[test.key as keyof SEOTestConfig] as boolean;
-
-                      return (
-                        <button
-                          key={test.key}
-                          type="button"
-                          onClick={() => handleTestTypeChange(test.key as keyof SEOTestConfig)}
-                          disabled={isRunning}
-                          className={`w-full p-4 rounded-lg border transition-all duration-200 text-left ${isEnabled
-                            ? `border-${test.color}-500 bg-${test.color}-500/10 hover:bg-${test.color}-500/15`
-                            : 'border-gray-600 bg-gray-700/30 hover:bg-gray-700/50 hover:border-gray-500'
-                            } ${isRunning
-                              ? 'opacity-50 cursor-not-allowed'
-                              : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'
-                            }`}
-                        >
-                          <div className="flex items-start space-x-3">
-                            <div
-                              className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${isEnabled
-                                ? `border-${test.color}-500 bg-${test.color}-500`
-                                : 'border-gray-500'
-                                }`}
-                            >
-                              {isEnabled && <CheckCircle className="w-3 h-3 text-white" />}
-                            </div>
-
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center space-x-2 mb-1">
-                                <IconComponent className={`w-4 h-4 ${isEnabled ? `text-${test.color}-400` : 'text-gray-400'}`} />
-                                <span className={`font-medium text-sm ${isEnabled ? `text-${test.color}-300` : 'text-gray-300'}`}>
-                                  {test.name}
-                                </span>
-                                {test.priority === 'medium' && (
-                                  <span className="px-1.5 py-0.5 text-xs bg-yellow-500/20 text-yellow-300 rounded">
-                                    进阶
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-xs text-gray-400 mb-2">{test.description}</p>
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-1">
-                                  <Clock className="w-3 h-3 text-gray-500" />
-                                  <span className="text-xs text-gray-500">{test.estimatedTime}</span>
-                                </div>
-                                {isEnabled && (
-                                  <div className="flex items-center space-x-1">
-                                    <CheckCircle className="w-3 h-3 text-green-400" />
-                                    <span className="text-xs text-green-400">已选择</span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
+                          <div className="text-sm text-gray-400 mt-1">
+                            上传HTML文件，不受网络限制
                           </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* 进度显示 */}
-      {(isRunning || progress > 0) && (
-        <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white">分析进度</h3>
-              <span className="text-sm text-gray-400">{Math.round(progress)}%</span>
-            </div>
-
-            {/* 进度条 */}
-            <div className="w-full bg-gray-700 rounded-full h-2">
-              <div
-                className="test-progress-dynamic h-2 rounded-full transition-all duration-300"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-
-            {/* 当前步骤 */}
-            {currentStep && (
-              <div className="flex items-center space-x-2 text-sm text-gray-300">
-                {isRunning ? (
-                  <Loader className="w-4 h-4 animate-spin text-blue-400" />
-                ) : progress >= 100 ? (
-                  <CheckCircle className="w-4 h-4 text-green-400" />
-                ) : (
-                  <XCircle className="w-4 h-4 text-red-400" />
-                )}
-                <span>{currentStep}</span>
-              </div>
-            )}
-
-            {/* 预估时间 */}
-            {isRunning && (
-              <div className="text-sm text-gray-400">
-                正在分析中...
-              </div>
-            )}
-
-            {/* 分析说明 */}
-            {isRunning && (
-              <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                <div className="flex items-start space-x-2">
-                  <AlertCircle className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                  <div className="text-sm text-blue-300">
-                    <div className="font-medium mb-1">分析过程说明</div>
-                    <div className="text-blue-200">
-                      正在执行专业SEO检查，包括技术配置、内容质量等多个维度。
-                      控制台中的404错误是正常的检查流程，不影响分析结果。
+                          <div className="text-xs text-green-400 mt-1 font-medium">
+                            ✓ 更快速 ✓ 更准确 ✓ 更稳定
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
-      {/* 错误显示 */}
-      {error && (
-        <NetworkErrorPrompt
-          error={error}
-          onRetry={() => {
-            setError('');
-            handleStartTest();
-          }}
-          onSwitchToLocal={handleSwitchToLocalAnalysis}
-        />
-      )}
+                {/* 模式状态提示 */}
+                <div className="mt-4 space-y-3">
+                  <div className="p-3 rounded-lg border border-gray-600/50 bg-gray-700/30">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        {seoTestMode === 'online' ? (
+                          <Globe className="w-4 h-4 text-blue-400" />
+                        ) : (
+                          <HardDrive className="w-4 h-4 text-green-400" />
+                        )}
+                        <span className="text-sm text-gray-300">
+                          当前模式: {seoTestMode === 'online' ? '在线网站分析' : '本地文件分析'}
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-400">
+                        {seoTestMode === 'online'
+                          ? (testConfig.url ? '✓ URL已输入' : '请输入URL')
+                          : (uploadedFiles.length > 0 ? `✓ 已上传${uploadedFiles.length}个文件` : '请上传HTML文件')
+                        }
+                      </div>
+                    </div>
+                  </div>
 
-      {/* 结果显示 */}
-      {results && (
-        <div className="space-y-6">
-          <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-white">分析结果</h3>
-              <div className="flex items-center space-x-3">
-                <div className={`px-3 py-1 rounded-full text-sm font-medium ${results.grade === 'A' ? 'bg-green-500/20 text-green-300' :
-                  results.grade === 'B' ? 'bg-blue-500/20 text-blue-300' :
-                    results.grade === 'C' ? 'bg-yellow-500/20 text-yellow-300' :
-                      results.grade === 'D' ? 'bg-orange-500/20 text-orange-300' :
-                        'bg-red-500/20 text-red-300'
-                  }`}>
-                  {results.grade} 级
-                </div>
-                <div className="text-2xl font-bold text-white">
-                  {results.score}/100
+                  {/* 本地分析优势提示 */}
+                  {seoTestMode === 'online' && (
+                    <div className="p-3 rounded-lg border border-green-500/30 bg-green-500/10">
+                      <div className="flex items-start space-x-2">
+                        <div className="text-green-400 text-lg">💡</div>
+                        <div>
+                          <div className="text-sm text-green-300 font-medium mb-1">
+                            遇到网络问题？试试本地文件分析！
+                          </div>
+                          <div className="text-xs text-green-400">
+                            本地分析不受网络限制，分析速度更快，结果更准确。只需上传HTML文件即可开始。
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
-            {seoTestMode === 'online' ? (
-              <EnhancedSEOResults results={results} onExport={handleExportReport} />
-            ) : (
-              <LocalSEOResults results={results} onExport={handleExportReport} />
-            )}
-          </div>
-        </div>
-      )}
+            {/* 输入区域 */}
+            <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+              <div className="space-y-4">
+                {seoTestMode === 'online' ? (
+                  <div className="url-input-form-group">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      网站URL
+                    </label>
+                    <div className="url-input-container">
+                      <URLInput
+                        value={testConfig.url}
+                        onChange={(url) => setTestConfig(prev => ({ ...prev, url }))}
+                        placeholder="请输入要分析的网站URL，例如：https://example.com"
+                        disabled={isRunning}
+                        className="url-input-full-width"
+                      />
+                    </div>
+                    <div className="mt-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                      <div className="flex items-start space-x-2">
+                        <AlertCircle className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                        <div className="text-sm text-blue-300">
+                          <div className="font-medium mb-1">使用说明</div>
+                          <div className="text-blue-200 space-y-1">
+                            <div>• 本工具只分析真实的网站内容，不提供模拟数据</div>
+                            <div>• 由于浏览器安全限制，某些网站可能无法直接分析</div>
+                            <div>• 建议测试支持CORS的网站或您自己的网站</div>
+                            <div>• 推荐测试网站：httpbin.org、公开API测试网站</div>
+                            <div>• 如果遇到访问问题，请尝试其他网站或稍后重试</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* 本地文件上传 */
+                  <div>
+                    <FileUploadSEO
+                      onAnalysisComplete={() => { }}
+                      isAnalyzing={isRunning}
+                      onFileUpload={handleLocalFileUpload}
+                    />
+                  </div>
+                )}
 
-      {/* 登录提示组件 */}
-      {LoginPromptComponent}
+                {/* 关键词输入 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    目标关键词 <span className="text-gray-500">(可选)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={testConfig.keywords}
+                    onChange={(e) => setTestConfig(prev => ({ ...prev, keywords: e.target.value }))}
+                    placeholder="请输入关键词，多个关键词用逗号分隔"
+                    disabled={isRunning}
+                    className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 检测项目选择 */}
+            <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-4">
+                  <h3 className="text-lg font-semibold text-white">选择检测项目</h3>
+
+                  {/* 分类切换 */}
+                  <div className="flex items-center bg-gray-700/50 rounded-lg p-1">
+                    <button
+                      type="button"
+                      onClick={() => setShowAdvanced(false)}
+                      disabled={isRunning}
+                      className={`px-3 py-1 text-xs rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${!showAdvanced
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
+                        }`}
+                    >
+                      核心项目
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowAdvanced(true)}
+                      disabled={isRunning}
+                      className={`px-3 py-1 text-xs rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${showAdvanced
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
+                        }`}
+                    >
+                      全部项目
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-4">
+                  <div className="text-sm text-gray-400">
+                    已选 {seoTests.filter(test => testConfig[test.key as keyof SEOTestConfig]).length}/{seoTests.length} 项
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const visibleTests = showAdvanced ? seoTests : seoTests.filter(test => test.category === 'core');
+                        const allEnabled = visibleTests.every(test => testConfig[test.key as keyof SEOTestConfig]);
+                        const newConfig = { ...testConfig };
+                        visibleTests.forEach(test => {
+                          newConfig[test.key as keyof SEOTestConfig] = !allEnabled as any;
+                        });
+                        setTestConfig(newConfig);
+                      }}
+                      disabled={isRunning}
+                      className="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {(() => {
+                        const visibleTests = showAdvanced ? seoTests : seoTests.filter(test => test.category === 'core');
+                        return visibleTests.every(test => testConfig[test.key as keyof SEOTestConfig]) ? '全不选' : '全选';
+                      })()}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newConfig = { ...testConfig };
+                        seoTests.forEach(test => {
+                          newConfig[test.key as keyof SEOTestConfig] = (test.priority === 'high') as any;
+                        });
+                        setTestConfig(newConfig);
+                      }}
+                      disabled={isRunning}
+                      className="px-3 py-1 text-xs bg-green-600 hover:bg-green-700 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      推荐项
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* 核心项目 */}
+              {(!showAdvanced || showAdvanced) && (
+                <div className="space-y-6">
+                  {!showAdvanced && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-300 mb-3 flex items-center space-x-2">
+                        <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                        <span>核心检测项目 (推荐)</span>
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {seoTests.filter(test => test.category === 'core').map((test) => {
+                          const IconComponent = test.icon;
+                          const isEnabled = testConfig[test.key as keyof SEOTestConfig] as boolean;
+
+                          return (
+                            <button
+                              key={test.key}
+                              type="button"
+                              onClick={() => handleTestTypeChange(test.key as keyof SEOTestConfig)}
+                              disabled={isRunning}
+                              className={`w-full p-4 rounded-lg border transition-all duration-200 text-left ${isEnabled
+                                ? `border-${test.color}-500 bg-${test.color}-500/10 hover:bg-${test.color}-500/15`
+                                : 'border-gray-600 bg-gray-700/30 hover:bg-gray-700/50 hover:border-gray-500'
+                                } ${isRunning
+                                  ? 'opacity-50 cursor-not-allowed'
+                                  : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'
+                                }`}
+                            >
+                              <div className="flex items-start space-x-3">
+                                <div
+                                  className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${isEnabled
+                                    ? `border-${test.color}-500 bg-${test.color}-500`
+                                    : 'border-gray-500'
+                                    }`}
+                                >
+                                  {isEnabled && <CheckCircle className="w-3 h-3 text-white" />}
+                                </div>
+
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center space-x-2 mb-1">
+                                    <IconComponent className={`w-4 h-4 ${isEnabled ? `text-${test.color}-400` : 'text-gray-400'}`} />
+                                    <span className={`font-medium text-sm ${isEnabled ? `text-${test.color}-300` : 'text-gray-300'}`}>
+                                      {test.name}
+                                    </span>
+                                    {test.priority === 'high' && (
+                                      <span className="px-1.5 py-0.5 text-xs bg-blue-500/20 text-blue-300 rounded">
+                                        推荐
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-xs text-gray-400 mb-2">{test.description}</p>
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-1">
+                                      <Clock className="w-3 h-3 text-gray-500" />
+                                      <span className="text-xs text-gray-500">{test.estimatedTime}</span>
+                                    </div>
+                                    {isEnabled && (
+                                      <div className="flex items-center space-x-1">
+                                        <CheckCircle className="w-3 h-3 text-green-400" />
+                                        <span className="text-xs text-green-400">已选择</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 全部项目 */}
+                  {showAdvanced && (
+                    <div className="space-y-6">
+                      {/* 核心项目组 */}
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-300 mb-3 flex items-center space-x-2">
+                          <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                          <span>核心检测项目</span>
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {seoTests.filter(test => test.category === 'core').map((test) => {
+                            const IconComponent = test.icon;
+                            const isEnabled = testConfig[test.key as keyof SEOTestConfig] as boolean;
+
+                            return (
+                              <button
+                                key={test.key}
+                                type="button"
+                                onClick={() => handleTestTypeChange(test.key as keyof SEOTestConfig)}
+                                disabled={isRunning}
+                                className={`w-full p-4 rounded-lg border transition-all duration-200 text-left ${isEnabled
+                                  ? `border-${test.color}-500 bg-${test.color}-500/10 hover:bg-${test.color}-500/15`
+                                  : 'border-gray-600 bg-gray-700/30 hover:bg-gray-700/50 hover:border-gray-500'
+                                  } ${isRunning
+                                    ? 'opacity-50 cursor-not-allowed'
+                                    : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'
+                                  }`}
+                              >
+                                <div className="flex items-start space-x-3">
+                                  <div
+                                    className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${isEnabled
+                                      ? `border-${test.color}-500 bg-${test.color}-500`
+                                      : 'border-gray-500'
+                                      }`}
+                                  >
+                                    {isEnabled && <CheckCircle className="w-3 h-3 text-white" />}
+                                  </div>
+
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center space-x-2 mb-1">
+                                      <IconComponent className={`w-4 h-4 ${isEnabled ? `text-${test.color}-400` : 'text-gray-400'}`} />
+                                      <span className={`font-medium text-sm ${isEnabled ? `text-${test.color}-300` : 'text-gray-300'}`}>
+                                        {test.name}
+                                      </span>
+                                      {test.priority === 'high' && (
+                                        <span className="px-1.5 py-0.5 text-xs bg-blue-500/20 text-blue-300 rounded">
+                                          推荐
+                                        </span>
+                                      )}
+                                    </div>
+                                    <p className="text-xs text-gray-400 mb-2">{test.description}</p>
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center space-x-1">
+                                        <Clock className="w-3 h-3 text-gray-500" />
+                                        <span className="text-xs text-gray-500">{test.estimatedTime}</span>
+                                      </div>
+                                      {isEnabled && (
+                                        <div className="flex items-center space-x-1">
+                                          <CheckCircle className="w-3 h-3 text-green-400" />
+                                          <span className="text-xs text-green-400">已选择</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* 高级项目组 */}
+                      <div>
+                        <h4 className="text-sm font-medium text-gray-300 mb-3 flex items-center space-x-2">
+                          <div className="w-2 h-2 rounded-full bg-purple-400"></div>
+                          <span>高级检测项目</span>
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {seoTests.filter(test => test.category === 'advanced').map((test) => {
+                            const IconComponent = test.icon;
+                            const isEnabled = testConfig[test.key as keyof SEOTestConfig] as boolean;
+
+                            return (
+                              <button
+                                key={test.key}
+                                type="button"
+                                onClick={() => handleTestTypeChange(test.key as keyof SEOTestConfig)}
+                                disabled={isRunning}
+                                className={`w-full p-4 rounded-lg border transition-all duration-200 text-left ${isEnabled
+                                  ? `border-${test.color}-500 bg-${test.color}-500/10 hover:bg-${test.color}-500/15`
+                                  : 'border-gray-600 bg-gray-700/30 hover:bg-gray-700/50 hover:border-gray-500'
+                                  } ${isRunning
+                                    ? 'opacity-50 cursor-not-allowed'
+                                    : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'
+                                  }`}
+                              >
+                                <div className="flex items-start space-x-3">
+                                  <div
+                                    className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${isEnabled
+                                      ? `border-${test.color}-500 bg-${test.color}-500`
+                                      : 'border-gray-500'
+                                      }`}
+                                  >
+                                    {isEnabled && <CheckCircle className="w-3 h-3 text-white" />}
+                                  </div>
+
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center space-x-2 mb-1">
+                                      <IconComponent className={`w-4 h-4 ${isEnabled ? `text-${test.color}-400` : 'text-gray-400'}`} />
+                                      <span className={`font-medium text-sm ${isEnabled ? `text-${test.color}-300` : 'text-gray-300'}`}>
+                                        {test.name}
+                                      </span>
+                                      {test.priority === 'medium' && (
+                                        <span className="px-1.5 py-0.5 text-xs bg-yellow-500/20 text-yellow-300 rounded">
+                                          进阶
+                                        </span>
+                                      )}
+                                    </div>
+                                    <p className="text-xs text-gray-400 mb-2">{test.description}</p>
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center space-x-1">
+                                        <Clock className="w-3 h-3 text-gray-500" />
+                                        <span className="text-xs text-gray-500">{test.estimatedTime}</span>
+                                      </div>
+                                      {isEnabled && (
+                                        <div className="flex items-center space-x-1">
+                                          <CheckCircle className="w-3 h-3 text-green-400" />
+                                          <span className="text-xs text-green-400">已选择</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* 进度显示 */}
+            {(isRunning || progress > 0) && (
+              <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-white">分析进度</h3>
+                    <span className="text-sm text-gray-400">{Math.round(progress)}%</span>
+                  </div>
+
+                  {/* 进度条 */}
+                  <div className="w-full bg-gray-700 rounded-full h-2">
+                    <div
+                      className="test-progress-dynamic h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+
+                  {/* 当前步骤 */}
+                  {currentStep && (
+                    <div className="flex items-center space-x-2 text-sm text-gray-300">
+                      {isRunning ? (
+                        <Loader className="w-4 h-4 animate-spin text-blue-400" />
+                      ) : progress >= 100 ? (
+                        <CheckCircle className="w-4 h-4 text-green-400" />
+                      ) : (
+                        <XCircle className="w-4 h-4 text-red-400" />
+                      )}
+                      <span>{currentStep}</span>
+                    </div>
+                  )}
+
+                  {/* 预估时间 */}
+                  {isRunning && (
+                    <div className="text-sm text-gray-400">
+                      正在分析中...
+                    </div>
+                  )}
+
+                  {/* 分析说明 */}
+                  {isRunning && (
+                    <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                      <div className="flex items-start space-x-2">
+                        <AlertCircle className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                        <div className="text-sm text-blue-300">
+                          <div className="font-medium mb-1">分析过程说明</div>
+                          <div className="text-blue-200">
+                            正在执行专业SEO检查，包括技术配置、内容质量等多个维度。
+                            控制台中的404错误是正常的检查流程，不影响分析结果。
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* 错误显示 */}
+            {error && (
+              <NetworkErrorPrompt
+                error={error}
+                onRetry={() => {
+                  setError('');
+                  handleStartTest();
+                }}
+                onSwitchToLocal={handleSwitchToLocalAnalysis}
+              />
+            )}
+
+            {/* 结果显示 */}
+            {results && (
+              <div className="space-y-6">
+                <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-white">分析结果</h3>
+                    <div className="flex items-center space-x-3">
+                      <div className={`px-3 py-1 rounded-full text-sm font-medium ${results.grade === 'A' ? 'bg-green-500/20 text-green-300' :
+                        results.grade === 'B' ? 'bg-blue-500/20 text-blue-300' :
+                          results.grade === 'C' ? 'bg-yellow-500/20 text-yellow-300' :
+                            results.grade === 'D' ? 'bg-orange-500/20 text-orange-300' :
+                              'bg-red-500/20 text-red-300'
+                        }`}>
+                        {results.grade} 级
+                      </div>
+                      <div className="text-2xl font-bold text-white">
+                        {results.score}/100
+                      </div>
+                    </div>
+                  </div>
+
+                  {seoTestMode === 'online' ? (
+                    <EnhancedSEOResults results={results} onExport={handleExportReport} />
+                  ) : (
+                    <LocalSEOResults results={results} onExport={handleExportReport} />
+                  )}
+                </div>
+              </div>
+            )}
+          </>
+      </UnifiedTestPageWithHistory>
     </TestPageLayout>
   );
 };

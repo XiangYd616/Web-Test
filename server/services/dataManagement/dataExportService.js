@@ -90,8 +90,9 @@ class DataExportService {
 
       const queryText = `
         SELECT ${selectFields.join(', ')}
-        FROM test_history
+        FROM test_sessions
         ${whereClause}
+        AND deleted_at IS NULL
         ORDER BY created_at DESC
       `;
 
@@ -100,7 +101,7 @@ class DataExportService {
 
       // 生成文件名
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = `test_history_export_${timestamp}.${format}`;
+      const filename = `test_sessions_export_${timestamp}.${format}`;
       const filepath = path.join(this.exportDir, filename);
 
       // 根据格式导出
@@ -123,7 +124,7 @@ class DataExportService {
       const exportTask = {
         id: this.generateTaskId(),
         name: `测试历史导出_${timestamp}`,
-        type: 'test_history',
+        type: 'test_sessions',
         format,
         status: 'completed',
         filename,
@@ -257,7 +258,7 @@ class DataExportService {
         {
           id: '1',
           name: '测试历史导出_2025-07-19',
-          type: 'test_history',
+          type: 'test_sessions',
           format: 'json',
           status: 'completed',
           recordCount: 150,
