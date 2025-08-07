@@ -9,6 +9,7 @@ const CoreWebVitalsAnalyzer = require('./analyzers/CoreWebVitalsAnalyzer');
 const ResourceAnalyzer = require('./analyzers/ResourceAnalyzer');
 const AdvancedPerformanceAnalyzer = require('./analyzers/AdvancedPerformanceAnalyzer');
 const RealTimePerformanceMonitor = require('./monitors/RealTimePerformanceMonitor');
+const PerformanceOptimizationEngine = require('./optimizers/PerformanceOptimizationEngine');
 
 class PerformanceAnalyzer {
   constructor(options = {}) {
@@ -28,6 +29,7 @@ class PerformanceAnalyzer {
     this.resourceAnalyzer = new ResourceAnalyzer();
     this.advancedAnalyzer = new AdvancedPerformanceAnalyzer();
     this.realTimeMonitor = new RealTimePerformanceMonitor();
+    this.optimizationEngine = new PerformanceOptimizationEngine();
   }
 
   /**
@@ -125,7 +127,10 @@ class PerformanceAnalyzer {
       // 生成建议
       results.recommendations = this.generateRecommendations(results);
 
-      console.log(`✅ 性能分析完成: ${url} - 总评分: ${results.scores.overall.score}`);
+      // 生成智能优化建议
+      results.optimizationRecommendations = this.optimizationEngine.generateOptimizationRecommendations(results);
+
+      console.log(`✅ 性能分析完成: ${url} - 总评分: ${results.scores.overall.score} - 优化建议: ${results.optimizationRecommendations.prioritizedRecommendations.length}条`);
 
       return results;
     } catch (error) {
@@ -167,6 +172,20 @@ class PerformanceAnalyzer {
    */
   getAllMonitors() {
     return this.realTimeMonitor.getAllMonitors();
+  }
+
+  /**
+   * 生成性能优化建议
+   */
+  generatePerformanceOptimizations(analysisResults) {
+    return this.optimizationEngine.generateOptimizationRecommendations(analysisResults);
+  }
+
+  /**
+   * 生成优化报告
+   */
+  generateOptimizationReport(optimizationRecommendations) {
+    return this.optimizationEngine.generateOptimizationReport(optimizationRecommendations);
   }
 
   /**

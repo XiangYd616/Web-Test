@@ -7,6 +7,7 @@
 const TestCaseManager = require('./managers/TestCaseManager');
 const HTTPClient = require('./clients/HTTPClient');
 const APITestAutomation = require('./automation/APITestAutomation');
+const APIPerformanceTester = require('./performance/APIPerformanceTester');
 
 class APIAnalyzer {
   constructor(options = {}) {
@@ -21,6 +22,7 @@ class APIAnalyzer {
     this.testCaseManager = new TestCaseManager(this.options);
     this.httpClient = new HTTPClient(this.options);
     this.automation = new APITestAutomation();
+    this.performanceTester = new APIPerformanceTester();
 
     // 分析结果
     this.analysisResults = {
@@ -823,6 +825,34 @@ class APIAnalyzer {
    */
   importTestSuite(exportData) {
     return this.automation.importTestSuite(exportData);
+  }
+
+  /**
+   * 执行API性能测试
+   */
+  async runPerformanceTest(testConfig) {
+    return await this.performanceTester.runPerformanceTest(testConfig);
+  }
+
+  /**
+   * 获取实时性能指标
+   */
+  getRealTimePerformanceMetrics() {
+    return this.performanceTester.getRealTimeMetrics();
+  }
+
+  /**
+   * 停止性能测试
+   */
+  stopPerformanceTest() {
+    this.performanceTester.stopTest();
+  }
+
+  /**
+   * 监听性能测试事件
+   */
+  onPerformanceTestEvent(eventName, callback) {
+    this.performanceTester.on(eventName, callback);
   }
 
   /**
