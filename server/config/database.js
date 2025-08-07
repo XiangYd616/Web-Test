@@ -5,9 +5,11 @@
 const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
+const DatabaseConnectionManager = require('../utils/DatabaseConnectionManager');
 
-// 数据库连接池
+// 数据库连接池和管理器
 let pool = null;
+let connectionManager = null;
 
 // 根据环境自动选择数据库
 const getDefaultDatabase = () => {
@@ -415,6 +417,41 @@ const getStats = async () => {
   }
 };
 
+/**
+ * 获取增强的数据库连接管理器
+ */
+const getConnectionManager = async () => {
+  if (!connectionManager) {
+    connectionManager = new DatabaseConnectionManager(dbConfig);
+    await connectionManager.initialize();
+  }
+  return connectionManager;
+};
+
+/**
+ * 执行优化的数据库查询
+ */
+const executeOptimizedQuery = async (sql, params = [], options = {}) => {
+  const manager = await getConnectionManager();
+  return manager.query(sql, params, options);
+};
+
+/**
+ * 获取数据库连接状态
+ */
+const getDatabaseStatus = async () => {
+  try {
+    const manager = await getConnectionManager();
+    return manager.getStatus();
+  } catch (error) {
+    return {
+      isConnected: false,
+      error: error.message,
+      timestamp: new Date().toISOString()
+    };
+  }
+};
+
 module.exports = {
   connectDB,
   testConnection,
@@ -425,6 +462,9 @@ module.exports = {
   batchInsert,
   healthCheck,
   getStats,
+  getConnectionManager,
+  executeOptimizedQuery,
+  getDatabaseStatus,
   // 兼容性导出
   db: { query },
   pool: () => getPool()
