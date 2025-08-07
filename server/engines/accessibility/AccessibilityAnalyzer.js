@@ -16,11 +16,11 @@ class AccessibilityAnalyzer {
       includeWarnings: true,
       ...options
     };
-    
+
     this.colorContrastAnalyzer = new ColorContrastAnalyzer();
     this.keyboardNavigationAnalyzer = new KeyboardNavigationAnalyzer();
     this.ariaSemanticAnalyzer = new ARIASemanticAnalyzer();
-    
+
     // WCAG 2.1 原则和指导原则
     this.wcagPrinciples = {
       perceivable: {
@@ -64,10 +64,10 @@ class AccessibilityAnalyzer {
    */
   async analyze(page, config = {}) {
     const startTime = Date.now();
-    
+
     try {
       console.log('♿ 开始可访问性分析...');
-      
+
       const analysisConfig = { ...this.options, ...config };
       const results = {
         url: await page.url(),
@@ -81,7 +81,7 @@ class AccessibilityAnalyzer {
         scores: null,
         recommendations: []
       };
-      
+
       // 发送进度更新
       if (config.onProgress) {
         config.onProgress({
@@ -90,7 +90,7 @@ class AccessibilityAnalyzer {
           message: '分析色彩对比度...'
         });
       }
-      
+
       // 色彩对比度分析
       try {
         await this.colorContrastAnalyzer.injectAnalysisFunctions(page);
@@ -99,7 +99,7 @@ class AccessibilityAnalyzer {
         console.warn('色彩对比度分析失败:', error.message);
         results.colorContrast = { error: error.message };
       }
-      
+
       // 发送进度更新
       if (config.onProgress) {
         config.onProgress({
@@ -108,15 +108,21 @@ class AccessibilityAnalyzer {
           message: '分析键盘导航...'
         });
       }
-      
+
       // 键盘导航分析
       try {
-        results.keyboardNavigation = await this.keyboardNavigationAnalyzer.analyze(page);
+        // 使用新的详细分析方法
+        results.keyboardNavigation = await this.keyboardNavigationAnalyzer.analyzeKeyboardNavigation(url, config.keyboardOptions);
       } catch (error) {
         console.warn('键盘导航分析失败:', error.message);
-        results.keyboardNavigation = { error: error.message };
+        // 回退到原有方法
+        try {
+          results.keyboardNavigation = await this.keyboardNavigationAnalyzer.analyze(page);
+        } catch (fallbackError) {
+          results.keyboardNavigation = { error: fallbackError.message };
+        }
       }
-      
+
       // 发送进度更新
       if (config.onProgress) {
         config.onProgress({
@@ -125,7 +131,7 @@ class AccessibilityAnalyzer {
           message: '分析ARIA和语义化...'
         });
       }
-      
+
       // ARIA和语义化分析
       try {
         results.ariaSemantics = await this.ariaSemanticAnalyzer.analyze(page);
@@ -133,7 +139,7 @@ class AccessibilityAnalyzer {
         console.warn('ARIA和语义化分析失败:', error.message);
         results.ariaSemantics = { error: error.message };
       }
-      
+
       // 发送进度更新
       if (config.onProgress) {
         config.onProgress({
@@ -142,10 +148,10 @@ class AccessibilityAnalyzer {
           message: '计算WCAG合规性...'
         });
       }
-      
+
       // 计算WCAG合规性
       results.compliance = this.calculateWCAGCompliance(results, analysisConfig.wcagLevel);
-      
+
       // 发送进度更新
       if (config.onProgress) {
         config.onProgress({
@@ -154,20 +160,20 @@ class AccessibilityAnalyzer {
           message: '计算可访问性评分...'
         });
       }
-      
+
       // 计算评分
       results.scores = this.calculateScores(results);
-      
+
       // 生成建议
       results.recommendations = this.generateRecommendations(results);
-      
+
       // 计算分析时间
       results.analysisTime = Date.now() - startTime;
-      
+
       console.log(`✅ 可访问性分析完成，总体评分: ${results.scores.overall}`);
-      
+
       return results;
-      
+
     } catch (error) {
       console.error('❌ 可访问性分析失败:', error);
       throw error;
@@ -190,7 +196,7 @@ class AccessibilityAnalyzer {
       },
       issues: []
     };
-    
+
     // 初始化原则评估
     Object.keys(this.wcagPrinciples).forEach(principle => {
       compliance.principles[principle] = {
@@ -202,29 +208,29 @@ class AccessibilityAnalyzer {
         rate: 0
       };
     });
-    
+
     // 评估可感知性 (Perceivable)
     this.evaluatePerceivable(results, compliance);
-    
+
     // 评估可操作性 (Operable)
     this.evaluateOperable(results, compliance);
-    
+
     // 评估可理解性 (Understandable)
     this.evaluateUnderstandable(results, compliance);
-    
+
     // 评估健壮性 (Robust)
     this.evaluateRobust(results, compliance);
-    
+
     // 计算总体合规率
-    compliance.summary.complianceRate = compliance.summary.totalChecks > 0 ? 
+    compliance.summary.complianceRate = compliance.summary.totalChecks > 0 ?
       Math.round((compliance.summary.passedChecks / compliance.summary.totalChecks) * 100) : 0;
-    
+
     // 计算各原则合规率
     Object.keys(compliance.principles).forEach(principle => {
       const p = compliance.principles[principle];
       p.rate = p.total > 0 ? Math.round((p.passed / p.total) * 100) : 0;
     });
-    
+
     return compliance;
   }
 
@@ -233,21 +239,21 @@ class AccessibilityAnalyzer {
    */
   evaluatePerceivable(results, compliance) {
     const principle = compliance.principles.perceivable;
-    
+
     // 1.1 替代文本
     if (results.ariaSemantics && results.ariaSemantics.images) {
       const imageIssues = results.ariaSemantics.images.issues || [];
       const totalImages = results.ariaSemantics.images.images ? results.ariaSemantics.images.images.length : 0;
-      
+
       principle.total += totalImages;
       compliance.summary.totalChecks += totalImages;
-      
+
       const failedImages = imageIssues.filter(issue => issue.type === 'missing_alt_attribute').length;
       principle.failed += failedImages;
       principle.passed += totalImages - failedImages;
       compliance.summary.failedChecks += failedImages;
       compliance.summary.passedChecks += totalImages - failedImages;
-      
+
       imageIssues.forEach(issue => {
         compliance.issues.push({
           principle: 'perceivable',
@@ -259,21 +265,21 @@ class AccessibilityAnalyzer {
         });
       });
     }
-    
+
     // 1.4 可辨别性 - 色彩对比度
     if (results.colorContrast && results.colorContrast.analysis) {
       const contrastAnalysis = results.colorContrast.analysis;
       const totalElements = contrastAnalysis.summary.total;
-      
+
       principle.total += totalElements;
       compliance.summary.totalChecks += totalElements;
-      
+
       const failedElements = contrastAnalysis.summary.nonCompliant.AA;
       principle.failed += failedElements;
       principle.passed += totalElements - failedElements;
       compliance.summary.failedChecks += failedElements;
       compliance.summary.passedChecks += totalElements - failedElements;
-      
+
       contrastAnalysis.issues.forEach(issue => {
         if (issue.type === 'contrast_aa_fail') {
           compliance.issues.push({
@@ -294,23 +300,23 @@ class AccessibilityAnalyzer {
    */
   evaluateOperable(results, compliance) {
     const principle = compliance.principles.operable;
-    
+
     // 2.1 键盘可访问
     if (results.keyboardNavigation && results.keyboardNavigation.analysis) {
       const keyboardAnalysis = results.keyboardNavigation.analysis;
-      
+
       // 焦点可见性
       const focusIssues = keyboardAnalysis.summary.focusVisibilityIssues;
       const totalFocusable = keyboardAnalysis.summary.focusableElements;
-      
+
       principle.total += totalFocusable;
       compliance.summary.totalChecks += totalFocusable;
-      
+
       principle.failed += focusIssues;
       principle.passed += totalFocusable - focusIssues;
       compliance.summary.failedChecks += focusIssues;
       compliance.summary.passedChecks += totalFocusable - focusIssues;
-      
+
       keyboardAnalysis.issues.forEach(issue => {
         if (issue.type === 'focus_not_visible' || issue.type === 'non_focusable_interactive') {
           compliance.issues.push({
@@ -324,22 +330,22 @@ class AccessibilityAnalyzer {
         }
       });
     }
-    
+
     // 2.4 导航
     if (results.keyboardNavigation && results.keyboardNavigation.skipLinks) {
       const skipLinks = results.keyboardNavigation.skipLinks;
       const hasSkipLinks = skipLinks.length > 0;
-      
+
       principle.total += 1;
       compliance.summary.totalChecks += 1;
-      
+
       if (hasSkipLinks) {
         principle.passed += 1;
         compliance.summary.passedChecks += 1;
       } else {
         principle.failed += 1;
         compliance.summary.failedChecks += 1;
-        
+
         compliance.issues.push({
           principle: 'operable',
           guideline: '2.4 导航',
@@ -356,23 +362,23 @@ class AccessibilityAnalyzer {
    */
   evaluateUnderstandable(results, compliance) {
     const principle = compliance.principles.understandable;
-    
+
     // 3.3 输入辅助
     if (results.ariaSemantics && results.ariaSemantics.formLabels) {
       const formAnalysis = results.ariaSemantics.formLabels;
       const totalControls = formAnalysis.labels ? formAnalysis.labels.length : 0;
-      const labelIssues = formAnalysis.issues ? formAnalysis.issues.filter(issue => 
+      const labelIssues = formAnalysis.issues ? formAnalysis.issues.filter(issue =>
         issue.type === 'missing_form_label'
       ).length : 0;
-      
+
       principle.total += totalControls;
       compliance.summary.totalChecks += totalControls;
-      
+
       principle.failed += labelIssues;
       principle.passed += totalControls - labelIssues;
       compliance.summary.failedChecks += labelIssues;
       compliance.summary.passedChecks += totalControls - labelIssues;
-      
+
       if (formAnalysis.issues) {
         formAnalysis.issues.forEach(issue => {
           if (issue.type === 'missing_form_label') {
@@ -395,21 +401,21 @@ class AccessibilityAnalyzer {
    */
   evaluateRobust(results, compliance) {
     const principle = compliance.principles.robust;
-    
+
     // 4.1 兼容性 - ARIA使用
     if (results.ariaSemantics && results.ariaSemantics.ariaUsage) {
       const ariaIssues = results.ariaSemantics.ariaUsage.issues || [];
       const ariaElements = results.ariaSemantics.ariaUsage.elements || [];
-      
+
       principle.total += ariaElements.length;
       compliance.summary.totalChecks += ariaElements.length;
-      
+
       const failedAria = ariaIssues.length;
       principle.failed += failedAria;
       principle.passed += Math.max(0, ariaElements.length - failedAria);
       compliance.summary.failedChecks += failedAria;
       compliance.summary.passedChecks += Math.max(0, ariaElements.length - failedAria);
-      
+
       ariaIssues.forEach(issue => {
         compliance.issues.push({
           principle: 'robust',
@@ -434,19 +440,19 @@ class AccessibilityAnalyzer {
       robust: 100,
       overall: 100
     };
-    
+
     // 基于合规性计算评分
     if (results.compliance) {
       Object.keys(results.compliance.principles).forEach(principle => {
         const rate = results.compliance.principles[principle].rate;
         scores[principle] = rate;
       });
-      
+
       scores.overall = Math.round(
         (scores.perceivable + scores.operable + scores.understandable + scores.robust) / 4
       );
     }
-    
+
     return scores;
   }
 
@@ -455,7 +461,7 @@ class AccessibilityAnalyzer {
    */
   generateRecommendations(results) {
     const recommendations = [];
-    
+
     // 基于各分析器的建议
     if (results.colorContrast && results.colorContrast.analysis && results.colorContrast.analysis.recommendations) {
       recommendations.push(...results.colorContrast.analysis.recommendations.map(rec => ({
@@ -463,21 +469,21 @@ class AccessibilityAnalyzer {
         source: 'color_contrast'
       })));
     }
-    
+
     if (results.keyboardNavigation && results.keyboardNavigation.analysis && results.keyboardNavigation.analysis.recommendations) {
       recommendations.push(...results.keyboardNavigation.analysis.recommendations.map(rec => ({
         ...rec,
         source: 'keyboard_navigation'
       })));
     }
-    
+
     if (results.ariaSemantics && results.ariaSemantics.analysis && results.ariaSemantics.analysis.recommendations) {
       recommendations.push(...results.ariaSemantics.analysis.recommendations.map(rec => ({
         ...rec,
         source: 'aria_semantics'
       })));
     }
-    
+
     // 基于总体评分生成建议
     if (results.scores && results.scores.overall < 80) {
       recommendations.push({
@@ -489,13 +495,13 @@ class AccessibilityAnalyzer {
         source: 'overall'
       });
     }
-    
+
     // 按优先级排序
     recommendations.sort((a, b) => {
       const priorityOrder = { 'high': 3, 'medium': 2, 'low': 1 };
       return priorityOrder[b.priority] - priorityOrder[a.priority];
     });
-    
+
     return recommendations.slice(0, 10); // 返回前10个建议
   }
 
