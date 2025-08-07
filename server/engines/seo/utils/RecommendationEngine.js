@@ -18,25 +18,28 @@ class RecommendationEngine {
    */
   generateRecommendations(analysisResults) {
     const recommendations = [];
-    
+
     // Meta标签建议
     recommendations.push(...this.generateMetaRecommendations(analysisResults.meta));
-    
+
     // 内容建议
     recommendations.push(...this.generateContentRecommendations(analysisResults.content));
-    
+
+    // 内容质量建议
+    recommendations.push(...this.generateContentQualityRecommendations(analysisResults.contentQuality));
+
     // 性能建议
     recommendations.push(...this.generatePerformanceRecommendations(analysisResults.performance));
-    
+
     // 结构化数据建议
     recommendations.push(...this.generateStructuredDataRecommendations(analysisResults.structuredData));
-    
+
     // 链接建议
     recommendations.push(...this.generateLinkRecommendations(analysisResults.links));
-    
+
     // 移动端建议
     recommendations.push(...this.generateMobileRecommendations(analysisResults.mobile));
-    
+
     // 按优先级排序
     return this.sortRecommendationsByPriority(recommendations);
   }
@@ -46,9 +49,9 @@ class RecommendationEngine {
    */
   generateMetaRecommendations(metaAnalysis) {
     const recommendations = [];
-    
+
     if (!metaAnalysis) return recommendations;
-    
+
     // Title标签建议
     if (!metaAnalysis.title?.exists) {
       recommendations.push({
@@ -112,7 +115,7 @@ class RecommendationEngine {
         ]
       });
     }
-    
+
     // Description建议
     if (!metaAnalysis.description?.exists) {
       recommendations.push({
@@ -161,7 +164,7 @@ class RecommendationEngine {
         ]
       });
     }
-    
+
     // Open Graph建议
     if (!metaAnalysis.openGraph?.exists) {
       recommendations.push({
@@ -192,7 +195,7 @@ class RecommendationEngine {
         actionItems: metaAnalysis.openGraph.missingTags.map(tag => `添加${tag}标签`)
       });
     }
-    
+
     // Viewport建议
     if (!metaAnalysis.viewport?.exists) {
       recommendations.push({
@@ -224,7 +227,7 @@ class RecommendationEngine {
         ]
       });
     }
-    
+
     return recommendations;
   }
 
@@ -233,9 +236,9 @@ class RecommendationEngine {
    */
   generateContentRecommendations(contentAnalysis) {
     const recommendations = [];
-    
+
     if (!contentAnalysis) return recommendations;
-    
+
     // 内容长度建议
     if (!contentAnalysis.textContent?.isAdequateLength) {
       recommendations.push({
@@ -254,7 +257,7 @@ class RecommendationEngine {
         ]
       });
     }
-    
+
     // 标题结构建议
     if (!contentAnalysis.headingStructure?.hasH1) {
       recommendations.push({
@@ -287,7 +290,7 @@ class RecommendationEngine {
         ]
       });
     }
-    
+
     if (!contentAnalysis.headingStructure?.hasProperHierarchy) {
       recommendations.push({
         category: 'content',
@@ -304,7 +307,7 @@ class RecommendationEngine {
         ]
       });
     }
-    
+
     // 图片优化建议
     if (contentAnalysis.images?.missingAltPercentage > 10) {
       recommendations.push({
@@ -323,7 +326,7 @@ class RecommendationEngine {
         ]
       });
     }
-    
+
     // 关键词优化建议
     if (contentAnalysis.keywords?.isKeywordStuffing) {
       recommendations.push({
@@ -342,7 +345,7 @@ class RecommendationEngine {
         ]
       });
     }
-    
+
     // 可读性建议
     if (contentAnalysis.readability?.isDifficultToRead) {
       recommendations.push({
@@ -361,7 +364,153 @@ class RecommendationEngine {
         ]
       });
     }
-    
+
+    return recommendations;
+  }
+
+  /**
+   * 生成内容质量建议
+   */
+  generateContentQualityRecommendations(contentQualityAnalysis) {
+    const recommendations = [];
+
+    if (!contentQualityAnalysis) return recommendations;
+
+    // 内容深度建议
+    if (!contentQualityAnalysis.contentDepth?.hasAdequateDepth) {
+      recommendations.push({
+        category: 'content-quality',
+        type: 'content-depth',
+        priority: this.priorityLevels.HIGH,
+        title: '增加内容深度',
+        description: `内容深度不足(${contentQualityAnalysis.contentDepth?.depthLevel || 'Unknown'})，需要更详细的信息`,
+        impact: 'high',
+        effort: 'high',
+        actionItems: [
+          `增加内容长度至${contentQualityAnalysis.contentDepth?.wordCount < 800 ? '800+' : '1500+'}词`,
+          '添加更多子标题和段落结构',
+          '包含具体示例和案例研究',
+          '提供深入的分析和见解'
+        ]
+      });
+    }
+
+    // 用户参与度建议
+    if (!contentQualityAnalysis.userEngagement?.isEngaging) {
+      recommendations.push({
+        category: 'content-quality',
+        type: 'user-engagement',
+        priority: this.priorityLevels.MEDIUM,
+        title: '提高用户参与度',
+        description: `用户参与度较低(评分: ${contentQualityAnalysis.userEngagement?.engagementScore || 0})`,
+        impact: 'medium',
+        effort: 'medium',
+        actionItems: [
+          '增加互动问题和思考点',
+          '使用更多个人化表达(你、我们)',
+          '添加行动号召(CTA)',
+          '包含互动元素和表单'
+        ]
+      });
+    }
+
+    // 专业性建议
+    if (!contentQualityAnalysis.expertiseSignals?.showsExpertise) {
+      recommendations.push({
+        category: 'content-quality',
+        type: 'expertise-signals',
+        priority: this.priorityLevels.MEDIUM,
+        title: '增强内容专业性',
+        description: `专业性信号不足(评分: ${contentQualityAnalysis.expertiseSignals?.expertiseScore || 0})`,
+        impact: 'medium',
+        effort: 'medium',
+        actionItems: [
+          '添加统计数据和研究引用',
+          '包含作者信息和资质',
+          '使用专业术语和技术细节',
+          '提供权威来源链接'
+        ]
+      });
+    }
+
+    // 主题相关性建议
+    if (!contentQualityAnalysis.topicalRelevance?.isTopicallyFocused) {
+      recommendations.push({
+        category: 'content-quality',
+        type: 'topical-focus',
+        priority: this.priorityLevels.MEDIUM,
+        title: '提高主题聚焦度',
+        description: '内容主题不够集中，建议围绕核心主题展开',
+        impact: 'medium',
+        effort: 'medium',
+        actionItems: [
+          '明确核心主题和关键概念',
+          '删除偏离主题的内容',
+          '确保标题与内容高度相关',
+          '使用相关的语义词汇'
+        ]
+      });
+    }
+
+    // 可操作性建议
+    if (!contentQualityAnalysis.actionability?.isActionable) {
+      recommendations.push({
+        category: 'content-quality',
+        type: 'actionability',
+        priority: this.priorityLevels.LOW,
+        title: '增强内容可操作性',
+        description: `内容可操作性不足(评分: ${contentQualityAnalysis.actionability?.actionabilityScore || 0})`,
+        impact: 'low',
+        effort: 'medium',
+        actionItems: [
+          '添加具体的步骤指导',
+          '提供实用工具和资源',
+          '包含实际操作示例',
+          '使用更多行动动词'
+        ]
+      });
+    }
+
+    // 内容完整性建议
+    if (!contentQualityAnalysis.contentCompleteness?.isComplete) {
+      const missingElements = contentQualityAnalysis.contentCompleteness?.missingElements || [];
+      if (missingElements.length > 0) {
+        recommendations.push({
+          category: 'content-quality',
+          type: 'content-completeness',
+          priority: this.priorityLevels.MEDIUM,
+          title: '完善内容结构',
+          description: `内容结构不完整，缺少: ${missingElements.join(', ')}`,
+          impact: 'medium',
+          effort: 'low',
+          actionItems: [
+            '添加引言部分介绍主题',
+            '包含结论总结要点',
+            '使用列表组织信息',
+            '添加相关图片和媒体'
+          ]
+        });
+      }
+    }
+
+    // 基于质量问题生成建议
+    if (contentQualityAnalysis.qualityIssues) {
+      contentQualityAnalysis.qualityIssues.forEach(issue => {
+        if (issue.severity === 'high') {
+          recommendations.push({
+            category: 'content-quality',
+            type: issue.type,
+            priority: this.priorityLevels.HIGH,
+            title: `修复${issue.type}问题`,
+            description: issue.message,
+            impact: 'high',
+            effort: 'medium',
+            actionItems: ['根据具体问题进行针对性优化']
+          });
+        }
+      });
+    }
+
     return recommendations;
   }
 
@@ -370,9 +519,9 @@ class RecommendationEngine {
    */
   generatePerformanceRecommendations(performanceAnalysis) {
     const recommendations = [];
-    
+
     if (!performanceAnalysis) return recommendations;
-    
+
     // 使用性能分析中的优化机会
     if (performanceAnalysis.optimizationOpportunities) {
       performanceAnalysis.optimizationOpportunities.forEach(opportunity => {
@@ -389,7 +538,7 @@ class RecommendationEngine {
         });
       });
     }
-    
+
     return recommendations;
   }
 
@@ -398,10 +547,10 @@ class RecommendationEngine {
    */
   generateStructuredDataRecommendations(structuredDataAnalysis) {
     const recommendations = [];
-    
+
     // 这里需要实现结构化数据的建议生成逻辑
     // 暂时返回空数组
-    
+
     return recommendations;
   }
 
@@ -410,10 +559,10 @@ class RecommendationEngine {
    */
   generateLinkRecommendations(linkAnalysis) {
     const recommendations = [];
-    
+
     // 这里需要实现链接分析的建议生成逻辑
     // 暂时返回空数组
-    
+
     return recommendations;
   }
 
@@ -422,10 +571,10 @@ class RecommendationEngine {
    */
   generateMobileRecommendations(mobileAnalysis) {
     const recommendations = [];
-    
+
     // 这里需要实现移动端优化的建议生成逻辑
     // 暂时返回空数组
-    
+
     return recommendations;
   }
 
@@ -439,11 +588,11 @@ class RecommendationEngine {
       [this.priorityLevels.MEDIUM]: 2,
       [this.priorityLevels.LOW]: 3
     };
-    
+
     return recommendations.sort((a, b) => {
       const priorityDiff = priorityOrder[a.priority] - priorityOrder[b.priority];
       if (priorityDiff !== 0) return priorityDiff;
-      
+
       // 相同优先级按影响程度排序
       const impactOrder = { high: 0, medium: 1, low: 2 };
       return impactOrder[a.impact] - impactOrder[b.impact];

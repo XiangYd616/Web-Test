@@ -11,12 +11,15 @@ const { URL } = require('url');
 // 导入分析模块
 const MetaTagAnalyzer = require('./analyzers/MetaTagAnalyzer');
 const ContentAnalyzer = require('./analyzers/ContentAnalyzer');
+const ContentQualityAnalyzer = require('./analyzers/ContentQualityAnalyzer');
 const PerformanceAnalyzer = require('./analyzers/PerformanceAnalyzer');
 const StructuredDataAnalyzer = require('./analyzers/StructuredDataAnalyzer');
 const LinkAnalyzer = require('./analyzers/LinkAnalyzer');
 const MobileOptimizationAnalyzer = require('./analyzers/MobileOptimizationAnalyzer');
 const ScoreCalculator = require('./utils/ScoreCalculator');
 const RecommendationEngine = require('./utils/RecommendationEngine');
+const AdvancedReportGenerator = require('./utils/AdvancedReportGenerator');
+const SmartOptimizationEngine = require('./utils/SmartOptimizationEngine');
 
 class SEOAnalyzer {
   constructor(options = {}) {
@@ -28,7 +31,7 @@ class SEOAnalyzer {
       maxRetries: options.maxRetries || 3,
       ...options
     };
-    
+
     this.browser = null;
     this.page = null;
     this.analysisStartTime = null;
@@ -40,38 +43,40 @@ class SEOAnalyzer {
    */
   async analyze(url, config = {}) {
     this.analysisStartTime = Date.now();
-    
+
     try {
       console.log(`🔍 开始SEO分析: ${url}`);
-      
+
       // 验证URL
       await this.validateUrl(url);
-      
+
       // 初始化浏览器
       await this.initializeBrowser();
-      
+
       // 加载页面
       const pageData = await this.loadPage(url);
-      
+
       // 并行执行所有分析模块
       const analysisPromises = [
         this.analyzeMetaTags(pageData),
         this.analyzeContent(pageData),
+        this.analyzeContentQuality(pageData),
         this.analyzePerformance(pageData),
         this.analyzeStructuredData(pageData),
         this.analyzeLinks(pageData),
         this.analyzeMobileOptimization(pageData)
       ];
-      
+
       const [
         metaAnalysis,
         contentAnalysis,
+        contentQualityAnalysis,
         performanceAnalysis,
         structuredDataAnalysis,
         linkAnalysis,
         mobileAnalysis
       ] = await Promise.all(analysisPromises);
-      
+
       // 汇总分析结果
       this.analysisResults = {
         url,
@@ -79,26 +84,37 @@ class SEOAnalyzer {
         analysisTime: Date.now() - this.analysisStartTime,
         meta: metaAnalysis,
         content: contentAnalysis,
+        contentQuality: contentQualityAnalysis,
         performance: performanceAnalysis,
         structuredData: structuredDataAnalysis,
         links: linkAnalysis,
         mobile: mobileAnalysis
       };
-      
+
       // 计算综合评分
       const scoreCalculator = new ScoreCalculator();
       const scores = scoreCalculator.calculateScores(this.analysisResults);
       this.analysisResults.scores = scores;
-      
+
       // 生成优化建议
       const recommendationEngine = new RecommendationEngine();
       const recommendations = recommendationEngine.generateRecommendations(this.analysisResults);
       this.analysisResults.recommendations = recommendations;
-      
-      console.log(`✅ SEO分析完成: ${url} (${this.analysisResults.analysisTime}ms)`);
-      
+
+      // 生成高级报告
+      const reportGenerator = new AdvancedReportGenerator();
+      const advancedReport = reportGenerator.generateReport(this.analysisResults, scores);
+      this.analysisResults.advancedReport = advancedReport;
+
+      // 生成智能优化建议
+      const optimizationEngine = new SmartOptimizationEngine();
+      const smartRecommendations = optimizationEngine.generateSmartRecommendations(this.analysisResults);
+      this.analysisResults.smartRecommendations = smartRecommendations;
+
+      console.log(`✅ SEO分析完成: ${url} (${this.analysisResults.analysisTime}ms) - 总体评分: ${scores.overall}`);
+
       return this.analysisResults;
-      
+
     } catch (error) {
       console.error(`❌ SEO分析失败: ${url}`, error);
       throw error;
@@ -138,13 +154,13 @@ class SEOAnalyzer {
           '--disable-gpu'
         ]
       });
-      
+
       this.page = await this.browser.newPage();
-      
+
       // 设置用户代理和视口
       await this.page.setUserAgent(this.options.userAgent);
       await this.page.setViewport(this.options.viewport);
-      
+
       // 设置请求拦截（可选：阻止某些资源以提高性能）
       await this.page.setRequestInterception(true);
       this.page.on('request', (request) => {
@@ -156,7 +172,7 @@ class SEOAnalyzer {
           request.continue();
         }
       });
-      
+
     } catch (error) {
       throw new Error(`浏览器初始化失败: ${error.message}`);
     }
@@ -168,35 +184,35 @@ class SEOAnalyzer {
   async loadPage(url) {
     try {
       console.log(`📄 加载页面: ${url}`);
-      
+
       // 记录性能指标
       const startTime = Date.now();
-      
+
       // 导航到页面
       const response = await this.page.goto(url, {
         waitUntil: 'networkidle2',
         timeout: this.options.timeout
       });
-      
+
       const loadTime = Date.now() - startTime;
-      
+
       // 检查响应状态
       if (!response.ok()) {
         throw new Error(`HTTP ${response.status()}: ${response.statusText()}`);
       }
-      
+
       // 等待页面完全加载
       await this.page.waitForTimeout(2000);
-      
+
       // 获取页面内容
       const html = await this.page.content();
       const $ = cheerio.load(html);
-      
+
       // 获取页面性能指标
       const performanceMetrics = await this.page.evaluate(() => {
         const navigation = performance.getEntriesByType('navigation')[0];
         const paint = performance.getEntriesByType('paint');
-        
+
         return {
           domContentLoaded: navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart,
           loadComplete: navigation.loadEventEnd - navigation.loadEventStart,
@@ -207,7 +223,7 @@ class SEOAnalyzer {
           decodedBodySize: navigation.decodedBodySize
         };
       });
-      
+
       // 获取页面基本信息
       const pageInfo = await this.page.evaluate(() => {
         return {
@@ -220,7 +236,7 @@ class SEOAnalyzer {
           lastModified: document.lastModified
         };
       });
-      
+
       return {
         url,
         html,
@@ -231,7 +247,7 @@ class SEOAnalyzer {
         pageInfo,
         page: this.page
       };
-      
+
     } catch (error) {
       throw new Error(`页面加载失败: ${error.message}`);
     }
@@ -250,6 +266,14 @@ class SEOAnalyzer {
    */
   async analyzeContent(pageData) {
     const analyzer = new ContentAnalyzer();
+    return await analyzer.analyze(pageData);
+  }
+
+  /**
+   * 内容质量分析
+   */
+  async analyzeContentQuality(pageData) {
+    const analyzer = new ContentQualityAnalyzer();
     return await analyzer.analyze(pageData);
   }
 
@@ -294,7 +318,7 @@ class SEOAnalyzer {
         await this.page.close();
         this.page = null;
       }
-      
+
       if (this.browser) {
         await this.browser.close();
         this.browser = null;
@@ -311,9 +335,9 @@ class SEOAnalyzer {
     if (!this.analysisResults.scores) {
       return null;
     }
-    
+
     const { scores } = this.analysisResults;
-    
+
     return {
       overallScore: scores.overall.score,
       grade: scores.overall.grade,
