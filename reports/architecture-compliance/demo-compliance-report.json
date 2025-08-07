@@ -1,0 +1,23 @@
+{
+  "timestamp": "2025-08-07T06:40:15.729Z",
+  "overallScore": 87,
+  "summary": {
+    "totalEngines": 7,
+    "compliantEngines": 6,
+    "partiallyCompliantEngines": 1,
+    "nonCompliantEngines": 0
+  },
+  "componentScores": {
+    "apiArchitecture": 88,
+    "databaseDesign": 87,
+    "realTimeCommunication": 83,
+    "cachePerformance": 89,
+    "commonComponents": 87
+  },
+  "recommendations": [
+    "完善OpenAPI文档",
+    "统一错误处理机制",
+    "优化数据库查询性能",
+    "完善实时通信重连机制"
+  ]
+}
