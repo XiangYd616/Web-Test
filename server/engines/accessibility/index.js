@@ -6,6 +6,7 @@
 const AccessibilityAnalyzer = require('./AccessibilityAnalyzer');
 const { getPool } = require('../../config/database');
 const puppeteer = require('puppeteer');
+const Logger = require('../../utils/logger');
 
 class AccessibilityEngine {
   constructor() {
@@ -19,18 +20,18 @@ class AccessibilityEngine {
    */
   async startTest(testId, url, config = {}) {
     try {
-      console.log(`♿ 启动可访问性测试: ${testId} - ${url}`);
-      
+      Logger.info('启动可访问性测试', { testId, url, engine: 'Accessibility' });
+
       // 更新测试状态为运行中
       await this.updateTestStatus(testId, 'running', { started_at: new Date() });
-      
+
       // 发送初始进度
       await this.sendProgress(testId, {
         percentage: 0,
         stage: 'initializing',
         message: '初始化可访问性测试引擎...'
       });
-      
+
       // 启动浏览器
       this.browser = await puppeteer.launch({
         headless: true,
@@ -44,42 +45,42 @@ class AccessibilityEngine {
           '--disable-gpu'
         ]
       });
-      
+
       const page = await this.browser.newPage();
-      
+
       // 设置视口
       await page.setViewport({ width: 1920, height: 1080 });
-      
+
       // 发送进度更新
       await this.sendProgress(testId, {
         percentage: 10,
         stage: 'loading',
         message: '加载页面...'
       });
-      
+
       // 导航到URL
       await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
-      
+
       // 创建分析器实例
       this.analyzer = new AccessibilityAnalyzer(config);
       this.isRunning = true;
-      
+
       // 执行分析（带进度回调）
       const analysisResults = await this.analyzer.analyze(page, {
         ...config,
         onProgress: (progress) => this.sendProgress(testId, progress)
       });
-      
+
       // 发送分析完成进度
       await this.sendProgress(testId, {
         percentage: 98,
         stage: 'saving',
         message: '保存分析结果...'
       });
-      
+
       // 保存分析结果
       await this.saveResults(testId, analysisResults);
-      
+
       // 更新测试状态为完成
       await this.updateTestStatus(testId, 'completed', {
         completed_at: new Date(),
@@ -91,39 +92,39 @@ class AccessibilityEngine {
         failed_checks: analysisResults.compliance.summary.failedChecks,
         warnings: analysisResults.compliance.summary.warningChecks
       });
-      
+
       // 发送完成进度
       await this.sendProgress(testId, {
         percentage: 100,
         stage: 'completed',
         message: '可访问性测试完成'
       });
-      
+
       const summary = this.createSummary(analysisResults);
-      
+
       // 发送测试完成通知
       await this.sendTestComplete(testId, summary);
-      
-      console.log(`✅ 可访问性测试完成: ${testId} - 评分: ${analysisResults.scores.overall}`);
-      
+
+      Logger.info('可访问性测试完成', { testId, score: analysisResults.scores.overall, engine: 'Accessibility' });
+
       return {
         success: true,
         testId,
         results: summary
       };
-      
+
     } catch (error) {
-      console.error(`❌ 可访问性测试失败: ${testId}`, error);
-      
+      Logger.error('可访问性测试失败', error, { testId, engine: 'Accessibility' });
+
       // 更新测试状态为失败
       await this.updateTestStatus(testId, 'failed', {
         completed_at: new Date(),
         error_message: error.message
       });
-      
+
       // 发送测试失败通知
       await this.sendTestFailed(testId, error);
-      
+
       throw error;
     } finally {
       this.isRunning = false;
@@ -141,20 +142,20 @@ class AccessibilityEngine {
   async cancelTest(testId) {
     try {
       console.log(`🛑 取消可访问性测试: ${testId}`);
-      
+
       if (this.browser) {
         await this.browser.close();
         this.browser = null;
       }
-      
+
       this.isRunning = false;
       this.analyzer = null;
-      
+
       // 更新测试状态为取消
       await this.updateTestStatus(testId, 'cancelled', {
         completed_at: new Date()
       });
-      
+
       return { success: true, testId };
     } catch (error) {
       console.error(`❌ 取消可访问性测试失败: ${testId}`, error);
@@ -172,13 +173,13 @@ class AccessibilityEngine {
         'SELECT status, started_at, completed_at, overall_score, grade FROM test_results WHERE id = $1',
         [testId]
       );
-      
+
       if (result.rows.length === 0) {
         throw new Error('测试不存在');
       }
-      
+
       const test = result.rows[0];
-      
+
       return {
         testId,
         status: test.status,
@@ -200,21 +201,21 @@ class AccessibilityEngine {
   async updateTestStatus(testId, status, additionalData = {}) {
     try {
       const pool = getPool();
-      
+
       const updateFields = ['status = $2', 'updated_at = NOW()'];
       const values = [testId, status];
       let paramIndex = 3;
-      
+
       // 动态添加更新字段
       Object.entries(additionalData).forEach(([key, value]) => {
         updateFields.push(`${key} = $${paramIndex}`);
         values.push(value);
         paramIndex++;
       });
-      
+
       const query = `UPDATE test_results SET ${updateFields.join(', ')} WHERE id = $1`;
       await pool.query(query, values);
-      
+
     } catch (error) {
       console.error(`❌ 更新测试状态失败: ${testId}`, error);
       throw error;
@@ -227,7 +228,7 @@ class AccessibilityEngine {
   async saveResults(testId, analysisResults) {
     try {
       const pool = getPool();
-      
+
       // 保存到accessibility_test_details表
       await pool.query(
         `INSERT INTO accessibility_test_details (
@@ -246,7 +247,7 @@ class AccessibilityEngine {
           JSON.stringify(analysisResults.recommendations)
         ]
       );
-      
+
       console.log(`💾 可访问性分析结果已保存: ${testId}`);
     } catch (error) {
       console.error(`❌ 保存分析结果失败: ${testId}`, error);
@@ -260,26 +261,26 @@ class AccessibilityEngine {
   async getDetailedResults(testId) {
     try {
       const pool = getPool();
-      
+
       // 获取基本测试信息
       const testResult = await pool.query(
         `SELECT * FROM test_results WHERE id = $1`,
         [testId]
       );
-      
+
       if (testResult.rows.length === 0) {
         throw new Error('测试不存在');
       }
-      
+
       // 获取详细可访问性分析结果
       const detailsResult = await pool.query(
         `SELECT * FROM accessibility_test_details WHERE test_id = $1`,
         [testId]
       );
-      
+
       const test = testResult.rows[0];
       const details = detailsResult.rows[0];
-      
+
       return {
         test: {
           id: test.id,
@@ -384,7 +385,7 @@ class AccessibilityEngine {
    */
   extractAccessibilityIssues(analysisResults) {
     const issues = [];
-    
+
     // 从合规性检查中提取问题
     if (analysisResults.compliance && analysisResults.compliance.issues) {
       issues.push(...analysisResults.compliance.issues.map(issue => ({
@@ -396,7 +397,7 @@ class AccessibilityEngine {
         description: issue.description
       })));
     }
-    
+
     return issues;
   }
 
@@ -416,7 +417,7 @@ class AccessibilityEngine {
       // 简单的健康检查
       const testBrowser = await puppeteer.launch({ headless: true });
       await testBrowser.close();
-      
+
       return {
         status: 'healthy',
         timestamp: new Date().toISOString(),

@@ -5,11 +5,14 @@
 
 const PerformanceAnalyzer = require('./PerformanceAnalyzer');
 const { getPool } = require('../../config/database');
+const Logger = require('../../utils/logger');
+const EngineCache = require('../../utils/cache/EngineCache');
 
 class PerformanceEngine {
   constructor() {
     this.analyzer = null;
     this.isRunning = false;
+    this.cache = new EngineCache('Performance');
   }
 
   /**
@@ -17,38 +20,38 @@ class PerformanceEngine {
    */
   async startTest(testId, url, config = {}) {
     try {
-      console.log(`🚀 启动性能测试: ${testId} - ${url}`);
-      
+      Logger.info('启动性能测试', { testId, url, engine: 'Performance' });
+
       // 更新测试状态为运行中
       await this.updateTestStatus(testId, 'running', { started_at: new Date() });
-      
+
       // 发送初始进度
       await this.sendProgress(testId, {
         percentage: 0,
         stage: 'initializing',
         message: '初始化性能分析引擎...'
       });
-      
+
       // 创建分析器实例
       this.analyzer = new PerformanceAnalyzer(config);
       this.isRunning = true;
-      
+
       // 执行分析（带进度回调）
       const analysisResults = await this.analyzer.analyze(url, {
         ...config,
         onProgress: (progress) => this.sendProgress(testId, progress)
       });
-      
+
       // 发送分析完成进度
       await this.sendProgress(testId, {
         percentage: 90,
         stage: 'saving',
         message: '保存分析结果...'
       });
-      
+
       // 保存分析结果
       await this.saveResults(testId, analysisResults);
-      
+
       // 更新测试状态为完成
       await this.updateTestStatus(testId, 'completed', {
         completed_at: new Date(),
@@ -60,39 +63,39 @@ class PerformanceEngine {
         failed_checks: this.calculateFailedChecks(analysisResults),
         warnings: this.calculateWarnings(analysisResults)
       });
-      
+
       // 发送完成进度
       await this.sendProgress(testId, {
         percentage: 100,
         stage: 'completed',
         message: '性能分析完成'
       });
-      
+
       const summary = this.createSummary(analysisResults);
-      
+
       // 发送测试完成通知
       await this.sendTestComplete(testId, summary);
-      
-      console.log(`✅ 性能测试完成: ${testId} - 评分: ${analysisResults.scores.overall.score}`);
-      
+
+      Logger.info('性能测试完成', { testId, score: analysisResults.scores.overall.score, engine: 'Performance' });
+
       return {
         success: true,
         testId,
         results: summary
       };
-      
+
     } catch (error) {
-      console.error(`❌ 性能测试失败: ${testId}`, error);
-      
+      Logger.error('性能测试失败', error, { testId, engine: 'Performance' });
+
       // 更新测试状态为失败
       await this.updateTestStatus(testId, 'failed', {
         completed_at: new Date(),
         error_message: error.message
       });
-      
+
       // 发送测试失败通知
       await this.sendTestFailed(testId, error);
-      
+
       throw error;
     } finally {
       this.isRunning = false;
@@ -109,19 +112,19 @@ class PerformanceEngine {
   async cancelTest(testId) {
     try {
       console.log(`🛑 取消性能测试: ${testId}`);
-      
+
       if (this.analyzer) {
         await this.analyzer.cleanup();
         this.analyzer = null;
       }
-      
+
       this.isRunning = false;
-      
+
       // 更新测试状态为取消
       await this.updateTestStatus(testId, 'cancelled', {
         completed_at: new Date()
       });
-      
+
       return { success: true, testId };
     } catch (error) {
       console.error(`❌ 取消性能测试失败: ${testId}`, error);
@@ -139,13 +142,13 @@ class PerformanceEngine {
         'SELECT status, started_at, completed_at, overall_score, grade FROM test_results WHERE id = $1',
         [testId]
       );
-      
+
       if (result.rows.length === 0) {
         throw new Error('测试不存在');
       }
-      
+
       const test = result.rows[0];
-      
+
       return {
         testId,
         status: test.status,
@@ -167,21 +170,21 @@ class PerformanceEngine {
   async updateTestStatus(testId, status, additionalData = {}) {
     try {
       const pool = getPool();
-      
+
       const updateFields = ['status = $2', 'updated_at = NOW()'];
       const values = [testId, status];
       let paramIndex = 3;
-      
+
       // 动态添加更新字段
       Object.entries(additionalData).forEach(([key, value]) => {
         updateFields.push(`${key} = $${paramIndex}`);
         values.push(value);
         paramIndex++;
       });
-      
+
       const query = `UPDATE test_results SET ${updateFields.join(', ')} WHERE id = $1`;
       await pool.query(query, values);
-      
+
     } catch (error) {
       console.error(`❌ 更新测试状态失败: ${testId}`, error);
       throw error;
@@ -194,7 +197,7 @@ class PerformanceEngine {
   async saveResults(testId, analysisResults) {
     try {
       const pool = getPool();
-      
+
       // 保存到performance_test_details表
       await pool.query(
         `INSERT INTO performance_test_details (
@@ -210,7 +213,7 @@ class PerformanceEngine {
           JSON.stringify(analysisResults.recommendations)
         ]
       );
-      
+
       console.log(`💾 性能分析结果已保存: ${testId}`);
     } catch (error) {
       console.error(`❌ 保存分析结果失败: ${testId}`, error);
@@ -224,26 +227,26 @@ class PerformanceEngine {
   async getDetailedResults(testId) {
     try {
       const pool = getPool();
-      
+
       // 获取基本测试信息
       const testResult = await pool.query(
         `SELECT * FROM test_results WHERE id = $1`,
         [testId]
       );
-      
+
       if (testResult.rows.length === 0) {
         throw new Error('测试不存在');
       }
-      
+
       // 获取详细性能分析结果
       const detailsResult = await pool.query(
         `SELECT * FROM performance_test_details WHERE test_id = $1`,
         [testId]
       );
-      
+
       const test = testResult.rows[0];
       const details = detailsResult.rows[0];
-      
+
       return {
         test: {
           id: test.id,
@@ -283,7 +286,7 @@ class PerformanceEngine {
         await global.realtimeService.updateTestProgress(testId, progress);
       }
     } catch (error) {
-      console.warn('发送测试进度失败:', error);
+      Logger.warn('发送测试进度失败', { error: error.message, testId });
     }
   }
 
@@ -348,37 +351,37 @@ class PerformanceEngine {
   // 辅助计算方法
   calculateTotalChecks(analysisResults) {
     let total = 0;
-    
+
     // Core Web Vitals检查项
     total += 5; // LCP, FID, CLS, FCP, TTFB
-    
+
     // 资源检查项
     total += 10; // 资源大小、数量、压缩、缓存等
-    
+
     // 网络检查项
     total += 5; // DNS、连接、响应时间等
-    
+
     return total;
   }
 
   calculatePassedChecks(analysisResults) {
     let passed = 0;
-    
+
     // Core Web Vitals通过检查
     if (analysisResults.coreWebVitals.lcp.rating === 'good') passed++;
     if (analysisResults.coreWebVitals.fid.rating === 'good') passed++;
     if (analysisResults.coreWebVitals.cls.rating === 'good') passed++;
     if (analysisResults.coreWebVitals.fcp.rating === 'good') passed++;
     if (analysisResults.coreWebVitals.ttfb.rating === 'good') passed++;
-    
+
     // 资源检查通过数
     const resourceScore = analysisResults.scores.resources.score;
     passed += Math.round((resourceScore / 100) * 10);
-    
+
     // 网络检查通过数
     const networkScore = analysisResults.scores.network.score;
     passed += Math.round((networkScore / 100) * 5);
-    
+
     return passed;
   }
 
@@ -389,7 +392,7 @@ class PerformanceEngine {
   }
 
   calculateWarnings(analysisResults) {
-    return analysisResults.recommendations.filter(r => 
+    return analysisResults.recommendations.filter(r =>
       r.priority === 'medium' || r.priority === 'low'
     ).length;
   }
@@ -402,7 +405,7 @@ class PerformanceEngine {
       // 简单的健康检查
       const testAnalyzer = new PerformanceAnalyzer({ timeout: 5000 });
       await testAnalyzer.cleanup();
-      
+
       return {
         status: 'healthy',
         timestamp: new Date().toISOString(),

@@ -5,6 +5,7 @@
 
 const SecurityAnalyzer = require('./SecurityAnalyzer');
 const { getPool } = require('../../config/database');
+const Logger = require('../../utils/logger');
 
 class SecurityEngine {
   constructor() {
@@ -17,38 +18,38 @@ class SecurityEngine {
    */
   async startTest(testId, url, config = {}) {
     try {
-      console.log(`🔒 启动安全测试: ${testId} - ${url}`);
-      
+      Logger.info('启动安全测试', { testId, url, engine: 'Security' });
+
       // 更新测试状态为运行中
       await this.updateTestStatus(testId, 'running', { started_at: new Date() });
-      
+
       // 发送初始进度
       await this.sendProgress(testId, {
         percentage: 0,
         stage: 'initializing',
         message: '初始化安全分析引擎...'
       });
-      
+
       // 创建分析器实例
       this.analyzer = new SecurityAnalyzer(config);
       this.isRunning = true;
-      
+
       // 执行分析（带进度回调）
       const analysisResults = await this.analyzer.analyze(url, {
         ...config,
         onProgress: (progress) => this.sendProgress(testId, progress)
       });
-      
+
       // 发送分析完成进度
       await this.sendProgress(testId, {
         percentage: 95,
         stage: 'saving',
         message: '保存分析结果...'
       });
-      
+
       // 保存分析结果
       await this.saveResults(testId, analysisResults);
-      
+
       // 更新测试状态为完成
       await this.updateTestStatus(testId, 'completed', {
         completed_at: new Date(),
@@ -60,39 +61,39 @@ class SecurityEngine {
         failed_checks: this.calculateFailedChecks(analysisResults),
         warnings: this.calculateWarnings(analysisResults)
       });
-      
+
       // 发送完成进度
       await this.sendProgress(testId, {
         percentage: 100,
         stage: 'completed',
         message: '安全分析完成'
       });
-      
+
       const summary = this.createSummary(analysisResults);
-      
+
       // 发送测试完成通知
       await this.sendTestComplete(testId, summary);
-      
-      console.log(`✅ 安全测试完成: ${testId} - 评分: ${analysisResults.scores.overall.score}`);
-      
+
+      Logger.info('安全测试完成', { testId, score: analysisResults.scores.overall.score, engine: 'Security' });
+
       return {
         success: true,
         testId,
         results: summary
       };
-      
+
     } catch (error) {
-      console.error(`❌ 安全测试失败: ${testId}`, error);
-      
+      Logger.error('安全测试失败', error, { testId, engine: 'Security' });
+
       // 更新测试状态为失败
       await this.updateTestStatus(testId, 'failed', {
         completed_at: new Date(),
         error_message: error.message
       });
-      
+
       // 发送测试失败通知
       await this.sendTestFailed(testId, error);
-      
+
       throw error;
     } finally {
       this.isRunning = false;
@@ -109,19 +110,19 @@ class SecurityEngine {
   async cancelTest(testId) {
     try {
       console.log(`🛑 取消安全测试: ${testId}`);
-      
+
       if (this.analyzer) {
         await this.analyzer.cleanup();
         this.analyzer = null;
       }
-      
+
       this.isRunning = false;
-      
+
       // 更新测试状态为取消
       await this.updateTestStatus(testId, 'cancelled', {
         completed_at: new Date()
       });
-      
+
       return { success: true, testId };
     } catch (error) {
       console.error(`❌ 取消安全测试失败: ${testId}`, error);
@@ -139,13 +140,13 @@ class SecurityEngine {
         'SELECT status, started_at, completed_at, overall_score, grade FROM test_results WHERE id = $1',
         [testId]
       );
-      
+
       if (result.rows.length === 0) {
         throw new Error('测试不存在');
       }
-      
+
       const test = result.rows[0];
-      
+
       return {
         testId,
         status: test.status,
@@ -167,21 +168,21 @@ class SecurityEngine {
   async updateTestStatus(testId, status, additionalData = {}) {
     try {
       const pool = getPool();
-      
+
       const updateFields = ['status = $2', 'updated_at = NOW()'];
       const values = [testId, status];
       let paramIndex = 3;
-      
+
       // 动态添加更新字段
       Object.entries(additionalData).forEach(([key, value]) => {
         updateFields.push(`${key} = $${paramIndex}`);
         values.push(value);
         paramIndex++;
       });
-      
+
       const query = `UPDATE test_results SET ${updateFields.join(', ')} WHERE id = $1`;
       await pool.query(query, values);
-      
+
     } catch (error) {
       console.error(`❌ 更新测试状态失败: ${testId}`, error);
       throw error;
@@ -194,7 +195,7 @@ class SecurityEngine {
   async saveResults(testId, analysisResults) {
     try {
       const pool = getPool();
-      
+
       // 保存到security_test_details表
       await pool.query(
         `INSERT INTO security_test_details (
@@ -213,7 +214,7 @@ class SecurityEngine {
           JSON.stringify(analysisResults.recommendations)
         ]
       );
-      
+
       console.log(`💾 安全分析结果已保存: ${testId}`);
     } catch (error) {
       console.error(`❌ 保存分析结果失败: ${testId}`, error);
@@ -227,26 +228,26 @@ class SecurityEngine {
   async getDetailedResults(testId) {
     try {
       const pool = getPool();
-      
+
       // 获取基本测试信息
       const testResult = await pool.query(
         `SELECT * FROM test_results WHERE id = $1`,
         [testId]
       );
-      
+
       if (testResult.rows.length === 0) {
         throw new Error('测试不存在');
       }
-      
+
       // 获取详细安全分析结果
       const detailsResult = await pool.query(
         `SELECT * FROM security_test_details WHERE test_id = $1`,
         [testId]
       );
-      
+
       const test = testResult.rows[0];
       const details = detailsResult.rows[0];
-      
+
       return {
         test: {
           id: test.id,
@@ -323,7 +324,7 @@ class SecurityEngine {
    */
   createSummary(analysisResults) {
     const vulnerabilitySummary = this.createVulnerabilitySummary(analysisResults.vulnerabilities);
-    
+
     return {
       url: analysisResults.url,
       timestamp: analysisResults.timestamp,
@@ -353,7 +354,7 @@ class SecurityEngine {
       low: vulnerabilities.filter(v => v.severity === 'low').length,
       byCategory: {}
     };
-    
+
     // 按类别统计
     vulnerabilities.forEach(vuln => {
       const category = this.getVulnerabilityCategory(vuln.type);
@@ -362,7 +363,7 @@ class SecurityEngine {
       }
       summary.byCategory[category]++;
     });
-    
+
     return summary;
   }
 
@@ -380,38 +381,38 @@ class SecurityEngine {
   // 辅助计算方法
   calculateTotalChecks(analysisResults) {
     let total = 0;
-    
+
     // SQL注入检查项
     total += 10;
-    
+
     // XSS检查项
     total += 10;
-    
+
     // SSL/TLS检查项
     total += 8;
-    
+
     // 安全头检查项
     total += 7;
-    
+
     return total;
   }
 
   calculatePassedChecks(analysisResults) {
     const totalChecks = this.calculateTotalChecks(analysisResults);
     const totalVulns = analysisResults.vulnerabilities.length;
-    
+
     // 简化计算：假设每个漏洞代表一个失败的检查
     return Math.max(0, totalChecks - totalVulns);
   }
 
   calculateFailedChecks(analysisResults) {
-    return analysisResults.vulnerabilities.filter(v => 
+    return analysisResults.vulnerabilities.filter(v =>
       v.severity === 'critical' || v.severity === 'high'
     ).length;
   }
 
   calculateWarnings(analysisResults) {
-    return analysisResults.vulnerabilities.filter(v => 
+    return analysisResults.vulnerabilities.filter(v =>
       v.severity === 'medium' || v.severity === 'low'
     ).length;
   }
@@ -424,7 +425,7 @@ class SecurityEngine {
       // 简单的健康检查
       const testAnalyzer = new SecurityAnalyzer({ timeout: 5000 });
       await testAnalyzer.cleanup();
-      
+
       return {
         status: 'healthy',
         timestamp: new Date().toISOString(),
