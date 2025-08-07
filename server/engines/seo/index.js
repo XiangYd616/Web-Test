@@ -5,19 +5,27 @@
 
 const SEOAnalyzer = require('./SEOAnalyzer');
 const { getPool } = require('../../config/database');
+const Logger = require('../../utils/logger');
+const EngineCache = require('../../utils/cache/EngineCache');
+const ErrorNotificationHelper = require('../../utils/ErrorNotificationHelper');
 
 class SEOEngine {
   constructor() {
     this.analyzer = null;
     this.isRunning = false;
+    this.cache = new EngineCache('SEO');
+    this.errorNotifier = new ErrorNotificationHelper('SEO');
   }
 
   /**
    * 启动SEO测试
    */
   async startTest(testId, url, config = {}) {
+    const startTime = Date.now();
+    this.startTime = startTime;
+
     try {
-      console.log(`🚀 启动SEO测试: ${testId} - ${url}`);
+      Logger.info('启动SEO测试', { testId, url, engine: 'SEO' });
 
       // 更新测试状态为运行中
       await this.updateTestStatus(testId, 'running', { started_at: new Date() });
@@ -40,11 +48,32 @@ class SEOEngine {
         message: '加载页面中...'
       });
 
-      // 执行分析（带进度回调）
-      const analysisResults = await this.analyzer.analyze(url, {
-        ...config,
-        onProgress: (progress) => this.sendProgress(testId, progress)
-      });
+      // 检查缓存
+      let analysisResults = null;
+      if (!config.forceRefresh) {
+        analysisResults = await this.cache.getCachedAnalysisResult(url, config);
+        if (analysisResults) {
+          Logger.info('使用缓存的SEO分析结果', { testId, url: url.substring(0, 50) });
+
+          // 快速完成进度
+          await this.sendProgress(testId, {
+            percentage: 80,
+            stage: 'cached',
+            message: '使用缓存结果...'
+          });
+        }
+      }
+
+      // 如果没有缓存结果，执行分析
+      if (!analysisResults) {
+        analysisResults = await this.analyzer.analyze(url, {
+          ...config,
+          onProgress: (progress) => this.sendProgress(testId, progress)
+        });
+
+        // 缓存分析结果
+        await this.cache.cacheAnalysisResult(url, config, analysisResults);
+      }
 
       // 发送分析完成进度
       await this.sendProgress(testId, {
@@ -80,7 +109,7 @@ class SEOEngine {
       // 发送测试完成通知
       await this.sendTestComplete(testId, summary);
 
-      console.log(`✅ SEO测试完成: ${testId} - 评分: ${analysisResults.scores.overall.score}`);
+      Logger.info('SEO测试完成', { testId, score: analysisResults.scores.overall.score, engine: 'SEO' });
 
       return {
         success: true,
@@ -89,7 +118,7 @@ class SEOEngine {
       };
 
     } catch (error) {
-      console.error(`❌ SEO测试失败: ${testId}`, error);
+      Logger.error('SEO测试失败', error, { testId, engine: 'SEO' });
 
       // 更新测试状态为失败
       await this.updateTestStatus(testId, 'failed', {
@@ -97,8 +126,12 @@ class SEOEngine {
         error_message: error.message
       });
 
-      // 发送测试失败通知
-      await this.sendTestFailed(testId, error);
+      // 发送详细的错误通知
+      const errorContext = this.errorNotifier.createErrorContext(testId, url, config, {
+        stage: 'analysis',
+        duration: Date.now() - startTime
+      });
+      await this.errorNotifier.sendTestFailedNotification(testId, error, errorContext);
 
       throw error;
     } finally {
@@ -390,7 +423,7 @@ class SEOEngine {
         await global.realtimeService.updateTestProgress(testId, progress);
       }
     } catch (error) {
-      console.warn('发送测试进度失败:', error);
+      Logger.warn('发送测试进度失败', { error: error.message, testId });
     }
   }
 
