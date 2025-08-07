@@ -6,6 +6,7 @@
 
 const TestCaseManager = require('./managers/TestCaseManager');
 const HTTPClient = require('./clients/HTTPClient');
+const APITestAutomation = require('./automation/APITestAutomation');
 
 class APIAnalyzer {
   constructor(options = {}) {
@@ -16,10 +17,11 @@ class APIAnalyzer {
       retryDelay: 1000,
       ...options
     };
-    
+
     this.testCaseManager = new TestCaseManager(this.options);
     this.httpClient = new HTTPClient(this.options);
-    
+    this.automation = new APITestAutomation();
+
     // 分析结果
     this.analysisResults = {
       endpoints: new Map(),
@@ -49,10 +51,10 @@ class APIAnalyzer {
    */
   async analyze(apiSpec, config = {}) {
     const startTime = Date.now();
-    
+
     try {
       console.log('🔍 开始API分析...');
-      
+
       const results = {
         apiSpec,
         timestamp: new Date().toISOString(),
@@ -65,7 +67,7 @@ class APIAnalyzer {
         scores: null,
         recommendations: []
       };
-      
+
       // 发送进度更新
       if (config.onProgress) {
         config.onProgress({
@@ -74,10 +76,10 @@ class APIAnalyzer {
           message: '解析API规范...'
         });
       }
-      
+
       // 解析API规范
       const endpoints = this.parseAPISpec(apiSpec);
-      
+
       // 发送进度更新
       if (config.onProgress) {
         config.onProgress({
@@ -86,11 +88,11 @@ class APIAnalyzer {
           message: '执行API测试...'
         });
       }
-      
+
       // 执行端点测试
       const endpointResults = await this.testEndpoints(endpoints, config);
       results.endpoints = endpointResults;
-      
+
       // 发送进度更新
       if (config.onProgress) {
         config.onProgress({
@@ -99,10 +101,10 @@ class APIAnalyzer {
           message: '分析性能指标...'
         });
       }
-      
+
       // 分析性能
       results.performance = this.analyzePerformance(endpointResults);
-      
+
       // 发送进度更新
       if (config.onProgress) {
         config.onProgress({
@@ -111,10 +113,10 @@ class APIAnalyzer {
           message: '分析可靠性...'
         });
       }
-      
+
       // 分析可靠性
       results.reliability = this.analyzeReliability(endpointResults);
-      
+
       // 发送进度更新
       if (config.onProgress) {
         config.onProgress({
@@ -123,10 +125,10 @@ class APIAnalyzer {
           message: '分析安全性...'
         });
       }
-      
+
       // 分析安全性
       results.security = this.analyzeSecurity(endpointResults, apiSpec);
-      
+
       // 发送进度更新
       if (config.onProgress) {
         config.onProgress({
@@ -135,23 +137,23 @@ class APIAnalyzer {
           message: '计算评分...'
         });
       }
-      
+
       // 分析合规性
       results.compliance = this.analyzeCompliance(endpointResults, apiSpec);
-      
+
       // 计算评分
       results.scores = this.calculateScores(results);
-      
+
       // 生成建议
       results.recommendations = this.generateRecommendations(results);
-      
+
       // 计算分析时间
       results.analysisTime = Date.now() - startTime;
-      
+
       console.log(`✅ API分析完成，测试了 ${endpoints.length} 个端点`);
-      
+
       return results;
-      
+
     } catch (error) {
       console.error('❌ API分析失败:', error);
       throw error;
@@ -163,7 +165,7 @@ class APIAnalyzer {
    */
   parseAPISpec(apiSpec) {
     const endpoints = [];
-    
+
     if (apiSpec.openapi || apiSpec.swagger) {
       // OpenAPI/Swagger规范
       endpoints.push(...this.parseOpenAPISpec(apiSpec));
@@ -178,7 +180,7 @@ class APIAnalyzer {
         name: 'Single Endpoint Test'
       });
     }
-    
+
     return endpoints;
   }
 
@@ -188,7 +190,7 @@ class APIAnalyzer {
   parseOpenAPISpec(spec) {
     const endpoints = [];
     const baseUrl = this.getBaseUrl(spec);
-    
+
     if (spec.paths) {
       Object.entries(spec.paths).forEach(([path, pathItem]) => {
         Object.entries(pathItem).forEach(([method, operation]) => {
@@ -208,7 +210,7 @@ class APIAnalyzer {
         });
       });
     }
-    
+
     return endpoints;
   }
 
@@ -219,13 +221,13 @@ class APIAnalyzer {
     if (spec.servers && spec.servers.length > 0) {
       return spec.servers[0].url;
     }
-    
+
     if (spec.host) {
       const scheme = spec.schemes && spec.schemes.length > 0 ? spec.schemes[0] : 'http';
       const basePath = spec.basePath || '';
       return `${scheme}://${spec.host}${basePath}`;
     }
-    
+
     return '';
   }
 
@@ -235,15 +237,15 @@ class APIAnalyzer {
   async testEndpoints(endpoints, config) {
     const results = [];
     const concurrency = Math.min(this.options.maxConcurrency, endpoints.length);
-    
+
     // 分批处理端点
     for (let i = 0; i < endpoints.length; i += concurrency) {
       const batch = endpoints.slice(i, i + concurrency);
-      
+
       const batchPromises = batch.map(async (endpoint, index) => {
         try {
           const result = await this.testEndpoint(endpoint, config);
-          
+
           // 更新进度
           if (config.onProgress) {
             const progress = 30 + Math.round(((i + index + 1) / endpoints.length) * 30);
@@ -253,7 +255,7 @@ class APIAnalyzer {
               message: `测试端点: ${endpoint.method} ${endpoint.path}`
             });
           }
-          
+
           return result;
         } catch (error) {
           return {
@@ -265,16 +267,16 @@ class APIAnalyzer {
           };
         }
       });
-      
+
       const batchResults = await Promise.all(batchPromises);
       results.push(...batchResults);
-      
+
       // 添加延迟避免过载
       if (i + concurrency < endpoints.length) {
         await this.sleep(100);
       }
     }
-    
+
     return results;
   }
 
@@ -284,7 +286,7 @@ class APIAnalyzer {
   async testEndpoint(endpoint, config) {
     const testCase = this.createTestCaseFromEndpoint(endpoint, config);
     const execution = await this.testCaseManager.executeTestCase(testCase.id, config.context || {});
-    
+
     return {
       endpoint,
       execution,
@@ -315,7 +317,7 @@ class APIAnalyzer {
         retries: config.retries || 0
       }
     };
-    
+
     return this.testCaseManager.createTestCase(testCase);
   }
 
@@ -327,7 +329,7 @@ class APIAnalyzer {
       'Accept': 'application/json',
       'User-Agent': 'API-Test-Engine/1.0.0'
     };
-    
+
     // 添加认证头
     if (config.auth) {
       if (config.auth.type === 'bearer') {
@@ -339,12 +341,12 @@ class APIAnalyzer {
         headers[config.auth.name || 'X-API-Key'] = config.auth.value;
       }
     }
-    
+
     // 添加自定义头
     if (config.headers) {
       Object.assign(headers, config.headers);
     }
-    
+
     return headers;
   }
 
@@ -360,7 +362,7 @@ class APIAnalyzer {
         return config.defaultRequestBody;
       }
     }
-    
+
     return null;
   }
 
@@ -372,7 +374,7 @@ class APIAnalyzer {
       status: this.getExpectedStatusCodes(endpoint),
       responseTime: { max: config.maxResponseTime || 5000 }
     };
-    
+
     // 从响应规范构建schema
     if (endpoint.responses) {
       const successResponse = endpoint.responses['200'] || endpoint.responses['201'];
@@ -383,7 +385,7 @@ class APIAnalyzer {
         }
       }
     }
-    
+
     return expectations;
   }
 
@@ -396,12 +398,12 @@ class APIAnalyzer {
         .filter(code => code !== 'default')
         .map(code => parseInt(code))
         .filter(code => code >= 200 && code < 400);
-      
+
       if (statusCodes.length > 0) {
         return statusCodes;
       }
     }
-    
+
     // 默认期望状态码
     switch (endpoint.method) {
       case 'POST':
@@ -421,7 +423,7 @@ class APIAnalyzer {
       const schema = requestBody.content['application/json'].schema;
       return this.generateDataFromSchema(schema);
     }
-    
+
     return {};
   }
 
@@ -430,7 +432,7 @@ class APIAnalyzer {
    */
   generateDataFromSchema(schema) {
     if (!schema) return null;
-    
+
     switch (schema.type) {
       case 'object':
         const obj = {};
@@ -440,20 +442,20 @@ class APIAnalyzer {
           });
         }
         return obj;
-        
+
       case 'array':
         return schema.items ? [this.generateDataFromSchema(schema.items)] : [];
-        
+
       case 'string':
         return schema.example || 'test';
-        
+
       case 'number':
       case 'integer':
         return schema.example || 1;
-        
+
       case 'boolean':
         return schema.example !== undefined ? schema.example : true;
-        
+
       default:
         return schema.example || null;
     }
@@ -466,7 +468,7 @@ class APIAnalyzer {
     const responseTimes = endpointResults
       .filter(result => result.success && result.timing)
       .map(result => result.timing.responseTime);
-    
+
     if (responseTimes.length === 0) {
       return {
         averageResponseTime: 0,
@@ -478,9 +480,9 @@ class APIAnalyzer {
         score: 0
       };
     }
-    
+
     responseTimes.sort((a, b) => a - b);
-    
+
     const performance = {
       averageResponseTime: Math.round(responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length),
       minResponseTime: responseTimes[0],
@@ -490,7 +492,7 @@ class APIAnalyzer {
       throughput: endpointResults.length / (Math.max(...responseTimes) / 1000),
       score: this.calculatePerformanceScore(responseTimes)
     };
-    
+
     return performance;
   }
 
@@ -501,10 +503,10 @@ class APIAnalyzer {
     const total = endpointResults.length;
     const successful = endpointResults.filter(result => result.success).length;
     const failed = total - successful;
-    const timeouts = endpointResults.filter(result => 
+    const timeouts = endpointResults.filter(result =>
       result.error && result.error.includes('timeout')
     ).length;
-    
+
     return {
       uptime: total > 0 ? (successful / total) * 100 : 0,
       errorRate: total > 0 ? (failed / total) * 100 : 0,
@@ -526,14 +528,14 @@ class APIAnalyzer {
       vulnerabilities: this.checkSecurityVulnerabilities(endpointResults),
       score: 100
     };
-    
+
     // 计算安全评分
     if (!security.httpsUsage) security.score -= 30;
     if (!security.authenticationRequired) security.score -= 20;
     security.score -= security.vulnerabilities.length * 10;
-    
+
     security.score = Math.max(0, security.score);
-    
+
     return security;
   }
 
@@ -560,18 +562,18 @@ class APIAnalyzer {
       security: 0.25,
       compliance: 0.15
     };
-    
+
     const scores = {
       performance: results.performance.score,
       reliability: results.reliability.score,
       security: results.security.score,
       compliance: results.compliance.score
     };
-    
+
     const overallScore = Object.entries(weights).reduce((sum, [category, weight]) => {
       return sum + (scores[category] * weight);
     }, 0);
-    
+
     return {
       ...scores,
       overall: Math.round(overallScore),
@@ -584,7 +586,7 @@ class APIAnalyzer {
    */
   generateRecommendations(results) {
     const recommendations = [];
-    
+
     // 性能建议
     if (results.performance.score < 80) {
       recommendations.push({
@@ -594,7 +596,7 @@ class APIAnalyzer {
         description: '平均响应时间过长，建议优化数据库查询和缓存策略'
       });
     }
-    
+
     // 可靠性建议
     if (results.reliability.score < 95) {
       recommendations.push({
@@ -604,7 +606,7 @@ class APIAnalyzer {
         description: '错误率较高，建议增加错误处理和重试机制'
       });
     }
-    
+
     // 安全性建议
     if (!results.security.httpsUsage) {
       recommendations.push({
@@ -614,14 +616,14 @@ class APIAnalyzer {
         description: '所有API端点都应该使用HTTPS协议'
       });
     }
-    
+
     return recommendations;
   }
 
   // 辅助方法
   calculatePerformanceScore(responseTimes) {
     const avgTime = responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
-    
+
     if (avgTime <= 200) return 100;
     if (avgTime <= 500) return 90;
     if (avgTime <= 1000) return 80;
@@ -631,7 +633,7 @@ class APIAnalyzer {
   }
 
   checkHTTPSUsage(endpointResults) {
-    return endpointResults.every(result => 
+    return endpointResults.every(result =>
       result.endpoint.path.startsWith('https://')
     );
   }
@@ -679,6 +681,148 @@ class APIAnalyzer {
 
   sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
+   * 创建自动化测试套件
+   */
+  createAutomationTestSuite(name, config) {
+    return this.automation.createTestSuite({
+      name,
+      description: config.description || `API自动化测试套件: ${name}`,
+      baseUrl: config.baseUrl,
+      environment: config.environment || 'default',
+      timeout: config.timeout || 30000,
+      retryCount: config.retryCount || 0
+    });
+  }
+
+  /**
+   * 从API规范生成测试用例
+   */
+  generateTestCasesFromSpec(suiteId, apiSpec) {
+    const endpoints = this.parseAPISpec(apiSpec);
+    const testCases = [];
+
+    endpoints.forEach(endpoint => {
+      const testCase = {
+        name: `Test ${endpoint.method} ${endpoint.path}`,
+        description: endpoint.description || `测试 ${endpoint.method} ${endpoint.path} 端点`,
+        method: endpoint.method,
+        endpoint: endpoint.path,
+        headers: endpoint.headers || {},
+        params: endpoint.parameters || {},
+        body: endpoint.requestBody || null,
+        expectedStatus: endpoint.expectedStatus || 200,
+        validations: this.generateValidationsFromEndpoint(endpoint),
+        tags: ['auto-generated', endpoint.method.toLowerCase()]
+      };
+
+      const result = this.automation.addTestCase(suiteId, testCase);
+      testCases.push(result);
+    });
+
+    return testCases;
+  }
+
+  /**
+   * 从端点生成验证规则
+   */
+  generateValidationsFromEndpoint(endpoint) {
+    const validations = [];
+
+    // 基本状态码验证
+    validations.push({
+      type: 'status',
+      operator: 'equals',
+      expected: endpoint.expectedStatus || 200,
+      message: '验证HTTP状态码'
+    });
+
+    // 响应时间验证
+    validations.push({
+      type: 'json_path',
+      field: 'response.timing.responseTime',
+      operator: 'less_than',
+      expected: 5000,
+      message: '响应时间应小于5秒'
+    });
+
+    // 如果有响应模式，添加结构验证
+    if (endpoint.responseSchema) {
+      validations.push({
+        type: 'json_path',
+        field: 'data',
+        operator: 'exists',
+        expected: true,
+        message: '响应数据应存在'
+      });
+    }
+
+    return validations;
+  }
+
+  /**
+   * 执行自动化测试套件
+   */
+  async executeAutomationTestSuite(suiteId, options = {}) {
+    return await this.automation.executeTestSuite(suiteId, options);
+  }
+
+  /**
+   * 获取自动化测试结果
+   */
+  getAutomationTestResult(executionId) {
+    return this.automation.getTestResult(executionId);
+  }
+
+  /**
+   * 生成自动化测试报告
+   */
+  generateAutomationTestReport(executionId) {
+    return this.automation.generateTestReport(executionId);
+  }
+
+  /**
+   * 设置测试环境
+   */
+  setTestEnvironment(name, config) {
+    return this.automation.setTestEnvironment(name, config);
+  }
+
+  /**
+   * 设置测试数据集
+   */
+  setTestDataSet(name, data) {
+    return this.automation.setTestDataSet(name, data);
+  }
+
+  /**
+   * 从文件加载测试数据
+   */
+  async loadTestDataFromFile(name, filePath) {
+    return await this.automation.loadTestDataFromFile(name, filePath);
+  }
+
+  /**
+   * 获取所有测试套件
+   */
+  getAllTestSuites() {
+    return this.automation.getAllTestSuites();
+  }
+
+  /**
+   * 导出测试套件
+   */
+  exportTestSuite(suiteId) {
+    return this.automation.exportTestSuite(suiteId);
+  }
+
+  /**
+   * 导入测试套件
+   */
+  importTestSuite(exportData) {
+    return this.automation.importTestSuite(exportData);
   }
 
   /**
