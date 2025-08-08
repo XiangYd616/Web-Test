@@ -1,80 +1,27 @@
-// 用户相关类型定义
+/**
+ * 用户相关类型定义
+ * 注意：此文件已被 src/types/common.ts 中的统一定义替代
+ * 为了向后兼容，保留此文件并重新导出统一类型
+ */
 
-export interface User {
-  id: string;
-  username: string;
-  email: string;
-  fullName?: string;
-  role: 'admin' | 'user' | 'tester' | 'manager';
-  status: 'active' | 'inactive' | 'suspended';
-  permissions?: string[];
-  avatar?: string;
-  createdAt: string;
-  updatedAt: string;
-  lastLogin?: string;
-  emailVerified: boolean;
-  loginAttempts?: number;
-  lockedUntil?: string;
-  preferences?: UserPreferences;
-  metadata?: Record<string, any>;
-}
+// 重新导出统一的用户类型
+export type {
+  AuthResponse,
+  DEFAULT_USER_PREFERENCES, LoginCredentials,
+  RegisterData, User, UserPreferences,
+  UserProfile, UserRole, UserSession, UserStatus
+} from './common';
 
-export interface UserPreferences {
-  theme: 'light' | 'dark' | 'auto';
-  language: 'zh-CN' | 'en-US' | 'ja-JP';
-  timezone: string;
-  dateFormat: 'YYYY-MM-DD' | 'MM/DD/YYYY' | 'DD/MM/YYYY';
-  timeFormat: '24h' | '12h';
-  notifications: {
-    email: boolean;
-    sms: boolean;
-    push: boolean;
-    browser: boolean;
-    testComplete: boolean;
-    testFailed: boolean;
-    weeklyReport: boolean;
-    securityAlert: boolean;
-  };
-  dashboard?: {
-    defaultView: string;
-    layout?: string;
-    widgets?: string[];
-    refreshInterval: number;
-    showTips?: boolean;
-  };
-}
+// 向后兼容的类型别名
+export type { User as UserInterface } from './common';
 
-export interface LoginCredentials {
-  email: string;
-  username?: string; // 支持用户名登录（向后兼容）
-  password: string;
-  rememberMe?: boolean;
-}
-
-export interface RegisterData {
-  username: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  fullName?: string;
-  acceptTerms: boolean;
-}
-
-export interface AuthResponse {
-  success: boolean;
-  message: string;
-  user?: User;
-  token?: string;
-  refreshToken?: string;
-  errors?: Record<string, string>;
-}
-
+// 扩展类型定义（不在通用类型中的特定用户管理类型）
 export interface CreateUserData {
   username: string;
   email: string;
   password: string;
   fullName?: string;
-  role?: 'admin' | 'user' | 'tester' | 'manager';
+  role?: UserRole;
   permissions?: string[];
   avatar?: string;
   metadata?: Record<string, any>;
@@ -84,7 +31,7 @@ export interface UpdateUserData {
   username?: string;
   email?: string;
   fullName?: string;
-  role?: 'admin' | 'user' | 'tester';
+  role?: UserRole;
   permissions?: string[];
   avatar?: string;
   preferences?: Partial<UserPreferences>;
@@ -106,18 +53,6 @@ export interface UserActivityLog {
   userAgent: string;
   timestamp: string;
   severity: 'low' | 'medium' | 'high';
-}
-
-export interface UserSession {
-  id: string;
-  userId: string;
-  token: string;
-  refreshToken?: string;
-  expiresAt: string;
-  createdAt: string;
-  ipAddress: string;
-  userAgent: string;
-  isActive: boolean;
 }
 
 export interface UserStats {

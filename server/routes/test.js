@@ -3464,6 +3464,46 @@ router.post('/seo', optionalAuth, testRateLimiter, validateURLMiddleware(), asyn
 }));
 
 /**
+ * 无障碍测试
+ * POST /api/test/accessibility
+ */
+router.post('/accessibility', optionalAuth, testRateLimiter, validateURLMiddleware(), asyncHandler(async (req, res) => {
+  const { url, level = 'AA', categories = [] } = req.body;
+  const validatedURL = req.validatedURL.url.toString();
+
+  try {
+    console.log(`♿ Starting accessibility test for: ${validatedURL}`);
+
+    // 重定向到专用的无障碍API
+    const accessibilityResponse = await fetch(`${req.protocol}://${req.get('host')}/api/accessibility/check`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': req.headers.authorization || ''
+      },
+      body: JSON.stringify({ url: validatedURL, level, categories })
+    });
+
+    const accessibilityResult = await accessibilityResponse.json();
+
+    res.json({
+      success: true,
+      data: accessibilityResult.data,
+      testType: 'accessibility',
+      timestamp: new Date().toISOString(),
+      note: 'This endpoint redirects to /api/accessibility/check for compatibility'
+    });
+
+  } catch (error) {
+    console.error('❌ Accessibility test failed:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || '无障碍测试失败'
+    });
+  }
+}));
+
+/**
  * API测试
  * POST /api/test/api-test
  */
