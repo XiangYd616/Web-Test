@@ -1,46 +1,44 @@
 /**
  * 统一API响应格式工具
- * 本地化程度：100%
- * 确保所有API响应格式一致，符合OpenAPI规范
+ * 版本: v2.0.0 - 重构为与responseFormatter中间件兼容
+ *
+ * 注意：此文件已重构为使用responseFormatter中间件的格式
+ * 主要用于非Express环境或需要手动构建响应的场景
  */
 
 const Logger = require('./logger');
 
 class ApiResponse {
   /**
-   * 成功响应
+   * 成功响应 - 兼容responseFormatter格式
    */
   static success(data = null, message = '操作成功', meta = {}) {
     const response = {
       success: true,
       message,
       data,
-      timestamp: new Date().toISOString()
+      meta: {
+        timestamp: new Date().toISOString(),
+        ...meta
+      }
     };
-
-    // 添加元数据（如分页信息、统计信息等）
-    if (Object.keys(meta).length > 0) {
-      response.meta = meta;
-    }
 
     return response;
   }
 
   /**
-   * 错误响应
+   * 错误响应 - 兼容responseFormatter格式
    */
-  static error(message = '操作失败', code = 'UNKNOWN_ERROR', details = {}, suggestions = []) {
+  static error(code = 'UNKNOWN_ERROR', message = '操作失败', details = null) {
     return {
       success: false,
       error: {
         code,
         message,
-        details: {
-          timestamp: new Date().toISOString(),
-          ...details
-        },
-        retryable: this.isRetryableError(code),
-        suggestions: suggestions.length > 0 ? suggestions : this.getDefaultSuggestions(code)
+        ...(details && { details })
+      },
+      meta: {
+        timestamp: new Date().toISOString()
       }
     };
   }
@@ -248,54 +246,27 @@ class ApiResponse {
       'RATE_LIMITED': ['降低请求频率', '稍后重试', '联系管理员提升限制'],
       'INTERNAL_ERROR': ['稍后重试', '联系技术支持', '检查系统状态']
     };
-    
+
     return suggestions[code] || ['稍后重试', '联系技术支持'];
   }
 
   /**
    * 中间件：统一响应格式
+   *
+   * @deprecated 推荐使用 server/api/middleware/responseFormatter.js 中间件
+   * 该中间件提供更完整的功能，包括请求ID、性能监控等
    */
   static middleware() {
+    console.warn('ApiResponse.middleware() 已废弃，请使用 responseFormatter 中间件');
+
     return (req, res, next) => {
-      // 添加便捷方法到响应对象
+      // 为了向后兼容，保留这些方法，但建议迁移到responseFormatter
       res.apiSuccess = (data, message, meta) => {
         return res.json(ApiResponse.success(data, message, meta));
       };
 
-      res.apiError = (message, code, details, suggestions) => {
-        return res.status(400).json(ApiResponse.error(message, code, details, suggestions));
-      };
-
-      res.apiValidationError = (errors, message) => {
-        return res.status(400).json(ApiResponse.validationError(errors, message));
-      };
-
-      res.apiAuthError = (message, code) => {
-        return res.status(401).json(ApiResponse.authError(message, code));
-      };
-
-      res.apiPermissionError = (message, resource) => {
-        return res.status(403).json(ApiResponse.permissionError(message, resource));
-      };
-
-      res.apiNotFound = (resource, id) => {
-        return res.status(404).json(ApiResponse.notFound(resource, id));
-      };
-
-      res.apiServerError = (message, code, details) => {
-        return res.status(500).json(ApiResponse.serverError(message, code, details));
-      };
-
-      res.apiPaginated = (data, pagination) => {
-        return res.json(ApiResponse.paginated(data, pagination));
-      };
-
-      res.apiTestResult = (testId, results, status) => {
-        return res.json(ApiResponse.testResult(testId, results, status));
-      };
-
-      res.apiTestProgress = (testId, progress) => {
-        return res.json(ApiResponse.testProgress(testId, progress));
+      res.apiError = (code, message, details) => {
+        return res.status(400).json(ApiResponse.error(code, message, details));
       };
 
       next();

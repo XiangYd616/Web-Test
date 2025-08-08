@@ -1,99 +1,16 @@
-// 用户类型定义
-export interface UserPreferences {
-  theme: 'light' | 'dark' | 'auto';
-  language: 'zh-CN' | 'en-US' | 'ja-JP';
-  timezone: string;
-  dateFormat: 'YYYY-MM-DD' | 'MM/DD/YYYY' | 'DD/MM/YYYY';
-  timeFormat: '24h' | '12h';
-  notifications: {
-    email: boolean;
-    sms: boolean;
-    push: boolean;
-    browser: boolean;
-    testComplete: boolean;
-    testFailed: boolean;
-    weeklyReport: boolean;
-    securityAlert: boolean;
-  };
-  dashboard?: {
-    defaultView: string;
-    layout?: string;
-    widgets?: string[];
-    refreshInterval: number;
-    showTips?: boolean;
-  };
-  testing: {
-    defaultTimeout: number;
-    maxConcurrentTests: number;
-    autoSaveResults: boolean;
-    enableAdvancedFeatures: boolean;
-  };
-  privacy: {
-    shareUsageData: boolean;
-    allowCookies: boolean;
-    trackingEnabled: boolean;
-  };
-}
+/**
+ * 用户类型定义 - 重新导出统一类型
+ * 此文件已迁移到统一类型定义系统，现在只重新导出统一类型
+ * 版本: v2.0.0 - 使用统一类型定义
+ */
 
-export interface User {
-  id: string;
-  username: string;
-  email: string;
-  role: 'admin' | 'user' | 'viewer';
-  avatar?: string;
-  createdAt: string;
-  lastLoginAt?: string;
-  preferences: UserPreferences;
-  profile: {
-    firstName?: string;
-    lastName?: string;
-    company?: string;
-    department?: string;
-    phone?: string;
-    timezone: string;
-  };
-  permissions: string[];
-  status: 'active' | 'inactive' | 'suspended';
-}
+// 重新导出统一的用户类型定义
+export type {
+  AuthResponse, fromDatabaseFields, LoginCredentials,
+  RegisterData, toDatabaseFields, User, UserDatabaseFields, UserPlan, UserPreferences, UserProfile, UserRole, UserSession, UserStatus
+} from '../../types/unified/models';
 
-export interface UserSession {
-  id: string;
-  userId: string;
-  token: string;
-  refreshToken: string;
-  expiresAt: string;
-  createdAt: string;
-  lastActivityAt: string;
-  ipAddress: string;
-  userAgent: string;
-  isActive: boolean;
-}
-
-export interface LoginCredentials {
-  username: string;
-  password: string;
-  rememberMe?: boolean;
-}
-
-export interface RegisterData {
-  username: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  firstName?: string;
-  lastName?: string;
-  company?: string;
-}
-
-export interface AuthResponse {
-  success: boolean;
-  user?: User;
-  token?: string;
-  refreshToken?: string;
-  message?: string;
-  errors?: string[];
-}
-
+// 扩展类型定义（服务层特有的类型）
 export interface PasswordResetRequest {
   email: string;
 }
@@ -121,40 +38,3 @@ export interface PasswordChangeData {
   newPassword: string;
   confirmPassword: string;
 }
-
-// 默认用户偏好设置
-export const defaultUserPreferences: UserPreferences = {
-  theme: 'auto',
-  language: 'zh-CN',
-  timezone: 'Asia/Shanghai',
-  dateFormat: 'YYYY-MM-DD',
-  timeFormat: '24h',
-  notifications: {
-    email: true,
-    sms: false,
-    push: true,
-    browser: true,
-    testComplete: true,
-    testFailed: true,
-    weeklyReport: false,
-    securityAlert: true
-  },
-  dashboard: {
-    defaultView: 'overview',
-    layout: 'grid',
-    widgets: [],
-    refreshInterval: 30,
-    showTips: true
-  },
-  testing: {
-    defaultTimeout: 30000,
-    maxConcurrentTests: 3,
-    autoSaveResults: true,
-    enableAdvancedFeatures: false
-  },
-  privacy: {
-    shareUsageData: false,
-    allowCookies: true,
-    trackingEnabled: false
-  }
-};
