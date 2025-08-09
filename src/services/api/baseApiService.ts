@@ -1,15 +1,11 @@
+import type { ApiResponse } from '../../types/unified/apiResponse';
+
 /**
  * 统一的API服务基类
  * 整合项目中重复的API调用逻辑、认证和错误处理
  */
 
-export interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-  errors?: Record<string, string>;
-}
+// ApiResponse类型已从统一类型定义导入
 
 export interface RequestConfig {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';

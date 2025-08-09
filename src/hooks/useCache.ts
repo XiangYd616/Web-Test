@@ -1,12 +1,12 @@
 /**
  * 缓存管理Hook
  * 提供统一的前端缓存操作接口
- * 版本: v1.0.0
+ * 版本: v2.0.0 - 整合新的缓存管理系统
  */
 
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { defaultMemoryCache, defaultLocalStorageCache, CacheFactory } from '../services/cacheStrategy';
-import type { CacheManager, CacheConfig, CacheStats } from '../services/cacheStrategy';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { CacheManager, CacheStats } from '../services/cacheStrategy';
+import { CacheFactory, defaultLocalStorageCache, defaultMemoryCache } from '../services/cacheStrategy';
 
 // ==================== 类型定义 ====================
 
@@ -98,7 +98,7 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
   // 获取混合缓存的localStorage管理器
   const getLocalStorageManager = useCallback((): CacheManager | null => {
     if (cacheType !== 'hybrid') return null;
-    
+
     const manager = cacheManagerRef.current;
     if (!manager) return null;
 
@@ -125,7 +125,7 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
           const localStorageManager = getLocalStorageManager();
           if (localStorageManager) {
             data = await localStorageManager.get(key, params);
-            
+
             // 如果localStorage中有数据，同步到内存缓存
             if (data) {
               await cacheManager.set(key, data, params, ttl);
@@ -278,11 +278,11 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
       try {
         const cacheManager = getCacheManager();
         const stats = await cacheManager.getStats();
-        
+
         if (enableStats) {
           updateState({ stats });
         }
-        
+
         return stats;
       } catch (error) {
         return {
@@ -394,6 +394,206 @@ export function useTestResultCache<T = any>(options: Omit<UseCacheOptions, 'name
     ttl: options.ttl || 3600000, // 1小时
     cacheType: 'hybrid' // 测试结果使用混合缓存
   });
+}
+
+// ==================== 新的缓存管理Hook ====================
+
+/**
+ * 使用新缓存管理系统的Hook
+ */
+export function useAdvancedCache<T = any>(config: {
+  dataType?: DataType;
+  strategy?: CacheStrategy;
+  ttl?: number;
+  onError?: (error: Error) => void;
+} = {}) {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [isFromCache, setIsFromCache] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+  // 获取缓存策略
+  const getStrategy = useCallback(() => {
+    if (config.strategy) return config.strategy;
+    if (config.dataType) return CacheStrategyManager.getStrategy(config.dataType).strategy;
+    return CacheStrategy.MEMORY_FIRST;
+  }, [config.strategy, config.dataType]);
+
+  // 获取TTL
+  const getTTL = useCallback(() => {
+    if (config.ttl) return config.ttl;
+    if (config.dataType) return CacheStrategyManager.getStrategy(config.dataType).ttl;
+    return 3600; // 默认1小时
+  }, [config.ttl, config.dataType]);
+
+  // 设置缓存
+  const set = useCallback(async (key: string, value: T, ttl?: number): Promise<void> => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const finalTTL = ttl || getTTL();
+      const strategy = getStrategy();
+
+      await cacheManager.set(key, value, finalTTL, strategy);
+
+      setData(value);
+      setIsFromCache(false);
+      setLastUpdated(new Date());
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Cache set failed');
+      setError(error);
+      config.onError?.(error);
+    } finally {
+      setLoading(false);
+    }
+  }, [getTTL, getStrategy, config]);
+
+  // 获取缓存
+  const get = useCallback(async (key: string): Promise<T | null> => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const strategy = getStrategy();
+      const result = await cacheManager.get<T>(key, strategy);
+
+      if (result !== null) {
+        setData(result);
+        setIsFromCache(true);
+        setLastUpdated(new Date());
+        return result;
+      } else {
+        setIsFromCache(false);
+        return null;
+      }
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Cache get failed');
+      setError(error);
+      config.onError?.(error);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [getStrategy, config]);
+
+  // 删除缓存
+  const remove = useCallback(async (key: string): Promise<boolean> => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const result = await cacheManager.delete(key);
+
+      if (result) {
+        setData(null);
+        setIsFromCache(false);
+        setLastUpdated(null);
+      }
+
+      return result;
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Cache remove failed');
+      setError(error);
+      config.onError?.(error);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [config]);
+
+  // 获取缓存统计
+  const getStats = useCallback(() => {
+    return cacheManager.getStats();
+  }, []);
+
+  return {
+    data,
+    loading,
+    error,
+    isFromCache,
+    lastUpdated,
+    set,
+    get,
+    remove,
+    getStats
+  };
+}
+
+/**
+ * 智能API缓存Hook
+ */
+export function useSmartApiCache<T = any>(endpoint: string, params?: Record<string, any>) {
+  const cache = useAdvancedCache<T>({
+    dataType: DataType.API_RESPONSES,
+    onError: (error) => console.error('Smart API cache error:', error)
+  });
+
+  const cacheKey = CacheKeys.api(endpoint, params);
+
+  const fetchWithCache = useCallback(async (fetcher: () => Promise<T>): Promise<T> => {
+    // 先尝试从缓存获取
+    const cached = await cache.get(cacheKey);
+    if (cached !== null) {
+      return cached;
+    }
+
+    // 缓存未命中，执行请求
+    const response = await fetcher();
+    await cache.set(cacheKey, response);
+    return response;
+  }, [cache, cacheKey]);
+
+  return {
+    ...cache,
+    cacheKey,
+    fetchWithCache
+  };
+}
+
+/**
+ * 用户数据智能缓存Hook
+ */
+export function useSmartUserCache(userId: string) {
+  const profileCache = useAdvancedCache<any>({
+    dataType: DataType.USER_PROFILE,
+    onError: (error) => console.error('User profile cache error:', error)
+  });
+
+  const preferencesCache = useAdvancedCache<any>({
+    dataType: DataType.USER_PREFERENCES,
+    onError: (error) => console.error('User preferences cache error:', error)
+  });
+
+  const getProfile = useCallback(async () => {
+    const key = CacheKeys.user(userId, 'profile');
+    return profileCache.get(key);
+  }, [userId, profileCache]);
+
+  const setProfile = useCallback(async (profile: any) => {
+    const key = CacheKeys.user(userId, 'profile');
+    return profileCache.set(key, profile);
+  }, [userId, profileCache]);
+
+  const getPreferences = useCallback(async () => {
+    const key = CacheKeys.user(userId, 'preferences');
+    return preferencesCache.get(key);
+  }, [userId, preferencesCache]);
+
+  const setPreferences = useCallback(async (preferences: any) => {
+    const key = CacheKeys.user(userId, 'preferences');
+    return preferencesCache.set(key, preferences);
+  }, [userId, preferencesCache]);
+
+  return {
+    profile: profileCache,
+    preferences: preferencesCache,
+    getProfile,
+    setProfile,
+    getPreferences,
+    setPreferences
+  };
 }
 
 export default useCache;

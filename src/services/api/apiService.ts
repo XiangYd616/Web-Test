@@ -1,3 +1,4 @@
+import type { ApiResponse, ApiSuccessResponse, ApiErrorResponse } from '../../types/unified/apiResponse';
 
 import type { AuthResponse, LoginCredentials, RegisterData, User } from '../../types/user';
 import { isDesktopEnvironment } from '../../utils/environment';
@@ -89,7 +90,7 @@ class UnifiedApiService {
   }
 
   // 通用 HTTP 方法
-  async get(url: string, config?: any): Promise<any> {
+  async get($2): Promise<ApiResponse> {
     if (this.useRemoteApi) {
       // 使用 fetch 直接调用
       const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}${url}`, {
@@ -106,7 +107,7 @@ class UnifiedApiService {
     throw new Error('GET method not supported in desktop mode');
   }
 
-  async post(url: string, data?: any, config?: any): Promise<any> {
+  async post($2): Promise<ApiResponse> {
     if (this.useRemoteApi) {
       const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}${url}`, {
         method: 'POST',
@@ -123,7 +124,7 @@ class UnifiedApiService {
     throw new Error('POST method not supported in desktop mode');
   }
 
-  async put(url: string, data?: any, config?: any): Promise<any> {
+  async put($2): Promise<ApiResponse> {
     if (this.useRemoteApi) {
       const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}${url}`, {
         method: 'PUT',
@@ -140,7 +141,7 @@ class UnifiedApiService {
     throw new Error('PUT method not supported in desktop mode');
   }
 
-  async delete(url: string, config?: any): Promise<any> {
+  async delete($2): Promise<ApiResponse> {
     if (this.useRemoteApi) {
       const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}${url}`, {
         method: 'DELETE',
