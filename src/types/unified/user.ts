@@ -129,33 +129,33 @@ export interface User {
   id: UUID;
   username: string;
   email: Email;
-  
+
   // 角色和权限
   role: UserRole;
   plan: UserPlan;
   status: UserStatus;
   permissions: string[];
-  
+
   // 个人信息
   profile: UserProfile;
   preferences: UserPreferences;
-  
+
   // 安全相关
   emailVerified: boolean;
   emailVerifiedAt?: Timestamp;
   twoFactorEnabled?: boolean;
   loginAttempts: number;
   lockedUntil?: Timestamp;
-  
+
   // 时间戳 - 使用统一的字段名
   createdAt: Timestamp;
   updatedAt: Timestamp;
   lastLoginAt?: Timestamp;
-  
+
   // 统计信息
   loginCount: number;
   testCount?: number;
-  
+
   // 元数据
   metadata: Record<string, any>;
 }
@@ -369,8 +369,8 @@ export function fromDatabaseFields(dbData: UserDatabaseFields): User {
     profile: {
       firstName: dbData.first_name,
       lastName: dbData.last_name,
-      fullName: dbData.first_name && dbData.last_name 
-        ? `${dbData.first_name} ${dbData.last_name}` 
+      fullName: dbData.first_name && dbData.last_name
+        ? `${dbData.first_name} ${dbData.last_name}`
         : undefined,
       timezone: 'Asia/Shanghai' // 默认值
     },

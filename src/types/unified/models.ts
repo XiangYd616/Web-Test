@@ -1,71 +1,53 @@
 /**
  * 统一数据模型定义
  * 前后端共享的核心数据模型，确保类型一致性
- * 版本: v2.0.0 - 统一所有数据模型定义
+ * 版本: v2.1.0 - 完善统一数据模型定义
+ * 更新时间: 2025-08-08
  */
+
+// ==================== 基础类型导出 ====================
 
 // 重新导出基础类型
 export type {
-  UUID,
-  Timestamp,
-  URL,
-  Email
-} from './common';
+  Email, Timestamp,
+  URL, UUID
+} from '../common';
+
+// ==================== 枚举类型导出 ====================
+
+// 重新导出所有枚举类型（只导出实际存在的枚举）
+export {
+  Language, TestGrade,
+  TestPriority, TestStatus, TestType, ThemeMode, Timezone, UserPlan, UserRole,
+  UserStatus
+} from './enums';
+
+// ==================== 用户相关类型导出 ====================
 
 // 重新导出用户相关类型
 export type {
-  User,
-  UserRole,
-  UserStatus,
-  UserPlan,
-  UserProfile,
-  UserPreferences,
-  UserDatabaseFields,
-  LoginCredentials,
-  RegisterData,
-  AuthResponse,
-  UserSession,
-  fromDatabaseFields,
-  toDatabaseFields
+  AuthResponse, ChangePasswordData, CreateUserData, DEFAULT_USER_PREFERENCES, DEFAULT_USER_PROFILE, fromDatabaseFields, LoginCredentials,
+  RegisterData, toDatabaseFields, UpdateUserData, User, UserActivityLog, UserDatabaseFields, UserFilter,
+  UserListQuery, UserPreferences, UserProfile, UserSession, UserStats
 } from './user';
+
+// ==================== API响应类型导出 ====================
 
 // 重新导出API响应类型
 export type {
-  ApiResponse,
-  ApiSuccessResponse,
-  ApiErrorResponse,
-  ApiError,
-  ApiMeta,
-  PaginatedResponse,
-  PaginationInfo,
-  CreatedResponse,
-  NoContentResponse
+  ApiError, ApiErrorResponse, ApiMeta, ApiResponse, ApiResponseUtils, ApiSuccessResponse, AuthConfig, CreatedResponse, ErrorCode, ErrorResponseMethods, NoContentResponse, PaginatedRequest, PaginatedResponse,
+  PaginationInfo, QueryParams,
+  RequestConfig, ResponseBuilder, ValidationError
 } from './apiResponse';
 
-// ==================== 测试相关模型 ====================
+// ==================== 测试相关类型导出 ====================
 
-/**
- * 测试类型枚举
- */
-export enum TestType {
-  PERFORMANCE = 'performance',
-  CONTENT = 'content',
-  SECURITY = 'security',
-  API = 'api',
-  STRESS = 'stress',
-  COMPATIBILITY = 'compatibility'
-}
+// 测试相关枚举已在上面导出，这里只导出接口类型
 
-/**
- * 测试状态枚举
- */
-export enum TestStatus {
-  PENDING = 'pending',
-  RUNNING = 'running',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled'
-}
+// 重新导出测试相关接口类型（从现有的test.ts文件导入）
+export type {
+  APITestConfig, ContentTestConfig, PerformanceTestConfig, SecurityTestConfig
+} from '../test';
 
 /**
  * 测试配置接口
@@ -78,7 +60,7 @@ export interface TestConfig {
     rampUpTime?: number;
     scenarios?: string[];
   };
-  
+
   // API测试配置
   api?: {
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
@@ -87,7 +69,7 @@ export interface TestConfig {
     expectedStatus?: number[];
     timeout?: number;
   };
-  
+
   // 内容测试配置
   content?: {
     checkSEO?: boolean;
@@ -97,7 +79,7 @@ export interface TestConfig {
     checkMobile?: boolean;
     customKeywords?: string[];
   };
-  
+
   // 压力测试配置
   stress?: {
     maxUsers: number;
@@ -105,7 +87,7 @@ export interface TestConfig {
     rampUpTime?: number;
     scenarios?: string[];
   };
-  
+
   // 安全测试配置
   security?: {
     checkSSL?: boolean;
@@ -113,7 +95,7 @@ export interface TestConfig {
     checkVulnerabilities?: boolean;
     customChecks?: string[];
   };
-  
+
   // 兼容性测试配置
   compatibility?: {
     browsers?: string[];
@@ -127,21 +109,21 @@ export interface TestConfig {
  */
 export interface TestResult {
   // 基础信息
-  id: UUID;
-  testId: UUID;
-  userId: UUID;
-  
+  id: string;
+  testId: string;
+  userId: string;
+
   // 测试配置
-  type: TestType;
-  url: URL;
-  config: TestConfig;
-  
+  type: string;
+  url: string;
+  config: any;
+
   // 执行状态
-  status: TestStatus;
-  startTime?: Timestamp;
-  endTime?: Timestamp;
+  status: string;
+  startTime?: string;
+  endTime?: string;
   duration?: number; // 毫秒
-  
+
   // 结果数据
   results: any; // 具体结果数据，根据测试类型而定
   metrics: Record<string, number>; // 性能指标
@@ -150,25 +132,25 @@ export interface TestResult {
     message: string;
     details?: any;
   }>;
-  
+
   // 元数据
   metadata: Record<string, any>;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: string;
+  updatedAt: string;
 }
 
 /**
  * 测试历史接口
  */
 export interface TestHistory {
-  id: UUID;
-  userId: UUID;
-  testType: TestType;
-  url: URL;
-  status: TestStatus;
+  id: string;
+  userId: string;
+  testType: string;
+  url: string;
+  status: string;
   results?: TestResult;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ==================== 数据库映射接口 ====================
@@ -219,10 +201,10 @@ export function testResultFromDatabase(dbData: TestResultDatabaseFields): TestRe
     id: dbData.id,
     testId: dbData.test_id,
     userId: dbData.user_id,
-    type: dbData.type as TestType,
+    type: dbData.type,
     url: dbData.url,
     config: JSON.parse(dbData.config || '{}'),
-    status: dbData.status as TestStatus,
+    status: dbData.status,
     startTime: dbData.start_time,
     endTime: dbData.end_time,
     duration: dbData.duration,
@@ -266,9 +248,9 @@ export function testHistoryFromDatabase(dbData: TestHistoryDatabaseFields): Test
   return {
     id: dbData.id,
     userId: dbData.user_id,
-    testType: dbData.test_type as TestType,
+    testType: dbData.test_type,
     url: dbData.url,
-    status: dbData.status as TestStatus,
+    status: dbData.status,
     results: dbData.results ? JSON.parse(dbData.results) : undefined,
     createdAt: dbData.created_at,
     updatedAt: dbData.updated_at
@@ -296,11 +278,11 @@ export function testHistoryToDatabase(testHistory: TestHistory): TestHistoryData
 /**
  * 验证测试配置
  */
-export function validateTestConfig(type: TestType, config: TestConfig): { isValid: boolean; errors: string[] } {
+export function validateTestConfig(type: string, config: any): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
 
   switch (type) {
-    case TestType.PERFORMANCE:
+    case 'performance':
       if (!config.performance?.users || config.performance.users < 1) {
         errors.push('性能测试需要指定用户数量');
       }
@@ -309,13 +291,13 @@ export function validateTestConfig(type: TestType, config: TestConfig): { isVali
       }
       break;
 
-    case TestType.API:
+    case 'api':
       if (!config.api?.method) {
         errors.push('API测试需要指定HTTP方法');
       }
       break;
 
-    case TestType.STRESS:
+    case 'stress':
       if (!config.stress?.maxUsers || config.stress.maxUsers < 1) {
         errors.push('压力测试需要指定最大用户数');
       }
