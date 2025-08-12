@@ -131,7 +131,7 @@ router.put('/profile', authMiddleware, asyncHandler(async (req, res) => {
     }
 
     const setClause = Object.values(updates).join(', ');
-    
+
     const result = await query(
       `UPDATE users SET ${setClause}, updated_at = NOW() 
        WHERE id = $1 
@@ -218,8 +218,8 @@ router.put('/preferences', authMiddleware, asyncHandler(async (req, res) => {
              email_notifications = $5, auto_save = $6, updated_at = NOW()
          WHERE user_id = $1
          RETURNING *`,
-        [req.user.id, preferences.theme, preferences.language, 
-         preferences.notifications, preferences.email_notifications, preferences.auto_save]
+        [req.user.id, preferences.theme, preferences.language,
+        preferences.notifications, preferences.email_notifications, preferences.auto_save]
       );
     } else {
       // 创建新偏好
@@ -228,8 +228,8 @@ router.put('/preferences', authMiddleware, asyncHandler(async (req, res) => {
          (user_id, theme, language, notifications, email_notifications, auto_save, created_at, updated_at)
          VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
          RETURNING *`,
-        [req.user.id, preferences.theme, preferences.language, 
-         preferences.notifications, preferences.email_notifications, preferences.auto_save]
+        [req.user.id, preferences.theme, preferences.language,
+        preferences.notifications, preferences.email_notifications, preferences.auto_save]
       );
     }
 
@@ -346,6 +346,156 @@ router.delete('/account', authMiddleware, asyncHandler(async (req, res) => {
     res.status(500).json({
       success: false,
       message: '删除用户账户失败'
+    });
+  }
+}));
+
+/**
+ * 获取用户通知
+ * GET /api/user/notifications
+ */
+router.get('/notifications', authMiddleware, asyncHandler(async (req, res) => {
+  const { page = 1, limit = 20, unread_only = false } = req.query;
+  const offset = (page - 1) * limit;
+
+  try {
+    let whereClause = 'WHERE user_id = $1';
+    let params = [req.user.id];
+
+    if (unread_only === 'true') {
+      whereClause += ' AND read_at IS NULL';
+    }
+
+    // 获取通知列表
+    const result = await query(
+      `SELECT id, type, title, message, priority, read_at, created_at, data
+       FROM user_notifications
+       ${whereClause}
+       ORDER BY created_at DESC
+       LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+      [...params, limit, offset]
+    );
+
+    // 获取总数
+    const countResult = await query(
+      `SELECT COUNT(*) as total FROM user_notifications ${whereClause}`,
+      params
+    );
+
+    const notifications = result.rows.map(row => ({
+      id: row.id,
+      type: row.type,
+      title: row.title,
+      message: row.message,
+      priority: row.priority,
+      read: !!row.read_at,
+      createdAt: row.created_at,
+      data: row.data
+    }));
+
+    res.json({
+      success: true,
+      data: notifications
+    });
+
+  } catch (error) {
+    console.error('获取用户通知失败:', error);
+    // 如果数据库表不存在，返回空数组
+    res.json({
+      success: true,
+      data: []
+    });
+  }
+}));
+
+/**
+ * 获取用户统计数据
+ * GET /api/user/stats/:userId
+ */
+router.get('/stats/:userId', authMiddleware, asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+
+  // 检查权限：只能查看自己的统计或管理员可以查看所有
+  if (req.user.id !== userId && req.user.role !== 'admin') {
+    return res.status(403).json({
+      success: false,
+      error: '无权访问此用户的统计数据'
+    });
+  }
+
+  try {
+    // 获取基础统计
+    const basicStats = await query(
+      `SELECT
+         COUNT(*) as total_tests,
+         COUNT(CASE WHEN DATE(created_at) = CURRENT_DATE THEN 1 END) as tests_today,
+         COUNT(CASE WHEN created_at >= DATE_TRUNC('week', CURRENT_DATE) THEN 1 END) as tests_this_week,
+         COUNT(CASE WHEN created_at >= DATE_TRUNC('month', CURRENT_DATE) THEN 1 END) as tests_this_month,
+         COUNT(CASE WHEN status = 'completed' THEN 1 END) as successful_tests,
+         COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed_tests,
+         AVG(CASE WHEN score IS NOT NULL THEN score END) as average_score,
+         SUM(CASE WHEN duration IS NOT NULL THEN duration END) as total_test_time
+       FROM test_results
+       WHERE user_id = $1`,
+      [userId]
+    );
+
+    // 获取按类型分组的测试数量
+    const testsByType = await query(
+      `SELECT test_type, COUNT(*) as count
+       FROM test_results
+       WHERE user_id = $1
+       GROUP BY test_type
+       ORDER BY count DESC`,
+      [userId]
+    );
+
+    // 获取最近活动
+    const recentActivity = await query(
+      `SELECT test_type, status, score, created_at
+       FROM test_results
+       WHERE user_id = $1
+       ORDER BY created_at DESC
+       LIMIT 10`,
+      [userId]
+    );
+
+    // 获取最常用的测试类型
+    const mostUsedType = testsByType.rows.length > 0 ? testsByType.rows[0].test_type : '压力测试';
+
+    const stats = basicStats.rows[0];
+    const testsByTypeObj = {};
+    testsByType.rows.forEach(row => {
+      testsByTypeObj[row.test_type] = parseInt(row.count);
+    });
+
+    res.json({
+      success: true,
+      data: {
+        total_tests: parseInt(stats.total_tests) || 0,
+        tests_today: parseInt(stats.tests_today) || 0,
+        tests_this_week: parseInt(stats.tests_this_week) || 0,
+        tests_this_month: parseInt(stats.tests_this_month) || 0,
+        successful_tests: parseInt(stats.successful_tests) || 0,
+        failed_tests: parseInt(stats.failed_tests) || 0,
+        average_score: parseFloat(stats.average_score) || 0,
+        total_test_time: parseInt(stats.total_test_time) || 0,
+        most_used_test_type: mostUsedType,
+        tests_by_type: testsByTypeObj,
+        recent_activity: recentActivity.rows.map(row => ({
+          test_type: row.test_type,
+          status: row.status,
+          score: row.score,
+          created_at: row.created_at
+        }))
+      }
+    });
+
+  } catch (error) {
+    console.error('获取用户统计失败:', error);
+    res.status(500).json({
+      success: false,
+      error: '获取统计数据失败'
     });
   }
 }));

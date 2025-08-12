@@ -83,11 +83,52 @@ nano server/.env
 
 4. **数据库设置**
 ```bash
-# 初始化数据库
+# 使用新的统一初始化工具（推荐）
+npm run db:init
+
+# 或使用传统方式
 npm run db:setup
 
-# 验证数据库连接
-npm run db:check
+# 验证数据库连接和健康状态
+npm run db:health
+```
+
+### 🗄️ 数据库管理工具
+
+#### 快速命令
+```bash
+# 健康检查
+npm run db:health                  # 基本健康检查
+npm run db:health:detailed         # 详细健康检查
+npm run db:health:json            # JSON格式输出
+
+# 迁移管理
+npm run db:status                  # 查看迁移状态
+npm run db:migrate                 # 执行迁移
+npm run db:create migration_name   # 创建迁移
+
+# 备份恢复
+npm run db:backup                  # 备份数据库
+npm run db:restore backup.sql     # 恢复数据库
+
+# 信息查询
+npm run db:info                    # 数据库信息
+npm run db:tables                  # 列出所有表
+npm run db:vacuum                  # 清理数据库
+```
+
+#### 统一管理工具
+```bash
+# 查看所有可用命令
+npm run db:manager help
+
+# 常用操作示例
+npm run db:manager health          # 健康检查
+npm run db:manager migrate         # 执行迁移
+npm run db:manager backup          # 备份数据库
+npm run db:manager info            # 数据库信息
+npm run db:manager tables          # 列出表
+npm run db:manager vacuum          # 清理数据库
 ```
 
 5. **启动应用**

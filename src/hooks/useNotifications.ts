@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export interface NotificationItem {
   id: string;
@@ -149,25 +149,14 @@ export const useNotifications = () => {
 
   // 初始化通知数据
   useEffect(() => {
-    const loadNotifications = () => {
+    const loadNotifications = async () => {
       try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          setNotifications(parsed.map((n: any) => ({
-            ...n,
-            createdAt: new Date(n.createdAt)
-          })));
-        } else {
-          // 首次加载，使用模拟数据
-          const mockData = generateMockNotifications();
-          setNotifications(mockData);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(mockData));
-        }
+        // 首先尝试从后端API获取通知
+        await fetchNotificationsFromAPI();
       } catch (error) {
-        console.error('Failed to load notifications:', error);
-        const mockData = generateMockNotifications();
-        setNotifications(mockData);
+        console.warn('Failed to fetch notifications from API, using local storage:', error);
+        // 如果API失败，从本地存储加载
+        loadNotificationsFromStorage();
       } finally {
         setLoading(false);
       }
@@ -175,6 +164,58 @@ export const useNotifications = () => {
 
     loadNotifications();
   }, []);
+
+  // 从API获取通知
+  const fetchNotificationsFromAPI = async () => {
+    const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No auth token available');
+    }
+
+    const response = await fetch('/api/user/notifications', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    if (result.success && result.data) {
+      const apiNotifications = result.data.map((n: any) => ({
+        ...n,
+        createdAt: new Date(n.createdAt || n.created_at)
+      }));
+      setNotifications(apiNotifications);
+      // 同步到本地存储
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(apiNotifications));
+    } else {
+      throw new Error('Invalid API response');
+    }
+  };
+
+  // 从本地存储加载通知
+  const loadNotificationsFromStorage = () => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setNotifications(parsed.map((n: any) => ({
+          ...n,
+          createdAt: new Date(n.createdAt)
+        })));
+      } else {
+        // 如果本地也没有数据，使用空数组
+        setNotifications([]);
+      }
+    } catch (error) {
+      console.error('Failed to load notifications from storage:', error);
+      setNotifications([]);
+    }
+  };
 
   // 保存通知到本地存储
   const saveNotifications = useCallback((newNotifications: NotificationItem[]) => {

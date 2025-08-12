@@ -191,34 +191,239 @@ class AdvancedTestEngine extends BrowserEventEmitter {
   async initializeEngines() {
     try {
       // 检查各种测试引擎的可用性
-      const status = await testAPI.checkEngineStatus();
-      if (status.success && status.data) {
-        this.engines = {
-          lighthouse: status.data.lighthouse?.available || false,
-          playwright: status.data.playwright?.available || false,
-          puppeteer: false, // 暂未实现
-          k6: status.data.k6?.available || false
-        };
-      } else {
-        // 如果API调用失败，使用默认值
-        this.engines = {
-          lighthouse: false,
-          playwright: false,
-          puppeteer: false,
-          k6: false
-        };
+      const response = await fetch('/api/test/status', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(this.getAuthHeaders())
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.data) {
+          this.engines = {
+            lighthouse: result.data.lighthouse?.available || false,
+            playwright: result.data.playwright?.available || false,
+            puppeteer: result.data.puppeteer?.available || false,
+            k6: result.data.k6?.available || false
+          };
+
+          console.log('🔧 Test engines initialized:', this.engines);
+          return;
+        }
       }
 
-      console.log('🔧 Test engines status:', this.engines);
+      // 如果API调用失败，逐个检查引擎状态
+      await this.checkIndividualEngines();
+
     } catch (error) {
       console.error('Failed to initialize test engines:', error);
-      // 设置默认值
-      this.engines = {
-        lighthouse: false,
-        playwright: false,
-        puppeteer: false,
-        k6: false
-      };
+      // 回退到逐个检查
+      await this.checkIndividualEngines();
+    }
+  }
+
+  private async checkIndividualEngines() {
+    const engines = ['k6', 'lighthouse', 'playwright', 'puppeteer'];
+    const results: Record<string, boolean> = {};
+
+    for (const engine of engines) {
+      try {
+        const response = await fetch(`/api/test/${engine}/status`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(this.getAuthHeaders())
+          }
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          results[engine] = result.success && result.data?.available;
+        } else {
+          results[engine] = false;
+        }
+      } catch (error) {
+        console.warn(`Failed to check ${engine} engine:`, error);
+        results[engine] = false;
+      }
+    }
+
+    this.engines = {
+      lighthouse: results.lighthouse || false,
+      playwright: results.playwright || false,
+      puppeteer: results.puppeteer || false,
+      k6: results.k6 || false
+    };
+
+    console.log('🔧 Individual engine check results:', this.engines);
+  }
+
+  private getAuthHeaders(): Record<string, string> {
+    const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
+  }
+
+  /**
+   * 简化的测试执行方法 - 直接调用后端API
+   */
+  async runSimpleTest(config: {
+    testType: string;
+    url: string;
+    [key: string]: any;
+  }): Promise<{ testId: string; promise: Promise<any> }> {
+    const testId = `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const selectedEngine = this.selectBestEngine(config.testType);
+
+    console.log(`🚀 Starting simple test ${testId} with engine: ${selectedEngine}`);
+
+    const testPromise = new Promise(async (resolve, reject) => {
+      try {
+        // 通知测试开始
+        this.emit('testProgress', {
+          testId,
+          status: 'running',
+          progress: 0,
+          message: '正在启动测试...'
+        });
+
+        const result = await this.executeRealTest(config, selectedEngine, testId);
+
+        // 保存测试结果到后端
+        await this.saveTestResult(testId, result);
+
+        resolve(result);
+      } catch (error) {
+        console.error(`❌ Test ${testId} failed:`, error);
+        reject(error);
+      } finally {
+        this.activeTests.delete(testId);
+      }
+    });
+
+    // 记录活跃测试
+    this.activeTests.set(testId, {
+      id: testId,
+      backgroundTestId: testId,
+      config,
+      startTime: Date.now(),
+      engine: selectedEngine
+    });
+
+    return { testId, promise: testPromise };
+  }
+
+  private async executeRealTest(config: any, engine: string, testId: string): Promise<any> {
+    const apiEndpoint = this.getTestEndpoint(config.testType);
+
+    try {
+      // 通知测试进行中
+      this.emit('testProgress', {
+        testId,
+        status: 'running',
+        progress: 25,
+        message: '正在执行测试...'
+      });
+
+      const response = await fetch(apiEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(this.getAuthHeaders())
+        },
+        body: JSON.stringify({
+          url: config.url,
+          engine: engine,
+          config: config,
+          testId: testId
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || '测试执行失败');
+      }
+
+      // 通知测试完成
+      this.emit('testProgress', {
+        testId,
+        status: 'completed',
+        progress: 100,
+        message: '测试完成'
+      });
+
+      return this.formatTestResult(result.data, config);
+
+    } catch (error) {
+      // 通知测试失败
+      this.emit('testProgress', {
+        testId,
+        status: 'failed',
+        progress: 0,
+        message: `测试失败: ${error.message}`
+      });
+
+      throw error;
+    }
+  }
+
+  private getTestEndpoint(testType: string): string {
+    const endpoints: Record<string, string> = {
+      'stress': '/api/test/stress',
+      'performance': '/api/test/performance',
+      'seo': '/api/test/seo',
+      'security': '/api/test/security',
+      'api': '/api/test/api',
+      'compatibility': '/api/test/compatibility',
+      'ux': '/api/test/ux',
+      'database': '/api/test/database'
+    };
+
+    return endpoints[testType] || '/api/test/generic';
+  }
+
+  private formatTestResult(data: any, config: any): any {
+    return {
+      id: data.id || `result_${Date.now()}`,
+      testType: config.testType,
+      url: config.url,
+      status: data.status || 'completed',
+      score: data.score || 0,
+      metrics: data.metrics || {},
+      recommendations: data.recommendations || [],
+      details: data.details || {},
+      timestamp: new Date().toISOString(),
+      duration: data.duration || 0,
+      engine: data.engine || 'unknown'
+    };
+  }
+
+  private async saveTestResult(testId: string, result: any): Promise<void> {
+    try {
+      const response = await fetch('/api/test/history', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(this.getAuthHeaders())
+        },
+        body: JSON.stringify({
+          testId,
+          result,
+          timestamp: new Date().toISOString()
+        })
+      });
+
+      if (!response.ok) {
+        console.warn('Failed to save test result to backend:', response.statusText);
+      }
+    } catch (error) {
+      console.warn('Failed to save test result:', error);
     }
   }
 
