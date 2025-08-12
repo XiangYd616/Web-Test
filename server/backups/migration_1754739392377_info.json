@@ -1,0 +1,119 @@
+{
+  "migrationId": "migration_1754739392377",
+  "timestamp": "2025-08-09T11:36:32.529Z",
+  "database": "testweb_dev",
+  "tables": [
+    {
+      "original": "test_status_logs",
+      "backup": "test_status_logs_backup_migration_1754739392377",
+      "rowCount": 583,
+      "size": "376 kB"
+    },
+    {
+      "original": "users",
+      "backup": "users_backup_migration_1754739392377",
+      "rowCount": 14,
+      "size": "240 kB"
+    },
+    {
+      "original": "test_progress_logs",
+      "backup": "test_progress_logs_backup_migration_1754739392377",
+      "rowCount": 400,
+      "size": "200 kB"
+    },
+    {
+      "original": "test_sessions",
+      "backup": "test_sessions_backup_migration_1754739392377",
+      "rowCount": 6,
+      "size": "112 kB"
+    },
+    {
+      "original": "system_settings",
+      "backup": "system_settings_backup_migration_1754739392377",
+      "rowCount": 8,
+      "size": "96 kB"
+    },
+    {
+      "original": "user_preferences",
+      "backup": "user_preferences_backup_migration_1754739392377",
+      "rowCount": 14,
+      "size": "56 kB"
+    },
+    {
+      "original": "user_sessions",
+      "backup": null,
+      "rowCount": 0,
+      "size": "56 kB",
+      "skipped": true
+    },
+    {
+      "original": "security_test_details",
+      "backup": null,
+      "rowCount": 0,
+      "size": "56 kB",
+      "skipped": true
+    },
+    {
+      "original": "api_keys",
+      "backup": null,
+      "rowCount": 0,
+      "size": "48 kB",
+      "skipped": true
+    },
+    {
+      "original": "migrations",
+      "backup": "migrations_backup_migration_1754739392377",
+      "rowCount": 1,
+      "size": "40 kB"
+    },
+    {
+      "original": "performance_test_details",
+      "backup": null,
+      "rowCount": 0,
+      "size": "40 kB",
+      "skipped": true
+    },
+    {
+      "original": "test_artifacts",
+      "backup": null,
+      "rowCount": 0,
+      "size": "32 kB",
+      "skipped": true
+    },
+    {
+      "original": "stress_test_details",
+      "backup": null,
+      "rowCount": 0,
+      "size": "24 kB",
+      "skipped": true
+    },
+    {
+      "original": "seo_test_details",
+      "backup": null,
+      "rowCount": 0,
+      "size": "24 kB",
+      "skipped": true
+    },
+    {
+      "original": "accessibility_test_details",
+      "backup": null,
+      "rowCount": 0,
+      "size": "16 kB",
+      "skipped": true
+    },
+    {
+      "original": "api_test_details",
+      "backup": null,
+      "rowCount": 0,
+      "size": "16 kB",
+      "skipped": true
+    },
+    {
+      "original": "compatibility_test_details",
+      "backup": null,
+      "rowCount": 0,
+      "size": "16 kB",
+      "skipped": true
+    }
+  ]
+}

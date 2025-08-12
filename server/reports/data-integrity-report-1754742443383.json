@@ -1,0 +1,964 @@
+{
+  "timestamp": "2025-08-09T12:27:23.383Z",
+  "database": "testweb_dev",
+  "environment": "development",
+  "summary": {
+    "passed": 3,
+    "failed": 2,
+    "warnings": 1
+  },
+  "details": {
+    "tables": {
+      "expected": 15,
+      "actual": 21,
+      "missing": [],
+      "extra": [
+        "migrations",
+        "system_settings",
+        "test_progress_logs",
+        "test_sessions",
+        "test_status_logs",
+        "user_preferences"
+      ],
+      "details": [
+        {
+          "table_name": "accessibility_test_details",
+          "size": "16 kB",
+          "size_bytes": "16384"
+        },
+        {
+          "table_name": "api_test_details",
+          "size": "16 kB",
+          "size_bytes": "16384"
+        },
+        {
+          "table_name": "compatibility_test_details",
+          "size": "16 kB",
+          "size_bytes": "16384"
+        },
+        {
+          "table_name": "engine_status",
+          "size": "80 kB",
+          "size_bytes": "81920"
+        },
+        {
+          "table_name": "migrations",
+          "size": "72 kB",
+          "size_bytes": "73728"
+        },
+        {
+          "table_name": "monitoring_results",
+          "size": "32 kB",
+          "size_bytes": "32768"
+        },
+        {
+          "table_name": "monitoring_sites",
+          "size": "32 kB",
+          "size_bytes": "32768"
+        },
+        {
+          "table_name": "performance_test_details",
+          "size": "48 kB",
+          "size_bytes": "49152"
+        },
+        {
+          "table_name": "security_test_details",
+          "size": "64 kB",
+          "size_bytes": "65536"
+        },
+        {
+          "table_name": "seo_test_details",
+          "size": "24 kB",
+          "size_bytes": "24576"
+        },
+        {
+          "table_name": "stress_test_details",
+          "size": "24 kB",
+          "size_bytes": "24576"
+        },
+        {
+          "table_name": "system_config",
+          "size": "80 kB",
+          "size_bytes": "81920"
+        },
+        {
+          "table_name": "system_logs",
+          "size": "40 kB",
+          "size_bytes": "40960"
+        },
+        {
+          "table_name": "system_settings",
+          "size": "128 kB",
+          "size_bytes": "131072"
+        },
+        {
+          "table_name": "test_artifacts",
+          "size": "32 kB",
+          "size_bytes": "32768"
+        },
+        {
+          "table_name": "test_progress_logs",
+          "size": "208 kB",
+          "size_bytes": "212992"
+        },
+        {
+          "table_name": "test_results",
+          "size": "128 kB",
+          "size_bytes": "131072"
+        },
+        {
+          "table_name": "test_sessions",
+          "size": "144 kB",
+          "size_bytes": "147456"
+        },
+        {
+          "table_name": "test_status_logs",
+          "size": "384 kB",
+          "size_bytes": "393216"
+        },
+        {
+          "table_name": "user_preferences",
+          "size": "88 kB",
+          "size_bytes": "90112"
+        },
+        {
+          "table_name": "users",
+          "size": "240 kB",
+          "size_bytes": "245760"
+        }
+      ]
+    },
+    "indexes": {
+      "total": 77,
+      "details": [
+        {
+          "schemaname": "public",
+          "tablename": "accessibility_test_details",
+          "indexname": "accessibility_test_details_pkey",
+          "indexdef": "CREATE UNIQUE INDEX accessibility_test_details_pkey ON public.accessibility_test_details USING btree (id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "accessibility_test_details",
+          "indexname": "idx_accessibility_test_details_session_id",
+          "indexdef": "CREATE INDEX idx_accessibility_test_details_session_id ON public.accessibility_test_details USING btree (session_id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "api_test_details",
+          "indexname": "api_test_details_pkey",
+          "indexdef": "CREATE UNIQUE INDEX api_test_details_pkey ON public.api_test_details USING btree (id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "api_test_details",
+          "indexname": "idx_api_test_details_session_id",
+          "indexdef": "CREATE INDEX idx_api_test_details_session_id ON public.api_test_details USING btree (session_id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "compatibility_test_details",
+          "indexname": "compatibility_test_details_pkey",
+          "indexdef": "CREATE UNIQUE INDEX compatibility_test_details_pkey ON public.compatibility_test_details USING btree (id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "compatibility_test_details",
+          "indexname": "idx_compatibility_test_details_session_id",
+          "indexdef": "CREATE INDEX idx_compatibility_test_details_session_id ON public.compatibility_test_details USING btree (session_id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "engine_status",
+          "indexname": "engine_status_engine_type_key",
+          "indexdef": "CREATE UNIQUE INDEX engine_status_engine_type_key ON public.engine_status USING btree (engine_type)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "engine_status",
+          "indexname": "engine_status_pkey",
+          "indexdef": "CREATE UNIQUE INDEX engine_status_pkey ON public.engine_status USING btree (id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "migrations",
+          "indexname": "migrations_filename_key",
+          "indexdef": "CREATE UNIQUE INDEX migrations_filename_key ON public.migrations USING btree (filename)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "migrations",
+          "indexname": "migrations_pkey",
+          "indexdef": "CREATE UNIQUE INDEX migrations_pkey ON public.migrations USING btree (id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "monitoring_results",
+          "indexname": "idx_monitoring_results_site_time",
+          "indexdef": "CREATE INDEX idx_monitoring_results_site_time ON public.monitoring_results USING btree (site_id, checked_at DESC)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "monitoring_results",
+          "indexname": "idx_monitoring_results_status",
+          "indexdef": "CREATE INDEX idx_monitoring_results_status ON public.monitoring_results USING btree (status, checked_at DESC)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "monitoring_results",
+          "indexname": "monitoring_results_pkey",
+          "indexdef": "CREATE UNIQUE INDEX monitoring_results_pkey ON public.monitoring_results USING btree (id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "monitoring_sites",
+          "indexname": "idx_monitoring_sites_status",
+          "indexdef": "CREATE INDEX idx_monitoring_sites_status ON public.monitoring_sites USING btree (status)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "monitoring_sites",
+          "indexname": "idx_monitoring_sites_user",
+          "indexdef": "CREATE INDEX idx_monitoring_sites_user ON public.monitoring_sites USING btree (user_id) WHERE (deleted_at IS NULL)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "monitoring_sites",
+          "indexname": "monitoring_sites_pkey",
+          "indexdef": "CREATE UNIQUE INDEX monitoring_sites_pkey ON public.monitoring_sites USING btree (id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "performance_test_details",
+          "indexname": "idx_performance_test_details_session_id",
+          "indexdef": "CREATE INDEX idx_performance_test_details_session_id ON public.performance_test_details USING btree (session_id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "performance_test_details",
+          "indexname": "performance_test_details_pkey",
+          "indexdef": "CREATE UNIQUE INDEX performance_test_details_pkey ON public.performance_test_details USING btree (id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "security_test_details",
+          "indexname": "idx_security_test_details_session_id",
+          "indexdef": "CREATE INDEX idx_security_test_details_session_id ON public.security_test_details USING btree (session_id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "security_test_details",
+          "indexname": "idx_security_test_vuln_score",
+          "indexdef": "CREATE INDEX idx_security_test_vuln_score ON public.security_test_details USING btree (vulnerabilities_total DESC, session_id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "security_test_details",
+          "indexname": "security_test_details_pkey",
+          "indexdef": "CREATE UNIQUE INDEX security_test_details_pkey ON public.security_test_details USING btree (id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "seo_test_details",
+          "indexname": "idx_seo_test_details_session_id",
+          "indexdef": "CREATE INDEX idx_seo_test_details_session_id ON public.seo_test_details USING btree (session_id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "seo_test_details",
+          "indexname": "idx_seo_test_score",
+          "indexdef": "CREATE INDEX idx_seo_test_score ON public.seo_test_details USING btree (seo_score DESC, session_id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "seo_test_details",
+          "indexname": "seo_test_details_pkey",
+          "indexdef": "CREATE UNIQUE INDEX seo_test_details_pkey ON public.seo_test_details USING btree (id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "stress_test_details",
+          "indexname": "idx_stress_test_details_session_id",
+          "indexdef": "CREATE INDEX idx_stress_test_details_session_id ON public.stress_test_details USING btree (session_id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "stress_test_details",
+          "indexname": "idx_stress_test_tps_score",
+          "indexdef": "CREATE INDEX idx_stress_test_tps_score ON public.stress_test_details USING btree (tps_peak DESC, session_id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "stress_test_details",
+          "indexname": "stress_test_details_pkey",
+          "indexdef": "CREATE UNIQUE INDEX stress_test_details_pkey ON public.stress_test_details USING btree (id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "system_config",
+          "indexname": "system_config_category_key_key",
+          "indexdef": "CREATE UNIQUE INDEX system_config_category_key_key ON public.system_config USING btree (category, key)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "system_config",
+          "indexname": "system_config_pkey",
+          "indexdef": "CREATE UNIQUE INDEX system_config_pkey ON public.system_config USING btree (id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "system_logs",
+          "indexname": "idx_system_logs_category_time",
+          "indexdef": "CREATE INDEX idx_system_logs_category_time ON public.system_logs USING btree (category, created_at DESC)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "system_logs",
+          "indexname": "idx_system_logs_level_time",
+          "indexdef": "CREATE INDEX idx_system_logs_level_time ON public.system_logs USING btree (level, created_at DESC)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "system_logs",
+          "indexname": "idx_system_logs_user",
+          "indexdef": "CREATE INDEX idx_system_logs_user ON public.system_logs USING btree (user_id, created_at DESC)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "system_logs",
+          "indexname": "system_logs_pkey",
+          "indexdef": "CREATE UNIQUE INDEX system_logs_pkey ON public.system_logs USING btree (id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "system_settings",
+          "indexname": "idx_system_settings_category",
+          "indexdef": "CREATE INDEX idx_system_settings_category ON public.system_settings USING btree (category)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "system_settings",
+          "indexname": "idx_system_settings_key",
+          "indexdef": "CREATE INDEX idx_system_settings_key ON public.system_settings USING btree (key)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "system_settings",
+          "indexname": "idx_system_settings_public",
+          "indexdef": "CREATE INDEX idx_system_settings_public ON public.system_settings USING btree (is_public) WHERE (is_public = true)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "system_settings",
+          "indexname": "system_settings_key_key",
+          "indexdef": "CREATE UNIQUE INDEX system_settings_key_key ON public.system_settings USING btree (key)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "system_settings",
+          "indexname": "system_settings_pkey",
+          "indexdef": "CREATE UNIQUE INDEX system_settings_pkey ON public.system_settings USING btree (id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "test_artifacts",
+          "indexname": "idx_test_artifacts_session_type",
+          "indexdef": "CREATE INDEX idx_test_artifacts_session_type ON public.test_artifacts USING btree (session_id, artifact_type)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "test_artifacts",
+          "indexname": "idx_test_artifacts_type_status",
+          "indexdef": "CREATE INDEX idx_test_artifacts_type_status ON public.test_artifacts USING btree (artifact_type, upload_status)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "test_artifacts",
+          "indexname": "test_artifacts_pkey",
+          "indexdef": "CREATE UNIQUE INDEX test_artifacts_pkey ON public.test_artifacts USING btree (id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "test_progress_logs",
+          "indexname": "idx_test_progress_logs_phase",
+          "indexdef": "CREATE INDEX idx_test_progress_logs_phase ON public.test_progress_logs USING btree (current_phase)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "test_progress_logs",
+          "indexname": "idx_test_progress_logs_recorded_at",
+          "indexdef": "CREATE INDEX idx_test_progress_logs_recorded_at ON public.test_progress_logs USING btree (recorded_at)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "test_progress_logs",
+          "indexname": "idx_test_progress_logs_test_id",
+          "indexdef": "CREATE INDEX idx_test_progress_logs_test_id ON public.test_progress_logs USING btree (test_history_id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "test_progress_logs",
+          "indexname": "test_progress_logs_pkey",
+          "indexdef": "CREATE UNIQUE INDEX test_progress_logs_pkey ON public.test_progress_logs USING btree (id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "test_results",
+          "indexname": "idx_test_results_active",
+          "indexdef": "CREATE INDEX idx_test_results_active ON public.test_results USING btree (user_id, test_type, created_at DESC) WHERE (deleted_at IS NULL)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "test_results",
+          "indexname": "idx_test_results_created_at",
+          "indexdef": "CREATE INDEX idx_test_results_created_at ON public.test_results USING btree (created_at DESC)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "test_results",
+          "indexname": "idx_test_results_status",
+          "indexdef": "CREATE INDEX idx_test_results_status ON public.test_results USING btree (status) WHERE ((status)::text <> 'completed'::text)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "test_results",
+          "indexname": "idx_test_results_user_type",
+          "indexdef": "CREATE INDEX idx_test_results_user_type ON public.test_results USING btree (user_id, test_type)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "test_results",
+          "indexname": "test_results_pkey",
+          "indexdef": "CREATE UNIQUE INDEX test_results_pkey ON public.test_results USING btree (id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "test_sessions",
+          "indexname": "idx_test_sessions_status_time",
+          "indexdef": "CREATE INDEX idx_test_sessions_status_time ON public.test_sessions USING btree (status, created_at DESC) WHERE (deleted_at IS NULL)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "test_sessions",
+          "indexname": "idx_test_sessions_type_time",
+          "indexdef": "CREATE INDEX idx_test_sessions_type_time ON public.test_sessions USING btree (test_type, created_at DESC) WHERE (deleted_at IS NULL)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "test_sessions",
+          "indexname": "idx_test_sessions_user_type_score",
+          "indexdef": "CREATE INDEX idx_test_sessions_user_type_score ON public.test_sessions USING btree (user_id, test_type, overall_score DESC) WHERE (deleted_at IS NULL)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "test_sessions",
+          "indexname": "idx_test_sessions_user_type_status",
+          "indexdef": "CREATE INDEX idx_test_sessions_user_type_status ON public.test_sessions USING btree (user_id, test_type, status) WHERE (deleted_at IS NULL)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "test_sessions",
+          "indexname": "idx_test_sessions_user_type_time",
+          "indexdef": "CREATE INDEX idx_test_sessions_user_type_time ON public.test_sessions USING btree (user_id, test_type, created_at DESC) WHERE (deleted_at IS NULL)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "test_sessions",
+          "indexname": "test_sessions_pkey",
+          "indexdef": "CREATE UNIQUE INDEX test_sessions_pkey ON public.test_sessions USING btree (id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "test_status_logs",
+          "indexname": "idx_status_logs_status",
+          "indexdef": "CREATE INDEX idx_status_logs_status ON public.test_status_logs USING btree (to_status, changed_at DESC)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "test_status_logs",
+          "indexname": "idx_status_logs_test_time",
+          "indexdef": "CREATE INDEX idx_status_logs_test_time ON public.test_status_logs USING btree (test_history_id, changed_at DESC)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "test_status_logs",
+          "indexname": "idx_test_status_logs_changed_at",
+          "indexdef": "CREATE INDEX idx_test_status_logs_changed_at ON public.test_status_logs USING btree (changed_at)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "test_status_logs",
+          "indexname": "idx_test_status_logs_status",
+          "indexdef": "CREATE INDEX idx_test_status_logs_status ON public.test_status_logs USING btree (to_status)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "test_status_logs",
+          "indexname": "idx_test_status_logs_test_id",
+          "indexdef": "CREATE INDEX idx_test_status_logs_test_id ON public.test_status_logs USING btree (test_history_id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "test_status_logs",
+          "indexname": "test_status_logs_optimized_pkey",
+          "indexdef": "CREATE UNIQUE INDEX test_status_logs_optimized_pkey ON public.test_status_logs USING btree (id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "user_preferences",
+          "indexname": "idx_user_preferences_user_id",
+          "indexdef": "CREATE INDEX idx_user_preferences_user_id ON public.user_preferences USING btree (user_id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "user_preferences",
+          "indexname": "user_preferences_pkey",
+          "indexdef": "CREATE UNIQUE INDEX user_preferences_pkey ON public.user_preferences USING btree (id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "user_preferences",
+          "indexname": "user_preferences_user_id_key",
+          "indexdef": "CREATE UNIQUE INDEX user_preferences_user_id_key ON public.user_preferences USING btree (user_id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "users",
+          "indexname": "idx_users_active",
+          "indexdef": "CREATE INDEX idx_users_active ON public.users USING btree (is_active) WHERE (is_active = true)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "users",
+          "indexname": "idx_users_created_at",
+          "indexdef": "CREATE INDEX idx_users_created_at ON public.users USING btree (created_at)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "users",
+          "indexname": "idx_users_email",
+          "indexdef": "CREATE INDEX idx_users_email ON public.users USING btree (email)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "users",
+          "indexname": "idx_users_is_active",
+          "indexdef": "CREATE INDEX idx_users_is_active ON public.users USING btree (is_active)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "users",
+          "indexname": "idx_users_last_login",
+          "indexdef": "CREATE INDEX idx_users_last_login ON public.users USING btree (last_login)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "users",
+          "indexname": "idx_users_role",
+          "indexdef": "CREATE INDEX idx_users_role ON public.users USING btree (role)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "users",
+          "indexname": "idx_users_username",
+          "indexdef": "CREATE INDEX idx_users_username ON public.users USING btree (username)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "users",
+          "indexname": "users_email_key",
+          "indexdef": "CREATE UNIQUE INDEX users_email_key ON public.users USING btree (email)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "users",
+          "indexname": "users_email_key1",
+          "indexdef": "CREATE UNIQUE INDEX users_email_key1 ON public.users USING btree (email)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "users",
+          "indexname": "users_pkey",
+          "indexdef": "CREATE UNIQUE INDEX users_pkey ON public.users USING btree (id)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "users",
+          "indexname": "users_username_key",
+          "indexdef": "CREATE UNIQUE INDEX users_username_key ON public.users USING btree (username)"
+        },
+        {
+          "schemaname": "public",
+          "tablename": "users",
+          "indexname": "users_username_key1",
+          "indexdef": "CREATE UNIQUE INDEX users_username_key1 ON public.users USING btree (username)"
+        }
+      ]
+    },
+    "constraints": {
+      "foreignKeys": 10,
+      "primaryKeys": 21,
+      "uniqueConstraints": 10,
+      "details": {
+        "foreignKeys": [
+          {
+            "table_name": "accessibility_test_details",
+            "constraint_name": "accessibility_test_details_session_id_fkey",
+            "constraint_type": "FOREIGN KEY",
+            "column_name": "session_id",
+            "foreign_table_name": "test_sessions",
+            "foreign_column_name": "id"
+          },
+          {
+            "table_name": "api_test_details",
+            "constraint_name": "api_test_details_session_id_fkey",
+            "constraint_type": "FOREIGN KEY",
+            "column_name": "session_id",
+            "foreign_table_name": "test_sessions",
+            "foreign_column_name": "id"
+          },
+          {
+            "table_name": "compatibility_test_details",
+            "constraint_name": "compatibility_test_details_session_id_fkey",
+            "constraint_type": "FOREIGN KEY",
+            "column_name": "session_id",
+            "foreign_table_name": "test_sessions",
+            "foreign_column_name": "id"
+          },
+          {
+            "table_name": "performance_test_details",
+            "constraint_name": "performance_test_details_session_id_fkey",
+            "constraint_type": "FOREIGN KEY",
+            "column_name": "session_id",
+            "foreign_table_name": "test_sessions",
+            "foreign_column_name": "id"
+          },
+          {
+            "table_name": "security_test_details",
+            "constraint_name": "security_test_details_session_id_fkey",
+            "constraint_type": "FOREIGN KEY",
+            "column_name": "session_id",
+            "foreign_table_name": "test_sessions",
+            "foreign_column_name": "id"
+          },
+          {
+            "table_name": "seo_test_details",
+            "constraint_name": "seo_test_details_session_id_fkey",
+            "constraint_type": "FOREIGN KEY",
+            "column_name": "session_id",
+            "foreign_table_name": "test_sessions",
+            "foreign_column_name": "id"
+          },
+          {
+            "table_name": "stress_test_details",
+            "constraint_name": "stress_test_details_session_id_fkey",
+            "constraint_type": "FOREIGN KEY",
+            "column_name": "session_id",
+            "foreign_table_name": "test_sessions",
+            "foreign_column_name": "id"
+          },
+          {
+            "table_name": "test_artifacts",
+            "constraint_name": "test_artifacts_session_id_fkey",
+            "constraint_type": "FOREIGN KEY",
+            "column_name": "session_id",
+            "foreign_table_name": "test_sessions",
+            "foreign_column_name": "id"
+          },
+          {
+            "table_name": "test_sessions",
+            "constraint_name": "test_sessions_user_id_fkey",
+            "constraint_type": "FOREIGN KEY",
+            "column_name": "user_id",
+            "foreign_table_name": "users",
+            "foreign_column_name": "id"
+          },
+          {
+            "table_name": "user_preferences",
+            "constraint_name": "user_preferences_user_id_fkey",
+            "constraint_type": "FOREIGN KEY",
+            "column_name": "user_id",
+            "foreign_table_name": "users",
+            "foreign_column_name": "id"
+          }
+        ],
+        "primaryKeys": [
+          {
+            "table_name": "accessibility_test_details",
+            "constraint_name": "accessibility_test_details_pkey",
+            "column_name": "id"
+          },
+          {
+            "table_name": "api_test_details",
+            "constraint_name": "api_test_details_pkey",
+            "column_name": "id"
+          },
+          {
+            "table_name": "compatibility_test_details",
+            "constraint_name": "compatibility_test_details_pkey",
+            "column_name": "id"
+          },
+          {
+            "table_name": "engine_status",
+            "constraint_name": "engine_status_pkey",
+            "column_name": "id"
+          },
+          {
+            "table_name": "migrations",
+            "constraint_name": "migrations_pkey",
+            "column_name": "id"
+          },
+          {
+            "table_name": "monitoring_results",
+            "constraint_name": "monitoring_results_pkey",
+            "column_name": "id"
+          },
+          {
+            "table_name": "monitoring_sites",
+            "constraint_name": "monitoring_sites_pkey",
+            "column_name": "id"
+          },
+          {
+            "table_name": "performance_test_details",
+            "constraint_name": "performance_test_details_pkey",
+            "column_name": "id"
+          },
+          {
+            "table_name": "security_test_details",
+            "constraint_name": "security_test_details_pkey",
+            "column_name": "id"
+          },
+          {
+            "table_name": "seo_test_details",
+            "constraint_name": "seo_test_details_pkey",
+            "column_name": "id"
+          },
+          {
+            "table_name": "stress_test_details",
+            "constraint_name": "stress_test_details_pkey",
+            "column_name": "id"
+          },
+          {
+            "table_name": "system_config",
+            "constraint_name": "system_config_pkey",
+            "column_name": "id"
+          },
+          {
+            "table_name": "system_logs",
+            "constraint_name": "system_logs_pkey",
+            "column_name": "id"
+          },
+          {
+            "table_name": "system_settings",
+            "constraint_name": "system_settings_pkey",
+            "column_name": "id"
+          },
+          {
+            "table_name": "test_artifacts",
+            "constraint_name": "test_artifacts_pkey",
+            "column_name": "id"
+          },
+          {
+            "table_name": "test_progress_logs",
+            "constraint_name": "test_progress_logs_pkey",
+            "column_name": "id"
+          },
+          {
+            "table_name": "test_results",
+            "constraint_name": "test_results_pkey",
+            "column_name": "id"
+          },
+          {
+            "table_name": "test_sessions",
+            "constraint_name": "test_sessions_pkey",
+            "column_name": "id"
+          },
+          {
+            "table_name": "test_status_logs",
+            "constraint_name": "test_status_logs_optimized_pkey",
+            "column_name": "id"
+          },
+          {
+            "table_name": "user_preferences",
+            "constraint_name": "user_preferences_pkey",
+            "column_name": "id"
+          },
+          {
+            "table_name": "users",
+            "constraint_name": "users_pkey",
+            "column_name": "id"
+          }
+        ],
+        "uniqueConstraints": [
+          {
+            "table_name": "engine_status",
+            "constraint_name": "engine_status_engine_type_key",
+            "column_name": "engine_type"
+          },
+          {
+            "table_name": "migrations",
+            "constraint_name": "migrations_filename_key",
+            "column_name": "filename"
+          },
+          {
+            "table_name": "system_config",
+            "constraint_name": "system_config_category_key_key",
+            "column_name": "key"
+          },
+          {
+            "table_name": "system_config",
+            "constraint_name": "system_config_category_key_key",
+            "column_name": "category"
+          },
+          {
+            "table_name": "system_settings",
+            "constraint_name": "system_settings_key_key",
+            "column_name": "key"
+          },
+          {
+            "table_name": "user_preferences",
+            "constraint_name": "user_preferences_user_id_key",
+            "column_name": "user_id"
+          },
+          {
+            "table_name": "users",
+            "constraint_name": "users_email_key",
+            "column_name": "email"
+          },
+          {
+            "table_name": "users",
+            "constraint_name": "users_email_key1",
+            "column_name": "email"
+          },
+          {
+            "table_name": "users",
+            "constraint_name": "users_username_key",
+            "column_name": "username"
+          },
+          {
+            "table_name": "users",
+            "constraint_name": "users_username_key1",
+            "column_name": "username"
+          }
+        ]
+      }
+    },
+    "data": {
+      "tableStats": {
+        "users": 14,
+        "test_results": 6,
+        "system_config": 13,
+        "engine_status": 7
+      },
+      "systemConfig": [
+        {
+          "category": "engine",
+          "count": "7"
+        },
+        {
+          "category": "limits",
+          "count": "3"
+        },
+        {
+          "category": "system",
+          "count": "3"
+        }
+      ],
+      "engineStatus": [
+        {
+          "engine_type": "accessibility",
+          "status": "healthy"
+        },
+        {
+          "engine_type": "api",
+          "status": "healthy"
+        },
+        {
+          "engine_type": "compatibility",
+          "status": "healthy"
+        },
+        {
+          "engine_type": "performance",
+          "status": "healthy"
+        },
+        {
+          "engine_type": "security",
+          "status": "healthy"
+        },
+        {
+          "engine_type": "seo",
+          "status": "healthy"
+        },
+        {
+          "engine_type": "stress",
+          "status": "healthy"
+        }
+      ]
+    },
+    "performance": {
+      "databaseSize": {
+        "size": "11 MB",
+        "size_bytes": "11988115"
+      },
+      "tableSizes": [
+        {
+          "tablename": "test_status_logs",
+          "size": "384 kB",
+          "size_bytes": "393216"
+        },
+        {
+          "tablename": "users",
+          "size": "240 kB",
+          "size_bytes": "245760"
+        },
+        {
+          "tablename": "test_progress_logs",
+          "size": "208 kB",
+          "size_bytes": "212992"
+        },
+        {
+          "tablename": "test_sessions",
+          "size": "144 kB",
+          "size_bytes": "147456"
+        },
+        {
+          "tablename": "test_results",
+          "size": "128 kB",
+          "size_bytes": "131072"
+        },
+        {
+          "tablename": "system_settings",
+          "size": "128 kB",
+          "size_bytes": "131072"
+        },
+        {
+          "tablename": "user_preferences",
+          "size": "88 kB",
+          "size_bytes": "90112"
+        },
+        {
+          "tablename": "system_config",
+          "size": "80 kB",
+          "size_bytes": "81920"
+        },
+        {
+          "tablename": "engine_status",
+          "size": "80 kB",
+          "size_bytes": "81920"
+        },
+        {
+          "tablename": "migrations",
+          "size": "72 kB",
+          "size_bytes": "73728"
+        }
+      ],
+      "indexUsage": [],
+      "cacheHitRatio": "98.48501013549557238900"
+    },
+    "overall": {
+      "passed": 3,
+      "failed": 2,
+      "warnings": 1
+    }
+  }
+}

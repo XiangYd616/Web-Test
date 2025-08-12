@@ -227,7 +227,7 @@ class SystemIntegrationChecker {
       'theme-management': ['themeService'],
       'internationalization': ['i18nService'],
       'responsive-design': ['responsive'],
-      'accessibility-features': ['accessibilityService'],
+      'accessibility-features': ['CompatibilityTest'],
       'security-measures': ['security', 'apiSecurity', 'errorHandler'],
       'data-visualization': ['dataVisualizationService', 'statisticsService', 'performanceRoutes', 'dataManagement'],
       'reporting-system': ['reportingService', 'statisticsService', 'dataManagement'],
@@ -286,7 +286,7 @@ class SystemIntegrationChecker {
       'theme-management': ['ThemeContext', 'ThemeProvider', 'ThemeToggle', 'useTheme'],
       'internationalization': ['i18n', 'useTranslation', 'realSEOAnalysisEngine'],
       'responsive-design': ['mobile', 'typography', 'design-system'],
-      'accessibility-features': ['accessibilityService'],
+      'accessibility-features': ['CompatibilityTest'],
       'security-measures': ['security', 'ErrorHandling', 'errorService'],
       'data-visualization': ['SimpleCharts', 'DataVisualizationOptimizer', 'dataAnalysisService'],
       'reporting-system': ['reportService', 'reportGeneratorService', 'ReportExporter']

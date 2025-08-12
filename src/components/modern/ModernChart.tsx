@@ -1,21 +1,41 @@
-import { ArcElement, BarElement, CategoryScale, Chart as ChartJS, Filler, Legend, LinearScale, LineElement, PointElement, Title, Tooltip } from 'chart.js';
 import React from 'react';
-import { Bar, Doughnut, Line } from 'react-chartjs-2';
 
-// CSS样式已迁移到组件库中
+// 延迟导入 Chart.js 以避免初始化问题
+let ChartJS: any;
+let Bar: any;
+let Doughnut: any;
+let Line: any;
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-);
+// 动态导入和注册 Chart.js
+const initializeChartJS = async () => {
+  if (ChartJS) return; // 已经初始化
+
+  try {
+    const chartModule = await import('chart.js');
+    const reactChartModule = await import('react-chartjs-2');
+
+    ChartJS = chartModule.Chart;
+    Bar = reactChartModule.Bar;
+    Doughnut = reactChartModule.Doughnut;
+    Line = reactChartModule.Line;
+
+    // 注册必要的组件
+    ChartJS.register(
+      chartModule.CategoryScale,
+      chartModule.LinearScale,
+      chartModule.PointElement,
+      chartModule.LineElement,
+      chartModule.BarElement,
+      chartModule.ArcElement,
+      chartModule.Title,
+      chartModule.Tooltip,
+      chartModule.Legend,
+      chartModule.Filler
+    );
+  } catch (error) {
+    console.error('Failed to initialize Chart.js:', error);
+  }
+};
 
 // 现代化图表配色方案
 export const chartColors = {
@@ -104,10 +124,26 @@ export const ModernLineChart: React.FC<LineChartProps> = ({
   height = 300,
   className = ''
 }) => {
+  const [isReady, setIsReady] = React.useState(false);
+
+  React.useEffect(() => {
+    initializeChartJS().then(() => setIsReady(true));
+  }, []);
+
   const mergedOptions = {
     ...defaultOptions,
     ...options
   };
+
+  if (!isReady || !Line) {
+    return (
+      <div className={`modern-chart-container ${className}`} style={{ height }}>
+        <div className="flex items-center justify-center h-full text-gray-500">
+          加载图表中...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`modern-chart-container ${className}`} style={{ height }}>
@@ -129,10 +165,26 @@ export const ModernBarChart: React.FC<BarChartProps> = ({
   height = 300,
   className = ''
 }) => {
+  const [isReady, setIsReady] = React.useState(false);
+
+  React.useEffect(() => {
+    initializeChartJS().then(() => setIsReady(true));
+  }, []);
+
   const mergedOptions = {
     ...defaultOptions,
     ...options
   };
+
+  if (!isReady || !Bar) {
+    return (
+      <div className={`modern-chart-container ${className}`} style={{ height }}>
+        <div className="flex items-center justify-center h-full text-gray-500">
+          加载图表中...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`modern-chart-container ${className}`} style={{ height }}>
@@ -154,6 +206,12 @@ export const ModernDoughnutChart: React.FC<DoughnutChartProps> = ({
   size = 200,
   className = ''
 }) => {
+  const [isReady, setIsReady] = React.useState(false);
+
+  React.useEffect(() => {
+    initializeChartJS().then(() => setIsReady(true));
+  }, []);
+
   const doughnutOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -192,6 +250,16 @@ export const ModernDoughnutChart: React.FC<DoughnutChartProps> = ({
     cutout: '70%',
     ...options
   };
+
+  if (!isReady || !Doughnut) {
+    return (
+      <div className={`modern-chart-container ${className}`} style={{ height: size, width: size }}>
+        <div className="flex items-center justify-center h-full text-gray-500">
+          加载图表中...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`modern-chart-container ${className}`} style={{ height: size, width: size }}>

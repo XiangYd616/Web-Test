@@ -34,7 +34,7 @@ const MonitoringDashboard = lazy(() => import('../../pages/MonitoringDashboard')
 
 // 报告和历史
 const TestHistory = lazy(() => import('../../pages/TestHistory'));
-const EnhancedTestHistory = lazy(() => import('../../pages/EnhancedTestHistory'));
+
 const Reports = lazy(() => import('../../pages/Reports'));
 const TestResultDetail = lazy(() => import('../../pages/TestResultDetail'));
 const StressTestDetail = lazy(() => import('../../pages/StressTestDetail'));
@@ -65,7 +65,7 @@ const TestSchedule = lazy(() => import('../../pages/TestSchedule'));
 const ScheduledTasks = lazy(() => import('../../pages/ScheduledTasks'));
 
 // 其他功能
-const UnifiedSettings = lazy(() => import('../../pages/UnifiedSettings'));
+const Settings = lazy(() => import('../../pages/Settings'));
 const Help = lazy(() => import('../../pages/Help'));
 // ThemeShowcase 已删除
 const Subscription = lazy(() => import('../../pages/Subscription'));
@@ -171,11 +171,7 @@ const AppRoutes: React.FC = () => {
             <TestHistory />
           </LazyPageWrapper>
         } />
-        <Route path="enhanced-test-history" element={
-          <LazyPageWrapper>
-            <EnhancedTestHistory />
-          </LazyPageWrapper>
-        } />
+
         <Route path="test-result/:id" element={
           <LazyPageWrapper>
             <TestResultDetail />
@@ -332,7 +328,7 @@ const AppRoutes: React.FC = () => {
       {/* 用户设置 - 需要登录 */}
       <Route path="settings" element={
         <LazyPageWrapper>
-          <UnifiedSettings />
+          <Settings />
         </LazyPageWrapper>
       } />
       <Route path="subscription" element={

@@ -5,7 +5,13 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const { query, transaction } = require('../config/database');
-const { generateToken, authMiddleware, refreshToken } = require('../middleware/auth');
+const {
+  generateTokenPair,
+  authMiddleware,
+  refreshToken,
+  recordSecurityEvent,
+  createUserSession
+} = require('../middleware/auth');
 const { loginRateLimiter, registerRateLimiter } = require('../middleware/rateLimiter');
 const { asyncHandler } = require('../middleware/errorHandler');
 const { securityLogger } = require('../middleware/logger');
@@ -20,34 +26,29 @@ router.post('/register', registerRateLimiter, asyncHandler(async (req, res) => {
   const { username, email, password, confirmPassword } = req.body;
 
   // 验证输入
-  if (!username || !email || !password || !confirmPassword) {
-    return res.status(400).json({
-      success: false,
-      message: '所有字段都是必填的'
-    });
+  const errors = [];
+
+  if (!username) errors.push({ field: 'username', message: '用户名是必填的' });
+  if (!email) errors.push({ field: 'email', message: '邮箱是必填的' });
+  if (!password) errors.push({ field: 'password', message: '密码是必填的' });
+  if (!confirmPassword) errors.push({ field: 'confirmPassword', message: '确认密码是必填的' });
+
+  if (password && confirmPassword && password !== confirmPassword) {
+    errors.push({ field: 'confirmPassword', message: '密码确认不匹配' });
   }
 
-  if (password !== confirmPassword) {
-    return res.status(400).json({
-      success: false,
-      message: '密码确认不匹配'
-    });
-  }
-
-  if (password.length < 6) {
-    return res.status(400).json({
-      success: false,
-      message: '密码长度至少6位'
-    });
+  if (password && password.length < 6) {
+    errors.push({ field: 'password', message: '密码长度至少6位' });
   }
 
   // 验证邮箱格式
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    return res.status(400).json({
-      success: false,
-      message: '邮箱格式无效'
-    });
+  if (email && !emailRegex.test(email)) {
+    errors.push({ field: 'email', message: '邮箱格式无效' });
+  }
+
+  if (errors.length > 0) {
+    return res.validationError(errors);
   }
 
   try {
@@ -58,10 +59,7 @@ router.post('/register', registerRateLimiter, asyncHandler(async (req, res) => {
     );
 
     if (existingUser.rows.length > 0) {
-      return res.status(409).json({
-        success: false,
-        message: '用户名或邮箱已存在'
-      });
+      return res.conflict('用户', '用户名或邮箱已存在');
     }
 
     // 加密密码
@@ -70,7 +68,7 @@ router.post('/register', registerRateLimiter, asyncHandler(async (req, res) => {
 
     // 创建用户
     const result = await query(
-      `INSERT INTO users (username, email, password, role, is_active, created_at, updated_at)
+      `INSERT INTO users (username, email, password_hash, role, is_active, created_at, updated_at)
        VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
        RETURNING id, username, email, role, is_active, created_at`,
       [username, email, hashedPassword, 'user', true]
@@ -78,8 +76,11 @@ router.post('/register', registerRateLimiter, asyncHandler(async (req, res) => {
 
     const user = result.rows[0];
 
-    // 生成JWT令牌
-    const token = generateToken(user.id);
+    // 生成JWT令牌对
+    const tokenPair = await generateTokenPair(user.id);
+
+    // 创建用户会话
+    await createUserSession(user.id, tokenPair.accessToken, tokenPair.refreshToken, req);
 
     // 记录安全日志
     securityLogger('user_registered', {
@@ -88,25 +89,23 @@ router.post('/register', registerRateLimiter, asyncHandler(async (req, res) => {
       email: user.email
     }, req);
 
-    res.status(201).json({
-      success: true,
-      message: '注册成功',
-      token,
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        isActive: user.is_active,
-        createdAt: user.created_at
-      }
-    });
+    // 记录安全事件
+    await recordSecurityEvent(user.id, 'user_registered', {
+      username: user.username,
+      email: user.email,
+      registrationMethod: 'email'
+    }, req, true, 'low');
+
+    return res.success({
+      accessToken: tokenPair.accessToken,
+      refreshToken: tokenPair.refreshToken,
+      tokenType: tokenPair.tokenType,
+      expiresIn: tokenPair.expiresIn,
+      user: tokenPair.user
+    }, '注册成功', 201);
   } catch (error) {
     console.error('注册错误:', error);
-    res.status(500).json({
-      success: false,
-      message: '注册失败，请稍后重试'
-    });
+    return res.serverError('注册失败，请稍后重试');
   }
 }));
 
@@ -118,17 +117,18 @@ router.post('/login', loginRateLimiter, asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   // 验证输入
-  if (!email || !password) {
-    return res.status(400).json({
-      success: false,
-      message: '邮箱和密码都是必填的'
-    });
+  const errors = [];
+  if (!email) errors.push({ field: 'email', message: '邮箱是必填的' });
+  if (!password) errors.push({ field: 'password', message: '密码是必填的' });
+
+  if (errors.length > 0) {
+    return res.validationError(errors);
   }
 
   try {
     // 查找用户
     const result = await query(
-      'SELECT id, username, email, password, role, is_active, last_login FROM users WHERE email = $1',
+      'SELECT id, username, email, password_hash, role, is_active, last_login, failed_login_attempts, locked_until FROM users WHERE email = $1',
       [email]
     );
 
@@ -138,13 +138,32 @@ router.post('/login', loginRateLimiter, asyncHandler(async (req, res) => {
         reason: 'user_not_found'
       }, req);
 
-      return res.status(401).json({
-        success: false,
-        message: '邮箱或密码错误'
-      });
+      await recordSecurityEvent(null, 'login_failed', {
+        email,
+        reason: 'user_not_found'
+      }, req, false, 'medium');
+
+      return res.unauthorized('邮箱或密码错误');
     }
 
     const user = result.rows[0];
+
+    // 检查账户是否被锁定
+    if (user.locked_until && new Date(user.locked_until) > new Date()) {
+      securityLogger('login_failed', {
+        userId: user.id,
+        email,
+        reason: 'account_locked'
+      }, req);
+
+      await recordSecurityEvent(user.id, 'login_failed', {
+        email,
+        reason: 'account_locked',
+        lockedUntil: user.locked_until
+      }, req, false, 'high');
+
+      return res.forbidden('账户已被锁定，请稍后重试');
+    }
 
     // 检查账户是否激活
     if (!user.is_active) {
@@ -154,35 +173,60 @@ router.post('/login', loginRateLimiter, asyncHandler(async (req, res) => {
         reason: 'account_disabled'
       }, req);
 
-      return res.status(401).json({
-        success: false,
-        message: '账户已被禁用'
-      });
+      await recordSecurityEvent(user.id, 'login_failed', {
+        email,
+        reason: 'account_disabled'
+      }, req, false, 'medium');
+
+      return res.forbidden('账户已被禁用');
     }
 
     // 验证密码
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
     if (!isPasswordValid) {
+      // 增加失败登录次数
+      const newFailedAttempts = (user.failed_login_attempts || 0) + 1;
+      let lockUntil = null;
+
+      // 如果失败次数达到5次，锁定账户30分钟
+      if (newFailedAttempts >= 5) {
+        lockUntil = new Date();
+        lockUntil.setMinutes(lockUntil.getMinutes() + 30);
+      }
+
+      await query(
+        'UPDATE users SET failed_login_attempts = $1, locked_until = $2, updated_at = NOW() WHERE id = $3',
+        [newFailedAttempts, lockUntil, user.id]
+      );
+
       securityLogger('login_failed', {
         userId: user.id,
         email,
-        reason: 'invalid_password'
+        reason: 'invalid_password',
+        failedAttempts: newFailedAttempts
       }, req);
 
-      return res.status(401).json({
-        success: false,
-        message: '邮箱或密码错误'
-      });
+      await recordSecurityEvent(user.id, 'login_failed', {
+        email,
+        reason: 'invalid_password',
+        failedAttempts: newFailedAttempts,
+        accountLocked: !!lockUntil
+      }, req, false, newFailedAttempts >= 3 ? 'high' : 'medium');
+
+      return res.unauthorized('邮箱或密码错误');
     }
 
-    // 更新最后登录时间
+    // 重置失败登录次数并更新最后登录时间
     await query(
-      'UPDATE users SET last_login = NOW(), updated_at = NOW() WHERE id = $1',
+      'UPDATE users SET last_login = NOW(), failed_login_attempts = 0, locked_until = NULL, updated_at = NOW() WHERE id = $1',
       [user.id]
     );
 
-    // 生成JWT令牌
-    const token = generateToken(user.id);
+    // 生成JWT令牌对
+    const tokenPair = await generateTokenPair(user.id);
+
+    // 创建用户会话
+    await createUserSession(user.id, tokenPair.accessToken, tokenPair.refreshToken, req);
 
     // 记录成功登录
     securityLogger('login_success', {
@@ -191,25 +235,22 @@ router.post('/login', loginRateLimiter, asyncHandler(async (req, res) => {
       email: user.email
     }, req);
 
-    res.json({
-      success: true,
-      message: '登录成功',
-      token,
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        isActive: user.is_active,
-        lastLogin: user.last_login
-      }
-    });
+    await recordSecurityEvent(user.id, 'login_success', {
+      username: user.username,
+      email: user.email,
+      loginMethod: 'password'
+    }, req, true, 'low');
+
+    return res.success({
+      accessToken: tokenPair.accessToken,
+      refreshToken: tokenPair.refreshToken,
+      tokenType: tokenPair.tokenType,
+      expiresIn: tokenPair.expiresIn,
+      user: tokenPair.user
+    }, '登录成功');
   } catch (error) {
     console.error('登录错误:', error);
-    res.status(500).json({
-      success: false,
-      message: '登录失败，请稍后重试'
-    });
+    return res.serverError('登录失败，请稍后重试');
   }
 }));
 
@@ -391,7 +432,7 @@ router.put('/change-password', authMiddleware, asyncHandler(async (req, res) => 
   try {
     // 获取当前密码哈希
     const result = await query(
-      'SELECT password FROM users WHERE id = $1',
+      'SELECT password_hash FROM users WHERE id = $1',
       [req.user.id]
     );
 
@@ -405,7 +446,7 @@ router.put('/change-password', authMiddleware, asyncHandler(async (req, res) => 
     const user = result.rows[0];
 
     // 验证当前密码
-    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password_hash);
     if (!isCurrentPasswordValid) {
       securityLogger('password_change_failed', {
         userId: req.user.id,
@@ -424,7 +465,7 @@ router.put('/change-password', authMiddleware, asyncHandler(async (req, res) => 
 
     // 更新密码
     await query(
-      'UPDATE users SET password = $1, updated_at = NOW() WHERE id = $2',
+      'UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2',
       [hashedNewPassword, req.user.id]
     );
 
@@ -555,7 +596,7 @@ router.post('/reset-password', asyncHandler(async (req, res) => {
 
     // 更新密码并清除重置令牌
     await query(
-      'UPDATE users SET password = $1, reset_token = NULL, reset_token_expires = NULL, updated_at = NOW() WHERE id = $2',
+      'UPDATE users SET password_hash = $1, reset_token = NULL, reset_token_expires = NULL, updated_at = NOW() WHERE id = $2',
       [hashedPassword, user.id]
     );
 

@@ -1,6 +1,6 @@
 /**
  * Test Web App - 主应用程序
- * 融合简化版和完整版功能的统一后端
+ * 完整的后端服务
  */
 
 const express = require('express');
@@ -39,13 +39,20 @@ const { errorHandler } = require('./middleware/errorHandler');
 const { requestLogger } = require('./middleware/logger');
 const { rateLimiter } = require('./middleware/rateLimiter');
 const { securityMiddleware } = require('./middleware/security');
+const {
+  responseFormatter,
+  errorResponseFormatter,
+  notFoundHandler,
+  responseTimeLogger
+} = require('./middleware/responseFormatter');
 
 // 导入数据库连接
 const { connectDB, testConnection } = require('./config/database');
 
 // 导入缓存和性能优化系统
 const cacheConfig = require('./config/cache');
-const { createCacheMiddleware } = require('./api/middleware/cacheMiddleware');
+const CacheManager = require('./services/CacheManager');
+const { createCacheMiddleware } = require('./middleware/cacheMiddleware');
 const {
   createCompressionMiddleware,
   createCacheControlMiddleware,
@@ -151,6 +158,10 @@ app.use(createSecurityHeadersMiddleware());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
+// 响应格式化中间件 - 必须在路由之前
+app.use(responseFormatter);
+app.use(responseTimeLogger);
+
 // 日志中间件
 app.use(morgan('combined', {
   stream: fs.createWriteStream(path.join(__dirname, 'logs', 'access.log'), { flags: 'a' })
@@ -181,7 +192,11 @@ app.use('/api/admin', adminRoutes);
 
 // 数据管理API - 统一到 /api/data-management
 app.use('/api/data-management', dataManagementRoutes);
+app.use('/api/data-export', require('./routes/dataExport').router);
+app.use('/api/data-import', require('./routes/dataImport').router);
+app.use('/api/backup', require('./routes/backup').router);
 app.use('/api/monitoring', monitoringRoutes);
+app.use('/api/alerts', require('./routes/alerts'));
 app.use('/api/reports', reportRoutes);
 app.use('/api/system', require('./routes/system'));
 app.use('/api/integrations', integrationRoutes);
@@ -189,6 +204,12 @@ app.use('/api/cache', cacheRoutes);
 app.use('/api/errors', errorRoutes);
 app.use('/api/performance', performanceRoutes);
 app.use('/api/accessibility', accessibilityRoutes);
+app.use('/api/test/performance-accessibility', require('./routes/performance-accessibility'));
+
+// API响应格式示例路由（仅在开发环境中启用）
+if (process.env.NODE_ENV === 'development') {
+  app.use('/api/example', require('./routes/api-example'));
+}
 
 // 健康检查端点
 app.get('/health', async (req, res) => {
@@ -421,16 +442,11 @@ app.get('/api', (req, res) => {
   });
 });
 
-// 404处理
-app.use('*', (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: '接口不存在',
-    path: req.originalUrl
-  });
-});
+// 404处理 - 使用统一格式
+app.use('*', notFoundHandler);
 
-// 错误处理中间件
+// 错误处理中间件 - 使用统一格式
+app.use(errorResponseFormatter);
 app.use(errorHandler);
 
 // 启动服务器
@@ -443,41 +459,54 @@ const startServer = async () => {
     const dbPool = await connectDB();
     console.log('✅ 数据库连接成功');
 
-    // 初始化缓存和性能优化系统
+    // 初始化新的缓存系统
     try {
-      const { cacheManager, queryCache, performanceMonitor } = await cacheConfig.initialize(dbPool);
+      const cacheManager = new CacheManager(dbPool);
+      const initialized = await cacheManager.initialize();
 
-      // 将缓存实例设置为全局变量供其他模块使用
-      global.cacheManager = cacheManager;
-      global.queryCache = queryCache;
-      global.performanceMonitor = performanceMonitor;
+      if (initialized) {
+        // 将缓存实例设置为全局变量供其他模块使用
+        global.cacheManager = cacheManager;
 
-      console.log('✅ 缓存和性能优化系统初始化成功');
+        console.log('✅ 新缓存系统初始化成功');
 
-      // 添加API缓存中间件到特定路由
-      app.use('/api/v1/tests', createCacheMiddleware(cacheManager, {
-        defaultTTL: 5 * 60, // 5分钟
-        shouldCache: (req, res, data, statusCode) => {
-          return statusCode === 200 && req.method === 'GET';
-        }
-      }));
+        // 添加缓存中间件到应用
+        app.use(createCacheMiddleware(cacheManager, {
+          apiCache: {
+            ttl: 15 * 60, // 15分钟
+            excludeMethods: ['POST', 'PUT', 'DELETE', 'PATCH'],
+            excludeStatus: [400, 401, 403, 404, 500, 502, 503, 504]
+          },
+          queryCache: {
+            enabled: true,
+            ttl: 10 * 60 // 10分钟
+          },
+          warmup: true,
+          health: true,
+          statsApi: true,
+          management: true
+        }));
 
-      app.use('/api/v1/system/config', createCacheMiddleware(cacheManager, {
-        defaultTTL: 30 * 60 // 30分钟
-      }));
+        console.log('✅ 缓存中间件已配置');
+      } else {
+        console.warn('⚠️ 缓存系统初始化失败，使用降级模式');
+      }
 
     } catch (error) {
       console.warn('⚠️ 缓存系统初始化失败，继续使用无缓存模式:', error.message);
     }
 
-    // 初始化实时通信系统
+    // 初始化实时通信系统 - 使用现有的Socket.IO实例
     try {
       const redisClient = global.cacheManager ? global.cacheManager.redis : null;
-      const { socketManager, realtimeService } = await realtimeConfig.initialize(server, redisClient, global.cacheManager);
 
-      // 将实时服务实例设置为全局变量供其他模块使用
-      global.socketManager = socketManager;
-      global.realtimeService = realtimeService;
+      // 直接使用现有的io实例，避免创建重复的WebSocket服务器
+      global.io = io;
+      global.socketManager = { io }; // 简化的socket管理器
+      global.realtimeService = {
+        emit: (event, data) => io.emit(event, data),
+        to: (room) => ({ emit: (event, data) => io.to(room).emit(event, data) })
+      };
 
       console.log('✅ 实时通信系统初始化成功');
 
@@ -489,19 +518,64 @@ const startServer = async () => {
     // 这样可以避免全局状态的复杂性，让每个模块都有独立的服务实例
     console.log('✅ 测试历史服务将在各模块中独立初始化');
 
+    // 初始化监控服务
+    try {
+      const MonitoringService = require('./services/MonitoringService');
+      const AlertService = require('./services/AlertService');
+
+      // 创建监控服务实例
+      const monitoringService = new MonitoringService(dbPool);
+      const alertService = new AlertService(dbPool);
+
+      // 设置监控服务到路由
+      const monitoringRoutes = require('./routes/monitoring');
+      monitoringRoutes.setMonitoringService(monitoringService);
+
+      // 设置告警服务到路由
+      const alertRoutes = require('./routes/alerts');
+      alertRoutes.setAlertService(alertService);
+
+      // 监听告警事件
+      monitoringService.on('alert:triggered', (alertData) => {
+        alertService.handleMonitoringAlert(alertData);
+      });
+
+      // 启动服务
+      await monitoringService.start();
+      await alertService.start();
+
+      // 设置为全局变量供其他模块使用
+      global.monitoringService = monitoringService;
+      global.alertService = alertService;
+
+      console.log('✅ 监控系统初始化成功');
+
+    } catch (error) {
+      console.warn('⚠️ 监控系统初始化失败，继续使用无监控模式:', error.message);
+    }
+
     // 初始化地理位置自动更新服务
     const geoUpdateService = require('./services/geoUpdateService');
     console.log('✅ 地理位置自动更新服务初始化成功');
 
     // 设置WebSocket事件处理
-    setupWebSocketHandlers(io);
+    try {
+      setupWebSocketHandlers(io);
+      console.log('✅ WebSocket事件处理器已设置');
+    } catch (wsError) {
+      console.warn('⚠️ WebSocket事件处理器设置失败，继续启动:', wsError.message);
+    }
 
     // 清理旧的测试房间
     setTimeout(async () => {
       try {
         const { RealStressTestEngine } = require('./services/realStressTestEngine');
         const stressTestEngine = new RealStressTestEngine();
-        stressTestEngine.io = io; // 设置WebSocket实例
+        try {
+          stressTestEngine.io = io; // 设置WebSocket实例
+        } catch (ioError) {
+          console.warn('⚠️ 设置WebSocket实例失败:', ioError.message);
+        }
         await stressTestEngine.cleanupAllTestRooms();
       } catch (error) {
         console.error('❌ 清理旧测试房间失败:', error);

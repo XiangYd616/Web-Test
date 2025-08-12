@@ -1,6 +1,7 @@
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 import { defineConfig } from 'vite';
+import { configDefaults } from 'vitest/config';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -96,13 +97,69 @@ export default defineConfig({
       ],
       output: {
         // 代码分割策略
-        manualChunks: {
-          // 将React相关库分离到单独的chunk
-          'react-vendor': ['react', 'react-dom'],
-          // 将UI组件库分离
-          'ui-vendor': ['lucide-react'],
-          // 将工具库分离
-          'utils-vendor': ['date-fns']
+        manualChunks: (id) => {
+          // React相关库
+          if (id.includes('react') || id.includes('react-dom')) {
+            return 'react-vendor';
+          }
+
+          // 路由相关
+          if (id.includes('react-router')) {
+            return 'router-vendor';
+          }
+
+          // UI组件库
+          if (id.includes('lucide-react') || id.includes('@headlessui')) {
+            return 'ui-vendor';
+          }
+
+          // 工具库
+          if (id.includes('date-fns') || id.includes('lodash') || id.includes('axios')) {
+            return 'utils-vendor';
+          }
+
+          // 图表库
+          if (id.includes('chart.js') || id.includes('recharts')) {
+            return 'chart-vendor';
+          }
+
+          // 测试引擎相关
+          if (id.includes('/pages/') && (
+            id.includes('Test.tsx') ||
+            id.includes('test') ||
+            id.includes('Test')
+          )) {
+            return 'test-pages';
+          }
+
+          // 管理页面
+          if (id.includes('/pages/') && (
+            id.includes('Admin') ||
+            id.includes('Management') ||
+            id.includes('Settings')
+          )) {
+            return 'admin-pages';
+          }
+
+          // 其他页面
+          if (id.includes('/pages/')) {
+            return 'other-pages';
+          }
+
+          // 业务组件
+          if (id.includes('/components/business/')) {
+            return 'business-components';
+          }
+
+          // 系统组件
+          if (id.includes('/components/system/')) {
+            return 'system-components';
+          }
+
+          // node_modules中的其他库
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
         },
         // 资源文件命名
         chunkFileNames: 'assets/js/[name]-[hash].js',
@@ -152,6 +209,36 @@ export default defineConfig({
         return { js: `/${filename}` };
       } else {
         return { relative: true };
+      }
+    }
+  },
+  // Vitest测试配置
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    exclude: [...configDefaults.exclude, 'e2e/*'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        'node_modules/',
+        'src/test/',
+        '**/*.d.ts',
+        '**/*.config.*',
+        '**/coverage/**',
+        '**/dist/**',
+        '**/.{idea,git,cache,output,temp}/**',
+        '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}.config.*'
+      ],
+      thresholds: {
+        global: {
+          branches: 70,
+          functions: 70,
+          lines: 70,
+          statements: 70
+        }
       }
     }
   }

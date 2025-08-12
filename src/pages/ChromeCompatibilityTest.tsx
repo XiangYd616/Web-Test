@@ -1,7 +1,6 @@
 
-import React, { useEffect, useState } from 'react';
 import { AlertTriangle, CheckCircle, Chrome, Info, XCircle } from 'lucide-react';
-import { TestPageLayout } from '../components/testing/UnifiedTestingComponents';
+import React, { useEffect, useState } from 'react';
 import { ChromeCompatibilityHelper } from '../utils/chromeCompatibility';
 
 interface CompatibilityTestResult {
@@ -29,6 +28,27 @@ const ChromeCompatibilityTest: React.FC = () => {
 
     runCompatibilityTest();
   }, []);
+
+  // 处理测试选择和重新运行
+  const handleTestSelect = (test: any) => {
+    console.log('选择测试:', test);
+    // 可以在这里加载选中的测试配置
+  };
+
+  const handleTestRerun = (test: any) => {
+    console.log('重新运行测试:', test);
+    // 可以在这里重新运行选中的测试
+  };
+
+  // 开始测试的处理函数
+  const handleStartTest = async () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      const result = ChromeCompatibilityHelper.detectCompatibilityIssues();
+      setTestResult(result);
+      setIsLoading(false);
+    }, 1000);
+  };
 
   const renderBrowserInfo = () => {
     if (!testResult) return null;
@@ -244,40 +264,59 @@ const ChromeCompatibilityTest: React.FC = () => {
 
   if (isLoading) {
     return (
-      <TestPageLayout className="space-y-4 dark-page-scrollbar">
-        <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-8">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <h2 className="text-xl font-semibold mb-2 text-white">正在检测浏览器兼容性...</h2>
-            <p className="text-gray-300">请稍候，正在分析您的浏览器环境</p>
+      <UnifiedTestPageLayout
+        testType="compatibility"
+        title="Chrome浏览器兼容性测试"
+        description="检测和验证浏览器兼容性，确保在不同浏览器中的一致显示效果"
+        icon={Chrome}
+        testTabLabel="兼容性测试"
+        historyTabLabel="测试历史"
+        testStatus="running"
+        isTestDisabled={true}
+        onTestSelect={handleTestSelect}
+        onTestRerun={handleTestRerun}
+        testContent={
+          <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-8">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <h2 className="text-xl font-semibold mb-2 text-white">正在检测浏览器兼容性...</h2>
+              <p className="text-gray-300">请稍候，正在分析您的浏览器环境</p>
+            </div>
           </div>
-        </div>
-      </TestPageLayout>
+        }
+      />
     );
   }
 
   return (
-    <TestPageLayout className="space-y-4 dark-page-scrollbar">
-      {/* 页面标题 */}
-      <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
-        <h1 className="text-2xl font-bold mb-2">Chrome浏览器兼容性测试</h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          检测和验证浏览器兼容性，确保在不同浏览器中的一致显示效果
-        </p>
-      </div>
+    <UnifiedTestPageLayout
+      testType="compatibility"
+      title="Chrome浏览器兼容性测试"
+      description="检测和验证浏览器兼容性，确保在不同浏览器中的一致显示效果"
+      icon={Chrome}
+      testTabLabel="兼容性测试"
+      historyTabLabel="测试历史"
+      testStatus="completed"
+      isTestDisabled={false}
+      onStartTest={handleStartTest}
+      onTestSelect={handleTestSelect}
+      onTestRerun={handleTestRerun}
+      testContent={
+        <div className="space-y-6">
+          {/* 浏览器信息 */}
+          {renderBrowserInfo()}
 
-      {/* 浏览器信息 */}
-      {renderBrowserInfo()}
+          {/* CSS特性支持 */}
+          {renderCSSSupport()}
 
-      {/* CSS特性支持 */}
-      {renderCSSSupport()}
+          {/* 兼容性问题 */}
+          {renderCompatibilityIssues()}
 
-      {/* 兼容性问题 */}
-      {renderCompatibilityIssues()}
-
-      {/* 测试组件 */}
-      {renderTestComponents()}
-    </TestPageLayout>
+          {/* 测试组件 */}
+          {renderTestComponents()}
+        </div>
+      }
+    />
   );
 };
 

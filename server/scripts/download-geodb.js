@@ -7,6 +7,7 @@ const http = require('http');
 const { createGunzip } = require('zlib');
 const { pipeline } = require('stream');
 const { promisify } = require('util');
+const tar = require('tar');
 
 const pipelineAsync = promisify(pipeline);
 
@@ -149,8 +150,6 @@ class GeoDBDownloader {
    * 解压数据库文件
    */
   async extractDatabase(tarFile, outputPath, edition) {
-    const tar = require('tar');
-
     return new Promise((resolve, reject) => {
       // 解压到临时目录
       const tempDir = path.join(this.dataDir, 'temp');
@@ -158,34 +157,57 @@ class GeoDBDownloader {
         fs.mkdirSync(tempDir);
       }
 
+      console.log(`📦 解压 ${edition}...`);
+
       tar.extract({
         file: tarFile,
         cwd: tempDir
       }).then(() => {
-        // 查找 .mmdb 文件
-        const extractedDir = fs.readdirSync(tempDir).find(dir => dir.startsWith(edition));
-        if (!extractedDir) {
-          reject(new Error('未找到解压的数据库目录'));
-          return;
+        try {
+          // 查找 .mmdb 文件
+          const extractedDirs = fs.readdirSync(tempDir);
+          console.log(`📂 解压目录: ${extractedDirs.join(', ')}`);
+
+          const extractedDir = extractedDirs.find(dir => dir.startsWith(edition));
+          if (!extractedDir) {
+            reject(new Error(`未找到解压的数据库目录，可用目录: ${extractedDirs.join(', ')}`));
+            return;
+          }
+
+          const extractedDirPath = path.join(tempDir, extractedDir);
+          const files = fs.readdirSync(extractedDirPath);
+          console.log(`📄 目录文件: ${files.join(', ')}`);
+
+          const mmdbFile = files.find(file => file.endsWith('.mmdb'));
+
+          if (!mmdbFile) {
+            reject(new Error(`未找到 .mmdb 数据库文件，可用文件: ${files.join(', ')}`));
+            return;
+          }
+
+          // 移动文件到目标位置
+          const sourcePath = path.join(extractedDirPath, mmdbFile);
+          console.log(`📋 移动文件: ${sourcePath} -> ${outputPath}`);
+
+          if (fs.existsSync(outputPath)) {
+            fs.unlinkSync(outputPath);
+          }
+
+          fs.renameSync(sourcePath, outputPath);
+          console.log(`✅ ${edition} 解压成功`);
+
+          // 清理临时目录
+          fs.rmSync(tempDir, { recursive: true, force: true });
+
+          resolve();
+        } catch (error) {
+          console.error(`❌ 解压后处理失败: ${error.message}`);
+          reject(error);
         }
-
-        const mmdbFile = fs.readdirSync(path.join(tempDir, extractedDir))
-          .find(file => file.endsWith('.mmdb'));
-
-        if (!mmdbFile) {
-          reject(new Error('未找到 .mmdb 数据库文件'));
-          return;
-        }
-
-        // 移动文件到目标位置
-        const sourcePath = path.join(tempDir, extractedDir, mmdbFile);
-        fs.renameSync(sourcePath, outputPath);
-
-        // 清理临时目录
-        fs.rmSync(tempDir, { recursive: true, force: true });
-
-        resolve();
-      }).catch(reject);
+      }).catch(error => {
+        console.error(`❌ tar解压失败: ${error.message}`);
+        reject(error);
+      });
     });
   }
 

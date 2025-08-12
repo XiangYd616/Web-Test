@@ -1,450 +1,560 @@
 # 故障排除指南
 
-## 📋 概述
+本指南帮助您解决使用 Test Web App 时可能遇到的常见问题。
 
-本指南提供了使用组件库时可能遇到的常见问题及其解决方案。
+## 🚀 启动问题
 
-## 🚨 常见问题
+### 应用无法启动
 
-### 1. 组件导入问题
+#### 问题：运行 `npm start` 后应用无法启动
 
-#### 问题：组件导入失败
-```
-Error: Module not found: Can't resolve '@/components/ui'
-```
+**可能原因和解决方案：**
 
-**原因**: 路径别名配置问题
+1. **端口被占用**
+   ```bash
+   # 检查端口占用
+   netstat -ano | findstr :5174
+   netstat -ano | findstr :3001
+   
+   # 杀死占用端口的进程
+   taskkill /PID <PID> /F
+   
+   # 或者修改端口配置
+   # 在 .env 文件中设置
+   VITE_DEV_PORT=5175
+   PORT=3002
+   ```
 
-**解决方案**:
-```typescript
-// vite.config.ts
-import { defineConfig } from 'vite';
-import path from 'path';
+2. **依赖安装不完整**
+   ```bash
+   # 清理并重新安装依赖
+   npm run clean:all
+   npm install
+   
+   # 如果仍有问题，尝试
+   rm -rf node_modules package-lock.json
+   rm -rf server/node_modules server/package-lock.json
+   npm install
+   ```
 
-export default defineConfig({
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-    },
-  },
-});
+3. **Node.js 版本不兼容**
+   ```bash
+   # 检查 Node.js 版本
+   node --version
+   
+   # 需要 >= 18.0.0
+   # 使用 nvm 切换版本
+   nvm install 18
+   nvm use 18
+   ```
 
-// tsconfig.json
-{
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
-  }
-}
-```
+### 前端启动失败
 
-#### 问题：组件类型定义缺失
-```
-Error: Could not find a declaration file for module '@/components/ui'
-```
+#### 问题：前端服务无法启动，显示 Vite 错误
 
-**解决方案**:
-```typescript
-// src/types/components.d.ts
-declare module '@/components/ui' {
-  export const Button: React.FC<any>;
-  export const Card: React.FC<any>;
-  // ... 其他组件
-}
-```
+**解决方案：**
 
-### 2. 样式问题
+1. **清理缓存**
+   ```bash
+   # 清理 Vite 缓存
+   rm -rf node_modules/.vite
+   rm -rf dist
+   
+   # 重新启动
+   npm run frontend
+   ```
 
-#### 问题：组件样式不生效
-**症状**: 组件渲染但没有样式
+2. **检查 TypeScript 配置**
+   ```bash
+   # 运行类型检查
+   npm run type-check
+   
+   # 如果有类型错误，修复后重新启动
+   ```
 
-**可能原因**:
-1. CSS文件未正确导入
-2. CSS加载顺序问题
-3. 样式被覆盖
+3. **环境变量问题**
+   ```bash
+   # 检查 .env 文件是否存在
+   ls -la .env
+   
+   # 如果不存在，复制模板
+   cp .env.example .env
+   ```
 
-**解决方案**:
-```tsx
-// 确保在应用入口导入样式
-import '@/styles/index.css';
+### 后端启动失败
 
-// 检查CSS加载顺序
-import './global.css';  // 全局样式
-import './components.css';  // 组件样式
-```
+#### 问题：后端服务无法启动
 
-#### 问题：样式冲突
-**症状**: 组件样式被其他CSS覆盖
+**解决方案：**
 
-**解决方案**:
-```css
-/* 使用更具体的选择器 */
-.my-app .btn {
-  /* 组件样式 */
-}
+1. **数据库连接问题**
+   ```bash
+   # 检查数据库连接
+   npm run db:check
+   
+   # 如果连接失败，检查配置
+   cat server/.env
+   ```
 
-/* 或使用CSS模块 */
-.button {
-  composes: btn from '@/components/ui/Button/Button.module.css';
-}
-```
+2. **环境变量缺失**
+   ```bash
+   # 检查后端环境变量
+   cd server
+   ls -la .env
+   
+   # 如果不存在，复制模板
+   cp .env.example .env
+   
+   # 编辑配置
+   nano .env
+   ```
 
-#### 问题：深色模式不工作
-**症状**: 主题切换无效果
+3. **权限问题**
+   ```bash
+   # 检查文件权限
+   ls -la server/
+   
+   # 修复权限
+   chmod +x server/app.js
+   ```
 
-**解决方案**:
-```tsx
-// 确保正确设置主题属性
-<div data-theme="dark">
-  <App />
-</div>
+## 🗄️ 数据库问题
 
-// 或使用CSS类
-<div className="dark">
-  <App />
-</div>
-```
+### 数据库连接失败
 
-### 3. TypeScript 问题
+#### 问题：无法连接到 PostgreSQL 数据库
 
-#### 问题：属性类型错误
-```
-Type '"large"' is not assignable to type '"sm" | "md" | "lg"'
-```
+**解决方案：**
 
-**解决方案**:
-```tsx
-// 错误
-<Button size="large">Click me</Button>
+1. **检查 PostgreSQL 服务**
+   ```bash
+   # Windows
+   net start postgresql-x64-12
+   
+   # macOS
+   brew services start postgresql
+   
+   # Linux
+   sudo systemctl start postgresql
+   ```
 
-// 正确
-<Button size="lg">Click me</Button>
-```
+2. **验证连接参数**
+   ```bash
+   # 测试数据库连接
+   psql -h localhost -p 5432 -U postgres -d testweb_dev
+   
+   # 如果连接失败，检查配置
+   cat server/.env | grep DB_
+   ```
 
-#### 问题：事件处理器类型错误
-```
-Type '(id: string) => void' is not assignable to type '(event: MouseEvent) => void'
-```
+3. **创建数据库**
+   ```sql
+   -- 连接到 PostgreSQL
+   psql -U postgres
+   
+   -- 创建数据库
+   CREATE DATABASE testweb_dev;
+   CREATE DATABASE testweb_prod;
+   
+   -- 创建用户（如果需要）
+   CREATE USER testweb_user WITH PASSWORD 'your_password';
+   GRANT ALL PRIVILEGES ON DATABASE testweb_dev TO testweb_user;
+   GRANT ALL PRIVILEGES ON DATABASE testweb_prod TO testweb_user;
+   ```
 
-**解决方案**:
-```tsx
-// 错误
-const handleClick = (id: string) => { ... };
-<Button onClick={handleClick}>Click</Button>
+### 数据库迁移失败
 
-// 正确
-const handleClick = (event: React.MouseEvent) => {
-  const id = event.currentTarget.dataset.id;
-  // 处理逻辑
-};
-<Button onClick={handleClick} data-id="123">Click</Button>
-```
+#### 问题：运行 `npm run db:setup` 失败
 
-### 4. 性能问题
+**解决方案：**
 
-#### 问题：组件渲染缓慢
-**症状**: 页面加载或交互响应慢
+1. **检查数据库权限**
+   ```sql
+   -- 确保用户有创建表的权限
+   GRANT CREATE ON SCHEMA public TO testweb_user;
+   GRANT USAGE ON SCHEMA public TO testweb_user;
+   ```
 
-**诊断方法**:
-```tsx
-// 使用React DevTools Profiler
-import { Profiler } from 'react';
+2. **手动运行迁移**
+   ```bash
+   cd server
+   
+   # 检查迁移文件
+   ls migrations/
+   
+   # 手动执行迁移
+   psql -U postgres -d testweb_dev -f migrations/001_initial_schema.sql
+   ```
 
-<Profiler id="MyComponent" onRender={onRenderCallback}>
-  <MyComponent />
-</Profiler>
-```
+3. **重置数据库**
+   ```bash
+   # 完全重置数据库
+   npm run db:reset
+   
+   # 重新初始化
+   npm run db:setup
+   ```
 
-**解决方案**:
-```tsx
-// 1. 使用React.memo优化
-const OptimizedComponent = React.memo(MyComponent);
+## 🔧 功能问题
 
-// 2. 使用useMemo缓存计算结果
-const expensiveValue = useMemo(() => {
-  return computeExpensiveValue(props);
-}, [props.dependency]);
+### 测试无法启动
 
-// 3. 使用useCallback缓存函数
-const handleClick = useCallback((event) => {
-  // 处理逻辑
-}, [dependency]);
-```
+#### 问题：点击"开始测试"后没有反应
 
-#### 问题：CSS文件过大
-**症状**: 首屏加载时间长
+**解决方案：**
 
-**解决方案**:
-```tsx
-// 使用动态导入
-const loadPageCSS = async (pageName: string) => {
-  await import(`@/styles/pages/${pageName}.css`);
-};
+1. **检查网络连接**
+   ```bash
+   # 测试目标URL是否可访问
+   curl -I https://example.com
+   
+   # 检查防火墙设置
+   ```
 
-// 使用CSS按需加载
-import { useCSS } from '@/hooks/useCSS';
+2. **查看浏览器控制台**
+   ```javascript
+   // 打开浏览器开发者工具
+   // 查看 Console 和 Network 标签页
+   // 寻找错误信息
+   ```
 
-const MyComponent = () => {
-  const { loaded } = useCSS('/styles/my-component.css', { immediate: true });
-  
-  if (!loaded) return <Loading />;
-  return <div>Component content</div>;
-};
-```
+3. **检查后端日志**
+   ```bash
+   # 查看后端日志
+   tail -f server/logs/app.log
+   
+   # 或者在启动时查看控制台输出
+   npm run backend
+   ```
 
-### 5. 响应式问题
+### WebSocket 连接失败
 
-#### 问题：移动端显示异常
-**症状**: 组件在移动设备上布局错乱
+#### 问题：实时数据更新不工作
 
-**解决方案**:
-```tsx
-// 使用响应式属性
-<Button 
-  size={{ base: 'lg', md: 'md' }}
-  fullWidth={{ base: true, md: false }}
->
-  响应式按钮
-</Button>
+**解决方案：**
 
-// 使用CSS媒体查询
-<div className="w-full md:w-auto">
-  <Button>自适应按钮</Button>
-</div>
-```
+1. **检查 WebSocket 连接**
+   ```javascript
+   // 在浏览器控制台中检查
+   console.log(window.io);
+   
+   // 查看连接状态
+   socket.connected
+   ```
 
-#### 问题：断点不生效
-**症状**: 响应式样式在某些屏幕尺寸下不工作
+2. **防火墙和代理问题**
+   ```bash
+   # 检查是否有代理阻止 WebSocket
+   # 在浏览器中禁用代理
+   
+   # 或者配置代理支持 WebSocket
+   ```
 
-**解决方案**:
-```css
-/* 检查断点定义 */
-@media (min-width: 768px) {
-  .responsive-component {
-    /* 平板样式 */
-  }
-}
+3. **端口问题**
+   ```bash
+   # 确保 WebSocket 端口可访问
+   telnet localhost 3001
+   ```
 
-@media (min-width: 1024px) {
-  .responsive-component {
-    /* 桌面样式 */
-  }
-}
-```
+### 文件上传失败
 
-### 6. 无障碍问题
+#### 问题：无法上传文件或导出报告
 
-#### 问题：键盘导航不工作
-**症状**: 无法使用Tab键导航
+**解决方案：**
 
-**解决方案**:
-```tsx
-// 确保组件有正确的tabIndex
-<Button tabIndex={0}>可聚焦按钮</Button>
+1. **检查文件大小限制**
+   ```javascript
+   // 检查服务器配置
+   // server/app.js 中的文件大小限制
+   app.use(express.json({ limit: '50mb' }));
+   ```
 
-// 处理键盘事件
-const handleKeyDown = (event: React.KeyboardEvent) => {
-  if (event.key === 'Enter' || event.key === ' ') {
-    handleClick();
-  }
-};
+2. **检查磁盘空间**
+   ```bash
+   # 检查磁盘空间
+   df -h
+   
+   # 清理临时文件
+   npm run clean
+   ```
 
-<div 
-  tabIndex={0}
-  onKeyDown={handleKeyDown}
-  role="button"
->
-  自定义按钮
-</div>
-```
+3. **权限问题**
+   ```bash
+   # 检查上传目录权限
+   ls -la server/uploads/
+   
+   # 修复权限
+   chmod 755 server/uploads/
+   ```
 
-#### 问题：屏幕阅读器支持不足
-**症状**: 屏幕阅读器无法正确读取内容
+## 🎨 界面问题
 
-**解决方案**:
-```tsx
-// 添加ARIA标签
-<Button 
-  aria-label="关闭对话框"
-  aria-describedby="help-text"
->
-  ×
-</Button>
-<div id="help-text">点击此按钮关闭对话框</div>
+### 页面显示异常
 
-// 使用语义化HTML
-<nav role="navigation">
-  <ul>
-    <li><a href="/home">首页</a></li>
-    <li><a href="/about">关于</a></li>
-  </ul>
-</nav>
-```
+#### 问题：页面布局混乱或样式丢失
 
-### 7. 浏览器兼容性问题
+**解决方案：**
 
-#### 问题：IE11不支持某些特性
-**症状**: 在IE11中样式或功能异常
+1. **清理浏览器缓存**
+   ```bash
+   # 硬刷新页面
+   Ctrl + F5 (Windows)
+   Cmd + Shift + R (Mac)
+   
+   # 或者清理浏览器缓存
+   ```
 
-**解决方案**:
-```css
-/* 使用CSS特性检测 */
-@supports (display: grid) {
-  .grid-container {
-    display: grid;
-  }
-}
+2. **检查 CSS 加载**
+   ```javascript
+   // 在开发者工具中检查
+   // Network 标签页查看 CSS 文件是否加载成功
+   ```
 
-@supports not (display: grid) {
-  .grid-container {
-    display: flex;
-    flex-wrap: wrap;
-  }
-}
-```
+3. **重新构建前端**
+   ```bash
+   # 清理并重新构建
+   npm run clean
+   npm run build
+   npm run preview
+   ```
 
-#### 问题：Safari中的样式问题
-**症状**: 在Safari中显示异常
+### 响应式布局问题
 
-**解决方案**:
-```css
-/* 添加webkit前缀 */
-.backdrop-blur {
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-}
+#### 问题：移动端显示不正常
 
-/* 处理Safari特有问题 */
-@supports (-webkit-appearance: none) {
-  .safari-specific {
-    /* Safari特定样式 */
-  }
-}
-```
+**解决方案：**
 
-## 🔧 调试工具
+1. **检查视口设置**
+   ```html
+   <!-- 确保 index.html 中有正确的 meta 标签 -->
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   ```
 
-### 1. React DevTools
+2. **测试不同屏幕尺寸**
+   ```bash
+   # 使用浏览器开发者工具
+   # 切换到不同设备模式测试
+   ```
+
+## 🔒 认证问题
+
+### 登录失败
+
+#### 问题：无法登录或登录后立即退出
+
+**解决方案：**
+
+1. **检查用户凭据**
+   ```sql
+   -- 在数据库中检查用户
+   SELECT * FROM users WHERE email = 'your-email@example.com';
+   
+   -- 重置密码（如果需要）
+   UPDATE users SET password = '$2b$10$...' WHERE email = 'your-email@example.com';
+   ```
+
+2. **JWT 令牌问题**
+   ```bash
+   # 检查 JWT 密钥配置
+   cat server/.env | grep JWT_SECRET
+   
+   # 确保密钥足够复杂
+   JWT_SECRET=your-very-long-and-complex-secret-key
+   ```
+
+3. **清理本地存储**
+   ```javascript
+   // 在浏览器控制台中清理
+   localStorage.clear();
+   sessionStorage.clear();
+   
+   // 然后重新登录
+   ```
+
+### 权限问题
+
+#### 问题：提示权限不足
+
+**解决方案：**
+
+1. **检查用户角色**
+   ```sql
+   -- 查看用户角色
+   SELECT username, email, role FROM users WHERE email = 'your-email@example.com';
+   
+   -- 更新用户角色
+   UPDATE users SET role = 'admin' WHERE email = 'your-email@example.com';
+   ```
+
+2. **检查权限配置**
+   ```javascript
+   // 查看权限中间件配置
+   // server/middleware/auth.js
+   ```
+
+## 📊 性能问题
+
+### 应用运行缓慢
+
+#### 问题：页面加载慢或操作响应慢
+
+**解决方案：**
+
+1. **启用 Redis 缓存**
+   ```bash
+   # 安装并启动 Redis
+   # Windows: 下载 Redis for Windows
+   # macOS: brew install redis && brew services start redis
+   # Linux: sudo apt-get install redis-server
+   
+   # 在 server/.env 中配置
+   REDIS_URL=redis://localhost:6379
+   ```
+
+2. **优化数据库查询**
+   ```sql
+   -- 检查慢查询
+   SELECT query, mean_time, calls 
+   FROM pg_stat_statements 
+   ORDER BY mean_time DESC 
+   LIMIT 10;
+   
+   -- 添加索引
+   CREATE INDEX idx_test_results_user_id ON test_results(user_id);
+   CREATE INDEX idx_test_results_created_at ON test_results(created_at);
+   ```
+
+3. **检查系统资源**
+   ```bash
+   # 检查 CPU 和内存使用
+   top
+   htop
+   
+   # 检查磁盘 I/O
+   iotop
+   ```
+
+### 内存泄漏
+
+#### 问题：应用运行一段时间后内存占用过高
+
+**解决方案：**
+
+1. **重启应用**
+   ```bash
+   # 临时解决方案
+   npm run clean
+   npm start
+   ```
+
+2. **检查内存使用**
+   ```javascript
+   // 在浏览器控制台中检查
+   console.log(performance.memory);
+   
+   // 使用 Chrome DevTools 的 Memory 标签页
+   ```
+
+3. **优化代码**
+   ```javascript
+   // 检查是否有未清理的定时器
+   // 检查是否有未取消的事件监听器
+   // 检查是否有循环引用
+   ```
+
+## 🔍 调试技巧
+
+### 启用调试模式
+
 ```bash
-# 安装React DevTools浏览器扩展
-# Chrome: https://chrome.google.com/webstore/detail/react-developer-tools
-# Firefox: https://addons.mozilla.org/en-US/firefox/addon/react-devtools/
+# 前端调试
+DEBUG=* npm run frontend
+
+# 后端调试
+DEBUG=* npm run backend
+
+# 或者设置特定的调试命名空间
+DEBUG=app:* npm run backend
 ```
 
-### 2. CSS调试
-```css
-/* 临时添加边框调试布局 */
-* {
-  outline: 1px solid red !important;
-}
+### 查看详细日志
 
-/* 调试特定组件 */
-.debug .btn {
-  background: yellow !important;
-  border: 2px solid red !important;
-}
+```bash
+# 查看应用日志
+tail -f server/logs/app.log
+
+# 查看错误日志
+tail -f server/logs/error.log
+
+# 查看访问日志
+tail -f server/logs/access.log
 ```
 
-### 3. 性能分析
-```tsx
-// 使用Performance API
-const start = performance.now();
-// 组件渲染
-const end = performance.now();
-console.log(`渲染时间: ${end - start}ms`);
+### 使用开发者工具
 
-// 使用React Profiler
-import { Profiler } from 'react';
+1. **浏览器开发者工具**
+   - Console: 查看 JavaScript 错误
+   - Network: 检查 API 请求
+   - Application: 查看本地存储
+   - Performance: 分析性能问题
 
-const onRenderCallback = (id, phase, actualDuration) => {
-  console.log('组件渲染信息:', { id, phase, actualDuration });
-};
+2. **Node.js 调试**
+   ```bash
+   # 使用 Node.js 调试器
+   node --inspect server/app.js
+   
+   # 然后在 Chrome 中访问
+   chrome://inspect
+   ```
+
+## 📞 获取帮助
+
+如果以上解决方案都无法解决您的问题，请：
+
+1. **查看日志文件**
+   - 前端: 浏览器开发者工具 Console
+   - 后端: `server/logs/` 目录下的日志文件
+
+2. **收集错误信息**
+   - 错误消息的完整文本
+   - 重现问题的步骤
+   - 系统环境信息（操作系统、Node.js 版本等）
+
+3. **联系支持**
+   - 📧 邮箱: support@testweb.app
+   - 🐛 GitHub Issues: [提交问题](https://github.com/your-org/test-web-app/issues)
+   - 💬 讨论区: [GitHub Discussions](https://github.com/your-org/test-web-app/discussions)
+
+## 📋 常用命令速查
+
+```bash
+# 应用启动
+npm start                    # 启动完整应用
+npm run frontend            # 仅启动前端
+npm run backend             # 仅启动后端
+
+# 数据库操作
+npm run db:setup            # 初始化数据库
+npm run db:check            # 检查数据库连接
+npm run db:reset            # 重置数据库
+
+# 测试
+npm test                    # 运行测试
+npm run test:coverage       # 测试覆盖率
+npm run e2e                 # 端到端测试
+
+# 构建和部署
+npm run build               # 构建生产版本
+npm run preview             # 预览生产版本
+npm run electron:build      # 构建桌面应用
+
+# 维护
+npm run clean               # 清理构建文件
+npm run clean:all           # 清理所有文件
+npm run lint                # 代码检查
+npm run format              # 代码格式化
 ```
-
-## 📊 错误监控
-
-### 1. 错误边界
-```tsx
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.error('组件错误:', error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return <h1>出现了错误</h1>;
-    }
-
-    return this.props.children;
-  }
-}
-```
-
-### 2. 控制台日志
-```tsx
-// 开发环境下的调试日志
-if (process.env.NODE_ENV === 'development') {
-  console.log('组件状态:', state);
-  console.log('组件属性:', props);
-}
-```
-
-## 🆘 获取帮助
-
-### 1. 文档资源
-- [组件API文档](./COMPONENT_API.md)
-- [开发规范](./DEVELOPMENT_GUIDELINES.md)
-- [迁移指南](./MIGRATION_GUIDE.md)
-
-### 2. 在线资源
-- [React官方文档](https://react.dev/)
-- [TypeScript文档](https://www.typescriptlang.org/docs/)
-- [Tailwind CSS文档](https://tailwindcss.com/docs)
-
-### 3. 社区支持
-- GitHub Issues
-- Stack Overflow
-- 开发团队内部支持
-
-### 4. 调试检查清单
-
-#### 组件问题
-- [ ] 检查组件导入路径
-- [ ] 验证属性类型和值
-- [ ] 确认CSS文件已导入
-- [ ] 检查控制台错误信息
-
-#### 样式问题
-- [ ] 检查CSS加载顺序
-- [ ] 验证选择器优先级
-- [ ] 确认主题设置正确
-- [ ] 测试不同浏览器
-
-#### 性能问题
-- [ ] 使用React DevTools分析
-- [ ] 检查不必要的重渲染
-- [ ] 优化大型列表渲染
-- [ ] 分析包体积大小
-
-#### 无障碍问题
-- [ ] 测试键盘导航
-- [ ] 验证ARIA标签
-- [ ] 检查颜色对比度
-- [ ] 使用屏幕阅读器测试
 
 ---
 
-**维护团队**: 前端开发团队  
-**最后更新**: 2025年8月2日  
-**文档版本**: v1.0.0
+**提示**: 遇到问题时，首先尝试重启应用和清理缓存，这能解决大部分常见问题。

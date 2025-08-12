@@ -108,6 +108,8 @@ packages/
 .vscode/launch.json
 .vscode/extensions.json
 *.code-workspace
+.kiro
+.augment
 
 # macOS
 .AppleDouble

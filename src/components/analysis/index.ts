@@ -1,7 +1,7 @@
 
-export { EnhancedAPIAnalysis } from './EnhancedAPIAnalysis';
-export { default as EnhancedContentAnalysis } from './EnhancedContentAnalysis';
-export { EnhancedPerformanceAnalysis } from './EnhancedPerformanceAnalysis';
-export { default as EnhancedSecurityAnalysis } from './EnhancedSecurityAnalysis';
-export { default as EnhancedSEOAnalysis } from './EnhancedSEOAnalysis';
+export { APIAnalysis } from './APIAnalysis';
+export { default as ContentAnalysis } from './ContentAnalysis';
+export { PerformanceAnalysis } from './PerformanceAnalysis';
+export { default as SecurityAnalysis } from './SecurityAnalysis';
+export { default as SEOAnalysis } from './SEOAnalysis';
 

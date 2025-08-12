@@ -5,8 +5,8 @@
 
 import { FileText } from 'lucide-react';
 import React from 'react';
-import { PageLayout } from '../components/common/UnifiedLayout';
-import { UnifiedTestHistory } from '../components/common/UnifiedTestHistory';
+import { PageLayout } from '../components/common/Layout';
+import TestHistory from '../components/common/TestHistory';
 
 const TestHistory: React.FC = () => {
   return (
@@ -17,7 +17,7 @@ const TestHistory: React.FC = () => {
       background="dark"
       maxWidth="xl"
     >
-      <UnifiedTestHistory
+      <TestHistory
         showStatistics={true}
         showFilters={true}
         showBatchActions={true}
