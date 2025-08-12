@@ -102,6 +102,8 @@ packages/
 *.backup
 *.bak
 *.orig
+backup-*.sql
+server/backups/*.sql
 
 # IDE specific files
 .vscode/settings.json

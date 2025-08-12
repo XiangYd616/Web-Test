@@ -30,7 +30,20 @@ class UserStatsService {
   private readonly ACTIVITY_KEY = 'user_recent_activity';
 
   // 获取用户统计数据
-  getUserStats(userId: string): UserActivityStats {
+  async getUserStats(userId: string): Promise<UserActivityStats> {
+    try {
+      // 首先尝试从API获取最新数据
+      const apiStats = await this.fetchStatsFromAPI(userId);
+      if (apiStats) {
+        // 保存到本地缓存
+        localStorage.setItem(`${this.STORAGE_KEY}_${userId}`, JSON.stringify(apiStats));
+        return apiStats;
+      }
+    } catch (error) {
+      console.warn('Failed to fetch stats from API, using cached data:', error);
+    }
+
+    // 如果API失败，从本地存储获取
     const stored = localStorage.getItem(`${this.STORAGE_KEY}_${userId}`);
     if (stored) {
       try {
@@ -58,6 +71,55 @@ class UserStatsService {
 
     // 返回默认统计数据
     return this.getDefaultStats();
+  }
+
+  // 从API获取统计数据
+  private async fetchStatsFromAPI(userId: string): Promise<UserActivityStats | null> {
+    try {
+      const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No auth token available');
+      }
+
+      const response = await fetch(`/api/user/stats/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      if (result.success && result.data) {
+        return this.normalizeStatsData(result.data);
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Failed to fetch user stats from API:', error);
+      return null;
+    }
+  }
+
+  // 标准化统计数据格式
+  private normalizeStatsData(apiData: any): UserActivityStats {
+    return {
+      totalTests: apiData.total_tests || apiData.totalTests || 0,
+      testsToday: apiData.tests_today || apiData.testsToday || 0,
+      testsThisWeek: apiData.tests_this_week || apiData.testsThisWeek || 0,
+      testsThisMonth: apiData.tests_this_month || apiData.testsThisMonth || 0,
+      favoriteTests: apiData.favorite_tests || apiData.favoriteTests || 0,
+      successfulTests: apiData.successful_tests || apiData.successfulTests || 0,
+      failedTests: apiData.failed_tests || apiData.failedTests || 0,
+      averageScore: apiData.average_score || apiData.averageScore || 0,
+      totalTestTime: apiData.total_test_time || apiData.totalTestTime || 0,
+      mostUsedTestType: apiData.most_used_test_type || apiData.mostUsedTestType || '压力测试',
+      testsByType: apiData.tests_by_type || apiData.testsByType || {},
+      recentActivity: apiData.recent_activity || apiData.recentActivity || []
+    };
   }
 
   // 获取默认统计数据
