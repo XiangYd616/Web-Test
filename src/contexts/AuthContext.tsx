@@ -93,46 +93,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const rememberMe = localStorage.getItem('remember_me') === 'true';
 
         if (token && userData) {
-          // 检查token是否即将过期
-          const expiryTime = parseTokenExpiry(token);
-          const currentTime = Date.now();
+          try {
+            // 解析用户数据
+            const user = JSON.parse(userData);
 
-          if (expiryTime > currentTime) {
-            // Token仍然有效，验证并设置用户
-            const response = await fetch('http://localhost:3001/api/auth/verify', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-              },
-            });
+            // 检查token是否即将过期
+            const expiryTime = parseTokenExpiry(token);
+            const currentTime = Date.now();
 
-            if (response.ok) {
-              const result = await response.json();
-              if (result.success && result.tokenValid) {
-                setUser(result.user);
+            if (expiryTime > currentTime) {
+              // Token仍然有效，直接设置用户状态
+              setUser(user);
 
-                // 设置自动刷新
-                if (rememberMe && refreshTokenValue) {
-                  setupTokenRefresh(expiryTime - currentTime);
-                }
+              // 设置自动刷新
+              if (rememberMe && refreshTokenValue) {
+                setupTokenRefresh(expiryTime - currentTime);
+              }
 
-                console.log('✅ Token验证成功，用户已登录:', result.user.email);
-              } else {
-                throw new Error('Token验证失败');
+              console.log('✅ 从localStorage恢复用户登录状态:', user.email);
+            } else if (rememberMe && refreshTokenValue) {
+              // Token过期但有refresh token，尝试刷新
+              try {
+                await refreshToken();
+              } catch (error) {
+                throw new Error('Token刷新失败');
               }
             } else {
-              throw new Error('Token验证请求失败');
+              throw new Error('Token已过期');
             }
-          } else if (rememberMe && refreshTokenValue) {
-            // Token过期但有refresh token，尝试刷新
-            try {
-              await refreshToken();
-            } catch (error) {
-              throw new Error('Token刷新失败');
-            }
-          } else {
-            throw new Error('Token已过期');
+          } catch (parseError) {
+            console.error('❌ 解析用户数据失败:', parseError);
+            throw new Error('用户数据格式错误');
           }
         }
       } catch (error) {
@@ -164,62 +155,73 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     setIsLoading(true);
     try {
-      // 调用真实的登录API - 兼容简化版和完整版后端
+      // 准备请求数据
+      const requestData = {
+        email,
+        password,
+        rememberMe
+      };
+
+      console.log('🔍 发送登录请求:', {
+        url: 'http://localhost:3001/api/auth/login',
+        data: { ...requestData, password: '***' } // 隐藏密码
+      });
+
+      // 调用登录API
       const response = await fetch('http://localhost:3001/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          email: email,           // 简化版后端使用
-          identifier: email,      // 完整版后端使用
-          password,
-          rememberMe
-        }),
+        body: JSON.stringify(requestData),
       });
 
       const result = await response.json();
 
+      console.log('📥 收到登录响应:', {
+        status: response.status,
+        ok: response.ok,
+        result: result
+      });
+
       if (!response.ok) {
+        console.error('❌ 登录请求失败:', {
+          status: response.status,
+          statusText: response.statusText,
+          result: result
+        });
         throw new Error(result.message || '登录失败');
       }
 
-      // 检查登录是否成功 - 兼容两种后端格式
-      if (!result.success && !result.user) {
+      // 检查登录是否成功
+      if (!result.success) {
         throw new Error(result.message || '登录失败');
       }
 
-      // 保存token和用户信息 - 兼容简化版和完整版后端
-      let token = '';
-      if (result.token) {
-        token = result.token;
-        localStorage.setItem('auth_token', result.token);
-      } else if (result.tokens?.accessToken) {
-        token = result.tokens.accessToken;
-        localStorage.setItem('auth_token', result.tokens.accessToken);
+      // 获取响应数据
+      const { data } = result;
+      if (!data || !data.user) {
+        throw new Error('登录响应格式错误');
       }
 
-      if (result.refreshToken) {
-        localStorage.setItem('refresh_token', result.refreshToken);
-      } else if (result.tokens?.refreshToken) {
-        localStorage.setItem('refresh_token', result.tokens.refreshToken);
-      }
-
-      localStorage.setItem('user_data', JSON.stringify(result.user));
+      // 保存token和用户信息
+      localStorage.setItem('auth_token', data.accessToken);
+      localStorage.setItem('refresh_token', data.refreshToken);
+      localStorage.setItem('user_data', JSON.stringify(data.user));
       localStorage.setItem('remember_me', rememberMe.toString());
 
-      setUser(result.user);
+      setUser(data.user);
 
       // 如果选择记住登录状态，设置自动刷新
-      if (rememberMe && token && (result.refreshToken || result.tokens?.refreshToken)) {
-        const expiryTime = parseTokenExpiry(token);
+      if (rememberMe && data.refreshToken) {
+        const expiryTime = parseTokenExpiry(data.accessToken);
         const currentTime = Date.now();
         if (expiryTime > currentTime) {
           setupTokenRefresh(expiryTime - currentTime);
         }
       }
 
-      console.log('✅ 登录成功:', result.user.email);
+      console.log('✅ 登录成功:', data.user.email);
 
     } catch (error: any) {
       console.error('❌ 登录失败:', error);
@@ -253,23 +255,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new Error(result.message || '注册失败');
       }
 
-      // 检查是否有用户信息（表示注册成功）
-      if (!result.user) {
+      // 检查注册是否成功
+      if (!result.success) {
         throw new Error(result.message || '注册失败');
       }
 
+      // 获取响应数据
+      const { data } = result;
+      if (!data || !data.user) {
+        throw new Error('注册响应格式错误');
+      }
+
       // 保存token和用户信息
-      if (result.token) {
-        localStorage.setItem('auth_token', result.token);
-      }
-      if (result.refreshToken) {
-        localStorage.setItem('refresh_token', result.refreshToken);
-      }
-      localStorage.setItem('user_data', JSON.stringify(result.user));
+      localStorage.setItem('auth_token', data.accessToken);
+      localStorage.setItem('refresh_token', data.refreshToken);
+      localStorage.setItem('user_data', JSON.stringify(data.user));
 
-      setUser(result.user);
+      setUser(data.user);
 
-      console.log('✅ 注册成功:', result.user.email);
+      console.log('✅ 注册成功:', data.user.email);
 
     } catch (error) {
       console.error('❌ 注册失败:', error);

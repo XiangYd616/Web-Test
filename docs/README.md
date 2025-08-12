@@ -5,19 +5,35 @@
 ## 📚 文档导航
 
 ### 🚀 快速开始
-- [**启动指南**](启动指南.md) - 如何快速启动项目
-- [**部署指南**](部署指南.md) - 生产环境部署说明
+- [**API参考文档**](API_REFERENCE.md) - 完整的API接口文档
+- [**故障排除指南**](TROUBLESHOOTING.md) - 常见问题解决方案
+- [**代码审查清单**](CODE_REVIEW_CHECKLIST.md) - 代码质量检查清单
+
+### 📖 开发文档
+- [**开发指南**](DEVELOPMENT_GUIDELINES.md) - 开发规范和最佳实践
+- [**代码风格指南**](CODE_STYLE.md) - 代码格式和命名规范
+- [**贡献指南**](CONTRIBUTING.md) - 如何为项目做贡献
+- [**更新日志**](CHANGELOG.md) - 版本更新记录
+
+### 🏗️ 架构文档
+- [**数据库架构**](DATABASE_SCHEMA.md) - 数据库设计和结构
+- [**环境配置**](ENVIRONMENT_SETUP.md) - 开发环境设置
 - [**PostgreSQL配置**](POSTGRESQL_SETUP.md) - 数据库配置指南
 
-### 📖 项目文档
-- [**项目结构说明**](项目结构说明.md) - 详细的项目结构介绍
-- [**功能特性说明**](功能特性说明.md) - 完整的功能特性列表
-- [**API接口文档**](API_REFERENCE.md) - 完整的API参考文档
-- [**设计系统文档**](modern-design-system.md) - UI设计系统说明
+### 🔗 功能指南
+- [**企业级集成**](ENTERPRISE_INTEGRATIONS.md) - Webhook、Slack、Jenkins等集成
+- [**智能报告系统**](INTELLIGENT_REPORTS.md) - 多格式报告生成和管理
+- [**Redis集成**](REDIS_INTEGRATION.md) - 缓存系统配置
+- [**统一日志系统**](UNIFIED_LOGGING.md) - 日志管理和监控
+- [**响应式设计**](RESPONSIVE_DESIGN_GUIDELINES.md) - 移动端适配指南
 
-### 🔗 新功能指南
-- [**企业级集成指南**](ENTERPRISE_INTEGRATIONS.md) - Webhook、Slack、Jenkins等集成
-- [**智能报告系统指南**](INTELLIGENT_REPORTS.md) - 多格式报告生成和管理
+### 📊 测试文档
+- [**本地压力测试**](LOCAL_STRESS_TEST.md) - 本地测试环境配置
+- [**浏览器安全指南**](browser-security-guide.md) - 浏览器安全配置
+
+### 🗄️ 数据管理
+- [**高级数据管理**](ADVANCED_DATA_MANAGEMENT.md) - 数据备份、同步和管理
+- [**数据库架构概览**](database-architecture-overview.md) - 数据库设计说明
 - [**统一日志系统指南**](UNIFIED_LOGGING.md) - 前后端统一日志管理
 
 ### 🎨 主题和设计

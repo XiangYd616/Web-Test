@@ -1,11 +1,13 @@
 /**
- * 数据库配置和连接管理
+ * 数据库配置和连接管理 - 优化版本
+ * 支持环境自适应、连接池优化、故障恢复
  */
 
 const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
 const DatabaseConnectionManager = require('../utils/DatabaseConnectionManager');
+const EnhancedDatabaseConnectionManager = require('../utils/EnhancedDatabaseConnectionManager');
 
 // 数据库连接池和管理器
 let pool = null;
@@ -13,35 +15,53 @@ let connectionManager = null;
 
 // 根据环境自动选择数据库
 const getDefaultDatabase = () => {
-  return process.env.NODE_ENV === 'production' ? 'testweb_prod' : 'testweb_dev';
+  const env = process.env.NODE_ENV || 'development';
+  switch (env) {
+    case 'production':
+      return process.env.DB_NAME || 'testweb_prod';
+    case 'test':
+      return process.env.DB_NAME || 'testweb_test';
+    default:
+      return process.env.DB_NAME || 'testweb_dev';
+  }
 };
 
-// 优化的数据库配置
+// 优化的数据库配置 - 环境自适应版本
 const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT) || 5432,
-  database: process.env.DB_NAME || getDefaultDatabase(),
+  database: getDefaultDatabase(),
   user: process.env.DB_USER || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
 
-  // 连接池优化配置
-  max: parseInt(process.env.DB_MAX_CONNECTIONS) || 20, // 最大连接数
-  min: parseInt(process.env.DB_MIN_CONNECTIONS) || 5,  // 最小连接数
-  idleTimeoutMillis: parseInt(process.env.DB_IDLE_TIMEOUT) || 30000, // 空闲超时
-  connectionTimeoutMillis: parseInt(process.env.DB_CONNECTION_TIMEOUT) || 5000, // 连接超时
-  acquireTimeoutMillis: parseInt(process.env.DB_ACQUIRE_TIMEOUT) || 60000, // 获取连接超时
+  // 连接池优化配置 (根据环境调整)
+  max: parseInt(process.env.DB_MAX_CONNECTIONS) || (process.env.NODE_ENV === 'production' ? 50 : 20),
+  min: parseInt(process.env.DB_MIN_CONNECTIONS) || (process.env.NODE_ENV === 'production' ? 10 : 5),
+  idleTimeoutMillis: parseInt(process.env.DB_IDLE_TIMEOUT) || 30000,
+  connectionTimeoutMillis: parseInt(process.env.DB_CONNECTION_TIMEOUT) || 5000,
+  acquireTimeoutMillis: parseInt(process.env.DB_ACQUIRE_TIMEOUT) || 60000,
 
   // 性能优化配置
-  statement_timeout: parseInt(process.env.DB_STATEMENT_TIMEOUT) || 30000, // SQL语句超时
-  query_timeout: parseInt(process.env.DB_QUERY_TIMEOUT) || 30000, // 查询超时
+  statement_timeout: parseInt(process.env.DB_STATEMENT_TIMEOUT) || 30000,
+  query_timeout: parseInt(process.env.DB_QUERY_TIMEOUT) || 30000,
 
   // SSL配置 (生产环境)
   ssl: process.env.NODE_ENV === 'production' ? {
-    rejectUnauthorized: false
+    rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false'
   } : false,
 
   // 应用名称 (便于监控)
-  application_name: process.env.DB_APPLICATION_NAME || 'testweb_platform'
+  application_name: process.env.DB_APPLICATION_NAME || `testweb_${process.env.NODE_ENV || 'dev'}`,
+
+  // 连接重试配置
+  retryAttempts: parseInt(process.env.DB_RETRY_ATTEMPTS) || 5,
+  retryDelay: parseInt(process.env.DB_RETRY_DELAY) || 1000,
+
+  // 健康检查配置
+  healthCheckInterval: parseInt(process.env.DB_HEALTH_CHECK_INTERVAL) || 30000,
+
+  // 日志配置
+  logLevel: process.env.DB_LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'error' : 'info')
 };
 
 /**
@@ -318,22 +338,23 @@ const batchInsert = async (tableName, columns, values) => {
  */
 const healthCheck = async () => {
   try {
-    const dbPool = getPool();
+    const manager = await getConnectionManager();
     const start = Date.now();
 
     // 基础连接测试
-    const connectionTest = await dbPool.query('SELECT NOW() as current_time, version() as version');
+    const connectionTest = await manager.query('SELECT NOW() as current_time, version() as version');
     const connectionTime = Date.now() - start;
 
     // 检查连接池状态
-    const poolStats = {
-      totalCount: dbPool.totalCount,
-      idleCount: dbPool.idleCount,
-      waitingCount: dbPool.waitingCount
+    const status = manager.getStatus();
+    const poolStats = status.pool || {
+      totalCount: 0,
+      idleCount: 0,
+      waitingCount: 0
     };
 
     // 检查核心表是否存在
-    const tablesCheck = await dbPool.query(`
+    const tablesCheck = await manager.query(`
       SELECT COUNT(*) as count
       FROM information_schema.tables
       WHERE table_schema = 'public'
@@ -346,7 +367,7 @@ const healthCheck = async () => {
     let engineStatus = null;
     if (coreTablesExist) {
       try {
-        const engineCheck = await dbPool.query('SELECT engine_type, status FROM engine_status');
+        const engineCheck = await manager.query('SELECT engine_type, status FROM engine_status');
         engineStatus = engineCheck.rows;
       } catch (err) {
         // 引擎状态表可能不存在
@@ -377,10 +398,10 @@ const healthCheck = async () => {
  */
 const getStats = async () => {
   try {
-    const dbPool = getPool();
+    const manager = await getConnectionManager();
 
     // 获取表大小信息
-    const tableSizes = await dbPool.query(`
+    const tableSizes = await manager.query(`
       SELECT
         schemaname,
         tablename,
@@ -393,7 +414,7 @@ const getStats = async () => {
     `);
 
     // 获取连接统计
-    const connectionStats = await dbPool.query(`
+    const connectionStats = await manager.query(`
       SELECT
         COUNT(*) as total_connections,
         COUNT(CASE WHEN state = 'active' THEN 1 END) as active_connections,
@@ -402,13 +423,14 @@ const getStats = async () => {
       WHERE datname = current_database()
     `);
 
+    const status = manager.getStatus();
     return {
       tableSizes: tableSizes.rows,
       connectionStats: connectionStats.rows[0],
-      poolStats: {
-        totalCount: dbPool.totalCount,
-        idleCount: dbPool.idleCount,
-        waitingCount: dbPool.waitingCount
+      poolStats: status.pool || {
+        totalCount: 0,
+        idleCount: 0,
+        waitingCount: 0
       }
     };
   } catch (error) {
@@ -422,7 +444,28 @@ const getStats = async () => {
  */
 const getConnectionManager = async () => {
   if (!connectionManager) {
-    connectionManager = new DatabaseConnectionManager(dbConfig);
+    // 使用增强版连接管理器
+    connectionManager = new EnhancedDatabaseConnectionManager(dbConfig);
+
+    // 设置事件监听
+    connectionManager.on('connected', (data) => {
+      console.log('✅ 数据库连接管理器已连接', data);
+    });
+
+    connectionManager.on('connectionError', (data) => {
+      console.error('❌ 数据库连接错误', data.error.message);
+    });
+
+    connectionManager.on('reconnected', (data) => {
+      console.log('🔄 数据库重连成功', `尝试次数: ${data.attempts}`);
+    });
+
+    connectionManager.on('healthCheck', (data) => {
+      if (data.status === 'unhealthy') {
+        console.warn('⚠️ 数据库健康检查失败', data.error);
+      }
+    });
+
     await connectionManager.initialize();
   }
   return connectionManager;
@@ -452,6 +495,19 @@ const getDatabaseStatus = async () => {
   }
 };
 
+/**
+ * 获取数据库配置
+ */
+const getDatabaseConfig = () => {
+  return {
+    host: dbConfig.host,
+    port: dbConfig.port,
+    database: dbConfig.database,
+    user: dbConfig.user,
+    password: dbConfig.password
+  };
+};
+
 module.exports = {
   connectDB,
   testConnection,
@@ -465,6 +521,7 @@ module.exports = {
   getConnectionManager,
   executeOptimizedQuery,
   getDatabaseStatus,
+  getDatabaseConfig,
   // 兼容性导出
   db: { query },
   pool: () => getPool()

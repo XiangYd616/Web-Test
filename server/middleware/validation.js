@@ -9,12 +9,12 @@
 const validateTestType = (req, res, next) => {
   const { testType } = req.query;
   const validTestTypes = [
-    'stress', 
-    'security', 
-    'api', 
-    'performance', 
-    'compatibility', 
-    'seo', 
+    'stress',
+    'security',
+    'api',
+    'performance',
+    'compatibility',
+    'seo',
     'accessibility'
   ];
 
@@ -66,17 +66,17 @@ const validatePagination = (req, res, next) => {
  */
 const validateSorting = (req, res, next) => {
   const { sortBy, sortOrder } = req.query;
-  
+
   const validSortFields = [
-    'created_at', 
-    'updated_at', 
-    'start_time', 
-    'end_time', 
-    'duration', 
+    'created_at',
+    'updated_at',
+    'start_time',
+    'end_time',
+    'duration',
     'overall_score',
     'test_name'
   ];
-  
+
   const validSortOrders = ['ASC', 'DESC', 'asc', 'desc'];
 
   if (sortBy && !validSortFields.includes(sortBy)) {
@@ -103,14 +103,14 @@ const validateUUID = (paramName) => {
   return (req, res, next) => {
     const value = req.params[paramName];
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    
+
     if (!uuidRegex.test(value)) {
       return res.status(400).json({
         success: false,
         error: `无效的${paramName}格式`
       });
     }
-    
+
     next();
   };
 };
@@ -163,14 +163,14 @@ const validateSearch = (req, res, next) => {
   if (search !== undefined) {
     // 清理搜索字符串
     const cleanSearch = search.trim();
-    
+
     if (cleanSearch.length > 100) {
       return res.status(400).json({
         success: false,
         error: '搜索关键词不能超过100个字符'
       });
     }
-    
+
     req.query.search = cleanSearch;
   }
 
@@ -215,6 +215,108 @@ const validateTimeRange = (req, res, next) => {
 };
 
 /**
+ * 通用请求验证中间件
+ * 使用Joi进行数据验证
+ */
+const validateRequest = (schema) => {
+  return (req, res, next) => {
+    const { error, value } = schema.validate(req.body, {
+      abortEarly: false,
+      stripUnknown: true,
+      allowUnknown: false
+    });
+
+    if (error) {
+      const errors = error.details.map(detail => ({
+        field: detail.path.join('.'),
+        message: detail.message,
+        value: detail.context?.value
+      }));
+
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: '请求数据验证失败',
+          details: errors
+        }
+      });
+    }
+
+    // 将验证后的数据附加到请求对象
+    req.validatedData = value;
+    next();
+  };
+};
+
+/**
+ * 验证查询参数
+ */
+const validateQuery = (schema) => {
+  return (req, res, next) => {
+    const { error, value } = schema.validate(req.query, {
+      abortEarly: false,
+      stripUnknown: true,
+      allowUnknown: true // 查询参数允许未知字段
+    });
+
+    if (error) {
+      const errors = error.details.map(detail => ({
+        field: detail.path.join('.'),
+        message: detail.message,
+        value: detail.context?.value
+      }));
+
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: '查询参数验证失败',
+          details: errors
+        }
+      });
+    }
+
+    // 将验证后的查询参数合并到原查询对象
+    Object.assign(req.query, value);
+    next();
+  };
+};
+
+/**
+ * 验证路径参数
+ */
+const validateParams = (schema) => {
+  return (req, res, next) => {
+    const { error, value } = schema.validate(req.params, {
+      abortEarly: false,
+      stripUnknown: true
+    });
+
+    if (error) {
+      const errors = error.details.map(detail => ({
+        field: detail.path.join('.'),
+        message: detail.message,
+        value: detail.context?.value
+      }));
+
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: '路径参数验证失败',
+          details: errors
+        }
+      });
+    }
+
+    // 将验证后的参数合并到原参数对象
+    Object.assign(req.params, value);
+    next();
+  };
+};
+
+/**
  * 组合验证中间件
  */
 const validateTestHistoryQuery = [
@@ -235,5 +337,8 @@ module.exports = {
   validateSearch,
   validateStatus,
   validateTimeRange,
-  validateTestHistoryQuery
+  validateTestHistoryQuery,
+  validateRequest,
+  validateQuery,
+  validateParams
 };

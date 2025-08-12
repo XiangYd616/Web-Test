@@ -1,11 +1,13 @@
 /**
- * 错误处理中间件
+ * 错误处理中间件 - 使用统一的API响应格式
  */
 
 const fs = require('fs');
 const path = require('path');
 const Logger = require('../utils/logger');
 const ErrorNotificationHelper = require('../utils/ErrorNotificationHelper');
+const { ErrorFactory, ErrorUtils } = require('../utils/ApiError');
+const { ErrorCodes, createErrorResponse } = require('../types/ApiResponse');
 
 /**
  * 异步路由包装器
@@ -20,109 +22,70 @@ const asyncHandler = (fn) => {
 const globalErrorNotifier = new ErrorNotificationHelper('System');
 
 /**
- * 全局错误处理中间件
+ * 全局错误处理中间件 - 使用统一响应格式
  */
 const errorHandler = (err, req, res, next) => {
-  let error = { ...err };
-  error.message = err.message;
+  // 如果响应已经发送，则跳过
+  if (res.headersSent) {
+    return next(err);
+  }
 
   // 记录错误日志
   logError(err, req);
 
-  // 数据库连接错误
-  if (err.code === 'ECONNREFUSED') {
-    error.message = '数据库连接失败';
-    error.statusCode = 503;
-  }
+  // 转换为标准API错误
+  const apiError = ErrorFactory.fromError(err);
 
-  // PostgreSQL错误
-  if (err.code && err.code.startsWith('23')) {
-    if (err.code === '23505') {
-      error.message = '数据已存在，违反唯一约束';
-      error.statusCode = 409;
-    } else if (err.code === '23503') {
-      error.message = '违反外键约束';
-      error.statusCode = 400;
-    } else {
-      error.message = '数据库约束错误';
-      error.statusCode = 400;
-    }
-  }
+  // 记录错误详情
+  ErrorUtils.logError(apiError, {
+    method: req.method,
+    url: req.originalUrl,
+    ip: req.ip,
+    userAgent: req.get('User-Agent'),
+    user: req.user ? req.user.id : 'anonymous'
+  });
 
-  // JWT错误
-  if (err.name === 'JsonWebTokenError') {
-    error.message = '无效的认证令牌';
-    error.statusCode = 401;
-  }
+  // 获取错误分类和建议（保持向后兼容）
+  const errorCategory = globalErrorNotifier.getErrorCategory(err);
+  const errorSeverity = globalErrorNotifier.getErrorSeverity(err);
+  const suggestions = globalErrorNotifier.getErrorSuggestions(err);
 
-  if (err.name === 'TokenExpiredError') {
-    error.message = '认证令牌已过期';
-    error.statusCode = 401;
-  }
-
-  // 验证错误
-  if (err.name === 'ValidationError') {
-    const message = Object.values(err.errors).map(val => val.message).join(', ');
-    error.message = message;
-    error.statusCode = 400;
-  }
-
-  // 文件上传错误
-  if (err.code === 'LIMIT_FILE_SIZE') {
-    error.message = '文件大小超出限制';
-    error.statusCode = 413;
-  }
-
-  if (err.code === 'LIMIT_UNEXPECTED_FILE') {
-    error.message = '意外的文件字段';
-    error.statusCode = 400;
-  }
-
-  // 网络错误
-  if (err.code === 'ENOTFOUND' || err.code === 'ECONNRESET') {
-    error.message = '网络连接错误';
-    error.statusCode = 503;
-  }
-
-  // 超时错误
-  if (err.code === 'ETIMEDOUT') {
-    error.message = '请求超时';
-    error.statusCode = 408;
-  }
-
-  // 默认错误
-  const statusCode = error.statusCode || err.statusCode || 500;
-  const message = error.message || '服务器内部错误';
-
-  // 获取错误分类和建议
-  const errorCategory = globalErrorNotifier.getErrorCategory(error);
-  const errorSeverity = globalErrorNotifier.getErrorSeverity(error);
-  const isRetryable = globalErrorNotifier.isRetryableError(error);
-  const suggestions = globalErrorNotifier.getErrorSuggestions(error);
-
-  // 标准化错误响应格式 (符合OpenAPI规范)
-  const response = {
-    success: false,
-    error: {
-      code: error.code || err.code || `HTTP_${statusCode}`,
-      message,
-      details: {
-        path: req.originalUrl,
-        method: req.method,
-        timestamp: new Date().toISOString(),
-        category: errorCategory,
-        severity: errorSeverity
-      },
-      retryable: isRetryable,
-      suggestions,
-      ...(process.env.NODE_ENV === 'development' && {
-        stack: err.stack,
-        originalError: err
-      })
-    }
+  // 构建元数据
+  const meta = {
+    requestId: req.requestId || generateRequestId(),
+    duration: req.startTime ? Date.now() - req.startTime : undefined,
+    path: req.originalUrl,
+    method: req.method,
+    category: errorCategory,
+    severity: errorSeverity
   };
 
-  res.status(statusCode).json(response);
+  // 在开发环境中添加调试信息
+  if (process.env.NODE_ENV === 'development') {
+    meta.debug = {
+      stack: err.stack,
+      originalError: err.message,
+      code: err.code
+    };
+  }
+
+  // 创建标准化错误响应
+  const response = createErrorResponse(
+    apiError.code,
+    apiError.message,
+    apiError.details,
+    meta
+  );
+
+  // 合并额外的建议
+  if (suggestions && suggestions.length > 0) {
+    response.error.suggestions = [
+      ...(response.error.suggestions || []),
+      ...suggestions
+    ];
+  }
+
+  res.status(apiError.statusCode).json(response);
 };
 
 /**
@@ -183,7 +146,17 @@ const validationError = (errors) => {
 };
 
 /**
- * 自定义错误类
+ * 生成请求ID（如果不存在）
+ */
+const generateRequestId = () => {
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).substring(2, 8);
+  return `req_${timestamp}_${random}`;
+};
+
+/**
+ * 自定义错误类 - 保持向后兼容
+ * @deprecated 请使用 ApiError 类
  */
 class AppError extends Error {
   constructor(message, statusCode = 500, isOperational = true, code = null) {

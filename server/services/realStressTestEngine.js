@@ -1,5 +1,5 @@
 /**
- * 真实的压力测试引擎 - 重构优化版本
+ * 真实的压力测试引擎 - 重构优化版本 v2.1.0
  * 
  * 主要改进：
  * - 提取公共方法和常量
@@ -7,6 +7,12 @@
  * - 统一错误处理和日志
  * - 优化取消和清理机制
  * - 移除重复代码
+ * - 增强WebSocket实时数据推送
+ * - 添加测试暂停/恢复功能
+ * - 完善结果分析和报告生成
+ * 
+ * 版本: v2.1.0
+ * 更新时间: 2024-12-19
  */
 
 const https = require('https');
@@ -571,15 +577,30 @@ class HttpClient {
 class RealStressTestEngine {
   constructor() {
     this.name = 'real-stress-test-engine';
-    this.version = '2.0.0';
+    this.version = '2.1.0';
     this.maxConcurrentUsers = CONSTANTS.LIMITS.MAX_CONCURRENT_USERS;
     this.runningTests = new Map(); // 存储正在运行的测试状态
     this.globalTimers = new Map(); // 全局定时器跟踪
+    this.pausedTests = new Map(); // 存储暂停的测试状态
+    this.testControllers = new Map(); // 存储测试控制器
 
     // 🔧 重构：添加回调支持
     this.progressCallback = null;
     this.completionCallback = null;
     this.errorCallback = null;
+    this.realTimeDataCallback = null;
+
+    // WebSocket连接管理
+    this.wsConnections = new Map();
+
+    // 测试统计
+    this.testStats = {
+      totalTestsRun: 0,
+      totalTestsCompleted: 0,
+      totalTestsFailed: 0,
+      totalTestsCancelled: 0,
+      averageTestDuration: 0
+    };
   }
 
   /**
@@ -604,6 +625,219 @@ class RealStressTestEngine {
   }
 
   /**
+   * 设置实时数据回调
+   */
+  setRealTimeDataCallback(callback) {
+    this.realTimeDataCallback = callback;
+  }
+
+  /**
+   * 注册WebSocket连接
+   */
+  registerWebSocketConnection(testId, socket) {
+    if (!this.wsConnections.has(testId)) {
+      this.wsConnections.set(testId, new Set());
+    }
+    this.wsConnections.get(testId).add(socket);
+
+    Logger.info(`WebSocket连接已注册: ${testId}`, {
+      socketId: socket.id,
+      totalConnections: this.wsConnections.get(testId).size
+    });
+
+    // 发送当前测试状态
+    const testStatus = this.getTestStatus(testId);
+    if (testStatus) {
+      socket.emit('test-status-update', testStatus);
+    }
+  }
+
+  /**
+   * 注销WebSocket连接
+   */
+  unregisterWebSocketConnection(testId, socket) {
+    if (this.wsConnections.has(testId)) {
+      this.wsConnections.get(testId).delete(socket);
+
+      if (this.wsConnections.get(testId).size === 0) {
+        this.wsConnections.delete(testId);
+      }
+
+      Logger.info(`WebSocket连接已注销: ${testId}`, {
+        socketId: socket.id,
+        remainingConnections: this.wsConnections.get(testId)?.size || 0
+      });
+    }
+  }
+
+  /**
+   * 广播实时数据到WebSocket客户端
+   */
+  broadcastRealTimeData(testId, data) {
+    if (this.wsConnections.has(testId)) {
+      const connections = this.wsConnections.get(testId);
+      const broadcastData = {
+        testId,
+        timestamp: Date.now(),
+        ...data
+      };
+
+      connections.forEach(socket => {
+        try {
+          socket.emit('real-time-data', broadcastData);
+        } catch (error) {
+          Logger.warn(`WebSocket广播失败: ${testId}`, {
+            socketId: socket.id,
+            error: error.message
+          });
+          // 移除失效的连接
+          connections.delete(socket);
+        }
+      });
+
+      // 调用实时数据回调
+      if (this.realTimeDataCallback) {
+        this.realTimeDataCallback(testId, broadcastData);
+      }
+    }
+  }
+
+  /**
+   * 暂停测试
+   */
+  async pauseTest(testId, reason = '用户暂停') {
+    try {
+      const testStatus = this.getTestStatus(testId);
+      if (!testStatus || testStatus.status !== 'running') {
+        throw new Error(`测试 ${testId} 不在运行状态，无法暂停`);
+      }
+
+      Logger.info(`暂停测试: ${testId}`, { reason });
+
+      // 保存当前状态
+      const pausedState = {
+        ...testStatus,
+        pausedAt: Date.now(),
+        pauseReason: reason,
+        previousStatus: testStatus.status
+      };
+
+      this.pausedTests.set(testId, pausedState);
+
+      // 更新测试状态
+      this.updateTestStatus(testId, {
+        status: 'paused',
+        pausedAt: new Date().toISOString(),
+        pauseReason: reason
+      });
+
+      // 广播暂停事件
+      this.broadcastRealTimeData(testId, {
+        type: 'test-paused',
+        reason,
+        pausedAt: new Date().toISOString()
+      });
+
+      return { success: true, message: '测试已暂停' };
+
+    } catch (error) {
+      Logger.error(`暂停测试失败: ${testId}`, error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * 恢复测试
+   */
+  async resumeTest(testId) {
+    try {
+      const pausedState = this.pausedTests.get(testId);
+      if (!pausedState) {
+        throw new Error(`测试 ${testId} 未处于暂停状态`);
+      }
+
+      Logger.info(`恢复测试: ${testId}`);
+
+      // 计算暂停时长
+      const pauseDuration = Date.now() - pausedState.pausedAt;
+
+      // 恢复测试状态
+      this.updateTestStatus(testId, {
+        status: 'running',
+        resumedAt: new Date().toISOString(),
+        totalPauseDuration: (pausedState.totalPauseDuration || 0) + pauseDuration
+      });
+
+      // 移除暂停状态
+      this.pausedTests.delete(testId);
+
+      // 广播恢复事件
+      this.broadcastRealTimeData(testId, {
+        type: 'test-resumed',
+        resumedAt: new Date().toISOString(),
+        pauseDuration
+      });
+
+      return { success: true, message: '测试已恢复' };
+
+    } catch (error) {
+      Logger.error(`恢复测试失败: ${testId}`, error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * 检查测试是否暂停
+   */
+  isTestPaused(testId) {
+    return this.pausedTests.has(testId);
+  }
+
+  /**
+   * 获取测试控制器
+   */
+  getTestController(testId) {
+    return this.testControllers.get(testId);
+  }
+
+  /**
+   * 创建测试控制器
+   */
+  createTestController(testId) {
+    const controller = {
+      testId,
+      createdAt: Date.now(),
+      cancelled: false,
+      paused: false,
+
+      cancel: (reason = '用户取消') => {
+        controller.cancelled = true;
+        controller.cancelReason = reason;
+        controller.cancelledAt = Date.now();
+        return this.cancelStressTest(testId, reason);
+      },
+
+      pause: (reason = '用户暂停') => {
+        return this.pauseTest(testId, reason);
+      },
+
+      resume: () => {
+        return this.resumeTest(testId);
+      },
+
+      getStatus: () => {
+        return this.getTestStatus(testId);
+      },
+
+      isCancelled: () => controller.cancelled,
+      isPaused: () => this.isTestPaused(testId)
+    };
+
+    this.testControllers.set(testId, controller);
+    return controller;
+  }
+
+  /**
    * 运行压力测试 - 主入口方法
    */
   async runStressTest(url, config = {}) {
@@ -613,6 +847,9 @@ class RealStressTestEngine {
     Logger.info(`启动压力测试: ${url}`, { testId, config: testConfig });
 
     try {
+      // 创建测试控制器
+      const controller = this.createTestController(testId);
+
       // 增强的参数验证
       await Validator.validateUrl(url);
       Validator.validateConfig(testConfig);
@@ -637,6 +874,13 @@ class RealStressTestEngine {
       // 初始化测试结果
       const results = this.initializeTestResults(testId, url, testConfig);
 
+      // 广播测试开始事件
+      this.broadcastRealTimeData(testId, {
+        type: 'test-started',
+        config: testConfig,
+        startTime: results.startTimeISO
+      });
+
       // 执行测试
       await this.executeTest(url, testConfig, results);
 
@@ -653,6 +897,9 @@ class RealStressTestEngine {
     } catch (error) {
       Logger.error(`压力测试失败: ${url}`, error);
       return this.handleTestFailure(testId, error);
+    } finally {
+      // 清理测试控制器
+      this.testControllers.delete(testId);
     }
   }
 
@@ -839,6 +1086,370 @@ class RealStressTestEngine {
   }
 
   /**
+   * 生成详细的测试报告
+   */
+  generateDetailedReport(testId, results) {
+    const report = {
+      testId,
+      generatedAt: new Date().toISOString(),
+      summary: this.generateTestSummary(results),
+      performance: this.analyzePerformance(results),
+      reliability: this.analyzeReliability(results),
+      scalability: this.analyzeScalability(results),
+      recommendations: this.generateRecommendations(results),
+      charts: this.generateChartData(results),
+      rawData: {
+        metrics: results.metrics,
+        realTimeData: results.realTimeData,
+        config: results.config
+      }
+    };
+
+    Logger.info(`生成详细报告: ${testId}`, {
+      summaryScore: report.summary.overallScore,
+      recommendationsCount: report.recommendations.length
+    });
+
+    return report;
+  }
+
+  /**
+   * 生成测试摘要
+   */
+  generateTestSummary(results) {
+    const { metrics, config, actualDuration } = results;
+
+    // 计算总体评分
+    const performanceScore = this.calculatePerformanceScore(metrics);
+    const reliabilityScore = this.calculateReliabilityScore(metrics);
+    const scalabilityScore = this.calculateScalabilityScore(metrics, config);
+
+    const overallScore = Math.round((performanceScore + reliabilityScore + scalabilityScore) / 3);
+
+    return {
+      overallScore,
+      grade: this.getPerformanceGrade(overallScore),
+      performanceScore,
+      reliabilityScore,
+      scalabilityScore,
+      testDuration: actualDuration,
+      totalRequests: metrics.totalRequests,
+      successRate: ((metrics.successfulRequests / metrics.totalRequests) * 100).toFixed(2),
+      averageResponseTime: metrics.averageResponseTime,
+      peakThroughput: metrics.peakTPS,
+      errorRate: metrics.errorRate,
+      status: results.status
+    };
+  }
+
+  /**
+   * 分析性能指标
+   */
+  analyzePerformance(results) {
+    const { metrics } = results;
+
+    return {
+      responseTime: {
+        average: metrics.averageResponseTime,
+        min: metrics.minResponseTime,
+        max: metrics.maxResponseTime,
+        p50: metrics.p50ResponseTime || metrics.p50,
+        p90: metrics.p90ResponseTime || metrics.p90,
+        p95: metrics.p95ResponseTime || metrics.p95,
+        p99: metrics.p99ResponseTime || metrics.p99,
+        analysis: this.analyzeResponseTimes(metrics)
+      },
+      throughput: {
+        average: metrics.throughput,
+        peak: metrics.peakTPS,
+        current: metrics.currentTPS,
+        trend: this.analyzeThroughputTrend(results.realTimeData),
+        analysis: this.analyzeThroughput(metrics)
+      },
+      concurrency: {
+        configured: results.config.users,
+        peak: Math.max(...(results.realTimeData.map(d => d.activeUsers) || [0])),
+        average: this.calculateAverageConcurrency(results.realTimeData),
+        analysis: this.analyzeConcurrency(results)
+      }
+    };
+  }
+
+  /**
+   * 分析可靠性指标
+   */
+  analyzeReliability(results) {
+    const { metrics } = results;
+
+    return {
+      errorRate: {
+        overall: metrics.errorRate,
+        trend: this.analyzeErrorTrend(results.realTimeData),
+        breakdown: this.analyzeErrorBreakdown(metrics.errors),
+        analysis: this.analyzeErrors(metrics)
+      },
+      stability: {
+        responseTimeVariability: this.calculateResponseTimeVariability(metrics),
+        throughputStability: this.calculateThroughputStability(results.realTimeData),
+        errorDistribution: this.analyzeErrorDistribution(metrics.errors),
+        analysis: this.analyzeStability(results)
+      },
+      availability: {
+        uptime: this.calculateUptime(results),
+        downtimeEvents: this.identifyDowntimeEvents(results.realTimeData),
+        analysis: this.analyzeAvailability(results)
+      }
+    };
+  }
+
+  /**
+   * 分析可扩展性指标
+   */
+  analyzeScalability(results) {
+    const { config, metrics, realTimeData } = results;
+
+    return {
+      loadHandling: {
+        configuredLoad: config.users,
+        actualLoad: metrics.totalRequests,
+        loadEfficiency: this.calculateLoadEfficiency(config, metrics),
+        analysis: this.analyzeLoadHandling(results)
+      },
+      resourceUtilization: {
+        requestsPerUser: metrics.totalRequests / config.users,
+        averageThinkTime: config.thinkTime,
+        utilizationRate: this.calculateUtilizationRate(results),
+        analysis: this.analyzeResourceUtilization(results)
+      },
+      bottlenecks: {
+        identified: this.identifyBottlenecks(results),
+        analysis: this.analyzeBottlenecks(results)
+      }
+    };
+  }
+
+  /**
+   * 生成改进建议
+   */
+  generateRecommendations(results) {
+    const recommendations = [];
+    const { metrics, config } = results;
+
+    // 性能建议
+    if (metrics.averageResponseTime > 1000) {
+      recommendations.push({
+        category: 'performance',
+        priority: 'high',
+        title: '优化响应时间',
+        description: `平均响应时间为 ${metrics.averageResponseTime}ms，建议优化服务器性能`,
+        impact: '提升用户体验，减少等待时间',
+        suggestions: [
+          '检查数据库查询性能',
+          '优化应用程序代码',
+          '考虑使用缓存机制',
+          '升级服务器硬件配置'
+        ]
+      });
+    }
+
+    // 可靠性建议
+    if (metrics.errorRate > 5) {
+      recommendations.push({
+        category: 'reliability',
+        priority: 'high',
+        title: '降低错误率',
+        description: `错误率为 ${metrics.errorRate}%，需要提升系统稳定性`,
+        impact: '提高系统可靠性，减少服务中断',
+        suggestions: [
+          '分析错误日志，找出根本原因',
+          '增加错误处理和重试机制',
+          '实施健康检查和监控',
+          '优化资源配置和限流策略'
+        ]
+      });
+    }
+
+    // 扩展性建议
+    if (metrics.peakTPS < config.users * 0.5) {
+      recommendations.push({
+        category: 'scalability',
+        priority: 'medium',
+        title: '提升并发处理能力',
+        description: `峰值TPS为 ${metrics.peakTPS}，低于预期并发能力`,
+        impact: '提高系统吞吐量，支持更多并发用户',
+        suggestions: [
+          '优化应用程序架构',
+          '实施负载均衡',
+          '考虑微服务架构',
+          '增加服务器实例'
+        ]
+      });
+    }
+
+    // 配置建议
+    if (config.thinkTime < 1) {
+      recommendations.push({
+        category: 'configuration',
+        priority: 'low',
+        title: '调整测试配置',
+        description: '思考时间过短，可能不能真实反映用户行为',
+        impact: '获得更真实的测试结果',
+        suggestions: [
+          '增加思考时间到1-3秒',
+          '模拟真实用户行为模式',
+          '考虑不同用户场景的混合测试'
+        ]
+      });
+    }
+
+    return recommendations;
+  }
+
+  /**
+   * 生成图表数据
+   */
+  generateChartData(results) {
+    const { realTimeData, metrics } = results;
+
+    return {
+      responseTimeChart: {
+        type: 'line',
+        title: '响应时间趋势',
+        data: realTimeData.map(point => ({
+          timestamp: point.timestamp,
+          value: point.responseTime || point.averageResponseTime
+        }))
+      },
+      throughputChart: {
+        type: 'line',
+        title: '吞吐量趋势',
+        data: realTimeData.map(point => ({
+          timestamp: point.timestamp,
+          value: point.throughput || point.requestsPerSecond
+        }))
+      },
+      errorRateChart: {
+        type: 'line',
+        title: '错误率趋势',
+        data: realTimeData.map(point => ({
+          timestamp: point.timestamp,
+          value: point.errorRate
+        }))
+      },
+      concurrencyChart: {
+        type: 'area',
+        title: '并发用户数',
+        data: realTimeData.map(point => ({
+          timestamp: point.timestamp,
+          value: point.activeUsers
+        }))
+      },
+      responseTimeDistribution: {
+        type: 'histogram',
+        title: '响应时间分布',
+        data: this.generateResponseTimeDistribution(metrics.responseTimes)
+      }
+    };
+  }
+
+  // 辅助分析方法
+  calculatePerformanceScore(metrics) {
+    let score = 100;
+
+    // 响应时间评分
+    if (metrics.averageResponseTime > 2000) score -= 30;
+    else if (metrics.averageResponseTime > 1000) score -= 15;
+    else if (metrics.averageResponseTime > 500) score -= 5;
+
+    // 吞吐量评分
+    if (metrics.throughput < 1) score -= 20;
+    else if (metrics.throughput < 5) score -= 10;
+
+    return Math.max(0, score);
+  }
+
+  calculateReliabilityScore(metrics) {
+    let score = 100;
+
+    // 错误率评分
+    if (metrics.errorRate > 10) score -= 40;
+    else if (metrics.errorRate > 5) score -= 20;
+    else if (metrics.errorRate > 1) score -= 10;
+
+    // 成功率评分
+    const successRate = (metrics.successfulRequests / metrics.totalRequests) * 100;
+    if (successRate < 95) score -= 20;
+    else if (successRate < 99) score -= 10;
+
+    return Math.max(0, score);
+  }
+
+  calculateScalabilityScore(metrics, config) {
+    let score = 100;
+
+    // 负载处理效率
+    const expectedTPS = config.users / (config.thinkTime || 1);
+    const actualTPS = metrics.peakTPS;
+    const efficiency = actualTPS / expectedTPS;
+
+    if (efficiency < 0.5) score -= 30;
+    else if (efficiency < 0.7) score -= 15;
+    else if (efficiency < 0.9) score -= 5;
+
+    return Math.max(0, score);
+  }
+
+  getPerformanceGrade(score) {
+    if (score >= 90) return 'A';
+    if (score >= 80) return 'B';
+    if (score >= 70) return 'C';
+    if (score >= 60) return 'D';
+    return 'F';
+  }
+
+  // 更多分析方法...
+  analyzeResponseTimes(metrics) {
+    const avg = metrics.averageResponseTime;
+    if (avg < 200) return 'excellent';
+    if (avg < 500) return 'good';
+    if (avg < 1000) return 'acceptable';
+    if (avg < 2000) return 'poor';
+    return 'critical';
+  }
+
+  analyzeThroughput(metrics) {
+    const tps = metrics.peakTPS;
+    if (tps > 100) return 'excellent';
+    if (tps > 50) return 'good';
+    if (tps > 10) return 'acceptable';
+    if (tps > 1) return 'poor';
+    return 'critical';
+  }
+
+  identifyBottlenecks(results) {
+    const bottlenecks = [];
+    const { metrics, config } = results;
+
+    if (metrics.averageResponseTime > 1000) {
+      bottlenecks.push({
+        type: 'response_time',
+        severity: 'high',
+        description: '响应时间过长，可能存在性能瓶颈'
+      });
+    }
+
+    if (metrics.errorRate > 5) {
+      bottlenecks.push({
+        type: 'error_rate',
+        severity: 'high',
+        description: '错误率过高，系统稳定性存在问题'
+      });
+    }
+
+    return bottlenecks;
+  }
+
+  /**
    * 处理测试完成
    */
   handleTestCompletion(testId, results) {
@@ -869,6 +1480,13 @@ class RealStressTestEngine {
       throughput: results.metrics?.throughput,
       errorRate: results.metrics?.errorRate
     });
+
+    // 生成详细报告
+    const detailedReport = this.generateDetailedReport(testId, results);
+    results.detailedReport = detailedReport;
+
+    // 更新测试统计
+    this.updateTestStatistics(testId, results);
 
     // 检查测试是否被取消
     if (this.shouldStopTest(testId)) {
@@ -914,6 +1532,230 @@ class RealStressTestEngine {
     });
 
     return { success: true, data: results };
+  }
+
+  /**
+   * 更新测试统计
+   */
+  updateTestStatistics(testId, results) {
+    this.testStats.totalTestsRun++;
+
+    if (results.status === 'completed') {
+      this.testStats.totalTestsCompleted++;
+    } else if (results.status === 'cancelled') {
+      this.testStats.totalTestsCancelled++;
+    } else {
+      this.testStats.totalTestsFailed++;
+    }
+
+    // 更新平均测试时长
+    const totalDuration = this.testStats.averageTestDuration * (this.testStats.totalTestsRun - 1) + results.actualDuration;
+    this.testStats.averageTestDuration = totalDuration / this.testStats.totalTestsRun;
+
+    Logger.info(`测试统计已更新: ${testId}`, this.testStats);
+  }
+
+  /**
+   * 获取引擎统计信息
+   */
+  getEngineStatistics() {
+    return {
+      ...this.testStats,
+      currentRunningTests: this.runningTests.size,
+      currentPausedTests: this.pausedTests.size,
+      totalActiveConnections: Array.from(this.wsConnections.values())
+        .reduce((total, connections) => total + connections.size, 0)
+    };
+  }
+
+  /**
+   * 生成响应时间分布数据
+   */
+  generateResponseTimeDistribution(responseTimes) {
+    if (!responseTimes || responseTimes.length === 0) {
+      return [];
+    }
+
+    const buckets = [0, 100, 200, 500, 1000, 2000, 5000, 10000, Infinity];
+    const distribution = buckets.slice(0, -1).map((bucket, index) => ({
+      range: `${bucket}-${buckets[index + 1] === Infinity ? '∞' : buckets[index + 1]}ms`,
+      count: 0,
+      percentage: 0
+    }));
+
+    responseTimes.forEach(time => {
+      for (let i = 0; i < buckets.length - 1; i++) {
+        if (time >= buckets[i] && time < buckets[i + 1]) {
+          distribution[i].count++;
+          break;
+        }
+      }
+    });
+
+    // 计算百分比
+    const total = responseTimes.length;
+    distribution.forEach(bucket => {
+      bucket.percentage = ((bucket.count / total) * 100).toFixed(2);
+    });
+
+    return distribution;
+  }
+
+  /**
+   * 分析吞吐量趋势
+   */
+  analyzeThroughputTrend(realTimeData) {
+    if (!realTimeData || realTimeData.length < 2) {
+      return 'insufficient_data';
+    }
+
+    const throughputValues = realTimeData.map(d => d.throughput || d.requestsPerSecond || 0);
+    const firstHalf = throughputValues.slice(0, Math.floor(throughputValues.length / 2));
+    const secondHalf = throughputValues.slice(Math.floor(throughputValues.length / 2));
+
+    const firstHalfAvg = firstHalf.reduce((sum, val) => sum + val, 0) / firstHalf.length;
+    const secondHalfAvg = secondHalf.reduce((sum, val) => sum + val, 0) / secondHalf.length;
+
+    const change = ((secondHalfAvg - firstHalfAvg) / firstHalfAvg) * 100;
+
+    if (change > 10) return 'increasing';
+    if (change < -10) return 'decreasing';
+    return 'stable';
+  }
+
+  /**
+   * 分析错误趋势
+   */
+  analyzeErrorTrend(realTimeData) {
+    if (!realTimeData || realTimeData.length < 2) {
+      return 'insufficient_data';
+    }
+
+    const errorRates = realTimeData.map(d => d.errorRate || 0);
+    const recentErrors = errorRates.slice(-Math.min(10, errorRates.length));
+    const avgRecentErrorRate = recentErrors.reduce((sum, rate) => sum + rate, 0) / recentErrors.length;
+
+    if (avgRecentErrorRate > 10) return 'critical';
+    if (avgRecentErrorRate > 5) return 'high';
+    if (avgRecentErrorRate > 1) return 'moderate';
+    return 'low';
+  }
+
+  /**
+   * 计算平均并发数
+   */
+  calculateAverageConcurrency(realTimeData) {
+    if (!realTimeData || realTimeData.length === 0) {
+      return 0;
+    }
+
+    const concurrencyValues = realTimeData.map(d => d.activeUsers || 0);
+    return Math.round(concurrencyValues.reduce((sum, val) => sum + val, 0) / concurrencyValues.length);
+  }
+
+  /**
+   * 计算响应时间变异性
+   */
+  calculateResponseTimeVariability(metrics) {
+    if (!metrics.responseTimes || metrics.responseTimes.length < 2) {
+      return 0;
+    }
+
+    const mean = metrics.averageResponseTime;
+    const variance = metrics.responseTimes.reduce((sum, time) => {
+      return sum + Math.pow(time - mean, 2);
+    }, 0) / metrics.responseTimes.length;
+
+    const standardDeviation = Math.sqrt(variance);
+    const coefficientOfVariation = (standardDeviation / mean) * 100;
+
+    return Math.round(coefficientOfVariation * 100) / 100;
+  }
+
+  /**
+   * 计算吞吐量稳定性
+   */
+  calculateThroughputStability(realTimeData) {
+    if (!realTimeData || realTimeData.length < 2) {
+      return 100; // 假设稳定
+    }
+
+    const throughputValues = realTimeData.map(d => d.throughput || d.requestsPerSecond || 0);
+    const mean = throughputValues.reduce((sum, val) => sum + val, 0) / throughputValues.length;
+
+    if (mean === 0) return 0;
+
+    const variance = throughputValues.reduce((sum, val) => {
+      return sum + Math.pow(val - mean, 2);
+    }, 0) / throughputValues.length;
+
+    const standardDeviation = Math.sqrt(variance);
+    const stability = Math.max(0, 100 - (standardDeviation / mean) * 100);
+
+    return Math.round(stability * 100) / 100;
+  }
+
+  /**
+   * 计算系统正常运行时间
+   */
+  calculateUptime(results) {
+    const { realTimeData, actualDuration } = results;
+
+    if (!realTimeData || realTimeData.length === 0) {
+      return 100; // 假设100%正常运行
+    }
+
+    // 计算错误率低于50%的时间点数量
+    const healthyPoints = realTimeData.filter(d => (d.errorRate || 0) < 50).length;
+    const uptime = (healthyPoints / realTimeData.length) * 100;
+
+    return Math.round(uptime * 100) / 100;
+  }
+
+  /**
+   * 识别停机事件
+   */
+  identifyDowntimeEvents(realTimeData) {
+    if (!realTimeData || realTimeData.length === 0) {
+      return [];
+    }
+
+    const downtimeEvents = [];
+    let currentDowntime = null;
+
+    realTimeData.forEach((point, index) => {
+      const isDown = (point.errorRate || 0) > 50;
+
+      if (isDown && !currentDowntime) {
+        // 开始停机
+        currentDowntime = {
+          startTime: point.timestamp,
+          startIndex: index,
+          maxErrorRate: point.errorRate || 0
+        };
+      } else if (!isDown && currentDowntime) {
+        // 结束停机
+        currentDowntime.endTime = point.timestamp;
+        currentDowntime.endIndex = index;
+        currentDowntime.duration = currentDowntime.endTime - currentDowntime.startTime;
+        downtimeEvents.push(currentDowntime);
+        currentDowntime = null;
+      } else if (isDown && currentDowntime) {
+        // 更新最大错误率
+        currentDowntime.maxErrorRate = Math.max(currentDowntime.maxErrorRate, point.errorRate || 0);
+      }
+    });
+
+    // 如果测试结束时仍在停机状态
+    if (currentDowntime) {
+      const lastPoint = realTimeData[realTimeData.length - 1];
+      currentDowntime.endTime = lastPoint.timestamp;
+      currentDowntime.endIndex = realTimeData.length - 1;
+      currentDowntime.duration = currentDowntime.endTime - currentDowntime.startTime;
+      downtimeEvents.push(currentDowntime);
+    }
+
+    return downtimeEvents;
   }
 
   /**
@@ -1224,7 +2066,7 @@ class RealStressTestEngine {
   }
 
   /**
-   * 运行虚拟用户
+   * 运行虚拟用户 - 支持暂停/恢复
    */
   async runVirtualUser(url, duration, method, timeout, thinkTime, results, proxyConfig) {
     const userId = Math.random().toString(36).substr(2, 9);
@@ -1238,6 +2080,13 @@ class RealStressTestEngine {
       if (this.shouldStopTest(results.testId)) {
         Logger.debug(`虚拟用户 ${userId} 检测到测试取消，退出循环`);
         break;
+      }
+
+      // 检查测试是否被暂停
+      if (this.isTestPaused(results.testId)) {
+        Logger.debug(`虚拟用户 ${userId} 检测到测试暂停，等待恢复`);
+        await this.waitForTestResume(results.testId);
+        continue;
       }
 
       try {
@@ -1300,6 +2149,79 @@ class RealStressTestEngine {
 
     Logger.debug(`虚拟用户 ${userId} 完成: ${userResults.successes}/${userResults.requests} 成功`);
     return userResults;
+  }
+
+  /**
+   * 等待测试恢复
+   */
+  async waitForTestResume(testId) {
+    const maxWaitTime = 300000; // 最大等待5分钟
+    const checkInterval = 1000; // 每秒检查一次
+    const startWait = Date.now();
+
+    while (this.isTestPaused(testId) && (Date.now() - startWait) < maxWaitTime) {
+      // 检查是否被取消
+      if (this.shouldStopTest(testId)) {
+        Logger.debug(`等待恢复时检测到测试取消: ${testId}`);
+        break;
+      }
+
+      await this.sleep(checkInterval);
+    }
+
+    // 如果超时仍未恢复，记录警告
+    if (this.isTestPaused(testId) && (Date.now() - startWait) >= maxWaitTime) {
+      Logger.warn(`测试 ${testId} 暂停超时，虚拟用户将退出`);
+    }
+  }
+
+  /**
+   * 更新实时指标
+   */
+  updateRealTimeMetrics(results) {
+    const now = Date.now();
+    const { metrics } = results;
+
+    // 更新当前吞吐量
+    MetricsCalculator.updateCurrentThroughput(metrics, now);
+
+    // 计算实时错误率
+    if (metrics.totalRequests > 0) {
+      metrics.errorRate = Math.round((metrics.failedRequests / metrics.totalRequests) * 100 * 100) / 100;
+    }
+
+    // 更新实时平均响应时间
+    if (metrics.responseTimes.length > 0) {
+      const recentTimes = metrics.responseTimes.slice(-100); // 最近100个请求
+      metrics.averageResponseTime = Math.round(
+        recentTimes.reduce((sum, time) => sum + time, 0) / recentTimes.length
+      );
+    }
+
+    // 记录实时数据点
+    const dataPoint = {
+      timestamp: now,
+      totalRequests: metrics.totalRequests,
+      successfulRequests: metrics.successfulRequests,
+      failedRequests: metrics.failedRequests,
+      averageResponseTime: metrics.averageResponseTime,
+      currentTPS: metrics.currentTPS,
+      errorRate: metrics.errorRate,
+      activeUsers: metrics.activeUsers,
+      throughput: metrics.throughput,
+      phase: results.currentPhase
+    };
+
+    // 添加到实时数据数组
+    if (!results.realTimeData) {
+      results.realTimeData = [];
+    }
+    results.realTimeData.push(dataPoint);
+
+    // 限制实时数据数组大小
+    if (results.realTimeData.length > 1000) {
+      results.realTimeData = results.realTimeData.slice(-500); // 保留最近500个数据点
+    }
   }
 
   // ==================== 工具方法 ====================
@@ -1770,6 +2692,32 @@ class RealStressTestEngine {
 
         return;
       }
+
+      // 检查测试是否暂停
+      if (this.isTestPaused(results.testId)) {
+        // 暂停状态下不更新进度，但继续监控
+        return;
+      }
+
+      // 更新实时指标
+      this.updateRealTimeMetrics(results);
+
+      // 广播实时数据
+      this.broadcastRealTimeData(results.testId, {
+        type: 'progress-update',
+        progress,
+        elapsed: elapsed / 1000,
+        metrics: {
+          totalRequests: results.metrics.totalRequests,
+          successfulRequests: results.metrics.successfulRequests,
+          failedRequests: results.metrics.failedRequests,
+          averageResponseTime: results.metrics.averageResponseTime,
+          currentTPS: results.metrics.currentTPS,
+          errorRate: results.metrics.errorRate,
+          activeUsers: results.metrics.activeUsers
+        },
+        phase: results.currentPhase
+      });
 
       // 🔧 调试：检查 metrics 数据
       console.log('🔍 进度监控器检查 metrics:', {

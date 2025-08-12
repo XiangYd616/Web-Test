@@ -9,6 +9,16 @@
     <meta name="keywords" content="网站测试,压力测试,性能测试,兼容性测试,API测试" />
     <meta name="author" content="Test Web App" />
     
+    <!-- Resource Hints for Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="//api.example.com" />
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="/src/index.css" as="style" onload="this.onload=null;this.rel='stylesheet'" crossorigin />
+    <noscript><link rel="stylesheet" href="/src/index.css"></noscript>
+    <link rel="preload" href="/src/main.tsx" as="script" crossorigin />
+    
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Test Web App - 专业网站测试平台" />
@@ -23,6 +33,10 @@
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+    
+    <!-- Performance Optimization -->
+    <meta name="theme-color" content="#3b82f6" />
+    <meta name="color-scheme" content="light dark" />
     
     <title>Test Web App - 专业网站测试平台</title>
   </head>

@@ -267,7 +267,7 @@ function createQuickActions(type: string, context: ErrorContext): Array<{
   return actions;
 }
 
-export function enhanceError(
+export function createError(
   error: Error | string,
   context: ErrorContext = {}
 ): EnhancedError {
@@ -318,30 +318,30 @@ export function enhanceError(
 }
 
 export const createCommonErrors = {
-  networkError: (url?: string): EnhancedError => enhanceError(
+  networkError: (url?: string): EnhancedError => createError(
     new Error('网络连接失败，请检查您的网络设置'),
     { url, operation: 'network_request' }
   ),
 
-  invalidUrl: (url?: string): EnhancedError => enhanceError(
+  invalidUrl: (url?: string): EnhancedError => createError(
     new Error('URL格式无效，请检查输入的网址'),
     { url, operation: 'url_validation' }
   ),
 
-  sslError: (url?: string): EnhancedError => enhanceError(
+  sslError: (url?: string): EnhancedError => createError(
     new Error('SSL证书验证失败，网站可能存在安全问题'),
     { url, operation: 'ssl_verification' }
   ),
 
-  timeoutError: (url?: string): EnhancedError => enhanceError(
+  timeoutError: (url?: string): EnhancedError => createError(
     new Error('请求超时，网站响应时间过长'),
     { url, operation: 'request_timeout' }
   ),
 
-  serverError: (url?: string, statusCode?: number): EnhancedError => enhanceError(
+  serverError: (url?: string, statusCode?: number): EnhancedError => createError(
     new Error(`服务器错误 ${statusCode ? `(${statusCode})` : ''}，请稍后重试`),
     { url, operation: 'server_request' }
   )
 };
 
-export default enhanceError;
+export default createError;

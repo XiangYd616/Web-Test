@@ -3,13 +3,12 @@ import { AlertCircle, AlertTriangle, BarChart3, CheckCircle, Clock, Download, Fi
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
-import { AdvancedStressTestChart, EnhancedStressTestCharts as UnifiedStressTestCharts } from '../components/charts';
+import { AdvancedStressTestChart, StressTestCharts as UnifiedStressTestCharts } from '../components/charts';
 import ExportModal from '../components/common/ExportModal';
 import CancelTestConfirmDialog from '../components/dialogs/CancelTestConfirmDialog';
 import CancelProgressFeedback from '../components/feedback/CancelProgressFeedback';
 import StressTestHistory from '../components/stress/StressTestHistory';
 import { URLInput } from '../components/testing';
-import { TestPageLayout } from '../components/testing/UnifiedTestingComponents';
 import { useLocalStressTest } from '../hooks/useLocalStressTest';
 import { AdvancedStressTestConfig as ImportedAdvancedStressTestConfig } from '../hooks/useSimpleTestEngine';
 import { useStressTestRecord } from '../hooks/useStressTestRecord';
@@ -3996,1935 +3995,1903 @@ const StressTest: React.FC = () => {
         }
     };
 
+    // 处理测试选择和重新运行
+    const handleTestSelect = (test: any) => {
+        console.log('选择测试:', test);
+        // 可以在这里加载选中的测试配置
+    };
+
+    const handleTestRerun = (test: any) => {
+        console.log('重新运行测试:', test);
+        // 可以在这里重新运行选中的测试
+    };
+
     return (
-        <TestPageLayout className="space-y-3 dark-page-scrollbar compact-layout">
+        <div className="space-y-4 dark-page-scrollbar">
+            <div className="space-y-6">
 
-            {/* 美化的页面标题和控制 */}
-            <div className="relative overflow-hidden bg-gradient-to-br from-gray-800/90 via-gray-800/80 to-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-2xl">
-                {/* 背景装饰 */}
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-purple-600/5 to-cyan-600/5"></div>
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-full blur-2xl"></div>
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-500/10 to-transparent rounded-full blur-xl"></div>
+                {/* 美化的页面标题和控制 */}
+                <div className="relative overflow-hidden bg-gradient-to-br from-gray-800/90 via-gray-800/80 to-gray-900/90 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-2xl">
+                    {/* 背景装饰 */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-purple-600/5 to-cyan-600/5"></div>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-full blur-2xl"></div>
+                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-500/10 to-transparent rounded-full blur-xl"></div>
 
-                {/* 内容区域 */}
-                <div className="relative p-6">
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                        {/* 标题区域 */}
-                        <div className="flex items-center space-x-4">
-                            {/* 图标装饰 */}
-                            <div className="relative">
-                                <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                                    <Zap className="w-8 h-8 text-white" />
-                                </div>
-                                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-gray-800 animate-pulse"></div>
-                            </div>
-
-                            {/* 标题文字 */}
-                            <div>
-                                <div className="flex items-center space-x-3">
-                                    <h2 className="text-2xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
-                                        压力测试
-                                    </h2>
-                                    <div className="flex items-center space-x-1">
-                                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                                        <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse [animation-delay:0.2s]"></div>
-                                        <div className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse [animation-delay:0.4s]"></div>
+                    {/* 内容区域 */}
+                    <div className="relative p-6">
+                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                            {/* 标题区域 */}
+                            <div className="flex items-center space-x-4">
+                                {/* 图标装饰 */}
+                                <div className="relative">
+                                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                                        <Zap className="w-8 h-8 text-white" />
                                     </div>
+                                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-gray-800 animate-pulse"></div>
                                 </div>
-                                <p className="text-gray-300 text-sm mt-1 flex items-center space-x-2">
-                                    <TrendingUp className="w-4 h-4 text-blue-400" />
-                                    <span>测试网站在高并发访问下的性能表现</span>
-                                </p>
 
-                                {/* 状态指示器 */}
-                                <div className="flex items-center space-x-4 mt-2">
-                                    <div className="flex items-center space-x-2 text-xs">
-                                        <div className={`w-2 h-2 rounded-full ${testStatus === 'running' ? 'bg-green-500 animate-pulse' :
-                                            testStatus === 'completed' ? 'bg-blue-500' :
-                                                testStatus === 'failed' ? 'bg-red-500' :
-                                                    testStatus === 'cancelled' ? 'bg-yellow-500' :
-                                                        'bg-gray-500'
-                                            }`}></div>
-                                        <span className="text-gray-400">
-                                            {testStatus === 'running' ? '测试进行中' :
-                                                testStatus === 'completed' ? '测试完成' :
-                                                    testStatus === 'failed' ? '测试失败' :
-                                                        testStatus === 'cancelled' ? '测试已取消' :
-                                                            '等待开始'}
-                                        </span>
+                                {/* 标题文字 */}
+                                <div>
+                                    <div className="flex items-center space-x-3">
+                                        <h2 className="text-2xl font-bold bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
+                                            压力测试
+                                        </h2>
+                                        <div className="flex items-center space-x-1">
+                                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                                            <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse [animation-delay:0.2s]"></div>
+                                            <div className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse [animation-delay:0.4s]"></div>
+                                        </div>
                                     </div>
+                                    <p className="text-gray-300 text-sm mt-1 flex items-center space-x-2">
+                                        <TrendingUp className="w-4 h-4 text-blue-400" />
+                                        <span>测试网站在高并发访问下的性能表现</span>
+                                    </p>
 
-                                    {testConfig.url && (
+                                    {/* 状态指示器 */}
+                                    <div className="flex items-center space-x-4 mt-2">
                                         <div className="flex items-center space-x-2 text-xs">
-                                            <div className="w-2 h-2 bg-cyan-500 rounded-full"></div>
-                                            <span className="text-gray-400 truncate max-w-48">
-                                                目标: {testConfig.url}
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* 模式切换 - 只在压力测试标签页显示 */}
-                        <div className="flex items-center space-x-2">
-                            {activeTab === 'test' && (
-                                <div className="flex items-center bg-gray-700/50 rounded-md p-0.5">
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsAdvancedMode(false)}
-                                        className={`px-2 py-1 text-xs font-medium rounded transition-all ${!isAdvancedMode
-                                            ? 'bg-blue-600 text-white shadow-sm'
-                                            : 'text-gray-300 hover:text-white'
-                                            }`}
-                                    >
-                                        简化模式
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsAdvancedMode(true)}
-                                        className={`px-2 py-1 text-xs font-medium rounded transition-all ${isAdvancedMode
-                                            ? 'bg-blue-600 text-white shadow-sm'
-                                            : 'text-gray-300 hover:text-white'
-                                            }`}
-                                    >
-                                        高级模式
-                                    </button>
-                                </div>
-                            )}
-
-                            {/* 测试状态和控制按钮 */}
-                            <div className="flex items-center space-x-2">
-                                {/* 标签页切换 */}
-                                <div className="flex items-center bg-gray-700/50 rounded-md p-0.5">
-                                    <button
-                                        type="button"
-                                        onClick={() => setActiveTab('test')}
-                                        className={`px-2 py-1 text-xs rounded transition-colors ${activeTab === 'test'
-                                            ? 'bg-blue-600 text-white'
-                                            : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
-                                            }`}
-                                    >
-                                        压力测试
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setActiveTab('history')}
-                                        className={`px-2 py-1 text-xs rounded transition-colors ${activeTab === 'history'
-                                            ? 'bg-blue-600 text-white'
-                                            : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
-                                            }`}
-                                    >
-                                        测试历史
-                                    </button>
-                                </div>
-                                {testStatus === 'idle' ? (
-                                    <button
-                                        type="button"
-                                        onClick={handleStartTest}
-                                        disabled={!testConfig.url}
-                                        className={`flex items-center space-x-1.5 px-4 py-2 rounded-md text-sm font-medium transition-all ${!testConfig.url
-                                            ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                                            : isAuthenticated
-                                                ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                                                : 'bg-yellow-600 hover:bg-yellow-700 text-white'
-                                            }`}
-                                    >
-                                        <Play className="w-4 h-4" />
-                                        <span>开始测试</span>
-                                    </button>
-                                ) : testStatus === 'starting' ? (
-                                    <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-blue-500/20 border border-blue-500/30 rounded-md">
-                                        <Loader className="w-3 h-3 animate-spin text-blue-400" />
-                                        <span className="text-xs text-blue-300 font-medium">正在启动...</span>
-                                    </div>
-                                ) : testStatus === 'running' ? (
-                                    <div className="flex items-center space-x-2">
-                                        <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-md">
-                                            <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
-                                            <span className="text-xs text-green-300 font-medium">
-                                                测试进行中
-                                            </span>
-                                        </div>
-
-
-
-                                        <button
-                                            type="button"
-                                            onClick={handleCancelTest}
-                                            disabled={isCancelling}
-                                            className={`px-3 py-1.5 text-white rounded-md transition-colors flex items-center space-x-1.5 text-xs ${isCancelling
-                                                ? 'bg-gray-600 cursor-not-allowed'
-                                                : 'bg-red-600 hover:bg-red-700'
-                                                }`}
-                                        >
-                                            {isCancelling ? (
-                                                <Loader className="w-3 h-3 animate-spin" />
-                                            ) : (
-                                                <Square className="w-3 h-3" />
-                                            )}
-                                            <span>{isCancelling ? '取消中...' : '取消'}</span>
-                                        </button>
-                                        {/* 紧急取消按钮 - 只在正常取消失败时显示 */}
-                                        {isCancelling && (
-                                            <button
-                                                type="button"
-                                                onClick={forceStopTest}
-                                                className="px-2 py-1.5 text-white rounded-md transition-colors flex items-center space-x-1 text-xs bg-red-800 hover:bg-red-900 border border-red-600"
-                                                title="强制取消测试（紧急情况下使用）"
-                                            >
-                                                <AlertTriangle className="w-3 h-3" />
-                                                <span>强制取消</span>
-                                            </button>
-                                        )}
-                                    </div>
-                                ) : testStatus === 'completed' ? (
-                                    <div className="flex items-center space-x-2">
-                                        <div className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
-                                            <CheckCircle className="w-4 h-4 text-green-400" />
-                                            <span className="text-sm text-green-300 font-medium">测试完成</span>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            onClick={resetTestState}
-                                            className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center space-x-2"
-                                        >
-                                            <RotateCcw className="w-4 h-4" />
-                                            <span>重新测试</span>
-                                        </button>
-                                    </div>
-                                ) : testStatus === 'failed' ? (
-                                    <div className="flex items-center space-x-2">
-                                        <div className="flex items-center space-x-2 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg">
-                                            <XCircle className="w-4 h-4 text-red-400" />
-                                            <span className="text-sm text-red-300 font-medium">测试失败</span>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setTestStatus('idle');
-                                                setTestProgress('');
-                                                setError('');
-                                            }}
-                                            className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center space-x-2"
-                                        >
-                                            <RotateCcw className="w-4 h-4" />
-                                            <span>重试</span>
-                                        </button>
-                                    </div>
-                                ) : testStatus === 'cancelled' ? (
-                                    <div className="flex items-center space-x-2">
-                                        <div className="flex items-center space-x-2 px-4 py-2 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
-                                            <Square className="w-4 h-4 text-yellow-400" />
-                                            <span className="text-sm text-yellow-300 font-medium">测试已取消</span>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            onClick={resetTestState}
-                                            className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center space-x-2"
-                                        >
-                                            <RotateCcw className="w-4 h-4" />
-                                            <span>重新测试</span>
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div className="px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg">
-                                        <span className="text-sm text-red-300">未知状态: {testStatus}</span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* 根据标签页显示不同内容 */}
-            {
-                activeTab === 'test' ? (
-                    <>
-                        {/* URL 输入与测试进度融合区域 */}
-                        <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4 url-input-card">
-                            <label className="block text-sm font-medium text-gray-300 mb-2">测试URL</label>
-                            <div className="url-input-container">
-                                <URLInput
-                                    value={testConfig.url}
-                                    onChange={(url) => setTestConfig((prev: StressTestConfig) => ({ ...prev, url }))}
-                                    placeholder="输入要进行压力测试的网站URL..."
-                                    enableReachabilityCheck={false}
-                                    className="url-input-full-width"
-                                />
-                            </div>
-
-                            {/* 集成的测试进度显示 - 永久保持显示直到重置 */}
-                            {(testProgress || backgroundTestInfo || testStatus !== 'idle' || result || metrics) && (
-                                <div className="mt-4 pt-4 border-t border-gray-700/50">
-                                    {(() => {
-                                        const progressData = calculateTestProgress();
-                                        return (
-                                            <>
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <div className="flex items-center space-x-2">
-                                                        <div className={`w-2 h-2 rounded-full ${testStatus === 'running' ? 'bg-blue-400 animate-pulse' :
-                                                            testStatus === 'completed' ? 'bg-green-400' :
-                                                                testStatus === 'cancelled' ? 'bg-yellow-400' :
-                                                                    testStatus === 'failed' ? 'bg-red-400' :
-                                                                        'bg-gray-400'
-                                                            }`}></div>
-                                                        <span className="text-sm font-medium text-white">
-                                                            {testStatus === 'running' ? '测试进行中' :
-                                                                testStatus === 'completed' ? '测试已完成' :
-                                                                    testStatus === 'cancelled' ? '测试已取消' :
-                                                                        testStatus === 'failed' ? '测试失败' :
-                                                                            testStatus === 'starting' ? '正在启动' : '测试状态'}
-                                                        </span>
-                                                    </div>
-                                                    <span className="text-sm text-blue-300 font-medium">
-                                                        {progressData.progress}%
-                                                    </span>
-                                                </div>
-
-                                                {/* 动态进度条 - 测试完成后永久显示 */}
-                                                <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
-                                                    <div
-                                                        className={`test-progress-dynamic h-2 rounded-full transition-all duration-300 ${progressData.progress >= 100 ? 'progress-100' :
-                                                            progressData.progress >= 95 ? 'progress-95' :
-                                                                progressData.progress >= 90 ? 'progress-90' :
-                                                                    progressData.progress >= 85 ? 'progress-85' :
-                                                                        progressData.progress >= 80 ? 'progress-80' :
-                                                                            progressData.progress >= 75 ? 'progress-75' :
-                                                                                progressData.progress >= 70 ? 'progress-70' :
-                                                                                    progressData.progress >= 65 ? 'progress-65' :
-                                                                                        progressData.progress >= 60 ? 'progress-60' :
-                                                                                            progressData.progress >= 55 ? 'progress-55' :
-                                                                                                progressData.progress >= 50 ? 'progress-50' :
-                                                                                                    progressData.progress >= 45 ? 'progress-45' :
-                                                                                                        progressData.progress >= 40 ? 'progress-40' :
-                                                                                                            progressData.progress >= 35 ? 'progress-35' :
-                                                                                                                progressData.progress >= 30 ? 'progress-30' :
-                                                                                                                    progressData.progress >= 25 ? 'progress-25' :
-                                                                                                                        progressData.progress >= 20 ? 'progress-20' :
-                                                                                                                            progressData.progress >= 15 ? 'progress-15' :
-                                                                                                                                progressData.progress >= 10 ? 'progress-10' :
-                                                                                                                                    progressData.progress >= 5 ? 'progress-5' : 'progress-0'
-                                                            }`}
-                                                        style={{ '--progress-width': `${progressData.progress}%` } as React.CSSProperties}
-                                                    />
-                                                </div>
-
-                                                {/* 进度描述 */}
-                                                <div className="text-xs text-gray-400 mb-2">
-                                                    {progressData.timeInfo}
-                                                </div>
-
-                                                {/* 预计剩余时间 */}
-                                                {progressData.estimatedRemaining && (
-                                                    <div className="text-xs text-blue-300 mb-2">
-                                                        {progressData.estimatedRemaining}
-                                                    </div>
-                                                )}
-
-                                                {/* 后台运行提示 */}
-                                                {testStatus === 'running' && canSwitchPages && (
-                                                    <div className="mt-2 p-2 bg-green-500/10 border border-green-500/20 rounded-md">
-                                                        <div className="flex items-center space-x-1.5">
-                                                            <CheckCircle className="w-3 h-3 text-green-400" />
-                                                            <span className="text-xs text-green-300 font-medium">后台运行模式</span>
-                                                        </div>
-                                                        <p className="text-xs text-green-200 mt-0.5">
-                                                            测试正在后台运行，您可以自由切换到其他页面，测试不会中断。
-                                                        </p>
-                                                    </div>
-                                                )}
-                                            </>
-                                        );
-                                    })()}
-                                </div>
-                            )}
-
-                            {/* 错误信息显示 */}
-                            {error && (
-                                <div className="mt-4 pt-4 border-t border-red-500/20">
-                                    <div className="flex items-center space-x-2 mb-2">
-                                        <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                                        <span className="text-sm font-medium text-red-300">测试错误</span>
-                                    </div>
-                                    <div className="text-sm text-red-200 bg-red-500/10 rounded p-2">
-                                        {error}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* 队列状态显示 - 只在有排队或当前测试在队列中时显示 */}
-                        {(queueStats.queueLength > 0 || currentQueueId) && (
-                            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-                                {/* 当前测试在队列中的位置 */}
-                                {currentQueueId ? (
-                                    <div>
-                                        <div className="flex items-center text-blue-300 mb-2">
-                                            <Loader className="w-4 h-4 mr-2 animate-spin" />
-                                            <span className="font-medium">您的测试在队列中</span>
-                                        </div>
-                                        <div className="text-sm text-blue-200">
-                                            队列位置: 第 {getQueuePosition(currentQueueId)} 位
-                                            {estimateWaitTime(currentQueueId) > 0 && (
-                                                <span className="ml-2">
-                                                    预计等待: {Math.round(estimateWaitTime(currentQueueId) / 60)} 分钟
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-                                ) : queueStats.queueLength > 0 && (
-                                    <div>
-                                        <div className="flex items-center text-blue-300 mb-2">
-                                            <Users className="w-4 h-4 mr-2" />
-                                            <span className="font-medium">系统繁忙</span>
-                                        </div>
-                                        <div className="text-sm text-blue-200">
-                                            当前有 {queueStats.queueLength} 个测试在排队等待
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {/* 主要配置区域 */}
-                        {!isAdvancedMode ? (
-                            /* 简化模式 - 快速模板选择 */
-                            <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
-                                <div className="text-center mb-4">
-                                    <h3 className="text-lg font-semibold text-white mb-1">选择测试强度</h3>
-                                    <p className="text-gray-400 text-xs">根据您的网站类型选择合适的测试模板</p>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                                    {quickTemplates.map((template) => (
-                                        <div
-                                            key={template.id}
-                                            onClick={() => applyTemplate(template.id)}
-                                            className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 hover:scale-105 ${selectedTemplate === template.id
-                                                ? 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20'
-                                                : 'border-gray-600 bg-gray-700/30 hover:border-blue-400 hover:bg-blue-500/5'
-                                                }`}
-                                        >
-                                            {/* 徽章 */}
-                                            {template.badge && (
-                                                <div className={`absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-medium ${selectedTemplate === template.id
-                                                    ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                                                    : 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
-                                                    }`}>
-                                                    {template.badge}
-                                                </div>
-                                            )}
-
-                                            <div className="text-center mt-6">
-                                                <div className="text-3xl mb-2">{template.icon}</div>
-                                                <h4 className="font-semibold text-white mb-1">
-                                                    {template.name}
-                                                </h4>
-                                                <p className="text-xs text-gray-400 mb-3">{template.description}</p>
-                                                <div className="text-xs text-blue-300 bg-blue-500/10 rounded-full px-2 py-1">
-                                                    {(() => {
-                                                        const fullTemplate = getTemplateById(template.id);
-                                                        return fullTemplate ? `${fullTemplate.config.users}用户 · ${fullTemplate.config.duration}秒` : '配置加载中...';
-                                                    })()}
-                                                </div>
-                                                <div className="text-xs text-gray-500 mt-2">{template.recommended}</div>
-                                            </div>
-
-                                            {selectedTemplate === template.id && (
-                                                <div className="absolute top-2 right-2">
-                                                    <CheckCircle className="w-5 h-5 text-blue-400" />
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-
-                                {selectedTemplate && (
-                                    <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 mb-4">
-                                        <div className="flex items-center space-x-2 mb-2">
-                                            <CheckCircle className="w-4 h-4 text-blue-400" />
-                                            <span className="text-sm font-medium text-blue-300">已选择模板</span>
-                                        </div>
-                                        <div className="text-sm text-gray-300">
-                                            将使用 <span className="text-blue-300 font-medium">{testConfig.users}</span> 个并发用户，
-                                            测试 <span className="text-blue-300 font-medium">{testConfig.duration}</span> 秒，
-                                            采用 <span className="text-blue-300 font-medium">
-                                                {testConfig.testType === 'gradual' ? '梯度加压' :
-                                                    testConfig.testType === 'spike' ? '峰值冲击' :
-                                                        testConfig.testType === 'constant' ? '恒定负载' :
-                                                            testConfig.testType === 'stress' ? '压力极限' :
-                                                                testConfig.testType === 'load' ? '负载测试' :
-                                                                    testConfig.testType === 'volume' ? '容量测试' : '未知类型'}
-                                            </span> 模式
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="text-center">
-                                    <button
-                                        type="button"
-                                        onClick={handleStartTest}
-                                        disabled={!testConfig.url || !selectedTemplate}
-                                        className={`px-8 py-3 rounded-lg font-medium transition-all ${!testConfig.url || !selectedTemplate
-                                            ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                                            : isAuthenticated
-                                                ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl'
-                                                : 'bg-yellow-600 hover:bg-yellow-700 text-white shadow-lg hover:shadow-xl'
-                                            }`}
-                                    >
-                                        {isAuthenticated ? (
-                                            <div className="flex items-center space-x-2">
-                                                <Play className="w-5 h-5" />
-                                                <span>开始压力测试</span>
-                                            </div>
-                                        ) : (
-                                            <div className="flex items-center space-x-2">
-                                                <Play className="w-5 h-5" />
-                                                <span>开始压力测试</span>
-                                            </div>
-                                        )}
-                                    </button>
-                                </div>
-                            </div>
-                        ) : (
-                            /* 高级模式 - 原有的详细配置 */
-                            <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-                                {/* 测试配置 */}
-                                <div className="xl:col-span-2 bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <h3 className="text-xl font-semibold text-white">高级测试配置</h3>
-                                        <button
-                                            type="button"
-                                            onClick={importConfigFromClipboard}
-                                            className="px-3 py-2 text-sm border border-gray-600 text-gray-400 rounded-lg hover:bg-gray-700/50 hover:text-gray-300 transition-colors flex items-center space-x-2"
-                                            title="从剪贴板导入配置"
-                                        >
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                            </svg>
-                                            <span>导入配置</span>
-                                        </button>
-                                    </div>
-
-
-
-                                    {/* 本地测试选项（桌面版专用） */}
-                                    {localStressTest.isAvailable && (
-                                        <div className="mb-4 p-4 bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg">
-                                            <div className="flex items-center justify-between mb-3">
-                                                <div className="flex items-center space-x-2">
-                                                    <Zap className="w-5 h-5 text-purple-400" />
-                                                    <h4 className="text-lg font-medium text-white">本地压力测试</h4>
-                                                    <span className="px-2 py-1 bg-purple-500/20 text-purple-300 text-xs rounded-full">桌面版专用</span>
-                                                </div>
-                                                <label className="relative inline-flex items-center cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={useLocalTest}
-                                                        onChange={(e) => setUseLocalTest(e.target.checked)}
-                                                        className="sr-only peer"
-                                                        aria-label="启用本地压力测试"
-                                                    />
-                                                    <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
-                                                </label>
-                                            </div>
-                                            <div className="text-sm text-gray-300 mb-3">
-                                                使用您的本地计算机资源进行压力测试，突破服务器限制，支持更高并发数和更长测试时间。
-                                            </div>
-                                            {useLocalTest && (
-                                                <div className="grid grid-cols-2 gap-3 text-xs">
-                                                    <div className="bg-green-500/10 border border-green-500/20 rounded p-2">
-                                                        <div className="text-green-400 font-medium">✅ 优势</div>
-                                                        <div className="text-gray-300 mt-1">
-                                                            • 无并发限制<br />
-                                                            • 使用本地资源<br />
-                                                            • 更高性能
-                                                        </div>
-                                                    </div>
-                                                    <div className="bg-blue-500/10 border border-blue-500/20 rounded p-2">
-                                                        <div className="text-blue-400 font-medium">📊 推荐配置</div>
-                                                        <div className="text-gray-300 mt-1">
-                                                            {(() => {
-                                                                const rec = localStressTest.getRecommendedConfig(testConfig.users);
-                                                                return `最大用户: ${rec.users || testConfig.users}`;
-                                                            })()}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    {/* 测试类型选择 - 移动端优化布局 */}
-                                    <div className="mb-4">
-                                        <h4 className="text-lg font-medium text-white mb-3">测试类型</h4>
-                                        <div className="grid grid-cols-2 gap-3">
-                                            {/* 梯度加压 */}
-                                            <div
-                                                className={`border-2 rounded-lg p-4 sm:p-3 cursor-pointer transition-all min-h-[60px] ${testConfig.testType === 'gradual'
-                                                    ? 'border-green-500 bg-green-500/10'
-                                                    : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
-                                                    }`}
-                                                onClick={() => adjustConfigForTestType('gradual')}
-                                            >
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center space-x-3 sm:space-x-2">
-                                                        <div className="w-10 h-10 sm:w-8 sm:h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
-                                                            <TrendingUp className="w-5 h-5 sm:w-4 sm:h-4 text-green-400" />
-                                                        </div>
-                                                        <h5 className="font-medium text-white text-base sm:text-sm">梯度加压</h5>
-                                                    </div>
-                                                    <div
-                                                        className={`w-5 h-5 sm:w-4 sm:h-4 rounded-full border-2 transition-all flex items-center justify-center ${testConfig.testType === 'gradual'
-                                                            ? 'border-green-500 bg-green-500'
-                                                            : 'border-gray-500 bg-gray-700/50'
-                                                            }`}
-                                                    >
-                                                        {testConfig.testType === 'gradual' && (
-                                                            <div className="w-2 h-2 sm:w-1.5 sm:h-1.5 bg-white rounded-full"></div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* 峰值测试 */}
-                                            <div
-                                                className={`border-2 rounded-lg p-4 sm:p-3 cursor-pointer transition-all min-h-[60px] ${testConfig.testType === 'spike'
-                                                    ? 'border-blue-500 bg-blue-500/10'
-                                                    : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
-                                                    }`}
-                                                onClick={() => adjustConfigForTestType('spike')}
-                                            >
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center space-x-3 sm:space-x-2">
-                                                        <div className="w-10 h-10 sm:w-8 sm:h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                                                            <BarChart3 className="w-5 h-5 sm:w-4 sm:h-4 text-blue-400" />
-                                                        </div>
-                                                        <h5 className="font-medium text-white text-base sm:text-sm">峰值测试</h5>
-                                                    </div>
-                                                    <div
-                                                        className={`w-5 h-5 sm:w-4 sm:h-4 rounded-full border-2 transition-all flex items-center justify-center ${testConfig.testType === 'spike'
-                                                            ? 'border-blue-500 bg-blue-500'
-                                                            : 'border-gray-500 bg-gray-700/50'
-                                                            }`}
-                                                    >
-                                                        {testConfig.testType === 'spike' && (
-                                                            <div className="w-2 h-2 sm:w-1.5 sm:h-1.5 bg-white rounded-full"></div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* 恒定负载 */}
-                                            <div
-                                                className={`border-2 rounded-lg p-4 sm:p-3 cursor-pointer transition-all min-h-[60px] ${testConfig.testType === 'constant'
-                                                    ? 'border-purple-500 bg-purple-500/10'
-                                                    : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
-                                                    }`}
-                                                onClick={() => adjustConfigForTestType('constant')}
-                                            >
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center space-x-3 sm:space-x-2">
-                                                        <div className="w-10 h-10 sm:w-8 sm:h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                                                            <Users className="w-5 h-5 sm:w-4 sm:h-4 text-purple-400" />
-                                                        </div>
-                                                        <h5 className="font-medium text-white text-base sm:text-sm">恒定负载</h5>
-                                                    </div>
-                                                    <div
-                                                        className={`w-5 h-5 sm:w-4 sm:h-4 rounded-full border-2 transition-all flex items-center justify-center ${testConfig.testType === 'constant'
-                                                            ? 'border-purple-500 bg-purple-500'
-                                                            : 'border-gray-500 bg-gray-700/50'
-                                                            }`}
-                                                    >
-                                                        {testConfig.testType === 'constant' && (
-                                                            <div className="w-2 h-2 sm:w-1.5 sm:h-1.5 bg-white rounded-full"></div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* 压力极限 */}
-                                            <div
-                                                className={`border-2 rounded-lg p-4 sm:p-3 cursor-pointer transition-all min-h-[60px] ${testConfig.testType === 'stress'
-                                                    ? 'border-red-500 bg-red-500/10'
-                                                    : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
-                                                    }`}
-                                                onClick={() => adjustConfigForTestType('stress')}
-                                            >
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center space-x-3 sm:space-x-2">
-                                                        <div className="w-10 h-10 sm:w-8 sm:h-8 bg-red-500/20 rounded-lg flex items-center justify-center">
-                                                            <AlertCircle className="w-5 h-5 sm:w-4 sm:h-4 text-red-400" />
-                                                        </div>
-                                                        <h5 className="font-medium text-white text-base sm:text-sm">压力极限</h5>
-                                                    </div>
-                                                    <div
-                                                        className={`w-5 h-5 sm:w-4 sm:h-4 rounded-full border-2 transition-all flex items-center justify-center ${testConfig.testType === 'stress'
-                                                            ? 'border-red-500 bg-red-500'
-                                                            : 'border-gray-500 bg-gray-700/50'
-                                                            }`}
-                                                    >
-                                                        {testConfig.testType === 'stress' && (
-                                                            <div className="w-2 h-2 sm:w-1.5 sm:h-1.5 bg-white rounded-full"></div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* 负载测试 */}
-                                            <div
-                                                className={`border-2 rounded-lg p-4 sm:p-3 cursor-pointer transition-all min-h-[60px] ${testConfig.testType === 'load'
-                                                    ? 'border-orange-500 bg-orange-500/10'
-                                                    : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
-                                                    }`}
-                                                onClick={() => adjustConfigForTestType('load')}
-                                            >
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center space-x-3 sm:space-x-2">
-                                                        <div className="w-10 h-10 sm:w-8 sm:h-8 bg-orange-500/20 rounded-lg flex items-center justify-center">
-                                                            <Users className="w-5 h-5 sm:w-4 sm:h-4 text-orange-400" />
-                                                        </div>
-                                                        <h5 className="font-medium text-white text-base sm:text-sm">负载测试</h5>
-                                                    </div>
-                                                    <div
-                                                        className={`w-5 h-5 sm:w-4 sm:h-4 rounded-full border-2 transition-all flex items-center justify-center ${testConfig.testType === 'load'
-                                                            ? 'border-orange-500 bg-orange-500'
-                                                            : 'border-gray-500 bg-gray-700/50'
-                                                            }`}
-                                                    >
-                                                        {testConfig.testType === 'load' && (
-                                                            <div className="w-2 h-2 sm:w-1.5 sm:h-1.5 bg-white rounded-full"></div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* 容量测试 */}
-                                            <div
-                                                className={`border-2 rounded-lg p-4 sm:p-3 cursor-pointer transition-all min-h-[60px] ${testConfig.testType === 'volume'
-                                                    ? 'border-yellow-500 bg-yellow-500/10'
-                                                    : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
-                                                    }`}
-                                                onClick={() => adjustConfigForTestType('volume')}
-                                            >
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center space-x-3 sm:space-x-2">
-                                                        <div className="w-10 h-10 sm:w-8 sm:h-8 bg-yellow-500/20 rounded-lg flex items-center justify-center">
-                                                            <BarChart3 className="w-5 h-5 sm:w-4 sm:h-4 text-yellow-400" />
-                                                        </div>
-                                                        <h5 className="font-medium text-white text-base sm:text-sm">容量测试</h5>
-                                                    </div>
-                                                    <div
-                                                        className={`w-5 h-5 sm:w-4 sm:h-4 rounded-full border-2 transition-all flex items-center justify-center ${testConfig.testType === 'volume'
-                                                            ? 'border-yellow-500 bg-yellow-500'
-                                                            : 'border-gray-500 bg-gray-700/50'
-                                                            }`}
-                                                    >
-                                                        {testConfig.testType === 'volume' && (
-                                                            <div className="w-2 h-2 sm:w-1.5 sm:h-1.5 bg-white rounded-full"></div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* 测试参数 - 移动端优化 */}
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        {/* 并发用户数 */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                                                并发用户数
-                                                <span className="text-xs text-gray-500 ml-2">
-                                                    (推荐: {getRecommendedConfig(testConfig.testType).users.recommended})
-                                                </span>
-                                            </label>
-                                            <div className="relative">
-                                                <Users className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                                                <input
-                                                    type="number"
-                                                    value={testConfig.users}
-                                                    onChange={(e) => setTestConfig((prev: StressTestConfig) => ({ ...prev, users: parseInt(e.target.value) || 0 }))}
-                                                    className="w-full pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                    style={{ paddingLeft: '2rem' }}
-                                                    min={getRecommendedConfig(testConfig.testType).users.min}
-                                                    max={getRecommendedConfig(testConfig.testType).users.max}
-                                                    placeholder="输入用户数"
-                                                />
-                                            </div>
-                                            <div className="text-xs text-gray-500 mt-1">
-                                                {getRecommendedConfig(testConfig.testType).users.description}
-                                            </div>
-                                        </div>
-
-                                        {/* 测试时长 */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                                                测试时长 (秒)
-                                                <span className="text-xs text-gray-500 ml-2">
-                                                    (推荐: {getRecommendedConfig(testConfig.testType).duration.recommended})
-                                                </span>
-                                            </label>
-                                            <div className="relative">
-                                                <Clock className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                                                <input
-                                                    type="number"
-                                                    value={testConfig.duration}
-                                                    onChange={(e) => setTestConfig((prev: StressTestConfig) => ({ ...prev, duration: parseInt(e.target.value) || 0 }))}
-                                                    className="w-full pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                    style={{ paddingLeft: '2rem' }}
-                                                    min={getRecommendedConfig(testConfig.testType).duration.min}
-                                                    max={getRecommendedConfig(testConfig.testType).duration.max}
-                                                    placeholder="输入时长(秒)"
-                                                />
-                                            </div>
-                                            <div className="text-xs text-gray-500 mt-1">
-                                                {getRecommendedConfig(testConfig.testType).duration.description}
-                                            </div>
-                                        </div>
-
-                                        {/* 加压时间 */}
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                                                加压时间 (秒)
-                                                <span className="text-xs text-gray-500 ml-2">
-                                                    (推荐: {getRecommendedConfig(testConfig.testType).rampUp.recommended})
-                                                </span>
-                                            </label>
-                                            <div className="relative">
-                                                <TrendingUp className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                                                <input
-                                                    type="number"
-                                                    value={testConfig.rampUp}
-                                                    onChange={(e) => setTestConfig((prev: StressTestConfig) => ({ ...prev, rampUp: parseInt(e.target.value) || 0 }))}
-                                                    className="w-full pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                    style={{ paddingLeft: '2rem' }}
-                                                    min={getRecommendedConfig(testConfig.testType).rampUp.min}
-                                                    max={getRecommendedConfig(testConfig.testType).rampUp.max}
-                                                    placeholder={`${getRecommendedConfig(testConfig.testType).rampUp.min}-${getRecommendedConfig(testConfig.testType).rampUp.max}`}
-                                                />
-                                            </div>
-                                            <div className="text-xs text-gray-500 mt-1">
-                                                {getRecommendedConfig(testConfig.testType).rampUp.description}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* 代理设置 */}
-                                    <div className="mt-4 bg-gray-800/80 backdrop-blur-sm rounded-xl border-2 border-blue-500/30 p-4">
-                                        <div className="flex items-center justify-between mb-3">
-                                            <div className="flex items-center">
-                                                <Globe className="w-4 h-4 text-blue-400 mr-2" />
-                                                <h4 className="text-base font-semibold text-white">代理设置</h4>
-                                            </div>
-                                            <div className="text-xs text-gray-400">
-                                                服务器端模式
-                                            </div>
-                                        </div>
-
-
-
-                                        <div className="space-y-3">
-                                            {/* 启用代理开关 */}
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center space-x-2">
-                                                    <span className="text-gray-300 text-sm">启用代理</span>
-                                                    <div className="text-xs text-gray-500">(可选)</div>
-                                                </div>
-                                                <label className="relative inline-flex items-center cursor-pointer">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={testConfig.proxy?.enabled || false}
-                                                        onChange={(e) => setTestConfig(prev => ({
-                                                            ...prev,
-                                                            proxy: {
-                                                                ...prev.proxy,
-                                                                enabled: e.target.checked
-                                                            }
-                                                        }))}
-                                                        className="sr-only peer"
-                                                        aria-label="启用代理"
-                                                    />
-                                                    <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                                                </label>
-                                            </div>
-
-                                            {/* 代理配置 */}
-                                            {testConfig.proxy?.enabled && (
-                                                <div className="space-y-2 pl-3 border-l-2 border-blue-500/30">
-                                                    {/* 代理类型 */}
-                                                    <div>
-                                                        <label className="block text-xs font-medium text-gray-300 mb-1">
-                                                            代理类型
-                                                        </label>
-                                                        <select
-                                                            value={testConfig.proxy?.type || 'http'}
-                                                            onChange={(e) => {
-                                                                const proxyType = e.target.value as 'http' | 'https' | 'socks5';
-                                                                let defaultHost = '127.0.0.1';
-                                                                let defaultPort = 8080;
-
-                                                                // 根据代理类型设置默认的本机代理值
-                                                                if (proxyType === 'socks5') {
-                                                                    defaultPort = 1080; // SOCKS5常用端口
-                                                                }
-
-                                                                setTestConfig(prev => ({
-                                                                    ...prev,
-                                                                    proxy: {
-                                                                        ...prev.proxy,
-                                                                        type: proxyType,
-                                                                        host: defaultHost,
-                                                                        port: defaultPort
-                                                                    }
-                                                                }));
-                                                            }}
-                                                            className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                            aria-label="选择代理类型"
-                                                        >
-                                                            <option value="http">HTTP</option>
-                                                            <option value="https">HTTPS</option>
-                                                            <option value="socks5">SOCKS5</option>
-                                                        </select>
-                                                    </div>
-
-                                                    {/* 快速设置本机代理 - 可折叠 */}
-                                                    <div className="bg-gray-700/30 rounded-lg border border-gray-600/50">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setShowQuickProxySettings(!showQuickProxySettings)}
-                                                            className="w-full flex items-center justify-between p-3 text-left hover:bg-gray-600/20 transition-colors rounded-lg"
-                                                        >
-                                                            <div className="text-xs font-medium text-gray-300">快速设置常用本机代理</div>
-                                                            <svg
-                                                                className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${showQuickProxySettings ? 'rotate-180' : ''}`}
-                                                                fill="none"
-                                                                stroke="currentColor"
-                                                                viewBox="0 0 24 24"
-                                                            >
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                                            </svg>
-                                                        </button>
-
-                                                        {showQuickProxySettings && (
-                                                            <div className="px-3 pb-3">
-                                                                <div className="grid grid-cols-2 gap-2">
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => setTestConfig(prev => ({
-                                                                            ...prev,
-                                                                            proxy: {
-                                                                                ...prev.proxy,
-                                                                                type: 'http',
-                                                                                host: '127.0.0.1',
-                                                                                port: 8080
-                                                                            }
-                                                                        }))}
-                                                                        className="px-3 py-2 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg text-xs text-blue-300 transition-colors"
-                                                                    >
-                                                                        HTTP :8080
-                                                                    </button>
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => setTestConfig(prev => ({
-                                                                            ...prev,
-                                                                            proxy: {
-                                                                                ...prev.proxy,
-                                                                                type: 'socks5',
-                                                                                host: '127.0.0.1',
-                                                                                port: 1080
-                                                                            }
-                                                                        }))}
-                                                                        className="px-3 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 rounded-lg text-xs text-purple-300 transition-colors"
-                                                                    >
-                                                                        SOCKS5 :1080
-                                                                    </button>
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => setTestConfig(prev => ({
-                                                                            ...prev,
-                                                                            proxy: {
-                                                                                ...prev.proxy,
-                                                                                type: 'http',
-                                                                                host: '127.0.0.1',
-                                                                                port: 7890
-                                                                            }
-                                                                        }))}
-                                                                        className="px-3 py-2 bg-green-600/20 hover:bg-green-600/30 border border-green-500/30 rounded-lg text-xs text-green-300 transition-colors"
-                                                                    >
-                                                                        Clash :7890
-                                                                    </button>
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => setTestConfig(prev => ({
-                                                                            ...prev,
-                                                                            proxy: {
-                                                                                ...prev.proxy,
-                                                                                type: 'socks5',
-                                                                                host: '127.0.0.1',
-                                                                                port: 7891
-                                                                            }
-                                                                        }))}
-                                                                        className="px-3 py-2 bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/30 rounded-lg text-xs text-orange-300 transition-colors"
-                                                                    >
-                                                                        Clash SOCKS :7891
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-
-                                                    {/* 代理地址 */}
-                                                    <div className="grid grid-cols-3 gap-2">
-                                                        <div className="col-span-2">
-                                                            <label className="block text-xs font-medium text-gray-300 mb-1">
-                                                                代理地址
-                                                            </label>
-                                                            <input
-                                                                type="text"
-                                                                value={testConfig.proxy?.host || ''}
-                                                                onChange={(e) => setTestConfig(prev => ({
-                                                                    ...prev,
-                                                                    proxy: {
-                                                                        ...prev.proxy,
-                                                                        host: e.target.value
-                                                                    }
-                                                                }))}
-                                                                placeholder="127.0.0.1"
-                                                                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                            />
-                                                        </div>
-                                                        <div>
-                                                            <label className="block text-xs font-medium text-gray-300 mb-1">
-                                                                端口
-                                                            </label>
-                                                            <input
-                                                                type="number"
-                                                                value={testConfig.proxy?.port || ''}
-                                                                onChange={(e) => setTestConfig(prev => ({
-                                                                    ...prev,
-                                                                    proxy: {
-                                                                        ...prev.proxy,
-                                                                        port: parseInt(e.target.value) || 8080
-                                                                    }
-                                                                }))}
-                                                                placeholder="8080"
-                                                                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                            />
-                                                        </div>
-                                                    </div>
-
-                                                    {/* 认证信息 */}
-                                                    <div className="grid grid-cols-2 gap-2">
-                                                        <div>
-                                                            <label className="block text-xs font-medium text-gray-300 mb-1">
-                                                                用户名 (可选)
-                                                            </label>
-                                                            <input
-                                                                type="text"
-                                                                value={testConfig.proxy?.username || ''}
-                                                                onChange={(e) => setTestConfig(prev => ({
-                                                                    ...prev,
-                                                                    proxy: {
-                                                                        ...prev.proxy,
-                                                                        username: e.target.value
-                                                                    }
-                                                                }))}
-                                                                placeholder="用户名"
-                                                                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                            />
-                                                        </div>
-                                                        <div>
-                                                            <label className="block text-xs font-medium text-gray-300 mb-1">
-                                                                密码 (可选)
-                                                            </label>
-                                                            <input
-                                                                type="password"
-                                                                value={testConfig.proxy?.password || ''}
-                                                                onChange={(e) => setTestConfig(prev => ({
-                                                                    ...prev,
-                                                                    proxy: {
-                                                                        ...prev.proxy,
-                                                                        password: e.target.value
-                                                                    }
-                                                                }))}
-                                                                placeholder="密码"
-                                                                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                            />
-                                                        </div>
-                                                    </div>
-
-                                                    {/* 代理状态提示和测试 */}
-                                                    <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
-                                                        <div className="flex items-center justify-between mb-2">
-                                                            <div className="flex items-center space-x-2">
-                                                                <Shield className="w-4 h-4 text-blue-400" />
-                                                                <span className="text-blue-300 text-xs">
-                                                                    代理已启用 - 服务器端测试请求将通过代理发送
-                                                                </span>
-                                                            </div>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => testProxyConnection()}
-                                                                disabled={proxyTestStatus.testing}
-                                                                className={`px-2 py-1 text-xs rounded transition-colors ${proxyTestStatus.testing
-                                                                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                                                                    : 'bg-blue-600 hover:bg-blue-700 text-white'
-                                                                    }`}
-                                                                title="测试代理连接"
-                                                            >
-                                                                {proxyTestStatus.testing ? '测试中...' : '测试连接'}
-                                                            </button>
-                                                        </div>
-
-                                                        {/* 代理测试结果显示 */}
-                                                        {(proxyTestStatus.result || proxyTestStatus.testing) && (
-                                                            <div className={`flex items-center justify-between text-xs p-2 rounded ${proxyTestStatus.result === 'success'
-                                                                ? 'bg-green-500/10 border border-green-500/30 text-green-300'
-                                                                : proxyTestStatus.result === 'error'
-                                                                    ? 'bg-red-500/10 border border-red-500/30 text-red-300'
-                                                                    : 'bg-blue-500/10 border border-blue-500/30 text-blue-300'
-                                                                }`}>
-                                                                <div className="flex items-center space-x-2">
-                                                                    {proxyTestStatus.testing && (
-                                                                        <div className="animate-spin w-3 h-3 border border-blue-400 border-t-transparent rounded-full"></div>
-                                                                    )}
-
-                                                                    {proxyTestStatus.result === 'error' && (
-                                                                        <svg className="w-3 h-3 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                                                                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                                                                        </svg>
-                                                                    )}
-                                                                    <div className="flex flex-col space-y-2">
-                                                                        <div className="flex items-center space-x-2">
-                                                                            <span className="font-medium">{proxyTestStatus.message}</span>
-                                                                            {proxyTestStatus.result === 'success' && (
-                                                                                <svg className="w-3 h-3 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                                                                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                                                                </svg>
-                                                                            )}
-                                                                        </div>
-                                                                        {proxyTestStatus.details && (
-                                                                            <div className="space-y-2 text-sm text-gray-300">
-                                                                                {/* 位置和出口IP - 横向排列 */}
-                                                                                <div className="flex items-center space-x-4 flex-wrap">
-                                                                                    {/* 地理位置信息 */}
-                                                                                    {proxyTestStatus.details.location && (
-                                                                                        <div className="flex items-center space-x-1">
-                                                                                            <span className="text-gray-400">位置:</span>
-                                                                                            <div className="flex items-center space-x-1">
-                                                                                                <span className="text-gray-400 text-sm">🌐</span>
-                                                                                                <span>
-                                                                                                    {typeof proxyTestStatus.details.location === 'string'
-                                                                                                        ? proxyTestStatus.details.location
-                                                                                                        : '未知位置'}
-                                                                                                </span>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    )}
-
-                                                                                    {/* 出口IP */}
-                                                                                    {proxyTestStatus.details.proxyIp && (
-                                                                                        <div className="flex items-center space-x-1">
-                                                                                            <span className="text-gray-400">出口IP:</span>
-                                                                                            <span className="font-mono text-blue-300">{proxyTestStatus.details.proxyIp}</span>
-                                                                                        </div>
-                                                                                    )}
-                                                                                </div>
-
-                                                                                {/* 延迟信息 - 横向排列 */}
-                                                                                {(proxyTestStatus.details.responseTime || proxyTestStatus.details.proxyResponseTime) && (
-                                                                                    <div className="flex items-center space-x-4 flex-wrap">
-                                                                                        {proxyTestStatus.details.responseTime && (
-                                                                                            <div className="flex items-center space-x-1">
-                                                                                                <span className="text-gray-400">延迟:</span>
-                                                                                                <span className="text-green-300 font-medium">{proxyTestStatus.details.responseTime}ms</span>
-                                                                                            </div>
-                                                                                        )}
-
-                                                                                        {proxyTestStatus.details.proxyResponseTime && (
-                                                                                            <div className="flex items-center space-x-1">
-                                                                                                <span className="text-gray-400">响应:</span>
-                                                                                                <span className="text-yellow-300">{proxyTestStatus.details.proxyResponseTime}ms</span>
-                                                                                            </div>
-                                                                                        )}
-
-                                                                                        {proxyTestStatus.details.networkLatency && proxyTestStatus.details.networkLatency !== proxyTestStatus.details.responseTime && (
-                                                                                            <div className="flex items-center space-x-1">
-                                                                                                <span className="text-gray-400">网络:</span>
-                                                                                                <span className="text-blue-300">{proxyTestStatus.details.networkLatency}ms</span>
-                                                                                            </div>
-                                                                                        )}
-                                                                                    </div>
-                                                                                )}
-
-                                                                                {/* 错误信息 */}
-                                                                                {proxyTestStatus.result === 'error' && proxyTestStatus.details?.errorCode && (
-                                                                                    <div className="flex items-center space-x-2">
-                                                                                        <span className="text-gray-400 w-16">错误:</span>
-                                                                                        <span className="text-red-300 font-mono text-xs">{proxyTestStatus.details.errorCode}</span>
-                                                                                    </div>
-                                                                                )}
-
-                                                                                {/* 故障排除建议 */}
-                                                                                {proxyTestStatus.result === 'error' && proxyTestStatus.details?.troubleshooting && (
-                                                                                    <div className="mt-2 pt-2 border-t border-gray-600">
-                                                                                        <div className="text-xs text-gray-400 mb-1">排查建议:</div>
-                                                                                        <ul className="text-xs text-gray-300 space-y-1">
-                                                                                            {proxyTestStatus.details.troubleshooting.slice(0, 3).map((tip, index) => (
-                                                                                                <li key={index} className="flex items-start space-x-2">
-                                                                                                    <span className="text-gray-500 mt-0.5">•</span>
-                                                                                                    <span>{tip}</span>
-                                                                                                </li>
-                                                                                            ))}
-                                                                                        </ul>
-                                                                                    </div>
-                                                                                )}
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                                {/* 关闭按钮 - 只在成功状态显示 */}
-                                                                {proxyTestStatus.result === 'success' && (
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => setProxyTestStatus({ testing: false, result: null, message: '' })}
-                                                                        className="ml-2 text-gray-400 hover:text-gray-200 transition-colors"
-                                                                        title="关闭"
-                                                                    >
-                                                                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                                                                        </svg>
-                                                                    </button>
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {/* 未启用代理时的提示 */}
-                                            {!testConfig.proxy?.enabled && (
-                                                <div className="rounded-lg p-3 bg-gray-700/30">
-                                                    <div className="flex items-center space-x-2">
-                                                        <Globe className="w-4 h-4 text-gray-400" />
-                                                        <span className="text-gray-400 text-xs">
-                                                            🖥️ 直连模式 - 测试请求将直接发送到目标服务器
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-
-
-                                </div>
-
-                                {/* 右侧控制面板 - 改进版 */}
-                                <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-                                    {/* 控制面板标题 */}
-                                    <div className="flex items-center justify-between mb-4">
-                                        <h3 className="text-lg font-semibold text-white flex items-center">
-                                            <Settings className="w-5 h-5 mr-2 text-blue-400" />
-                                            测试控制
-                                        </h3>
-                                        <div className="flex items-center space-x-2">
-                                            <div className={`w-2 h-2 rounded-full ${testConfig.url.trim() && testConfig.users > 0 && testConfig.duration > 0
-                                                ? 'bg-green-400' : 'bg-yellow-400'
+                                            <div className={`w-2 h-2 rounded-full ${testStatus === 'running' ? 'bg-green-500 animate-pulse' :
+                                                testStatus === 'completed' ? 'bg-blue-500' :
+                                                    testStatus === 'failed' ? 'bg-red-500' :
+                                                        testStatus === 'cancelled' ? 'bg-yellow-500' :
+                                                            'bg-gray-500'
                                                 }`}></div>
-                                            <span className="text-xs text-gray-400">
-                                                {testConfig.url.trim() && testConfig.users > 0 && testConfig.duration > 0
-                                                    ? '配置完成' : '配置中'}
+                                            <span className="text-gray-400">
+                                                {testStatus === 'running' ? '测试进行中' :
+                                                    testStatus === 'completed' ? '测试完成' :
+                                                        testStatus === 'failed' ? '测试失败' :
+                                                            testStatus === 'cancelled' ? '测试已取消' :
+                                                                '等待开始'}
                                             </span>
                                         </div>
-                                    </div>
 
-                                    {/* 当前配置摘要 - 改进版 */}
-                                    <div className="bg-gray-700/30 rounded-lg p-4 mb-4">
-                                        <div className="grid grid-cols-1 gap-3">
-                                            {/* 核心参数 */}
-                                            <div className="grid grid-cols-3 gap-3 text-center">
-                                                <div className="bg-gray-600/30 rounded-lg p-3">
-                                                    <div className="text-lg font-bold text-white">{testConfig.users}</div>
-                                                    <div className="text-xs text-gray-400">并发用户</div>
-                                                </div>
-                                                <div className="bg-gray-600/30 rounded-lg p-3">
-                                                    <div className="text-lg font-bold text-white">{testConfig.duration}s</div>
-                                                    <div className="text-xs text-gray-400">测试时长</div>
-                                                </div>
-                                                <div className="bg-gray-600/30 rounded-lg p-3">
-                                                    <div className="text-lg font-bold text-white">{testConfig.rampUp}s</div>
-                                                    <div className="text-xs text-gray-400">加压时间</div>
-                                                </div>
-                                            </div>
-
-                                            {/* 测试类型 */}
-                                            <div className="flex items-center justify-between pt-2 border-t border-gray-600/50">
-                                                <span className="text-gray-400 text-sm">测试类型:</span>
-                                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${testConfig.testType === 'gradual' ? 'bg-blue-500/20 text-blue-300' :
-                                                    testConfig.testType === 'spike' ? 'bg-red-500/20 text-red-300' :
-                                                        testConfig.testType === 'constant' ? 'bg-green-500/20 text-green-300' :
-                                                            testConfig.testType === 'stress' ? 'bg-purple-500/20 text-purple-300' :
-                                                                testConfig.testType === 'load' ? 'bg-orange-500/20 text-orange-300' :
-                                                                    testConfig.testType === 'volume' ? 'bg-yellow-500/20 text-yellow-300' :
-                                                                        'bg-gray-500/20 text-gray-300'
-                                                    }`}>
-                                                    {testConfig.testType === 'gradual' ? '梯度加压' :
-                                                        testConfig.testType === 'spike' ? '峰值测试' :
-                                                            testConfig.testType === 'constant' ? '恒定负载' :
-                                                                testConfig.testType === 'stress' ? '压力极限' :
-                                                                    testConfig.testType === 'load' ? '负载测试' :
-                                                                        testConfig.testType === 'volume' ? '容量测试' : '未知类型'}
+                                        {testConfig.url && (
+                                            <div className="flex items-center space-x-2 text-xs">
+                                                <div className="w-2 h-2 bg-cyan-500 rounded-full"></div>
+                                                <span className="text-gray-400 truncate max-w-48">
+                                                    目标: {testConfig.url}
                                                 </span>
                                             </div>
-                                        </div>
+                                        )}
                                     </div>
+                                </div>
+                            </div>
 
-                                    {/* 测试状态显示 */}
-                                    {isRunning ? (
-                                        <div className="space-y-4">
-                                            <div className="text-center">
-                                                <div className="w-12 h-12 mx-auto mb-3 relative">
-                                                    <div className="w-12 h-12 border-4 border-gray-600 rounded-full"></div>
-                                                    <div className="absolute top-0 left-0 w-12 h-12 border-4 border-blue-500 rounded-full animate-spin border-t-transparent border-r-transparent"></div>
-                                                </div>
-                                                <p className="text-sm font-medium text-white">测试进行中</p>
-                                                <p className="text-xs text-gray-300 mt-1">{testProgress}</p>
+                            {/* 模式切换 - 只在压力测试标签页显示 */}
+                            <div className="flex items-center space-x-2">
+                                {activeTab === 'test' && (
+                                    <div className="flex items-center bg-gray-700/50 rounded-md p-0.5">
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsAdvancedMode(false)}
+                                            className={`px-2 py-1 text-xs font-medium rounded transition-all ${!isAdvancedMode
+                                                ? 'bg-blue-600 text-white shadow-sm'
+                                                : 'text-gray-300 hover:text-white'
+                                                }`}
+                                        >
+                                            简化模式
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsAdvancedMode(true)}
+                                            className={`px-2 py-1 text-xs font-medium rounded transition-all ${isAdvancedMode
+                                                ? 'bg-blue-600 text-white shadow-sm'
+                                                : 'text-gray-300 hover:text-white'
+                                                }`}
+                                        >
+                                            高级模式
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* 测试状态和控制按钮 */}
+                                <div className="flex items-center space-x-2">
+                                    {/* 标签页切换 */}
+                                    <div className="flex items-center bg-gray-700/50 rounded-md p-0.5">
+                                        <button
+                                            type="button"
+                                            onClick={() => setActiveTab('test')}
+                                            className={`px-2 py-1 text-xs rounded transition-colors ${activeTab === 'test'
+                                                ? 'bg-blue-600 text-white'
+                                                : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
+                                                }`}
+                                        >
+                                            压力测试
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setActiveTab('history')}
+                                            className={`px-2 py-1 text-xs rounded transition-colors ${activeTab === 'history'
+                                                ? 'bg-blue-600 text-white'
+                                                : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
+                                                }`}
+                                        >
+                                            测试历史
+                                        </button>
+                                    </div>
+                                    {testStatus === 'idle' ? (
+                                        <button
+                                            type="button"
+                                            onClick={handleStartTest}
+                                            disabled={!testConfig.url}
+                                            className={`flex items-center space-x-1.5 px-4 py-2 rounded-md text-sm font-medium transition-all ${!testConfig.url
+                                                ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                                                : isAuthenticated
+                                                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                                                    : 'bg-yellow-600 hover:bg-yellow-700 text-white'
+                                                }`}
+                                        >
+                                            <Play className="w-4 h-4" />
+                                            <span>开始测试</span>
+                                        </button>
+                                    ) : testStatus === 'starting' ? (
+                                        <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-blue-500/20 border border-blue-500/30 rounded-md">
+                                            <Loader className="w-3 h-3 animate-spin text-blue-400" />
+                                            <span className="text-xs text-blue-300 font-medium">正在启动...</span>
+                                        </div>
+                                    ) : testStatus === 'running' ? (
+                                        <div className="flex items-center space-x-2">
+                                            <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-green-500/20 border border-green-500/30 rounded-md">
+                                                <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                                                <span className="text-xs text-green-300 font-medium">
+                                                    测试进行中
+                                                </span>
                                             </div>
+
+
+
                                             <button
                                                 type="button"
                                                 onClick={handleCancelTest}
                                                 disabled={isCancelling}
-                                                className={`w-full flex items-center justify-center space-x-2 px-4 py-2 text-white rounded-lg transition-colors ${isCancelling
+                                                className={`px-3 py-1.5 text-white rounded-md transition-colors flex items-center space-x-1.5 text-xs ${isCancelling
                                                     ? 'bg-gray-600 cursor-not-allowed'
                                                     : 'bg-red-600 hover:bg-red-700'
                                                     }`}
                                             >
                                                 {isCancelling ? (
-                                                    <Loader className="w-4 h-4 animate-spin" />
+                                                    <Loader className="w-3 h-3 animate-spin" />
                                                 ) : (
-                                                    <Square className="w-4 h-4" />
+                                                    <Square className="w-3 h-3" />
                                                 )}
-                                                <span>{isCancelling ? '正在取消测试...' : '取消测试'}</span>
+                                                <span>{isCancelling ? '取消中...' : '取消'}</span>
                                             </button>
+                                            {/* 紧急取消按钮 - 只在正常取消失败时显示 */}
+                                            {isCancelling && (
+                                                <button
+                                                    type="button"
+                                                    onClick={forceStopTest}
+                                                    className="px-2 py-1.5 text-white rounded-md transition-colors flex items-center space-x-1 text-xs bg-red-800 hover:bg-red-900 border border-red-600"
+                                                    title="强制取消测试（紧急情况下使用）"
+                                                >
+                                                    <AlertTriangle className="w-3 h-3" />
+                                                    <span>强制取消</span>
+                                                </button>
+                                            )}
                                         </div>
                                     ) : testStatus === 'completed' ? (
-                                        <div className="space-y-4">
-                                            <div className="text-center">
-                                                <div className="w-12 h-12 mx-auto mb-3 bg-green-500/20 rounded-full flex items-center justify-center">
-                                                    <CheckCircle className="w-6 h-6 text-green-400" />
-                                                </div>
-                                                <p className="text-sm font-medium text-green-300">测试完成</p>
-                                                <p className="text-xs text-gray-300 mt-1">测试已成功完成</p>
+                                        <div className="flex items-center space-x-2">
+                                            <div className="flex items-center space-x-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
+                                                <CheckCircle className="w-4 h-4 text-green-400" />
+                                                <span className="text-sm text-green-300 font-medium">测试完成</span>
                                             </div>
                                             <button
                                                 type="button"
                                                 onClick={resetTestState}
-                                                className="w-full flex items-center justify-center space-x-2 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors"
+                                                className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center space-x-2"
                                             >
                                                 <RotateCcw className="w-4 h-4" />
                                                 <span>重新测试</span>
                                             </button>
                                         </div>
                                     ) : testStatus === 'failed' ? (
-                                        <div className="space-y-4">
-                                            <div className="text-center">
-                                                <div className="w-12 h-12 mx-auto mb-3 bg-red-500/20 rounded-full flex items-center justify-center">
-                                                    <XCircle className="w-6 h-6 text-red-400" />
-                                                </div>
-                                                <p className="text-sm font-medium text-red-300">测试失败</p>
-                                                <p className="text-xs text-gray-300 mt-1">{error || '测试过程中发生错误'}</p>
+                                        <div className="flex items-center space-x-2">
+                                            <div className="flex items-center space-x-2 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg">
+                                                <XCircle className="w-4 h-4 text-red-400" />
+                                                <span className="text-sm text-red-300 font-medium">测试失败</span>
                                             </div>
                                             <button
                                                 type="button"
-                                                onClick={resetTestState}
-                                                className="w-full flex items-center justify-center space-x-2 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors"
+                                                onClick={() => {
+                                                    setTestStatus('idle');
+                                                    setTestProgress('');
+                                                    setError('');
+                                                }}
+                                                className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center space-x-2"
                                             >
                                                 <RotateCcw className="w-4 h-4" />
                                                 <span>重试</span>
                                             </button>
                                         </div>
                                     ) : testStatus === 'cancelled' ? (
-                                        <div className="space-y-4">
-                                            <div className="text-center">
-                                                <div className="w-12 h-12 mx-auto mb-3 bg-yellow-500/20 rounded-full flex items-center justify-center">
-                                                    <Square className="w-6 h-6 text-yellow-400" />
-                                                </div>
-                                                <p className="text-sm font-medium text-yellow-300">测试已取消</p>
-                                                <p className="text-xs text-gray-300 mt-1">测试被用户手动停止</p>
+                                        <div className="flex items-center space-x-2">
+                                            <div className="flex items-center space-x-2 px-4 py-2 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
+                                                <Square className="w-4 h-4 text-yellow-400" />
+                                                <span className="text-sm text-yellow-300 font-medium">测试已取消</span>
                                             </div>
                                             <button
                                                 type="button"
                                                 onClick={resetTestState}
-                                                className="w-full flex items-center justify-center space-x-2 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors"
+                                                className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center space-x-2"
                                             >
                                                 <RotateCcw className="w-4 h-4" />
                                                 <span>重新测试</span>
                                             </button>
                                         </div>
                                     ) : (
-                                        <div className="space-y-3">
-                                            <button
-                                                type="button"
-                                                onClick={handleStartTest}
-                                                disabled={!testConfig.url.trim()}
-                                                className="w-full flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed transition-all duration-200"
-                                            >
-                                                <Play className="w-5 h-5" />
-                                                <span>开始压力测试</span>
-                                            </button>
-                                        </div>
-                                    )}
-
-                                    {/* 快速模板 - 改进版 */}
-                                    <div className="mt-6">
-                                        <div className="flex items-center justify-between mb-3">
-                                            <h4 className="text-sm font-medium text-gray-300 flex items-center">
-                                                <Zap className="w-4 h-4 mr-2 text-yellow-400" />
-                                                快速模板
-                                            </h4>
-                                            <button
-                                                type="button"
-                                                onClick={importConfigFromClipboard}
-                                                className="px-2 py-1 text-xs border border-gray-600 text-gray-400 rounded-md hover:bg-gray-700/50 hover:text-gray-300 transition-colors flex items-center space-x-1"
-                                                title="从剪贴板导入配置"
-                                            >
-                                                <FileText className="w-3 h-3" />
-                                                <span>导入</span>
-                                            </button>
-                                        </div>
-                                        <div className="space-y-2">
-                                            {/* 轻量测试 */}
-                                            <button
-                                                type="button"
-                                                onClick={() => applyTemplate('light-load')}
-                                                className={`w-full p-3 text-sm border rounded-lg transition-all text-left ${selectedTemplate === 'light-load'
-                                                    ? 'border-green-500 bg-green-500/10 text-green-300'
-                                                    : 'border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:border-green-400'
-                                                    }`}
-                                            >
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center space-x-2">
-                                                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                                                        <span className="font-medium">轻量测试</span>
-                                                    </div>
-                                                    <span className="text-xs bg-gray-600/50 px-2 py-1 rounded">5用户/30秒</span>
-                                                </div>
-                                                <div className="text-xs text-gray-400 mt-1">适合小型网站初次测试</div>
-                                            </button>
-
-                                            {/* 中等负载 */}
-                                            <button
-                                                type="button"
-                                                onClick={() => applyTemplate('medium-load')}
-                                                className={`w-full p-3 text-sm border rounded-lg transition-all text-left ${selectedTemplate === 'medium-load'
-                                                    ? 'border-yellow-500 bg-yellow-500/10 text-yellow-300'
-                                                    : 'border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:border-yellow-400'
-                                                    }`}
-                                            >
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center space-x-2">
-                                                        <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                                                        <span className="font-medium">中等负载</span>
-                                                        <span className="text-xs bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded">推荐</span>
-                                                    </div>
-                                                    <span className="text-xs bg-gray-600/50 px-2 py-1 rounded">20用户/60秒</span>
-                                                </div>
-                                                <div className="text-xs text-gray-400 mt-1">适合企业网站常规测试</div>
-                                            </button>
-
-                                            {/* 重负载 */}
-                                            <button
-                                                type="button"
-                                                onClick={() => applyTemplate('heavy-load')}
-                                                className={`w-full p-3 text-sm border rounded-lg transition-all text-left ${selectedTemplate === 'heavy-load'
-                                                    ? 'border-red-500 bg-red-500/10 text-red-300'
-                                                    : 'border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:border-red-400'
-                                                    }`}
-                                            >
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center space-x-2">
-                                                        <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                                                        <span className="font-medium">重负载</span>
-                                                        <span className="text-xs bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded">专业</span>
-                                                    </div>
-                                                    <span className="text-xs bg-gray-600/50 px-2 py-1 rounded">50用户/120秒</span>
-                                                </div>
-                                                <div className="text-xs text-gray-400 mt-1">适合大型网站压力测试</div>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    {/* 测试引擎状态 - 改进版 */}
-                                    <div className="mt-6">
-                                        <h4 className="text-sm font-medium text-gray-300 mb-3 flex items-center">
-                                            <Globe className="w-4 h-4 mr-2 text-green-400" />
-                                            引擎状态
-                                        </h4>
-                                        <div className="bg-gray-700/30 rounded-lg p-3">
-                                            <div className="space-y-3 text-sm">
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center space-x-2">
-                                                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                                                        <span className="text-gray-300">真实网络测试</span>
-                                                    </div>
-                                                    <CheckCircle className="w-4 h-4 text-green-400" />
-                                                </div>
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center space-x-2">
-                                                        <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                                                        <span className="text-gray-300">准确性能指标</span>
-                                                    </div>
-                                                    <CheckCircle className="w-4 h-4 text-blue-400" />
-                                                </div>
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center space-x-2">
-                                                        <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
-                                                        <span className="text-gray-300">实时错误检测</span>
-                                                    </div>
-                                                    <CheckCircle className="w-4 h-4 text-purple-400" />
-                                                </div>
-
-                                                {/* 引擎信息 */}
-                                                <div className="pt-2 border-t border-gray-600/50">
-                                                    <div className="flex items-center justify-between text-xs">
-                                                        <span className="text-gray-400">引擎版本:</span>
-                                                        <span className="text-gray-300 font-mono">v2.1.0</span>
-                                                    </div>
-                                                    <div className="flex items-center justify-between text-xs mt-1">
-                                                        <span className="text-gray-400">连接状态:</span>
-                                                        <span className="text-green-300 flex items-center space-x-1">
-                                                            <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
-                                                            <span>已连接</span>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* 导出功能 - 统一组件 */}
-                                    {result && (
-                                        <div className="mt-6">
-                                            <h4 className="text-sm font-medium text-gray-300 mb-3 flex items-center">
-                                                <Download className="w-4 h-4 mr-2 text-blue-400" />
-                                                导出报告
-                                            </h4>
-                                            <button
-                                                onClick={() => setIsExportModalOpen(true)}
-                                                className="w-full px-3 py-2 text-sm border border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:text-white rounded-lg transition-colors flex items-center justify-center space-x-2"
-                                            >
-                                                <Download className="w-4 h-4" />
-                                                <span>导出</span>
-                                            </button>
+                                        <div className="px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg">
+                                            <span className="text-sm text-red-300">未知状态: {testStatus}</span>
                                         </div>
                                     )}
                                 </div>
                             </div>
-                        )}
+                        </div>
+                    </div>
+                </div>
 
-                        {/* 测试结果 */}
-                        {(result || metrics) && (
-                            <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="text-lg font-semibold text-white">测试结果</h3>
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsExportModalOpen(true)}
-                                        className="px-3 py-2 text-sm border border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:text-white rounded-lg transition-colors flex items-center space-x-2"
-                                    >
-                                        <Download className="w-4 h-4" />
-                                        <span>导出</span>
-                                    </button>
+                {/* 根据标签页显示不同内容 */}
+                {
+                    activeTab === 'test' ? (
+                        <>
+                            {/* URL 输入与测试进度融合区域 */}
+                            <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4 url-input-card">
+                                <label className="block text-sm font-medium text-gray-300 mb-2">测试URL</label>
+                                <div className="url-input-container">
+                                    <URLInput
+                                        value={testConfig.url}
+                                        onChange={(url) => setTestConfig((prev: StressTestConfig) => ({ ...prev, url }))}
+                                        placeholder="输入要进行压力测试的网站URL..."
+                                        enableReachabilityCheck={false}
+                                        className="url-input-full-width"
+                                    />
                                 </div>
 
-                                {/* 主要性能指标卡片 */}
-                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-                                    <div className="text-center p-3 bg-blue-500/20 rounded-lg border border-blue-500/30">
-                                        <div className="text-xl font-bold text-blue-400">
-                                            {result?.metrics?.totalRequests || metrics?.totalRequests || 0}
-                                        </div>
-                                        <div className="text-xs text-blue-300">总请求数</div>
-                                    </div>
-                                    <div className="text-center p-3 bg-green-500/20 rounded-lg border border-green-500/30">
-                                        <div className="text-xl font-bold text-green-400">
-                                            {result?.metrics?.successfulRequests || metrics?.successfulRequests || 0}
-                                        </div>
-                                        <div className="text-xs text-green-300">成功请求</div>
-                                    </div>
-                                    <div className="text-center p-3 bg-orange-500/20 rounded-lg border border-orange-500/30">
-                                        <div className="text-xl font-bold text-orange-400">
-                                            {(result?.metrics?.averageResponseTime || metrics?.averageResponseTime || 0).toFixed(3)}ms
-                                        </div>
-                                        <div className="text-xs text-orange-300">平均响应时间</div>
-                                    </div>
-                                    <div className="text-center p-3 bg-red-500/20 rounded-lg border border-red-500/30">
-                                        <div className="text-xl font-bold text-red-400">
-                                            {(() => {
-                                                const errorRate = result?.metrics?.errorRate || metrics?.errorRate || 0;
-                                                return typeof errorRate === 'string' ? errorRate : errorRate.toFixed(1);
-                                            })()}%
-                                        </div>
-                                        <div className="text-xs text-red-300">错误率</div>
-                                    </div>
-                                </div>
+                                {/* 集成的测试进度显示 - 永久保持显示直到重置 */}
+                                {(testProgress || backgroundTestInfo || testStatus !== 'idle' || result || metrics) && (
+                                    <div className="mt-4 pt-4 border-t border-gray-700/50">
+                                        {(() => {
+                                            const progressData = calculateTestProgress();
+                                            return (
+                                                <>
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <div className="flex items-center space-x-2">
+                                                            <div className={`w-2 h-2 rounded-full ${testStatus === 'running' ? 'bg-blue-400 animate-pulse' :
+                                                                testStatus === 'completed' ? 'bg-green-400' :
+                                                                    testStatus === 'cancelled' ? 'bg-yellow-400' :
+                                                                        testStatus === 'failed' ? 'bg-red-400' :
+                                                                            'bg-gray-400'
+                                                                }`}></div>
+                                                            <span className="text-sm font-medium text-white">
+                                                                {testStatus === 'running' ? '测试进行中' :
+                                                                    testStatus === 'completed' ? '测试已完成' :
+                                                                        testStatus === 'cancelled' ? '测试已取消' :
+                                                                            testStatus === 'failed' ? '测试失败' :
+                                                                                testStatus === 'starting' ? '正在启动' : '测试状态'}
+                                                            </span>
+                                                        </div>
+                                                        <span className="text-sm text-blue-300 font-medium">
+                                                            {progressData.progress}%
+                                                        </span>
+                                                    </div>
 
-                                {/* 详细性能指标 */}
-                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
-                                    {/* 左侧：响应时间和吞吐量分析 */}
-                                    <div className="lg:col-span-2 space-y-4">
-                                        {/* 响应时间分析 */}
-                                        <div className="bg-gray-700/50 rounded-lg p-3">
-                                            <h4 className="text-sm font-semibold text-white mb-3 flex items-center">
-                                                <Clock className="w-4 h-4 mr-2 text-orange-400" />
-                                                响应时间分析
-                                            </h4>
-                                            <div className="grid grid-cols-4 gap-3">
-                                                <div className="text-center">
-                                                    <div className="text-lg font-bold text-green-400">
-                                                        {result?.metrics?.p50ResponseTime || metrics?.p50ResponseTime || 0}ms
+                                                    {/* 动态进度条 - 测试完成后永久显示 */}
+                                                    <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+                                                        <div
+                                                            className={`test-progress-dynamic h-2 rounded-full transition-all duration-300 ${progressData.progress >= 100 ? 'progress-100' :
+                                                                progressData.progress >= 95 ? 'progress-95' :
+                                                                    progressData.progress >= 90 ? 'progress-90' :
+                                                                        progressData.progress >= 85 ? 'progress-85' :
+                                                                            progressData.progress >= 80 ? 'progress-80' :
+                                                                                progressData.progress >= 75 ? 'progress-75' :
+                                                                                    progressData.progress >= 70 ? 'progress-70' :
+                                                                                        progressData.progress >= 65 ? 'progress-65' :
+                                                                                            progressData.progress >= 60 ? 'progress-60' :
+                                                                                                progressData.progress >= 55 ? 'progress-55' :
+                                                                                                    progressData.progress >= 50 ? 'progress-50' :
+                                                                                                        progressData.progress >= 45 ? 'progress-45' :
+                                                                                                            progressData.progress >= 40 ? 'progress-40' :
+                                                                                                                progressData.progress >= 35 ? 'progress-35' :
+                                                                                                                    progressData.progress >= 30 ? 'progress-30' :
+                                                                                                                        progressData.progress >= 25 ? 'progress-25' :
+                                                                                                                            progressData.progress >= 20 ? 'progress-20' :
+                                                                                                                                progressData.progress >= 15 ? 'progress-15' :
+                                                                                                                                    progressData.progress >= 10 ? 'progress-10' :
+                                                                                                                                        progressData.progress >= 5 ? 'progress-5' : 'progress-0'
+                                                                }`}
+                                                            style={{ '--progress-width': `${progressData.progress}%` } as React.CSSProperties}
+                                                        />
                                                     </div>
-                                                    <div className="text-xs text-gray-400">P50响应时间</div>
-                                                </div>
-                                                <div className="text-center">
-                                                    <div className="text-lg font-bold text-red-400">
-                                                        {result?.metrics?.p90ResponseTime || metrics?.p90ResponseTime || 0}ms
+
+                                                    {/* 进度描述 */}
+                                                    <div className="text-xs text-gray-400 mb-2">
+                                                        {progressData.timeInfo}
                                                     </div>
-                                                    <div className="text-xs text-gray-400">P90响应时间</div>
-                                                </div>
-                                                <div className="text-center">
-                                                    <div className="text-lg font-bold text-blue-400">
-                                                        {result?.metrics?.p95ResponseTime || metrics?.p95ResponseTime || 0}ms
-                                                    </div>
-                                                    <div className="text-xs text-gray-400">P95响应时间</div>
-                                                </div>
-                                                <div className="text-center">
-                                                    <div className="text-lg font-bold text-purple-400">
-                                                        {result?.metrics?.p99ResponseTime || metrics?.p99ResponseTime || 0}ms
-                                                    </div>
-                                                    <div className="text-xs text-gray-400">P99响应时间</div>
-                                                </div>
+
+                                                    {/* 预计剩余时间 */}
+                                                    {progressData.estimatedRemaining && (
+                                                        <div className="text-xs text-blue-300 mb-2">
+                                                            {progressData.estimatedRemaining}
+                                                        </div>
+                                                    )}
+
+                                                    {/* 后台运行提示 */}
+                                                    {testStatus === 'running' && canSwitchPages && (
+                                                        <div className="mt-2 p-2 bg-green-500/10 border border-green-500/20 rounded-md">
+                                                            <div className="flex items-center space-x-1.5">
+                                                                <CheckCircle className="w-3 h-3 text-green-400" />
+                                                                <span className="text-xs text-green-300 font-medium">后台运行模式</span>
+                                                            </div>
+                                                            <p className="text-xs text-green-200 mt-0.5">
+                                                                测试正在后台运行，您可以自由切换到其他页面，测试不会中断。
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                </>
+                                            );
+                                        })()}
+                                    </div>
+                                )}
+
+                                {/* 错误信息显示 */}
+                                {error && (
+                                    <div className="mt-4 pt-4 border-t border-red-500/20">
+                                        <div className="flex items-center space-x-2 mb-2">
+                                            <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                                            <span className="text-sm font-medium text-red-300">测试错误</span>
+                                        </div>
+                                        <div className="text-sm text-red-200 bg-red-500/10 rounded p-2">
+                                            {error}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 队列状态显示 - 只在有排队或当前测试在队列中时显示 */}
+                            {(queueStats.queueLength > 0 || currentQueueId) && (
+                                <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                                    {/* 当前测试在队列中的位置 */}
+                                    {currentQueueId ? (
+                                        <div>
+                                            <div className="flex items-center text-blue-300 mb-2">
+                                                <Loader className="w-4 h-4 mr-2 animate-spin" />
+                                                <span className="font-medium">您的测试在队列中</span>
+                                            </div>
+                                            <div className="text-sm text-blue-200">
+                                                队列位置: 第 {getQueuePosition(currentQueueId)} 位
+                                                {estimateWaitTime(currentQueueId) > 0 && (
+                                                    <span className="ml-2">
+                                                        预计等待: {Math.round(estimateWaitTime(currentQueueId) / 60)} 分钟
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
+                                    ) : queueStats.queueLength > 0 && (
+                                        <div>
+                                            <div className="flex items-center text-blue-300 mb-2">
+                                                <Users className="w-4 h-4 mr-2" />
+                                                <span className="font-medium">系统繁忙</span>
+                                            </div>
+                                            <div className="text-sm text-blue-200">
+                                                当前有 {queueStats.queueLength} 个测试在排队等待
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
-                                        {/* 吞吐量分析 */}
-                                        <div className="bg-gray-700/50 rounded-lg p-3">
-                                            <h4 className="text-sm font-semibold text-white mb-3 flex items-center">
-                                                <BarChart3 className="w-4 h-4 mr-2 text-blue-400" />
-                                                吞吐量分析
-                                            </h4>
-                                            <div className="grid grid-cols-4 gap-3">
-                                                <div className="text-center">
-                                                    <div className="text-lg font-bold text-blue-400">
-                                                        {result?.metrics?.currentTPS || metrics?.currentTPS || 0}
+                            {/* 主要配置区域 */}
+                            {!isAdvancedMode ? (
+                                /* 简化模式 - 快速模板选择 */
+                                <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4">
+                                    <div className="text-center mb-4">
+                                        <h3 className="text-lg font-semibold text-white mb-1">选择测试强度</h3>
+                                        <p className="text-gray-400 text-xs">根据您的网站类型选择合适的测试模板</p>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                                        {quickTemplates.map((template) => (
+                                            <div
+                                                key={template.id}
+                                                onClick={() => applyTemplate(template.id)}
+                                                className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 hover:scale-105 ${selectedTemplate === template.id
+                                                    ? 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20'
+                                                    : 'border-gray-600 bg-gray-700/30 hover:border-blue-400 hover:bg-blue-500/5'
+                                                    }`}
+                                            >
+                                                {/* 徽章 */}
+                                                {template.badge && (
+                                                    <div className={`absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-medium ${selectedTemplate === template.id
+                                                        ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                                                        : 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+                                                        }`}>
+                                                        {template.badge}
                                                     </div>
-                                                    <div className="text-xs text-gray-400">当前TPS</div>
-                                                </div>
-                                                <div className="text-center">
-                                                    <div className="text-lg font-bold text-green-400">
-                                                        {result?.metrics?.peakTPS || metrics?.peakTPS || 0}
-                                                    </div>
-                                                    <div className="text-xs text-gray-400">峰值TPS</div>
-                                                </div>
-                                                <div className="text-center">
-                                                    <div className="text-lg font-bold text-yellow-400">
+                                                )}
+
+                                                <div className="text-center mt-6">
+                                                    <div className="text-3xl mb-2">{template.icon}</div>
+                                                    <h4 className="font-semibold text-white mb-1">
+                                                        {template.name}
+                                                    </h4>
+                                                    <p className="text-xs text-gray-400 mb-3">{template.description}</p>
+                                                    <div className="text-xs text-blue-300 bg-blue-500/10 rounded-full px-2 py-1">
                                                         {(() => {
-                                                            const throughput = result?.metrics?.throughput || metrics?.throughput || 0;
-                                                            return throughput;
+                                                            const fullTemplate = getTemplateById(template.id);
+                                                            return fullTemplate ? `${fullTemplate.config.users}用户 · ${fullTemplate.config.duration}秒` : '配置加载中...';
                                                         })()}
                                                     </div>
-                                                    <div className="text-xs text-gray-400">平均TPS</div>
+                                                    <div className="text-xs text-gray-500 mt-2">{template.recommended}</div>
                                                 </div>
-                                                <div className="text-center">
-                                                    <div className="text-lg font-bold text-indigo-400">
-                                                        {result?.metrics?.requestsPerSecond || metrics?.requestsPerSecond || 0}
+
+                                                {selectedTemplate === template.id && (
+                                                    <div className="absolute top-2 right-2">
+                                                        <CheckCircle className="w-5 h-5 text-blue-400" />
                                                     </div>
-                                                    <div className="text-xs text-gray-400">请求/秒</div>
-                                                </div>
+                                                )}
                                             </div>
-                                        </div>
+                                        ))}
                                     </div>
 
-                                    {/* 右侧：测试配置 */}
-                                    <div className="bg-gray-700/50 rounded-lg p-3">
-                                        <h4 className="text-sm font-semibold text-white mb-3 flex items-center">
-                                            <Users className="w-4 h-4 mr-2 text-cyan-400" />
-                                            测试配置
-                                        </h4>
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <div className="text-center p-2 bg-cyan-500/10 border border-cyan-500/20 rounded-lg">
-                                                <div className="text-lg font-bold text-cyan-400">{testConfig.users}</div>
-                                                <div className="text-xs text-gray-400">并发用户数</div>
+                                    {selectedTemplate && (
+                                        <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 mb-4">
+                                            <div className="flex items-center space-x-2 mb-2">
+                                                <CheckCircle className="w-4 h-4 text-blue-400" />
+                                                <span className="text-sm font-medium text-blue-300">已选择模板</span>
                                             </div>
-                                            <div className="text-center p-2 bg-cyan-500/10 border border-cyan-500/20 rounded-lg">
-                                                <div className="text-lg font-bold text-cyan-400">{testConfig.duration}s</div>
-                                                <div className="text-xs text-gray-400">测试时长</div>
-                                            </div>
-                                            <div className="text-center p-2 bg-cyan-500/10 border border-cyan-500/20 rounded-lg">
-                                                <div className="text-lg font-bold text-cyan-400">{testConfig.rampUp}s</div>
-                                                <div className="text-xs text-gray-400">加压时间</div>
-                                            </div>
-                                            <div className="text-center p-2 bg-cyan-500/10 border border-cyan-500/20 rounded-lg">
-                                                <div className="text-lg font-bold text-cyan-400">
+                                            <div className="text-sm text-gray-300">
+                                                将使用 <span className="text-blue-300 font-medium">{testConfig.users}</span> 个并发用户，
+                                                测试 <span className="text-blue-300 font-medium">{testConfig.duration}</span> 秒，
+                                                采用 <span className="text-blue-300 font-medium">
                                                     {testConfig.testType === 'gradual' ? '梯度加压' :
-                                                        testConfig.testType === 'spike' ? '峰值测试' :
+                                                        testConfig.testType === 'spike' ? '峰值冲击' :
                                                             testConfig.testType === 'constant' ? '恒定负载' :
                                                                 testConfig.testType === 'stress' ? '压力极限' :
                                                                     testConfig.testType === 'load' ? '负载测试' :
                                                                         testConfig.testType === 'volume' ? '容量测试' : '未知类型'}
-                                                </div>
-                                                <div className="text-xs text-gray-400">测试类型</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* 错误分析 */}
-                                {(result?.metrics?.errorBreakdown || metrics?.errorBreakdown) &&
-                                    Object.keys(result?.metrics?.errorBreakdown || metrics?.errorBreakdown || {}).length > 0 && (
-                                        <div className="bg-gray-700/50 rounded-lg p-4 mb-6">
-                                            <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
-                                                <AlertTriangle className="w-5 h-5 mr-2 text-red-400" />
-                                                错误类型分析
-                                            </h4>
-                                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                                                {Object.entries(result?.metrics?.errorBreakdown || metrics?.errorBreakdown || {}).map(([errorType, count]) => (
-                                                    <div key={errorType} className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-center">
-                                                        <div className="text-lg font-bold text-red-400">{String(count)}</div>
-                                                        <div className="text-xs text-red-300">{errorType}</div>
-                                                    </div>
-                                                ))}
+                                                </span> 模式
                                             </div>
                                         </div>
                                     )}
 
-                                {/* 数据传输分析 */}
-                                {(result?.metrics?.dataReceived || metrics?.dataReceived || result?.metrics?.dataSent || metrics?.dataSent) && (
-                                    <div className="bg-gray-700/50 rounded-lg p-4 mb-6">
-                                        <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
-                                            <Download className="w-5 h-5 mr-2 text-teal-400" />
-                                            数据传输分析
-                                        </h4>
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                            <div className="text-center">
-                                                <div className="text-xl font-bold text-teal-400">
-                                                    {(() => {
-                                                        const bytes = result?.metrics?.dataReceived || metrics?.dataReceived || 0;
-                                                        if (bytes > 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
-                                                        if (bytes > 1024) return `${(bytes / 1024).toFixed(1)}KB`;
-                                                        return `${bytes}B`;
-                                                    })()}
-                                                </div>
-                                                <div className="text-xs text-gray-400">接收数据量</div>
-                                            </div>
-                                            <div className="text-center">
-                                                <div className="text-xl font-bold text-teal-400">
-                                                    {(() => {
-                                                        const bytes = result?.metrics?.dataSent || metrics?.dataSent || 0;
-                                                        if (bytes > 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
-                                                        if (bytes > 1024) return `${(bytes / 1024).toFixed(1)}KB`;
-                                                        return `${bytes}B`;
-                                                    })()}
-                                                </div>
-                                                <div className="text-xs text-gray-400">发送数据量</div>
-                                            </div>
-                                            <div className="text-center">
-                                                <div className="text-xl font-bold text-teal-400">
-                                                    {(() => {
-                                                        const received = result?.metrics?.dataReceived || metrics?.dataReceived || 0;
-                                                        const sent = result?.metrics?.dataSent || metrics?.dataSent || 0;
-                                                        const total = received + sent;
-                                                        if (total > 1024 * 1024) return `${(total / (1024 * 1024)).toFixed(1)}MB`;
-                                                        if (total > 1024) return `${(total / 1024).toFixed(1)}KB`;
-                                                        return `${total}B`;
-                                                    })()}
-                                                </div>
-                                                <div className="text-xs text-gray-400">总数据量</div>
-                                            </div>
-                                            <div className="text-center">
-                                                <div className="text-xl font-bold text-teal-400">
-                                                    {(() => {
-                                                        const received = result?.metrics?.dataReceived || metrics?.dataReceived || 0;
-                                                        const totalRequests = result?.metrics?.totalRequests || metrics?.totalRequests || 1;
-                                                        const avgPerRequest = received / totalRequests;
-                                                        if (avgPerRequest > 1024) return `${(avgPerRequest / 1024).toFixed(1)}KB`;
-                                                        return `${avgPerRequest.toFixed(0)}B`;
-                                                    })()}
-                                                </div>
-                                                <div className="text-xs text-gray-400">平均响应大小</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* 性能评估 */}
-                                <div className="bg-gray-700/50 rounded-lg p-3">
-                                    <h4 className="text-sm font-semibold text-white mb-3 flex items-center">
-                                        <CheckCircle className="w-4 h-4 mr-2 text-green-400" />
-                                        性能评估
-                                    </h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                        <div className="text-center p-2 bg-green-500/10 border border-green-500/30 rounded-lg">
-                                            <div className="text-lg font-bold text-green-400">
-                                                {(() => {
-                                                    const successRate = result?.metrics?.totalRequests ?
-                                                        ((result.metrics.successfulRequests / result.metrics.totalRequests) * 100) :
-                                                        metrics?.totalRequests ?
-                                                            ((metrics.successfulRequests / metrics.totalRequests) * 100) : 0;
-                                                    return successRate.toFixed(1);
-                                                })()}%
-                                            </div>
-                                            <div className="text-xs text-green-300">成功率</div>
-                                        </div>
-                                        <div className="text-center p-2 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                                            <div className="text-lg font-bold text-blue-400">
-                                                {(() => {
-                                                    const avgResponseTime = result?.metrics?.averageResponseTime || metrics?.averageResponseTime || 0;
-                                                    if (avgResponseTime < 200) return 'A+';
-                                                    if (avgResponseTime < 500) return 'A';
-                                                    if (avgResponseTime < 1000) return 'B';
-                                                    if (avgResponseTime < 2000) return 'C';
-                                                    return 'D';
-                                                })()}
-                                            </div>
-                                            <div className="text-xs text-blue-300">响应时间等级</div>
-                                        </div>
-                                        <div className="text-center p-2 bg-purple-500/10 border border-purple-500/30 rounded-lg">
-                                            <div className="text-lg font-bold text-purple-400">
-                                                {(() => {
-                                                    const tps = result?.metrics?.currentTPS || metrics?.currentTPS || 0;
-                                                    if (tps > 100) return '优秀';
-                                                    if (tps > 50) return '良好';
-                                                    if (tps > 20) return '一般';
-                                                    return '较差';
-                                                })()}
-                                            </div>
-                                            <div className="text-xs text-purple-300">吞吐量评级</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* 统一压力测试图表 - 空间复用 */}
-                        {useUnifiedCharts ? (
-                            <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h3 className="text-lg font-semibold text-white">
-                                        {isRunning && testStatus !== 'cancelled' ? '实时性能监控' :
-                                            result || testStatus === 'cancelled' ? '测试结果分析' : '压力测试图表'}
-                                    </h3>
-                                    <div className="flex items-center gap-2">
+                                    <div className="text-center">
                                         <button
                                             type="button"
-                                            onClick={() => setUseUnifiedCharts(false)}
-                                            className="px-3 py-1 bg-gray-700 text-gray-300 rounded text-sm hover:bg-gray-600"
+                                            onClick={handleStartTest}
+                                            disabled={!testConfig.url || !selectedTemplate}
+                                            className={`px-8 py-3 rounded-lg font-medium transition-all ${!testConfig.url || !selectedTemplate
+                                                ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                                                : isAuthenticated
+                                                    ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl'
+                                                    : 'bg-yellow-600 hover:bg-yellow-700 text-white shadow-lg hover:shadow-xl'
+                                                }`}
                                         >
-                                            切换到传统图表
+                                            {isAuthenticated ? (
+                                                <div className="flex items-center space-x-2">
+                                                    <Play className="w-5 h-5" />
+                                                    <span>开始压力测试</span>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center space-x-2">
+                                                    <Play className="w-5 h-5" />
+                                                    <span>开始压力测试</span>
+                                                </div>
+                                            )}
                                         </button>
                                     </div>
                                 </div>
-                                <UnifiedStressTestCharts
-                                    realTimeData={(() => {
-                                        const convertedData = convertToEnhancedRealTimeData(unifiedTestData.realTimeData);
-                                        console.log('🎯 图表数据传递检查:', {
-                                            原始数据长度: unifiedTestData.realTimeData.length,
-                                            转换后数据长度: convertedData.length,
-                                            测试状态: testStatus,
-                                            是否运行中: testStatus === 'running',
-                                            是否完成: testStatus === 'completed',
-                                            样本数据: convertedData.slice(0, 2)
-                                        });
-                                        return convertedData;
-                                    })()}
-                                    isRunning={testStatus === 'running'}
-                                    testCompleted={testStatus === 'completed'}
-                                    currentMetrics={unifiedTestData.currentMetrics}
-                                    height={500}
-                                    dataPointDensity="medium"
-                                />
-                            </div>
-                        ) : (
-                            <>
-                                {/* 传统压力测试图表 - 始终显示 */}
+                            ) : (
+                                /* 高级模式 - 原有的详细配置 */
+                                <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+                                    {/* 测试配置 */}
+                                    <div className="xl:col-span-2 bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="text-xl font-semibold text-white">高级测试配置</h3>
+                                            <button
+                                                type="button"
+                                                onClick={importConfigFromClipboard}
+                                                className="px-3 py-2 text-sm border border-gray-600 text-gray-400 rounded-lg hover:bg-gray-700/50 hover:text-gray-300 transition-colors flex items-center space-x-2"
+                                                title="从剪贴板导入配置"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                                </svg>
+                                                <span>导入配置</span>
+                                            </button>
+                                        </div>
+
+
+
+                                        {/* 本地测试选项（桌面版专用） */}
+                                        {localStressTest.isAvailable && (
+                                            <div className="mb-4 p-4 bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-lg">
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <div className="flex items-center space-x-2">
+                                                        <Zap className="w-5 h-5 text-purple-400" />
+                                                        <h4 className="text-lg font-medium text-white">本地压力测试</h4>
+                                                        <span className="px-2 py-1 bg-purple-500/20 text-purple-300 text-xs rounded-full">桌面版专用</span>
+                                                    </div>
+                                                    <label className="relative inline-flex items-center cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={useLocalTest}
+                                                            onChange={(e) => setUseLocalTest(e.target.checked)}
+                                                            className="sr-only peer"
+                                                            aria-label="启用本地压力测试"
+                                                        />
+                                                        <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                                    </label>
+                                                </div>
+                                                <div className="text-sm text-gray-300 mb-3">
+                                                    使用您的本地计算机资源进行压力测试，突破服务器限制，支持更高并发数和更长测试时间。
+                                                </div>
+                                                {useLocalTest && (
+                                                    <div className="grid grid-cols-2 gap-3 text-xs">
+                                                        <div className="bg-green-500/10 border border-green-500/20 rounded p-2">
+                                                            <div className="text-green-400 font-medium">✅ 优势</div>
+                                                            <div className="text-gray-300 mt-1">
+                                                                • 无并发限制<br />
+                                                                • 使用本地资源<br />
+                                                                • 更高性能
+                                                            </div>
+                                                        </div>
+                                                        <div className="bg-blue-500/10 border border-blue-500/20 rounded p-2">
+                                                            <div className="text-blue-400 font-medium">📊 推荐配置</div>
+                                                            <div className="text-gray-300 mt-1">
+                                                                {(() => {
+                                                                    const rec = localStressTest.getRecommendedConfig(testConfig.users);
+                                                                    return `最大用户: ${rec.users || testConfig.users}`;
+                                                                })()}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {/* 测试类型选择 - 移动端优化布局 */}
+                                        <div className="mb-4">
+                                            <h4 className="text-lg font-medium text-white mb-3">测试类型</h4>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                {/* 梯度加压 */}
+                                                <div
+                                                    className={`border-2 rounded-lg p-4 sm:p-3 cursor-pointer transition-all min-h-[60px] ${testConfig.testType === 'gradual'
+                                                        ? 'border-green-500 bg-green-500/10'
+                                                        : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
+                                                        }`}
+                                                    onClick={() => adjustConfigForTestType('gradual')}
+                                                >
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center space-x-3 sm:space-x-2">
+                                                            <div className="w-10 h-10 sm:w-8 sm:h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
+                                                                <TrendingUp className="w-5 h-5 sm:w-4 sm:h-4 text-green-400" />
+                                                            </div>
+                                                            <h5 className="font-medium text-white text-base sm:text-sm">梯度加压</h5>
+                                                        </div>
+                                                        <div
+                                                            className={`w-5 h-5 sm:w-4 sm:h-4 rounded-full border-2 transition-all flex items-center justify-center ${testConfig.testType === 'gradual'
+                                                                ? 'border-green-500 bg-green-500'
+                                                                : 'border-gray-500 bg-gray-700/50'
+                                                                }`}
+                                                        >
+                                                            {testConfig.testType === 'gradual' && (
+                                                                <div className="w-2 h-2 sm:w-1.5 sm:h-1.5 bg-white rounded-full"></div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* 峰值测试 */}
+                                                <div
+                                                    className={`border-2 rounded-lg p-4 sm:p-3 cursor-pointer transition-all min-h-[60px] ${testConfig.testType === 'spike'
+                                                        ? 'border-blue-500 bg-blue-500/10'
+                                                        : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
+                                                        }`}
+                                                    onClick={() => adjustConfigForTestType('spike')}
+                                                >
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center space-x-3 sm:space-x-2">
+                                                            <div className="w-10 h-10 sm:w-8 sm:h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                                                                <BarChart3 className="w-5 h-5 sm:w-4 sm:h-4 text-blue-400" />
+                                                            </div>
+                                                            <h5 className="font-medium text-white text-base sm:text-sm">峰值测试</h5>
+                                                        </div>
+                                                        <div
+                                                            className={`w-5 h-5 sm:w-4 sm:h-4 rounded-full border-2 transition-all flex items-center justify-center ${testConfig.testType === 'spike'
+                                                                ? 'border-blue-500 bg-blue-500'
+                                                                : 'border-gray-500 bg-gray-700/50'
+                                                                }`}
+                                                        >
+                                                            {testConfig.testType === 'spike' && (
+                                                                <div className="w-2 h-2 sm:w-1.5 sm:h-1.5 bg-white rounded-full"></div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* 恒定负载 */}
+                                                <div
+                                                    className={`border-2 rounded-lg p-4 sm:p-3 cursor-pointer transition-all min-h-[60px] ${testConfig.testType === 'constant'
+                                                        ? 'border-purple-500 bg-purple-500/10'
+                                                        : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
+                                                        }`}
+                                                    onClick={() => adjustConfigForTestType('constant')}
+                                                >
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center space-x-3 sm:space-x-2">
+                                                            <div className="w-10 h-10 sm:w-8 sm:h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                                                                <Users className="w-5 h-5 sm:w-4 sm:h-4 text-purple-400" />
+                                                            </div>
+                                                            <h5 className="font-medium text-white text-base sm:text-sm">恒定负载</h5>
+                                                        </div>
+                                                        <div
+                                                            className={`w-5 h-5 sm:w-4 sm:h-4 rounded-full border-2 transition-all flex items-center justify-center ${testConfig.testType === 'constant'
+                                                                ? 'border-purple-500 bg-purple-500'
+                                                                : 'border-gray-500 bg-gray-700/50'
+                                                                }`}
+                                                        >
+                                                            {testConfig.testType === 'constant' && (
+                                                                <div className="w-2 h-2 sm:w-1.5 sm:h-1.5 bg-white rounded-full"></div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* 压力极限 */}
+                                                <div
+                                                    className={`border-2 rounded-lg p-4 sm:p-3 cursor-pointer transition-all min-h-[60px] ${testConfig.testType === 'stress'
+                                                        ? 'border-red-500 bg-red-500/10'
+                                                        : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
+                                                        }`}
+                                                    onClick={() => adjustConfigForTestType('stress')}
+                                                >
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center space-x-3 sm:space-x-2">
+                                                            <div className="w-10 h-10 sm:w-8 sm:h-8 bg-red-500/20 rounded-lg flex items-center justify-center">
+                                                                <AlertCircle className="w-5 h-5 sm:w-4 sm:h-4 text-red-400" />
+                                                            </div>
+                                                            <h5 className="font-medium text-white text-base sm:text-sm">压力极限</h5>
+                                                        </div>
+                                                        <div
+                                                            className={`w-5 h-5 sm:w-4 sm:h-4 rounded-full border-2 transition-all flex items-center justify-center ${testConfig.testType === 'stress'
+                                                                ? 'border-red-500 bg-red-500'
+                                                                : 'border-gray-500 bg-gray-700/50'
+                                                                }`}
+                                                        >
+                                                            {testConfig.testType === 'stress' && (
+                                                                <div className="w-2 h-2 sm:w-1.5 sm:h-1.5 bg-white rounded-full"></div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* 负载测试 */}
+                                                <div
+                                                    className={`border-2 rounded-lg p-4 sm:p-3 cursor-pointer transition-all min-h-[60px] ${testConfig.testType === 'load'
+                                                        ? 'border-orange-500 bg-orange-500/10'
+                                                        : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
+                                                        }`}
+                                                    onClick={() => adjustConfigForTestType('load')}
+                                                >
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center space-x-3 sm:space-x-2">
+                                                            <div className="w-10 h-10 sm:w-8 sm:h-8 bg-orange-500/20 rounded-lg flex items-center justify-center">
+                                                                <Users className="w-5 h-5 sm:w-4 sm:h-4 text-orange-400" />
+                                                            </div>
+                                                            <h5 className="font-medium text-white text-base sm:text-sm">负载测试</h5>
+                                                        </div>
+                                                        <div
+                                                            className={`w-5 h-5 sm:w-4 sm:h-4 rounded-full border-2 transition-all flex items-center justify-center ${testConfig.testType === 'load'
+                                                                ? 'border-orange-500 bg-orange-500'
+                                                                : 'border-gray-500 bg-gray-700/50'
+                                                                }`}
+                                                        >
+                                                            {testConfig.testType === 'load' && (
+                                                                <div className="w-2 h-2 sm:w-1.5 sm:h-1.5 bg-white rounded-full"></div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* 容量测试 */}
+                                                <div
+                                                    className={`border-2 rounded-lg p-4 sm:p-3 cursor-pointer transition-all min-h-[60px] ${testConfig.testType === 'volume'
+                                                        ? 'border-yellow-500 bg-yellow-500/10'
+                                                        : 'border-gray-600 hover:border-gray-500 bg-gray-700/30'
+                                                        }`}
+                                                    onClick={() => adjustConfigForTestType('volume')}
+                                                >
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center space-x-3 sm:space-x-2">
+                                                            <div className="w-10 h-10 sm:w-8 sm:h-8 bg-yellow-500/20 rounded-lg flex items-center justify-center">
+                                                                <BarChart3 className="w-5 h-5 sm:w-4 sm:h-4 text-yellow-400" />
+                                                            </div>
+                                                            <h5 className="font-medium text-white text-base sm:text-sm">容量测试</h5>
+                                                        </div>
+                                                        <div
+                                                            className={`w-5 h-5 sm:w-4 sm:h-4 rounded-full border-2 transition-all flex items-center justify-center ${testConfig.testType === 'volume'
+                                                                ? 'border-yellow-500 bg-yellow-500'
+                                                                : 'border-gray-500 bg-gray-700/50'
+                                                                }`}
+                                                        >
+                                                            {testConfig.testType === 'volume' && (
+                                                                <div className="w-2 h-2 sm:w-1.5 sm:h-1.5 bg-white rounded-full"></div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* 测试参数 - 移动端优化 */}
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                            {/* 并发用户数 */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                    并发用户数
+                                                    <span className="text-xs text-gray-500 ml-2">
+                                                        (推荐: {getRecommendedConfig(testConfig.testType).users.recommended})
+                                                    </span>
+                                                </label>
+                                                <div className="relative">
+                                                    <Users className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                                                    <input
+                                                        type="number"
+                                                        value={testConfig.users}
+                                                        onChange={(e) => setTestConfig((prev: StressTestConfig) => ({ ...prev, users: parseInt(e.target.value) || 0 }))}
+                                                        className="w-full pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                        style={{ paddingLeft: '2rem' }}
+                                                        min={getRecommendedConfig(testConfig.testType).users.min}
+                                                        max={getRecommendedConfig(testConfig.testType).users.max}
+                                                        placeholder="输入用户数"
+                                                    />
+                                                </div>
+                                                <div className="text-xs text-gray-500 mt-1">
+                                                    {getRecommendedConfig(testConfig.testType).users.description}
+                                                </div>
+                                            </div>
+
+                                            {/* 测试时长 */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                    测试时长 (秒)
+                                                    <span className="text-xs text-gray-500 ml-2">
+                                                        (推荐: {getRecommendedConfig(testConfig.testType).duration.recommended})
+                                                    </span>
+                                                </label>
+                                                <div className="relative">
+                                                    <Clock className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                                                    <input
+                                                        type="number"
+                                                        value={testConfig.duration}
+                                                        onChange={(e) => setTestConfig((prev: StressTestConfig) => ({ ...prev, duration: parseInt(e.target.value) || 0 }))}
+                                                        className="w-full pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                        style={{ paddingLeft: '2rem' }}
+                                                        min={getRecommendedConfig(testConfig.testType).duration.min}
+                                                        max={getRecommendedConfig(testConfig.testType).duration.max}
+                                                        placeholder="输入时长(秒)"
+                                                    />
+                                                </div>
+                                                <div className="text-xs text-gray-500 mt-1">
+                                                    {getRecommendedConfig(testConfig.testType).duration.description}
+                                                </div>
+                                            </div>
+
+                                            {/* 加压时间 */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                    加压时间 (秒)
+                                                    <span className="text-xs text-gray-500 ml-2">
+                                                        (推荐: {getRecommendedConfig(testConfig.testType).rampUp.recommended})
+                                                    </span>
+                                                </label>
+                                                <div className="relative">
+                                                    <TrendingUp className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                                                    <input
+                                                        type="number"
+                                                        value={testConfig.rampUp}
+                                                        onChange={(e) => setTestConfig((prev: StressTestConfig) => ({ ...prev, rampUp: parseInt(e.target.value) || 0 }))}
+                                                        className="w-full pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                        style={{ paddingLeft: '2rem' }}
+                                                        min={getRecommendedConfig(testConfig.testType).rampUp.min}
+                                                        max={getRecommendedConfig(testConfig.testType).rampUp.max}
+                                                        placeholder={`${getRecommendedConfig(testConfig.testType).rampUp.min}-${getRecommendedConfig(testConfig.testType).rampUp.max}`}
+                                                    />
+                                                </div>
+                                                <div className="text-xs text-gray-500 mt-1">
+                                                    {getRecommendedConfig(testConfig.testType).rampUp.description}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* 代理设置 */}
+                                        <div className="mt-4 bg-gray-800/80 backdrop-blur-sm rounded-xl border-2 border-blue-500/30 p-4">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-center">
+                                                    <Globe className="w-4 h-4 text-blue-400 mr-2" />
+                                                    <h4 className="text-base font-semibold text-white">代理设置</h4>
+                                                </div>
+                                                <div className="text-xs text-gray-400">
+                                                    服务器端模式
+                                                </div>
+                                            </div>
+
+
+
+                                            <div className="space-y-3">
+                                                {/* 启用代理开关 */}
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center space-x-2">
+                                                        <span className="text-gray-300 text-sm">启用代理</span>
+                                                        <div className="text-xs text-gray-500">(可选)</div>
+                                                    </div>
+                                                    <label className="relative inline-flex items-center cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={testConfig.proxy?.enabled || false}
+                                                            onChange={(e) => setTestConfig(prev => ({
+                                                                ...prev,
+                                                                proxy: {
+                                                                    ...prev.proxy,
+                                                                    enabled: e.target.checked
+                                                                }
+                                                            }))}
+                                                            className="sr-only peer"
+                                                            aria-label="启用代理"
+                                                        />
+                                                        <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                                    </label>
+                                                </div>
+
+                                                {/* 代理配置 */}
+                                                {testConfig.proxy?.enabled && (
+                                                    <div className="space-y-2 pl-3 border-l-2 border-blue-500/30">
+                                                        {/* 代理类型 */}
+                                                        <div>
+                                                            <label className="block text-xs font-medium text-gray-300 mb-1">
+                                                                代理类型
+                                                            </label>
+                                                            <select
+                                                                value={testConfig.proxy?.type || 'http'}
+                                                                onChange={(e) => {
+                                                                    const proxyType = e.target.value as 'http' | 'https' | 'socks5';
+                                                                    let defaultHost = '127.0.0.1';
+                                                                    let defaultPort = 8080;
+
+                                                                    // 根据代理类型设置默认的本机代理值
+                                                                    if (proxyType === 'socks5') {
+                                                                        defaultPort = 1080; // SOCKS5常用端口
+                                                                    }
+
+                                                                    setTestConfig(prev => ({
+                                                                        ...prev,
+                                                                        proxy: {
+                                                                            ...prev.proxy,
+                                                                            type: proxyType,
+                                                                            host: defaultHost,
+                                                                            port: defaultPort
+                                                                        }
+                                                                    }));
+                                                                }}
+                                                                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                aria-label="选择代理类型"
+                                                            >
+                                                                <option value="http">HTTP</option>
+                                                                <option value="https">HTTPS</option>
+                                                                <option value="socks5">SOCKS5</option>
+                                                            </select>
+                                                        </div>
+
+                                                        {/* 快速设置本机代理 - 可折叠 */}
+                                                        <div className="bg-gray-700/30 rounded-lg border border-gray-600/50">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setShowQuickProxySettings(!showQuickProxySettings)}
+                                                                className="w-full flex items-center justify-between p-3 text-left hover:bg-gray-600/20 transition-colors rounded-lg"
+                                                            >
+                                                                <div className="text-xs font-medium text-gray-300">快速设置常用本机代理</div>
+                                                                <svg
+                                                                    className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${showQuickProxySettings ? 'rotate-180' : ''}`}
+                                                                    fill="none"
+                                                                    stroke="currentColor"
+                                                                    viewBox="0 0 24 24"
+                                                                >
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                                </svg>
+                                                            </button>
+
+                                                            {showQuickProxySettings && (
+                                                                <div className="px-3 pb-3">
+                                                                    <div className="grid grid-cols-2 gap-2">
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => setTestConfig(prev => ({
+                                                                                ...prev,
+                                                                                proxy: {
+                                                                                    ...prev.proxy,
+                                                                                    type: 'http',
+                                                                                    host: '127.0.0.1',
+                                                                                    port: 8080
+                                                                                }
+                                                                            }))}
+                                                                            className="px-3 py-2 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 rounded-lg text-xs text-blue-300 transition-colors"
+                                                                        >
+                                                                            HTTP :8080
+                                                                        </button>
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => setTestConfig(prev => ({
+                                                                                ...prev,
+                                                                                proxy: {
+                                                                                    ...prev.proxy,
+                                                                                    type: 'socks5',
+                                                                                    host: '127.0.0.1',
+                                                                                    port: 1080
+                                                                                }
+                                                                            }))}
+                                                                            className="px-3 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 rounded-lg text-xs text-purple-300 transition-colors"
+                                                                        >
+                                                                            SOCKS5 :1080
+                                                                        </button>
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => setTestConfig(prev => ({
+                                                                                ...prev,
+                                                                                proxy: {
+                                                                                    ...prev.proxy,
+                                                                                    type: 'http',
+                                                                                    host: '127.0.0.1',
+                                                                                    port: 7890
+                                                                                }
+                                                                            }))}
+                                                                            className="px-3 py-2 bg-green-600/20 hover:bg-green-600/30 border border-green-500/30 rounded-lg text-xs text-green-300 transition-colors"
+                                                                        >
+                                                                            Clash :7890
+                                                                        </button>
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => setTestConfig(prev => ({
+                                                                                ...prev,
+                                                                                proxy: {
+                                                                                    ...prev.proxy,
+                                                                                    type: 'socks5',
+                                                                                    host: '127.0.0.1',
+                                                                                    port: 7891
+                                                                                }
+                                                                            }))}
+                                                                            className="px-3 py-2 bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/30 rounded-lg text-xs text-orange-300 transition-colors"
+                                                                        >
+                                                                            Clash SOCKS :7891
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        {/* 代理地址 */}
+                                                        <div className="grid grid-cols-3 gap-2">
+                                                            <div className="col-span-2">
+                                                                <label className="block text-xs font-medium text-gray-300 mb-1">
+                                                                    代理地址
+                                                                </label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={testConfig.proxy?.host || ''}
+                                                                    onChange={(e) => setTestConfig(prev => ({
+                                                                        ...prev,
+                                                                        proxy: {
+                                                                            ...prev.proxy,
+                                                                            host: e.target.value
+                                                                        }
+                                                                    }))}
+                                                                    placeholder="127.0.0.1"
+                                                                    className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-xs font-medium text-gray-300 mb-1">
+                                                                    端口
+                                                                </label>
+                                                                <input
+                                                                    type="number"
+                                                                    value={testConfig.proxy?.port || ''}
+                                                                    onChange={(e) => setTestConfig(prev => ({
+                                                                        ...prev,
+                                                                        proxy: {
+                                                                            ...prev.proxy,
+                                                                            port: parseInt(e.target.value) || 8080
+                                                                        }
+                                                                    }))}
+                                                                    placeholder="8080"
+                                                                    className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                />
+                                                            </div>
+                                                        </div>
+
+                                                        {/* 认证信息 */}
+                                                        <div className="grid grid-cols-2 gap-2">
+                                                            <div>
+                                                                <label className="block text-xs font-medium text-gray-300 mb-1">
+                                                                    用户名 (可选)
+                                                                </label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={testConfig.proxy?.username || ''}
+                                                                    onChange={(e) => setTestConfig(prev => ({
+                                                                        ...prev,
+                                                                        proxy: {
+                                                                            ...prev.proxy,
+                                                                            username: e.target.value
+                                                                        }
+                                                                    }))}
+                                                                    placeholder="用户名"
+                                                                    className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-xs font-medium text-gray-300 mb-1">
+                                                                    密码 (可选)
+                                                                </label>
+                                                                <input
+                                                                    type="password"
+                                                                    value={testConfig.proxy?.password || ''}
+                                                                    onChange={(e) => setTestConfig(prev => ({
+                                                                        ...prev,
+                                                                        proxy: {
+                                                                            ...prev.proxy,
+                                                                            password: e.target.value
+                                                                        }
+                                                                    }))}
+                                                                    placeholder="密码"
+                                                                    className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white text-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                                />
+                                                            </div>
+                                                        </div>
+
+                                                        {/* 代理状态提示和测试 */}
+                                                        <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
+                                                            <div className="flex items-center justify-between mb-2">
+                                                                <div className="flex items-center space-x-2">
+                                                                    <Shield className="w-4 h-4 text-blue-400" />
+                                                                    <span className="text-blue-300 text-xs">
+                                                                        代理已启用 - 服务器端测试请求将通过代理发送
+                                                                    </span>
+                                                                </div>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => testProxyConnection()}
+                                                                    disabled={proxyTestStatus.testing}
+                                                                    className={`px-2 py-1 text-xs rounded transition-colors ${proxyTestStatus.testing
+                                                                        ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                                                                        : 'bg-blue-600 hover:bg-blue-700 text-white'
+                                                                        }`}
+                                                                    title="测试代理连接"
+                                                                >
+                                                                    {proxyTestStatus.testing ? '测试中...' : '测试连接'}
+                                                                </button>
+                                                            </div>
+
+                                                            {/* 代理测试结果显示 */}
+                                                            {(proxyTestStatus.result || proxyTestStatus.testing) && (
+                                                                <div className={`flex items-center justify-between text-xs p-2 rounded ${proxyTestStatus.result === 'success'
+                                                                    ? 'bg-green-500/10 border border-green-500/30 text-green-300'
+                                                                    : proxyTestStatus.result === 'error'
+                                                                        ? 'bg-red-500/10 border border-red-500/30 text-red-300'
+                                                                        : 'bg-blue-500/10 border border-blue-500/30 text-blue-300'
+                                                                    }`}>
+                                                                    <div className="flex items-center space-x-2">
+                                                                        {proxyTestStatus.testing && (
+                                                                            <div className="animate-spin w-3 h-3 border border-blue-400 border-t-transparent rounded-full"></div>
+                                                                        )}
+
+                                                                        {proxyTestStatus.result === 'error' && (
+                                                                            <svg className="w-3 h-3 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                                                                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                                            </svg>
+                                                                        )}
+                                                                        <div className="flex flex-col space-y-2">
+                                                                            <div className="flex items-center space-x-2">
+                                                                                <span className="font-medium">{proxyTestStatus.message}</span>
+                                                                                {proxyTestStatus.result === 'success' && (
+                                                                                    <svg className="w-3 h-3 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                                                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                                                    </svg>
+                                                                                )}
+                                                                            </div>
+                                                                            {proxyTestStatus.details && (
+                                                                                <div className="space-y-2 text-sm text-gray-300">
+                                                                                    {/* 位置和出口IP - 横向排列 */}
+                                                                                    <div className="flex items-center space-x-4 flex-wrap">
+                                                                                        {/* 地理位置信息 */}
+                                                                                        {proxyTestStatus.details.location && (
+                                                                                            <div className="flex items-center space-x-1">
+                                                                                                <span className="text-gray-400">位置:</span>
+                                                                                                <div className="flex items-center space-x-1">
+                                                                                                    <span className="text-gray-400 text-sm">🌐</span>
+                                                                                                    <span>
+                                                                                                        {typeof proxyTestStatus.details.location === 'string'
+                                                                                                            ? proxyTestStatus.details.location
+                                                                                                            : '未知位置'}
+                                                                                                    </span>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        )}
+
+                                                                                        {/* 出口IP */}
+                                                                                        {proxyTestStatus.details.proxyIp && (
+                                                                                            <div className="flex items-center space-x-1">
+                                                                                                <span className="text-gray-400">出口IP:</span>
+                                                                                                <span className="font-mono text-blue-300">{proxyTestStatus.details.proxyIp}</span>
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </div>
+
+                                                                                    {/* 延迟信息 - 横向排列 */}
+                                                                                    {(proxyTestStatus.details.responseTime || proxyTestStatus.details.proxyResponseTime) && (
+                                                                                        <div className="flex items-center space-x-4 flex-wrap">
+                                                                                            {proxyTestStatus.details.responseTime && (
+                                                                                                <div className="flex items-center space-x-1">
+                                                                                                    <span className="text-gray-400">延迟:</span>
+                                                                                                    <span className="text-green-300 font-medium">{proxyTestStatus.details.responseTime}ms</span>
+                                                                                                </div>
+                                                                                            )}
+
+                                                                                            {proxyTestStatus.details.proxyResponseTime && (
+                                                                                                <div className="flex items-center space-x-1">
+                                                                                                    <span className="text-gray-400">响应:</span>
+                                                                                                    <span className="text-yellow-300">{proxyTestStatus.details.proxyResponseTime}ms</span>
+                                                                                                </div>
+                                                                                            )}
+
+                                                                                            {proxyTestStatus.details.networkLatency && proxyTestStatus.details.networkLatency !== proxyTestStatus.details.responseTime && (
+                                                                                                <div className="flex items-center space-x-1">
+                                                                                                    <span className="text-gray-400">网络:</span>
+                                                                                                    <span className="text-blue-300">{proxyTestStatus.details.networkLatency}ms</span>
+                                                                                                </div>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    )}
+
+                                                                                    {/* 错误信息 */}
+                                                                                    {proxyTestStatus.result === 'error' && proxyTestStatus.details?.errorCode && (
+                                                                                        <div className="flex items-center space-x-2">
+                                                                                            <span className="text-gray-400 w-16">错误:</span>
+                                                                                            <span className="text-red-300 font-mono text-xs">{proxyTestStatus.details.errorCode}</span>
+                                                                                        </div>
+                                                                                    )}
+
+                                                                                    {/* 故障排除建议 */}
+                                                                                    {proxyTestStatus.result === 'error' && proxyTestStatus.details?.troubleshooting && (
+                                                                                        <div className="mt-2 pt-2 border-t border-gray-600">
+                                                                                            <div className="text-xs text-gray-400 mb-1">排查建议:</div>
+                                                                                            <ul className="text-xs text-gray-300 space-y-1">
+                                                                                                {proxyTestStatus.details.troubleshooting.slice(0, 3).map((tip, index) => (
+                                                                                                    <li key={index} className="flex items-start space-x-2">
+                                                                                                        <span className="text-gray-500 mt-0.5">•</span>
+                                                                                                        <span>{tip}</span>
+                                                                                                    </li>
+                                                                                                ))}
+                                                                                            </ul>
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                    {/* 关闭按钮 - 只在成功状态显示 */}
+                                                                    {proxyTestStatus.result === 'success' && (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => setProxyTestStatus({ testing: false, result: null, message: '' })}
+                                                                            className="ml-2 text-gray-400 hover:text-gray-200 transition-colors"
+                                                                            title="关闭"
+                                                                        >
+                                                                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                                                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                                            </svg>
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* 未启用代理时的提示 */}
+                                                {!testConfig.proxy?.enabled && (
+                                                    <div className="rounded-lg p-3 bg-gray-700/30">
+                                                        <div className="flex items-center space-x-2">
+                                                            <Globe className="w-4 h-4 text-gray-400" />
+                                                            <span className="text-gray-400 text-xs">
+                                                                🖥️ 直连模式 - 测试请求将直接发送到目标服务器
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+
+
+                                    </div>
+
+                                    {/* 右侧控制面板 - 改进版 */}
+                                    <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+                                        {/* 控制面板标题 */}
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="text-lg font-semibold text-white flex items-center">
+                                                <Settings className="w-5 h-5 mr-2 text-blue-400" />
+                                                测试控制
+                                            </h3>
+                                            <div className="flex items-center space-x-2">
+                                                <div className={`w-2 h-2 rounded-full ${testConfig.url.trim() && testConfig.users > 0 && testConfig.duration > 0
+                                                    ? 'bg-green-400' : 'bg-yellow-400'
+                                                    }`}></div>
+                                                <span className="text-xs text-gray-400">
+                                                    {testConfig.url.trim() && testConfig.users > 0 && testConfig.duration > 0
+                                                        ? '配置完成' : '配置中'}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* 当前配置摘要 - 改进版 */}
+                                        <div className="bg-gray-700/30 rounded-lg p-4 mb-4">
+                                            <div className="grid grid-cols-1 gap-3">
+                                                {/* 核心参数 */}
+                                                <div className="grid grid-cols-3 gap-3 text-center">
+                                                    <div className="bg-gray-600/30 rounded-lg p-3">
+                                                        <div className="text-lg font-bold text-white">{testConfig.users}</div>
+                                                        <div className="text-xs text-gray-400">并发用户</div>
+                                                    </div>
+                                                    <div className="bg-gray-600/30 rounded-lg p-3">
+                                                        <div className="text-lg font-bold text-white">{testConfig.duration}s</div>
+                                                        <div className="text-xs text-gray-400">测试时长</div>
+                                                    </div>
+                                                    <div className="bg-gray-600/30 rounded-lg p-3">
+                                                        <div className="text-lg font-bold text-white">{testConfig.rampUp}s</div>
+                                                        <div className="text-xs text-gray-400">加压时间</div>
+                                                    </div>
+                                                </div>
+
+                                                {/* 测试类型 */}
+                                                <div className="flex items-center justify-between pt-2 border-t border-gray-600/50">
+                                                    <span className="text-gray-400 text-sm">测试类型:</span>
+                                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${testConfig.testType === 'gradual' ? 'bg-blue-500/20 text-blue-300' :
+                                                        testConfig.testType === 'spike' ? 'bg-red-500/20 text-red-300' :
+                                                            testConfig.testType === 'constant' ? 'bg-green-500/20 text-green-300' :
+                                                                testConfig.testType === 'stress' ? 'bg-purple-500/20 text-purple-300' :
+                                                                    testConfig.testType === 'load' ? 'bg-orange-500/20 text-orange-300' :
+                                                                        testConfig.testType === 'volume' ? 'bg-yellow-500/20 text-yellow-300' :
+                                                                            'bg-gray-500/20 text-gray-300'
+                                                        }`}>
+                                                        {testConfig.testType === 'gradual' ? '梯度加压' :
+                                                            testConfig.testType === 'spike' ? '峰值测试' :
+                                                                testConfig.testType === 'constant' ? '恒定负载' :
+                                                                    testConfig.testType === 'stress' ? '压力极限' :
+                                                                        testConfig.testType === 'load' ? '负载测试' :
+                                                                            testConfig.testType === 'volume' ? '容量测试' : '未知类型'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* 测试状态显示 */}
+                                        {isRunning ? (
+                                            <div className="space-y-4">
+                                                <div className="text-center">
+                                                    <div className="w-12 h-12 mx-auto mb-3 relative">
+                                                        <div className="w-12 h-12 border-4 border-gray-600 rounded-full"></div>
+                                                        <div className="absolute top-0 left-0 w-12 h-12 border-4 border-blue-500 rounded-full animate-spin border-t-transparent border-r-transparent"></div>
+                                                    </div>
+                                                    <p className="text-sm font-medium text-white">测试进行中</p>
+                                                    <p className="text-xs text-gray-300 mt-1">{testProgress}</p>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={handleCancelTest}
+                                                    disabled={isCancelling}
+                                                    className={`w-full flex items-center justify-center space-x-2 px-4 py-2 text-white rounded-lg transition-colors ${isCancelling
+                                                        ? 'bg-gray-600 cursor-not-allowed'
+                                                        : 'bg-red-600 hover:bg-red-700'
+                                                        }`}
+                                                >
+                                                    {isCancelling ? (
+                                                        <Loader className="w-4 h-4 animate-spin" />
+                                                    ) : (
+                                                        <Square className="w-4 h-4" />
+                                                    )}
+                                                    <span>{isCancelling ? '正在取消测试...' : '取消测试'}</span>
+                                                </button>
+                                            </div>
+                                        ) : testStatus === 'completed' ? (
+                                            <div className="space-y-4">
+                                                <div className="text-center">
+                                                    <div className="w-12 h-12 mx-auto mb-3 bg-green-500/20 rounded-full flex items-center justify-center">
+                                                        <CheckCircle className="w-6 h-6 text-green-400" />
+                                                    </div>
+                                                    <p className="text-sm font-medium text-green-300">测试完成</p>
+                                                    <p className="text-xs text-gray-300 mt-1">测试已成功完成</p>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={resetTestState}
+                                                    className="w-full flex items-center justify-center space-x-2 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors"
+                                                >
+                                                    <RotateCcw className="w-4 h-4" />
+                                                    <span>重新测试</span>
+                                                </button>
+                                            </div>
+                                        ) : testStatus === 'failed' ? (
+                                            <div className="space-y-4">
+                                                <div className="text-center">
+                                                    <div className="w-12 h-12 mx-auto mb-3 bg-red-500/20 rounded-full flex items-center justify-center">
+                                                        <XCircle className="w-6 h-6 text-red-400" />
+                                                    </div>
+                                                    <p className="text-sm font-medium text-red-300">测试失败</p>
+                                                    <p className="text-xs text-gray-300 mt-1">{error || '测试过程中发生错误'}</p>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={resetTestState}
+                                                    className="w-full flex items-center justify-center space-x-2 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors"
+                                                >
+                                                    <RotateCcw className="w-4 h-4" />
+                                                    <span>重试</span>
+                                                </button>
+                                            </div>
+                                        ) : testStatus === 'cancelled' ? (
+                                            <div className="space-y-4">
+                                                <div className="text-center">
+                                                    <div className="w-12 h-12 mx-auto mb-3 bg-yellow-500/20 rounded-full flex items-center justify-center">
+                                                        <Square className="w-6 h-6 text-yellow-400" />
+                                                    </div>
+                                                    <p className="text-sm font-medium text-yellow-300">测试已取消</p>
+                                                    <p className="text-xs text-gray-300 mt-1">测试被用户手动停止</p>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={resetTestState}
+                                                    className="w-full flex items-center justify-center space-x-2 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors"
+                                                >
+                                                    <RotateCcw className="w-4 h-4" />
+                                                    <span>重新测试</span>
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={handleStartTest}
+                                                    disabled={!testConfig.url.trim()}
+                                                    className="w-full flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed transition-all duration-200"
+                                                >
+                                                    <Play className="w-5 h-5" />
+                                                    <span>开始压力测试</span>
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {/* 快速模板 - 改进版 */}
+                                        <div className="mt-6">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <h4 className="text-sm font-medium text-gray-300 flex items-center">
+                                                    <Zap className="w-4 h-4 mr-2 text-yellow-400" />
+                                                    快速模板
+                                                </h4>
+                                                <button
+                                                    type="button"
+                                                    onClick={importConfigFromClipboard}
+                                                    className="px-2 py-1 text-xs border border-gray-600 text-gray-400 rounded-md hover:bg-gray-700/50 hover:text-gray-300 transition-colors flex items-center space-x-1"
+                                                    title="从剪贴板导入配置"
+                                                >
+                                                    <FileText className="w-3 h-3" />
+                                                    <span>导入</span>
+                                                </button>
+                                            </div>
+                                            <div className="space-y-2">
+                                                {/* 轻量测试 */}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => applyTemplate('light-load')}
+                                                    className={`w-full p-3 text-sm border rounded-lg transition-all text-left ${selectedTemplate === 'light-load'
+                                                        ? 'border-green-500 bg-green-500/10 text-green-300'
+                                                        : 'border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:border-green-400'
+                                                        }`}
+                                                >
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center space-x-2">
+                                                            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                                            <span className="font-medium">轻量测试</span>
+                                                        </div>
+                                                        <span className="text-xs bg-gray-600/50 px-2 py-1 rounded">5用户/30秒</span>
+                                                    </div>
+                                                    <div className="text-xs text-gray-400 mt-1">适合小型网站初次测试</div>
+                                                </button>
+
+                                                {/* 中等负载 */}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => applyTemplate('medium-load')}
+                                                    className={`w-full p-3 text-sm border rounded-lg transition-all text-left ${selectedTemplate === 'medium-load'
+                                                        ? 'border-yellow-500 bg-yellow-500/10 text-yellow-300'
+                                                        : 'border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:border-yellow-400'
+                                                        }`}
+                                                >
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center space-x-2">
+                                                            <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                                                            <span className="font-medium">中等负载</span>
+                                                            <span className="text-xs bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded">推荐</span>
+                                                        </div>
+                                                        <span className="text-xs bg-gray-600/50 px-2 py-1 rounded">20用户/60秒</span>
+                                                    </div>
+                                                    <div className="text-xs text-gray-400 mt-1">适合企业网站常规测试</div>
+                                                </button>
+
+                                                {/* 重负载 */}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => applyTemplate('heavy-load')}
+                                                    className={`w-full p-3 text-sm border rounded-lg transition-all text-left ${selectedTemplate === 'heavy-load'
+                                                        ? 'border-red-500 bg-red-500/10 text-red-300'
+                                                        : 'border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:border-red-400'
+                                                        }`}
+                                                >
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center space-x-2">
+                                                            <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                                                            <span className="font-medium">重负载</span>
+                                                            <span className="text-xs bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded">专业</span>
+                                                        </div>
+                                                        <span className="text-xs bg-gray-600/50 px-2 py-1 rounded">50用户/120秒</span>
+                                                    </div>
+                                                    <div className="text-xs text-gray-400 mt-1">适合大型网站压力测试</div>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* 测试引擎状态 - 改进版 */}
+                                        <div className="mt-6">
+                                            <h4 className="text-sm font-medium text-gray-300 mb-3 flex items-center">
+                                                <Globe className="w-4 h-4 mr-2 text-green-400" />
+                                                引擎状态
+                                            </h4>
+                                            <div className="bg-gray-700/30 rounded-lg p-3">
+                                                <div className="space-y-3 text-sm">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center space-x-2">
+                                                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                                            <span className="text-gray-300">真实网络测试</span>
+                                                        </div>
+                                                        <CheckCircle className="w-4 h-4 text-green-400" />
+                                                    </div>
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center space-x-2">
+                                                            <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                                                            <span className="text-gray-300">准确性能指标</span>
+                                                        </div>
+                                                        <CheckCircle className="w-4 h-4 text-blue-400" />
+                                                    </div>
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center space-x-2">
+                                                            <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                                                            <span className="text-gray-300">实时错误检测</span>
+                                                        </div>
+                                                        <CheckCircle className="w-4 h-4 text-purple-400" />
+                                                    </div>
+
+                                                    {/* 引擎信息 */}
+                                                    <div className="pt-2 border-t border-gray-600/50">
+                                                        <div className="flex items-center justify-between text-xs">
+                                                            <span className="text-gray-400">引擎版本:</span>
+                                                            <span className="text-gray-300 font-mono">v2.1.0</span>
+                                                        </div>
+                                                        <div className="flex items-center justify-between text-xs mt-1">
+                                                            <span className="text-gray-400">连接状态:</span>
+                                                            <span className="text-green-300 flex items-center space-x-1">
+                                                                <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                                                                <span>已连接</span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* 导出功能 - 统一组件 */}
+                                        {result && (
+                                            <div className="mt-6">
+                                                <h4 className="text-sm font-medium text-gray-300 mb-3 flex items-center">
+                                                    <Download className="w-4 h-4 mr-2 text-blue-400" />
+                                                    导出报告
+                                                </h4>
+                                                <button
+                                                    onClick={() => setIsExportModalOpen(true)}
+                                                    className="w-full px-3 py-2 text-sm border border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:text-white rounded-lg transition-colors flex items-center justify-center space-x-2"
+                                                >
+                                                    <Download className="w-4 h-4" />
+                                                    <span>导出</span>
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 测试结果 */}
+                            {(result || metrics) && (
+                                <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4">
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="text-lg font-semibold text-white">测试结果</h3>
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsExportModalOpen(true)}
+                                            className="px-3 py-2 text-sm border border-gray-600 text-gray-300 hover:bg-gray-700/50 hover:text-white rounded-lg transition-colors flex items-center space-x-2"
+                                        >
+                                            <Download className="w-4 h-4" />
+                                            <span>导出</span>
+                                        </button>
+                                    </div>
+
+                                    {/* 主要性能指标卡片 */}
+                                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+                                        <div className="text-center p-3 bg-blue-500/20 rounded-lg border border-blue-500/30">
+                                            <div className="text-xl font-bold text-blue-400">
+                                                {result?.metrics?.totalRequests || metrics?.totalRequests || 0}
+                                            </div>
+                                            <div className="text-xs text-blue-300">总请求数</div>
+                                        </div>
+                                        <div className="text-center p-3 bg-green-500/20 rounded-lg border border-green-500/30">
+                                            <div className="text-xl font-bold text-green-400">
+                                                {result?.metrics?.successfulRequests || metrics?.successfulRequests || 0}
+                                            </div>
+                                            <div className="text-xs text-green-300">成功请求</div>
+                                        </div>
+                                        <div className="text-center p-3 bg-orange-500/20 rounded-lg border border-orange-500/30">
+                                            <div className="text-xl font-bold text-orange-400">
+                                                {(result?.metrics?.averageResponseTime || metrics?.averageResponseTime || 0).toFixed(3)}ms
+                                            </div>
+                                            <div className="text-xs text-orange-300">平均响应时间</div>
+                                        </div>
+                                        <div className="text-center p-3 bg-red-500/20 rounded-lg border border-red-500/30">
+                                            <div className="text-xl font-bold text-red-400">
+                                                {(() => {
+                                                    const errorRate = result?.metrics?.errorRate || metrics?.errorRate || 0;
+                                                    return typeof errorRate === 'string' ? errorRate : errorRate.toFixed(1);
+                                                })()}%
+                                            </div>
+                                            <div className="text-xs text-red-300">错误率</div>
+                                        </div>
+                                    </div>
+
+                                    {/* 详细性能指标 */}
+                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+                                        {/* 左侧：响应时间和吞吐量分析 */}
+                                        <div className="lg:col-span-2 space-y-4">
+                                            {/* 响应时间分析 */}
+                                            <div className="bg-gray-700/50 rounded-lg p-3">
+                                                <h4 className="text-sm font-semibold text-white mb-3 flex items-center">
+                                                    <Clock className="w-4 h-4 mr-2 text-orange-400" />
+                                                    响应时间分析
+                                                </h4>
+                                                <div className="grid grid-cols-4 gap-3">
+                                                    <div className="text-center">
+                                                        <div className="text-lg font-bold text-green-400">
+                                                            {result?.metrics?.p50ResponseTime || metrics?.p50ResponseTime || 0}ms
+                                                        </div>
+                                                        <div className="text-xs text-gray-400">P50响应时间</div>
+                                                    </div>
+                                                    <div className="text-center">
+                                                        <div className="text-lg font-bold text-red-400">
+                                                            {result?.metrics?.p90ResponseTime || metrics?.p90ResponseTime || 0}ms
+                                                        </div>
+                                                        <div className="text-xs text-gray-400">P90响应时间</div>
+                                                    </div>
+                                                    <div className="text-center">
+                                                        <div className="text-lg font-bold text-blue-400">
+                                                            {result?.metrics?.p95ResponseTime || metrics?.p95ResponseTime || 0}ms
+                                                        </div>
+                                                        <div className="text-xs text-gray-400">P95响应时间</div>
+                                                    </div>
+                                                    <div className="text-center">
+                                                        <div className="text-lg font-bold text-purple-400">
+                                                            {result?.metrics?.p99ResponseTime || metrics?.p99ResponseTime || 0}ms
+                                                        </div>
+                                                        <div className="text-xs text-gray-400">P99响应时间</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* 吞吐量分析 */}
+                                            <div className="bg-gray-700/50 rounded-lg p-3">
+                                                <h4 className="text-sm font-semibold text-white mb-3 flex items-center">
+                                                    <BarChart3 className="w-4 h-4 mr-2 text-blue-400" />
+                                                    吞吐量分析
+                                                </h4>
+                                                <div className="grid grid-cols-4 gap-3">
+                                                    <div className="text-center">
+                                                        <div className="text-lg font-bold text-blue-400">
+                                                            {result?.metrics?.currentTPS || metrics?.currentTPS || 0}
+                                                        </div>
+                                                        <div className="text-xs text-gray-400">当前TPS</div>
+                                                    </div>
+                                                    <div className="text-center">
+                                                        <div className="text-lg font-bold text-green-400">
+                                                            {result?.metrics?.peakTPS || metrics?.peakTPS || 0}
+                                                        </div>
+                                                        <div className="text-xs text-gray-400">峰值TPS</div>
+                                                    </div>
+                                                    <div className="text-center">
+                                                        <div className="text-lg font-bold text-yellow-400">
+                                                            {(() => {
+                                                                const throughput = result?.metrics?.throughput || metrics?.throughput || 0;
+                                                                return throughput;
+                                                            })()}
+                                                        </div>
+                                                        <div className="text-xs text-gray-400">平均TPS</div>
+                                                    </div>
+                                                    <div className="text-center">
+                                                        <div className="text-lg font-bold text-indigo-400">
+                                                            {result?.metrics?.requestsPerSecond || metrics?.requestsPerSecond || 0}
+                                                        </div>
+                                                        <div className="text-xs text-gray-400">请求/秒</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* 右侧：测试配置 */}
+                                        <div className="bg-gray-700/50 rounded-lg p-3">
+                                            <h4 className="text-sm font-semibold text-white mb-3 flex items-center">
+                                                <Users className="w-4 h-4 mr-2 text-cyan-400" />
+                                                测试配置
+                                            </h4>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div className="text-center p-2 bg-cyan-500/10 border border-cyan-500/20 rounded-lg">
+                                                    <div className="text-lg font-bold text-cyan-400">{testConfig.users}</div>
+                                                    <div className="text-xs text-gray-400">并发用户数</div>
+                                                </div>
+                                                <div className="text-center p-2 bg-cyan-500/10 border border-cyan-500/20 rounded-lg">
+                                                    <div className="text-lg font-bold text-cyan-400">{testConfig.duration}s</div>
+                                                    <div className="text-xs text-gray-400">测试时长</div>
+                                                </div>
+                                                <div className="text-center p-2 bg-cyan-500/10 border border-cyan-500/20 rounded-lg">
+                                                    <div className="text-lg font-bold text-cyan-400">{testConfig.rampUp}s</div>
+                                                    <div className="text-xs text-gray-400">加压时间</div>
+                                                </div>
+                                                <div className="text-center p-2 bg-cyan-500/10 border border-cyan-500/20 rounded-lg">
+                                                    <div className="text-lg font-bold text-cyan-400">
+                                                        {testConfig.testType === 'gradual' ? '梯度加压' :
+                                                            testConfig.testType === 'spike' ? '峰值测试' :
+                                                                testConfig.testType === 'constant' ? '恒定负载' :
+                                                                    testConfig.testType === 'stress' ? '压力极限' :
+                                                                        testConfig.testType === 'load' ? '负载测试' :
+                                                                            testConfig.testType === 'volume' ? '容量测试' : '未知类型'}
+                                                    </div>
+                                                    <div className="text-xs text-gray-400">测试类型</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* 错误分析 */}
+                                    {(result?.metrics?.errorBreakdown || metrics?.errorBreakdown) &&
+                                        Object.keys(result?.metrics?.errorBreakdown || metrics?.errorBreakdown || {}).length > 0 && (
+                                            <div className="bg-gray-700/50 rounded-lg p-4 mb-6">
+                                                <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
+                                                    <AlertTriangle className="w-5 h-5 mr-2 text-red-400" />
+                                                    错误类型分析
+                                                </h4>
+                                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                                                    {Object.entries(result?.metrics?.errorBreakdown || metrics?.errorBreakdown || {}).map(([errorType, count]) => (
+                                                        <div key={errorType} className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-center">
+                                                            <div className="text-lg font-bold text-red-400">{String(count)}</div>
+                                                            <div className="text-xs text-red-300">{errorType}</div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                    {/* 数据传输分析 */}
+                                    {(result?.metrics?.dataReceived || metrics?.dataReceived || result?.metrics?.dataSent || metrics?.dataSent) && (
+                                        <div className="bg-gray-700/50 rounded-lg p-4 mb-6">
+                                            <h4 className="text-lg font-semibold text-white mb-4 flex items-center">
+                                                <Download className="w-5 h-5 mr-2 text-teal-400" />
+                                                数据传输分析
+                                            </h4>
+                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                <div className="text-center">
+                                                    <div className="text-xl font-bold text-teal-400">
+                                                        {(() => {
+                                                            const bytes = result?.metrics?.dataReceived || metrics?.dataReceived || 0;
+                                                            if (bytes > 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
+                                                            if (bytes > 1024) return `${(bytes / 1024).toFixed(1)}KB`;
+                                                            return `${bytes}B`;
+                                                        })()}
+                                                    </div>
+                                                    <div className="text-xs text-gray-400">接收数据量</div>
+                                                </div>
+                                                <div className="text-center">
+                                                    <div className="text-xl font-bold text-teal-400">
+                                                        {(() => {
+                                                            const bytes = result?.metrics?.dataSent || metrics?.dataSent || 0;
+                                                            if (bytes > 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
+                                                            if (bytes > 1024) return `${(bytes / 1024).toFixed(1)}KB`;
+                                                            return `${bytes}B`;
+                                                        })()}
+                                                    </div>
+                                                    <div className="text-xs text-gray-400">发送数据量</div>
+                                                </div>
+                                                <div className="text-center">
+                                                    <div className="text-xl font-bold text-teal-400">
+                                                        {(() => {
+                                                            const received = result?.metrics?.dataReceived || metrics?.dataReceived || 0;
+                                                            const sent = result?.metrics?.dataSent || metrics?.dataSent || 0;
+                                                            const total = received + sent;
+                                                            if (total > 1024 * 1024) return `${(total / (1024 * 1024)).toFixed(1)}MB`;
+                                                            if (total > 1024) return `${(total / 1024).toFixed(1)}KB`;
+                                                            return `${total}B`;
+                                                        })()}
+                                                    </div>
+                                                    <div className="text-xs text-gray-400">总数据量</div>
+                                                </div>
+                                                <div className="text-center">
+                                                    <div className="text-xl font-bold text-teal-400">
+                                                        {(() => {
+                                                            const received = result?.metrics?.dataReceived || metrics?.dataReceived || 0;
+                                                            const totalRequests = result?.metrics?.totalRequests || metrics?.totalRequests || 1;
+                                                            const avgPerRequest = received / totalRequests;
+                                                            if (avgPerRequest > 1024) return `${(avgPerRequest / 1024).toFixed(1)}KB`;
+                                                            return `${avgPerRequest.toFixed(0)}B`;
+                                                        })()}
+                                                    </div>
+                                                    <div className="text-xs text-gray-400">平均响应大小</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* 性能评估 */}
+                                    <div className="bg-gray-700/50 rounded-lg p-3">
+                                        <h4 className="text-sm font-semibold text-white mb-3 flex items-center">
+                                            <CheckCircle className="w-4 h-4 mr-2 text-green-400" />
+                                            性能评估
+                                        </h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                            <div className="text-center p-2 bg-green-500/10 border border-green-500/30 rounded-lg">
+                                                <div className="text-lg font-bold text-green-400">
+                                                    {(() => {
+                                                        const successRate = result?.metrics?.totalRequests ?
+                                                            ((result.metrics.successfulRequests / result.metrics.totalRequests) * 100) :
+                                                            metrics?.totalRequests ?
+                                                                ((metrics.successfulRequests / metrics.totalRequests) * 100) : 0;
+                                                        return successRate.toFixed(1);
+                                                    })()}%
+                                                </div>
+                                                <div className="text-xs text-green-300">成功率</div>
+                                            </div>
+                                            <div className="text-center p-2 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                                                <div className="text-lg font-bold text-blue-400">
+                                                    {(() => {
+                                                        const avgResponseTime = result?.metrics?.averageResponseTime || metrics?.averageResponseTime || 0;
+                                                        if (avgResponseTime < 200) return 'A+';
+                                                        if (avgResponseTime < 500) return 'A';
+                                                        if (avgResponseTime < 1000) return 'B';
+                                                        if (avgResponseTime < 2000) return 'C';
+                                                        return 'D';
+                                                    })()}
+                                                </div>
+                                                <div className="text-xs text-blue-300">响应时间等级</div>
+                                            </div>
+                                            <div className="text-center p-2 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                                                <div className="text-lg font-bold text-purple-400">
+                                                    {(() => {
+                                                        const tps = result?.metrics?.currentTPS || metrics?.currentTPS || 0;
+                                                        if (tps > 100) return '优秀';
+                                                        if (tps > 50) return '良好';
+                                                        if (tps > 20) return '一般';
+                                                        return '较差';
+                                                    })()}
+                                                </div>
+                                                <div className="text-xs text-purple-300">吞吐量评级</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* 统一压力测试图表 - 空间复用 */}
+                            {useUnifiedCharts ? (
                                 <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
                                     <div className="flex items-center justify-between mb-4">
                                         <h3 className="text-lg font-semibold text-white">
                                             {isRunning && testStatus !== 'cancelled' ? '实时性能监控' :
-                                                testStatus === 'cancelled' || result ? '测试结果分析' : '传统压力测试图表'}
+                                                result || testStatus === 'cancelled' ? '测试结果分析' : '压力测试图表'}
                                         </h3>
-                                        <button
-                                            type="button"
-                                            onClick={() => setUseUnifiedCharts(true)}
-                                            className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
-                                        >
-                                            切换到统一图表
-                                        </button>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => setUseUnifiedCharts(false)}
+                                                className="px-3 py-1 bg-gray-700 text-gray-300 rounded text-sm hover:bg-gray-600"
+                                            >
+                                                切换到传统图表
+                                            </button>
+                                        </div>
                                     </div>
-
-                                    {/* 根据状态显示不同内容 */}
-                                    {((): null => {
-                                        console.log('🔍 图表渲染条件检查:', {
-                                            isRunning,
-                                            stressTestDataLength: stressTestData.length,
-                                            testStatus,
-                                            stressTestDataSample: stressTestData.slice(0, 2)
-                                        });
-                                        return null;
-                                    })()}
-                                    {(stressTestData && stressTestData.length > 0) ? (
-                                        <div>
-                                            <div className="mb-2 text-sm text-gray-400">
-                                                传统图表模式 (数据点: {stressTestData.length})
-                                                {isRunning && <span className="ml-2 text-green-400">● 运行中</span>}
-                                            </div>
-                                            <AdvancedStressTestChart
-                                                data={stressTestData.map((point: any) => ({
-                                                    time: new Date(point.timestamp).toLocaleTimeString(),
-                                                    timestamp: point.timestamp,
-                                                    responseTime: point.responseTime,
-                                                    throughput: point.rps || point.throughput,
-                                                    errors: point.errors,
-                                                    users: point.users,
-                                                    p95ResponseTime: point.p95ResponseTime,
-                                                    errorRate: point.errorRate,
-                                                    phase: point.phase || 'steady'
-                                                }))}
-                                                showAdvancedMetrics={false}
-                                                height={400}
-                                                theme="dark"
-                                                interactive={true}
-                                                realTime={testStatus === 'running'}
-                                            />
+                                    <UnifiedStressTestCharts
+                                        realTimeData={(() => {
+                                            const convertedData = convertToEnhancedRealTimeData(unifiedTestData.realTimeData);
+                                            console.log('🎯 图表数据传递检查:', {
+                                                原始数据长度: unifiedTestData.realTimeData.length,
+                                                转换后数据长度: convertedData.length,
+                                                测试状态: testStatus,
+                                                是否运行中: testStatus === 'running',
+                                                是否完成: testStatus === 'completed',
+                                                样本数据: convertedData.slice(0, 2)
+                                            });
+                                            return convertedData;
+                                        })()}
+                                        isRunning={testStatus === 'running'}
+                                        testCompleted={testStatus === 'completed'}
+                                        currentMetrics={unifiedTestData.currentMetrics}
+                                        height={500}
+                                        dataPointDensity="medium"
+                                    />
+                                </div>
+                            ) : (
+                                <>
+                                    {/* 传统压力测试图表 - 始终显示 */}
+                                    <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="text-lg font-semibold text-white">
+                                                {isRunning && testStatus !== 'cancelled' ? '实时性能监控' :
+                                                    testStatus === 'cancelled' || result ? '测试结果分析' : '传统压力测试图表'}
+                                            </h3>
+                                            <button
+                                                type="button"
+                                                onClick={() => setUseUnifiedCharts(true)}
+                                                className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                                            >
+                                                切换到统一图表
+                                            </button>
                                         </div>
-                                    ) : isRunning ? (
-                                        /* 测试运行中但还没有数据时的占位图表 */
-                                        <div className="bg-gray-800/50 rounded-lg border border-gray-700/50 h-96">
-                                            <div className="flex items-center justify-center h-full">
-                                                <div className="text-center">
-                                                    <div className="w-16 h-16 mx-auto mb-4 relative">
-                                                        <div className="w-16 h-16 border-4 border-gray-600 rounded-full"></div>
-                                                        <div className="absolute top-0 left-0 w-16 h-16 border-4 border-blue-500 rounded-full animate-spin border-t-transparent border-r-transparent"></div>
-                                                    </div>
-                                                    <div className="text-white font-medium text-lg mb-2">等待实时数据</div>
-                                                    <div className="text-gray-400 text-sm mb-4">
-                                                        压力测试正在运行，等待WebSocket数据...
-                                                    </div>
-                                                    <div className="text-gray-500 text-xs mb-4">
-                                                        数据点: {stressTestData.length} | WebSocket: {socketRef.current?.connected ? '已连接' : '未连接'}
-                                                    </div>
 
+                                        {/* 根据状态显示不同内容 */}
+                                        {((): null => {
+                                            console.log('🔍 图表渲染条件检查:', {
+                                                isRunning,
+                                                stressTestDataLength: stressTestData.length,
+                                                testStatus,
+                                                stressTestDataSample: stressTestData.slice(0, 2)
+                                            });
+                                            return null;
+                                        })()}
+                                        {(stressTestData && stressTestData.length > 0) ? (
+                                            <div>
+                                                <div className="mb-2 text-sm text-gray-400">
+                                                    传统图表模式 (数据点: {stressTestData.length})
+                                                    {isRunning && <span className="ml-2 text-green-400">● 运行中</span>}
                                                 </div>
-                                            </div>
-                                        </div>
-                                    ) : stressTestData && stressTestData.length > 0 ? (
-                                        /* 显示测试完成后的数据 */
-                                        <div className="bg-white rounded-lg border border-gray-200 h-96">
-                                            <div className="p-4 h-full">
-                                                <h4 className="text-lg font-semibold text-gray-800 mb-4">传统压力测试图表</h4>
                                                 <AdvancedStressTestChart
                                                     data={stressTestData.map((point: any) => ({
                                                         time: new Date(point.timestamp).toLocaleTimeString(),
@@ -5938,161 +5905,219 @@ const StressTest: React.FC = () => {
                                                         phase: point.phase || 'steady'
                                                     }))}
                                                     showAdvancedMetrics={false}
-                                                    height={320}
-                                                    theme="light"
+                                                    height={400}
+                                                    theme="dark"
                                                     interactive={true}
-                                                    realTime={false}
+                                                    realTime={testStatus === 'running'}
                                                 />
                                             </div>
-                                        </div>
-                                    ) : (
-                                        /* 占位图表区域 */
-                                        <div className="bg-white rounded-lg border border-gray-200 h-96">
-                                            <div className="flex items-center justify-center h-full">
-                                                <div className="text-center">
-                                                    <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-lg flex items-center justify-center">
-                                                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                                        </svg>
-                                                    </div>
-                                                    <div className="text-gray-600 font-medium text-lg mb-2">传统压力测试图表</div>
-                                                    <div className="text-gray-500 text-sm mb-4">
-                                                        开始测试后将显示真实的压力测试数据
-                                                    </div>
-                                                    <div className="text-gray-400 text-xs">
-                                                        ✅ 真实HTTP请求 | ✅ 实时响应时间 | ✅ 专业级指标
-                                                    </div>
-                                                    <div className="text-gray-400 text-xs mt-2">
-                                                        Active Threads Over Time
+                                        ) : isRunning ? (
+                                            /* 测试运行中但还没有数据时的占位图表 */
+                                            <div className="bg-gray-800/50 rounded-lg border border-gray-700/50 h-96">
+                                                <div className="flex items-center justify-center h-full">
+                                                    <div className="text-center">
+                                                        <div className="w-16 h-16 mx-auto mb-4 relative">
+                                                            <div className="w-16 h-16 border-4 border-gray-600 rounded-full"></div>
+                                                            <div className="absolute top-0 left-0 w-16 h-16 border-4 border-blue-500 rounded-full animate-spin border-t-transparent border-r-transparent"></div>
+                                                        </div>
+                                                        <div className="text-white font-medium text-lg mb-2">等待实时数据</div>
+                                                        <div className="text-gray-400 text-sm mb-4">
+                                                            压力测试正在运行，等待WebSocket数据...
+                                                        </div>
+                                                        <div className="text-gray-500 text-xs mb-4">
+                                                            数据点: {stressTestData.length} | WebSocket: {socketRef.current?.connected ? '已连接' : '未连接'}
+                                                        </div>
+
                                                     </div>
                                                 </div>
                                             </div>
+                                        ) : stressTestData && stressTestData.length > 0 ? (
+                                            /* 显示测试完成后的数据 */
+                                            <div className="bg-white rounded-lg border border-gray-200 h-96">
+                                                <div className="p-4 h-full">
+                                                    <h4 className="text-lg font-semibold text-gray-800 mb-4">传统压力测试图表</h4>
+                                                    <AdvancedStressTestChart
+                                                        data={stressTestData.map((point: any) => ({
+                                                            time: new Date(point.timestamp).toLocaleTimeString(),
+                                                            timestamp: point.timestamp,
+                                                            responseTime: point.responseTime,
+                                                            throughput: point.rps || point.throughput,
+                                                            errors: point.errors,
+                                                            users: point.users,
+                                                            p95ResponseTime: point.p95ResponseTime,
+                                                            errorRate: point.errorRate,
+                                                            phase: point.phase || 'steady'
+                                                        }))}
+                                                        showAdvancedMetrics={false}
+                                                        height={320}
+                                                        theme="light"
+                                                        interactive={true}
+                                                        realTime={false}
+                                                    />
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            /* 占位图表区域 */
+                                            <div className="bg-white rounded-lg border border-gray-200 h-96">
+                                                <div className="flex items-center justify-center h-full">
+                                                    <div className="text-center">
+                                                        <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-lg flex items-center justify-center">
+                                                            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                                            </svg>
+                                                        </div>
+                                                        <div className="text-gray-600 font-medium text-lg mb-2">传统压力测试图表</div>
+                                                        <div className="text-gray-500 text-sm mb-4">
+                                                            开始测试后将显示真实的压力测试数据
+                                                        </div>
+                                                        <div className="text-gray-400 text-xs">
+                                                            ✅ 真实HTTP请求 | ✅ 实时响应时间 | ✅ 专业级指标
+                                                        </div>
+                                                        <div className="text-gray-400 text-xs mt-2">
+                                                            Active Threads Over Time
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+
+
+                                </>
+                            )}
+
+                            {/* 实时测试日志 */}
+                            {isRunning && (
+                                <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
+                                    <h3 className="text-lg font-semibold text-white mb-4">实时日志</h3>
+                                    <div className="bg-gray-900/80 text-green-400 p-4 rounded-lg font-mono text-sm h-32 overflow-y-auto border border-gray-700">
+                                        <div>[{new Date().toLocaleTimeString()}] 🚀 压力测试开始</div>
+                                        <div>[{new Date().toLocaleTimeString()}] 📊 配置: {testConfig.users}用户, {testConfig.duration}秒</div>
+                                        <div>[{new Date().toLocaleTimeString()}] ⏳ 测试进行中...</div>
+                                        {testProgress && (
+                                            <div>[{new Date().toLocaleTimeString()}] 📋 {testProgress}</div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    ) : activeTab === 'history' ? (
+                        /* 压力测试历史 */
+                        <div className="space-y-6">
+                            <StressTestHistory />
+
+                            {/* 测试记录管理提示 */}
+                            {currentRecord && (
+                                <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                                            <FileText className="w-4 h-4 text-blue-400" />
                                         </div>
-                                    )}
-                                </div>
-
-
-
-                            </>
-                        )}
-
-                        {/* 实时测试日志 */}
-                        {isRunning && (
-                            <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-                                <h3 className="text-lg font-semibold text-white mb-4">实时日志</h3>
-                                <div className="bg-gray-900/80 text-green-400 p-4 rounded-lg font-mono text-sm h-32 overflow-y-auto border border-gray-700">
-                                    <div>[{new Date().toLocaleTimeString()}] 🚀 压力测试开始</div>
-                                    <div>[{new Date().toLocaleTimeString()}] 📊 配置: {testConfig.users}用户, {testConfig.duration}秒</div>
-                                    <div>[{new Date().toLocaleTimeString()}] ⏳ 测试进行中...</div>
-                                    {testProgress && (
-                                        <div>[{new Date().toLocaleTimeString()}] 📋 {testProgress}</div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-                    </>
-                ) : activeTab === 'history' ? (
-                    /* 压力测试历史 */
-                    <div className="space-y-6">
-                        <StressTestHistory />
-
-                        {/* 测试记录管理提示 */}
-                        {currentRecord && (
-                            <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                                        <FileText className="w-4 h-4 text-blue-400" />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-blue-400 font-medium">当前测试记录</h4>
-                                        <p className="text-gray-300 text-sm">
-                                            正在跟踪测试: {currentRecord.testName} - {currentRecord.status}
-                                        </p>
+                                        <div>
+                                            <h4 className="text-blue-400 font-medium">当前测试记录</h4>
+                                            <p className="text-gray-300 text-sm">
+                                                正在跟踪测试: {currentRecord.testName} - {currentRecord.status}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
-                    </div>
-                ) : null
-            }
+                            )}
+                        </div>
+                    ) : null
+                }
 
+                {LoginPromptComponent}
+
+                {/* 取消测试确认对话框 */}
+                <CancelTestConfirmDialog
+                    isOpen={showCancelDialog}
+                    onCancel={handleCancelDialogClose}
+                    onConfirm={handleCancelConfirm}
+                    testProgress={isRunning ? {
+                        duration: (() => {
+                            // 🔧 修复：正确计算运行时长
+                            if (result?.startTime) {
+                                return Math.floor((Date.now() - new Date(result.startTime).getTime()) / 1000);
+                            }
+                            // 如果没有startTime，使用第一个数据点的时间戳
+                            if (stressTestData.length > 0) {
+                                const firstDataTime = typeof stressTestData[0].timestamp === 'string'
+                                    ? new Date(stressTestData[0].timestamp).getTime()
+                                    : stressTestData[0].timestamp;
+                                return Math.floor((Date.now() - firstDataTime) / 1000);
+                            }
+                            // 都没有的话，返回0
+                            return 0;
+                        })(),
+                        completedRequests: stressTestData.length,
+                        // 🔧 修复：保留请求数显示，但进度计算改为基于时间
+                        totalRequests: (() => {
+                            const currentDuration = Math.floor((Date.now() - (result?.startTime ? new Date(result.startTime).getTime() : Date.now())) / 1000);
+                            const completedRequests = stressTestData.length;
+
+                            // 如果测试刚开始（前10秒），使用理论估算
+                            if (currentDuration < 10 || completedRequests < 20) {
+                                // 理论值：每个用户每秒大约1个请求
+                                return Math.round(testConfig.users * testConfig.duration);
+                            }
+
+                            // 测试进行中，基于当前实际TPS估算
+                            const currentTPS = completedRequests / currentDuration;
+                            const estimatedTotal = Math.round(currentTPS * testConfig.duration);
+
+                            // 确保估算值合理：不能小于已完成的请求数
+                            return Math.max(estimatedTotal, completedRequests);
+                        })(),
+                        currentUsers: testConfig.users,
+                        // 🔧 新增：添加总测试时长，用于基于时间的进度计算
+                        totalDuration: testConfig.duration,
+                        // 🔧 修复：显示更合适的阶段信息，而不是包含百分比的testProgress
+                        phase: currentStatus === 'RUNNING' ? '压力测试运行中' :
+                            currentStatus === 'STARTING' ? '测试启动中' :
+                                currentStatus === 'WAITING' ? '等待开始' :
+                                    '运行中'
+                    } : undefined}
+                    isLoading={cancelInProgress}
+                />
+
+                {/* 取消进度反馈 */}
+                <CancelProgressFeedback
+                    isVisible={showCancelProgress}
+                    onComplete={handleCancelProgressComplete}
+                    testId={currentTestId || undefined}
+                />
+
+                {/* 导出模态框 */}
+                <ExportModal
+                    isOpen={isExportModalOpen}
+                    onClose={() => setIsExportModalOpen(false)}
+                    data={{
+                        testConfig,
+                        result,
+                        metrics,
+                        realTimeData: stressTestData
+                    }}
+                    testType="stress"
+                    testId={currentTestId || undefined}
+                    testName={`压力测试-${getHostnameFromUrl(testConfig.url) || '未知'}`}
+                    onExport={handleExport}
+                />
+            </div>
+
+            {/* 历史标签页内容 */}
+            {activeTab === 'history' && (
+                <div className="mt-6">
+                    <StressTestHistory
+                        onTestSelect={handleTestSelect}
+                        onTestRerun={handleTestRerun}
+                    />
+                </div>
+            )}
+
+            {/* 登录提示组件 */}
             {LoginPromptComponent}
-
-            {/* 取消测试确认对话框 */}
-            <CancelTestConfirmDialog
-                isOpen={showCancelDialog}
-                onCancel={handleCancelDialogClose}
-                onConfirm={handleCancelConfirm}
-                testProgress={isRunning ? {
-                    duration: (() => {
-                        // 🔧 修复：正确计算运行时长
-                        if (result?.startTime) {
-                            return Math.floor((Date.now() - new Date(result.startTime).getTime()) / 1000);
-                        }
-                        // 如果没有startTime，使用第一个数据点的时间戳
-                        if (stressTestData.length > 0) {
-                            const firstDataTime = typeof stressTestData[0].timestamp === 'string'
-                                ? new Date(stressTestData[0].timestamp).getTime()
-                                : stressTestData[0].timestamp;
-                            return Math.floor((Date.now() - firstDataTime) / 1000);
-                        }
-                        // 都没有的话，返回0
-                        return 0;
-                    })(),
-                    completedRequests: stressTestData.length,
-                    // 🔧 修复：保留请求数显示，但进度计算改为基于时间
-                    totalRequests: (() => {
-                        const currentDuration = Math.floor((Date.now() - (result?.startTime ? new Date(result.startTime).getTime() : Date.now())) / 1000);
-                        const completedRequests = stressTestData.length;
-
-                        // 如果测试刚开始（前10秒），使用理论估算
-                        if (currentDuration < 10 || completedRequests < 20) {
-                            // 理论值：每个用户每秒大约1个请求
-                            return Math.round(testConfig.users * testConfig.duration);
-                        }
-
-                        // 测试进行中，基于当前实际TPS估算
-                        const currentTPS = completedRequests / currentDuration;
-                        const estimatedTotal = Math.round(currentTPS * testConfig.duration);
-
-                        // 确保估算值合理：不能小于已完成的请求数
-                        return Math.max(estimatedTotal, completedRequests);
-                    })(),
-                    currentUsers: testConfig.users,
-                    // 🔧 新增：添加总测试时长，用于基于时间的进度计算
-                    totalDuration: testConfig.duration,
-                    // 🔧 修复：显示更合适的阶段信息，而不是包含百分比的testProgress
-                    phase: currentStatus === 'RUNNING' ? '压力测试运行中' :
-                        currentStatus === 'STARTING' ? '测试启动中' :
-                            currentStatus === 'WAITING' ? '等待开始' :
-                                '运行中'
-                } : undefined}
-                isLoading={cancelInProgress}
-            />
-
-            {/* 取消进度反馈 */}
-            <CancelProgressFeedback
-                isVisible={showCancelProgress}
-                onComplete={handleCancelProgressComplete}
-                testId={currentTestId || undefined}
-            />
-
-            {/* 导出模态框 */}
-            <ExportModal
-                isOpen={isExportModalOpen}
-                onClose={() => setIsExportModalOpen(false)}
-                data={{
-                    testConfig,
-                    result,
-                    metrics,
-                    realTimeData: stressTestData
-                }}
-                testType="stress"
-                testId={currentTestId || undefined}
-                testName={`压力测试-${getHostnameFromUrl(testConfig.url) || '未知'}`}
-                onExport={handleExport}
-            />
-        </TestPageLayout >
+        </div>
     );
 };
 

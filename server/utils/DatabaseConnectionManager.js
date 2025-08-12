@@ -1,55 +1,100 @@
 /**
- * 数据库连接管理器
- * 本地化程度：100%
- * 提供连接池优化、自动重连、健康检查等功能
+ * 数据库连接管理器 - 增强版本
+ * 提供连接池优化、自动重连、健康检查、故障恢复等功能
  */
 
 const { Pool } = require('pg');
-const Logger = require('./logger');
+const EventEmitter = require('events');
 
-class DatabaseConnectionManager {
+// 简单的日志记录器（如果没有外部日志器）
+const Logger = {
+  info: (msg, data) => console.log(`[INFO] ${msg}`, data || ''),
+  warn: (msg, data) => console.warn(`[WARN] ${msg}`, data || ''),
+  error: (msg, error, data) => console.error(`[ERROR] ${msg}`, error?.message || error, data || ''),
+  debug: (msg, data) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[DEBUG] ${msg}`, data || '');
+    }
+  }
+};
+
+class DatabaseConnectionManager extends EventEmitter {
   constructor(config = {}) {
+    super();
+
+    // 根据环境自动选择数据库
+    const getDefaultDatabase = () => {
+      const env = process.env.NODE_ENV || 'development';
+      switch (env) {
+        case 'production':
+          return 'testweb_prod';
+        case 'test':
+          return 'testweb_test';
+        default:
+          return 'testweb_dev';
+      }
+    };
+
     this.config = {
       // 连接池配置
-      max: config.max || 20,                    // 最大连接数
-      min: config.min || 2,                     // 最小连接数
-      idleTimeoutMillis: config.idleTimeoutMillis || 30000,  // 空闲超时
-      connectionTimeoutMillis: config.connectionTimeoutMillis || 5000,  // 连接超时
-      
+      max: config.max || parseInt(process.env.DB_MAX_CONNECTIONS) || 20,
+      min: config.min || parseInt(process.env.DB_MIN_CONNECTIONS) || 5,
+      idleTimeoutMillis: config.idleTimeoutMillis || parseInt(process.env.DB_IDLE_TIMEOUT) || 30000,
+      connectionTimeoutMillis: config.connectionTimeoutMillis || parseInt(process.env.DB_CONNECTION_TIMEOUT) || 5000,
+      acquireTimeoutMillis: config.acquireTimeoutMillis || parseInt(process.env.DB_ACQUIRE_TIMEOUT) || 60000,
+
       // 重连配置
-      retryAttempts: config.retryAttempts || 5,
-      retryDelay: config.retryDelay || 1000,
-      maxRetryDelay: config.maxRetryDelay || 30000,
-      
+      retryAttempts: config.retryAttempts || parseInt(process.env.DB_RETRY_ATTEMPTS) || 5,
+      retryDelay: config.retryDelay || parseInt(process.env.DB_RETRY_DELAY) || 1000,
+      maxRetryDelay: config.maxRetryDelay || parseInt(process.env.DB_MAX_RETRY_DELAY) || 30000,
+
       // 健康检查配置
-      healthCheckInterval: config.healthCheckInterval || 30000,
-      healthCheckQuery: config.healthCheckQuery || 'SELECT 1',
-      
+      healthCheckInterval: config.healthCheckInterval || parseInt(process.env.DB_HEALTH_CHECK_INTERVAL) || 30000,
+      healthCheckQuery: config.healthCheckQuery || 'SELECT 1 as health_check',
+
       // 数据库配置
-      host: process.env.DB_HOST || 'localhost',
-      port: process.env.DB_PORT || 5432,
-      database: process.env.DB_NAME || 'testweb',
-      user: process.env.DB_USER || 'postgres',
-      password: process.env.DB_PASSWORD || 'password',
-      
+      host: config.host || process.env.DB_HOST || 'localhost',
+      port: config.port || parseInt(process.env.DB_PORT) || 5432,
+      database: config.database || process.env.DB_NAME || getDefaultDatabase(),
+      user: config.user || process.env.DB_USER || 'postgres',
+      password: config.password || process.env.DB_PASSWORD || 'postgres',
+
       // SSL配置
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+      ssl: config.ssl || (process.env.NODE_ENV === 'production' ? {
+        rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false'
+      } : false),
+
+      // 应用名称
+      application_name: config.application_name || process.env.DB_APPLICATION_NAME || `testweb_${process.env.NODE_ENV || 'dev'}`,
+
+      // 性能配置
+      statement_timeout: config.statement_timeout || parseInt(process.env.DB_STATEMENT_TIMEOUT) || 30000,
+      query_timeout: config.query_timeout || parseInt(process.env.DB_QUERY_TIMEOUT) || 30000
     };
 
     this.pool = null;
     this.isConnected = false;
     this.reconnectAttempts = 0;
     this.healthCheckTimer = null;
+    this.lastHealthCheck = null;
     this.connectionStats = {
       totalConnections: 0,
       activeConnections: 0,
       idleConnections: 0,
       waitingClients: 0,
       totalQueries: 0,
+      successfulQueries: 0,
+      failedQueries: 0,
       errorCount: 0,
       lastError: null,
-      uptime: Date.now()
+      uptime: Date.now(),
+      averageQueryTime: 0,
+      slowQueries: 0
     };
+
+    // 环境信息
+    this.environment = process.env.NODE_ENV || 'development';
+    this.isProduction = this.environment === 'production';
   }
 
   /**
@@ -75,7 +120,7 @@ class DatabaseConnectionManager {
         min: this.config.min,
         idleTimeoutMillis: this.config.idleTimeoutMillis,
         connectionTimeoutMillis: this.config.connectionTimeoutMillis,
-        
+
         // 连接池事件处理
         application_name: 'testweb_platform'
       });
@@ -85,13 +130,13 @@ class DatabaseConnectionManager {
 
       // 测试连接
       await this.testConnection();
-      
+
       this.isConnected = true;
       this.reconnectAttempts = 0;
-      
+
       // 启动健康检查
       this.startHealthCheck();
-      
+
       Logger.info('数据库连接池初始化成功');
       return true;
 
@@ -142,7 +187,7 @@ class DatabaseConnectionManager {
         message: error.message,
         timestamp: new Date().toISOString()
       };
-      
+
       Logger.error('数据库连接池错误', error);
       this.handleConnectionError(error);
     });
@@ -167,9 +212,9 @@ class DatabaseConnectionManager {
    */
   async query(sql, params = [], options = {}) {
     const { retryOnFailure = true, timeout = 30000 } = options;
-    
+
     this.connectionStats.totalQueries++;
-    
+
     try {
       // 检查连接状态
       if (!this.isConnected) {
@@ -183,7 +228,7 @@ class DatabaseConnectionManager {
       });
 
       const result = await Promise.race([queryPromise, timeoutPromise]);
-      
+
       Logger.debug('数据库查询成功', {
         rowCount: result.rowCount,
         duration: Date.now() - Date.now() // 这里应该记录实际执行时间
@@ -243,14 +288,14 @@ class DatabaseConnectionManager {
 
       // 重新初始化
       await this.initialize();
-      
+
       Logger.info('数据库重连成功', {
         attempts: this.reconnectAttempts
       });
 
     } catch (error) {
       Logger.error(`数据库重连失败 (尝试 ${this.reconnectAttempts})`, error);
-      
+
       if (this.reconnectAttempts < this.config.retryAttempts) {
         return this.reconnect();
       } else {
@@ -284,7 +329,7 @@ class DatabaseConnectionManager {
    */
   async handleConnectionError(error) {
     this.isConnected = false;
-    
+
     Logger.error('数据库连接错误', error, {
       reconnectAttempts: this.reconnectAttempts,
       maxRetryAttempts: this.config.retryAttempts
@@ -311,10 +356,10 @@ class DatabaseConnectionManager {
       'ECONNRESET',
       'EPIPE'
     ];
-    
-    return connectionErrorCodes.includes(error.code) || 
-           error.message.includes('connection') ||
-           error.message.includes('timeout');
+
+    return connectionErrorCodes.includes(error.code) ||
+      error.message.includes('connection') ||
+      error.message.includes('timeout');
   }
 
   /**
@@ -347,7 +392,7 @@ class DatabaseConnectionManager {
    */
   async close() {
     Logger.info('关闭数据库连接池');
-    
+
     if (this.healthCheckTimer) {
       clearInterval(this.healthCheckTimer);
       this.healthCheckTimer = null;

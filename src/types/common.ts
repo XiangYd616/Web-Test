@@ -1,197 +1,240 @@
 /**
- * 通用数据模型定义
- * 统一前后端数据结构，确保类型一致性
- * 版本: v1.0.0
+ * 通用类型定义
+ * 包含项目中常用的基础类型和接口
  */
 
-// ==================== 基础类型 ====================
+// 基础类型
+export type ID = string | number;
+export type Timestamp = string | number | Date;
+export type Status = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
 
-export type UUID = string;
-export type Timestamp = string; // ISO 8601 格式
-export type URL = string;
-export type Email = string;
-
-// ==================== API 响应格式 ====================
-
-/**
- * 重新导出统一的API响应类型定义
- * 注意：实际定义已迁移到 src/types/unified/apiResponse.ts
- */
-export type {
-  ApiError, ApiErrorResponse, ApiMeta, ApiResponse, ApiResponseUtils, ApiSuccessResponse, AuthConfig, CreatedResponse, ErrorCode, ErrorResponseMethods, NoContentResponse, PaginatedRequest, PaginatedResponse, PaginationInfo, QueryParams, RequestConfig, ResponseBuilder, ValidationError
-} from './unified/apiResponse';
-
-// ==================== 用户相关类型 ====================
-
-/**
- * 统一用户角色定义
- */
-export type UserRole = 'admin' | 'manager' | 'user' | 'viewer' | 'tester';
-
-/**
- * 用户状态
- */
-export type UserStatus = 'active' | 'inactive' | 'suspended' | 'pending';
-
-/**
- * 重新导出统一的用户类型定义
- * 注意：实际定义已迁移到 src/types/unified/user.ts
- */
-export type {
-  AuthResponse, ChangePasswordData, CreateUserData, DEFAULT_USER_PREFERENCES,
-  DEFAULT_USER_PROFILE, LoginCredentials,
-  RegisterData, UpdateUserData, User, UserActivityLog, UserFilter,
-  UserListQuery, UserPlan, UserPreferences, UserProfile, UserRole, UserSession, UserStats, UserStatus
-} from './unified/user';
-
-// 注意：UserPreferences, LoginCredentials, RegisterData, AuthResponse 等类型
-// 已迁移到 src/types/unified/user.ts，通过上面的 export type 重新导出
-
-export interface UserSession {
-  id: UUID;
-  userId: UUID;
-  token: string;
-  refreshToken: string;
-  expiresAt: Timestamp;
-  createdAt: Timestamp;
-  lastActivityAt: Timestamp;
-  ipAddress: string;
-  userAgent: string;
-  isActive: boolean;
-}
-
-// ==================== 测试相关类型 ====================
-
-/**
- * 重新导出统一的测试相关类型定义
- * 注意：实际定义已迁移到 src/types/unified/testResult.ts
- */
-export type {
-  APITestConfig, BaseTestConfig, BatchTestRequest,
-  BatchTestResult, PerformanceTestConfig,
-  SecurityTestConfig, StressTestConfig, TestArtifact, TestError, TestGrade, TestHistory, TestMetrics, TestPriority, TestRecommendation, TestResult, TestResultFilter,
-  TestResultQuery, TestSession, TestStats, TestStatus, TestType, TestWarning
-} from './unified/testResult';
-
-// 向后兼容的类型别名
-export type { TestResult as BaseTestResult } from './unified/testResult';
-
-// 注意：TestSession, TestHistoryRecord 等类型
-// 已迁移到 src/types/unified/testResult.ts，通过上面的 export type 重新导出
-
-// ==================== 系统监控类型 ====================
-
-export interface SystemStats {
-  totalUsers: number;
-  activeUsers: number;
-  totalTests: number;
-  testsToday: number;
-  systemUptime: number;
-  cpuUsage: number;
-  memoryUsage: number;
-  diskUsage: number;
-  networkTraffic: {
-    incoming: number;
-    outgoing: number;
+// API响应类型
+export interface ApiResponse<T = any> {
+  success: boolean;
+  message?: string;
+  data?: T;
+  error?: {
+    code: string;
+    message: string;
+    details?: any;
   };
-  errorRate: number;
-  responseTime: number;
+  meta?: {
+    timestamp: string;
+    requestId: string;
+    version: string;
+  };
 }
 
-export interface SystemHealth {
-  status: 'healthy' | 'warning' | 'critical';
-  uptime: number;
-  services: Record<string, ServiceStatus>;
-  resources: SystemResources;
-  metrics: SystemMetrics;
+// 分页类型
+export interface PaginationParams {
+  page: number;
+  limit: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
-export interface ServiceStatus {
-  status: 'healthy' | 'warning' | 'critical';
-  responseTime: number;
-  lastCheck?: Timestamp;
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: PaginationMeta;
+}
+
+// 用户类型
+export interface User {
+  id: ID;
+  username: string;
+  email: string;
+  role: 'admin' | 'user' | 'viewer';
+  isActive: boolean;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  lastLogin?: Timestamp;
+}
+
+// 测试相关类型
+export type TestType =
+  | 'stress'
+  | 'seo'
+  | 'security'
+  | 'performance'
+  | 'accessibility'
+  | 'compatibility'
+  | 'api';
+
+export interface TestConfig {
+  url: string;
+  type: TestType;
+  duration?: number;
+  concurrency?: number;
+  options?: Record<string, any>;
+}
+
+export interface TestResult {
+  id: ID;
+  testId: ID;
+  userId: ID;
+  type: TestType;
+  status: Status;
+  config: TestConfig;
+  results?: Record<string, any>;
+  metrics?: Record<string, number>;
   error?: string;
+  startedAt: Timestamp;
+  completedAt?: Timestamp;
+  createdAt: Timestamp;
 }
 
-export interface SystemResources {
-  cpu: ResourceUsage;
-  memory: MemoryUsage;
-  disk: DiskUsage;
-  network: NetworkUsage;
+// 监控类型
+export interface MonitoringTarget {
+  id: ID;
+  name: string;
+  url: string;
+  checkInterval: number; // 秒
+  timeout: number; // 秒
+  isActive: boolean;
+  alertConfig?: AlertConfig;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
 }
 
-export interface ResourceUsage {
-  usage: number; // 百分比
-  cores?: number;
+export interface AlertConfig {
+  enabled: boolean;
+  conditions: AlertCondition[];
+  notifications: NotificationConfig[];
 }
 
-export interface MemoryUsage {
-  usage: number; // 百分比
-  total: number; // MB
-  available: number; // MB
+export interface AlertCondition {
+  metric: string;
+  operator: '>' | '<' | '=' | '>=' | '<=';
+  threshold: number;
+  duration?: number; // 持续时间（秒）
 }
 
-export interface DiskUsage {
-  usage: number; // 百分比
-  total: number; // GB
-  available: number; // GB
+export interface NotificationConfig {
+  type: 'email' | 'slack' | 'webhook';
+  target: string;
+  enabled: boolean;
 }
 
-export interface NetworkUsage {
-  incoming: number; // bytes/sec
-  outgoing: number; // bytes/sec
+// 组件Props类型
+export interface BaseComponentProps {
+  className?: string;
+  children?: React.ReactNode;
+  'data-testid'?: string;
 }
 
-export interface SystemMetrics {
-  requestsPerMinute: number;
-  errorRate: number;
-  averageResponseTime: number;
-  activeConnections: number;
+export interface LoadingProps extends BaseComponentProps {
+  loading: boolean;
+  size?: 'small' | 'medium' | 'large';
+  text?: string;
 }
 
-// ==================== 导出默认值 ====================
+export interface ErrorProps extends BaseComponentProps {
+  error: Error | string | null;
+  onRetry?: () => void;
+  showDetails?: boolean;
+}
 
-export const DEFAULT_USER_PREFERENCES: UserPreferences = {
-  theme: 'auto',
-  language: 'zh-CN',
-  timezone: 'Asia/Shanghai',
-  dateFormat: 'YYYY-MM-DD',
-  timeFormat: '24h',
-  notifications: {
-    email: true,
-    sms: false,
-    push: true,
-    browser: true,
-    testComplete: true,
-    testFailed: true,
-    weeklyReport: false,
-    securityAlert: true
-  },
-  dashboard: {
-    defaultView: 'overview',
-    layout: 'grid',
-    widgets: [],
-    refreshInterval: 30,
-    showTips: true
-  },
-  testing: {
-    defaultTimeout: 30000,
-    maxConcurrentTests: 3,
-    autoSaveResults: true,
-    enableAdvancedFeatures: false
-  },
-  privacy: {
-    shareUsageData: false,
-    allowCookies: true,
-    trackingEnabled: false
-  }
+// 表单类型
+export interface FormField<T = any> {
+  name: string;
+  label: string;
+  type: 'text' | 'email' | 'password' | 'number' | 'select' | 'checkbox' | 'textarea';
+  value: T;
+  required?: boolean;
+  disabled?: boolean;
+  placeholder?: string;
+  options?: Array<{ label: string; value: any }>;
+  validation?: {
+    min?: number;
+    max?: number;
+    pattern?: RegExp;
+    custom?: (value: T) => string | null;
+  };
+}
+
+export interface FormState {
+  fields: Record<string, FormField>;
+  errors: Record<string, string>;
+  isSubmitting: boolean;
+  isValid: boolean;
+}
+
+// 主题类型
+export interface Theme {
+  name: string;
+  colors: {
+    primary: string;
+    secondary: string;
+    success: string;
+    warning: string;
+    error: string;
+    background: string;
+    surface: string;
+    text: string;
+    textSecondary: string;
+  };
+  spacing: {
+    xs: string;
+    sm: string;
+    md: string;
+    lg: string;
+    xl: string;
+  };
+  borderRadius: {
+    sm: string;
+    md: string;
+    lg: string;
+  };
+}
+
+// 工具类型
+export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
+export type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
 };
 
-export const DEFAULT_PAGINATION: PaginationInfo = {
-  page: 1,
-  limit: 20,
-  total: 0,
-  totalPages: 0,
-  hasNext: false,
-  hasPrev: false
+// 事件类型
+export interface CustomEvent<T = any> {
+  type: string;
+  data: T;
+  timestamp: Timestamp;
+  source?: string;
+}
+
+// 配置类型
+export interface AppConfig {
+  apiUrl: string;
+  wsUrl: string;
+  version: string;
+  environment: 'development' | 'production' | 'test';
+  features: {
+    monitoring: boolean;
+    analytics: boolean;
+    debugging: boolean;
+  };
+  limits: {
+    maxFileSize: number;
+    maxConcurrentTests: number;
+    requestTimeout: number;
+  };
+}
+
+// 导出所有类型
+export type {
+  AlertCondition, AlertConfig,
+  // 重新导出以确保类型可用
+  ApiResponse, AppConfig, BaseComponentProps, CustomEvent, ErrorProps,
+  FormField,
+  FormState, LoadingProps, MonitoringTarget, NotificationConfig, PaginatedResponse, PaginationMeta, PaginationParams, TestConfig,
+  TestResult, TestType, Theme, User
 };

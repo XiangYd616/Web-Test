@@ -7,6 +7,8 @@ module.exports = {
   },
   extends: [
     'eslint:recommended',
+    '@typescript-eslint/recommended',
+    '@typescript-eslint/recommended-requiring-type-checking'
   ],
   ignorePatterns: [
     'dist',
@@ -15,28 +17,52 @@ module.exports = {
     '.eslintrc.cjs',
     'server/node_modules',
     'build',
-    'coverage'
+    'coverage',
+    'scripts',
+    'docs'
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
+    project: './tsconfig.json',
     ecmaFeatures: {
       jsx: true
     }
   },
+  plugins: ['@typescript-eslint'],
   rules: {
-    // 只保留最基础的规则，避免CI失败
+    // TypeScript规则
+    '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+    '@typescript-eslint/no-explicit-any': 'warn',
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/no-unsafe-assignment': 'off',
+    '@typescript-eslint/no-unsafe-member-access': 'off',
+    '@typescript-eslint/no-unsafe-call': 'off',
+    '@typescript-eslint/no-unsafe-return': 'off',
+    '@typescript-eslint/no-unsafe-argument': 'off',
+    '@typescript-eslint/restrict-template-expressions': 'off',
+    '@typescript-eslint/no-floating-promises': 'off',
+    '@typescript-eslint/require-await': 'off',
+    '@typescript-eslint/no-misused-promises': 'off',
+
+    // 基础规则
     'no-debugger': 'error',
-    'no-console': 'off', // 允许console
-    'no-unused-vars': 'off', // 允许未使用变量
-    'no-undef': 'off', // 允许未定义变量
-    'prefer-const': 'off', // 允许let
-    'no-var': 'off', // 允许var
-    'semi': 'off', // 不强制分号
-    'quotes': 'off', // 不强制引号类型
-    'no-useless-escape': 'off', // 允许转义字符
-    'no-case-declarations': 'off', // 允许case中声明
-    'no-useless-catch': 'off', // 允许无用catch
+    'no-console': ['warn', { allow: ['warn', 'error'] }],
+    'prefer-const': 'error',
+    'no-var': 'error',
+    'semi': ['error', 'always'],
+    'quotes': ['error', 'single'],
+    'no-useless-escape': 'warn',
+    'no-case-declarations': 'off',
+    'no-useless-catch': 'warn',
+
+    // 代码质量
+    'eqeqeq': 'error',
+    'no-duplicate-imports': 'error',
+    'no-unused-expressions': 'warn',
+    'consistent-return': 'off',
+    'array-callback-return': 'warn'
   }
 }

@@ -3617,6 +3617,129 @@ router.delete('/:testId', authMiddleware, asyncHandler(async (req, res) => {
   }
 }));
 
+// ==================== 兼容路由：前端期望的路径 ====================
+
+/**
+ * K6 引擎状态检查 (兼容路径)
+ * GET /api/test/k6/status
+ */
+router.get('/k6/status', asyncHandler(async (req, res) => {
+  try {
+    let engineStatus = {
+      name: 'k6',
+      available: false,
+      version: 'unknown',
+      status: 'not_installed',
+      description: 'Load testing tool'
+    };
+
+    try {
+      // 尝试检查k6是否安装
+      const { exec } = require('child_process');
+      const { promisify } = require('util');
+      const execAsync = promisify(exec);
+
+      const { stdout } = await execAsync('k6 version');
+      if (stdout) {
+        engineStatus.available = true;
+        engineStatus.version = stdout.trim().split(' ')[1] || 'unknown';
+        engineStatus.status = 'ready';
+      }
+    } catch (error) {
+      engineStatus.status = 'not_installed';
+      engineStatus.error = 'K6 not found in PATH';
+    }
+
+    res.json({
+      success: true,
+      data: engineStatus
+    });
+  } catch (error) {
+    console.error('K6 status check failed:', error);
+    res.status(500).json({
+      success: false,
+      message: 'K6状态检查失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * Lighthouse 引擎状态检查 (兼容路径)
+ * GET /api/test/lighthouse/status
+ */
+router.get('/lighthouse/status', asyncHandler(async (req, res) => {
+  try {
+    let engineStatus = {
+      name: 'lighthouse',
+      available: false,
+      version: 'unknown',
+      status: 'not_installed',
+      description: 'Web performance auditing tool'
+    };
+
+    try {
+      const lighthouse = require('lighthouse');
+      engineStatus.available = true;
+      engineStatus.version = require('lighthouse/package.json').version;
+      engineStatus.status = 'ready';
+    } catch (error) {
+      engineStatus.status = 'not_installed';
+      engineStatus.error = 'Lighthouse not installed';
+    }
+
+    res.json({
+      success: true,
+      data: engineStatus
+    });
+  } catch (error) {
+    console.error('Lighthouse status check failed:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Lighthouse状态检查失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * Playwright 引擎状态检查 (兼容路径)
+ * GET /api/test/playwright/status
+ */
+router.get('/playwright/status', asyncHandler(async (req, res) => {
+  try {
+    let engineStatus = {
+      name: 'playwright',
+      available: false,
+      version: 'unknown',
+      status: 'not_installed',
+      description: 'Browser automation tool'
+    };
+
+    try {
+      const playwright = require('playwright');
+      engineStatus.available = true;
+      engineStatus.version = require('playwright/package.json').version;
+      engineStatus.status = 'ready';
+    } catch (error) {
+      engineStatus.status = 'not_installed';
+      engineStatus.error = 'Playwright not installed';
+    }
+
+    res.json({
+      success: true,
+      data: engineStatus
+    });
+  } catch (error) {
+    console.error('Playwright status check failed:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Playwright状态检查失败',
+      error: error.message
+    });
+  }
+}));
+
 /**
  * 获取测试引擎状态
  * GET /api/test-engines/:engine/status
