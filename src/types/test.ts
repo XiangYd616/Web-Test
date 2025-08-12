@@ -23,7 +23,7 @@ export interface PerformanceTestConfig extends TestConfig {
 
 export interface ContentTestConfig extends TestConfig {
   checkSEO: boolean;
-  checkAccessibility: boolean;
+  // checkAccessibility: boolean; // Removed - functionality moved to compatibility test
   checkPerformance: boolean;
   checkLinks?: boolean;
   checkSecurity?: boolean;

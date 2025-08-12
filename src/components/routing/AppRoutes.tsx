@@ -3,7 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import Login from '../../pages/Login';
 import Register from '../../pages/Register';
 import { AdminGuard, ProtectedRoute } from '../auth';
-import ModernLayout from '../modern/ModernLayout';
+import { ModernLayout } from '../modern';
 import { EnhancedErrorBoundary, LoadingSpinner } from '../ui';
 
 // 懒加载页面组件

@@ -1,7 +1,7 @@
 import React from 'react';
 import { LucideIcon } from 'lucide-react';
 
-import '../../styles/modern-design-system.css';
+import '../../styles/design-system.css';
 
 export interface ModernButtonProps {
   children: React.ReactNode;

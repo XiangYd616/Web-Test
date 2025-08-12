@@ -2,6 +2,7 @@
 export interface TestInfo {
   id: string;
   type: 'database' | 'api' | 'performance' | 'security' | 'compatibility' | 'content' | 'stress' | 'seo' | 'website';
+  // 'accessibility' type removed - functionality moved to compatibility test
   config: any;
   status: 'running' | 'completed' | 'failed' | 'cancelled';
   progress: number;

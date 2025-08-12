@@ -32,7 +32,7 @@ const integrationRoutes = require('./routes/integrations');
 const cacheRoutes = require('./routes/cache');
 const errorRoutes = require('./routes/errorRoutes');
 const performanceRoutes = require('./routes/performanceRoutes');
-const accessibilityRoutes = require('./routes/accessibility');
+// Accessibility routes removed - functionality moved to compatibility test
 
 // 导入中间件
 const { errorHandler } = require('./middleware/errorHandler');
@@ -203,8 +203,7 @@ app.use('/api/integrations', integrationRoutes);
 app.use('/api/cache', cacheRoutes);
 app.use('/api/errors', errorRoutes);
 app.use('/api/performance', performanceRoutes);
-app.use('/api/accessibility', accessibilityRoutes);
-app.use('/api/test/performance-accessibility', require('./routes/performance-accessibility'));
+// Accessibility API routes removed - functionality moved to compatibility test
 
 // API响应格式示例路由（仅在开发环境中启用）
 if (process.env.NODE_ENV === 'development') {

@@ -309,38 +309,8 @@ CREATE TABLE IF NOT EXISTS compatibility_test_details (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 可访问性测试详细结果
-CREATE TABLE IF NOT EXISTS accessibility_test_details (
-    test_id UUID PRIMARY KEY REFERENCES test_results(id) ON DELETE CASCADE,
-    
-    -- WCAG符合性评分
-    wcag_a_score DECIMAL(5,2),
-    wcag_aa_score DECIMAL(5,2),
-    wcag_aaa_score DECIMAL(5,2),
-    
-    -- 可访问性指标
-    keyboard_navigation_score DECIMAL(5,2),
-    screen_reader_score DECIMAL(5,2),
-    color_contrast_score DECIMAL(5,2),
-    
-    -- 检查统计
-    total_elements_checked INTEGER DEFAULT 0,
-    accessible_elements INTEGER DEFAULT 0,
-    inaccessible_elements INTEGER DEFAULT 0,
-    
-    -- 具体问题统计
-    missing_alt_text INTEGER DEFAULT 0,
-    poor_color_contrast INTEGER DEFAULT 0,
-    missing_aria_labels INTEGER DEFAULT 0,
-    keyboard_navigation_issues INTEGER DEFAULT 0,
-    
-    -- 详细分析结果
-    wcag_analysis JSONB DEFAULT '{}',
-    accessibility_issues JSONB DEFAULT '[]',
-    recommendations JSONB DEFAULT '[]',
-    
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+-- 可访问性测试详细结果表已移除
+-- 可访问性功能已整合到兼容性测试中
 
 -- 压力测试详细结果
 CREATE TABLE IF NOT EXISTS stress_test_details (
@@ -692,7 +662,7 @@ ANALYZE performance_test_details;
 ANALYZE security_test_details;
 ANALYZE api_test_details;
 ANALYZE compatibility_test_details;
-ANALYZE accessibility_test_details;
+-- accessibility_test_details table removed
 ANALYZE stress_test_details;
 ANALYZE monitoring_sites;
 ANALYZE monitoring_results;

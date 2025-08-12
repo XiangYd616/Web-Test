@@ -9,7 +9,7 @@ const config: StorybookConfig = {
     '@storybook/addon-links',
     '@storybook/addon-essentials',
     '@storybook/addon-interactions',
-    '@storybook/addon-a11y',
+    // '@storybook/addon-a11y', // Removed - accessibility testing moved to compatibility test
     '@storybook/addon-viewport',
     '@storybook/addon-docs',
     '@storybook/addon-controls',
@@ -38,7 +38,7 @@ const config: StorybookConfig = {
         '@': '/src',
       };
     }
-    
+
     return config;
   },
 };

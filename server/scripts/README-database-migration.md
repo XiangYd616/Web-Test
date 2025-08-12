@@ -18,9 +18,8 @@
 3. **performance_test_details** - 性能测试详细结果
 4. **security_test_details** - 安全测试详细结果
 5. **api_test_details** - API测试详细结果
-6. **compatibility_test_details** - 兼容性测试详细结果
-7. **accessibility_test_details** - 可访问性测试详细结果
-8. **stress_test_details** - 压力测试详细结果（优化版）
+6. **compatibility_test_details** - 兼容性测试详细结果（包含可访问性功能）
+7. **stress_test_details** - 压力测试详细结果（优化版）
 9. **test_artifacts** - 测试文件和资源
 10. **system_config** - 系统配置
 11. **engine_status** - 测试引擎状态监控
@@ -116,7 +115,8 @@ WHERE table_schema = 'public'
 AND table_name IN (
   'users', 'test_results', 'seo_test_details', 'performance_test_details',
   'security_test_details', 'api_test_details', 'compatibility_test_details',
-  'accessibility_test_details', 'stress_test_details', 'test_artifacts',
+  -- 'accessibility_test_details', -- Removed - functionality moved to compatibility test
+  'stress_test_details', 'test_artifacts',
   'system_config', 'engine_status'
 ) ORDER BY table_name;
 ```

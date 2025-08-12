@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 
-import '../../styles/modern-design-system.css';
+import '../../styles/design-system.css';
 
 export interface ModernCardProps {
   children: React.ReactNode;
