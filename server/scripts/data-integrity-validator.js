@@ -105,7 +105,8 @@ class DataIntegrityValidator {
             const expectedTables = [
                 'users', 'test_results', 'seo_test_details', 'performance_test_details',
                 'security_test_details', 'api_test_details', 'compatibility_test_details',
-                'accessibility_test_details', 'stress_test_details', 'monitoring_sites',
+                // 'accessibility_test_details', // Removed - functionality moved to compatibility test
+                'stress_test_details', 'monitoring_sites',
                 'monitoring_results', 'test_artifacts', 'system_config', 'engine_status',
                 'system_logs'
             ];

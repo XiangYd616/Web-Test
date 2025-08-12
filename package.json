@@ -62,6 +62,13 @@
     "_comment_config": "⚙️ 配置管理",
     "port:check": "node scripts/port-config.cjs",
     "package:analyze": "node scripts/package-json-analyzer.cjs",
+    "_comment_maintenance_tools": "🔧 持续维护工具",
+    "maintenance": "node scripts/continuous-maintenance.cjs",
+    "maintenance:daily": "node scripts/scheduled-maintenance.cjs daily",
+    "maintenance:weekly": "node scripts/scheduled-maintenance.cjs weekly",
+    "maintenance:monthly": "node scripts/scheduled-maintenance.cjs monthly",
+    "maintenance:dashboard": "node scripts/maintenance-dashboard.cjs",
+    "maintenance:dashboard:html": "node scripts/maintenance-dashboard.cjs --html",
     "clean": "rimraf dist dist-electron node_modules/.cache",
     "clean:all": "rimraf dist dist-electron node_modules"
   },

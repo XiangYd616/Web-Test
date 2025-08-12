@@ -4,11 +4,11 @@
  * 版本: v1.0.0
  */
 
-import type { 
-  BaseTestConfig, 
-  BaseTestResult, 
-  TestType, 
-  TestStatus, 
+import type {
+  BaseTestConfig,
+  BaseTestResult,
+  TestType,
+  TestStatus,
   TestPriority,
   TestError,
   TestWarning,
@@ -555,7 +555,7 @@ export interface StressTestTimelinePoint {
 
 // ==================== 统一测试引擎接口 ====================
 
-export type TestConfig = 
+export type TestConfig =
   | SEOTestConfig
   | PerformanceTestConfig
   | SecurityTestConfig
@@ -564,7 +564,7 @@ export type TestConfig =
   | AccessibilityTestConfig
   | StressTestConfig;
 
-export type TestResult = 
+export type TestResult =
   | SEOTestResult
   | PerformanceTestResult
   | SecurityTestResult

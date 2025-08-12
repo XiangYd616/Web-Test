@@ -45,7 +45,7 @@ class SystemIntegrationChecker {
       { name: 'Security', path: 'security', frontend: 'SecurityTest', backend: 'security' },
       { name: 'API', path: 'api', frontend: 'APITest', backend: 'api' },
       { name: 'Compatibility', path: 'compatibility', frontend: 'CompatibilityTest', backend: 'compatibility' },
-      { name: 'Accessibility', path: 'accessibility', frontend: 'AccessibilityTest', backend: 'accessibility' },
+      // Accessibility removed - functionality moved to compatibility test
       { name: 'StressTest', path: 'stress', frontend: 'StressTest', backend: 'stress' }
     ];
 
@@ -227,7 +227,7 @@ class SystemIntegrationChecker {
       'theme-management': ['themeService'],
       'internationalization': ['i18nService'],
       'responsive-design': ['responsive'],
-      'accessibility-features': ['CompatibilityTest'],
+      // 'accessibility-features': ['CompatibilityTest'], // Removed - integrated into compatibility test
       'security-measures': ['security', 'apiSecurity', 'errorHandler'],
       'data-visualization': ['dataVisualizationService', 'statisticsService', 'performanceRoutes', 'dataManagement'],
       'reporting-system': ['reportingService', 'statisticsService', 'dataManagement'],
@@ -532,7 +532,8 @@ class SystemIntegrationChecker {
 
     const requiredTables = [
       'test_results', 'users', 'test_history', 'api_docs',
-      'compatibility_results', 'accessibility_results', 'performance_metrics'
+      'compatibility_results', 'performance_metrics'
+      // accessibility_results removed - functionality moved to compatibility
     ];
 
     const schemaFiles = [

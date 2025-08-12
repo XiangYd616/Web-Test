@@ -59,7 +59,9 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
     { id: 'seo-analysis', name: 'SEO分析', icon: Search, href: '/content-test', color: 'green' },
     { id: 'api-test', name: 'API测试', icon: Package, href: '/api-test', color: 'purple' },
     { id: 'monitoring', name: '实时监控', icon: Monitor, href: '/monitoring', color: 'yellow' },
-    { id: 'system-status', name: '系统状态', icon: Settings, href: '/system-status', color: 'gray' },
+    {
+      id: 'system-status', name: '系统状态', icon: Settings, href: '/system-status', color: 'gray'
+    },
     { id: 'reports', name: '测试报告', icon: FileText, href: '/reports', color: 'indigo' }
   ];
 
@@ -89,20 +91,20 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // 全局键盘快捷键
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // Ctrl+K 或 Cmd+K 打开搜索
-      if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
-        event.preventDefault();
-        const searchInput = document.querySelector('input[placeholder*="搜索"]') as HTMLInputElement;
-        if (searchInput) {
-          searchInput.focus();
-          setShowSearchDropdown(true);
-        }
+  // 全局键盘快捷�?  useEffect(() => {
+  const handleKeyDown = (event: KeyboardEvent) => {
+    // Ctrl+K �?Cmd+K 打开搜索
+    if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+      event.preventDefault();
+      const searchInput = document.querySelector('input[placeholder*="搜索"]') as HTMLInputElement;
+      if (searchInput) {
+        searchInput.focus();
+        setShowSearchDropdown(true);
       }
-    };
+    }
+  };
 
+  useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
@@ -171,8 +173,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
     }
     if (notification.actionUrl) {
       setShowNotifications(false);
-      // 跳转到相应页面
-      window.location.href = notification.actionUrl;
+      // 跳转到相应页�?      window.location.href = notification.actionUrl;
     }
   };
 
@@ -190,13 +191,14 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
     e.stopPropagation();
     // 可以在这里添加更多操作菜单
     const actions = [
-      { label: '标记为已读', action: () => markAsRead(notification.id) },
+      {
+        label: '标记为已读', action: () => markAsRead(notification.id)
+      },
       { label: '删除通知', action: () => deleteNotification(notification.id) },
       { label: '查看详情', action: () => notification.actionUrl && (window.location.href = notification.actionUrl) }
     ];
 
-    // 简单的确认对话框实现
-    const actionText = notification.read ? '删除此通知？' : '标记为已读并删除？';
+    // 简单的确认对话框实�?    const actionText = notification.read ? '删除此通知�? : '标记为已读并删除�?;
     if (confirm(actionText)) {
       deleteNotification(notification.id);
     }
@@ -229,47 +231,44 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
       globalSearchService.recordSearch(query);
       setSearchHistory(globalSearchService.getSearchHistory());
       setShowSearchDropdown(false);
-      // 如果没有精确匹配的结果，导航到帮助页面进行搜索
-      if (searchResults.length === 0) {
-        window.location.href = `/help?search=${encodeURIComponent(query)}`;
-      } else {
-        // 导航到第一个结果
-        handleSearchResultClick(searchResults[0]);
-      }
+      // 如果没有精确匹配的结果，导航到帮助页面进行搜�?      if (searchResults.length === 0) {
+      window.location.href = `/help?search=${encodeURIComponent(query)}`;
+    } else {
+      // 导航到第一个结�?        handleSearchResultClick(searchResults[0]);
     }
+  }
+};
+
+const clearSearchHistory = () => {
+  globalSearchService.clearSearchHistory();
+  setSearchHistory([]);
+};
+
+// 渲染搜索图标
+const renderSearchIcon = (iconName: string) => {
+  const iconMap: Record<string, React.ComponentType<any>> = {
+    Home, Globe, Zap, Shield, Search, BarChart3, Settings, HelpCircle,
+    Code, Monitor, Activity, Upload, Download, User, Bell, Key, Play,
+    Book, Lock, TestTube, Clock
   };
+  const IconComponent = iconMap[iconName];
+  return IconComponent ? <IconComponent className="w-3 h-3" /> : <Search className="w-3 h-3" />;
+};
 
-  const clearSearchHistory = () => {
-    globalSearchService.clearSearchHistory();
-    setSearchHistory([]);
-  };
+// 高亮搜索结果
+const highlightSearchText = (text: string, searchQuery: string) => {
+  if (!searchQuery.trim()) return text;
 
-  // 渲染搜索图标
-  const renderSearchIcon = (iconName: string) => {
-    const iconMap: Record<string, React.ComponentType<any>> = {
-      Home, Globe, Zap, Shield, Search, BarChart3, Settings, HelpCircle,
-      Code, Monitor, Activity, Upload, Download, User, Bell, Key, Play,
-      Book, Lock, TestTube, Clock
-    };
-    const IconComponent = iconMap[iconName];
-    return IconComponent ? <IconComponent className="w-3 h-3" /> : <Search className="w-3 h-3" />;
-  };
+  const regex = new RegExp(`(${searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+  const parts = text.split(regex);
 
-  // 高亮搜索词
-  const highlightSearchText = (text: string, searchQuery: string) => {
-    if (!searchQuery.trim()) return text;
-
-    const regex = new RegExp(`(${searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-    const parts = text.split(regex);
-
-    return parts.map((part, index) =>
-      regex.test(part) ? (
-        <span key={index} className="bg-blue-500/30 text-blue-300 font-medium">
-          {part}
-        </span>
-      ) : part
-    );
-  };
+  return parts.map((part, index) =>
+    regex.test(part) ? (
+      <span key={index} className="bg-blue-500/30 text-blue-300 font-medium">
+        {part}
+      </span>
+    ) : part
+  );
 
   return (
     <header className={`px-6 py-4 relative z-[1000] transition-all duration-300 ${actualTheme === 'light'
@@ -277,7 +276,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
       : 'bg-gray-800/50 backdrop-blur-sm border-b border-gray-700/50'
       }`}>
       <div className="flex items-center justify-between">
-        {/* 左侧：Logo和导航控制 */}
+        {/* 左侧：Logo和导航控�?*/}
         <div className="flex items-center space-x-4">
           <button
             type="button"
@@ -339,7 +338,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                   (e.target as HTMLInputElement).blur();
                 }
               }}
-              placeholder="搜索测试、报告、设置..."
+              placeholder="搜索测试、报告、设�?.."
               className={`w-full pl-10 pr-4 py-2 text-sm transition-all duration-200 ${actualTheme === 'light'
                 ? `bg-gray-50 border text-gray-900 placeholder-gray-500 ${showSearchDropdown
                   ? 'border-blue-500 ring-2 ring-blue-500/20 rounded-t-lg rounded-b-none bg-white'
@@ -366,7 +365,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
             )}
           </div>
 
-          {/* 搜索下拉框 */}
+          {/* 搜索下拉�?*/}
           {showSearchDropdown && (
             <div className="absolute top-full left-0 right-0 bg-gray-700/95 backdrop-blur-xl border border-blue-500 border-t-0 rounded-b-lg shadow-2xl z-[9999] max-h-96 overflow-hidden">
               {searchQuery.trim() ? (
@@ -375,7 +374,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                   {isSearching ? (
                     <div className="p-4 text-center">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-2"></div>
-                      <p className="text-sm text-gray-400">搜索中...</p>
+                      <p className="text-sm text-gray-400">搜索�?..</p>
                     </div>
                   ) : searchResults.length > 0 ? (
                     <div className="py-2">
@@ -429,38 +428,40 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
               ) : (
                 // 搜索历史和建议
                 <div className="py-2">
-                  {searchHistory.length > 0 && (
-                    <div className="px-4 py-2 border-b border-gray-600/50">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center text-gray-400">
-                          <Clock className="w-3 h-3 mr-2" />
-                          <span className="text-xs font-medium">最近搜索</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={clearSearchHistory}
-                          className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
-                        >
-                          清除
-                        </button>
-                      </div>
-                      <div className="space-y-1">
-                        {searchHistory.slice(0, 3).map((historyItem, index) => (
+                  {
+                    searchHistory.length > 0 && (
+                      <div className="px-4 py-2 border-b border-gray-600/50">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center text-gray-400">
+                            <Clock className="w-3 h-3 mr-2" />
+                            <span className="text-xs font-medium">最近搜索</span>
+                          </div>
                           <button
-                            key={index}
                             type="button"
-                            onClick={() => {
-                              setSearchQuery(historyItem);
-                              setShowSearchDropdown(false);
-                            }}
-                            className="w-full text-left px-2 py-1 text-sm text-gray-300 hover:bg-gray-600/50 rounded transition-colors"
+                            onClick={clearSearchHistory}
+                            className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
                           >
-                            {historyItem}
+                            清除
                           </button>
-                        ))}
+                        </div>
+                        <div className="space-y-1">
+                          {searchHistory.slice(0, 3).map((historyItem, index) => (
+                            <button
+                              key={index}
+                              type="button"
+                              onClick={() => {
+                                setSearchQuery(historyItem);
+                                setShowSearchDropdown(false);
+                              }}
+                              className="w-full text-left px-2 py-1 text-sm text-gray-300 hover:bg-gray-600/50 rounded transition-colors"
+                            >
+                              {historyItem}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )
+                  }
 
                   {/* 快捷搜索建议 */}
                   <div className="px-4 py-2">
@@ -470,7 +471,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                     </div>
                     <div className="grid grid-cols-2 gap-1">
                       {['网站测试', '安全检测', 'API测试', '实时监控', '系统设置', '帮助文档'].map((suggestion, index) => (
-                        <button
+                        < button
                           key={index}
                           type="button"
                           onClick={() => {
@@ -492,7 +493,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                 <div className="flex items-center justify-between text-xs text-gray-500">
                   <div className="flex items-center space-x-3">
                     <span>↑↓ 导航</span>
-                    <span>↵ 选择</span>
+                    <span>�?选择</span>
                     <span>ESC 关闭</span>
                   </div>
                   <span>Ctrl+K 快速搜索</span>
@@ -573,7 +574,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                     </div>
                   </div>
 
-                  {/* 筛选按钮 */}
+                  {/* 筛选按�?*/}
                   <div className="flex items-center space-x-2">
                     <button
                       type="button"
@@ -661,7 +662,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                                         'bg-yellow-500/20 text-yellow-400'
                                       }`}>
                                       {notification.priority === 'urgent' ? '紧急' :
-                                        notification.priority === 'high' ? '高' : '中'}
+                                        notification.priority === 'high' ? '高' : '低'}
                                     </span>
                                   )}
                                 </div>
@@ -720,8 +721,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
                       className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
                       onClick={() => setShowNotifications(false)}
                     >
-                      查看全部通知 →
-                    </Link>
+                      查看全部通知 �?                    </Link>
                     <button
                       type="button"
                       className="text-sm text-gray-400 hover:text-gray-300 transition-colors"
@@ -750,44 +750,46 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
             <HelpCircle className="w-5 h-5" />
           </Link>
 
-          {/* 用户菜单或登录按钮 */}
-          {isAuthenticated ? (
-            <div className="relative" ref={userMenuRef}>
-              <button
-                type="button"
-                onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center space-x-2 p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700/50 transition-colors"
-                title="用户菜单"
-              >
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                  {user?.role === 'admin' ? (
-                    <Crown className="w-4 h-4 text-white" />
-                  ) : (
-                    <User className="w-4 h-4 text-white" />
-                  )}
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </button>
+          {/* 用户菜单或登录按�?*/}
+          {
+            isAuthenticated ? (
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center space-x-2 p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700/50 transition-colors"
+                  title="用户菜单"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                    {user?.role === 'admin' ? (
+                      <Crown className="w-4 h-4 text-white" />
+                    ) : (
+                      <User className="w-4 h-4 text-white" />
+                    )}
+                  </div>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
 
-              {showUserMenu && (
-                <UserDropdownMenu onClose={() => setShowUserMenu(false)} />
-              )}
-            </div>
-          ) : (
-            <Link
-              to="/login"
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${actualTheme === 'light'
-                ? 'bg-blue-600 text-white hover:bg-blue-700'
-                : 'bg-blue-600 text-white hover:bg-blue-700'
-                }`}
-              title="登录"
-            >
-              <User className="w-4 h-4" />
-              <span className="text-sm font-medium">登录</span>
-            </Link>
-          )}
-        </div>
-      </div>
+                {showUserMenu && (
+                  <UserDropdownMenu onClose={() => setShowUserMenu(false)} />
+                )}
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${actualTheme === 'light'
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
+                title="登录"
+              >
+                <User className="w-4 h-4" />
+                <span className="text-sm font-medium">登录</span>
+              </Link>
+            )
+          }
+        </div >
+      </div >
 
     </header>
   );

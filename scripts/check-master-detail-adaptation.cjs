@@ -89,7 +89,7 @@ async function checkDatabaseTables(pool) {
       'security_test_details',
       'api_test_details',
       'seo_test_details',
-      'accessibility_test_details',
+      // 'accessibility_test_details', // Removed - functionality moved to compatibility test
       'compatibility_test_details',
       'performance_test_details'
     ];

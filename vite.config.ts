@@ -85,6 +85,8 @@ export default defineConfig({
     cssCodeSplit: true,
     // 资源内联阈值
     assetsInlineLimit: 4096,
+    // Chunk大小警告限制 - 更严格
+    chunkSizeWarningLimit: 300,
     rollupOptions: {
       external: [
         'electron',
@@ -96,10 +98,10 @@ export default defineConfig({
         'jws'
       ],
       output: {
-        // 代码分割策略
+        // 优化的代码分割策略
         manualChunks: (id) => {
-          // React相关库
-          if (id.includes('react') || id.includes('react-dom')) {
+          // React核心库
+          if (id.includes('react') && !id.includes('react-router') && !id.includes('react-chartjs')) {
             return 'react-vendor';
           }
 
@@ -108,52 +110,112 @@ export default defineConfig({
             return 'router-vendor';
           }
 
+          // 图表库 - 进一步细分
+          if (id.includes('chart.js') || id.includes('react-chartjs')) {
+            return 'chart-vendor';
+          }
+          if (id.includes('recharts') || id.includes('d3-')) {
+            return 'recharts-vendor';
+          }
+
           // UI组件库
-          if (id.includes('lucide-react') || id.includes('@headlessui')) {
+          if (id.includes('lucide-react')) {
+            return 'icons-vendor';
+          }
+          if (id.includes('@headlessui') || id.includes('framer-motion')) {
             return 'ui-vendor';
           }
 
           // 工具库
-          if (id.includes('date-fns') || id.includes('lodash') || id.includes('axios')) {
+          if (id.includes('date-fns') || id.includes('lodash')) {
             return 'utils-vendor';
           }
-
-          // 图表库
-          if (id.includes('chart.js') || id.includes('recharts')) {
-            return 'chart-vendor';
+          if (id.includes('axios') || id.includes('socket.io')) {
+            return 'network-vendor';
           }
 
-          // 测试引擎相关
-          if (id.includes('/pages/') && (
-            id.includes('Test.tsx') ||
-            id.includes('test') ||
-            id.includes('Test')
-          )) {
-            return 'test-pages';
+          // 测试页面 - 按类型细分
+          if (id.includes('/pages/') && id.includes('Test')) {
+            if (id.includes('Performance')) {
+              return 'performance-tests';
+            }
+            if (id.includes('Stress')) {
+              return 'stress-tests';
+            }
+            if (id.includes('Security')) {
+              return 'security-tests';
+            }
+            if (id.includes('API')) {
+              return 'api-tests';
+            }
+            if (id.includes('SEO')) {
+              return 'seo-tests';
+            }
+            if (id.includes('Compatibility') || id.includes('Chrome')) {
+              return 'compatibility-tests';
+            }
+            if (id.includes('UX')) {
+              return 'ux-tests';
+            }
+            if (id.includes('Website')) {
+              return 'website-tests';
+            }
+            if (id.includes('Network')) {
+              return 'network-tests';
+            }
+            if (id.includes('Database')) {
+              return 'database-tests';
+            }
+            return 'misc-tests';
           }
 
-          // 管理页面
+          // 管理和设置页面
           if (id.includes('/pages/') && (
-            id.includes('Admin') ||
-            id.includes('Management') ||
-            id.includes('Settings')
+            id.includes('Admin') || id.includes('Settings') || id.includes('Management')
           )) {
             return 'admin-pages';
           }
 
+          // 用户相关页面
+          if (id.includes('/pages/') && (
+            id.includes('Login') || id.includes('Register') || id.includes('Profile') || id.includes('User')
+          )) {
+            return 'auth-pages';
+          }
+
+          // 报告和分析页面
+          if (id.includes('/pages/') && (
+            id.includes('Report') || id.includes('Analytics') || id.includes('Statistics') || id.includes('Dashboard')
+          )) {
+            return 'analytics-pages';
+          }
+
           // 其他页面
           if (id.includes('/pages/')) {
-            return 'other-pages';
+            return 'misc-pages';
           }
 
-          // 业务组件
-          if (id.includes('/components/business/')) {
-            return 'business-components';
+          // 组件分割 - 更细粒度
+          if (id.includes('/components/modern/')) {
+            return 'modern-components';
           }
-
-          // 系统组件
-          if (id.includes('/components/system/')) {
-            return 'system-components';
+          if (id.includes('/components/ui/')) {
+            return 'ui-components';
+          }
+          if (id.includes('/components/charts/')) {
+            return 'chart-components';
+          }
+          if (id.includes('/components/auth/')) {
+            return 'auth-components';
+          }
+          if (id.includes('/components/routing/')) {
+            return 'routing-components';
+          }
+          if (id.includes('/components/common/')) {
+            return 'common-components';
+          }
+          if (id.includes('/components/')) {
+            return 'misc-components';
           }
 
           // node_modules中的其他库

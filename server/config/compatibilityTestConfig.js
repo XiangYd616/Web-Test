@@ -242,11 +242,11 @@ const TIMEOUT_CONFIG = {
 
 // 评分权重配置
 const SCORING_WEIGHTS = {
-  basicFunctionality: 0.3,    // 基本功能 30%
-  modernFeatures: 0.25,       // 现代特性 25%
+  basicFunctionality: 0.35,   // 基本功能 35% (increased)
+  modernFeatures: 0.3,        // 现代特性 30% (increased)
   responsiveDesign: 0.2,      // 响应式设计 20%
   performance: 0.15,          // 性能 15%
-  accessibility: 0.1          // 可访问性 10%
+  // accessibility: 0.1       // Removed - functionality integrated into other categories
 };
 
 module.exports = {

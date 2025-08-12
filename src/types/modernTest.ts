@@ -28,7 +28,7 @@ export type TestType =
   | 'security-scan'
   | 'load-test'
   | 'api-test'
-  | 'accessibility-test'
+  // | 'accessibility-test' // Removed - functionality moved to compatibility test
   | 'seo-audit'
   | 'uptime-monitor'
   | 'synthetic-monitor'

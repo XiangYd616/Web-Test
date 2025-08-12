@@ -42,15 +42,15 @@ function log(message, color = 'reset') {
 async function executeSqlFile(filePath, description) {
   try {
     log(`\n📄 执行 ${description}...`, 'blue');
-    
+
     const sql = fs.readFileSync(filePath, 'utf8');
     const client = await pool.connect();
-    
+
     try {
       await client.query('BEGIN');
       await client.query(sql);
       await client.query('COMMIT');
-      
+
       log(`✅ ${description} 执行成功`, 'green');
     } catch (error) {
       await client.query('ROLLBACK');
@@ -71,7 +71,7 @@ async function checkConnection() {
     const client = await pool.connect();
     const result = await client.query('SELECT version()');
     client.release();
-    
+
     log(`✅ 数据库连接成功`, 'green');
     log(`📊 PostgreSQL版本: ${result.rows[0].version}`, 'cyan');
     return true;
@@ -85,9 +85,9 @@ async function checkConnection() {
 async function backupExistingData() {
   try {
     log('\n💾 备份现有数据...', 'blue');
-    
+
     const client = await pool.connect();
-    
+
     // 检查是否存在现有表
     const tableCheck = await client.query(`
       SELECT table_name 
@@ -95,22 +95,22 @@ async function backupExistingData() {
       WHERE table_schema = 'public' 
       AND table_name IN ('users', 'test_results', 'stress_test_results')
     `);
-    
+
     if (tableCheck.rows.length > 0) {
       log(`📋 发现 ${tableCheck.rows.length} 个现有表`, 'yellow');
-      
+
       // 创建备份表
       for (const row of tableCheck.rows) {
         const tableName = row.table_name;
         const backupTableName = `${tableName}_backup_${Date.now()}`;
-        
+
         await client.query(`CREATE TABLE ${backupTableName} AS SELECT * FROM ${tableName}`);
         log(`📦 已备份 ${tableName} -> ${backupTableName}`, 'cyan');
       }
     } else {
       log('📋 未发现现有表，跳过备份', 'yellow');
     }
-    
+
     client.release();
     log('✅ 数据备份完成', 'green');
   } catch (error) {
@@ -123,9 +123,9 @@ async function backupExistingData() {
 async function validateMigration() {
   try {
     log('\n🔍 验证迁移结果...', 'blue');
-    
+
     const client = await pool.connect();
-    
+
     // 检查核心表是否存在
     const coreTablesCheck = await client.query(`
       SELECT table_name 
@@ -134,65 +134,66 @@ async function validateMigration() {
       AND table_name IN (
         'users', 'test_results', 'seo_test_details', 'performance_test_details',
         'security_test_details', 'api_test_details', 'compatibility_test_details',
-        'accessibility_test_details', 'stress_test_details', 'test_artifacts',
+        -- 'accessibility_test_details', -- Removed - functionality moved to compatibility test
+        'stress_test_details', 'test_artifacts',
         'system_config', 'engine_status'
       )
       ORDER BY table_name
     `);
-    
-    log(`📊 核心表数量: ${coreTablesCheck.rows.length}/12`, 'cyan');
-    
+
+    log(`📊 核心表数量: ${coreTablesCheck.rows.length}/11`, 'cyan');
+
     // 检查索引
     const indexCheck = await client.query(`
       SELECT COUNT(*) as index_count
       FROM pg_indexes 
       WHERE schemaname = 'public'
     `);
-    
+
     log(`📈 索引数量: ${indexCheck.rows[0].index_count}`, 'cyan');
-    
+
     // 检查视图
     const viewCheck = await client.query(`
       SELECT COUNT(*) as view_count
       FROM information_schema.views 
       WHERE table_schema = 'public'
     `);
-    
+
     log(`👁️ 视图数量: ${viewCheck.rows[0].view_count}`, 'cyan');
-    
+
     // 检查函数
     const functionCheck = await client.query(`
       SELECT COUNT(*) as function_count
       FROM information_schema.routines 
       WHERE routine_schema = 'public'
     `);
-    
+
     log(`⚙️ 函数数量: ${functionCheck.rows[0].function_count}`, 'cyan');
-    
+
     // 检查系统配置
     const configCheck = await client.query(`
       SELECT COUNT(*) as config_count
       FROM system_config
     `);
-    
+
     log(`🔧 系统配置数量: ${configCheck.rows[0].config_count}`, 'cyan');
-    
+
     // 检查引擎状态
     const engineCheck = await client.query(`
       SELECT engine_type, status
       FROM engine_status
       ORDER BY engine_type
     `);
-    
+
     log(`🚀 测试引擎状态:`, 'cyan');
     engineCheck.rows.forEach(row => {
       const statusColor = row.status === 'healthy' ? 'green' : 'yellow';
       log(`   ${row.engine_type}: ${row.status}`, statusColor);
     });
-    
+
     client.release();
     log('✅ 迁移验证完成', 'green');
-    
+
     return true;
   } catch (error) {
     log(`❌ 迁移验证失败: ${error.message}`, 'red');
@@ -204,16 +205,16 @@ async function validateMigration() {
 async function showPerformanceRecommendations() {
   try {
     log('\n💡 性能优化建议:', 'magenta');
-    
+
     const client = await pool.connect();
     const recommendations = await client.query('SELECT * FROM get_performance_recommendations()');
-    
+
     recommendations.rows.forEach(rec => {
       log(`\n📋 ${rec.category}: ${rec.recommendation}`, 'cyan');
       log(`   当前值: ${rec.current_value}`, 'yellow');
       log(`   建议值: ${rec.suggested_value}`, 'green');
     });
-    
+
     client.release();
   } catch (error) {
     log(`⚠️ 无法获取性能建议: ${error.message}`, 'yellow');
@@ -223,54 +224,54 @@ async function showPerformanceRecommendations() {
 // 主迁移函数
 async function runMigration() {
   const startTime = Date.now();
-  
+
   try {
     log('🚀 开始数据库迁移...', 'bright');
-    log('=' .repeat(50), 'blue');
-    
+    log('='.repeat(50), 'blue');
+
     // 1. 检查数据库连接
     const connected = await checkConnection();
     if (!connected) {
       process.exit(1);
     }
-    
+
     // 2. 备份现有数据
     await backupExistingData();
-    
+
     // 3. 执行主要架构迁移
     await executeSqlFile(
       path.join(__dirname, 'optimized-database-schema.sql'),
       '优化数据库架构'
     );
-    
+
     // 4. 执行性能优化
     await executeSqlFile(
       path.join(__dirname, 'database-performance-optimization.sql'),
       '数据库性能优化'
     );
-    
+
     // 5. 验证迁移结果
     const validated = await validateMigration();
     if (!validated) {
       throw new Error('迁移验证失败');
     }
-    
+
     // 6. 显示性能建议
     await showPerformanceRecommendations();
-    
+
     const endTime = Date.now();
     const duration = ((endTime - startTime) / 1000).toFixed(2);
-    
-    log('\n' + '=' .repeat(50), 'green');
+
+    log('\n' + '='.repeat(50), 'green');
     log(`🎉 数据库迁移成功完成! 耗时: ${duration}秒`, 'bright');
-    log('=' .repeat(50), 'green');
-    
+    log('='.repeat(50), 'green');
+
     log('\n📋 下一步操作:', 'magenta');
     log('1. 重启应用服务器', 'cyan');
     log('2. 运行应用测试', 'cyan');
     log('3. 监控数据库性能', 'cyan');
     log('4. 定期执行维护: SELECT perform_maintenance();', 'cyan');
-    
+
   } catch (error) {
     log('\n❌ 迁移失败!', 'red');
     log(`错误信息: ${error.message}`, 'red');

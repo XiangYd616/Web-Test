@@ -51,7 +51,7 @@ const ModernNavigation: React.FC = () => {
       name: '兼容性测试',
       href: '/compatibility-test',
       icon: Globe,
-      description: '跨浏览器兼容性'
+      description: '跨浏览器兼容性检测'
     },
     {
       name: 'API测试',
@@ -69,7 +69,7 @@ const ModernNavigation: React.FC = () => {
       name: '数据库测试',
       href: '/database-test',
       icon: Database,
-      description: '数据库性能和完整性'
+      description: '数据库性能和完整性检测'
     },
     {
       name: '网络测试',
@@ -167,7 +167,7 @@ const ModernNavigation: React.FC = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
-            {/* 主导航 */}
+            {/* 主导�?*/}
             {mainNavigation.map((item) => (
               <Link
                 key={item.name}
@@ -291,8 +291,7 @@ const ModernNavigation: React.FC = () => {
                           className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                         >
                           <LogOut className="w-4 h-4 mr-3" />
-                          退出登录
-                        </button>
+                          退出登�?                        </button>
                       </div>
                     </div>
                   )}
@@ -331,7 +330,7 @@ const ModernNavigation: React.FC = () => {
       {isOpen && (
         <div className="md:hidden bg-white border-t border-gray-200">
           <div className="px-4 py-4 space-y-2">
-            {/* 主导航 */}
+            {/* 主导�?*/}
             {mainNavigation.map((item) => (
               <Link
                 key={item.name}

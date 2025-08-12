@@ -1,0 +1,50 @@
+{
+  "type": "daily",
+  "timestamp": "2025-08-12T05:36:36.512Z",
+  "checks": [
+    {
+      "name": "project_structure",
+      "status": "success",
+      "score": 7,
+      "details": "Project structure check completed"
+    },
+    {
+      "name": "dependencies",
+      "status": "success",
+      "outdated": 0,
+      "vulnerabilities": 0,
+      "details": "Found 0 outdated packages and 0 vulnerabilities"
+    },
+    {
+      "name": "build_health",
+      "status": "success",
+      "buildTime": 30,
+      "largeChunks": 3,
+      "totalSize": 2438.25,
+      "details": "Build completed in 30s with 3 large chunks"
+    },
+    {
+      "name": "code_quality",
+      "status": "success",
+      "score": 4,
+      "details": "Code quality check completed"
+    },
+    {
+      "name": "performance",
+      "status": "success",
+      "bundleSize": 2700278,
+      "imageOptimization": {
+        "optimized": true,
+        "count": 0
+      },
+      "details": "Bundle size: 2.58 MB"
+    }
+  ],
+  "summary": {
+    "total": 5,
+    "success": 5,
+    "errors": 0,
+    "healthScore": 100
+  },
+  "duration": 29074
+}
