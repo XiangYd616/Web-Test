@@ -1,46 +1,86 @@
-# 环境变量配置指南
+# 环境变量配置指南 (更新版)
 
-## 📁 **配置文件分布**
+## 🎯 配置文件结构优化
 
-### **根目录 `.env`** - 前端和全局配置
+经过清理整理，现在项目使用**清晰分离**的环境配置结构：
+
+## 📁 **新的配置文件分布**
+
+### **根目录 `.env`** - 前端专用配置
 ```bash
-# 位置：./env
-# 用途：前端构建、全局数据库连接、CORS等
-# 读取：Vite前端构建、根目录脚本
+# 位置：./.env
+# 用途：前端开发配置，Vite构建变量
+# 读取：Vite前端构建系统
+# 特点：所有变量以VITE_开头，会被打包到前端代码中
 ```
 
 **包含配置：**
-- 前端API地址 (`VITE_API_URL`)
-- 前端安全配置 (`VITE_*`)
-- 缓存配置 (`REDIS_*`)
+- 前端开发服务器 (`VITE_DEV_PORT`, `VITE_API_URL`)
+- 应用基本信息 (`VITE_APP_NAME`, `VITE_APP_VERSION`)
+- 前端功能开关 (`VITE_ENABLE_*`)
+- 前端安全配置 (`VITE_MAX_LOGIN_ATTEMPTS`)
+- 第三方API密钥 (仅前端使用的)
 - 全局环境设置
 
 ### **server/.env** - 后端专用配置
 ```bash
 # 位置：server/.env
-# 用途：后端服务专用配置
-# 读取：Express服务器、后端脚本
+# 用途：后端服务器、数据库连接、敏感配置
+# 读取：Node.js后端服务器
+# 特点：包含所有敏感信息，不会暴露给前端
 ```
 
 **包含配置：**
-- 数据库连接 (`DATABASE_URL`, `DB_*`)
-- MaxMind许可证 (`MAXMIND_LICENSE_KEY`)
-- JWT密钥 (`JWT_SECRET`)
-- 邮件配置 (`SMTP_*`)
-- 后端专用服务配置
+- 服务器配置 (`PORT`, `HOST`, `NODE_ENV`)
+- 数据库连接 (`DATABASE_URL`, `DB_*`) - PostgreSQL
+- Redis缓存 (`REDIS_*`)
+- 认证安全 (`JWT_SECRET`, `SESSION_SECRET`, `BCRYPT_ROUNDS`)
+- 第三方服务 (`MAXMIND_LICENSE_KEY`, `GOOGLE_*`)
+- 测试引擎 (`K6_*`, `LIGHTHOUSE_*`, `PLAYWRIGHT_*`)
+- 邮件服务 (`SMTP_*`)
+- 监控配置 (`MONITORING_*`)
+- 文件上传 (`MAX_FILE_SIZE`, `UPLOAD_*`)
+- 日志配置 (`LOG_*`)
+- CORS和限流 (`CORS_*`, `RATE_LIMIT_*`)
+
+## 📋 **模板文件**
+
+### **`.env.example`** - 前端配置模板
+```bash
+# 位置：./.env.example
+# 用途：前端环境配置模板
+# 使用：复制为 .env 并修改配置值
+```
+
+### **`server/.env.example`** - 后端配置模板
+```bash
+# 位置：server/.env.example
+# 用途：后端环境配置模板
+# 使用：复制为 server/.env 并修改配置值
+```
 
 ## 🔧 **配置规范**
 
 ### **✅ 正确的配置分离**
 
-#### **根目录 `.env`**
+#### **根目录 `.env`** - 前端专用
 ```bash
 # ===========================================
-# 前端和全局配置
+# 前端开发配置
 # ===========================================
 
-# 前端API配置
+# 前端开发服务器
+VITE_DEV_PORT=5174
 VITE_API_URL=http://localhost:3001/api
+VITE_WS_URL=ws://localhost:3001
+
+# 应用信息
+VITE_APP_NAME=Test Web App
+VITE_APP_VERSION=1.0.0
+
+# 功能开关
+VITE_ENABLE_MOCK_DATA=false
+VITE_ENABLE_DEBUG=true
 
 # 缓存配置
 REDIS_HOST=localhost
