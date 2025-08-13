@@ -1,6 +1,5 @@
 import { AlertTriangle, CheckCircle, Clock, Download, Loader, Play, RotateCcw, Square, XCircle } from 'lucide-react';
 import React from 'react';
-import { TestHeader } from './TestHeader';
 
 // 统一的测试状态类型
 export type TestStatus = 'idle' | 'starting' | 'running' | 'completed' | 'failed' | 'stopped';

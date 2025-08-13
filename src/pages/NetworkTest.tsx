@@ -1,6 +1,5 @@
 import { Activity, AlertTriangle, BarChart3, CheckCircle, Clock, Cloud, Download, Globe, MapPin, Play, Router, Server, Signal, Square, Upload, Wifi, XCircle, Zap } from 'lucide-react';
 import React, { useState } from 'react';
-import TestPageLayout from '../components/testing/TestPageLayout';
 
 interface NetworkTestConfig {
   target: string;
@@ -196,12 +195,11 @@ const NetworkTest: React.FC = () => {
 
 
   return (
-    <TestPageLayout
+    <BaseTestPage
       testType="performance"
       title="网络测试"
       description="检测网络连接质量、延迟、带宽和DNS解析性能"
       icon={Wifi}
-      testTabLabel="网络测试"
       historyTabLabel="测试历史"
       testStatus={testStatus === 'starting' ? 'running' : testStatus as 'idle' | 'running' | 'completed' | 'failed'}
       isTestDisabled={!config.target}

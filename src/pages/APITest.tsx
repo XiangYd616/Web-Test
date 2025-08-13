@@ -2,7 +2,7 @@ import { BarChart3, CheckCircle, Clock, Code, Database, Download, Eye, EyeOff, F
 import React, { useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { URLInput } from '../components/testing';
-import UnifiedTestPageLayout from '../components/testing/UnifiedTestPageLayout';
+import BaseTestPage from '../components/testing/BaseTestPage';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { useUserStats } from '../hooks/useUserStats';
 import backgroundTestManager from '../services/backgroundTestManager';
@@ -623,10 +623,10 @@ const APITest: React.FC = () => {
   };
 
   return (
-    <UnifiedTestPageLayout
+    <BaseTestPage
       testType="api"
       title="API测试"
-      testStatus={testStatus === 'starting' ? 'running' : testStatus}
+      description="全面测试API接口的功能、性能和安全性"
       icon={Code}
       onTestSelect={handleTestSelect}
       onTestRerun={handleTestRerun}
@@ -1664,7 +1664,7 @@ const APITest: React.FC = () => {
           )}
         </>
       )}
-    </UnifiedTestPageLayout>
+    </BaseTestPage>
   );
 };
 

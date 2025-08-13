@@ -1,7 +1,6 @@
 import { Database, Network, Server } from 'lucide-react';
 import React, { useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
-import TestPageLayout from '../components/testing/TestPageLayout';
 import { useUserStats } from '../hooks/useUserStats';
 
 // 基础设施测试类型
@@ -178,12 +177,11 @@ const InfrastructureTest: React.FC = () => {
   };
 
   return (
-    <TestPageLayout
+    <BaseTestPage
       testType="performance"
       title="基础设施测试"
       description="全面测试数据库性能、网络连接质量和服务器基础设施"
       icon={Server}
-      testStatus={testStatus}
       isTestDisabled={!config.database.enabled && !config.network.enabled}
       onStartTest={handleStartTest}
       onTestSelect={handleTestSelect}
@@ -196,8 +194,8 @@ const InfrastructureTest: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* 数据库测试 */}
               <div className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${config.database.enabled
-                  ? 'border-blue-500 bg-blue-500/10'
-                  : 'border-gray-600 bg-gray-800/50'
+                ? 'border-blue-500 bg-blue-500/10'
+                : 'border-gray-600 bg-gray-800/50'
                 }`}
                 onClick={() => setConfig(prev => ({
                   ...prev,
@@ -214,8 +212,8 @@ const InfrastructureTest: React.FC = () => {
 
               {/* 网络测试 */}
               <div className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${config.network.enabled
-                  ? 'border-green-500 bg-green-500/10'
-                  : 'border-gray-600 bg-gray-800/50'
+                ? 'border-green-500 bg-green-500/10'
+                : 'border-gray-600 bg-gray-800/50'
                 }`}
                 onClick={() => setConfig(prev => ({
                   ...prev,

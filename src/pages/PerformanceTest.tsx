@@ -3,7 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import TestHistory from '../components/common/TestHistory';
 import { URLInput } from '../components/ui/URLInput';
+import BaseTestPage from '../components/testing/BaseTestPage';
 import { useUserStats } from '../hooks/useUserStats';
+import { apiService } from '../services/api/apiService';
 
 // 性能测试相关类型定义
 type TestMode = 'basic' | 'standard' | 'comprehensive' | 'lighthouse';

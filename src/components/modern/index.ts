@@ -20,9 +20,9 @@ export type {
 } from './ModernChart';
 
 // 布局和导航组件
-export { default as ModernLayout } from './ModernLayout';
-export { default as ModernNavigation } from './ModernNavigation';
-export { default as ModernSidebar } from './ModernSidebar';
+export { default as ModernLayout } from './Layout';
+export { default as ModernNavigation } from './Navigation';
+export { default as ModernSidebar } from './Sidebar';
 export { default as TopNavbar } from './TopNavbar';
 export { default as UserDropdownMenu } from './UserDropdownMenu';
 export { default as UserMenu } from './UserMenu';

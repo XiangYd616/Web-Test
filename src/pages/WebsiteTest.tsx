@@ -4,7 +4,6 @@ import { useSearchParams } from 'react-router-dom';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { TestCharts } from '../components/charts/TestCharts';
 import { URLInput } from '../components/testing';
-import TestPageLayout from '../components/testing/TestPageLayout';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { useUserStats } from '../hooks/useUserStats';
 
@@ -445,12 +444,11 @@ const WebsiteTest: React.FC = () => {
   const estimatedTime = selectedTestsCount * 45; // 平均45秒每个测试
 
   return (
-    <TestPageLayout
+    <BaseTestPage
       testType="performance"
       title="网站综合测试"
       description="全面检测网站的性能、安全性、SEO和用户体验"
       icon={Globe}
-      testTabLabel="网站测试"
       historyTabLabel="测试历史"
       testStatus={testStatus === 'starting' ? 'running' : testStatus as 'idle' | 'running' | 'completed' | 'failed'}
       isTestDisabled={!config.url}

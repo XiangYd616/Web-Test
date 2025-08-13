@@ -3,7 +3,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { TestCharts } from '../components/charts/TestCharts';
 import { URLInput } from '../components/testing';
-import TestPageLayout from '../components/testing/TestPageLayout';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { useUserStats } from '../hooks/useUserStats';
 
@@ -858,7 +857,7 @@ const CompatibilityTest: React.FC = () => {
   };
 
   return (
-    <TestPageLayout
+    <BaseTestPage
       testType="compatibility"
       title="兼容性测试"
       description="检测网站在不同浏览器和设备上的兼容性"

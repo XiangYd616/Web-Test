@@ -11,6 +11,13 @@ const Register = lazy(() => import('../../pages/Register'));
 // 懒加载页面组件
 const ModernDashboard = lazy(() => import('../../pages/dashboard/ModernDashboard'));
 const WebsiteTest = lazy(() => import('../../pages/WebsiteTest'));
+
+// 分析页面（推荐使用）
+const SEOAnalysis = lazy(() => import('../../pages/SEOAnalysis'));
+const PerformanceAnalysis = lazy(() => import('../../pages/PerformanceAnalysis'));
+const APIAnalysis = lazy(() => import('../../pages/APIAnalysis'));
+
+// 传统测试页面（保持兼容性）
 const SecurityTest = lazy(() => import('../../pages/SecurityTest'));
 const PerformanceTest = lazy(() => import('../../pages/PerformanceTest'));
 const SEOTest = lazy(() => import('../../pages/SEOTest'));
@@ -125,19 +132,43 @@ const AppRoutes: React.FC = () => {
             <SecurityTest />
           </LazyPageWrapper>
         } />
+        {/* 性能分析（推荐） */}
         <Route path="performance-test" element={
+          <LazyPageWrapper>
+            <PerformanceAnalysis />
+          </LazyPageWrapper>
+        } />
+
+        {/* 传统性能测试（兼容性） */}
+        <Route path="performance-test-legacy" element={
           <LazyPageWrapper>
             <PerformanceTest />
           </LazyPageWrapper>
         } />
 
+        {/* SEO分析（推荐） */}
         <Route path="seo-test" element={
+          <LazyPageWrapper>
+            <SEOAnalysis />
+          </LazyPageWrapper>
+        } />
+
+        {/* 传统SEO测试（兼容性） */}
+        <Route path="seo-test-legacy" element={
           <LazyPageWrapper>
             <SEOTest />
           </LazyPageWrapper>
         } />
 
+        {/* API分析（推荐） */}
         <Route path="api-test" element={
+          <LazyPageWrapper>
+            <APIAnalysis />
+          </LazyPageWrapper>
+        } />
+
+        {/* 传统API测试（兼容性） */}
+        <Route path="api-test-legacy" element={
           <LazyPageWrapper>
             <APITest />
           </LazyPageWrapper>

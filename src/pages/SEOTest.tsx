@@ -6,7 +6,6 @@ import LocalSEOResults from '../components/seo/LocalSEOResults';
 import NetworkErrorPrompt from '../components/seo/NetworkErrorPrompt';
 import SEOResults from '../components/seo/SEOResults';
 import { URLInput } from '../components/testing';
-import TestPageLayout from '../components/testing/TestPageLayout';
 import type { SEOTestMode } from '../hooks/useUnifiedSEOTest';
 import { useUnifiedSEOTest } from '../hooks/useUnifiedSEOTest';
 
@@ -80,6 +79,46 @@ const SEOTest: React.FC = () => {
   const [seoTestMode, setSeoTestMode] = useState<SEOTestMode>('online');
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // 真实SEO测试功能
+  const runRealSEOTest = async (config: SEOTestConfig) => {
+    try {
+      setTestStatus('running');
+      setError('');
+
+      // 调用后端真实SEO测试API
+      const response = await apiService.post('/api/test/seo', {
+        url: config.url,
+        keywords: config.keywords?.split(',').map(k => k.trim()).filter(Boolean) || [],
+        options: {
+          checkTechnicalSEO: config.checkTechnicalSEO,
+          checkContentQuality: config.checkContentQuality,
+          checkPageSpeed: config.checkPageSpeed,
+          checkMobileFriendly: config.checkMobileFriendly,
+          checkSocialMedia: config.checkSocialMedia,
+          checkStructuredData: config.checkStructuredData,
+          checkImageOptimization: config.checkImageOptimization,
+          checkInternalLinking: config.checkInternalLinking,
+          checkSchemaMarkup: config.checkSchemaMarkup,
+          checkLocalSEO: config.checkLocalSEO,
+          checkCompetitorAnalysis: config.checkCompetitorAnalysis,
+          checkKeywordDensity: config.checkKeywordDensity,
+          mode: config.mode
+        }
+      });
+
+      if (response.success) {
+        setTestStatus('completed');
+        return response.data;
+      } else {
+        throw new Error(response.message || 'SEO测试失败');
+      }
+    } catch (err: any) {
+      setTestStatus('failed');
+      setError(err.message || '测试过程中发生错误');
+      throw err;
+    }
+  };
 
   // 使用统一SEO测试的状态
   const progress = testProgress?.progress || 0;
@@ -509,11 +548,36 @@ const SEOTest: React.FC = () => {
   // 在使用功能时才提示登录
 
   return (
-    <TestPageLayout
+    <BaseTestPage
       testType="seo"
       title="SEO综合分析"
       description="全面分析网站SEO状况，发现关键问题和优化机会"
       icon={Search}
+      headerExtra={
+        <div className="flex items-center space-x-4">
+          {/* 测试模式切换 */}
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setSeoTestMode('online')}
+              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${seoTestMode === 'online'
+                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
+                }`}
+            >
+              在线分析
+            </button>
+            <button
+              onClick={() => setSeoTestMode('local')}
+              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${seoTestMode === 'local'
+                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
+                }`}
+            >
+              本地分析
+            </button>
+          </div>
+        </div>
+      }
       testTabLabel="SEO测试"
       historyTabLabel="测试历史"
       testStatus={testStatus === 'starting' ? 'running' : testStatus as 'idle' | 'running' | 'completed' | 'failed'}
