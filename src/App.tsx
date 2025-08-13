@@ -22,7 +22,6 @@ import './services/apiErrorInterceptor';
 import './services/errorService';
 
 // 性能优化工具导入
-import { initializePerformanceOptimization } from './utils/performanceOptimization';
 import { initializePreloading } from './utils/routePreloader';
 
 /**
@@ -31,9 +30,6 @@ import { initializePreloading } from './utils/routePreloader';
  */
 function App() {
   useEffect(() => {
-    // 初始化性能优化功能
-    initializePerformanceOptimization();
-
     // 初始化路由预加载
     initializePreloading();
 

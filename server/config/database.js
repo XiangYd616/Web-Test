@@ -12,16 +12,16 @@ const EnhancedDatabaseConnectionManager = require('../utils/EnhancedDatabaseConn
 let pool = null;
 let connectionManager = null;
 
-// 根据环境自动选择数据库 - 统一使用新架构数据库名
+// 根据环境自动选择数据库
 const getDefaultDatabase = () => {
   const env = process.env.NODE_ENV || 'development';
   switch (env) {
     case 'production':
-      return process.env.DB_NAME || 'test_platform_prod';
+      return process.env.DB_NAME || 'testweb_prod';
     case 'test':
-      return process.env.DB_NAME || 'test_platform_test';
+      return process.env.DB_NAME || 'testweb_test';
     default:
-      return process.env.DB_NAME || 'testweb_dev'; // 保持与现有配置一致
+      return process.env.DB_NAME || 'testweb_dev';
   }
 };
 

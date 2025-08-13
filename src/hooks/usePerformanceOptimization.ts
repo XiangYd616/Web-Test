@@ -8,7 +8,7 @@ import {
   lazyImageLoader,
   performanceMonitor,
   performanceUtils
-} from '../utils/performanceOptimization';
+} from '../utils/performanceUtils';
 
 /**
  * 图片懒加载Hook

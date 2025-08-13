@@ -33,7 +33,6 @@ const cacheRoutes = require('./routes/cache');
 const errorRoutes = require('./routes/errors');
 const performanceRoutes = require('./routes/performance');
 const filesRoutes = require('./routes/files');
-// Accessibility routes removed - functionality moved to compatibility test
 
 // 导入中间件
 const { errorHandler } = require('./middleware/errorHandler');
@@ -183,6 +182,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', authRoutes);
 // 🔧 修复：更具体的路由必须在更通用的路由之前注册
 app.use('/api/test/history', testHistoryRoutes); // 新的测试历史API - 必须在 /api/test 之前
+app.use('/api/test/real', require('./routes/realTest')); // 真实测试API - 新增
 app.use('/api/test', testRoutes);
 app.use('/api/seo', seoRoutes); // SEO测试API - 解决CORS问题
 app.use('/api/user', userRoutes);
@@ -205,7 +205,6 @@ app.use('/api/cache', cacheRoutes);
 app.use('/api/errors', errorRoutes);
 app.use('/api/performance', performanceRoutes);
 app.use('/api/files', filesRoutes);
-// Accessibility API routes removed - functionality moved to compatibility test
 
 // API响应格式示例路由（仅在开发环境中启用）
 if (process.env.NODE_ENV === 'development') {

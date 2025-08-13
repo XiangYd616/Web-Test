@@ -1,7 +1,6 @@
 import { AlertTriangle, BarChart3, CheckCircle, Clock, Download, Eye, Gauge, ImageIcon, MousePointer, Play, Square, Target, TrendingUp, XCircle, Zap } from 'lucide-react';
 import React, { useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
-import TestPageLayout from '../components/testing/TestPageLayout';
 import { useUserStats } from '../hooks/useUserStats';
 
 // CSS样式已迁移到组件库中
@@ -214,12 +213,11 @@ const UXTest: React.FC = () => {
   };
 
   return (
-    <TestPageLayout
+    <BaseTestPage
       testType="accessibility"
       title="用户体验测试"
       description="评估网站的可用性、可访问性和用户交互体验"
       icon={Eye}
-      testTabLabel="用户体验测试"
       historyTabLabel="测试历史"
       testStatus={testStatus === 'starting' ? 'running' : testStatus as 'idle' | 'running' | 'completed' | 'failed'}
       isTestDisabled={!config.url}

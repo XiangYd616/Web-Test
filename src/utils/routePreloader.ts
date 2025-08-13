@@ -32,7 +32,7 @@ class RoutePreloader {
     }
 
     this.state.loading.add(routePath);
-    
+
     const promise = importFn()
       .then((module) => {
         this.state.loading.delete(routePath);
@@ -56,10 +56,10 @@ class RoutePreloader {
    * 批量预加载路由
    */
   async preloadRoutes(routes: Array<{ path: string; importFn: () => Promise<any> }>): Promise<void> {
-    const promises = routes.map(({ path, importFn }) => 
-      this.preloadRoute(path, importFn).catch(() => {}) // 忽略单个路由的错误
+    const promises = routes.map(({ path, importFn }) =>
+      this.preloadRoute(path, importFn).catch(() => { }) // 忽略单个路由的错误
     );
-    
+
     await Promise.allSettled(promises);
   }
 
@@ -135,7 +135,7 @@ class RoutePreloader {
     // 清理所有超时
     this.preloadTimeouts.forEach(timeout => clearTimeout(timeout));
     this.preloadTimeouts.clear();
-    
+
     // 清理状态
     this.state.loading.clear();
     this.preloadPromises.clear();
@@ -170,29 +170,29 @@ export const routeImports = {
   '/stress-test': () => import('../pages/StressTest'),
   '/compatibility-test': () => import('../pages/CompatibilityTest'),
   '/ux-test': () => import('../pages/UXTest'),
-  
+
   // 仪表板和数据
   '/dashboard': () => import('../pages/dashboard/ModernDashboard'),
   '/data-management': () => import('../pages/DataManagement'),
   '/statistics': () => import('../pages/Statistics'),
   '/analytics': () => import('../pages/Analytics'),
-  
+
   // 报告和历史
   '/test-history': () => import('../pages/TestHistory'),
   '/reports': () => import('../pages/Reports'),
-  
+
   // 用户相关
   '/profile': () => import('../pages/UserProfile'),
   '/settings': () => import('../pages/Settings'),
   '/notifications': () => import('../pages/Notifications'),
-  
+
   // 管理
   '/admin': () => import('../pages/Admin'),
-  
+
   // 集成
   '/integrations': () => import('../pages/Integrations'),
   '/api-docs': () => import('../pages/APIDocs'),
-  
+
   // 认证
   '/login': () => import('../pages/Login'),
   '/register': () => import('../pages/Register')
@@ -204,13 +204,13 @@ export const routeImports = {
 export const preloadStrategies = {
   // 关键路径 - 立即预加载
   critical: ['/dashboard', '/website-test', '/test-history'],
-  
+
   // 高优先级 - 空闲时预加载
   high: ['/security-test', '/performance-test', '/seo-test', '/api-test'],
-  
+
   // 中优先级 - 用户交互时预加载
   medium: ['/network-test', '/database-test', '/stress-test', '/compatibility-test'],
-  
+
   // 低优先级 - 按需预加载
   low: ['/settings', '/profile', '/admin', '/integrations']
 };
@@ -244,12 +244,12 @@ export const createLazyComponent = <T extends ComponentType<any>>(
   routePath?: string
 ) => {
   const LazyComponent = lazy(importFn);
-  
+
   // 如果提供了路由路径，注册到预加载器
   if (routePath) {
     routePreloader.preloadRoute(routePath, importFn);
   }
-  
+
   return LazyComponent;
 };
 
