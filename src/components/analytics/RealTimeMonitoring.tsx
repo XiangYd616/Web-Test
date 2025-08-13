@@ -1,507 +1,226 @@
-import { Activity, AlertTriangle, BarChart3, Bell, CheckCircle, Clock, Eye, Globe, Pause, Play, Plus, Settings, Shield, Target, Trash2, TrendingDown, TrendingUp, Wifi, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { Area, AreaChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { MonitoringData, monitoringService, MonitoringSite, MonitoringStats } from '../../services/monitoringService';
+import { Activity, AlertTriangle, CheckCircle, Clock, Database, Server, Users, Zap } from 'lucide-react';
 
-interface AlertRule {
-  id: string;
-  name: string;
-  condition: string;
-  threshold: number;
-  enabled: boolean;
-  notifications: string[];
-}
-
-interface RealTimeData {
-  timestamp: string;
+export interface MonitoringMetrics {
+  activeUsers: number;
+  serverLoad: number;
   responseTime: number;
-  status: number;
-  uptime: number;
+  errorRate: number;
+  databaseConnections: number;
+  memoryUsage: number;
+  cpuUsage: number;
+  networkTraffic: number;
 }
 
-const RealTimeMonitoring: React.FC = () => {
-  const [monitoringSites, setMonitoringSites] = useState<MonitoringSite[]>([]);
-  const [realTimeData, setRealTimeData] = useState<MonitoringData[]>([]);
-  const [isMonitoring, setIsMonitoring] = useState(false);
-  const [showAddSite, setShowAddSite] = useState(false);
-  const [showAlertConfig, setShowAlertConfig] = useState(false);
-  const [newSite, setNewSite] = useState({ name: '', url: '', region: '默认' });
-  const [selectedSite, setSelectedSite] = useState<MonitoringSite | null>(null);
-  const [showSiteDetails, setShowSiteDetails] = useState(false);
-  const [monitoringStats, setMonitoringStats] = useState<MonitoringStats>({
-    totalSites: 0,
-    onlineSites: 0,
-    avgResponseTime: 0,
-    totalUptime: 0,
-    activeAlerts: 0,
-    validCertificates: 0,
-    totalChecks: 0,
-    incidents: 0
+export interface RealTimeMonitoringProps {
+  refreshInterval?: number;
+  showAlerts?: boolean;
+  compactMode?: boolean;
+}
+
+const RealTimeMonitoring: React.FC<RealTimeMonitoringProps> = ({
+  refreshInterval = 5000,
+  showAlerts = true,
+  compactMode = false
+}) => {
+  const [metrics, setMetrics] = useState<MonitoringMetrics>({
+    activeUsers: 0,
+    serverLoad: 0,
+    responseTime: 0,
+    errorRate: 0,
+    databaseConnections: 0,
+    memoryUsage: 0,
+    cpuUsage: 0,
+    networkTraffic: 0
   });
-  const [loading, setLoading] = useState(true);
 
-  // 初始化数据加载
+  const [isConnected, setIsConnected] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+
+  // 模拟实时数据更新
   useEffect(() => {
-    loadMonitoringData();
-  }, []);
-
-  // 监控状态变化
-  useEffect(() => {
-    if (isMonitoring) {
-      monitoringService.startMonitoring(30000); // 30秒间隔
-
-      // 定期更新数据
-      const interval = setInterval(() => {
-        updateRealTimeData();
-        updateMonitoringStats();
-      }, 5000);
-
-      return () => {
-        clearInterval(interval);
-      };
-    } else {
-      monitoringService.stopMonitoring();
-    }
-    return undefined;
-  }, [isMonitoring]);
-
-  // 加载监控数据
-  const loadMonitoringData = async () => {
-    setLoading(true);
-    try {
-      const sites = await monitoringService.getSites();
-      setMonitoringSites(sites);
-
-      const stats = monitoringService.getMonitoringStats();
-      setMonitoringStats(stats);
-
-      const data = monitoringService.getMonitoringData();
-      setRealTimeData(data);
-    } catch (error) {
-      console.error('Failed to load monitoring data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 更新实时数据
-  const updateRealTimeData = () => {
-    const data = monitoringService.getMonitoringData(undefined, 50);
-    setRealTimeData(data);
-  };
-
-  // 更新监控统计
-  const updateMonitoringStats = () => {
-    const stats = monitoringService.getMonitoringStats();
-    setMonitoringStats(stats);
-  };
-
-  const addMonitoringSite = async () => {
-    console.log('添加监控站点被调用', { newSite });
-
-    if (!newSite.name || !newSite.url) {
-      console.log('站点名称或URL为空', { name: newSite.name, url: newSite.url });
-      alert('请填写站点名称和URL');
-      return;
-    }
-
-    try {
-      console.log('开始添加站点...');
-      const site = await monitoringService.addSite({
-        name: newSite.name,
-        url: newSite.url,
-        region: newSite.region,
-        enabled: true
+    const updateMetrics = () => {
+      setMetrics({
+        activeUsers: Math.floor(Math.random() * 1000) + 100,
+        serverLoad: Math.random() * 100,
+        responseTime: Math.random() * 500 + 50,
+        errorRate: Math.random() * 5,
+        databaseConnections: Math.floor(Math.random() * 50) + 10,
+        memoryUsage: Math.random() * 100,
+        cpuUsage: Math.random() * 100,
+        networkTraffic: Math.random() * 1000
       });
+      setLastUpdate(new Date());
+      setIsConnected(true);
+    };
 
-      console.log('站点添加成功', site);
-      setMonitoringSites(prev => {
-        const updated = [...prev, site];
-        console.log('更新站点列表', updated);
-        return updated;
-      });
+    // 初始更新
+    updateMetrics();
 
-      setNewSite({ name: '', url: '', region: '默认' });
-      setShowAddSite(false);
+    // 设置定时更新
+    const interval = setInterval(updateMetrics, refreshInterval);
 
-      // 更新统计
-      updateMonitoringStats();
+    return () => clearInterval(interval);
+  }, [refreshInterval]);
 
-      // 立即重新加载数据
-      await loadMonitoringData();
-
-    } catch (error) {
-      console.error('Failed to add monitoring site:', error);
-      alert('添加站点失败: ' + (error instanceof Error ? error.message : '未知错误'));
-    }
+  const getStatusColor = (value: number, thresholds: { warning: number; critical: number }) => {
+    if (value >= thresholds.critical) return 'text-red-600 bg-red-50 border-red-200';
+    if (value >= thresholds.warning) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+    return 'text-green-600 bg-green-50 border-green-200';
   };
 
-  const removeSite = async (id: string) => {
-    try {
-      await monitoringService.removeSite(id);
-      setMonitoringSites(prev => prev.filter(site => site.id !== id));
-      updateMonitoringStats();
-    } catch (error) {
-      console.error('Failed to remove monitoring site:', error);
-    }
+  const getStatusIcon = (value: number, thresholds: { warning: number; critical: number }) => {
+    if (value >= thresholds.critical) return <AlertTriangle className="w-4 h-4" />;
+    if (value >= thresholds.warning) return <Clock className="w-4 h-4" />;
+    return <CheckCircle className="w-4 h-4" />;
   };
 
-  const toggleMonitoring = () => {
-    setIsMonitoring(!isMonitoring);
-  };
+  const MetricCard: React.FC<{
+    title: string;
+    value: number;
+    unit: string;
+    icon: React.ReactNode;
+    thresholds: { warning: number; critical: number };
+    format?: (value: number) => string;
+  }> = ({ title, value, unit, icon, thresholds, format }) => {
+    const formattedValue = format ? format(value) : value.toFixed(1);
+    const statusColor = getStatusColor(value, thresholds);
+    const statusIcon = getStatusIcon(value, thresholds);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'online': return 'text-green-400 bg-green-500/20';
-      case 'offline': return 'text-red-400 bg-red-500/20';
-      case 'warning': return 'text-yellow-400 bg-yellow-500/20';
-      default: return 'text-gray-400 bg-gray-500/20';
+    if (compactMode) {
+      return (
+        <div className={`flex items-center gap-2 p-2 rounded border ${statusColor}`}>
+          {icon}
+          <div className="flex-1 min-w-0">
+            <div className="text-xs font-medium truncate">{title}</div>
+            <div className="text-sm font-bold">{formattedValue}{unit}</div>
+          </div>
+          {statusIcon}
+        </div>
+      );
     }
-  };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'online': return <CheckCircle className="w-4 h-4" />;
-      case 'offline': return <AlertTriangle className="w-4 h-4" />;
-      case 'warning': return <Clock className="w-4 h-4" />;
-      default: return <Activity className="w-4 h-4" />;
-    }
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2 text-gray-600">
+            {icon}
+            <span className="text-sm font-medium">{title}</span>
+          </div>
+          {statusIcon}
+        </div>
+        <div className="text-2xl font-bold text-gray-900">
+          {formattedValue}
+          <span className="text-sm font-normal text-gray-500 ml-1">{unit}</span>
+        </div>
+        <div className={`mt-2 text-xs px-2 py-1 rounded ${statusColor}`}>
+          {value >= thresholds.critical ? '严重' : value >= thresholds.warning ? '警告' : '正常'}
+        </div>
+      </div>
+    );
   };
 
   return (
-    <div className="space-y-6">
-      {/* 头部控制 */}
+    <div className="space-y-4">
+      {/* 连接状态 */}
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white">实时监控</h2>
-        <div className="flex items-center space-x-3">
-          <button
-            onClick={() => setShowAlertConfig(true)}
-            className="flex items-center space-x-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-          >
-            <Settings className="w-4 h-4" />
-            <span>告警设置</span>
-          </button>
-          <button
-            onClick={() => setShowAddSite(true)}
-            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            <span>添加站点</span>
-          </button>
-          <button
-            onClick={toggleMonitoring}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${isMonitoring
-              ? 'bg-red-600 hover:bg-red-700 text-white'
-              : 'bg-green-600 hover:bg-green-700 text-white'
-              }`}
-          >
-            {isMonitoring ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-            <span>{isMonitoring ? '停止监控' : '开始监控'}</span>
-          </button>
+        <h2 className="text-lg font-semibold text-gray-900">实时监控</h2>
+        <div className="flex items-center gap-2">
+          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+          <span className="text-sm text-gray-600">
+            {isConnected ? '已连接' : '连接中...'}
+          </span>
+          {lastUpdate && (
+            <span className="text-xs text-gray-400">
+              更新于 {lastUpdate.toLocaleTimeString()}
+            </span>
+          )}
         </div>
       </div>
 
-      {/* 监控状态概览 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6">
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm font-medium">监控站点</p>
-              <p className="text-2xl font-bold text-white mt-1">{monitoringStats.totalSites}</p>
-              <div className="flex items-center mt-2">
-                <TrendingUp className="w-4 h-4 text-green-400 mr-1" />
-                <span className="text-sm text-green-400">+2 本周</span>
-              </div>
-            </div>
-            <Globe className="w-8 h-8 text-blue-400" />
-          </div>
-        </div>
-
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm font-medium">在线站点</p>
-              <p className="text-2xl font-bold text-green-400 mt-1">
-                {monitoringStats.onlineSites}
-              </p>
-              <div className="flex items-center mt-2">
-                <Wifi className="w-4 h-4 text-green-400 mr-1" />
-                <span className="text-sm text-green-400">
-                  {monitoringStats.totalSites > 0
-                    ? Math.round((monitoringStats.onlineSites / monitoringStats.totalSites) * 100)
-                    : 0}% 可用
-                </span>
-              </div>
-            </div>
-            <CheckCircle className="w-8 h-8 text-green-400" />
-          </div>
-        </div>
-
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm font-medium">平均响应时间</p>
-              <p className="text-2xl font-bold text-white mt-1">
-                {Math.round(monitoringStats.avgResponseTime)}ms
-              </p>
-              <div className="flex items-center mt-2">
-                <TrendingDown className="w-4 h-4 text-green-400 mr-1" />
-                <span className="text-sm text-green-400">-15ms 今日</span>
-              </div>
-            </div>
-            <Zap className="w-8 h-8 text-yellow-400" />
-          </div>
-        </div>
-
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm font-medium">活跃告警</p>
-              <p className="text-2xl font-bold text-red-400 mt-1">
-                {monitoringStats.activeAlerts}
-              </p>
-              <div className="flex items-center mt-2">
-                <Bell className="w-4 h-4 text-red-400 mr-1" />
-                <span className="text-sm text-red-400">需要关注</span>
-              </div>
-            </div>
-            <AlertTriangle className="w-8 h-8 text-red-400" />
-          </div>
-        </div>
-
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm font-medium">SSL证书</p>
-              <p className="text-2xl font-bold text-green-400 mt-1">
-                {monitoringStats.validCertificates}
-              </p>
-              <div className="flex items-center mt-2">
-                <Shield className="w-4 h-4 text-green-400 mr-1" />
-                <span className="text-sm text-green-400">全部有效</span>
-              </div>
-            </div>
-            <Shield className="w-8 h-8 text-green-400" />
-          </div>
-        </div>
-
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-400 text-sm font-medium">总可用性</p>
-              <p className="text-2xl font-bold text-white mt-1">
-                {monitoringStats.totalUptime.toFixed(1)}%
-              </p>
-              <div className="flex items-center mt-2">
-                <Target className="w-4 h-4 text-blue-400 mr-1" />
-                <span className="text-sm text-blue-400">SLA 99.9%</span>
-              </div>
-            </div>
-            <BarChart3 className="w-8 h-8 text-blue-400" />
-          </div>
-        </div>
+      {/* 指标网格 */}
+      <div className={`grid gap-4 ${compactMode ? 'grid-cols-2 lg:grid-cols-4' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'}`}>
+        <MetricCard
+          title="活跃用户"
+          value={metrics.activeUsers}
+          unit=""
+          icon={<Users className="w-4 h-4" />}
+          thresholds={{ warning: 800, critical: 900 }}
+          format={(value) => value.toString()}
+        />
+        
+        <MetricCard
+          title="服务器负载"
+          value={metrics.serverLoad}
+          unit="%"
+          icon={<Server className="w-4 h-4" />}
+          thresholds={{ warning: 70, critical: 90 }}
+        />
+        
+        <MetricCard
+          title="响应时间"
+          value={metrics.responseTime}
+          unit="ms"
+          icon={<Zap className="w-4 h-4" />}
+          thresholds={{ warning: 200, critical: 400 }}
+        />
+        
+        <MetricCard
+          title="错误率"
+          value={metrics.errorRate}
+          unit="%"
+          icon={<AlertTriangle className="w-4 h-4" />}
+          thresholds={{ warning: 2, critical: 5 }}
+        />
+        
+        <MetricCard
+          title="数据库连接"
+          value={metrics.databaseConnections}
+          unit=""
+          icon={<Database className="w-4 h-4" />}
+          thresholds={{ warning: 40, critical: 45 }}
+          format={(value) => value.toString()}
+        />
+        
+        <MetricCard
+          title="内存使用"
+          value={metrics.memoryUsage}
+          unit="%"
+          icon={<Activity className="w-4 h-4" />}
+          thresholds={{ warning: 80, critical: 95 }}
+        />
+        
+        <MetricCard
+          title="CPU使用"
+          value={metrics.cpuUsage}
+          unit="%"
+          icon={<Activity className="w-4 h-4" />}
+          thresholds={{ warning: 70, critical: 90 }}
+        />
+        
+        <MetricCard
+          title="网络流量"
+          value={metrics.networkTraffic}
+          unit="MB/s"
+          icon={<Activity className="w-4 h-4" />}
+          thresholds={{ warning: 800, critical: 950 }}
+        />
       </div>
 
-      {/* 实时图表 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* 响应时间图表 */}
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">实时响应时间</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={realTimeData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis
-                dataKey="timestamp"
-                stroke="#9CA3AF"
-                fontSize={12}
-                tickFormatter={(value) => new Date(value).toLocaleTimeString('zh-CN', {
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              />
-              <YAxis stroke="#9CA3AF" fontSize={12} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#1F2937',
-                  border: '1px solid #374151',
-                  borderRadius: '8px',
-                  color: '#F9FAFB'
-                }}
-                labelFormatter={(value) => new Date(value).toLocaleTimeString('zh-CN')}
-                formatter={(value: number) => [`${value.toFixed(0)}ms`, '响应时间']}
-              />
-              <Line
-                type="monotone"
-                dataKey="responseTime"
-                stroke="#3B82F6"
-                strokeWidth={2}
-                dot={false}
-                name="响应时间"
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* 可用性图表 */}
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">服务可用性</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={realTimeData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis
-                dataKey="timestamp"
-                stroke="#9CA3AF"
-                fontSize={12}
-                tickFormatter={(value) => new Date(value).toLocaleTimeString('zh-CN', {
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              />
-              <YAxis stroke="#9CA3AF" fontSize={12} domain={[95, 100]} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#1F2937',
-                  border: '1px solid #374151',
-                  borderRadius: '8px',
-                  color: '#F9FAFB'
-                }}
-                labelFormatter={(value) => new Date(value).toLocaleTimeString('zh-CN')}
-                formatter={(value: number) => [`${value.toFixed(2)}%`, '可用性']}
-              />
-              <Area
-                type="monotone"
-                dataKey="uptime"
-                stroke="#10B981"
-                fill="#10B981"
-                fillOpacity={0.6}
-                name="可用性"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* 监控站点列表 */}
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">监控站点</h3>
-        {monitoringSites.length === 0 ? (
-          <div className="text-center py-8">
-            <Globe className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-            <p className="text-gray-400">暂无监控站点</p>
-            <button
-              onClick={() => setShowAddSite(true)}
-              className="mt-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-            >
-              添加第一个站点
-            </button>
+      {/* 警报区域 */}
+      {showAlerts && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertTriangle className="w-4 h-4 text-yellow-600" />
+            <span className="text-sm font-medium text-yellow-800">系统警报</span>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-700">
-                  <th className="text-left py-3 px-4 text-gray-300">站点</th>
-                  <th className="text-left py-3 px-4 text-gray-300">状态</th>
-                  <th className="text-left py-3 px-4 text-gray-300">响应时间</th>
-                  <th className="text-left py-3 px-4 text-gray-300">可用性</th>
-                  <th className="text-left py-3 px-4 text-gray-300">最后检查</th>
-                  <th className="text-left py-3 px-4 text-gray-300">操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                {monitoringSites.map((site) => (
-                  <tr key={site.id} className="border-b border-gray-700/50">
-                    <td className="py-3 px-4">
-                      <div>
-                        <div className="text-white font-medium">{site.name}</div>
-                        <div className="text-gray-400 text-xs">{site.url}</div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className={`inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(site.status)}`}>
-                        {getStatusIcon(site.status)}
-                        <span>{site.status === 'online' ? '在线' : site.status === 'offline' ? '离线' : '警告'}</span>
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-white">{site.responseTime}ms</td>
-                    <td className="py-3 px-4 text-white">{site.uptime}%</td>
-                    <td className="py-3 px-4 text-gray-300">
-                      {new Date(site.lastCheck).toLocaleTimeString('zh-CN')}
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center space-x-2">
-                        <button
-                          type="button"
-                          className="p-1 text-gray-400 hover:text-blue-400 transition-colors"
-                          title="查看详情"
-                          aria-label="查看站点详情"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => removeSite(site.id)}
-                          className="p-1 text-gray-400 hover:text-red-400 transition-colors"
-                          title="删除站点"
-                          aria-label="删除监控站点"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      {/* 添加站点模态框 */}
-      {showAddSite && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold text-white mb-4">添加监控站点</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">站点名称</label>
-                <input
-                  type="text"
-                  value={newSite.name}
-                  onChange={(e) => setNewSite(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="例如：我的网站"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">URL</label>
-                <input
-                  type="url"
-                  value={newSite.url}
-                  onChange={(e) => setNewSite(prev => ({ ...prev, url: e.target.value }))}
-                  className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="https://example.com"
-                />
-              </div>
-            </div>
-            <div className="flex items-center justify-end space-x-3 mt-6">
-              <button
-                type="button"
-                onClick={() => setShowAddSite(false)}
-                className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
-                title="取消添加"
-                aria-label="取消添加站点"
-              >
-                取消
-              </button>
-              <button
-                type="button"
-                onClick={addMonitoringSite}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-              >
-                添加
-              </button>
-            </div>
+          <div className="text-sm text-yellow-700">
+            {metrics.serverLoad > 70 && <div>• 服务器负载过高 ({metrics.serverLoad.toFixed(1)}%)</div>}
+            {metrics.responseTime > 200 && <div>• 响应时间较慢 ({metrics.responseTime.toFixed(0)}ms)</div>}
+            {metrics.errorRate > 2 && <div>• 错误率偏高 ({metrics.errorRate.toFixed(1)}%)</div>}
+            {metrics.serverLoad <= 70 && metrics.responseTime <= 200 && metrics.errorRate <= 2 && (
+              <div>• 系统运行正常</div>
+            )}
           </div>
         </div>
       )}

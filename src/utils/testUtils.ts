@@ -69,7 +69,7 @@ export class TestSuite {
    */
   async runAll(): Promise<TestResult[]> {
     this.results = [];
-    
+
     for (const test of this.tests) {
       const result = await test();
       this.results.push(result);
@@ -121,8 +121,8 @@ export class PerformanceTester {
       const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
       if (navEntries.length > 0) {
         const nav = navEntries[0];
-        const loadTime = nav.loadEventEnd - nav.navigationStart;
-        
+        const loadTime = nav.loadEventEnd - (nav as any).navigationStart;
+
         results.push({
           metric: 'Page Load Time',
           value: loadTime,
@@ -131,7 +131,7 @@ export class PerformanceTester {
           passed: loadTime <= this.thresholds.loadTime
         });
 
-        const renderTime = nav.domContentLoadedEventEnd - nav.navigationStart;
+        const renderTime = nav.domContentLoadedEventEnd - (nav as any).navigationStart;
         results.push({
           metric: 'DOM Content Loaded',
           value: renderTime,
@@ -165,7 +165,7 @@ export class PerformanceTester {
     if ('memory' in performance) {
       const memory = (performance as any).memory;
       const usedMB = memory.usedJSHeapSize / 1024 / 1024;
-      
+
       return {
         metric: 'Memory Usage',
         value: usedMB,
@@ -224,11 +224,11 @@ export class UXTester {
       }
 
       const startTime = performance.now();
-      
+
       const handleClick = () => {
         const responseTime = performance.now() - startTime;
         button.removeEventListener('click', handleClick);
-        
+
         resolve({
           component: 'Button',
           interaction: 'Click',
@@ -257,7 +257,7 @@ export class UXTester {
     }
 
     const startTime = performance.now();
-    
+
     // 触发表单验证
     const inputs = form.querySelectorAll('input[required]');
     if (inputs.length > 0) {
@@ -268,9 +268,9 @@ export class UXTester {
 
     // 等待验证消息出现
     await new Promise(resolve => setTimeout(resolve, 50));
-    
+
     const responseTime = performance.now() - startTime;
-    
+
     return {
       component: 'Form',
       interaction: 'Validation',
@@ -326,11 +326,11 @@ export class APITester {
    */
   async testAPIResponse(url: string, options?: RequestInit): Promise<TestResult> {
     const startTime = performance.now();
-    
+
     try {
       const response = await fetch(url, options);
       const duration = performance.now() - startTime;
-      
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
@@ -361,19 +361,19 @@ export class APITester {
    */
   async testErrorHandling(url: string): Promise<TestResult> {
     const startTime = performance.now();
-    
+
     try {
       // 故意发送错误请求
       const response = await fetch(url + '/nonexistent', {
         method: 'POST',
         body: 'invalid data'
       });
-      
+
       const duration = performance.now() - startTime;
-      
+
       // 检查是否正确处理了错误
       const hasErrorResponse = !response.ok;
-      
+
       return {
         name: `Error Handling: ${url}`,
         passed: hasErrorResponse,
@@ -430,11 +430,11 @@ export class TestRunner {
       // 用户体验测试
       console.log('👤 运行用户体验测试...');
       const uxResults: UXTestResult[] = [];
-      
+
       // API测试
       console.log('🌐 运行API测试...');
       const apiResults: TestResult[] = [];
-      
+
       // 测试健康检查端点
       const healthTest = await this.apiTester.testAPIResponse('/api/health');
       apiResults.push(healthTest);
@@ -459,7 +459,7 @@ export class TestRunner {
       };
 
       console.log('✅ 测试套件运行完成');
-      
+
       return {
         performance: performanceResults,
         ux: uxResults,

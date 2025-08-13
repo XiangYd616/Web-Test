@@ -1,5 +1,6 @@
 import { Activity, AlertTriangle, BarChart3, CheckCircle, Clock, Cloud, Download, Globe, MapPin, Play, Router, Server, Signal, Square, Upload, Wifi, XCircle, Zap } from 'lucide-react';
 import React, { useState } from 'react';
+import TestPageLayout from '../components/testing/TestPageLayout';
 
 interface NetworkTestConfig {
   target: string;
@@ -67,6 +68,7 @@ const NetworkTest: React.FC = () => {
   });
 
   const [isRunning, setIsRunning] = useState(false);
+  const [testStatus, setTestStatus] = useState<'idle' | 'starting' | 'running' | 'completed' | 'failed'>('idle');
   const [result, setResult] = useState<NetworkTestResult | null>(null);
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState('');
@@ -194,8 +196,8 @@ const NetworkTest: React.FC = () => {
 
 
   return (
-    <UnifiedTestPageLayout
-      testType="network"
+    <TestPageLayout
+      testType="performance"
       title="网络测试"
       description="检测网络连接质量、延迟、带宽和DNS解析性能"
       icon={Wifi}

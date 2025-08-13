@@ -1,8 +1,9 @@
-import { AlertTriangle, CheckCircle, Clock, Globe, Grid, Loader, Lock, Monitor, Play, RotateCcw, Settings, Smartphone, Square, Tablet, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Eye, Globe, Grid, Loader, Lock, Monitor, Play, RotateCcw, Settings, Smartphone, Square, Tablet, XCircle } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
+import { TestCharts } from '../components/charts/TestCharts';
 import { URLInput } from '../components/testing';
-import UnifiedTestPageLayout from '../components/testing/UnifiedTestPageLayout';
+import TestPageLayout from '../components/testing/TestPageLayout';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { useUserStats } from '../hooks/useUserStats';
 
@@ -45,6 +46,19 @@ interface CompatibilityConfig {
   targetBrowsers: BrowserVersion[];
   features: string[];
   engines: CompatibilityEngine[];
+  // Chrome 专项测试配置
+  chromeSpecific: {
+    enabled: boolean;
+    testModernFeatures: boolean;
+    testExperimentalFeatures: boolean;
+    testPerformanceAPIs: boolean;
+    testWebComponents: boolean;
+    testServiceWorkers: boolean;
+    testWebAssembly: boolean;
+    testWebGL: boolean;
+    testWebRTC: boolean;
+    testPWAFeatures: boolean;
+  };
   // 保持向后兼容的属性
   checkDesktop?: boolean;
   checkMobile?: boolean;
@@ -193,6 +207,19 @@ const CompatibilityTest: React.FC = () => {
     ],
     features: ['flexbox', 'css-grid', 'es6-modules', 'fetch-api', 'web-components'],
     engines: ['caniuse', 'feature-detection'],
+    // Chrome 专项测试配置
+    chromeSpecific: {
+      enabled: false, // 默认关闭，用户可选择启用
+      testModernFeatures: true,
+      testExperimentalFeatures: false,
+      testPerformanceAPIs: true,
+      testWebComponents: true,
+      testServiceWorkers: true,
+      testWebAssembly: false,
+      testWebGL: true,
+      testWebRTC: false,
+      testPWAFeatures: true,
+    },
     // 向后兼容属性
     checkDesktop: true,
     checkMobile: true,
@@ -831,7 +858,7 @@ const CompatibilityTest: React.FC = () => {
   };
 
   return (
-    <UnifiedTestPageLayout
+    <TestPageLayout
       testType="compatibility"
       title="兼容性测试"
       description="检测网站在不同浏览器和设备上的兼容性"

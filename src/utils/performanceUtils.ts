@@ -372,7 +372,7 @@ class PerformanceMonitor {
         this.metrics.set('ResourceLoad', entry.loadEventEnd - entry.domContentLoadedEventEnd);
 
         // 总页面加载时间
-        this.metrics.set('PageLoad', entry.loadEventEnd - entry.navigationStart);
+        this.metrics.set('PageLoad', entry.loadEventEnd - (entry as any).navigationStart);
 
         // 首次内容绘制 (FCP)
         const fcpEntry = performance.getEntriesByName('first-contentful-paint')[0];

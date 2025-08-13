@@ -4,7 +4,8 @@
  * 版本: v2.0.0 - 完善的错误处理和重试机制
  */
 
-import { ApiError, ErrorCode } from '../../types/unified/apiResponse';
+import { ErrorCode } from '../../types/enums';
+import { ApiError } from '../../types/unified/apiResponse';
 import { enhanceError, ErrorContext as UtilsErrorContext } from '../../utils/errorHandler';
 
 // 错误处理配置
@@ -50,11 +51,10 @@ const DEFAULT_CONFIG: ErrorHandlerConfig = {
   exponentialBackoff: true,
   enableLogging: true,
   retryableErrors: [
-    'NETWORK_ERROR',
-    'TIMEOUT_ERROR',
-    'SERVER_ERROR',
-    'SERVICE_UNAVAILABLE',
-    'CONNECTION_ERROR'
+    ErrorCode.NETWORK_ERROR,
+    ErrorCode.TIMEOUT_ERROR,
+    ErrorCode.SERVER_ERROR,
+    ErrorCode.SERVICE_UNAVAILABLE
   ] as ErrorCode[],
   userFriendlyMessages: {
     'NETWORK_ERROR': '网络连接失败，请检查网络设置后重试',
@@ -79,7 +79,7 @@ const DEFAULT_CONFIG: ErrorHandlerConfig = {
     'QUOTA_EXCEEDED': '已达到使用限额，请升级账户或稍后重试',
     'MAINTENANCE_MODE': '系统正在维护中，请稍后访问',
     'UNKNOWN_ERROR': '发生未知错误，请稍后重试或联系技术支持'
-  } as Record<ErrorCode, string>
+  } as Record<string, string>
 };
 
 export class ApiErrorHandler {
@@ -270,23 +270,23 @@ export class ApiErrorHandler {
 
     // 根据HTTP状态码映射错误
     const errorMapping: Record<number, { code: ErrorCode; message: string; retryable: boolean }> = {
-      400: { code: 'VALIDATION_ERROR', message: '请求参数错误', retryable: false },
-      401: { code: 'TOKEN_EXPIRED', message: '认证失败', retryable: false },
-      403: { code: 'PERMISSION_DENIED', message: '权限不足', retryable: false },
-      404: { code: 'RESOURCE_NOT_FOUND', message: '资源不存在', retryable: false },
-      409: { code: 'VALIDATION_ERROR', message: '数据冲突', retryable: false },
-      413: { code: 'FILE_TOO_LARGE', message: '请求体过大', retryable: false },
-      415: { code: 'UNSUPPORTED_FILE_TYPE', message: '不支持的媒体类型', retryable: false },
-      422: { code: 'VALIDATION_ERROR', message: '数据验证失败', retryable: false },
-      429: { code: 'RATE_LIMIT_EXCEEDED', message: '请求过于频繁', retryable: true },
-      500: { code: 'SERVER_ERROR', message: '服务器内部错误', retryable: true },
-      502: { code: 'SERVICE_UNAVAILABLE', message: '网关错误', retryable: true },
-      503: { code: 'SERVICE_UNAVAILABLE', message: '服务不可用', retryable: true },
-      504: { code: 'TIMEOUT_ERROR', message: '网关超时', retryable: true }
+      400: { code: ErrorCode.VALIDATION_ERROR, message: '请求参数错误', retryable: false },
+      401: { code: ErrorCode.TOKEN_EXPIRED, message: '认证失败', retryable: false },
+      403: { code: ErrorCode.FORBIDDEN, message: '权限不足', retryable: false },
+      404: { code: ErrorCode.RESOURCE_NOT_FOUND, message: '资源不存在', retryable: false },
+      409: { code: ErrorCode.VALIDATION_ERROR, message: '数据冲突', retryable: false },
+      413: { code: ErrorCode.VALIDATION_ERROR, message: '请求体过大', retryable: false },
+      415: { code: ErrorCode.VALIDATION_ERROR, message: '不支持的媒体类型', retryable: false },
+      422: { code: ErrorCode.VALIDATION_ERROR, message: '数据验证失败', retryable: false },
+      429: { code: ErrorCode.RATE_LIMIT_EXCEEDED, message: '请求过于频繁', retryable: true },
+      500: { code: ErrorCode.SERVER_ERROR, message: '服务器内部错误', retryable: true },
+      502: { code: ErrorCode.SERVICE_UNAVAILABLE, message: '网关错误', retryable: true },
+      503: { code: ErrorCode.SERVICE_UNAVAILABLE, message: '服务不可用', retryable: true },
+      504: { code: ErrorCode.TIMEOUT_ERROR, message: '网关超时', retryable: true }
     };
 
     const errorInfo = errorMapping[status] || {
-      code: 'UNKNOWN_ERROR' as ErrorCode,
+      code: ErrorCode.UNKNOWN_ERROR,
       message: `HTTP ${status} 错误`,
       retryable: status >= 500
     };
@@ -340,16 +340,16 @@ export class ApiErrorHandler {
   /**
    * 获取用户友好的错误消息
    */
-  private getUserFriendlyMessage(errorCode: ErrorCode): string {
+  private getUserFriendlyMessage(errorCode: string): string {
     return this.config.userFriendlyMessages[errorCode] || this.config.userFriendlyMessages['UNKNOWN_ERROR'];
   }
 
   /**
    * 判断是否应该重试请求
    */
-  private shouldRetryRequest(errorCode: ErrorCode, requestId: string): boolean {
+  private shouldRetryRequest(errorCode: string, requestId: string): boolean {
     // 检查错误类型是否可重试
-    if (!this.config.retryableErrors.includes(errorCode)) {
+    if (!this.config.retryableErrors.includes(errorCode as ErrorCode)) {
       return false;
     }
 
@@ -567,7 +567,8 @@ export const ErrorHandlerUtils = {
     code,
     message,
     details,
-    retryable: ['NETWORK_ERROR', 'TIMEOUT_ERROR', 'SERVER_ERROR', 'SERVICE_UNAVAILABLE'].includes(code)
+    timestamp: new Date().toISOString(),
+    retryable: [ErrorCode.NETWORK_ERROR, ErrorCode.TIMEOUT_ERROR, ErrorCode.SERVER_ERROR, ErrorCode.SERVICE_UNAVAILABLE].includes(code)
   }),
 
   /**
@@ -597,7 +598,7 @@ export const ErrorHandlerUtils = {
     }
 
     return ErrorHandlerUtils.createError(
-      status >= 500 ? 'SERVER_ERROR' : 'UNKNOWN_ERROR',
+      status >= 500 ? ErrorCode.SERVER_ERROR : ErrorCode.UNKNOWN_ERROR,
       `HTTP ${status} Error`,
       { status, statusText: response.statusText, data }
     );

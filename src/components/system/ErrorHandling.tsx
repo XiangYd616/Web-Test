@@ -1,5 +1,5 @@
 import { AlertCircle, AlertTriangle, ArrowLeft, CheckCircle, Clock, Globe, Home, Info, RefreshCw, Server, Shield, WifiOff, XCircle } from 'lucide-react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 // 错误类型定义
 export type ErrorType =
@@ -268,9 +268,9 @@ export const Notification: React.FC<{
   duration?: number;
   className?: string;
 }> = ({ type, title, message, onClose, autoClose = true, duration = 5000, className = '' }) => {
-  const [isVisible, setIsVisible] = React.useState(true);
+  const [isVisible, setIsVisible] = useState(true);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (autoClose && duration > 0) {
       const timer = setTimeout(() => {
         setIsVisible(false);
@@ -415,7 +415,7 @@ const DefaultErrorFallback: React.FC<{ error: Error; resetError: () => void }> =
 
 // 错误处理Hook
 export const useErrorHandler = () => {
-  const [error, setError] = React.useState<ErrorInfo | null>(null);
+  const [error, setError] = useState<ErrorInfo | null>(null);
 
   const handleError = (error: any, context?: string) => {
     let errorInfo: ErrorInfo;
@@ -466,7 +466,7 @@ export const useErrorHandler = () => {
 
 // 通知管理Hook
 export const useNotifications = () => {
-  const [notifications, setNotifications] = React.useState<Array<{
+  const [notifications, setNotifications] = useState<Array<{
     id: string;
     type: 'success' | 'warning' | 'error' | 'info';
     title: string;

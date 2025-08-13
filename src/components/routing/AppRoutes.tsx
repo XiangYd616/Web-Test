@@ -1,10 +1,12 @@
 import React, { Suspense, lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import Login from '../../pages/Login';
-import Register from '../../pages/Register';
 import { AdminGuard, ProtectedRoute } from '../auth';
 import { ModernLayout } from '../modern';
 import { EnhancedErrorBoundary, LoadingSpinner } from '../ui';
+
+// 认证页面 - 也使用懒加载以减少初始包大小
+const Login = lazy(() => import('../../pages/Login'));
+const Register = lazy(() => import('../../pages/Register'));
 
 // 懒加载页面组件
 const ModernDashboard = lazy(() => import('../../pages/dashboard/ModernDashboard'));
@@ -14,12 +16,15 @@ const PerformanceTest = lazy(() => import('../../pages/PerformanceTest'));
 const SEOTest = lazy(() => import('../../pages/SEOTest'));
 
 const APITest = lazy(() => import('../../pages/APITest'));
-const NetworkTest = lazy(() => import('../../pages/NetworkTest'));
-const DatabaseTest = lazy(() => import('../../pages/DatabaseTest'));
+const InfrastructureTest = lazy(() => import('../../pages/InfrastructureTest'));
 const StressTest = lazy(() => import('../../pages/StressTest'));
 const CompatibilityTest = lazy(() => import('../../pages/CompatibilityTest'));
-const ChromeCompatibilityTest = lazy(() => import('../../pages/ChromeCompatibilityTest'));
 const UXTest = lazy(() => import('../../pages/UXTest'));
+
+// 保留但标记为已合并的页面（向后兼容）
+const NetworkTest = lazy(() => import('../../pages/NetworkTest'));
+const DatabaseTest = lazy(() => import('../../pages/DatabaseTest'));
+const ChromeCompatibilityTest = lazy(() => import('../../pages/ChromeCompatibilityTest'));
 
 // 演示和测试页面
 // URLInputDemo 已删除
@@ -79,7 +84,11 @@ interface LazyPageWrapperProps {
 
 const LazyPageWrapper: React.FC<LazyPageWrapperProps> = ({ children }) => (
   <EnhancedErrorBoundary>
-    <Suspense fallback={<LoadingSpinner size="lg" text="加载页面..." />}>
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <LoadingSpinner size="lg" text="加载页面..." />
+      </div>
+    }>
       {children}
     </Suspense>
   </EnhancedErrorBoundary>
@@ -88,9 +97,17 @@ const LazyPageWrapper: React.FC<LazyPageWrapperProps> = ({ children }) => (
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
-      {/* 公开路由 */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      {/* 公开路由 - 使用懒加载包装器 */}
+      <Route path="/login" element={
+        <LazyPageWrapper>
+          <Login />
+        </LazyPageWrapper>
+      } />
+      <Route path="/register" element={
+        <LazyPageWrapper>
+          <Register />
+        </LazyPageWrapper>
+      } />
       {/* LoginDemo 路由已移除，因为文件不存在 */}
       {/* background-test-demo 路由已移除 */}
 
@@ -125,16 +142,15 @@ const AppRoutes: React.FC = () => {
             <APITest />
           </LazyPageWrapper>
         } />
-        <Route path="network-test" element={
+        <Route path="infrastructure-test" element={
           <LazyPageWrapper>
-            <NetworkTest />
+            <InfrastructureTest />
           </LazyPageWrapper>
         } />
-        <Route path="database-test" element={
-          <LazyPageWrapper>
-            <DatabaseTest />
-          </LazyPageWrapper>
-        } />
+
+        {/* 向后兼容路由 - 重定向到新的合并页面 */}
+        <Route path="network-test" element={<Navigate to="/infrastructure-test" replace />} />
+        <Route path="database-test" element={<Navigate to="/infrastructure-test" replace />} />
         <Route path="stress-test" element={
           <LazyPageWrapper>
             <StressTest />
@@ -145,11 +161,9 @@ const AppRoutes: React.FC = () => {
             <CompatibilityTest />
           </LazyPageWrapper>
         } />
-        <Route path="chrome-compatibility-test" element={
-          <LazyPageWrapper>
-            <ChromeCompatibilityTest />
-          </LazyPageWrapper>
-        } />
+
+        {/* Chrome 兼容性测试重定向到兼容性测试 */}
+        <Route path="chrome-compatibility-test" element={<Navigate to="/compatibility-test" replace />} />
         <Route path="ux-test" element={
           <LazyPageWrapper>
             <UXTest />

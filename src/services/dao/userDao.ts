@@ -3,7 +3,7 @@
  * 提供用户相关的数据库操作
  */
 
-import { User, CreateUserData, UpdateUserData } from '../../types/user';
+import { CreateUserData, UpdateUserData, User } from '../../types/user';
 
 // 模拟用户数据存储
 const users: User[] = [
@@ -12,10 +12,10 @@ const users: User[] = [
     username: 'admin',
     email: 'admin@example.com',
     password: '$2b$10$rOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQ', // 'admin123'
-    role: 'admin',
+    role: 'admin' as any, // 临时修复，稍后会正确导入枚举
     isActive: true,
-    createdAt: new Date('2024-01-01'),
-    updatedAt: new Date('2024-01-01'),
+    createdAt: new Date('2024-01-01').toISOString(),
+    updatedAt: new Date('2024-01-01').toISOString(),
     lastLoginAt: null,
     profile: {
       firstName: 'Admin',
@@ -27,10 +27,12 @@ const users: User[] = [
       preferences: {
         theme: 'light',
         language: 'zh-CN',
+        timezone: 'Asia/Shanghai',
         notifications: {
           email: true,
           push: true,
-          sms: false
+          sms: false,
+          browser: true
         }
       }
     }
@@ -40,10 +42,10 @@ const users: User[] = [
     username: 'testuser',
     email: 'test@example.com',
     password: '$2b$10$rOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQ', // 'test123'
-    role: 'user',
+    role: 'user' as any, // 临时修复，稍后会正确导入枚举
     isActive: true,
-    createdAt: new Date('2024-01-02'),
-    updatedAt: new Date('2024-01-02'),
+    createdAt: new Date('2024-01-02').toISOString(),
+    updatedAt: new Date('2024-01-02').toISOString(),
     lastLoginAt: null,
     profile: {
       firstName: 'Test',
@@ -55,10 +57,12 @@ const users: User[] = [
       preferences: {
         theme: 'light',
         language: 'zh-CN',
+        timezone: 'Asia/Shanghai',
         notifications: {
           email: true,
           push: false,
-          sms: false
+          sms: false,
+          browser: false
         }
       }
     }
@@ -102,10 +106,10 @@ export const userDao = {
       username: userData.username,
       email: userData.email,
       password: userData.password,
-      role: userData.role || 'user',
+      role: userData.role || 'user' as any,
       isActive: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       lastLoginAt: null,
       profile: {
         firstName: userData.firstName || '',
@@ -117,10 +121,12 @@ export const userDao = {
         preferences: {
           theme: 'light',
           language: 'zh-CN',
+          timezone: 'Asia/Shanghai',
           notifications: {
             email: true,
             push: true,
-            sms: false
+            sms: false,
+            browser: true
           }
         }
       }
@@ -143,7 +149,7 @@ export const userDao = {
     const updatedUser: User = {
       ...user,
       ...updateData,
-      updatedAt: new Date(),
+      updatedAt: new Date().toISOString(),
       profile: {
         ...user.profile,
         ...updateData.profile
@@ -180,8 +186,8 @@ export const userDao = {
   async updateLastLogin(id: string): Promise<void> {
     const user = users.find(u => u.id === id);
     if (user) {
-      user.lastLoginAt = new Date();
-      user.updatedAt = new Date();
+      user.lastLoginAt = new Date().toISOString();
+      user.updatedAt = new Date().toISOString();
     }
   },
 
@@ -247,7 +253,7 @@ export const userDao = {
    */
   async search(query: string): Promise<User[]> {
     const lowercaseQuery = query.toLowerCase();
-    return users.filter(user => 
+    return users.filter(user =>
       user.username.toLowerCase().includes(lowercaseQuery) ||
       user.email.toLowerCase().includes(lowercaseQuery) ||
       user.profile.firstName?.toLowerCase().includes(lowercaseQuery) ||
@@ -274,12 +280,12 @@ export const userDao = {
    */
   async batchUpdateStatus(userIds: string[], isActive: boolean): Promise<number> {
     let updatedCount = 0;
-    
+
     for (const id of userIds) {
       const user = users.find(u => u.id === id);
       if (user) {
         user.isActive = isActive;
-        user.updatedAt = new Date();
+        user.updatedAt = new Date().toISOString();
         updatedCount++;
       }
     }

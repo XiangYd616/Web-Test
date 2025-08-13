@@ -1,12 +1,12 @@
 import { AlertCircle, CheckCircle, Clock, Eye, FileText, Globe, HardDrive, Image, Link, Loader, MapPin, Search, Settings, Share2, Smartphone, Square, XCircle, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
-import EnhancedSEOResults from '../components/seo/EnhancedSEOResults';
 import FileUploadSEO from '../components/seo/FileUploadSEO';
 import LocalSEOResults from '../components/seo/LocalSEOResults';
 import NetworkErrorPrompt from '../components/seo/NetworkErrorPrompt';
+import SEOResults from '../components/seo/SEOResults';
 import { URLInput } from '../components/testing';
-import UnifiedTestPageLayout from '../components/testing/UnifiedTestPageLayout';
+import TestPageLayout from '../components/testing/TestPageLayout';
 import type { SEOTestMode } from '../hooks/useUnifiedSEOTest';
 import { useUnifiedSEOTest } from '../hooks/useUnifiedSEOTest';
 
@@ -509,7 +509,7 @@ const SEOTest: React.FC = () => {
   // 在使用功能时才提示登录
 
   return (
-    <UnifiedTestPageLayout
+    <TestPageLayout
       testType="seo"
       title="SEO综合分析"
       description="全面分析网站SEO状况，发现关键问题和优化机会"
@@ -1186,7 +1186,7 @@ const SEOTest: React.FC = () => {
                 </div>
 
                 {seoTestMode === 'online' ? (
-                  <EnhancedSEOResults results={results} onExport={handleExportReport} />
+                  <SEOResults results={results} onExport={handleExportReport} />
                 ) : (
                   <LocalSEOResults results={results} onExport={handleExportReport} />
                 )}

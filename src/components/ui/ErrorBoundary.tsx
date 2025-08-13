@@ -1,6 +1,5 @@
+import { AlertTriangle, Bug, Home, RefreshCw } from 'lucide-react';
 import { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
-import Logger from '../../utils/logger';
 
 interface Props {
   children: ReactNode;
@@ -10,39 +9,82 @@ interface Props {
 
 interface State {
   hasError: boolean;
-  error?: Error;
-  errorInfo?: ErrorInfo;
+  error: Error | null;
+  errorInfo: ErrorInfo | null;
+  errorId: string;
 }
 
 class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = {
+      hasError: false,
+      error: null,
+      errorInfo: null,
+      errorId: ''
+    };
   }
 
-  static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+  static getDerivedStateFromError(error: Error): Partial<State> {
+    return {
+      hasError: true,
+      error,
+      errorId: Date.now().toString(36)
+    };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    Logger.error('ErrorBoundary caught an error', error, {
-      component: 'ErrorBoundary',
-      errorInfo: errorInfo.componentStack
+    this.setState({
+      error,
+      errorInfo
     });
-    this.setState({ error, errorInfo });
 
-    // 调用错误回调
+    // 调用外部错误处理函数
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
     }
+
+    // 记录错误到控制台
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
+
+    // 可以在这里添加错误报告服务
+    // reportError(error, errorInfo);
   }
 
   handleRetry = () => {
-    this.setState({ hasError: false, error: undefined, errorInfo: undefined });
+    this.setState({
+      hasError: false,
+      error: null,
+      errorInfo: null,
+      errorId: ''
+    });
   };
 
   handleGoHome = () => {
     window.location.href = '/';
+  };
+
+  handleReportBug = () => {
+    const { error, errorInfo, errorId } = this.state;
+    const errorReport = {
+      errorId,
+      message: error?.message,
+      stack: error?.stack,
+      componentStack: errorInfo?.componentStack,
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      url: window.location.href
+    };
+
+    // 复制错误信息到剪贴板
+    navigator.clipboard.writeText(JSON.stringify(errorReport, null, 2))
+      .then(() => {
+        alert('错误信息已复制到剪贴板，请联系技术支持');
+      })
+      .catch(() => {
+        console.log('错误报告:', errorReport);
+        alert('请将控制台中的错误信息发送给技术支持');
+      });
   };
 
   render() {
@@ -52,52 +94,61 @@ class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback;
       }
 
-      // 默认错误UI
+      // 默认错误界面
       return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-6">
-          <div className="max-w-md w-full bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-8 text-center">
-            <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center">
-                <AlertTriangle className="w-8 h-8 text-red-400" />
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+          <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6">
+            <div className="text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                <AlertTriangle className="h-6 w-6 text-red-600" />
               </div>
-            </div>
 
-            <h2 className="text-xl font-bold text-white mb-4">
-              出现了一些问题
-            </h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-2">
+                页面出现错误
+              </h2>
 
-            <p className="text-gray-300 mb-6">
-              应用程序遇到了意外错误。我们已经记录了这个问题，请稍后重试。
-            </p>
+              <p className="text-sm text-gray-600 mb-6">
+                抱歉，页面遇到了意外错误。您可以尝试刷新页面或返回首页。
+              </p>
 
-            {process.env.NODE_ENV === 'development' && this.state.error && (
-              <div className="mb-6 p-4 bg-gray-900/50 rounded-lg text-left">
-                <h3 className="text-sm font-medium text-red-400 mb-2">错误详情:</h3>
-                <pre className="text-xs text-gray-400 overflow-auto max-h-32">
-                  {this.state.error.toString()}
-                  {this.state.errorInfo?.componentStack}
-                </pre>
+              {/* 错误详情（开发环境） */}
+              {process.env.NODE_ENV === 'development' && this.state.error && (
+                <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded text-left">
+                  <p className="text-xs font-mono text-red-800 break-all">
+                    {this.state.error.message}
+                  </p>
+                </div>
+              )}
+
+              <div className="space-y-3">
+                <button
+                  onClick={this.handleRetry}
+                  className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  type="button">
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  重试
+                </button>
+
+                <button
+                  onClick={this.handleGoHome}
+                  className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  type="button">
+                  <Home className="w-4 h-4 mr-2" />
+                  返回首页
+                </button>
+
+                <button
+                  onClick={this.handleReportBug}
+                  className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-500 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  type="button">
+                  <Bug className="w-4 h-4 mr-2" />
+                  报告问题
+                </button>
               </div>
-            )}
 
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                type="button"
-                onClick={this.handleRetry}
-                className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-              >
-                <RefreshCw className="w-4 h-4" />
-                <span>重试</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={this.handleGoHome}
-                className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
-              >
-                <Home className="w-4 h-4" />
-                <span>返回首页</span>
-              </button>
+              <p className="mt-4 text-xs text-gray-400">
+                错误ID: {this.state.errorId}
+              </p>
             </div>
           </div>
         </div>

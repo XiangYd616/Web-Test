@@ -141,17 +141,7 @@ export interface StressTestDetails {
   bytesReceived?: number;
 }
 
-export interface TestHistoryQuery {
-  page?: number;
-  limit?: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-  testType?: TestType | TestType[];
-  status?: string;
-  search?: string;
-  dateFrom?: string;
-  dateTo?: string;
-}
+// TestHistoryQuery 接口已在下方定义
 
 export interface TestHistoryResponse {
   success: boolean;

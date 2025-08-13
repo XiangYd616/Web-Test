@@ -1,32 +1,32 @@
-import React from 'react';
 import { LucideIcon } from 'lucide-react';
+import React from 'react';
 
-interface UnifiedTestHeaderProps {
+interface TestHeaderProps {
   // 基本信息
   title: string;
   description: string;
   icon: LucideIcon;
-  
+
   // 标签页状态
   activeTab: 'test' | 'history';
   onTabChange: (tab: 'test' | 'history') => void;
   testTabLabel?: string;
   historyTabLabel?: string;
-  
+
   // 测试状态
   testStatus?: 'idle' | 'running' | 'completed' | 'failed';
   isTestDisabled?: boolean;
   onStartTest?: () => void;
   onStopTest?: () => void;
-  
+
   // 额外的控制按钮
   extraControls?: React.ReactNode;
-  
+
   // 样式
   className?: string;
 }
 
-export const UnifiedTestHeader: React.FC<UnifiedTestHeaderProps> = ({
+export const TestHeader: React.FC<TestHeaderProps> = ({
   title,
   description,
   icon: Icon,
@@ -55,7 +55,7 @@ export const UnifiedTestHeader: React.FC<UnifiedTestHeaderProps> = ({
         return {
           text: '开始测试',
           onClick: onStartTest,
-          className: isTestDisabled 
+          className: isTestDisabled
             ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
             : 'bg-blue-600 hover:bg-blue-700 text-white',
           disabled: isTestDisabled
@@ -89,22 +89,20 @@ export const UnifiedTestHeader: React.FC<UnifiedTestHeaderProps> = ({
             <button
               type="button"
               onClick={() => onTabChange('test')}
-              className={`px-3 py-1.5 text-sm rounded transition-colors ${
-                activeTab === 'test'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
-              }`}
+              className={`px-3 py-1.5 text-sm rounded transition-colors ${activeTab === 'test'
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
+                }`}
             >
               {testTabLabel}
             </button>
             <button
               type="button"
               onClick={() => onTabChange('history')}
-              className={`px-3 py-1.5 text-sm rounded transition-colors ${
-                activeTab === 'history'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
-              }`}
+              className={`px-3 py-1.5 text-sm rounded transition-colors ${activeTab === 'history'
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-300 hover:text-white hover:bg-gray-600/50'
+                }`}
             >
               {historyTabLabel}
             </button>
@@ -127,4 +125,4 @@ export const UnifiedTestHeader: React.FC<UnifiedTestHeaderProps> = ({
   );
 };
 
-export default UnifiedTestHeader;
+export default TestHeader;

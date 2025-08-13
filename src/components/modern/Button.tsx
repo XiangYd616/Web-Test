@@ -1,9 +1,9 @@
-import React from 'react';
 import { LucideIcon } from 'lucide-react';
+import React from 'react';
 
 import '../../styles/design-system.css';
 
-export interface ModernButtonProps {
+export interface ButtonProps {
   children: React.ReactNode;
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
   size?: 'sm' | 'base' | 'lg';
@@ -16,7 +16,7 @@ export interface ModernButtonProps {
   type?: 'button' | 'submit' | 'reset';
 }
 
-const ModernButton: React.FC<ModernButtonProps> = ({
+const Button: React.FC<ButtonProps> = ({
   children,
   variant = 'primary',
   size = 'base',
@@ -86,4 +86,4 @@ const ModernButton: React.FC<ModernButtonProps> = ({
   );
 };
 
-export default ModernButton;
+export default Button;

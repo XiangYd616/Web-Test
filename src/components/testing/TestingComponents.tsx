@@ -1,5 +1,6 @@
 import { AlertTriangle, CheckCircle, Clock, Download, Loader, Play, RotateCcw, Square, XCircle } from 'lucide-react';
 import React from 'react';
+import { TestHeader } from './TestHeader';
 
 // 统一的测试状态类型
 export type TestStatus = 'idle' | 'starting' | 'running' | 'completed' | 'failed' | 'stopped';
@@ -30,8 +31,13 @@ export interface TestProgress {
   phase?: string;
 }
 
-// 统一的测试头部组件
-interface TestHeaderProps {
+// 导入统一的测试头部组件
+
+// 统一的测试头部组件 - 使用导入的组件
+// interface TestHeaderProps 已在 TestHeader.tsx 中定义
+
+// 内部测试头部组件（用于特殊情况）
+interface InternalTestHeaderProps {
   title: string;
   description: string;
   icon: React.ReactNode;
@@ -42,7 +48,7 @@ interface TestHeaderProps {
   isRunning?: boolean;
 }
 
-export const TestHeader: React.FC<TestHeaderProps> = ({
+export const InternalTestHeader: React.FC<InternalTestHeaderProps> = ({
   title,
   description,
   icon,

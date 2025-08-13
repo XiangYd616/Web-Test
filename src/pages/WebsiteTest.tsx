@@ -2,13 +2,30 @@ import { AlertTriangle, CheckCircle, Clock, Code, Download, Eye, Gauge, Globe, L
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
+import { TestCharts } from '../components/charts/TestCharts';
 import { URLInput } from '../components/testing';
-import UnifiedTestPageLayout from '../components/testing/UnifiedTestPageLayout';
+import TestPageLayout from '../components/testing/TestPageLayout';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { useUserStats } from '../hooks/useUserStats';
 
 // CSS样式已迁移到组件库中
 // 进度条样式已集成到ProgressBar组件
+
+// 合并性能测试配置
+type TestMode = 'basic' | 'standard' | 'comprehensive' | 'lighthouse';
+type NetworkCondition = 'fast-3g' | 'slow-3g' | '4g' | 'wifi' | 'cable' | 'no-throttling';
+type DeviceType = 'desktop' | 'mobile' | 'tablet' | 'both';
+type TestEngine = 'pagespeed' | 'gtmetrix' | 'webpagetest' | 'lighthouse' | 'local';
+
+// Core Web Vitals 指标
+interface CoreWebVitals {
+  lcp: number; // Largest Contentful Paint
+  fid: number; // First Input Delay
+  cls: number; // Cumulative Layout Shift
+  fcp: number; // First Contentful Paint
+  ttfb: number; // Time to First Byte
+  si: number; // Speed Index
+}
 
 interface WebsiteTestConfig {
   url: string;
@@ -19,14 +36,80 @@ interface WebsiteTestConfig {
     compatibility: boolean;
     api: boolean;
     accessibility: boolean;
+    performance: boolean; // 新增性能测试选项
   };
-  // 性能测试配置移到独立配置中
-  performanceLevel: 'basic' | 'standard' | 'comprehensive';
-  includePerformance: boolean;
+  // 增强的性能测试配置
+  performanceConfig: {
+    mode: TestMode;
+    engine: TestEngine;
+    device: DeviceType;
+    networkCondition: NetworkCondition;
+    location: string;
+    includeScreenshots: boolean;
+    includeFilmstrip: boolean;
+    runs: number;
+  };
   options: {
     device: string;
     location: string;
     throttling: string;
+  };
+}
+
+// 性能测试结果接口
+interface PerformanceTestResult {
+  id: string;
+  url: string;
+  timestamp: string;
+  engine: TestEngine;
+  device: DeviceType;
+  location: string;
+  overallScore: number;
+  coreWebVitals: CoreWebVitals;
+  metrics: {
+    loadTime: number;
+    domContentLoaded: number;
+    firstPaint: number;
+    pageSize: number;
+    requests: number;
+    domElements: number;
+  };
+  opportunities: Array<{
+    id: string;
+    title: string;
+    description: string;
+    impact: 'high' | 'medium' | 'low';
+    savings: number;
+  }>;
+  diagnostics: Array<{
+    id: string;
+    title: string;
+    description: string;
+    severity: 'error' | 'warning' | 'info';
+  }>;
+  screenshots?: string[];
+  filmstrip?: Array<{
+    timestamp: number;
+    image: string;
+  }>;
+}
+
+// 综合测试结果接口
+interface ComprehensiveTestResult {
+  id: string;
+  url: string;
+  timestamp: string;
+  overallScore: number;
+  performance?: PerformanceTestResult;
+  seo?: any;
+  security?: any;
+  compatibility?: any;
+  accessibility?: any;
+  summary: {
+    passed: number;
+    failed: number;
+    warnings: number;
+    total: number;
   };
 }
 
@@ -54,10 +137,19 @@ const WebsiteTest: React.FC = () => {
       security: false,
       compatibility: false,
       api: false,
-      accessibility: false
+      accessibility: false,
+      performance: true, // 默认启用性能测试
     },
-    performanceLevel: 'standard',
-    includePerformance: true,
+    performanceConfig: {
+      mode: 'standard',
+      engine: 'lighthouse',
+      device: 'both',
+      networkCondition: '4g',
+      location: 'beijing',
+      includeScreenshots: true,
+      includeFilmstrip: false,
+      runs: 1,
+    },
     options: {
       device: 'desktop',
       location: 'beijing',
@@ -182,6 +274,15 @@ const WebsiteTest: React.FC = () => {
   }, [isRunning, results, error, recordTestCompletion]);
 
   const testTypes = [
+    {
+      key: 'performance',
+      name: '性能测试',
+      icon: Gauge,
+      description: '测试页面加载速度、Core Web Vitals和性能优化建议',
+      color: 'blue',
+      estimatedTime: '30-60秒',
+      featured: true // 标记为主要功能
+    },
     {
       key: 'seo',
       name: 'SEO分析',
@@ -344,8 +445,8 @@ const WebsiteTest: React.FC = () => {
   const estimatedTime = selectedTestsCount * 45; // 平均45秒每个测试
 
   return (
-    <UnifiedTestPageLayout
-      testType="website"
+    <TestPageLayout
+      testType="performance"
       title="网站综合测试"
       description="全面检测网站的性能、安全性、SEO和用户体验"
       icon={Globe}
@@ -552,7 +653,7 @@ const WebsiteTest: React.FC = () => {
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={config.includePerformance}
+                        checked={config.testTypes.performance}
                         onChange={(e) => setConfig(prev => ({ ...prev, includePerformance: e.target.checked }))}
                         className="sr-only peer"
                         aria-label="包含性能测试"
@@ -563,11 +664,11 @@ const WebsiteTest: React.FC = () => {
                   </div>
 
                   {/* 性能测试级别 */}
-                  {config.includePerformance && (
+                  {config.testTypes.performance && (
                     <div>
                       <label className="block text-white font-medium mb-2">性能测试级别</label>
                       <select
-                        value={config.performanceLevel}
+                        value={config.performanceConfig.mode}
                         onChange={(e) => setConfig(prev => ({ ...prev, performanceLevel: e.target.value as 'basic' | 'standard' | 'comprehensive' }))}
                         className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                         title="选择性能测试级别"
@@ -578,9 +679,10 @@ const WebsiteTest: React.FC = () => {
                         <option value="comprehensive">全面检测 - 完整性能分析</option>
                       </select>
                       <p className="text-sm text-gray-400 mt-1">
-                        {config.performanceLevel === 'basic' && '快速检测页面加载时间和基本指标'}
-                        {config.performanceLevel === 'standard' && '包含Core Web Vitals和资源优化分析'}
-                        {config.performanceLevel === 'comprehensive' && '完整的性能分析，包含所有优化建议'}
+                        {config.performanceConfig.mode === 'basic' && '快速检测页面加载时间和基本指标'}
+                        {config.performanceConfig.mode === 'standard' && '包含Core Web Vitals和资源优化分析'}
+                        {config.performanceConfig.mode === 'comprehensive' && '完整的性能分析，包含所有优化建议'}
+                        {config.performanceConfig.mode === 'lighthouse' && '使用Google Lighthouse进行专业性能分析'}
                       </p>
                     </div>
                   )}

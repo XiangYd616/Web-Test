@@ -462,3 +462,5 @@ export const AdvancedTestCharts: React.FC<AdvancedTestChartsProps> = ({
 };
 
 export default AdvancedTestCharts;
+export { AdvancedTestCharts as TestCharts };
+

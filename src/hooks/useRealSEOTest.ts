@@ -1,8 +1,8 @@
 import { useCallback, useRef, useState } from 'react';
-import { RealSEOAnalysisEngine, SEOAnalysisResult } from '../services/realSEOAnalysisEngine';
+import { RealSEOAnalysisEngine, SEOAnalysisResult } from '../services/seoAnalysisEngine';
 
 const getPerformanceMetrics = async (url: string, options: any) => {
-  
+
   return {
     loadTime: Math.random() * 3000 + 1000,
     fcp: Math.random() * 2000 + 500,

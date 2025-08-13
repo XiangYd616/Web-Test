@@ -501,9 +501,9 @@ export class DataNormalizationPipeline {
   }
 
   /**
-   * 验证数据点
+   * 验证数据点（简化版本）
    */
-  private validateDataPoint(point: TestDataPoint): boolean {
+  private validateBasicDataPoint(point: TestDataPoint): boolean {
     return (
       typeof point.timestamp === 'number' &&
       point.timestamp > 0 &&

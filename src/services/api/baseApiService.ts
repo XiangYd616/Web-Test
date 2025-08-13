@@ -108,7 +108,10 @@ export class BaseApiService {
           console.log(`✅ API请求成功: ${method} ${url}`);
           return responseData;
         } else {
-          throw new Error(responseData.error || `HTTP ${response.status}: ${response.statusText}`);
+          const errorMessage = typeof responseData.error === 'string'
+            ? responseData.error
+            : responseData.error?.message || `HTTP ${response.status}: ${response.statusText}`;
+          throw new Error(errorMessage);
         }
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
@@ -129,7 +132,11 @@ export class BaseApiService {
     console.error(`❌ API请求最终失败: ${method} ${url}`, lastError);
     return {
       success: false,
-      error: lastError?.message || 'API请求失败'
+      error: {
+        code: 'API_REQUEST_FAILED',
+        message: lastError?.message || 'API请求失败',
+        timestamp: new Date().toISOString()
+      }
     };
   }
 
@@ -174,7 +181,11 @@ export class BaseApiService {
     } catch (error) {
       return {
         success: false,
-        error: `响应解析失败: ${error instanceof Error ? error.message : String(error)}`
+        error: {
+          code: 'RESPONSE_PARSE_ERROR',
+          message: `响应解析失败: ${error instanceof Error ? error.message : String(error)}`,
+          timestamp: new Date().toISOString()
+        }
       };
     }
   }

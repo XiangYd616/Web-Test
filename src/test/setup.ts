@@ -3,12 +3,11 @@
  * 配置全局测试环境和模拟
  */
 
-import * as matchers from '@testing-library/jest-dom';
+import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
-import { afterEach, expect, vi } from 'vitest';
+import { afterEach, vi } from 'vitest';
 
-// 扩展expect匹配器
-expect.extend(matchers);
+// Jest DOM 匹配器已通过导入自动扩展
 
 // 每个测试后清理
 afterEach(() => {

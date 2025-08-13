@@ -65,7 +65,7 @@ class RealTimeMonitoringService {
    */
   private initializeSocket() {
     const socketUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
-    
+
     this.socket = io(socketUrl, {
       transports: ['websocket', 'polling'],
       timeout: 10000,
@@ -102,7 +102,7 @@ class RealTimeMonitoringService {
     this.socket.on('connect_error', (error) => {
       console.error('Socket连接错误:', error);
       this.reconnectAttempts++;
-      
+
       if (this.reconnectAttempts >= this.maxReconnectAttempts) {
         console.warn('达到最大重连次数，切换到轮询模式');
         this.startPollingMode();
@@ -153,7 +153,7 @@ class RealTimeMonitoringService {
       site.status = data.status;
       site.responseTime = data.responseTime;
       site.lastCheck = data.timestamp;
-      
+
       if (data.metrics) {
         site.metrics = { ...site.metrics, ...data.metrics };
       }
@@ -169,7 +169,7 @@ class RealTimeMonitoringService {
    */
   private handleNewAlert(alert: Alert) {
     this.alerts.unshift(alert);
-    
+
     // 只保留最近100条告警
     if (this.alerts.length > 100) {
       this.alerts = this.alerts.slice(0, 100);
@@ -197,7 +197,7 @@ class RealTimeMonitoringService {
    */
   private startPollingMode() {
     console.log('🔄 启动轮询模式');
-    
+
     const pollInterval = setInterval(async () => {
       if (this.isConnected) {
         clearInterval(pollInterval);
@@ -400,7 +400,7 @@ class RealTimeMonitoringService {
     }
   }
 
-  public isConnected(): boolean {
+  public getConnectionStatus(): boolean {
     return this.isConnected;
   }
 

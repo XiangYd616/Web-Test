@@ -11,7 +11,7 @@
 export type {
   Email, Timestamp,
   URL, UUID
-} from '../common';
+} from './common';
 
 // ==================== 枚举类型导出 ====================
 
@@ -26,9 +26,9 @@ export {
 
 // 重新导出用户相关类型
 export type {
-  AuthResponse, ChangePasswordData, CreateUserData, DEFAULT_USER_PREFERENCES, DEFAULT_USER_PROFILE, fromDatabaseFields, LoginCredentials,
-  RegisterData, toDatabaseFields, UpdateUserData, User, UserActivityLog, UserDatabaseFields, UserFilter,
-  UserListQuery, UserPreferences, UserProfile, UserSession, UserStats
+  AuthResponse, ChangePasswordData, CreateUserData, DEFAULT_USER_PREFERENCES, LoginCredentials,
+  RegisterData, UpdateUserData, User, UserActivityLog,
+  UserPreferences, UserProfile, UserSession, UserStats
 } from './user';
 
 // ==================== API响应类型导出 ====================
@@ -47,7 +47,7 @@ export type {
 // 重新导出测试相关接口类型（从现有的test.ts文件导入）
 export type {
   APITestConfig, ContentTestConfig, PerformanceTestConfig, SecurityTestConfig
-} from '../test';
+} from './testEngines';
 
 /**
  * 测试配置接口

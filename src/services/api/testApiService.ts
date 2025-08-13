@@ -192,7 +192,10 @@ export class UnifiedTestApiService extends BaseApiService {
 
         this.completeSession(session.id, response.data);
       } else {
-        throw new Error(response.error || '网站测试失败');
+        const errorMessage = typeof response.error === 'string'
+          ? response.error
+          : response.error?.message || '网站测试失败';
+        throw new Error(errorMessage);
       }
     } catch (error) {
       this.failSession(session.id, error instanceof Error ? error.message : String(error));
@@ -224,7 +227,10 @@ export class UnifiedTestApiService extends BaseApiService {
 
         this.completeSession(session.id, response.data);
       } else {
-        throw new Error(response.error || '压力测试失败');
+        const errorMessage = typeof response.error === 'string'
+          ? response.error
+          : response.error?.message || '压力测试失败';
+        throw new Error(errorMessage);
       }
     } catch (error) {
       this.failSession(session.id, error instanceof Error ? error.message : String(error));
@@ -256,7 +262,10 @@ export class UnifiedTestApiService extends BaseApiService {
 
         this.completeSession(session.id, response.data);
       } else {
-        throw new Error(response.error || 'API测试失败');
+        const errorMessage = typeof response.error === 'string'
+          ? response.error
+          : response.error?.message || 'API测试失败';
+        throw new Error(errorMessage);
       }
     } catch (error) {
       this.failSession(session.id, error instanceof Error ? error.message : String(error));
@@ -288,7 +297,10 @@ export class UnifiedTestApiService extends BaseApiService {
 
         this.completeSession(session.id, response.data);
       } else {
-        throw new Error(response.error || 'SEO测试失败');
+        const errorMessage = typeof response.error === 'string'
+          ? response.error
+          : response.error?.message || 'SEO测试失败';
+        throw new Error(errorMessage);
       }
     } catch (error) {
       this.failSession(session.id, error instanceof Error ? error.message : String(error));

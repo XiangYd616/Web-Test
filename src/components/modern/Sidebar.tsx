@@ -1,5 +1,5 @@
 import { BarChart3, ChevronRight, Code, Crown, Database, GitBranch, Globe, Home, Key, Link2, Monitor, Package, Search, Settings, Shield, TestTube, Zap } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../hooks/useAuth';
@@ -45,9 +45,10 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
       children: [
         {
           id: 'website-test',
-          name: '网站测试',
+          name: '网站综合测试',
           icon: Globe,
-          href: '/website-test'
+          href: '/website-test',
+          badge: '增强'
         },
         {
           id: 'stress-test',
@@ -55,7 +56,6 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
           icon: Zap,
           href: '/stress-test'
         },
-
         {
           id: 'seo-test',
           name: 'SEO测试',
@@ -66,27 +66,33 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
           id: 'security-test',
           name: '安全测试',
           icon: Shield,
-          href: '/security-test',
-          badge: 'NEW'
-        },
-        {
-          id: 'performance-test',
-          name: '性能测试',
-          icon: Zap,
-          href: '/performance-test',
-          badge: 'NEW'
-        },
-        {
-          id: 'compatibility-test',
-          name: '兼容性测试',
-          icon: Monitor,
-          href: '/compatibility-test'
+          href: '/security-test'
         },
         {
           id: 'api-test',
           name: 'API测试',
           icon: Code,
           href: '/api-test'
+        },
+        {
+          id: 'compatibility-test',
+          name: '兼容性测试',
+          icon: Monitor,
+          href: '/compatibility-test',
+          badge: '增强'
+        },
+        {
+          id: 'infrastructure-test',
+          name: '基础设施测试',
+          icon: Database,
+          href: '/infrastructure-test',
+          badge: 'NEW'
+        },
+        {
+          id: 'ux-test',
+          name: '用户体验测试',
+          icon: TestTube,
+          href: '/ux-test'
         }
       ]
     },
@@ -217,15 +223,17 @@ const isGroupActiveByChild = (item: SidebarItem) => {
   return false;
 };
 
-// 悬浮菜单状态管�?  const [hoveredItem, setHoveredItem] = React.useState<string | null>(null);
-const [hoverPosition, setHoverPosition] = React.useState<{
+// 悬浮菜单状态管理
+const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+const [hoverPosition, setHoverPosition] = useState<{
   top: number;
   left: number;
 } | null>(null);
-const hoverTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-// 点击状态管�?  const [clickedItem, setClickedItem] = React.useState<string | null>(null);
-const clickTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+// 点击状态管理
+const [clickedItem, setClickedItem] = useState<string | null>(null);
+const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
 // 处理按钮点击效果
 const handleButtonClick = (itemId: string) => {
@@ -288,7 +296,7 @@ const handleMenuLeave = () => {
 };
 
 // 清理定时器
-React.useEffect(() => {
+useEffect(() => {
   return () => {
     if (hoverTimeoutRef.current) {
       clearTimeout(hoverTimeoutRef.current);
@@ -297,7 +305,7 @@ React.useEffect(() => {
 }, []);
 
 // 智能展开包含活跃子项的组（仅在侧边栏展开时）
-React.useEffect(() => {
+useEffect(() => {
   if (!collapsed) {
     const groupsToExpand: string[] = [];
 

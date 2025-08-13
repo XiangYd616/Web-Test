@@ -4,19 +4,44 @@
  * 版本: v1.0.0
  */
 
-import type {
-  BaseTestConfig,
-  BaseTestResult,
-  TestType,
-  TestStatus,
-  TestPriority,
-  TestError,
-  TestWarning,
-  TestRecommendation,
-  UUID,
-  Timestamp,
-  URL
-} from './common';
+import type { TestPriority } from './enums';
+
+// 定义缺失的基础类型
+export type UUID = string;
+export type URL = string;
+
+export interface BaseTestConfig {
+  // 基础测试配置
+}
+
+export interface BaseTestResult {
+  // 基础测试结果
+}
+
+export interface TestError {
+  code: string;
+  message: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  line?: number;
+  column?: number;
+}
+
+export interface TestWarning {
+  code: string;
+  message: string;
+  severity: 'info' | 'warning';
+  suggestion?: string;
+}
+
+export interface TestRecommendation {
+  id: string;
+  title: string;
+  description: string;
+  priority: TestPriority;
+  impact: 'low' | 'medium' | 'high';
+  effort: 'low' | 'medium' | 'high';
+  category: string;
+}
 
 // ==================== SEO 测试类型 ====================
 
@@ -513,7 +538,7 @@ export interface StressTestResult extends BaseTestResult {
   timeline: StressTestTimelinePoint[];
 }
 
-export interface StressTestMetrics {
+export interface StressTestMetrics extends Record<string, number> {
   totalRequests: number;
   successfulRequests: number;
   failedRequests: number;

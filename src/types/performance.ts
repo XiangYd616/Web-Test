@@ -1,4 +1,32 @@
 
+// 扩展 Performance 接口
+declare global {
+  interface Performance {
+    memory?: {
+      usedJSHeapSize: number;
+      totalJSHeapSize: number;
+      jsHeapSizeLimit: number;
+    };
+  }
+
+  interface PerformanceEntry {
+    processingStart?: number;
+    processingEnd?: number;
+    renderStart?: number;
+    renderEnd?: number;
+  }
+
+  interface PerformanceNavigationTiming {
+    processingStart?: number;
+    processingEnd?: number;
+  }
+
+  interface PerformanceResourceTiming {
+    processingStart?: number;
+    processingEnd?: number;
+  }
+}
+
 // ==================== 性能配置接口 ====================
 
 export interface UnifiedPerformanceConfig {
