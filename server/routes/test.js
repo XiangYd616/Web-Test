@@ -15,12 +15,12 @@ const { validateURLMiddleware, validateAPIURLMiddleware } = require('../middlewa
 const cacheMiddleware = require('../middleware/cache');
 
 // 导入测试引擎类
-const { RealTestEngine } = require('../services/realTestEngine');
-const { RealStressTestEngine } = require('../services/realStressTestEngine');
-const RealSecurityTestEngine = require('../services/realSecurityTestEngine'); // 直接导出
-const { RealCompatibilityTestEngine } = require('../services/realCompatibilityTestEngine');
-const { RealUXTestEngine } = require('../services/realUXTestEngine');
-const { RealAPITestEngine } = require('../services/realAPITestEngine');
+const { RealTestEngine } = require('../services/testEngine');
+const { RealStressTestEngine } = require('../services/stressTestEngine');
+const RealSecurityTestEngine = require('../services/securityTestEngine'); // 直接导出
+const { RealCompatibilityTestEngine } = require('../services/compatibilityTestEngine');
+const { RealUXTestEngine } = require('../services/uxTestEngine');
+const { RealAPITestEngine } = require('../services/apiTestEngine');
 const securityTestStorage = require('../services/securityTestStorage');
 const TestHistoryService = require('../services/TestHistoryService');
 const userTestManager = require('../services/UserTestManager');

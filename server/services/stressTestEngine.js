@@ -3195,7 +3195,7 @@ class RealStressTestEngine {
       Logger.info(`🌐 使用k6引擎执行代理压力测试: ${testId}`);
 
       // 导入k6引擎
-      const { RealK6Engine } = require('./realK6Engine');
+      const { RealK6Engine } = require('./k6Engine');
       const k6Engine = new RealK6Engine();
 
       // 检查k6是否可用
