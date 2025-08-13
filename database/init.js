@@ -43,17 +43,13 @@ async function initializeDatabase() {
       }
     }
 
-    // 3. 执行数据库架构脚本
-    console.log('\n3️⃣  创建数据库表结构...');
-    await executeSqlFile('schema.sql');
+    // 3. 执行完备数据库架构脚本
+    console.log('\n3️⃣  创建完备数据库表结构...');
+    await executeSqlFile('complete-schema.sql');
 
-    // 4. 执行初始数据脚本
-    console.log('\n4️⃣  插入初始数据...');
-    try {
-      await executeSqlFile('initial_data.sql');
-    } catch (err) {
-      console.log('⚠️  初始数据插入失败（可能文件不存在）:', err.message);
-    }
+    // 4. 执行初始数据脚本（已包含在complete-schema.sql中）
+    console.log('\n4️⃣  初始数据已包含在架构脚本中...');
+    console.log('✅ 系统配置和基础数据已自动插入');
 
     // 5. 验证安装
     console.log('\n5️⃣  验证数据库安装...');
@@ -64,9 +60,10 @@ async function initializeDatabase() {
 
     // 6. 验证关键表
     const criticalTables = [
-      'users', 'test_projects', 'test_configurations',
-      'test_executions', 'performance_test_results',
-      'security_test_results', 'api_test_results'
+      'users', 'user_sessions', 'user_preferences',
+      'test_sessions', 'test_results', 'test_templates',
+      'test_reports', 'test_plans', 'monitoring_sites',
+      'monitoring_results', 'system_configs', 'system_stats'
     ];
 
     console.log('\n6️⃣  验证关键表...');
@@ -99,3 +96,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 }
 
 export { initializeDatabase };
+

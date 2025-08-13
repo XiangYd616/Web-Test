@@ -158,34 +158,54 @@ class User {
   }
 
   /**
-   * 转换为数据库格式 - 使用统一的字段映射
+   * 转换为数据库格式 - 与数据库模式完全匹配
    */
   toDatabase() {
     return {
       id: this.id,
       username: this.username,
       email: this.email,
-      // 将profile对象拆分为数据库字段
-      first_name: this.profile.firstName,
-      last_name: this.profile.lastName,
+
+      // 个人信息字段（从profile对象拆分）
+      first_name: this.profile?.firstName || null,
+      last_name: this.profile?.lastName || null,
+      avatar_url: this.profile?.avatarUrl || null,
+      bio: this.profile?.bio || null,
+      location: this.profile?.location || null,
+      website: this.profile?.website || null,
+
+      // 角色和状态
       role: this.role,
       plan: this.plan,
       status: this.status,
+
+      // 安全相关字段
       email_verified: this.emailVerified,
       email_verified_at: this.emailVerifiedAt,
-      last_login: this.lastLoginAt, // 使用统一字段名
-      login_count: this.loginCount,
+      two_factor_enabled: this.twoFactorEnabled || false,
       failed_login_attempts: this.loginAttempts,
       locked_until: this.lockedUntil,
-      preferences: JSON.stringify(this.preferences),
-      metadata: JSON.stringify(this.metadata),
+
+      // 统计信息
+      login_count: this.loginCount,
+      last_login: this.lastLoginAt, // 修复：使用正确的数据库字段名
+
+      // JSON 字段
+      preferences: JSON.stringify(this.preferences || {}),
+      metadata: JSON.stringify(this.metadata || {}),
+
+      // 时间戳
       created_at: this.createdAt,
-      updated_at: this.updatedAt
+      updated_at: this.updatedAt,
+      deleted_at: this.deletedAt || null,
+
+      // 扩展字段
+      api_key: this.apiKey || null
     };
   }
 
   /**
-   * 从数据库格式创建实例 - 使用统一的字段映射
+   * 从数据库格式创建实例 - 与数据库模式完全匹配
    */
   static fromDatabase(dbData) {
     if (!dbData) return null;
@@ -198,13 +218,18 @@ class User {
       plan: dbData.plan,
       status: dbData.status,
       permissions: [], // 需要从其他表获取
-      // 构建profile对象
+
+      // 构建profile对象（从数据库字段组装）
       profile: {
         firstName: dbData.first_name,
         lastName: dbData.last_name,
         fullName: dbData.first_name && dbData.last_name
           ? `${dbData.first_name} ${dbData.last_name}`
           : null,
+        avatarUrl: dbData.avatar_url,
+        bio: dbData.bio,
+        location: dbData.location,
+        website: dbData.website,
         timezone: 'Asia/Shanghai' // 默认值
       },
       emailVerified: dbData.email_verified,
