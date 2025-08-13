@@ -30,8 +30,8 @@ const monitoringRoutes = require('./routes/monitoring');
 const reportRoutes = require('./routes/reports');
 const integrationRoutes = require('./routes/integrations');
 const cacheRoutes = require('./routes/cache');
-const errorRoutes = require('./routes/errorRoutes');
-const performanceRoutes = require('./routes/performanceRoutes');
+const errorRoutes = require('./routes/errors');
+const performanceRoutes = require('./routes/performance');
 const filesRoutes = require('./routes/files');
 // Accessibility routes removed - functionality moved to compatibility test
 
@@ -209,7 +209,7 @@ app.use('/api/files', filesRoutes);
 
 // API响应格式示例路由（仅在开发环境中启用）
 if (process.env.NODE_ENV === 'development') {
-  app.use('/api/example', require('./routes/api-example'));
+  app.use('/api/example', require('./routes/apiExample'));
 }
 
 // 健康检查端点

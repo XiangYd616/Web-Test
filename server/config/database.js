@@ -6,23 +6,22 @@
 const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
-const DatabaseConnectionManager = require('../utils/DatabaseConnectionManager');
 const EnhancedDatabaseConnectionManager = require('../utils/EnhancedDatabaseConnectionManager');
 
 // 数据库连接池和管理器
 let pool = null;
 let connectionManager = null;
 
-// 根据环境自动选择数据库
+// 根据环境自动选择数据库 - 统一使用新架构数据库名
 const getDefaultDatabase = () => {
   const env = process.env.NODE_ENV || 'development';
   switch (env) {
     case 'production':
-      return process.env.DB_NAME || 'testweb_prod';
+      return process.env.DB_NAME || 'test_platform_prod';
     case 'test':
-      return process.env.DB_NAME || 'testweb_test';
+      return process.env.DB_NAME || 'test_platform_test';
     default:
-      return process.env.DB_NAME || 'testweb_dev';
+      return process.env.DB_NAME || 'testweb_dev'; // 保持与现有配置一致
   }
 };
 

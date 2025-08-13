@@ -18,7 +18,7 @@ class TestEngineManager {
     initializeEngines() {
         try {
             // 压力测试引擎
-            const RealStressTestEngine = require('./realStressTestEngine');
+            const RealStressTestEngine = require('./stressTestEngine');
             this.engines.set('stress', new RealStressTestEngine());
 
             // SEO测试引擎
@@ -36,21 +36,21 @@ class TestEngineManager {
 
             // 尝试加载其他可选引擎
             try {
-                const { RealCompatibilityTestEngine } = require('./realCompatibilityTestEngine');
+                const { RealCompatibilityTestEngine } = require('./compatibilityTestEngine');
                 this.engines.set('compatibility', new RealCompatibilityTestEngine());
             } catch (error) {
                 console.warn('兼容性测试引擎不可用:', error.message);
             }
 
             try {
-                const { RealAPITestEngine } = require('./realAPITestEngine');
+                const { RealAPITestEngine } = require('./apiTestEngine');
                 this.engines.set('api', new RealAPITestEngine());
             } catch (error) {
                 console.warn('API测试引擎不可用:', error.message);
             }
 
             try {
-                const { RealUXTestEngine } = require('./realUXTestEngine');
+                const { RealUXTestEngine } = require('./uxTestEngine');
                 this.engines.set('ux', new RealUXTestEngine());
             } catch (error) {
                 console.warn('UX测试引擎不可用:', error.message);
