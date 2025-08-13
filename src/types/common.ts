@@ -5,8 +5,30 @@
 
 // 基础类型
 export type ID = string | number;
-export type Timestamp = string | number | Date;
+export type UUID = string;
+export type Timestamp = string; // 统一使用 ISO 8601 字符串格式
 export type Status = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+
+// 重新导出用户相关类型以保持兼容性
+export type {
+  AuthResponse,
+  LoginCredentials,
+  RegisterData,
+  UserPreferences,
+  UserProfile,
+  UserSession
+} from './user';
+
+// 重新导出枚举类型
+export {
+  Language,
+  TestPriority,
+  TestStatus,
+  ThemeMode,
+  Timezone,
+  UserRole,
+  UserStatus
+} from './enums';
 
 // API响应类型
 export interface ApiResponse<T = any> {
@@ -17,6 +39,7 @@ export interface ApiResponse<T = any> {
     code: string;
     message: string;
     details?: any;
+    timestamp?: string;
   };
   meta?: {
     timestamp: string;
@@ -229,12 +252,11 @@ export interface AppConfig {
   };
 }
 
-// 导出所有类型
-export type {
-  AlertCondition, AlertConfig,
-  // 重新导出以确保类型可用
-  ApiResponse, AppConfig, BaseComponentProps, CustomEvent, ErrorProps,
-  FormField,
-  FormState, LoadingProps, MonitoringTarget, NotificationConfig, PaginatedResponse, PaginationMeta, PaginationParams, TestConfig,
-  TestResult, TestType, Theme, User
-};
+// 导出所有类型 - 移除重复导出，这些类型已经在各自的文件中导出
+// export type {
+//   AlertCondition, AlertConfig,
+//   ApiResponse, AppConfig, BaseComponentProps, CustomEvent, ErrorProps,
+//   FormField,
+//   FormState, LoadingProps, MonitoringTarget, NotificationConfig, PaginatedResponse, PaginationMeta, PaginationParams, TestConfig,
+//   TestResult, TestType, Theme, User
+// };

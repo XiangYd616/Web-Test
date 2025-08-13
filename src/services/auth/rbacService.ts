@@ -4,9 +4,8 @@
  * 版本: v1.0.0
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useState } from 'react';
 import { defaultMemoryCache } from '../cacheStrategy';
-import type { User, UserRole } from '../../types/common';
 
 // ==================== 类型定义 ====================
 
@@ -102,7 +101,7 @@ class PermissionCalculator {
 
     // 2. 通过角色继承获取权限
     const allRoles = this.expandRoles(userRoles, roles);
-    
+
     for (const roleId of allRoles) {
       const role = roles.get(roleId);
       if (role && role.isActive) {
@@ -154,7 +153,7 @@ class PermissionCalculator {
   ): boolean {
     return conditions.every(condition => {
       const contextValue = context[condition.type];
-      
+
       switch (condition.operator) {
         case 'equals':
           return contextValue === condition.value;
@@ -212,7 +211,7 @@ export class RBACService {
    */
   async getPermission(permissionId: string): Promise<Permission | null> {
     let permission = this.permissions.get(permissionId);
-    
+
     if (!permission) {
       permission = await defaultMemoryCache.get(`permission_${permissionId}`);
       if (permission) {
@@ -271,7 +270,7 @@ export class RBACService {
    */
   async getRole(roleId: string): Promise<Role | null> {
     let role = this.roles.get(roleId);
-    
+
     if (!role) {
       role = await defaultMemoryCache.get(`role_${roleId}`);
       if (role) {
@@ -341,7 +340,7 @@ export class RBACService {
    */
   async assignRolesToUser(userId: string, roleIds: string[]): Promise<void> {
     let userPerms = this.userPermissions.get(userId);
-    
+
     if (!userPerms) {
       userPerms = {
         userId,
@@ -384,7 +383,7 @@ export class RBACService {
    */
   async assignPermissionsToUser(userId: string, permissionIds: string[]): Promise<void> {
     let userPerms = this.userPermissions.get(userId);
-    
+
     if (!userPerms) {
       userPerms = {
         userId,
@@ -407,7 +406,7 @@ export class RBACService {
    */
   async denyPermissionsToUser(userId: string, permissionIds: string[]): Promise<void> {
     let userPerms = this.userPermissions.get(userId);
-    
+
     if (!userPerms) {
       userPerms = {
         userId,
@@ -473,7 +472,7 @@ export class RBACService {
     }
 
     const matchedPermissions: Permission[] = [];
-    
+
     // 检查有效权限
     for (const permId of userPerms.effectivePermissions) {
       const permission = this.permissions.get(permId);
@@ -525,7 +524,7 @@ export class RBACService {
     checks: PermissionCheck[]
   ): Promise<Record<string, PermissionResult>> {
     const results: Record<string, PermissionResult> = {};
-    
+
     for (const check of checks) {
       const key = `${check.resource}:${check.action}${check.scope ? ':' + check.scope : ''}`;
       results[key] = await this.checkPermission(userId, check);
@@ -554,7 +553,7 @@ export class RBACService {
    */
   async getUserPermissions(userId: string): Promise<UserPermissions | null> {
     let userPerms = this.userPermissions.get(userId);
-    
+
     if (!userPerms) {
       userPerms = await defaultMemoryCache.get(`user_permissions_${userId}`);
       if (userPerms) {
@@ -621,12 +620,12 @@ export class RBACService {
       { name: '创建用户', description: '创建新用户', resource: 'user', action: 'create', scope: 'all', isSystem: true, category: 'user_management' },
       { name: '编辑用户', description: '编辑用户信息', resource: 'user', action: 'update', scope: 'all', isSystem: true, category: 'user_management' },
       { name: '删除用户', description: '删除用户', resource: 'user', action: 'delete', scope: 'all', isSystem: true, category: 'user_management' },
-      
+
       // 测试管理权限
       { name: '运行测试', description: '运行各种测试', resource: 'test', action: 'execute', scope: 'own', isSystem: true, category: 'testing' },
       { name: '查看测试结果', description: '查看测试结果', resource: 'test', action: 'read', scope: 'own', isSystem: true, category: 'testing' },
       { name: '管理测试', description: '管理所有测试', resource: 'test', action: 'manage', scope: 'all', isSystem: true, category: 'testing' },
-      
+
       // 系统管理权限
       { name: '系统配置', description: '修改系统配置', resource: 'system', action: 'configure', scope: 'all', isSystem: true, category: 'system' },
       { name: '查看日志', description: '查看系统日志', resource: 'system', action: 'read_logs', scope: 'all', isSystem: true, category: 'system' },
@@ -649,7 +648,7 @@ export class RBACService {
    */
   private initializeDefaultRoles(): void {
     const allPermissions = Array.from(this.permissions.keys());
-    
+
     const defaultRoles: Omit<Role, 'id' | 'createdAt' | 'updatedAt'>[] = [
       {
         name: 'admin',
@@ -747,7 +746,7 @@ export function useRBAC() {
   const checkPermission = useCallback(async (userId: string, check: PermissionCheck) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const result = await rbacService.checkPermission(userId, check);
       return result;
@@ -772,7 +771,7 @@ export function useRBAC() {
   const getUserPermissions = useCallback(async (userId: string) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const result = await rbacService.getUserPermissions(userId);
       return result;

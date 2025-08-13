@@ -23,6 +23,7 @@ import './services/errorService';
 
 // 性能优化工具导入
 import { initializePerformanceOptimization } from './utils/performanceOptimization';
+import { initializePreloading } from './utils/routePreloader';
 
 /**
  * 应用程序根组件
@@ -33,8 +34,11 @@ function App() {
     // 初始化性能优化功能
     initializePerformanceOptimization();
 
+    // 初始化路由预加载
+    initializePreloading();
+
     // 在生产环境中注册Service Worker
-    if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+    if ('serviceWorker' in navigator && import.meta.env.MODE === 'production') {
       navigator.serviceWorker.register('/sw.js')
         .then((registration) => {
           console.log('Service Worker 注册成功:', registration);
@@ -67,7 +71,7 @@ function App() {
           <AuthProvider>
             <AppRoutes />
             <BackgroundTestNotifications />
-            <PerformanceMonitor showDetails={process.env.NODE_ENV === 'development'} />
+            <PerformanceMonitor showDetails={import.meta.env.MODE === 'development'} />
           </AuthProvider>
           {/* </NotificationProvider> */}
         </ThemeProvider>

@@ -2,10 +2,12 @@
 
 // 默认导出
 export { default as TestEngineStatus } from './TestEngineStatus';
+export { default as TestHeader } from './TestHeader';
+export { default as TestingComponents } from './TestingComponents';
 export { default as TestInterface } from './TestInterface';
+export { default as TestPageLayout } from './TestPageLayout';
 export { default as TestResultDisplay } from './TestResultDisplay';
 export { default as TestTemplateSelector } from './TestTemplateSelector';
-export { default as UnifiedTestInterface } from './UnifiedTestInterface';
 export { default as URLInput } from './URLInput';
 
 // 类型导出

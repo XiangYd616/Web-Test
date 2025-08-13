@@ -76,7 +76,7 @@ export interface MonitoringIncident {
 }
 
 // 统一服务导出
-export { realTimeMonitoring } from './realTimeMonitoring';
+export { default as monitoring } from './monitoring';
 
 // 兼容性导出（逐步迁移）
 export { monitoringService } from '../monitoringService';

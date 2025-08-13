@@ -17,24 +17,24 @@ export enum ErrorCode {
   UNKNOWN_ERROR = 'UNKNOWN_ERROR',
   INTERNAL_ERROR = 'INTERNAL_ERROR',
   SERVICE_UNAVAILABLE = 'SERVICE_UNAVAILABLE',
-  
+
   // 认证错误
   UNAUTHORIZED = 'UNAUTHORIZED',
   TOKEN_EXPIRED = 'TOKEN_EXPIRED',
   TOKEN_INVALID = 'TOKEN_INVALID',
   INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
-  
+
   // 权限错误
   FORBIDDEN = 'FORBIDDEN',
   INSUFFICIENT_PERMISSIONS = 'INSUFFICIENT_PERMISSIONS',
-  
+
   // 请求错误
   BAD_REQUEST = 'BAD_REQUEST',
   VALIDATION_ERROR = 'VALIDATION_ERROR',
   NOT_FOUND = 'NOT_FOUND',
   CONFLICT = 'CONFLICT',
   TOO_MANY_REQUESTS = 'TOO_MANY_REQUESTS',
-  
+
   // 业务错误
   USER_NOT_FOUND = 'USER_NOT_FOUND',
   USER_INACTIVE = 'USER_INACTIVE',
@@ -198,10 +198,10 @@ export interface ErrorResponseMethods {
 export interface ApiResponseUtils {
   isSuccess<T>(response: ApiResponse<T>): response is ApiSuccessResponse<T>;
   isError<T>(response: ApiResponse<T>): response is ApiErrorResponse;
-  isPaginated<T>(response: ApiResponse<T>): response is PaginatedResponse<T>;
+  isPaginated<T>(response: ApiResponse<T[]>): response is PaginatedResponse<T>;
   extractData<T>(response: ApiResponse<T>): T | null;
   extractError(response: ApiResponse): ApiError | null;
-  extractPagination<T>(response: ApiResponse<T>): PaginationInfo | null;
+  extractPagination<T>(response: ApiResponse<T[]>): PaginationInfo | null;
 }
 
 // ==================== 默认值和常量 ====================
@@ -256,15 +256,15 @@ export function isApiErrorResponse<T>(response: ApiResponse<T>): response is Api
   return response.success === false;
 }
 
-export function isPaginatedResponse<T>(response: ApiResponse<T>): response is PaginatedResponse<T> {
-  return isApiSuccessResponse(response) && 
-         'pagination' in response.meta && 
-         response.meta.pagination !== undefined;
+export function isPaginatedResponse<T>(response: ApiResponse<T[]>): response is PaginatedResponse<T> {
+  return isApiSuccessResponse(response) &&
+    'pagination' in response.meta &&
+    response.meta.pagination !== undefined;
 }
 
 export function isRetryableError(error: ApiError): boolean {
-  return error.retryable === true || 
-         RETRYABLE_ERROR_CODES.includes(error.code as ErrorCode);
+  return error.retryable === true ||
+    RETRYABLE_ERROR_CODES.includes(error.code as ErrorCode);
 }
 
 // ==================== 工具函数 ====================
@@ -301,7 +301,7 @@ export function createErrorResponse(
   meta: Partial<ApiMeta> = {}
 ): ApiErrorResponse {
   const errorMessage = message || DEFAULT_ERROR_MESSAGES[code as ErrorCode] || '未知错误';
-  
+
   return {
     success: false,
     error: {
@@ -357,7 +357,7 @@ export function createPagination(
   const totalPages = Math.ceil(total / limit);
   const hasNext = page < totalPages;
   const hasPrev = page > 1;
-  
+
   return {
     current: parseInt(String(page)),
     limit: parseInt(String(limit)),

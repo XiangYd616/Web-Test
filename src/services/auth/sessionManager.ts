@@ -4,7 +4,7 @@
  * 版本: v1.0.0
  */
 
-import type { User, UserSession } from '../../types/common';
+import type { User, UserSession } from '../../types/user';
 import { defaultMemoryCache } from '../cacheStrategy';
 
 // ==================== 类型定义 ====================
@@ -20,6 +20,18 @@ export interface SessionConfig {
 }
 
 export interface SessionData extends UserSession {
+  // 基础会话信息
+  id: string;
+  userId: string;
+  isActive: boolean;
+  lastActivityAt: string;
+  expiresAt: string;
+  ipAddress: string;
+  userAgent: string;
+  createdAt: string;
+  refreshToken?: string; // 刷新令牌
+
+  // 扩展信息
   deviceInfo: DeviceInfo;
   locationInfo?: LocationInfo;
   securityFlags: SecurityFlags;
@@ -98,7 +110,7 @@ class DeviceDetector {
   static getDeviceInfo(): DeviceInfo {
     const userAgent = navigator.userAgent;
     const platform = navigator.platform;
-    
+
     return {
       deviceId: this.getDeviceId(),
       userAgent,
@@ -130,7 +142,7 @@ class DeviceDetector {
    */
   private static getBrowserInfo(): { name: string; version: string } {
     const userAgent = navigator.userAgent;
-    
+
     if (userAgent.includes('Chrome')) {
       const match = userAgent.match(/Chrome\/(\d+)/);
       return { name: 'Chrome', version: match ? match[1] : 'Unknown' };
@@ -144,7 +156,7 @@ class DeviceDetector {
       const match = userAgent.match(/Edge\/(\d+)/);
       return { name: 'Edge', version: match ? match[1] : 'Unknown' };
     }
-    
+
     return { name: 'Unknown', version: 'Unknown' };
   }
 
@@ -154,7 +166,7 @@ class DeviceDetector {
   private static getOSInfo(): { name: string; version: string } {
     const userAgent = navigator.userAgent;
     const platform = navigator.platform;
-    
+
     if (platform.includes('Win')) {
       return { name: 'Windows', version: this.getWindowsVersion(userAgent) };
     } else if (platform.includes('Mac')) {
@@ -168,7 +180,7 @@ class DeviceDetector {
       const match = userAgent.match(/OS (\d+_?\d*)/);
       return { name: 'iOS', version: match ? match[1].replace('_', '.') : 'Unknown' };
     }
-    
+
     return { name: 'Unknown', version: 'Unknown' };
   }
 
@@ -266,7 +278,7 @@ class SecurityAnalyzer {
       const knownLocations = userSessions
         .filter(s => s.locationInfo)
         .map(s => `${s.locationInfo!.country}-${s.locationInfo!.region}`);
-      
+
       const currentLocation = `${sessionData.locationInfo.country}-${sessionData.locationInfo.region}`;
       if (!knownLocations.includes(currentLocation)) {
         isNewLocation = true;
@@ -627,7 +639,7 @@ export class SessionManager {
       allActivities.push(...session.activityLog);
     });
 
-    return allActivities.sort((a, b) => 
+    return allActivities.sort((a, b) =>
       new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
   }
@@ -649,7 +661,7 @@ export class SessionManager {
       // 检查非活跃超时
       const lastActivity = new Date(session.lastActivityAt).getTime();
       const now = Date.now();
-      
+
       if (now - lastActivity > this.config.inactivityTimeout) {
         await this.terminateSession(sessionId, 'inactivity_timeout');
         return;

@@ -1,7 +1,9 @@
 import { Shield, XCircle } from 'lucide-react';
 import React, { useRef, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
+import SecurityResults from '../components/security/SecurityResults';
 import { SecurityTestPanel } from '../components/security/SecurityTestPanel';
+import TestPageLayout from '../components/testing/TestPageLayout';
 import { useUserStats } from '../hooks/useUserStats';
 import { SecurityTestResult, TestProgress } from '../services/unifiedSecurityEngine';
 
@@ -112,7 +114,7 @@ const SecurityTest: React.FC = () => {
   // 在使用功能时才提示登录
 
   return (
-    <UnifiedTestPageLayout
+    <TestPageLayout
       testType="security"
       title="安全测试"
       description="全面检测网站安全漏洞和防护措施"

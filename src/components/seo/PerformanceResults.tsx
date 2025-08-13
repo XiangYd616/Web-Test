@@ -2,11 +2,11 @@ import { AlertTriangle, CheckCircle, Info, Lightbulb, TrendingUp, XCircle, Zap }
 import React from 'react';
 import { PerformanceResult } from '../../services/realSEOAnalysisEngine';
 
-interface EnhancedPerformanceResultsProps {
+interface PerformanceResultsProps {
   results: PerformanceResult;
 }
 
-const EnhancedPerformanceResults: React.FC<EnhancedPerformanceResultsProps> = ({ results }) => {
+const PerformanceResults: React.FC<PerformanceResultsProps> = ({ results }) => {
   const getVitalStatusIcon = (status: string) => {
     switch (status) {
       case 'good':
@@ -134,7 +134,7 @@ const EnhancedPerformanceResults: React.FC<EnhancedPerformanceResultsProps> = ({
             {results.opportunities.slice(0, 5).map((opportunity, index) => (
               <div key={index} className="flex items-start space-x-3 p-3 bg-gray-700/30 rounded-lg">
                 <div className={`w-2 h-2 rounded-full mt-2 ${opportunity.impact === 'high' ? 'bg-red-400' :
-                    opportunity.impact === 'medium' ? 'bg-yellow-400' : 'bg-green-400'
+                  opportunity.impact === 'medium' ? 'bg-yellow-400' : 'bg-green-400'
                   }`} />
                 <div className="flex-1">
                   <div className="font-medium text-white">{opportunity.title}</div>
@@ -193,4 +193,4 @@ const EnhancedPerformanceResults: React.FC<EnhancedPerformanceResultsProps> = ({
   );
 };
 
-export default EnhancedPerformanceResults;
+export default PerformanceResults;

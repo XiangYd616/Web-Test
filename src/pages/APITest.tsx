@@ -67,6 +67,7 @@ const APITest: React.FC = () => {
   const [testProgress, setTestProgress] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'basic' | 'auth' | 'headers' | 'environment' | 'advanced'>('basic');
+  const [mainTab, setMainTab] = useState<'test' | 'history'>('test');
   const [showAuthPassword, setShowAuthPassword] = useState(false);
 
   const [globalHeaders, setGlobalHeaders] = useState<Array<{ key: string, value: string, enabled: boolean }>>([
@@ -624,8 +625,9 @@ const APITest: React.FC = () => {
   return (
     <UnifiedTestPageLayout
       testType="api"
-      testTypeName="API测试"
-      testIcon={Code}
+      title="API测试"
+      testStatus={testStatus === 'starting' ? 'running' : testStatus}
+      icon={Code}
       onTestSelect={handleTestSelect}
       onTestRerun={handleTestRerun}
     >

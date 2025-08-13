@@ -3,12 +3,12 @@
  * 基于主从表设计，提供统一的测试历史管理功能
  */
 
-import type { 
-  TestSession, 
-  TestHistoryQuery, 
-  TestHistoryResponse,
-  TestStatistics,
+import type {
   BatchOperationResult,
+  TestHistoryQuery,
+  TestHistoryResponse,
+  TestSession,
+  TestStatistics,
   TestType
 } from '../types/testHistory';
 
@@ -69,12 +69,12 @@ class UnifiedTestHistoryService {
   private getCache(key: string): any | null {
     const cached = this.cache.get(key);
     if (!cached) return null;
-    
+
     if (Date.now() - cached.timestamp > this.cacheTimeout) {
       this.cache.delete(key);
       return null;
     }
-    
+
     return cached.data;
   }
 
@@ -94,13 +94,13 @@ class UnifiedTestHistoryService {
     if (cached) return cached;
 
     const params = new URLSearchParams();
-    
+
     // 基础查询参数
     if (query.page) params.append('page', query.page.toString());
     if (query.limit) params.append('limit', query.limit.toString());
     if (query.sortBy) params.append('sortBy', query.sortBy);
     if (query.sortOrder) params.append('sortOrder', query.sortOrder);
-    
+
     // 过滤参数
     if (query.testType) {
       if (Array.isArray(query.testType)) {
@@ -109,8 +109,11 @@ class UnifiedTestHistoryService {
         params.append('testType', query.testType);
       }
     }
-    
-    if (query.status) params.append('status', query.status);
+
+    if (query.status) {
+      const statusValue = Array.isArray(query.status) ? query.status.join(',') : query.status;
+      params.append('status', statusValue);
+    }
     if (query.search) params.append('search', query.search);
     if (query.dateFrom) params.append('dateFrom', query.dateFrom);
     if (query.dateTo) params.append('dateTo', query.dateTo);
@@ -375,7 +378,7 @@ class UnifiedTestHistoryService {
   async searchTests(searchQuery: string, filters?: TestHistoryFilters): Promise<TestHistoryResponse> {
     const params = new URLSearchParams();
     params.append('search', searchQuery);
-    
+
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {

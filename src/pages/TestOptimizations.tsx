@@ -6,7 +6,7 @@
 import { AlertCircle, BarChart3, CheckCircle, Clock, Play, Users, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { SmartTooltip, useSmartNotification } from '../components/ui/EnhancedUX';
-import { useLoadingState } from '../components/ui/LoadingStates';
+import { TestLoadingStates as LoadingStates, useLoadingState } from '../components/ui/LoadingStates';
 import { usePerformanceOptimization } from '../hooks/usePerformanceOptimization';
 import { createTestRunner, PerformanceTestResult, TestResult, UXTestResult } from '../utils/testUtils';
 
@@ -23,7 +23,7 @@ const TestOptimizations: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<'performance' | 'ux' | 'api'>('performance');
 
   const { metrics, measureRenderTime, getOptimizationSuggestions, applyOptimizations } = usePerformanceOptimization();
-  const { showSuccess, showError, showInfo } = useSmartNotification();
+  const { success: showSuccess, error: showError, info: showInfo } = useSmartNotification();
   const loadingState = useLoadingState();
 
   useEffect(() => {
@@ -42,22 +42,21 @@ const TestOptimizations: React.FC = () => {
    */
   const runTestSuite = async () => {
     setIsRunningTests(true);
-    loadingState.setLoading('正在运行测试套件...');
+    loadingState.startLoading('正在运行测试套件...');
 
     try {
       const testRunner = createTestRunner();
       const results = await testRunner.runFullTestSuite();
 
       setTestResults(results);
-      loadingState.setSuccess('测试完成');
+      loadingState.finishLoading();
 
       showSuccess(
-        '测试套件完成',
-        `性能测试: ${results.summary.performance.passed}/${results.summary.performance.total} 通过`
+        `测试套件完成 - 性能测试: ${results.summary.performance.passed}/${results.summary.performance.total} 通过`
       );
     } catch (error) {
-      loadingState.setError('测试失败');
-      showError('测试失败', error instanceof Error ? error.message : '未知错误');
+      loadingState.setLoadingError('测试失败');
+      showError(error instanceof Error ? error.message : '测试失败');
     } finally {
       setIsRunningTests(false);
     }
@@ -68,7 +67,7 @@ const TestOptimizations: React.FC = () => {
    */
   const handleApplyOptimizations = () => {
     applyOptimizations();
-    showInfo('优化应用', '性能优化已应用，页面将自动刷新');
+    showInfo('性能优化已应用，页面将自动刷新');
     setTimeout(() => {
       window.location.reload();
     }, 2000);
@@ -233,7 +232,7 @@ const TestOptimizations: React.FC = () => {
           <div className="mb-8">
             <LoadingStates
               state="loading"
-              message={loadingState.message}
+              message={loadingState.stage}
               progress={loadingState.progress}
               showProgress={true}
             />
@@ -300,8 +299,8 @@ const TestOptimizations: React.FC = () => {
                     key={key}
                     onClick={() => setSelectedTab(key as any)}
                     className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg ${selectedTab === key
-                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                        : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                      : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                       }`}
                   >
                     <Icon className="w-4 h-4 mr-2" />

@@ -3,11 +3,11 @@
 export { default as StatCard } from './StatCard';
 export type { StatCardProps } from './StatCard';
 
-export { default as ModernCard } from './ModernCard';
-export type { ModernCardProps } from './ModernCard';
+export { default as Card } from './Card';
+export type { CardProps } from './Card';
 
-export { default as ModernButton } from './ModernButton';
-export type { ModernButtonProps } from './ModernButton';
+export { default as Button } from './Button';
+export type { ButtonProps } from './Button';
 
 export {
   MiniLineChart, ModernBarChart,

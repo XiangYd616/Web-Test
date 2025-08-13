@@ -1,3 +1,4 @@
+import { UserRole, UserStatus } from '../../types/enums';
 import { AuthResponse, ChangePasswordData, CreateUserData, LoginCredentials, RegisterData, UpdateUserData, User } from '../../types/user';
 import { browserJwt } from '../../utils/browserJwt';
 import { canUseDatabase } from '../../utils/environment';
@@ -437,8 +438,8 @@ export class UnifiedAuthService {
         email: 'admin@testweb.com',
         fullName: '系统管理员',
         avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
-        role: 'admin',
-        status: 'active',
+        role: UserRole.ADMIN,
+        status: UserStatus.ACTIVE,
         permissions: [],
         preferences: this.getDefaultPreferences(),
         emailVerified: true,
@@ -453,8 +454,8 @@ export class UnifiedAuthService {
         email: 'manager@testweb.com',
         fullName: '项目经理',
         avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=manager',
-        role: 'manager',
-        status: 'active',
+        role: UserRole.MANAGER,
+        status: UserStatus.ACTIVE,
         permissions: [],
         preferences: this.getDefaultPreferences(),
         emailVerified: true,
@@ -469,8 +470,8 @@ export class UnifiedAuthService {
         email: 'tester@testweb.com',
         fullName: '测试工程师',
         avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=tester',
-        role: 'tester',
-        status: 'active',
+        role: UserRole.TESTER,
+        status: UserStatus.ACTIVE,
         permissions: [],
         preferences: this.getDefaultPreferences(),
         emailVerified: true,
@@ -496,11 +497,7 @@ export class UnifiedAuthService {
         email: true,
         sms: false,
         push: false,
-        browser: true,
-        testComplete: true,
-        testFailed: true,
-        weeklyReport: false,
-        securityAlert: true,
+        browser: true
       },
       dashboard: {
         defaultView: 'overview',

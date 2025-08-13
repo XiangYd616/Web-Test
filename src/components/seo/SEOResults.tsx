@@ -1,8 +1,8 @@
 import { AlertCircle, AlertTriangle, BarChart3, CheckCircle, Download, ExternalLink, FileText, Globe, Hash, Info, Lightbulb, Shield, Smartphone, TrendingUp, Type, Users, XCircle, Zap } from 'lucide-react';
 import React, { useState } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
-import EnhancedPerformanceResults from './EnhancedPerformanceResults';
-import EnhancedTechnicalResults from './EnhancedTechnicalResults';
+import PerformanceResults from './PerformanceResults';
+import TechnicalResults from './TechnicalResults';
 
 interface SEOResults {
   id: string;
@@ -65,7 +65,7 @@ interface SEOResults {
   contentQuality?: any;
 }
 
-interface EnhancedSEOResultsProps {
+interface SEOResultsProps {
   results: SEOResults | Record<string, any>; // 支持新的SEOAnalysisResult结构
   onExport?: (format: string) => void;
 }
@@ -86,7 +86,7 @@ const getModuleScores = (results: any) => {
   return scores;
 };
 
-const EnhancedSEOResults: React.FC<EnhancedSEOResultsProps> = ({ results, onExport }) => {
+const SEOResults: React.FC<SEOResultsProps> = ({ results, onExport }) => {
   const { actualTheme } = useTheme();
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -264,7 +264,7 @@ const EnhancedSEOResults: React.FC<EnhancedSEOResultsProps> = ({ results, onExpo
       );
     }
 
-    return <EnhancedTechnicalResults results={results.technicalSEO} />;
+    return <TechnicalResults results={results.technicalSEO} />;
   };
 
   const renderContentAnalysis = () => {
@@ -515,7 +515,7 @@ const EnhancedSEOResults: React.FC<EnhancedSEOResultsProps> = ({ results, onExpo
       );
     }
 
-    return <EnhancedPerformanceResults results={results.performance} />;
+    return <PerformanceResults results={results.performance} />;
   };
 
   const renderIssuesAndSuggestions = () => {
@@ -709,4 +709,4 @@ const EnhancedSEOResults: React.FC<EnhancedSEOResultsProps> = ({ results, onExpo
   );
 };
 
-export default EnhancedSEOResults;
+export default SEOResults;

@@ -1,5 +1,6 @@
 import { Activity, AlertCircle, AlertTriangle, BarChart3, CheckCircle, Clock, CloudOff, Cpu, Database, Download, Gauge, HardDrive, History, Layers, Lock, Monitor, Network, Pause, Play, RefreshCw, RotateCcw, Save, Search, Server, Settings, Shield, Signal, Square, Target, Timer, TrendingUp, Wifi, WifiOff, XCircle, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import TestPageLayout from '../components/testing/TestPageLayout';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { useTheme } from '../contexts/ThemeContext';
 import backgroundTestManager from '../services/backgroundTestManager';
@@ -111,6 +112,8 @@ const DatabaseTest: React.FC = () => {
   });
 
   const [isRunning, setIsRunning] = useState(false);
+  const [testStatus, setTestStatus] = useState<'idle' | 'starting' | 'running' | 'completed' | 'failed'>('idle');
+  const [config, setConfig] = useState({ connectionString: '' });
   const [result, setResult] = useState<DatabaseTestResult | null>(null);
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState('');
@@ -541,8 +544,8 @@ const DatabaseTest: React.FC = () => {
         )}
       </div>
 
-      <UnifiedTestPageLayout
-        testType="database"
+      <TestPageLayout
+        testType="performance"
         title="数据库测试"
         description="测试数据库连接、性能、安全性和数据完整性"
         icon={Database}

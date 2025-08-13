@@ -1,6 +1,6 @@
 
 import { RotateCcw } from 'lucide-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Bar, BarChart, Brush, CartesianGrid, Cell, ComposedChart, Legend, Line, Pie, PieChart, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
@@ -108,7 +108,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
   const [timeDisplayMode, setTimeDisplayMode] = useState<'relative' | 'absolute'>('relative');
 
   // 根据测试状态自动切换图表类型
-  React.useEffect(() => {
+  useEffect(() => {
     if (isRunning) {
       setChartType('realtime');
     } else if (testCompleted && testResultData.length > 0) {

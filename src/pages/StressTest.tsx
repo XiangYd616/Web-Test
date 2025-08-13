@@ -1479,7 +1479,7 @@ const StressTest: React.FC = () => {
     }, [lifecycleManager]);
 
     // 自动选择默认模板（仅在简化模式下且未手动选择时）
-    React.useEffect(() => {
+    useEffect(() => {
         if (!isAdvancedMode && !selectedTemplate && !hasAutoSelectedTemplate) {
             const defaultTemplate = quickTemplates.find(t => t.isDefault);
             if (defaultTemplate) {
@@ -1491,7 +1491,7 @@ const StressTest: React.FC = () => {
     }, [isAdvancedMode, selectedTemplate, hasAutoSelectedTemplate]);
 
     // 当切换到高级模式时，重置自动选择状态
-    React.useEffect(() => {
+    useEffect(() => {
         if (isAdvancedMode) {
             setHasAutoSelectedTemplate(false);
         }

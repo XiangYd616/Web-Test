@@ -4,15 +4,11 @@
  * 版本: v1.0.0
  */
 
-import type { 
-  ApiResponse, 
-  RequestConfig, 
+import type {
+  ApiResponse,
   AuthConfig,
-  ApiError,
-  ValidationError 
+  RequestConfig
 } from '../../types/api';
-import type { VersionedData } from '../../types/version';
-import { VersionChecker, ApiVersionNegotiator } from '../../types/version';
 
 // ==================== 配置接口 ====================
 
@@ -337,7 +333,7 @@ export class EnhancedApiService {
   // ==================== 核心请求方法 ====================
 
   async request<T = any>(
-    url: string, 
+    url: string,
     config: RequestConfig = {}
   ): Promise<ApiResponse<T>> {
     const fullUrl = this.buildUrl(url);
@@ -396,16 +392,16 @@ export class EnhancedApiService {
   }
 
   async post<T = any>(url: string, data?: any, config: RequestConfig = {}): Promise<ApiResponse<T>> {
-    return this.request<T>(url, { 
-      ...config, 
+    return this.request<T>(url, {
+      ...config,
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined
     });
   }
 
   async put<T = any>(url: string, data?: any, config: RequestConfig = {}): Promise<ApiResponse<T>> {
-    return this.request<T>(url, { 
-      ...config, 
+    return this.request<T>(url, {
+      ...config,
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined
     });
@@ -416,8 +412,8 @@ export class EnhancedApiService {
   }
 
   async patch<T = any>(url: string, data?: any, config: RequestConfig = {}): Promise<ApiResponse<T>> {
-    return this.request<T>(url, { 
-      ...config, 
+    return this.request<T>(url, {
+      ...config,
       method: 'PATCH',
       body: data ? JSON.stringify(data) : undefined
     });
@@ -500,7 +496,7 @@ export class EnhancedApiService {
   }
 
   private async executeWithRetry<T>(
-    url: string, 
+    url: string,
     config: RequestConfig
   ): Promise<ApiResponse<T>> {
     let lastError: Error;
@@ -535,7 +531,7 @@ export class EnhancedApiService {
   }
 
   private async executeRequest<T>(
-    url: string, 
+    url: string,
     config: RequestConfig
   ): Promise<ApiResponse<T>> {
     const controller = new AbortController();
@@ -568,7 +564,7 @@ export class EnhancedApiService {
 
   private async parseResponse<T>(response: Response): Promise<ApiResponse<T>> {
     const contentType = response.headers.get('content-type');
-    
+
     let data: any;
     if (contentType?.includes('application/json')) {
       data = await response.json();
@@ -651,9 +647,9 @@ export class EnhancedApiService {
 
   private defaultRetryCondition(error: any): boolean {
     // 网络错误和服务器错误可以重试
-    return error instanceof NetworkError || 
-           error instanceof TimeoutError ||
-           (error instanceof ServerError && error.status >= 500);
+    return error instanceof NetworkError ||
+      error instanceof TimeoutError ||
+      (error instanceof ServerError && error.status >= 500);
   }
 
   private calculateRetryDelay(attempt: number): number {
@@ -669,18 +665,18 @@ export class EnhancedApiService {
     if (this.cacheConfig.keyGenerator) {
       return this.cacheConfig.keyGenerator(url, config);
     }
-    
+
     const method = config.method || 'GET';
     const body = config.body || '';
     const params = new URLSearchParams(url.split('?')[1] || '').toString();
-    
+
     return `${method}:${url}:${params}:${body}`;
   }
 
   private shouldUseCache(config: RequestConfig): boolean {
-    return this.cacheConfig.enabled && 
-           (config.method === 'GET' || !config.method) &&
-           (config.cache !== false);
+    return this.cacheConfig.enabled &&
+      (config.method === 'GET' || !config.method) &&
+      (config.cache !== false);
   }
 
   private shouldCacheResponse(response: any, config: RequestConfig): boolean {

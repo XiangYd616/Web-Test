@@ -1,12 +1,12 @@
 import { AlertTriangle, CheckCircle, FileText, Info, Link, Search, XCircle } from 'lucide-react';
 import React from 'react';
-import { TechnicalSEOResult } from '../../services/realSEOAnalysisEngine';
+import { TechnicalSEOResult } from '../../services/seoAnalysisEngine';
 
-interface EnhancedTechnicalResultsProps {
+interface TechnicalResultsProps {
   results: TechnicalSEOResult;
 }
 
-const EnhancedTechnicalResults: React.FC<EnhancedTechnicalResultsProps> = ({ results }) => {
+const TechnicalResults: React.FC<TechnicalResultsProps> = ({ results }) => {
   const getStatusIcon = (status: boolean | undefined, hasIssues?: boolean) => {
     if (status === undefined) return <Info className="w-5 h-5 text-gray-400" />;
     if (hasIssues) return <AlertTriangle className="w-5 h-5 text-yellow-500" />;
@@ -231,4 +231,4 @@ const EnhancedTechnicalResults: React.FC<EnhancedTechnicalResultsProps> = ({ res
   );
 };
 
-export default EnhancedTechnicalResults;
+export default TechnicalResults;

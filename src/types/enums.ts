@@ -259,16 +259,47 @@ export function getTestStatusDisplayName(status: TestStatus): string {
 }
 
 // ==================== 导出所有枚举 ====================
+// 注释掉重复导出，枚举已经通过 export enum 直接导出
 
-export {
-  UserRole,
-  UserStatus,
-  UserPlan,
-  TestType,
-  TestStatus,
-  TestGrade,
-  TestPriority,
-  ThemeMode,
-  Language,
-  Timezone
-};
+// export {
+//   UserRole,
+//   UserStatus,
+//   UserPlan,
+//   TestType,
+//   TestStatus,
+//   TestGrade,
+//   TestPriority,
+//   ThemeMode,
+//   Language,
+//   Timezone
+// };
+
+// ==================== API 错误代码枚举 ====================
+
+/**
+ * API 错误代码枚举
+ */
+export enum ErrorCode {
+  // 通用错误
+  UNKNOWN_ERROR = 'UNKNOWN_ERROR',
+  VALIDATION_ERROR = 'VALIDATION_ERROR',
+  NETWORK_ERROR = 'NETWORK_ERROR',
+  TIMEOUT_ERROR = 'TIMEOUT_ERROR',
+
+  // 认证错误
+  UNAUTHORIZED = 'UNAUTHORIZED',
+  FORBIDDEN = 'FORBIDDEN',
+  TOKEN_EXPIRED = 'TOKEN_EXPIRED',
+  INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
+
+  // 业务错误
+  RESOURCE_NOT_FOUND = 'RESOURCE_NOT_FOUND',
+  RESOURCE_CONFLICT = 'RESOURCE_CONFLICT',
+  RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
+
+  // 服务器错误
+  INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR',
+  SERVER_ERROR = 'SERVER_ERROR',
+  SERVICE_UNAVAILABLE = 'SERVICE_UNAVAILABLE',
+  BAD_GATEWAY = 'BAD_GATEWAY'
+}

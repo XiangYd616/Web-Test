@@ -10,7 +10,7 @@ interface UnifiedSecurityResultsProps {
   onRetry?: () => void;
 }
 
-export const UnifiedSecurityResults: React.FC<UnifiedSecurityResultsProps> = ({
+const SecurityResults: React.FC<UnifiedSecurityResultsProps> = ({
   result,
   onExport,
   onRetry
@@ -476,3 +476,6 @@ export const UnifiedSecurityResults: React.FC<UnifiedSecurityResultsProps> = ({
     </div>
   );
 };
+
+export default SecurityResults;
+export { SecurityResults as UnifiedSecurityResults };

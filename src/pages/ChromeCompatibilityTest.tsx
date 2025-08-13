@@ -1,6 +1,7 @@
 
 import { AlertTriangle, CheckCircle, Chrome, Info, XCircle } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import TestPageLayout from '../components/testing/TestPageLayout';
 import { ChromeCompatibilityHelper } from '../utils/chromeCompatibility';
 
 interface CompatibilityTestResult {
@@ -264,7 +265,7 @@ const ChromeCompatibilityTest: React.FC = () => {
 
   if (isLoading) {
     return (
-      <UnifiedTestPageLayout
+      <TestPageLayout
         testType="compatibility"
         title="Chrome浏览器兼容性测试"
         description="检测和验证浏览器兼容性，确保在不同浏览器中的一致显示效果"
@@ -289,7 +290,7 @@ const ChromeCompatibilityTest: React.FC = () => {
   }
 
   return (
-    <UnifiedTestPageLayout
+    <TestPageLayout
       testType="compatibility"
       title="Chrome浏览器兼容性测试"
       description="检测和验证浏览器兼容性，确保在不同浏览器中的一致显示效果"

@@ -1,410 +1,311 @@
 import React from 'react';
+import {
+  Cell,
+  Doughnut,
+  Line,
+  LineChart,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
+} from 'recharts';
 
-// 延迟导入 Chart.js 以避免初始化问题
-let ChartJS: any;
-let Bar: any;
-let Doughnut: any;
-let Line: any;
-
-// 动态导入和注册 Chart.js
-const initializeChartJS = async () => {
-  if (ChartJS) return; // 已经初始�?
-  try {
-    const chartModule = await import('chart.js');
-    const reactChartModule = await import('react-chartjs-2');
-
-    ChartJS = chartModule.Chart;
-    Bar = reactChartModule.Bar;
-    Doughnut = reactChartModule.Doughnut;
-    Line = reactChartModule.Line;
-
-    // 注册必要的组件
-    ChartJS.register(
-      chartModule.CategoryScale,
-      chartModule.LinearScale,
-      chartModule.PointElement,
-      chartModule.LineElement,
-      chartModule.BarElement,
-      chartModule.ArcElement,
-      chartModule.Title,
-      chartModule.Tooltip,
-      chartModule.Legend,
-      chartModule.Filler
-    );
-  } catch (error) {
-    console.error('Failed to initialize Chart.js:', error);
-  }
-};
-
-// 现代化图表配色方案
-export const chartColors = {
-  primary: '#4f46e5',
-  success: '#10b981',
-  warning: '#f59e0b',
-  error: '#ef4444',
-  info: '#3b82f6',
-  purple: '#8b5cf6',
-  cyan: '#06b6d4',
-  pink: '#ec4899'
-};
-
-// 默认图表选项
-const defaultOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-      labels: {
-        color: '#b4b7c1',
-        font: {
-          family: 'Inter',
-          size: 12
-        }
-      }
-    },
-    tooltip: {
-      backgroundColor: '#2a2f3e',
-      titleColor: '#ffffff',
-      bodyColor: '#b4b7c1',
-      borderColor: '#3a3f4e',
-      borderWidth: 1,
-      cornerRadius: 8,
-      titleFont: {
-        family: 'Inter',
-        size: 14,
-        weight: '600'
-      },
-      bodyFont: {
-        family: 'Inter',
-        size: 12
-      }
-    }
-  },
-  scales: {
-    x: {
-      grid: {
-        color: '#3a3f4e',
-        borderColor: '#3a3f4e'
-      },
-      ticks: {
-        color: '#8b8fa3',
-        font: {
-          family: 'Inter',
-          size: 11
-        }
-      }
-    },
-    y: {
-      grid: {
-        color: '#3a3f4e',
-        borderColor: '#3a3f4e'
-      },
-      ticks: {
-        color: '#8b8fa3',
-        font: {
-          family: 'Inter',
-          size: 11
-        }
-      }
-    }
-  }
-};
-
-export interface LineChartProps {
-  data: any;
-  options?: any;
-  height?: number;
-  className?: string;
-}
-
-export const ModernLineChart: React.FC<LineChartProps> = ({
-  data,
-  options = {},
-  height = 300,
-  className = ''
-}) => {
-  const [isReady, setIsReady] = React.useState(false);
-
-  React.useEffect(() => {
-    initializeChartJS().then(() => setIsReady(true));
-  }, []);
-
-  const mergedOptions = {
-    ...defaultOptions,
-    ...options
+// 现代化线图组件
+export interface ModernLineChartProps {
+  data: Array<Record<string, any>> | {
+    labels: string[];
+    datasets: Array<{
+      label: string;
+      data: number[];
+      borderColor?: string;
+      backgroundColor?: string;
+      fill?: boolean;
+      tension?: number;
+      pointBackgroundColor?: string;
+      pointBorderColor?: string;
+      pointRadius?: number;
+    }>;
   };
-
-  if (!isReady || !Line) {
-    return (
-      <div className={`modern-chart-container ${className}`} style={{ height }}>
-        <div className="flex items-center justify-center h-full text-gray-500">
-          加载图表�?..
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className={`modern-chart-container ${className}`} style={{ height }}>
-      <Line data={data} options={mergedOptions} />
-    </div>
-  );
-};
-
-export interface BarChartProps {
-  data: any;
-  options?: any;
-  height?: number;
-  className?: string;
-}
-
-export const ModernBarChart: React.FC<BarChartProps> = ({
-  data,
-  options = {},
-  height = 300,
-  className = ''
-}) => {
-  const [isReady, setIsReady] = React.useState(false);
-
-  React.useEffect(() => {
-    initializeChartJS().then(() => setIsReady(true));
-  }, []);
-
-  const mergedOptions = {
-    ...defaultOptions,
-    ...options
-  };
-
-  if (!isReady || !Bar) {
-    return (
-      <div className={`modern-chart-container ${className}`} style={{ height }}>
-        <div className="flex items-center justify-center h-full text-gray-500">
-          加载图表�?..
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className={`modern-chart-container ${className}`} style={{ height }}>
-      <Bar data={data} options={mergedOptions} />
-    </div>
-  );
-};
-
-export interface DoughnutChartProps {
-  data: any;
-  options?: any;
-  size?: number;
-  className?: string;
-}
-
-export const ModernDoughnutChart: React.FC<DoughnutChartProps> = ({
-  data,
-  options = {},
-  size = 200,
-  className = ''
-}) => {
-  const [isReady, setIsReady] = React.useState(false);
-
-  React.useEffect(() => {
-    initializeChartJS().then(() => setIsReady(true));
-  }, []);
-
-  const doughnutOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'bottom' as const,
-        labels: {
-          color: '#b4b7c1',
-          font: {
-            family: 'Inter',
-            size: 12
-          },
-          padding: 20,
-          usePointStyle: true,
-          pointStyle: 'circle'
-        }
-      },
-      tooltip: {
-        backgroundColor: '#2a2f3e',
-        titleColor: '#ffffff',
-        bodyColor: '#b4b7c1',
-        borderColor: '#3a3f4e',
-        borderWidth: 1,
-        cornerRadius: 8,
-        titleFont: {
-          family: 'Inter',
-          size: 14,
-          weight: '600'
-        },
-        bodyFont: {
-          family: 'Inter',
-          size: 12
-        }
-      }
-    },
-    cutout: '70%',
-    ...options
-  };
-
-  if (!isReady || !Doughnut) {
-    return (
-      <div className={`modern-chart-container ${className}`} style={{ height: size, width: size }}>
-        <div className="flex items-center justify-center h-full text-gray-500">
-          加载图表�?..
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className={`modern-chart-container ${className}`} style={{ height: size, width: size }}>
-      <Doughnut data={data} options={doughnutOptions} />
-    </div>
-  );
-};
-
-// 进度环图组件
-export interface ProgressRingProps {
-  percentage: number;
-  size?: number;
-  strokeWidth?: number;
+  xKey?: string;
+  yKey?: string;
+  title?: string;
   color?: string;
-  backgroundColor?: string;
-  showText?: boolean;
-  className?: string;
+  height?: number;
+  showGrid?: boolean;
+  showTooltip?: boolean;
 }
 
-export const ProgressRing: React.FC<ProgressRingProps> = ({
-  percentage,
-  size = 120,
-  strokeWidth = 8,
-  color = chartColors.primary,
-  backgroundColor = '#3a3f4e',
-  showText = true,
-  className = ''
+export const ModernLineChart: React.FC<ModernLineChartProps> = ({
+  data,
+  xKey = 'name',
+  yKey = 'value',
+  title,
+  color = '#3B82F6',
+  height = 300,
+  showGrid = true,
+  showTooltip = true
 }) => {
-  const radius = (size - strokeWidth) / 2;
-  const circumference = radius * 2 * Math.PI;
-  const strokeDasharray = circumference;
-  const strokeDashoffset = circumference - (percentage / 100) * circumference;
+  // 转换 Chart.js 格式的数据为 Recharts 格式
+  const processedData = React.useMemo(() => {
+    if (Array.isArray(data)) {
+      return data;
+    }
 
+    // Chart.js 格式转换
+    if ('labels' in data && 'datasets' in data) {
+      return data.labels.map((label, index) => {
+        const item: Record<string, any> = { [xKey]: label };
+        data.datasets.forEach((dataset, datasetIndex) => {
+          item[dataset.label || `dataset${datasetIndex}`] = dataset.data[index] || 0;
+        });
+        return item;
+      });
+    }
+
+    return [];
+  }, [data, xKey]);
   return (
-    <div className={`progress-ring ${className}`} style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="progress-ring-svg">
-        {/* 背景圆环 */}
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="transparent"
-          stroke={backgroundColor}
-          strokeWidth={strokeWidth}
-        />
-        {/* 进度圆环 */}
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="transparent"
-          stroke={color}
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-          strokeDasharray={strokeDasharray}
-          strokeDashoffset={strokeDashoffset}
-          style={{
-            transition: 'stroke-dashoffset 0.5s ease-in-out',
-            transform: 'rotate(-90deg)',
-            transformOrigin: '50% 50%'
-          }}
-        />
-      </svg>
-      {showText && (
-        <div className="progress-ring-text">
-          <span className="text-2xl font-bold text-primary">
-            {Math.round(percentage)}%
-          </span>
-        </div>
+    <div className="w-full">
+      {title && (
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
       )}
+      <div style={{ height }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={processedData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            {showGrid && (
+              <>
+                <XAxis
+                  dataKey={xKey}
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12, fill: '#6B7280' }}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 12, fill: '#6B7280' }}
+                />
+              </>
+            )}
+            {showTooltip && (
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#1F2937',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: '#F9FAFB'
+                }}
+              />
+            )}
+            <Line
+              type="monotone"
+              dataKey={yKey}
+              stroke={color}
+              strokeWidth={2}
+              dot={{ fill: color, strokeWidth: 2, r: 4 }}
+              activeDot={{ r: 6, stroke: color, strokeWidth: 2 }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 };
 
-// 迷你图表组件
-export interface MiniChartProps {
-  data: number[];
-  color?: string;
+// 现代化环形图组件
+export interface ModernDoughnutChartProps {
+  data: Array<{
+    name: string;
+    value: number;
+    color?: string;
+  }> | {
+    labels: string[];
+    datasets: Array<{
+      data: number[];
+      backgroundColor?: string[];
+      borderWidth?: number;
+      hoverBorderWidth?: number;
+      hoverBorderColor?: string;
+      cutout?: string;
+    }>;
+  };
+  title?: string;
+  centerText?: string;
   height?: number;
-  className?: string;
+  innerRadius?: number;
+  outerRadius?: number;
+  size?: number;
 }
 
-export const MiniLineChart: React.FC<MiniChartProps> = ({
+export const ModernDoughnutChart: React.FC<ModernDoughnutChartProps> = ({
   data,
-  color = chartColors.primary,
-  height = 40,
-  className = ''
+  title,
+  centerText,
+  height = 300,
+  innerRadius = 60,
+  outerRadius = 100,
+  size = 200
 }) => {
-  const width = data.length * 8;
-  const max = Math.max(...data);
-  const min = Math.min(...data);
-  const range = max - min || 1;
+  // 转换 Chart.js 格式的数据为 Recharts 格式
+  const processedData = React.useMemo(() => {
+    if (Array.isArray(data)) {
+      return data;
+    }
 
-  const points = data.map((value, index) => {
-    const x = index * 8;
-    const y = height - ((value - min) / range) * height;
-    return `${x},${y}`;
-  }).join(' ');
+    // Chart.js 格式转换
+    if ('labels' in data && 'datasets' in data) {
+      const dataset = data.datasets[0];
+      if (!dataset) return [];
+
+      return data.labels.map((label, index) => ({
+        name: label,
+        value: dataset.data[index] || 0,
+        color: Array.isArray(dataset.backgroundColor)
+          ? dataset.backgroundColor[index]
+          : dataset.backgroundColor || `hsl(${index * 45}, 70%, 50%)`
+      }));
+    }
+
+    return [];
+  }, [data]);
+  const COLORS = [
+    '#3B82F6', '#10B981', '#F59E0B', '#EF4444',
+    '#8B5CF6', '#06B6D4', '#84CC16', '#F97316'
+  ];
+
+  const dataWithColors = processedData.map((item, index) => ({
+    ...item,
+    color: item.color || COLORS[index % COLORS.length]
+  }));
+
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0];
+      return (
+        <div className="bg-gray-900 text-white p-3 rounded-lg shadow-lg">
+          <p className="font-medium">{data.name}</p>
+          <p className="text-sm">
+            值: <span className="font-semibold">{data.value}</span>
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
-    <div className={`mini-chart ${className}`}>
-      <svg width={width} height={height} className="mini-chart-svg">
-        <polyline
-          points={points}
-          fill="none"
-          stroke={color}
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+    <div className="w-full">
+      {title && (
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
+      )}
+      <div className="relative" style={{ height }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Doughnut
+              data={dataWithColors}
+              cx="50%"
+              cy="50%"
+              innerRadius={innerRadius}
+              outerRadius={outerRadius}
+              paddingAngle={2}
+              dataKey="value"
+            >
+              {dataWithColors.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Doughnut>
+            <Tooltip content={<CustomTooltip />} />
+          </PieChart>
+        </ResponsiveContainer>
+
+        {centerText && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-gray-900">{centerText}</div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 图例 */}
+      <div className="mt-4 flex flex-wrap gap-4 justify-center">
+        {dataWithColors.map((item, index) => (
+          <div key={index} className="flex items-center gap-2">
+            <div
+              className="w-3 h-3 rounded-full"
+              style={{ backgroundColor: item.color }}
+            />
+            <span className="text-sm text-gray-600">{item.name}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
 
-// CSS样式
-const chartStyles = `
-.modern-chart-container {
-  position: relative;
+// 现代化条形图组件
+export interface ModernBarChartProps {
+  data: Array<Record<string, any>>;
+  xKey: string;
+  yKey: string;
+  title?: string;
+  color?: string;
+  height?: number;
 }
 
-.progress-ring {
-  position: relative;
-  display: inline-block;
-}
+export const ModernBarChart: React.FC<ModernBarChartProps> = ({
+  data,
+  xKey,
+  yKey,
+  title,
+  color = '#3B82F6',
+  height = 300
+}) => {
+  return (
+    <div className="w-full">
+      {title && (
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
+      )}
+      <div style={{ height }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <XAxis
+              dataKey={xKey}
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 12, fill: '#6B7280' }}
+            />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 12, fill: '#6B7280' }}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: '#1F2937',
+                border: 'none',
+                borderRadius: '8px',
+                color: '#F9FAFB'
+              }}
+            />
+            <Line
+              type="monotone"
+              dataKey={yKey}
+              stroke={color}
+              strokeWidth={2}
+              dot={false}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+};
 
-.progress-ring-text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-}
-
-.mini-chart {
-  display: inline-block;
-}
-
-.mini-chart-svg {
-  display: block;
-}
-`;
-
-// 注入样式
-if (typeof document !== 'undefined') {
-  const styleElement = document.createElement('style');
-  styleElement.textContent = chartStyles;
-  document.head.appendChild(styleElement);
-}
+// 导出所有组件
+export default {
+  ModernLineChart,
+  ModernDoughnutChart,
+  ModernBarChart
+};

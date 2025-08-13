@@ -272,7 +272,7 @@ export class ExportUtils {
         point.queueLength || 0
       ]);
 
-      csvContent += rows.map(row => row.join(',')).join('\n');
+      csvContent += rows.map((row: any[]) => row.join(',')).join('\n');
     }
 
     return csvContent;
@@ -348,7 +348,7 @@ export class ExportUtils {
       result.dataSize || 0
     ]) || [];
 
-    return [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+    return [headers.join(','), ...rows.map((row: any[]) => row.join(','))].join('\n');
   }
 
   /**
@@ -594,7 +594,7 @@ export class ExportUtils {
                 <div class="summary-box">
                     <h3>关键发现</h3>
                     <p>本次${testType}测试共执行${metrics.totalRequests || 0}个请求，平均响应时间为${metrics.averageResponseTime || 0}ms，
-                    成功率达到${metrics.successRate || 0}%。${performanceGrade.description}</p>
+                    成功率达到${metrics.successRate || 0}%。${(performanceGrade as any).description || ''}</p>
                 </div>
             </div>
 
@@ -631,7 +631,7 @@ export class ExportUtils {
                 <div class="grade-card">
                     <div class="grade-score">${performanceGrade.score}</div>
                     <h3>${performanceGrade.grade}级</h3>
-                    <p>${performanceGrade.description}</p>
+                    <p>${(performanceGrade as any).description || ''}</p>
                 </div>
             </div>
 
@@ -656,10 +656,10 @@ export class ExportUtils {
                 <h2>🔍 性能瓶颈分析</h2>
                 ${bottlenecks.length > 0 ? bottlenecks.map(bottleneck => `
                     <div class="bottleneck-item">
-                        <h4>⚠️ ${bottleneck.type}</h4>
-                        <p>${bottleneck.description}</p>
-                        <p><strong>影响程度:</strong> ${bottleneck.severity || '中等'}</p>
-                        <p><strong>建议措施:</strong> ${bottleneck.suggestion || '需要进一步分析'}</p>
+                        <h4>⚠️ ${(bottleneck as any).type || bottleneck}</h4>
+                        <p>${(bottleneck as any).description || bottleneck}</p>
+                        <p><strong>影响程度:</strong> ${(bottleneck as any).severity || '中等'}</p>
+                        <p><strong>建议措施:</strong> ${(bottleneck as any).suggestion || '需要进一步分析'}</p>
                     </div>
                 `).join('') : '<p>✅ 未发现明显的性能瓶颈</p>'}
             </div>
@@ -710,10 +710,10 @@ export class ExportUtils {
                 <h2>🎯 优化建议</h2>
                 ${recommendations.map((rec, index) => `
                     <div class="recommendation-item">
-                        <h4>${index + 1}. ${rec.title || rec}</h4>
-                        <p>${rec.description || rec}</p>
-                        ${rec.priority ? `<p><strong>优先级:</strong> ${rec.priority}</p>` : ''}
-                        ${rec.impact ? `<p><strong>预期影响:</strong> ${rec.impact}</p>` : ''}
+                        <h4>${index + 1}. ${(rec as any).title || rec}</h4>
+                        <p>${(rec as any).description || rec}</p>
+                        ${(rec as any).priority ? `<p><strong>优先级:</strong> ${(rec as any).priority}</p>` : ''}
+                        ${(rec as any).impact ? `<p><strong>预期影响:</strong> ${(rec as any).impact}</p>` : ''}
                     </div>
                 `).join('')}
             </div>
@@ -813,16 +813,16 @@ export class ExportUtils {
     csvContent += '性能分析\n';
     csvContent += '分析项目,结果,建议\n';
     const performanceGrade = this.calculatePerformanceGrade(metrics);
-    csvContent += `整体性能评级,${performanceGrade.grade} (${performanceGrade.score}分),${performanceGrade.description}\n`;
+    csvContent += `整体性能评级,${performanceGrade.grade} (${performanceGrade.score}分),${(performanceGrade as any).description || ''}\n`;
 
     const bottlenecks = this.identifyBottlenecks(metrics);
     bottlenecks.forEach(bottleneck => {
-      csvContent += `性能瓶颈,${bottleneck.type},${bottleneck.description}\n`;
+      csvContent += `性能瓶颈,${(bottleneck as any).type || bottleneck},${(bottleneck as any).description || bottleneck}\n`;
     });
 
     const recommendations = this.generateRecommendations(metrics, testType);
     recommendations.slice(0, 5).forEach((rec, index) => {
-      csvContent += `优化建议${index + 1},${rec.title},${rec.description}\n`;
+      csvContent += `优化建议${index + 1},${(rec as any).title || rec},${(rec as any).description || rec}\n`;
     });
     csvContent += '\n';
 
