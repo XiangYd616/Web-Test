@@ -7,7 +7,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
   icon?: React.ReactNode;
   iconPosition?: 'left' | 'right';
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 const buttonVariants = {
@@ -97,7 +97,7 @@ export const Button: React.FC<ButtonProps> = ({
         <span className="flex-shrink-0">{icon}</span>
       )}
 
-      <span>{children}</span>
+      {children && <span>{children}</span>}
 
       {icon && iconPosition === 'right' && !loading && (
         <span className="flex-shrink-0">{icon}</span>

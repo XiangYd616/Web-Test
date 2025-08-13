@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import { TestCharts } from '../components/charts/TestCharts';
 import { URLInput } from '../components/testing';
+import BaseTestPage from '../components/testing/BaseTestPage';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { useUserStats } from '../hooks/useUserStats';
 

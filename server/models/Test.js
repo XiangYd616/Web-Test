@@ -6,12 +6,14 @@
 
 // 测试类型枚举 - 与前端保持一致
 const TestType = {
-  PERFORMANCE: 'performance',
-  CONTENT: 'content',
-  SECURITY: 'security',
   API: 'api',
+  COMPATIBILITY: 'compatibility',
+  INFRASTRUCTURE: 'infrastructure',
+  SECURITY: 'security',
+  SEO: 'seo',
   STRESS: 'stress',
-  COMPATIBILITY: 'compatibility'
+  UX: 'ux',
+  WEBSITE: 'website'
 };
 
 // 测试状态枚举 - 与前端保持一致

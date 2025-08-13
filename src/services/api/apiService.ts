@@ -501,4 +501,5 @@ class UnifiedApiService {
 }
 
 export const unifiedApiService = new UnifiedApiService();
-export default UnifiedApiService;
+export const apiService = unifiedApiService; // 兼容性导出
+export default unifiedApiService;

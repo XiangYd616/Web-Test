@@ -1,6 +1,7 @@
 import { Database, Network, Server } from 'lucide-react';
 import React, { useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
+import BaseTestPage from '../components/testing/BaseTestPage';
 import { useUserStats } from '../hooks/useUserStats';
 
 // 基础设施测试类型

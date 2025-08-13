@@ -20,7 +20,7 @@ import {
 } from '../ui';
 
 // 测试类型定义
-export type TestType = 'stress' | 'security' | 'seo' | 'api' | 'performance' | 'accessibility' | 'compatibility';
+export type TestType = 'api' | 'compatibility' | 'infrastructure' | 'security' | 'seo' | 'stress' | 'ux' | 'website';
 
 // 测试配置接口
 export interface TestConfig {

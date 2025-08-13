@@ -1,7 +1,7 @@
 // 🛠️ 管理页面统一导出
 // 只导出实际存在的文件
 export { default as DataStorage } from './DataStorage';
-export { default as Settings } from './Settings';
+// Settings已移动到主pages目录
 
 // 从父目录导出主要管理页面 - 所有管理功能都在Admin内部
 export { default as Admin } from '../Admin';

@@ -84,13 +84,14 @@ export interface User {
 
 // 测试相关类型
 export type TestType =
-  | 'stress'
-  | 'seo'
-  | 'security'
-  | 'performance'
-  | 'accessibility'
+  | 'api'
   | 'compatibility'
-  | 'api';
+  | 'infrastructure'
+  | 'security'
+  | 'seo'
+  | 'stress'
+  | 'ux'
+  | 'website';
 
 export interface TestConfig {
   url: string;
