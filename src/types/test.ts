@@ -1,6 +1,6 @@
 
 
-export type TestType = 'performance' | 'content' | 'security' | 'api' | 'stress' | 'compatibility';
+export type TestType = 'api' | 'compatibility' | 'infrastructure' | 'security' | 'seo' | 'stress' | 'ux' | 'website';
 
 export interface TestConfig {
   url: string;

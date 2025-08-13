@@ -17,13 +17,14 @@ export type URL = string;
  * 测试类型枚举 - 与数据库约束保持一致
  */
 export enum TestType {
-  SEO = 'seo',
-  PERFORMANCE = 'performance',
-  SECURITY = 'security',
   API = 'api',
   COMPATIBILITY = 'compatibility',
-  ACCESSIBILITY = 'accessibility',
-  STRESS = 'stress'
+  INFRASTRUCTURE = 'infrastructure',
+  SECURITY = 'security',
+  SEO = 'seo',
+  STRESS = 'stress',
+  UX = 'ux',
+  WEBSITE = 'website'
 }
 
 /**
@@ -151,12 +152,12 @@ export interface TestMetrics {
   timeToInteractive?: number;
   speedIndex?: number;
   totalBlockingTime?: number;
-  
+
   // 资源指标
   pageSize?: number;
   requestCount?: number;
   domElements?: number;
-  
+
   // 自定义指标
   [key: string]: any;
 }
@@ -184,21 +185,21 @@ export interface TestResult {
   testType: TestType;
   testName: string;
   url: URL;
-  
+
   // 状态和时间信息
   status: TestStatus;
   startedAt: Timestamp;
   completedAt?: Timestamp;
   duration?: number; // 毫秒
-  
+
   // 评分和等级
   overallScore?: number; // 0-100
   grade?: TestGrade;
-  
+
   // 测试配置和结果
   config: Record<string, any>;
   results: Record<string, any>;
-  
+
   // 详细信息
   summary?: string;
   metrics?: TestMetrics;
@@ -206,25 +207,25 @@ export interface TestResult {
   warnings?: TestWarning[];
   recommendations?: TestRecommendation[];
   artifacts?: TestArtifact[];
-  
+
   // 统计信息
   totalIssues?: number;
   criticalIssues?: number;
   majorIssues?: number;
   minorIssues?: number;
   warningCount?: number;
-  
+
   // 环境和标签
   environment?: string;
   tags?: string[];
   description?: string;
   notes?: string;
-  
+
   // 时间戳
   createdAt: Timestamp;
   updatedAt: Timestamp;
   deletedAt?: Timestamp;
-  
+
   // 元数据
   metadata?: Record<string, any>;
 }

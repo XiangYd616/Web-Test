@@ -95,7 +95,7 @@ export interface AccessibilityViolation {
   nodes: any[];
 }
 
-export type TestType = 'stress' | 'content' | 'compatibility' | 'api' | 'security' | 'accessibility' | 'performance';
+export type TestType = 'api' | 'compatibility' | 'infrastructure' | 'security' | 'seo' | 'stress' | 'ux' | 'website';
 
 export interface TestProgress {
   stage: string;

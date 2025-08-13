@@ -176,8 +176,8 @@ export default defineConfig({
 
           // 测试页面 - 更细粒度分割以减少 misc-tests 大小
           if (id.includes('/pages/') && id.includes('Test')) {
-            if (id.includes('Performance')) {
-              return 'performance-tests';
+            if (id.includes('Infrastructure')) {
+              return 'infrastructure-tests';
             }
             if (id.includes('Stress')) {
               return 'stress-tests';
@@ -200,12 +200,7 @@ export default defineConfig({
             if (id.includes('Website')) {
               return 'website-tests';
             }
-            if (id.includes('Network')) {
-              return 'network-tests';
-            }
-            if (id.includes('Database')) {
-              return 'database-tests';
-            }
+            // Network和Database测试已合并到Infrastructure测试
             // 进一步细分其他测试页面
             if (id.includes('Accessibility')) {
               return 'accessibility-tests';

@@ -13,15 +13,14 @@ export enum TestStatus {
 export type TestStatusType = 'idle' | 'starting' | 'running' | 'completed' | 'cancelled' | 'failed';
 
 export enum TestType {
-  PERFORMANCE = 'performance',
+  API = 'api',
+  COMPATIBILITY = 'compatibility',
+  INFRASTRUCTURE = 'infrastructure',
   SECURITY = 'security',
   SEO = 'seo',
   STRESS = 'stress',
-  API = 'api',
-  WEBSITE = 'website',
-  DATABASE = 'database',
-  COMPATIBILITY = 'compatibility',
-  NETWORK = 'network'
+  UX = 'ux',
+  WEBSITE = 'website'
 }
 
 export enum TestPriority {

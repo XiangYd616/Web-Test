@@ -162,11 +162,10 @@ export const routeImports = {
   // 测试页面
   '/website-test': () => import('../pages/WebsiteTest'),
   '/security-test': () => import('../pages/SecurityTest'),
-  '/performance-test': () => import('../pages/PerformanceTest'),
+  '/performance-test': () => import('../pages/WebsiteTest'), // 重定向到WebsiteTest
   '/seo-test': () => import('../pages/SEOTest'),
   '/api-test': () => import('../pages/APITest'),
-  '/network-test': () => import('../pages/NetworkTest'),
-  '/database-test': () => import('../pages/DatabaseTest'),
+  '/infrastructure-test': () => import('../pages/InfrastructureTest'),
   '/stress-test': () => import('../pages/StressTest'),
   '/compatibility-test': () => import('../pages/CompatibilityTest'),
   '/ux-test': () => import('../pages/UXTest'),

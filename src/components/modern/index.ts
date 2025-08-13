@@ -3,15 +3,13 @@
 export { default as StatCard } from './StatCard';
 export type { StatCardProps } from './StatCard';
 
-export { default as Card } from './Card';
-export type { CardProps } from './Card';
+// Card组件已统一到ui目录
 
-export { default as Button } from './Button';
-export type { ButtonProps } from './Button';
+// Button组件已统一到ui目录
 
 export {
-  MiniLineChart, ModernBarChart,
-  ModernDoughnutChart, ModernLineChart, ProgressRing, chartColors
+  chartColors, MiniLineChart, ModernBarChart,
+  ModernDoughnutChart, ModernLineChart, ProgressRing
 } from './ModernChart';
 
 export type {

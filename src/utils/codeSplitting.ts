@@ -14,8 +14,7 @@ export const largeComponentImports = {
   'NetworkErrorPrompt': () => import('../components/seo/NetworkErrorPrompt'),
 
   // 测试相关组件 - 按测试类型分割
-  'TestInterface': () => import('../components/testing/TestInterface'),
-  'TestPageLayout': () => import('../components/testing/TestPageLayout'),
+  'UnifiedTestInterface': () => import('../components/testing/UnifiedTestInterface'),
   'TestResultDisplay': () => import('../components/testing/TestResultDisplay'),
   'TestEngineStatus': () => import('../components/testing/TestEngineStatus'),
 
@@ -35,7 +34,7 @@ export const largeComponentImports = {
   'Layout': () => import('../components/modern/Layout'),
   'Chart': () => import('../components/modern/Chart'),
   'StatCard': () => import('../components/modern/StatCard'),
-  'Card': () => import('../components/modern/Card'),
+  'Card': () => import('../components/ui/Card'),
 };
 
 // 创建带分析的懒加载组件
@@ -204,13 +203,13 @@ export const createPageChunks = (pageName: string) => {
     },
 
     'DatabaseTest': {
-      main: () => import('../pages/DatabaseTest'),
+      main: () => import('../pages/InfrastructureTest'),
     },
 
     'Admin': {
       main: () => import('../pages/Admin'),
       dataStorage: () => import('../pages/admin/DataStorage'),
-      settings: () => import('../pages/admin/Settings'),
+      settings: () => import('../pages/Settings'),
       systemMonitor: () => import('../pages/admin/SystemMonitor'),
     }
   };

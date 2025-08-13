@@ -3,8 +3,26 @@ import React, { useRef, useState } from 'react';
 import { useAuthCheck } from '../components/auth/withAuthCheck';
 import SecurityResults from '../components/security/SecurityResults';
 import { SecurityTestPanel } from '../components/security/SecurityTestPanel';
+import BaseTestPage from '../components/testing/BaseTestPage';
 import { useUserStats } from '../hooks/useUserStats';
-import { SecurityTestResult, TestProgress } from '../services/unifiedSecurityEngine';
+
+// 临时类型定义，替代缺失的unifiedSecurityEngine
+interface SecurityTestResult {
+  score: number;
+  vulnerabilities: Array<{
+    type: string;
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    description: string;
+    recommendation: string;
+  }>;
+  summary: string;
+}
+
+interface TestProgress {
+  stage: string;
+  progress: number;
+  message: string;
+}
 
 // CSS样式已迁移到组件库中
 

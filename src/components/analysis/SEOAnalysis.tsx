@@ -1,6 +1,6 @@
-import React from 'react';
 import { AlertTriangle, CheckCircle, Download, Info, Share2, XCircle } from 'lucide-react';
-import { TestResult } from '../../services/advancedTestEngine';
+import React from 'react';
+import { TestResult } from '../../services/testEngine';
 
 // CSS样式已迁移到组件库，不再需要外部CSS文件
 

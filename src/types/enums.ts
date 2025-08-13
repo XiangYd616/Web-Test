@@ -66,13 +66,14 @@ export enum UserPlan {
  * CHECK (test_type IN ('seo', 'performance', 'security', 'api', 'compatibility', 'accessibility', 'stress'))
  */
 export enum TestType {
-  SEO = 'seo',
-  PERFORMANCE = 'performance',
-  SECURITY = 'security',
   API = 'api',
   COMPATIBILITY = 'compatibility',
-  ACCESSIBILITY = 'accessibility',
-  STRESS = 'stress'
+  INFRASTRUCTURE = 'infrastructure',
+  SECURITY = 'security',
+  SEO = 'seo',
+  STRESS = 'stress',
+  UX = 'ux',
+  WEBSITE = 'website'
 }
 
 /**

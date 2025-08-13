@@ -13,13 +13,12 @@ const ModernDashboard = lazy(() => import('../../pages/dashboard/ModernDashboard
 const WebsiteTest = lazy(() => import('../../pages/WebsiteTest'));
 
 // 分析页面（推荐使用）
-const SEOAnalysis = lazy(() => import('../../pages/SEOAnalysis'));
 const PerformanceAnalysis = lazy(() => import('../../pages/PerformanceAnalysis'));
-const APIAnalysis = lazy(() => import('../../pages/APIAnalysis'));
+// APIAnalysis已合并到APITest
 
 // 传统测试页面（保持兼容性）
 const SecurityTest = lazy(() => import('../../pages/SecurityTest'));
-const PerformanceTest = lazy(() => import('../../pages/PerformanceTest'));
+// PerformanceTest已合并到WebsiteTest
 const SEOTest = lazy(() => import('../../pages/SEOTest'));
 
 const APITest = lazy(() => import('../../pages/APITest'));
@@ -31,7 +30,6 @@ const UXTest = lazy(() => import('../../pages/UXTest'));
 // 保留但标记为已合并的页面（向后兼容）
 const NetworkTest = lazy(() => import('../../pages/NetworkTest'));
 const DatabaseTest = lazy(() => import('../../pages/DatabaseTest'));
-const ChromeCompatibilityTest = lazy(() => import('../../pages/ChromeCompatibilityTest'));
 
 // 演示和测试页面
 // URLInputDemo 已删除
@@ -139,36 +137,19 @@ const AppRoutes: React.FC = () => {
           </LazyPageWrapper>
         } />
 
-        {/* 传统性能测试（兼容性） */}
-        <Route path="performance-test-legacy" element={
-          <LazyPageWrapper>
-            <PerformanceTest />
-          </LazyPageWrapper>
-        } />
+        {/* 性能测试重定向到网站测试 */}
+        <Route path="performance-test" element={<Navigate to="/website-test" replace />} />
+        <Route path="performance-test-legacy" element={<Navigate to="/website-test" replace />} />
 
-        {/* SEO分析（推荐） */}
+        {/* SEO测试 */}
         <Route path="seo-test" element={
-          <LazyPageWrapper>
-            <SEOAnalysis />
-          </LazyPageWrapper>
-        } />
-
-        {/* 传统SEO测试（兼容性） */}
-        <Route path="seo-test-legacy" element={
           <LazyPageWrapper>
             <SEOTest />
           </LazyPageWrapper>
         } />
 
-        {/* API分析（推荐） */}
+        {/* API测试 */}
         <Route path="api-test" element={
-          <LazyPageWrapper>
-            <APIAnalysis />
-          </LazyPageWrapper>
-        } />
-
-        {/* 传统API测试（兼容性） */}
-        <Route path="api-test-legacy" element={
           <LazyPageWrapper>
             <APITest />
           </LazyPageWrapper>

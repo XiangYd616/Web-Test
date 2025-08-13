@@ -6,6 +6,7 @@ import LocalSEOResults from '../components/seo/LocalSEOResults';
 import NetworkErrorPrompt from '../components/seo/NetworkErrorPrompt';
 import SEOResults from '../components/seo/SEOResults';
 import { URLInput } from '../components/testing';
+import BaseTestPage from '../components/testing/BaseTestPage';
 import type { SEOTestMode } from '../hooks/useUnifiedSEOTest';
 import { useUnifiedSEOTest } from '../hooks/useUnifiedSEOTest';
 
@@ -560,8 +561,8 @@ const SEOTest: React.FC = () => {
             <button
               onClick={() => setSeoTestMode('online')}
               className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${seoTestMode === 'online'
-                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
+                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
                 }`}
             >
               在线分析
@@ -569,8 +570,8 @@ const SEOTest: React.FC = () => {
             <button
               onClick={() => setSeoTestMode('local')}
               className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${seoTestMode === 'local'
-                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
+                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
                 }`}
             >
               本地分析

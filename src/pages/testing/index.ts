@@ -4,8 +4,7 @@ export { default as APITest } from '../APITest';
 // export { default as BackgroundTestDemo } from '../BackgroundTestDemo'; // 文件不存在，已注释
 export { default as CompatibilityTest } from '../CompatibilityTest';
 
-export { default as DatabaseTest } from '../DatabaseTest';
-export { default as NetworkTest } from '../NetworkTest';
+export { default as InfrastructureTest } from '../InfrastructureTest';
 export { default as SecurityTest } from '../SecurityTest';
 export { default as SEOTest } from '../SEOTest';
 export { default as StressTest } from '../StressTest';

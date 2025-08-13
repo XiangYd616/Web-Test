@@ -8,10 +8,7 @@ export { default as DashboardCharts } from './DashboardCharts';
 export { default as TestCharts } from './TestCharts';
 export { default as TestComparisonCharts } from './TestComparisonCharts';
 
-// 从 SimpleCharts 导出特定组件（保留向后兼容）
-export {
-    AdvancedStressTestChart
-} from './SimpleCharts';
+// AdvancedStressTestChart 已移动到其他文件
 
 // 🔧 统一的图表组件别名，便于迁移
 export { default as RealTimeStressChart, default as UnifiedStressTestCharts } from './StressTestCharts';

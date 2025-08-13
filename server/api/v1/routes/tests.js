@@ -28,13 +28,14 @@ const router = express.Router();
 // =====================================================
 
 const TEST_TYPES = {
-  SEO: 'seo',
-  PERFORMANCE: 'performance',
-  SECURITY: 'security',
   API: 'api',
   COMPATIBILITY: 'compatibility',
-  ACCESSIBILITY: 'accessibility',
-  STRESS: 'stress'
+  INFRASTRUCTURE: 'infrastructure',
+  SECURITY: 'security',
+  SEO: 'seo',
+  STRESS: 'stress',
+  UX: 'ux',
+  WEBSITE: 'website'
 };
 
 const TEST_STATUS = {
