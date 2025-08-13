@@ -229,7 +229,7 @@ class SystemIntegrationChecker {
       'responsive-design': ['responsive'],
       // 'accessibility-features': ['CompatibilityTest'], // Removed - integrated into compatibility test
       'security-measures': ['security', 'apiSecurity', 'errorHandler'],
-      'data-visualization': ['dataVisualizationService', 'statisticsService', 'performanceRoutes', 'dataManagement'],
+      'data-visualization': ['dataVisualizationService', 'statisticsService', 'performance', 'dataManagement'],
       'reporting-system': ['reportingService', 'statisticsService', 'dataManagement'],
     };
 
