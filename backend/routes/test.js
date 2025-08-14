@@ -24,6 +24,9 @@ const { RealAPITestEngine } = require('..\engines\api\apiTestEngine.js');
 const securityTestStorage = require('..\services\testing\securityTestStorage.js');
 const TestHistoryService = require('..\services\testing\TestHistoryService.js');
 const userTestManager = require('..\services\testing\UserTestManager.js');
+const databaseService = require('../services/DatabaseService');
+const testQueueService = require('../services/TestQueueService');
+const smartCacheService = require('../services/SmartCacheService');
 // const enhancedTestHistoryService = require('../services/enhancedTestHistoryService'); // 已移除，功能迁移到 dataManagement
 
 const multer = require('multer');
@@ -718,10 +721,52 @@ router.get('/', asyncHandler(async (req, res) => {
 }));
 
 /**
- * 获取测试历史记录
+ * 获取测试历史记录 (新版本 - 使用数据库)
  * GET /api/test/history
  */
 router.get('/history', optionalAuth, historyRateLimiter, asyncHandler(async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 20,
+      testType,
+      status,
+      startDate,
+      endDate
+    } = req.query;
+
+    // 获取测试历史
+    const result = await databaseService.getTestHistory({
+      page: parseInt(page),
+      limit: parseInt(limit),
+      testType,
+      status,
+      userId: req.user?.id,
+      startDate,
+      endDate
+    });
+
+    res.json({
+      success: true,
+      data: result.data,
+      pagination: result.pagination
+    });
+
+  } catch (error) {
+    console.error('获取测试历史失败:', error);
+    res.status(500).json({
+      success: false,
+      error: '获取测试历史失败',
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+}));
+
+/**
+ * 获取测试历史记录 (旧版本 - 兼容性)
+ * GET /api/test/history/legacy
+ */
+router.get('/history/legacy', optionalAuth, historyRateLimiter, asyncHandler(async (req, res) => {
   return handleTestHistory(req, res);
 }));
 
@@ -932,111 +977,178 @@ router.post('/run', authMiddleware, testRateLimiter, asyncHandler(async (req, re
   try {
     console.log(`🚀 启动${testType}测试: ${url}`);
 
-    // 根据测试类型路由到相应的测试引擎
-    let testResult;
+    // 生成测试ID
     const testId = `${testType}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    switch (testType.toLowerCase()) {
-      case 'api':
-        const { RealAPITestEngine } = require('../engines/api/apiTestEngine');
-        const apiEngine = new RealAPITestEngine();
-        testResult = await apiEngine.runAPITest(url, config);
-        break;
-
-      case 'security':
-        const RealSecurityTestEngine = require('../engines/security/securityTestEngine');
-        const securityEngine = new RealSecurityTestEngine();
-        testResult = await securityEngine.runSecurityTest(url, config);
-        break;
-
-      case 'stress':
-        const RealStressTestEngine = require('../engines/stress/stressTestEngine');
-        const stressEngine = new RealStressTestEngine();
-        testResult = await stressEngine.runStressTest(url, config);
-        break;
-
-      case 'seo':
-        const SEOTestEngine = require('../engines/seo/SEOTestEngine');
-        const seoEngine = new SEOTestEngine();
-        testResult = await seoEngine.runSEOTest(url, config);
-        break;
-
-      case 'compatibility':
-        const { RealCompatibilityTestEngine } = require('../engines/compatibility/compatibilityTestEngine');
-        const compatibilityEngine = new RealCompatibilityTestEngine();
-        testResult = await compatibilityEngine.runCompatibilityTest(url, config);
-        break;
-
-      case 'ux':
-        const UXTestEngine = require('../engines/ux/UXTestEngine');
-        const uxEngine = new UXTestEngine();
-        testResult = await uxEngine.runUXTest(url, config);
-        break;
-
-      case 'website':
-        const WebsiteTestEngine = require('../engines/website/websiteTestEngine');
-        const websiteEngine = new WebsiteTestEngine();
-        testResult = await websiteEngine.runWebsiteTest(url, config);
-        break;
-
-      case 'infrastructure':
-        const InfrastructureTestEngine = require('../engines/infrastructure/InfrastructureTestEngine');
-        const infrastructureEngine = new InfrastructureTestEngine();
-        testResult = await infrastructureEngine.runInfrastructureTest(url, config);
-        break;
-
-      default:
-        return res.status(400).json({
-          success: false,
-          error: `不支持的测试类型: ${testType}`
-        });
-    }
-
-    // 保存测试结果到历史记录
-    const historyRecord = {
+    // 创建测试记录
+    await databaseService.createTest({
       testId,
       testType,
-      testName: testName || `${testType.toUpperCase()}测试 - ${new Date().toLocaleString()}`,
+      testName,
       url,
       config,
-      result: testResult,
-      status: testResult.success ? 'completed' : 'failed',
-      userId: req.user?.id,
-      createdAt: new Date(),
-      completedAt: new Date()
-    };
-
-    // 这里应该保存到数据库，暂时返回结果
-    console.log(`✅ ${testType}测试完成:`, testResult.success ? '成功' : '失败');
-
-    // 保存测试状态和结果到全局映射（实际项目中应该保存到数据库）
-    if (!global.testStatusMap) global.testStatusMap = new Map();
-    if (!global.testResultsMap) global.testResultsMap = new Map();
-
-    global.testStatusMap.set(testId, {
-      testId,
-      status: testResult.success ? 'completed' : 'failed',
-      progress: 100,
-      message: testResult.success ? '测试完成' : '测试失败',
-      startedAt: historyRecord.createdAt,
-      completedAt: historyRecord.completedAt
+      userId: req.user?.id
     });
 
-    global.testResultsMap.set(testId, testResult);
+    // 添加到测试队列
+    const queueResult = await testQueueService.addTestToQueue({
+      testId,
+      testType,
+      url,
+      config,
+      userId: req.user?.id
+    }, req.body.priority || 0);
 
     res.json({
       success: true,
       testId,
-      result: testResult,
-      message: `${testType.toUpperCase()}测试${testResult.success ? '完成' : '失败'}`
+      queuePosition: queueResult.queuePosition,
+      estimatedWaitTime: queueResult.estimatedWaitTime,
+      message: queueResult.queuePosition > 0
+        ? `测试已加入队列，排队位置: ${queueResult.queuePosition}`
+        : '测试已开始执行'
     });
 
   } catch (error) {
-    console.error(`❌ ${testType}测试失败:`, error);
+    console.error(`❌ ${testType}测试启动失败:`, error);
+
+    // 更新测试状态为失败
+    if (testId) {
+      try {
+        await databaseService.updateTestStatus(testId, 'failed', 100, error.message);
+      } catch (dbError) {
+        console.error('更新测试状态失败:', dbError);
+      }
+    }
+
     res.status(500).json({
       success: false,
-      error: error.message || `${testType}测试执行失败`,
+      error: error.message || `${testType}测试启动失败`,
       details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+}));
+
+/**
+ * 获取队列状态
+ * GET /api/test/queue/status
+ */
+router.get('/queue/status', optionalAuth, asyncHandler(async (req, res) => {
+  try {
+    const queueStatus = testQueueService.getQueueStatus();
+
+    res.json({
+      success: true,
+      data: queueStatus
+    });
+  } catch (error) {
+    console.error('获取队列状态失败:', error);
+    res.status(500).json({
+      success: false,
+      error: '获取队列状态失败'
+    });
+  }
+}));
+
+/**
+ * 取消测试
+ * POST /api/test/:testId/cancel
+ */
+router.post('/:testId/cancel', authMiddleware, asyncHandler(async (req, res) => {
+  const { testId } = req.params;
+
+  try {
+    await testQueueService.cancelTest(testId);
+
+    res.json({
+      success: true,
+      message: '测试已取消'
+    });
+  } catch (error) {
+    console.error('取消测试失败:', error);
+    res.status(500).json({
+      success: false,
+      error: '取消测试失败'
+    });
+  }
+}));
+
+// 移除原来的同步测试执行代码
+/*
+    // 根据测试类型路由到相应的测试引擎
+    let testResult;
+
+*/
+
+/**
+ * 获取缓存统计
+ * GET /api/test/cache/stats
+ */
+router.get('/cache/stats', optionalAuth, asyncHandler(async (req, res) => {
+  try {
+    const stats = smartCacheService.getStats();
+
+    res.json({
+      success: true,
+      data: stats
+    });
+  } catch (error) {
+    console.error('获取缓存统计失败:', error);
+    res.status(500).json({
+      success: false,
+      error: '获取缓存统计失败'
+    });
+  }
+}));
+
+/**
+ * 清空缓存
+ * POST /api/test/cache/flush
+ */
+router.post('/cache/flush', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    await smartCacheService.flush();
+
+    res.json({
+      success: true,
+      message: '缓存已清空'
+    });
+  } catch (error) {
+    console.error('清空缓存失败:', error);
+    res.status(500).json({
+      success: false,
+      error: '清空缓存失败'
+    });
+  }
+}));
+
+/**
+ * 缓存失效
+ * POST /api/test/cache/invalidate
+ */
+router.post('/cache/invalidate', authMiddleware, asyncHandler(async (req, res) => {
+  const { event, data } = req.body;
+
+  if (!event) {
+    return res.status(400).json({
+      success: false,
+      error: '缺少必需参数: event'
+    });
+  }
+
+  try {
+    const invalidatedCount = await smartCacheService.invalidate(event, data);
+
+    res.json({
+      success: true,
+      message: `已失效 ${invalidatedCount} 条缓存记录`,
+      invalidatedCount
+    });
+  } catch (error) {
+    console.error('缓存失效失败:', error);
+    res.status(500).json({
+      success: false,
+      error: '缓存失效失败'
     });
   }
 }));
@@ -1049,13 +1161,8 @@ router.get('/:testId/status', optionalAuth, asyncHandler(async (req, res) => {
   const { testId } = req.params;
 
   try {
-    // 从内存中获取测试状态（实际项目中应该从数据库获取）
-    const testStatus = global.testStatusMap?.get(testId) || {
-      testId,
-      status: 'not_found',
-      progress: 0,
-      message: '测试不存在或已过期'
-    };
+    // 从数据库获取测试状态
+    const testStatus = await databaseService.getTestStatus(testId);
 
     res.json({
       success: true,
@@ -1080,8 +1187,8 @@ router.get('/:testId/result', optionalAuth, asyncHandler(async (req, res) => {
   const { testId } = req.params;
 
   try {
-    // 从内存中获取测试结果（实际项目中应该从数据库获取）
-    const testResult = global.testResultsMap?.get(testId);
+    // 从数据库获取测试结果
+    const testResult = await databaseService.getTestResult(testId);
 
     if (!testResult) {
       return res.status(404).json({
@@ -1114,15 +1221,7 @@ router.post('/:testId/stop', authMiddleware, asyncHandler(async (req, res) => {
 
   try {
     // 更新测试状态为已停止
-    if (global.testStatusMap?.has(testId)) {
-      const currentStatus = global.testStatusMap.get(testId);
-      global.testStatusMap.set(testId, {
-        ...currentStatus,
-        status: 'stopped',
-        message: '测试已被用户停止',
-        stoppedAt: new Date().toISOString()
-      });
-    }
+    await databaseService.updateTestStatus(testId, 'stopped', null, '测试已被用户停止');
 
     res.json({
       success: true,
@@ -1147,47 +1246,12 @@ router.get('/config/templates', optionalAuth, asyncHandler(async (req, res) => {
   const { testType } = req.query;
 
   try {
-    // 模拟配置模板数据（实际项目中应该从数据库获取）
-    const templates = [
-      {
-        id: 'api-basic',
-        name: 'API基础测试',
-        testType: 'api',
-        config: {
-          timeout: 10000,
-          retries: 3,
-          followRedirects: true,
-          validateSSL: true
-        },
-        description: '基础的API测试配置',
-        isDefault: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: 'security-standard',
-        name: '标准安全测试',
-        testType: 'security',
-        config: {
-          checkSSL: true,
-          checkHeaders: true,
-          checkCookies: true,
-          depth: 'standard'
-        },
-        description: '标准的安全测试配置',
-        isDefault: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-    ];
-
-    const filteredTemplates = testType
-      ? templates.filter(t => t.testType === testType)
-      : templates;
+    // 从数据库获取配置模板
+    const templates = await databaseService.getConfigTemplates(testType);
 
     res.json({
       success: true,
-      data: filteredTemplates
+      data: templates
     });
 
   } catch (error) {
@@ -1214,19 +1278,14 @@ router.post('/config/templates', authMiddleware, asyncHandler(async (req, res) =
   }
 
   try {
-    const template = {
-      id: `${testType}-${Date.now()}`,
+    // 保存配置模板到数据库
+    const template = await databaseService.saveConfigTemplate({
       name,
       testType,
       config,
       description,
-      isDefault: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-
-    // 实际项目中应该保存到数据库
-    console.log('保存配置模板:', template);
+      userId: req.user?.id
+    });
 
     res.json({
       success: true,

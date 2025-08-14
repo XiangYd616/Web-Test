@@ -48,6 +48,9 @@ const {
 
 // 导入数据库连接
 const { connectDB, testConnection } = require('..\config\database.js');
+const databaseService = require('../services/DatabaseService');
+const webSocketService = require('../services/WebSocketService');
+const testQueueService = require('../services/TestQueueService');
 
 // 导入缓存和性能优化系统
 const cacheConfig = require('..\config\cache.js');
@@ -92,6 +95,9 @@ const io = new Server(server, {
     credentials: true
   }
 });
+
+// 初始化WebSocket服务
+webSocketService.initialize(server);
 
 // 确保必要的目录存在
 const ensureDirectories = () => {
@@ -458,6 +464,24 @@ const startServer = async () => {
     // 连接数据库
     const dbPool = await connectDB();
     console.log('✅ 数据库连接成功');
+
+    // 初始化数据库服务
+    try {
+      await databaseService.initialize();
+      console.log('✅ 数据库服务初始化成功');
+    } catch (error) {
+      console.error('❌ 数据库服务初始化失败:', error);
+      // 继续启动，但记录错误
+    }
+
+    // 初始化测试队列服务
+    try {
+      await testQueueService.initialize();
+      console.log('✅ 测试队列服务初始化成功');
+    } catch (error) {
+      console.error('❌ 测试队列服务初始化失败:', error);
+      // 继续启动，但记录错误
+    }
 
     // 初始化新的缓存系统
     try {
