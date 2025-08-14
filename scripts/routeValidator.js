@@ -11,9 +11,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const PROJECT_ROOT = path.resolve(__dirname, '..');
-const PAGES_DIR = path.join(PROJECT_ROOT, 'src/pages');
-const ROUTES_FILE = path.join(PROJECT_ROOT, 'src/components/routing/AppRoutes.tsx');
-const ROUTE_UTILS_FILE = path.join(PROJECT_ROOT, 'src/utils/routeUtils.ts');
+const PAGES_DIR = path.join(PROJECT_ROOT, 'frontend/pages');
+const ROUTES_FILE = path.join(PROJECT_ROOT, 'frontend/components/tools/AppRoutes.tsx');
+const ROUTE_UTILS_FILE = path.join(PROJECT_ROOT, 'frontend/utils/routeUtils.ts');
 
 // 验证结果
 const validationResults = {
