@@ -1,8 +1,8 @@
 import { Database, Network, Server } from 'lucide-react';
 import React, { useState } from 'react';
-import { useAuthCheck } from '../components/auth/withAuthCheck';
-import BaseTestPage from '../components/testing/BaseTestPage';
-import { useUserStats } from '../hooks/useUserStats';
+import { useAuthCheck } from '..\..\..\components\auth\withAuthCheck.tsx';
+import BaseTestPage from '..\..\..\components\testing\BaseTestPage.tsx';
+import { useUserStats } from '..\..\..\hooks\useUserStats.ts';
 
 // 基础设施测试类型
 type InfrastructureTestType = 'database' | 'network' | 'server' | 'all';

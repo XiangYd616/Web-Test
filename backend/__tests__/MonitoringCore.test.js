@@ -2,8 +2,8 @@
  * 监控系统核心功能测试
  */
 
-const MonitoringService = require('../services/MonitoringService');
-const AlertService = require('../services/AlertService');
+const MonitoringService = require('..\services\monitoring\MonitoringService.js');
+const AlertService = require('..\services\core\AlertService.js');
 
 // 模拟数据库连接池
 const mockDbPool = {

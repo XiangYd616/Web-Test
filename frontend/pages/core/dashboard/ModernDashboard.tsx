@@ -1,7 +1,7 @@
 import { Activity, AlertTriangle, BarChart3, CheckCircle, Clock, Download, Globe, TestTube } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { ModernDoughnutChart, ModernLineChart } from '../../components/modern/ModernChart';
-import { useTheme } from '../../contexts/ThemeContext';
+import { ModernDoughnutChart, ModernLineChart } from '..\..\..\components\charts\ModernChart.tsx';
+import { useTheme } from '..\..\..\contexts\ThemeContext.tsx';
 
 // CSS样式已迁移到组件库和主题配置中
 

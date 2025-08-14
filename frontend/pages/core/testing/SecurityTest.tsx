@@ -1,10 +1,10 @@
 import { Shield, XCircle } from 'lucide-react';
 import React, { useRef, useState } from 'react';
-import { useAuthCheck } from '../components/auth/withAuthCheck';
-import SecurityResults from '../components/security/SecurityResults';
-import { SecurityTestPanel } from '../components/security/SecurityTestPanel';
-import BaseTestPage from '../components/testing/BaseTestPage';
-import { useUserStats } from '../hooks/useUserStats';
+import { useAuthCheck } from '..\..\..\components\auth\withAuthCheck.tsx';
+import SecurityResults from '..\..\..\components\testing\SecurityResults.tsx';
+import { SecurityTestPanel } from '..\..\..\components\testing\SecurityTestPanel.tsx';
+import BaseTestPage from '..\..\..\components\testing\BaseTestPage.tsx';
+import { useUserStats } from '..\..\..\hooks\useUserStats.ts';
 
 // 临时类型定义，替代缺失的unifiedSecurityEngine
 interface SecurityTestResult {

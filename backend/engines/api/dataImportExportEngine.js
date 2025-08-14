@@ -166,8 +166,8 @@ class RealDataImportExportEngine {
     const { dateRange, includeDeleted, filters, userId } = options;
 
     // 这里需要根据实际的数据模型来获取数据
-    const TestHistory = require('../models/TestHistory');
-    const User = require('../models/User');
+    const TestHistory = require('..\..\models\TestHistory.js');
+    const User = require('..\..\models\User.js');
 
     let data = {};
 
@@ -207,7 +207,7 @@ class RealDataImportExportEngine {
    * 导出用户数据
    */
   async exportUsers(requestUserId, includeDeleted) {
-    const User = require('../models/User');
+    const User = require('..\..\models\User.js');
 
     const whereClause = {};
     if (!includeDeleted) {
@@ -227,7 +227,7 @@ class RealDataImportExportEngine {
    * 导出测试数据
    */
   async exportTests(dateRange, filters, userId) {
-    const TestHistory = require('../models/TestHistory');
+    const TestHistory = require('..\..\models\TestHistory.js');
 
     const whereClause = {};
     if (userId) whereClause.userId = userId;
@@ -268,7 +268,7 @@ class RealDataImportExportEngine {
   async exportReports(dateRange, filters, userId) {
     // 这里应该从报告表获取数据
     // 暂时返回测试历史中有报告的记录
-    const TestHistory = require('../models/TestHistory');
+    const TestHistory = require('..\..\models\TestHistory.js');
 
     const whereClause = {
       reportGenerated: true

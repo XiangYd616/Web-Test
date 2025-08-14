@@ -5,7 +5,7 @@
 
 const express = require('express');
 const router = express.Router();
-const TestHistoryService = require('../services/TestHistoryService');
+const TestHistoryService = require('..\services\testing\TestHistoryService.js');
 const { authMiddleware } = require('../middleware/auth');
 // const { validateTestType, validatePagination, validateSorting, validateSearch, validateStatus, validateUUID } = require('../middleware/validation');
 

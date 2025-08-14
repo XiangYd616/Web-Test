@@ -3,7 +3,7 @@
  * 提供无障碍检测、评估、优化建议功能
  */
 
-const Logger = require('../utils/logger');
+const Logger = require('..\..\middleware\logger.js');
 
 class AccessibilityService {
   constructor() {

@@ -5,10 +5,10 @@
 
 import { Activity, Download, Globe, TestTube } from 'lucide-react';
 import React from 'react';
-import { DataExporter } from '../components/business/DataExporter';
-import { MonitorDashboard } from '../components/business/MonitorDashboard';
-import { ResultViewer } from '../components/business/ResultViewer';
-import { TestRunner } from '../components/business/TestRunner';
+import { DataExporter } from '..\components\features\DataExporter.tsx';
+import { MonitorDashboard } from '..\components\features\MonitorDashboard.tsx';
+import { ResultViewer } from '..\components\features\ResultViewer.tsx';
+import { TestRunner } from '..\components\features\TestRunner.tsx';
 import { Card } from '../components/ui';
 import { AppProvider } from '../contexts/AppContext';
 

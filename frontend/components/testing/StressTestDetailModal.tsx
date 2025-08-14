@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import ExportUtils from '../../utils/exportUtils';
-import ExportModal from '../common/ExportModal';
+import ExportModal from '..\ui\ExportModal.tsx';
 
 import './StressTestDetailModal.css';
 

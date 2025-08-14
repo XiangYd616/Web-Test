@@ -2,26 +2,26 @@
 import { AlertCircle, AlertTriangle, BarChart3, CheckCircle, Clock, Download, FileText, Globe, Loader, Play, RotateCcw, Settings, Shield, Square, TrendingUp, Users, XCircle, Zap } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useAuthCheck } from '../components/auth/withAuthCheck';
+import { useAuthCheck } from '..\..\..\components\auth\withAuthCheck.tsx';
 import { AdvancedStressTestChart, StressTestCharts as UnifiedStressTestCharts } from '../components/charts';
-import ExportModal from '../components/common/ExportModal';
-import CancelTestConfirmDialog from '../components/dialogs/CancelTestConfirmDialog';
-import CancelProgressFeedback from '../components/feedback/CancelProgressFeedback';
-import StressTestHistory from '../components/stress/StressTestHistory';
+import ExportModal from '..\..\..\components\ui\ExportModal.tsx';
+import CancelTestConfirmDialog from '..\..\..\components\ui\CancelTestConfirmDialog.tsx';
+import CancelProgressFeedback from '..\..\..\components\ui\CancelProgressFeedback.tsx';
+import StressTestHistory from '..\..\..\components\testing\StressTestHistory.tsx';
 import { URLInput } from '../components/testing';
-import { useLocalStressTest } from '../hooks/useLocalStressTest';
-import { AdvancedStressTestConfig as ImportedAdvancedStressTestConfig } from '../hooks/useSimpleTestEngine';
-import { useStressTestRecord } from '../hooks/useStressTestRecord';
-import { useUserStats } from '../hooks/useUserStats';
-import backgroundTestManager from '../services/backgroundTestManager';
-import ExportUtils from '../utils/exportUtils';
+import { useLocalStressTest } from '..\..\..\hooks\useLocalStressTest.ts';
+import { AdvancedStressTestConfig as ImportedAdvancedStressTestConfig } from '..\..\..\hooks\useSimpleTestEngine.ts';
+import { useStressTestRecord } from '..\..\..\hooks\useStressTestRecord.ts';
+import { useUserStats } from '..\..\..\hooks\useUserStats.ts';
+import backgroundTestManager from '..\..\..\services\backgroundTestManager.ts';
+import ExportUtils from '..\..\..\utils\exportUtils.ts';
 
-import { systemResourceMonitor } from '../services/systemResourceMonitor';
-import { testEngineManager } from '../services/testEngines';
+import { systemResourceMonitor } from '..\..\..\services\systemResourceMonitor.ts';
+import { testEngineManager } from '..\..\..\services\testEngines.ts';
 import { TestPhase, type RealTimeMetrics, type TestDataPoint } from '../services/TestStateManager';
 import '../styles/progress-bar.css';
-import type { TestStatusType } from '../types/testHistory';
-import { getTemplateById } from '../utils/testTemplates';
+import type { TestStatusType } from '..\..\..\types\testHistory.ts';
+import { getTemplateById } from '..\..\..\services\testTemplates.ts';
 
 // 工具函数：安全地从URL获取主机名
 const getHostnameFromUrl = (url: string): string => {

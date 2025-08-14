@@ -6,7 +6,7 @@
 const EventEmitter = require('events');
 const nodemailer = require('nodemailer');
 const axios = require('axios');
-const logger = require('../utils/logger');
+const logger = require('..\..\middleware\logger.js');
 
 class AlertService extends EventEmitter {
     constructor(dbPool) {

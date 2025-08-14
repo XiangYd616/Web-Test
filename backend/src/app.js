@@ -14,58 +14,58 @@ const fs = require('fs');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 // 导入路由
-const authRoutes = require('./routes/auth');
-const testRoutes = require('./routes/test');
-const seoRoutes = require('./routes/seo');
+const authRoutes = require('..\middleware\auth.js');
+const testRoutes = require('..\routes\test.js');
+const seoRoutes = require('..\routes\seo.js');
 // const unifiedSecurityRoutes = require('./routes/unifiedSecurity'); // 已移除
-const userRoutes = require('./routes/user');
-const adminRoutes = require('./routes/admin');
+const userRoutes = require('..\routes\user.js');
+const adminRoutes = require('..\routes\admin.js');
 // const dataRoutes = require('./routes/data'); // 已移除，功能合并到 dataManagementRoutes
 
 // 导入中间件
-// const { authMiddleware } = require('./middleware/auth'); // 已移除，不再需要
-const dataManagementRoutes = require('./routes/dataManagement');
-const testHistoryRoutes = require('./routes/testHistory');
-const monitoringRoutes = require('./routes/monitoring');
-const reportRoutes = require('./routes/reports');
-const integrationRoutes = require('./routes/integrations');
-const cacheRoutes = require('./routes/cache');
-const errorRoutes = require('./routes/errors');
-const performanceRoutes = require('./routes/performance');
-const filesRoutes = require('./routes/files');
+// const { authMiddleware } = require('..\middleware\auth.js'); // 已移除，不再需要
+const dataManagementRoutes = require('..\routes\dataManagement.js');
+const testHistoryRoutes = require('..\routes\testHistory.js');
+const monitoringRoutes = require('..\routes\monitoring.js');
+const reportRoutes = require('..\routes\reports.js');
+const integrationRoutes = require('..\routes\integrations.js');
+const cacheRoutes = require('..\config\cache.js');
+const errorRoutes = require('..\routes\errors.js');
+const performanceRoutes = require('..\routes\performance.js');
+const filesRoutes = require('..\routes\files.js');
 
 // 导入中间件
-const { errorHandler } = require('./middleware/errorHandler');
-const { requestLogger } = require('./middleware/logger');
-const { rateLimiter } = require('./middleware/rateLimiter');
-const { securityMiddleware } = require('./middleware/security');
+const { errorHandler } = require('..\middleware\errorHandler.js');
+const { requestLogger } = require('..\middleware\logger.js');
+const { rateLimiter } = require('..\middleware\rateLimiter.js');
+const { securityMiddleware } = require('..\..\frontend\config\security.ts');
 const {
   responseFormatter,
   errorResponseFormatter,
   notFoundHandler,
   responseTimeLogger
-} = require('./middleware/responseFormatter');
+} = require('..\middleware\responseFormatter.js');
 
 // 导入数据库连接
-const { connectDB, testConnection } = require('./config/database');
+const { connectDB, testConnection } = require('..\config\database.js');
 
 // 导入缓存和性能优化系统
-const cacheConfig = require('./config/cache');
-const CacheManager = require('./services/CacheManager');
-const { createCacheMiddleware } = require('./middleware/cacheMiddleware');
+const cacheConfig = require('..\config\cache.js');
+const CacheManager = require('..\services\cache\CacheManager.js');
+const { createCacheMiddleware } = require('..\middleware\cacheMiddleware.js');
 const {
   createCompressionMiddleware,
   createCacheControlMiddleware,
   createETagMiddleware,
   createSecurityHeadersMiddleware
-} = require('./api/middleware/staticOptimization');
+} = require('..\api\middleware\staticOptimization.js');
 
 // 导入实时通信系统
-const realtimeConfig = require('./config/realtime');
+const realtimeConfig = require('..\config\realtime.js');
 
 // 导入Redis服务
-const redisConnection = require('./services/redis/connection');
-const cacheMonitoring = require('./services/redis/monitoring');
+const redisConnection = require('..\services\redis\connection.js');
+const cacheMonitoring = require('..\routes\monitoring.js');
 
 // 导入测试历史服务将在启动时动态加载
 
@@ -182,7 +182,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', authRoutes);
 // 🔧 修复：更具体的路由必须在更通用的路由之前注册
 app.use('/api/test/history', testHistoryRoutes); // 新的测试历史API - 必须在 /api/test 之前
-app.use('/api/test/real', require('./routes/realTest')); // 真实测试API - 新增
+app.use('/api/test/real', require('..\routes\realTest.js')); // 真实测试API - 新增
 app.use('/api/test', testRoutes);
 app.use('/api/seo', seoRoutes); // SEO测试API - 解决CORS问题
 app.use('/api/user', userRoutes);
@@ -193,13 +193,13 @@ app.use('/api/admin', adminRoutes);
 
 // 数据管理API - 统一到 /api/data-management
 app.use('/api/data-management', dataManagementRoutes);
-app.use('/api/data-export', require('./routes/dataExport').router);
-app.use('/api/data-import', require('./routes/dataImport').router);
-app.use('/api/backup', require('./routes/backup').router);
+app.use('/api/data-export', require('..\routes\dataExport.js').router);
+app.use('/api/data-import', require('..\routes\dataImport.js').router);
+app.use('/api/backup', require('..\routes\backup.js').router);
 app.use('/api/monitoring', monitoringRoutes);
-app.use('/api/alerts', require('./routes/alerts'));
+app.use('/api/alerts', require('..\routes\alerts.js'));
 app.use('/api/reports', reportRoutes);
-app.use('/api/system', require('./routes/system'));
+app.use('/api/system', require('..\routes\system.js'));
 app.use('/api/integrations', integrationRoutes);
 app.use('/api/cache', cacheRoutes);
 app.use('/api/errors', errorRoutes);
@@ -208,7 +208,7 @@ app.use('/api/files', filesRoutes);
 
 // API响应格式示例路由（仅在开发环境中启用）
 if (process.env.NODE_ENV === 'development') {
-  app.use('/api/example', require('./routes/apiExample'));
+  app.use('/api/example', require('..\routes\apiExample.js'));
 }
 
 // 健康检查端点
@@ -520,19 +520,19 @@ const startServer = async () => {
 
     // 初始化监控服务
     try {
-      const MonitoringService = require('./services/MonitoringService');
-      const AlertService = require('./services/AlertService');
+      const MonitoringService = require('..\services\monitoring\MonitoringService.js');
+      const AlertService = require('..\services\core\AlertService.js');
 
       // 创建监控服务实例
       const monitoringService = new MonitoringService(dbPool);
       const alertService = new AlertService(dbPool);
 
       // 设置监控服务到路由
-      const monitoringRoutes = require('./routes/monitoring');
+      const monitoringRoutes = require('..\routes\monitoring.js');
       monitoringRoutes.setMonitoringService(monitoringService);
 
       // 设置告警服务到路由
-      const alertRoutes = require('./routes/alerts');
+      const alertRoutes = require('..\routes\alerts.js');
       alertRoutes.setAlertService(alertService);
 
       // 监听告警事件
@@ -555,7 +555,7 @@ const startServer = async () => {
     }
 
     // 初始化地理位置自动更新服务
-    const geoUpdateService = require('./services/geoUpdateService');
+    const geoUpdateService = require('..\services\core\geoUpdateService.js');
     console.log('✅ 地理位置自动更新服务初始化成功');
 
     // 设置WebSocket事件处理
@@ -591,7 +591,7 @@ const startServer = async () => {
       console.log(`🔌 WebSocket服务已启动`);
 
       // 显示地理位置服务状态
-      const geoUpdateService = require('./services/geoUpdateService');
+      const geoUpdateService = require('..\services\core\geoUpdateService.js');
       const geoStatus = geoUpdateService.getStatus();
       console.log(`🗺️  地理位置自动更新: ${geoStatus.enabled ? '已启用' : '已禁用'}`);
       if (geoStatus.enabled) {
@@ -634,7 +634,7 @@ function setupWebSocketHandlers(io) {
       console.log(`🔥 用户连接测试: ${userId}/${testId}`, { socketId: socket.id });
 
       // 🔧 重构：注册用户WebSocket连接
-      const userTestManager = require('./services/UserTestManager');
+      const userTestManager = require('..\services\testing\UserTestManager.js');
       userTestManager.registerUserSocket(userId, socket);
 
       // 存储userId到socket对象，用于断开连接时清理
@@ -783,7 +783,7 @@ function setupWebSocketHandlers(io) {
       // 注意：这里我们不知道具体的userId，所以需要在连接时存储
       // 实际实现中可以在socket对象上存储userId
       if (socket.userId) {
-        const userTestManager = require('./services/UserTestManager');
+        const userTestManager = require('..\services\testing\UserTestManager.js');
         userTestManager.unregisterUserSocket(socket.userId);
       }
     });

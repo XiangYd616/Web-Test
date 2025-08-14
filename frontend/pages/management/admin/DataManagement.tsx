@@ -1,5 +1,5 @@
 import React from 'react';
-import { DataManagement as DataManagementComponent } from '../components/data/DataManagement';
+import { DataManagement as DataManagementComponent } from './DataManagement.tsx';
 
 /**
  * 数据管理页面 - 重构版

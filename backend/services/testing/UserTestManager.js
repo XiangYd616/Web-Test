@@ -244,7 +244,7 @@ class UserTestManager {
     try {
       // 导入TestHistoryService
       const TestHistoryService = require('./TestHistoryService');
-      const dbModule = require('../config/database');
+      const dbModule = require('..\..\config\database.js');
       const testHistoryService = new TestHistoryService(dbModule);
 
       // 根据测试类型确定保存方式

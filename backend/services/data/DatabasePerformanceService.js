@@ -4,7 +4,7 @@
  */
 
 const winston = require('winston');
-const { getConnectionManager } = require('../config/database');
+const { getConnectionManager } = require('..\..\config\database.js');
 
 class DatabasePerformanceOptimizer {
     constructor() {

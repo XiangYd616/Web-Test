@@ -1,11 +1,11 @@
 import { CheckCircle, Clock, Gauge, Image, Play, Smartphone, Square, Timer, Zap } from 'lucide-react';
 import React, { useState } from 'react';
-import { useAuthCheck } from '../components/auth/withAuthCheck';
-import TestHistory from '../components/common/TestHistory';
-import BaseTestPage from '../components/testing/BaseTestPage';
-import { URLInput } from '../components/ui/URLInput';
-import { useUserStats } from '../hooks/useUserStats';
-import { apiService } from '../services/api/apiService';
+import { useAuthCheck } from '..\..\..\components\auth\withAuthCheck.tsx';
+import TestHistory from '..\results\TestHistory.tsx';
+import BaseTestPage from '..\..\..\components\testing\BaseTestPage.tsx';
+import { URLInput } from '..\..\..\components\testing\URLInput.tsx';
+import { useUserStats } from '..\..\..\hooks\useUserStats.ts';
+import { apiService } from '..\..\..\services\api\apiService.ts';
 
 interface PerformanceTestConfig {
   url: string;

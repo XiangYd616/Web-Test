@@ -7,9 +7,9 @@ const express = require('express');
 const { body, validationResult } = require('express-validator');
 
 const { getPool, healthCheck, getStats } = require('../../../config/database');
-const { requireRole, ROLES } = require('../middleware/auth');
-const { asyncHandler } = require('../middleware/errorHandler');
-const { formatValidationErrors } = require('../middleware/responseFormatter');
+const { requireRole, ROLES } = require('./auth.js');
+const { asyncHandler } = require('..\..\middleware\errorHandler.js');
+const { formatValidationErrors } = require('..\..\middleware\responseFormatter.js');
 
 const router = express.Router();
 

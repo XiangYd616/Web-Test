@@ -1,6 +1,6 @@
 import { History } from 'lucide-react';
 import React, { ReactNode, useEffect, useState } from 'react';
-import { TestPageHistory } from '../testHistory/TestPageHistory';
+import { TestPageHistory } from '..\ui\TestPageHistory.tsx';
 
 interface UnifiedTestPageWithHistoryProps {
   // 页面基本信息
