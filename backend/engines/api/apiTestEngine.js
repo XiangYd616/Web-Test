@@ -1,5 +1,6 @@
 const axios = require('axios');
 const https = require('https');
+const webSocketService = require('../../services/WebSocketService');
 
 /**
  * 真实的API测试引擎
@@ -22,7 +23,7 @@ class RealAPITestEngine {
   /**
    * 运行API测试
    */
-  async runAPITest(config) {
+  async runAPITest(config, testId = null) {
     const {
       baseUrl,
       endpoints = [],
@@ -43,11 +44,16 @@ class RealAPITestEngine {
     console.log(`🔌 Starting API test: ${baseUrl}`);
     console.log(`📊 Testing ${endpoints.length} endpoints`);
 
-    const testId = Date.now().toString();
+    const actualTestId = testId || Date.now().toString();
     const startTime = Date.now();
 
+    // 发送测试开始通知
+    if (testId) {
+      webSocketService.broadcastTestStatusUpdate(testId, 'running', 0, '开始API测试...');
+    }
+
     const results = {
-      testId,
+      testId: actualTestId,
       baseUrl,
       testEnvironment,
       startTime: new Date(startTime).toISOString(),
@@ -113,8 +119,21 @@ class RealAPITestEngine {
       // 创建axios实例
       const apiClient = this.createAPIClient(baseUrl, timeout, headers, auth);
 
-      for (const endpoint of endpoints) {
+      for (let i = 0; i < endpoints.length; i++) {
+        const endpoint = endpoints[i];
         console.log(`🎯 Testing endpoint: ${endpoint.method || 'GET'} ${endpoint.path}`);
+
+        // 发送进度更新
+        if (testId) {
+          const progress = Math.round((i / endpoints.length) * 100);
+          webSocketService.broadcastTestProgress(
+            testId,
+            progress,
+            i + 1,
+            endpoints.length,
+            `测试端点: ${endpoint.method || 'GET'} ${endpoint.path}`
+          );
+        }
 
         const endpointResult = await this.testEndpoint(apiClient, endpoint, {
           retries,
@@ -160,8 +179,15 @@ class RealAPITestEngine {
 
       results.endTime = new Date().toISOString();
       results.duration = Date.now() - startTime;
+      results.success = true;
 
-      this.activeTests.set(testId, { config, results, status: 'completed' });
+      this.activeTests.set(actualTestId, { config, results, status: 'completed' });
+
+      // 发送测试完成通知
+      if (testId) {
+        webSocketService.broadcastTestCompleted(testId, results, true);
+        webSocketService.broadcastTestStatusUpdate(testId, 'completed', 100, '测试完成');
+      }
 
       console.log(`✅ API test completed. Score: ${results.overallScore}/100`);
       return results;
@@ -170,7 +196,15 @@ class RealAPITestEngine {
       console.error('❌ API test failed:', error);
       results.endTime = new Date().toISOString();
       results.error = error.message;
-      this.activeTests.set(testId, { config, results, status: 'failed' });
+      results.success = false;
+      this.activeTests.set(actualTestId, { config, results, status: 'failed' });
+
+      // 发送测试错误通知
+      if (testId) {
+        webSocketService.broadcastTestError(testId, error, 'API_TEST_FAILED');
+        webSocketService.broadcastTestStatusUpdate(testId, 'failed', 100, `测试失败: ${error.message}`);
+      }
+
       throw error;
     }
   }
