@@ -1,17 +1,14 @@
-
-
-// 默认导出
-export { default as TestEngineStatus } from './TestEngineStatus';
-export { default as TestHeader } from './TestHeader';
-export { default as TestingComponents } from './TestingComponents';
-export { default as TestResultDisplay } from './TestResultDisplay';
-export { default as TestTemplateSelector } from './TestTemplateSelector';
-export { default as UnifiedTestInterface } from './UnifiedTestInterface';
+// Testing components
+export { default as BaseTestPage } from './BaseTestPage';
+export { default as TestHistoryPanel } from './TestHistoryPanel';
+export { default as TestConfigPanel } from './TestConfigPanel';
+export { default as TestResultsPanel } from './TestResultsPanel';
+export { default as TestProgressPanel } from './TestProgressPanel';
 export { default as URLInput } from './URLInput';
+export { default as StressTestDetailModal } from './StressTestDetailModal';
+export { default as StressTestHistory } from './StressTestHistory';
+export { default as UnifiedTestInterface } from './UnifiedTestInterface';
+export { default as UnifiedTestPageWithHistory } from './UnifiedTestPageWithHistory';
 
-// 类型导出
-export type { TestEngineStatusProps } from './TestEngineStatus';
-export type { TestResultDisplayProps } from './TestResultDisplay';
-export type { TestTemplateSelectorProps } from './TestTemplateSelector';
-export type { UnifiedTestInterfaceProps } from './UnifiedTestInterface';
-
+// Types
+export type { TestHistoryItem } from './TestHistoryPanel';
