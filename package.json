@@ -122,7 +122,9 @@
     "project:full-stack-analysis": "npm run project:analyze && npm run backend:analyze",
     "backend:restructure": "node scripts/backendRestructure.cjs",
     "backend:restructure:preview": "node scripts/backendRestructure.cjs --dry-run",
-    "backend:optimize": "npm run backend:restructure && npm run backend:analyze"
+    "backend:optimize": "npm run backend:restructure && npm run backend:analyze",
+    "docs:update": "node scripts/updateProjectDocumentation.cjs",
+    "project:finalize": "npm run project:complete-check && npm run docs:update"
   },
   "dependencies": {
     "axios": "^1.11.0",

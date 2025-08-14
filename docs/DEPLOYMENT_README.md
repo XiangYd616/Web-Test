@@ -12,7 +12,7 @@
 需要上传到服务器的文件：
 
 1. **complete-deploy.sh** - 完整部署脚本
-2. **server/app-simple.js** - 简化版服务器应用
+2. **backend/app-simple.js** - 简化版服务器应用
 3. **client/index.html** - 前端页面
 4. **init-database.sql** - 数据库初始化脚本
 5. **README-DEPLOY.md** - 本说明文件
@@ -30,7 +30,7 @@ cd /opt/test-web-app
 
 # 上传文件（在本地执行）
 scp complete-deploy.sh root@8.137.111.126:/opt/test-web-app/
-scp server/app-simple.js root@8.137.111.126:/opt/test-web-app/server/
+scp backend/app-simple.js root@8.137.111.126:/opt/test-web-app/backend/
 scp client/index.html root@8.137.111.126:/opt/test-web-app/client/
 scp init-database.sql root@8.137.111.126:/opt/test-web-app/
 ```

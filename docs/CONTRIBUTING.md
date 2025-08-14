@@ -63,3 +63,29 @@
 ## 🙏 致谢
 
 感谢所有为项目做出贡献的开发者！
+
+## 🛠️ 维护工具
+
+项目提供了完整的维护工具链：
+
+### 项目分析工具
+```bash
+npm run project:analyze              # 项目结构分析
+npm run backend:analyze              # Backend结构分析
+npm run project:full-stack-analysis  # 全栈分析
+```
+
+### 重构工具
+```bash
+npm run project:restructure          # 全项目重构
+npm run backend:restructure          # Backend重构
+npm run naming:fix                   # 命名规范修复
+```
+
+### 验证工具
+```bash
+npm run config:validate              # 配置验证
+npm run validate:routes              # 路由验证
+npm run project:complete-check       # 完整检查
+```
+
