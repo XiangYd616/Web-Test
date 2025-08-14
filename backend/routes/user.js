@@ -6,6 +6,7 @@ const express = require('express');
 const { query } = require('../config/database');
 const { authMiddleware } = require('../middleware/auth');
 const { asyncHandler } = require('../middleware/errorHandler');
+const OptimizedQueries = require('../utils/optimizedQueries');
 
 const router = express.Router();
 
