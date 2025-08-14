@@ -4,7 +4,7 @@
  */
 
 const request = require('supertest');
-const app = require('../app');
+const app = require('..\src\app.js');
 const { Pool } = require('pg');
 
 // 模拟数据库连接池

@@ -1,8 +1,8 @@
 import { AlertTriangle, BarChart3, CheckCircle, Clock, Download, Eye, Gauge, ImageIcon, MousePointer, Play, Square, Target, TrendingUp, XCircle, Zap } from 'lucide-react';
 import React, { useState } from 'react';
-import { useAuthCheck } from '../components/auth/withAuthCheck';
-import BaseTestPage from '../components/testing/BaseTestPage';
-import { useUserStats } from '../hooks/useUserStats';
+import { useAuthCheck } from '..\..\..\components\auth\withAuthCheck.tsx';
+import BaseTestPage from '..\..\..\components\testing\BaseTestPage.tsx';
+import { useUserStats } from '..\..\..\hooks\useUserStats.ts';
 
 // CSS样式已迁移到组件库中
 

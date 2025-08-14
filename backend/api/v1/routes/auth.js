@@ -14,9 +14,9 @@ const {
   verifyToken,
   updateLastLogin,
   authMiddleware
-} = require('../middleware/auth');
-const { asyncHandler } = require('../middleware/errorHandler');
-const { formatValidationErrors, ERROR_CODES } = require('../middleware/responseFormatter');
+} = require('./auth.js');
+const { asyncHandler } = require('..\..\middleware\errorHandler.js');
+const { formatValidationErrors, ERROR_CODES } = require('..\..\middleware\responseFormatter.js');
 
 const router = express.Router();
 

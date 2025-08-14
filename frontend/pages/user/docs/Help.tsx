@@ -1,7 +1,7 @@
 import { BarChart3, Book, ChevronRight, Clock, Code, Download, FileText, Filter, HelpCircle, Mail, MessageCircle, Phone, Play, Search, Send, Shield, Tag, ThumbsDown, ThumbsUp, Users, Video, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { helpService } from '../services/helpService';
+import { useAuth } from '..\..\..\contexts\AuthContext.tsx';
+import { helpService } from '..\..\..\services\helpService.ts';
 
 interface FAQItem {
   id: string;

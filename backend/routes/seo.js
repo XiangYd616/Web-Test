@@ -7,7 +7,7 @@ const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const rateLimit = require('express-rate-limit');
-const cacheMiddleware = require('../middleware/cache');
+const cacheMiddleware = require('./cache.js');
 
 const router = express.Router();
 

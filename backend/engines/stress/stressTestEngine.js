@@ -3024,8 +3024,8 @@ class RealStressTestEngine {
           Logger.info(`保存取消的测试记录: ${testId}`);
 
           // 调用测试历史服务保存取消状态
-          const TestHistoryService = require('./TestHistoryService');
-          const testHistoryService = new TestHistoryService(require('../config/database'));
+          const TestHistoryService = require('..\..\services\testing\TestHistoryService.js');
+          const testHistoryService = new TestHistoryService(require('..\..\config\database.js'));
 
           try {
             await testHistoryService.cancelTest(
@@ -3046,8 +3046,8 @@ class RealStressTestEngine {
       Logger.info(`保存最终测试结果: ${testId}`);
 
       // 调用测试历史服务保存完成状态
-      const TestHistoryService = require('./TestHistoryService');
-      const testHistoryService = new TestHistoryService(require('../config/database'));
+      const TestHistoryService = require('..\..\services\testing\TestHistoryService.js');
+      const testHistoryService = new TestHistoryService(require('..\..\config\database.js'));
 
       try {
         const finalResults = {
@@ -3195,7 +3195,7 @@ class RealStressTestEngine {
       Logger.info(`🌐 使用k6引擎执行代理压力测试: ${testId}`);
 
       // 导入k6引擎
-      const { RealK6Engine } = require('./k6Engine');
+      const { RealK6Engine } = require('..\api\k6Engine.js');
       const k6Engine = new RealK6Engine();
 
       // 检查k6是否可用

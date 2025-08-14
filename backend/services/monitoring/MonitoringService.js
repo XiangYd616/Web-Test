@@ -7,7 +7,7 @@ const { Pool } = require('pg');
 const EventEmitter = require('events');
 const axios = require('axios');
 const { performance } = require('perf_hooks');
-const logger = require('../utils/logger');
+const logger = require('..\..\middleware\logger.js');
 
 class MonitoringService extends EventEmitter {
     constructor(dbPool) {

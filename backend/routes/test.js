@@ -12,18 +12,18 @@ const { authMiddleware, optionalAuth, adminAuth } = require('../middleware/auth'
 const { testRateLimiter, historyRateLimiter } = require('../middleware/rateLimiter');
 const { asyncHandler } = require('../middleware/errorHandler');
 const { validateURLMiddleware, validateAPIURLMiddleware } = require('../middleware/urlValidator');
-const cacheMiddleware = require('../middleware/cache');
+const cacheMiddleware = require('./cache.js');
 
 // 导入测试引擎类
-const { RealTestEngine } = require('../services/testEngine');
-const { RealStressTestEngine } = require('../services/stressTestEngine');
-const RealSecurityTestEngine = require('../services/securityTestEngine'); // 直接导出
-const { RealCompatibilityTestEngine } = require('../services/compatibilityTestEngine');
-const { RealUXTestEngine } = require('../services/uxTestEngine');
-const { RealAPITestEngine } = require('../services/apiTestEngine');
-const securityTestStorage = require('../services/securityTestStorage');
-const TestHistoryService = require('../services/TestHistoryService');
-const userTestManager = require('../services/UserTestManager');
+const { RealTestEngine } = require('..\engines\api\testEngine.js');
+const { RealStressTestEngine } = require('..\engines\stress\stressTestEngine.js');
+const RealSecurityTestEngine = require('..\engines\security\securityTestEngine.js'); // 直接导出
+const { RealCompatibilityTestEngine } = require('..\engines\compatibility\compatibilityTestEngine.js');
+const { RealUXTestEngine } = require('..\engines\api\uxTestEngine.js');
+const { RealAPITestEngine } = require('..\engines\api\apiTestEngine.js');
+const securityTestStorage = require('..\services\testing\securityTestStorage.js');
+const TestHistoryService = require('..\services\testing\TestHistoryService.js');
+const userTestManager = require('..\services\testing\UserTestManager.js');
 // const enhancedTestHistoryService = require('../services/enhancedTestHistoryService'); // 已移除，功能迁移到 dataManagement
 
 const multer = require('multer');
@@ -3833,8 +3833,8 @@ const ipLocationCache = new Map();
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24小时缓存
 
 // 引入地理位置服务
-const geoLocationService = require('../services/geoLocationService');
-const geoUpdateService = require('../services/geoUpdateService');
+const geoLocationService = require('..\services\core\geoLocationService.js');
+const geoUpdateService = require('..\services\core\geoUpdateService.js');
 const ProxyValidator = require('../services/proxyValidator');
 
 /**

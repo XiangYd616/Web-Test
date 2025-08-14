@@ -3,7 +3,7 @@
  * 提供图表生成、数据分析、可视化配置功能
  */
 
-const Logger = require('../utils/logger');
+const Logger = require('..\..\middleware\logger.js');
 
 class DataVisualizationService {
   constructor() {

@@ -7,7 +7,7 @@
 import { useEffect } from 'react';
 
 // 路由和组件导入
-import AppRoutes from './components/routing/AppRoutes';
+import AppRoutes from './components\tools\AppRoutes.tsx';
 import BackgroundTestNotifications from './components/system/BackgroundTestNotifications';
 import PerformanceMonitor from './components/system/PerformanceMonitor';
 import ErrorBoundary from './components/ui/ErrorBoundary';

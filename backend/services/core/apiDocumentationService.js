@@ -5,7 +5,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const Logger = require('../utils/logger');
+const Logger = require('..\..\middleware\logger.js');
 
 class ApiDocumentationService {
   constructor() {

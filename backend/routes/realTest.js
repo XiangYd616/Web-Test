@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const SEOTestEngine = require('../services/SEOTestEngine');
-const PerformanceTestEngine = require('../services/optimized/PerformanceTestEngine');
-const SecurityTestEngine = require('../services/securityTestEngine');
-const APITestEngine = require('../services/apiTestEngine');
+const SEOTestEngine = require('..\engines\seo\SEOTestEngine.js');
+const PerformanceTestEngine = require('..\engines\performance\PerformanceTestEngine.js');
+const SecurityTestEngine = require('..\engines\security\securityTestEngine.js');
+const APITestEngine = require('..\engines\api\apiTestEngine.js');
 const Logger = require('../utils/logger');
 
 // 创建测试引擎实例

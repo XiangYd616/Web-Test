@@ -1,6 +1,6 @@
 import { Activity, AlertTriangle, CheckCircle, Clock, Copy, Edit, Eye, EyeOff, Filter, Key, Plus, RefreshCw, Search, Shield, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import IntegrationService, { APIKey } from '../services/integrationService';
+import IntegrationService, { APIKey } from '..\..\..\services\integrationService.ts';
 
 interface APIKeysProps { }
 

@@ -9,9 +9,9 @@ import {
   getStatusStyleClasses,
   getStatusText
 } from '../../utils/testStatusUtils';
-import { DeleteConfirmDialog } from '../common/DeleteConfirmDialog';
-import ExportModal from '../common/ExportModal';
-import { showToast } from '../common/Toast';
+import { DeleteConfirmDialog } from '..\ui\DeleteConfirmDialog.tsx';
+import ExportModal from '..\ui\ExportModal.tsx';
+import { showToast } from '..\ui\Toast.tsx';
 import StressTestDetailModal from './StressTestDetailModal';
 
 import '../../styles/pagination.css';

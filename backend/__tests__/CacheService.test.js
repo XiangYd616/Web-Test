@@ -2,7 +2,7 @@
  * CacheService 测试
  */
 
-const CacheService = require('../services/CacheService');
+const CacheService = require('..\services\cache\CacheService.js');
 
 // Mock Redis
 jest.mock('redis', () => ({

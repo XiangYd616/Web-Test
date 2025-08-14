@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { AlertCircle, CheckCircle, Eye, EyeOff, Lock, Mail, Moon, Sun, User } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '..\..\..\contexts\AuthContext.tsx';
+import { useTheme } from '..\..\..\contexts\ThemeContext.tsx';
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({

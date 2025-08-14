@@ -3,7 +3,7 @@
  * 验证所有测试引擎是否正确集成和工作
  */
 
-const TestEngineManager = require('../services/TestEngineManager');
+const TestEngineManager = require('..\engines\api\TestEngineManager.js');
 
 describe('测试引擎集成', () => {
     let testEngineManager;

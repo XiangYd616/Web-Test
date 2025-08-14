@@ -2,7 +2,7 @@
  * QueryCacheService 测试
  */
 
-const QueryCacheService = require('../services/QueryCacheService');
+const QueryCacheService = require('..\services\cache\QueryCacheService.js');
 
 // Mock CacheService
 const mockCacheService = {

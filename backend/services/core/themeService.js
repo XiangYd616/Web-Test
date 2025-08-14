@@ -3,7 +3,7 @@
  * 提供主题配置、用户偏好、动态主题切换功能
  */
 
-const Logger = require('../utils/logger');
+const Logger = require('..\..\middleware\logger.js');
 
 class ThemeService {
   constructor() {

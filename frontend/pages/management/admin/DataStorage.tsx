@@ -1,11 +1,11 @@
 import { Activity, BarChart3, ChevronDown, ChevronUp, Code, Database, Download, Eye, FileText, Filter, Globe, RefreshCw, Search, Shield, SortAsc, SortDesc, Trash2, TrendingUp, Wifi, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import AnalyticsOverview from '../../components/analytics/AnalyticsOverview';
-import ImportExport from '../../components/analytics/ImportExport';
-import PerformanceAnalysis from '../../components/analytics/PerformanceAnalysis';
-import RealTimeMonitoring from '../../components/analytics/RealTimeMonitoring';
-import ReportManagement from '../../components/analytics/ReportManagement';
+import AnalyticsOverview from '..\..\..\components\features\AnalyticsOverview.tsx';
+import ImportExport from '..\..\..\components\features\ImportExport.tsx';
+import PerformanceAnalysis from '..\..\data\reports\PerformanceAnalysis.tsx';
+import RealTimeMonitoring from '..\..\..\components\features\RealTimeMonitoring.tsx';
+import ReportManagement from '..\..\..\components\features\ReportManagement.tsx';
 import { TestResultDisplay } from '../../components/testing';
 
 interface TestRecord {

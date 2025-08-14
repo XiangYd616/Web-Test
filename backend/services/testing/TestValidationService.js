@@ -3,7 +3,7 @@
  * 验证和标准化测试配置
  */
 
-const { ErrorFactory } = require('../utils/ApiError');
+const { ErrorFactory } = require('..\..\utils\ApiError.js');
 
 class TestValidationService {
     constructor() {

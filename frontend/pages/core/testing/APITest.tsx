@@ -1,12 +1,12 @@
 import { BarChart3, CheckCircle, Clock, Code, Database, Download, Eye, EyeOff, FileText, Globe, History, Key, Loader, Lock, Play, Plus, RotateCcw, Settings, Shield, Square, Trash2, XCircle, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { useAuthCheck } from '../components/auth/withAuthCheck';
+import { useAuthCheck } from '..\..\..\components\auth\withAuthCheck.tsx';
 import { URLInput } from '../components/testing';
-import BaseTestPage from '../components/testing/BaseTestPage';
-import { ProgressBar } from '../components/ui/ProgressBar';
-import { useUserStats } from '../hooks/useUserStats';
-import backgroundTestManager from '../services/backgroundTestManager';
-import type { APIEndpoint, APITestConfig } from '../services/testing/apiTestEngine';
+import BaseTestPage from '..\..\..\components\testing\BaseTestPage.tsx';
+import { ProgressBar } from '..\..\..\components\ui\ProgressBar.tsx';
+import { useUserStats } from '..\..\..\hooks\useUserStats.ts';
+import backgroundTestManager from '..\..\..\services\backgroundTestManager.ts';
+import type { APIEndpoint, APITestConfig } from '..\..\..\services\testing\apiTestEngine.ts';
 
 // CSS样式已迁移到组件库中
 // 进度条样式已集成到ProgressBar组件

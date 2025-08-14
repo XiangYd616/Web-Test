@@ -2,7 +2,7 @@
  * CacheManager 测试
  */
 
-const CacheManager = require('../services/CacheManager');
+const CacheManager = require('..\services\cache\CacheManager.js');
 
 // Mock所有依赖服务
 jest.mock('../services/CacheService');
@@ -10,10 +10,10 @@ jest.mock('../services/QueryCacheService');
 jest.mock('../services/CacheMonitoringService');
 jest.mock('../services/CacheWarmupService');
 
-const CacheService = require('../services/CacheService');
-const QueryCacheService = require('../services/QueryCacheService');
-const CacheMonitoringService = require('../services/CacheMonitoringService');
-const CacheWarmupService = require('../services/CacheWarmupService');
+const CacheService = require('..\services\cache\CacheService.js');
+const QueryCacheService = require('..\services\cache\QueryCacheService.js');
+const CacheMonitoringService = require('..\services\cache\CacheMonitoringService.js');
+const CacheWarmupService = require('..\services\cache\CacheWarmupService.js');
 
 describe('CacheManager', () => {
     let cacheManager;
