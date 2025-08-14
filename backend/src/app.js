@@ -29,7 +29,7 @@ const testHistoryRoutes = require('..\routes\testHistory.js');
 const monitoringRoutes = require('..\routes\monitoring.js');
 const reportRoutes = require('..\routes\reports.js');
 const integrationRoutes = require('..\routes\integrations.js');
-const cacheRoutes = require('..\config\cache.js');
+// const cacheRoutes = require('..\config\cache.js'); // 已移除，使用SmartCacheService
 const errorRoutes = require('..\routes\errors.js');
 const performanceRoutes = require('..\routes\performance.js');
 const filesRoutes = require('..\routes\files.js');
@@ -53,8 +53,8 @@ const webSocketService = require('../services/WebSocketService');
 const testQueueService = require('../services/TestQueueService');
 
 // 导入缓存和性能优化系统
-const cacheConfig = require('..\config\cache.js');
-const CacheManager = require('..\services\cache\CacheManager.js');
+// const cacheConfig = require('..\config\cache.js'); // 已移除，使用SmartCacheService
+// const CacheManager = require('..\services\cache\CacheManager.js'); // 已移除，使用SmartCacheService
 const { createCacheMiddleware } = require('..\middleware\cacheMiddleware.js');
 const {
   createCompressionMiddleware,
@@ -67,7 +67,7 @@ const {
 const realtimeConfig = require('..\config\realtime.js');
 
 // 导入Redis服务
-const redisConnection = require('..\services\redis\connection.js');
+// const redisConnection = require('..\services\redis\connection.js'); // 已移除，使用SmartCacheService
 const cacheMonitoring = require('..\routes\monitoring.js');
 
 // 导入测试历史服务将在启动时动态加载
@@ -188,7 +188,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', authRoutes);
 // 🔧 修复：更具体的路由必须在更通用的路由之前注册
 app.use('/api/test/history', testHistoryRoutes); // 新的测试历史API - 必须在 /api/test 之前
-app.use('/api/test/real', require('..\routes\realTest.js')); // 真实测试API - 新增
+// app.use('/api/test/real', require('..\routes\realTest.js')); // 已移除，功能合并到主测试路由
 app.use('/api/test', testRoutes);
 app.use('/api/seo', seoRoutes); // SEO测试API - 解决CORS问题
 app.use('/api/user', userRoutes);
@@ -207,7 +207,7 @@ app.use('/api/alerts', require('..\routes\alerts.js'));
 app.use('/api/reports', reportRoutes);
 app.use('/api/system', require('..\routes\system.js'));
 app.use('/api/integrations', integrationRoutes);
-app.use('/api/cache', cacheRoutes);
+// app.use('/api/cache', cacheRoutes); // 已移除，缓存管理功能合并到测试路由
 app.use('/api/errors', errorRoutes);
 app.use('/api/performance', performanceRoutes);
 app.use('/api/files', filesRoutes);
@@ -483,42 +483,16 @@ const startServer = async () => {
       // 继续启动，但记录错误
     }
 
-    // 初始化新的缓存系统
-    try {
-      const cacheManager = new CacheManager(dbPool);
-      const initialized = await cacheManager.initialize();
+    // 初始化新的缓存系统 - 已移除，使用SmartCacheService
+    // try {
+    //   const cacheManager = new CacheManager(dbPool);
+    //   const initialized = await cacheManager.initialize();
+    //   // ... 缓存管理器代码已移除，使用SmartCacheService替代
+    // } catch (error) {
+    //   console.warn('⚠️ 缓存系统初始化失败，继续使用无缓存模式:', error.message);
+    // }
 
-      if (initialized) {
-        // 将缓存实例设置为全局变量供其他模块使用
-        global.cacheManager = cacheManager;
-
-        console.log('✅ 新缓存系统初始化成功');
-
-        // 添加缓存中间件到应用
-        app.use(createCacheMiddleware(cacheManager, {
-          apiCache: {
-            ttl: 15 * 60, // 15分钟
-            excludeMethods: ['POST', 'PUT', 'DELETE', 'PATCH'],
-            excludeStatus: [400, 401, 403, 404, 500, 502, 503, 504]
-          },
-          queryCache: {
-            enabled: true,
-            ttl: 10 * 60 // 10分钟
-          },
-          warmup: true,
-          health: true,
-          statsApi: true,
-          management: true
-        }));
-
-        console.log('✅ 缓存中间件已配置');
-      } else {
-        console.warn('⚠️ 缓存系统初始化失败，使用降级模式');
-      }
-
-    } catch (error) {
-      console.warn('⚠️ 缓存系统初始化失败，继续使用无缓存模式:', error.message);
-    }
+    console.log('✅ 使用新的SmartCacheService缓存系统');
 
     // 初始化实时通信系统 - 使用现有的Socket.IO实例
     try {
