@@ -1,0 +1,191 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - staging
+        - production
+      version:
+        description: 'Version to deploy'
+        required: true
+        default: 'latest'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: testweb
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup deployment tools
+      run: |
+        # 安装kubectl
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        chmod +x kubectl
+        sudo mv kubectl /usr/local/bin/
+
+        # 安装helm
+        curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+    - name: Configure kubectl
+      run: |
+        echo "${{ secrets.KUBECONFIG }}" | base64 -d > kubeconfig
+        export KUBECONFIG=kubeconfig
+        kubectl config current-context
+
+    - name: Deploy with Helm
+      run: |
+        export KUBECONFIG=kubeconfig
+
+        helm upgrade --install testweb ./helm/testweb \
+          --namespace testweb-${{ github.event.inputs.environment }} \
+          --create-namespace \
+          --set image.repository=${{ env.REGISTRY }}/${{ github.repository }}/${{ env.IMAGE_NAME }} \
+          --set image.tag=${{ github.event.inputs.version }} \
+          --set environment=${{ github.event.inputs.environment }} \
+          --values ./helm/testweb/values-${{ github.event.inputs.environment }}.yaml \
+          --wait --timeout=10m
+
+    - name: Verify deployment
+      run: |
+        export KUBECONFIG=kubeconfig
+
+        # 等待部署完成
+        kubectl rollout status deployment/testweb -n testweb-${{ github.event.inputs.environment }} --timeout=600s
+
+        # 检查Pod状态
+        kubectl get pods -n testweb-${{ github.event.inputs.environment }} -l app=testweb
+
+        # 运行健康检查
+        kubectl run health-check --rm -i --restart=Never --image=curlimages/curl -- \
+          curl -f http://testweb-service.testweb-${{ github.event.inputs.environment }}.svc.cluster.local:3000/health
+
+    - name: Run smoke tests
+      run: |
+        export KUBECONFIG=kubeconfig
+
+        # 获取服务URL
+        SERVICE_URL=$(kubectl get service testweb-service -n testweb-${{ github.event.inputs.environment }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+
+        if [ -z "$SERVICE_URL" ]; then
+          SERVICE_URL=$(kubectl get service testweb-service -n testweb-${{ github.event.inputs.environment }} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+        fi
+
+        echo "Testing service at: http://$SERVICE_URL"
+
+        # 基本健康检查
+        curl -f "http://$SERVICE_URL/health" || exit 1
+
+        # API端点检查
+        curl -f "http://$SERVICE_URL/api/health" || exit 1
+
+        # 前端页面检查
+        curl -f "http://$SERVICE_URL/" | grep -q "Test Web" || exit 1
+
+    - name: Update deployment status
+      run: |
+        # 更新部署状态到数据库或监控系统
+        echo "Deployment completed successfully"
+        echo "Environment: ${{ github.event.inputs.environment }}"
+        echo "Version: ${{ github.event.inputs.version }}"
+        echo "Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+    - name: Notify teams
+      uses: 8398a7/action-slack@v3
+      with:
+        status: custom
+        custom_payload: |
+          {
+            "text": "🚀 Deployment Completed",
+            "attachments": [
+              {
+                "color": "good",
+                "fields": [
+                  {
+                    "title": "Environment",
+                    "value": "${{ github.event.inputs.environment }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Version",
+                    "value": "${{ github.event.inputs.version }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Status",
+                    "value": "✅ Success",
+                    "short": true
+                  },
+                  {
+                    "title": "Deployed by",
+                    "value": "${{ github.actor }}",
+                    "short": true
+                  }
+                ]
+              }
+            ]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+      if: success()
+
+    - name: Notify on failure
+      uses: 8398a7/action-slack@v3
+      with:
+        status: custom
+        custom_payload: |
+          {
+            "text": "❌ Deployment Failed",
+            "attachments": [
+              {
+                "color": "danger",
+                "fields": [
+                  {
+                    "title": "Environment",
+                    "value": "${{ github.event.inputs.environment }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Version",
+                    "value": "${{ github.event.inputs.version }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Failed by",
+                    "value": "${{ github.actor }}",
+                    "short": true
+                  }
+                ]
+              }
+            ]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+      if: failure()
+
+    - name: Rollback on failure
+      if: failure()
+      run: |
+        export KUBECONFIG=kubeconfig
+
+        echo "Deployment failed, initiating rollback..."
+
+        # 回滚到上一个版本
+        helm rollback testweb -n testweb-${{ github.event.inputs.environment }}
+
+        # 等待回滚完成
+        kubectl rollout status deployment/testweb -n testweb-${{ github.event.inputs.environment }} --timeout=300s
+
+        echo "Rollback completed"

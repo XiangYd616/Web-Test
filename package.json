@@ -134,7 +134,14 @@
     "path:complete-fix": "npm run path:smart-fix && npm run path:fix && npm run validate:routes",
     "files:create-missing": "node scripts/createMissingFiles.cjs",
     "files:create-preview": "node scripts/createMissingFiles.cjs --dry-run",
-    "path:ultimate-fix": "npm run files:create-missing && npm run path:smart-fix && npm run path:fix"
+    "path:ultimate-fix": "npm run files:create-missing && npm run path:smart-fix && npm run path:fix",
+    "task:implement": "node scripts/completeTaskAnalysisImplementer.cjs",
+    "task:implement:preview": "node scripts/completeTaskAnalysisImplementer.cjs --dry-run",
+    "task:implement:phase1": "node scripts/completeTaskAnalysisImplementer.cjs --phase=1",
+    "task:implement:phase2": "node scripts/completeTaskAnalysisImplementer.cjs --phase=2",
+    "task:implement:phase3": "node scripts/completeTaskAnalysisImplementer.cjs --phase=3",
+    "task:implement:phase4": "node scripts/completeTaskAnalysisImplementer.cjs --phase=4",
+    "task:implement:phase5": "node scripts/completeTaskAnalysisImplementer.cjs --phase=5"
   },
   "dependencies": {
     "axios": "^1.11.0",
