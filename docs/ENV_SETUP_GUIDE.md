@@ -10,7 +10,7 @@
 Test-Web/
 ├── .env                    # 前端专用配置
 ├── .env.example           # 前端配置模板
-├── server/
+├── backend/
 │   ├── .env              # 后端专用配置
 │   └── .env.example      # 后端配置模板
 ```
@@ -52,7 +52,7 @@ VITE_GOOGLE_PAGESPEED_API_KEY=your_api_key
 VITE_GTMETRIX_API_KEY=your_api_key
 ```
 
-### 2. `server/.env` - 后端专用配置
+### 2. `backend/.env` - 后端专用配置
 
 **用途**: 后端服务器、数据库连接、敏感配置  
 **特点**: 包含所有敏感信息，不会暴露给前端
@@ -123,16 +123,16 @@ TEST_TIMEOUT=30000
 ```bash
 # 1. 复制配置模板
 cp .env.example .env
-cp server/.env.example server/.env
+cp backend/.env.example backend/.env
 
 # 2. 编辑前端配置
 nano .env
 
 # 3. 编辑后端配置
-nano server/.env
+nano backend/.env
 
 # 4. 验证配置
-node server/scripts/validate-env.js
+node backend/scripts/validate-env.js
 ```
 
 ### 2. 必须修改的配置
@@ -146,7 +146,7 @@ VITE_API_URL=http://localhost:3001/api
 VITE_GOOGLE_PAGESPEED_API_KEY=your_real_api_key
 ```
 
-#### 后端配置 (`server/.env`)
+#### 后端配置 (`backend/.env`)
 ```bash
 # 修改数据库连接
 DB_PASSWORD=your_secure_password
@@ -176,15 +176,15 @@ MAXMIND_LICENSE_KEY=your_license_key
 - `.env.cloud` - 功能重复
 - `.env.production` - 功能重复  
 - `.env.frontend.example.bak` - 过时文件
-- `server/.env.local` - 功能重复
+- `backend/.env.local` - 功能重复
 
 ### ✅ Git忽略配置
 `.gitignore` 已更新，确保以下文件被忽略：
 ```
 .env
 .env.local
-server/.env
-server/.env.local
+backend/.env
+backend/.env.local
 ```
 
 ## 📚 相关文档

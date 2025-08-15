@@ -29,18 +29,18 @@ src/hooks/
 
 ### 后端架构
 ```
-server/routes/
+backend/routes/
 ├── dataManagement.js           # 数据管理路由
 ├── backup.js                   # 备份管理路由
 └── sync.js                     # 同步管理路由
 
-server/services/
+backend/services/
 ├── dataManagementService.js    # 数据管理服务
 ├── backupService.js            # 备份服务
 ├── syncService.js              # 同步服务
 └── analyticsService.js         # 分析服务
 
-server/models/
+backend/models/
 ├── DataRecord.js               # 数据记录模型
 ├── BackupRecord.js             # 备份记录模型
 └── SyncConfig.js               # 同步配置模型
@@ -339,13 +339,13 @@ CREATE TABLE operation_logs (...);
 ### 日志分析
 ```bash
 # 查看数据管理日志
-tail -f server/logs/data-management.log
+tail -f backend/logs/data-management.log
 
 # 查看备份日志
-tail -f server/logs/backup.log
+tail -f backend/logs/backup.log
 
 # 查看同步日志
-tail -f server/logs/sync.log
+tail -f backend/logs/sync.log
 ```
 
 ## 📞 技术支持

@@ -253,7 +253,7 @@ class ApiResponse {
   /**
    * 中间件：统一响应格式
    *
-   * @deprecated 推荐使用 server/api/middleware/responseFormatter.js 中间件
+   * @deprecated 推荐使用 backend/api/middleware/responseFormatter.js 中间件
    * 该中间件提供更完整的功能，包括请求ID、性能监控等
    */
   static middleware() {

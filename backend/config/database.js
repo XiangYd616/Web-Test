@@ -220,7 +220,7 @@ const initializeTables = async () => {
 
       if (parseInt(newTablesResult.rows[0].count) < 3) {
         console.log('🔄 检测到旧版数据库架构，建议运行迁移脚本');
-        console.log('💡 运行: node server/scripts/migrate-database.js');
+        console.log('💡 运行: node backend/scripts/migrate-database.js');
       }
 
       return;

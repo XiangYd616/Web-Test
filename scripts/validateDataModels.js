@@ -98,7 +98,7 @@ class DataModelValidator {
 
     // 检查前端统一类型定义
     const frontendUserPath = 'src/types/unified/user.ts';
-    const backendUserPath = 'server/models/User.js';
+    const backendUserPath = 'backend/models/User.js';
 
     if (!fs.existsSync(frontendUserPath)) {
       this.issues.push('❌ 前端用户类型定义文件不存在');
@@ -146,7 +146,7 @@ class DataModelValidator {
     console.log('🧪 验证测试模型一致性...');
 
     const frontendTestPath = 'src/types/unified/models.ts';
-    const backendTestPath = 'server/models/Test.js';
+    const backendTestPath = 'backend/models/Test.js';
 
     if (!fs.existsSync(frontendTestPath)) {
       this.issues.push('❌ 前端测试类型定义文件不存在');
@@ -175,8 +175,8 @@ class DataModelValidator {
     console.log('🌐 验证API响应格式一致性...');
 
     const frontendApiPath = 'src/types/unified/apiResponse.ts';
-    const backendApiPath = 'server/utils/ApiResponse.js';
-    const middlewarePath = 'server/api/middleware/responseFormatter.js';
+    const backendApiPath = 'backend/utils/ApiResponse.js';
+    const middlewarePath = 'backend/api/middleware/responseFormatter.js';
 
     if (!fs.existsSync(frontendApiPath)) {
       this.issues.push('❌ 前端API响应类型定义文件不存在');
@@ -236,8 +236,8 @@ class DataModelValidator {
 
     // 检查数据库初始化脚本
     const dbScripts = [
-      'server/scripts/compatible-init-database.sql',
-      'server/scripts/master-detail-test-history-schema.sql'
+      'backend/scripts/compatible-init-database.sql',
+      'backend/scripts/master-detail-test-history-schema.sql'
     ];
 
     const existingScripts = dbScripts.filter(fs.existsSync);

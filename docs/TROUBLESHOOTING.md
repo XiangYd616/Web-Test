@@ -33,7 +33,7 @@
    
    # 如果仍有问题，尝试
    rm -rf node_modules package-lock.json
-   rm -rf server/node_modules server/package-lock.json
+   rm -rf backend/node_modules backend/package-lock.json
    npm install
    ```
 
@@ -93,7 +93,7 @@
    npm run db:check
    
    # 如果连接失败，检查配置
-   cat server/.env
+   cat backend/.env
    ```
 
 2. **环境变量缺失**
@@ -112,10 +112,10 @@
 3. **权限问题**
    ```bash
    # 检查文件权限
-   ls -la server/
+   ls -la backend/
    
    # 修复权限
-   chmod +x server/app.js
+   chmod +x backend/app.js
    ```
 
 ## 🗄️ 数据库问题
@@ -144,7 +144,7 @@
    psql -h localhost -p 5432 -U postgres -d testweb_dev
    
    # 如果连接失败，检查配置
-   cat server/.env | grep DB_
+   cat backend/.env | grep DB_
    ```
 
 3. **创建数据库**
@@ -221,7 +221,7 @@
 3. **检查后端日志**
    ```bash
    # 查看后端日志
-   tail -f server/logs/app.log
+   tail -f backend/logs/app.log
    
    # 或者在启动时查看控制台输出
    npm run backend
@@ -265,7 +265,7 @@
 1. **检查文件大小限制**
    ```javascript
    // 检查服务器配置
-   // server/app.js 中的文件大小限制
+   // backend/app.js 中的文件大小限制
    app.use(express.json({ limit: '50mb' }));
    ```
 
@@ -281,10 +281,10 @@
 3. **权限问题**
    ```bash
    # 检查上传目录权限
-   ls -la server/uploads/
+   ls -la backend/uploads/
    
    # 修复权限
-   chmod 755 server/uploads/
+   chmod 755 backend/uploads/
    ```
 
 ## 🎨 界面问题
@@ -356,7 +356,7 @@
 2. **JWT 令牌问题**
    ```bash
    # 检查 JWT 密钥配置
-   cat server/.env | grep JWT_SECRET
+   cat backend/.env | grep JWT_SECRET
    
    # 确保密钥足够复杂
    JWT_SECRET=your-very-long-and-complex-secret-key
@@ -389,7 +389,7 @@
 2. **检查权限配置**
    ```javascript
    // 查看权限中间件配置
-   // server/middleware/auth.js
+   // backend/middleware/auth.js
    ```
 
 ## 📊 性能问题
@@ -407,7 +407,7 @@
    # macOS: brew install redis && brew services start redis
    # Linux: sudo apt-get install redis-server
    
-   # 在 server/.env 中配置
+   # 在 backend/.env 中配置
    REDIS_URL=redis://localhost:6379
    ```
 
@@ -481,13 +481,13 @@ DEBUG=app:* npm run backend
 
 ```bash
 # 查看应用日志
-tail -f server/logs/app.log
+tail -f backend/logs/app.log
 
 # 查看错误日志
-tail -f server/logs/error.log
+tail -f backend/logs/error.log
 
 # 查看访问日志
-tail -f server/logs/access.log
+tail -f backend/logs/access.log
 ```
 
 ### 使用开发者工具
@@ -501,7 +501,7 @@ tail -f server/logs/access.log
 2. **Node.js 调试**
    ```bash
    # 使用 Node.js 调试器
-   node --inspect server/app.js
+   node --inspect backend/app.js
    
    # 然后在 Chrome 中访问
    chrome://inspect
@@ -513,7 +513,7 @@ tail -f server/logs/access.log
 
 1. **查看日志文件**
    - 前端: 浏览器开发者工具 Console
-   - 后端: `server/logs/` 目录下的日志文件
+   - 后端: `backend/logs/` 目录下的日志文件
 
 2. **收集错误信息**
    - 错误消息的完整文本

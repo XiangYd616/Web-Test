@@ -13,6 +13,10 @@ const fs = require('fs');
 // 加载后端专用环境变量配置
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
+// 统一配置管理
+const { configManager } = require('./ConfigManager.js');
+const { unifiedTestEngineManager } = require('../engines/UnifiedTestEngineManager.js');
+
 // 导入路由
 const authRoutes = require('../routes/auth.js');
 const testRoutes = require('../routes/test.js');
@@ -185,38 +189,21 @@ app.use(rateLimiter);
 app.use('/exports', express.static(path.join(__dirname, 'exports')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// API路由
-app.use('/api/auth', authRoutes);
-// 🔧 修复：更具体的路由必须在更通用的路由之前注册
-app.use('/api/test/history', testHistoryRoutes); // 新的测试历史API - 必须在 /api/test 之前
-// app.use('/api/test/real', require('../routes/realTest.js')); // 已移除，功能合并到主测试路由
-app.use('/api/test', testRoutes);
-app.use('/api/seo', seoRoutes); // SEO测试API - 解决CORS问题
-app.use('/api/user', userRoutes);
-app.use('/api/admin', adminRoutes);
+// 使用统一路由管理器
+const RouteManager = require('./RouteManager.js');
+const routeManager = new RouteManager(app);
 
-// 偏好设置API已移除，请使用 /api/user/preferences
-// 原有的 /api/preferences 路由功能已整合到 /api/user/preferences 中
+// 注册所有标准路由
+routeManager.registerStandardRoutes();
 
-// 数据管理API - 统一到 /api/data-management
-app.use('/api/data-management', dataManagementRoutes);
-app.use('/api/data-export', require('../routes/dataExport.js').router);
-app.use('/api/data-import', require('../routes/dataImport.js').router);
-app.use('/api/backup', require('../routes/backup.js').router);
-app.use('/api/monitoring', monitoringRoutes);
-app.use('/api/alerts', require('../routes/alerts.js'));
-app.use('/api/reports', reportRoutes);
-app.use('/api/system', require('../routes/system.js'));
-app.use('/api/integrations', integrationRoutes);
-// app.use('/api/cache', cacheRoutes); // 已移除，缓存管理功能合并到测试路由
-app.use('/api/errors', errorRoutes);
-app.use('/api/performance', performanceRoutes);
-app.use('/api/files', filesRoutes);
-
-// API响应格式示例路由（仅在开发环境中启用）
-if (process.env.NODE_ENV === 'development') {
-  app.use('/api/example', require('../routes/apiExample.js'));
+// 检查路由冲突
+const conflicts = routeManager.checkRouteConflicts();
+if (conflicts.length > 0) {
+  console.warn('⚠️ 检测到路由冲突，请检查路由配置');
 }
+
+// 应用所有路由
+routeManager.applyRoutes();
 
 // 健康检查端点
 app.get('/health', async (req, res) => {

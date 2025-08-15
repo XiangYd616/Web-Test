@@ -164,18 +164,18 @@ npm run db:restore           # 恢复数据
 ### 高级管理功能
 ```bash
 # 查询数据
-node server/scripts/complete-database-manager.js query --query "SELECT * FROM users LIMIT 5"
+node backend/scripts/complete-database-manager.js query --query "SELECT * FROM users LIMIT 5"
 
 # 表操作
-node server/scripts/complete-database-manager.js describe users
-node server/scripts/complete-database-manager.js count users
+node backend/scripts/complete-database-manager.js describe users
+node backend/scripts/complete-database-manager.js count users
 
 # 索引管理
-node server/scripts/complete-database-manager.js create-index --table users --columns email
-node server/scripts/complete-database-manager.js analyze-indexes
+node backend/scripts/complete-database-manager.js create-index --table users --columns email
+node backend/scripts/complete-database-manager.js analyze-indexes
 
 # 用户管理
-node server/scripts/complete-database-manager.js create-user --username newuser
+node backend/scripts/complete-database-manager.js create-user --username newuser
 ```
 
 ## 📊 性能优化
@@ -258,7 +258,7 @@ node server/scripts/complete-database-manager.js create-user --username newuser
 ```bash
 # 连接失败
 npm run db:health              # 检查连接状态
-node server/scripts/validate-env.js  # 验证环境配置
+node backend/scripts/validate-env.js  # 验证环境配置
 
 # 表结构问题
 npm run db:integrity           # 检查完整性
@@ -275,10 +275,10 @@ npm run db:backup              # 创建备份
 
 ### 获取详细帮助
 ```bash
-node server/scripts/init-database.js --help
-node server/scripts/complete-database-manager.js help
-node server/scripts/health-check.js --help
-node server/scripts/data-integrity-checker.js --help
+node backend/scripts/init-database.js --help
+node backend/scripts/complete-database-manager.js help
+node backend/scripts/health-check.js --help
+node backend/scripts/data-integrity-checker.js --help
 ```
 
 ---

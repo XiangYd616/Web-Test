@@ -38,6 +38,7 @@ const DataStorage = lazy(() => import('../../pages/management/admin/DataStorage'
 const DataManagement = lazy(() => import('../../pages/management/admin/DataManagement'));
 const Statistics = lazy(() => import('../../pages/data/reports/Statistics'));
 const Analytics = lazy(() => import('../../pages/data/reports/Analytics'));
+const AdvancedAnalytics = lazy(() => import('../../pages/analytics/AdvancedAnalyticsPage'));
 const MonitoringDashboard = lazy(() => import('../../pages/data/reports/MonitoringDashboard'));
 
 // 报告和历史
@@ -278,6 +279,13 @@ const AppRoutes: React.FC = () => {
         <ProtectedRoute>
           <LazyPageWrapper>
             <Analytics />
+          </LazyPageWrapper>
+        </ProtectedRoute>
+      } />
+      <Route path="advanced-analytics" element={
+        <ProtectedRoute>
+          <LazyPageWrapper>
+            <AdvancedAnalytics />
           </LazyPageWrapper>
         </ProtectedRoute>
       } />

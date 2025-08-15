@@ -231,11 +231,11 @@ Node.js + Express + PostgreSQL 构建的企业级后端服务
 - ❌ `scripts/check-database.cjs` (功能重复)
 - ❌ `scripts/check-table-structure.cjs` (功能重复)
 - ❌ `scripts/setup-databases.sql` (功能简单)
-- ❌ `server/database-schema.sql` (已有完备版本)
-- ❌ `server/init-db.js` (已有完备版本)
-- ❌ `server/utils/DatabaseConnectionManager.js` (已有增强版本)
-- ❌ `server/middleware/cache.js` (已有完备版本)
-- ❌ `server/middleware/security.js` (已有完备版本)
+- ❌ `backend/database-schema.sql` (已有完备版本)
+- ❌ `backend/init-db.js` (已有完备版本)
+- ❌ `backend/utils/DatabaseConnectionManager.js` (已有增强版本)
+- ❌ `backend/middleware/cache.js` (已有完备版本)
+- ❌ `backend/middleware/security.js` (已有完备版本)
 - ❌ `docs/DATABASE_README.md` (已合并)
 - ❌ `docs/DATABASE_SCHEMA.md` (已合并)
 - ❌ `docs/DATABASE_SETUP.md` (已合并)
@@ -247,7 +247,7 @@ Node.js + Express + PostgreSQL 构建的企业级后端服务
 - ❌ `docs/database-architecture-overview.md` (已合并)
 
 ### 保留的核心文件
-- ✅ 完备的数据库管理工具 (server/scripts/)
+- ✅ 完备的数据库管理工具 (backend/scripts/)
 - ✅ 完整的API路由和中间件
 - ✅ 统一的配置管理
 - ✅ 完备的文档系统

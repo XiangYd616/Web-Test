@@ -83,9 +83,9 @@
 - `docs/TYPESCRIPT_REPAIR_STRATEGY.md`
 
 ### 🔧 已修复的过时路径引用 (3个文件)
-- `docs/archive/SERVER_README.md` - 修复 `server/` → `backend/`
-- `docs/PROJECT_STRUCTURE.md` - 修复 `server/` → `backend/`
-- `docs/GEOLITE2_README.md` - 修复 `server/` → `backend/`
+- `docs/archive/SERVER_README.md` - 修复 `backend/` → `backend/`
+- `docs/PROJECT_STRUCTURE.md` - 修复 `backend/` → `backend/`
+- `docs/GEOLITE2_README.md` - 修复 `backend/` → `backend/`
 
 ---
 
@@ -123,7 +123,7 @@
 - 保留了核心使用和维护文档
 
 ### 4. 过时路径引用修复 ✅
-- 修复了文档中的 `server/` → `backend/` 路径引用
+- 修复了文档中的 `backend/` → `backend/` 路径引用
 - 确保所有路径引用与当前项目结构一致
 - 验证了路径引用的正确性
 

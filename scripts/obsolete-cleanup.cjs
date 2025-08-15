@@ -47,7 +47,7 @@ class ObsoleteCleanup {
       'scripts/createMissingFiles.cjs',
       'scripts/deepRestructure.cjs',
       'scripts/finishProjectRestructure.cjs',
-      
+
       // 过时的报告文件
       'docs/reports/BACKEND_OPTIMIZATION_COMPLETE_REPORT.md',
       'docs/reports/BACKEND_RESTRUCTURE_REPORT.md',
@@ -79,7 +79,7 @@ class ObsoleteCleanup {
       'docs/reports/RENAMED_IMPORTS_FIX_REPORT.json',
       'docs/reports/ROUTE_VALIDATION_REPORT.md',
       'docs/reports/TEST_PAGE_ANALYSIS_REPORT.md',
-      
+
       // 过时的文档文件
       'docs/COMPLETE_TASK_ANALYSIS_PROJECT_PLAN.md',
       'docs/COMPLETE_TASK_ANALYSIS_PROJECT_STATUS.md',
@@ -124,7 +124,7 @@ class ObsoleteCleanup {
 
   async execute(options = {}) {
     const { dryRun = true, cleanObsolete = true, cleanTemp = true, cleanPaths = true } = options;
-    
+
     console.log('🧹 开始清理过时路径和无用文件...');
     console.log(`模式: ${dryRun ? '预览模式' : '实际清理'}`);
     console.log('==================================================');
@@ -165,12 +165,12 @@ class ObsoleteCleanup {
 
     for (const file of this.obsoleteFiles) {
       const filePath = path.join(this.projectRoot, file);
-      
+
       if (fs.existsSync(filePath)) {
         try {
           const stats = fs.statSync(filePath);
           const sizeKB = Math.round(stats.size / 1024);
-          
+
           if (dryRun) {
             console.log(`  📄 [预览] 将删除: ${file} (${sizeKB}KB)`);
           } else {
@@ -178,20 +178,20 @@ class ObsoleteCleanup {
             console.log(`  ✅ 已删除: ${file} (${sizeKB}KB)`);
             this.cleanupResults.spaceSaved += stats.size;
           }
-          
+
           this.cleanupResults.obsoleteFiles.push({
             file,
             size: stats.size,
             deleted: !dryRun
           });
           this.cleanupResults.totalCleaned++;
-          
+
         } catch (error) {
           console.error(`  ❌ 删除失败: ${file} - ${error.message}`);
         }
       }
     }
-    
+
     console.log(`  📊 找到 ${this.cleanupResults.obsoleteFiles.length} 个过时文件`);
   }
 
@@ -210,7 +210,7 @@ class ObsoleteCleanup {
         const stats = fs.statSync(file);
         const sizeKB = Math.round(stats.size / 1024);
         const relativePath = path.relative(this.projectRoot, file);
-        
+
         if (dryRun) {
           console.log(`  📄 [预览] 将删除: ${relativePath} (${sizeKB}KB)`);
         } else {
@@ -218,19 +218,19 @@ class ObsoleteCleanup {
           console.log(`  ✅ 已删除: ${relativePath} (${sizeKB}KB)`);
           this.cleanupResults.spaceSaved += stats.size;
         }
-        
+
         this.cleanupResults.tempFiles.push({
           file: relativePath,
           size: stats.size,
           deleted: !dryRun
         });
         this.cleanupResults.totalCleaned++;
-        
+
       } catch (error) {
         console.error(`  ❌ 删除失败: ${file} - ${error.message}`);
       }
     }
-    
+
     console.log(`  📊 找到 ${this.cleanupResults.tempFiles.length} 个临时文件`);
   }
 
@@ -257,14 +257,14 @@ class ObsoleteCleanup {
 
         if (hasChanges) {
           const relativePath = path.relative(this.projectRoot, file);
-          
+
           if (dryRun) {
             console.log(`  📄 [预览] 将修复: ${relativePath}`);
           } else {
             fs.writeFileSync(file, newContent, 'utf8');
             console.log(`  ✅ 已修复: ${relativePath}`);
           }
-          
+
           this.cleanupResults.obsoletePaths.push({
             file: relativePath,
             fixed: !dryRun
@@ -276,7 +276,7 @@ class ObsoleteCleanup {
         console.error(`  ❌ 修复失败: ${file} - ${error.message}`);
       }
     }
-    
+
     console.log(`  📊 修复了 ${pathsFixed} 个文件的过时路径`);
   }
 
@@ -284,10 +284,10 @@ class ObsoleteCleanup {
     console.log('\n📁 清理空目录...');
 
     const emptyDirs = this.findEmptyDirectories(this.projectRoot);
-    
+
     for (const dir of emptyDirs) {
       const relativePath = path.relative(this.projectRoot, dir);
-      
+
       if (dryRun) {
         console.log(`  📁 [预览] 将删除空目录: ${relativePath}`);
       } else {
@@ -299,23 +299,23 @@ class ObsoleteCleanup {
         }
       }
     }
-    
+
     console.log(`  📊 找到 ${emptyDirs.length} 个空目录`);
   }
 
   getAllFiles(dir, extensions = []) {
     const files = [];
-    
+
     const scan = (currentDir) => {
       try {
         const items = fs.readdirSync(currentDir);
-        
+
         for (const item of items) {
           if (item.startsWith('.') || this.isProtectedPath(item)) continue;
-          
+
           const itemPath = path.join(currentDir, item);
           const stat = fs.statSync(itemPath);
-          
+
           if (stat.isDirectory()) {
             scan(itemPath);
           } else if (extensions.length === 0 || extensions.some(ext => item.endsWith(ext))) {
@@ -326,28 +326,28 @@ class ObsoleteCleanup {
         // 忽略访问错误
       }
     };
-    
+
     scan(dir);
     return files;
   }
 
   findEmptyDirectories(dir) {
     const emptyDirs = [];
-    
+
     const scan = (currentDir) => {
       try {
         const items = fs.readdirSync(currentDir);
         const nonHiddenItems = items.filter(item => !item.startsWith('.'));
-        
+
         if (nonHiddenItems.length === 0) {
           emptyDirs.push(currentDir);
           return;
         }
-        
+
         for (const item of nonHiddenItems) {
           const itemPath = path.join(currentDir, item);
           const stat = fs.statSync(itemPath);
-          
+
           if (stat.isDirectory() && !this.isProtectedPath(item)) {
             scan(itemPath);
           }
@@ -356,19 +356,19 @@ class ObsoleteCleanup {
         // 忽略访问错误
       }
     };
-    
+
     scan(dir);
     return emptyDirs.filter(dir => dir !== this.projectRoot);
   }
 
   isProtectedPath(filePath) {
     const protectedPaths = ['node_modules', '.git', 'dist', 'build', 'coverage', '.next', '.nuxt', '.vscode', '.idea'];
-    return protectedPaths.some(protected => filePath.includes(protected));
+    return protectedPaths.some(protectedPath => filePath.includes(protectedPath));
   }
 
   async generateReport() {
     console.log('\n📊 生成清理报告...');
-    
+
     const report = {
       timestamp: new Date().toISOString(),
       summary: {
@@ -380,17 +380,17 @@ class ObsoleteCleanup {
       },
       details: this.cleanupResults
     };
-    
+
     const reportPath = path.join(this.projectRoot, 'docs/reports/OBSOLETE_CLEANUP_FINAL_REPORT.json');
-    
+
     // 确保目录存在
     const reportDir = path.dirname(reportPath);
     if (!fs.existsSync(reportDir)) {
       fs.mkdirSync(reportDir, { recursive: true });
     }
-    
+
     fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
-    
+
     console.log(`报告已保存到: ${reportPath}`);
     console.log(`\n📈 清理统计:`);
     console.log(`  清理文件: ${report.summary.totalCleaned}个`);

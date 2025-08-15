@@ -170,7 +170,7 @@ class DatabaseBackupCLI {
         
         console.log('');
         console.log('💡 恢复备份:');
-        console.log(`   node server/scripts/restore-database.js ${result.file}`);
+        console.log(`   node backend/scripts/restore-database.js ${result.file}`);
       } else {
         console.error('❌ 数据库备份失败');
         process.exit(1);

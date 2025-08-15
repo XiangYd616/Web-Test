@@ -12,9 +12,9 @@
 - **返回**: 出口IP、延迟时间、代理响应时间、地理位置信息
 
 ### 2. 代理延迟测试工具
-- **文件**: `server/test-proxy.js`
+- **文件**: `backend/test-proxy.js`
 - **功能**: 命令行延迟测试，通过代理获取出口IP并测试延迟
-- **使用**: `node server/test-proxy.js <host> <port> [type] [username] [password]`
+- **使用**: `node backend/test-proxy.js <host> <port> [type] [username] [password]`
 
 ### 3. 前端集成
 - **页面**: 压力测试页面的代理配置区域
@@ -26,19 +26,19 @@
 ### 1. 命令行延迟测试
 ```bash
 # 通过代理测试延迟（获取出口IP并ping）
-node server/test-proxy.js YOUR_PROXY_HOST YOUR_PROXY_PORT
+node backend/test-proxy.js YOUR_PROXY_HOST YOUR_PROXY_PORT
 
 # 测试HTTP代理
-node server/test-proxy.js proxy.example.com 8080 http
+node backend/test-proxy.js proxy.example.com 8080 http
 
 # 测试带认证的代理
-node server/test-proxy.js proxy.example.com 8080 http username password
+node backend/test-proxy.js proxy.example.com 8080 http username password
 
 # 使用环境变量配置
 export PROXY_HOST=your-proxy-host.com
 export PROXY_PORT=8080
 export PROXY_TYPE=http
-node server/test-proxy.js
+node backend/test-proxy.js
 ```
 
 ### 2. API延迟测试
