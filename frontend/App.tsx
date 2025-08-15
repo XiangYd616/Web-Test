@@ -8,9 +8,9 @@ import { useEffect } from 'react';
 
 // 路由和组件导入
 import BackgroundTestNotifications from './components/system/BackgroundTestNotifications';
-import PerformanceMonitor from './components/system/PerformanceMonitor';
 import AppRoutes from './components/tools/AppRoutes.tsx';
-import ErrorBoundary from './components/ui/ErrorBoundary';
+
+// 增强的系统组件导入
 
 // 上下文提供者导入
 import { AppProvider } from './contexts/AppContext';
@@ -21,6 +21,11 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import './services/apiErrorInterceptor';
 import './services/errorService';
 
+// 增强的系统服务导入
+import { enhancedConfigManager } from './config/EnhancedConfigManager';
+import { lazyLoadManager } from './utils/LazyLoadManager';
+import { performanceMonitor } from './utils/performanceMonitor';
+
 // 性能优化工具导入
 import { initializePreloading } from './utils/routePreloader';
 
@@ -30,8 +35,37 @@ import { initializePreloading } from './utils/routePreloader';
  */
 function App() {
   useEffect(() => {
-    // 初始化路由预加载
-    initializePreloading();
+    const initializeApp = async () => {
+      try {
+        console.log('🚀 初始化前端架构系统...');
+
+        // 1. 初始化配置管理器
+        await enhancedConfigManager.initialize();
+
+        // 2. 初始化性能监控
+        await performanceMonitor.initialize();
+
+        // 3. 初始化路由预加载
+        initializePreloading();
+
+        // 4. 设置配置变更监听
+        enhancedConfigManager.on('configChanged', (event) => {
+          console.log('配置已更新:', event.key, event.newValue);
+        });
+
+        // 5. 设置主题变更监听
+        enhancedConfigManager.on('themeChanged', (theme) => {
+          document.documentElement.setAttribute('data-theme', theme);
+        });
+
+        console.log('✅ 前端架构系统初始化完成');
+
+      } catch (error) {
+        console.error('❌ 前端架构系统初始化失败:', error);
+      }
+    };
+
+    initializeApp();
 
     // 在生产环境中注册Service Worker
     if ('serviceWorker' in navigator && import.meta.env.MODE === 'production') {
@@ -57,22 +91,31 @@ function App() {
     } else if (isSafari) {
       document.body.classList.add('safari-browser');
     }
+
+    // 清理函数
+    return () => {
+      performanceMonitor.destroy();
+      enhancedConfigManager.destroy();
+      lazyLoadManager.clearCache();
+    };
   }, []);
 
   return (
-    <ErrorBoundary>
-      <AppProvider>
-        <ThemeProvider>
-          {/* <NotificationProvider> */}
-          <AuthProvider>
-            <AppRoutes />
-            <BackgroundTestNotifications />
-            <PerformanceMonitor showDetails={import.meta.env.MODE === 'development'} />
-          </AuthProvider>
-          {/* </NotificationProvider> */}
-        </ThemeProvider>
-      </AppProvider>
-    </ErrorBoundary>
+    <EnhancedErrorBoundary level="page">
+      <ThemeProvider>
+        <AuthProvider>
+          <AppProvider>
+            <div className="app">
+              {/* 后台测试通知 */}
+              <BackgroundTestNotifications />
+
+              {/* 主要路由内容 */}
+              <AppRoutes />
+            </div>
+          </AppProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </EnhancedErrorBoundary>
   )
 }
 

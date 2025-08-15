@@ -92,8 +92,11 @@ class UnifiedApiService {
   // 通用 HTTP 方法
   async get(url: string, config?: any): Promise<ApiResponse> {
     if (this.useRemoteApi) {
-      // 使用 fetch 直接调用
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}${url}`, {
+      // 使用配置管理器获取API URL
+      const { enhancedConfigManager } = await import('../../config/EnhancedConfigManager');
+      const apiBaseUrl = enhancedConfigManager.get('api.baseUrl');
+
+      const response = await fetch(`${apiBaseUrl}${url}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -109,7 +112,11 @@ class UnifiedApiService {
 
   async post(url: string, data?: any, config?: any): Promise<ApiResponse> {
     if (this.useRemoteApi) {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}${url}`, {
+      // 使用配置管理器获取API URL
+      const { enhancedConfigManager } = await import('../../config/EnhancedConfigManager');
+      const apiBaseUrl = enhancedConfigManager.get('api.baseUrl');
+
+      const response = await fetch(`${apiBaseUrl}${url}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
