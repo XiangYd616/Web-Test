@@ -175,7 +175,7 @@ export const routeImports = {
   '/data-management': () => import('../pages/management/admin/DataManagement'),
   '/statistics': () => import('../pages/data/reports/Statistics'),
   '/analytics': () => import('../pages/data/reports/Analytics'),
-  '/advanced-analytics': () => import('../pages/analytics/AdvancedAnalyticsPage'),
+  '/advanced-analytics': () => import('../pages/analytics/AnalyticsPage'),
 
   // 报告和历史
   '/test-history': () => import('../pages/data/results/TestHistory'),

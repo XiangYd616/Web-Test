@@ -7,7 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { asyncHandler } = require('../middleware/errorHandler');
 const { authMiddleware } = require('../middleware/auth');
-const { AdvancedSecurityEngine } = require('../engines/security/AdvancedSecurityEngine');
+const { AdvancedSecurityEngine } = require('../engines/security/SecurityEngine');
 
 // 应用认证中间件
 router.use(authMiddleware);

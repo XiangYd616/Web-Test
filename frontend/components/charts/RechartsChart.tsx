@@ -11,8 +11,8 @@ import {
   YAxis
 } from 'recharts';
 
-// 现代化线图组件
-export interface ModernLineChartProps {
+// Recharts线图组件
+export interface RechartsLineChartProps {
   data: Array<Record<string, any>> | {
     labels: string[];
     datasets: Array<{
@@ -36,7 +36,7 @@ export interface ModernLineChartProps {
   showTooltip?: boolean;
 }
 
-export const ModernLineChart: React.FC<ModernLineChartProps> = ({
+export const RechartsLineChart: React.FC<RechartsLineChartProps> = ({
   data,
   xKey = 'name',
   yKey = 'value',
@@ -113,8 +113,8 @@ export const ModernLineChart: React.FC<ModernLineChartProps> = ({
   );
 };
 
-// 现代化环形图组件
-export interface ModernDoughnutChartProps {
+// Recharts环形图组件
+export interface RechartsDoughnutChartProps {
   data: Array<{
     name: string;
     value: number;
@@ -138,7 +138,7 @@ export interface ModernDoughnutChartProps {
   size?: number;
 }
 
-export const ModernDoughnutChart: React.FC<ModernDoughnutChartProps> = ({
+export const RechartsDoughnutChart: React.FC<RechartsDoughnutChartProps> = ({
   data,
   title,
   centerText,
@@ -244,8 +244,8 @@ export const ModernDoughnutChart: React.FC<ModernDoughnutChartProps> = ({
   );
 };
 
-// 现代化条形图组件
-export interface ModernBarChartProps {
+// Recharts条形图组件
+export interface RechartsBarChartProps {
   data: Array<Record<string, any>>;
   xKey: string;
   yKey: string;
@@ -254,7 +254,7 @@ export interface ModernBarChartProps {
   height?: number;
 }
 
-export const ModernBarChart: React.FC<ModernBarChartProps> = ({
+export const RechartsBarChart: React.FC<RechartsBarChartProps> = ({
   data,
   xKey,
   yKey,
@@ -305,7 +305,7 @@ export const ModernBarChart: React.FC<ModernBarChartProps> = ({
 
 // 导出所有组件
 export default {
-  ModernLineChart,
-  ModernDoughnutChart,
-  ModernBarChart
+  RechartsLineChart,
+  RechartsDoughnutChart,
+  RechartsBarChart
 };

@@ -1,0 +1,292 @@
+{
+  "timestamp": "2025-08-15T11:34:19.374Z",
+  "dryRun": true,
+  "summary": {
+    "totalActions": 34,
+    "deletedFiles": 0,
+    "analyzedFiles": 34
+  },
+  "actions": [
+    {
+      "action": "analyze",
+      "file": "components/auth/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.130Z"
+    },
+    {
+      "action": "analyze",
+      "file": "components/charts/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.131Z"
+    },
+    {
+      "action": "analyze",
+      "file": "components/features/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.132Z"
+    },
+    {
+      "action": "analyze",
+      "file": "components/layout/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.132Z"
+    },
+    {
+      "action": "analyze",
+      "file": "components/routing/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.132Z"
+    },
+    {
+      "action": "analyze",
+      "file": "components/system/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.132Z"
+    },
+    {
+      "action": "analyze",
+      "file": "components/testing/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.132Z"
+    },
+    {
+      "action": "analyze",
+      "file": "components/tools/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.132Z"
+    },
+    {
+      "action": "analyze",
+      "file": "components/ui/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.132Z"
+    },
+    {
+      "action": "analyze",
+      "file": "config/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.132Z"
+    },
+    {
+      "action": "analyze",
+      "file": "hooks/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.133Z"
+    },
+    {
+      "action": "analyze",
+      "file": "pages/user/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.133Z"
+    },
+    {
+      "action": "analyze",
+      "file": "services/admin/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.133Z"
+    },
+    {
+      "action": "analyze",
+      "file": "services/api/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.133Z"
+    },
+    {
+      "action": "analyze",
+      "file": "services/auth/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.133Z"
+    },
+    {
+      "action": "analyze",
+      "file": "services/cache/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.133Z"
+    },
+    {
+      "action": "analyze",
+      "file": "services/config/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.134Z"
+    },
+    {
+      "action": "analyze",
+      "file": "services/data/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.134Z"
+    },
+    {
+      "action": "analyze",
+      "file": "services/help/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.134Z"
+    },
+    {
+      "action": "analyze",
+      "file": "services/history/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.134Z"
+    },
+    {
+      "action": "analyze",
+      "file": "services/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.134Z"
+    },
+    {
+      "action": "analyze",
+      "file": "services/integration/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.134Z"
+    },
+    {
+      "action": "analyze",
+      "file": "services/monitoring/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.134Z"
+    },
+    {
+      "action": "analyze",
+      "file": "services/reporting/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.135Z"
+    },
+    {
+      "action": "analyze",
+      "file": "services/search/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.135Z"
+    },
+    {
+      "action": "analyze",
+      "file": "services/seo/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.135Z"
+    },
+    {
+      "action": "analyze",
+      "file": "services/system/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.135Z"
+    },
+    {
+      "action": "analyze",
+      "file": "services/testing/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.135Z"
+    },
+    {
+      "action": "analyze",
+      "file": "services/user/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.135Z"
+    },
+    {
+      "action": "analyze",
+      "file": "services/websocket/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.135Z"
+    },
+    {
+      "action": "analyze",
+      "file": "utils/index.ts",
+      "reason": "整理重复的index文件",
+      "risk": "medium",
+      "timestamp": "2025-08-15T11:34:19.135Z"
+    },
+    {
+      "action": "analyze",
+      "file": "components/auth/ProtectedRoute.tsx",
+      "reason": "清理未使用的组件",
+      "risk": "high",
+      "timestamp": "2025-08-15T11:34:19.136Z"
+    },
+    {
+      "action": "analyze",
+      "file": "components/data/DataManagement.tsx",
+      "reason": "清理未使用的组件",
+      "risk": "high",
+      "timestamp": "2025-08-15T11:34:19.136Z"
+    },
+    {
+      "action": "analyze",
+      "file": "components/ui/ThemeProvider.tsx",
+      "reason": "清理未使用的组件",
+      "risk": "high",
+      "timestamp": "2025-08-15T11:34:19.136Z"
+    }
+  ],
+  "directoryStandards": {
+    "frontend/components": {
+      "subdirs": [
+        "ui",
+        "features",
+        "layout",
+        "common"
+      ],
+      "description": "组件按功能分类"
+    },
+    "frontend/pages": {
+      "subdirs": [
+        "core",
+        "data",
+        "user",
+        "management"
+      ],
+      "description": "页面按业务分类"
+    },
+    "frontend/services": {
+      "subdirs": [
+        "api",
+        "auth",
+        "data",
+        "monitoring"
+      ],
+      "description": "服务按功能分类"
+    },
+    "backend/engines": {
+      "subdirs": [
+        "api",
+        "security",
+        "performance",
+        "stress"
+      ],
+      "description": "引擎按测试类型分类"
+    }
+  },
+  "recommendations": [
+    "⚠️ 有 34 个文件需要进一步分析",
+    "建议定期运行文件整理工具",
+    "建议建立文件命名和组织规范"
+  ]
+}

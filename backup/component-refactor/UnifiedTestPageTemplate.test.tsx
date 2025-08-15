@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { UnifiedTestPageTemplate } from '../UnifiedTestPageTemplate';
+import { TestPageTemplate } from '../UnifiedTestPageTemplate';
 
 // Mock services
 jest.mock('../../../services/testService', () => ({

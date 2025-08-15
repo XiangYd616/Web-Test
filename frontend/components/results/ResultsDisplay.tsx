@@ -8,7 +8,7 @@ import {
   Play, Pause, RotateCcw, Wifi, WifiOff, Bell, BellOff,
   TrendingUp, Activity, Clock, AlertCircle
 } from 'lucide-react';
-import EnhancedTestResults from './EnhancedTestResults';
+import TestResults from './EnhancedTestResults';
 import { createApiUrl } from '../../config/api';
 
 interface TestResult {

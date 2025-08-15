@@ -5,7 +5,7 @@
 
 const { EventEmitter } = require('events');
 const { configCenter } = require('../config/ConfigCenter');
-const { ErrorSeverity } = require('./UnifiedErrorHandler');
+const { ErrorSeverity } = require('./ErrorHandler');
 
 /**
  * 告警通道类型

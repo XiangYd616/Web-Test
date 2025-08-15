@@ -93,7 +93,7 @@ class UnifiedApiService {
   async get(url: string, config?: any): Promise<ApiResponse> {
     if (this.useRemoteApi) {
       // 使用配置管理器获取API URL
-      const { enhancedConfigManager } = await import('../../config/EnhancedConfigManager');
+      const { enhancedConfigManager } = await import('../../config/ConfigManager');
       const apiBaseUrl = enhancedConfigManager.get('api.baseUrl');
 
       const response = await fetch(`${apiBaseUrl}${url}`, {
@@ -113,7 +113,7 @@ class UnifiedApiService {
   async post(url: string, data?: any, config?: any): Promise<ApiResponse> {
     if (this.useRemoteApi) {
       // 使用配置管理器获取API URL
-      const { enhancedConfigManager } = await import('../../config/EnhancedConfigManager');
+      const { enhancedConfigManager } = await import('../../config/ConfigManager');
       const apiBaseUrl = enhancedConfigManager.get('api.baseUrl');
 
       const response = await fetch(`${apiBaseUrl}${url}`, {

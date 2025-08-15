@@ -13,7 +13,7 @@ export { ThemeSelector, ThemeSwitch, default as ThemeToggle } from './ThemeToggl
 export * from './types';
 
 // 基础UI组件
-export { default as EnhancedErrorBoundary, default as ErrorBoundary } from '../system/EnhancedErrorBoundary';
+export { default as EnhancedErrorBoundary, default as ErrorBoundary } from '../system/ErrorBoundary';
 export { default as LoadingStates } from './LoadingStates';
 
 // 增强UI组件

@@ -5,7 +5,7 @@
 
 import React, { Suspense, lazy, useState, useEffect, ComponentType } from 'react';
 import { LoadingSpinner } from './EnhancedLoadingSpinner';
-import EnhancedErrorBoundary from './EnhancedErrorBoundary';
+import ErrorBoundary from './EnhancedErrorBoundary';
 
 // 懒加载组件的配置选项
 interface LazyComponentOptions {

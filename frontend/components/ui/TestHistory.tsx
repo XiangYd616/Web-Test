@@ -1,983 +1,753 @@
-/**
- * 统一的测试历史组件
- * 基于StressTestHistory.tsx的实现，支持所有测试类型
- */
-
-import { BarChart3, Eye, RefreshCw, Search, Trash2 } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { AlertCircle, Archive, BarChart3, CheckCircle, Clock, Database, Download, Eye, FileText, Filter, Globe, MoreHorizontal, RefreshCw, Search, Shield, Star, Tag, Trash2, TrendingUp, XCircle, Zap } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import {
-    getStatusConfig,
-    getStatusStyleClasses,
-    getStatusText
-} from '../../utils/testStatusUtils';
-import { DeleteConfirmDialog } from './DeleteConfirmDialog';
-import ExportModal from './ExportModal';
-import { showToast } from './Toast';
 
-import '../../styles/pagination.css';
-import '../stress/StatusLabel.css';
-import '../stress/StressTestHistory.css';
+import { TestRecord, TestHistoryQuery, TestHistoryResponse, TestHistoryStatistics, TestStatus, TestType } from '../../types/testHistory';
 
-interface TestRecord {
-    id: string;
-    testName: string;
-    testType: string;
-    url: string;
-    status: 'idle' | 'starting' | 'running' | 'completed' | 'failed' | 'cancelled';
-    startTime?: string;
-    endTime?: string;
-    duration?: number;
-    createdAt: string;
-    updatedAt: string;
-    overallScore?: number;
-    performanceGrade?: string;
-    config: any;
-    results?: any;
-    errorMessage?: string;
-    totalRequests?: number;
-    successfulRequests?: number;
-    failedRequests?: number;
-    averageResponseTime?: number;
-    peakTps?: number;
-    errorRate?: number;
-    tags?: string[];
-    environment?: string;
+interface TestHistoryProps {
+  className?: string;
 }
 
-interface UnifiedTestHistoryProps {
-    testType: string; // 指定要显示的测试类型
-    className?: string;
-    title?: string;
-    description?: string;
-    onTestSelect?: (record: TestRecord) => void;
-    onTestRerun?: (record: TestRecord) => void;
-}
+const TestHistory: React.FC<TestHistoryProps> = ({ className = '' }) => {
+  // 认证状态
+  const { isAuthenticated, user } = useAuth();
 
-const UnifiedTestHistory: React.FC<UnifiedTestHistoryProps> = ({
-    testType,
-    className = '',
-    title,
-    description,
-    onTestSelect,
-    onTestRerun
-}) => {
-    // 路由导航
-    const navigate = useNavigate();
+  // 状态管理
+  const [testHistory, setTestHistory] = useState<TestRecord[]>([]);
+  const [statistics, setStatistics] = useState<TestHistoryStatistics | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedTests, setSelectedTests] = useState<string[]>([]);
+  const [showFilters, setShowFilters] = useState(false);
+  const [showBatchActions, setShowBatchActions] = useState(false);
 
-    // 认证状态
-    const { isAuthenticated } = useAuth();
+  // 查询参数
+  const [query, setQuery] = useState<TestHistoryQuery>({
+    page: 1,
+    limit: 20,
+    sortBy: 'createdAt',
+    sortOrder: 'desc'
+  });
 
-    // 状态管理
-    const [records, setRecords] = useState<TestRecord[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState<string>('all');
-    const [dateFilter, setDateFilter] = useState<string>('all');
-    const [sortBy, setSortBy] = useState<'created_at' | 'duration' | 'start_time' | 'status'>('created_at');
-    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-    const [selectedRecords, setSelectedRecords] = useState<Set<string>>(new Set());
+  // 分页信息
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 20,
+    total: 0,
+    totalPages: 0,
+    hasNext: false,
+    hasPrev: false
+  });
 
-    // 分页状态
-    const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
-    const [totalRecords, setTotalRecords] = useState(0);
+  // 过滤器选项
+  const [filterOptions, setFilterOptions] = useState({
+    availableTypes: [] as TestType[],
+    availableStatuses: [] as TestStatus[],
+    availableTags: [] as string[],
+    availableCategories: [] as string[],
+    dateRange: { earliest: '', latest: '' },
+    scoreRange: { min: 0, max: 100 }
+  });
 
-    // 详情模态框状态
-    const [selectedRecord, setSelectedRecord] = useState<TestRecord | null>(null);
-    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  // 获取测试历史数据
+  const fetchTestHistory = useCallback(async () => {
+    try {
+      setLoading(true);
 
-    // 删除确认对话框状态
-    const [deleteDialog, setDeleteDialog] = useState<{
-        isOpen: boolean;
-        type: 'single' | 'batch';
-        recordId?: string;
-        recordName?: string;
-        recordNames?: string[];
-        isLoading: boolean;
-    }>({
-        isOpen: false,
-        type: 'single',
-        isLoading: false
-    });
+      // 如果用户未登录，直接设置空数据
+      if (!isAuthenticated) {
+        setTestHistory([]);
+        setPagination({
+          page: 1,
+          limit: 20,
+          total: 0,
+          totalPages: 0,
+          hasNext: false,
+          hasPrev: false
+        });
+        return;
+      }
 
-    // 导出模态框状态
-    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+      const params = new URLSearchParams();
+      Object.entries(query).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          if (Array.isArray(value)) {
+            value.forEach(v => params.append(key, v.toString()));
+          } else {
+            params.append(key, value.toString());
+          }
+        }
+      });
 
-    // 缓存管理
-    const requestCacheRef = useRef<Map<string, Promise<any>>>(new Map());
-    const cacheTimestampRef = useRef<Map<string, number>>(new Map());
-    const lastRequestParamsRef = useRef<string>('');
+      const headers: Record<string, string> = {};
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
 
-    // API接口参数类型
-    interface LoadTestRecordsParams {
-        page?: number;
-        pageSize?: number;
-        search?: string;
-        status?: string;
-        dateFilter?: string;
-        sortBy?: string;
-        sortOrder?: 'asc' | 'desc';
-        testType?: string;
+      const response = await fetch(`/api/test/history?${params}`, {
+        headers
+      });
+
+      if (!response.ok) {
+        throw new Error('获取测试历史失败');
+      }
+
+      const data: TestHistoryResponse = await response.json();
+
+      if (data.success) {
+        setTestHistory(data.data.tests);
+        setPagination(data.data.pagination);
+        if (data.data.filters) {
+          setFilterOptions(data.data.filters);
+        }
+      } else {
+        throw new Error(data.message || '获取测试历史失败');
+      }
+    } catch (error) {
+      console.error('获取测试历史失败:', error);
+      // 这里可以添加错误提示
+    } finally {
+      setLoading(false);
     }
+  }, [query, isAuthenticated]);
 
-    // 加载测试记录（支持分页和筛选）
-    const loadTestRecords = async (params: LoadTestRecordsParams = {}) => {
-        try {
-            // 生成请求参数的唯一标识
-            const requestKey = JSON.stringify({ ...params, testType });
+  // 获取统计信息
+  const fetchStatistics = useCallback(async () => {
+    try {
+      const response = await fetch('/api/test/statistics?timeRange=30', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        }
+      });
 
-            // 清理过期缓存（30秒）
-            const cacheExpiry = 30 * 1000;
-            const now = Date.now();
-            for (const [key, timestamp] of cacheTimestampRef.current.entries()) {
-                if (now - timestamp > cacheExpiry) {
-                    requestCacheRef.current.delete(key);
-                    cacheTimestampRef.current.delete(key);
-                }
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setStatistics(data.data);
+        }
+      }
+    } catch (error) {
+      console.error('获取统计信息失败:', error);
+    }
+  }, []);
+
+  // WebSocket连接用于实时更新
+  useEffect(() => {
+    // 连接到后端WebSocket服务器
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//localhost:3001`;
+    const ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+      console.log('测试历史WebSocket连接已建立');
+      // 加入测试历史更新房间
+      ws.send(JSON.stringify({
+        type: 'join-room',
+        room: 'test-history-updates'
+      }));
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+
+        // 处理测试记录更新
+        if (data.type === 'test-record-update') {
+          setTestHistory(prev => {
+            const updatedTests = [...prev];
+            const index = updatedTests.findIndex(test => test.id === data.recordId);
+
+            if (index >= 0) {
+              // 更新现有记录
+              updatedTests[index] = { ...updatedTests[index], ...data.updates };
+            } else if (data.updates.status === 'running') {
+              // 添加新的运行中测试记录
+              updatedTests.unshift(data.updates as TestRecord);
             }
 
-            // 如果参数相同，避免重复请求
-            if (requestKey === lastRequestParamsRef.current && requestCacheRef.current.has(requestKey)) {
-                console.log('🔄 使用缓存的请求结果，避免重复请求');
-                return;
-            }
-
-            // 如果有相同的请求正在进行，等待其完成
-            if (requestCacheRef.current.has(requestKey)) {
-                console.log('⏳ 等待相同请求完成...');
-                await requestCacheRef.current.get(requestKey);
-                return;
-            }
-
-            lastRequestParamsRef.current = requestKey;
-            cacheTimestampRef.current.set(requestKey, now);
-
-            setLoading(true);
-
-            // 构建查询参数
-            const queryParams = new URLSearchParams();
-            queryParams.append('testType', testType); // 添加测试类型过滤
-            if (params.page) queryParams.append('page', params.page.toString());
-            if (params.pageSize) queryParams.append('pageSize', params.pageSize.toString());
-            if (params.search) queryParams.append('search', params.search);
-            if (params.status && params.status !== 'all') queryParams.append('status', params.status);
-            if (params.dateFilter && params.dateFilter !== 'all') queryParams.append('dateFilter', params.dateFilter);
-            if (params.sortBy) queryParams.append('sortBy', params.sortBy);
-            if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
-
-            // 创建请求Promise并缓存
-            const requestPromise = fetch(`/api/test/history?${queryParams.toString()}`, {
-                headers: {
-                    ...(localStorage.getItem('auth_token') ? {
-                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-                    } : {})
-                }
-            }).then(async (response) => {
-                if (response.status === 429) {
-                    const retryAfter = response.headers.get('Retry-After') || '60';
-                    throw new Error(`请求过于频繁，请${retryAfter}秒后再试`);
-                }
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                return response.json();
-            });
-
-            requestCacheRef.current.set(requestKey, requestPromise);
-
-            const data = await requestPromise;
-
-            if (data.success) {
-                const { tests = [], pagination = {} } = data.data;
-                const { total = 0, page = 1 } = pagination;
-                setRecords(tests);
-                setTotalRecords(total);
-                setCurrentPage(page);
-            } else {
-                console.error('加载测试记录失败:', data.message);
-                setRecords([]);
-                setTotalRecords(0);
-            }
-
-            // 清理缓存（5秒后）
-            setTimeout(() => {
-                requestCacheRef.current.delete(requestKey);
-            }, 5000);
-
-        } catch (error: any) {
-            console.error('❌ 加载测试记录失败:', error);
-            setRecords([]);
-            setTotalRecords(0);
-
-            // 优雅处理 showToast 错误
-            try {
-                if (showToast && typeof showToast.error === 'function') {
-                    showToast.error(error.message || '加载测试记录失败');
-                }
-            } catch (toastError) {
-                console.warn('Toast 显示失败:', toastError);
-            }
-        } finally {
-            setLoading(false);
+            return updatedTests;
+          });
         }
+      } catch (error) {
+        console.error('处理WebSocket消息失败:', error);
+      }
     };
 
-    // 防抖定时器
-    const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-    const isInitialLoadRef = useRef(true);
-
-    // 统一的加载逻辑
-    const triggerLoad = (resetPage = false) => {
-        // 清除之前的防抖定时器
-        if (debounceTimerRef.current) {
-            clearTimeout(debounceTimerRef.current);
-        }
-
-        debounceTimerRef.current = setTimeout(() => {
-            loadTestRecords({
-                page: resetPage ? 1 : currentPage,
-                pageSize: pageSize,
-                search: searchTerm,
-                status: statusFilter,
-                dateFilter: dateFilter,
-                sortBy: sortBy,
-                sortOrder: sortOrder,
-                testType: testType
-            });
-        }, isInitialLoadRef.current ? 0 : 800);
+    ws.onclose = () => {
+      console.log('测试历史WebSocket连接已关闭');
     };
 
-    // 初始加载
-    useEffect(() => {
-        if (isInitialLoadRef.current) {
-            triggerLoad();
-            isInitialLoadRef.current = false;
-        }
-    }, []);
-
-    // 监听筛选条件变化
-    useEffect(() => {
-        if (!isInitialLoadRef.current) {
-            triggerLoad(true); // 重置到第一页
-        }
-    }, [searchTerm, statusFilter, dateFilter, sortBy, sortOrder]);
-
-    // 监听分页变化
-    useEffect(() => {
-        if (!isInitialLoadRef.current) {
-            triggerLoad(false); // 不重置页码
-        }
-    }, [currentPage, pageSize]);
-
-    // 手动刷新
-    const handleRefresh = () => {
-        // 清除缓存，强制重新请求
-        requestCacheRef.current.clear();
-        lastRequestParamsRef.current = '';
-
-        loadTestRecords({
-            page: currentPage,
-            pageSize: pageSize,
-            search: searchTerm,
-            status: statusFilter,
-            dateFilter: dateFilter,
-            sortBy: sortBy,
-            sortOrder: sortOrder,
-            testType: testType
-        });
+    ws.onerror = (error) => {
+      console.error('测试历史WebSocket错误:', error);
     };
 
-    // 分页信息
-    const totalPages = Math.ceil(totalRecords / pageSize);
-    const startRecord = totalRecords === 0 ? 0 : (currentPage - 1) * pageSize + 1;
-    const endRecord = Math.min(currentPage * pageSize, totalRecords);
-
-    // 获取状态样式（使用统一的状态管理）
-    const getStatusStyle = (status: string) => {
-        return `!${getStatusStyleClasses(status)}`;
+    // 清理函数
+    return () => {
+      ws.close();
     };
+  }, []);
 
-    // 获取状态图标（使用统一的状态管理）
-    const getStatusIcon = (status: string) => {
-        const config = getStatusConfig(status);
-        const IconComponent = config.icon;
-        const isAnimated = status === 'running';
+  // 初始化数据
+  useEffect(() => {
+    fetchTestHistory();
+    fetchStatistics();
+  }, [fetchTestHistory, fetchStatistics]);
 
-        return (
-            <IconComponent
-                className={`w-4 h-4 ${isAnimated ? 'animate-pulse' : ''}`}
-            />
-        );
-    };
+  // 处理搜索
+  const handleSearch = (searchTerm: string) => {
+    setQuery(prev => ({
+      ...prev,
+      search: searchTerm,
+      page: 1
+    }));
+  };
 
-    // 格式化时间
-    const formatTime = (timestamp?: string) => {
-        if (!timestamp) return '-';
-        const date = new Date(timestamp);
+  // 处理过滤
+  const handleFilter = (filterKey: string, filterValue: any) => {
+    setQuery(prev => ({
+      ...prev,
+      [filterKey]: filterValue,
+      page: 1
+    }));
+  };
 
-        // 始终显示完整的日期和时间
-        return date.toLocaleString('zh-CN', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
+  // 处理排序
+  const handleSort = (sortBy: string) => {
+    setQuery(prev => ({
+      ...prev,
+      sortBy: sortBy as any,
+      sortOrder: prev.sortBy === sortBy && prev.sortOrder === 'desc' ? 'asc' : 'desc',
+      page: 1
+    }));
+  };
 
-    // 格式化持续时间
-    const formatDuration = (record: TestRecord) => {
-        // 对于运行中的测试，不显示时长，避免显示配置时长造成混淆
-        if (record.status === 'running' || record.status === 'starting') {
-            return '-';
+  // 处理分页
+  const handlePageChange = (page: number) => {
+    setQuery(prev => ({ ...prev, page }));
+  };
+
+  // 处理测试选择
+  const handleTestSelect = (testId: string, selected: boolean) => {
+    if (selected) {
+      setSelectedTests(prev => [...prev, testId]);
+    } else {
+      setSelectedTests(prev => prev.filter(id => id !== testId));
+    }
+  };
+
+  // 处理全选
+  const handleSelectAll = (selected: boolean) => {
+    if (selected) {
+      setSelectedTests(testHistory.map(test => test.id));
+    } else {
+      setSelectedTests([]);
+    }
+  };
+
+  // 批量操作
+  const handleBatchAction = async (action: string, options?: any) => {
+    if (selectedTests.length === 0) return;
+
+    try {
+      const response = await fetch('/api/data-management/test-history/batch', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify({
+          testIds: selectedTests
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          // 刷新数据
+          fetchTestHistory();
+          setSelectedTests([]);
+          setShowBatchActions(false);
         }
+      }
+    } catch (error) {
+      console.error('批量操作失败:', error);
+    }
+  };
 
-        // 优先使用 duration
-        let seconds = record.duration;
+  // 获取测试类型图标
+  const getTestTypeIcon = (type: string) => {
+    switch (type) {
+      case 'performance':
+        return <BarChart3 className="w-4 h-4 text-blue-400" />;
+      case 'security':
+        return <Shield className="w-4 h-4 text-green-400" />;
+      case 'stress':
+        return <Zap className="w-4 h-4 text-yellow-400" />;
+      case 'seo':
+        return <TrendingUp className="w-4 h-4 text-purple-400" />;
+      case 'api':
+        return <Database className="w-4 h-4 text-cyan-400" />;
+      case 'website':
+        return <Globe className="w-4 h-4 text-indigo-400" />;
+      default:
+        return <FileText className="w-4 h-4 text-gray-400" />;
+    }
+  };
 
-        // 如果没有duration，尝试从results.metrics获取
-        if ((!seconds || seconds <= 0) && record.results?.metrics?.duration) {
-            seconds = record.results.metrics.duration;
-        }
+  // 获取状态图标
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case 'failed':
+        return <XCircle className="w-4 h-4 text-red-500" />;
+      case 'running':
+        return <Clock className="w-4 h-4 text-blue-500" />;
+      case 'cancelled':
+        return <AlertCircle className="w-4 h-4 text-yellow-500" />;
+      default:
+        return <Clock className="w-4 h-4 text-gray-500" />;
+    }
+  };
 
-        // 如果还是没有，尝试从results.summary获取
-        if ((!seconds || seconds <= 0) && record.results?.summary?.duration) {
-            seconds = record.results.summary.duration;
-        }
+  // 格式化持续时间
+  const formatDuration = (duration?: number) => {
+    if (!duration) return '-';
 
-        // 尝试从results直接获取
-        if ((!seconds || seconds <= 0) && record.results?.duration) {
-            seconds = record.results.duration;
-        }
+    if (duration < 1000) {
+      return `${duration}ms`;
+    } else if (duration < 60000) {
+      return `${(duration / 1000).toFixed(1)}s`;
+    } else {
+      return `${(duration / 60000).toFixed(1)}m`;
+    }
+  };
 
-        // 最后尝试计算时间差（仅对已完成的测试）
-        if ((!seconds || seconds <= 0) && record.startTime && record.endTime) {
-            const start = new Date(record.startTime).getTime();
-            const end = new Date(record.endTime).getTime();
-            seconds = Math.floor((end - start) / 1000);
-        }
+  // 格式化分数
+  const formatScore = (score?: number) => {
+    if (score === undefined || score === null) return '-';
+    return `${score.toFixed(1)}`;
+  };
 
-        if (!seconds || seconds <= 0) return '-';
+  // 格式化日期
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = seconds % 60;
-        if (minutes > 0) {
-            return `${minutes}分${remainingSeconds}秒`;
-        } else {
-            return `${remainingSeconds}秒`;
-        }
-    };
-
-    // 格式化性能评分
-    const formatScore = (record: TestRecord) => {
-        // 优先使用 overallScore
-        let score = record.overallScore;
-
-        // 如果没有overallScore，尝试从results.metrics获取
-        if ((!score || score <= 0) && record.results?.metrics?.overallScore) {
-            score = record.results.metrics.overallScore;
-        }
-
-        // 如果还是没有，尝试从results.summary获取
-        if ((!score || score <= 0) && record.results?.summary?.overallScore) {
-            score = record.results.summary.overallScore;
-        }
-
-        // 尝试从results直接获取
-        if ((!score || score <= 0) && record.results?.overallScore) {
-            score = record.results.overallScore;
-        }
-
-        if (!score || score <= 0) return '-';
-        return `${score.toFixed(1)}分`;
-    };
-
-    // 获取测试类型显示名称
-    const getTestTypeName = (type: string) => {
-        const typeNames: Record<string, string> = {
-            stress: '压力测试',
-            security: '安全测试',
-            performance: '性能测试',
-            api: 'API测试',
-            seo: 'SEO测试',
-            compatibility: '兼容性测试',
-            accessibility: '可访问性测试',
-            ux: 'UX测试',
-            database: '数据库测试',
-            network: '网络测试',
-            website: '网站测试'
-        };
-        return typeNames[type] || type;
-    };
-
-    // 切换选择记录
-    const toggleSelectRecord = (recordId: string) => {
-        setSelectedRecords(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(recordId)) {
-                newSet.delete(recordId);
-            } else {
-                newSet.add(recordId);
-            }
-            return newSet;
-        });
-    };
-
-    // 切换全选
-    const toggleSelectAll = () => {
-        if (selectedRecords.size === records.length) {
-            setSelectedRecords(new Set());
-        } else {
-            setSelectedRecords(new Set(records.map(r => r.id)));
-        }
-    };
-
-    // 查看测试详情
-    const handleViewDetails = (record: TestRecord) => {
-        if (onTestSelect) {
-            onTestSelect(record);
-        } else {
-            setSelectedRecord(record);
-            setIsDetailModalOpen(true);
-        }
-    };
-
-    // 重新运行测试
-    const handleRerunTest = (record: TestRecord) => {
-        if (onTestRerun) {
-            onTestRerun(record);
-        }
-    };
-
-    // 删除单个记录
-    const handleDeleteRecord = async (recordId: string) => {
-        try {
-            const response = await fetch(`/api/test/history/${recordId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-                }
-            });
-
-            if (response.ok) {
-                setRecords(prev => prev.filter(r => r.id !== recordId));
-                setSelectedRecords(prev => {
-                    const newSet = new Set(prev);
-                    newSet.delete(recordId);
-                    return newSet;
-                });
-                setTotalRecords(prev => prev - 1);
-                try {
-                    if (showToast && typeof showToast.success === 'function') {
-                        showToast.success('删除成功');
-                    }
-                } catch (toastError) {
-                    console.warn('Toast 显示失败:', toastError);
-                }
-            } else {
-                throw new Error('删除失败');
-            }
-        } catch (error) {
-            console.error('删除记录失败:', error);
-            try {
-                if (showToast && typeof showToast.error === 'function') {
-                    showToast.error('删除失败');
-                }
-            } catch (toastError) {
-                console.warn('Toast 显示失败:', toastError);
-            }
-        }
-    };
-
-    // 批量删除记录
-    const handleBatchDelete = async () => {
-        if (selectedRecords.size === 0) return;
-
-        try {
-            const response = await fetch('/api/test/history/batch-delete', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
-                },
-                body: JSON.stringify({
-                    recordIds: Array.from(selectedRecords)
-                })
-            });
-
-            if (response.ok) {
-                setRecords(prev => prev.filter(r => !selectedRecords.has(r.id)));
-                setTotalRecords(prev => prev - selectedRecords.size);
-                setSelectedRecords(new Set());
-                try {
-                    if (showToast && typeof showToast.success === 'function') {
-                        showToast.success(`成功删除 ${selectedRecords.size} 条记录`);
-                    }
-                } catch (toastError) {
-                    console.warn('Toast 显示失败:', toastError);
-                }
-            } else {
-                throw new Error('批量删除失败');
-            }
-        } catch (error) {
-            console.error('批量删除失败:', error);
-            try {
-                if (showToast && typeof showToast.error === 'function') {
-                    showToast.error('批量删除失败');
-                }
-            } catch (toastError) {
-                console.warn('Toast 显示失败:', toastError);
-            }
-        }
-    };
-
-    // 打开批量删除对话框
-    const openBatchDeleteDialog = () => {
-        setDeleteDialog({
-            isOpen: true,
-            type: 'batch',
-            recordNames: records
-                .filter(r => selectedRecords.has(r.id))
-                .map(r => r.testName),
-            isLoading: false
-        });
-    };
-
-    // 打开单个删除对话框
-    const openSingleDeleteDialog = (record: TestRecord) => {
-        setDeleteDialog({
-            isOpen: true,
-            type: 'single',
-            recordId: record.id,
-            recordName: record.testName,
-            isLoading: false
-        });
-    };
-
-    // 确认删除
-    const confirmDelete = async () => {
-        setDeleteDialog(prev => ({ ...prev, isLoading: true }));
-
-        try {
-            if (deleteDialog.type === 'single' && deleteDialog.recordId) {
-                await handleDeleteRecord(deleteDialog.recordId);
-            } else if (deleteDialog.type === 'batch') {
-                await handleBatchDelete();
-            }
-        } finally {
-            setDeleteDialog({
-                isOpen: false,
-                type: 'single',
-                isLoading: false
-            });
-        }
-    };
-
-    // 取消删除
-    const cancelDelete = () => {
-        setDeleteDialog({
-            isOpen: false,
-            type: 'single',
-            isLoading: false
-        });
-    };
-
+  // 未登录状态显示
+  if (!isAuthenticated) {
     return (
-        <div className={`test-records-container bg-gray-800/30 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/40 dark:border-gray-600/30 shadow-lg ${className}`}>
-            {/* 头部 */}
-            <div className="test-records-header p-6 border-b border-gray-700/40 dark:border-gray-600/30">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-blue-500/20 backdrop-blur-sm rounded-lg flex items-center justify-center border border-blue-500/30">
-                            <BarChart3 className="w-4 h-4 text-blue-400" />
-                        </div>
-                        <div>
-                            <h2 className="text-xl font-semibold text-white">
-                                {title || `${getTestTypeName(testType)}历史`}
-                            </h2>
-                            <p className="text-sm text-gray-300 mt-1">
-                                {description || `查看和管理${getTestTypeName(testType)}记录`}
-                            </p>
-                        </div>
-                    </div>
+      <section className={`enhanced-test-history ${className}`}>
+        <div className="p-12 text-center">
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-8 max-w-md mx-auto">
+            <Shield className="w-16 h-16 mx-auto mb-6 text-gray-500" />
+            <h3 className="text-xl font-semibold text-white mb-4">需要登录</h3>
+            <p className="text-gray-300 mb-6">
+              请登录以查看您的测试历史记录
+            </p>
+            <button
+              type="button"
+              onClick={() => window.location.href = '/login'}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+            >
+              立即登录
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
-                    <div className="flex items-center gap-3">
-                        {/* 美化的全选复选框 */}
-                        {records.length > 0 && (
-                            <div className="flex items-center">
-                                <label className="flex items-center gap-3 cursor-pointer group">
-                                    <div className="relative">
-                                        <input
-                                            type="checkbox"
-                                            checked={records.length > 0 && selectedRecords.size === records.length}
-                                            onChange={toggleSelectAll}
-                                            className="sr-only"
-                                            aria-label="全选/取消全选测试记录"
-                                            title={selectedRecords.size === 0
-                                                ? '全选所有记录'
-                                                : selectedRecords.size === records.length
-                                                    ? '取消全选'
-                                                    : `已选择 ${selectedRecords.size} 项，点击全选`}
-                                        />
-                                        <div className={`
-                                            w-5 h-5 rounded-md border-2 transition-all duration-200 flex items-center justify-center
-                                            ${records.length > 0 && selectedRecords.size === records.length
-                                                ? 'bg-blue-600 border-blue-600 shadow-lg shadow-blue-500/25'
-                                                : selectedRecords.size > 0
-                                                    ? 'bg-blue-600/50 border-blue-500 shadow-md shadow-blue-500/20'
-                                                    : 'bg-gray-700/50 border-gray-600/60 hover:border-gray-500/80 hover:bg-gray-600/50'
-                                            }
-                                            group-hover:scale-105 group-active:scale-95
-                                        `}>
-                                            {selectedRecords.size > 0 && (
-                                                <svg
-                                                    className={`w-3 h-3 text-white transition-all duration-150 ${selectedRecords.size === records.length ? 'animate-in fade-in' : 'opacity-75'
-                                                        }`}
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    {selectedRecords.size === records.length ? (
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth={3}
-                                                            d="M5 13l4 4L19 7"
-                                                        />
-                                                    ) : (
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth={3}
-                                                            d="M20 12H4"
-                                                        />
-                                                    )}
-                                                </svg>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">
-                                        {selectedRecords.size === 0
-                                            ? '全选'
-                                            : selectedRecords.size === records.length
-                                                ? '全选'
-                                                : `${selectedRecords.size}项`}
-                                    </span>
-                                </label>
-                            </div>
-                        )}
-
-                        {selectedRecords.size > 0 && (
-                            <>
-                                <button
-                                    type="button"
-                                    onClick={openBatchDeleteDialog}
-                                    disabled={loading}
-                                    aria-label={`批量删除 ${selectedRecords.size} 条记录`}
-                                    title={`删除选中的 ${selectedRecords.size} 条测试记录`}
-                                    className="test-action-button inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-400 bg-red-900/20 hover:bg-red-800/30 border border-red-600/40 hover:border-red-500/60 rounded-lg transition-all duration-200 disabled:opacity-50 backdrop-blur-sm"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                    删除选中 ({selectedRecords.size})
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setSelectedRecords(new Set())}
-                                    className="test-action-button inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-400 bg-gray-700/30 hover:bg-gray-600/40 border border-gray-600/40 hover:border-gray-500/60 rounded-lg transition-all duration-200 backdrop-blur-sm"
-                                    title="清除选择"
-                                >
-                                    清除选择
-                                </button>
-                            </>
-                        )}
-                        <button
-                            type="button"
-                            onClick={handleRefresh}
-                            disabled={loading}
-                            aria-label={loading ? '正在刷新测试记录' : '刷新测试记录'}
-                            title={loading ? '正在刷新测试记录...' : '刷新测试记录列表'}
-                            className="test-action-button inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700/50 hover:bg-gray-600/60 border border-gray-600/40 hover:border-gray-500/60 rounded-lg transition-all duration-200 disabled:opacity-50 backdrop-blur-sm"
-                        >
-                            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                            刷新
-                        </button>
-                    </div>
-                </div>
+  return (
+    <section className={`enhanced-test-history ${className}`}>
+      {/* 统计概览 */}
+      {statistics && (
+        <section className="test-stats-grid" aria-label="测试统计概览">
+          <article className="test-stat-card">
+            <div className="test-stat-content">
+              <p className="test-stat-label">总测试数</p>
+              <p className="test-stat-value">{statistics.overview.totalTests}</p>
             </div>
-
-            {/* 搜索和过滤区域 */}
-            <div className="p-6 border-b border-gray-700/40 dark:border-gray-600/30">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    {/* 搜索框 */}
-                    <div className="flex-1 max-w-md">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                            <input
-                                type="text"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                placeholder={`搜索${getTestTypeName(testType)}记录...`}
-                                className="w-full pl-10 pr-4 py-2 bg-gray-700/50 border border-gray-600/40 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                        </div>
-                    </div>
-
-                    {/* 过滤器 */}
-                    <div className="flex items-center gap-3">
-                        <select
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                            className="px-3 py-2 bg-gray-700/50 border border-gray-600/40 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                            <option value="all">所有状态</option>
-                            <option value="completed">已完成</option>
-                            <option value="failed">失败</option>
-                            <option value="running">运行中</option>
-                            <option value="cancelled">已取消</option>
-                        </select>
-
-                        <select
-                            value={dateFilter}
-                            onChange={(e) => setDateFilter(e.target.value)}
-                            className="px-3 py-2 bg-gray-700/50 border border-gray-600/40 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                            <option value="all">所有时间</option>
-                            <option value="today">今天</option>
-                            <option value="week">本周</option>
-                            <option value="month">本月</option>
-                        </select>
-                    </div>
-                </div>
+            <div className="test-stat-icon-wrapper bg-blue-500/20">
+              <FileText className="test-stat-icon text-blue-400" />
             </div>
+          </article>
+
+          <article className="test-stat-card">
+            <div className="test-stat-content">
+              <p className="test-stat-label">成功率</p>
+              <p className="test-stat-value text-green-400">
+                {statistics.overview.successRate ? statistics.overview.successRate.toFixed(1) : '0.0'}%
+              </p>
+            </div>
+            <div className="test-stat-icon-wrapper bg-green-500/20">
+              <CheckCircle className="test-stat-icon text-green-400" />
+            </div>
+          </article>
+
+          <article className="test-stat-card">
+            <div className="test-stat-content">
+              <p className="test-stat-label">平均分数</p>
+              <p className="test-stat-value text-blue-400">
+                {statistics.overview.averageScore ? statistics.overview.averageScore.toFixed(1) : '0.0'}
+              </p>
+            </div>
+            <div className="test-stat-icon-wrapper bg-yellow-500/20">
+              <Star className="test-stat-icon text-yellow-400" />
+            </div>
+          </article>
+
+          <article className="test-stat-card">
+            <div className="test-stat-content">
+              <p className="test-stat-label">平均耗时</p>
+              <p className="test-stat-value text-purple-400">
+                {formatDuration(statistics.overview.averageDuration)}
+              </p>
+            </div>
+            <div className="test-stat-icon-wrapper bg-purple-500/20">
+              <Clock className="test-stat-icon text-purple-400" />
+            </div>
+          </article>
+        </section>
+      )}
+
+      {/* 工具栏 */}
+      <nav className="test-toolbar" aria-label="测试历史工具栏">
+        <header className="test-toolbar-header">
+          {/* 搜索框 */}
+          <div className="test-search-wrapper">
+            <label>
+              <span className="sr-only">搜索测试记录</span>
+              <Search className="test-search-icon" />
+              <input
+                type="search"
+                placeholder="搜索测试名称、URL..."
+                className="test-search-input"
+                value={query.search || ''}
+                onChange={(e) => handleSearch(e.target.value)}
+              />
+            </label>
+          </div>
+
+          {/* 操作按钮 */}
+          <div className="test-actions-group" role="toolbar" aria-label="测试历史操作">
+            <button
+              type="button"
+              onClick={() => setShowFilters(!showFilters)}
+              className="test-action-button"
+              aria-expanded={showFilters}
+              aria-controls="filters-panel"
+            >
+              <Filter className="test-action-icon" />
+              过滤器
+            </button>
+
+            <button
+              type="button"
+              onClick={() => fetchTestHistory()}
+              className="test-action-button"
+              aria-label="刷新测试历史数据"
+            >
+              <RefreshCw className="test-action-icon" />
+              刷新
+            </button>
+
+            {selectedTests.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowBatchActions(!showBatchActions)}
+                className="flex items-center gap-2 px-3 py-2 bg-blue-600/80 text-white rounded-lg hover:bg-blue-600"
+                aria-expanded={showBatchActions}
+                aria-label={`批量操作 ${selectedTests.length} 个选中项`}
+              >
+                <MoreHorizontal className="w-4 h-4" />
+                批量操作 ({selectedTests.length})
+              </button>
+            )}
+          </div>
+        </header>
+      </nav>
+
+      {/* 高级过滤器 */}
+      {showFilters && (
+        <form
+          id="filters-panel"
+          className="test-filters-panel"
+          aria-label="高级过滤器"
+        >
+          <fieldset className="test-filters-grid">
+            <legend className="sr-only">测试历史过滤选项</legend>
+
+            {/* 测试类型过滤 */}
+            <label className="test-filter-group">
+              <span className="test-filter-label">
+                测试类型
+              </span>
+              <select
+                className="test-filter-select"
+                value={query.testType || ''}
+                onChange={(e) => handleFilter('testType', e.target.value || undefined)}
+              >
+                <option value="">全部类型</option>
+                {filterOptions.availableTypes.map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            </label>
+
+            {/* 状态过滤 */}
+            <label className="test-filter-group">
+              <span className="test-filter-label">
+                状态
+              </span>
+              <select
+                className="test-filter-select"
+                value={query.status || ''}
+                onChange={(e) => handleFilter('status', e.target.value || undefined)}
+              >
+                <option value="">全部状态</option>
+                {filterOptions.availableStatuses.map(status => (
+                  <option key={status} value={status}>{status}</option>
+                ))}
+              </select>
+            </label>
+
+            {/* 日期范围 */}
+            <label className="block">
+              <span className="block text-sm font-medium text-gray-300 mb-1">
+                开始日期
+              </span>
+              <input
+                type="date"
+                className="w-full bg-gray-800/40 border border-gray-700/40 rounded-lg px-3 py-2 text-white"
+                value={query.dateFrom || ''}
+                onChange={(e) => handleFilter('dateFrom', e.target.value || undefined)}
+              />
+            </label>
+
+            <label className="block">
+              <span className="block text-sm font-medium text-gray-300 mb-1">
+                结束日期
+              </span>
+              <input
+                type="date"
+                className="w-full bg-gray-800/40 border border-gray-700/40 rounded-lg px-3 py-2 text-white"
+                value={query.dateTo || ''}
+                onChange={(e) => handleFilter('dateTo', e.target.value || undefined)}
+              />
+            </label>
+
+            {/* 分数范围 */}
+            <label className="block">
+              <span className="block text-sm font-medium text-gray-300 mb-1">
+                最低分数
+              </span>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                className="w-full bg-gray-800/40 border border-gray-700/40 rounded-lg px-3 py-2 text-white"
+                value={query.minScore || ''}
+                onChange={(e) => handleFilter('minScore', e.target.value ? parseFloat(e.target.value) : undefined)}
+              />
+            </label>
+          </fieldset>
+        </form>
+      )}
+
+      {/* 批量操作面板 */}
+      {showBatchActions && selectedTests.length > 0 && (
+        <div className="p-4 bg-gray-800/20 border-b border-gray-700/40">
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => handleBatchAction('delete')}
+              className="flex items-center gap-2 px-3 py-2 bg-red-600/80 text-white rounded-lg hover:bg-red-600"
+            >
+              <Trash2 className="w-4 h-4" />
+              删除
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleBatchAction('archive')}
+              className="flex items-center gap-2 px-3 py-2 bg-gray-800/50 text-white rounded-lg hover:bg-gray-800/70"
+            >
+              <Archive className="w-4 h-4" />
+              归档
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                const tags = prompt('请输入标签（用逗号分隔）:');
+                if (tags) {
+                  handleBatchAction('tag', { tags: tags.split(',').map(t => t.trim()) });
+                }
+              }}
+              className="flex items-center gap-2 px-3 py-2 bg-green-600/80 text-white rounded-lg hover:bg-green-600"
+            >
+              <Tag className="w-4 h-4" />
+              添加标签
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 测试历史列表 */}
+      <section className="test-records-container" aria-label="测试历史记录">
+        {loading ? (
+          <div className="p-12 text-center" role="status" aria-live="polite">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-400 mx-auto"></div>
+            <p className="mt-4 text-gray-300 text-lg">加载中...</p>
+          </div>
+        ) : testHistory.length === 0 ? (
+          <div className="p-12 text-center text-gray-400">
+            <FileText className="w-16 h-16 mx-auto mb-6 text-gray-500" />
+            <p className="text-lg">暂无测试历史记录</p>
+          </div>
+        ) : (
+          <>
+            {/* 表格头部 */}
+            <header className="test-records-header">
+              <label className="flex items-center gap-4">
+                <input
+                  type="checkbox"
+                  checked={selectedTests.length === testHistory.length}
+                  onChange={(e) => handleSelectAll(e.target.checked)}
+                  className="rounded border-gray-700/40 bg-gray-800/40"
+                  aria-label="全选测试记录"
+                />
+                <span className="text-sm text-gray-300">
+                  已选择 {selectedTests.length} / {testHistory.length} 项
+                </span>
+              </label>
+            </header>
 
             {/* 测试记录列表 */}
-            <div className="p-6">
-                {loading ? (
-                    <div className="flex items-center justify-center py-12">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                        <span className="ml-3 text-gray-400">加载中...</span>
-                    </div>
-                ) : records.length === 0 ? (
-                    <div className="text-center py-12">
-                        <div className="w-16 h-16 bg-gray-700/50 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <BarChart3 className="w-8 h-8 text-gray-400" />
-                        </div>
-                        <h3 className="text-lg font-medium text-white mb-2">暂无{getTestTypeName(testType)}记录</h3>
-                        <p className="text-gray-400">开始您的第一个{getTestTypeName(testType)}吧</p>
-                    </div>
-                ) : (
-                    <>
-                        {/* 记录统计 */}
-                        <div className="flex items-center justify-between mb-6">
-                            <div className="text-sm text-gray-400">
-                                显示 {startRecord}-{endRecord} 条，共 {totalRecords} 条{getTestTypeName(testType)}记录
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-sm text-gray-400">排序:</span>
-                                <select
-                                    value={`${sortBy}-${sortOrder}`}
-                                    onChange={(e) => {
-                                        const [field, order] = e.target.value.split('-');
-                                        setSortBy(field as any);
-                                        setSortOrder(order as any);
-                                    }}
-                                    className="px-3 py-1 bg-gray-700/50 border border-gray-600/40 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                >
-                                    <option value="created_at-desc">创建时间 (新到旧)</option>
-                                    <option value="created_at-asc">创建时间 (旧到新)</option>
-                                    <option value="duration-desc">耗时 (长到短)</option>
-                                    <option value="duration-asc">耗时 (短到长)</option>
-                                    <option value="status-asc">状态</option>
-                                </select>
-                            </div>
-                        </div>
+            <ul className="test-records-list" role="list">
+              {testHistory.map((test) => (
+                <li key={test.id} className="test-record-item">
+                  <article className="test-record-content">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedTests.includes(test.id)}
+                        onChange={(e) => handleTestSelect(test.id, e.target.checked)}
+                        className="rounded border-gray-700/40 bg-gray-800/40"
+                        aria-label={`选择测试 ${test.testName}`}
+                      />
+                    </label>
 
-                        {/* 记录表格 */}
-                        <div className="bg-gray-800/30 rounded-lg border border-gray-700/40 overflow-hidden">
-                            <div className="overflow-x-auto">
-                                <table className="w-full">
-                                    <thead className="bg-gray-700/30">
-                                        <tr>
-                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={records.length > 0 && selectedRecords.size === records.length}
-                                                    onChange={toggleSelectAll}
-                                                    className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
-                                                />
-                                            </th>
-                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                                测试名称
-                                            </th>
-                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                                URL
-                                            </th>
-                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                                状态
-                                            </th>
-                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                                评分
-                                            </th>
-                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                                耗时
-                                            </th>
-                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                                创建时间
-                                            </th>
-                                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                                操作
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-700/40">
-                                        {records.map((record) => (
-                                            <tr key={record.id} className="hover:bg-gray-700/20 transition-colors">
-                                                <td className="px-4 py-3">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={selectedRecords.has(record.id)}
-                                                        onChange={() => toggleSelectRecord(record.id)}
-                                                        className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
-                                                    />
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    <div className="text-sm font-medium text-white truncate max-w-xs">
-                                                        {record.testName || `${getTestTypeName(testType)} - ${record.id.slice(-8)}`}
-                                                    </div>
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    <div className="text-sm text-gray-300 truncate max-w-xs" title={record.url}>
-                                                        {record.url}
-                                                    </div>
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusStyle(record.status)}`}>
-                                                        {getStatusIcon(record.status)}
-                                                        {getStatusText(record.status)}
-                                                    </div>
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    <div className="text-sm text-gray-300">
-                                                        {formatScore(record)}
-                                                    </div>
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    <div className="text-sm text-gray-300">
-                                                        {formatDuration(record)}
-                                                    </div>
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    <div className="text-sm text-gray-300">
-                                                        {formatTime(record.createdAt)}
-                                                    </div>
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    <div className="flex items-center gap-2">
-                                                        <button
-                                                            onClick={() => handleViewDetails(record)}
-                                                            className="p-1 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded transition-colors"
-                                                            title="查看详情"
-                                                        >
-                                                            <Eye className="w-4 h-4" />
-                                                        </button>
-                                                        {onTestRerun && (
-                                                            <button
-                                                                onClick={() => handleRerunTest(record)}
-                                                                className="p-1 text-green-400 hover:text-green-300 hover:bg-green-500/10 rounded transition-colors"
-                                                                title="重新运行"
-                                                            >
-                                                                <RefreshCw className="w-4 h-4" />
-                                                            </button>
-                                                        )}
-                                                        <button
-                                                            onClick={() => openSingleDeleteDialog(record)}
-                                                            className="p-1 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded transition-colors"
-                                                            title="删除"
-                                                        >
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                    <div className="test-record-main">
+                      <header className="test-record-header">
+                        {getTestTypeIcon(test.testType)}
+                        <h3 className="test-record-title">
+                          {test.testName}
+                        </h3>
+                        {getStatusIcon(test.status)}
+                        <span className="text-sm text-gray-300">
+                          {test.status}
+                        </span>
+                      </header>
 
-                        {/* 分页 */}
-                        {totalPages > 1 && (
-                            <div className="flex items-center justify-between mt-6">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm text-gray-400">每页显示:</span>
-                                    <select
-                                        value={pageSize}
-                                        onChange={(e) => setPageSize(Number(e.target.value))}
-                                        className="px-2 py-1 bg-gray-700/50 border border-gray-600/40 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        <option value={5}>5</option>
-                                        <option value={10}>10</option>
-                                        <option value={20}>20</option>
-                                        <option value={50}>50</option>
-                                    </select>
-                                </div>
-
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                                        disabled={currentPage === 1}
-                                        className="px-3 py-1 bg-gray-700/50 border border-gray-600/40 rounded text-white text-sm hover:bg-gray-600/50 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        上一页
-                                    </button>
-
-                                    <span className="text-sm text-gray-400">
-                                        第 {currentPage} 页，共 {totalPages} 页
-                                    </span>
-
-                                    <button
-                                        onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                                        disabled={currentPage === totalPages}
-                                        className="px-3 py-1 bg-gray-700/50 border border-gray-600/40 rounded text-white text-sm hover:bg-gray-600/50 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        下一页
-                                    </button>
-                                </div>
-                            </div>
+                      <div className="test-record-meta">
+                        <span className="test-record-url">{test.url}</span>
+                        <span>{formatDate(test.startTime)}</span>
+                        <span>耗时: {formatDuration(test.duration)}</span>
+                        {test.overallScore !== undefined && (
+                          <span>分数: {formatScore(test.overallScore)}</span>
                         )}
-                    </>
-                )}
-            </div>
+                      </div>
 
-            {/* 删除确认对话框 */}
-            <DeleteConfirmDialog
-                isOpen={deleteDialog.isOpen}
-                title={deleteDialog.type === 'single' ? '删除测试记录' : '批量删除测试记录'}
-                message={
-                    deleteDialog.type === 'single'
-                        ? `确定要删除测试记录 "${deleteDialog.recordName}" 吗？`
-                        : `确定要删除选中的 ${selectedRecords.size} 条测试记录吗？`
-                }
-                confirmText="删除"
-                cancelText="取消"
-                isLoading={deleteDialog.isLoading}
-                onConfirm={confirmDelete}
-                onCancel={cancelDelete}
-                variant="danger"
-            />
+                      {test.tags && test.tags.length > 0 && (
+                        <div className="test-record-tags">
+                          {test.tags.map((tag, index) => (
+                            <span
+                              key={index}
+                              className="test-record-tag"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
 
-            {/* 导出模态框 */}
-            <ExportModal
-                isOpen={isExportModalOpen}
-                onClose={() => setIsExportModalOpen(false)}
-                data={records}
-                filename={`${testType}-test-history`}
-                title={`导出${getTestTypeName(testType)}历史`}
-            />
-        </div>
-    );
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          // 查看详情逻辑
+                          window.open(`/test-result/${test.id}`, '_blank');
+                        }}
+                        className="p-2 text-gray-400 hover:text-blue-400 rounded-lg hover:bg-blue-500/10"
+                        title="查看详情"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+
+                      {test.reportUrl && (
+                        <button
+                          type="button"
+                          onClick={() => window.open(test.reportUrl, '_blank')}
+                          className="p-2 text-gray-400 hover:text-green-400 rounded-lg hover:bg-green-500/10"
+                          title="下载报告"
+                        >
+                          <Download className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  </article>
+                </li>
+              ))}
+            </ul>
+
+            {/* 分页 */}
+            {pagination.totalPages > 1 && (
+              <div className="test-pagination-container">
+                <div className="test-pagination-info">
+                  显示 {((pagination.page - 1) * pagination.limit) + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)}
+                  / 共 {pagination.total} 条记录
+                </div>
+
+                <div className="test-pagination-controls">
+                  <button
+                    type="button"
+                    onClick={() => handlePageChange(pagination.page - 1)}
+                    disabled={!pagination.hasPrev}
+                    className="test-pagination-button"
+                  >
+                    上一页
+                  </button>
+
+                  <span className="test-pagination-current">
+                    第 {pagination.page} / {pagination.totalPages} 页
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={() => handlePageChange(pagination.page + 1)}
+                    disabled={!pagination.hasNext}
+                    className="test-pagination-button"
+                  >
+                    下一页
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </section>
+    </section>
+  );
 };
 
-export default UnifiedTestHistory;
+export default TestHistory;

@@ -22,7 +22,7 @@ import './services/apiErrorInterceptor';
 import './services/errorService';
 
 // 增强的系统服务导入
-import { enhancedConfigManager } from './config/EnhancedConfigManager';
+import { enhancedConfigManager } from './config/ConfigManager';
 import { lazyLoadManager } from './utils/LazyLoadManager';
 import { performanceMonitor } from './utils/performanceMonitor';
 
