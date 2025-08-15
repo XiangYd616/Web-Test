@@ -16,10 +16,12 @@ const { formatValidationErrors, createPagination, ERROR_CODES } = require('../..
 const seoEngine = require('../../../engines/seo');
 const performanceEngine = require('../../../engines/performance');
 const securityEngine = require('../../../engines/security');
+const stressEngine = require('../../../engines/stress');
 const apiEngine = require('../../../engines/api');
 const compatibilityEngine = require('../../../engines/compatibility');
-const accessibilityEngine = require('../../../routes/accessibility.js');
-const stressEngine = require('../../../engines/stress');
+const uxEngine = require('../../../engines/ux');
+const infrastructureEngine = require('../../../engines/infrastructure');
+const websiteEngine = require('../../../engines/website');
 
 const router = express.Router();
 
@@ -193,7 +195,7 @@ const startTestEngine = async (testType, testId, url, config = {}) => {
         return await seoEngine.startTest(testId, url, config);
 
       case TEST_TYPES.PERFORMANCE:
-        return await performanceEngine.startTest(testId, url, config);
+        return await performanceEngine.runPerformanceTest(config, testId);
 
       case TEST_TYPES.SECURITY:
         return await securityEngine.startTest(testId, url, config);
