@@ -331,7 +331,7 @@ function optimizeGitignore() {
   const essentialIgnores = [
     '# Dependencies',
     'node_modules/',
-    'server/node_modules/',
+    'backend/node_modules/',
     '',
     '# Build outputs',
     'dist/',

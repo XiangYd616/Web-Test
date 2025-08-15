@@ -61,8 +61,8 @@ class ApiTypeValidator {
     console.log('🌐 扫描API端点...');
 
     const routeDirectories = [
-      'server/routes',
-      'server/api/v1/routes'
+      'backend/routes',
+      'backend/api/v1/routes'
     ];
 
     routeDirectories.forEach(dir => {

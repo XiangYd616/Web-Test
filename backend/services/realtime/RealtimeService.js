@@ -11,18 +11,37 @@ class RealtimeService {
     this.testProgress = new Map(); // 存储测试进度
     this.messageQueue = []; // 消息队列
     this.isProcessingQueue = false;
-    
+    this.rooms = new Map(); // 房间管理
+    this.notifications = new Map(); // 通知管理
+
     // 配置选项
     this.options = {
       maxQueueSize: 1000,
       batchSize: 10,
       processInterval: 100, // 100ms
       retryAttempts: 3,
-      retryDelay: 1000
+      retryDelay: 1000,
+      heartbeatInterval: 30000, // 30秒心跳
+      cleanupInterval: 300000 // 5分钟清理
     };
-    
+
+    // 消息类型定义
+    this.messageTypes = {
+      TEST_STARTED: 'test_started',
+      TEST_PROGRESS: 'test_progress',
+      TEST_COMPLETED: 'test_completed',
+      TEST_FAILED: 'test_failed',
+      DATA_UPDATED: 'data_updated',
+      NOTIFICATION: 'notification',
+      SYSTEM_STATUS: 'system_status',
+      USER_ACTIVITY: 'user_activity'
+    };
+
     // 启动消息队列处理
     this.startQueueProcessor();
+
+    // 启动定期清理
+    this.startCleanupProcess();
   }
 
   /**
@@ -31,7 +50,7 @@ class RealtimeService {
   async subscribeToTest(userId, testId, socketId = null) {
     try {
       const subscriptionKey = `${userId}:${testId}`;
-      
+
       // 存储订阅信息
       this.subscribers.set(subscriptionKey, {
         userId,
@@ -40,22 +59,22 @@ class RealtimeService {
         subscribedAt: new Date(),
         lastUpdate: null
       });
-      
+
       // 缓存订阅信息
       await this.cache.set('temporary', `subscription:${subscriptionKey}`, {
         userId,
         testId,
         subscribedAt: new Date().toISOString()
       }, 24 * 60 * 60); // 24小时过期
-      
+
       console.log(`🔔 用户 ${userId} 订阅测试进度: ${testId}`);
-      
+
       // 如果测试已有进度，立即发送
       const currentProgress = this.testProgress.get(testId);
       if (currentProgress) {
         await this.sendTestProgress(testId, currentProgress);
       }
-      
+
       return true;
     } catch (error) {
       console.error('订阅测试进度失败:', error);
@@ -69,15 +88,15 @@ class RealtimeService {
   async unsubscribeFromTest(userId, testId) {
     try {
       const subscriptionKey = `${userId}:${testId}`;
-      
+
       // 删除订阅信息
       this.subscribers.delete(subscriptionKey);
-      
+
       // 删除缓存
       await this.cache.delete('temporary', `subscription:${subscriptionKey}`);
-      
+
       console.log(`🔕 用户 ${userId} 取消订阅测试进度: ${testId}`);
-      
+
       return true;
     } catch (error) {
       console.error('取消订阅测试进度失败:', error);
@@ -95,18 +114,18 @@ class RealtimeService {
       if (!validatedProgress) {
         throw new Error('无效的进度数据');
       }
-      
+
       // 存储进度
       this.testProgress.set(testId, validatedProgress);
-      
+
       // 缓存进度
       await this.cache.set('temporary', `progress:${testId}`, validatedProgress, 60 * 60); // 1小时过期
-      
+
       // 发送进度更新
       await this.sendTestProgress(testId, validatedProgress);
-      
+
       console.log(`📊 测试进度更新: ${testId} - ${validatedProgress.percentage}%`);
-      
+
       return true;
     } catch (error) {
       console.error('更新测试进度失败:', error);
@@ -121,15 +140,15 @@ class RealtimeService {
     try {
       // 通过Socket.IO广播
       this.socketManager.broadcastTestProgress(testId, progress);
-      
+
       // 找到所有订阅者并发送个人消息
       const subscribers = Array.from(this.subscribers.entries())
         .filter(([key, sub]) => sub.testId === testId);
-      
+
       for (const [key, subscription] of subscribers) {
         // 更新最后更新时间
         subscription.lastUpdate = new Date();
-        
+
         // 发送个人消息
         const sent = this.socketManager.sendToUser(subscription.userId, 'test:progress_update', {
           testId,
@@ -139,7 +158,7 @@ class RealtimeService {
             lastUpdate: subscription.lastUpdate
           }
         });
-        
+
         if (!sent) {
           // 如果发送失败，加入重试队列
           this.addToQueue('test:progress_update', {
@@ -149,7 +168,7 @@ class RealtimeService {
           });
         }
       }
-      
+
       return true;
     } catch (error) {
       console.error('发送测试进度失败:', error);
@@ -167,21 +186,21 @@ class RealtimeService {
       if (!validatedResult) {
         throw new Error('无效的测试结果');
       }
-      
+
       // 通过Socket.IO广播
       this.socketManager.broadcastTestComplete(testId, validatedResult);
-      
+
       // 发送个人通知
       const subscribers = Array.from(this.subscribers.entries())
         .filter(([key, sub]) => sub.testId === testId);
-      
+
       for (const [key, subscription] of subscribers) {
         const sent = this.socketManager.sendToUser(subscription.userId, 'test:completed', {
           testId,
           result: validatedResult,
           completedAt: new Date().toISOString()
         });
-        
+
         if (!sent) {
           this.addToQueue('test:completed', {
             userId: subscription.userId,
@@ -189,17 +208,17 @@ class RealtimeService {
             result: validatedResult
           });
         }
-        
+
         // 自动取消订阅
         await this.unsubscribeFromTest(subscription.userId, testId);
       }
-      
+
       // 清理进度数据
       this.testProgress.delete(testId);
       await this.cache.delete('temporary', `progress:${testId}`);
-      
+
       console.log(`✅ 测试完成通知已发送: ${testId}`);
-      
+
       return true;
     } catch (error) {
       console.error('发送测试完成通知失败:', error);
@@ -217,23 +236,23 @@ class RealtimeService {
         code: error.code || 'TEST_FAILED',
         timestamp: new Date().toISOString()
       };
-      
+
       // 通过Socket.IO广播
       this.socketManager.io.to(`test:${testId}`).emit('test:failed', {
         testId,
         error: errorInfo
       });
-      
+
       // 发送个人通知
       const subscribers = Array.from(this.subscribers.entries())
         .filter(([key, sub]) => sub.testId === testId);
-      
+
       for (const [key, subscription] of subscribers) {
         const sent = this.socketManager.sendToUser(subscription.userId, 'test:failed', {
           testId,
           error: errorInfo
         });
-        
+
         if (!sent) {
           this.addToQueue('test:failed', {
             userId: subscription.userId,
@@ -241,17 +260,17 @@ class RealtimeService {
             error: errorInfo
           });
         }
-        
+
         // 自动取消订阅
         await this.unsubscribeFromTest(subscription.userId, testId);
       }
-      
+
       // 清理进度数据
       this.testProgress.delete(testId);
       await this.cache.delete('temporary', `progress:${testId}`);
-      
+
       console.log(`❌ 测试失败通知已发送: ${testId}`);
-      
+
       return true;
     } catch (error) {
       console.error('发送测试失败通知失败:', error);
@@ -275,12 +294,12 @@ class RealtimeService {
         expiresAt: options.expiresAt || null,
         timestamp: new Date().toISOString()
       };
-      
+
       // 如果是持久化通知，存储到缓存
       if (notification.persistent) {
         await this.cache.set('temporary', `notification:${notification.id}`, notification, 24 * 60 * 60);
       }
-      
+
       // 发送通知
       if (notification.targetUsers) {
         // 发送给特定用户
@@ -302,9 +321,9 @@ class RealtimeService {
         // 广播给所有用户
         this.socketManager.broadcastSystemNotification(notification.message, notification.level);
       }
-      
+
       console.log(`📢 系统通知已发送: ${notification.message}`);
-      
+
       return notification.id;
     } catch (error) {
       console.error('发送系统通知失败:', error);
@@ -319,10 +338,10 @@ class RealtimeService {
     try {
       // 从缓存获取持久化通知
       const notifications = [];
-      
+
       // 这里可以实现更复杂的通知获取逻辑
       // 例如从数据库获取用户的历史通知
-      
+
       return notifications;
     } catch (error) {
       console.error('获取用户通知失败:', error);
@@ -338,7 +357,7 @@ class RealtimeService {
       console.warn('消息队列已满，丢弃最旧的消息');
       this.messageQueue.shift();
     }
-    
+
     this.messageQueue.push({
       event,
       data,
@@ -355,28 +374,28 @@ class RealtimeService {
     if (this.isProcessingQueue) {
       return;
     }
-    
+
     this.isProcessingQueue = true;
-    
+
     const processQueue = async () => {
       if (this.messageQueue.length === 0) {
         setTimeout(processQueue, this.options.processInterval);
         return;
       }
-      
+
       const batch = this.messageQueue.splice(0, this.options.batchSize);
       const now = new Date();
-      
+
       for (const message of batch) {
         if (message.nextRetry > now) {
           // 还没到重试时间，放回队列
           this.messageQueue.unshift(message);
           continue;
         }
-        
+
         try {
           let success = false;
-          
+
           switch (message.event) {
             case 'test:progress_update':
             case 'test:completed':
@@ -387,14 +406,14 @@ class RealtimeService {
               success = this.socketManager.sendToUser(message.data.userId, message.event, message.data.notification);
               break;
           }
-          
+
           if (!success) {
             throw new Error('消息发送失败');
           }
-          
+
         } catch (error) {
           message.attempts++;
-          
+
           if (message.attempts < this.options.retryAttempts) {
             // 重试
             message.nextRetry = new Date(now.getTime() + this.options.retryDelay * message.attempts);
@@ -404,10 +423,10 @@ class RealtimeService {
           }
         }
       }
-      
+
       setTimeout(processQueue, this.options.processInterval);
     };
-    
+
     processQueue();
   }
 
@@ -418,7 +437,7 @@ class RealtimeService {
     if (!progress || typeof progress !== 'object') {
       return null;
     }
-    
+
     const validated = {
       percentage: Math.max(0, Math.min(100, progress.percentage || 0)),
       stage: progress.stage || 'unknown',
@@ -426,7 +445,7 @@ class RealtimeService {
       details: progress.details || {},
       timestamp: new Date().toISOString()
     };
-    
+
     return validated;
   }
 
@@ -437,7 +456,7 @@ class RealtimeService {
     if (!result || typeof result !== 'object') {
       return null;
     }
-    
+
     return {
       testId: result.testId,
       status: result.status || 'completed',
@@ -467,7 +486,7 @@ class RealtimeService {
     try {
       const now = new Date();
       const expireTime = 24 * 60 * 60 * 1000; // 24小时
-      
+
       // 清理过期订阅
       for (const [key, subscription] of this.subscribers.entries()) {
         if (now - subscription.subscribedAt > expireTime) {
@@ -475,7 +494,7 @@ class RealtimeService {
           await this.cache.delete('temporary', `subscription:${key}`);
         }
       }
-      
+
       // 清理过期进度
       for (const [testId, progress] of this.testProgress.entries()) {
         if (now - new Date(progress.timestamp) > expireTime) {
@@ -483,7 +502,7 @@ class RealtimeService {
           await this.cache.delete('temporary', `progress:${testId}`);
         }
       }
-      
+
       console.log('🧹 实时服务数据清理完成');
     } catch (error) {
       console.error('清理实时服务数据失败:', error);
@@ -491,24 +510,316 @@ class RealtimeService {
   }
 
   /**
+   * 推送数据更新通知
+   */
+  async pushDataUpdate(dataType, operation, data, userId = null) {
+    try {
+      const message = {
+        type: this.messageTypes.DATA_UPDATED,
+        dataType,
+        operation,
+        data,
+        timestamp: new Date().toISOString()
+      };
+
+      // 添加到消息队列
+      this.addToQueue({
+        type: 'broadcast',
+        channel: `data:${dataType}`,
+        message,
+        userId
+      });
+
+      console.log(`📊 推送数据更新: ${dataType} - ${operation}`);
+    } catch (error) {
+      console.error('推送数据更新失败:', error);
+    }
+  }
+
+  /**
+   * 推送系统通知
+   */
+  async pushNotification(notification) {
+    try {
+      const message = {
+        type: this.messageTypes.NOTIFICATION,
+        notification: {
+          id: this.generateNotificationId(),
+          ...notification,
+          timestamp: new Date().toISOString()
+        }
+      };
+
+      // 存储通知
+      this.notifications.set(message.notification.id, message.notification);
+
+      // 推送通知
+      if (notification.userId) {
+        this.addToQueue({
+          type: 'user',
+          userId: notification.userId,
+          message
+        });
+      } else {
+        this.addToQueue({
+          type: 'broadcast',
+          channel: 'notifications',
+          message
+        });
+      }
+
+      console.log(`🔔 推送通知: ${notification.title}`);
+    } catch (error) {
+      console.error('推送通知失败:', error);
+    }
+  }
+
+  /**
+   * 推送系统状态更新
+   */
+  async pushSystemStatus(status) {
+    try {
+      const message = {
+        type: this.messageTypes.SYSTEM_STATUS,
+        status,
+        timestamp: new Date().toISOString()
+      };
+
+      this.addToQueue({
+        type: 'broadcast',
+        channel: 'system',
+        message
+      });
+
+      console.log(`⚡ 推送系统状态: ${status.type}`);
+    } catch (error) {
+      console.error('推送系统状态失败:', error);
+    }
+  }
+
+  /**
+   * 推送用户活动
+   */
+  async pushUserActivity(userId, activity) {
+    try {
+      const message = {
+        type: this.messageTypes.USER_ACTIVITY,
+        userId,
+        activity,
+        timestamp: new Date().toISOString()
+      };
+
+      this.addToQueue({
+        type: 'broadcast',
+        channel: 'user_activity',
+        message,
+        excludeUserId: userId
+      });
+
+      console.log(`👤 推送用户活动: ${userId} - ${activity.type}`);
+    } catch (error) {
+      console.error('推送用户活动失败:', error);
+    }
+  }
+
+  /**
+   * 创建协作房间
+   */
+  async createRoom(roomId, options = {}) {
+    try {
+      const room = {
+        id: roomId,
+        name: options.name || roomId,
+        type: options.type || 'collaboration',
+        members: new Set(),
+        createdAt: new Date(),
+        lastActivity: new Date(),
+        settings: options.settings || {}
+      };
+
+      this.rooms.set(roomId, room);
+
+      // 缓存房间信息
+      await this.cache.set('temporary', `room:${roomId}`, room, 24 * 60 * 60);
+
+      console.log(`🏠 创建协作房间: ${roomId}`);
+      return room;
+    } catch (error) {
+      console.error('创建协作房间失败:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 加入协作房间
+   */
+  async joinRoom(userId, roomId) {
+    try {
+      let room = this.rooms.get(roomId);
+
+      if (!room) {
+        // 尝试从缓存加载房间
+        const cachedRoom = await this.cache.get('temporary', `room:${roomId}`);
+        if (cachedRoom) {
+          room = {
+            ...cachedRoom,
+            members: new Set(cachedRoom.members || [])
+          };
+          this.rooms.set(roomId, room);
+        } else {
+          // 创建新房间
+          room = await this.createRoom(roomId);
+        }
+      }
+
+      room.members.add(userId);
+      room.lastActivity = new Date();
+
+      // 通知房间内其他成员
+      this.addToQueue({
+        type: 'room',
+        roomId,
+        message: {
+          type: 'user_joined',
+          userId,
+          timestamp: new Date().toISOString()
+        },
+        excludeUserId: userId
+      });
+
+      console.log(`👥 用户 ${userId} 加入房间 ${roomId}`);
+      return room;
+    } catch (error) {
+      console.error('加入协作房间失败:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 离开协作房间
+   */
+  async leaveRoom(userId, roomId) {
+    try {
+      const room = this.rooms.get(roomId);
+      if (!room) return;
+
+      room.members.delete(userId);
+      room.lastActivity = new Date();
+
+      // 通知房间内其他成员
+      this.addToQueue({
+        type: 'room',
+        roomId,
+        message: {
+          type: 'user_left',
+          userId,
+          timestamp: new Date().toISOString()
+        },
+        excludeUserId: userId
+      });
+
+      // 如果房间为空，删除房间
+      if (room.members.size === 0) {
+        this.rooms.delete(roomId);
+        await this.cache.delete('temporary', `room:${roomId}`);
+        console.log(`🗑️ 删除空房间: ${roomId}`);
+      }
+
+      console.log(`🚪 用户 ${userId} 离开房间 ${roomId}`);
+    } catch (error) {
+      console.error('离开协作房间失败:', error);
+    }
+  }
+
+  /**
+   * 启动定期清理
+   */
+  startCleanupProcess() {
+    setInterval(async () => {
+      await this.cleanupData();
+      await this.cleanupRooms();
+      await this.cleanupNotifications();
+    }, this.options.cleanupInterval);
+  }
+
+  /**
+   * 清理房间
+   */
+  async cleanupRooms() {
+    try {
+      const expireTime = 24 * 60 * 60 * 1000; // 24小时
+      const now = new Date();
+
+      for (const [roomId, room] of this.rooms) {
+        if (now - room.lastActivity > expireTime || room.members.size === 0) {
+          this.rooms.delete(roomId);
+          await this.cache.delete('temporary', `room:${roomId}`);
+          console.log(`🧹 清理过期房间: ${roomId}`);
+        }
+      }
+    } catch (error) {
+      console.error('清理房间失败:', error);
+    }
+  }
+
+  /**
+   * 清理通知
+   */
+  async cleanupNotifications() {
+    try {
+      const expireTime = 7 * 24 * 60 * 60 * 1000; // 7天
+      const now = new Date();
+
+      for (const [notificationId, notification] of this.notifications) {
+        if (now - new Date(notification.timestamp) > expireTime) {
+          this.notifications.delete(notificationId);
+        }
+      }
+    } catch (error) {
+      console.error('清理通知失败:', error);
+    }
+  }
+
+  /**
+   * 生成通知ID
+   */
+  generateNotificationId() {
+    return `notification_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  /**
+   * 获取服务统计信息
+   */
+  getStats() {
+    return {
+      subscribers: this.subscribers.size,
+      activeTests: this.testProgress.size,
+      queueSize: this.messageQueue.length,
+      rooms: this.rooms.size,
+      notifications: this.notifications.size,
+      isProcessingQueue: this.isProcessingQueue
+    };
+  }
+
+  /**
    * 关闭服务
    */
   async shutdown() {
     console.log('🔌 关闭实时通信服务...');
-    
+
     this.isProcessingQueue = false;
-    
+
     // 通知所有用户服务即将关闭
     await this.sendSystemNotification('系统维护中，连接即将断开', {
       level: 'warning',
       category: 'maintenance'
     });
-    
+
     // 清理数据
     this.subscribers.clear();
     this.testProgress.clear();
     this.messageQueue.length = 0;
-    
+
     console.log('✅ 实时通信服务已关闭');
   }
 }

@@ -232,9 +232,9 @@ interface ComprehensiveTestSuite {
 - `src/services/accessibilityService.ts` - 前端可访问性服务
 
 #### 🔧 保留的后端支持
-- `server/routes/accessibility.js` - API路由支持
-- `server/services/accessibilityService.js` - 后端服务
-- `server/engines/accessibility/` - 后端分析引擎
+- `backend/routes/accessibility.js` - API路由支持
+- `backend/services/accessibilityService.js` - 后端服务
+- `backend/engines/accessibility/` - 后端分析引擎
 - `accessibility_test_details` 数据库表 - 数据存储
 
 #### 📍 功能整合位置

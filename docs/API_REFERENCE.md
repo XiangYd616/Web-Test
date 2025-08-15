@@ -560,7 +560,92 @@ curl -X POST http://localhost:3001/api/v1/test/create \
   }'
 ```
 
+## 新增功能API
+
+### 高级分析API
+
+#### 获取趋势分析
+```http
+GET /api/v1/analytics/trends
+```
+
+#### 获取对比分析
+```http
+GET /api/v1/analytics/compare
+```
+
+### 批量操作API
+
+#### 创建批量测试
+```http
+POST /api/v1/batch/tests
+```
+
+#### 批量导出数据
+```http
+POST /api/v1/batch/export
+```
+
+### 高级安全测试API
+
+#### 执行高级安全测试
+```http
+POST /api/v1/security/advanced-test
+```
+
+#### 快速安全检查
+```http
+POST /api/v1/security/quick-check
+```
+
+### 自动化报告API
+
+#### 获取定时报告列表
+```http
+GET /api/v1/reports/scheduled
+```
+
+#### 创建定时报告
+```http
+POST /api/v1/reports/scheduled
+```
+
+#### 立即执行报告
+```http
+POST /api/v1/reports/scheduled/{reportId}/execute
+```
+
+### CI/CD集成API
+
+#### 获取支持的平台
+```http
+GET /api/v1/integrations/cicd/platforms
+```
+
+#### 创建CI/CD集成
+```http
+POST /api/v1/integrations/cicd
+```
+
+#### 触发集成
+```http
+POST /api/v1/integrations/cicd/{integrationId}/trigger
+```
+
+#### Webhook回调
+```http
+POST /api/v1/integrations/webhook/{platform}
+```
+
 ## 更新日志
+
+### v1.1.0 (2024-08-15)
+- 新增高级分析功能API
+- 新增批量操作API
+- 新增高级安全测试API
+- 新增自动化报告API
+- 新增CI/CD集成API
+- 新增实时协作WebSocket API
 
 ### v1.0.0 (2024-01-01)
 - 初始API版本发布

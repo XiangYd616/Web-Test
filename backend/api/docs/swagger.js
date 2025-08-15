@@ -415,10 +415,10 @@ const options = {
     ]
   },
   apis: [
-    './server/api/v1/routes/*.js', // 路由文件路径
-    './server/api/v1/index.js',    // 主API文件
-    './server/routes/*.js',        // 主要路由文件
-    './server/api/docs/*.js'       // API文档定义
+    './backend/api/v1/routes/*.js', // 路由文件路径
+    './backend/api/v1/index.js',    // 主API文件
+    './backend/routes/*.js',        // 主要路由文件
+    './backend/api/docs/*.js'       // API文档定义
   ]
 };
 

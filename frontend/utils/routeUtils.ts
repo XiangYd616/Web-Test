@@ -27,6 +27,7 @@ export const routes: RouteInfo[] = [
   { path: '/data-management', name: '数据管理', icon: 'FolderOpen', requiresAuth: true },
   { path: '/statistics', name: '统计分析', icon: 'BarChart', requiresAuth: true },
   { path: '/analytics', name: '高级分析', icon: 'TrendingUp', requiresAuth: true },
+  { path: '/advanced-analytics', name: '深度分析', icon: 'BarChart3', requiresAuth: true },
   { path: '/test-history', name: '测试历史', icon: 'History', requiresAuth: false },
   { path: '/reports', name: '测试报告', icon: 'FileText', requiresAuth: true },
 

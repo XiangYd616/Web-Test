@@ -171,7 +171,7 @@ const loggerConfig = {
 ### 后端日志配置
 
 ```javascript
-// server/utils/logger.js
+// backend/utils/logger.js
 const LOG_LEVELS = {
   ERROR: 0,
   WARN: 1,

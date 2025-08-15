@@ -8,6 +8,8 @@ const { asyncHandler } = require('../middleware/errorHandler');
 const Logger = require('../utils/logger');
 const path = require('path');
 const fs = require('fs').promises;
+const { automatedReportingService } = require('../services/reporting/AutomatedReportingService');
+const { performanceBenchmarkService } = require('../services/performance/PerformanceBenchmarkService');
 
 const router = express.Router();
 
@@ -362,5 +364,302 @@ function generateMockReportContent(report) {
       return `Mock ${report.format.toUpperCase()} report content for ${report.name}`;
   }
 }
+
+// ==================== 自动化报告功能 ====================
+
+/**
+ * 获取定时报告列表
+ */
+router.get('/scheduled', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const reports = automatedReportingService.getScheduledReports();
+
+    res.json({
+      success: true,
+      data: reports
+    });
+  } catch (error) {
+    Logger.error('获取定时报告列表失败', error);
+    res.status(500).json({
+      success: false,
+      message: '获取定时报告列表失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 创建定时报告
+ */
+router.post('/scheduled', authMiddleware, asyncHandler(async (req, res) => {
+  const {
+    name,
+    description,
+    schedule,
+    reportType,
+    dataSource,
+    filters = {},
+    template = 'standard',
+    recipients = [],
+    format = 'pdf',
+    enabled = true
+  } = req.body;
+
+  if (!name || !schedule || !reportType) {
+    return res.status(400).json({
+      success: false,
+      message: '缺少必要参数: name, schedule, reportType'
+    });
+  }
+
+  try {
+    const reportId = await automatedReportingService.createScheduledReport({
+      name,
+      description,
+      schedule,
+      reportType,
+      dataSource,
+      filters,
+      template,
+      recipients,
+      format,
+      enabled,
+      createdBy: req.user.id
+    });
+
+    Logger.info(`创建定时报告成功: ${name}`, { reportId, userId: req.user.id });
+
+    res.json({
+      success: true,
+      data: { reportId },
+      message: '定时报告创建成功'
+    });
+  } catch (error) {
+    Logger.error('创建定时报告失败', error, { userId: req.user.id });
+    res.status(500).json({
+      success: false,
+      message: '创建定时报告失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 立即执行报告
+ */
+router.post('/scheduled/:reportId/execute', authMiddleware, asyncHandler(async (req, res) => {
+  const { reportId } = req.params;
+
+  try {
+    await automatedReportingService.executeReportNow(reportId);
+
+    Logger.info(`立即执行报告: ${reportId}`, { userId: req.user.id });
+
+    res.json({
+      success: true,
+      message: '报告执行已启动'
+    });
+  } catch (error) {
+    Logger.error('执行报告失败', error, { reportId, userId: req.user.id });
+    res.status(500).json({
+      success: false,
+      message: '执行报告失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 获取报告模板列表
+ */
+router.get('/templates', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const templates = [
+      {
+        id: 'standard',
+        name: '标准报告模板',
+        description: '包含基本的测试结果和统计信息',
+        features: ['测试摘要', '结果统计', '趋势图表', '基础建议']
+      },
+      {
+        id: 'simple',
+        name: '简洁报告模板',
+        description: '简化的报告格式，突出关键指标',
+        features: ['核心指标', '简要摘要']
+      },
+      {
+        id: 'detailed',
+        name: '详细报告模板',
+        description: '全面的报告内容，包含详细分析',
+        features: ['完整测试结果', '详细分析', '高级图表', '深度建议', '对比分析']
+      }
+    ];
+
+    res.json({
+      success: true,
+      data: templates
+    });
+  } catch (error) {
+    Logger.error('获取报告模板失败', error);
+    res.status(500).json({
+      success: false,
+      message: '获取报告模板失败',
+      error: error.message
+    });
+  }
+}));
+
+// ==================== 性能基准测试功能 ====================
+
+/**
+ * 创建性能基准测试
+ */
+router.post('/performance/benchmarks', authMiddleware, asyncHandler(async (req, res) => {
+  const {
+    name,
+    description,
+    type,
+    target,
+    metrics,
+    iterations = 5,
+    warmupRuns = 2,
+    options = {}
+  } = req.body;
+
+  if (!name || !type || !metrics) {
+    return res.status(400).json({
+      success: false,
+      message: '缺少必要参数: name, type, metrics'
+    });
+  }
+
+  try {
+    const benchmarkId = await performanceBenchmarkService.createBenchmark({
+      name,
+      description,
+      type,
+      target,
+      metrics,
+      iterations,
+      warmupRuns,
+      options,
+      createdBy: req.user.id
+    });
+
+    Logger.info(`创建性能基准测试成功: ${name}`, { benchmarkId, userId: req.user.id });
+
+    res.json({
+      success: true,
+      data: { benchmarkId },
+      message: '性能基准测试创建成功'
+    });
+  } catch (error) {
+    Logger.error('创建性能基准测试失败', error, { userId: req.user.id });
+    res.status(500).json({
+      success: false,
+      message: '创建性能基准测试失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 执行性能基准测试
+ */
+router.post('/performance/benchmarks/:benchmarkId/run', authMiddleware, asyncHandler(async (req, res) => {
+  const { benchmarkId } = req.params;
+  const options = req.body;
+
+  try {
+    const testResult = await performanceBenchmarkService.runBenchmark(benchmarkId, {
+      ...options,
+      executedBy: req.user.id
+    });
+
+    Logger.info(`执行性能基准测试: ${benchmarkId}`, { testId: testResult.id, userId: req.user.id });
+
+    res.json({
+      success: true,
+      data: testResult,
+      message: '性能基准测试执行成功'
+    });
+  } catch (error) {
+    Logger.error('执行性能基准测试失败', error, { benchmarkId, userId: req.user.id });
+    res.status(500).json({
+      success: false,
+      message: '执行性能基准测试失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 设置性能基线
+ */
+router.post('/performance/baselines', authMiddleware, asyncHandler(async (req, res) => {
+  const { benchmarkId, testResultId } = req.body;
+
+  if (!benchmarkId || !testResultId) {
+    return res.status(400).json({
+      success: false,
+      message: '缺少必要参数: benchmarkId, testResultId'
+    });
+  }
+
+  try {
+    const baseline = await performanceBenchmarkService.setBaseline(benchmarkId, testResultId);
+
+    Logger.info(`设置性能基线: ${benchmarkId}`, { testResultId, userId: req.user.id });
+
+    res.json({
+      success: true,
+      data: baseline,
+      message: '性能基线设置成功'
+    });
+  } catch (error) {
+    Logger.error('设置性能基线失败', error, { benchmarkId, testResultId, userId: req.user.id });
+    res.status(500).json({
+      success: false,
+      message: '设置性能基线失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 生成性能报告
+ */
+router.post('/performance/report', authMiddleware, asyncHandler(async (req, res) => {
+  const {
+    benchmarkIds,
+    timeRange = '30d',
+    includeBaselines = true,
+    includeRecommendations = true
+  } = req.body;
+
+  try {
+    const report = await performanceBenchmarkService.generatePerformanceReport({
+      benchmarkIds,
+      timeRange,
+      includeBaselines,
+      includeRecommendations
+    });
+
+    Logger.info('生成性能报告', { timeRange, userId: req.user.id });
+
+    res.json({
+      success: true,
+      data: report,
+      message: '性能报告生成成功'
+    });
+  } catch (error) {
+    Logger.error('生成性能报告失败', error, { userId: req.user.id });
+    res.status(500).json({
+      success: false,
+      message: '生成性能报告失败',
+      error: error.message
+    });
+  }
+}));
 
 module.exports = router;

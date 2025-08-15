@@ -6,6 +6,7 @@ const express = require('express');
 const { authMiddleware } = require('../middleware/auth');
 const { asyncHandler } = require('../middleware/errorHandler');
 const Logger = require('../utils/logger');
+const { cicdIntegrationService } = require('../services/integration/CICDIntegrationService');
 
 const router = express.Router();
 
@@ -206,5 +207,207 @@ function isValidUrl(string) {
     return false;
   }
 }
+
+// ==================== CI/CD集成功能 ====================
+
+/**
+ * 获取支持的CI/CD平台
+ */
+router.get('/cicd/platforms', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const platforms = cicdIntegrationService.getSupportedPlatforms();
+
+    res.json({
+      success: true,
+      data: platforms
+    });
+  } catch (error) {
+    Logger.error('获取支持的平台失败', error);
+    res.status(500).json({
+      success: false,
+      message: '获取支持的平台失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 创建CI/CD集成
+ */
+router.post('/cicd', authMiddleware, asyncHandler(async (req, res) => {
+  const {
+    name,
+    platform,
+    description,
+    configuration,
+    enabled = true,
+    triggerEvents = ['test_completed', 'test_failed'],
+    webhookSecret
+  } = req.body;
+
+  if (!name || !platform || !configuration) {
+    return res.status(400).json({
+      success: false,
+      message: '缺少必要参数: name, platform, configuration'
+    });
+  }
+
+  try {
+    const integrationId = await cicdIntegrationService.createIntegration({
+      name,
+      platform,
+      description,
+      configuration,
+      enabled,
+      triggerEvents,
+      webhookSecret,
+      createdBy: req.user.id
+    });
+
+    Logger.info(`创建CI/CD集成成功: ${name}`, { integrationId, userId: req.user.id });
+
+    res.json({
+      success: true,
+      data: { integrationId },
+      message: 'CI/CD集成创建成功'
+    });
+  } catch (error) {
+    Logger.error('创建CI/CD集成失败', error, { userId: req.user.id });
+    res.status(500).json({
+      success: false,
+      message: '创建CI/CD集成失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 手动触发CI/CD集成
+ */
+router.post('/cicd/:integrationId/trigger', authMiddleware, asyncHandler(async (req, res) => {
+  const { integrationId } = req.params;
+  const { eventType = 'manual_trigger', data = {} } = req.body;
+
+  try {
+    await cicdIntegrationService.triggerIntegration(integrationId, eventType, {
+      ...data,
+      triggeredBy: req.user.id,
+      triggeredAt: new Date().toISOString()
+    });
+
+    Logger.info(`手动触发CI/CD集成: ${integrationId}`, { eventType, userId: req.user.id });
+
+    res.json({
+      success: true,
+      message: 'CI/CD集成触发成功'
+    });
+  } catch (error) {
+    Logger.error('触发CI/CD集成失败', error, { integrationId, userId: req.user.id });
+    res.status(500).json({
+      success: false,
+      message: '触发CI/CD集成失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 获取CI/CD集成列表
+ */
+router.get('/cicd', authMiddleware, asyncHandler(async (req, res) => {
+  try {
+    const integrations = cicdIntegrationService.getIntegrations();
+
+    res.json({
+      success: true,
+      data: integrations
+    });
+  } catch (error) {
+    Logger.error('获取CI/CD集成列表失败', error);
+    res.status(500).json({
+      success: false,
+      message: '获取CI/CD集成列表失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 处理webhook回调 (不需要认证)
+ */
+router.post('/webhook/:platform', asyncHandler(async (req, res) => {
+  const { platform } = req.params;
+  const payload = req.body;
+  const signature = req.headers['x-hub-signature'] || req.headers['x-gitlab-token'] || req.headers['authorization'];
+
+  try {
+    const result = await cicdIntegrationService.handleWebhook(platform, payload, signature);
+
+    Logger.info(`处理${platform} webhook`, { success: result.success });
+
+    if (result.success) {
+      res.json({ success: true, message: 'Webhook处理成功' });
+    } else {
+      res.status(400).json({ success: false, message: result.error });
+    }
+  } catch (error) {
+    Logger.error('Webhook处理失败', error, { platform });
+    res.status(500).json({
+      success: false,
+      message: 'Webhook处理失败',
+      error: error.message
+    });
+  }
+}));
+
+/**
+ * 获取配置模板
+ */
+router.get('/cicd/templates/:platform', authMiddleware, asyncHandler(async (req, res) => {
+  const { platform } = req.params;
+
+  try {
+    const templates = {
+      'jenkins': {
+        serverUrl: 'https://jenkins.example.com',
+        username: 'your-username',
+        apiToken: 'your-api-token',
+        jobName: 'your-job-name'
+      },
+      'github-actions': {
+        repoOwner: 'your-username',
+        repoName: 'your-repo',
+        token: 'ghp_your-token',
+        workflowFile: 'test-automation.yml'
+      },
+      'gitlab-ci': {
+        gitlabUrl: 'https://gitlab.com',
+        projectId: 'your-project-id',
+        token: 'glpat-your-token',
+        pipelineFile: '.gitlab-ci.yml'
+      }
+    };
+
+    const template = templates[platform];
+    if (!template) {
+      return res.status(404).json({
+        success: false,
+        message: `不支持的平台: ${platform}`
+      });
+    }
+
+    res.json({
+      success: true,
+      data: template
+    });
+  } catch (error) {
+    Logger.error('获取配置模板失败', error);
+    res.status(500).json({
+      success: false,
+      message: '获取配置模板失败',
+      error: error.message
+    });
+  }
+}));
 
 module.exports = router;

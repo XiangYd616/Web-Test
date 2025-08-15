@@ -7,6 +7,10 @@ const express = require('express');
 const router = express.Router();
 const { asyncHandler } = require('../middleware/errorHandler');
 const Logger = require('../utils/logger');
+const { errorMonitoringManager, ERROR_LEVELS, ERROR_TYPES } = require('../src/ErrorMonitoringManager.js');
+
+// 初始化错误监控管理器
+errorMonitoringManager.initialize().catch(console.error);
 
 /**
  * 前端错误报告
@@ -56,6 +60,27 @@ router.post('/report', asyncHandler(async (req, res) => {
   Logger.error('Frontend Error Report', errorReport, {
     source: 'frontend',
     reportId: id
+  });
+
+  // 使用统一错误监控管理器记录
+  await errorMonitoringManager.logError({
+    level: severity === 'critical' ? ERROR_LEVELS.CRITICAL :
+      severity === 'error' ? ERROR_LEVELS.ERROR :
+        severity === 'warning' ? ERROR_LEVELS.WARNING : ERROR_LEVELS.INFO,
+    type: type === 'network' ? ERROR_TYPES.NETWORK :
+      type === 'validation' ? ERROR_TYPES.VALIDATION :
+        type === 'authentication' ? ERROR_TYPES.AUTHENTICATION :
+          ERROR_TYPES.APPLICATION,
+    message,
+    stack,
+    context: { ...context, details, code, errorUrl },
+    userId: req.user?.id,
+    sessionId: req.sessionID,
+    requestId: id,
+    userAgent: userAgent || req.get('User-Agent'),
+    ip: req.ip,
+    url: errorUrl,
+    method: req.method
   });
 
   // 可以在这里添加错误统计、告警等逻辑
@@ -119,18 +144,18 @@ async function processErrorReport(errorReport) {
   try {
     // 1. 错误分类和优先级判断
     const priority = determinePriority(errorReport);
-    
+
     // 2. 错误频率检查
     const frequency = await checkErrorFrequency(errorReport);
-    
+
     // 3. 如果是高频错误或高优先级错误，发送告警
     if (priority === 'high' || frequency > 10) {
       await sendErrorAlert(errorReport, { priority, frequency });
     }
-    
+
     // 4. 更新错误统计
     await updateErrorStats(errorReport);
-    
+
   } catch (processError) {
     Logger.error('Error processing error report', processError, {
       originalErrorId: errorReport.id
@@ -143,23 +168,23 @@ async function processErrorReport(errorReport) {
  */
 function determinePriority(errorReport) {
   const { type, severity, context } = errorReport;
-  
+
   // 关键功能错误
   const criticalPaths = ['/api/auth', '/api/test', '/api/payment'];
   if (context?.url && criticalPaths.some(path => context.url.includes(path))) {
     return 'high';
   }
-  
+
   // 严重程度判断
   if (severity === 'CRITICAL' || severity === 'HIGH') {
     return 'high';
   }
-  
+
   // 错误类型判断
   if (type === 'SERVER' || type === 'AUTHENTICATION') {
     return 'medium';
   }
-  
+
   return 'low';
 }
 
@@ -186,10 +211,10 @@ async function sendErrorAlert(errorReport, metadata) {
       frequency: metadata.frequency,
       timestamp: errorReport.timestamp
     });
-    
+
     // 示例：发送到监控系统
     // await sendToMonitoringSystem(errorReport, metadata);
-    
+
   } catch (alertError) {
     Logger.error('Failed to send error alert', alertError);
   }
@@ -207,7 +232,7 @@ async function updateErrorStats(errorReport) {
       type: errorReport.type,
       severity: errorReport.severity
     });
-    
+
   } catch (statsError) {
     Logger.error('Failed to update error stats', statsError);
   }

@@ -52,7 +52,7 @@ npm run db:reset
 #### 2. 完备数据库管理器 (`complete-database-manager.js`)
 ```bash
 # 查看所有可用命令
-node server/scripts/complete-database-manager.js help
+node backend/scripts/complete-database-manager.js help
 
 # 表管理
 npm run db:tables              # 列出所有表
@@ -85,7 +85,7 @@ npm run db:health
 npm run db:health:detailed
 
 # JSON格式输出
-node server/scripts/health-check.js --json
+node backend/scripts/health-check.js --json
 ```
 
 **检查项目:**
@@ -108,9 +108,9 @@ npm run db:integrity:fix
 npm run db:integrity:report
 
 # 专项检查
-node server/scripts/data-integrity-checker.js --schema-only
-node server/scripts/data-integrity-checker.js --performance-only
-node server/scripts/data-integrity-checker.js --security-only
+node backend/scripts/data-integrity-checker.js --schema-only
+node backend/scripts/data-integrity-checker.js --performance-only
+node backend/scripts/data-integrity-checker.js --security-only
 ```
 
 **检查项目:**
@@ -127,37 +127,37 @@ node server/scripts/data-integrity-checker.js --security-only
 npm run db:migrate
 
 # 查看迁移状态
-node server/scripts/migration-manager.js status
+node backend/scripts/migration-manager.js status
 
 # 创建新迁移
-node server/scripts/migration-manager.js create "add_new_feature"
+node backend/scripts/migration-manager.js create "add_new_feature"
 ```
 
 #### 6. 备份和恢复 (`backup-database.js`, `restore-database.js`)
 ```bash
 # 创建备份
-node server/scripts/backup-database.js
+node backend/scripts/backup-database.js
 
 # 恢复数据
-node server/scripts/restore-database.js --file backup.sql
+node backend/scripts/restore-database.js --file backup.sql
 ```
 
 #### 7. Redis管理
 ```bash
 # 检查Redis连接
-node server/scripts/check-redis.js
+node backend/scripts/check-redis.js
 
 # 监控Redis状态
-node server/scripts/monitor-redis.js
+node backend/scripts/monitor-redis.js
 
 # 清理缓存
-node server/scripts/flush-cache.js
+node backend/scripts/flush-cache.js
 ```
 
 #### 8. 环境验证
 ```bash
 # 验证环境配置
-node server/scripts/validate-env.js
+node backend/scripts/validate-env.js
 ```
 
 ## 📋 完整的NPM脚本命令
@@ -242,7 +242,7 @@ npm run db:integrity
 npm run db:integrity:fix
 
 # 重建索引
-node server/scripts/complete-database-manager.js reindex
+node backend/scripts/complete-database-manager.js reindex
 
 # 清理数据库
 npm run db:vacuum
@@ -306,10 +306,10 @@ npm run db:vacuum
 ### 获取帮助
 ```bash
 # 查看工具帮助
-node server/scripts/init-database.js --help
-node server/scripts/complete-database-manager.js help
-node server/scripts/health-check.js --help
-node server/scripts/data-integrity-checker.js --help
+node backend/scripts/init-database.js --help
+node backend/scripts/complete-database-manager.js help
+node backend/scripts/health-check.js --help
+node backend/scripts/data-integrity-checker.js --help
 ```
 
 ---
@@ -330,7 +330,7 @@ npm run db:init
 npm run db:force-init
 
 # 仅创建表结构
-node server/scripts/init-database.js --no-data
+node backend/scripts/init-database.js --no-data
 
 # 重置数据库（危险操作）
 npm run db:reset
@@ -372,13 +372,13 @@ npm run db:rollback 20231201120000_add_new_feature
 npm run db:backup
 
 # 备份到指定文件
-node server/scripts/backup-database.js -o my_backup.sql
+node backend/scripts/backup-database.js -o my_backup.sql
 
 # 恢复数据库
 npm run db:restore backup.sql
 
 # 强制恢复（不询问确认）
-node server/scripts/restore-database.js backup.sql --force
+node backend/scripts/restore-database.js backup.sql --force
 ```
 
 ## 📁 工具文件说明
@@ -421,7 +421,7 @@ ADMIN_PASSWORD=admin123456
 所有工具都支持通过命令行参数覆盖环境变量：
 
 ```bash
-node server/scripts/init-database.js \
+node backend/scripts/init-database.js \
   --host localhost \
   --port 5432 \
   --db testweb \
@@ -525,13 +525,13 @@ module.exports = {
 npm run db:backup
 
 # 仅备份表结构
-node server/scripts/backup-database.js --schema-only
+node backend/scripts/backup-database.js --schema-only
 
 # 仅备份数据
-node server/scripts/backup-database.js --data-only
+node backend/scripts/backup-database.js --data-only
 
 # 压缩备份
-node server/scripts/backup-database.js --compress
+node backend/scripts/backup-database.js --compress
 ```
 
 ### 恢复选项
@@ -541,10 +541,10 @@ node server/scripts/backup-database.js --compress
 npm run db:restore backup.sql
 
 # 清理后恢复
-node server/scripts/restore-database.js backup.sql --clean
+node backend/scripts/restore-database.js backup.sql --clean
 
 # 强制恢复
-node server/scripts/restore-database.js backup.sql --force
+node backend/scripts/restore-database.js backup.sql --force
 ```
 
 ## 🚨 故障排除
