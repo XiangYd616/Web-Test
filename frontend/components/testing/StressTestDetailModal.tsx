@@ -3,9 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import ExportUtils from '../../utils/exportUtils';
-import ExportModal from '..\ui\ExportModal.tsx';
+import ExportModal from '../ui/ExportModal.tsx';
 
-import './StressTestDetailModal.css';
+// import './StressTestDetailModal.css'; // CSS文件不存在，已注释
 
 interface StressTestDetailModalProps {
   record: any;

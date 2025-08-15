@@ -3,7 +3,7 @@
  * 提供批量测试执行、管理、监控功能
  */
 
-const Logger = require('..\..\middleware\logger.js');
+const Logger = require('../../middleware/logger.js');
 const { v4: uuidv4 } = require('uuid');
 
 class BatchTestingService {

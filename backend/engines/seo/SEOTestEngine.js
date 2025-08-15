@@ -263,7 +263,7 @@ class SEOTestEngine {
         }
 
         // 检查重复词汇
-        const words = title.toLowerCase().split(/\s+/);
+        const words = title.toLowerCase().split(//s+/);
         const duplicates = words.filter((word, index) => words.indexOf(word) !== index);
         if (duplicates.length > 0) {
             analysis.issues.push('标题中存在重复词汇');
@@ -555,8 +555,8 @@ class SEOTestEngine {
      * 分析页面内容
      */
     analyzeContent($) {
-        const bodyText = $('body').text().replace(/\s+/g, ' ').trim();
-        const words = bodyText.split(/\s+/).filter(word => word.length > 0);
+        const bodyText = $('body').text().replace(//s+/g, ' ').trim();
+        const words = bodyText.split(//s+/).filter(word => word.length > 0);
 
         const analysis = {
             wordCount: words.length,
@@ -811,9 +811,9 @@ class SEOTestEngine {
                 analysis.accessible = true;
 
                 // 简单解析sitemap
-                const urlMatches = response.data.match(/<loc>(.*?)<\/loc>/g) || [];
+                const urlMatches = response.data.match(/<loc>(.*?)<//loc>/g) || [];
                 analysis.urls = urlMatches.map(match =>
-                    match.replace(/<\/?loc>/g, '').trim()
+                    match.replace(/<//?loc>/g, '').trim()
                 );
                 analysis.urlCount = analysis.urls.length;
                 analysis.score = 100;
@@ -832,9 +832,9 @@ class SEOTestEngine {
                     const response = await this.axiosInstance.get(sitemapUrl);
 
                     analysis.accessible = true;
-                    const urlMatches = response.data.match(/<loc>(.*?)<\/loc>/g) || [];
+                    const urlMatches = response.data.match(/<loc>(.*?)<//loc>/g) || [];
                     analysis.urls = urlMatches.map(match =>
-                        match.replace(/<\/?loc>/g, '').trim()
+                        match.replace(/<//?loc>/g, '').trim()
                     );
                     analysis.urlCount = analysis.urls.length;
                     analysis.score = 80; // 存在但未声明
@@ -1045,7 +1045,7 @@ class SEOTestEngine {
     calculateReadabilityScore(text) {
         // 简化的可读性评分算法
         const sentences = text.split(/[.!?]+/).length;
-        const words = text.split(/\s+/).length;
+        const words = text.split(//s+/).length;
         const avgWordsPerSentence = words / sentences;
 
         if (avgWordsPerSentence < 15) return 90;
@@ -1059,7 +1059,7 @@ class SEOTestEngine {
         const totalWords = words.length;
 
         words.forEach(word => {
-            const cleanWord = word.toLowerCase().replace(/[^\w]/g, '');
+            const cleanWord = word.toLowerCase().replace(/[^/w]/g, '');
             if (cleanWord.length > 2) {
                 wordCount[cleanWord] = (wordCount[cleanWord] || 0) + 1;
             }
@@ -1083,7 +1083,7 @@ class SEOTestEngine {
     }
 
     parseRobotsDirectives(content) {
-        const lines = content.split('\n');
+        const lines = content.split('/n');
         const directives = [];
 
         lines.forEach(line => {

@@ -1329,7 +1329,7 @@ export class APITestEngine {
     // 生成Schema文档
     config.endpoints.forEach(endpoint => {
       if (endpoint.expectedSchema) {
-        result.documentation.schemas[`${endpoint.method}_${endpoint.path.replace(/\//g, '_')}`] = endpoint.expectedSchema;
+        result.documentation.schemas[`${endpoint.method}_${endpoint.path.replace(////g, '_')}`] = endpoint.expectedSchema;
       }
     });
   }

@@ -9,8 +9,8 @@
 // npm install uuid
 const crypto = require('crypto');
 const uuidv4 = () => crypto.randomUUID();
-const { getPool } = require('..\..\config\database.js');
-const Logger = require('..\..\middleware\logger.js');
+const { getPool } = require('../../config/database.js');
+const Logger = require('../../middleware/logger.js');
 
 // ==================== 配置 ====================
 

@@ -6,8 +6,8 @@
 
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
-const { getPool } = require('..\..\config\database.js');
-const Logger = require('..\..\middleware\logger.js');
+const { getPool } = require('../../config/database.js');
+const Logger = require('../../middleware/logger.js');
 const emailService = require('./emailService');
 
 // ==================== 配置 ====================
@@ -52,8 +52,8 @@ const WEAK_PATTERNS = [
   /^welcome/i,
   /^monkey/i,
   /^dragon/i,
-  /(.)\1{2,}/, // 重复字符
-  /^(.+)\1+$/, // 重复模式
+  /(.)/1{2,}/, // 重复字符
+  /^(.+)/1+$/, // 重复模式
   /^(012|123|234|345|456|567|678|789|890)+/,
   /^(abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)+/i
 ];
@@ -87,7 +87,7 @@ class PasswordSecurityService {
     // 字符类型检查
     const hasUppercase = /[A-Z]/.test(password);
     const hasLowercase = /[a-z]/.test(password);
-    const hasNumbers = /\d/.test(password);
+    const hasNumbers = //d/.test(password);
     const hasSpecialChars = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
     if (PASSWORD_CONFIG.requireUppercase && !hasUppercase) {
@@ -174,7 +174,7 @@ class PasswordSecurityService {
     
     if (/[a-z]/.test(password)) charsetSize += 26;
     if (/[A-Z]/.test(password)) charsetSize += 26;
-    if (/\d/.test(password)) charsetSize += 10;
+    if (//d/.test(password)) charsetSize += 10;
     if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) charsetSize += 32;
     if (/[^a-zA-Z0-9!@#$%^&*(),.?":{}|<>]/.test(password)) charsetSize += 32;
 

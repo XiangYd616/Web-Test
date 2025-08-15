@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { userStatsService, UserActivityStats, ActivityItem } from '../services/userStatsService';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityItem, UserActivityStats, userStatsService } from '../services/user/userStatsService';
 import { useAuth } from './useAuth';
 
 export const useUserStats = () => {

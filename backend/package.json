@@ -23,10 +23,10 @@
     "security:audit": "npm audit",
     "security:fix": "npm audit fix",
     "_comment_health": "🏥 健康检查",
-    "health:check": "curl http://localhost:3001/health",
+    "health:check": "curl http:/localhost:3001/health",
     "_comment_cache": "💾 缓存管理",
-    "cache:stats": "curl http://localhost:3001/api/test/cache/stats",
-    "cache:flush": "curl -X POST http://localhost:3001/api/test/cache/flush",
+    "cache:stats": "curl http:/localhost:3001/api/test/cache/stats",
+    "cache:flush": "curl -X POST http:/localhost:3001/api/test/cache/flush",
     "_comment_redis": "🔴 Redis操作",
     "redis:check": "node ../scripts/backend/check-redis.js",
     "_comment_docker": "🐳 Docker操作",
@@ -37,7 +37,8 @@
     "@socket.io/redis-adapter": "^8.3.0",
     "abort-controller": "^3.0.0",
     "archiver": "^7.0.1",
-    "axios": "^1.10.0",
+    "axios": "^1.11.0",
+    "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "bull": "^4.12.2",
     "cheerio": "^1.1.0",
@@ -124,12 +125,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/test-web-app.git"
+    "url": "https:/github.com/your-org/test-web-app.git"
   },
   "bugs": {
-    "url": "https://github.com/your-org/test-web-app/issues"
+    "url": "https:/github.com/your-org/test-web-app/issues"
   },
-  "homepage": "https://github.com/your-org/test-web-app#readme",
+  "homepage": "https:/github.com/your-org/test-web-app#readme",
   "jest": {
     "testEnvironment": "node",
     "collectCoverageFrom": [

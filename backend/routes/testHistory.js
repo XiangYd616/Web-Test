@@ -5,7 +5,7 @@
 
 const express = require('express');
 const router = express.Router();
-const TestHistoryService = require('..\services\testing\TestHistoryService.js');
+const TestHistoryService = require('../services/testing/TestHistoryService.js');
 const { authMiddleware } = require('../middleware/auth');
 // const { validateTestType, validatePagination, validateSorting, validateSearch, validateStatus, validateUUID } = require('../middleware/validation');
 
@@ -396,7 +396,7 @@ router.get('/export', authMiddleware, async (req, res) => {
         ).join(',')
       );
 
-      res.send([headers, ...rows].join('\n'));
+      res.send([headers, ...rows].join('/n'));
     }
   } catch (error) {
     console.error('导出测试历史失败:', error);

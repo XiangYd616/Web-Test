@@ -11,7 +11,7 @@ const SSLAnalyzer = require('./analyzers/SSLAnalyzer');
 const AdvancedSSLAnalyzer = require('./analyzers/AdvancedSSLAnalyzer');
 const SecurityHeadersAnalyzer = require('./analyzers/SecurityHeadersAnalyzer');
 const AdvancedSecurityHeadersAnalyzer = require('./analyzers/AdvancedSecurityHeadersAnalyzer');
-const SecurityRiskAssessment = require('./utils/SecurityRiskAssessment');
+const SecurityRiskAssessment = require('./utils/securityRiskAssessment');
 
 class SecurityAnalyzer {
   constructor(options = {}) {

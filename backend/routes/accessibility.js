@@ -5,7 +5,7 @@
 
 const express = require('express');
 const router = express.Router();
-const accessibilityService = require('..\services\core\accessibilityService.js');
+const accessibilityService = require('../services/core/accessibilityService.js');
 const Logger = require('../utils/logger');
 
 /**

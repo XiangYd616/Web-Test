@@ -7,7 +7,7 @@ const SEOAnalyzer = require('./SEOAnalyzer');
 const { getPool } = require('../../config/database');
 const Logger = require('../../utils/logger');
 const EngineCache = require('../../utils/cache/EngineCache');
-const ErrorNotificationHelper = require('../../utils/ErrorNotificationHelper');
+const ErrorNotificationHelper = require('../../utils/errorNotificationHelper');
 
 class SEOEngine {
   constructor() {

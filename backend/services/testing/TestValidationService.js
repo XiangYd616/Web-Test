@@ -3,7 +3,7 @@
  * 验证和标准化测试配置
  */
 
-const { ErrorFactory } = require('..\..\utils\ApiError.js');
+const { ErrorFactory } = require('../../utils/apiError')');
 
 class TestValidationService {
     constructor() {
@@ -474,7 +474,7 @@ class TestValidationService {
      * @returns {boolean} 是否有效
      */
     isValidEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailRegex = /^[^/s@]+@[^/s@]+/.[^/s@]+$/;
         return emailRegex.test(email);
     }
 

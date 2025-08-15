@@ -161,7 +161,7 @@ class Validator {
 
       // 检查是否为本地地址（可选的安全检查）
       const isLocalhost = ['localhost', '127.0.0.1', '::1'].includes(urlObj.hostname);
-      const isPrivateIP = /^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.)/.test(urlObj.hostname);
+      const isPrivateIP = /^(10/.| 172 /.(1[6 - 9] | 2[0 - 9] | 3[01]) /.| 192 / .168 /.)/.test(urlObj.hostname);
 
       if (isLocalhost || isPrivateIP) {
         Logger.warn(`检测到本地或私有网络地址: ${urlObj.hostname}`);
@@ -1226,6 +1226,313 @@ class RealStressTestEngine {
         analysis: this.analyzeBottlenecks(results)
       }
     };
+  }
+
+  /**
+   * 生成性能等级和评分
+   */
+  generatePerformanceGrade(results) {
+    const { metrics } = results;
+    let score = 100;
+    let grade = 'A';
+    const issues = [];
+    const recommendations = [];
+
+    // 响应时间评分 (40%)
+    const avgResponseTime = metrics.averageResponseTime;
+    if (avgResponseTime > 5000) {
+      score -= 40;
+      issues.push('响应时间过长 (>5秒)');
+      recommendations.push('优化服务器性能，考虑增加缓存');
+    } else if (avgResponseTime > 2000) {
+      score -= 25;
+      issues.push('响应时间较长 (>2秒)');
+      recommendations.push('检查数据库查询性能，优化代码逻辑');
+    } else if (avgResponseTime > 1000) {
+      score -= 15;
+      issues.push('响应时间偏高 (>1秒)');
+      recommendations.push('考虑使用CDN，优化静态资源加载');
+    }
+
+    // 错误率评分 (30%)
+    const errorRate = metrics.errorRate || 0;
+    if (errorRate > 0.1) {
+      score -= 30;
+      issues.push(`错误率过高 (${(errorRate * 100).toFixed(1)}%)`);
+      recommendations.push('检查服务器稳定性，修复应用程序错误');
+    } else if (errorRate > 0.05) {
+      score -= 20;
+      issues.push(`错误率较高 (${(errorRate * 100).toFixed(1)}%)`);
+      recommendations.push('监控错误日志，提高系统容错能力');
+    } else if (errorRate > 0.01) {
+      score -= 10;
+      issues.push(`错误率偏高 (${(errorRate * 100).toFixed(1)}%)`);
+      recommendations.push('定期检查系统健康状态');
+    }
+
+    // 吞吐量评分 (20%)
+    const throughput = metrics.throughput || 0;
+    if (throughput < 10) {
+      score -= 20;
+      issues.push('吞吐量过低 (<10 req/s)');
+      recommendations.push('优化服务器配置，考虑水平扩展');
+    } else if (throughput < 50) {
+      score -= 10;
+      issues.push('吞吐量较低 (<50 req/s)');
+      recommendations.push('优化应用程序性能');
+    }
+
+    // 稳定性评分 (10%)
+    const responseTimeVariance = this.calculateResponseTimeVariance(results);
+    if (responseTimeVariance > 1000) {
+      score -= 10;
+      issues.push('响应时间波动较大');
+      recommendations.push('检查系统负载均衡，优化资源分配');
+    }
+
+    // 确定等级
+    if (score >= 90) grade = 'A';
+    else if (score >= 80) grade = 'B';
+    else if (score >= 70) grade = 'C';
+    else if (score >= 60) grade = 'D';
+    else grade = 'F';
+
+    return {
+      grade,
+      score: Math.max(0, score),
+      bottlenecks: issues,
+      recommendations
+    };
+  }
+
+  /**
+   * 计算响应时间方差
+   */
+  calculateResponseTimeVariance(results) {
+    const responseTimes = results.realTimeData?.map(d => d.responseTime) || [];
+    if (responseTimes.length === 0) return 0;
+
+    const mean = responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length;
+    const variance = responseTimes.reduce((sum, time) => sum + Math.pow(time - mean, 2), 0) / responseTimes.length;
+
+    return Math.sqrt(variance);
+  }
+
+  /**
+   * 生成详细的测试报告
+   */
+  generateDetailedReport(results) {
+    const performance = this.generatePerformanceGrade(results);
+    const scalability = this.analyzeScalability(results);
+
+    return {
+      ...results,
+      performance,
+      scalability,
+
+      // 添加百分位数计算
+      percentiles: this.calculatePercentiles(results),
+
+      // 添加错误分析
+      errorAnalysis: this.analyzeErrors(results),
+
+      // 添加时间序列分析
+      timeSeriesAnalysis: this.analyzeTimeSeries(results)
+    };
+  }
+
+  /**
+   * 计算响应时间百分位数
+   */
+  calculatePercentiles(results) {
+    const responseTimes = results.realTimeData?.map(d => d.responseTime) || [];
+    if (responseTimes.length === 0) {
+      return { p50: 0, p90: 0, p95: 0, p99: 0 };
+    }
+
+    const sorted = responseTimes.sort((a, b) => a - b);
+    const len = sorted.length;
+
+    return {
+      p50: sorted[Math.floor(len * 0.5)],
+      p90: sorted[Math.floor(len * 0.9)],
+      p95: sorted[Math.floor(len * 0.95)],
+      p99: sorted[Math.floor(len * 0.99)]
+    };
+  }
+
+  /**
+   * 分析错误类型和分布
+   */
+  analyzeErrors(results) {
+    const errors = results.errors || [];
+    const errorTypes = {};
+
+    errors.forEach(error => {
+      const type = error.type || 'Unknown';
+      if (!errorTypes[type]) {
+        errorTypes[type] = { count: 0, messages: new Set() };
+      }
+      errorTypes[type].count++;
+      errorTypes[type].messages.add(error.message || 'No message');
+    });
+
+    const totalErrors = errors.length;
+
+    return Object.entries(errorTypes).map(([type, data]) => ({
+      type,
+      count: data.count,
+      percentage: totalErrors > 0 ? (data.count / totalErrors) * 100 : 0,
+      message: Array.from(data.messages).join('; ')
+    }));
+  }
+
+  /**
+   * 分析时间序列数据
+   */
+  analyzeTimeSeries(results) {
+    const timeSeriesData = results.realTimeData || [];
+    if (timeSeriesData.length === 0) {
+      return { trend: 'stable', volatility: 'low', patterns: [] };
+    }
+
+    // 分析响应时间趋势
+    const responseTimes = timeSeriesData.map(d => d.responseTime);
+    const trend = this.calculateTrend(responseTimes);
+
+    // 分析波动性
+    const volatility = this.calculateVolatility(responseTimes);
+
+    // 识别模式
+    const patterns = this.identifyPatterns(timeSeriesData);
+
+    return {
+      trend,
+      volatility,
+      patterns
+    };
+  }
+
+  /**
+   * 计算趋势
+   */
+  calculateTrend(values) {
+    if (values.length < 2) return 'stable';
+
+    const firstHalf = values.slice(0, Math.floor(values.length / 2));
+    const secondHalf = values.slice(Math.floor(values.length / 2));
+
+    const firstAvg = firstHalf.reduce((sum, val) => sum + val, 0) / firstHalf.length;
+    const secondAvg = secondHalf.reduce((sum, val) => sum + val, 0) / secondHalf.length;
+
+    const change = (secondAvg - firstAvg) / firstAvg;
+
+    if (change > 0.1) return 'increasing';
+    if (change < -0.1) return 'decreasing';
+    return 'stable';
+  }
+
+  /**
+   * 计算波动性
+   */
+  calculateVolatility(values) {
+    if (values.length < 2) return 'low';
+
+    const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
+    const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+    const stdDev = Math.sqrt(variance);
+    const cv = stdDev / mean; // 变异系数
+
+    if (cv > 0.5) return 'high';
+    if (cv > 0.2) return 'medium';
+    return 'low';
+  }
+
+  /**
+   * 识别模式
+   */
+  identifyPatterns(timeSeriesData) {
+    const patterns = [];
+
+    // 检测峰值
+    const spikes = this.detectSpikes(timeSeriesData);
+    if (spikes.length > 0) {
+      patterns.push(`检测到 ${spikes.length} 个响应时间峰值`);
+    }
+
+    // 检测周期性
+    const periodicity = this.detectPeriodicity(timeSeriesData);
+    if (periodicity) {
+      patterns.push('检测到周期性模式');
+    }
+
+    // 检测异常值
+    const outliers = this.detectOutliers(timeSeriesData);
+    if (outliers.length > 0) {
+      patterns.push(`检测到 ${outliers.length} 个异常数据点`);
+    }
+
+    return patterns;
+  }
+
+  /**
+   * 检测峰值
+   */
+  detectSpikes(timeSeriesData) {
+    const responseTimes = timeSeriesData.map(d => d.responseTime);
+    const mean = responseTimes.reduce((sum, val) => sum + val, 0) / responseTimes.length;
+    const threshold = mean * 2; // 超过平均值2倍视为峰值
+
+    return responseTimes.map((time, index) => ({ index, time }))
+      .filter(item => item.time > threshold);
+  }
+
+  /**
+   * 检测周期性
+   */
+  detectPeriodicity(timeSeriesData) {
+    // 简单的周期性检测 - 检查是否有重复的模式
+    if (timeSeriesData.length < 10) return false;
+
+    const responseTimes = timeSeriesData.map(d => d.responseTime);
+    const windowSize = Math.floor(responseTimes.length / 4);
+
+    for (let period = 2; period <= windowSize; period++) {
+      let correlation = 0;
+      let count = 0;
+
+      for (let i = 0; i < responseTimes.length - period; i++) {
+        const current = responseTimes[i];
+        const next = responseTimes[i + period];
+        correlation += Math.abs(current - next);
+        count++;
+      }
+
+      const avgDifference = correlation / count;
+      const overallAvg = responseTimes.reduce((sum, val) => sum + val, 0) / responseTimes.length;
+
+      if (avgDifference < overallAvg * 0.1) {
+        return true; // 发现周期性
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * 检测异常值
+   */
+  detectOutliers(timeSeriesData) {
+    const responseTimes = timeSeriesData.map(d => d.responseTime);
+    const sorted = [...responseTimes].sort((a, b) => a - b);
+    const q1 = sorted[Math.floor(sorted.length * 0.25)];
+    const q3 = sorted[Math.floor(sorted.length * 0.75)];
+    const iqr = q3 - q1;
+    const lowerBound = q1 - 1.5 * iqr;
+    const upperBound = q3 + 1.5 * iqr;
+
+    return responseTimes.map((time, index) => ({ index, time }))
+      .filter(item => item.time < lowerBound || item.time > upperBound);
   }
 
   /**
@@ -3024,8 +3331,8 @@ class RealStressTestEngine {
           Logger.info(`保存取消的测试记录: ${testId}`);
 
           // 调用测试历史服务保存取消状态
-          const TestHistoryService = require('..\..\services\testing\TestHistoryService.js');
-          const testHistoryService = new TestHistoryService(require('..\..\config\database.js'));
+          const TestHistoryService = require('../../services/testing/TestHistoryService.js');
+          const testHistoryService = new TestHistoryService(require('../../config/database.js'));
 
           try {
             await testHistoryService.cancelTest(
@@ -3046,8 +3353,8 @@ class RealStressTestEngine {
       Logger.info(`保存最终测试结果: ${testId}`);
 
       // 调用测试历史服务保存完成状态
-      const TestHistoryService = require('..\..\services\testing\TestHistoryService.js');
-      const testHistoryService = new TestHistoryService(require('..\..\config\database.js'));
+      const TestHistoryService = require('../../services/testing/TestHistoryService.js');
+      const testHistoryService = new TestHistoryService(require('../../config/database.js'));
 
       try {
         const finalResults = {
@@ -3195,7 +3502,7 @@ class RealStressTestEngine {
       Logger.info(`🌐 使用k6引擎执行代理压力测试: ${testId}`);
 
       // 导入k6引擎
-      const { RealK6Engine } = require('..\api\k6Engine.js');
+      const { RealK6Engine } = require('../api/k6Engine.js');
       const k6Engine = new RealK6Engine();
 
       // 检查k6是否可用

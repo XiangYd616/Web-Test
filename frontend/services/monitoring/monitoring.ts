@@ -430,7 +430,7 @@ export class RealTimeMonitoringService {
     console.log('Sending email notification:', {
       to: config.config.email?.recipients,
       subject: `[${alert.severity.toUpperCase()}] ${alert.title}`,
-      body: `目标: ${target.name}\nURL: ${target.url}\n消息: ${alert.message}\n时间: ${alert.timestamp}`
+      body: `目标: ${target.name}/nURL: ${target.url}/n消息: ${alert.message}/n时间: ${alert.timestamp}`
     });
   }
 

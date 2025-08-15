@@ -506,11 +506,11 @@ class PerformanceAnalyzer {
   }
 
   getResourceType(url) {
-    if (/\.(jpg|jpeg|png|gif|webp|svg|ico)$/i.test(url)) return 'image';
-    if (/\.(js|mjs)$/i.test(url)) return 'script';
-    if (/\.css$/i.test(url)) return 'stylesheet';
-    if (/\.(woff|woff2|ttf|otf|eot)$/i.test(url)) return 'font';
-    if (/\.(html|htm)$/i.test(url)) return 'document';
+    if (//.(jpg|jpeg|png|gif|webp|svg|ico)$/i.test(url)) return 'image';
+    if (//.(js|mjs)$/i.test(url)) return 'script';
+    if (//.css$/i.test(url)) return 'stylesheet';
+    if (//.(woff|woff2|ttf|otf|eot)$/i.test(url)) return 'font';
+    if (//.(html|htm)$/i.test(url)) return 'document';
     return 'other';
   }
 }

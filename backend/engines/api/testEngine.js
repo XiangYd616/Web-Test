@@ -346,7 +346,7 @@ class RealTestEngine {
    */
   async runPerformanceTest(url) {
     console.log(`⚡ Running performance test for: ${url}`);
-    
+
     const startTime = Date.now();
     const results = {
       testType: 'performance',
@@ -377,7 +377,7 @@ class RealTestEngine {
 
       // 计算性能分数
       results.score = this.calculatePerformanceScore(results.metrics);
-      
+
       // 模拟Core Web Vitals（基于实际测量）
       results.coreWebVitals = {
         fcp: Math.max(800, results.metrics.connectionTime + 200),
@@ -851,7 +851,7 @@ class RealTestEngine {
     });
 
     const topWords = Object.entries(wordFreq)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([, a], [, b]) => b - a)
       .slice(0, 5);
 
     if (topWords.length > 0) {
@@ -936,7 +936,7 @@ class RealTestEngine {
    */
   async runSEOTest(url) {
     console.log(`📄 Running SEO test for: ${url}`);
-    
+
     const results = {
       testType: 'seo',
       score: 0,
@@ -947,12 +947,12 @@ class RealTestEngine {
     try {
       // 获取页面内容
       const pageContent = await this.fetchPageContent(url);
-      
+
       // 1. 检查标题
       const titleMatch = pageContent.match(/<title[^>]*>([^<]+)<\/title>/i);
       results.checks.hasTitle = !!titleMatch;
       results.checks.titleLength = titleMatch ? titleMatch[1].length : 0;
-      
+
       if (!titleMatch) {
         results.issues.push('页面缺少标题标签');
       } else if (titleMatch[1].length < 30 || titleMatch[1].length > 60) {
@@ -960,10 +960,10 @@ class RealTestEngine {
       }
 
       // 2. 检查meta描述
-      const metaDescMatch = pageContent.match(/<meta[^>]*name=["\']description["\'][^>]*content=["\']([^"\']+)["\'][^>]*>/i);
+      const metaDescMatch = pageContent.match(/<meta[^>]*name=["/']description["/'][^>]*content=["/']([^"/']+)["/'][^>]*>/i);
       results.checks.hasMetaDescription = !!metaDescMatch;
       results.checks.metaDescriptionLength = metaDescMatch ? metaDescMatch[1].length : 0;
-      
+
       if (!metaDescMatch) {
         results.issues.push('页面缺少meta描述');
       }
@@ -971,7 +971,7 @@ class RealTestEngine {
       // 3. 检查H1标签
       const h1Match = pageContent.match(/<h1[^>]*>([^<]+)<\/h1>/i);
       results.checks.hasH1 = !!h1Match;
-      
+
       if (!h1Match) {
         results.issues.push('页面缺少H1标签');
       }
@@ -981,7 +981,7 @@ class RealTestEngine {
       const imgsWithAlt = imgTags.filter(img => /alt\s*=/i.test(img));
       results.checks.imagesWithAlt = imgsWithAlt.length;
       results.checks.totalImages = imgTags.length;
-      
+
       if (imgTags.length > 0 && imgsWithAlt.length < imgTags.length) {
         results.issues.push(`${imgTags.length - imgsWithAlt.length}个图片缺少alt属性`);
       }
@@ -994,7 +994,7 @@ class RealTestEngine {
 
       // 计算SEO分数
       results.score = this.calculateSEOScore(results.checks, results.issues);
-      
+
       console.log(`✅ SEO test completed: ${results.score} points`);
       return results;
 
@@ -1015,7 +1015,7 @@ class RealTestEngine {
    */
   async runSecurityTest(url) {
     console.log(`🔒 Running security test for: ${url}`);
-    
+
     const results = {
       testType: 'security',
       score: 0,
@@ -1032,7 +1032,7 @@ class RealTestEngine {
 
       // 2. 获取响应头
       const headers = await this.getResponseHeaders(url);
-      
+
       // 3. 安全头部检查
       results.checks.securityHeaders = {
         'Content-Security-Policy': !!headers['content-security-policy'],
@@ -1055,7 +1055,7 @@ class RealTestEngine {
           const sslInfo = await this.checkSSLCertificate(url);
           results.checks.sslValid = sslInfo.valid;
           results.checks.sslExpiry = sslInfo.expiry;
-          
+
           if (!sslInfo.valid) {
             results.vulnerabilities.push('SSL证书无效或已过期');
           }
@@ -1066,7 +1066,7 @@ class RealTestEngine {
 
       // 计算安全分数
       results.score = this.calculateSecurityScore(results.checks, results.vulnerabilities);
-      
+
       console.log(`✅ Security test completed: ${results.score} points`);
       return results;
 
@@ -1088,7 +1088,7 @@ class RealTestEngine {
     return new Promise((resolve, reject) => {
       const urlObj = new URL(url);
       const client = urlObj.protocol === 'https:' ? https : http;
-      
+
       const req = client.request({
         hostname: urlObj.hostname,
         port: urlObj.port,
@@ -1099,7 +1099,7 @@ class RealTestEngine {
         const time = Date.now() - startTime;
         resolve({ time, statusCode: res.statusCode });
       });
-      
+
       req.on('error', reject);
       req.on('timeout', () => reject(new Error('Connection timeout')));
       req.end();
@@ -1109,7 +1109,7 @@ class RealTestEngine {
   async testDNSResolution(url) {
     const startTime = Date.now();
     const { hostname } = new URL(url);
-    
+
     return new Promise((resolve, reject) => {
       require('dns').lookup(hostname, (err, address) => {
         const time = Date.now() - startTime;
@@ -1124,7 +1124,7 @@ class RealTestEngine {
     return new Promise((resolve, reject) => {
       const urlObj = new URL(url);
       const client = urlObj.protocol === 'https:' ? https : http;
-      
+
       const req = client.request(url, (res) => {
         let data = '';
         res.on('data', chunk => data += chunk);
@@ -1133,7 +1133,7 @@ class RealTestEngine {
           resolve({ time, size: data.length });
         });
       });
-      
+
       req.on('error', reject);
       req.setTimeout(30000, () => reject(new Error('Page load timeout')));
       req.end();
@@ -1150,11 +1150,11 @@ class RealTestEngine {
         // 忽略单个请求失败
       }
     }
-    
+
     if (times.length === 0) {
       throw new Error('All requests failed');
     }
-    
+
     return {
       average: Math.round(times.reduce((a, b) => a + b, 0) / times.length),
       min: Math.min(...times),
@@ -1166,13 +1166,13 @@ class RealTestEngine {
     return new Promise((resolve, reject) => {
       const urlObj = new URL(url);
       const client = urlObj.protocol === 'https:' ? https : http;
-      
+
       const req = client.request(url, (res) => {
         let data = '';
         res.on('data', chunk => data += chunk);
         res.on('end', () => resolve(data));
       });
-      
+
       req.on('error', reject);
       req.setTimeout(30000, () => reject(new Error('Fetch timeout')));
       req.end();
@@ -1183,7 +1183,7 @@ class RealTestEngine {
     return new Promise((resolve, reject) => {
       const urlObj = new URL(url);
       const client = urlObj.protocol === 'https:' ? https : http;
-      
+
       const req = client.request({
         hostname: urlObj.hostname,
         port: urlObj.port,
@@ -1192,7 +1192,7 @@ class RealTestEngine {
       }, (res) => {
         resolve(res.headers);
       });
-      
+
       req.on('error', reject);
       req.setTimeout(10000, () => reject(new Error('Headers timeout')));
       req.end();
@@ -1210,7 +1210,7 @@ class RealTestEngine {
         const cert = socket.getPeerCertificate();
         const now = new Date();
         const expiry = new Date(cert.valid_to);
-        
+
         resolve({
           valid: now < expiry,
           expiry: cert.valid_to,
@@ -1218,7 +1218,7 @@ class RealTestEngine {
         });
         socket.end();
       });
-      
+
       socket.on('error', reject);
       socket.setTimeout(10000, () => reject(new Error('SSL check timeout')));
     });
@@ -1227,54 +1227,54 @@ class RealTestEngine {
   // 分数计算方法
   calculatePerformanceScore(metrics) {
     let score = 100;
-    
+
     // 连接时间评分
     if (metrics.connectionTime > 1000) score -= 20;
     else if (metrics.connectionTime > 500) score -= 10;
-    
+
     // 平均响应时间评分
     if (metrics.averageResponseTime > 2000) score -= 30;
     else if (metrics.averageResponseTime > 1000) score -= 15;
     else if (metrics.averageResponseTime > 500) score -= 5;
-    
+
     // 加载时间评分
     if (metrics.loadTime > 5000) score -= 25;
     else if (metrics.loadTime > 3000) score -= 15;
     else if (metrics.loadTime > 1000) score -= 5;
-    
+
     return Math.max(0, Math.min(100, score));
   }
 
   calculateSEOScore(checks, issues) {
     let score = 100;
-    
+
     if (!checks.hasTitle) score -= 20;
     else if (checks.titleLength < 30 || checks.titleLength > 60) score -= 10;
-    
+
     if (!checks.hasMetaDescription) score -= 15;
     if (!checks.hasH1) score -= 15;
     if (!checks.isHTTPS) score -= 20;
-    
+
     if (checks.totalImages > 0) {
       const altRatio = checks.imagesWithAlt / checks.totalImages;
       if (altRatio < 0.5) score -= 20;
       else if (altRatio < 0.8) score -= 10;
     }
-    
+
     return Math.max(0, Math.min(100, score));
   }
 
   calculateSecurityScore(checks, vulnerabilities) {
     let score = 100;
-    
+
     if (!checks.httpsUsage) score -= 30;
-    
+
     const securityHeaders = checks.securityHeaders || {};
     const missingHeaders = Object.values(securityHeaders).filter(present => !present).length;
     score -= missingHeaders * 10;
-    
+
     if (checks.httpsUsage && !checks.sslValid) score -= 25;
-    
+
     return Math.max(0, Math.min(100, score));
   }
 
@@ -1303,20 +1303,20 @@ class RealTestEngine {
 
   generateRecommendations(tests) {
     const recommendations = [];
-    
+
     if (tests.performance?.score < 80) {
       recommendations.push('优化网站加载速度');
       recommendations.push('减少服务器响应时间');
     }
-    
+
     if (tests.seo?.issues?.length > 0) {
       recommendations.push(...tests.seo.issues.slice(0, 3));
     }
-    
+
     if (tests.security?.vulnerabilities?.length > 0) {
       recommendations.push(...tests.security.vulnerabilities.slice(0, 3));
     }
-    
+
     return recommendations;
   }
 }

@@ -5,8 +5,8 @@
  */
 
 const crypto = require('crypto');
-const { getPool } = require('..\..\config\database.js');
-const Logger = require('..\..\middleware\logger.js');
+const { getPool } = require('../../config/database.js');
+const Logger = require('../../middleware/logger.js');
 
 // ==================== 配置 ====================
 

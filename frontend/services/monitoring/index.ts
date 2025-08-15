@@ -79,7 +79,7 @@ export interface MonitoringIncident {
 export { default as monitoring } from './monitoring';
 
 // 兼容性导出（逐步迁移）
-export { monitoringService } from '../monitoringService';
+export { monitoringService } from './monitoringService';
 
 // 类型已在上面定义并自动导出，无需重复导出
 

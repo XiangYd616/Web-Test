@@ -91,7 +91,7 @@ export function autoFixUrl(url: string): { fixed: string; fixes: string[] } {
 
   // 修复错误的协议分隔符
   if (URL_PATTERNS.wrongProtocolSeparator.test(fixed)) {
-    fixed = fixed.replace(/:\/([^\/])/, '://$1');
+    fixed = fixed.replace(/:\/\s([^\/])/, ':/\$1');
     fixes.push('修复了协议分隔符');
   }
 

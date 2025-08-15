@@ -3,7 +3,7 @@
  * 每个用户管理自己的测试实例，不需要全局状态
  */
 
-const { RealStressTestEngine } = require('./realStressTestEngine');
+const { RealStressTestEngine } = require('../../engines/stress/stressTestEngine');
 // 暂时使用console.log替代Logger
 const Logger = {
   info: (msg, meta) => console.log(`[INFO] ${msg}`, meta || ''),
@@ -244,7 +244,7 @@ class UserTestManager {
     try {
       // 导入TestHistoryService
       const TestHistoryService = require('./TestHistoryService');
-      const dbModule = require('..\..\config\database.js');
+      const dbModule = require('../../config/database.js');
       const testHistoryService = new TestHistoryService(dbModule);
 
       // 根据测试类型确定保存方式

@@ -5,7 +5,7 @@
 
 const EventEmitter = require('events');
 const winston = require('winston');
-const { getConnectionManager } = require('..\..\config\database.js');
+const { getConnectionManager } = require('../../config/database.js');
 
 class DatabaseMonitoringService extends EventEmitter {
     constructor() {
@@ -52,7 +52,7 @@ class DatabaseMonitoringService extends EventEmitter {
                 winston.format.json()
             ),
             transports: [
-                new winston.transports.File({ filename: 'logs/db-monitoring.log' }),
+                new winston.transports.File({ filename: 'backend/runtime/logs/db-monitoring.log' }),
                 new winston.transports.Console({ level: 'warn' })
             ]
         });
@@ -722,7 +722,7 @@ class DatabaseMonitoringService extends EventEmitter {
      * 解析时间周期
      */
     parsePeriod(period) {
-        const match = period.match(/^(\d+)([smhd])$/);
+        const match = period.match(/^(/d +)([smhd])$/);
         if (!match) return 60 * 60 * 1000; // 默认1小时
 
         const value = parseInt(match[1]);

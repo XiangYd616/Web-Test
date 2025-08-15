@@ -1,12 +1,12 @@
 import { Activity, BarChart3, ChevronDown, ChevronUp, Code, Database, Download, Eye, FileText, Filter, Globe, RefreshCw, Search, Shield, SortAsc, SortDesc, Trash2, TrendingUp, Wifi, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import AnalyticsOverview from '..\..\..\components\features\AnalyticsOverview.tsx';
-import ImportExport from '..\..\..\components\features\ImportExport.tsx';
-import PerformanceAnalysis from '..\..\data\reports\PerformanceAnalysis.tsx';
-import RealTimeMonitoring from '..\..\..\components\features\RealTimeMonitoring.tsx';
-import ReportManagement from '..\..\..\components\features\ReportManagement.tsx';
-import { TestResultDisplay } from '../../components/testing';
+import AnalyticsOverview from '../../../components/features/AnalyticsOverview.tsx';
+import ImportExport from '../../../components/features/ImportExport.tsx';
+import RealTimeMonitoring from '../../../components/features/RealTimeMonitoring.tsx';
+import ReportManagement from '../../../components/features/ReportManagement.tsx';
+// import { TestResultDisplay } from '../../../components/testing'; // 组件不存在，已注释
+import PerformanceAnalysis from '../../data/reports/PerformanceAnalysis.tsx';
 
 interface TestRecord {
   id: string;
@@ -306,9 +306,9 @@ const DataStorage: React.FC = () => {
       case 'csv':
         const headers = Object.keys(dataToExport[0] || {});
         const csvContent = [
-          '\uFEFF' + headers.join(','),
+          '/uFEFF' + headers.join(','),
           ...dataToExport.map(row => headers.map(header => `"${row[header as keyof typeof row]}"`).join(','))
-        ].join('\n');
+        ].join('/n');
         const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
         downloadFile(csvBlob, `test-records-${Date.now()}.csv`);
         break;
@@ -704,7 +704,7 @@ const DataStorage: React.FC = () => {
                   </button>
                 </div>
 
-                <TestResultDisplay
+                {/* <TestResultDisplay
                   result={{
                     testId: selectedRecord.id,
                     testType: selectedRecord.testType,
@@ -719,7 +719,7 @@ const DataStorage: React.FC = () => {
                   }}
                   onViewDetails={() => { }}
                   onDownloadReport={() => { }}
-                />
+                /> */}
               </header>
             </article>
           </div>

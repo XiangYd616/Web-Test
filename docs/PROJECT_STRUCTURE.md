@@ -145,7 +145,7 @@ Vue.js 3 + Vite + TypeScript 构建的现代化前端应用
 - 🛣️ Vue Router路由管理
 - 🎯 组件化开发
 
-### 📁 server/ - 后端应用
+### 📁 backend/ - 后端应用
 Node.js + Express + PostgreSQL 构建的企业级后端服务
 
 **核心特性:**
@@ -156,7 +156,7 @@ Node.js + Express + PostgreSQL 构建的企业级后端服务
 - 📝 完整的日志系统
 - 🛡️ 安全中间件保护
 
-### 📁 server/scripts/ - 完备数据库管理工具
+### 📁 backend/scripts/ - 完备数据库管理工具
 企业级数据库管理工具集，支持全生命周期管理
 
 **核心工具:**
@@ -196,7 +196,7 @@ Node.js + Express + PostgreSQL 构建的企业级后端服务
 
 ### 开发者指南
 1. 📊 查看 `docs/API_REFERENCE.md` - API文档
-2. 🏗️ 参考 `server/scripts/README.md` - 数据库工具
+2. 🏗️ 参考 `backend/scripts/README.md` - 数据库工具
 3. 🔧 使用 `scripts/` 中的开发工具
 4. 📝 查看各模块的README文档
 

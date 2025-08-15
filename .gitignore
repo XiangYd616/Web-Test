@@ -14,11 +14,11 @@ build/
 .env.development.local
 .env.test.local
 .env.production.local
-server/.env
-server/.env.local
-server/.env.development.local
-server/.env.test.local
-server/.env.production.local
+backend/.env
+backend/.env.local
+backend/.env.development.local
+backend/.env.test.local
+backend/.env.production.local
 
 # Logs
 logs/
@@ -87,7 +87,8 @@ playwright/.cache/
 .env.production.local
 
 # Server logs
-server/logs/
+backend/logs/
+backend/runtime/logs/
 
 # Vite cache
 .vite/
@@ -108,7 +109,8 @@ packages/
 *.bak
 *.orig
 backup-*.sql
-server/backups/*.sql
+backend/backups/*.sql
+backend/runtime/backups/
 
 # IDE specific files
 .vscode/settings.json
@@ -133,8 +135,11 @@ $RECYCLE.BIN/
 .Trash-*
 
 # Project specific
-server/uploads/
-server/temp/
-server/exports/
+backend/uploads/
+backend/temp/
+backend/exports/
+backend/runtime/uploads/
+backend/runtime/temp/
+backend/runtime/exports/
 docs/reports/*.html
 scripts/logs/

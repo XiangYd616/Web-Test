@@ -1,13 +1,13 @@
 import { Activity, BarChart3, Clock, Cpu, Database, HardDrive, MemoryStick, Monitor, Network, Server, Settings, Shield, TestTube, TrendingUp, Users } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import BackupManagement from '..\..\..\components\system\BackupManagement.tsx';
-import SecurityCenter from '..\..\..\components\system\SecurityCenter.tsx';
+import BackupManagement from '../../../components/system/BackupManagement.tsx';
+import SecurityCenter from '../../../components/system/SecurityCenter.tsx';
 import SystemMonitorComponent from './SystemMonitor.tsx';
-import SystemSettings from '..\..\..\components\system\SystemSettings.tsx';
-import TestManagement from '..\..\..\components\system\TestManagement.tsx';
-import UserManagement from '..\..\..\components\system\UserManagement.tsx';
-import { adminService } from '..\..\..\services\adminService.ts';
-import type { SystemMonitor, SystemStats } from '..\..\..\types\admin.ts';
+import SystemSettings from '../../../components/system/SystemSettings.tsx';
+import TestManagement from '../../../components/system/TestManagement.tsx';
+import UserManagement from '../../../components/system/UserManagement.tsx';
+import { adminService } from '../../../services/adminService.ts';
+import type { SystemMonitor, SystemStats } from '../../../types/admin.ts';
 
 const Admin: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');

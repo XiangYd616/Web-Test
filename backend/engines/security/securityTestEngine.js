@@ -85,13 +85,13 @@ class RealSecurityTestEngine {
       ],
       pathTraversal: [
         "../../../etc/passwd",
-        "..\\..\\..\\windows\\system32\\drivers\\etc\\hosts",
+        "..//..//..//windows//system32//drivers//etc//hosts",
         "%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd",
         "....//....//....//etc/passwd",
         "..%252f..%252f..%252fetc%252fpasswd",
         "..%c0%af..%c0%af..%c0%afetc%c0%afpasswd",
         "/var/www/../../etc/passwd",
-        "\\..\\..\\..\\etc\\passwd"
+        "//..//..//..//etc//passwd"
       ],
       ldapInjection: [
         "*)(uid=*))(|(uid=*",
@@ -1156,7 +1156,7 @@ class RealSecurityTestEngine {
         'http://evil.com',
         'https://evil.com',
         '//evil.com',
-        '/\\evil.com',
+        '///evil.com',
         'javascript:alert(1)'
       ];
 
@@ -1191,8 +1191,8 @@ class RealSecurityTestEngine {
   async testHeaderInjection(url, results) {
     try {
       const headerPayloads = [
-        'test\r\nX-Injected: true',
-        'test\nX-Injected: true',
+        'test/r/nX-Injected: true',
+        'test/nX-Injected: true',
         'test%0d%0aX-Injected: true',
         'test%0aX-Injected: true'
       ];
@@ -1237,7 +1237,9 @@ class RealSecurityTestEngine {
         { pattern: /private[_-]?key\s*[:=]\s*['"][^'"]+['"]/gi, type: '私钥' },
         { pattern: /token\s*[:=]\s*['"][^'"]+['"]/gi, type: '访问令牌' },
         { pattern: /-----BEGIN\s+(RSA\s+)?PRIVATE\s+KEY-----/gi, type: 'RSA私钥' },
-        { pattern: /ssh-rsa\s+[A-Za-z0-9+\/=]+/gi, type: 'SSH公钥' }
+        {
+          pattern: /ssh-rsa\s+[A-Za-z0-9+\/=]+/gi, type: 'SSH公钥'
+        }
       ];
 
       sensitivePatterns.forEach(({ pattern, type }) => {
@@ -1392,10 +1394,10 @@ class RealSecurityTestEngine {
 
       // 检查HTTP资源引用
       const httpPatterns = [
-        /src\s*=\s*["']http:\/\/[^"']+["']/gi,
-        /href\s*=\s*["']http:\/\/[^"']+["']/gi,
-        /url\s*\(\s*["']?http:\/\/[^"')]+["']?\s*\)/gi,
-        /@import\s+["']http:\/\/[^"']+["']/gi
+        /src/s *= /s*["']http:////[^"']+["']/gi,
+        / href / s*=/s*["']http:////[^"']+["']/gi,
+          / url / s * /(/s * ["']?http:////[^"')]+["'] ? /s*/)/gi,
+        / @import /s+["']http:////[^"']+["']/gi
       ];
 
       let mixedContentFound = false;
@@ -1466,7 +1468,7 @@ class RealSecurityTestEngine {
     // 解析CSP指令
     const parts = cspHeader.split(';');
     parts.forEach(part => {
-      const [directive, ...values] = part.trim().split(/\s+/);
+      const [directive, ...values] = part.trim().split(//s+/);
       if (directive) {
         directives[directive] = values;
       }
@@ -2660,10 +2662,10 @@ class RealSecurityTestEngine {
 
       // 检测localStorage和sessionStorage的使用
       const storagePatterns = [
-        /localStorage\.setItem\s*\(\s*["'][^"']*password[^"']*["']/gi,
-        /localStorage\.setItem\s*\(\s*["'][^"']*token[^"']*["']/gi,
-        /sessionStorage\.setItem\s*\(\s*["'][^"']*secret[^"']*["']/gi
-      ];
+        /localStorage/.setItem / s * /(/s * ["'][^"']*password[^"'] * ["']/gi,
+          / localStorage /.setItem / s * /(/s * ["'][^"']*token[^"'] * ["']/gi,
+            / sessionStorage /.setItem / s * /(/s * ["'][^"']*secret[^"'] * ["']/gi
+            ];
 
       const sensitiveStorageUsage = storagePatterns.some(pattern => pattern.test(html));
 
@@ -2748,8 +2750,8 @@ class RealSecurityTestEngine {
 
       // 检测WebSocket连接
       const wsPatterns = [
-        /new\s+WebSocket\s*\(\s*["']ws:\/\/[^"']+["']/gi,
-        /new\s+WebSocket\s*\(\s*["']wss:\/\/[^"']+["']/gi
+        /new/s + WebSocket / s * /(/s * ["']ws:////[^"']+["'] / gi,
+        /new/s + WebSocket / s * /(/s * ["']wss:////[^"']+["'] / gi
       ];
 
       const hasInsecureWS = wsPatterns[0].test(html);
@@ -2787,70 +2789,71 @@ class RealSecurityTestEngine {
 
             // 检查Service Worker中的安全问题
             const securityIssues = [
-              { pattern: /fetch\s*\(\s*event\.request\s*\)/, issue: '未验证的请求转发' },
-              { pattern: /importScripts\s*\(\s*["'][^"']*http:\/\/[^"']*["']\s*\)/, issue: '不安全的脚本导入' }
-            ];
+              { pattern: /fetch/s * /(/s * event /.request / s * /)/, issue: '未验证的请求转发' },
+              {
+                pattern: /importScripts/s * /(/s * ["'][^"']*http:////[^"'] * ["']/s*/)/, issue: '不安全的脚本导入' }
+                ];
 
-            for (const { pattern, issue } of securityIssues) {
-              if (pattern.test(swContent)) {
-                results.vulnerabilities.push({
-                  type: 'Service Worker安全',
-                  severity: '中',
-                  description: `Service Worker中发现安全问题: ${issue}`,
-                  recommendation: '验证Service Worker中的所有网络请求和脚本导入'
-                });
+                for(const { pattern, issue } of securityIssues) {
+                  if (pattern.test(swContent)) {
+                    results.vulnerabilities.push({
+                      type: 'Service Worker安全',
+                      severity: '中',
+                      description: `Service Worker中发现安全问题: ${issue}`,
+                      recommendation: '验证Service Worker中的所有网络请求和脚本导入'
+                    });
+                  }
+                }
               }
-            }
-          }
         } catch (error) {
-          // Service Worker文件不存在或无法访问
+            // Service Worker文件不存在或无法访问
+          }
         }
-      }
 
     } catch (error) {
-      console.error('Service Worker security check failed:', error);
+        console.error('Service Worker security check failed:', error);
+      }
     }
-  }
 
   /**
    * 第三方集成安全检测
    */
   async checkThirdPartyIntegrations(url, results) {
-    try {
-      const response = await fetch(url, { timeout: 10000 });
-      const html = await response.text();
+      try {
+        const response = await fetch(url, { timeout: 10000 });
+        const html = await response.text();
 
-      // 检测常见的第三方集成
-      const thirdPartyPatterns = [
-        { pattern: /google-analytics\.com/gi, service: 'Google Analytics' },
-        { pattern: /googletagmanager\.com/gi, service: 'Google Tag Manager' },
-        { pattern: /facebook\.net/gi, service: 'Facebook Pixel' },
-        { pattern: /hotjar\.com/gi, service: 'Hotjar' },
-        { pattern: /intercom\.io/gi, service: 'Intercom' }
-      ];
+        // 检测常见的第三方集成
+        const thirdPartyPatterns = [
+          { pattern: /google-analytics/.com / gi, service: 'Google Analytics' },
+          { pattern: /googletagmanager/.com / gi, service: 'Google Tag Manager' },
+          { pattern: /facebook/.net / gi, service: 'Facebook Pixel' },
+          { pattern: /hotjar/.com / gi, service: 'Hotjar' },
+          { pattern: /intercom/.io / gi, service: 'Intercom' }
+        ];
 
-      const detectedServices = [];
+        const detectedServices = [];
 
-      for (const { pattern, service } of thirdPartyPatterns) {
-        if (pattern.test(html)) {
-          detectedServices.push(service);
+        for (const { pattern, service } of thirdPartyPatterns) {
+          if (pattern.test(html)) {
+            detectedServices.push(service);
+          }
         }
-      }
 
-      if (detectedServices.length > 0) {
-        results.vulnerabilities.push({
-          type: '第三方集成',
-          severity: '低',
-          description: `检测到 ${detectedServices.length} 个第三方服务集成`,
-          recommendation: '审查第三方服务的隐私政策，确保符合数据保护法规',
-          evidence: detectedServices
-        });
-      }
+        if (detectedServices.length > 0) {
+          results.vulnerabilities.push({
+            type: '第三方集成',
+            severity: '低',
+            description: `检测到 ${detectedServices.length} 个第三方服务集成`,
+            recommendation: '审查第三方服务的隐私政策，确保符合数据保护法规',
+            evidence: detectedServices
+          });
+        }
 
-    } catch (error) {
-      console.error('Third party integrations check failed:', error);
+      } catch (error) {
+        console.error('Third party integrations check failed:', error);
+      }
     }
-  }
 
   // ==================== 真实网络安全检查 ====================
 
@@ -2858,189 +2861,189 @@ class RealSecurityTestEngine {
    * 执行真实的网络安全检查
    */
   async performRealNetworkChecks(url, results) {
-    const urlObj = new URL(url);
+      const urlObj = new URL(url);
 
-    // DNS记录检查
-    await this.checkDNSRecords(urlObj.hostname, results);
+      // DNS记录检查
+      await this.checkDNSRecords(urlObj.hostname, results);
 
-    // 子域名发现
-    await this.discoverSubdomains(urlObj.hostname, results);
+      // 子域名发现
+      await this.discoverSubdomains(urlObj.hostname, results);
 
-    // 端口扫描（有限的）
-    await this.scanCommonPorts(urlObj.hostname, results);
+      // 端口扫描（有限的）
+      await this.scanCommonPorts(urlObj.hostname, results);
 
-    // 服务识别
-    await this.identifyServices(url, results);
-  }
+      // 服务识别
+      await this.identifyServices(url, results);
+    }
 
   /**
    * DNS记录检查
    */
   async checkDNSRecords(hostname, results) {
-    results.totalChecks++;
+      results.totalChecks++;
 
-    try {
-      // 检查常见的DNS记录类型
-      const dnsChecks = [
-        { type: 'A', description: 'IPv4地址记录' },
-        { type: 'AAAA', description: 'IPv6地址记录' },
-        { type: 'MX', description: '邮件交换记录' },
-        { type: 'TXT', description: '文本记录' },
-        { type: 'CNAME', description: '别名记录' }
-      ];
+      try {
+        // 检查常见的DNS记录类型
+        const dnsChecks = [
+          { type: 'A', description: 'IPv4地址记录' },
+          { type: 'AAAA', description: 'IPv6地址记录' },
+          { type: 'MX', description: '邮件交换记录' },
+          { type: 'TXT', description: '文本记录' },
+          { type: 'CNAME', description: '别名记录' }
+        ];
 
-      for (const check of dnsChecks) {
-        try {
-          // 这里应该使用真实的DNS查询，但在浏览器环境中受限
-          // 我们通过HTTP请求来间接检查
-          const testUrl = `https://${hostname}`;
-          const response = await fetch(testUrl, {
-            method: 'HEAD',
-            timeout: 5000
-          });
-
-          if (response.ok) {
-            results.dnsRecords.push({
-              type: check.type,
-              description: check.description,
-              status: 'resolved'
+        for (const check of dnsChecks) {
+          try {
+            // 这里应该使用真实的DNS查询，但在浏览器环境中受限
+            // 我们通过HTTP请求来间接检查
+            const testUrl = `https://${hostname}`;
+            const response = await fetch(testUrl, {
+              method: 'HEAD',
+              timeout: 5000
             });
-          }
-        } catch (error) {
-          // DNS解析失败
-        }
-      }
 
-      if (results.dnsRecords.length > 0) {
-        results.passedChecks++;
-      } else {
+            if (response.ok) {
+              results.dnsRecords.push({
+                type: check.type,
+                description: check.description,
+                status: 'resolved'
+              });
+            }
+          } catch (error) {
+            // DNS解析失败
+          }
+        }
+
+        if (results.dnsRecords.length > 0) {
+          results.passedChecks++;
+        } else {
+          results.failedChecks++;
+          results.findings.push({
+            type: 'DNS配置',
+            severity: '中',
+            description: 'DNS记录配置可能存在问题',
+            recommendation: '检查DNS配置是否正确'
+          });
+        }
+
+      } catch (error) {
         results.failedChecks++;
         results.findings.push({
-          type: 'DNS配置',
-          severity: '中',
-          description: 'DNS记录配置可能存在问题',
-          recommendation: '检查DNS配置是否正确'
+          type: 'DNS检查错误',
+          severity: '低',
+          description: `DNS检查失败: ${error.message}`,
+          recommendation: '检查网络连接和DNS配置'
         });
       }
-
-    } catch (error) {
-      results.failedChecks++;
-      results.findings.push({
-        type: 'DNS检查错误',
-        severity: '低',
-        description: `DNS检查失败: ${error.message}`,
-        recommendation: '检查网络连接和DNS配置'
-      });
     }
-  }
 
   /**
    * 执行真实的合规性检查
    */
   async performRealComplianceChecks(url, results) {
-    // GDPR合规性检查
-    await this.checkGDPRCompliance(url, results);
+      // GDPR合规性检查
+      await this.checkGDPRCompliance(url, results);
 
-    // 隐私政策检查
-    await this.checkPrivacyPolicy(url, results);
+      // 隐私政策检查
+      await this.checkPrivacyPolicy(url, results);
 
-    // Cookie合规性检查
-    await this.checkCookieCompliance(url, results);
-  }
+      // Cookie合规性检查
+      await this.checkCookieCompliance(url, results);
+    }
 
   /**
    * GDPR合规性检查
    */
   async checkGDPRCompliance(url, results) {
-    results.totalChecks++;
+      results.totalChecks++;
 
-    try {
-      const response = await fetch(url);
-      const html = await response.text();
+      try {
+        const response = await fetch(url);
+        const html = await response.text();
 
-      // 检查隐私政策链接
-      const hasPrivacyPolicy = /privacy|隐私|datenschutz/i.test(html);
+        // 检查隐私政策链接
+        const hasPrivacyPolicy = /privacy|隐私|datenschutz/i.test(html);
 
-      // 检查Cookie同意
-      const hasCookieConsent = /cookie.*consent|cookie.*notice|cookie.*banner/i.test(html);
+        // 检查Cookie同意
+        const hasCookieConsent = /cookie.*consent|cookie.*notice|cookie.*banner/i.test(html);
 
-      // 检查数据处理说明
-      const hasDataProcessing = /data.*processing|数据处理|datenverarbeitung/i.test(html);
+        // 检查数据处理说明
+        const hasDataProcessing = /data.*processing|数据处理|datenverarbeitung/i.test(html);
 
-      let complianceScore = 0;
-      if (hasPrivacyPolicy) complianceScore += 33;
-      if (hasCookieConsent) complianceScore += 33;
-      if (hasDataProcessing) complianceScore += 34;
+        let complianceScore = 0;
+        if (hasPrivacyPolicy) complianceScore += 33;
+        if (hasCookieConsent) complianceScore += 33;
+        if (hasDataProcessing) complianceScore += 34;
 
-      if (complianceScore >= 66) {
-        results.passedChecks++;
-        results.standards.push({
-          name: 'GDPR',
-          status: 'compliant',
-          score: complianceScore
-        });
-      } else {
+        if (complianceScore >= 66) {
+          results.passedChecks++;
+          results.standards.push({
+            name: 'GDPR',
+            status: 'compliant',
+            score: complianceScore
+          });
+        } else {
+          results.failedChecks++;
+          results.findings.push({
+            type: 'GDPR合规性',
+            severity: '高',
+            description: 'GDPR合规性检查未通过',
+            recommendation: '添加隐私政策、Cookie同意机制和数据处理说明'
+          });
+        }
+
+      } catch (error) {
         results.failedChecks++;
         results.findings.push({
-          type: 'GDPR合规性',
-          severity: '高',
-          description: 'GDPR合规性检查未通过',
-          recommendation: '添加隐私政策、Cookie同意机制和数据处理说明'
+          type: 'GDPR检查错误',
+          severity: '中',
+          description: `GDPR合规性检查失败: ${error.message}`,
+          recommendation: '检查目标URL是否可访问'
         });
       }
+    }
 
-    } catch (error) {
-      results.failedChecks++;
-      results.findings.push({
-        type: 'GDPR检查错误',
-        severity: '中',
-        description: `GDPR合规性检查失败: ${error.message}`,
-        recommendation: '检查目标URL是否可访问'
+    /**
+     * 计算网络安全分数
+     */
+    calculateNetworkScore(results) {
+      if (results.totalChecks === 0) return 0;
+
+      const passRate = results.passedChecks / results.totalChecks;
+      let score = Math.round(passRate * 100);
+
+      // 根据发现的问题调整分数
+      results.findings.forEach(finding => {
+        switch (finding.severity) {
+          case '高': score -= 20; break;
+          case '中': score -= 10; break;
+          case '低': score -= 5; break;
+        }
       });
+
+      return Math.max(0, score);
+    }
+
+    /**
+     * 计算合规性分数
+     */
+    calculateComplianceScore(results) {
+      if (results.totalChecks === 0) return 0;
+
+      const passRate = results.passedChecks / results.totalChecks;
+      let score = Math.round(passRate * 100);
+
+      // 根据发现的问题调整分数
+      results.findings.forEach(finding => {
+        switch (finding.severity) {
+          case '高': score -= 25; break;
+          case '中': score -= 15; break;
+          case '低': score -= 5; break;
+        }
+      });
+
+      return Math.max(0, score);
     }
   }
 
-  /**
-   * 计算网络安全分数
-   */
-  calculateNetworkScore(results) {
-    if (results.totalChecks === 0) return 0;
-
-    const passRate = results.passedChecks / results.totalChecks;
-    let score = Math.round(passRate * 100);
-
-    // 根据发现的问题调整分数
-    results.findings.forEach(finding => {
-      switch (finding.severity) {
-        case '高': score -= 20; break;
-        case '中': score -= 10; break;
-        case '低': score -= 5; break;
-      }
-    });
-
-    return Math.max(0, score);
-  }
-
-  /**
-   * 计算合规性分数
-   */
-  calculateComplianceScore(results) {
-    if (results.totalChecks === 0) return 0;
-
-    const passRate = results.passedChecks / results.totalChecks;
-    let score = Math.round(passRate * 100);
-
-    // 根据发现的问题调整分数
-    results.findings.forEach(finding => {
-      switch (finding.severity) {
-        case '高': score -= 25; break;
-        case '中': score -= 15; break;
-        case '低': score -= 5; break;
-      }
-    });
-
-    return Math.max(0, score);
-  }
-}
-
-module.exports = RealSecurityTestEngine;
+    module.exports = RealSecurityTestEngine;

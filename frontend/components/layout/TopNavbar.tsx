@@ -4,7 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { NotificationItem, useNotifications } from '../../hooks/useNotifications';
-import { globalSearchService, SearchResult } from '../../services/globalSearchService';
+import { globalSearchService, SearchResult } from '../../services/search/globalSearchService';
 import { ThemeToggle } from '../ui';
 import UserDropdownMenu from './UserDropdownMenu';
 

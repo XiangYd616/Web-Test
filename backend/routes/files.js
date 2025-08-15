@@ -15,7 +15,7 @@ const logger = require('../utils/logger');
 const router = express.Router();
 
 // 确保上传目录存在
-const uploadDir = path.join(__dirname, '../uploads');
+const uploadDir = path.join(__dirname, '../runtime/uploads');
 const ensureUploadDir = async () => {
   try {
     await fs.access(uploadDir);
@@ -106,7 +106,7 @@ router.post('/upload', authMiddleware, upload.single('file'), asyncHandler(async
 
   } catch (error) {
     logger.error('文件上传失败:', error);
-    
+
     // 清理上传的文件
     if (req.file) {
       try {

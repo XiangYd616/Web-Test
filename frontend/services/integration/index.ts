@@ -1,7 +1,7 @@
 // 🔗 集成服务统一导出
-// 从父目录导出集成服务
-export { globalSearchService } from '../globalSearchService';
-export { IntegrationService } from '../integrationService';
+// 从正确路径导出集成服务
+export { default as globalSearchService } from '../search/globalSearchService';
+export { IntegrationService } from './integrationService';
 
 // 其他集成相关服务
 export { configService } from './configService';

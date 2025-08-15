@@ -144,16 +144,16 @@ class DeviceDetector {
     const userAgent = navigator.userAgent;
 
     if (userAgent.includes('Chrome')) {
-      const match = userAgent.match(/Chrome\/(\d+)/);
+      const match = userAgent.match(/Chrome/\(/d+)/);
       return { name: 'Chrome', version: match ? match[1] : 'Unknown' };
     } else if (userAgent.includes('Firefox')) {
-      const match = userAgent.match(/Firefox\/(\d+)/);
+      const match = userAgent.match(/Firefox/\(/d+)/);
       return { name: 'Firefox', version: match ? match[1] : 'Unknown' };
     } else if (userAgent.includes('Safari')) {
-      const match = userAgent.match(/Safari\/(\d+)/);
+      const match = userAgent.match(/Safari/\(/d+)/);
       return { name: 'Safari', version: match ? match[1] : 'Unknown' };
     } else if (userAgent.includes('Edge')) {
-      const match = userAgent.match(/Edge\/(\d+)/);
+      const match = userAgent.match(/Edge/\(/d+)/);
       return { name: 'Edge', version: match ? match[1] : 'Unknown' };
     }
 
@@ -174,10 +174,10 @@ class DeviceDetector {
     } else if (platform.includes('Linux')) {
       return { name: 'Linux', version: 'Unknown' };
     } else if (userAgent.includes('Android')) {
-      const match = userAgent.match(/Android (\d+\.?\d*)/);
+      const match = userAgent.match(/Android (/d+/.?/d*)/);
       return { name: 'Android', version: match ? match[1] : 'Unknown' };
     } else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) {
-      const match = userAgent.match(/OS (\d+_?\d*)/);
+      const match = userAgent.match(/OS (/d+_?/d*)/);
       return { name: 'iOS', version: match ? match[1].replace('_', '.') : 'Unknown' };
     }
 
@@ -193,7 +193,7 @@ class DeviceDetector {
   }
 
   private static getMacVersion(userAgent: string): string {
-    const match = userAgent.match(/Mac OS X (\d+_?\d+_?\d*)/);
+    const match = userAgent.match(/Mac OS X (/d+_?/d+_?/d*)/);
     return match ? match[1].replace(/_/g, '.') : 'Unknown';
   }
 }

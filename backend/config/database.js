@@ -6,7 +6,7 @@
 const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
-const EnhancedDatabaseConnectionManager = require('../utils/EnhancedDatabaseConnectionManager');
+const EnhancedDatabaseConnectionManager = require('../utils/enhancedDatabaseConnectionManager');
 
 // 数据库连接池和管理器
 let pool = null;
@@ -502,8 +502,9 @@ const getDatabaseConfig = () => {
     host: dbConfig.host,
     port: dbConfig.port,
     database: dbConfig.database,
-    user: dbConfig.user,
-    password: dbConfig.password
+    username: dbConfig.user,
+    password: dbConfig.password,
+    dialect: 'postgres' // 添加dialect配置
   };
 };
 
@@ -523,5 +524,7 @@ module.exports = {
   getDatabaseConfig,
   // 兼容性导出
   db: { query },
-  pool: () => getPool()
+  pool: () => getPool(),
+  // Sequelize配置
+  ...getDatabaseConfig()
 };

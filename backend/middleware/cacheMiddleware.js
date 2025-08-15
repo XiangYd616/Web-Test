@@ -4,7 +4,7 @@
  */
 
 const crypto = require('crypto');
-const smartCacheService = require('../services/SmartCacheService');
+const smartCacheService = require('../services/smartCacheService');
 
 /**
  * 创建缓存中间件

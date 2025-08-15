@@ -420,16 +420,16 @@ class ReportService {
   private generateExcelReport(report: Report, analyticsData: any, monitoringStats: any, template: ReportTemplate): string {
     // 在真实环境中，这里会使用Excel生成库如SheetJS
     // 现在返回CSV格式的数据
-    let csv = '报告名称,生成时间,数据范围\n';
+    let csv = '报告名称,生成时间,数据范围/n';
     csv += `${report.name},${report.createdAt},${report.dateRange}\n\n`;
 
-    csv += '指标,数值\n';
+    csv += '指标,数值/n';
     csv += `总测试数,${analyticsData.totalTests}\n`;
     csv += `成功率,${analyticsData.successRate.toFixed(1)}%\n`;
     csv += `平均分数,${analyticsData.averageScore.toFixed(1)}\n`;
     csv += `在线站点,${monitoringStats.onlineSites}/${monitoringStats.totalSites}\n\n`;
 
-    csv += 'URL,测试次数,平均分数\n';
+    csv += 'URL,测试次数,平均分数/n';
     analyticsData.topUrls.forEach((url: any) => {
       csv += `${url.url},${url.count},${url.avgScore.toFixed(1)}\n`;
     });

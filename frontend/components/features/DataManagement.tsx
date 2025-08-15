@@ -12,7 +12,7 @@ import {
   Search
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import TestHistory from '..\ui\TestHistory.tsx';
+import TestHistory from '../ui/TestHistory.tsx';
 // import { TestStatisticsPanel } from './TestStatisticsPanel';
 // import { DataExportPanel } from './DataExportPanel';
 import { unifiedTestHistoryService } from '../../services/unifiedTestHistoryService';

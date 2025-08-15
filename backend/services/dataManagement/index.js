@@ -3,7 +3,7 @@
  * 整合测试历史、数据导入导出、统计分析等功能
  */
 
-const TestHistoryService = require('..\testing\TestHistoryService.js');
+const TestHistoryService = require('../testing/TestHistoryService.js');
 const DataExportService = require('./dataExportService');
 const DataImportService = require('./dataImportService');
 const StatisticsService = require('./statisticsService');

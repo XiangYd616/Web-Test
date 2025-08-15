@@ -55,7 +55,7 @@ const cleanUrl = (url) => {
 
   // 移除常见错误
   cleanedUrl = cleanedUrl.replace(/,/g, '.');
-  cleanedUrl = cleanedUrl.replace(/\s+/g, '');
+  cleanedUrl = cleanedUrl.replace(//s+/g, '');
 
   // 确保有协议
   if (!cleanedUrl.startsWith('http://') && !cleanedUrl.startsWith('https://')) {
@@ -237,10 +237,10 @@ router.post('/fetch-sitemap',
 
       // 简单解析sitemap中的URL
       const urls = [];
-      const urlMatches = response.data.match(/<loc>(.*?)<\/loc>/g);
+      const urlMatches = response.data.match(/<loc>(.*?)<//loc>/g);
       if (urlMatches) {
         urlMatches.forEach(match => {
-          const url = match.replace(/<\/?loc>/g, '').trim();
+          const url = match.replace(/<//?loc>/g, '').trim();
           if (url) {
             urls.push(url);
           }

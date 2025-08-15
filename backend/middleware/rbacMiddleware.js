@@ -4,7 +4,7 @@
  * 版本: v2.0.0
  */
 
-const { rbacService } = require('..\services\core\rbacService.js');
+const { rbacService } = require('../services/core/rbacService.js');
 const Logger = require('../utils/logger');
 
 // ==================== 权限中间件 ====================

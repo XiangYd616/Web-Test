@@ -1,311 +1,435 @@
-const { Server } = require('socket.io');
-const jwt = require('jsonwebtoken');
-const databaseService = require('./DatabaseService');
-
 /**
- * WebSocket服务类
- * 提供实时通信功能，支持测试进度推送和状态更新
+ * WebSocket服务
+ * 提供实时通信功能，支持测试进度推送、状态更新等
  */
+
+const WebSocket = require('ws');
+const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
+
 class WebSocketService {
   constructor() {
-    this.io = null;
-    this.connectedClients = new Map(); // 存储连接的客户端
-    this.testSubscriptions = new Map(); // 存储测试订阅关系
+    this.wss = null;
+    this.clients = new Map(); // 存储客户端连接信息
+    this.testSessions = new Map(); // 存储测试会话信息
+    this.rooms = new Map(); // 存储房间信息
   }
 
   /**
-   * 初始化WebSocket服务
+   * 初始化WebSocket服务器
    */
   initialize(server) {
-    this.io = new Server(server, {
-      cors: {
-        origin: process.env.FRONTEND_URL || "http://localhost:3000",
-        methods: ["GET", "POST"],
-        credentials: true
-      },
-      transports: ['websocket', 'polling']
+    this.wss = new WebSocket.Server({ 
+      server,
+      path: '/ws',
+      verifyClient: this.verifyClient.bind(this)
     });
 
-    this.setupEventHandlers();
-    console.log('✅ WebSocket服务初始化完成');
+    this.wss.on('connection', this.handleConnection.bind(this));
+    console.log('🔌 WebSocket服务已启动');
   }
 
   /**
-   * 设置事件处理器
+   * 验证客户端连接
    */
-  setupEventHandlers() {
-    this.io.on('connection', (socket) => {
-      console.log(`🔗 客户端连接: ${socket.id}`);
-
-      // 处理认证
-      socket.on('authenticate', async (token) => {
-        try {
-          const decoded = jwt.verify(token, process.env.JWT_SECRET);
-          socket.userId = decoded.userId;
-          socket.authenticated = true;
-          
-          this.connectedClients.set(socket.id, {
-            socket,
-            userId: decoded.userId,
-            connectedAt: new Date()
-          });
-
-          socket.emit('authenticated', { success: true, userId: decoded.userId });
-          console.log(`✅ 客户端认证成功: ${socket.id} (用户: ${decoded.userId})`);
-        } catch (error) {
-          socket.emit('authentication_error', { error: '认证失败' });
-          console.log(`❌ 客户端认证失败: ${socket.id}`);
-        }
-      });
-
-      // 处理测试订阅
-      socket.on('subscribe_test', (testId) => {
-        if (!socket.authenticated) {
-          socket.emit('error', { message: '请先进行认证' });
-          return;
-        }
-
-        socket.join(`test_${testId}`);
-        
-        // 记录订阅关系
-        if (!this.testSubscriptions.has(testId)) {
-          this.testSubscriptions.set(testId, new Set());
-        }
-        this.testSubscriptions.get(testId).add(socket.id);
-
-        socket.emit('subscribed', { testId });
-        console.log(`📡 客户端订阅测试: ${socket.id} -> ${testId}`);
-
-        // 发送当前测试状态
-        this.sendCurrentTestStatus(testId, socket);
-      });
-
-      // 处理取消订阅
-      socket.on('unsubscribe_test', (testId) => {
-        socket.leave(`test_${testId}`);
-        
-        if (this.testSubscriptions.has(testId)) {
-          this.testSubscriptions.get(testId).delete(socket.id);
-          if (this.testSubscriptions.get(testId).size === 0) {
-            this.testSubscriptions.delete(testId);
-          }
-        }
-
-        socket.emit('unsubscribed', { testId });
-        console.log(`📡 客户端取消订阅测试: ${socket.id} -> ${testId}`);
-      });
-
-      // 处理获取测试状态
-      socket.on('get_test_status', async (testId) => {
-        if (!socket.authenticated) {
-          socket.emit('error', { message: '请先进行认证' });
-          return;
-        }
-
-        try {
-          const status = await databaseService.getTestStatus(testId);
-          socket.emit('test_status', { testId, status });
-        } catch (error) {
-          socket.emit('error', { message: '获取测试状态失败', testId });
-        }
-      });
-
-      // 处理获取测试结果
-      socket.on('get_test_result', async (testId) => {
-        if (!socket.authenticated) {
-          socket.emit('error', { message: '请先进行认证' });
-          return;
-        }
-
-        try {
-          const result = await databaseService.getTestResult(testId);
-          socket.emit('test_result', { testId, result });
-        } catch (error) {
-          socket.emit('error', { message: '获取测试结果失败', testId });
-        }
-      });
-
-      // 处理断开连接
-      socket.on('disconnect', () => {
-        console.log(`🔌 客户端断开连接: ${socket.id}`);
-        
-        // 清理连接记录
-        this.connectedClients.delete(socket.id);
-        
-        // 清理订阅记录
-        for (const [testId, subscribers] of this.testSubscriptions) {
-          subscribers.delete(socket.id);
-          if (subscribers.size === 0) {
-            this.testSubscriptions.delete(testId);
-          }
-        }
-      });
-
-      // 处理错误
-      socket.on('error', (error) => {
-        console.error(`❌ WebSocket错误 (${socket.id}):`, error);
-      });
-    });
-  }
-
-  /**
-   * 发送当前测试状态
-   */
-  async sendCurrentTestStatus(testId, socket) {
+  verifyClient(info) {
     try {
-      const status = await databaseService.getTestStatus(testId);
-      socket.emit('test_status_update', {
-        testId,
-        status: status.status,
-        progress: status.progress,
-        message: status.message,
-        timestamp: new Date().toISOString()
-      });
+      const url = new URL(info.req.url, 'http://localhost');
+      const token = url.searchParams.get('token');
+      
+      if (!token) {
+        console.log('❌ WebSocket连接被拒绝: 缺少token');
+        return false;
+      }
+
+      // 验证JWT token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+      info.req.user = decoded;
+      return true;
     } catch (error) {
-      console.error(`获取测试状态失败 (${testId}):`, error);
+      console.log('❌ WebSocket连接被拒绝: token无效', error.message);
+      return false;
     }
   }
 
   /**
-   * 广播测试状态更新
+   * 处理新的WebSocket连接
    */
-  broadcastTestStatusUpdate(testId, status, progress, message) {
-    const updateData = {
-      testId,
-      status,
-      progress,
-      message,
-      timestamp: new Date().toISOString()
-    };
-
-    // 向订阅该测试的所有客户端广播
-    this.io.to(`test_${testId}`).emit('test_status_update', updateData);
+  handleConnection(ws, req) {
+    const clientId = uuidv4();
+    const user = req.user;
     
-    console.log(`📡 广播测试状态更新: ${testId} -> ${status} (${progress}%)`);
+    // 存储客户端信息
+    const clientInfo = {
+      id: clientId,
+      ws,
+      user,
+      connectedAt: new Date(),
+      lastPing: new Date(),
+      subscriptions: new Set()
+    };
+    
+    this.clients.set(clientId, clientInfo);
+    
+    console.log(`✅ 用户 ${user.email} 已连接 WebSocket (${clientId})`);
+
+    // 发送连接确认
+    this.sendToClient(clientId, {
+      type: 'connection_established',
+      clientId,
+      timestamp: new Date().toISOString()
+    });
+
+    // 设置消息处理
+    ws.on('message', (data) => this.handleMessage(clientId, data));
+    
+    // 设置连接关闭处理
+    ws.on('close', () => this.handleDisconnection(clientId));
+    
+    // 设置错误处理
+    ws.on('error', (error) => this.handleError(clientId, error));
+
+    // 设置心跳检测
+    ws.on('pong', () => {
+      if (this.clients.has(clientId)) {
+        this.clients.get(clientId).lastPing = new Date();
+      }
+    });
+  }
+
+  /**
+   * 处理客户端消息
+   */
+  handleMessage(clientId, data) {
+    try {
+      const message = JSON.parse(data);
+      const client = this.clients.get(clientId);
+      
+      if (!client) return;
+
+      console.log(`📨 收到消息 from ${clientId}:`, message.type);
+
+      switch (message.type) {
+        case 'subscribe_test':
+          this.handleTestSubscription(clientId, message.testId);
+          break;
+          
+        case 'unsubscribe_test':
+          this.handleTestUnsubscription(clientId, message.testId);
+          break;
+          
+        case 'join_room':
+          this.handleJoinRoom(clientId, message.room);
+          break;
+          
+        case 'leave_room':
+          this.handleLeaveRoom(clientId, message.room);
+          break;
+          
+        case 'ping':
+          this.sendToClient(clientId, { type: 'pong', timestamp: new Date().toISOString() });
+          break;
+          
+        default:
+          console.log(`⚠️ 未知消息类型: ${message.type}`);
+      }
+    } catch (error) {
+      console.error('❌ 处理WebSocket消息失败:', error);
+      this.sendToClient(clientId, {
+        type: 'error',
+        message: '消息处理失败',
+        error: error.message
+      });
+    }
+  }
+
+  /**
+   * 处理测试订阅
+   */
+  handleTestSubscription(clientId, testId) {
+    const client = this.clients.get(clientId);
+    if (!client) return;
+
+    client.subscriptions.add(`test:${testId}`);
+    
+    this.sendToClient(clientId, {
+      type: 'subscription_confirmed',
+      subscription: `test:${testId}`,
+      timestamp: new Date().toISOString()
+    });
+
+    console.log(`📡 客户端 ${clientId} 订阅测试 ${testId}`);
+  }
+
+  /**
+   * 处理测试取消订阅
+   */
+  handleTestUnsubscription(clientId, testId) {
+    const client = this.clients.get(clientId);
+    if (!client) return;
+
+    client.subscriptions.delete(`test:${testId}`);
+    
+    this.sendToClient(clientId, {
+      type: 'unsubscription_confirmed',
+      subscription: `test:${testId}`,
+      timestamp: new Date().toISOString()
+    });
+
+    console.log(`📡 客户端 ${clientId} 取消订阅测试 ${testId}`);
+  }
+
+  /**
+   * 处理加入房间
+   */
+  handleJoinRoom(clientId, roomName) {
+    if (!this.rooms.has(roomName)) {
+      this.rooms.set(roomName, new Set());
+    }
+    
+    this.rooms.get(roomName).add(clientId);
+    
+    const client = this.clients.get(clientId);
+    if (client) {
+      client.subscriptions.add(`room:${roomName}`);
+    }
+
+    this.sendToClient(clientId, {
+      type: 'room_joined',
+      room: roomName,
+      timestamp: new Date().toISOString()
+    });
+
+    console.log(`🏠 客户端 ${clientId} 加入房间 ${roomName}`);
+  }
+
+  /**
+   * 处理离开房间
+   */
+  handleLeaveRoom(clientId, roomName) {
+    if (this.rooms.has(roomName)) {
+      this.rooms.get(roomName).delete(clientId);
+      
+      // 如果房间为空，删除房间
+      if (this.rooms.get(roomName).size === 0) {
+        this.rooms.delete(roomName);
+      }
+    }
+    
+    const client = this.clients.get(clientId);
+    if (client) {
+      client.subscriptions.delete(`room:${roomName}`);
+    }
+
+    this.sendToClient(clientId, {
+      type: 'room_left',
+      room: roomName,
+      timestamp: new Date().toISOString()
+    });
+
+    console.log(`🏠 客户端 ${clientId} 离开房间 ${roomName}`);
+  }
+
+  /**
+   * 处理连接断开
+   */
+  handleDisconnection(clientId) {
+    const client = this.clients.get(clientId);
+    if (!client) return;
+
+    // 从所有房间中移除
+    for (const [roomName, members] of this.rooms.entries()) {
+      if (members.has(clientId)) {
+        members.delete(clientId);
+        if (members.size === 0) {
+          this.rooms.delete(roomName);
+        }
+      }
+    }
+
+    // 移除客户端
+    this.clients.delete(clientId);
+    
+    console.log(`❌ 客户端 ${clientId} 已断开连接`);
+  }
+
+  /**
+   * 处理连接错误
+   */
+  handleError(clientId, error) {
+    console.error(`❌ WebSocket错误 (${clientId}):`, error);
+  }
+
+  /**
+   * 发送消息给特定客户端
+   */
+  sendToClient(clientId, message) {
+    const client = this.clients.get(clientId);
+    if (!client || client.ws.readyState !== WebSocket.OPEN) {
+      return false;
+    }
+
+    try {
+      client.ws.send(JSON.stringify({
+        ...message,
+        timestamp: message.timestamp || new Date().toISOString()
+      }));
+      return true;
+    } catch (error) {
+      console.error(`❌ 发送消息失败 (${clientId}):`, error);
+      return false;
+    }
   }
 
   /**
    * 广播测试进度更新
    */
   broadcastTestProgress(testId, progress, currentStep, totalSteps, message) {
-    const progressData = {
+    const progressMessage = {
+      type: 'test_progress',
       testId,
-      progress,
+      progress: Math.min(100, Math.max(0, progress)),
       currentStep,
       totalSteps,
       message,
       timestamp: new Date().toISOString()
     };
 
-    this.io.to(`test_${testId}`).emit('test_progress_update', progressData);
-    
-    console.log(`📊 广播测试进度: ${testId} -> ${progress}% (${currentStep}/${totalSteps})`);
+    this.broadcastToSubscribers(`test:${testId}`, progressMessage);
+    console.log(`📊 广播测试进度: ${testId} - ${progress}%`);
+  }
+
+  /**
+   * 广播测试状态更新
+   */
+  broadcastTestStatusUpdate(testId, status, progress, message) {
+    const statusMessage = {
+      type: 'test_status_update',
+      testId,
+      status, // 'running', 'completed', 'failed', 'cancelled'
+      progress,
+      message,
+      timestamp: new Date().toISOString()
+    };
+
+    this.broadcastToSubscribers(`test:${testId}`, statusMessage);
+    console.log(`📡 广播测试状态: ${testId} - ${status}`);
   }
 
   /**
    * 广播测试完成
    */
-  broadcastTestCompleted(testId, results, success) {
-    const completionData = {
+  broadcastTestCompleted(testId, results, success = true) {
+    const completionMessage = {
+      type: 'test_completed',
       testId,
-      results,
       success,
-      completedAt: new Date().toISOString()
+      results,
+      timestamp: new Date().toISOString()
     };
 
-    this.io.to(`test_${testId}`).emit('test_completed', completionData);
-    
-    console.log(`🎉 广播测试完成: ${testId} -> ${success ? '成功' : '失败'}`);
+    this.broadcastToSubscribers(`test:${testId}`, completionMessage);
+    console.log(`✅ 广播测试完成: ${testId}`);
   }
 
   /**
    * 广播测试错误
    */
-  broadcastTestError(testId, error, errorCode) {
-    const errorData = {
+  broadcastTestError(testId, error, errorType = 'UNKNOWN_ERROR') {
+    const errorMessage = {
+      type: 'test_error',
       testId,
-      error: error.message || error,
-      errorCode,
+      error: {
+        message: error.message || error,
+        type: errorType,
+        stack: error.stack
+      },
       timestamp: new Date().toISOString()
     };
 
-    this.io.to(`test_${testId}`).emit('test_error', errorData);
-    
-    console.log(`❌ 广播测试错误: ${testId} -> ${error.message || error}`);
+    this.broadcastToSubscribers(`test:${testId}`, errorMessage);
+    console.log(`❌ 广播测试错误: ${testId} - ${error.message || error}`);
   }
 
   /**
-   * 发送系统通知
+   * 向订阅者广播消息
    */
-  broadcastSystemNotification(message, type = 'info', targetUsers = null) {
-    const notification = {
-      message,
-      type, // info, warning, error, success
-      timestamp: new Date().toISOString()
-    };
-
-    if (targetUsers && targetUsers.length > 0) {
-      // 发送给特定用户
-      for (const [socketId, client] of this.connectedClients) {
-        if (targetUsers.includes(client.userId)) {
-          client.socket.emit('system_notification', notification);
+  broadcastToSubscribers(subscription, message) {
+    let sentCount = 0;
+    
+    for (const [clientId, client] of this.clients.entries()) {
+      if (client.subscriptions.has(subscription)) {
+        if (this.sendToClient(clientId, message)) {
+          sentCount++;
         }
       }
-    } else {
-      // 广播给所有连接的客户端
-      this.io.emit('system_notification', notification);
     }
+    
+    return sentCount;
+  }
 
-    console.log(`📢 系统通知: ${message} (类型: ${type})`);
+  /**
+   * 向房间广播消息
+   */
+  broadcastToRoom(roomName, message) {
+    const room = this.rooms.get(roomName);
+    if (!room) return 0;
+
+    let sentCount = 0;
+    for (const clientId of room) {
+      if (this.sendToClient(clientId, message)) {
+        sentCount++;
+      }
+    }
+    
+    return sentCount;
   }
 
   /**
    * 获取连接统计
    */
-  getConnectionStats() {
+  getStats() {
     return {
-      totalConnections: this.connectedClients.size,
-      authenticatedConnections: Array.from(this.connectedClients.values())
-        .filter(client => client.socket.authenticated).length,
-      activeSubscriptions: this.testSubscriptions.size,
-      totalSubscribers: Array.from(this.testSubscriptions.values())
-        .reduce((total, subscribers) => total + subscribers.size, 0)
+      totalClients: this.clients.size,
+      totalRooms: this.rooms.size,
+      totalTestSessions: this.testSessions.size,
+      clients: Array.from(this.clients.values()).map(client => ({
+        id: client.id,
+        userId: client.user.id,
+        email: client.user.email,
+        connectedAt: client.connectedAt,
+        subscriptions: Array.from(client.subscriptions)
+      }))
     };
   }
 
   /**
-   * 获取测试订阅统计
+   * 启动心跳检测
    */
-  getTestSubscriptionStats() {
-    const stats = {};
-    for (const [testId, subscribers] of this.testSubscriptions) {
-      stats[testId] = subscribers.size;
-    }
-    return stats;
-  }
+  startHeartbeat() {
+    setInterval(() => {
+      const now = new Date();
+      const timeout = 30000; // 30秒超时
 
-  /**
-   * 清理过期连接
-   */
-  cleanupExpiredConnections() {
-    const now = new Date();
-    const expiredThreshold = 30 * 60 * 1000; // 30分钟
-
-    for (const [socketId, client] of this.connectedClients) {
-      if (now - client.connectedAt > expiredThreshold && !client.socket.connected) {
-        this.connectedClients.delete(socketId);
-        console.log(`🧹 清理过期连接: ${socketId}`);
+      for (const [clientId, client] of this.clients.entries()) {
+        if (now - client.lastPing > timeout) {
+          console.log(`💔 客户端 ${clientId} 心跳超时，断开连接`);
+          client.ws.terminate();
+          this.handleDisconnection(clientId);
+        } else if (client.ws.readyState === WebSocket.OPEN) {
+          client.ws.ping();
+        }
       }
-    }
+    }, 15000); // 每15秒检查一次
   }
 
   /**
    * 关闭WebSocket服务
    */
   close() {
-    if (this.io) {
-      this.io.close();
-      console.log('✅ WebSocket服务已关闭');
+    if (this.wss) {
+      this.wss.close();
+      console.log('🔌 WebSocket服务已关闭');
     }
   }
 }

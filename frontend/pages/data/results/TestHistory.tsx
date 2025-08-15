@@ -5,7 +5,7 @@
 
 import { FileText } from 'lucide-react';
 import React from 'react';
-import { PageLayout } from '..\..\..\components\layout\Layout.tsx';
+import { PageLayout } from '../../../components/layout/PageLayout.tsx';
 import TestHistoryComponent from './TestHistory.tsx';
 
 const TestHistory: React.FC = () => {

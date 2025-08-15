@@ -15,9 +15,9 @@
     <link rel="dns-prefetch" href="//api.example.com" />
     
     <!-- Preload Critical Resources -->
-    <link rel="preload" href="/src/index.css" as="style" onload="this.onload=null;this.rel='stylesheet'" crossorigin />
-    <noscript><link rel="stylesheet" href="/src/index.css"></noscript>
-    <link rel="preload" href="/src/main.tsx" as="script" crossorigin />
+    <link rel="preload" href="./frontend/index.css" as="style" onload="this.onload=null;this.rel='stylesheet'" crossorigin />
+    <noscript><link rel="stylesheet" href="./frontend/index.css"></noscript>
+    <link rel="preload" href="./frontend/main.tsx" as="script" crossorigin />
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -42,6 +42,6 @@
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="./frontend/main.tsx"></script>
   </body>
 </html>

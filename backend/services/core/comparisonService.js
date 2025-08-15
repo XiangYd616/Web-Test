@@ -3,7 +3,7 @@
  * 提供测试结果比较、性能对比、趋势分析功能
  */
 
-const Logger = require('..\..\middleware\logger.js');
+const Logger = require('../../middleware/logger.js');
 
 class ComparisonService {
   constructor() {

@@ -253,11 +253,32 @@ export interface AppConfig {
   };
 }
 
-// 导出所有类型 - 移除重复导出，这些类型已经在各自的文件中导出
-// export type {
-//   AlertCondition, AlertConfig,
-//   ApiResponse, AppConfig, BaseComponentProps, CustomEvent, ErrorProps,
-//   FormField,
-//   FormState, LoadingProps, MonitoringTarget, NotificationConfig, PaginatedResponse, PaginationMeta, PaginationParams, TestConfig,
-//   TestResult, TestType, Theme, User
-// };
+// 帮助系统相关类型
+export interface FAQFeedback {
+  faqId: string;
+  isHelpful: boolean;
+  userId?: string;
+}
+
+export interface FeedbackSubmission {
+  type: 'bug' | 'feature' | 'improvement' | 'question';
+  title: string;
+  description: string;
+  email: string;
+  priority: 'low' | 'medium' | 'high';
+  userId?: string;
+}
+
+export interface SearchResult {
+  id: string;
+  type: 'faq' | 'guide' | 'video' | 'download';
+  title: string;
+  description: string;
+  relevance: number;
+  url?: string;
+}
+
+export interface DownloadRequest {
+  resourceId: string;
+  userId?: string;
+}

@@ -21,7 +21,7 @@ router.get('/stats', asyncHandler(async (req, res) => {
     const [usersResult, testsResult, activeUsersResult] = await Promise.all([
       query('SELECT COUNT(*) as total FROM users'),
       query('SELECT COUNT(*) as total FROM test_sessions WHERE deleted_at IS NULL'),
-      query('SELECT COUNT(*) as total FROM users WHERE last_login >= NOW() - INTERVAL \'30 days\'')
+      query('SELECT COUNT(*) as total FROM users WHERE last_login >= NOW() - INTERVAL /'30 days\'')
     ]);
 
     res.json({

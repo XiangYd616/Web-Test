@@ -476,7 +476,7 @@ self.addEventListener('fetch', event => {
 
       resources.images.forEach(image => {
         // 检查图片格式
-        if (!image.url.match(/\.(webp|avif)$/i)) {
+        if (!image.url.match(//.(webp|avif)$/i)) {
           analysis.unoptimizedImages++;
           analysis.issues.push({
             type: 'format',
@@ -639,7 +639,7 @@ self.addEventListener('fetch', event => {
     };
 
     // 基于改进百分比估算收益
-    const improvementMatch = recommendation.estimatedImprovement.match(/(\d+)-?(\d+)?%/);
+    const improvementMatch = recommendation.estimatedImprovement.match(/(/d+)-?(/d+)?%/);
     if (improvementMatch) {
       const minImprovement = parseInt(improvementMatch[1]);
       const maxImprovement = parseInt(improvementMatch[2]) || minImprovement;
@@ -713,7 +713,7 @@ self.addEventListener('fetch', event => {
 
     // 累计所有建议的影响
     recommendations.forEach(rec => {
-      const improvementMatch = rec.estimatedImprovement.match(/(\d+)-?(\d+)?%/);
+      const improvementMatch = rec.estimatedImprovement.match(/(/d+)-?(/d+)?%/);
       if (improvementMatch) {
         const avgImprovement = (parseInt(improvementMatch[1]) + (parseInt(improvementMatch[2]) || parseInt(improvementMatch[1]))) / 2;
 

@@ -28,6 +28,18 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
   const { actualTheme } = useTheme();
   const [expandedGroups, setExpandedGroups] = useState<string[]>(['testing']);
 
+  // 悬浮菜单状态管理
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [hoverPosition, setHoverPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // 点击状态管理
+  const [clickedItem, setClickedItem] = useState<string | null>(null);
+  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const isAdmin = user?.role === 'admin';
 
   const sidebarItems: SidebarItem[] = [
@@ -223,17 +235,7 @@ const isGroupActiveByChild = (item: SidebarItem) => {
   return false;
 };
 
-// 悬浮菜单状态管理
-const [hoveredItem, setHoveredItem] = useState<string | null>(null);
-const [hoverPosition, setHoverPosition] = useState<{
-  top: number;
-  left: number;
-} | null>(null);
-const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-// 点击状态管理
-const [clickedItem, setClickedItem] = useState<string | null>(null);
-const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
 // 处理按钮点击效果
 const handleButtonClick = (itemId: string) => {

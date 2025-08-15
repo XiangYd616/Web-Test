@@ -136,7 +136,7 @@ class WebsiteTestEngine {
       const forms = $('form').length;
       
       // 文本内容分析
-      const textContent = $('body').text().replace(/\s+/g, ' ').trim();
+      const textContent = $('body').text().replace(//s+/g, ' ').trim();
       const wordCount = textContent.split(' ').length;
       
       this.testResults.results.content = {
@@ -301,7 +301,7 @@ class WebsiteTestEngine {
     if (!text || text.length < 100) return 0;
     
     const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
-    const words = text.split(/\s+/).filter(w => w.length > 0);
+    const words = text.split(//s+/).filter(w => w.length > 0);
     const syllables = words.reduce((count, word) => {
       return count + Math.max(1, word.match(/[aeiouAEIOU]/g)?.length || 1);
     }, 0);

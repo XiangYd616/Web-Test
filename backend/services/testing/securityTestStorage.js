@@ -3,7 +3,7 @@
  * 负责安全测试结果的数据库存储、查询和管理
  */
 
-const { query, transaction } = require('..\..\config\database.js');
+const { query, transaction } = require('../../config/database.js');
 const { v4: uuidv4 } = require('uuid');
 
 class SecurityTestStorage {

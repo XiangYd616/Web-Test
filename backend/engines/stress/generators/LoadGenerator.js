@@ -434,7 +434,7 @@ class LoadGenerator {
     // 计算头部大小
     if (response.headers) {
       Object.entries(response.headers).forEach(([key, value]) => {
-        size += Buffer.byteLength(`${key}: ${value}\r\n`, 'utf8');
+        size += Buffer.byteLength(`${key}: ${value}/r/n`, 'utf8');
       });
     }
     

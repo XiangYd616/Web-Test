@@ -30,8 +30,8 @@ class DataExportService extends EventEmitter {
       ]
     });
 
-    this.exportDir = path.join(__dirname, '../../exports');
-    this.tempDir = path.join(__dirname, '../../temp/exports');
+    this.exportDir = path.join(__dirname, '../../runtime/exports');
+    this.tempDir = path.join(__dirname, '../../runtime/temp/exports');
 
     // 导出任务队列
     this.exportQueue = new Map();
@@ -574,7 +574,7 @@ class DataExportService extends EventEmitter {
           }
 
           // 转义CSV特殊字符
-          if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+          if (value.includes(',') || value.includes('"') || value.includes('/n')) {
             value = `"${value.replace(/"/g, '""')}"`;
           }
 
@@ -582,9 +582,9 @@ class DataExportService extends EventEmitter {
         }).join(',');
       });
 
-      const csvContent = [csvHeader, ...csvRows].join('\n');
+      const csvContent = [csvHeader, ...csvRows].join('/n');
       // 添加UTF-8 BOM头以支持中文
-      const BOM = '\uFEFF';
+      const BOM = '/uFEFF';
       const csvWithBOM = BOM + csvContent;
       await fs.writeFile(filePath, csvWithBOM, 'utf8');
 

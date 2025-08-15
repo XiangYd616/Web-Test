@@ -1,7 +1,7 @@
 import { BarChart3, Book, ChevronRight, Clock, Code, Download, FileText, Filter, HelpCircle, Mail, MessageCircle, Phone, Play, Search, Send, Shield, Tag, ThumbsDown, ThumbsUp, Users, Video, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '..\..\..\contexts\AuthContext.tsx';
-import { helpService } from '..\..\..\services\helpService.ts';
+import { useAuth } from '../../../contexts/AuthContext.tsx';
+import { helpService } from '../../../services/helpService.ts';
 
 interface FAQItem {
   id: string;
@@ -165,7 +165,7 @@ const Help: React.FC = () => {
     {
       id: 'how-to-start-testing',
       question: '如何开始第一次测试？',
-      answer: '开始测试非常简单：\n\n1. 在测试页面输入您的网站URL\n2. 选择需要的测试类型（性能、安全、SEO等）\n3. 配置测试参数（可选）\n4. 点击"开始测试"按钮\n5. 等待测试完成并查看详细结果报告\n\n首次测试建议选择"综合测试"以获得全面的网站评估。',
+      answer: '开始测试非常简单：/n/n1. 在测试页面输入您的网站URL/n2. 选择需要的测试类型（性能、安全、SEO等）/n3. 配置测试参数（可选）/n4. 点击"开始测试"按钮/n5. 等待测试完成并查看详细结果报告/n/n首次测试建议选择"综合测试"以获得全面的网站评估。',
       category: 'getting-started',
       tags: ['快速开始', '测试流程', '新手指南'],
       helpful: 38,
@@ -175,7 +175,7 @@ const Help: React.FC = () => {
     {
       id: 'test-types-available',
       question: '支持哪些类型的测试？',
-      answer: '我们提供全面的测试服务：\n\n• 性能测试：页面加载速度、Core Web Vitals\n• 安全检测：漏洞扫描、SSL证书检查\n• SEO分析：搜索引擎优化建议\n• 兼容性测试：多浏览器、多设备测试\n• API测试：接口功能和性能测试\n• 可访问性检测：WCAG合规性检查\n• 内容分析：文本质量、图片优化\n• 移动端优化：响应式设计检测',
+      answer: '我们提供全面的测试服务：/n/n• 性能测试：页面加载速度、Core Web Vitals/n• 安全检测：漏洞扫描、SSL证书检查/n• SEO分析：搜索引擎优化建议/n• 兼容性测试：多浏览器、多设备测试/n• API测试：接口功能和性能测试/n• 可访问性检测：WCAG合规性检查/n• 内容分析：文本质量、图片优化/n• 移动端优化：响应式设计检测',
       category: 'testing',
       tags: ['测试类型', '功能列表', '测试范围'],
       helpful: 52,
@@ -185,7 +185,7 @@ const Help: React.FC = () => {
     {
       id: 'monitoring-frequency',
       question: '监控检查的频率是多少？',
-      answer: '监控频率根据您的订阅计划而定：\n\n• 免费版：每小时检查一次\n• 基础版：每30分钟检查一次\n• 专业版：每5分钟检查一次\n• 企业版：每分钟检查一次（可自定义）\n\n您可以在设置中调整监控频率，也可以设置特定时间段的监控策略。',
+      answer: '监控频率根据您的订阅计划而定：/n/n• 免费版：每小时检查一次/n• 基础版：每30分钟检查一次/n• 专业版：每5分钟检查一次/n• 企业版：每分钟检查一次（可自定义）/n/n您可以在设置中调整监控频率，也可以设置特定时间段的监控策略。',
       category: 'monitoring',
       tags: ['监控频率', '订阅计划', '实时监控'],
       helpful: 29,
@@ -195,7 +195,7 @@ const Help: React.FC = () => {
     {
       id: 'api-rate-limits',
       question: 'API调用有频率限制吗？',
-      answer: 'API调用限制如下：\n\n• 免费用户：每小时100次调用\n• 基础版：每小时500次调用\n• 专业版：每小时2000次调用\n• 企业版：每小时10000次调用\n\n超出限制后会返回429状态码，建议实现重试机制。企业用户可申请更高的调用限制。',
+      answer: 'API调用限制如下：/n/n• 免费用户：每小时100次调用/n• 基础版：每小时500次调用/n• 专业版：每小时2000次调用/n• 企业版：每小时10000次调用/n/n超出限制后会返回429状态码，建议实现重试机制。企业用户可申请更高的调用限制。',
       category: 'api',
       tags: ['API限制', '调用频率', '开发者'],
       helpful: 33,
@@ -205,7 +205,7 @@ const Help: React.FC = () => {
     {
       id: 'data-retention',
       question: '测试数据保存多长时间？',
-      answer: '数据保存期限：\n\n• 免费版：保存30天\n• 基础版：保存90天\n• 专业版：保存1年\n• 企业版：可自定义保存时间（最长5年）\n\n您可以随时导出历史数据，支持JSON、CSV、Excel等格式。重要数据建议定期备份。',
+      answer: '数据保存期限：/n/n• 免费版：保存30天/n• 基础版：保存90天/n• 专业版：保存1年/n• 企业版：可自定义保存时间（最长5年）/n/n您可以随时导出历史数据，支持JSON、CSV、Excel等格式。重要数据建议定期备份。',
       category: 'billing',
       tags: ['数据保存', '历史记录', '数据导出'],
       helpful: 41,

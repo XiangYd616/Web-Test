@@ -9,8 +9,8 @@ const { body, query, validationResult } = require('express-validator');
 
 const { getPool } = require('../../../config/database');
 const { authMiddleware, requirePlan, PLANS } = require('./auth.js');
-const { asyncHandler } = require('..\..\middleware\errorHandler.js');
-const { formatValidationErrors, createPagination, ERROR_CODES } = require('..\..\middleware\responseFormatter.js');
+const { asyncHandler } = require('../../middleware/errorHandler.js');
+const { formatValidationErrors, createPagination, ERROR_CODES } = require('../../middleware/responseFormatter.js');
 
 // 导入测试引擎
 const seoEngine = require('../../../engines/seo');
@@ -18,7 +18,7 @@ const performanceEngine = require('../../../engines/performance');
 const securityEngine = require('../../../engines/security');
 const apiEngine = require('../../../engines/api');
 const compatibilityEngine = require('../../../engines/compatibility');
-const accessibilityEngine = require('..\..\..\routes\accessibility.js');
+const accessibilityEngine = require('../../../routes/accessibility.js');
 const stressEngine = require('../../../engines/stress');
 
 const router = express.Router();

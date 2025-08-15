@@ -16,7 +16,7 @@ class SecurityHeadersAnalyzer {
         description: 'HTTP严格传输安全',
         recommendation: '添加HSTS头以强制HTTPS连接',
         validPatterns: [
-          /max-age=\d+/,
+          /max-age=/d+/,
           /includeSubDomains/,
           /preload/
         ],
@@ -31,7 +31,7 @@ class SecurityHeadersAnalyzer {
         dangerousValues: [
           /unsafe-inline/,
           /unsafe-eval/,
-          /\*/
+          //*/
         ]
       },
       
@@ -82,9 +82,9 @@ class SecurityHeadersAnalyzer {
         description: '权限策略',
         recommendation: '配置Permissions-Policy限制浏览器功能',
         validPatterns: [
-          /camera=\(\)/,
-          /microphone=\(\)/,
-          /geolocation=\(\)/
+          /camera=/(/)/,
+          /microphone=/(/)/,
+          /geolocation=/(/)/
         ]
       }
     };
@@ -299,7 +299,7 @@ class SecurityHeadersAnalyzer {
     const issues = [];
     
     // 检查max-age
-    const maxAgeMatch = value.match(/max-age=(\d+)/);
+    const maxAgeMatch = value.match(/max-age=(/d+)/);
     if (!maxAgeMatch) {
       issues.push({
         description: '缺少max-age指令',

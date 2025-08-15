@@ -114,7 +114,7 @@ const options = {
         // 分页响应格式
         PaginatedResponse: {
           allOf: [
-            { $ref: '#/components/schemas/ApiResponse' },
+            { $ref: '#/components/schemas/apiResponse' },
             {
               type: 'object',
               properties: {
@@ -340,7 +340,7 @@ const options = {
             password: {
               type: 'string',
               minLength: 8,
-              pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)',
+              pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*//d)',
               description: '密码（至少8位，包含大小写字母和数字）'
             },
             firstName: {

@@ -650,7 +650,7 @@ class RealTimePerformanceMonitor extends EventEmitter {
       'w': 7 * 24 * 60 * 60 * 1000
     };
 
-    const match = timeRange.match(/^(\d+)([hdw])$/);
+    const match = timeRange.match(/^(/d+)([hdw])$/);
     if (!match) return 24 * 60 * 60 * 1000; // 默认24小时
 
     const [, amount, unit] = match;

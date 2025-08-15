@@ -383,7 +383,7 @@ class ContentQualityAnalyzer {
     ];
 
     return positiveWords.reduce((count, word) => {
-      return count + (text.match(new RegExp(`\\b${word}\\b`, 'g')) || []).length;
+      return count + (text.match(new RegExp(`//b${word}//b`, 'g')) || []).length;
     }, 0);
   }
 
@@ -395,7 +395,7 @@ class ContentQualityAnalyzer {
     ];
 
     return negativeWords.reduce((count, word) => {
-      return count + (text.match(new RegExp(`\\b${word}\\b`, 'g')) || []).length;
+      return count + (text.match(new RegExp(`//b${word}//b`, 'g')) || []).length;
     }, 0);
   }
 
@@ -406,7 +406,7 @@ class ContentQualityAnalyzer {
     ];
 
     return neutralWords.reduce((count, word) => {
-      return count + (text.match(new RegExp(`\\b${word}\\b`, 'g')) || []).length;
+      return count + (text.match(new RegExp(`//b${word}//b`, 'g')) || []).length;
     }, 0);
   }
 
@@ -428,7 +428,7 @@ class ContentQualityAnalyzer {
     ];
 
     return actionVerbs.reduce((count, verb) => {
-      return count + (text.match(new RegExp(`\\b${verb}\\b`, 'g')) || []).length;
+      return count + (text.match(new RegExp(`//b${verb}//b`, 'g')) || []).length;
     }, 0);
   }
 
@@ -445,8 +445,8 @@ class ContentQualityAnalyzer {
   countPracticalExamples($) {
     const text = $('body').text().toLowerCase();
     const exampleIndicators = [
-      'for example', 'for instance', 'such as', 'like this', 'here\'s how',
-      'let\'s say', 'imagine', 'suppose', 'consider this', 'case study'
+      'for example', 'for instance', 'such as', 'like this', 'here/'s how',
+      'let/'s say', 'imagine', 'suppose', 'consider this', 'case study'
     ];
 
     return exampleIndicators.reduce((count, indicator) => {
@@ -462,7 +462,7 @@ class ContentQualityAnalyzer {
     ];
 
     return resourceIndicators.reduce((count, indicator) => {
-      return count + (text.match(new RegExp(`\\b${indicator}\\b`, 'g')) || []).length;
+      return count + (text.match(new RegExp(`//b${indicator}//b`, 'g')) || []).length;
     }, 0);
   }
 
@@ -586,11 +586,11 @@ class ContentQualityAnalyzer {
   countTechnicalTerms($) {
     const text = $('body').text().toLowerCase();
     const technicalPatterns = [
-      /\b\w+tion\b/g, // -tion endings
-      /\b\w+ment\b/g, // -ment endings
-      /\b\w+ness\b/g, // -ness endings
-      /\b\w+ity\b/g,  // -ity endings
-      /\b\w+ing\b/g   // -ing endings (filtered)
+      //b/w+tion/b/g, // -tion endings
+      //b/w+ment/b/g, // -ment endings
+      //b/w+ness/b/g, // -ness endings
+      //b/w+ity/b/g,  // -ity endings
+      //b/w+ing/b/g   // -ing endings (filtered)
     ];
 
     let count = 0;
@@ -605,11 +605,11 @@ class ContentQualityAnalyzer {
   countStatistics($) {
     const text = $('body').text();
     const statPatterns = [
-      /\d+%/g,                    // 百分比
-      /\$\d+/g,                   // 金额
-      /\d+,\d+/g,                 // 大数字
-      /\d+\.\d+/g,                // 小数
-      /\b\d+\s*(million|billion|thousand)\b/gi // 数量级
+      //d+%/g,                    // 百分比
+      //$/d+/g,                   // 金额
+      //d+,/d+/g,                 // 大数字
+      //d+/./d+/g,                // 小数
+      //b/d+/s*(million|billion|thousand)/b/gi // 数量级
     ];
 
     let count = 0;
@@ -633,7 +633,7 @@ class ContentQualityAnalyzer {
     const exampleKeywords = ['example', 'for instance', 'such as', 'like', 'including'];
 
     return exampleKeywords.reduce((count, keyword) => {
-      return count + (text.match(new RegExp(`\\b${keyword}\\b`, 'g')) || []).length;
+      return count + (text.match(new RegExp(`//b${keyword}//b`, 'g')) || []).length;
     }, 0);
   }
 
@@ -765,14 +765,14 @@ class ContentQualityAnalyzer {
 
   countQuestions($) {
     const text = $('body').text();
-    return (text.match(/\?/g) || []).length;
+    return (text.match(//?/g) || []).length;
   }
 
   countCallsToAction($) {
     const ctaWords = ['click', 'download', 'subscribe', 'buy', 'get', 'start', 'try', 'learn'];
     const text = $('body').text().toLowerCase();
     return ctaWords.reduce((count, word) => {
-      return count + (text.match(new RegExp(`\\b${word}\\b`, 'g')) || []).length;
+      return count + (text.match(new RegExp(`//b${word}//b`, 'g')) || []).length;
     }, 0);
   }
 
@@ -792,7 +792,7 @@ class ContentQualityAnalyzer {
 
   calculateTopicCoherence(headings, concepts) {
     // 简化的主题一致性计算
-    const headingWords = headings.join(' ').toLowerCase().split(/\s+/);
+    const headingWords = headings.join(' ').toLowerCase().split(//s+/);
     const conceptWords = concepts.map(c => c.concept);
 
     const overlap = headingWords.filter(word => conceptWords.includes(word)).length;
@@ -854,7 +854,7 @@ class ContentQualityAnalyzer {
     const pronouns = ['you', 'your', 'we', 'our', 'us', 'i', 'my', 'me'];
 
     return pronouns.reduce((count, pronoun) => {
-      return count + (text.match(new RegExp(`\\b${pronoun}\\b`, 'g')) || []).length;
+      return count + (text.match(new RegExp(`//b${pronoun}//b`, 'g')) || []).length;
     }, 0);
   }
 
@@ -867,7 +867,7 @@ class ContentQualityAnalyzer {
     ];
 
     return emotionalWords.reduce((count, word) => {
-      return count + (text.match(new RegExp(`\\b${word}\\b`, 'g')) || []).length;
+      return count + (text.match(new RegExp(`//b${word}//b`, 'g')) || []).length;
     }, 0);
   }
 
@@ -876,7 +876,7 @@ class ContentQualityAnalyzer {
     const timeWords = ['today', 'yesterday', 'tomorrow', 'recently', 'latest', 'current', 'now', '2024', '2023'];
 
     return timeWords.reduce((count, word) => {
-      return count + (text.match(new RegExp(`\\b${word}\\b`, 'g')) || []).length;
+      return count + (text.match(new RegExp(`//b${word}//b`, 'g')) || []).length;
     }, 0);
   }
 
@@ -906,7 +906,7 @@ class ContentQualityAnalyzer {
   }
 
   analyzeSentenceVariety(sentences) {
-    const lengths = sentences.map(s => s.split(/\s+/).length);
+    const lengths = sentences.map(s => s.split(//s+/).length);
     const avgLength = lengths.reduce((sum, len) => sum + len, 0) / lengths.length;
     const variance = lengths.reduce((sum, len) => sum + Math.pow(len - avgLength, 2), 0) / lengths.length;
     const varietyScore = Math.min(100, variance * 2);
@@ -1161,7 +1161,7 @@ class ContentQualityAnalyzer {
     }
 
     // 检测内容深度
-    const technicalTerms = content.match(/[A-Z]{2,}|[a-z]+[A-Z][a-z]+|\d+%|\d+px|\d+em/g) || [];
+    const technicalTerms = content.match(/[A-Z]{2,}|[a-z]+[A-Z][a-z]+|/d +%| /d+px|/d + em / g) || [];
     const depthScore = Math.min(technicalTerms.length / 10, 1) * 20;
     originalityScore += depthScore;
 
@@ -1214,18 +1214,18 @@ class ContentQualityAnalyzer {
   analyzeContentDepth(content, $) {
     const analysis = {
       wordCount: content.length,
-      paragraphCount: content.split(/\n\s*\n/).length,
-      averageParagraphLength: 0,
-      technicalTerms: [],
-      dataPoints: [],
-      citations: [],
-      depth: 'shallow'
+      paragraphCount: content.split(//n/s*/n/).length,
+        averageParagraphLength: 0,
+        technicalTerms: [],
+        dataPoints: [],
+        citations: [],
+        depth: 'shallow'
     };
 
     // 计算平均段落长度
-    const paragraphs = content.split(/\n\s*\n/).filter(p => p.trim().length > 0);
-    analysis.averageParagraphLength = paragraphs.length > 0 ?
-      Math.round(content.length / paragraphs.length) : 0;
+    const paragraphs = content.split(//n/s*/n/).filter(p => p.trim().length > 0);
+      analysis.averageParagraphLength = paragraphs.length > 0 ?
+        Math.round(content.length / paragraphs.length) : 0;
 
     // 检测技术术语
     const techPatterns = [
@@ -1241,12 +1241,12 @@ class ContentQualityAnalyzer {
 
     // 检测数据点
     const dataPatterns = [
-      /\d+%/g,
-      /\d+倍/g,
-      /\d+万/g,
-      /\d+亿/g,
-      /\d+年/g,
-      /\$\d+/g
+      //d+%/g,
+      //d+倍/g,
+      //d+万/g,
+      //d+亿/g,
+      //d+年/g,
+      //$/d+/g
     ];
 
     dataPatterns.forEach(pattern => {

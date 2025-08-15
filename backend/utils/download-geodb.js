@@ -123,7 +123,7 @@ class GeoDBDownloader {
           downloadedSize += chunk.length;
           if (totalSize > 0) {
             const progress = Math.round((downloadedSize / totalSize) * 100);
-            process.stdout.write(`\r📊 下载进度: ${progress}% (${Math.round(downloadedSize / 1024 / 1024)}MB/${Math.round(totalSize / 1024 / 1024)}MB)`);
+            process.stdout.write(`/r📊 下载进度: ${progress}% (${Math.round(downloadedSize / 1024 / 1024)}MB/${Math.round(totalSize / 1024 / 1024)}MB)`);
           }
         });
 
@@ -231,13 +231,13 @@ class GeoDBDownloader {
       }
     }
 
-    console.log(`\n📊 下载完成: ${successCount}/${databases.length} 个数据库`);
+    console.log(`/n📊 下载完成: ${successCount}/${databases.length} 个数据库`);
 
     if (successCount > 0) {
       console.log('\n✅ 地理位置数据库已准备就绪！');
       console.log('🚀 重启服务器以使用本地数据库查询');
     } else {
-      console.log('\n❌ 所有数据库下载失败');
+      console.log('/n❌ 所有数据库下载失败');
       console.log('💡 请检查许可证密钥和网络连接');
     }
 

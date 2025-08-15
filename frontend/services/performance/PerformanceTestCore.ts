@@ -894,7 +894,7 @@ export class PerformanceTestCore {
 
   private detectAnalytics(html: string): string[] {
     const patterns = [
-      { name: 'Google Analytics', pattern: /google-analytics|gtag|ga\(/ },
+      { name: 'Google Analytics', pattern: /google-analytics|gtag|ga/(/ },
       { name: 'Adobe Analytics', pattern: /omniture|s_code|adobe/ },
       { name: 'Mixpanel', pattern: /mixpanel/ },
       { name: 'Hotjar', pattern: /hotjar/ },
@@ -906,10 +906,10 @@ export class PerformanceTestCore {
 
   private detectSocialMedia(html: string): string[] {
     const patterns = [
-      { name: 'Facebook Pixel', pattern: /facebook\.net|fbevents/ },
-      { name: 'Twitter', pattern: /twitter\.com\/widgets/ },
-      { name: 'LinkedIn', pattern: /linkedin\.com/ },
-      { name: 'Pinterest', pattern: /pinterest\.com/ }
+      { name: 'Facebook Pixel', pattern: /facebook/.net|fbevents/ },
+      { name: 'Twitter', pattern: /twitter/.com//widgets/ },
+      { name: 'LinkedIn', pattern: /linkedin/.com/ },
+      { name: 'Pinterest', pattern: /pinterest/.com/ }
     ];
 
     return patterns.filter(p => p.pattern.test(html)).map(p => p.name);
@@ -919,7 +919,7 @@ export class PerformanceTestCore {
     const patterns = [
       { name: 'Google Ads', pattern: /googleadservices|googlesyndication/ },
       { name: 'Amazon Associates', pattern: /amazon-adsystem/ },
-      { name: 'Media.net', pattern: /media\.net/ }
+      { name: 'Media.net', pattern: /media/.net/ }
     ];
 
     return patterns.filter(p => p.pattern.test(html)).map(p => p.name);
@@ -927,8 +927,8 @@ export class PerformanceTestCore {
 
   private detectWebFonts(html: string): string[] {
     const patterns = [
-      { name: 'Google Fonts', pattern: /fonts\.googleapis\.com/ },
-      { name: 'Adobe Fonts', pattern: /typekit\.net|use\.typekit/ },
+      { name: 'Google Fonts', pattern: /fonts/.googleapis/.com/ },
+      { name: 'Adobe Fonts', pattern: /typekit/.net|use/.typekit/ },
       { name: 'Font Awesome', pattern: /fontawesome/ }
     ];
 
@@ -937,7 +937,7 @@ export class PerformanceTestCore {
 
   private detectMaps(html: string): string[] {
     const patterns = [
-      { name: 'Google Maps', pattern: /maps\.googleapis\.com/ },
+      { name: 'Google Maps', pattern: /maps/.googleapis/.com/ },
       { name: 'Mapbox', pattern: /mapbox/ },
       { name: 'OpenStreetMap', pattern: /openstreetmap/ }
     ];
@@ -957,8 +957,8 @@ export class PerformanceTestCore {
 
   private detectVideoPlayers(html: string): string[] {
     const patterns = [
-      { name: 'YouTube', pattern: /youtube\.com\/embed/ },
-      { name: 'Vimeo', pattern: /vimeo\.com/ },
+      { name: 'YouTube', pattern: /youtube/.com//embed/ },
+      { name: 'Vimeo', pattern: /vimeo/.com/ },
       { name: 'Wistia', pattern: /wistia/ }
     ];
 

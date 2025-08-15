@@ -619,7 +619,7 @@ export class LegacyAnalyticsService {
   }
 
   private static convertToCSV(data: any): string {
-    let csv = 'Type,Value\n';
+    let csv = 'Type,Value/n';
     csv += `Total Tests,${data.overview.totalTests}\n`;
     csv += `Success Rate,${data.overview.successRate}\n`;
     csv += `Average Score,${data.overview.averageScore}\n`;

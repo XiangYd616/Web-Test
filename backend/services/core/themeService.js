@@ -3,7 +3,7 @@
  * 提供主题配置、用户偏好、动态主题切换功能
  */
 
-const Logger = require('..\..\middleware\logger.js');
+const Logger = require('../../middleware/logger.js');
 
 class ThemeService {
   constructor() {
@@ -422,8 +422,8 @@ class ThemeService {
    */
   isValidColor(color) {
     const hexRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
-    const rgbRegex = /^rgb\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)$/;
-    const rgbaRegex = /^rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*[\d.]+\s*\)$/;
+    const rgbRegex = /^rgb/(/s*/d+/s*,/s*/d+/s*,/s*/d+/s*/)$/;
+    const rgbaRegex = /^rgba/(/s*/d+/s*,/s*/d+/s*,/s*/d+/s*,/s*[/d.]+/s*/)$/;
     
     return hexRegex.test(color) || rgbRegex.test(color) || rgbaRegex.test(color);
   }

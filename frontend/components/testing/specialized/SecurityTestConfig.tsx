@@ -328,12 +328,12 @@ export const SecurityTestConfig: React.FC<SecurityTestConfigProps> = ({
               排除模式 (每行一个正则表达式)
             </label>
             <textarea
-              value={advancedSettings.excludePatterns.join('\n')}
+              value={advancedSettings.excludePatterns.join('/n')}
               onChange={(e) => handleAdvancedSettingChange('excludePatterns',
-                e.target.value.split('\n').filter(p => p.trim())
+                e.target.value.split('/n').filter(p => p.trim())
               )}
               disabled={disabled}
-              placeholder=".*\.pdf$\n.*\.jpg$"
+              placeholder=".*/.pdf$/n.*/.jpg$"
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
             />

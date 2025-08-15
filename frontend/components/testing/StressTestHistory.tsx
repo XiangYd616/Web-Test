@@ -9,14 +9,14 @@ import {
   getStatusStyleClasses,
   getStatusText
 } from '../../utils/testStatusUtils';
-import { DeleteConfirmDialog } from '..\ui\DeleteConfirmDialog.tsx';
-import ExportModal from '..\ui\ExportModal.tsx';
-import { showToast } from '..\ui\Toast.tsx';
+import { DeleteConfirmDialog } from '../ui/DeleteConfirmDialog.tsx';
+import ExportModal from '../ui/ExportModal.tsx';
+import { showToast } from '../ui/Toast.tsx';
 import StressTestDetailModal from './StressTestDetailModal';
 
 import '../../styles/pagination.css';
-import './StatusLabel.css';
-import './StressTestHistory.css';
+// import './StatusLabel.css'; // CSS文件不存在，已注释
+// import './StressTestHistory.css'; // CSS文件不存在，已注释
 
 interface TestRecord {
   id: string;
@@ -730,7 +730,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
     const recordsToDelete = records.filter(r => selectedRecords.has(r.id));
     const recordNames = recordsToDelete.map(r => r.testName).join('、');
 
-    if (!confirm(`确定要删除以下 ${selectedRecords.size} 条测试记录吗？\n\n${recordNames}\n\n此操作无法撤销，删除后将无法恢复这些测试记录的所有数据。`)) {
+    if (!confirm(`确定要删除以下 ${selectedRecords.size} 条测试记录吗？/n/n${recordNames}/n/n此操作无法撤销，删除后将无法恢复这些测试记录的所有数据。`)) {
       return;
     }
 

@@ -208,14 +208,14 @@ export const UnifiedExportButton: React.FC<UnifiedExportButtonProps> = ({
               : value;
           }).join(',')
         )
-      ].join('\n');
+      ].join('/n');
       
       return csvContent;
     } else {
       // 对象转换为键值对CSV
       return Object.entries(data)
         .map(([key, value]) => `${key},${value}`)
-        .join('\n');
+        .join('/n');
     }
   };
 

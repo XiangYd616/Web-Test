@@ -1,6 +1,6 @@
 import { Activity, AlertTriangle, CheckCircle, Edit, ExternalLink, Filter, Globe, Pause, Play, Plus, RefreshCw, Search, Send, Shield, Trash2, Webhook, XCircle } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import IntegrationService, { WebhookConfig } from '..\..\..\services\integrationService.ts';
+import IntegrationService, { WebhookConfig } from '../../../services/integration/integrationService.ts';
 
 interface WebhooksProps { }
 
@@ -293,8 +293,8 @@ const Webhooks: React.FC<WebhooksProps> = () => {
                   <h4 className="font-medium text-white mb-1 flex items-center gap-2">
                     {webhook.name}
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${webhook.isActive
-                        ? 'text-green-400 bg-green-500/10 border-green-500/20'
-                        : 'text-gray-400 bg-gray-500/10 border-gray-500/20'
+                      ? 'text-green-400 bg-green-500/10 border-green-500/20'
+                      : 'text-gray-400 bg-gray-500/10 border-gray-500/20'
                       }`}>
                       {webhook.isActive ? '活跃' : '禁用'}
                     </span>

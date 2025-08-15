@@ -1,31 +1,4 @@
-interface FAQFeedback {
-  faqId: string;
-  isHelpful: boolean;
-  userId?: string;
-}
-
-interface FeedbackSubmission {
-  type: 'bug' | 'feature' | 'improvement' | 'question';
-  title: string;
-  description: string;
-  email: string;
-  priority: 'low' | 'medium' | 'high';
-  userId?: string;
-}
-
-interface SearchResult {
-  id: string;
-  type: 'faq' | 'guide' | 'video' | 'download';
-  title: string;
-  description: string;
-  relevance: number;
-  url?: string;
-}
-
-interface DownloadRequest {
-  resourceId: string;
-  userId?: string;
-}
+import type { DownloadRequest, FAQFeedback, FeedbackSubmission, SearchResult } from '../types/common';
 
 class HelpService {
   private baseUrl = '/api/help';
@@ -218,4 +191,5 @@ class HelpService {
 }
 
 export const helpService = new HelpService();
-export type { FAQFeedback, FeedbackSubmission, SearchResult, DownloadRequest };
+export type { DownloadRequest, FAQFeedback, FeedbackSubmission, SearchResult };
+

@@ -1,6 +1,6 @@
 import { Activity, AlertTriangle, CheckCircle, Clock, Copy, Edit, Eye, EyeOff, Filter, Key, Plus, RefreshCw, Search, Shield, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import IntegrationService, { APIKey } from '..\..\..\services\integrationService.ts';
+import IntegrationService, { APIKey } from '../../../services/integration/integrationService.ts';
 
 interface APIKeysProps { }
 
@@ -275,8 +275,8 @@ const APIKeys: React.FC<APIKeysProps> = () => {
                   <h4 className="font-medium text-white mb-1 flex items-center gap-2">
                     {apiKey.name}
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${apiKey.isActive
-                        ? 'text-green-400 bg-green-500/10 border-green-500/20'
-                        : 'text-gray-400 bg-gray-500/10 border-gray-500/20'
+                      ? 'text-green-400 bg-green-500/10 border-green-500/20'
+                      : 'text-gray-400 bg-gray-500/10 border-gray-500/20'
                       }`}>
                       {apiKey.isActive ? '活跃' : '禁用'}
                     </span>

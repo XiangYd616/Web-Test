@@ -1,6 +1,6 @@
 import { LucideIcon } from 'lucide-react';
 import React from 'react';
-import { useAuthCheck } from '../auth/withAuthCheck';
+import { useAuthCheck } from '../auth/WithAuthCheck';
 
 // 基础测试页面布局 - 提供共同的结构但允许完全自定义内容
 interface BaseTestLayoutProps {
@@ -116,21 +116,20 @@ export const TestStatusIndicator: React.FC<TestStatusIndicatorProps> = ({
     <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <div className={`w-3 h-3 rounded-full ${
-            config.color === 'gray' ? 'bg-gray-400' :
-            config.color === 'yellow' ? 'bg-yellow-400 animate-pulse' :
-            config.color === 'blue' ? 'bg-blue-400 animate-pulse' :
-            config.color === 'green' ? 'bg-green-400' :
-            'bg-red-400'
-          }`} />
+          <div className={`w-3 h-3 rounded-full ${config.color === 'gray' ? 'bg-gray-400' :
+              config.color === 'yellow' ? 'bg-yellow-400 animate-pulse' :
+                config.color === 'blue' ? 'bg-blue-400 animate-pulse' :
+                  config.color === 'green' ? 'bg-green-400' :
+                    'bg-red-400'
+            }`} />
           <span className="text-white font-medium">{config.text}</span>
           {message && <span className="text-gray-300">- {message}</span>}
         </div>
-        
+
         {status === 'running' && progress !== undefined && (
           <div className="flex items-center space-x-2">
             <div className="w-32 bg-gray-700 rounded-full h-2">
-              <div 
+              <div
                 className="bg-blue-400 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${progress}%` }}
               />
@@ -176,7 +175,7 @@ export const TestControlButtons: React.FC<TestControlButtonsProps> = ({
           {startLabel}
         </button>
       )}
-      
+
       {(status === 'running' || status === 'starting') && onStop && (
         <button
           onClick={onStop}
@@ -185,7 +184,7 @@ export const TestControlButtons: React.FC<TestControlButtonsProps> = ({
           {stopLabel}
         </button>
       )}
-      
+
       {onReset && (
         <button
           onClick={onReset}

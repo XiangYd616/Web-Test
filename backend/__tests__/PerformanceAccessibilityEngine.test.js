@@ -14,7 +14,7 @@
  * 更新时间: 2024-12-19
  */
 
-const PerformanceAccessibilityEngine = require('..\engines\performance\PerformanceAccessibilityEngine.js');
+const PerformanceAccessibilityEngine = require('../engines/performance/PerformanceAccessibilityEngine.js');
 const axios = require('axios');
 
 // Mock axios

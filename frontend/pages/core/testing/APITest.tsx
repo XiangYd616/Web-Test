@@ -1,12 +1,12 @@
 import { BarChart3, CheckCircle, Clock, Code, Database, Download, Eye, EyeOff, FileText, Globe, History, Key, Loader, Lock, Play, Plus, RotateCcw, Settings, Shield, Square, Trash2, XCircle, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { useAuthCheck } from '..\..\..\components\auth\withAuthCheck.tsx';
-import { URLInput } from '../components/testing';
-import BaseTestPage from '..\..\..\components\testing\BaseTestPage.tsx';
-import { ProgressBar } from '..\..\..\components\ui\ProgressBar.tsx';
-import { useUserStats } from '..\..\..\hooks\useUserStats.ts';
-import backgroundTestManager from '..\..\..\services\backgroundTestManager.ts';
-import type { APIEndpoint, APITestConfig } from '..\..\..\services\testing\apiTestEngine.ts';
+import { useAuthCheck } from '../../../components/auth/WithAuthCheck.tsx';
+import BaseTestPage from '../../../components/testing/BaseTestPage.tsx';
+import URLInput from '../../../components/testing/URLInput';
+import { ProgressBar } from '../../../components/ui/ProgressBar.tsx';
+import { useUserStats } from '../../../hooks/useUserStats.ts';
+import type { APIEndpoint, APITestConfig } from '../../../services/testing/apiTestEngine.ts';
+import backgroundTestManager from '../../../services/testing/backgroundTestManager.ts';
 
 // CSS样式已迁移到组件库中
 // 进度条样式已集成到ProgressBar组件
@@ -556,8 +556,8 @@ const APITest: React.FC = () => {
             ep.name, ep.method, ep.status, (Math.round(ep.responseTime * 100) / 100).toFixed(2), ep.statusCode, (ep.errors || []).length
           ]),
         ];
-        const BOM = '\uFEFF';
-        const csvContent = BOM + csvData.map(row => row.join(',')).join('\n');
+        const BOM = '/uFEFF';
+        const csvContent = BOM + csvData.map(row => row.join(',')).join('/n');
         const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
         const csvUrl = URL.createObjectURL(csvBlob);
         const csvLink = document.createElement('a');
