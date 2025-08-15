@@ -1,395 +1,250 @@
 /**
- * 性能测试引擎
- * 专注于网站性能指标测试
+ * 性能测试工具
+ * 真实实现性能测试功能，使用Lighthouse进行专业性能分析
  */
 
-const HttpTestEngine = require('../api/HttpTestEngine.js');
-const { AppError } = require('../../middleware/errorHandler');
+const lighthouse = require('lighthouse');
+const chromeLauncher = require('chrome-launcher');
+const Joi = require('joi');
 
-class PerformanceTestEngine extends HttpTestEngine {
-  constructor(options = {}) {
-    super({
-      name: 'PerformanceTestEngine',
-      version: '2.0.0',
-      ...options
-    });
-    
-    // 性能测试配置
-    this.perfConfig = {
-      iterations: 10,
-      warmupIterations: 3,
-      timeout: 30000,
-      collectDetailedMetrics: true,
-      ...options.perfConfig
-    };
-    
-    // 性能指标
-    this.performanceMetrics = {
-      dns: [],
-      tcp: [],
-      tls: [],
-      firstByte: [],
-      download: [],
-      total: [],
-      contentSize: [],
-      headers: []
-    };
+class PerformanceTestEngine {
+  constructor() {
+    this.name = 'performance';
+    this.activeTests = new Map();
+    this.defaultTimeout = 60000;
   }
 
   /**
-   * 验证性能测试配置
+   * 验证配置
    */
   validateConfig(config) {
-    super.validateConfig(config);
-    
-    if (!config.url) {
-      throw new AppError('Target URL is required for performance test', 400);
+    const schema = Joi.object({
+      url: Joi.string().uri().required(),
+      device: Joi.string().valid('desktop', 'mobile').default('desktop'),
+      throttling: Joi.string().valid('none', '3g', '4g').default('none'),
+      categories: Joi.array().items(
+        Joi.string().valid('performance', 'accessibility', 'best-practices', 'seo', 'pwa')
+      ).default(['performance']),
+      timeout: Joi.number().min(30000).max(300000).default(60000),
+      locale: Joi.string().default('zh-CN'),
+      onlyCategories: Joi.array().items(Joi.string()).optional(),
+      skipAudits: Joi.array().items(Joi.string()).optional()
+    });
+
+    const { error, value } = schema.validate(config);
+    if (error) {
+      throw new Error(`配置验证失败: ${error.details[0].message}`);
     }
-    
-    if (config.iterations && (config.iterations < 1 || config.iterations > 100)) {
-      throw new AppError('Iterations must be between 1 and 100', 400);
+
+    return value;
+  }
+
+  /**
+   * 检查可用性
+   */
+  async checkAvailability() {
+    try {
+      // 检查Chrome是否可用
+      const chrome = await chromeLauncher.launch({
+        chromeFlags: ['--headless', '--no-sandbox'],
+        logLevel: 'silent'
+      });
+
+      await chrome.kill();
+
+      return {
+        available: true,
+        version: {
+          lighthouse: require('lighthouse/package.json').version,
+          chromeLauncher: require('chrome-launcher/package.json').version
+        },
+        dependencies: ['lighthouse', 'chrome-launcher', 'puppeteer']
+      };
+    } catch (error) {
+      return {
+        available: false,
+        error: error.message,
+        dependencies: ['lighthouse', 'chrome-launcher', 'puppeteer']
+      };
     }
-    
-    return true;
   }
 
   /**
    * 执行性能测试
    */
-  async executeTest(config) {
-    const { url, iterations = this.perfConfig.iterations } = config;
-    
-    this.log('info', `Starting performance test`, { url, iterations });
-    
-    const testResult = {
-      success: true,
-      url,
-      iterations,
-      warmupResults: [],
-      testResults: [],
-      summary: {}
-    };
-    
+  async runPerformanceTest(config) {
+    const testId = `perf_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
     try {
-      // 预热阶段
-      this.updateProgress(0, 100, 'warmup', 'Running warmup iterations');
-      const warmupResults = await this.runWarmupIterations(url);
-      testResult.warmupResults = warmupResults;
-      
-      if (this.isCancelled()) return this.getCancelledResult();
-      
-      // 正式测试阶段
-      this.updateProgress(25, 100, 'testing', 'Running performance test iterations');
-      const testResults = await this.runTestIterations(url, iterations);
-      testResult.testResults = testResults;
-      
-      if (this.isCancelled()) return this.getCancelledResult();
-      
-      // 分析结果
-      this.updateProgress(90, 100, 'analyzing', 'Analyzing performance metrics');
-      const summary = this.analyzeResults(testResults);
-      testResult.summary = summary;
-      
-      this.updateProgress(100, 100, 'completed', 'Performance test completed');
-      
-      return testResult;
-      
-    } catch (error) {
-      this.log('error', `Performance test failed: ${error.message}`);
-      throw error;
-    }
-  }
+      const validatedConfig = this.validateConfig(config);
 
-  /**
-   * 运行预热迭代
-   */
-  async runWarmupIterations(url) {
-    const warmupResults = [];
-    
-    for (let i = 0; i < this.perfConfig.warmupIterations; i++) {
-      if (this.isCancelled()) break;
-      
+      this.activeTests.set(testId, {
+        status: 'running',
+        progress: 0,
+        startTime: Date.now()
+      });
+
+      this.updateTestProgress(testId, 10, '启动Chrome浏览器');
+
+      // 启动Chrome
+      const chrome = await chromeLauncher.launch({
+        chromeFlags: ['--headless', '--no-sandbox', '--disable-gpu'],
+        logLevel: 'silent'
+      });
+
       try {
-        const result = await this.runSingleIteration(url, `warmup_${i + 1}`);
-        warmupResults.push(result);
-        
-        this.updateProgress(
-          (i + 1) / this.perfConfig.warmupIterations * 25,
-          100,
-          'warmup',
-          `Warmup ${i + 1}/${this.perfConfig.warmupIterations}`
-        );
-        
-      } catch (error) {
-        this.log('warn', `Warmup iteration ${i + 1} failed: ${error.message}`);
-      }
-      
-      // 短暂延迟
-      await this.sleep(1000);
-    }
-    
-    return warmupResults;
-  }
+        this.updateTestProgress(testId, 20, '配置Lighthouse');
 
-  /**
-   * 运行测试迭代
-   */
-  async runTestIterations(url, iterations) {
-    const testResults = [];
-    
-    for (let i = 0; i < iterations; i++) {
-      if (this.isCancelled()) break;
-      
-      try {
-        const result = await this.runSingleIteration(url, `test_${i + 1}`);
-        testResults.push(result);
-        
-        // 收集性能指标
-        this.collectPerformanceMetrics(result);
-        
-        this.updateProgress(
-          25 + (i + 1) / iterations * 65,
-          100,
-          'testing',
-          `Test ${i + 1}/${iterations} - ${result.total}ms`
-        );
-        
-      } catch (error) {
-        this.log('warn', `Test iteration ${i + 1} failed: ${error.message}`);
-        this.recordMetric('error', 1, { type: 'iteration_error', iteration: i + 1 });
-      }
-      
-      // 迭代间延迟
-      await this.sleep(500);
-    }
-    
-    return testResults;
-  }
-
-  /**
-   * 运行单次迭代
-   */
-  async runSingleIteration(url, iterationId) {
-    const startTime = process.hrtime.bigint();
-    
-    try {
-      const result = await this.makeDetailedRequest(url);
-      const endTime = process.hrtime.bigint();
-      
-      const timing = {
-        id: iterationId,
-        timestamp: Date.now(),
-        dns: result.timings?.dns || 0,
-        tcp: result.timings?.tcp || 0,
-        tls: result.timings?.tls || 0,
-        firstByte: result.timings?.firstByte || 0,
-        download: result.timings?.download || 0,
-        total: Number(endTime - startTime) / 1000000, // 转换为毫秒
-        statusCode: result.statusCode,
-        contentLength: result.contentLength || 0,
-        headers: Object.keys(result.headers || {}).length
-      };
-      
-      this.recordMetric('responseTime', timing.total);
-      
-      if (result.statusCode >= 200 && result.statusCode < 300) {
-        this.recordMetric('success', 1);
-      } else {
-        this.recordMetric('failure', 1);
-      }
-      
-      return timing;
-      
-    } catch (error) {
-      this.recordMetric('failure', 1);
-      throw error;
-    }
-  }
-
-  /**
-   * 执行详细的HTTP请求（包含时间测量）
-   */
-  async makeDetailedRequest(url) {
-    const startTime = Date.now();
-    
-    // 这里可以集成更详细的时间测量
-    // 目前使用简化版本
-    const result = await this.makeRequest(url);
-    
-    const endTime = Date.now();
-    const totalTime = endTime - startTime;
-    
-    return {
-      ...result,
-      contentLength: result.body ? Buffer.byteLength(result.body) : 0,
-      timings: {
-        total: totalTime,
-        dns: Math.round(totalTime * 0.1), // 模拟DNS时间
-        tcp: Math.round(totalTime * 0.1), // 模拟TCP时间
-        tls: Math.round(totalTime * 0.1), // 模拟TLS时间
-        firstByte: Math.round(totalTime * 0.6), // 模拟首字节时间
-        download: Math.round(totalTime * 0.1) // 模拟下载时间
-      }
-    };
-  }
-
-  /**
-   * 收集性能指标
-   */
-  collectPerformanceMetrics(result) {
-    if (!this.perfConfig.collectDetailedMetrics) return;
-    
-    this.performanceMetrics.dns.push(result.dns);
-    this.performanceMetrics.tcp.push(result.tcp);
-    this.performanceMetrics.tls.push(result.tls);
-    this.performanceMetrics.firstByte.push(result.firstByte);
-    this.performanceMetrics.download.push(result.download);
-    this.performanceMetrics.total.push(result.total);
-    this.performanceMetrics.contentSize.push(result.contentLength);
-    this.performanceMetrics.headers.push(result.headers);
-  }
-
-  /**
-   * 分析测试结果
-   */
-  analyzeResults(testResults) {
-    if (testResults.length === 0) {
-      return { error: 'No test results to analyze' };
-    }
-    
-    const summary = {
-      iterations: testResults.length,
-      timing: this.calculateTimingStats(testResults),
-      performance: this.calculatePerformanceStats(),
-      reliability: this.calculateReliabilityStats(testResults),
-      recommendations: this.generateRecommendations(testResults)
-    };
-    
-    return summary;
-  }
-
-  /**
-   * 计算时间统计
-   */
-  calculateTimingStats(results) {
-    const times = results.map(r => r.total).sort((a, b) => a - b);
-    
-    return {
-      min: Math.min(...times),
-      max: Math.max(...times),
-      avg: times.reduce((a, b) => a + b, 0) / times.length,
-      median: times[Math.floor(times.length / 2)],
-      p95: times[Math.floor(times.length * 0.95)],
-      p99: times[Math.floor(times.length * 0.99)],
-      stdDev: this.calculateStandardDeviation(times)
-    };
-  }
-
-  /**
-   * 计算性能统计
-   */
-  calculatePerformanceStats() {
-    if (!this.perfConfig.collectDetailedMetrics) {
-      return { message: 'Detailed metrics collection disabled' };
-    }
-    
-    const stats = {};
-    
-    for (const [metric, values] of Object.entries(this.performanceMetrics)) {
-      if (values.length > 0 && typeof values[0] === 'number') {
-        const sorted = [...values].sort((a, b) => a - b);
-        stats[metric] = {
-          min: Math.min(...sorted),
-          max: Math.max(...sorted),
-          avg: sorted.reduce((a, b) => a + b, 0) / sorted.length,
-          median: sorted[Math.floor(sorted.length / 2)]
+        // 配置Lighthouse选项
+        const options = {
+          logLevel: 'silent',
+          output: 'json',
+          onlyCategories: validatedConfig.categories,
+          port: chrome.port,
+          locale: validatedConfig.locale
         };
+
+        // 设备配置
+        if (validatedConfig.device === 'mobile') {
+          options.emulatedFormFactor = 'mobile';
+        } else {
+          options.emulatedFormFactor = 'desktop';
+        }
+
+        this.updateTestProgress(testId, 30, '开始性能分析');
+
+        // 运行Lighthouse
+        const runnerResult = await lighthouse(validatedConfig.url, options);
+
+        this.updateTestProgress(testId, 80, '分析测试结果');
+
+        // 解析结果
+        const results = this.parseResults(runnerResult, validatedConfig);
+        results.testId = testId;
+        results.timestamp = new Date().toISOString();
+        results.totalTime = Date.now() - this.activeTests.get(testId).startTime;
+
+        this.updateTestProgress(testId, 100, '测试完成');
+
+        this.activeTests.set(testId, {
+          status: 'completed',
+          progress: 100,
+          results
+        });
+
+        return results;
+
+      } finally {
+        // 确保Chrome进程被关闭
+        await chrome.kill();
       }
-    }
-    
-    return stats;
-  }
 
-  /**
-   * 计算可靠性统计
-   */
-  calculateReliabilityStats(results) {
-    const successCount = results.filter(r => r.statusCode >= 200 && r.statusCode < 300).length;
-    const errorCount = results.length - successCount;
-    
-    return {
-      successRate: (successCount / results.length * 100).toFixed(2),
-      errorRate: (errorCount / results.length * 100).toFixed(2),
-      totalRequests: results.length,
-      successfulRequests: successCount,
-      failedRequests: errorCount
-    };
-  }
-
-  /**
-   * 生成性能建议
-   */
-  generateRecommendations(results) {
-    const recommendations = [];
-    const avgTime = results.reduce((sum, r) => sum + r.total, 0) / results.length;
-    
-    if (avgTime > 3000) {
-      recommendations.push({
-        type: 'performance',
-        severity: 'high',
-        message: '平均响应时间超过3秒，建议优化服务器性能或使用CDN'
+    } catch (error) {
+      this.activeTests.set(testId, {
+        status: 'failed',
+        progress: 0,
+        error: error.message
       });
-    } else if (avgTime > 1000) {
-      recommendations.push({
-        type: 'performance',
-        severity: 'medium',
-        message: '响应时间可以进一步优化，建议检查数据库查询和缓存策略'
+
+      throw error;
+    }
+  }
+
+  /**
+   * 解析Lighthouse结果
+   */
+  parseResults(runnerResult, config) {
+    const lhr = runnerResult.lhr;
+
+    const results = {
+      url: config.url,
+      device: config.device,
+      scores: {},
+      metrics: {},
+      opportunities: [],
+      diagnostics: [],
+      audits: {}
+    };
+
+    // 提取分数
+    if (lhr.categories) {
+      Object.keys(lhr.categories).forEach(category => {
+        results.scores[category] = Math.round(lhr.categories[category].score * 100);
       });
     }
-    
-    const errorRate = results.filter(r => r.statusCode >= 400).length / results.length;
-    if (errorRate > 0.05) {
-      recommendations.push({
-        type: 'reliability',
-        severity: 'high',
-        message: '错误率超过5%，建议检查服务器稳定性和错误处理'
+
+    // 提取核心Web指标
+    if (lhr.audits) {
+      const coreMetrics = {
+        'first-contentful-paint': 'FCP',
+        'largest-contentful-paint': 'LCP',
+        'first-input-delay': 'FID',
+        'cumulative-layout-shift': 'CLS',
+        'speed-index': 'Speed Index',
+        'total-blocking-time': 'TBT',
+        'interactive': 'TTI'
+      };
+
+      Object.keys(coreMetrics).forEach(auditId => {
+        if (lhr.audits[auditId]) {
+          const audit = lhr.audits[auditId];
+          results.metrics[coreMetrics[auditId]] = {
+            value: audit.numericValue,
+            displayValue: audit.displayValue,
+            score: audit.score
+          };
+        }
+      });
+
+      // 提取优化建议
+      Object.keys(lhr.audits).forEach(auditId => {
+        const audit = lhr.audits[auditId];
+        if (audit.details && audit.details.type === 'opportunity' && audit.score < 1) {
+          results.opportunities.push({
+            id: auditId,
+            title: audit.title,
+            description: audit.description,
+            score: audit.score,
+            savings: audit.details.overallSavingsMs || 0
+          });
+        }
       });
     }
-    
-    return recommendations;
+
+    return results;
   }
 
   /**
-   * 计算标准差
+   * 更新测试进度
    */
-  calculateStandardDeviation(values) {
-    const avg = values.reduce((a, b) => a + b, 0) / values.length;
-    const squareDiffs = values.map(value => Math.pow(value - avg, 2));
-    const avgSquareDiff = squareDiffs.reduce((a, b) => a + b, 0) / squareDiffs.length;
-    return Math.sqrt(avgSquareDiff);
+  updateTestProgress(testId, progress, message) {
+    const test = this.activeTests.get(testId);
+    if (test) {
+      test.progress = progress;
+      test.message = message;
+      this.activeTests.set(testId, test);
+      console.log(`[${this.name.toUpperCase()}-${testId}] ${progress}% - ${message}`);
+    }
   }
 
   /**
-   * 获取取消结果
+   * 获取测试状态
    */
-  getCancelledResult() {
-    return {
-      success: false,
-      cancelled: true,
-      summary: { message: 'Performance test was cancelled by user' }
-    };
+  getTestStatus(testId) {
+    return this.activeTests.get(testId);
   }
 
   /**
-   * 获取扩展状态
+   * 停止测试
    */
-  getStatus() {
-    const baseStatus = super.getStatus();
-    return {
-      ...baseStatus,
-      performanceMetrics: this.performanceMetrics,
-      perfConfig: this.perfConfig
-    };
+  async stopTest(testId) {
+    const test = this.activeTests.get(testId);
+    if (test && test.status === 'running') {
+      test.status = 'cancelled';
+      this.activeTests.set(testId, test);
+      return true;
+    }
+    return false;
   }
 }
 

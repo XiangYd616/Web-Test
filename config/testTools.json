@@ -1,0 +1,163 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-08-15T12:32:13.303Z",
+  "tools": [
+    {
+      "id": "api",
+      "name": "API测试",
+      "description": "REST API端点测试、负载测试、安全测试",
+      "category": "performance",
+      "enabled": true,
+      "defaultConfig": {
+        "url": "",
+        "timeout": 30000,
+        "retries": 2,
+        "advanced": {}
+      },
+      "estimatedTime": 2,
+      "dependencies": [
+        "axios"
+      ]
+    },
+    {
+      "id": "compatibility",
+      "name": "兼容性测试",
+      "description": "多浏览器、多设备兼容性测试",
+      "category": "quality",
+      "enabled": true,
+      "defaultConfig": {
+        "url": "",
+        "timeout": 30000,
+        "retries": 2,
+        "advanced": {}
+      },
+      "estimatedTime": 8,
+      "dependencies": [
+        "playwright"
+      ]
+    },
+    {
+      "id": "infrastructure",
+      "name": "基础设施测试",
+      "description": "服务器监控、网络连接、系统资源测试",
+      "category": "performance",
+      "enabled": true,
+      "defaultConfig": {
+        "url": "",
+        "timeout": 30000,
+        "retries": 2,
+        "advanced": {}
+      },
+      "estimatedTime": 3,
+      "dependencies": [
+        "axios"
+      ]
+    },
+    {
+      "id": "performance",
+      "name": "性能测试",
+      "description": "Core Web Vitals、页面速度、可访问性测试",
+      "category": "performance",
+      "enabled": true,
+      "defaultConfig": {
+        "url": "",
+        "timeout": 30000,
+        "retries": 2,
+        "advanced": {}
+      },
+      "estimatedTime": 5,
+      "dependencies": [
+        "lighthouse",
+        "puppeteer"
+      ]
+    },
+    {
+      "id": "security",
+      "name": "安全测试",
+      "description": "SSL检查、漏洞扫描、OWASP Top 10测试",
+      "category": "security",
+      "enabled": true,
+      "defaultConfig": {
+        "url": "",
+        "timeout": 30000,
+        "retries": 2,
+        "advanced": {}
+      },
+      "estimatedTime": 6,
+      "dependencies": [
+        "puppeteer",
+        "axe-puppeteer"
+      ]
+    },
+    {
+      "id": "seo",
+      "name": "SEO测试",
+      "description": "Meta分析、结构化数据、技术SEO测试",
+      "category": "analysis",
+      "enabled": true,
+      "defaultConfig": {
+        "url": "",
+        "timeout": 30000,
+        "retries": 2,
+        "advanced": {}
+      },
+      "estimatedTime": 3,
+      "dependencies": [
+        "cheerio",
+        "puppeteer"
+      ]
+    },
+    {
+      "id": "stress",
+      "name": "压力测试",
+      "description": "负载测试、并发测试、性能极限测试",
+      "category": "performance",
+      "enabled": true,
+      "defaultConfig": {
+        "url": "",
+        "timeout": 30000,
+        "retries": 2,
+        "advanced": {}
+      },
+      "estimatedTime": 10,
+      "dependencies": [
+        "k6"
+      ]
+    },
+    {
+      "id": "ux",
+      "name": "UX测试",
+      "description": "用户体验分析、交互测试、可用性评估",
+      "category": "quality",
+      "enabled": true,
+      "defaultConfig": {
+        "url": "",
+        "timeout": 30000,
+        "retries": 2,
+        "advanced": {}
+      },
+      "estimatedTime": 7,
+      "dependencies": [
+        "puppeteer"
+      ]
+    },
+    {
+      "id": "website",
+      "name": "网站测试",
+      "description": "网站综合评估、内容分析、技术指标",
+      "category": "analysis",
+      "enabled": true,
+      "defaultConfig": {
+        "url": "",
+        "timeout": 30000,
+        "retries": 2,
+        "advanced": {}
+      },
+      "estimatedTime": 4,
+      "dependencies": [
+        "puppeteer",
+        "cheerio"
+      ]
+    }
+  ]
+}

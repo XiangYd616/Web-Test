@@ -1,412 +1,551 @@
+/**
+ * 用户体验测试工具
+ * 真实实现可访问性审计、可用性测试、交互测试
+ */
+
 const puppeteer = require('puppeteer');
-const lighthouse = require('lighthouse');
-const chromeLauncher = require('chrome-launcher');
+const Joi = require('joi');
 
-class UXTestEngine {
+class UxTestEngine {
   constructor() {
-    this.testResults = {
-      performance: {},
-      accessibility: {},
-      usability: {},
-      mobile: {},
-      score: 0,
-      recommendations: []
-    };
+    this.name = 'ux';
+    this.activeTests = new Map();
+    this.defaultTimeout = 60000;
   }
 
-  async runUXTest(url, config = {}) {
-    console.log(`开始UX测试: ${url}`);
+  /**
+   * 验证配置
+   */
+  validateConfig(config) {
+    const schema = Joi.object({
+      url: Joi.string().uri().required(),
+      checks: Joi.array().items(
+        Joi.string().valid('accessibility', 'usability', 'interactions', 'mobile', 'forms')
+      ).default(['accessibility', 'usability', 'interactions']),
+      timeout: Joi.number().min(30000).max(300000).default(60000),
+      device: Joi.string().valid('desktop', 'mobile', 'tablet').default('desktop'),
+      viewport: Joi.object({
+        width: Joi.number().min(320).max(1920).default(1366),
+        height: Joi.number().min(240).max(1080).default(768)
+      }).default({ width: 1366, height: 768 }),
+      waitForSelector: Joi.string().optional(),
+      interactions: Joi.array().items(Joi.object({
+        type: Joi.string().valid('click', 'type', 'scroll', 'hover').required(),
+        selector: Joi.string().required(),
+        value: Joi.string().optional()
+      })).default([])
+    });
 
-    try {
-      // 1. 性能测试
-      if (config.checkPerformance !== false) {
-        await this.checkPerformance(url);
-      }
-
-      // 2. 可访问性测试
-      if (config.checkAccessibility !== false) {
-        await this.checkAccessibility(url);
-      }
-
-      // 3. 可用性测试
-      if (config.checkUsability !== false) {
-        await this.checkUsability(url);
-      }
-
-      // 4. 移动端适配测试
-      if (config.checkMobile !== false) {
-        await this.checkMobileCompatibility(url);
-      }
-
-      // 5. 计算UX评分
-      this.calculateUXScore();
-
-      return {
-        success: true,
-        results: this.testResults,
-        timestamp: new Date().toISOString()
-      };
-
-    } catch (error) {
-      console.error('UX测试失败:', error);
-      return {
-        success: false,
-        error: error.message,
-        timestamp: new Date().toISOString()
-      };
+    const { error, value } = schema.validate(config);
+    if (error) {
+      throw new Error(`配置验证失败: ${error.details[0].message}`);
     }
+
+    return value;
   }
 
-  async checkPerformance(url) {
+  /**
+   * 检查可用性
+   */
+  async checkAvailability() {
     try {
-      const chrome = await chromeLauncher.launch({chromeFlags: ['--headless']});
-      const options = {
-        logLevel: 'info',
-        output: 'json',
-        onlyCategories: ['performance'],
-        port: chrome.port,
-      };
+      // 测试Puppeteer是否可用
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
 
-      const runnerResult = await lighthouse(url, options);
-      await chrome.kill();
+      const page = await browser.newPage();
+      await page.goto('data:text/html,<h1>Test</h1>');
+      const title = await page.title();
 
-      const performanceScore = runnerResult.lhr.categories.performance.score * 100;
-      const metrics = runnerResult.lhr.audits;
+      await browser.close();
 
-      this.testResults.performance = {
-        score: Math.round(performanceScore),
-        metrics: {
-          firstContentfulPaint: metrics['first-contentful-paint']?.displayValue,
-          largestContentfulPaint: metrics['largest-contentful-paint']?.displayValue,
-          firstInputDelay: metrics['max-potential-fid']?.displayValue,
-          cumulativeLayoutShift: metrics['cumulative-layout-shift']?.displayValue,
-          speedIndex: metrics['speed-index']?.displayValue,
-          totalBlockingTime: metrics['total-blocking-time']?.displayValue
+      return {
+        available: true,
+        version: {
+          puppeteer: require('puppeteer/package.json').version,
+          chromium: await this.getChromiumVersion()
         },
-        opportunities: this.extractOpportunities(runnerResult.lhr.audits)
+        dependencies: ['puppeteer']
       };
-
     } catch (error) {
-      this.testResults.performance = {
+      return {
+        available: false,
         error: error.message,
-        score: 0
+        dependencies: ['puppeteer']
       };
     }
   }
 
-  async checkAccessibility(url) {
+  /**
+   * 获取Chromium版本
+   */
+  async getChromiumVersion() {
     try {
-      const chrome = await chromeLauncher.launch({chromeFlags: ['--headless']});
-      const options = {
-        logLevel: 'info',
-        output: 'json',
-        onlyCategories: ['accessibility'],
-        port: chrome.port,
-      };
-
-      const runnerResult = await lighthouse(url, options);
-      await chrome.kill();
-
-      const accessibilityScore = runnerResult.lhr.categories.accessibility.score * 100;
-      const audits = runnerResult.lhr.audits;
-
-      this.testResults.accessibility = {
-        score: Math.round(accessibilityScore),
-        issues: this.extractAccessibilityIssues(audits),
-        passed: this.extractPassedAudits(audits),
-        wcagLevel: this.determineWCAGLevel(accessibilityScore)
-      };
-
-    } catch (error) {
-      this.testResults.accessibility = {
-        error: error.message,
-        score: 0
-      };
-    }
-  }
-
-  async checkUsability(url) {
-    const browser = await puppeteer.launch({ headless: true });
-    const page = await browser.newPage();
-
-    try {
-      await page.goto(url, { waitUntil: 'networkidle2' });
-
-      // 检查页面基本可用性
-      const usabilityChecks = {
-        hasTitle: await this.checkPageTitle(page),
-        hasNavigation: await this.checkNavigation(page),
-        hasSearchFunction: await this.checkSearchFunction(page),
-        hasContactInfo: await this.checkContactInfo(page),
-        hasErrorHandling: await this.checkErrorHandling(page),
-        hasLoadingStates: await this.checkLoadingStates(page)
-      };
-
-      const passedChecks = Object.values(usabilityChecks).filter(Boolean).length;
-      const totalChecks = Object.keys(usabilityChecks).length;
-
-      this.testResults.usability = {
-        score: Math.round((passedChecks / totalChecks) * 100),
-        checks: usabilityChecks,
-        issues: this.generateUsabilityIssues(usabilityChecks)
-      };
-
-    } catch (error) {
-      this.testResults.usability = {
-        error: error.message,
-        score: 0
-      };
-    } finally {
+      const browser = await puppeteer.launch({ headless: true });
+      const version = await browser.version();
       await browser.close();
+      return version;
+    } catch (error) {
+      return 'unknown';
     }
   }
 
-  async checkMobileCompatibility(url) {
-    const browser = await puppeteer.launch({ headless: true });
-    const page = await browser.newPage();
+  /**
+   * 执行UX测试
+   */
+  async runUxTest(config) {
+    const testId = `ux_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+    let browser = null;
 
     try {
-      // 模拟移动设备
-      await page.setViewport({ width: 375, height: 667 });
-      await page.setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15');
+      const validatedConfig = this.validateConfig(config);
 
-      await page.goto(url, { waitUntil: 'networkidle2' });
+      this.activeTests.set(testId, {
+        status: 'running',
+        progress: 0,
+        startTime: Date.now()
+      });
 
-      const mobileChecks = {
-        isResponsive: await this.checkResponsiveDesign(page),
-        hasTouchTargets: await this.checkTouchTargets(page),
-        hasViewportMeta: await this.checkViewportMeta(page),
-        hasReadableText: await this.checkReadableText(page),
-        hasProperSpacing: await this.checkProperSpacing(page)
-      };
+      this.updateTestProgress(testId, 5, '启动浏览器');
 
-      const passedChecks = Object.values(mobileChecks).filter(Boolean).length;
-      const totalChecks = Object.keys(mobileChecks).length;
+      // 启动浏览器
+      browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+      });
 
-      this.testResults.mobile = {
-        score: Math.round((passedChecks / totalChecks) * 100),
-        checks: mobileChecks,
-        issues: this.generateMobileIssues(mobileChecks)
-      };
+      const page = await browser.newPage();
 
-    } catch (error) {
-      this.testResults.mobile = {
-        error: error.message,
-        score: 0
-      };
-    } finally {
-      await browser.close();
-    }
-  }
+      // 设置视口
+      await page.setViewport(validatedConfig.viewport);
 
-  // 辅助方法
-  extractOpportunities(audits) {
-    const opportunities = [];
+      this.updateTestProgress(testId, 10, '加载页面');
 
-    Object.values(audits).forEach(audit => {
-      if (audit.details && audit.details.type === 'opportunity' && audit.score < 1) {
-        opportunities.push({
-          title: audit.title,
-          description: audit.description,
-          savings: audit.details.overallSavingsMs || 0
+      // 加载页面
+      await page.goto(validatedConfig.url, {
+        waitUntil: 'networkidle2',
+        timeout: validatedConfig.timeout
+      });
+
+      // 等待特定选择器（如果指定）
+      if (validatedConfig.waitForSelector) {
+        await page.waitForSelector(validatedConfig.waitForSelector, {
+          timeout: 10000
         });
       }
-    });
 
-    return opportunities.sort((a, b) => b.savings - a.savings);
-  }
+      const results = {
+        testId,
+        url: validatedConfig.url,
+        timestamp: new Date().toISOString(),
+        checks: {},
+        summary: {
+          totalChecks: 0,
+          passed: 0,
+          failed: 0,
+          warnings: 0,
+          score: 0
+        }
+      };
 
-  extractAccessibilityIssues(audits) {
-    const issues = [];
+      const progressStep = 80 / validatedConfig.checks.length;
+      let currentProgress = 10;
 
-    Object.values(audits).forEach(audit => {
-      if (audit.score !== null && audit.score < 1) {
-        issues.push({
-          title: audit.title,
-          description: audit.description,
-          impact: this.getImpactLevel(audit.score)
-        });
+      // 执行各项UX检查
+      for (const check of validatedConfig.checks) {
+        this.updateTestProgress(testId, currentProgress, `执行${check}检查`);
+
+        switch (check) {
+          case 'accessibility':
+            results.checks.accessibility = await this.checkAccessibility(page);
+            break;
+          case 'usability':
+            results.checks.usability = await this.checkUsability(page);
+            break;
+          case 'interactions':
+            results.checks.interactions = await this.checkInteractions(page, validatedConfig.interactions);
+            break;
+          case 'mobile':
+            results.checks.mobile = await this.checkMobileUsability(page);
+            break;
+          case 'forms':
+            results.checks.forms = await this.checkForms(page);
+            break;
+        }
+
+        currentProgress += progressStep;
       }
-    });
 
-    return issues;
-  }
+      this.updateTestProgress(testId, 90, '计算UX评分');
 
-  extractPassedAudits(audits) {
-    return Object.values(audits)
-      .filter(audit => audit.score === 1)
-      .map(audit => audit.title);
-  }
+      // 计算总体UX评分
+      results.summary = this.calculateUxScore(results.checks);
+      results.totalTime = Date.now() - this.activeTests.get(testId).startTime;
 
-  determineWCAGLevel(score) {
-    if (score >= 95) return 'AAA';
-    if (score >= 80) return 'AA';
-    if (score >= 60) return 'A';
-    return 'Below A';
-  }
+      this.updateTestProgress(testId, 100, 'UX测试完成');
 
-  getImpactLevel(score) {
-    if (score === 0) return 'high';
-    if (score < 0.5) return 'medium';
-    return 'low';
-  }
+      this.activeTests.set(testId, {
+        status: 'completed',
+        progress: 100,
+        results
+      });
 
-  async checkPageTitle(page) {
-    const title = await page.title();
-    return title && title.length > 0 && title.length < 60;
-  }
+      return results;
 
-  async checkNavigation(page) {
-    const nav = await page.$('nav, .navigation, .menu');
-    return nav !== null;
-  }
+    } catch (error) {
+      this.activeTests.set(testId, {
+        status: 'failed',
+        progress: 0,
+        error: error.message
+      });
 
-  async checkSearchFunction(page) {
-    const search = await page.$('input[type="search"], .search-input, #search');
-    return search !== null;
-  }
-
-  async checkContactInfo(page) {
-    const contact = await page.$('.contact, .footer, [href*="contact"], [href*="mailto"]');
-    return contact !== null;
-  }
-
-  async checkErrorHandling(page) {
-    // 简单检查是否有错误处理相关的元素
-    const errorElements = await page.$$('.error, .alert, .notification');
-    return errorElements.length > 0;
-  }
-
-  async checkLoadingStates(page) {
-    // 检查是否有加载状态指示器
-    const loadingElements = await page.$$('.loading, .spinner, .skeleton');
-    return loadingElements.length > 0;
-  }
-
-  async checkResponsiveDesign(page) {
-    const viewport = page.viewport();
-    const bodyWidth = await page.evaluate(() => document.body.scrollWidth);
-    return bodyWidth <= viewport.width * 1.1; // 允许10%的误差
-  }
-
-  async checkTouchTargets(page) {
-    const buttons = await page.$$('button, a, input[type="button"], input[type="submit"]');
-    let validTargets = 0;
-
-    for (const button of buttons) {
-      const box = await button.boundingBox();
-      if (box && box.width >= 44 && box.height >= 44) {
-        validTargets++;
+      throw error;
+    } finally {
+      if (browser) {
+        await browser.close();
       }
     }
-
-    return buttons.length === 0 || validTargets / buttons.length >= 0.8;
   }
 
-  async checkViewportMeta(page) {
-    const viewport = await page.$('meta[name="viewport"]');
-    return viewport !== null;
-  }
+  /**
+   * 检查可访问性
+   */
+  async checkAccessibility(page) {
+    try {
+      // 基础可访问性检查
+      const results = {
+        images: { total: 0, withAlt: 0, withoutAlt: 0 },
+        headings: { total: 0, structure: [] },
+        links: { total: 0, withText: 0, withoutText: 0 },
+        forms: { total: 0, withLabels: 0, withoutLabels: 0 },
+        contrast: { issues: [] },
+        score: 0,
+        issues: []
+      };
 
-  async checkReadableText(page) {
-    const textElements = await page.$$('p, span, div, h1, h2, h3, h4, h5, h6');
-    let readableCount = 0;
+      // 检查图片alt属性
+      const images = await page.$$('img');
+      results.images.total = images.length;
 
-    for (const element of textElements.slice(0, 10)) { // 检查前10个元素
-      const fontSize = await page.evaluate(el => {
-        const style = window.getComputedStyle(el);
-        return parseInt(style.fontSize);
-      }, element);
-
-      if (fontSize >= 16) {
-        readableCount++;
+      for (const img of images) {
+        const alt = await img.getAttribute('alt');
+        if (alt && alt.trim()) {
+          results.images.withAlt++;
+        } else {
+          results.images.withoutAlt++;
+          results.issues.push('图片缺少alt属性');
+        }
       }
+
+      // 检查标题结构
+      const headings = await page.$$('h1, h2, h3, h4, h5, h6');
+      results.headings.total = headings.length;
+
+      for (const heading of headings) {
+        const tagName = await heading.evaluate(el => el.tagName.toLowerCase());
+        const text = await heading.evaluate(el => el.textContent.trim());
+        results.headings.structure.push({ tag: tagName, text });
+      }
+
+      // 检查链接文本
+      const links = await page.$$('a');
+      results.links.total = links.length;
+
+      for (const link of links) {
+        const text = await link.evaluate(el => el.textContent.trim());
+        const ariaLabel = await link.getAttribute('aria-label');
+
+        if (text || ariaLabel) {
+          results.links.withText++;
+        } else {
+          results.links.withoutText++;
+          results.issues.push('链接缺少描述文本');
+        }
+      }
+
+      // 检查表单标签
+      const inputs = await page.$$('input, textarea, select');
+      results.forms.total = inputs.length;
+
+      for (const input of inputs) {
+        const id = await input.getAttribute('id');
+        const ariaLabel = await input.getAttribute('aria-label');
+
+        let hasLabel = false;
+        if (id) {
+          const label = await page.$(`label[for="${id}"]`);
+          hasLabel = !!label;
+        }
+
+        if (hasLabel || ariaLabel) {
+          results.forms.withLabels++;
+        } else {
+          results.forms.withoutLabels++;
+          results.issues.push('表单元素缺少标签');
+        }
+      }
+
+      // 计算可访问性分数
+      let score = 100;
+
+      if (results.images.total > 0) {
+        const altCoverage = (results.images.withAlt / results.images.total) * 100;
+        score -= Math.max(0, (100 - altCoverage) * 0.3);
+      }
+
+      if (results.links.total > 0) {
+        const linkTextCoverage = (results.links.withText / results.links.total) * 100;
+        score -= Math.max(0, (100 - linkTextCoverage) * 0.2);
+      }
+
+      if (results.forms.total > 0) {
+        const labelCoverage = (results.forms.withLabels / results.forms.total) * 100;
+        score -= Math.max(0, (100 - labelCoverage) * 0.3);
+      }
+
+      results.score = Math.max(0, Math.round(score));
+
+      return {
+        status: results.score >= 80 ? 'passed' : results.score >= 60 ? 'warning' : 'failed',
+        message: `可访问性评分: ${results.score}%`,
+        score: results.score,
+        details: results
+      };
+
+    } catch (error) {
+      return {
+        status: 'failed',
+        message: `可访问性检查失败: ${error.message}`,
+        score: 0,
+        details: { error: error.message }
+      };
     }
-
-    return textElements.length === 0 || readableCount / Math.min(textElements.length, 10) >= 0.8;
   }
 
-  async checkProperSpacing(page) {
-    // 简单检查页面是否有适当的间距
-    const elements = await page.$$('*');
-    return elements.length > 0; // 简化检查
+  /**
+   * 检查可用性
+   */
+  async checkUsability(page) {
+    try {
+      const results = {
+        pageLoad: 0,
+        interactivity: 0,
+        navigation: { hasMenu: false, hasBreadcrumb: false },
+        search: { hasSearch: false },
+        content: { hasHeadings: false, readability: 0 },
+        score: 0,
+        issues: []
+      };
+
+      // 检查页面加载时间
+      const performanceTiming = JSON.parse(
+        await page.evaluate(() => JSON.stringify(performance.timing))
+      );
+
+      results.pageLoad = performanceTiming.loadEventEnd - performanceTiming.navigationStart;
+
+      // 检查导航元素
+      const nav = await page.$('nav, .nav, .navigation, .menu');
+      results.navigation.hasMenu = !!nav;
+
+      const breadcrumb = await page.$('.breadcrumb, .breadcrumbs, nav[aria-label*="breadcrumb"]');
+      results.navigation.hasBreadcrumb = !!breadcrumb;
+
+      // 检查搜索功能
+      const searchInput = await page.$('input[type="search"], input[name*="search"], .search input');
+      results.search.hasSearch = !!searchInput;
+
+      // 检查内容结构
+      const headings = await page.$$('h1, h2, h3, h4, h5, h6');
+      results.content.hasHeadings = headings.length > 0;
+
+      // 计算可用性分数
+      let score = 0;
+
+      // 页面加载时间评分
+      if (results.pageLoad < 3000) score += 25;
+      else if (results.pageLoad < 5000) score += 15;
+      else score += 5;
+
+      // 导航评分
+      if (results.navigation.hasMenu) score += 25;
+      if (results.navigation.hasBreadcrumb) score += 10;
+
+      // 搜索功能评分
+      if (results.search.hasSearch) score += 15;
+
+      // 内容结构评分
+      if (results.content.hasHeadings) score += 25;
+
+      results.score = score;
+
+      return {
+        status: results.score >= 70 ? 'passed' : results.score >= 50 ? 'warning' : 'failed',
+        message: `可用性评分: ${results.score}%`,
+        score: results.score,
+        details: results
+      };
+
+    } catch (error) {
+      return {
+        status: 'failed',
+        message: `可用性检查失败: ${error.message}`,
+        score: 0,
+        details: { error: error.message }
+      };
+    }
   }
 
-  generateUsabilityIssues(checks) {
-    const issues = [];
+  /**
+   * 检查交互功能
+   */
+  async checkInteractions(page, interactions) {
+    try {
+      const results = {
+        totalInteractions: interactions.length,
+        successfulInteractions: 0,
+        failedInteractions: 0,
+        interactions: [],
+        score: 0
+      };
 
-    if (!checks.hasTitle) issues.push('页面缺少有效的标题');
-    if (!checks.hasNavigation) issues.push('页面缺少导航菜单');
-    if (!checks.hasSearchFunction) issues.push('页面缺少搜索功能');
-    if (!checks.hasContactInfo) issues.push('页面缺少联系信息');
-    if (!checks.hasErrorHandling) issues.push('页面缺少错误处理机制');
-    if (!checks.hasLoadingStates) issues.push('页面缺少加载状态指示');
+      for (const interaction of interactions) {
+        const interactionResult = {
+          type: interaction.type,
+          selector: interaction.selector,
+          success: false,
+          error: null,
+          responseTime: 0
+        };
 
-    return issues;
+        const startTime = Date.now();
+
+        try {
+          switch (interaction.type) {
+            case 'click':
+              await page.click(interaction.selector);
+              break;
+            case 'type':
+              await page.type(interaction.selector, interaction.value || 'test');
+              break;
+            case 'scroll':
+              await page.evaluate((selector) => {
+                const element = document.querySelector(selector);
+                if (element) element.scrollIntoView();
+              }, interaction.selector);
+              break;
+            case 'hover':
+              await page.hover(interaction.selector);
+              break;
+          }
+
+          interactionResult.success = true;
+          results.successfulInteractions++;
+
+        } catch (error) {
+          interactionResult.error = error.message;
+          results.failedInteractions++;
+        }
+
+        interactionResult.responseTime = Date.now() - startTime;
+        results.interactions.push(interactionResult);
+      }
+
+      // 计算交互评分
+      results.score = results.totalInteractions > 0
+        ? Math.round((results.successfulInteractions / results.totalInteractions) * 100)
+        : 100;
+
+      return {
+        status: results.score >= 80 ? 'passed' : results.score >= 60 ? 'warning' : 'failed',
+        message: `${results.successfulInteractions}/${results.totalInteractions} 交互成功`,
+        score: results.score,
+        details: results
+      };
+
+    } catch (error) {
+      return {
+        status: 'failed',
+        message: `交互检查失败: ${error.message}`,
+        score: 0,
+        details: { error: error.message }
+      };
+    }
   }
 
-  generateMobileIssues(checks) {
-    const issues = [];
-
-    if (!checks.isResponsive) issues.push('页面不是响应式设计');
-    if (!checks.hasTouchTargets) issues.push('触摸目标尺寸不足');
-    if (!checks.hasViewportMeta) issues.push('缺少viewport meta标签');
-    if (!checks.hasReadableText) issues.push('文字大小不适合移动端阅读');
-    if (!checks.hasProperSpacing) issues.push('元素间距不适合移动端');
-
-    return issues;
-  }
-
-  calculateUXScore() {
-    const weights = {
-      performance: 0.35,
-      accessibility: 0.25,
-      usability: 0.25,
-      mobile: 0.15
-    };
-
+  /**
+   * 计算UX评分
+   */
+  calculateUxScore(checks) {
     let totalScore = 0;
+    let totalChecks = 0;
+    let passed = 0;
+    let failed = 0;
+    let warnings = 0;
 
-    totalScore += (this.testResults.performance.score || 0) * weights.performance;
-    totalScore += (this.testResults.accessibility.score || 0) * weights.accessibility;
-    totalScore += (this.testResults.usability.score || 0) * weights.usability;
-    totalScore += (this.testResults.mobile.score || 0) * weights.mobile;
+    Object.values(checks).forEach(check => {
+      totalChecks++;
+      totalScore += check.score;
 
-    this.testResults.score = Math.round(totalScore);
+      switch (check.status) {
+        case 'passed':
+          passed++;
+          break;
+        case 'warning':
+          warnings++;
+          break;
+        case 'failed':
+          failed++;
+          break;
+      }
+    });
 
-    // 生成建议
-    this.generateRecommendations();
+    const averageScore = totalChecks > 0 ? Math.round(totalScore / totalChecks) : 0;
+
+    return {
+      totalChecks,
+      passed,
+      failed,
+      warnings,
+      score: averageScore,
+      status: averageScore >= 80 ? 'excellent' : averageScore >= 60 ? 'good' : 'needs_improvement'
+    };
   }
 
-  generateRecommendations() {
-    const recommendations = [];
-
-    if (this.testResults.performance.score < 70) {
-      recommendations.push({
-        priority: 'high',
-        title: '优化页面性能',
-        description: '页面加载速度较慢，建议优化图片、压缩资源、使用CDN等'
-      });
+  /**
+   * 更新测试进度
+   */
+  updateTestProgress(testId, progress, message) {
+    const test = this.activeTests.get(testId);
+    if (test) {
+      test.progress = progress;
+      test.message = message;
+      this.activeTests.set(testId, test);
+      console.log(`[${this.name.toUpperCase()}-${testId}] ${progress}% - ${message}`);
     }
+  }
 
-    if (this.testResults.accessibility.score < 80) {
-      recommendations.push({
-        priority: 'medium',
-        title: '改善可访问性',
-        description: '页面可访问性需要改进，建议添加alt属性、改善颜色对比度等'
-      });
+  /**
+   * 获取测试状态
+   */
+  getTestStatus(testId) {
+    return this.activeTests.get(testId);
+  }
+
+  /**
+   * 停止测试
+   */
+  async stopTest(testId) {
+    const test = this.activeTests.get(testId);
+    if (test && test.status === 'running') {
+      test.status = 'cancelled';
+      this.activeTests.set(testId, test);
+      return true;
     }
-
-    if (this.testResults.mobile.score < 80) {
-      recommendations.push({
-        priority: 'medium',
-        title: '优化移动端体验',
-        description: '移动端适配需要改进，建议优化触摸目标、文字大小等'
-      });
-    }
-
-    this.testResults.recommendations = recommendations;
+    return false;
   }
 }
 
-module.exports = UXTestEngine;
+module.exports = UxTestEngine;

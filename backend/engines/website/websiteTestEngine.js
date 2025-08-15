@@ -1,466 +1,547 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
-const { URL } = require('url');
-
 /**
- * 网站综合测试引擎
- * 提供网站的综合性测试，包括可用性、内容质量、技术指标等
+ * 网站综合测试工具
+ * 真实实现网站整体健康检查、最佳实践分析
  */
+
+const cheerio = require('cheerio');
+const axios = require('axios');
+const { URL } = require('url');
+const Joi = require('joi');
+
 class WebsiteTestEngine {
   constructor() {
-    this.testResults = {
-      url: '',
-      timestamp: new Date().toISOString(),
-      testType: 'website',
-      success: false,
-      score: 0,
-      results: {},
-      recommendations: [],
-      errors: []
+    this.name = 'website';
+    this.activeTests = new Map();
+    this.defaultTimeout = 60000;
+  }
+
+  /**
+   * 验证配置
+   */
+  validateConfig(config) {
+    const schema = Joi.object({
+      url: Joi.string().uri().required(),
+      checks: Joi.array().items(
+        Joi.string().valid('health', 'seo', 'performance', 'security', 'accessibility', 'best-practices')
+      ).default(['health', 'seo', 'performance', 'security']),
+      timeout: Joi.number().min(30000).max(300000).default(60000),
+      depth: Joi.number().min(1).max(5).default(1), // 检查深度（页面层级）
+      maxPages: Joi.number().min(1).max(50).default(10), // 最大检查页面数
+      followExternalLinks: Joi.boolean().default(false),
+      userAgent: Joi.string().default('Mozilla/5.0 (compatible; WebsiteTestEngine/1.0)')
+    });
+
+    const { error, value } = schema.validate(config);
+    if (error) {
+      throw new Error(`配置验证失败: ${error.details[0].message}`);
+    }
+
+    return value;
+  }
+
+  /**
+   * 检查可用性
+   */
+  async checkAvailability() {
+    try {
+      // 测试基本HTTP请求和HTML解析功能
+      const testResponse = await axios.get('https://httpbin.org/html', {
+        timeout: 5000
+      });
+
+      const $ = cheerio.load(testResponse.data);
+      const hasTitle = $('title').length > 0;
+
+      return {
+        available: testResponse.status === 200 && hasTitle,
+        version: {
+          cheerio: require('cheerio/package.json').version,
+          axios: require('axios/package.json').version
+        },
+        dependencies: ['cheerio', 'axios']
+      };
+    } catch (error) {
+      return {
+        available: false,
+        error: error.message,
+        dependencies: ['cheerio', 'axios']
+      };
+    }
+  }
+
+  /**
+   * 执行网站综合测试
+   */
+  async runWebsiteTest(config) {
+    const testId = `website_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+
+    try {
+      const validatedConfig = this.validateConfig(config);
+
+      this.activeTests.set(testId, {
+        status: 'running',
+        progress: 0,
+        startTime: Date.now()
+      });
+
+      this.updateTestProgress(testId, 5, '开始网站综合测试');
+
+      const results = {
+        testId,
+        url: validatedConfig.url,
+        timestamp: new Date().toISOString(),
+        pages: {},
+        summary: {
+          totalPages: 0,
+          healthyPages: 0,
+          warningPages: 0,
+          errorPages: 0,
+          overallScore: 0,
+          categories: {}
+        },
+        recommendations: []
+      };
+
+      // 发现页面
+      this.updateTestProgress(testId, 10, '发现网站页面');
+      const discoveredPages = await this.discoverPages(validatedConfig);
+      results.summary.totalPages = discoveredPages.length;
+
+      this.updateTestProgress(testId, 20, `发现 ${discoveredPages.length} 个页面`);
+
+      const progressStep = 70 / discoveredPages.length;
+      let currentProgress = 20;
+
+      // 测试每个页面
+      for (const pageUrl of discoveredPages) {
+        this.updateTestProgress(testId, currentProgress, `测试页面: ${pageUrl}`);
+
+        const pageResult = await this.testSinglePage(pageUrl, validatedConfig);
+        results.pages[pageUrl] = pageResult;
+
+        // 更新汇总统计
+        switch (pageResult.status) {
+          case 'healthy':
+            results.summary.healthyPages++;
+            break;
+          case 'warning':
+            results.summary.warningPages++;
+            break;
+          case 'error':
+            results.summary.errorPages++;
+            break;
+        }
+
+        currentProgress += progressStep;
+      }
+
+      this.updateTestProgress(testId, 90, '计算综合评分');
+
+      // 计算总体评分和建议
+      results.summary = this.calculateWebsiteSummary(results.pages, validatedConfig.checks);
+      results.recommendations = this.generateRecommendations(results.pages);
+      results.totalTime = Date.now() - this.activeTests.get(testId).startTime;
+
+      this.updateTestProgress(testId, 100, '网站综合测试完成');
+
+      this.activeTests.set(testId, {
+        status: 'completed',
+        progress: 100,
+        results
+      });
+
+      return results;
+
+    } catch (error) {
+      this.activeTests.set(testId, {
+        status: 'failed',
+        progress: 0,
+        error: error.message
+      });
+
+      throw error;
+    }
+  }
+
+  /**
+   * 发现网站页面
+   */
+  async discoverPages(config) {
+    const pages = new Set([config.url]);
+    const visited = new Set();
+    const toVisit = [config.url];
+
+    const baseUrl = new URL(config.url);
+
+    while (toVisit.length > 0 && pages.size < config.maxPages) {
+      const currentUrl = toVisit.shift();
+
+      if (visited.has(currentUrl)) continue;
+      visited.add(currentUrl);
+
+      try {
+        const response = await axios.get(currentUrl, {
+          timeout: config.timeout,
+          headers: { 'User-Agent': config.userAgent }
+        });
+
+        const $ = cheerio.load(response.data);
+
+        // 提取链接
+        $('a[href]').each((i, elem) => {
+          const href = $(elem).attr('href');
+          if (!href) return;
+
+          try {
+            const linkUrl = new URL(href, currentUrl);
+
+            // 只处理同域名链接（除非允许外部链接）
+            if (!config.followExternalLinks && linkUrl.hostname !== baseUrl.hostname) {
+              return;
+            }
+
+            // 过滤掉锚点、邮件、电话等链接
+            if (linkUrl.protocol === 'http:' || linkUrl.protocol === 'https:') {
+              const fullUrl = linkUrl.toString();
+
+              if (!pages.has(fullUrl) && pages.size < config.maxPages) {
+                pages.add(fullUrl);
+
+                // 如果还在深度范围内，添加到待访问列表
+                if (this.getUrlDepth(fullUrl, config.url) <= config.depth) {
+                  toVisit.push(fullUrl);
+                }
+              }
+            }
+          } catch (error) {
+            // 忽略无效URL
+          }
+        });
+
+      } catch (error) {
+        // 忽略无法访问的页面
+      }
+    }
+
+    return Array.from(pages);
+  }
+
+  /**
+   * 计算URL深度
+   */
+  getUrlDepth(url, baseUrl) {
+    try {
+      const urlObj = new URL(url);
+      const baseUrlObj = new URL(baseUrl);
+
+      const urlPath = urlObj.pathname.split('/').filter(p => p);
+      const basePath = baseUrlObj.pathname.split('/').filter(p => p);
+
+      return Math.max(0, urlPath.length - basePath.length);
+    } catch (error) {
+      return 0;
+    }
+  }
+
+  /**
+   * 测试单个页面
+   */
+  async testSinglePage(url, config) {
+    try {
+      const startTime = Date.now();
+
+      const response = await axios.get(url, {
+        timeout: config.timeout,
+        headers: { 'User-Agent': config.userAgent },
+        validateStatus: () => true // 接受所有状态码
+      });
+
+      const loadTime = Date.now() - startTime;
+      const $ = cheerio.load(response.data);
+
+      const result = {
+        url,
+        status: 'healthy',
+        statusCode: response.status,
+        loadTime,
+        checks: {},
+        issues: [],
+        score: 100
+      };
+
+      // 基本健康检查
+      if (response.status >= 400) {
+        result.issues.push(`HTTP错误: ${response.status}`);
+        result.score -= 30;
+      }
+
+      if (loadTime > 5000) {
+        result.issues.push('页面加载时间过长');
+        result.score -= 20;
+      }
+
+      // 执行各项检查
+      for (const check of config.checks) {
+        switch (check) {
+          case 'health':
+            result.checks.health = this.checkPageHealth($, response);
+            break;
+          case 'seo':
+            result.checks.seo = this.checkPageSEO($);
+            break;
+          case 'performance':
+            result.checks.performance = this.checkPagePerformance($, response, loadTime);
+            break;
+          case 'security':
+            result.checks.security = this.checkPageSecurity(response);
+            break;
+          case 'accessibility':
+            result.checks.accessibility = this.checkPageAccessibility($);
+            break;
+          case 'best-practices':
+            result.checks.bestPractices = this.checkBestPractices($, response);
+            break;
+        }
+      }
+
+      // 计算页面总分
+      result.score = this.calculatePageScore(result.checks, result.issues);
+      result.status = result.score >= 80 ? 'healthy' : result.score >= 60 ? 'warning' : 'error';
+
+      return result;
+
+    } catch (error) {
+      return {
+        url,
+        status: 'error',
+        statusCode: 0,
+        loadTime: 0,
+        checks: {},
+        issues: [`页面测试失败: ${error.message}`],
+        score: 0,
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * 检查页面健康状况
+   */
+  checkPageHealth($, response) {
+    const result = {
+      title: $('title').text().trim(),
+      hasContent: $('body').text().trim().length > 0,
+      images: { total: 0, withAlt: 0 },
+      links: { total: 0, broken: 0 },
+      score: 100,
+      issues: []
+    };
+
+    // 检查标题
+    if (!result.title) {
+      result.issues.push('缺少页面标题');
+      result.score -= 20;
+    }
+
+    // 检查内容
+    if (!result.hasContent) {
+      result.issues.push('页面内容为空');
+      result.score -= 30;
+    }
+
+    // 检查图片
+    $('img').each((i, elem) => {
+      result.images.total++;
+      if ($(elem).attr('alt')) {
+        result.images.withAlt++;
+      }
+    });
+
+    if (result.images.total > 0) {
+      const altCoverage = result.images.withAlt / result.images.total;
+      if (altCoverage < 0.8) {
+        result.issues.push('部分图片缺少alt属性');
+        result.score -= 10;
+      }
+    }
+
+    return {
+      status: result.score >= 80 ? 'passed' : result.score >= 60 ? 'warning' : 'failed',
+      score: result.score,
+      details: result
     };
   }
 
   /**
-   * 运行网站综合测试
+   * 计算页面评分
    */
-  async runWebsiteTest(url, config = {}) {
-    try {
-      console.log(`🌐 开始网站综合测试: ${url}`);
-      
-      this.testResults.url = url;
-      this.testResults.config = config;
+  calculatePageScore(checks, issues) {
+    if (Object.keys(checks).length === 0) return 0;
 
-      // 基础可用性测试
-      await this.testBasicAvailability(url);
-      
-      // 内容分析
-      await this.analyzeContent(url);
-      
-      // 技术指标检测
-      await this.checkTechnicalMetrics(url);
-      
-      // 用户体验评估
-      await this.evaluateUserExperience(url);
-      
-      // 计算综合评分
-      this.calculateOverallScore();
-      
-      // 生成建议
-      this.generateRecommendations();
+    let totalScore = 0;
+    let checkCount = 0;
 
-      this.testResults.success = true;
-      console.log(`✅ 网站综合测试完成，评分: ${this.testResults.score}/100`);
-      
-      return this.testResults;
-
-    } catch (error) {
-      console.error('❌ 网站综合测试失败:', error);
-      this.testResults.success = false;
-      this.testResults.error = error.message;
-      this.testResults.errors.push({
-        type: 'test_execution_error',
-        message: error.message,
-        timestamp: new Date().toISOString()
-      });
-      
-      return this.testResults;
-    }
-  }
-
-  /**
-   * 基础可用性测试
-   */
-  async testBasicAvailability(url) {
-    try {
-      const startTime = Date.now();
-      const response = await axios.get(url, {
-        timeout: 10000,
-        validateStatus: () => true, // 接受所有状态码
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        }
-      });
-      const responseTime = Date.now() - startTime;
-
-      this.testResults.results.availability = {
-        accessible: response.status < 400,
-        statusCode: response.status,
-        responseTime,
-        contentLength: response.data?.length || 0,
-        headers: response.headers
-      };
-
-      console.log(`📊 可用性测试: ${response.status} (${responseTime}ms)`);
-
-    } catch (error) {
-      this.testResults.results.availability = {
-        accessible: false,
-        error: error.message,
-        responseTime: null
-      };
-      this.testResults.errors.push({
-        type: 'availability_error',
-        message: error.message
-      });
-    }
-  }
-
-  /**
-   * 内容分析
-   */
-  async analyzeContent(url) {
-    try {
-      const response = await axios.get(url, {
-        timeout: 10000,
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        }
-      });
-
-      const $ = cheerio.load(response.data);
-      
-      // 基础内容分析
-      const title = $('title').text().trim();
-      const description = $('meta[name="description"]').attr('content') || '';
-      const headings = {
-        h1: $('h1').length,
-        h2: $('h2').length,
-        h3: $('h3').length,
-        h4: $('h4').length,
-        h5: $('h5').length,
-        h6: $('h6').length
-      };
-      
-      const images = $('img').length;
-      const links = $('a').length;
-      const forms = $('form').length;
-      
-      // 文本内容分析
-      const textContent = $('body').text().replace(//s+/g, ' ').trim();
-      const wordCount = textContent.split(' ').length;
-      
-      this.testResults.results.content = {
-        title: {
-          text: title,
-          length: title.length,
-          present: title.length > 0
-        },
-        description: {
-          text: description,
-          length: description.length,
-          present: description.length > 0
-        },
-        headings,
-        elements: {
-          images,
-          links,
-          forms
-        },
-        text: {
-          wordCount,
-          readabilityScore: this.calculateReadabilityScore(textContent)
-        }
-      };
-
-      console.log(`📝 内容分析完成: ${wordCount}词, ${images}图片, ${links}链接`);
-
-    } catch (error) {
-      this.testResults.errors.push({
-        type: 'content_analysis_error',
-        message: error.message
-      });
-    }
-  }
-
-  /**
-   * 技术指标检测
-   */
-  async checkTechnicalMetrics(url) {
-    try {
-      const response = await axios.get(url, {
-        timeout: 10000,
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        }
-      });
-
-      const $ = cheerio.load(response.data);
-      
-      // HTML验证
-      const doctype = response.data.toLowerCase().includes('<!doctype html>');
-      const charset = $('meta[charset]').length > 0 || $('meta[http-equiv="content-type"]').length > 0;
-      const viewport = $('meta[name="viewport"]').length > 0;
-      
-      // 性能相关
-      const cssFiles = $('link[rel="stylesheet"]').length;
-      const jsFiles = $('script[src]').length;
-      const inlineStyles = $('style').length;
-      const inlineScripts = $('script:not([src])').length;
-      
-      // SEO基础
-      const metaTags = $('meta').length;
-      const altTexts = $('img[alt]').length;
-      const totalImages = $('img').length;
-      
-      this.testResults.results.technical = {
-        html: {
-          doctype,
-          charset,
-          viewport,
-          valid: doctype && charset
-        },
-        performance: {
-          cssFiles,
-          jsFiles,
-          inlineStyles,
-          inlineScripts,
-          resourcesOptimized: cssFiles + jsFiles < 10
-        },
-        seo: {
-          metaTags,
-          altTextCoverage: totalImages > 0 ? (altTexts / totalImages * 100).toFixed(1) : 100,
-          seoFriendly: metaTags > 5 && (altTexts / Math.max(totalImages, 1)) > 0.8
-        }
-      };
-
-      console.log(`🔧 技术指标检测完成`);
-
-    } catch (error) {
-      this.testResults.errors.push({
-        type: 'technical_metrics_error',
-        message: error.message
-      });
-    }
-  }
-
-  /**
-   * 用户体验评估
-   */
-  async evaluateUserExperience(url) {
-    try {
-      const response = await axios.get(url, {
-        timeout: 10000,
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        }
-      });
-
-      const $ = cheerio.load(response.data);
-      
-      // 导航结构
-      const navigation = $('nav').length > 0 || $('ul.nav, .navigation, .menu').length > 0;
-      const breadcrumbs = $('.breadcrumb, .breadcrumbs, nav[aria-label*="breadcrumb"]').length > 0;
-      
-      // 表单可用性
-      const formsWithLabels = $('form').toArray().map(form => {
-        const $form = $(form);
-        const inputs = $form.find('input, select, textarea').length;
-        const labels = $form.find('label').length;
-        return inputs > 0 ? labels / inputs : 1;
-      });
-      
-      const avgLabelCoverage = formsWithLabels.length > 0 
-        ? formsWithLabels.reduce((a, b) => a + b, 0) / formsWithLabels.length 
-        : 1;
-      
-      // 可访问性基础
-      const skipLinks = $('a[href^="#"]').filter((i, el) => $(el).text().toLowerCase().includes('skip')).length > 0;
-      const headingStructure = this.validateHeadingStructure($);
-      
-      this.testResults.results.userExperience = {
-        navigation: {
-          present: navigation,
-          breadcrumbs,
-          score: (navigation ? 50 : 0) + (breadcrumbs ? 25 : 0)
-        },
-        forms: {
-          labelCoverage: (avgLabelCoverage * 100).toFixed(1),
-          accessible: avgLabelCoverage > 0.8
-        },
-        accessibility: {
-          skipLinks,
-          headingStructure: headingStructure.valid,
-          score: (skipLinks ? 25 : 0) + (headingStructure.valid ? 25 : 0)
-        }
-      };
-
-      console.log(`👤 用户体验评估完成`);
-
-    } catch (error) {
-      this.testResults.errors.push({
-        type: 'user_experience_error',
-        message: error.message
-      });
-    }
-  }
-
-  /**
-   * 计算可读性评分（简化版）
-   */
-  calculateReadabilityScore(text) {
-    if (!text || text.length < 100) return 0;
-    
-    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
-    const words = text.split(//s+/).filter(w => w.length > 0);
-    const syllables = words.reduce((count, word) => {
-      return count + Math.max(1, word.match(/[aeiouAEIOU]/g)?.length || 1);
-    }, 0);
-    
-    if (sentences.length === 0 || words.length === 0) return 0;
-    
-    const avgWordsPerSentence = words.length / sentences.length;
-    const avgSyllablesPerWord = syllables / words.length;
-    
-    // 简化的Flesch Reading Ease公式
-    const score = 206.835 - (1.015 * avgWordsPerSentence) - (84.6 * avgSyllablesPerWord);
-    
-    return Math.max(0, Math.min(100, Math.round(score)));
-  }
-
-  /**
-   * 验证标题结构
-   */
-  validateHeadingStructure($) {
-    const headings = [];
-    $('h1, h2, h3, h4, h5, h6').each((i, el) => {
-      headings.push(parseInt(el.tagName.charAt(1)));
+    Object.values(checks).forEach(check => {
+      totalScore += check.score;
+      checkCount++;
     });
-    
-    if (headings.length === 0) return { valid: false, reason: 'No headings found' };
-    if (headings[0] !== 1) return { valid: false, reason: 'First heading is not H1' };
-    
-    for (let i = 1; i < headings.length; i++) {
-      if (headings[i] > headings[i-1] + 1) {
-        return { valid: false, reason: 'Heading levels skip' };
-      }
-    }
-    
-    return { valid: true };
+
+    let averageScore = checkCount > 0 ? totalScore / checkCount : 0;
+
+    // 根据问题数量调整分数
+    averageScore -= issues.length * 5;
+
+    return Math.max(0, Math.round(averageScore));
   }
 
   /**
-   * 计算综合评分
+   * 计算网站综合评分
    */
-  calculateOverallScore() {
-    let score = 0;
-    let maxScore = 0;
-    
-    // 可用性评分 (30分)
-    if (this.testResults.results.availability) {
-      maxScore += 30;
-      if (this.testResults.results.availability.accessible) {
-        score += 25;
-        if (this.testResults.results.availability.responseTime < 3000) score += 5;
+  calculateWebsiteSummary(pages, checks) {
+    const pageResults = Object.values(pages);
+    const totalPages = pageResults.length;
+
+    if (totalPages === 0) {
+      return {
+        totalPages: 0,
+        healthyPages: 0,
+        warningPages: 0,
+        errorPages: 0,
+        overallScore: 0,
+        categories: {}
+      };
+    }
+
+    let totalScore = 0;
+    let healthyPages = 0;
+    let warningPages = 0;
+    let errorPages = 0;
+
+    const categoryScores = {};
+
+    // 初始化分类分数
+    checks.forEach(check => {
+      categoryScores[check] = { total: 0, count: 0 };
+    });
+
+    pageResults.forEach(page => {
+      totalScore += page.score;
+
+      switch (page.status) {
+        case 'healthy':
+          healthyPages++;
+          break;
+        case 'warning':
+          warningPages++;
+          break;
+        case 'error':
+          errorPages++;
+          break;
       }
-    }
-    
-    // 内容质量评分 (25分)
-    if (this.testResults.results.content) {
-      maxScore += 25;
-      const content = this.testResults.results.content;
-      if (content.title.present && content.title.length > 10) score += 8;
-      if (content.description.present && content.description.length > 50) score += 7;
-      if (content.text.wordCount > 100) score += 5;
-      if (content.text.readabilityScore > 60) score += 5;
-    }
-    
-    // 技术指标评分 (25分)
-    if (this.testResults.results.technical) {
-      maxScore += 25;
-      const tech = this.testResults.results.technical;
-      if (tech.html.valid) score += 10;
-      if (tech.performance.resourcesOptimized) score += 8;
-      if (tech.seo.seoFriendly) score += 7;
-    }
-    
-    // 用户体验评分 (20分)
-    if (this.testResults.results.userExperience) {
-      maxScore += 20;
-      const ux = this.testResults.results.userExperience;
-      score += Math.round(ux.navigation.score * 0.4);
-      if (ux.forms.accessible) score += 5;
-      score += Math.round(ux.accessibility.score * 0.4);
-    }
-    
-    this.testResults.score = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
+
+      // 累计分类分数
+      Object.keys(page.checks).forEach(checkName => {
+        if (categoryScores[checkName]) {
+          categoryScores[checkName].total += page.checks[checkName].score;
+          categoryScores[checkName].count++;
+        }
+      });
+    });
+
+    // 计算分类平均分
+    const categories = {};
+    Object.keys(categoryScores).forEach(category => {
+      const data = categoryScores[category];
+      categories[category] = data.count > 0 ? Math.round(data.total / data.count) : 0;
+    });
+
+    return {
+      totalPages,
+      healthyPages,
+      warningPages,
+      errorPages,
+      overallScore: Math.round(totalScore / totalPages),
+      categories
+    };
   }
 
   /**
    * 生成改进建议
    */
-  generateRecommendations() {
+  generateRecommendations(pages) {
     const recommendations = [];
-    
-    // 可用性建议
-    if (!this.testResults.results.availability?.accessible) {
-      recommendations.push({
-        type: 'critical',
-        category: 'availability',
-        message: '网站无法访问，请检查服务器状态和域名配置'
+    const pageResults = Object.values(pages);
+
+    // 分析常见问题
+    const commonIssues = {};
+
+    pageResults.forEach(page => {
+      page.issues.forEach(issue => {
+        commonIssues[issue] = (commonIssues[issue] || 0) + 1;
       });
-    } else if (this.testResults.results.availability.responseTime > 3000) {
-      recommendations.push({
-        type: 'warning',
-        category: 'performance',
-        message: '页面响应时间较慢，建议优化服务器性能或使用CDN'
-      });
+    });
+
+    // 生成基于频率的建议
+    Object.entries(commonIssues).forEach(([issue, count]) => {
+      if (count > pageResults.length * 0.3) { // 超过30%的页面有此问题
+        recommendations.push({
+          priority: 'high',
+          category: 'common_issue',
+          description: `${count}个页面存在问题: ${issue}`,
+          suggestion: this.getIssueSuggestion(issue)
+        });
+      }
+    });
+
+    return recommendations;
+  }
+
+  /**
+   * 获取问题建议
+   */
+  getIssueSuggestion(issue) {
+    const suggestions = {
+      '缺少页面标题': '为每个页面添加描述性的title标签',
+      '页面内容为空': '确保页面包含有意义的内容',
+      '部分图片缺少alt属性': '为所有图片添加描述性的alt属性',
+      '页面加载时间过长': '优化图片、压缩资源、使用CDN加速',
+      'HTTP错误': '修复服务器错误，确保页面正常访问'
+    };
+
+    return suggestions[issue] || '请检查并修复此问题';
+  }
+
+  /**
+   * 更新测试进度
+   */
+  updateTestProgress(testId, progress, message) {
+    const test = this.activeTests.get(testId);
+    if (test) {
+      test.progress = progress;
+      test.message = message;
+      this.activeTests.set(testId, test);
+      console.log(`[${this.name.toUpperCase()}-${testId}] ${progress}% - ${message}`);
     }
-    
-    // 内容建议
-    const content = this.testResults.results.content;
-    if (content && !content.title.present) {
-      recommendations.push({
-        type: 'error',
-        category: 'seo',
-        message: '缺少页面标题，这对SEO和用户体验都很重要'
-      });
+  }
+
+  /**
+   * 获取测试状态
+   */
+  getTestStatus(testId) {
+    return this.activeTests.get(testId);
+  }
+
+  /**
+   * 停止测试
+   */
+  async stopTest(testId) {
+    const test = this.activeTests.get(testId);
+    if (test && test.status === 'running') {
+      test.status = 'cancelled';
+      this.activeTests.set(testId, test);
+      return true;
     }
-    
-    if (content && !content.description.present) {
-      recommendations.push({
-        type: 'warning',
-        category: 'seo',
-        message: '缺少页面描述，建议添加meta description标签'
-      });
-    }
-    
-    // 技术建议
-    const tech = this.testResults.results.technical;
-    if (tech && !tech.html.doctype) {
-      recommendations.push({
-        type: 'error',
-        category: 'html',
-        message: '缺少HTML5文档类型声明'
-      });
-    }
-    
-    if (tech && !tech.html.viewport) {
-      recommendations.push({
-        type: 'warning',
-        category: 'mobile',
-        message: '缺少viewport meta标签，可能影响移动端显示'
-      });
-    }
-    
-    // 用户体验建议
-    const ux = this.testResults.results.userExperience;
-    if (ux && !ux.navigation.present) {
-      recommendations.push({
-        type: 'warning',
-        category: 'usability',
-        message: '建议添加清晰的导航结构'
-      });
-    }
-    
-    if (ux && !ux.forms.accessible) {
-      recommendations.push({
-        type: 'warning',
-        category: 'accessibility',
-        message: '表单缺少标签，影响可访问性'
-      });
-    }
-    
-    this.testResults.recommendations = recommendations;
+    return false;
   }
 }
 

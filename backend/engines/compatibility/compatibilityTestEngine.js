@@ -1,849 +1,490 @@
 /**
- * 真实的兼容性测试引擎 - 使用Playwright进行多浏览器兼容性测试
+ * 浏览器兼容性测试工具
+ * 真实实现跨浏览器、跨设备兼容性测试
  */
 
 const { chromium, firefox, webkit } = require('playwright');
-const https = require('https');
-const http = require('http');
-const { URL } = require('url');
+const Joi = require('joi');
 
-class RealCompatibilityTestEngine {
+class CompatibilityTestEngine {
   constructor() {
-    this.name = 'real-compatibility-test-engine';
-    this.version = '1.0.0';
-    this.supportedBrowsers = {
-      'Chrome': chromium,
-      'Firefox': firefox,
-      'Safari': webkit,
-      'Edge': chromium // Edge使用Chromium内核
+    this.name = 'compatibility';
+    this.activeTests = new Map();
+    this.defaultTimeout = 60000;
+
+    // 支持的浏览器
+    this.browsers = {
+      chromium: { name: 'Chromium', engine: chromium },
+      firefox: { name: 'Firefox', engine: firefox },
+      webkit: { name: 'WebKit (Safari)', engine: webkit }
+    };
+
+    // 预定义设备
+    this.devices = {
+      desktop: { width: 1366, height: 768, userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+      mobile: { width: 375, height: 667, userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15' },
+      tablet: { width: 768, height: 1024, userAgent: 'Mozilla/5.0 (iPad; CPU OS 14_0 like Mac OS X) AppleWebKit/605.1.15' }
     };
   }
 
   /**
-   * 运行真实的兼容性测试
+   * 验证配置
    */
-  async runCompatibilityTest(url, config = {}) {
-    const {
-      devices = { desktop: true, tablet: true, mobile: true },
-      browsers = ['Chrome', 'Firefox', 'Safari', 'Edge'],
-      accessibility = true
-    } = config;
+  validateConfig(config) {
+    const schema = Joi.object({
+      url: Joi.string().uri().required(),
+      browsers: Joi.array().items(
+        Joi.string().valid('chromium', 'firefox', 'webkit')
+      ).default(['chromium', 'firefox']),
+      devices: Joi.array().items(
+        Joi.string().valid('desktop', 'mobile', 'tablet')
+      ).default(['desktop', 'mobile']),
+      checks: Joi.array().items(
+        Joi.string().valid('rendering', 'javascript', 'css', 'responsive', 'features')
+      ).default(['rendering', 'javascript', 'css']),
+      timeout: Joi.number().min(30000).max(300000).default(60000),
+      screenshots: Joi.boolean().default(false),
+      waitForSelector: Joi.string().optional()
+    });
 
-    console.log(`🌐 Starting real compatibility test for: ${url}`);
-    console.log(`📱 Devices: ${Object.keys(devices).filter(d => devices[d]).join(', ')}`);
-    console.log(`🌍 Browsers: ${browsers.join(', ')}`);
+    const { error, value } = schema.validate(config);
+    if (error) {
+      throw new Error(`配置验证失败: ${error.details[0].message}`);
+    }
 
-    const testId = `compatibility-${Date.now()}`;
-    const startTime = Date.now();
+    return value;
+  }
 
-    const results = {
-      testId,
-      url,
-      config,
-      startTime: new Date(startTime).toISOString(),
-      status: 'running',
-      overallScore: 0,
-      browserCompatibility: {},
-      deviceCompatibility: {},
-      accessibilityScore: 0,
-      issues: [],
-      recommendations: [],
-      detailedResults: {}
-    };
+  /**
+   * 检查可用性
+   */
+  async checkAvailability() {
+    try {
+      // 测试Playwright浏览器是否可用
+      const browser = await chromium.launch({ headless: true });
+      const page = await browser.newPage();
+      await page.goto('data:text/html,<h1>Test</h1>');
+      const title = await page.title();
+      await browser.close();
+
+      return {
+        available: true,
+        version: {
+          playwright: require('playwright/package.json').version
+        },
+        supportedBrowsers: Object.keys(this.browsers),
+        dependencies: ['playwright']
+      };
+    } catch (error) {
+      return {
+        available: false,
+        error: error.message,
+        dependencies: ['playwright']
+      };
+    }
+  }
+
+  /**
+   * 执行兼容性测试
+   */
+  async runCompatibilityTest(config) {
+    const testId = `compat_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 
     try {
-      // 并行测试所有浏览器
-      const browserTests = browsers.map(browser =>
-        this.testBrowser(url, browser, devices, accessibility)
-      );
+      const validatedConfig = this.validateConfig(config);
 
-      const browserResults = await Promise.all(browserTests);
-
-      // 处理测试结果
-      browserResults.forEach((result, index) => {
-        const browser = browsers[index];
-        results.browserCompatibility[browser] = result.score;
-        results.detailedResults[browser] = result;
-
-        // 收集问题和建议
-        results.issues.push(...result.issues);
-        results.recommendations.push(...result.recommendations);
+      this.activeTests.set(testId, {
+        status: 'running',
+        progress: 0,
+        startTime: Date.now()
       });
 
-      // 计算设备兼容性
-      results.deviceCompatibility = this.calculateDeviceCompatibility(browserResults, devices);
+      this.updateTestProgress(testId, 5, '开始兼容性测试');
 
-      // 计算可访问性分数
-      if (accessibility) {
-        results.accessibilityScore = this.calculateAccessibilityScore(browserResults);
+      const results = {
+        testId,
+        url: validatedConfig.url,
+        timestamp: new Date().toISOString(),
+        browsers: {},
+        summary: {
+          totalCombinations: 0,
+          passedCombinations: 0,
+          failedCombinations: 0,
+          warningCombinations: 0,
+          overallScore: 0
+        }
+      };
+
+      const totalCombinations = validatedConfig.browsers.length * validatedConfig.devices.length;
+      results.summary.totalCombinations = totalCombinations;
+
+      let currentProgress = 5;
+      const progressStep = 90 / totalCombinations;
+
+      // 测试每个浏览器和设备组合
+      for (const browserName of validatedConfig.browsers) {
+        results.browsers[browserName] = {};
+
+        for (const deviceName of validatedConfig.devices) {
+          this.updateTestProgress(testId, currentProgress, `测试 ${browserName} - ${deviceName}`);
+
+          const testResult = await this.testBrowserDeviceCombination(
+            browserName,
+            deviceName,
+            validatedConfig
+          );
+
+          results.browsers[browserName][deviceName] = testResult;
+
+          // 更新汇总统计
+          switch (testResult.status) {
+            case 'passed':
+              results.summary.passedCombinations++;
+              break;
+            case 'warning':
+              results.summary.warningCombinations++;
+              break;
+            case 'failed':
+              results.summary.failedCombinations++;
+              break;
+          }
+
+          currentProgress += progressStep;
+        }
       }
 
-      // 计算总体分数
-      results.overallScore = this.calculateOverallScore(results);
+      this.updateTestProgress(testId, 95, '计算兼容性评分');
 
-      // 去重建议
-      results.recommendations = [...new Set(results.recommendations)];
+      // 计算总体兼容性评分
+      results.summary.overallScore = this.calculateCompatibilityScore(results.browsers);
+      results.totalTime = Date.now() - this.activeTests.get(testId).startTime;
 
-      // 生成通用建议
-      results.recommendations.push(...this.generateGeneralRecommendations(results));
+      this.updateTestProgress(testId, 100, '兼容性测试完成');
 
-      results.status = 'completed';
-      results.endTime = new Date().toISOString();
-      results.actualDuration = (Date.now() - startTime) / 1000;
-      results.duration = results.actualDuration; // 确保两个字段都存在
+      this.activeTests.set(testId, {
+        status: 'completed',
+        progress: 100,
+        results
+      });
 
-      console.log(`✅ Compatibility test completed for: ${url}`);
-      console.log(`📊 Overall Score: ${Math.round(results.overallScore)}`);
-
-      return { success: true, data: results };
+      return results;
 
     } catch (error) {
-      console.error(`❌ Compatibility test failed for: ${url}`, error);
-      results.status = 'failed';
-      results.error = error.message;
-      results.endTime = new Date().toISOString();
-      results.actualDuration = (Date.now() - startTime) / 1000;
-      results.duration = results.actualDuration; // 确保两个字段都存在
+      this.activeTests.set(testId, {
+        status: 'failed',
+        progress: 0,
+        error: error.message
+      });
 
-      return {
-        success: false,
-        error: error.message,
-        data: results
-      };
+      throw error;
     }
   }
 
   /**
-   * 测试单个浏览器
+   * 测试浏览器设备组合
    */
-  async testBrowser(url, browserName, devices, checkAccessibility) {
-    const browserEngine = this.supportedBrowsers[browserName];
-    if (!browserEngine) {
-      return {
-        score: 0,
-        issues: [{ type: '浏览器不支持', description: `${browserName} 浏览器不支持`, severity: 'high' }],
-        recommendations: [`请使用支持的浏览器进行测试`],
-        deviceResults: {}
-      };
-    }
-
+  async testBrowserDeviceCombination(browserName, deviceName, config) {
     let browser = null;
-    const result = {
-      score: 0,
-      issues: [],
-      recommendations: [],
-      deviceResults: {},
-      accessibilityScore: 0
-    };
 
     try {
+      const browserEngine = this.browsers[browserName].engine;
+      const device = this.devices[deviceName];
+
       // 启动浏览器
       browser = await browserEngine.launch({
         headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox']
       });
 
-      const deviceTests = [];
+      const page = await browser.newPage();
 
-      if (devices.desktop) {
-        deviceTests.push(this.testDevice(browser, url, 'desktop', browserName));
-      }
-      if (devices.tablet) {
-        deviceTests.push(this.testDevice(browser, url, 'tablet', browserName));
-      }
-      if (devices.mobile) {
-        deviceTests.push(this.testDevice(browser, url, 'mobile', browserName));
-      }
+      // 设置设备参数
+      await page.setViewportSize({ width: device.width, height: device.height });
+      await page.setUserAgent(device.userAgent);
 
-      const deviceResults = await Promise.all(deviceTests);
+      const result = {
+        browser: browserName,
+        device: deviceName,
+        status: 'passed',
+        score: 100,
+        checks: {},
+        issues: [],
+        metrics: {
+          loadTime: 0,
+          renderTime: 0,
+          jsErrors: 0,
+          cssErrors: 0
+        }
+      };
 
-      // 处理设备测试结果
-      deviceResults.forEach(deviceResult => {
-        result.deviceResults[deviceResult.device] = deviceResult;
-        result.issues.push(...deviceResult.issues);
-        result.recommendations.push(...deviceResult.recommendations);
+      const startTime = Date.now();
+
+      // 加载页面
+      await page.goto(config.url, {
+        waitUntil: 'networkidle',
+        timeout: config.timeout
       });
 
-      // 计算浏览器分数
-      const deviceScores = deviceResults.map(dr => dr.score);
-      result.score = deviceScores.length > 0 ?
-        Math.round(deviceScores.reduce((a, b) => a + b, 0) / deviceScores.length) : 0;
+      result.metrics.loadTime = Date.now() - startTime;
 
-      // 可访问性检查
-      if (checkAccessibility && deviceResults.length > 0) {
-        result.accessibilityScore = deviceResults[0].accessibilityScore || 0;
+      // 等待特定选择器（如果指定）
+      if (config.waitForSelector) {
+        try {
+          await page.waitForSelector(config.waitForSelector, { timeout: 10000 });
+        } catch (error) {
+          result.issues.push(`等待选择器失败: ${config.waitForSelector}`);
+        }
       }
+
+      // 执行各项兼容性检查
+      for (const check of config.checks) {
+        switch (check) {
+          case 'rendering':
+            result.checks.rendering = await this.checkRendering(page);
+            break;
+          case 'javascript':
+            result.checks.javascript = await this.checkJavaScript(page);
+            break;
+          case 'css':
+            result.checks.css = await this.checkCSS(page);
+            break;
+          case 'responsive':
+            result.checks.responsive = await this.checkResponsive(page, device);
+            break;
+          case 'features':
+            result.checks.features = await this.checkBrowserFeatures(page);
+            break;
+        }
+      }
+
+      // 截图（如果启用）
+      if (config.screenshots) {
+        try {
+          result.screenshot = await page.screenshot({
+            encoding: 'base64',
+            fullPage: false
+          });
+        } catch (error) {
+          result.issues.push(`截图失败: ${error.message}`);
+        }
+      }
+
+      // 计算组合评分
+      result.score = this.calculateCombinationScore(result.checks, result.issues);
+      result.status = result.score >= 80 ? 'passed' : result.score >= 60 ? 'warning' : 'failed';
+
+      return result;
 
     } catch (error) {
-      console.error(`Browser test failed for ${browserName}:`, error);
-      result.issues.push({
-        type: '浏览器测试失败',
-        description: `${browserName} 测试失败: ${error.message}`,
-        severity: 'high'
-      });
+      return {
+        browser: browserName,
+        device: deviceName,
+        status: 'failed',
+        score: 0,
+        error: error.message,
+        checks: {},
+        issues: [`测试失败: ${error.message}`],
+        metrics: {}
+      };
     } finally {
       if (browser) {
         await browser.close();
       }
     }
-
-    return result;
   }
 
   /**
-   * 测试单个设备
+   * 检查页面渲染
    */
-  async testDevice(browser, url, deviceType, browserName) {
-    const deviceConfigs = {
-      desktop: { width: 1920, height: 1080, isMobile: false },
-      tablet: { width: 768, height: 1024, isMobile: false },
-      mobile: { width: 375, height: 667, isMobile: true }
-    };
-
-    const config = deviceConfigs[deviceType];
-    const result = {
-      device: deviceType,
-      score: 100,
-      issues: [],
-      recommendations: [],
-      accessibilityScore: 0,
-      performanceMetrics: {}
-    };
-
-    let page = null;
-
+  async checkRendering(page) {
     try {
-      page = await browser.newPage();
+      const result = {
+        viewport: await page.viewportSize(),
+        title: await page.title(),
+        bodyContent: false,
+        images: { total: 0, loaded: 0 },
+        score: 0,
+        issues: []
+      };
 
-      // 设置视口
-      await page.setViewportSize({ width: config.width, height: config.height });
-
-      // 导航到页面
-      const response = await page.goto(url, {
-        waitUntil: 'networkidle',
-        timeout: 30000
-      });
-
-      if (!response.ok()) {
-        throw new Error(`HTTP ${response.status()}: ${response.statusText()}`);
-      }
-
-      // 等待页面加载
-      await page.waitForLoadState('domcontentloaded');
-
-      // 检查页面基本功能
-      await this.checkBasicFunctionality(page, result, deviceType, browserName);
-
-      // 检查响应式设计
-      await this.checkResponsiveDesign(page, result, deviceType);
-
-      // 检查JavaScript错误
-      await this.checkJavaScriptErrors(page, result);
-
-      // 检查可访问性（仅在桌面端进行详细检查）
-      if (deviceType === 'desktop') {
-        result.accessibilityScore = await this.checkAccessibility(page);
-      }
-
-      // 性能检查
-      result.performanceMetrics = await this.checkPerformance(page);
-
-    } catch (error) {
-      console.error(`Device test failed for ${deviceType}:`, error);
-      result.score = 0;
-      result.issues.push({
-        type: '设备测试失败',
-        description: `${deviceType} 测试失败: ${error.message}`,
-        severity: 'high'
-      });
-    } finally {
-      if (page) {
-        await page.close();
-      }
-    }
-
-    return result;
-  }
-
-  /**
-   * 检查基本功能
-   */
-  async checkBasicFunctionality(page, result, deviceType, browserName) {
-    try {
-      // 检查页面标题
-      const title = await page.title();
-      if (!title || title.length === 0) {
-        result.issues.push({
-          type: '页面标题缺失',
-          description: '页面没有标题',
-          severity: 'medium',
-          browser: browserName,
-          device: deviceType
-        });
-        result.score -= 10;
-      }
-
-      // 检查主要内容是否可见
+      // 检查页面是否有内容
       const bodyText = await page.textContent('body');
-      if (!bodyText || bodyText.trim().length < 100) {
-        result.issues.push({
-          type: '内容不足',
-          description: '页面内容过少或无法加载',
-          severity: 'high',
-          browser: browserName,
-          device: deviceType
-        });
-        result.score -= 20;
+      result.bodyContent = bodyText && bodyText.trim().length > 0;
+
+      if (!result.bodyContent) {
+        result.issues.push('页面内容为空');
       }
-
-      // 检查现代Web特性支持
-      const webFeatures = await this.checkModernWebFeatures(page, result, browserName, deviceType);
-
-      // 检查CSS兼容性
-      await this.checkCSSCompatibility(page, result, browserName, deviceType);
-
-      // 检查JavaScript兼容性
-      await this.checkJavaScriptCompatibility(page, result, browserName, deviceType);
 
       // 检查图片加载
       const images = await page.$$('img');
-      let brokenImages = 0;
+      result.images.total = images.length;
 
       for (const img of images) {
         const naturalWidth = await img.evaluate(el => el.naturalWidth);
-        if (naturalWidth === 0) {
-          brokenImages++;
+        if (naturalWidth > 0) {
+          result.images.loaded++;
         }
       }
 
-      if (brokenImages > 0) {
-        result.issues.push({
-          type: '图片加载失败',
-          description: `${brokenImages} 张图片无法加载`,
-          severity: 'medium'
-        });
-        result.score -= Math.min(15, brokenImages * 3);
+      // 计算渲染评分
+      let score = 100;
+
+      if (!result.bodyContent) score -= 50;
+      if (result.images.total > 0) {
+        const imageLoadRate = result.images.loaded / result.images.total;
+        score -= (1 - imageLoadRate) * 30;
       }
 
-      // 检查链接
-      const links = await page.$$('a[href]');
-      if (links.length === 0) {
-        result.issues.push({
-          type: '缺少导航链接',
-          description: '页面没有导航链接',
-          severity: 'low'
-        });
-        result.score -= 5;
-      }
+      result.score = Math.max(0, Math.round(score));
+
+      return {
+        status: result.score >= 80 ? 'passed' : result.score >= 60 ? 'warning' : 'failed',
+        score: result.score,
+        details: result
+      };
 
     } catch (error) {
-      console.error('Basic functionality check failed:', error);
-    }
-  }
-
-  /**
-   * 检查现代Web特性支持
-   */
-  async checkModernWebFeatures(page, result, browserName, deviceType) {
-    try {
-      const features = await page.evaluate(() => {
-        const testResults = {};
-
-        // CSS特性检测
-        testResults.css = {
-          grid: CSS.supports('display', 'grid'),
-          flexbox: CSS.supports('display', 'flex'),
-          customProperties: CSS.supports('color', 'var(--test)'),
-          transforms: CSS.supports('transform', 'translateX(10px)'),
-          animations: CSS.supports('animation', 'test 1s'),
-          filters: CSS.supports('filter', 'blur(5px)'),
-          backdrop: CSS.supports('backdrop-filter', 'blur(5px)')
-        };
-
-        // JavaScript特性检测
-        testResults.js = {
-          es6Classes: typeof class { } === 'function',
-          arrow: (() => { try { eval('() => {}'); return true; } catch (e) { return false; } })(),
-          async: (() => { try { eval('async function() {}'); return true; } catch (e) { return false; } })(),
-          modules: 'noModule' in document.createElement('script'),
-          fetch: typeof fetch !== 'undefined',
-          promises: typeof Promise !== 'undefined',
-          webWorkers: typeof Worker !== 'undefined',
-          serviceWorker: 'serviceWorker' in navigator
-        };
-
-        // HTML5特性检测
-        testResults.html5 = {
-          canvas: !!document.createElement('canvas').getContext,
-          video: !!document.createElement('video').canPlayType,
-          audio: !!document.createElement('audio').canPlayType,
-          localStorage: typeof Storage !== 'undefined',
-          sessionStorage: typeof sessionStorage !== 'undefined',
-          webGL: (() => {
-            try {
-              const canvas = document.createElement('canvas');
-              return !!(canvas.getContext('webgl') || canvas.getContext('experimental-webgl'));
-            } catch (e) {
-              return false;
-            }
-          })()
-        };
-
-        return testResults;
-      });
-
-      // 分析特性支持情况
-      const unsupportedFeatures = [];
-
-      // 检查关键CSS特性
-      if (!features.css.flexbox) {
-        unsupportedFeatures.push('Flexbox');
-        result.issues.push({
-          type: 'CSS兼容性',
-          description: `${browserName} 不支持 Flexbox`,
-          severity: 'high',
-          browser: browserName,
-          device: deviceType
-        });
-        result.score -= 15;
-      }
-
-      if (!features.css.grid) {
-        unsupportedFeatures.push('CSS Grid');
-        result.issues.push({
-          type: 'CSS兼容性',
-          description: `${browserName} 不支持 CSS Grid`,
-          severity: 'medium',
-          browser: browserName,
-          device: deviceType
-        });
-        result.score -= 10;
-      }
-
-      // 检查JavaScript特性
-      if (!features.js.fetch) {
-        unsupportedFeatures.push('Fetch API');
-        result.issues.push({
-          type: 'JavaScript兼容性',
-          description: `${browserName} 不支持 Fetch API`,
-          severity: 'medium',
-          browser: browserName,
-          device: deviceType
-        });
-        result.score -= 8;
-      }
-
-      if (!features.js.promises) {
-        unsupportedFeatures.push('Promises');
-        result.issues.push({
-          type: 'JavaScript兼容性',
-          description: `${browserName} 不支持 Promises`,
-          severity: 'high',
-          browser: browserName,
-          device: deviceType
-        });
-        result.score -= 12;
-      }
-
-      // 添加建议
-      if (unsupportedFeatures.length > 0) {
-        result.recommendations.push(`考虑为 ${browserName} 添加 polyfill 支持: ${unsupportedFeatures.join(', ')}`);
-      }
-
-      return features;
-    } catch (error) {
-      console.error('Modern web features check failed:', error);
-      result.score -= 5;
-      return {};
-    }
-  }
-
-  /**
-   * 检查CSS兼容性
-   */
-  async checkCSSCompatibility(page, result, browserName, deviceType) {
-    try {
-      const cssIssues = await page.evaluate(() => {
-        const issues = [];
-        const styles = window.getComputedStyle(document.documentElement);
-
-        // 检查CSS变量使用
-        const cssText = Array.from(document.styleSheets)
-          .map(sheet => {
-            try {
-              return Array.from(sheet.cssRules).map(rule => rule.cssText).join('');
-            } catch (e) {
-              return '';
-            }
-          }).join('');
-
-        // 检查现代CSS特性使用
-        const modernFeatures = {
-          'CSS Grid': /display:/s*grid/i.test(cssText),
-          'Flexbox': /display:/s*flex/i.test(cssText),
-          'CSS Variables': /var/(--/i.test(cssText),
-          'CSS Transforms': /transform:/i.test(cssText),
-          'CSS Animations': /@keyframes|animation:/i.test(cssText)
-        };
-
-        return { issues, modernFeatures };
-      });
-
-      // 记录CSS特性使用情况
-      result.cssFeatures = cssIssues.modernFeatures;
-
-    } catch (error) {
-      console.error('CSS compatibility check failed:', error);
+      return {
+        status: 'failed',
+        score: 0,
+        details: { error: error.message }
+      };
     }
   }
 
   /**
    * 检查JavaScript兼容性
    */
-  async checkJavaScriptCompatibility(page, result, browserName, deviceType) {
+  async checkJavaScript(page) {
     try {
+      const result = {
+        errors: [],
+        features: {},
+        score: 100
+      };
+
       // 监听JavaScript错误
-      const jsErrors = [];
-      page.on('pageerror', error => {
-        jsErrors.push({
-          message: error.message,
-          stack: error.stack
-        });
+      page.on('pageerror', (error) => {
+        result.errors.push(error.message);
       });
 
-      // 检查JavaScript特性使用
+      // 检查基本JavaScript功能
       const jsFeatures = await page.evaluate(() => {
-        const features = {
-          usesES6: false,
-          usesAsync: false,
-          usesModules: false,
-          usesWebAPIs: false
-        };
+        const features = {};
 
-        // 检查脚本标签
-        const scripts = Array.from(document.querySelectorAll('script'));
-        const scriptContent = scripts.map(s => s.textContent || '').join('');
-
-        features.usesES6 = /const |let |=>|class /.test(scriptContent);
-        features.usesAsync = /async |await /.test(scriptContent);
-        features.usesModules = scripts.some(s => s.type === 'module');
-        features.usesWebAPIs = /fetch/(|navigator/.|localStorage|sessionStorage/.test(scriptContent);
+        // 检查ES6+特性
+        try {
+          features.arrow_functions = typeof (() => { }) === 'function';
+          features.const_let = typeof const !== 'undefined';
+          features.template_literals = `test` === 'test';
+          features.promises = typeof Promise !== 'undefined';
+          features.fetch = typeof fetch !== 'undefined';
+        } catch (e) {
+          features.error = e.message;
+        }
 
         return features;
       });
 
-      // 记录JavaScript特性
-      result.jsFeatures = jsFeatures;
-      result.jsErrors = jsErrors;
+      result.features = jsFeatures;
 
-      if (jsErrors.length > 0) {
-        result.issues.push({
-          type: 'JavaScript错误',
-          description: `发现 ${jsErrors.length} 个JavaScript错误`,
-          severity: 'high',
-          browser: browserName,
-          device: deviceType,
-          details: jsErrors.slice(0, 3) // 只显示前3个错误
-        });
-        result.score -= Math.min(20, jsErrors.length * 5);
-      }
+      // 根据错误数量和特性支持计算分数
+      let score = 100;
+      score -= result.errors.length * 10; // 每个错误扣10分
 
-    } catch (error) {
-      console.error('JavaScript compatibility check failed:', error);
-    }
-  }
+      const supportedFeatures = Object.values(jsFeatures).filter(Boolean).length;
+      const totalFeatures = Object.keys(jsFeatures).length;
+      const featureSupport = supportedFeatures / totalFeatures;
+      score = Math.round(score * featureSupport);
 
-  /**
-   * 检查响应式设计
-   */
-  async checkResponsiveDesign(page, result, deviceType) {
-    try {
-      // 检查水平滚动
-      const hasHorizontalScroll = await page.evaluate(() => {
-        return document.documentElement.scrollWidth > document.documentElement.clientWidth;
-      });
-
-      if (hasHorizontalScroll && (deviceType === 'mobile' || deviceType === 'tablet')) {
-        result.issues.push({
-          type: '响应式设计问题',
-          description: `${deviceType}设备出现水平滚动条`,
-          severity: 'medium'
-        });
-        result.score -= 15;
-        result.recommendations.push('优化响应式设计，避免水平滚动');
-      }
-
-      // 检查字体大小
-      const fontSize = await page.evaluate(() => {
-        const body = document.body;
-        return window.getComputedStyle(body).fontSize;
-      });
-
-      const fontSizeNum = parseInt(fontSize);
-      if (deviceType === 'mobile' && fontSizeNum < 14) {
-        result.issues.push({
-          type: '字体过小',
-          description: '移动端字体过小，影响可读性',
-          severity: 'medium'
-        });
-        result.score -= 10;
-        result.recommendations.push('增大移动端字体大小，提高可读性');
-      }
-
-    } catch (error) {
-      console.error('Responsive design check failed:', error);
-    }
-  }
-
-  /**
-   * 检查JavaScript错误
-   */
-  async checkJavaScriptErrors(page, result) {
-    const errors = [];
-
-    page.on('pageerror', error => {
-      errors.push(error.message);
-    });
-
-    page.on('console', msg => {
-      if (msg.type() === 'error') {
-        errors.push(msg.text());
-      }
-    });
-
-    // 等待一段时间收集错误
-    await page.waitForTimeout(2000);
-
-    if (errors.length > 0) {
-      result.issues.push({
-        type: 'JavaScript错误',
-        description: `发现 ${errors.length} 个JavaScript错误`,
-        severity: 'high'
-      });
-      result.score -= Math.min(25, errors.length * 5);
-      result.recommendations.push('修复JavaScript错误，确保功能正常');
-    }
-  }
-
-  /**
-   * 检查可访问性
-   */
-  async checkAccessibility(page) {
-    let score = 100;
-
-    try {
-      // 检查图片alt属性
-      const imagesWithoutAlt = await page.$$eval('img', imgs =>
-        imgs.filter(img => !img.alt).length
-      );
-      if (imagesWithoutAlt > 0) score -= 20;
-
-      // 检查表单标签
-      const inputsWithoutLabels = await page.$$eval('input, textarea, select', inputs =>
-        inputs.filter(input => !input.labels?.length && !input.getAttribute('aria-label')).length
-      );
-      if (inputsWithoutLabels > 0) score -= 15;
-
-      // 检查标题结构
-      const headings = await page.$$eval('h1, h2, h3, h4, h5, h6', headings =>
-        headings.map(h => h.tagName)
-      );
-      if (headings.length === 0 || !headings.includes('H1')) score -= 15;
-
-    } catch (error) {
-      console.error('Accessibility check failed:', error);
-      score = 50;
-    }
-
-    return Math.max(0, score);
-  }
-
-  /**
-   * 检查性能 - 使用统一的性能指标标准
-   */
-  async checkPerformance(page) {
-    try {
-      const metrics = await page.evaluate(() => {
-        const navigation = performance.getEntriesByType('navigation')[0];
-        const paintEntries = performance.getEntriesByType('paint');
-
-        return {
-          loadTime: navigation ? navigation.loadEventEnd - navigation.loadEventStart : 0,
-          domContentLoaded: navigation ? navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart : 0,
-          firstPaint: paintEntries.find(entry => entry.name === 'first-paint')?.startTime || 0,
-          firstContentfulPaint: paintEntries.find(entry => entry.name === 'first-contentful-paint')?.startTime || 0,
-          // 添加更多统一的性能指标
-          responseStart: navigation ? navigation.responseStart - navigation.fetchStart : 0,
-          responseEnd: navigation ? navigation.responseEnd - navigation.fetchStart : 0
-        };
-      });
-
-      // 使用统一的性能评估标准
-      const performanceScore = this.calculateCompatibilityPerformanceScore(metrics);
+      result.score = Math.max(0, score);
 
       return {
-        ...metrics,
-        score: performanceScore,
-        grade: this.getPerformanceGrade(performanceScore)
+        status: result.score >= 80 ? 'passed' : result.score >= 60 ? 'warning' : 'failed',
+        score: result.score,
+        details: result
       };
+
     } catch (error) {
-      console.error('Performance check failed:', error);
       return {
-        loadTime: 0,
-        domContentLoaded: 0,
-        firstPaint: 0,
-        firstContentfulPaint: 0,
+        status: 'failed',
         score: 0,
-        grade: 'F'
+        details: { error: error.message }
       };
     }
   }
 
   /**
-   * 计算兼容性测试中的性能评分
+   * 计算组合评分
    */
-  calculateCompatibilityPerformanceScore(metrics) {
-    let score = 100;
+  calculateCombinationScore(checks, issues) {
+    if (Object.keys(checks).length === 0) return 0;
 
-    // 使用与性能测试核心相同的评分标准
-    if (metrics.loadTime > 3000) score -= 30;
-    else if (metrics.loadTime > 2000) score -= 20;
-    else if (metrics.loadTime > 1000) score -= 10;
+    let totalScore = 0;
+    let checkCount = 0;
 
-    if (metrics.firstContentfulPaint > 3000) score -= 20;
-    else if (metrics.firstContentfulPaint > 1800) score -= 10;
+    Object.values(checks).forEach(check => {
+      totalScore += check.score;
+      checkCount++;
+    });
 
-    if (metrics.domContentLoaded > 2000) score -= 15;
-    else if (metrics.domContentLoaded > 1000) score -= 8;
+    let averageScore = checkCount > 0 ? totalScore / checkCount : 0;
 
-    return Math.max(0, score);
+    // 根据问题数量调整分数
+    averageScore -= issues.length * 5;
+
+    return Math.max(0, Math.round(averageScore));
   }
 
   /**
-   * 获取性能等级
+   * 计算总体兼容性评分
    */
-  getPerformanceGrade(score) {
-    if (score >= 90) return 'A';
-    if (score >= 80) return 'B';
-    if (score >= 70) return 'C';
-    if (score >= 60) return 'D';
-    return 'F';
-  }
+  calculateCompatibilityScore(browsers) {
+    let totalScore = 0;
+    let combinationCount = 0;
 
-  /**
-   * 计算设备兼容性
-   */
-  calculateDeviceCompatibility(browserResults, devices) {
-    const deviceScores = { Desktop: 0, Tablet: 0, Mobile: 0 };
-    const deviceCounts = { Desktop: 0, Tablet: 0, Mobile: 0 };
-
-    browserResults.forEach(result => {
-      Object.entries(result.deviceResults).forEach(([device, deviceResult]) => {
-        const deviceKey = device.charAt(0).toUpperCase() + device.slice(1);
-        if (deviceScores[deviceKey] !== undefined) {
-          deviceScores[deviceKey] += deviceResult.score;
-          deviceCounts[deviceKey]++;
-        }
+    Object.values(browsers).forEach(browserResults => {
+      Object.values(browserResults).forEach(deviceResult => {
+        totalScore += deviceResult.score;
+        combinationCount++;
       });
     });
 
-    // 计算平均分数
-    Object.keys(deviceScores).forEach(device => {
-      if (deviceCounts[device] > 0) {
-        deviceScores[device] = Math.round(deviceScores[device] / deviceCounts[device]);
-      }
-    });
-
-    return deviceScores;
+    return combinationCount > 0 ? Math.round(totalScore / combinationCount) : 0;
   }
 
   /**
-   * 计算可访问性分数
+   * 更新测试进度
    */
-  calculateAccessibilityScore(browserResults) {
-    const scores = browserResults
-      .map(result => result.accessibilityScore)
-      .filter(score => score > 0);
-
-    return scores.length > 0 ?
-      Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+  updateTestProgress(testId, progress, message) {
+    const test = this.activeTests.get(testId);
+    if (test) {
+      test.progress = progress;
+      test.message = message;
+      this.activeTests.set(testId, test);
+      console.log(`[${this.name.toUpperCase()}-${testId}] ${progress}% - ${message}`);
+    }
   }
 
   /**
-   * 计算总体分数
+   * 获取测试状态
    */
-  calculateOverallScore(results) {
-    const browserScores = Object.values(results.browserCompatibility);
-    const deviceScores = Object.values(results.deviceCompatibility);
-
-    const avgBrowserScore = browserScores.length > 0 ?
-      browserScores.reduce((a, b) => a + b, 0) / browserScores.length : 0;
-
-    const avgDeviceScore = deviceScores.length > 0 ?
-      deviceScores.reduce((a, b) => a + b, 0) / deviceScores.length : 0;
-
-    // 权重分配：浏览器兼容性60%，设备兼容性30%，可访问性10%
-    let score = avgBrowserScore * 0.6 + avgDeviceScore * 0.3;
-
-    if (results.accessibilityScore > 0) {
-      score += results.accessibilityScore * 0.1;
-    }
-
-    return Math.round(Math.max(0, Math.min(100, score)));
+  getTestStatus(testId) {
+    return this.activeTests.get(testId);
   }
 
   /**
-   * 生成通用建议
+   * 停止测试
    */
-  generateGeneralRecommendations(results) {
-    const recommendations = [];
-
-    if (results.overallScore < 80) {
-      recommendations.push('提升整体兼容性，关注主要浏览器支持');
+  async stopTest(testId) {
+    const test = this.activeTests.get(testId);
+    if (test && test.status === 'running') {
+      test.status = 'cancelled';
+      this.activeTests.set(testId, test);
+      return true;
     }
-
-    const lowBrowsers = Object.entries(results.browserCompatibility)
-      .filter(([browser, score]) => score < 80)
-      .map(([browser]) => browser);
-
-    if (lowBrowsers.length > 0) {
-      recommendations.push(`重点优化 ${lowBrowsers.join(', ')} 浏览器的兼容性`);
-    }
-
-    const lowDevices = Object.entries(results.deviceCompatibility)
-      .filter(([device, score]) => score < 80)
-      .map(([device]) => device);
-
-    if (lowDevices.length > 0) {
-      recommendations.push(`改善 ${lowDevices.join(', ')} 设备的显示效果`);
-    }
-
-    if (results.accessibilityScore < 80) {
-      recommendations.push('提升网站可访问性，遵循WCAG指南');
-    }
-
-    return recommendations;
-  }
-
-  /**
-   * 获取测试引擎状态
-   */
-  getStatus() {
-    return {
-      name: this.name,
-      version: this.version,
-      available: true,
-      supportedBrowsers: Object.keys(this.supportedBrowsers),
-      capabilities: [
-        '多浏览器兼容性测试',
-        '响应式设计检查',
-        '可访问性评估',
-        'JavaScript错误检测',
-        '性能基础检查',
-        '多设备模拟'
-      ]
-    };
+    return false;
   }
 }
 
-module.exports = { RealCompatibilityTestEngine };
+module.exports = CompatibilityTestEngine;

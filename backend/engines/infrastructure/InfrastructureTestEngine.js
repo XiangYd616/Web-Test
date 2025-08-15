@@ -1,482 +1,418 @@
+/**
+ * 基础设施测试工具
+ * 真实实现服务器健康检查、网络连接、DNS解析等基础设施测试
+ */
+
 const axios = require('axios');
 const dns = require('dns').promises;
 const net = require('net');
 const { URL } = require('url');
+const Joi = require('joi');
 
 class InfrastructureTestEngine {
   constructor() {
-    this.testResults = {
-      dns: {},
-      connectivity: {},
-      server: {},
-      cdn: {},
-      monitoring: {},
-      score: 0,
-      recommendations: []
-    };
+    this.name = 'infrastructure';
+    this.activeTests = new Map();
+    this.defaultTimeout = 30000;
   }
 
-  async runInfrastructureTest(url, config = {}) {
-    console.log(`开始基础设施测试: ${url}`);
-
-    try {
-      const urlObj = new URL(url);
-
-      // 1. DNS 解析测试
-      await this.testDNSResolution(urlObj.hostname);
-
-      // 2. 连接性测试
-      await this.testConnectivity(urlObj);
-
-      // 3. 服务器信息检测
-      await this.testServerInfo(url);
-
-      // 4. CDN 检测
-      await this.testCDNUsage(url);
-
-      // 5. 监控和健康检查
-      await this.testMonitoring(url);
-
-      // 6. 计算基础设施评分
-      this.calculateInfrastructureScore();
-
-      return {
-        success: true,
-        results: this.testResults,
-        timestamp: new Date().toISOString()
-      };
-
-    } catch (error) {
-      console.error('基础设施测试失败:', error);
-      return {
-        success: false,
-        error: error.message,
-        timestamp: new Date().toISOString()
-      };
-    }
-  }
-
-  async testDNSResolution(hostname) {
-    try {
-      const startTime = Date.now();
-
-      // DNS 查询
-      const [ipv4, ipv6] = await Promise.allSettled([
-        dns.resolve4(hostname),
-        dns.resolve6(hostname)
-      ]);
-
-      const resolutionTime = Date.now() - startTime;
-
-      // MX 记录
-      const mx = await dns.resolveMx(hostname).catch(() => []);
-
-      // TXT 记录
-      const txt = await dns.resolveTxt(hostname).catch(() => []);
-
-      this.testResults.dns = {
-        hostname,
-        resolutionTime,
-        ipv4: ipv4.status === 'fulfilled' ? ipv4.value : null,
-        ipv6: ipv6.status === 'fulfilled' ? ipv6.value : null,
-        mx: mx,
-        txt: txt,
-        score: this.calculateDNSScore(resolutionTime, ipv4.status, ipv6.status)
-      };
-
-    } catch (error) {
-      this.testResults.dns = {
-        error: error.message,
-        score: 0
-      };
-    }
-  }
-
-  async testConnectivity(urlObj) {
-    const port = urlObj.port || (urlObj.protocol === 'https:' ? 443 : 80);
-
-    try {
-      const connectivityTests = await Promise.allSettled([
-        this.testTCPConnection(urlObj.hostname, port),
-        this.testHTTPConnection(urlObj.href),
-        this.testLatency(urlObj.hostname, port)
-      ]);
-
-      this.testResults.connectivity = {
-        tcp: connectivityTests[0].status === 'fulfilled' ? connectivityTests[0].value : null,
-        http: connectivityTests[1].status === 'fulfilled' ? connectivityTests[1].value : null,
-        latency: connectivityTests[2].status === 'fulfilled' ? connectivityTests[2].value : null,
-        score: this.calculateConnectivityScore(connectivityTests)
-      };
-
-    } catch (error) {
-      this.testResults.connectivity = {
-        error: error.message,
-        score: 0
-      };
-    }
-  }
-
-  async testTCPConnection(hostname, port) {
-    return new Promise((resolve, reject) => {
-      const startTime = Date.now();
-      const socket = new net.Socket();
-
-      socket.setTimeout(10000);
-
-      socket.connect(port, hostname, () => {
-        const connectionTime = Date.now() - startTime;
-        socket.destroy();
-        resolve({
-          success: true,
-          connectionTime,
-          port
-        });
-      });
-
-      socket.on('error', (error) => {
-        reject(error);
-      });
-
-      socket.on('timeout', () => {
-        socket.destroy();
-        reject(new Error('Connection timeout'));
-      });
+  /**
+   * 验证配置
+   */
+  validateConfig(config) {
+    const schema = Joi.object({
+      url: Joi.string().uri().required(),
+      checks: Joi.array().items(
+        Joi.string().valid('connectivity', 'dns', 'ssl', 'ports', 'headers', 'redirects')
+      ).default(['connectivity', 'dns', 'ssl']),
+      timeout: Joi.number().min(5000).max(60000).default(30000),
+      ports: Joi.array().items(Joi.number().min(1).max(65535)).default([80, 443]),
+      dnsServers: Joi.array().items(Joi.string().ip()).optional(),
+      maxRedirects: Joi.number().min(0).max(10).default(5)
     });
+
+    const { error, value } = schema.validate(config);
+    if (error) {
+      throw new Error(`配置验证失败: ${error.details[0].message}`);
+    }
+
+    return value;
   }
 
-  async testHTTPConnection(url) {
-    const startTime = Date.now();
+  /**
+   * 检查可用性
+   */
+  async checkAvailability() {
+    try {
+      // 测试DNS解析
+      await dns.resolve('google.com', 'A');
+
+      // 测试HTTP请求
+      const response = await axios.get('https://httpbin.org/status/200', {
+        timeout: 5000
+      });
+
+      return {
+        available: response.status === 200,
+        version: {
+          axios: require('axios/package.json').version,
+          node: process.version
+        },
+        dependencies: ['axios', 'dns', 'net']
+      };
+    } catch (error) {
+      return {
+        available: false,
+        error: error.message,
+        dependencies: ['axios', 'dns', 'net']
+      };
+    }
+  }
+
+  /**
+   * 执行基础设施测试
+   */
+  async runInfrastructureTest(config) {
+    const testId = `infra_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 
     try {
-      const response = await axios.head(url, {
-        timeout: 10000,
-        validateStatus: () => true
+      const validatedConfig = this.validateConfig(config);
+
+      this.activeTests.set(testId, {
+        status: 'running',
+        progress: 0,
+        startTime: Date.now()
+      });
+
+      this.updateTestProgress(testId, 10, '开始基础设施测试');
+
+      const results = {
+        testId,
+        url: validatedConfig.url,
+        timestamp: new Date().toISOString(),
+        checks: {},
+        summary: {
+          totalChecks: 0,
+          passed: 0,
+          failed: 0,
+          warnings: 0,
+          score: 0
+        }
+      };
+
+      const progressStep = 80 / validatedConfig.checks.length;
+      let currentProgress = 10;
+
+      // 执行各项基础设施检查
+      for (const check of validatedConfig.checks) {
+        this.updateTestProgress(testId, currentProgress, `执行${check}检查`);
+
+        switch (check) {
+          case 'connectivity':
+            results.checks.connectivity = await this.checkConnectivity(validatedConfig.url, validatedConfig.timeout);
+            break;
+          case 'dns':
+            results.checks.dns = await this.checkDNS(validatedConfig.url, validatedConfig.dnsServers);
+            break;
+          case 'ssl':
+            results.checks.ssl = await this.checkSSL(validatedConfig.url);
+            break;
+          case 'ports':
+            results.checks.ports = await this.checkPorts(validatedConfig.url, validatedConfig.ports);
+            break;
+          case 'headers':
+            results.checks.headers = await this.checkHeaders(validatedConfig.url, validatedConfig.timeout);
+            break;
+          case 'redirects':
+            results.checks.redirects = await this.checkRedirects(validatedConfig.url, validatedConfig.maxRedirects);
+            break;
+        }
+
+        currentProgress += progressStep;
+      }
+
+      this.updateTestProgress(testId, 90, '计算基础设施评分');
+
+      // 计算总体评分
+      results.summary = this.calculateInfrastructureScore(results.checks);
+      results.totalTime = Date.now() - this.activeTests.get(testId).startTime;
+
+      this.updateTestProgress(testId, 100, '基础设施测试完成');
+
+      this.activeTests.set(testId, {
+        status: 'completed',
+        progress: 100,
+        results
+      });
+
+      return results;
+
+    } catch (error) {
+      this.activeTests.set(testId, {
+        status: 'failed',
+        progress: 0,
+        error: error.message
+      });
+
+      throw error;
+    }
+  }
+
+  /**
+   * 检查网络连接性
+   */
+  async checkConnectivity(url, timeout) {
+    try {
+      const startTime = Date.now();
+
+      const response = await axios.get(url, {
+        timeout,
+        validateStatus: () => true, // 接受所有状态码
+        maxRedirects: 0
       });
 
       const responseTime = Date.now() - startTime;
 
       return {
-        success: true,
-        responseTime,
-        statusCode: response.status,
-        headers: response.headers
+        status: response.status < 400 ? 'passed' : 'warning',
+        message: `HTTP连接成功，状态码: ${response.status}`,
+        score: response.status < 400 ? 100 : 70,
+        details: {
+          statusCode: response.status,
+          responseTime,
+          headers: {
+            server: response.headers.server,
+            'content-type': response.headers['content-type'],
+            'content-length': response.headers['content-length']
+          }
+        }
       };
 
     } catch (error) {
       return {
-        success: false,
-        error: error.message,
-        responseTime: Date.now() - startTime
+        status: 'failed',
+        message: `连接失败: ${error.message}`,
+        score: 0,
+        details: {
+          error: error.message,
+          code: error.code
+        }
       };
     }
   }
 
-  async testLatency(hostname, port) {
-    const tests = [];
+  /**
+   * 检查DNS解析
+   */
+  async checkDNS(url, customServers) {
+    try {
+      const parsedUrl = new URL(url);
+      const hostname = parsedUrl.hostname;
 
-    // 进行5次延迟测试
-    for (let i = 0; i < 5; i++) {
+      const results = {
+        hostname,
+        records: {},
+        responseTime: 0,
+        issues: []
+      };
+
+      const startTime = Date.now();
+
+      // 解析A记录
       try {
-        const startTime = Date.now();
-        const socket = new net.Socket();
-
-        await new Promise((resolve, reject) => {
-          socket.setTimeout(5000);
-
-          socket.connect(port, hostname, () => {
-            const latency = Date.now() - startTime;
-            socket.destroy();
-            tests.push(latency);
-            resolve();
-          });
-
-          socket.on('error', reject);
-          socket.on('timeout', () => {
-            socket.destroy();
-            reject(new Error('Timeout'));
-          });
-        });
-
+        results.records.A = await dns.resolve(hostname, 'A');
       } catch (error) {
-        // 忽略单次测试失败
+        results.issues.push(`A记录解析失败: ${error.message}`);
+      }
+
+      // 解析AAAA记录（IPv6）
+      try {
+        results.records.AAAA = await dns.resolve(hostname, 'AAAA');
+      } catch (error) {
+        // IPv6不是必需的，不算错误
+      }
+
+      // 解析CNAME记录
+      try {
+        results.records.CNAME = await dns.resolve(hostname, 'CNAME');
+      } catch (error) {
+        // CNAME不是必需的
+      }
+
+      // 解析MX记录
+      try {
+        results.records.MX = await dns.resolve(hostname, 'MX');
+      } catch (error) {
+        // MX不是必需的
+      }
+
+      results.responseTime = Date.now() - startTime;
+
+      let score = 100;
+      if (results.issues.length > 0) {
+        score = Math.max(0, 100 - (results.issues.length * 25));
+      }
+
+      return {
+        status: score >= 75 ? 'passed' : score >= 50 ? 'warning' : 'failed',
+        message: `DNS解析${results.issues.length === 0 ? '成功' : '部分成功'}`,
+        score,
+        details: results
+      };
+
+    } catch (error) {
+      return {
+        status: 'failed',
+        message: `DNS解析失败: ${error.message}`,
+        score: 0,
+        details: {
+          error: error.message
+        }
+      };
+    }
+  }
+
+  /**
+   * 检查端口连接
+   */
+  async checkPorts(url, ports) {
+    const parsedUrl = new URL(url);
+    const hostname = parsedUrl.hostname;
+
+    const results = {
+      hostname,
+      ports: [],
+      openPorts: 0,
+      closedPorts: 0
+    };
+
+    for (const port of ports) {
+      const portResult = await this.checkSinglePort(hostname, port);
+      results.ports.push(portResult);
+
+      if (portResult.open) {
+        results.openPorts++;
+      } else {
+        results.closedPorts++;
       }
     }
 
-    if (tests.length === 0) {
-      throw new Error('All latency tests failed');
-    }
-
-    const avgLatency = tests.reduce((a, b) => a + b, 0) / tests.length;
-    const minLatency = Math.min(...tests);
-    const maxLatency = Math.max(...tests);
+    const score = Math.round((results.openPorts / ports.length) * 100);
 
     return {
-      average: Math.round(avgLatency),
-      min: minLatency,
-      max: maxLatency,
-      tests: tests.length
+      status: score >= 80 ? 'passed' : score >= 50 ? 'warning' : 'failed',
+      message: `${results.openPorts}/${ports.length} 端口开放`,
+      score,
+      details: results
     };
   }
 
-  async testServerInfo(url) {
-    try {
-      const response = await axios.head(url, {
-        timeout: 10000,
-        validateStatus: () => true
-      });
+  /**
+   * 检查单个端口
+   */
+  checkSinglePort(hostname, port, timeout = 5000) {
+    return new Promise((resolve) => {
+      const startTime = Date.now();
+      const socket = new net.Socket();
 
-      const headers = response.headers;
-
-      this.testResults.server = {
-        server: headers.server || 'Unknown',
-        poweredBy: headers['x-powered-by'] || null,
-        cloudflare: headers['cf-ray'] ? true : false,
-        loadBalancer: this.detectLoadBalancer(headers),
-        caching: this.detectCaching(headers),
-        compression: headers['content-encoding'] || null,
-        score: this.calculateServerScore(headers)
+      const onConnect = () => {
+        socket.destroy();
+        resolve({
+          port,
+          open: true,
+          responseTime: Date.now() - startTime
+        });
       };
 
-    } catch (error) {
-      this.testResults.server = {
-        error: error.message,
-        score: 0
+      const onError = (error) => {
+        socket.destroy();
+        resolve({
+          port,
+          open: false,
+          error: error.message,
+          responseTime: Date.now() - startTime
+        });
       };
-    }
+
+      socket.setTimeout(timeout);
+      socket.on('connect', onConnect);
+      socket.on('error', onError);
+      socket.on('timeout', onError);
+
+      socket.connect(port, hostname);
+    });
   }
 
-  async testCDNUsage(url) {
-    try {
-      const response = await axios.get(url, {
-        timeout: 10000,
-        validateStatus: () => true
-      });
+  /**
+   * 计算基础设施评分
+   */
+  calculateInfrastructureScore(checks) {
+    let totalScore = 0;
+    let totalChecks = 0;
+    let passed = 0;
+    let failed = 0;
+    let warnings = 0;
 
-      const headers = response.headers;
-      const cdnIndicators = {
-        cloudflare: headers['cf-ray'] || headers['cf-cache-status'],
-        cloudfront: headers['x-amz-cf-id'],
-        fastly: headers['fastly-debug-digest'],
-        maxcdn: headers['x-maxcdn-cache'],
-        keycdn: headers['x-keycdn-cache'],
-        generic: headers['x-cache'] || headers['x-served-by']
-      };
+    Object.values(checks).forEach(check => {
+      totalChecks++;
+      totalScore += check.score;
 
-      const detectedCDNs = Object.entries(cdnIndicators)
-        .filter(([, value]) => value)
-        .map(([name]) => name);
-
-      this.testResults.cdn = {
-        detected: detectedCDNs,
-        hasCDN: detectedCDNs.length > 0,
-        cacheStatus: headers['x-cache-status'] || headers['cf-cache-status'] || 'unknown',
-        score: detectedCDNs.length > 0 ? 100 : 0
-      };
-
-    } catch (error) {
-      this.testResults.cdn = {
-        error: error.message,
-        score: 0
-      };
-    }
-  }
-
-  async testMonitoring(url) {
-    try {
-      // 检查常见的监控和健康检查端点
-      const monitoringEndpoints = [
-        '/health',
-        '/healthcheck',
-        '/status',
-        '/ping',
-        '/.well-known/health-check'
-      ];
-
-      const urlObj = new URL(url);
-      const baseUrl = `${urlObj.protocol}//${urlObj.host}`;
-
-      const healthChecks = await Promise.allSettled(
-        monitoringEndpoints.map(endpoint =>
-          axios.get(`${baseUrl}${endpoint}`, {
-            timeout: 5000,
-            validateStatus: () => true
-          })
-        )
-      );
-
-      const availableEndpoints = healthChecks
-        .map((result, index) => ({
-          endpoint: monitoringEndpoints[index],
-          available: result.status === 'fulfilled' && result.value.status < 400
-        }))
-        .filter(item => item.available);
-
-      this.testResults.monitoring = {
-        healthCheckEndpoints: availableEndpoints,
-        hasHealthCheck: availableEndpoints.length > 0,
-        uptime: await this.estimateUptime(url),
-        score: availableEndpoints.length > 0 ? 80 : 20
-      };
-
-    } catch (error) {
-      this.testResults.monitoring = {
-        error: error.message,
-        score: 0
-      };
-    }
-  }
-
-  async estimateUptime(url) {
-    // 简单的可用性检查
-    try {
-      const response = await axios.head(url, {
-        timeout: 10000,
-        validateStatus: () => true
-      });
-
-      return {
-        status: response.status < 400 ? 'up' : 'down',
-        statusCode: response.status,
-        responseTime: response.headers['x-response-time'] || null
-      };
-
-    } catch (error) {
-      return {
-        status: 'down',
-        error: error.message
-      };
-    }
-  }
-
-  detectLoadBalancer(headers) {
-    const lbIndicators = [
-      'x-forwarded-for',
-      'x-real-ip',
-      'x-forwarded-proto',
-      'x-load-balancer'
-    ];
-
-    return lbIndicators.some(header => headers[header]);
-  }
-
-  detectCaching(headers) {
-    const cacheHeaders = [
-      'cache-control',
-      'expires',
-      'etag',
-      'last-modified'
-    ];
-
-    return cacheHeaders.some(header => headers[header]);
-  }
-
-  calculateDNSScore(resolutionTime, ipv4Status, ipv6Status) {
-    let score = 100;
-
-    // DNS 解析时间评分
-    if (resolutionTime > 1000) score -= 30;
-    else if (resolutionTime > 500) score -= 15;
-
-    // IPv4 支持
-    if (ipv4Status !== 'fulfilled') score -= 40;
-
-    // IPv6 支持（加分项）
-    if (ipv6Status === 'fulfilled') score += 10;
-
-    return Math.max(0, Math.min(100, score));
-  }
-
-  calculateConnectivityScore(tests) {
-    let score = 0;
-    let validTests = 0;
-
-    tests.forEach(test => {
-      if (test.status === 'fulfilled') {
-        validTests++;
-        if (test.value.success) {
-          score += 33.33;
-        }
+      switch (check.status) {
+        case 'passed':
+          passed++;
+          break;
+        case 'warning':
+          warnings++;
+          break;
+        case 'failed':
+          failed++;
+          break;
       }
     });
 
-    return validTests > 0 ? Math.round(score) : 0;
-  }
+    const averageScore = totalChecks > 0 ? Math.round(totalScore / totalChecks) : 0;
 
-  calculateServerScore(headers) {
-    let score = 50; // 基础分
-
-    // 服务器信息隐藏（安全性）
-    if (!headers.server || headers.server === 'Unknown') score += 20;
-
-    // 压缩支持
-    if (headers['content-encoding']) score += 15;
-
-    // 缓存配置
-    if (headers['cache-control'] || headers['expires']) score += 15;
-
-    return Math.min(100, score);
-  }
-
-  calculateInfrastructureScore() {
-    const weights = {
-      dns: 0.2,
-      connectivity: 0.3,
-      server: 0.2,
-      cdn: 0.15,
-      monitoring: 0.15
+    return {
+      totalChecks,
+      passed,
+      failed,
+      warnings,
+      score: averageScore,
+      status: averageScore >= 80 ? 'healthy' : averageScore >= 60 ? 'warning' : 'critical'
     };
-
-    let totalScore = 0;
-
-    totalScore += (this.testResults.dns.score || 0) * weights.dns;
-    totalScore += (this.testResults.connectivity.score || 0) * weights.connectivity;
-    totalScore += (this.testResults.server.score || 0) * weights.server;
-    totalScore += (this.testResults.cdn.score || 0) * weights.cdn;
-    totalScore += (this.testResults.monitoring.score || 0) * weights.monitoring;
-
-    this.testResults.score = Math.round(totalScore);
-
-    // 生成建议
-    this.generateRecommendations();
   }
 
-  generateRecommendations() {
-    const recommendations = [];
-
-    if (this.testResults.dns.score < 70) {
-      recommendations.push({
-        priority: 'medium',
-        title: '优化DNS配置',
-        description: 'DNS解析速度较慢，建议使用更快的DNS服务商或配置DNS缓存'
-      });
+  /**
+   * 更新测试进度
+   */
+  updateTestProgress(testId, progress, message) {
+    const test = this.activeTests.get(testId);
+    if (test) {
+      test.progress = progress;
+      test.message = message;
+      this.activeTests.set(testId, test);
+      console.log(`[${this.name.toUpperCase()}-${testId}] ${progress}% - ${message}`);
     }
+  }
 
-    if (!this.testResults.cdn.hasCDN) {
-      recommendations.push({
-        priority: 'high',
-        title: '使用CDN服务',
-        description: '建议使用CDN来提高全球访问速度和可用性'
-      });
+  /**
+   * 获取测试状态
+   */
+  getTestStatus(testId) {
+    return this.activeTests.get(testId);
+  }
+
+  /**
+   * 停止测试
+   */
+  async stopTest(testId) {
+    const test = this.activeTests.get(testId);
+    if (test && test.status === 'running') {
+      test.status = 'cancelled';
+      this.activeTests.set(testId, test);
+      return true;
     }
-
-    if (!this.testResults.monitoring.hasHealthCheck) {
-      recommendations.push({
-        priority: 'medium',
-        title: '添加健康检查',
-        description: '建议添加健康检查端点以便监控服务状态'
-      });
-    }
-
-    if (this.testResults.connectivity.score < 80) {
-      recommendations.push({
-        priority: 'high',
-        title: '改善网络连接',
-        description: '网络连接存在问题，建议检查服务器配置和网络设置'
-      });
-    }
-
-    this.testResults.recommendations = recommendations;
+    return false;
   }
 }
 
