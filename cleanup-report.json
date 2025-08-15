@@ -1,0 +1,45 @@
+{
+  "timestamp": "2025-08-15T10:05:03.629Z",
+  "summary": {
+    "totalProcessed": 2,
+    "successfullyDeleted": 0,
+    "needsManualReview": 3
+  },
+  "cleanupActions": [],
+  "manualReviewItems": [
+    {
+      "category": "增强路由管理器",
+      "deprecated": "backend/src/EnhancedRouteManager.js",
+      "current": "backend/src/UnifiedRouteManager.js",
+      "risk": "medium",
+      "reason": "需要确认所有功能都已迁移到UnifiedRouteManager"
+    },
+    {
+      "category": "路由管理器",
+      "deprecated": "backend/src/RouteManager.js",
+      "current": "backend/src/UnifiedRouteManager.js",
+      "risk": "low",
+      "reason": "UnifiedRouteManager是最新版本，功能更完整",
+      "references": [
+        "backend/src/app.js"
+      ]
+    },
+    {
+      "category": "错误边界",
+      "deprecated": "frontend/components/ui/ErrorBoundary.tsx",
+      "current": "frontend/components/system/EnhancedErrorBoundary.tsx",
+      "risk": "low",
+      "reason": "EnhancedErrorBoundary提供了更好的错误处理",
+      "references": [
+        "dist/assets/js/index-94272d68.js",
+        "dist/assets/js/router-vendor-9a6c8812.js",
+        "dist/assets/js/system-components-3200ed27.js",
+        "frontend/components/tools/AppRoutes.tsx",
+        "frontend/components/ui/index.ts",
+        "frontend/components/ui/LazyComponent.tsx",
+        "frontend/utils/LazyLoadManager.tsx"
+      ]
+    }
+  ],
+  "backupLocation": "D:\\myproject\\Test-Web\\backup\\deprecated-components"
+}

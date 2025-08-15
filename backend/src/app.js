@@ -189,21 +189,40 @@ app.use(rateLimiter);
 app.use('/exports', express.static(path.join(__dirname, 'exports')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// 使用统一路由管理器
-const RouteManager = require('./RouteManager.js');
-const routeManager = new RouteManager(app);
+// 初始化错误处理系统
+const { initializeErrorHandlingSystem, unifiedErrorHandler } = require('../utils/UnifiedErrorHandler');
 
-// 注册所有标准路由
-routeManager.registerStandardRoutes();
+// 使用统一路由管理器 - 修复API路由架构问题
+const UnifiedRouteManager = require('./UnifiedRouteManager.js');
+const routeManager = new UnifiedRouteManager(app);
 
-// 检查路由冲突
-const conflicts = routeManager.checkRouteConflicts();
-if (conflicts.length > 0) {
-  console.warn('⚠️ 检测到路由冲突，请检查路由配置');
+// 初始化应用系统
+async function initializeApp() {
+  try {
+    // 1. 初始化错误处理系统
+    await initializeErrorHandlingSystem();
+
+    // 2. 设置全局错误处理中间件
+    app.use(unifiedErrorHandler.expressMiddleware());
+
+    // 3. 初始化路由管理器
+    await routeManager.initialize();
+
+    // 4. 注册所有标准路由
+    routeManager.registerStandardRoutes();
+
+    // 5. 应用所有路由
+    routeManager.applyRoutes();
+
+    console.log('✅ Application systems initialized successfully');
+  } catch (error) {
+    console.error('❌ Failed to initialize application:', error);
+    process.exit(1);
+  }
 }
 
-// 应用所有路由
-routeManager.applyRoutes();
+// 立即初始化应用
+initializeApp();
 
 // 健康检查端点
 app.get('/health', async (req, res) => {
