@@ -1,7 +1,7 @@
 import { Activity, AlertTriangle, BarChart3, Calendar, CheckCircle, Download, Filter, Globe, RefreshCw, TrendingDown, TrendingUp } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { AnalyticsData, dataAnalysisService } from '../../services/dataAnalysisService';
+import { AnalyticsData, dataAnalysisService } from '../../services/data/dataAnalysisService';
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 

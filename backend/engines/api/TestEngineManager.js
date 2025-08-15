@@ -3,7 +3,7 @@
  * 统一管理所有测试引擎的执行和状态
  */
 
-const { ErrorFactory } = require('..\..\utils\ApiError.js');
+const { ErrorFactory } = require('../../utils/apiError')');
 
 class TestEngineManager {
     constructor() {
@@ -18,11 +18,11 @@ class TestEngineManager {
     initializeEngines() {
         try {
             // 压力测试引擎
-            const RealStressTestEngine = require('..\stress\stressTestEngine.js');
+            const RealStressTestEngine = require('../stress/stressTestEngine.js');
             this.engines.set('stress', new RealStressTestEngine());
 
             // SEO测试引擎
-            const SEOTestEngine = require('..\seo\SEOTestEngine.js');
+            const SEOTestEngine = require('../seo/SEOTestEngine.js');
             this.engines.set('seo', new SEOTestEngine());
 
             // 安全测试引擎
@@ -30,13 +30,13 @@ class TestEngineManager {
             this.engines.set('security', new SecurityTestEngine());
 
             // 性能和可访问性测试引擎
-            const PerformanceAccessibilityEngine = require('..\performance\PerformanceAccessibilityEngine.js');
+            const PerformanceAccessibilityEngine = require('../performance/PerformanceAccessibilityEngine.js');
             this.engines.set('performance', new PerformanceAccessibilityEngine());
             this.engines.set('accessibility', new PerformanceAccessibilityEngine());
 
             // 尝试加载其他可选引擎
             try {
-                const { RealCompatibilityTestEngine } = require('..\compatibility\compatibilityTestEngine.js');
+                const { RealCompatibilityTestEngine } = require('../compatibility/compatibilityTestEngine.js');
                 this.engines.set('compatibility', new RealCompatibilityTestEngine());
             } catch (error) {
                 console.warn('兼容性测试引擎不可用:', error.message);

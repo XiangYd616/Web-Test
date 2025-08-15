@@ -5,7 +5,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const Logger = require('..\..\middleware\logger.js');
+const Logger = require('../../middleware/logger.js');
 
 class I18nService {
   constructor() {
@@ -227,7 +227,7 @@ class I18nService {
       let result = text;
       
       for (const [key, value] of Object.entries(params)) {
-        const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
+        const regex = new RegExp(`{{//s*${key}//s*}}`, 'g');
         result = result.replace(regex, value);
       }
 
@@ -479,7 +479,7 @@ class I18nService {
       if (typeof value === 'object' && value !== null) {
         csv += this.convertToCSV(value, fullKey);
       } else {
-        csv += `"${fullKey}","${String(value).replace(/"/g, '""')}"\n`;
+        csv += `"${fullKey}","${String(value).replace(/"/g, '""')}"/n`;
       }
     }
     

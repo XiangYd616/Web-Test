@@ -211,7 +211,7 @@ async function getWindowsDiskInfo() {
 
     // 使用wmic命令获取磁盘信息
     const { stdout } = await execAsync('wmic logicaldisk get size,freespace,caption');
-    const lines = stdout.trim().split('\n').slice(1); // 跳过标题行
+    const lines = stdout.trim().split('/n').slice(1); // 跳过标题行
 
     let totalSize = 0;
     let totalFree = 0;
@@ -249,13 +249,13 @@ async function getUnixDiskInfo() {
 
     // 使用df命令获取磁盘信息
     const { stdout } = await execAsync('df -h /');
-    const lines = stdout.trim().split('\n');
+    const lines = stdout.trim().split('/n');
 
     if (lines.length >= 2) {
       const parts = lines[1].split(/\s+/);
       if (parts.length >= 5) {
         const usagePercent = parseInt(parts[4].replace('%', '')) || 50;
-        const available = parseFloat(parts[3].replace(/[^\d.]/g, '')) || 100;
+        const available = parseFloat(parts[3].replace(/[^/d.]/g, '')) || 100;
 
         return {
           usage: usagePercent,

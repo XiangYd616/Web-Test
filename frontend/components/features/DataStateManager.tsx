@@ -7,7 +7,7 @@
 import React from 'react';
 import { ExclamationTriangleIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { cn } from '../../lib/utils';
-import type { LoadingState } from '..\..\services\dataProcessor.ts';
+import type { LoadingState } from '../../services/dataProcessor.ts';
 
 // ==================== 类型定义 ====================
 

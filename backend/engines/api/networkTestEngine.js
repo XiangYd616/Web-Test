@@ -216,23 +216,23 @@ class RealNetworkTestEngine {
     try {
       if (isWindows) {
         // Windows ping输出解析
-        const lossMatch = output.match(/\((\d+)% loss\)/);
+        const lossMatch = output.match(//((/d+)% loss/)/);
         if (lossMatch) {
           result.packetLoss = parseInt(lossMatch[1]);
         }
 
-        const timeMatch = output.match(/Average = (\d+)ms/);
+        const timeMatch = output.match(/Average = (/d+)ms/);
         if (timeMatch) {
           result.averageLatency = parseInt(timeMatch[1]);
         }
       } else {
         // Linux/Mac ping输出解析
-        const lossMatch = output.match(/(\d+)% packet loss/);
+        const lossMatch = output.match(/(/d+)% packet loss/);
         if (lossMatch) {
           result.packetLoss = parseInt(lossMatch[1]);
         }
 
-        const statsMatch = output.match(/min\/avg\/max\/stddev = ([\d.]+)\/([\d.]+)\/([\d.]+)\/([\d.]+) ms/);
+        const statsMatch = output.match(/min//avg//max//stddev = ([/d.]+)//([/d.]+)//([/d.]+)//([/d.]+) ms/);
         if (statsMatch) {
           result.minLatency = parseFloat(statsMatch[1]);
           result.averageLatency = parseFloat(statsMatch[2]);
@@ -382,7 +382,7 @@ class RealNetworkTestEngine {
    */
   parseTracerouteOutput(output, isWindows) {
     const hops = [];
-    const lines = output.split('\n');
+    const lines = output.split('/n');
 
     for (const line of lines) {
       if (isWindows) {

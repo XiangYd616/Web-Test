@@ -553,10 +553,10 @@ class ResponsiveDesignAnalyzer {
           if (media.includes('pointer')) features.pointer++;
 
           // 提取断点
-          const widthMatch = media.match(/(?:min-width|max-width):\s*(\d+)px/g);
+          const widthMatch = media.match(/(?:min-width|max-width):/s*(/d+)px/g);
           if (widthMatch) {
             widthMatch.forEach(match => {
-              const value = parseInt(match.match(/\d+/)[0]);
+              const value = parseInt(match.match(//d+/)[0]);
               if (!breakpoints.includes(value)) {
                 breakpoints.push(value);
               }

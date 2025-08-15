@@ -320,7 +320,7 @@ class TestCaseManager {
       return template;
     }
     
-    return template.replace(/\{\{(\w+)\}\}/g, (match, varName) => {
+    return template.replace(//{/{(/w+)/}/}/g, (match, varName) => {
       return context[varName] !== undefined ? context[varName] : match;
     });
   }

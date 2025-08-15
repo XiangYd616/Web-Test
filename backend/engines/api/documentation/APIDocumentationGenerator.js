@@ -928,7 +928,7 @@ ${testReport.testSuites.map(suite => `
 |---------|------|------|------|
 ${suite.testCases.map(testCase =>
       `| ${testCase.name} | ${testCase.method} | ${testCase.endpoint} | ${testCase.status} |`
-    ).join('\n')}
+    ).join('/n')}
 `).join('')}
 
 ## 建议
@@ -941,7 +941,7 @@ ${testReport.recommendations.map(rec => `
 ${rec.description}
 
 **建议**:
-${rec.suggestions.map(s => `- ${s}`).join('\n')}
+${rec.suggestions.map(s => `- ${s}`).join('/n')}
 `).join('')}
 `;
   }

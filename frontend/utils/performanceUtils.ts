@@ -641,38 +641,13 @@ export function initializePerformanceOptimization() {
     });
 }
 
-// 工具函数
-export const performanceUtils = {
-    /**
-     * 防抖函数
-     */
-    debounce<T extends (...args: any[]) => any>(
-        func: T,
-        wait: number
-    ): (...args: Parameters<T>) => void {
-        let timeout: NodeJS.Timeout;
-        return (...args: Parameters<T>) => {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(this, args), wait);
-        };
-    },
+// 工具函数 - 使用 lodash 实现以避免重复
+import { debounce, throttle } from 'lodash';
 
-    /**
-     * 节流函数
-     */
-    throttle<T extends (...args: any[]) => any>(
-        func: T,
-        limit: number
-    ): (...args: Parameters<T>) => void {
-        let inThrottle: boolean;
-        return (...args: Parameters<T>) => {
-            if (!inThrottle) {
-                func.apply(this, args);
-                inThrottle = true;
-                setTimeout(() => (inThrottle = false), limit);
-            }
-        };
-    },
+export const performanceUtils = {
+    // 重新导出 lodash 的防抖和节流函数
+    debounce,
+    throttle,
 
     /**
      * 空闲时执行

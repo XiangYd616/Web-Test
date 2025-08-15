@@ -29,8 +29,8 @@ class BackupService extends EventEmitter {
             ]
         });
 
-        this.backupDir = path.join(__dirname, '../../backups');
-        this.tempDir = path.join(__dirname, '../../temp/backups');
+        this.backupDir = path.join(__dirname, '../../runtime/backups');
+        this.tempDir = path.join(__dirname, '../../runtime/temp/backups');
 
         // 备份配置
         this.maxBackupRetention = 30; // 保留30天的备份
@@ -409,7 +409,7 @@ class BackupService extends EventEmitter {
                 const fileName = `incremental_backup_${timestamp}.sql`;
                 const filePath = path.join(this.tempDir, fileName);
 
-                await fs.writeFile(filePath, '-- No changes since last backup\n');
+                await fs.writeFile(filePath, '-- No changes since last backup/n');
 
                 return {
                     filePath,
@@ -969,7 +969,7 @@ class BackupService extends EventEmitter {
     async extractTablesFromBackup(filePath) {
         try {
             const content = await fs.readFile(filePath, 'utf8');
-            const tableMatches = content.match(/CREATE TABLE (\w+)/g) || [];
+            const tableMatches = content.match(/CREATE TABLE (/w +) / g) || [];
             return tableMatches.map(match => match.replace('CREATE TABLE ', ''));
         } catch (error) {
             this.logger.warn('提取表列表失败:', error);

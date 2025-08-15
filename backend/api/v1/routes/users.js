@@ -8,8 +8,8 @@ const { body, validationResult } = require('express-validator');
 
 const { getPool } = require('../../../config/database');
 const { requireRole, ROLES } = require('./auth.js');
-const { asyncHandler } = require('..\..\middleware\errorHandler.js');
-const { formatValidationErrors } = require('..\..\middleware\responseFormatter.js');
+const { asyncHandler } = require('../../middleware/errorHandler.js');
+const { formatValidationErrors } = require('../../middleware/responseFormatter.js');
 
 const router = express.Router();
 

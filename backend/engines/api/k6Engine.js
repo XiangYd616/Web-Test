@@ -136,7 +136,7 @@ class RealK6Engine {
       proxyConfig = `
 // 代理配置
 const proxyUrl = '${proxyUrl}';
-console.log('🌐 Using proxy:', proxyUrl.replace(/\\/\\/.*:.*@/, '//***:***@'));
+console.log('🌐 Using proxy:', proxyUrl.replace(///////.*:.*@/, '//***:***@'));
 `;
     }
 
@@ -209,7 +209,7 @@ export default function() {
 
   // 🐛 调试信息
   if (!isSuccess) {
-    console.log(\`❌ Request failed: status=\${response.status}, duration=\${response.timings.duration}ms, size=\${response.body ? response.body.length : 0}\`);
+    console.log(/`❌ Request failed: status=/${response.status}, duration=/${response.timings.duration}ms, size=/${response.body ? response.body.length : 0}/`);
   }
 
   // 根据测试类型调整请求间隔
@@ -293,7 +293,7 @@ export function setup() {
         env.http_proxy = proxyUrl;
         env.https_proxy = proxyUrl;
 
-        console.log(`🌐 Setting proxy environment variables: ${proxyUrl.replace(/\/\/.*:.*@/, '//***:***@')}`);
+        console.log(`🌐 Setting proxy environment variables: ${proxyUrl.replace(/////.*:.*@/, '//***:***@')}`);
       }
 
       console.log(`🎯 Executing: k6 ${args.join(' ')}`);
@@ -342,7 +342,7 @@ export function setup() {
   parseK6Results(result) {
     try {
       // 从stdout解析结果
-      const lines = result.stdout.split('\n');
+      const lines = result.stdout.split('/n');
       const summaryData = {};
 
       // 解析关键指标
@@ -352,10 +352,10 @@ export function setup() {
           const avgMatch = line.match(/avg=([0-9.]+)ms/);
           const minMatch = line.match(/min=([0-9.]+)ms/);
           const maxMatch = line.match(/max=([0-9.]+)ms/);
-          const p50Match = line.match(/p\(50\)=([0-9.]+)ms/);
-          const p90Match = line.match(/p\(90\)=([0-9.]+)ms/);
-          const p95Match = line.match(/p\(95\)=([0-9.]+)ms/);
-          const p99Match = line.match(/p\(99\)=([0-9.]+)ms/);
+          const p50Match = line.match(/p/(50/)=([0-9.]+)ms/);
+          const p90Match = line.match(/p/(90/)=([0-9.]+)ms/);
+          const p95Match = line.match(/p/(95/)=([0-9.]+)ms/);
+          const p99Match = line.match(/p/(99/)=([0-9.]+)ms/);
 
           if (avgMatch) summaryData.avgResponseTime = parseFloat(avgMatch[1]);
           if (minMatch) summaryData.minResponseTime = parseFloat(minMatch[1]);
@@ -369,7 +369,7 @@ export function setup() {
         // 解析请求总数和TPS
         if (line.includes('http_reqs')) {
           const totalMatch = line.match(/([0-9]+)/);
-          const rateMatch = line.match(/([0-9.]+)\/s/);
+          const rateMatch = line.match(/([0-9.]+)//s/);
           if (totalMatch) summaryData.totalRequests = parseInt(totalMatch[1]);
           if (rateMatch) summaryData.requestsPerSecond = parseFloat(rateMatch[1]);
         }
@@ -392,7 +392,7 @@ export function setup() {
 
         // 解析数据传输量
         if (line.includes('data_received')) {
-          const match = line.match(/([0-9.]+)\s*([KMGT]?B)/);
+          const match = line.match(/([0-9.]+)/s*([KMGT]?B)/);
           if (match) {
             const value = parseFloat(match[1]);
             const unit = match[2];
@@ -405,7 +405,7 @@ export function setup() {
         }
 
         if (line.includes('data_sent')) {
-          const match = line.match(/([0-9.]+)\s*([KMGT]?B)/);
+          const match = line.match(/([0-9.]+)/s*([KMGT]?B)/);
           if (match) {
             const value = parseFloat(match[1]);
             const unit = match[2];
@@ -468,7 +468,7 @@ export function setup() {
    */
   parseErrorBreakdown(stdout) {
     const errorBreakdown = {};
-    const lines = stdout.split('\n');
+    const lines = stdout.split('/n');
 
     for (const line of lines) {
       // 查找错误相关的行

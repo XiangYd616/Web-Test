@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import TestPageWithHistory from '../components/testing/TestPageWithHistory';
-import TestPageHistory from '..\components\ui\TestPageHistory.tsx';
+import TestPageHistory from '../components/ui/TestPageHistory.tsx';
 
 const SecurityTestWithHistory: React.FC = () => {
   // 安全测试的状态

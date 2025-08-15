@@ -109,7 +109,7 @@ class PasswordAnalyzer {
     const feedback: string[] = [];
     const warnings: string[] = [];
     const suggestions: string[] = [];
-    
+
     let score = 0;
     let entropy = 0;
 
@@ -202,7 +202,7 @@ class PasswordAnalyzer {
       const personalInfo = [userInfo.email, userInfo.username, userInfo.name]
         .filter(Boolean)
         .map(info => info!.toLowerCase());
-      
+
       for (const info of personalInfo) {
         if (password.toLowerCase().includes(info)) {
           score -= 20;
@@ -244,19 +244,19 @@ class PasswordAnalyzer {
    */
   private static findRepeatingPattern(password: string): string {
     let longestPattern = '';
-    
+
     for (let i = 0; i < password.length; i++) {
       for (let j = i + 1; j <= password.length; j++) {
         const pattern = password.slice(i, j);
         const regex = new RegExp(pattern, 'g');
         const matches = password.match(regex);
-        
+
         if (matches && matches.length > 1 && pattern.length > longestPattern.length) {
           longestPattern = pattern;
         }
       }
     }
-    
+
     return longestPattern;
   }
 
@@ -265,18 +265,18 @@ class PasswordAnalyzer {
    */
   private static hasSequentialChars(password: string): boolean {
     const lowerPassword = password.toLowerCase();
-    
+
     for (const pattern of this.SEQUENTIAL_PATTERNS) {
       for (let i = 0; i <= pattern.length - 3; i++) {
         const sequence = pattern.slice(i, i + 3);
         const reverseSequence = sequence.split('').reverse().join('');
-        
+
         if (lowerPassword.includes(sequence) || lowerPassword.includes(reverseSequence)) {
           return true;
         }
       }
     }
-    
+
     return false;
   }
 
@@ -337,7 +337,7 @@ export class PasswordPolicyService {
    * 验证密码是否符合策略
    */
   validatePassword(
-    password: string, 
+    password: string,
     userInfo?: { email?: string; username?: string; name?: string },
     userId?: string
   ): PasswordValidationResult {
@@ -384,7 +384,7 @@ export class PasswordPolicyService {
       const personalInfo = [userInfo.email, userInfo.username, userInfo.name]
         .filter(Boolean)
         .map(info => info!.toLowerCase());
-      
+
       for (const info of personalInfo) {
         if (password.toLowerCase().includes(info)) {
           violations.push('密码不能包含个人信息');
@@ -410,7 +410,7 @@ export class PasswordPolicyService {
     if (userId && this.policy.passwordHistory > 0) {
       const history = this.passwordHistory.get(userId) || [];
       const passwordHash = this.hashPassword(password);
-      
+
       if (history.includes(passwordHash)) {
         violations.push(`不能重复使用最近${this.policy.passwordHistory}个密码`);
       }
@@ -438,15 +438,15 @@ export class PasswordPolicyService {
   updatePasswordHistory(userId: string, password: string): void {
     const passwordHash = this.hashPassword(password);
     const history = this.passwordHistory.get(userId) || [];
-    
+
     // 添加新密码到历史记录
     history.unshift(passwordHash);
-    
+
     // 保持历史记录数量限制
     if (history.length > this.policy.passwordHistory) {
       history.splice(this.policy.passwordHistory);
     }
-    
+
     this.passwordHistory.set(userId, history);
   }
 
@@ -473,12 +473,12 @@ export class PasswordPolicyService {
 
     const attempts = this.loginAttempts.get(userId) || [];
     attempts.unshift(attempt);
-    
+
     // 保持最近100次尝试记录
     if (attempts.length > 100) {
       attempts.splice(100);
     }
-    
+
     this.loginAttempts.set(userId, attempts);
 
     // 如果登录失败，检查是否需要锁定账户
@@ -496,8 +496,8 @@ export class PasswordPolicyService {
   private checkAccountLock(userId: string): void {
     const attempts = this.loginAttempts.get(userId) || [];
     const recentFailures = attempts.filter(
-      attempt => !attempt.success && 
-      Date.now() - new Date(attempt.timestamp).getTime() < 15 * 60 * 1000 // 15分钟内
+      attempt => !attempt.success &&
+        Date.now() - new Date(attempt.timestamp).getTime() < 15 * 60 * 1000 // 15分钟内
     );
 
     const maxAttempts = 5; // 最大失败次数
@@ -533,7 +533,7 @@ export class PasswordPolicyService {
     };
 
     this.accountLocks.set(userId, lockInfo);
-    
+
     // 缓存锁定信息
     defaultMemoryCache.set(`account_lock_${userId}`, lockInfo, undefined, duration * 1000);
   }
@@ -552,7 +552,7 @@ export class PasswordPolicyService {
   async isAccountLocked(userId: string): Promise<AccountLockInfo | null> {
     // 先检查内存
     let lockInfo = this.accountLocks.get(userId);
-    
+
     // 如果内存中没有，检查缓存
     if (!lockInfo) {
       lockInfo = await defaultMemoryCache.get(`account_lock_${userId}`);
@@ -575,8 +575,8 @@ export class PasswordPolicyService {
   private getRecentFailedAttempts(userId: string): number {
     const attempts = this.loginAttempts.get(userId) || [];
     return attempts.filter(
-      attempt => !attempt.success && 
-      Date.now() - new Date(attempt.timestamp).getTime() < 15 * 60 * 1000
+      attempt => !attempt.success &&
+        Date.now() - new Date(attempt.timestamp).getTime() < 15 * 60 * 1000
     ).length;
   }
 
@@ -625,7 +625,7 @@ export class PasswordPolicyService {
     };
 
     this.userSecurityQuestions.set(userId, userQuestions);
-    
+
     // 缓存用户安全问题
     await defaultMemoryCache.set(`security_questions_${userId}`, userQuestions, undefined, 24 * 60 * 60 * 1000);
   }
@@ -637,8 +637,8 @@ export class PasswordPolicyService {
     userId: string,
     answers: Array<{ questionId: string; answer: string }>
   ): Promise<boolean> {
-    const userQuestions = this.userSecurityQuestions.get(userId) || 
-                         await defaultMemoryCache.get(`security_questions_${userId}`);
+    const userQuestions = this.userSecurityQuestions.get(userId) ||
+      await defaultMemoryCache.get(`security_questions_${userId}`);
 
     if (!userQuestions) return false;
 
@@ -675,7 +675,7 @@ export class PasswordPolicyService {
   private findLongestRepeatingChar(password: string): string {
     let longest = '';
     let current = '';
-    
+
     for (let i = 0; i < password.length; i++) {
       if (i === 0 || password[i] === password[i - 1]) {
         current += password[i];
@@ -686,11 +686,11 @@ export class PasswordPolicyService {
         current = password[i];
       }
     }
-    
+
     if (current.length > longest.length) {
       longest = current;
     }
-    
+
     return longest;
   }
 
@@ -699,19 +699,19 @@ export class PasswordPolicyService {
    */
   private hasSequentialChars(password: string): boolean {
     const sequences = ['abcdefghijklmnopqrstuvwxyz', '1234567890', 'qwertyuiop'];
-    
+
     for (const sequence of sequences) {
       for (let i = 0; i <= sequence.length - 3; i++) {
         const subseq = sequence.slice(i, i + 3);
         const reverseSubseq = subseq.split('').reverse().join('');
-        
-        if (password.toLowerCase().includes(subseq) || 
-            password.toLowerCase().includes(reverseSubseq)) {
+
+        if (password.toLowerCase().includes(subseq) ||
+          password.toLowerCase().includes(reverseSubseq)) {
           return true;
         }
       }
     }
-    
+
     return false;
   }
 

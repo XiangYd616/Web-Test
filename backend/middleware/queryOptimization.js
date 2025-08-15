@@ -292,7 +292,7 @@ function queryCacheMiddleware(cacheManager) {
  */
 function generateQueryCacheKey(sql, params) {
     const crypto = require('crypto');
-    const normalizedSQL = sql.replace(/\s+/g, ' ').trim().toLowerCase();
+    const normalizedSQL = sql.replace(//s+/g, ' ').trim().toLowerCase();
     const paramString = JSON.stringify(params);
     return crypto.createHash('md5').update(normalizedSQL + paramString).digest('hex');
 }

@@ -86,9 +86,9 @@ class TestHistoryService {
 
     try {
       console.log('🔍 [TestHistoryService] 执行查询:', {
-        query: query.replace(/\s+/g, ' ').trim(),
+        query: query.replace(//s+/g, ' ').trim(),
         params,
-        countQuery: countQuery.replace(/\s+/g, ' ').trim(),
+        countQuery: countQuery.replace(//s+/g, ' ').trim(),
         countParams: countParams
       });
 
@@ -120,7 +120,7 @@ class TestHistoryService {
         stack: error.stack,
         code: error.code,
         detail: error.detail,
-        query: query?.replace(/\s+/g, ' ').trim(),
+        query: query?.replace(//s+/g, ' ').trim(),
         params
       });
       return {

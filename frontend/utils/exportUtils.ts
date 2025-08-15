@@ -118,7 +118,7 @@ export class ExportUtils {
       case 'csv':
         const csvContent = this.convertStressTestToCSV(exportData);
         // 🔧 修复中文乱码：添加UTF-8 BOM头
-        const BOM = '\uFEFF';
+        const BOM = '/uFEFF';
         const csvWithBOM = BOM + csvContent;
         this.downloadFile(csvWithBOM, filename, 'text/csv;charset=utf-8');
         break;
@@ -166,7 +166,7 @@ export class ExportUtils {
       case 'csv':
         const csvContent = this.convertPerformanceTestToCSV(exportData);
         // 🔧 修复中文乱码：添加UTF-8 BOM头
-        const BOM = '\uFEFF';
+        const BOM = '/uFEFF';
         const csvWithBOM = BOM + csvContent;
         this.downloadFile(csvWithBOM, filename, 'text/csv;charset=utf-8');
         break;
@@ -208,7 +208,7 @@ export class ExportUtils {
       case 'csv':
         const csvContent = this.convertAPITestToCSV(exportData);
         // 🔧 修复中文乱码：添加UTF-8 BOM头
-        const BOM = '\uFEFF';
+        const BOM = '/uFEFF';
         const csvWithBOM = BOM + csvContent;
         this.downloadFile(csvWithBOM, filename, 'text/csv;charset=utf-8');
         break;
@@ -225,24 +225,24 @@ export class ExportUtils {
     let csvContent = '';
 
     // 添加测试摘要
-    csvContent += '压力测试报告摘要\n';
-    csvContent += '项目,数值,单位\n';
-    csvContent += `测试开始时间,${new Date(data.startTime || Date.now()).toLocaleString('zh-CN')},\n`;
-    csvContent += `测试结束时间,${new Date(data.endTime || Date.now()).toLocaleString('zh-CN')},\n`;
-    csvContent += `测试持续时间,${this.formatDuration(data.duration)},\n`;
-    csvContent += `目标URL,${data.url || 'N/A'},\n`;
-    csvContent += `最大并发数,${data.maxConcurrency || 'N/A'},\n`;
-    csvContent += `总请求数,${data.totalRequests || 0},次\n`;
-    csvContent += `平均响应时间,${data.averageResponseTime || 0},ms\n`;
-    csvContent += `最大响应时间,${data.maxResponseTime || 0},ms\n`;
-    csvContent += `平均吞吐量,${data.averageThroughput || 0},req/s\n`;
-    csvContent += `整体成功率,${data.successRate || 0},%\n`;
-    csvContent += `整体错误率,${data.errorRate || 0},%\n`;
-    csvContent += '\n';
+    csvContent += '压力测试报告摘要/n';
+    csvContent += '项目,数值,单位/n';
+    csvContent += `测试开始时间,${new Date(data.startTime || Date.now()).toLocaleString('zh-CN')},/n`;
+    csvContent += `测试结束时间,${new Date(data.endTime || Date.now()).toLocaleString('zh-CN')},/n`;
+    csvContent += `测试持续时间,${this.formatDuration(data.duration)},/n`;
+    csvContent += `目标URL,${data.url || 'N/A'},/n`;
+    csvContent += `最大并发数,${data.maxConcurrency || 'N/A'},/n`;
+    csvContent += `总请求数,${data.totalRequests || 0},次/n`;
+    csvContent += `平均响应时间,${data.averageResponseTime || 0},ms/n`;
+    csvContent += `最大响应时间,${data.maxResponseTime || 0},ms/n`;
+    csvContent += `平均吞吐量,${data.averageThroughput || 0},req/s/n`;
+    csvContent += `整体成功率,${data.successRate || 0},%/n`;
+    csvContent += `整体错误率,${data.errorRate || 0},%/n`;
+    csvContent += '/n';
 
     // 添加详细的实时数据
     if (data.realTimeData && data.realTimeData.length > 0) {
-      csvContent += '实时性能数据\n';
+      csvContent += '实时性能数据/n';
       const headers = [
         '时间戳',
         '并发用户数',
@@ -256,7 +256,7 @@ export class ExportUtils {
         '活跃连接数',
         '队列长度'
       ];
-      csvContent += headers.join(',') + '\n';
+      csvContent += headers.join(',') + '/n';
 
       const rows = data.realTimeData.map((point: any) => [
         new Date(point.timestamp).toLocaleString('zh-CN'),
@@ -272,7 +272,7 @@ export class ExportUtils {
         point.queueLength || 0
       ]);
 
-      csvContent += rows.map((row: any[]) => row.join(',')).join('\n');
+      csvContent += rows.map((row: any[]) => row.join(',')).join('/n');
     }
 
     return csvContent;
@@ -285,36 +285,36 @@ export class ExportUtils {
     let csvContent = '';
 
     // 添加测试摘要
-    csvContent += '性能测试报告摘要\n';
-    csvContent += '项目,数值,单位,评级,基准值\n';
-    csvContent += `测试时间,${new Date().toLocaleString('zh-CN')},,\n`;
-    csvContent += `测试URL,${data.url || 'N/A'},,\n`;
-    csvContent += `总体评分,${data.overallScore || 0},分,${this.getScoreRating(data.overallScore)},> 90分\n`;
-    csvContent += '\n';
+    csvContent += '性能测试报告摘要/n';
+    csvContent += '项目,数值,单位,评级,基准值/n';
+    csvContent += `测试时间,${new Date().toLocaleString('zh-CN')},,/n`;
+    csvContent += `测试URL,${data.url || 'N/A'},,/n`;
+    csvContent += `总体评分,${data.overallScore || 0},分,${this.getScoreRating(data.overallScore)},> 90分/n`;
+    csvContent += '/n';
 
     // 核心Web指标
-    csvContent += '核心Web指标\n';
-    csvContent += '指标,数值,单位,评级,基准值,说明\n';
-    csvContent += `首次内容绘制(FCP),${data.metrics?.fcp || 'N/A'},ms,${this.getPerformanceRating(data.metrics?.fcp, 'responseTime')},< 1800ms,用户看到第一个内容的时间\n`;
-    csvContent += `最大内容绘制(LCP),${data.metrics?.lcp || 'N/A'},ms,${this.getPerformanceRating(data.metrics?.lcp, 'responseTime')},< 2500ms,最大内容元素渲染完成时间\n`;
-    csvContent += `首次输入延迟(FID),${data.metrics?.fid || 'N/A'},ms,${this.getPerformanceRating(data.metrics?.fid, 'responseTime')},< 100ms,用户首次交互的响应时间\n`;
-    csvContent += `累积布局偏移(CLS),${data.metrics?.cls || 'N/A'},,${this.getCLSRating(data.metrics?.cls)},< 0.1,页面布局稳定性指标\n`;
-    csvContent += '\n';
+    csvContent += '核心Web指标/n';
+    csvContent += '指标,数值,单位,评级,基准值,说明/n';
+    csvContent += `首次内容绘制(FCP),${data.metrics?.fcp || 'N/A'},ms,${this.getPerformanceRating(data.metrics?.fcp, 'responseTime')},< 1800ms,用户看到第一个内容的时间/n`;
+    csvContent += `最大内容绘制(LCP),${data.metrics?.lcp || 'N/A'},ms,${this.getPerformanceRating(data.metrics?.lcp, 'responseTime')},< 2500ms,最大内容元素渲染完成时间/n`;
+    csvContent += `首次输入延迟(FID),${data.metrics?.fid || 'N/A'},ms,${this.getPerformanceRating(data.metrics?.fid, 'responseTime')},< 100ms,用户首次交互的响应时间/n`;
+    csvContent += `累积布局偏移(CLS),${data.metrics?.cls || 'N/A'},,${this.getCLSRating(data.metrics?.cls)},< 0.1,页面布局稳定性指标/n`;
+    csvContent += '/n';
 
     // 详细性能指标
-    csvContent += '详细性能指标\n';
-    csvContent += '指标,数值,单位,评级,说明\n';
-    csvContent += `页面加载时间,${data.metrics?.loadTime || 'N/A'},ms,${this.getPerformanceRating(data.metrics?.loadTime, 'responseTime')},完整页面加载时间\n`;
-    csvContent += `DOM内容加载时间,${data.metrics?.domContentLoaded || 'N/A'},ms,${this.getPerformanceRating(data.metrics?.domContentLoaded, 'responseTime')},DOM解析完成时间\n`;
-    csvContent += `首次字节时间(TTFB),${data.metrics?.ttfb || 'N/A'},ms,${this.getPerformanceRating(data.metrics?.ttfb, 'responseTime')},服务器响应时间\n`;
-    csvContent += `可交互时间(TTI),${data.metrics?.tti || 'N/A'},ms,${this.getPerformanceRating(data.metrics?.tti, 'responseTime')},页面完全可交互时间\n`;
-    csvContent += `速度指数(SI),${data.metrics?.speedIndex || 'N/A'},,${this.getSpeedIndexRating(data.metrics?.speedIndex)},页面内容填充速度\n`;
+    csvContent += '详细性能指标/n';
+    csvContent += '指标,数值,单位,评级,说明/n';
+    csvContent += `页面加载时间,${data.metrics?.loadTime || 'N/A'},ms,${this.getPerformanceRating(data.metrics?.loadTime, 'responseTime')},完整页面加载时间/n`;
+    csvContent += `DOM内容加载时间,${data.metrics?.domContentLoaded || 'N/A'},ms,${this.getPerformanceRating(data.metrics?.domContentLoaded, 'responseTime')},DOM解析完成时间/n`;
+    csvContent += `首次字节时间(TTFB),${data.metrics?.ttfb || 'N/A'},ms,${this.getPerformanceRating(data.metrics?.ttfb, 'responseTime')},服务器响应时间/n`;
+    csvContent += `可交互时间(TTI),${data.metrics?.tti || 'N/A'},ms,${this.getPerformanceRating(data.metrics?.tti, 'responseTime')},页面完全可交互时间/n`;
+    csvContent += `速度指数(SI),${data.metrics?.speedIndex || 'N/A'},,${this.getSpeedIndexRating(data.metrics?.speedIndex)},页面内容填充速度/n`;
     csvContent += '\n';
 
     // 资源分析
     if (data.resources && data.resources.length > 0) {
-      csvContent += '资源加载分析\n';
-      csvContent += '资源类型,数量,总大小(KB),平均加载时间(ms),最大加载时间(ms)\n';
+      csvContent += '资源加载分析/n';
+      csvContent += '资源类型,数量,总大小(KB),平均加载时间(ms),最大加载时间(ms)/n';
 
       const resourceStats = this.analyzeResources(data.resources);
       Object.entries(resourceStats).forEach(([type, stats]: [string, any]) => {
@@ -325,10 +325,10 @@ export class ExportUtils {
 
     // 性能建议
     if (data.recommendations && data.recommendations.length > 0) {
-      csvContent += '性能优化建议\n';
-      csvContent += '优先级,建议内容,预期收益\n';
+      csvContent += '性能优化建议/n';
+      csvContent += '优先级,建议内容,预期收益/n';
       data.recommendations.forEach((rec: any) => {
-        csvContent += `${rec.priority || '中'},${rec.title || rec},${rec.impact || '中等'}\n`;
+        csvContent += `${rec.priority || '中'},${rec.title || rec},${rec.impact || '中等'}/n`;
       });
     }
 
@@ -779,57 +779,57 @@ export class ExportUtils {
     let csvContent = '';
 
     // 添加基本信息
-    csvContent += '测试基本信息\n';
-    csvContent += '项目,数值,备注\n';
+    csvContent += '测试基本信息/n';
+    csvContent += '项目,数值,备注/n';
     csvContent += `测试名称,${testName || testType}测试,\n`;
-    csvContent += `测试ID,${testId || 'N/A'},\n`;
-    csvContent += `测试时间,${new Date().toLocaleString('zh-CN')},\n`;
-    csvContent += `测试类型,${testType},\n`;
-    csvContent += `测试URL,${testConfig.url || result.url || 'N/A'},\n`;
-    csvContent += `测试持续时间,${testConfig.duration || 'N/A'},秒\n`;
-    csvContent += `并发用户数,${testConfig.concurrency || 'N/A'},\n`;
-    csvContent += `总测试时长,${this.formatDuration(result.totalDuration)},\n`;
+    csvContent += `测试ID,${testId || 'N/A'},/n`;
+    csvContent += `测试时间,${new Date().toLocaleString('zh-CN')},/n`;
+    csvContent += `测试类型,${testType},/n`;
+    csvContent += `测试URL,${testConfig.url || result.url || 'N/A'},/n`;
+    csvContent += `测试持续时间,${testConfig.duration || 'N/A'},秒/n`;
+    csvContent += `并发用户数,${testConfig.concurrency || 'N/A'},/n`;
+    csvContent += `总测试时长,${this.formatDuration(result.totalDuration)},/n`;
     csvContent += '\n';
 
     // 添加核心性能指标
-    csvContent += '核心性能指标\n';
-    csvContent += '指标名称,数值,单位,评级,基准值\n';
-    csvContent += `平均响应时间,${metrics.averageResponseTime || 0},ms,${this.getPerformanceRating(metrics.averageResponseTime, 'responseTime')},< 200ms\n`;
-    csvContent += `最小响应时间,${metrics.minResponseTime || 0},ms,${this.getPerformanceRating(metrics.minResponseTime, 'responseTime')},\n`;
-    csvContent += `最大响应时间,${metrics.maxResponseTime || 0},ms,${this.getPerformanceRating(metrics.maxResponseTime, 'responseTime')},< 1000ms\n`;
-    csvContent += `P50响应时间,${metrics.p50ResponseTime || 'N/A'},ms,${this.getPerformanceRating(metrics.p50ResponseTime, 'responseTime')},< 150ms\n`;
-    csvContent += `P90响应时间,${metrics.p90ResponseTime || 'N/A'},ms,${this.getPerformanceRating(metrics.p90ResponseTime, 'responseTime')},< 300ms\n`;
-    csvContent += `P95响应时间,${metrics.p95ResponseTime || 'N/A'},ms,${this.getPerformanceRating(metrics.p95ResponseTime, 'responseTime')},< 500ms\n`;
-    csvContent += `P99响应时间,${metrics.p99ResponseTime || 'N/A'},ms,${this.getPerformanceRating(metrics.p99ResponseTime, 'responseTime')},< 800ms\n`;
-    csvContent += `吞吐量,${metrics.throughput || 0},req/s,${this.getPerformanceRating(metrics.throughput, 'throughput')},> 100 req/s\n`;
-    csvContent += `总请求数,${metrics.totalRequests || 0},次,,\n`;
-    csvContent += `成功请求数,${metrics.successfulRequests || 0},次,,\n`;
-    csvContent += `失败请求数,${metrics.failedRequests || 0},次,,\n`;
-    csvContent += `成功率,${metrics.successRate || 0},%,${this.getPerformanceRating(metrics.successRate, 'successRate')},> 99%\n`;
-    csvContent += `错误率,${metrics.errorRate || 0},%,${this.getPerformanceRating(metrics.errorRate, 'errorRate')},< 1%\n`;
+    csvContent += '核心性能指标/n';
+    csvContent += '指标名称,数值,单位,评级,基准值/n';
+    csvContent += `平均响应时间,${metrics.averageResponseTime || 0},ms,${this.getPerformanceRating(metrics.averageResponseTime, 'responseTime')},< 200ms/n`;
+    csvContent += `最小响应时间,${metrics.minResponseTime || 0},ms,${this.getPerformanceRating(metrics.minResponseTime, 'responseTime')},/n`;
+    csvContent += `最大响应时间,${metrics.maxResponseTime || 0},ms,${this.getPerformanceRating(metrics.maxResponseTime, 'responseTime')},< 1000ms/n`;
+    csvContent += `P50响应时间,${metrics.p50ResponseTime || 'N/A'},ms,${this.getPerformanceRating(metrics.p50ResponseTime, 'responseTime')},< 150ms/n`;
+    csvContent += `P90响应时间,${metrics.p90ResponseTime || 'N/A'},ms,${this.getPerformanceRating(metrics.p90ResponseTime, 'responseTime')},< 300ms/n`;
+    csvContent += `P95响应时间,${metrics.p95ResponseTime || 'N/A'},ms,${this.getPerformanceRating(metrics.p95ResponseTime, 'responseTime')},< 500ms/n`;
+    csvContent += `P99响应时间,${metrics.p99ResponseTime || 'N/A'},ms,${this.getPerformanceRating(metrics.p99ResponseTime, 'responseTime')},< 800ms/n`;
+    csvContent += `吞吐量,${metrics.throughput || 0},req/s,${this.getPerformanceRating(metrics.throughput, 'throughput')},> 100 req/s/n`;
+    csvContent += `总请求数,${metrics.totalRequests || 0},次,,/n`;
+    csvContent += `成功请求数,${metrics.successfulRequests || 0},次,,/n`;
+    csvContent += `失败请求数,${metrics.failedRequests || 0},次,,/n`;
+    csvContent += `成功率,${metrics.successRate || 0},%,${this.getPerformanceRating(metrics.successRate, 'successRate')},> 99%/n`;
+    csvContent += `错误率,${metrics.errorRate || 0},%,${this.getPerformanceRating(metrics.errorRate, 'errorRate')},< 1%/n`;
     csvContent += '\n';
 
     // 添加性能分析
-    csvContent += '性能分析\n';
-    csvContent += '分析项目,结果,建议\n';
+    csvContent += '性能分析/n';
+    csvContent += '分析项目,结果,建议/n';
     const performanceGrade = this.calculatePerformanceGrade(metrics);
-    csvContent += `整体性能评级,${performanceGrade.grade} (${performanceGrade.score}分),${(performanceGrade as any).description || ''}\n`;
+    csvContent += `整体性能评级,${performanceGrade.grade} (${performanceGrade.score}分),${(performanceGrade as any).description || ''}/n`;
 
     const bottlenecks = this.identifyBottlenecks(metrics);
     bottlenecks.forEach(bottleneck => {
-      csvContent += `性能瓶颈,${(bottleneck as any).type || bottleneck},${(bottleneck as any).description || bottleneck}\n`;
+      csvContent += `性能瓶颈,${(bottleneck as any).type || bottleneck},${(bottleneck as any).description || bottleneck}/n`;
     });
 
     const recommendations = this.generateRecommendations(metrics, testType);
     recommendations.slice(0, 5).forEach((rec, index) => {
-      csvContent += `优化建议${index + 1},${(rec as any).title || rec},${(rec as any).description || rec}\n`;
+      csvContent += `优化建议${index + 1},${(rec as any).title || rec},${(rec as any).description || rec}/n`;
     });
     csvContent += '\n';
 
     // 添加错误分析（如果有错误）
     if (data.errors && data.errors.length > 0) {
-      csvContent += '错误分析\n';
-      csvContent += '错误类型,错误代码,错误次数,错误率,首次出现时间,最后出现时间\n';
+      csvContent += '错误分析/n';
+      csvContent += '错误类型,错误代码,错误次数,错误率,首次出现时间,最后出现时间/n';
 
       const errorStats = this.analyzeErrors(data.errors);
       errorStats.forEach(error => {
@@ -840,19 +840,19 @@ export class ExportUtils {
 
     // 添加实时数据（如果有）
     if (realTimeData.length > 0) {
-      csvContent += '实时性能数据\n';
-      csvContent += '时间戳,响应时间(ms),吞吐量(req/s),错误率(%),CPU使用率(%),内存使用率(%),活跃连接数,队列长度\n';
+      csvContent += '实时性能数据/n';
+      csvContent += '时间戳,响应时间(ms),吞吐量(req/s),错误率(%),CPU使用率(%),内存使用率(%),活跃连接数,队列长度/n';
 
       realTimeData.slice(0, 1000).forEach((point: any) => { // 限制数据量
-        csvContent += `${point.timestamp || ''},${point.responseTime || 0},${point.throughput || 0},${point.errorRate || 0},${point.cpuUsage || 0},${point.memoryUsage || 0},${point.activeConnections || 0},${point.queueLength || 0}\n`;
+        csvContent += `${point.timestamp || ''},${point.responseTime || 0},${point.throughput || 0},${point.errorRate || 0},${point.cpuUsage || 0},${point.memoryUsage || 0},${point.activeConnections || 0},${point.queueLength || 0}/n`;
       });
       csvContent += '\n';
     }
 
     // 添加趋势分析
     if (realTimeData.length > 10) {
-      csvContent += '趋势分析\n';
-      csvContent += '指标,趋势,变化率,稳定性评分\n';
+      csvContent += '趋势分析/n';
+      csvContent += '指标,趋势,变化率,稳定性评分/n';
       const trends = this.analyzeTrends(realTimeData);
       Object.entries(trends).forEach(([metric, trend]: [string, any]) => {
         csvContent += `${metric},${trend.direction},${trend.changeRate}%,${trend.stability}\n`;
@@ -862,7 +862,7 @@ export class ExportUtils {
     const filename = this.generateFilename(`enhanced-data-table-${testName || testType}`, 'csv');
 
     // 🔧 修复中文乱码：添加UTF-8 BOM头
-    const BOM = '\uFEFF';
+    const BOM = '/uFEFF';
     const csvWithBOM = BOM + csvContent;
 
     this.downloadFile(csvWithBOM, filename, 'text/csv;charset=utf-8');

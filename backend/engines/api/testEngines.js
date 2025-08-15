@@ -227,7 +227,7 @@ export default function() {
   }
 
   parseK6Results(jsonData) {
-    const lines = jsonData.split('\n').filter(line => line.trim());
+    const lines = jsonData.split('/n').filter(line => line.trim());
     const metrics = {};
 
     lines.forEach(line => {
@@ -249,12 +249,12 @@ export default function() {
 
   parseK6Stdout(stdout) {
     // 从stdout解析基本指标
-    const lines = stdout.split('\n');
+    const lines = stdout.split('/n');
     const summary = {};
 
     lines.forEach(line => {
       if (line.includes('http_req_duration')) {
-        const match = line.match(/avg=([0-9.]+)ms.*p\(95\)=([0-9.]+)ms/);
+        const match = line.match(/avg=([0-9.]+)ms.*p/(95/)=([0-9.]+)ms/);
         if (match) {
           summary.http_req_duration = {
             avg: parseFloat(match[1]),

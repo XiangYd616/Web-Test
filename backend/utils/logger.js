@@ -44,12 +44,12 @@ class Logger {
       let logMessage = formatLogMessage('error', message, meta);
 
       if (error instanceof Error) {
-        logMessage += `\nError: ${error.message}`;
+        logMessage += `/nError: ${error.message}`;
         if (error.stack) {
-          logMessage += `\nStack: ${error.stack}`;
+          logMessage += `/nStack: ${error.stack}`;
         }
       } else if (error) {
-        logMessage += `\nError: ${JSON.stringify(error)}`;
+        logMessage += `/nError: ${JSON.stringify(error)}`;
       }
 
       console.error(logMessage);

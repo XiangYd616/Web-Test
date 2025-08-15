@@ -1,11 +1,11 @@
 import { CheckCircle, Clock, Gauge, Image, Play, Smartphone, Square, Timer, Zap } from 'lucide-react';
 import React, { useState } from 'react';
-import { useAuthCheck } from '..\..\..\components\auth\withAuthCheck.tsx';
-import TestHistory from '..\results\TestHistory.tsx';
-import BaseTestPage from '..\..\..\components\testing\BaseTestPage.tsx';
-import { URLInput } from '..\..\..\components\testing\URLInput.tsx';
-import { useUserStats } from '..\..\..\hooks\useUserStats.ts';
-import { apiService } from '..\..\..\services\api\apiService.ts';
+import { useAuthCheck } from '../../../components/auth/WithAuthCheck.tsx';
+import BaseTestPage from '../../../components/testing/BaseTestPage.tsx';
+import URLInput from '../../../components/testing/URLInput.tsx';
+import { useUserStats } from '../../../hooks/useUserStats.ts';
+import { apiService } from '../../../services/api/apiService.ts';
+import TestHistory from '../results/TestHistory.tsx';
 
 interface PerformanceTestConfig {
   url: string;
@@ -133,8 +133,8 @@ const PerformanceAnalysis: React.FC = () => {
             <button
               onClick={() => setActiveTab('test')}
               className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${activeTab === 'test'
-                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
+                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
                 }`}
             >
               性能测试
@@ -142,8 +142,8 @@ const PerformanceAnalysis: React.FC = () => {
             <button
               onClick={() => setActiveTab('history')}
               className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${activeTab === 'history'
-                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
+                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
                 }`}
             >
               测试历史

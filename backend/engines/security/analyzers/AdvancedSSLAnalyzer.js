@@ -704,7 +704,7 @@ class AdvancedSSLAnalyzer {
       return { vulnerabilities };
     }
 
-    const maxAgeMatch = hstsHeader.match(/max-age=(\d+)/);
+    const maxAgeMatch = hstsHeader.match(/max-age=(/d+)/);
     if (maxAgeMatch) {
       const maxAge = parseInt(maxAgeMatch[1]);
       if (maxAge < 31536000) { // 1年

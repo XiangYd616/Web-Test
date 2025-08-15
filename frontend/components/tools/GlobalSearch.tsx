@@ -1,6 +1,7 @@
 import { Activity, ArrowRight, BarChart3, Bell, Book, Clock, Code, Download, Globe, HelpCircle, Home, Key, Lock, Monitor, Play, Search, Settings, Shield, TestTube, TrendingUp, Upload, User, X, Zap } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { default as globalSearchService } from '../../services/search/globalSearchService';
 
 interface SearchResult {
   id: string;
@@ -13,26 +14,7 @@ interface SearchResult {
   category?: string;
 }
 
-const globalSearchService = {
-  search: async (query: string, options?: { limit?: number }): Promise<SearchResult[]> => {
-    // 模拟搜索结果
-    return [];
-  },
-  getSuggestions: async (query: string): Promise<string[]> => {
-    // 模拟搜索建议
-    return [];
-  },
-  getSearchHistory: (): string[] => {
-    // 模拟搜索历史
-    return [];
-  },
-  recordSearch: (query: string): void => {
-    // 模拟记录搜索
-  },
-  clearSearchHistory: (): void => {
-    // 模拟清除搜索历史
-  }
-};
+
 
 interface GlobalSearchProps {
   isOpen: boolean;
@@ -194,7 +176,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose, initialQue
   const highlightText = (text: string, searchQuery: string) => {
     if (!searchQuery.trim()) return text;
 
-    const regex = new RegExp(`(${searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    const regex = new RegExp(`(${searchQuery.replace(/[.*+?^${}()|[/]/ /]/g, '\\$&')})`, 'gi');
     const parts = text.split(regex);
 
     return parts.map((part, index) =>

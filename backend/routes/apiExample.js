@@ -6,8 +6,8 @@
 const express = require('express');
 const { asyncHandler } = require('../middleware/errorHandler');
 const { authMiddleware, optionalAuth } = require('../middleware/auth');
-const { ErrorFactory } = require('../utils/ApiError');
-const { ErrorCodes } = require('../types/ApiResponse');
+const { ErrorFactory } = require('../utils/apiError');
+const { ErrorCodes } = require('../types/apiResponse');
 
 const router = express.Router();
 
@@ -64,7 +64,7 @@ router.post('/validation-error', asyncHandler(async (req, res) => {
 
     if (!email) {
         errors.push({ field: 'email', message: '邮箱是必填字段' });
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    } else if (!/^[^/s@]+@[^/s@]+/.[^/s@]+$/.test(email)) {
         errors.push({ field: 'email', message: '邮箱格式无效' });
     }
 

@@ -7,7 +7,7 @@ const { Pool } = require('pg');
 const EventEmitter = require('events');
 const axios = require('axios');
 const { performance } = require('perf_hooks');
-const logger = require('..\..\middleware\logger.js');
+const logger = require('../../middleware/logger.js');
 
 class MonitoringService extends EventEmitter {
     constructor(dbPool) {
@@ -1533,7 +1533,7 @@ class MonitoringService extends EventEmitter {
                         `"${site.name}","${site.url}","${site.last_status || 'unknown'}","${site.last_checked_at || ''}","${site.last_response_time || ''}"`
                     )
                 ];
-                return csvLines.join('\n');
+                return csvLines.join('/n');
             }
 
             return JSON.stringify(exportData, null, 2);
@@ -1735,7 +1735,7 @@ class MonitoringService extends EventEmitter {
             });
         }
 
-        return lines.join('\n');
+        return lines.join('/n');
     }
 
     /**

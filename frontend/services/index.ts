@@ -1,52 +1,64 @@
-// Auto-generated index file
+// 服务层统一导出文件 - 按功能分类组织
+// 管理服务
 export * from './admin';
 export { default as adminService } from './adminService';
+
+// 分析服务
 export * from './analytics';
+
+// API服务
 export * from './api';
 export { default as apiErrorInterceptor } from './apiErrorInterceptor';
+
+// 认证服务
 export * from './auth';
-export { default as backgroundTestManager } from './backgroundTestManager';
-export { default as batchTestingService } from './batchTestingService';
-export { default as browserTestEngineIntegrator } from './browserTestEngineIntegrator';
-export { default as cacheStrategy } from './cacheStrategy';
-export { default as comparisonService } from './comparisonService';
-export { default as dataAnalysisService } from './dataAnalysisService';
-export { default as dataNormalizationPipeline } from './dataNormalizationPipeline';
-export { default as dataProcessor } from './dataProcessor';
-export { default as dataService } from './dataService';
-export { default as dataStateManager } from './dataStateManager';
-export { default as errorService } from './errorService';
-export { default as fileUploadService } from './fileUploadService';
-export { default as globalSearchService } from './globalSearchService';
-export { default as googlePageSpeedService } from './googlePageSpeedService';
+
+// 缓存服务
+export * from './cache';
+
+// 配置服务
+export * from './config';
+
+// 数据服务
+export * from './data';
+
+// 历史服务
+export * from './history';
+
+// 帮助服务
 export * from './help';
 export { default as helpService } from './helpService';
-export { default as historyManagement } from './historyManagement';
+
+// 集成服务
 export * from './integration';
-export { default as integrationService } from './integrationService';
-export { default as localSEOAnalysisEngine } from './localSEOAnalysisEngine';
+
+// 监控服务
 export * from './monitoring';
-export { default as monitoringService } from './monitoringService';
-export { default as proxyService } from './proxyService';
-export { default as realtimeMonitoringService } from './realtimeMonitoringService';
-export { default as reportGeneratorService } from './reportGeneratorService';
+
+// 性能服务
+export * from './performance';
+
+// 报告服务
 export * from './reporting';
-export { default as scheduling } from './scheduling';
-export { default as securityEngine } from './securityEngine';
-export { default as seoAnalysisEngine } from './seoAnalysisEngine';
-export { default as settingsService } from './settingsService';
-export { default as stressTestQueueManager } from './stressTestQueueManager';
-export { default as stressTestRecordService } from './stressTestRecordService';
-export { default as systemResourceMonitor } from './systemResourceMonitor';
-export { default as systemService } from './systemService';
-export { default as testApiService } from './testApiService';
-export { default as testEngine } from './testEngine';
-export { default as testEngines } from './testEngines';
-export { default as testHistoryService } from './testHistoryService';
+
+// 搜索服务
+export * from './search';
+
+// SEO服务
+export * from './seo';
+
+// 系统服务
+export * from './system';
+
+// 测试服务
 export * from './testing';
-export { default as testStateManager } from './testStateManager';
-export { default as testTemplates } from './testTemplates';
+
+// 用户服务
 export * from './user';
-export { default as userFeedbackService } from './userFeedbackService';
-export { default as userStatsService } from './userStatsService';
-export { default as versionControlService } from './versionControlService';
+
+// WebSocket服务
+export * from './websocket';
+
+// 其他服务
+export { default as errorService } from './errorService';
+

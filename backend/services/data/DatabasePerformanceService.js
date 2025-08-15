@@ -4,7 +4,7 @@
  */
 
 const winston = require('winston');
-const { getConnectionManager } = require('..\..\config\database.js');
+const { getConnectionManager } = require('../../config/database.js');
 
 class DatabasePerformanceOptimizer {
     constructor() {
@@ -362,12 +362,12 @@ class DatabasePerformanceOptimizer {
             const { query, calls, mean_time } = queryData;
 
             // 简单的模式匹配来识别可能需要索引的查询
-            const whereMatches = query.match(/WHERE\s+(\w+)\s*=/gi);
-            const orderByMatches = query.match(/ORDER\s+BY\s+(\w+)/gi);
+            const whereMatches = query.match(/WHERE/s+(/w+)/s*=/gi);
+            const orderByMatches = query.match(/ORDER/s+BY/s+(/w+)/gi);
 
             if (whereMatches) {
                 whereMatches.forEach(match => {
-                    const column = match.replace(/WHERE\s+/i, '').replace(/\s*=.*/, '');
+                    const column = match.replace(/WHERE/s+/i, '').replace(//s*=.*/, '');
                     suggestions.push({
                         type: 'WHERE_CLAUSE',
                         table: this.extractTableFromQuery(query),
@@ -380,7 +380,7 @@ class DatabasePerformanceOptimizer {
 
             if (orderByMatches) {
                 orderByMatches.forEach(match => {
-                    const column = match.replace(/ORDER\s+BY\s+/i, '');
+                    const column = match.replace(/ORDER/s+BY/s+/i, '');
                     suggestions.push({
                         type: 'ORDER_BY',
                         table: this.extractTableFromQuery(query),
@@ -409,7 +409,7 @@ class DatabasePerformanceOptimizer {
      * 从查询中提取表名
      */
     extractTableFromQuery(query) {
-        const fromMatch = query.match(/FROM\s+(\w+)/i);
+        const fromMatch = query.match(/FROM/s+(/w+)/i);
         return fromMatch ? fromMatch[1] : 'unknown';
     }
 

@@ -7,7 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { asyncHandler } = require('../middleware/errorHandler');
 const { queryOptimizer } = require('../utils/queryOptimizer');
-const { cacheManager } = require('../utils/cacheManager');
+const cacheMiddleware = require('./cache.js');
 const Logger = require('../utils/logger');
 
 /**
@@ -34,14 +34,14 @@ router.get('/overview', asyncHandler(async (req, res) => {
  */
 router.get('/database', asyncHandler(async (req, res) => {
   const stats = queryOptimizer.getPerformanceStats();
-  
+
   res.json({
     success: true,
     data: {
       queryStats: stats,
       summary: {
         totalQueries: stats.length,
-        avgDuration: stats.length > 0 ? 
+        avgDuration: stats.length > 0 ?
           stats.reduce((sum, s) => sum + s.avgDuration, 0) / stats.length : 0,
         slowQueries: stats.filter(s => s.avgDuration > 1000).length,
         topSlowQueries: stats.slice(0, 10)
@@ -54,8 +54,8 @@ router.get('/database', asyncHandler(async (req, res) => {
  * 获取缓存性能统计
  */
 router.get('/cache', asyncHandler(async (req, res) => {
-  const stats = cacheManager.getStats();
-  
+  const stats = cacheMiddleware.getCacheStats();
+
   res.json({
     success: true,
     data: stats
@@ -67,7 +67,7 @@ router.get('/cache', asyncHandler(async (req, res) => {
  */
 router.get('/api', asyncHandler(async (req, res) => {
   const stats = getApiMetrics();
-  
+
   res.json({
     success: true,
     data: stats
@@ -97,13 +97,13 @@ router.get('/realtime', asyncHandler(async (req, res) => {
  */
 router.post('/test', asyncHandler(async (req, res) => {
   const { testType = 'basic', iterations = 10 } = req.body;
-  
+
   const startTime = Date.now();
   const results = [];
-  
+
   for (let i = 0; i < iterations; i++) {
     const iterationStart = Date.now();
-    
+
     switch (testType) {
       case 'database':
         await testDatabasePerformance();
@@ -117,7 +117,7 @@ router.post('/test', asyncHandler(async (req, res) => {
       default:
         await testBasicPerformance();
     }
-    
+
     const iterationTime = Date.now() - iterationStart;
     results.push({
       iteration: i + 1,
@@ -125,10 +125,10 @@ router.post('/test', asyncHandler(async (req, res) => {
       timestamp: Date.now()
     });
   }
-  
+
   const totalTime = Date.now() - startTime;
   const avgTime = results.reduce((sum, r) => sum + r.duration, 0) / results.length;
-  
+
   res.json({
     success: true,
     data: {
@@ -148,19 +148,19 @@ router.post('/test', asyncHandler(async (req, res) => {
  */
 router.delete('/cleanup', asyncHandler(async (req, res) => {
   const { type } = req.query;
-  
+
   let cleaned = [];
-  
+
   if (!type || type === 'cache') {
-    cacheManager.clear();
+    cacheMiddleware.clearAllCache();
     cleaned.push('cache');
   }
-  
+
   if (!type || type === 'query') {
     queryOptimizer.clearStats();
     cleaned.push('query_stats');
   }
-  
+
   res.json({
     success: true,
     message: `Cleaned: ${cleaned.join(', ')}`,
@@ -174,7 +174,7 @@ router.delete('/cleanup', asyncHandler(async (req, res) => {
 async function getSystemMetrics() {
   const memUsage = process.memoryUsage();
   const cpuUsage = process.cpuUsage();
-  
+
   return {
     memory: {
       rss: formatBytes(memUsage.rss),
@@ -199,10 +199,10 @@ async function getSystemMetrics() {
  */
 async function getDatabaseMetrics() {
   const stats = queryOptimizer.getPerformanceStats();
-  
+
   return {
     totalQueries: stats.length,
-    avgDuration: stats.length > 0 ? 
+    avgDuration: stats.length > 0 ?
       stats.reduce((sum, s) => sum + s.avgDuration, 0) / stats.length : 0,
     slowQueries: stats.filter(s => s.avgDuration > 1000).length,
     fastQueries: stats.filter(s => s.avgDuration < 100).length,
@@ -214,7 +214,7 @@ async function getDatabaseMetrics() {
  * 获取缓存指标
  */
 function getCacheMetrics() {
-  return cacheManager.getStats();
+  return cacheMiddleware.getCacheStats();
 }
 
 /**
@@ -271,10 +271,10 @@ async function testDatabasePerformance() {
 async function testCachePerformance() {
   const key = `perf_test_${Date.now()}`;
   const value = { test: 'data', timestamp: Date.now() };
-  
-  await cacheManager.set(key, value);
-  await cacheManager.get(key);
-  await cacheManager.delete(key);
+
+  cacheMiddleware.setCache(key, value);
+  cacheMiddleware.getCache(key);
+  cacheMiddleware.deleteCache(key);
 }
 
 /**
@@ -287,7 +287,7 @@ async function testMemoryPerformance() {
     data: `test_data_${i}`,
     timestamp: Date.now()
   }));
-  
+
   // 模拟一些计算
   const sum = testData.reduce((acc, item) => acc + item.id, 0);
   return sum;
@@ -310,11 +310,11 @@ async function testBasicPerformance() {
  */
 function formatBytes(bytes) {
   if (bytes === 0) return '0 B';
-  
+
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
+
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 

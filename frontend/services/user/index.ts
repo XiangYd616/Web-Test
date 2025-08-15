@@ -1,6 +1,6 @@
 // 👤 用户服务统一导出
-export { userStatsService } from '../userStatsService';
-export { userService } from './userService';
+export { default as userService } from './userService';
+export { userStatsService } from './userStatsService';
 
 // 类型导出
 // export type { UserStatsService } from '../userStatsService'; // UserStatsService类没有被导出，只有实例

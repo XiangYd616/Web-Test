@@ -60,7 +60,7 @@ export const detectCSSSupport = (): FeatureSupport => {
 
       // backdrop-filter
       support.backdropFilter = CSS.supports('backdrop-filter', 'blur(1px)') ||
-                              CSS.supports('-webkit-backdrop-filter', 'blur(1px)');
+        CSS.supports('-webkit-backdrop-filter', 'blur(1px)');
 
       // Flexbox gap
       support.flexboxGap = CSS.supports('gap', '1rem');
@@ -112,7 +112,7 @@ export const detectCSSSupport = (): FeatureSupport => {
   return support;
 };
 
-const detectImageFormats = async (): Promise<{webp: boolean; avif: boolean}> => {
+const detectImageFormats = async (): Promise<{ webp: boolean; avif: boolean }> => {
   const formats = { webp: false, avif: false };
 
   try {

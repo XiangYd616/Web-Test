@@ -317,7 +317,7 @@ class QueryOptimizer {
    * 生成查询哈希
    */
   generateQueryHash(sql, params) {
-    const normalizedSql = sql.replace(/\s+/g, ' ').trim().toLowerCase();
+    const normalizedSql = sql.replace(//s+/g, ' ').trim().toLowerCase();
     const paramStr = JSON.stringify(params);
     return require('crypto')
       .createHash('md5')

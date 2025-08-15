@@ -1,9 +1,9 @@
 import React from 'react';
 import {
   Cell,
-  Doughnut,
   Line,
   LineChart,
+  Pie,
   PieChart,
   ResponsiveContainer,
   Tooltip,
@@ -202,7 +202,7 @@ export const ModernDoughnutChart: React.FC<ModernDoughnutChartProps> = ({
       <div className="relative" style={{ height }}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
-            <Doughnut
+            <Pie
               data={dataWithColors}
               cx="50%"
               cy="50%"
@@ -214,7 +214,7 @@ export const ModernDoughnutChart: React.FC<ModernDoughnutChartProps> = ({
               {dataWithColors.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
-            </Doughnut>
+            </Pie>
             <Tooltip content={<CustomTooltip />} />
           </PieChart>
         </ResponsiveContainer>

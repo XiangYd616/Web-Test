@@ -196,7 +196,7 @@ const TOTPSetupStep: React.FC<TOTPSetupStepProps> = ({
               <input
                 type="text"
                 value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                onChange={(e) => setVerificationCode(e.target.value.replace(//D/g, '').slice(0, 6))}
                 placeholder="000000"
                 className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white text-center text-2xl font-mono tracking-widest focus:outline-none focus:border-blue-500"
                 maxLength={6}
@@ -248,7 +248,7 @@ const BackupCodesDisplay: React.FC<BackupCodesDisplayProps> = ({
   const [downloaded, setDownloaded] = useState(false);
 
   const handleDownload = () => {
-    const content = `TestWeb 平台备用码\n生成时间: ${new Date().toLocaleString()}\n\n${codes.map((code, index) => `${index + 1}. ${code}`).join('\n')}\n\n重要提示:\n- 每个备用码只能使用一次\n- 请将这些代码保存在安全的地方\n- 如果丢失，请重新生成新的备用码`;
+    const content = `TestWeb 平台备用码/n生成时间: ${new Date().toLocaleString()}/n/n${codes.map((code, index) => `${index + 1}. ${code}`).join('\n')}/n/n重要提示:/n- 每个备用码只能使用一次/n- 请将这些代码保存在安全的地方/n- 如果丢失，请重新生成新的备用码`;
     
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);

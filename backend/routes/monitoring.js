@@ -5,7 +5,7 @@
 const express = require('express');
 const { authMiddleware } = require('../middleware/auth');
 const { asyncHandler } = require('../middleware/errorHandler');
-const MonitoringService = require('..\services\monitoring\MonitoringService.js');
+const MonitoringService = require('../services/monitoring/MonitoringService.js');
 const { validateRequest } = require('../middleware/validation');
 const Joi = require('joi');
 

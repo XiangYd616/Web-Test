@@ -15,8 +15,8 @@ const {
   updateLastLogin,
   authMiddleware
 } = require('./auth.js');
-const { asyncHandler } = require('..\..\middleware\errorHandler.js');
-const { formatValidationErrors, ERROR_CODES } = require('..\..\middleware\responseFormatter.js');
+const { asyncHandler } = require('../../middleware/errorHandler.js');
+const { formatValidationErrors, ERROR_CODES } = require('../../middleware/responseFormatter.js');
 
 const router = express.Router();
 
@@ -39,7 +39,7 @@ const registerValidation = [
   body('password')
     .isLength({ min: 8 })
     .withMessage('密码长度至少8个字符')
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*/d)/)
     .withMessage('密码必须包含至少一个小写字母、一个大写字母和一个数字'),
 
   body('firstName')
@@ -72,7 +72,7 @@ const changePasswordValidation = [
   body('newPassword')
     .isLength({ min: 8 })
     .withMessage('新密码长度至少8个字符')
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*/d)/)
     .withMessage('新密码必须包含至少一个小写字母、一个大写字母和一个数字')
 ];
 

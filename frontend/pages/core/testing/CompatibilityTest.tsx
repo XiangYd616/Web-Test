@@ -1,11 +1,11 @@
 import { AlertTriangle, CheckCircle, Clock, Eye, Globe, Grid, Loader, Lock, Monitor, Play, RotateCcw, Settings, Smartphone, Square, Tablet, XCircle } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useAuthCheck } from '..\..\..\components\auth\withAuthCheck.tsx';
-import { TestCharts } from '..\..\..\components\charts\TestCharts.tsx';
-import { URLInput } from '../components/testing';
-import BaseTestPage from '..\..\..\components\testing\BaseTestPage.tsx';
-import { ProgressBar } from '..\..\..\components\ui\ProgressBar.tsx';
-import { useUserStats } from '..\..\..\hooks\useUserStats.ts';
+import { useAuthCheck } from '../../../components/auth/WithAuthCheck.tsx';
+import { TestCharts } from '../../../components/charts/TestCharts.tsx';
+import URLInput from '../../../components/testing/URLInput';
+import BaseTestPage from '../../../components/testing/BaseTestPage.tsx';
+import { ProgressBar } from '../../../components/ui/ProgressBar.tsx';
+import { useUserStats } from '../../../hooks/useUserStats.ts';
 
 // CSS样式已迁移到组件库中
 // 进度条样式已集成到ProgressBar组件

@@ -1,7 +1,7 @@
 
 import { BarChart3, Download, Settings, TrendingUp } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
-import { TestPhase, TestState, type RealTimeMetrics, type TestDataPoint } from '../../services/TestStateManager';
+import { TestPhase, TestState, type RealTimeMetrics, type TestDataPoint } from '../../services/testing/testStateManager';
 
 import '../../styles/optimized-charts.css';
 

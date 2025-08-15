@@ -8,6 +8,7 @@ const sequelize = new Sequelize(
   config.password,
   {
     host: config.host,
+    dialect: config.dialect || 'sqlite',
     port: config.port,
     dialect: config.dialect,
     logging: config.logging || false,

@@ -100,7 +100,7 @@ const FileUploadSEO: React.FC<FileUploadSEOProps> = ({
     });
 
     if (errors.length > 0) {
-      alert(errors.join('\n'));
+      alert(errors.join('/n'));
     }
 
     if (validFiles.length > 0) {

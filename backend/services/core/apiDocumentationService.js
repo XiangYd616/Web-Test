@@ -5,7 +5,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const Logger = require('..\..\middleware\logger.js');
+const Logger = require('../../middleware/logger.js');
 
 class ApiDocumentationService {
   constructor() {
@@ -271,22 +271,22 @@ class ApiDocumentationService {
 
     for (const [key, value] of Object.entries(obj)) {
       if (value === null || value === undefined) {
-        yaml += `${spaces}${key}: null\n`;
+        yaml += `${spaces}${key}: null/n`;
       } else if (typeof value === 'object' && !Array.isArray(value)) {
-        yaml += `${spaces}${key}:\n`;
+        yaml += `${spaces}${key}:/n`;
         yaml += this.convertToYaml(value, indent + 1);
       } else if (Array.isArray(value)) {
-        yaml += `${spaces}${key}:\n`;
+        yaml += `${spaces}${key}:/n`;
         value.forEach(item => {
           if (typeof item === 'object') {
-            yaml += `${spaces}  -\n`;
+            yaml += `${spaces}  -/n`;
             yaml += this.convertToYaml(item, indent + 2);
           } else {
-            yaml += `${spaces}  - ${item}\n`;
+            yaml += `${spaces}  - ${item}/n`;
           }
         });
       } else {
-        yaml += `${spaces}${key}: ${JSON.stringify(value)}\n`;
+        yaml += `${spaces}${key}: ${JSON.stringify(value)}/n`;
       }
     }
 

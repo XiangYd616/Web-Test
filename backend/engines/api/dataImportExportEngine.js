@@ -15,8 +15,8 @@ class RealDataImportExportEngine {
     this.version = '1.0.0';
     this.supportedFormats = ['json', 'csv', 'xlsx', 'pdf'];
     this.maxFileSize = 50 * 1024 * 1024; // 50MB
-    this.tempDir = path.join(process.cwd(), 'temp');
-    this.outputDir = path.join(process.cwd(), 'exports');
+    this.tempDir = path.join(process.cwd(), 'backend/runtime/temp');
+    this.outputDir = path.join(process.cwd(), 'backend/runtime/exports');
 
     this.initDirectories();
   }
@@ -166,8 +166,8 @@ class RealDataImportExportEngine {
     const { dateRange, includeDeleted, filters, userId } = options;
 
     // 这里需要根据实际的数据模型来获取数据
-    const TestHistory = require('..\..\models\TestHistory.js');
-    const User = require('..\..\models\User.js');
+    const TestHistory = require('../../models/TestHistory.js');
+    const User = require('../../models/User.js');
 
     let data = {};
 
@@ -207,7 +207,7 @@ class RealDataImportExportEngine {
    * 导出用户数据
    */
   async exportUsers(requestUserId, includeDeleted) {
-    const User = require('..\..\models\User.js');
+    const User = require('../../models/User.js');
 
     const whereClause = {};
     if (!includeDeleted) {
@@ -227,7 +227,7 @@ class RealDataImportExportEngine {
    * 导出测试数据
    */
   async exportTests(dateRange, filters, userId) {
-    const TestHistory = require('..\..\models\TestHistory.js');
+    const TestHistory = require('../../models/TestHistory.js');
 
     const whereClause = {};
     if (userId) whereClause.userId = userId;
@@ -268,7 +268,7 @@ class RealDataImportExportEngine {
   async exportReports(dateRange, filters, userId) {
     // 这里应该从报告表获取数据
     // 暂时返回测试历史中有报告的记录
-    const TestHistory = require('..\..\models\TestHistory.js');
+    const TestHistory = require('../../models/TestHistory.js');
 
     const whereClause = {
       reportGenerated: true
@@ -340,7 +340,7 @@ class RealDataImportExportEngine {
 
     // 🔧 修复中文乱码：手动添加BOM头
     const originalContent = await fs.readFile(filePath, 'utf8');
-    const BOM = '\uFEFF';
+    const BOM = '/uFEFF';
     await fs.writeFile(filePath, BOM + originalContent, 'utf8');
 
     const stats = await fs.stat(filePath);

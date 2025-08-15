@@ -1,127 +1,95 @@
-// Jest测试设置文件
+/**
+ * Vitest测试环境设置
+ * 配置全局测试环境和模拟
+ */
+
 import '@testing-library/jest-dom';
-import { configure } from '@testing-library/react';
-import { server } from './mocks/server';
+import { cleanup } from '@testing-library/react';
+import { afterEach, vi } from 'vitest';
 
-// 配置Testing Library
-configure({
-  testIdAttribute: 'data-testid',
-});
+// Jest DOM 匹配器已通过导入自动扩展
 
-// 设置MSW服务器
-beforeAll(() => {
-  server.listen({
-    onUnhandledRequest: 'error',
-  });
-});
-
+// 每个测试后清理
 afterEach(() => {
-  server.resetHandlers();
+    cleanup();
 });
 
-afterAll(() => {
-  server.close();
-});
-
-// 模拟Next.js路由
-jest.mock('next/router', () => ({
-  useRouter: () => ({
-    route: '/',
-    pathname: '/',
-    query: {},
-    asPath: '/',
-    push: jest.fn(),
-    replace: jest.fn(),
-    reload: jest.fn(),
-    back: jest.fn(),
-    prefetch: jest.fn(),
-    beforePopState: jest.fn(),
-    events: {
-      on: jest.fn(),
-      off: jest.fn(),
-      emit: jest.fn(),
-    },
-  }),
-}));
-
-// 模拟window.matchMedia
+// 模拟环境变量
 Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: jest.fn().mockImplementation(query => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  })),
+    writable: true,
+    value: vi.fn().mockImplementation(query => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(), // deprecated
+        removeListener: vi.fn(), // deprecated
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+    })),
 });
-
-// 模拟IntersectionObserver
-global.IntersectionObserver = class IntersectionObserver {
-  constructor() {}
-  observe() {
-    return null;
-  }
-  disconnect() {
-    return null;
-  }
-  unobserve() {
-    return null;
-  }
-};
 
 // 模拟ResizeObserver
-global.ResizeObserver = class ResizeObserver {
-  constructor() {}
-  observe() {
-    return null;
-  }
-  disconnect() {
-    return null;
-  }
-  unobserve() {
-    return null;
-  }
-};
+global.ResizeObserver = vi.fn().mockImplementation(() => ({
+    observe: vi.fn(),
+    unobserve: vi.fn(),
+    disconnect: vi.fn(),
+}));
+
+// 模拟IntersectionObserver
+global.IntersectionObserver = vi.fn().mockImplementation(() => ({
+    observe: vi.fn(),
+    unobserve: vi.fn(),
+    disconnect: vi.fn(),
+}));
 
 // 模拟fetch
-global.fetch = jest.fn();
+global.fetch = vi.fn();
 
 // 模拟localStorage
 const localStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
+    getItem: vi.fn(),
+    setItem: vi.fn(),
+    removeItem: vi.fn(),
+    clear: vi.fn(),
 };
-global.localStorage = localStorageMock;
+vi.stubGlobal('localStorage', localStorageMock);
 
 // 模拟sessionStorage
 const sessionStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
+    getItem: vi.fn(),
+    setItem: vi.fn(),
+    removeItem: vi.fn(),
+    clear: vi.fn(),
 };
-global.sessionStorage = sessionStorageMock;
+vi.stubGlobal('sessionStorage', sessionStorageMock);
 
-// 控制台错误处理
-const originalError = console.error;
-beforeAll(() => {
-  console.error = (...args) => {
-    if (
-      typeof args[0] === 'string' &&
-      args[0].includes('Warning: ReactDOM.render is no longer supported')
-    ) {
-      return;
-    }
-    originalError.call(console, ...args);
-  };
-});
+// 模拟console方法以避免测试输出污染
+global.console = {
+    ...console,
+    log: vi.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+};
 
-afterAll(() => {
-  console.error = originalError;
-});
+// 模拟URL.createObjectURL
+global.URL.createObjectURL = vi.fn(() => 'mocked-url');
+global.URL.revokeObjectURL = vi.fn();
+
+// 模拟WebSocket
+global.WebSocket = vi.fn().mockImplementation(() => ({
+    close: vi.fn(),
+    send: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    readyState: 1,
+    CONNECTING: 0,
+    OPEN: 1,
+    CLOSING: 2,
+    CLOSED: 3,
+}));
+
+// 设置测试超时
+vi.setConfig({ testTimeout: 10000 });

@@ -1,6 +1,6 @@
 const axios = require('axios');
 const https = require('https');
-const webSocketService = require('../../services/WebSocketService');
+// const webSocketService = require('../../services/webSocketService'); // 已删除服务
 
 /**
  * 真实的API测试引擎
@@ -47,9 +47,122 @@ class RealAPITestEngine {
     const actualTestId = testId || Date.now().toString();
     const startTime = Date.now();
 
-    // 发送测试开始通知
+    // 初始化测试结果结构
+    const testResult = {
+      testId: actualTestId,
+      baseUrl,
+      startTime: new Date(startTime).toISOString(),
+      endTime: null,
+      duration: 0,
+      summary: {
+        totalEndpoints: endpoints.length,
+        successfulEndpoints: 0,
+        failedEndpoints: 0,
+        averageResponseTime: 0,
+        totalResponseTime: 0,
+        successRate: 0
+      },
+      endpoints: [],
+      performance: {
+        fastest: null,
+        slowest: null,
+        averageResponseTime: 0,
+        totalDataTransferred: 0
+      },
+      security: {
+        httpsUsage: 0,
+        securityHeaders: 0,
+        vulnerabilities: []
+      },
+      reliability: {
+        uptime: 0,
+        errorRate: 0,
+        timeouts: 0
+      }
+    };
+
+    // 发送测试开始通知 - 已删除服务，需要使用替代方案
     if (testId) {
-      webSocketService.broadcastTestStatusUpdate(testId, 'running', 0, '开始API测试...');
+      // webSocketService.broadcastTestStatusUpdate(testId, 'running', 0, '开始API测试...');
+      console.log(`测试开始通知: ${testId} - 开始API测试...`);
+    }
+
+    try {
+      // 执行端点测试
+      for (let i = 0; i < endpoints.length; i++) {
+        const endpoint = endpoints[i];
+        console.log(`🔍 Testing endpoint ${i + 1}/${endpoints.length}: ${endpoint.method} ${endpoint.path}`);
+
+        const endpointResult = await this.testEndpoint(endpoint, {
+          baseUrl,
+          timeout,
+          retries,
+          headers,
+          auth,
+          testSecurity,
+          testPerformance
+        });
+
+        testResult.endpoints.push(endpointResult);
+
+        // 更新统计
+        if (endpointResult.success) {
+          testResult.summary.successfulEndpoints++;
+        } else {
+          testResult.summary.failedEndpoints++;
+        }
+
+        testResult.summary.totalResponseTime += endpointResult.responseTime;
+        testResult.performance.totalDataTransferred += endpointResult.responseSize || 0;
+
+        // 更新最快/最慢端点
+        if (!testResult.performance.fastest || endpointResult.responseTime < testResult.performance.fastest.responseTime) {
+          testResult.performance.fastest = endpointResult;
+        }
+        if (!testResult.performance.slowest || endpointResult.responseTime > testResult.performance.slowest.responseTime) {
+          testResult.performance.slowest = endpointResult;
+        }
+
+        // 发送进度更新
+        if (testId) {
+          const progress = Math.round(((i + 1) / endpoints.length) * 100);
+          console.log(`测试进度: ${progress}% - ${endpoint.name}`);
+        }
+      }
+
+      // 计算最终统计
+      const endTime = Date.now();
+      testResult.endTime = new Date(endTime).toISOString();
+      testResult.duration = endTime - startTime;
+      testResult.summary.averageResponseTime = testResult.summary.totalResponseTime / endpoints.length;
+      testResult.summary.successRate = testResult.summary.successfulEndpoints / testResult.summary.totalEndpoints;
+      testResult.performance.averageResponseTime = testResult.summary.averageResponseTime;
+
+      // 计算安全指标
+      this.calculateSecurityMetrics(testResult);
+
+      // 计算可靠性指标
+      this.calculateReliabilityMetrics(testResult);
+
+      console.log(`✅ API测试完成: ${testResult.summary.successfulEndpoints}/${testResult.summary.totalEndpoints} 成功`);
+
+      return {
+        success: true,
+        data: testResult
+      };
+
+    } catch (error) {
+      console.error('❌ API测试失败:', error);
+
+      const endTime = Date.now();
+      testResult.endTime = new Date(endTime).toISOString();
+      testResult.duration = endTime - startTime;
+
+      return {
+        success: false,
+        error: error.message,
+        data: testResult
+      };
     }
 
     const results = {
@@ -126,13 +239,18 @@ class RealAPITestEngine {
         // 发送进度更新
         if (testId) {
           const progress = Math.round((i / endpoints.length) * 100);
-          webSocketService.broadcastTestProgress(
-            testId,
-            progress,
-            i + 1,
-            endpoints.length,
-            `测试端点: ${endpoint.method || 'GET'} ${endpoint.path}`
-          );
+          try {
+            const webSocketService = require('../../services/websocketService');
+            webSocketService.broadcastTestProgress(
+              testId,
+              progress,
+              i + 1,
+              endpoints.length,
+              `测试端点: ${endpoint.method || 'GET'} ${endpoint.path}`
+            );
+          } catch (error) {
+            console.log(`测试进度: ${testId} - ${progress}% - 测试端点: ${endpoint.method || 'GET'} ${endpoint.path}`);
+          }
         }
 
         const endpointResult = await this.testEndpoint(apiClient, endpoint, {
@@ -185,8 +303,13 @@ class RealAPITestEngine {
 
       // 发送测试完成通知
       if (testId) {
-        webSocketService.broadcastTestCompleted(testId, results, true);
-        webSocketService.broadcastTestStatusUpdate(testId, 'completed', 100, '测试完成');
+        try {
+          const webSocketService = require('../../services/websocketService');
+          webSocketService.broadcastTestCompleted(testId, results, true);
+          webSocketService.broadcastTestStatusUpdate(testId, 'completed', 100, '测试完成');
+        } catch (error) {
+          console.log(`测试完成通知: ${testId} - 测试完成`);
+        }
       }
 
       console.log(`✅ API test completed. Score: ${results.overallScore}/100`);
@@ -201,8 +324,13 @@ class RealAPITestEngine {
 
       // 发送测试错误通知
       if (testId) {
-        webSocketService.broadcastTestError(testId, error, 'API_TEST_FAILED');
-        webSocketService.broadcastTestStatusUpdate(testId, 'failed', 100, `测试失败: ${error.message}`);
+        try {
+          const webSocketService = require('../../services/websocketService');
+          webSocketService.broadcastTestError(testId, error, 'API_TEST_FAILED');
+          webSocketService.broadcastTestStatusUpdate(testId, 'failed', 100, `测试失败: ${error.message}`);
+        } catch (wsError) {
+          console.log(`测试错误通知: ${testId} - 测试失败: ${error.message}`);
+        }
       }
 
       throw error;
@@ -780,7 +908,7 @@ class RealAPITestEngine {
     if (expires) result.cacheInfo.cacheHeaders.push(`Expires: ${expires}`);
 
     // 提取max-age
-    const maxAgeMatch = cacheControl.match(/max-age=(\d+)/);
+    const maxAgeMatch = cacheControl.match(/max-age=(/d +) /);
     if (maxAgeMatch) {
       result.cacheInfo.maxAge = parseInt(maxAgeMatch[1]);
     }
@@ -964,6 +1092,205 @@ class RealAPITestEngine {
     }
 
     return errors;
+  }
+
+  /**
+   * 测试单个端点 - 增强版本
+   */
+  async testEndpointEnhanced(endpoint, config) {
+    const { baseUrl, timeout, retries, headers, auth, testSecurity, testPerformance } = config;
+    const url = `${baseUrl}${endpoint.path}`;
+
+    const endpointResult = {
+      id: endpoint.id || Date.now().toString(),
+      name: endpoint.name,
+      method: endpoint.method,
+      path: endpoint.path,
+      url,
+      success: false,
+      statusCode: 0,
+      responseTime: 0,
+      responseSize: 0,
+      error: null,
+      response: null,
+      headers: {},
+      performance: {
+        dns: 0,
+        connect: 0,
+        firstByte: 0,
+        download: 0,
+        total: 0
+      },
+      security: {
+        https: url.startsWith('https://'),
+        headers: {
+          contentType: false,
+          cacheControl: false,
+          xFrameOptions: false,
+          xContentTypeOptions: false,
+          strictTransportSecurity: false
+        }
+      },
+      validations: {
+        statusCode: false,
+        responseTime: false,
+        contentType: false,
+        schema: false
+      }
+    };
+
+    try {
+      const startTime = Date.now();
+
+      // 准备请求配置
+      const requestConfig = {
+        method: endpoint.method,
+        url,
+        timeout,
+        headers: { ...headers, ...endpoint.headers },
+        validateStatus: () => true, // 接受所有状态码
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: false // 允许自签名证书
+        })
+      };
+
+      // 添加认证
+      if (auth) {
+        if (auth.type === 'basic') {
+          requestConfig.auth = {
+            username: auth.username,
+            password: auth.password
+          };
+        } else if (auth.type === 'bearer') {
+          requestConfig.headers.Authorization = `Bearer ${auth.token}`;
+        } else if (auth.type === 'apikey') {
+          requestConfig.headers[auth.apiKeyHeader || 'X-API-Key'] = auth.apiKey;
+        }
+      }
+
+      // 添加请求体
+      if (endpoint.body && ['POST', 'PUT', 'PATCH'].includes(endpoint.method)) {
+        try {
+          requestConfig.data = JSON.parse(endpoint.body);
+          requestConfig.headers['Content-Type'] = 'application/json';
+        } catch (e) {
+          requestConfig.data = endpoint.body;
+        }
+      }
+
+      // 执行请求
+      const response = await axios(requestConfig);
+      const endTime = Date.now();
+
+      endpointResult.responseTime = endTime - startTime;
+      endpointResult.statusCode = response.status;
+      endpointResult.responseSize = JSON.stringify(response.data).length;
+      endpointResult.response = response.data;
+      endpointResult.headers = response.headers;
+      endpointResult.performance.total = endpointResult.responseTime;
+
+      // 验证状态码
+      const expectedStatus = endpoint.expectedStatus || [200];
+      endpointResult.validations.statusCode = expectedStatus.includes(response.status);
+
+      // 验证响应时间
+      const maxResponseTime = endpoint.timeout || timeout;
+      endpointResult.validations.responseTime = endpointResult.responseTime <= maxResponseTime;
+
+      // 安全检查
+      if (testSecurity) {
+        this.performSecurityChecks(endpointResult, response);
+      }
+
+      // 判断成功
+      endpointResult.success = endpointResult.validations.statusCode && endpointResult.validations.responseTime;
+
+    } catch (error) {
+      endpointResult.error = error.message;
+      endpointResult.responseTime = 0;
+
+      if (error.code === 'ECONNABORTED') {
+        endpointResult.error = '请求超时';
+      } else if (error.code === 'ENOTFOUND') {
+        endpointResult.error = '域名解析失败';
+      } else if (error.code === 'ECONNREFUSED') {
+        endpointResult.error = '连接被拒绝';
+      }
+    }
+
+    return endpointResult;
+  }
+
+  /**
+   * 执行安全检查
+   */
+  performSecurityChecks(endpointResult, response) {
+    const headers = response.headers;
+
+    // 检查安全头
+    endpointResult.security.headers.contentType = !!headers['content-type'];
+    endpointResult.security.headers.cacheControl = !!headers['cache-control'];
+    endpointResult.security.headers.xFrameOptions = !!headers['x-frame-options'];
+    endpointResult.security.headers.xContentTypeOptions = !!headers['x-content-type-options'];
+    endpointResult.security.headers.strictTransportSecurity = !!headers['strict-transport-security'];
+  }
+
+  /**
+   * 计算安全指标
+   */
+  calculateSecurityMetrics(testResult) {
+    let httpsCount = 0;
+    let securityHeadersCount = 0;
+    let totalHeaders = 0;
+
+    testResult.endpoints.forEach(endpoint => {
+      if (endpoint.security.https) {
+        httpsCount++;
+      }
+
+      const headers = endpoint.security.headers;
+      const headerCount = Object.values(headers).filter(Boolean).length;
+      securityHeadersCount += headerCount;
+      totalHeaders += Object.keys(headers).length;
+    });
+
+    testResult.security.httpsUsage = httpsCount / testResult.endpoints.length;
+    testResult.security.securityHeaders = totalHeaders > 0 ? securityHeadersCount / totalHeaders : 0;
+
+    // 识别安全漏洞
+    testResult.endpoints.forEach(endpoint => {
+      if (!endpoint.security.https) {
+        testResult.security.vulnerabilities.push(`${endpoint.name}: 未使用HTTPS`);
+      }
+
+      if (!endpoint.security.headers.xFrameOptions) {
+        testResult.security.vulnerabilities.push(`${endpoint.name}: 缺少X-Frame-Options头`);
+      }
+
+      if (!endpoint.security.headers.xContentTypeOptions) {
+        testResult.security.vulnerabilities.push(`${endpoint.name}: 缺少X-Content-Type-Options头`);
+      }
+
+      if (endpoint.security.https && !endpoint.security.headers.strictTransportSecurity) {
+        testResult.security.vulnerabilities.push(`${endpoint.name}: 缺少HSTS头`);
+      }
+    });
+  }
+
+  /**
+   * 计算可靠性指标
+   */
+  calculateReliabilityMetrics(testResult) {
+    const successfulEndpoints = testResult.summary.successfulEndpoints;
+    const totalEndpoints = testResult.summary.totalEndpoints;
+
+    testResult.reliability.uptime = successfulEndpoints / totalEndpoints;
+    testResult.reliability.errorRate = 1 - testResult.reliability.uptime;
+
+    // 计算超时次数
+    testResult.reliability.timeouts = testResult.endpoints.filter(endpoint =>
+      endpoint.error && endpoint.error.includes('超时')
+    ).length;
   }
 }
 

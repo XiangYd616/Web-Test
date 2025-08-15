@@ -4,7 +4,7 @@
  */
 
 const EventEmitter = require('events');
-const logger = require('..\..\middleware\logger.js');
+const logger = require('../../middleware/logger.js');
 
 class MonitoringDataCollector extends EventEmitter {
     constructor(dbPool) {

@@ -5,8 +5,8 @@
 
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const { query } = require('..\..\config\database.js');
-const { ErrorFactory } = require('..\..\utils\ApiError.js');
+const { query } = require('../../config/database.js');
+const { ErrorFactory } = require('../../utils/apiError');
 
 class JwtService {
     constructor() {

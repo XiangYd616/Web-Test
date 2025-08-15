@@ -5,7 +5,7 @@
  */
 
 import { jwtDecode } from 'jwt-decode';
-import type { User, AuthResponse } from '../../types/unified/models';
+import type { AuthResponse, User } from '../../types/unified/models';
 import { defaultErrorHandler } from '../unified/apiErrorHandler';
 
 // ==================== 类型定义 ====================
@@ -15,17 +15,17 @@ export interface AuthConfig {
   accessTokenExpiry: number; // 访问token过期时间（秒）
   refreshTokenExpiry: number; // 刷新token过期时间（秒）
   autoRefreshThreshold: number; // 自动刷新阈值（秒）
-  
+
   // 会话配置
   maxConcurrentSessions: number; // 最大并发会话数
   sessionTimeout: number; // 会话超时时间（秒）
   enableSessionTracking: boolean; // 启用会话追踪
-  
+
   // 安全配置
   enableDeviceFingerprinting: boolean; // 启用设备指纹
   enableSecureStorage: boolean; // 启用安全存储
   requireMFA: boolean; // 要求多因素认证
-  
+
   // 密码策略
   passwordPolicy: {
     minLength: number;
@@ -36,7 +36,7 @@ export interface AuthConfig {
     maxAge: number; // 密码最大使用天数
     preventReuse: number; // 防止重复使用的历史密码数量
   };
-  
+
   // API配置
   apiBaseUrl: string;
   endpoints: {
@@ -94,15 +94,15 @@ const DEFAULT_CONFIG: AuthConfig = {
   accessTokenExpiry: 900, // 15分钟
   refreshTokenExpiry: 604800, // 7天
   autoRefreshThreshold: 300, // 5分钟前自动刷新
-  
+
   maxConcurrentSessions: 5,
   sessionTimeout: 3600, // 1小时
   enableSessionTracking: true,
-  
+
   enableDeviceFingerprinting: true,
   enableSecureStorage: true,
   requireMFA: false,
-  
+
   passwordPolicy: {
     minLength: 8,
     requireUppercase: true,
@@ -112,7 +112,7 @@ const DEFAULT_CONFIG: AuthConfig = {
     maxAge: 90, // 90天
     preventReuse: 5
   },
-  
+
   apiBaseUrl: '/api',
   endpoints: {
     login: '/auth/login',
@@ -130,7 +130,7 @@ export class EnhancedAuthManager {
   private refreshTimer?: NodeJS.Timeout;
   private sessionCheckTimer?: NodeJS.Timeout;
   private deviceFingerprint?: string;
-  
+
   // 事件监听器
   private eventListeners: Map<string, Function[]> = new Map();
 
@@ -194,7 +194,7 @@ export class EnhancedAuthManager {
     }
 
     const fingerprint = components.join('|');
-    
+
     // 生成哈希
     if (crypto.subtle) {
       const encoder = new TextEncoder();
@@ -244,12 +244,12 @@ export class EnhancedAuthManager {
 
         // 存储tokens
         await this.storeTokens(data.token, data.refreshToken);
-        
+
         // 启动自动刷新
         this.startAutoRefresh();
-        
+
         this.emit('loginSuccess', data.user);
-        
+
         return {
           success: true,
           user: data.user,
@@ -262,7 +262,7 @@ export class EnhancedAuthManager {
     } catch (error) {
       const processedError = await defaultErrorHandler.handleError(error);
       this.emit('loginError', processedError);
-      
+
       return {
         success: false,
         message: processedError.userMessage,
@@ -330,7 +330,7 @@ export class EnhancedAuthManager {
 
     // 每分钟检查一次
     this.refreshTimer = setInterval(checkAndRefresh, 60000);
-    
+
     // 立即检查一次
     checkAndRefresh();
   }
@@ -365,7 +365,7 @@ export class EnhancedAuthManager {
         await this.storeTokens(data.token, data.refreshToken);
         this.startAutoRefresh();
         this.emit('mfaSuccess', data.user);
-        
+
         return {
           success: true,
           user: data.user,
@@ -378,7 +378,7 @@ export class EnhancedAuthManager {
     } catch (error) {
       const processedError = await defaultErrorHandler.handleError(error);
       this.emit('mfaError', processedError);
-      
+
       return {
         success: false,
         message: processedError.userMessage,
@@ -505,8 +505,8 @@ export class EnhancedAuthManager {
       length: password.length >= policy.minLength,
       uppercase: policy.requireUppercase ? /[A-Z]/.test(password) : true,
       lowercase: policy.requireLowercase ? /[a-z]/.test(password) : true,
-      numbers: policy.requireNumbers ? /\d/.test(password) : true,
-      specialChars: policy.requireSpecialChars ? /[!@#$%^&*(),.?":{}|<>]/.test(password) : true
+      numbers: policy.requireNumbers ? //d/.test(password) : true,
+        specialChars : policy.requireSpecialChars ? /[!@#$%^&*(),.?":{}|<>]/.test(password) : true
     };
 
     let score = 0;
@@ -572,7 +572,7 @@ export class EnhancedAuthManager {
       // 使用加密存储
       const encryptedAccess = await this.encryptData(accessToken);
       const encryptedRefresh = await this.encryptData(refreshToken);
-      
+
       localStorage.setItem('auth_access_token_enc', encryptedAccess);
       localStorage.setItem('auth_refresh_token_enc', encryptedRefresh);
     } else {
@@ -640,12 +640,12 @@ export class EnhancedAuthManager {
       if (this.sessionCheckTimer) {
         clearInterval(this.sessionCheckTimer);
       }
-      
+
       localStorage.removeItem('auth_access_token');
       localStorage.removeItem('auth_refresh_token');
       localStorage.removeItem('auth_access_token_enc');
       localStorage.removeItem('auth_refresh_token_enc');
-      
+
       this.emit('logout');
     }
   }

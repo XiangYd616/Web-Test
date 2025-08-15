@@ -476,8 +476,8 @@ const SystemSettings: React.FC = () => {
                     默认测试位置 (每行一个)
                   </label>
                   <textarea
-                    value={config.testing.defaultLocations.join('\n')}
-                    onChange={(e) => updateConfig('testing', 'defaultLocations', e.target.value.split('\n').filter(loc => loc.trim()))}
+                    value={config.testing.defaultLocations.join('/n')}
+                    onChange={(e) => updateConfig('testing', 'defaultLocations', e.target.value.split('/n').filter(loc => loc.trim()))}
                     rows={4}
                     className="input"
                     placeholder="beijing&#10;shanghai&#10;guangzhou"
@@ -588,8 +588,8 @@ const SystemSettings: React.FC = () => {
                     IP白名单 (每行一个IP地址)
                   </label>
                   <textarea
-                    value={config.security.ipWhitelist.join('\n')}
-                    onChange={(e) => updateConfig('security', 'ipWhitelist', e.target.value.split('\n').filter(ip => ip.trim()))}
+                    value={config.security.ipWhitelist.join('/n')}
+                    onChange={(e) => updateConfig('security', 'ipWhitelist', e.target.value.split('/n').filter(ip => ip.trim()))}
                     rows={4}
                     className="input"
                     placeholder="192.168.1.1&#10;10.0.0.0/8"

@@ -129,7 +129,7 @@ GET /api/test/geo-status
 ## 📁 文件结构
 
 ```
-server/
+backend/
 ├── services/
 │   └── geoLocationService.js    # 地理位置服务
 ├── scripts/
@@ -152,7 +152,7 @@ npm run download-geodb
 
 # 设置定时任务（Linux/Mac）
 # 每周三凌晨2点更新
-0 2 * * 3 cd /path/to/project/server && npm run download-geodb
+0 2 * * 3 cd /path/to/project/backend && npm run download-geodb
 ```
 
 ### 监控状态

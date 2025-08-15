@@ -5,9 +5,9 @@
 const fs = require('fs');
 const path = require('path');
 const Logger = require('../utils/logger');
-const ErrorNotificationHelper = require('../utils/ErrorNotificationHelper');
-const { ErrorFactory, ErrorUtils } = require('../utils/ApiError');
-const { ErrorCodes, createErrorResponse } = require('../types/ApiResponse');
+const ErrorNotificationHelper = require('../utils/errorNotificationHelper');
+const { ErrorFactory, ErrorUtils } = require('../utils/apiError');
+const { ErrorCodes, createErrorResponse } = require('../types/apiResponse');
 
 /**
  * 异步路由包装器
@@ -110,7 +110,7 @@ const logError = (err, req) => {
 
   // 写入错误日志文件
   const logPath = path.join(__dirname, '..', 'logs', 'error.log');
-  const logString = JSON.stringify(logEntry) + '\n';
+  const logString = JSON.stringify(logEntry) + '/n';
 
   fs.appendFile(logPath, logString, (writeErr) => {
     if (writeErr) {

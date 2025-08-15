@@ -10,7 +10,7 @@ const {
     generateRequestId,
     ErrorCodes,
     getStatusCode
-} = require('../types/ApiResponse');
+} = require('../types/apiResponse');
 
 /**
  * 响应格式化中间件

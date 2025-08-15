@@ -44,21 +44,21 @@ const createCacheControlMiddleware = (options = {}) => {
     strategies: {
       // 静态资源 - 长期缓存
       static: {
-        pattern: /\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/,
+        pattern: //.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/,
         maxAge: 365 * 24 * 60 * 60, // 1年
         immutable: true
       },
       
       // HTML文件 - 短期缓存
       html: {
-        pattern: /\.html$/,
+        pattern: //.html$/,
         maxAge: 60 * 60, // 1小时
         mustRevalidate: true
       },
       
       // API响应 - 根据内容缓存
       api: {
-        pattern: /^\/api\//,
+        pattern: /^//api///,
         maxAge: 5 * 60, // 5分钟
         mustRevalidate: true,
         vary: ['Authorization', 'Accept-Encoding']

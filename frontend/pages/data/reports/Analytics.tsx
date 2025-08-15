@@ -2,7 +2,7 @@
 import { Activity, AlertTriangle, ArrowDownRight, ArrowUpRight, BarChart3, Brain, ExternalLink, Eye, Info, Lightbulb, Minus, RefreshCw, Search, Shield, Target, TrendingDown, TrendingUp } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
-import { analyticsService as AdvancedAnalyticsService } from '..\..\..\..\backend\services\redis\analytics.js';
+// import { analyticsService as AdvancedAnalyticsService } from '../../../../backend/services/redis/analytics.js'; // 前端不应该直接导入后端文件
 
 interface AnalyticsInsight {
   id: string;

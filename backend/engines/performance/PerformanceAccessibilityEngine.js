@@ -853,7 +853,7 @@ class PerformanceAccessibilityEngine {
     }
 
     checkPageTitle(html) {
-        const titleRegex = /<title[^>]*>([^<]+)<\/title>/i;
+        const titleRegex = /<title[^>]*>([^<]+)<//title>/i;
         const titleMatch = html.match(titleRegex);
         const hasTitle = titleMatch && titleMatch[1].trim().length > 0;
 
@@ -1397,7 +1397,7 @@ class PerformanceAccessibilityEngine {
             rows.push(['可访问性违规', violation.title, '', violation.impact, violation.description]);
         });
 
-        return rows.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+        return rows.map(row => row.map(cell => `"${cell}"`).join(',')).join('/n');
     }
 
     /**

@@ -171,7 +171,7 @@ export class ReportExporter {
       ...Object.entries(result.metrics).map(([key, value]) => [key, value].join(','))
     ];
 
-    return rows.join('\n');
+    return rows.join('/n');
   }
 
   private downloadFile(blob: Blob, filename: string): void {

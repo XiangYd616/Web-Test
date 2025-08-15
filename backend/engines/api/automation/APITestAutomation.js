@@ -168,7 +168,7 @@ class APITestAutomation extends EventEmitter {
    * 解析CSV数据
    */
   parseCSV(csvContent) {
-    const lines = csvContent.trim().split('\n');
+    const lines = csvContent.trim().split('/n');
     if (lines.length < 2) return [];
 
     const headers = lines[0].split(',').map(h => h.trim());
@@ -704,7 +704,7 @@ class APITestAutomation extends EventEmitter {
     // 递归替换所有字符串中的变量
     const interpolateValue = (value) => {
       if (typeof value === 'string') {
-        return value.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+        return value.replace(//{/{(/w+)/}/}/g, (match, key) => {
           return data[key] !== undefined ? data[key] : match;
         });
       } else if (typeof value === 'object' && value !== null) {
@@ -728,8 +728,8 @@ class APITestAutomation extends EventEmitter {
       return endpoint;
     }
 
-    const cleanBaseUrl = baseUrl.replace(/\/$/, '');
-    const cleanEndpoint = endpoint.replace(/^\//, '');
+    const cleanBaseUrl = baseUrl.replace(///$/, '');
+    const cleanEndpoint = endpoint.replace(/^///, '');
 
     return `${cleanBaseUrl}/${cleanEndpoint}`;
   }

@@ -326,7 +326,7 @@ class LinkAnalyzer {
             rel,
             isPrev: rel === 'prev' || text.toLowerCase().includes('prev'),
             isNext: rel === 'next' || text.toLowerCase().includes('next'),
-            isNumeric: /^\d+$/.test(text)
+            isNumeric: /^/d+$/.test(text)
           });
         });
         

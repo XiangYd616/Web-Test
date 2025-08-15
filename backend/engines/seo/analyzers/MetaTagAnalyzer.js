@@ -430,7 +430,7 @@ class MetaTagAnalyzer {
 
   validateImageUrl(url) {
     if (!url) return false;
-    return url.startsWith('http') && /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+    return url.startsWith('http') && //.(jpg|jpeg|png|gif|webp)$/i.test(url);
   }
 
   getRequiredTwitterTags(cardType) {

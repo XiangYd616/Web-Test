@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { GitBranch, Code, Settings, Play, Copy, CheckCircle, ExternalLink, Webhook, Key, Shield, Zap, Clock, AlertTriangle, Book, Download, Terminal, Globe, Layers } from 'lucide-react';
+import { AlertTriangle, Book, CheckCircle, Clock, Code, Copy, Download, ExternalLink, GitBranch, Globe, Key, Layers, Play, Settings, Shield, Terminal, Webhook, Zap } from 'lucide-react';
 
 const CICDIntegration: React.FC = () => {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
@@ -34,12 +34,12 @@ jobs:
       - name: Run Website Tests
         run: |
           curl -X POST \\
-            -H "Authorization: Bearer \${{ secrets.TESTWEB_API_TOKEN }}" \\
+            -H "Authorization: Bearer \$\{{ secrets.TESTWEB_API_TOKEN }}" \\
             -H "Content-Type: application/json" \\
             -d '{
-              "url": "\${{ secrets.WEBSITE_URL }}",
+              "url": "\$\{{ secrets.WEBSITE_URL }}",
               "tests": ["performance", "security", "seo"],
-              "webhook": "\${{ secrets.WEBHOOK_URL }}"
+              "webhook": "\$\{{ secrets.WEBHOOK_URL }}"
             }' \\
             https://api.testweb.com/v1/test/comprehensive
 
@@ -49,7 +49,7 @@ jobs:
 
       - name: Get Test Results
         run: |
-          curl -H "Authorization: Bearer \${{ secrets.TESTWEB_API_TOKEN }}" \\
+          curl -H "Authorization: Bearer \$\{{ secrets.TESTWEB_API_TOKEN }}" \\
             https://api.testweb.com/v1/test/results/latest`;
 
   // GitLab CI 配置代码
@@ -67,18 +67,18 @@ test_website:
     - apk add --no-cache curl
   script:
     - |
-      curl -X POST \\
-        -H "Authorization: Bearer $TESTWEB_API_TOKEN" \\
-        -H "Content-Type: application/json" \\
+      curl -X POST //
+        -H "Authorization: Bearer $TESTWEB_API_TOKEN" //
+        -H "Content-Type: application/json" //
         -d '{
           "url": "'$WEBSITE_URL'",
           "tests": ["performance", "security", "seo"],
           "webhook": "'$WEBHOOK_URL'"
-        }' \\
+        }' //
         https://api.testweb.com/v1/test/comprehensive
     - sleep 60
     - |
-      curl -H "Authorization: Bearer $TESTWEB_API_TOKEN" \\
+      curl -H "Authorization: Bearer $TESTWEB_API_TOKEN" //
         https://api.testweb.com/v1/test/results/latest
   only:
     - main
@@ -137,11 +137,10 @@ test_website:
               key={platform.id}
               type="button"
               onClick={() => setActiveTab(platform.id as any)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
-                activeTab === platform.id
-                  ? 'bg-purple-600 text-white'
-                  : 'text-gray-300 hover:bg-gray-600/50'
-              }`}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${activeTab === platform.id
+                ? 'bg-purple-600 text-white'
+                : 'text-gray-300 hover:bg-gray-600/50'
+                }`}
             >
               <platform.icon className={`w-4 h-4 ${platform.color}`} />
               <span className="text-sm">{platform.label}</span>
@@ -286,11 +285,10 @@ test_website:
                 <div key={index} className="bg-gray-700/20 rounded-lg p-3 border border-gray-600/30">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <span className={`px-2 py-1 text-xs font-mono rounded ${
-                        api.method === 'POST'
-                          ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                          : 'bg-green-500/10 text-green-400 border border-green-500/20'
-                      }`}>
+                      <span className={`px-2 py-1 text-xs font-mono rounded ${api.method === 'POST'
+                        ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                        : 'bg-green-500/10 text-green-400 border border-green-500/20'
+                        }`}>
                         {api.method}
                       </span>
                       <code className="text-sm text-gray-300 font-mono">{api.endpoint}</code>
@@ -334,14 +332,14 @@ test_website:
                 </h4>
                 <div className="bg-gray-800/50 rounded p-3 border border-gray-600/30">
                   <pre className="text-xs text-gray-300 overflow-x-auto">
-{`curl -X POST \\
-  -H "Authorization: Bearer YOUR_TOKEN" \\
-  -H "Content-Type: application/json" \\
+                    {`curl -X POST //
+  -H "Authorization: Bearer YOUR_TOKEN" //
+  -H "Content-Type: application/json" //
   -d '{
     "url": "https://example.com",
     "tests": ["performance", "security"],
     "webhook": "https://your-webhook.com"
-  }' \\
+  }' //
   https://api.testweb.com/v1/test/comprehensive`}
                   </pre>
                 </div>
@@ -413,7 +411,7 @@ test_website:
             <div className="bg-gray-700/20 rounded-lg p-4 border border-gray-600/30">
               <div className="bg-gray-800/50 rounded p-4 border border-gray-600/30">
                 <pre className="text-xs text-gray-300 overflow-x-auto">
-{`{
+                  {`{
   "event": "test.completed",
   "timestamp": "2025-06-19T10:30:00Z",
   "test_id": "test_123456",

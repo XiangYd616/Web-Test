@@ -168,11 +168,11 @@ const getLogLevel = (statusCode, responseTime) => {
  */
 const colorLog = (level, message) => {
   const colors = {
-    error: '\x1b[31m',   // 红色
-    warn: '\x1b[33m',    // 黄色
-    info: '\x1b[32m',    // 绿色
-    debug: '\x1b[36m',   // 青色
-    reset: '\x1b[0m'     // 重置
+    error: '/x1b[31m',   // 红色
+    warn: '/x1b[33m',    // 黄色
+    info: '/x1b[32m',    // 绿色
+    debug: '/x1b[36m',   // 青色
+    reset: '/x1b[0m'     // 重置
   };
   
   const color = colors[level] || colors.reset;

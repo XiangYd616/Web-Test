@@ -3,7 +3,7 @@
  * 专注于网站性能指标测试
  */
 
-const HttpTestEngine = require('..\api\HttpTestEngine.js');
+const HttpTestEngine = require('../api/HttpTestEngine.js');
 const { AppError } = require('../../middleware/errorHandler');
 
 class PerformanceTestEngine extends HttpTestEngine {

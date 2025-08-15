@@ -2,7 +2,7 @@
  * 告警服务测试
  */
 
-const AlertService = require('..\services\core\AlertService.js');
+const AlertService = require('../services/core/AlertService.js');
 const axios = require('axios');
 
 // 模拟数据库连接池

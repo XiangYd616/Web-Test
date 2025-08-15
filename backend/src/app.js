@@ -14,61 +14,62 @@ const fs = require('fs');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 // 导入路由
-const authRoutes = require('..\middleware\auth.js');
-const testRoutes = require('..\routes\test.js');
-const seoRoutes = require('..\routes\seo.js');
+const authRoutes = require('../routes/auth.js');
+const testRoutes = require('../routes/test.js');
+const seoRoutes = require('../routes/seo.js');
 // const unifiedSecurityRoutes = require('./routes/unifiedSecurity'); // 已移除
-const userRoutes = require('..\routes\user.js');
-const adminRoutes = require('..\routes\admin.js');
+const userRoutes = require('../routes/user.js');
+const adminRoutes = require('../routes/admin.js');
 // const dataRoutes = require('./routes/data'); // 已移除，功能合并到 dataManagementRoutes
 
 // 导入中间件
-// const { authMiddleware } = require('..\middleware\auth.js'); // 已移除，不再需要
-const dataManagementRoutes = require('..\routes\dataManagement.js');
-const testHistoryRoutes = require('..\routes\testHistory.js');
-const monitoringRoutes = require('..\routes\monitoring.js');
-const reportRoutes = require('..\routes\reports.js');
-const integrationRoutes = require('..\routes\integrations.js');
-// const cacheRoutes = require('..\config\cache.js'); // 已移除，使用SmartCacheService
-const errorRoutes = require('..\routes\errors.js');
-const performanceRoutes = require('..\routes\performance.js');
-const filesRoutes = require('..\routes\files.js');
+// const { authMiddleware } = require('../middleware/auth.js'); // 已移除，不再需要
+const dataManagementRoutes = require('../routes/dataManagement.js');
+const testHistoryRoutes = require('../routes/testHistory.js');
+const monitoringRoutes = require('../routes/monitoring.js');
+const reportRoutes = require('../routes/reports.js');
+const integrationRoutes = require('../routes/integrations.js');
+// const cacheRoutes = require('../config/cache.js'); // 已移除，使用SmartCacheService
+const errorRoutes = require('../routes/errors.js');
+const performanceRoutes = require('../routes/performance.js');
+const filesRoutes = require('../routes/files.js');
 
 // 导入中间件
-const { errorHandler } = require('..\middleware\errorHandler.js');
-const { requestLogger } = require('..\middleware\logger.js');
-const { rateLimiter } = require('..\middleware\rateLimiter.js');
-const { securityMiddleware } = require('..\..\frontend\config\security.ts');
+const { errorHandler } = require('../middleware/errorHandler.js');
+const { requestLogger } = require('../middleware/logger.js');
+const { rateLimiter } = require('../middleware/rateLimiter.js');
+// const { securityMiddleware } = require('../../frontend/config/security.ts'); // 暂时注释掉，因为TS模块导入问题
 const {
   responseFormatter,
   errorResponseFormatter,
   notFoundHandler,
   responseTimeLogger
-} = require('..\middleware\responseFormatter.js');
+} = require('../middleware/responseFormatter.js');
 
 // 导入数据库连接
-const { connectDB, testConnection } = require('..\config\database.js');
-const databaseService = require('../services/DatabaseService');
-const webSocketService = require('../services/WebSocketService');
-const testQueueService = require('../services/TestQueueService');
+const { connectDB, testConnection } = require('../config/database.js');
+// 注意：这些服务文件已被删除，需要使用替代方案
+// const databaseService = require('../services/databaseService');
+// const webSocketService = require('../services/webSocketService');
+// const testQueueService = require('../services/testQueueService');
 
 // 导入缓存和性能优化系统
-// const cacheConfig = require('..\config\cache.js'); // 已移除，使用SmartCacheService
-// const CacheManager = require('..\services\cache\CacheManager.js'); // 已移除，使用SmartCacheService
-const { createCacheMiddleware } = require('..\middleware\cacheMiddleware.js');
+// const cacheConfig = require('../config/cache.js'); // 已移除，使用SmartCacheService
+// const CacheManager = require('../services/cache/CacheManager.js'); // 已移除，使用SmartCacheService
+const { createCacheMiddleware } = require('../middleware/cacheMiddleware.js');
 const {
   createCompressionMiddleware,
   createCacheControlMiddleware,
   createETagMiddleware,
   createSecurityHeadersMiddleware
-} = require('..\api\middleware\staticOptimization.js');
+} = require('../api/middleware/staticOptimization.js');
 
 // 导入实时通信系统
-const realtimeConfig = require('..\config\realtime.js');
+const realtimeConfig = require('../config/realtime.js');
 
 // 导入Redis服务
-// const redisConnection = require('..\services\redis\connection.js'); // 已移除，使用SmartCacheService
-const cacheMonitoring = require('..\routes\monitoring.js');
+// const redisConnection = require('../services/redis/connection.js'); // 已移除，使用SmartCacheService
+const cacheMonitoring = require('../routes/monitoring.js');
 
 // 导入测试历史服务将在启动时动态加载
 
@@ -96,8 +97,8 @@ const io = new Server(server, {
   }
 });
 
-// 初始化WebSocket服务
-webSocketService.initialize(server);
+// 初始化WebSocket服务 - 已删除，需要使用替代方案
+// webSocketService.initialize(server);
 
 // 确保必要的目录存在
 const ensureDirectories = () => {
@@ -170,7 +171,7 @@ app.use(responseTimeLogger);
 
 // 日志中间件
 app.use(morgan('combined', {
-  stream: fs.createWriteStream(path.join(__dirname, 'logs', 'access.log'), { flags: 'a' })
+  stream: fs.createWriteStream(path.join(__dirname, '../runtime/logs', 'access.log'), { flags: 'a' })
 }));
 app.use(requestLogger);
 
@@ -178,7 +179,7 @@ app.use(requestLogger);
 app.use(rateLimiter);
 
 // 安全中间件
-app.use(securityMiddleware);
+// app.use(securityMiddleware); // 暂时注释掉，因为TS模块导入问题
 
 // 静态文件服务
 app.use('/exports', express.static(path.join(__dirname, 'exports')));
@@ -188,7 +189,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', authRoutes);
 // 🔧 修复：更具体的路由必须在更通用的路由之前注册
 app.use('/api/test/history', testHistoryRoutes); // 新的测试历史API - 必须在 /api/test 之前
-// app.use('/api/test/real', require('..\routes\realTest.js')); // 已移除，功能合并到主测试路由
+// app.use('/api/test/real', require('../routes/realTest.js')); // 已移除，功能合并到主测试路由
 app.use('/api/test', testRoutes);
 app.use('/api/seo', seoRoutes); // SEO测试API - 解决CORS问题
 app.use('/api/user', userRoutes);
@@ -199,13 +200,13 @@ app.use('/api/admin', adminRoutes);
 
 // 数据管理API - 统一到 /api/data-management
 app.use('/api/data-management', dataManagementRoutes);
-app.use('/api/data-export', require('..\routes\dataExport.js').router);
-app.use('/api/data-import', require('..\routes\dataImport.js').router);
-app.use('/api/backup', require('..\routes\backup.js').router);
+app.use('/api/data-export', require('../routes/dataExport.js').router);
+app.use('/api/data-import', require('../routes/dataImport.js').router);
+app.use('/api/backup', require('../routes/backup.js').router);
 app.use('/api/monitoring', monitoringRoutes);
-app.use('/api/alerts', require('..\routes\alerts.js'));
+app.use('/api/alerts', require('../routes/alerts.js'));
 app.use('/api/reports', reportRoutes);
-app.use('/api/system', require('..\routes\system.js'));
+app.use('/api/system', require('../routes/system.js'));
 app.use('/api/integrations', integrationRoutes);
 // app.use('/api/cache', cacheRoutes); // 已移除，缓存管理功能合并到测试路由
 app.use('/api/errors', errorRoutes);
@@ -214,7 +215,7 @@ app.use('/api/files', filesRoutes);
 
 // API响应格式示例路由（仅在开发环境中启用）
 if (process.env.NODE_ENV === 'development') {
-  app.use('/api/example', require('..\routes\apiExample.js'));
+  app.use('/api/example', require('../routes/apiExample.js'));
 }
 
 // 健康检查端点
@@ -465,23 +466,23 @@ const startServer = async () => {
     const dbPool = await connectDB();
     console.log('✅ 数据库连接成功');
 
-    // 初始化数据库服务
-    try {
-      await databaseService.initialize();
-      console.log('✅ 数据库服务初始化成功');
-    } catch (error) {
-      console.error('❌ 数据库服务初始化失败:', error);
-      // 继续启动，但记录错误
-    }
+    // 初始化数据库服务 - 已删除，需要使用替代方案
+    // try {
+    //   await databaseService.initialize();
+    //   console.log('✅ 数据库服务初始化成功');
+    // } catch (error) {
+    //   console.error('❌ 数据库服务初始化失败:', error);
+    //   // 继续启动，但记录错误
+    // }
 
-    // 初始化测试队列服务
-    try {
-      await testQueueService.initialize();
-      console.log('✅ 测试队列服务初始化成功');
-    } catch (error) {
-      console.error('❌ 测试队列服务初始化失败:', error);
-      // 继续启动，但记录错误
-    }
+    // 初始化测试队列服务 - 已删除，需要使用替代方案
+    // try {
+    //   await testQueueService.initialize();
+    //   console.log('✅ 测试队列服务初始化成功');
+    // } catch (error) {
+    //   console.error('❌ 测试队列服务初始化失败:', error);
+    //   // 继续启动，但记录错误
+    // }
 
     // 初始化新的缓存系统 - 已移除，使用SmartCacheService
     // try {
@@ -518,19 +519,19 @@ const startServer = async () => {
 
     // 初始化监控服务
     try {
-      const MonitoringService = require('..\services\monitoring\MonitoringService.js');
-      const AlertService = require('..\services\core\AlertService.js');
+      const MonitoringService = require('../services/monitoring/MonitoringService.js');
+      const AlertService = require('../services/core/AlertService.js');
 
       // 创建监控服务实例
       const monitoringService = new MonitoringService(dbPool);
       const alertService = new AlertService(dbPool);
 
       // 设置监控服务到路由
-      const monitoringRoutes = require('..\routes\monitoring.js');
+      const monitoringRoutes = require('../routes/monitoring.js');
       monitoringRoutes.setMonitoringService(monitoringService);
 
       // 设置告警服务到路由
-      const alertRoutes = require('..\routes\alerts.js');
+      const alertRoutes = require('../routes/alerts.js');
       alertRoutes.setAlertService(alertService);
 
       // 监听告警事件
@@ -553,7 +554,7 @@ const startServer = async () => {
     }
 
     // 初始化地理位置自动更新服务
-    const geoUpdateService = require('..\services\core\geoUpdateService.js');
+    const geoUpdateService = require('../services/core/geoUpdateService.js');
     console.log('✅ 地理位置自动更新服务初始化成功');
 
     // 设置WebSocket事件处理
@@ -567,7 +568,7 @@ const startServer = async () => {
     // 清理旧的测试房间
     setTimeout(async () => {
       try {
-        const { RealStressTestEngine } = require('./services/realStressTestEngine');
+        const { RealStressTestEngine } = require('../engines/stress/realStressTestEngine');
         const stressTestEngine = new RealStressTestEngine();
         try {
           stressTestEngine.io = io; // 设置WebSocket实例
@@ -588,8 +589,18 @@ const startServer = async () => {
       console.log(`🌍 环境: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🔌 WebSocket服务已启动`);
 
+      // 初始化新的WebSocket服务
+      try {
+        const webSocketService = require('../services/websocketService');
+        webSocketService.initialize(server);
+        webSocketService.startHeartbeat();
+        console.log(`🔌 新WebSocket服务已启动: ws://localhost:${PORT}/ws`);
+      } catch (wsError) {
+        console.warn('⚠️ 新WebSocket服务启动失败:', wsError.message);
+      }
+
       // 显示地理位置服务状态
-      const geoUpdateService = require('..\services\core\geoUpdateService.js');
+      const geoUpdateService = require('../services/core/geoUpdateService.js');
       const geoStatus = geoUpdateService.getStatus();
       console.log(`🗺️  地理位置自动更新: ${geoStatus.enabled ? '已启用' : '已禁用'}`);
       if (geoStatus.enabled) {
@@ -599,7 +610,7 @@ const startServer = async () => {
 
     // 优雅关闭
     const gracefulShutdown = (signal) => {
-      console.log(`\n收到 ${signal} 信号，开始优雅关闭...`);
+      console.log(`/n收到 ${signal} 信号，开始优雅关闭...`);
       server.close(() => {
         console.log('HTTP服务器已关闭');
         process.exit(0);
@@ -632,7 +643,7 @@ function setupWebSocketHandlers(io) {
       console.log(`🔥 用户连接测试: ${userId}/${testId}`, { socketId: socket.id });
 
       // 🔧 重构：注册用户WebSocket连接
-      const userTestManager = require('..\services\testing\UserTestManager.js');
+      const userTestManager = require('../services/testing/UserTestManager.js');
       userTestManager.registerUserSocket(userId, socket);
 
       // 存储userId到socket对象，用于断开连接时清理
@@ -738,7 +749,7 @@ function setupWebSocketHandlers(io) {
         }
 
         // 获取测试引擎实例
-        const { RealStressTestEngine } = require('./services/realStressTestEngine');
+        const { RealStressTestEngine } = require('../engines/stress/realStressTestEngine');
         const stressTestEngine = new RealStressTestEngine();
         stressTestEngine.io = io;
 
@@ -781,7 +792,7 @@ function setupWebSocketHandlers(io) {
       // 注意：这里我们不知道具体的userId，所以需要在连接时存储
       // 实际实现中可以在socket对象上存储userId
       if (socket.userId) {
-        const userTestManager = require('..\services\testing\UserTestManager.js');
+        const userTestManager = require('../services/testing/UserTestManager.js');
         userTestManager.unregisterUserSocket(socket.userId);
       }
     });

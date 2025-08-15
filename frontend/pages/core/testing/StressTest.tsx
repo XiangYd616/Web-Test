@@ -2,26 +2,26 @@
 import { AlertCircle, AlertTriangle, BarChart3, CheckCircle, Clock, Download, FileText, Globe, Loader, Play, RotateCcw, Settings, Shield, Square, TrendingUp, Users, XCircle, Zap } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useAuthCheck } from '..\..\..\components\auth\withAuthCheck.tsx';
-import { AdvancedStressTestChart, StressTestCharts as UnifiedStressTestCharts } from '../components/charts';
-import ExportModal from '..\..\..\components\ui\ExportModal.tsx';
-import CancelTestConfirmDialog from '..\..\..\components\ui\CancelTestConfirmDialog.tsx';
-import CancelProgressFeedback from '..\..\..\components\ui\CancelProgressFeedback.tsx';
-import StressTestHistory from '..\..\..\components\testing\StressTestHistory.tsx';
-import { URLInput } from '../components/testing';
-import { useLocalStressTest } from '..\..\..\hooks\useLocalStressTest.ts';
-import { AdvancedStressTestConfig as ImportedAdvancedStressTestConfig } from '..\..\..\hooks\useSimpleTestEngine.ts';
-import { useStressTestRecord } from '..\..\..\hooks\useStressTestRecord.ts';
-import { useUserStats } from '..\..\..\hooks\useUserStats.ts';
-import backgroundTestManager from '..\..\..\services\backgroundTestManager.ts';
-import ExportUtils from '..\..\..\utils\exportUtils.ts';
+import { useAuthCheck } from '../../../components/auth/WithAuthCheck.tsx';
+import { StressTestCharts as UnifiedStressTestCharts } from '../../../components/charts';
+import StressTestHistory from '../../../components/testing/StressTestHistory.tsx';
+import URLInput from '../../../components/testing/URLInput';
+import CancelProgressFeedback from '../../../components/ui/CancelProgressFeedback.tsx';
+import CancelTestConfirmDialog from '../../../components/ui/CancelTestConfirmDialog.tsx';
+import ExportModal from '../../../components/ui/ExportModal.tsx';
+import { useLocalStressTest } from '../../../hooks/useLocalStressTest.ts';
+import { AdvancedStressTestConfig as ImportedAdvancedStressTestConfig } from '../../../hooks/useSimpleTestEngine.ts';
+import { useStressTestRecord } from '../../../hooks/useStressTestRecord.ts';
+import { useUserStats } from '../../../hooks/useUserStats.ts';
+import backgroundTestManager from '../../../services/testing/backgroundTestManager.ts';
+import ExportUtils from '../../../utils/exportUtils.ts';
 
-import { systemResourceMonitor } from '..\..\..\services\systemResourceMonitor.ts';
-import { testEngineManager } from '..\..\..\services\testEngines.ts';
-import { TestPhase, type RealTimeMetrics, type TestDataPoint } from '../services/TestStateManager';
-import '../styles/progress-bar.css';
-import type { TestStatusType } from '..\..\..\types\testHistory.ts';
-import { getTemplateById } from '..\..\..\services\testTemplates.ts';
+import { systemResourceMonitor } from '../../../services/system/systemResourceMonitor.ts';
+import { testEngineManager } from '../../../services/testing/testEngines.ts';
+import { TestPhase, type RealTimeMetrics, type TestDataPoint } from '../../../services/testing/testStateManager';
+// import { getTemplateById } from '../../../services/testTemplates.ts'; // 函数不存在，已注释
+import '../../../styles/progress-bar.css';
+import type { TestStatusType } from '../../../types/testHistory.ts';
 
 // 工具函数：安全地从URL获取主机名
 const getHostnameFromUrl = (url: string): string => {
@@ -1372,7 +1372,8 @@ const StressTest: React.FC = () => {
 
     // 应用快速模板
     const applyTemplate = (templateId: string) => {
-        const template = getTemplateById(templateId);
+        // const template = getTemplateById(templateId);
+        const template = null; // 临时修复
         if (template) {
             setTestConfig(prev => ({
                 ...prev,
@@ -3093,7 +3094,7 @@ const StressTest: React.FC = () => {
                 if (trimmedUrl.startsWith('http://') || trimmedUrl.startsWith('https://')) {
                     return trimmedUrl;
                 }
-                return `https://${trimmedUrl}`;
+                return `https:/\${trimmedUrl}`;
             };
 
             // 转换配置格式
@@ -3736,7 +3737,7 @@ const StressTest: React.FC = () => {
                     break;
                 case 'csv':
                     // 简单的CSV格式
-                    dataStr = `URL,Duration,Total Requests,Success Rate,Average Response Time\n${testConfig.url},${testConfig.duration},${result.metrics.totalRequests},${result.metrics.successRate}%,${result.metrics.averageResponseTime}ms`;
+                    dataStr = `URL,Duration,Total Requests,Success Rate,Average Response Time/n${testConfig.url},${testConfig.duration},${result.metrics.totalRequests},${result.metrics.successRate}%,${result.metrics.averageResponseTime}ms`;
                     mimeType = 'text/csv';
                     fileExtension = 'csv';
                     break;
@@ -3886,11 +3887,11 @@ const StressTest: React.FC = () => {
             if (result.success) {
                 const { validation } = result.analysis;
 
-                let message = `代理分析结果:\n\n`;
-                message += `代理类型: ${validation.proxyType}\n`;
-                message += `服务器可访问: ${validation.accessible ? '是' : '否'}\n`;
-                message += `推荐模式: 服务器端测试\n\n`;
-                message += `建议:\n${validation.suggestion.join('\n')}`;
+                let message = `代理分析结果:/n/n`;
+                message += `代理类型: ${validation.proxyType}/n`;
+                message += `服务器可访问: ${validation.accessible ? '是' : '否'}/n`;
+                message += `推荐模式: 服务器端测试/n/n`;
+                message += `建议:/n${validation.suggestion.join('\n')}`;
 
                 alert(message);
             } else {
@@ -4436,7 +4437,8 @@ const StressTest: React.FC = () => {
                                                     <p className="text-xs text-gray-400 mb-3">{template.description}</p>
                                                     <div className="text-xs text-blue-300 bg-blue-500/10 rounded-full px-2 py-1">
                                                         {(() => {
-                                                            const fullTemplate = getTemplateById(template.id);
+                                                            // const fullTemplate = getTemplateById(template.id);
+                                                            const fullTemplate = null; // 临时修复
                                                             return fullTemplate ? `${fullTemplate.config.users}用户 · ${fullTemplate.config.duration}秒` : '配置加载中...';
                                                         })()}
                                                     </div>
@@ -5892,24 +5894,27 @@ const StressTest: React.FC = () => {
                                                     传统图表模式 (数据点: {stressTestData.length})
                                                     {isRunning && <span className="ml-2 text-green-400">● 运行中</span>}
                                                 </div>
-                                                <AdvancedStressTestChart
+                                                {/* <AdvancedStressTestChart
                                                     data={stressTestData.map((point: any) => ({
-                                                        time: new Date(point.timestamp).toLocaleTimeString(),
-                                                        timestamp: point.timestamp,
-                                                        responseTime: point.responseTime,
-                                                        throughput: point.rps || point.throughput,
-                                                        errors: point.errors,
-                                                        users: point.users,
-                                                        p95ResponseTime: point.p95ResponseTime,
-                                                        errorRate: point.errorRate,
-                                                        phase: point.phase || 'steady'
-                                                    }))}
-                                                    showAdvancedMetrics={false}
-                                                    height={400}
-                                                    theme="dark"
-                                                    interactive={true}
-                                                    realTime={testStatus === 'running'}
-                                                />
+                                                time: new Date(point.timestamp).toLocaleTimeString(),
+                                                timestamp: point.timestamp,
+                                                responseTime: point.responseTime,
+                                                throughput: point.rps || point.throughput,
+                                                errors: point.errors,
+                                                users: point.users,
+                                                p95ResponseTime: point.p95ResponseTime,
+                                                errorRate: point.errorRate,
+                                                phase: point.phase || 'steady'
+                                            }))}
+                                        showAdvancedMetrics={false}
+                                        height={400}
+                                        theme="dark"
+                                        interactive={true}
+                                        realTime={testStatus === 'running'}
+                                                /> */}
+                                                <div className="p-4 text-center text-gray-400">
+                                                    图表组件暂时不可用
+                                                </div>
                                             </div>
                                         ) : isRunning ? (
                                             /* 测试运行中但还没有数据时的占位图表 */
@@ -5936,24 +5941,27 @@ const StressTest: React.FC = () => {
                                             <div className="bg-white rounded-lg border border-gray-200 h-96">
                                                 <div className="p-4 h-full">
                                                     <h4 className="text-lg font-semibold text-gray-800 mb-4">传统压力测试图表</h4>
-                                                    <AdvancedStressTestChart
-                                                        data={stressTestData.map((point: any) => ({
-                                                            time: new Date(point.timestamp).toLocaleTimeString(),
-                                                            timestamp: point.timestamp,
-                                                            responseTime: point.responseTime,
-                                                            throughput: point.rps || point.throughput,
-                                                            errors: point.errors,
-                                                            users: point.users,
-                                                            p95ResponseTime: point.p95ResponseTime,
-                                                            errorRate: point.errorRate,
-                                                            phase: point.phase || 'steady'
-                                                        }))}
-                                                        showAdvancedMetrics={false}
-                                                        height={320}
-                                                        theme="light"
-                                                        interactive={true}
-                                                        realTime={false}
-                                                    />
+                                                    {/* <AdvancedStressTestChart
+                                                data={stressTestData.map((point: any) => ({
+                                                    time: new Date(point.timestamp).toLocaleTimeString(),
+                                                    timestamp: point.timestamp,
+                                                    responseTime: point.responseTime,
+                                                    throughput: point.rps || point.throughput,
+                                                    errors: point.errors,
+                                                    users: point.users,
+                                                    p95ResponseTime: point.p95ResponseTime,
+                                                    errorRate: point.errorRate,
+                                                    phase: point.phase || 'steady'
+                                                }))}
+                                                showAdvancedMetrics={false}
+                                                height={320}
+                                                theme="light"
+                                                interactive={true}
+                                                realTime={false}
+                                                    /> */}
+                                                    <div className="p-4 text-center text-gray-400">
+                                                        图表组件暂时不可用
+                                                    </div>
                                                 </div>
                                             </div>
                                         ) : (
@@ -6103,21 +6111,23 @@ const StressTest: React.FC = () => {
                     testName={`压力测试-${getHostnameFromUrl(testConfig.url) || '未知'}`}
                     onExport={handleExport}
                 />
-            </div>
+            </div >
 
             {/* 历史标签页内容 */}
-            {activeTab === 'history' && (
-                <div className="mt-6">
-                    <StressTestHistory
-                        onTestSelect={handleTestSelect}
-                        onTestRerun={handleTestRerun}
-                    />
-                </div>
-            )}
+            {
+                activeTab === 'history' && (
+                    <div className="mt-6">
+                        <StressTestHistory
+                            onTestSelect={handleTestSelect}
+                            onTestRerun={handleTestRerun}
+                        />
+                    </div>
+                )
+            }
 
             {/* 登录提示组件 */}
             {LoginPromptComponent}
-        </div>
+        </div >
     );
 };
 

@@ -29,8 +29,8 @@ class DataImportService extends EventEmitter {
       ]
     });
 
-    this.uploadDir = path.join(__dirname, '../../uploads');
-    this.tempDir = path.join(__dirname, '../../temp/imports');
+    this.uploadDir = path.join(__dirname, '../../runtime/uploads');
+    this.tempDir = path.join(__dirname, '../../runtime/temp/imports');
 
     // 导入任务队列
     this.importQueue = new Map();
@@ -777,7 +777,7 @@ class DataImportService extends EventEmitter {
 
     // 邮箱格式验证
     if (row.email) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const emailRegex = /^[^/s@]+@[^/s@]+/.[^ /s@]+$/;
       if (!emailRegex.test(row.email)) {
         errors.push({
           row: rowNumber,

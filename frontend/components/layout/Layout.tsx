@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
-import ModernSidebar from './ModernSidebar';
+import Sidebar from './Sidebar';
 import TopNavbar from './TopNavbar';
 
 const ModernLayout: React.FC = () => {
@@ -22,7 +22,7 @@ const ModernLayout: React.FC = () => {
 
       <div className="flex flex-1 overflow-hidden">
         {/* 侧边�?*/}
-        <ModernSidebar
+        <Sidebar
           collapsed={sidebarCollapsed}
           onToggle={toggleSidebar}
         />

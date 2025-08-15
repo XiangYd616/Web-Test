@@ -16,10 +16,10 @@ const PerformanceAnalyzer = require('./analyzers/PerformanceAnalyzer');
 const StructuredDataAnalyzer = require('./analyzers/StructuredDataAnalyzer');
 const LinkAnalyzer = require('./analyzers/LinkAnalyzer');
 const MobileOptimizationAnalyzer = require('./analyzers/MobileOptimizationAnalyzer');
-const ScoreCalculator = require('./utils/ScoreCalculator');
-const RecommendationEngine = require('./utils/RecommendationEngine');
+const ScoreCalculator = require('./utils/scoreCalculator');
+const RecommendationEngine = require('./utils/recommendationEngine');
 const AdvancedReportGenerator = require('./utils/AdvancedReportGenerator');
-const SmartOptimizationEngine = require('./utils/SmartOptimizationEngine');
+const SmartOptimizationEngine = require('./utils/smartOptimizationEngine');
 
 class SEOAnalyzer {
   constructor(options = {}) {

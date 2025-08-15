@@ -479,9 +479,9 @@ class RealCompatibilityTestEngine {
 
         // 检查现代CSS特性使用
         const modernFeatures = {
-          'CSS Grid': /display:\s*grid/i.test(cssText),
-          'Flexbox': /display:\s*flex/i.test(cssText),
-          'CSS Variables': /var\(--/i.test(cssText),
+          'CSS Grid': /display:/s*grid/i.test(cssText),
+          'Flexbox': /display:/s*flex/i.test(cssText),
+          'CSS Variables': /var/(--/i.test(cssText),
           'CSS Transforms': /transform:/i.test(cssText),
           'CSS Animations': /@keyframes|animation:/i.test(cssText)
         };
@@ -527,7 +527,7 @@ class RealCompatibilityTestEngine {
         features.usesES6 = /const |let |=>|class /.test(scriptContent);
         features.usesAsync = /async |await /.test(scriptContent);
         features.usesModules = scripts.some(s => s.type === 'module');
-        features.usesWebAPIs = /fetch\(|navigator\.|localStorage|sessionStorage/.test(scriptContent);
+        features.usesWebAPIs = /fetch/(|navigator/.|localStorage|sessionStorage/.test(scriptContent);
 
         return features;
       });

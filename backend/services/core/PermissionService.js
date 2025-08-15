@@ -3,8 +3,8 @@
  * 实现基于角色的权限控制（RBAC）
  */
 
-const { query } = require('..\..\config\database.js');
-const { ErrorFactory } = require('..\..\utils\ApiError.js');
+const { query } = require('../../config/database.js');
+const { ErrorFactory } = require('../../utils/apiError');
 
 /**
  * 预定义的权限常量

@@ -38,9 +38,9 @@ const APIDocs: React.FC = () => {
     "estimatedTime": 60
   }
 }`,
-        example: `curl -X POST "https://api.testweb.com/v1/test/performance" \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
-  -H "Content-Type: application/json" \\
+        example: `curl -X POST "https://api.testweb.com/v1/test/performance" //
+  -H "Authorization: Bearer YOUR_API_KEY" //
+  -H "Content-Type: application/json" //
   -d '{
     "url": "https://example.com",
     "device": "desktop",
@@ -67,7 +67,7 @@ const APIDocs: React.FC = () => {
     }
   }
 }`,
-        example: `curl -X GET "https://api.testweb.com/v1/test/test_123456/result" \\
+        example: `curl -X GET "https://api.testweb.com/v1/test/test_123456/result" //
   -H "Authorization: Bearer YOUR_API_KEY"`
       }
     ],
@@ -90,9 +90,9 @@ const APIDocs: React.FC = () => {
     "status": "active"
   }
 }`,
-        example: `curl -X POST "https://api.testweb.com/v1/monitoring/sites" \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
-  -H "Content-Type: application/json" \\
+        example: `curl -X POST "https://api.testweb.com/v1/monitoring/sites" //
+  -H "Authorization: Bearer YOUR_API_KEY" //
+  -H "Content-Type: application/json" //
   -d '{
     "name": "My Website",
     "url": "https://example.com",
@@ -223,7 +223,7 @@ const APIDocs: React.FC = () => {
                         <span className="text-green-400 text-sm font-medium">示例请求</span>
                         <button
                           type="button"
-                          onClick={() => copyToClipboard(`curl -X GET "https://api.testweb.com/v1/account/info" \\
+                          onClick={() => copyToClipboard(`curl -X GET "https://api.testweb.com/v1/account/info" //
   -H "Authorization: Bearer YOUR_API_KEY"`)}
                           className="text-gray-400 hover:text-white"
                           title="复制到剪贴板"
@@ -232,7 +232,7 @@ const APIDocs: React.FC = () => {
                         </button>
                       </div>
                       <pre className="text-green-400 text-sm overflow-x-auto">
-{`curl -X GET "https://api.testweb.com/v1/account/info" \\
+{`curl -X GET "https://api.testweb.com/v1/account/info" //
   -H "Authorization: Bearer YOUR_API_KEY"`}
                       </pre>
                     </div>

@@ -1,31 +1,31 @@
 import React, { Suspense, lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AdminGuard, ProtectedRoute } from '../auth';
-import { ModernLayout } from '../modern';
+import { Layout } from '../layout';
 import { EnhancedErrorBoundary, LoadingSpinner } from '../ui';
 
 // 认证页面 - 也使用懒加载以减少初始包大小
-const Login = lazy(() => import('../pages/core/auth/Login'));
-const Register = lazy(() => import('../pages/core/auth/Register'));
+const Login = lazy(() => import('../../pages/core/auth/Login'));
+const Register = lazy(() => import('../../pages/core/auth/Register'));
 
 // 懒加载页面组件
-const ModernDashboard = lazy(() => import('../pages/core/dashboard/ModernDashboard'));
-const WebsiteTest = lazy(() => import('../pages/core/testing/WebsiteTest'));
+const ModernDashboard = lazy(() => import('../../pages/core/dashboard/ModernDashboard'));
+const WebsiteTest = lazy(() => import('../../pages/core/testing/WebsiteTest'));
 
 // 分析页面（推荐使用）
-const PerformanceAnalysis = lazy(() => import('../pages/data/reports/PerformanceAnalysis'));
+const PerformanceAnalysis = lazy(() => import('../../pages/data/reports/PerformanceAnalysis'));
 // APIAnalysis已合并到APITest
 
 // 传统测试页面（保持兼容性）
-const SecurityTest = lazy(() => import('../pages/core/testing/SecurityTest'));
+const SecurityTest = lazy(() => import('../../pages/core/testing/SecurityTest'));
 // PerformanceTest已合并到WebsiteTest
-const SEOTest = lazy(() => import('../pages/core/testing/SEOTest'));
+const SEOTest = lazy(() => import('../../pages/core/testing/SEOTest'));
 
-const APITest = lazy(() => import('../pages/core/testing/APITest'));
-const InfrastructureTest = lazy(() => import('../pages/core/testing/InfrastructureTest'));
-const StressTest = lazy(() => import('../pages/core/testing/StressTest'));
-const CompatibilityTest = lazy(() => import('../pages/core/testing/CompatibilityTest'));
-const UXTest = lazy(() => import('../pages/core/testing/UXTest'));
+const APITest = lazy(() => import('../../pages/core/testing/APITest'));
+const InfrastructureTest = lazy(() => import('../../pages/core/testing/InfrastructureTest'));
+const StressTest = lazy(() => import('../../pages/core/testing/StressTest'));
+const CompatibilityTest = lazy(() => import('../../pages/core/testing/CompatibilityTest'));
+const UXTest = lazy(() => import('../../pages/core/testing/UXTest'));
 
 // NetworkTest和DatabaseTest已合并到InfrastructureTest中
 
@@ -34,50 +34,50 @@ const UXTest = lazy(() => import('../pages/core/testing/UXTest'));
 // LocalStressTestDemo 已删除
 
 // 数据管理相关页面
-const DataStorage = lazy(() => import('../pages/management/admin/DataStorage'));
-const DataManagement = lazy(() => import('../pages/management/admin/DataManagement'));
-const Statistics = lazy(() => import('../pages/data/reports/Statistics'));
-const Analytics = lazy(() => import('../pages/data/reports/Analytics'));
-const MonitoringDashboard = lazy(() => import('../pages/data/reports/MonitoringDashboard'));
+const DataStorage = lazy(() => import('../../pages/management/admin/DataStorage'));
+const DataManagement = lazy(() => import('../../pages/management/admin/DataManagement'));
+const Statistics = lazy(() => import('../../pages/data/reports/Statistics'));
+const Analytics = lazy(() => import('../../pages/data/reports/Analytics'));
+const MonitoringDashboard = lazy(() => import('../../pages/data/reports/MonitoringDashboard'));
 
 // 报告和历史
-const TestHistory = lazy(() => import('../pages/data/results/TestHistory'));
+const TestHistory = lazy(() => import('../../pages/data/results/TestHistory'));
 
-const Reports = lazy(() => import('../pages/data/reports/Reports'));
-const TestResultDetail = lazy(() => import('../pages/data/results/TestResultDetail'));
-const StressTestDetail = lazy(() => import('../pages/data/results/StressTestDetail'));
+const Reports = lazy(() => import('../../pages/data/reports/Reports'));
+const TestResultDetail = lazy(() => import('../../pages/data/results/TestResultDetail'));
+const StressTestDetail = lazy(() => import('../../pages/data/results/StressTestDetail'));
 
-const StressTestReport = lazy(() => import('../pages/data/results/StressTestReport'));
-const SecurityReport = lazy(() => import('../pages/data/results/SecurityReport'));
+const StressTestReport = lazy(() => import('../../pages/data/results/StressTestReport'));
+const SecurityReport = lazy(() => import('../../pages/data/results/SecurityReport'));
 
 // 系统管理 - 只保留Admin页面，其他管理功能都在Admin内部
-const Admin = lazy(() => import('../pages/management/admin/Admin'));
+const Admin = lazy(() => import('../../pages/management/admin/Admin'));
 
 // 用户相关
-const UserProfile = lazy(() => import('../pages/user/profile/UserProfile'));
-const UserBookmarks = lazy(() => import('../pages/user/profile/UserBookmarks'));
+const UserProfile = lazy(() => import('../../pages/user/profile/UserProfile'));
+const UserBookmarks = lazy(() => import('../../pages/user/profile/UserBookmarks'));
 
 // 测试和优化
-const TestOptimizations = lazy(() => import('../pages/management/scheduling/TestOptimizations'));
-const Notifications = lazy(() => import('../pages/management/integration/Notifications'));
+const TestOptimizations = lazy(() => import('../../pages/management/scheduling/TestOptimizations'));
+const Notifications = lazy(() => import('../../pages/management/integration/Notifications'));
 
 // 集成和配置
-const Integrations = lazy(() => import('../pages/management/integration/Integrations'));
-const CICDIntegration = lazy(() => import('../pages/management/integration/CICDIntegration'));
-const Webhooks = lazy(() => import('../pages/management/integration/Webhooks'));
-const APIKeys = lazy(() => import('../pages/management/integration/APIKeys'));
-const APIDocs = lazy(() => import('../pages/user/docs/APIDocs'));
+const Integrations = lazy(() => import('../../pages/management/integration/Integrations'));
+const CICDIntegration = lazy(() => import('../../pages/management/integration/CICDIntegration'));
+const Webhooks = lazy(() => import('../../pages/management/integration/Webhooks'));
+const APIKeys = lazy(() => import('../../pages/management/integration/APIKeys'));
+const APIDocs = lazy(() => import('../../pages/user/docs/APIDocs'));
 
 // 调度和任务
-const TestSchedule = lazy(() => import('../pages/management/scheduling/TestSchedule'));
-const ScheduledTasks = lazy(() => import('../pages/management/scheduling/ScheduledTasks'));
+const TestSchedule = lazy(() => import('../../pages/management/scheduling/TestSchedule'));
+const ScheduledTasks = lazy(() => import('../../pages/management/scheduling/ScheduledTasks'));
 
 // 其他功能
-const Settings = lazy(() => import('../pages/management/settings/Settings'));
-const Help = lazy(() => import('../pages/user/docs/Help'));
+const Settings = lazy(() => import('../../pages/management/settings/Settings'));
+const Help = lazy(() => import('../../pages/user/docs/Help'));
 // ThemeShowcase 已删除
-const Subscription = lazy(() => import('../pages/user/misc/Subscription'));
-const DownloadDesktop = lazy(() => import('../pages/user/misc/DownloadDesktop'));
+const Subscription = lazy(() => import('../../pages/user/misc/Subscription'));
+const DownloadDesktop = lazy(() => import('../../pages/user/misc/DownloadDesktop'));
 
 // 演示页面
 
@@ -115,7 +115,7 @@ const AppRoutes: React.FC = () => {
       {/* background-test-demo 路由已移除 */}
 
       {/* 公开路由 - 测试工具页面 */}
-      <Route path="/" element={<ModernLayout />}>
+      <Route path="/" element={<Layout />}>
         {/* 测试工具 - 公开访问，但功能需要登录 */}
         <Route path="test" element={<Navigate to="/website-test" replace />} />
         <Route path="website-test" element={

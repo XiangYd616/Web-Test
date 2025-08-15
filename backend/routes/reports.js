@@ -247,7 +247,7 @@ router.get('/:id/download', authMiddleware, asyncHandler(async (req, res) => {
     report.downloadCount++;
 
     // 模拟文件下载
-    const fileName = `${report.name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_')}.${report.format}`;
+    const fileName = `${report.name.replace(/[^a-zA-Z0-9/u4e00-/u9fa5]/g, '_')}.${report.format}`;
 
     res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(fileName)}"`);
     res.setHeader('Content-Type', getContentType(report.format));
@@ -339,7 +339,7 @@ function generateMockReportContent(report) {
       }, null, 2);
 
     case REPORT_FORMATS.CSV:
-      return 'Metric,Value,Status\nPerformance Score,85,Good\nSecurity Score,92,Excellent\nSEO Score,78,Good';
+      return 'Metric,Value,Status/nPerformance Score,85,Good/nSecurity Score,92,Excellent/nSEO Score,78,Good';
 
     case REPORT_FORMATS.HTML:
       return `

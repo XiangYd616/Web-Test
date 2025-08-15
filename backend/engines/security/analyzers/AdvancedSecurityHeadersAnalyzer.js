@@ -505,7 +505,7 @@ class AdvancedSecurityHeadersAnalyzer {
 
     switch (headerName) {
       case 'strict-transport-security':
-        const maxAgeMatch = headerValue.match(/max-age=(\d+)/);
+        const maxAgeMatch = headerValue.match(/max-age=(/d+)/);
         if (!maxAgeMatch) {
           issues.push('缺少max-age指令');
           isValid = false;

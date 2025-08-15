@@ -2,11 +2,11 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
-![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-green.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
-![TypeScript](https://img.shields.io/badge/typescript-5.8+-blue.svg)
-![React](https://img.shields.io/badge/react-18.2+-blue.svg)
+![Version](https:/img.shields.io/badge/version-1.0.0-blue.svg)
+![Node](https:/img.shields.io/badge/node-%3E%3D18.0.0-green.svg)
+![License](https:/img.shields.io/badge/license-MIT-green.svg)
+![TypeScript](https:/img.shields.io/badge/typescript-5.8+-blue.svg)
+![React](https:/img.shields.io/badge/react-18.2+-blue.svg)
 
 **功能完整的企业级网站测试平台**
 
@@ -61,7 +61,7 @@ Test Web App 是一个现代化的企业级网站测试平台，集成了智能�
 
 1. **克隆项目**
 ```bash
-git clone https://github.com/your-org/test-web-app.git
+git clone https:/github.com/your-org/test-web-app.git
 cd test-web-app
 ```
 
@@ -74,11 +74,11 @@ npm install
 ```bash
 # 复制环境变量模板
 cp .env.example .env
-cp server/.env.example server/.env
+cp backend/.env.example backend/.env
 
 # 编辑配置文件
 nano .env
-nano server/.env
+nano backend/.env
 ```
 
 4. **数据库设置**
@@ -143,9 +143,9 @@ npm run backend   # 后端服务
 
 ### 🌐 访问地址
 
-- **前端应用**: http://localhost:5174
-- **后端API**: http://localhost:3001
-- **API文档**: http://localhost:3001/api-docs
+- **前端应用**: http:/localhost:5174
+- **后端API**: http:/localhost:3001
+- **API文档**: http:/localhost:3001/api-docs
 
 ### 🎯 环境说明
 
@@ -155,8 +155,8 @@ npm run backend   # 后端服务
 |------|--------|------|------|
 | 开发环境 | `testweb_dev` | 5174 | 本地开发使用 |
 | 生产环境 | `testweb_prod` | 3001 | 生产部署使用 |
-- **后端API**: http://localhost:3001
-- **API健康检查**: http://localhost:3001/health
+- **后端API**: http:/localhost:3001
+- **API健康检查**: http:/localhost:3001/health
 
 ## 📊 版本对比
 
@@ -408,7 +408,7 @@ Test-Web/                      # 🏗️ 现代化全栈架构
 - **utils/**: 通用工具函数
 - **styles/**: 样式系统和主题
 
-#### 后端架构 (`server/`)
+#### 后端架构 (`backend/`)
 - **routes/**: RESTful API路由定义
 - **middleware/**: 请求处理中间件
 - **services/**: 业务逻辑服务层
@@ -678,7 +678,7 @@ npm run db:setup
 2. **数据库连接失败**: 检查PostgreSQL服务和配置
 3. **依赖安装失败**: 清除node_modules重新安装
 4. **主题切换异常**: 清除浏览器缓存
-5. **用户偏好设置500错误**: 运行 `node server/create-user-preferences-table.js` 创建用户偏好表
+5. **用户偏好设置500错误**: 运行 `node backend/create-user-preferences-table.js` 创建用户偏好表
 6. **测试引擎不可用**: 检查K6、Playwright等测试工具是否正确安装
 7. **数据管理功能异常**: 确保数据库表已正确创建和初始化
 8. **备份恢复失败**: 检查文件权限和存储空间
@@ -687,10 +687,10 @@ npm run db:setup
 ### 日志查看
 ```bash
 # 查看后端日志
-tail -f server/logs/combined.log
+tail -f backend/logs/combined.log
 
 # 查看错误日志
-tail -f server/logs/error.log
+tail -f backend/logs/error.log
 ```
 
 ## 📚 相关文档
@@ -955,11 +955,11 @@ Test-Web/                      # 🏗️ 现代化全栈架构
 #### 批量测试
 ```bash
 # 使用API进行批量测试
-curl -X POST http://localhost:3001/api/test/batch \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_TOKEN" \
+curl -X POST http:/localhost:3001/api/test/batch /
+  -H "Content-Type: application/json" /
+  -H "Authorization: Bearer YOUR_TOKEN" /
   -d '{
-    "urls": ["https://example1.com", "https://example2.com"],
+    "urls": ["https:/example1.com", "https:/example2.com"],
     "testType": "stress",
     "config": {
       "duration": 60,
@@ -970,10 +970,10 @@ curl -X POST http://localhost:3001/api/test/batch \
 
 #### 企业集成
 ```javascript
-// Webhook配置示例
+/ Webhook配置示例
 {
   "webhook": {
-    "url": "https://your-webhook-url.com/notify",
+    "url": "https:/your-webhook-url.com/notify",
     "events": ["test.completed", "monitor.alert"],
     "headers": {
       "Authorization": "Bearer YOUR_WEBHOOK_TOKEN"
@@ -1081,9 +1081,9 @@ npm run electron:dist
 ## 📞 支持
 
 - 📧 邮箱: support@testweb.app
-- 💬 讨论: [GitHub Discussions](https://github.com/your-org/test-web-app/discussions)
-- 🐛 问题反馈: [GitHub Issues](https://github.com/your-org/test-web-app/issues)
-- 📖 文档: [在线文档](https://docs.testweb.app)
+- 💬 讨论: [GitHub Discussions](https:/github.com/your-org/test-web-app/discussions)
+- 🐛 问题反馈: [GitHub Issues](https:/github.com/your-org/test-web-app/issues)
+- 📖 文档: [在线文档](https:/docs.testweb.app)
 
 ---
 

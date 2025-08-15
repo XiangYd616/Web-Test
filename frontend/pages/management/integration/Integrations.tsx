@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { Package, Key, Webhook, Settings, Plus, Activity, BarChart3, Clock, CheckCircle, XCircle, AlertTriangle, RefreshCw, ExternalLink, Copy, Edit, Trash2, Eye, EyeOff, Zap, Globe, Shield, Code } from 'lucide-react';
+import { Activity, AlertTriangle, BarChart3, Copy, Edit, Eye, EyeOff, Globe, Key, Package, Plus, RefreshCw, Trash2, Webhook, Zap } from 'lucide-react';
 import IntegrationService, {
   APIKey,
-  WebhookConfig,
+  IntegrationStats,
   ThirdPartyIntegration,
-  IntegrationStats
-} from '../services/integrationService';
+  WebhookConfig
+} from '../../../services/integration/integrationService.ts';
 
-interface IntegrationsProps {}
+interface IntegrationsProps { }
 
 const Integrations: React.FC<IntegrationsProps> = () => {
   const [activeTab, setActiveTab] = useState<'overview' | 'api-keys' | 'webhooks' | 'third-party'>('overview');
@@ -191,11 +191,10 @@ const Integrations: React.FC<IntegrationsProps> = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
-                activeTab === tab.id
+              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${activeTab === tab.id
                   ? 'bg-purple-600 text-white'
                   : 'text-gray-300 hover:bg-gray-600/50'
-              }`}
+                }`}
             >
               <tab.icon className="w-4 h-4" />
               <span className="text-sm">{tab.label}</span>
@@ -330,11 +329,10 @@ const Integrations: React.FC<IntegrationsProps> = () => {
                       <p className="text-sm text-gray-400">{apiKey.description}</p>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium border ${
-                        apiKey.isActive
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium border ${apiKey.isActive
                           ? 'text-green-400 bg-green-500/10 border-green-500/20'
                           : 'text-gray-400 bg-gray-500/10 border-gray-500/20'
-                      }`}>
+                        }`}>
                         {apiKey.isActive ? '活跃' : '禁用'}
                       </span>
                     </div>
@@ -456,11 +454,10 @@ const Integrations: React.FC<IntegrationsProps> = () => {
                       <p className="text-sm text-gray-400">{webhook.url}</p>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium border ${
-                        webhook.isActive
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium border ${webhook.isActive
                           ? 'text-green-400 bg-green-500/10 border-green-500/20'
                           : 'text-gray-400 bg-gray-500/10 border-gray-500/20'
-                      }`}>
+                        }`}>
                         {webhook.isActive ? '活跃' : '禁用'}
                       </span>
                     </div>
@@ -557,8 +554,8 @@ const Integrations: React.FC<IntegrationsProps> = () => {
                     </div>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(integration.status)}`}>
                       {integration.status === 'connected' ? '已连接' :
-                       integration.status === 'disconnected' ? '未连接' :
-                       integration.status === 'error' ? '错误' : '待处理'}
+                        integration.status === 'disconnected' ? '未连接' :
+                          integration.status === 'error' ? '错误' : '待处理'}
                     </span>
                   </div>
 
@@ -569,11 +566,10 @@ const Integrations: React.FC<IntegrationsProps> = () => {
                       {integration.lastSync ? `最后同步: ${new Date(integration.lastSync).toLocaleDateString()}` : '从未同步'}
                     </div>
                     <button
-                      className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
-                        integration.isEnabled
+                      className={`px-3 py-1 rounded text-xs font-medium transition-colors ${integration.isEnabled
                           ? 'bg-red-600 text-white hover:bg-red-700'
                           : 'bg-green-600 text-white hover:bg-green-700'
-                      }`}
+                        }`}
                     >
                       {integration.isEnabled ? '禁用' : '启用'}
                     </button>

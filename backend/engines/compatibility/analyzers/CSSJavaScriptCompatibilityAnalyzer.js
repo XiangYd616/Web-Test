@@ -348,7 +348,7 @@ class CSSJavaScriptCompatibilityAnalyzer {
           // 外部脚本，无法直接分析内容
           return;
         }
-        allScriptContent += script.textContent + '\n';
+        allScriptContent += script.textContent + '/n';
       });
 
       // 检测JavaScript特性使用
@@ -358,27 +358,27 @@ class CSSJavaScriptCompatibilityAnalyzer {
 
         switch (featureKey) {
           case 'arrow-functions':
-            isUsed = /=>\s*{/.test(allScriptContent) || /=>\s*[^{]/.test(allScriptContent);
+            isUsed = /=>/s*{/.test(allScriptContent) || /=>/s*[^{]/.test(allScriptContent);
             usage = 'Arrow function syntax detected';
             break;
           case 'promises':
-            isUsed = /new Promise\s*\(/.test(allScriptContent) ||
-              /\.then\s*\(/.test(allScriptContent) ||
-              /\.catch\s*\(/.test(allScriptContent);
+            isUsed = /new Promise/s*/(/.test(allScriptContent) ||
+              //.then/s*/(/.test(allScriptContent) ||
+              //.catch/s*/(/.test(allScriptContent);
             usage = 'Promise API usage detected';
             break;
           case 'fetch':
-            isUsed = /fetch\s*\(/.test(allScriptContent);
+            isUsed = /fetch/s*/(/.test(allScriptContent);
             usage = 'Fetch API usage detected';
             break;
           case 'async-await':
-            isUsed = /async\s+function/.test(allScriptContent) ||
-              /await\s+/.test(allScriptContent);
+            isUsed = /async/s+function/.test(allScriptContent) ||
+              /await/s+/.test(allScriptContent);
             usage = 'Async/await syntax detected';
             break;
           case 'modules':
-            isUsed = /import\s+/.test(allScriptContent) ||
-              /export\s+/.test(allScriptContent) ||
+            isUsed = /import/s+/.test(allScriptContent) ||
+              /export/s+/.test(allScriptContent) ||
               document.querySelector('script[type="module"]');
             usage = 'ES6 modules detected';
             break;
@@ -666,7 +666,7 @@ const fetchData = async (url) => {
 <!-- 条件加载Polyfill -->
 <script>
 if (!window.Promise) {
-  document.write('<script src="https://polyfill.io/v3/polyfill.min.js?features=Promise"><\/script>');
+  document.write('<script src="https://polyfill.io/v3/polyfill.min.js?features=Promise"><//script>');
 }
 </script>
 

@@ -317,7 +317,7 @@ class HTTPClient {
     // 计算头部大小
     if (config.headers) {
       Object.entries(config.headers).forEach(([key, value]) => {
-        size += Buffer.byteLength(`${key}: ${value}\r\n`, 'utf8');
+        size += Buffer.byteLength(`${key}: ${value}/r/n`, 'utf8');
       });
     }
     
@@ -342,7 +342,7 @@ class HTTPClient {
     // 计算头部大小
     if (response.headers) {
       Object.entries(response.headers).forEach(([key, value]) => {
-        size += Buffer.byteLength(`${key}: ${value}\r\n`, 'utf8');
+        size += Buffer.byteLength(`${key}: ${value}/r/n`, 'utf8');
       });
     }
     

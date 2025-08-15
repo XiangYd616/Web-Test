@@ -282,7 +282,7 @@ export const DataExporter: React.FC<DataExporterProps> = ({
             const contentDisposition = response.headers.get('Content-Disposition');
             let filename = `${task.name}.${task.config.format}`;
             if (contentDisposition) {
-                const matches = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+                const matches = contentDisposition.match(/filename[^;=/n]*=((['"]).*?/2|[^;/n]*)/);
                 if (matches && matches[1]) {
                     filename = matches[1].replace(/['"]/g, '');
                 }

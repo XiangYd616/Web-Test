@@ -3,7 +3,7 @@
  * 提供无障碍检测、评估、优化建议功能
  */
 
-const Logger = require('..\..\middleware\logger.js');
+const Logger = require('../../middleware/logger.js');
 
 class AccessibilityService {
   constructor() {
@@ -565,7 +565,7 @@ class AccessibilityService {
    * 十六进制转RGB
    */
   hexToRgb(hex) {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    const result = /^#?([a-f/d]{2})([a-f/d]{2})([a-f/d]{2})$/i.exec(hex);
     return result ? {
       r: parseInt(result[1], 16),
       g: parseInt(result[2], 16),

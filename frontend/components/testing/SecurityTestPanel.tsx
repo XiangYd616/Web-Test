@@ -1,9 +1,9 @@
 
 import { AlertTriangle, Award, Eye, FileText, Lock, Network, Settings, Shield, Target, Zap } from 'lucide-react';
 import React, { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
-import { SecurityTestConfig, SecurityTestResult, TestProgress, unifiedSecurityEngine } from '../../services/unifiedSecurityEngine';
-import { URLValidationResult } from '../../utils/enhancedUrlValidator';
-import { createCommonErrors, createError } from '../../utils/errorHandler';
+import { SecurityTestConfig, SecurityTestResult, TestProgress, unifiedSecurityEngine } from '../../services/auth/securityEngine';
+// import { createCommonErrors, createError } from '../../utils/errorHandler'; // 函数不存在，已注释
+import { URLValidationResult } from '../../utils/urlValidator';
 import { EnhancedError } from './ErrorDisplay';
 
 interface UnifiedSecurityTestPanelProps {
@@ -201,11 +201,12 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
       const errorMessage = err instanceof Error ? err.message : '测试失败';
 
       // 创建增强错误
-      const enhancedErr = createError(err instanceof Error ? err : new Error(errorMessage), {
-        url: config.url,
-        operation: 'security_test',
-        timestamp: Date.now()
-      });
+      // const enhancedErr = createError(err instanceof Error ? err : new Error(errorMessage), {
+      //   url: config.url,
+      //   operation: 'security_test',
+      //   timestamp: Date.now()
+      // });
+      const enhancedErr = null; // 临时修复
 
       setEnhancedError(enhancedErr);
       setError(errorMessage);
