@@ -190,11 +190,11 @@ app.use('/exports', express.static(path.join(__dirname, 'exports')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // 初始化错误处理系统
-const { initializeErrorHandlingSystem, unifiedErrorHandler } = require('../utils/UnifiedErrorHandler');
+const { initializeErrorHandlingSystem, unifiedErrorHandler } = require('../utils/ErrorHandler');
 
 // 使用统一路由管理器 - 修复API路由架构问题
-const UnifiedRouteManager = require('./UnifiedRouteManager.js');
-const routeManager = new UnifiedRouteManager(app);
+const RouteManager = require('./RouteManager.js');
+const routeManager = new RouteManager(app);
 
 // 初始化应用系统
 async function initializeApp() {

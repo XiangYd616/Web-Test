@@ -4,7 +4,7 @@
  */
 
 const express = require('express');
-const { unifiedErrorHandler } = require('../utils/UnifiedErrorHandler');
+const { unifiedErrorHandler } = require('../utils/ErrorHandler');
 const { errorLogAggregator } = require('../utils/ErrorLogAggregator');
 const { errorMonitoringSystem } = require('../utils/ErrorMonitoringSystem');
 

@@ -15,7 +15,7 @@ import {
   Filter
 } from 'lucide-react';
 import { useAuthCheck } from '../../components/auth/WithAuthCheck';
-import AdvancedAnalytics from '../../components/analytics/AdvancedAnalytics';
+import Analytics from '../../components/analytics/AdvancedAnalytics';
 
 const AdvancedAnalyticsPage: React.FC = () => {
   useAuthCheck();

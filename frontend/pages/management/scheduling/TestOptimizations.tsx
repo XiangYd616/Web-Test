@@ -5,8 +5,8 @@
 
 import { AlertCircle, BarChart3, CheckCircle, Clock, Play, Users, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { SmartTooltip, useSmartNotification } from '../../../components/ui/EnhancedUX.tsx';
 import { TestLoadingStates as LoadingStates, useLoadingState } from '../../../components/ui/LoadingStates.tsx';
+import { SmartTooltip, useSmartNotification } from '../../../components/ui/UX.tsx';
 import { usePerformanceOptimization } from '../../../hooks/usePerformanceOptimization.ts';
 import { createTestRunner, PerformanceTestResult, TestResult, UXTestResult } from '../../../utils/testUtils.ts';
 

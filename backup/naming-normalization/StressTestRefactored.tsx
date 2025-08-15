@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UnifiedTestPageTemplate } from '../../../components/testing/UnifiedTestPageTemplate';
+import { TestPageTemplate } from '../../../components/testing/UnifiedTestPageTemplate';
 import { StressTestConfig } from '../../../components/testing/specialized/StressTestConfig';
 import { testService } from '../../../services/testService';
 import { configService } from '../../../services/configService';

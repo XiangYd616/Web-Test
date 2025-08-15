@@ -8,9 +8,9 @@ const puppeteer = require('puppeteer');
 const SQLInjectionAnalyzer = require('./analyzers/SQLInjectionAnalyzer');
 const XSSAnalyzer = require('./analyzers/XSSAnalyzer');
 const SSLAnalyzer = require('./analyzers/SSLAnalyzer');
-const AdvancedSSLAnalyzer = require('./analyzers/AdvancedSSLAnalyzer');
+const AdvancedSSLAnalyzer = require('./analyzers/SSLAnalyzer');
 const SecurityHeadersAnalyzer = require('./analyzers/SecurityHeadersAnalyzer');
-const AdvancedSecurityHeadersAnalyzer = require('./analyzers/AdvancedSecurityHeadersAnalyzer');
+const AdvancedSecurityHeadersAnalyzer = require('./analyzers/SecurityHeadersAnalyzer');
 const SecurityRiskAssessment = require('./utils/securityRiskAssessment');
 
 class SecurityAnalyzer {
