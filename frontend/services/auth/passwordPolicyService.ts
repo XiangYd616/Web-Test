@@ -1,3 +1,4 @@
+import { handleAsyncError } from '../utils/errorHandler';
 /**
  * 密码策略和安全验证服务
  * 提供密码强度检查、安全问题、账户锁定等功能
@@ -554,7 +555,12 @@ export class PasswordPolicyService {
 
     // 如果内存中没有，检查缓存
     if (!lockInfo) {
-      lockInfo = await defaultMemoryCache.get(`account_lock_${userId}`);
+      lockInfo = try {
+  await defaultMemoryCache.get(`account_lock_${userId}`);
+} catch (error) {
+  console.error('Await error:', error);
+  throw error;
+}
     }
 
     if (!lockInfo) return null;
@@ -626,7 +632,12 @@ export class PasswordPolicyService {
     this.userSecurityQuestions.set(userId, userQuestions);
 
     // 缓存用户安全问题
-    await defaultMemoryCache.set(`security_questions_${userId}`, userQuestions, undefined, 24 * 60 * 60 * 1000);
+    try {
+  await defaultMemoryCache.set(`security_questions_${userId}`, userQuestions, undefined, 24 * 60 * 60 * 1000);
+} catch (error) {
+  console.error('Await error:', error);
+  throw error;
+}
   }
 
   /**
@@ -637,7 +648,12 @@ export class PasswordPolicyService {
     answers: Array<{ questionId: string; answer: string }>
   ): Promise<boolean> {
     const userQuestions = this.userSecurityQuestions.get(userId) ||
-      await defaultMemoryCache.get(`security_questions_${userId}`);
+      try {
+  await defaultMemoryCache.get(`security_questions_${userId}`);
+} catch (error) {
+  console.error('Await error:', error);
+  throw error;
+}
 
     if (!userQuestions) return false;
 

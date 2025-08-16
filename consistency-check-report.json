@@ -1,11 +1,11 @@
 {
-  "timestamp": "2025-08-16T06:15:57.496Z",
+  "timestamp": "2025-08-16T07:09:53.368Z",
   "summary": {
-    "filesChecked": 2496,
-    "issuesFound": 1083,
+    "filesChecked": 2520,
+    "issuesFound": 1082,
     "categories": {
       "naming": 3,
-      "imports": 117,
+      "imports": 116,
       "exports": 0,
       "functions": 0,
       "variables": 269,
@@ -5674,13 +5674,6 @@
       "type": "formatting",
       "file": "frontend\\services\\data\\dataAnalysisService.ts",
       "message": "导入语句应在花括号内添加空格: import {format, subDays} from 'date-fns'",
-      "severity": "low"
-    },
-    {
-      "category": "imports",
-      "type": "formatting",
-      "file": "frontend\\services\\errorService.ts",
-      "message": "导入语句应在花括号内添加空格: import {toast} from 'react-hot-toast'",
       "severity": "low"
     },
     {

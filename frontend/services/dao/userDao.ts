@@ -1,3 +1,4 @@
+import { handleAsyncError } from '../utils/errorHandler';
 /**
  * 用户数据访问对象
  * 提供用户相关的数据库操作
@@ -197,7 +198,12 @@ export const userDao = {
    * 验证用户凭据
    */
   async validateCredentials(username: string, password: string): Promise<User | null> {
-    const user = await this.findByUsername(username) || await this.findByEmail(username);
+    const user = try {
+  await this.findByUsername(username) || await this.findByEmail(username);
+} catch (error) {
+  console.error('Await error:', error);
+  throw error;
+}
     if (!user || !user.isActive) {
       
         return null;
@@ -217,7 +223,12 @@ export const userDao = {
    * 检查用户名是否存在
    */
   async usernameExists(username: string): Promise<boolean> {
-    const user = await this.findByUsername(username);
+    const user = try {
+  await this.findByUsername(username);
+} catch (error) {
+  console.error('Await error:', error);
+  throw error;
+}
     return user !== null;
   },
 
@@ -225,7 +236,12 @@ export const userDao = {
    * 检查邮箱是否存在
    */
   async emailExists(email: string): Promise<boolean> {
-    const user = await this.findByEmail(email);
+    const user = try {
+  await this.findByEmail(email);
+} catch (error) {
+  console.error('Await error:', error);
+  throw error;
+}
     return user !== null;
   },
 

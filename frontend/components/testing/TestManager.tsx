@@ -1,3 +1,4 @@
+import { handleAsyncError } from '../utils/errorHandler';
 /**
  * 统一测试工具管理器
  * 提供所有9个测试工具的统一管理界面
@@ -174,11 +175,17 @@ const TestManager: React.FC = () => {
   };
 
   const handleStartTests = async () => {
+  try {
     if (selectedTools.length === 0) {
       
         alert('请选择至少一个测试工具');
       return;
-      }
+      
+  } catch (error) {
+    console.error('Error in handleStartTests:', error);
+    throw error;
+  }
+}
 
     setIsRunning(true);
     setProgress({});
@@ -189,7 +196,12 @@ const TestManager: React.FC = () => {
       
       // 模拟进度更新
       for (let i = 0; i <= 100; i += 10) {
-        await new Promise(resolve => setTimeout(resolve, 200));
+        try {
+  await new Promise(resolve => setTimeout(resolve, 200));
+} catch (error) {
+  console.error('Await error:', error);
+  throw error;
+}
         setProgress(prev => ({ ...prev, [toolId]: i }));
       }
     }
