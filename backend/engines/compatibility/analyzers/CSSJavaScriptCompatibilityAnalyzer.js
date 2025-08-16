@@ -723,7 +723,7 @@ if ('fetch' in window) {
   fetch('/api/data');
 } else {
   // 使用XMLHttpRequest回退
-  var xhr = new XMLHttpRequest();
+  let xhr = new XMLHttpRequest();
   xhr.open('GET', '/api/data');
   xhr.send();
 }`

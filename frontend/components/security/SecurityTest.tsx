@@ -20,7 +20,7 @@ import {
   Download,
   RefreshCw
 } from 'lucide-react';
-import { createApiUrl } from '../../config/api';
+import {createApiUrl} from '../../config/api';
 
 interface SecurityVulnerability {
   type: string;
@@ -53,12 +53,12 @@ interface SecurityTestResult {
   recommendations: string[];
 }
 
-interface AdvancedSecurityTestProps {
+interface SecurityTestProps {
   url?: string;
   onTestComplete?: (result: SecurityTestResult) => void;
 }
 
-const AdvancedSecurityTest: React.FC<AdvancedSecurityTestProps> = ({
+const SecurityTest: React.FC<SecurityTestProps> = ({
   url: initialUrl = '',
   onTestComplete
 }) => {
@@ -585,4 +585,4 @@ const AdvancedSecurityTest: React.FC<AdvancedSecurityTestProps> = ({
   );
 };
 
-export default AdvancedSecurityTest;
+export default SecurityTest;

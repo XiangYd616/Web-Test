@@ -50,10 +50,10 @@ class ErrorMonitoringManager extends EventEmitter {
     this.alertRules = new Map();
     this.isInitialized = false;
     this.logFile = null;
-    
+
     // 初始化错误统计
     this.initializeStats();
-    
+
     // 设置定期清理
     this.setupCleanup();
   }
@@ -70,18 +70,18 @@ class ErrorMonitoringManager extends EventEmitter {
       // 创建日志目录
       const logDir = path.join(process.cwd(), 'logs');
       await fs.mkdir(logDir, { recursive: true });
-      
+
       this.logFile = path.join(logDir, 'errors.log');
-      
+
       // 设置默认告警规则
       this.setupDefaultAlertRules();
-      
+
       // 监听进程错误
       this.setupProcessErrorHandlers();
-      
+
       this.isInitialized = true;
       console.log('✅ 错误监控管理器初始化完成');
-      
+
       this.emit('initialized');
     } catch (error) {
       console.error('❌ 错误监控管理器初始化失败:', error);
@@ -96,7 +96,7 @@ class ErrorMonitoringManager extends EventEmitter {
     Object.values(ERROR_LEVELS).forEach(level => {
       this.errorStats.byLevel[level] = 0;
     });
-    
+
     Object.values(ERROR_TYPES).forEach(type => {
       this.errorStats.byType[type] = 0;
     });
@@ -109,7 +109,7 @@ class ErrorMonitoringManager extends EventEmitter {
   async logError(errorInfo) {
     const errorId = this.generateErrorId();
     const timestamp = new Date();
-    
+
     const errorRecord = {
       id: errorId,
       timestamp,
@@ -132,25 +132,25 @@ class ErrorMonitoringManager extends EventEmitter {
 
     // 存储错误记录
     this.errors.set(errorId, errorRecord);
-    
+
     // 更新统计
     this.updateStats(errorRecord);
-    
+
     // 写入日志文件
     await this.writeToLogFile(errorRecord);
-    
+
     // 检查告警规则
     await this.checkAlertRules(errorRecord);
-    
+
     // 发送事件
     this.emit('errorLogged', errorRecord);
-    
+
     console.error(`[${errorRecord.level.toUpperCase()}] ${errorRecord.message}`, {
       id: errorId,
       type: errorRecord.type,
       context: errorRecord.context
     });
-    
+
     return errorId;
   }
 
@@ -162,14 +162,14 @@ class ErrorMonitoringManager extends EventEmitter {
     this.errorStats.total++;
     this.errorStats.byLevel[errorRecord.level]++;
     this.errorStats.byType[errorRecord.type]++;
-    
+
     // 按小时统计
     const hour = errorRecord.timestamp.getHours();
     if (!this.errorStats.byHour[hour]) {
       this.errorStats.byHour[hour] = 0;
     }
     this.errorStats.byHour[hour]++;
-    
+
     // 保持最近100个错误
     this.errorStats.recentErrors.unshift(errorRecord);
     if (this.errorStats.recentErrors.length > 100) {
@@ -183,7 +183,7 @@ class ErrorMonitoringManager extends EventEmitter {
    */
   async writeToLogFile(errorRecord) {
     if (!this.logFile) return;
-    
+
     try {
       const logEntry = JSON.stringify({
         timestamp: errorRecord.timestamp.toISOString(),
@@ -194,7 +194,7 @@ class ErrorMonitoringManager extends EventEmitter {
         context: errorRecord.context,
         stack: errorRecord.stack
       }) + '\n';
-      
+
       await fs.appendFile(this.logFile, logEntry);
     } catch (error) {
       console.error('写入错误日志失败:', error);
@@ -211,7 +211,7 @@ class ErrorMonitoringManager extends EventEmitter {
       action: 'immediate',
       description: '严重错误立即告警'
     });
-    
+
     // 错误频率告警
     this.addAlertRule('error_frequency', {
       condition: () => {
@@ -221,14 +221,14 @@ class ErrorMonitoringManager extends EventEmitter {
       action: 'frequency',
       description: '错误频率过高告警'
     });
-    
+
     // 数据库错误告警
     this.addAlertRule('database_errors', {
       condition: (error) => error.type === ERROR_TYPES.DATABASE,
       action: 'database',
       description: '数据库错误告警'
     });
-    
+
     // 测试引擎错误告警
     this.addAlertRule('test_engine_errors', {
       condition: (error) => error.type === ERROR_TYPES.TEST_ENGINE,
@@ -258,7 +258,7 @@ class ErrorMonitoringManager extends EventEmitter {
   async checkAlertRules(errorRecord) {
     for (const [name, rule] of this.alertRules) {
       if (!rule.enabled) continue;
-      
+
       try {
         if (rule.condition(errorRecord)) {
           await this.triggerAlert(name, rule, errorRecord);
@@ -278,17 +278,17 @@ class ErrorMonitoringManager extends EventEmitter {
   async triggerAlert(ruleName, rule, errorRecord) {
     rule.triggeredCount++;
     rule.lastTriggered = new Date();
-    
+
     const alertInfo = {
       ruleName,
       rule,
       errorRecord,
       timestamp: new Date()
     };
-    
+
     // 发送告警事件
     this.emit('alertTriggered', alertInfo);
-    
+
     // 根据告警类型执行相应操作
     switch (rule.action) {
       case 'immediate':
@@ -316,7 +316,7 @@ class ErrorMonitoringManager extends EventEmitter {
       message: alertInfo.errorRecord.message,
       type: alertInfo.errorRecord.type
     });
-    
+
     // 这里可以集成邮件、短信、Slack等告警渠道
     // await this.sendEmailAlert(alertInfo);
     // await this.sendSlackAlert(alertInfo);
@@ -362,7 +362,7 @@ class ErrorMonitoringManager extends EventEmitter {
    */
   getRecentErrors(minutes = 60) {
     const cutoff = new Date(Date.now() - minutes * 60 * 1000);
-    return this.errorStats.recentErrors.filter(error => 
+    return this.errorStats.recentErrors.filter(error =>
       error.timestamp > cutoff
     );
   }
@@ -395,7 +395,7 @@ class ErrorMonitoringManager extends EventEmitter {
       error.resolved = true;
       error.resolvedAt = new Date();
       error.resolvedBy = resolvedBy;
-      
+
       this.emit('errorResolved', error);
       return true;
     }
@@ -416,7 +416,7 @@ class ErrorMonitoringManager extends EventEmitter {
         context: { error: error.message }
       });
     });
-    
+
     // 未处理的Promise拒绝
     process.on('unhandledRejection', (reason, promise) => {
       this.logError({
@@ -445,7 +445,7 @@ class ErrorMonitoringManager extends EventEmitter {
   cleanupOldErrors() {
     const retentionDays = configManager.get('monitoring.retentionDays', 30);
     const cutoff = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
-    
+
     let cleanedCount = 0;
     for (const [id, error] of this.errors) {
       if (error.timestamp < cutoff) {
@@ -453,7 +453,7 @@ class ErrorMonitoringManager extends EventEmitter {
         cleanedCount++;
       }
     }
-    
+
     if (cleanedCount > 0) {
       console.log(`🧹 清理了 ${cleanedCount} 个过期错误记录`);
     }
@@ -464,7 +464,7 @@ class ErrorMonitoringManager extends EventEmitter {
    * @returns {string} 错误ID
    */
   generateErrorId() {
-    return `err_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `err_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   }
 
   /**
@@ -483,7 +483,7 @@ class ErrorMonitoringManager extends EventEmitter {
    */
   searchErrors(criteria = {}) {
     const errors = Array.from(this.errors.values());
-    
+
     return errors.filter(error => {
       if (criteria.level && error.level !== criteria.level) return false;
       if (criteria.type && error.type !== criteria.type) return false;
@@ -491,7 +491,7 @@ class ErrorMonitoringManager extends EventEmitter {
       if (criteria.startDate && error.timestamp < criteria.startDate) return false;
       if (criteria.endDate && error.timestamp > criteria.endDate) return false;
       if (criteria.message && !error.message.includes(criteria.message)) return false;
-      
+
       return true;
     }).sort((a, b) => b.timestamp - a.timestamp);
   }

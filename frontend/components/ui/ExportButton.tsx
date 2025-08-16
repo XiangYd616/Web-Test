@@ -1,4 +1,4 @@
-import { ChevronDown, Download, FileText, Image, Table } from 'lucide-react';
+import {ChevronDown, Download, FileText, Image, Table} from 'lucide-react';
 import React, { useState } from 'react';
 
 // 导出格式配置
@@ -68,7 +68,7 @@ export interface ExportData {
 }
 
 // 组件属性接口
-export interface UnifiedExportButtonProps {
+export interface ExportButtonProps {
   data: ExportData;
   formats?: string[]; // 支持的格式列表
   onExport?: (format: string, data: ExportData) => void;
@@ -84,7 +84,7 @@ export interface UnifiedExportButtonProps {
 }
 
 // 统一导出按钮组件
-export const UnifiedExportButton: React.FC<UnifiedExportButtonProps> = ({
+export const ExportButton: React.FC<ExportButtonProps> = ({
   data,
   formats = ['json', 'csv'],
   onExport,
@@ -336,4 +336,4 @@ export const UnifiedExportButton: React.FC<UnifiedExportButtonProps> = ({
   );
 };
 
-export default UnifiedExportButton;
+export default ExportButton;

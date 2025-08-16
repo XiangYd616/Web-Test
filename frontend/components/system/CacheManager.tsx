@@ -19,8 +19,8 @@ import {
   TrendingUp,
   Activity
 } from 'lucide-react';
-import { useCache, useApiCache, useUserCache, useTempCache, useTestResultCache } from '../../hooks/useCache';
-import type { CacheStats } from '../../services/cacheStrategy';
+import {useCache, useApiCache, useUserCache, useTempCache, useTestResultCache} from '../../hooks/useCache';
+// import type { CacheStats } from '../../services/cacheStrategy'; // 已删除
 
 // ==================== 类型定义 ====================
 

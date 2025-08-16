@@ -1,5 +1,5 @@
 /**
- * 增强的统一测试引擎管理器
+ * 统一测试引擎管理器
  * 提供引擎池管理、故障转移、健康检查、负载均衡等企业级功能
  */
 
@@ -7,13 +7,14 @@ const { EventEmitter } = require('events');
 const { ServiceError, ErrorTypes } = require('../../utils/ErrorHandler');
 
 /**
- * 标准测试引擎接口
+ * 测试引擎接口
+ * 所有测试引擎必须实现此接口
  */
-class ITestEngine {
+class TestEngineInterface {
   constructor(name, version = '1.0.0') {
     this.name = name;
     this.version = version;
-    this.id = `${name}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    this.id = `${name}_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     this.status = 'idle'; // idle, running, busy, error, maintenance
     this.isAvailable = false;
     this.lastHealthCheck = null;
@@ -328,9 +329,10 @@ class EnginePool extends EventEmitter {
 }
 
 /**
- * 增强的测试引擎管理器
+ * 统一测试引擎管理器
+ * 管理所有测试引擎的生命周期、负载均衡和健康检查
  */
-class EnhancedTestEngineManager extends EventEmitter {
+class TestEngineManager extends EventEmitter {
   constructor() {
     super();
     this.enginePools = new Map();
@@ -392,7 +394,7 @@ class EnhancedTestEngineManager extends EventEmitter {
    * 执行测试
    */
   async executeTest(type, config, options = {}) {
-    const testId = options.testId || `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const testId = options.testId || `test_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 
     try {
       const pool = this.enginePools.get(type);
@@ -543,6 +545,26 @@ class EnhancedTestEngineManager extends EventEmitter {
   }
 
   /**
+   * 获取健康状态 - 兼容方法
+   */
+  getHealthStatus() {
+    const healthStatus = {};
+
+    for (const [type, pool] of this.enginePools) {
+      const poolStatus = pool.getPoolStatus();
+      healthStatus[type] = {
+        healthy: poolStatus.availableEngines > 0,
+        poolSize: poolStatus.totalEngines,
+        busyInstances: poolStatus.busyEngines,
+        availableInstances: poolStatus.availableEngines,
+        lastCheck: new Date().toISOString()
+      };
+    }
+
+    return healthStatus;
+  }
+
+  /**
    * 停止测试
    */
   async stopTest(testId) {
@@ -592,7 +614,7 @@ class EnhancedTestEngineManager extends EventEmitter {
 /**
  * 引擎适配器 - 将现有引擎适配到标准接口
  */
-class EngineAdapter extends ITestEngine {
+class EngineAdapter extends TestEngineInterface {
   constructor(originalEngine, engineType) {
     super(originalEngine.name || engineType, originalEngine.version || '1.0.0');
     this.originalEngine = originalEngine;
@@ -767,50 +789,50 @@ class EngineFactory {
 }
 
 // 创建全局实例并注册引擎类型
-const enhancedTestEngineManager = new EnhancedTestEngineManager();
+const testEngineManager = new TestEngineManager();
 
 // 注册所有引擎类型
-enhancedTestEngineManager.registerEngineType('performance', () => EngineFactory.createPerformanceEngine(), {
+testEngineManager.registerEngineType('performance', () => EngineFactory.createPerformanceEngine(), {
   minInstances: 2,
   maxInstances: 5,
   loadBalanceStrategy: 'least-busy'
 });
 
-enhancedTestEngineManager.registerEngineType('security', () => EngineFactory.createSecurityEngine(), {
+testEngineManager.registerEngineType('security', () => EngineFactory.createSecurityEngine(), {
   minInstances: 1,
   maxInstances: 3,
   loadBalanceStrategy: 'round-robin'
 });
 
-enhancedTestEngineManager.registerEngineType('compatibility', () => EngineFactory.createCompatibilityEngine(), {
+testEngineManager.registerEngineType('compatibility', () => EngineFactory.createCompatibilityEngine(), {
   minInstances: 1,
   maxInstances: 4,
   loadBalanceStrategy: 'round-robin'
 });
 
-enhancedTestEngineManager.registerEngineType('ux', () => EngineFactory.createUXEngine(), {
+testEngineManager.registerEngineType('ux', () => EngineFactory.createUXEngine(), {
   minInstances: 1,
   maxInstances: 3,
   loadBalanceStrategy: 'least-busy'
 });
 
-enhancedTestEngineManager.registerEngineType('network', () => EngineFactory.createNetworkEngine(), {
+testEngineManager.registerEngineType('network', () => EngineFactory.createNetworkEngine(), {
   minInstances: 1,
   maxInstances: 2,
   loadBalanceStrategy: 'round-robin'
 });
 
-enhancedTestEngineManager.registerEngineType('seo', () => EngineFactory.createSEOEngine(), {
+testEngineManager.registerEngineType('seo', () => EngineFactory.createSEOEngine(), {
   minInstances: 1,
   maxInstances: 2,
   loadBalanceStrategy: 'round-robin'
 });
 
 module.exports = {
-  ITestEngine,
+  TestEngineInterface,
   EnginePool,
-  EnhancedTestEngineManager,
+  TestEngineManager,
   EngineAdapter,
   EngineFactory,
-  enhancedTestEngineManager
+  testEngineManager
 };

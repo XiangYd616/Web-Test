@@ -1,6 +1,6 @@
 import React from 'react';
-import { AlertTriangle, CheckCircle, Clock, Loader, XCircle } from 'lucide-react';
-import { cn } from '../../utils/cn';
+import {AlertTriangle, CheckCircle, Clock, Loader, XCircle} from 'lucide-react';
+import {cn} from '../../utils/cn';
 
 export type StatusType = 'success' | 'error' | 'warning' | 'pending' | 'loading' | 'info';
 

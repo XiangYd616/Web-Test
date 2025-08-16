@@ -382,7 +382,7 @@ class AlertRuleEngine {
 
   createAlert(ruleName, rule, error) {
     return {
-      id: `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `alert_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       rule: ruleName,
       level: rule.alertLevel,
       channels: rule.channels,

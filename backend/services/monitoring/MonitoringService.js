@@ -1751,7 +1751,7 @@ class MonitoringService extends EventEmitter {
                 RETURNING *
             `;
 
-            const reportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            const reportId = `report_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
             const values = [
                 reportId,
                 userId,

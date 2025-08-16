@@ -4,7 +4,6 @@
  * 版本: v1.0.0
  */
 
-import { defaultMemoryCache } from '../cacheStrategy';
 
 // ==================== 类型定义 ====================
 

@@ -1,8 +1,8 @@
 
 import React, { useMemo, useState } from 'react';
-import { BarChart3, Download, GitCompare, Target, TrendingUp } from 'lucide-react';
+import {BarChart3, Download, GitCompare, Target, TrendingUp} from 'lucide-react';
 
-import { Bar, BarChart, CartesianGrid, ComposedChart, Legend, Line, LineChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import {Bar, BarChart, CartesianGrid, ComposedChart, Legend, Line, LineChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
 
 interface TestResult {
   id: string;

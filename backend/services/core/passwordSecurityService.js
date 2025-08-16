@@ -8,7 +8,7 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const { getPool } = require('../../config/database.js');
 const Logger = require('../../middleware/logger.js');
-const emailService = require('./emailService');
+const emailService = require('../email/emailService');
 
 // ==================== 配置 ====================
 

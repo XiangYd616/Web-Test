@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { AlertCircle, CheckCircle, Loader, Upload, X } from 'lucide-react';
-import { useTheme } from '../../contexts/ThemeContext';
+import {AlertCircle, CheckCircle, Loader, Upload, X} from 'lucide-react';
+import {useTheme} from '../../contexts/ThemeContext';
 
 interface FileUploadSEOProps {
   onAnalysisComplete: (results: any) => void;
@@ -94,7 +94,7 @@ const FileUploadSEO: React.FC<FileUploadSEOProps> = ({
 
       validFiles.push({
         file,
-        id: Math.random().toString(36).substr(2, 9),
+        id: Math.random().toString(36).substring(2, 9),
         status: 'pending'
       });
     });

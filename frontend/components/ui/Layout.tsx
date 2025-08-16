@@ -3,7 +3,7 @@
  * 整合项目中重复的布局模式和容器组件
  */
 
-import { LucideIcon } from 'lucide-react';
+import {LucideIcon} from 'lucide-react';
 import React from 'react';
 
 // 基础页面布局

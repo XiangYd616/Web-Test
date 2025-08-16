@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import backgroundTestManager from '../services/testing/backgroundTestManager.ts';
-import { testAPI } from '../services/testApiService';
+import {testAPI} from '../services/testing/testService';
 
-export interface AdvancedStressTestConfig {
+export interface StressTestConfig {
   url: string;
   users: number;
   duration: number;
@@ -86,7 +86,7 @@ export interface DetailedTestProgress {
   };
 }
 
-export interface AdvancedTestDataPoint {
+export interface TestDataPoint {
   timestamp: number;
   responseTime: number;
   users: number;
@@ -103,7 +103,7 @@ export interface AdvancedTestDataPoint {
   protocol?: string;
 }
 
-export interface EnhancedBrowserCapabilities {
+export interface BrowserCapabilities {
   fetch: boolean;
   webWorkers: boolean;
   serviceWorker: boolean;
@@ -124,7 +124,7 @@ export interface EnhancedBrowserCapabilities {
 export const useAdvancedTestEngine = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState<DetailedTestProgress | null>(null);
-  const [testData, setTestData] = useState<AdvancedTestDataPoint[]>([]);
+  const [testData, setTestData] = useState<TestDataPoint[]>([]);
   const [testResults, setTestResults] = useState<any>(null);
   const [testHistory, setTestHistory] = useState<any[]>([]);
   const [engineStatus, setEngineStatus] = useState<any>(null);
@@ -133,7 +133,7 @@ export const useAdvancedTestEngine = () => {
   const metricsInterval = useRef<NodeJS.Timeout | null>(null);
 
   // 检测增强的浏览器能力
-  const browserCapabilities: EnhancedBrowserCapabilities = {
+  const browserCapabilities: BrowserCapabilities = {
     fetch: typeof fetch !== 'undefined',
     webWorkers: typeof Worker !== 'undefined',
     serviceWorker: 'serviceWorker' in navigator,
@@ -246,7 +246,7 @@ export const useAdvancedTestEngine = () => {
     }
   }, []);
 
-  const runAdvancedStressTest = useCallback(async (config: AdvancedStressTestConfig) => {
+  const runAdvancedStressTest = useCallback(async (config: StressTestConfig) => {
     setIsRunning(true);
     setProgress(null);
     setTestData([]);
@@ -358,7 +358,7 @@ export const useAdvancedTestEngine = () => {
     }
   }, []);
 
-  const scheduleTest = useCallback(async (config: AdvancedStressTestConfig, schedule: any) => {
+  const scheduleTest = useCallback(async (config: StressTestConfig, schedule: any) => {
     try {
       const response = await (testAPI as any).scheduleTest('stress', config, schedule);
       return response.data;
@@ -378,7 +378,7 @@ export const useAdvancedTestEngine = () => {
     }
   }, []);
 
-  const saveTestTemplate = useCallback(async (name: string, config: AdvancedStressTestConfig) => {
+  const saveTestTemplate = useCallback(async (name: string, config: StressTestConfig) => {
     try {
       const response = await testAPI.saveTestTemplate({ testType: 'stress', name, description: `${name} 压力测试模板`, config });
       return response.data;

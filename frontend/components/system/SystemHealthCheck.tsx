@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Activity, AlertTriangle, CheckCircle, Clock, Database, Globe, Server, Wifi } from 'lucide-react';
+import {Activity, AlertTriangle, CheckCircle, Clock, Database, Globe, Server, Wifi} from 'lucide-react';
 
 interface HealthMetric {
   name: string;

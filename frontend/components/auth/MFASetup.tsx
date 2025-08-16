@@ -4,21 +4,21 @@
  * 版本: v1.0.0
  */
 
-import React, { useState, useEffect } from 'react';
-import { 
-  Shield, 
-  Smartphone, 
-  Mail, 
-  Key, 
-  QrCode, 
-  Copy, 
-  Check,
+import {
   AlertTriangle,
+  Check,
+  Copy,
+  Download,
+  Key,
   Loader2,
-  Download
+  Mail,
+  QrCode,
+  Shield,
+  Smartphone
 } from 'lucide-react';
-import { useMFA } from '../../services/auth/mfaService';
-import type { MFASetup, MFAMethod, TOTPSetupResult } from '../../services/auth/mfaService';
+import React, { useEffect, useState } from 'react';
+import type { MFAMethod, MFASetup, TOTPSetupResult } from '../../services/auth/mfaService';
+import {useMFA} from '../../services/auth/mfaService';
 
 // ==================== 类型定义 ====================
 
@@ -115,9 +115,9 @@ const TOTPSetupStep: React.FC<TOTPSetupStepProps> = ({
 
           <div className="bg-gray-800 rounded-lg p-6 space-y-4">
             <div className="text-center">
-              <img 
-                src={setupData.qrCodeUrl} 
-                alt="TOTP QR Code" 
+              <img
+                src={setupData.qrCodeUrl}
+                alt="TOTP QR Code"
                 className="mx-auto bg-white p-4 rounded-lg"
               />
             </div>
@@ -196,7 +196,7 @@ const TOTPSetupStep: React.FC<TOTPSetupStepProps> = ({
               <input
                 type="text"
                 value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value.replace(//D/g, '').slice(0, 6))}
+                onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                 placeholder="000000"
                 className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white text-center text-2xl font-mono tracking-widest focus:outline-none focus:border-blue-500"
                 maxLength={6}
@@ -249,7 +249,7 @@ const BackupCodesDisplay: React.FC<BackupCodesDisplayProps> = ({
 
   const handleDownload = () => {
     const content = `TestWeb 平台备用码/n生成时间: ${new Date().toLocaleString()}/n/n${codes.map((code, index) => `${index + 1}. ${code}`).join('\n')}/n/n重要提示:/n- 每个备用码只能使用一次/n- 请将这些代码保存在安全的地方/n- 如果丢失，请重新生成新的备用码`;
-    
+
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -259,7 +259,7 @@ const BackupCodesDisplay: React.FC<BackupCodesDisplayProps> = ({
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
+
     setDownloaded(true);
     onDownload();
   };
@@ -376,7 +376,7 @@ export const MFASetup: React.FC<MFASetupProps> = ({
       <div className="max-w-md mx-auto">
         <BackupCodesDisplay
           codes={backupCodes}
-          onDownload={() => {}}
+          onDownload={() => { }}
           onContinue={handleSetupComplete}
         />
       </div>
@@ -412,16 +412,14 @@ export const MFASetup: React.FC<MFASetupProps> = ({
         {/* TOTP身份验证器 */}
         <div
           onClick={() => !isMethodEnabled('totp') && handleMethodSelect('totp')}
-          className={`p-4 rounded-lg border cursor-pointer transition-colors ${
-            isMethodEnabled('totp')
+          className={`p-4 rounded-lg border cursor-pointer transition-colors ${isMethodEnabled('totp')
               ? 'bg-green-900/30 border-green-700'
               : 'bg-gray-800 border-gray-600 hover:border-gray-500'
-          }`}
+            }`}
         >
           <div className="flex items-center space-x-3">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-              isMethodEnabled('totp') ? 'bg-green-600' : 'bg-gray-600'
-            }`}>
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isMethodEnabled('totp') ? 'bg-green-600' : 'bg-gray-600'
+              }`}>
               <Smartphone className="w-5 h-5 text-white" />
             </div>
             <div className="flex-1">

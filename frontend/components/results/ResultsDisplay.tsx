@@ -8,8 +8,8 @@ import {
   Play, Pause, RotateCcw, Wifi, WifiOff, Bell, BellOff,
   TrendingUp, Activity, Clock, AlertCircle
 } from 'lucide-react';
-import TestResults from './EnhancedTestResults';
-import { createApiUrl } from '../../config/api';
+import TestResults from './TestResults';
+import {createApiUrl} from '../../config/api';
 
 interface TestResult {
   id: string;
@@ -339,7 +339,7 @@ const RealTimeResultsDisplay: React.FC<RealTimeResultsDisplayProps> = ({
       </div>
 
       {/* 结果展示 */}
-      <EnhancedTestResults
+      <TestResults
         results={results}
         loading={loading}
         onResultClick={(result) => {

@@ -6,7 +6,7 @@
 const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
-const EnhancedDatabaseConnectionManager = require('../utils/enhancedDatabaseConnectionManager');
+const DatabaseConnectionManager = require('../utils/database');
 
 // 数据库连接池和管理器
 let pool = null;
@@ -444,7 +444,7 @@ const getStats = async () => {
 const getConnectionManager = async () => {
   if (!connectionManager) {
     // 使用增强版连接管理器
-    connectionManager = new EnhancedDatabaseConnectionManager(dbConfig);
+    connectionManager = new DatabaseConnectionManager(dbConfig);
 
     // 设置事件监听
     connectionManager.on('connected', (data) => {

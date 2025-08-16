@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Activity, Cpu, HardDrive, Wifi, AlertTriangle, CheckCircle } from 'lucide-react';
+import {Activity, Cpu, HardDrive, Wifi, AlertTriangle, CheckCircle} from 'lucide-react';
 
 interface SystemResources {
   cpu: {

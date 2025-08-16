@@ -1,7 +1,7 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 
-import { Lock, User, ArrowRight, Shield, Star, X, LogIn } from 'lucide-react';
+import {Lock, ArrowRight, Shield, Star, X, LogIn} from 'lucide-react';
 
 interface LoginPromptProps {
   isOpen: boolean;

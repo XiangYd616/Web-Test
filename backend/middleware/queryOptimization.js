@@ -3,7 +3,7 @@
  * 提供查询性能监控、慢查询检测和优化建议
  */
 
-const DatabasePerformanceOptimizer = require('../services/DatabasePerformanceOptimizer');
+const DatabasePerformanceOptimizer = require('../services/database/performanceOptimizer');
 
 // 全局性能优化器实例
 let performanceOptimizer = null;

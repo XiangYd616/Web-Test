@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Lock, Eye, EyeOff, Shield, Star } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
+import {Lock, Eye, EyeOff, Shield, Star} from 'lucide-react';
+import {useAuth} from '../../contexts/AuthContext';
 import LoginPrompt from './LoginPrompt';
 
 interface ProtectedFeatureProps {

@@ -19,8 +19,8 @@ import {
   X
 } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDataManagement } from '../../hooks/useDataManagement';
-import { realtimeManager } from '../../services/realtime/RealtimeManager';
+import {useDataManagement} from '../../hooks/useDataManagement';
+import {realtimeManager} from '../services/realtime/websocketService';
 
 interface DataRecord {
   id: string;
@@ -68,7 +68,7 @@ interface ExportProgress {
   message?: string;
 }
 
-const EnhancedDataManager: React.FC = () => {
+const DataManager: React.FC = () => {
   const {
     records,
     loading,
@@ -142,7 +142,7 @@ const EnhancedDataManager: React.FC = () => {
   // 处理文件导入
   const handleFileImport = useCallback(async (files: FileList, config: any) => {
     for (const file of Array.from(files)) {
-      const taskId = `import_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const taskId = `import_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
       const progress: ImportProgress = {
         taskId,
@@ -205,7 +205,7 @@ const EnhancedDataManager: React.FC = () => {
 
   // 处理数据导出
   const handleDataExport = useCallback(async (config: any) => {
-    const taskId = `export_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const taskId = `export_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
     const progress: ExportProgress = {
       taskId,
@@ -988,4 +988,4 @@ const ExportModal: React.FC<ExportModalProps> = ({ onClose, onExport, selectedCo
   );
 };
 
-export default EnhancedDataManager;
+export default DataManager;

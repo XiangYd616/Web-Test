@@ -4,9 +4,9 @@
  * 版本: v2.0.0
  */
 
-import { jwtDecode } from 'jwt-decode';
+import {jwtDecode} from 'jwt-decode';
 import type { AuthResponse, User } from '../../types/unified/models';
-import { defaultErrorHandler } from '../unified/apiErrorHandler';
+import {defaultErrorHandler} from '../unified/apiErrorHandler';
 
 // ==================== 类型定义 ====================
 
@@ -125,7 +125,7 @@ const DEFAULT_CONFIG: AuthConfig = {
 
 // ==================== 增强认证管理器 ====================
 
-export class EnhancedAuthManager {
+export class AuthManager {
   private config: AuthConfig;
   private refreshTimer?: NodeJS.Timeout;
   private sessionCheckTimer?: NodeJS.Timeout;
@@ -693,6 +693,6 @@ export class EnhancedAuthManager {
 
 // ==================== 默认实例 ====================
 
-export const authManager = new EnhancedAuthManager();
+export const authManager = new AuthManager();
 
-export default EnhancedAuthManager;
+export default AuthManager;

@@ -16,8 +16,8 @@
     "test:coverage": "vitest run --coverage",
     "_comment_maintenance": "🔧 代码维护",
     "type-check": "tsc --noEmit",
-    "lint": "eslint src --ext .ts,.tsx",
-    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,css,md}\""
   },
   "dependencies": {

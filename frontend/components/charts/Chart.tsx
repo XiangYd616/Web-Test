@@ -117,7 +117,7 @@ export interface LineChartProps {
   className?: string;
 }
 
-export const ModernLineChart: React.FC<LineChartProps> = ({
+export const LineChart: React.FC<LineChartProps> = ({
   data,
   options = {},
   height = 300,
@@ -158,7 +158,7 @@ export interface BarChartProps {
   className?: string;
 }
 
-export const ModernBarChart: React.FC<BarChartProps> = ({
+export const BarChart: React.FC<BarChartProps> = ({
   data,
   options = {},
   height = 300,
@@ -199,7 +199,7 @@ export interface DoughnutChartProps {
   className?: string;
 }
 
-export const ModernDoughnutChart: React.FC<DoughnutChartProps> = ({
+export const DoughnutChart: React.FC<DoughnutChartProps> = ({
   data,
   options = {},
   size = 200,

@@ -1,8 +1,8 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import {useNavigate} from 'react-router-dom';
+import {useAuth} from '../../contexts/AuthContext';
 
-import { User, Lock, LogIn, UserCheck, Shield, Crown } from 'lucide-react';
+import {User, Lock, LogIn, UserCheck, Crown} from 'lucide-react';
 
 interface AuthStatusIndicatorProps {
   showInSidebar?: boolean;

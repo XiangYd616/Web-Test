@@ -137,7 +137,7 @@ export interface BatchOperation {
   metadata?: any;
 }
 
-export class AdvancedDataService {
+export class DataService {
   private baseUrl: string;
   private cache: Map<string, { data: any; timestamp: number }>;
   private cacheTimeout: number;
@@ -528,10 +528,10 @@ export class AdvancedDataService {
 }
 
 // 导出单例实例
-export const advancedDataService = new AdvancedDataService();
+export const advancedDataService = new DataService();
 
 // 兼容性导出（保持向后兼容）
 export const advancedDataManager = advancedDataService;
-export { AdvancedDataService as AdvancedDataManager };
+export { DataService as DataManager };
 
 export default advancedDataService;

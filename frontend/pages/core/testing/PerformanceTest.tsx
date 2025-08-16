@@ -4,12 +4,12 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '../../../components/ui/Button';
-import { LoadingStates } from '../../../components/ui/LoadingStates';
-import { TestConfig } from '../../../components/testing/TestConfig';
-import { TestResults } from '../../../components/testing/TestResults';
-import { useTestExecution } from '../../../hooks/useTestExecution';
-import { useTestHistory } from '../../../hooks/useTestHistory';
+import {Button} from '../../../components/ui/Button';
+import {LoadingStates} from '../../../components/ui/LoadingStates';
+import {TestConfig} from '../../../components/testing/TestConfig';
+import {TestResults} from '../../../components/testing/TestResults';
+import {useTestExecution} from '../../../hooks/useTestRunner';
+import {useTestHistory} from '../../../hooks/useTestData';
 
 interface PerformanceTestConfig {
   url: string;

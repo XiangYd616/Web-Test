@@ -8,8 +8,8 @@ export { default as TestHistoryPanel } from './TestHistoryPanel';
 export { default as TestProgressPanel } from './TestProgressPanel';
 export { default as TestResults } from './TestResults';
 export { default as TestResultsPanel } from './TestResultsPanel';
-export { default as UnifiedTestInterface } from './UnifiedTestInterface';
-export { default as UnifiedTestPageWithHistory } from './UnifiedTestPageWithHistory';
+export { default as TestInterface } from './TestInterface';
+export { default as TestPageWithHistory } from './TestPageWithHistory';
 export { default as URLInput } from './URLInput';
 
 // Types

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { loadCSS, loadPageCSS, loadComponentCSS, preloadPageCSS } from '../utils/cssLoader';
+import {useEffect, useState} from 'react';
+import {loadCSS, loadPageCSS, loadComponentCSS, preloadPageCSS} from '../utils/cssLoader';
 
 export const useCSS = (
   cssPath: string,

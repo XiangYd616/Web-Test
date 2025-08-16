@@ -1,8 +1,8 @@
-import { BarChart3, ChevronRight, Code, Crown, Database, GitBranch, Globe, Home, Key, Link2, Monitor, Package, Search, Settings, Shield, TestTube, Zap } from 'lucide-react';
+import {BarChart3, ChevronRight, Code, Crown, Database, GitBranch, Globe, Home, Key, Link2, Monitor, Package, Search, Settings, Shield, TestTube, Zap} from 'lucide-react';
 import React, { useRef, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useAuth } from '../../hooks/useAuth';
+import {Link, useLocation} from 'react-router-dom';
+import {useTheme} from '../../contexts/ThemeContext';
+import {useAuth} from '../../hooks/useAuth';
 import AuthStatusIndicator from '../auth/AuthStatusIndicator';
 
 interface SidebarItem {
@@ -53,58 +53,62 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
       id: 'testing',
       name: '测试工具',
       icon: TestTube,
-      href: '#',
+      href: '/testing',
+      badge: '全新',
       children: [
         {
-          id: 'website-test',
-          name: '网站综合测试',
-          icon: Globe,
-          href: '/website-test',
-          badge: '增强'
+          id: 'api-test',
+          name: 'API测试',
+          icon: Code,
+          href: '/testing/api'
         },
         {
-          id: 'stress-test',
-          name: '压力测试',
+          id: 'performance-test',
+          name: '性能测试',
           icon: Zap,
-          href: '/stress-test'
-        },
-        {
-          id: 'seo-test',
-          name: 'SEO测试',
-          icon: Search,
-          href: '/seo-test'
+          href: '/testing/performance'
         },
         {
           id: 'security-test',
           name: '安全测试',
           icon: Shield,
-          href: '/security-test'
+          href: '/testing/security'
         },
         {
-          id: 'api-test',
-          name: 'API测试',
-          icon: Code,
-          href: '/api-test'
+          id: 'seo-test',
+          name: 'SEO测试',
+          icon: Search,
+          href: '/testing/seo'
         },
         {
-          id: 'compatibility-test',
-          name: '兼容性测试',
-          icon: Monitor,
-          href: '/compatibility-test',
-          badge: '增强'
+          id: 'stress-test',
+          name: '压力测试',
+          icon: Zap,
+          href: '/testing/stress'
         },
         {
           id: 'infrastructure-test',
           name: '基础设施测试',
           icon: Database,
-          href: '/infrastructure-test',
-          badge: 'NEW'
+          href: '/testing/infrastructure'
         },
         {
           id: 'ux-test',
-          name: '用户体验测试',
+          name: 'UX测试',
           icon: TestTube,
-          href: '/ux-test'
+          href: '/testing/ux'
+        },
+        {
+          id: 'compatibility-test',
+          name: '兼容性测试',
+          icon: Monitor,
+          href: '/testing/compatibility'
+        },
+        {
+          id: 'website-test',
+          name: '网站综合测试',
+          icon: Globe,
+          href: '/testing/website'
         }
       ]
     },

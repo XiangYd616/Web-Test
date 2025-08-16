@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, TrendingDown, Activity, Clock, Target, Users } from 'lucide-react';
+import {TrendingUp, TrendingDown, Activity, Clock, Target, Users} from 'lucide-react';
 
 interface ChartData {
   label: string;
@@ -8,11 +8,11 @@ interface ChartData {
   trend: 'up' | 'down' | 'stable';
 }
 
-interface EnhancedDashboardChartsProps {
+interface DashboardChartsProps {
   className?: string;
 }
 
-const EnhancedDashboardCharts: React.FC<EnhancedDashboardChartsProps> = ({ className = '' }) => {
+const DashboardCharts: React.FC<DashboardChartsProps> = ({ className = '' }) => {
   // 模拟图表数据
   const performanceData = [
     { time: '00:00', value: 85 },
@@ -208,4 +208,4 @@ const EnhancedDashboardCharts: React.FC<EnhancedDashboardChartsProps> = ({ class
   );
 };
 
-export default EnhancedDashboardCharts;
+export default DashboardCharts;

@@ -545,7 +545,7 @@ class DatabaseMonitoringService extends EventEmitter {
         } else {
             // 创建新告警
             const alert = {
-                id: `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                id: `alert_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
                 type,
                 severity,
                 message,

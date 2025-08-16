@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { DataBackup, DataQuery, DataRecord, advancedDataManager } from '../services/dataService';
+import {useCallback, useEffect, useState} from 'react';
+import {DataBackup, DataQuery, DataRecord, advancedDataManager} from '../services/data/dataService';
 
 const extendedDataManager = {
   ...advancedDataManager,

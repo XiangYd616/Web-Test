@@ -67,7 +67,7 @@ export class ErrorHandler {
           'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
         },
         body: JSON.stringify({
-          id: `frontend_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          id: `frontend_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
           type: this.getErrorType(error),
           severity: this.getErrorSeverity(error),
           message: error.message,

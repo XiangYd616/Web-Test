@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle, Database, Globe, Mail, Monitor, Save, Server, Shield } from 'lucide-react';
+import {AlertTriangle, CheckCircle, Database, Globe, Mail, Monitor, Save, Server, Shield} from 'lucide-react';
 import React, { useState } from 'react';
 import type { SystemConfig } from '../../types/admin';
 

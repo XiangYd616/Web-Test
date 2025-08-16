@@ -3,7 +3,7 @@
  * 管理用户的个性化配置和偏好设置
  */
 
-import { createApiUrl } from '../../config/api';
+import {createApiUrl} from '../../config/api';
 
 export interface UserPreferences {
   // 界面设置

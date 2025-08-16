@@ -507,21 +507,21 @@ class CollaborationService extends EventEmitter {
    * 生成会话ID
    */
   generateSessionId() {
-    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   /**
    * 生成评论ID
    */
   generateCommentId() {
-    return `comment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `comment_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   /**
    * 生成分享ID
    */
   generateShareId() {
-    return `share_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `share_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   /**

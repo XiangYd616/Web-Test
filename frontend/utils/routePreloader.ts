@@ -3,7 +3,7 @@
  * 智能预加载用户可能访问的页面，提升用户体验
  */
 
-import { ComponentType, lazy } from 'react';
+import {ComponentType, lazy} from 'react';
 
 // 预加载状态管理
 interface PreloadState {
@@ -171,7 +171,7 @@ export const routeImports = {
   '/ux-test': () => import('../pages/core/testing/UXTest'),
 
   // 仪表板和数据
-  '/dashboard': () => import('../pages/core/dashboard/ModernDashboard'),
+  '/dashboard': () => import('../pages/core/dashboard/Dashboard'),
   '/data-management': () => import('../pages/management/admin/DataManagement'),
   '/statistics': () => import('../pages/data/reports/Statistics'),
   '/analytics': () => import('../pages/data/reports/Analytics'),

@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { Clock, Users, TrendingUp, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
-import { type QueueStats } from '../../services/stressTestQueueManager';
+import {Clock, Users, TrendingUp, AlertCircle, CheckCircle, XCircle} from 'lucide-react';
 
 interface StressTestQueueStatusProps {
   queueStats: QueueStats;

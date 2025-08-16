@@ -7,13 +7,13 @@ const express = require('express');
 const router = express.Router();
 const { asyncHandler } = require('../middleware/errorHandler');
 const { authMiddleware } = require('../middleware/auth');
-const { AdvancedSecurityEngine } = require('../engines/security/SecurityEngine');
+const { SecurityEngine } = require('../engines/security/SecurityAnalyzer');
 
 // 应用认证中间件
 router.use(authMiddleware);
 
 // 创建安全引擎实例
-const securityEngine = new AdvancedSecurityEngine();
+const securityEngine = new SecurityEngine();
 
 /**
  * 高级安全测试
@@ -48,7 +48,7 @@ router.post('/advanced-test', asyncHandler(async (req, res) => {
     }, {
       ...options,
       userId: req.user.id,
-      testId: `security_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      testId: `security_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
     });
 
     // 记录测试结果到数据库（这里应该实际保存到数据库）

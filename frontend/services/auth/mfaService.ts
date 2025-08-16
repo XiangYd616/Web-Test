@@ -5,7 +5,6 @@
  */
 
 import { useCallback, useState } from 'react';
-import { defaultMemoryCache } from '../cacheStrategy';
 
 // ==================== 类型定义 ====================
 
@@ -627,7 +626,7 @@ export class MFAService {
   // ==================== 私有方法 ====================
 
   private generateChallengeId(): string {
-    return 'mfa_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    return 'mfa_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
   }
 
   private async saveMFASetup(setup: MFASetup): Promise<void> {

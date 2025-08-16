@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { MessageSquare, Star, ThumbsDown, ThumbsUp, X } from 'lucide-react';
-import { FeedbackSeverity, FeedbackType, PageType, userFeedbackService } from '../../services/userFeedbackService';
+import {MessageSquare, Star, ThumbsDown, ThumbsUp, X} from 'lucide-react';
+import {FeedbackSeverity, FeedbackType, PageType, userFeedbackService} from '../../services/user/userFeedbackService';
 
 interface FeedbackWidgetProps {
   page: PageType;

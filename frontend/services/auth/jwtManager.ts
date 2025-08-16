@@ -4,7 +4,7 @@
  * 版本: v1.0.0
  */
 
-import { jwtDecode } from 'jwt-decode';
+import {jwtDecode} from 'jwt-decode';
 import type { User } from '../../types/common';
 
 // ==================== 类型定义 ====================
@@ -275,7 +275,7 @@ class SecureStorageManager {
 
 // ==================== 增强JWT管理器 ====================
 
-export class EnhancedJwtManager {
+export class JwtManager {
   private config: JwtConfig;
   private refreshTimer?: NodeJS.Timeout;
   private currentTokens?: TokenPair;
@@ -321,7 +321,7 @@ export class EnhancedJwtManager {
   private generateDeviceId(): string {
     let deviceId = localStorage.getItem('device_id');
     if (!deviceId) {
-      deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
       localStorage.setItem('device_id', deviceId);
     }
     return deviceId;
@@ -660,6 +660,6 @@ export class EnhancedJwtManager {
 
 // ==================== 默认实例 ====================
 
-export const defaultJwtManager = new EnhancedJwtManager();
+export const defaultJwtManager = new JwtManager();
 
 export default defaultJwtManager;

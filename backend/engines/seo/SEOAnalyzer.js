@@ -18,8 +18,8 @@ const LinkAnalyzer = require('./analyzers/LinkAnalyzer');
 const MobileOptimizationAnalyzer = require('./analyzers/MobileOptimizationAnalyzer');
 const ScoreCalculator = require('./utils/scoreCalculator');
 const RecommendationEngine = require('./utils/recommendationEngine');
-const AdvancedReportGenerator = require('./utils/AdvancedReportGenerator');
-const SmartOptimizationEngine = require('./utils/smartOptimizationEngine');
+const ReportGenerator = require('./utils/ReportGenerator');
+const OptimizationEngine = require('./utils/optimizationEngine');
 
 class SEOAnalyzer {
   constructor(options = {}) {
@@ -102,12 +102,12 @@ class SEOAnalyzer {
       this.analysisResults.recommendations = recommendations;
 
       // 生成高级报告
-      const reportGenerator = new AdvancedReportGenerator();
+      const reportGenerator = new ReportGenerator();
       const advancedReport = reportGenerator.generateReport(this.analysisResults, scores);
       this.analysisResults.advancedReport = advancedReport;
 
       // 生成智能优化建议
-      const optimizationEngine = new SmartOptimizationEngine();
+      const optimizationEngine = new OptimizationEngine();
       const smartRecommendations = optimizationEngine.generateSmartRecommendations(this.analysisResults);
       this.analysisResults.smartRecommendations = smartRecommendations;
 

@@ -3,12 +3,12 @@
  * 展示和测试所有的性能优化和用户体验改进
  */
 
-import { AlertCircle, BarChart3, CheckCircle, Clock, Play, Users, Zap } from 'lucide-react';
+import {AlertCircle, BarChart3, CheckCircle, Clock, Play, Users, Zap} from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { TestLoadingStates as LoadingStates, useLoadingState } from '../../../components/ui/LoadingStates.tsx';
-import { SmartTooltip, useSmartNotification } from '../../../components/ui/UX.tsx';
-import { usePerformanceOptimization } from '../../../hooks/usePerformanceOptimization.ts';
-import { createTestRunner, PerformanceTestResult, TestResult, UXTestResult } from '../../../utils/testUtils.ts';
+import {useLoadingState} from '../../../components/ui/LoadingStates.tsx';
+import {Tooltip, useSmartNotification} from '../../../components/ui/UX.tsx';
+import {usePerformanceOptimization} from '../../../hooks/usePerformanceOptimization.ts';
+import {createTestRunner, PerformanceTestResult, TestResult, UXTestResult} from '../../../utils/testUtils.ts';
 
 interface TestResults {
   performance: PerformanceTestResult[];
@@ -91,12 +91,12 @@ const TestOptimizations: React.FC = () => {
               {title}
             </h3>
           </div>
-          <SmartTooltip content={`阈值: ${threshold}${unit}`}>
+          <Tooltip content={`阈值: ${threshold}${unit}`}>
             <div className={`px-2 py-1 rounded text-xs font-medium ${isGood ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
               }`}>
               {isGood ? '良好' : '需优化'}
             </div>
-          </SmartTooltip>
+          </Tooltip>
         </div>
 
         <div className="space-y-2">

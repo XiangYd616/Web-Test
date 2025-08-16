@@ -297,7 +297,7 @@ class TestApiService {
 
   // 会话管理方法
   private generateSessionId(): string {
-    return `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `test_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   private createSession(sessionId: string, type: string): void {

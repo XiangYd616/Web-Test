@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart3, Code, Globe, Loader2, Shield, Zap } from 'lucide-react';
+import {BarChart3, Code, Globe, Loader2, Shield, Zap} from 'lucide-react';
 
 // CSS样式已迁移到组件内部，不再需要外部CSS文件
 
@@ -12,7 +12,7 @@ interface LoadingSpinnerProps {
   className?: string;
 }
 
-const EnhancedLoadingSpinner: React.FC<LoadingSpinnerProps> = ({
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = 'md',
   text = '加载中...',
   type = 'default',
@@ -177,4 +177,4 @@ export const InlineLoadingSpinner: React.FC<{ text?: string; className?: string 
   );
 };
 
-export default EnhancedLoadingSpinner;
+export default LoadingSpinner;

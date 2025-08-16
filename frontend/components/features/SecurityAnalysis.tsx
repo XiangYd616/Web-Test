@@ -1,4 +1,4 @@
-import { AlertCircle, AlertTriangle, CheckCircle, Eye, Info, Lock, Shield, TrendingDown, TrendingUp, XCircle } from 'lucide-react';
+import {AlertCircle, AlertTriangle, CheckCircle, Eye, Info, Lock, Shield, TrendingDown, TrendingUp, XCircle} from 'lucide-react';
 import React from 'react';
 
 interface SecurityAnalysisResult {
@@ -51,11 +51,11 @@ interface SecurityAnalysisResult {
   };
 }
 
-interface EnhancedSecurityAnalysisProps {
+interface SecurityAnalysisProps {
   result: SecurityAnalysisResult;
 }
 
-export const EnhancedSecurityAnalysis: React.FC<EnhancedSecurityAnalysisProps> = ({ result }) => {
+export const SecurityAnalysis: React.FC<SecurityAnalysisProps> = ({ result }) => {
   const getScoreColor = (score: number) => {
     if (score >= 85) return 'text-green-400 bg-green-500/20 border-green-500/30';
     if (score >= 70) return 'text-yellow-400 bg-yellow-500/20 border-yellow-500/30';
@@ -281,4 +281,4 @@ export const EnhancedSecurityAnalysis: React.FC<EnhancedSecurityAnalysisProps> =
   );
 };
 
-export default EnhancedSecurityAnalysis;
+export default SecurityAnalysis;

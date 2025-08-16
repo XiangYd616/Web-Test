@@ -356,7 +356,7 @@ class DataVisualizationService {
    * 生成图表ID
    */
   generateChartId() {
-    return `chart_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `chart_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   /**

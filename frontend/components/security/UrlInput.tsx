@@ -1,9 +1,9 @@
 
-import { AlertTriangle, CheckCircle, ExternalLink, Globe, HelpCircle, RefreshCw, Zap } from 'lucide-react';
+import {AlertTriangle, CheckCircle, ExternalLink, Globe, HelpCircle, RefreshCw, Zap} from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { URLValidationResult, validateUrlSync } from '../../utils/enhancedUrlValidator';
+import {URLValidationResult, validateUrlSync} from '../../utils/urlValidator';
 
-interface EnhancedUrlInputProps {
+interface UrlInputProps {
   value: string;
   onChange: (value: string) => void;
   onValidationChange?: (isValid: boolean, result?: URLValidationResult) => void;
@@ -21,7 +21,7 @@ const COMMON_EXAMPLES = [
   'http://localhost:3000'
 ];
 
-export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
+export const UrlInput: React.FC<UrlInputProps> = ({
   value,
   onChange,
   onValidationChange,
@@ -277,4 +277,4 @@ export const EnhancedUrlInput: React.FC<EnhancedUrlInputProps> = ({
   );
 };
 
-export default EnhancedUrlInput;
+export default UrlInput;

@@ -170,7 +170,7 @@ class BrowserManager {
         await page.grantPermissions(pageOptions.permissions);
       }
       
-      const pageKey = `${browserType}_${version}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const pageKey = `${browserType}_${version}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
       
       // 存储页面实例
       this.activePages.set(pageKey, {

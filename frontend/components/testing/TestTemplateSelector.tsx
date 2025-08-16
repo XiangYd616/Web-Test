@@ -1,6 +1,6 @@
-import { Bookmark, BookmarkCheck, Clock, Plus, Search, Star, Tag, TrendingUp } from 'lucide-react';
+import {Bookmark, BookmarkCheck, Clock, Plus, Search, Star, Tag, TrendingUp} from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { TestTemplate, TestTemplateService } from '../../services/testTemplates';
+import {TestTemplate, TestTemplateService} from '../../services/testing/testTemplateService';
 
 export interface TestTemplateSelectorProps {
   onSelectTemplate: (template: TestTemplate) => void;

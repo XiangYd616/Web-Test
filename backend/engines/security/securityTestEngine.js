@@ -69,7 +69,7 @@ class SecurityTestEngine {
    * 执行安全测试
    */
   async runSecurityTest(config) {
-    const testId = `sec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const testId = `sec_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
     try {
       const validatedConfig = this.validateConfig(config);

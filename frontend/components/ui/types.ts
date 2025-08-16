@@ -2,7 +2,7 @@
  * UI组件类型定义
  */
 
-import { ReactNode } from 'react';
+import {ReactNode} from 'react';
 
 // 基础组件属性
 export interface BaseComponentProps {

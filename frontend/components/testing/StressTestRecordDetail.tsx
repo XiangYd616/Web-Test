@@ -1,5 +1,5 @@
 
-import { Activity, AlertCircle, BarChart3, CheckCircle, Clock, Download, Globe, Settings, TrendingUp, Users, XCircle, Zap } from 'lucide-react';
+import {Activity, AlertCircle, BarChart3, CheckCircle, Clock, Download, Globe, Settings, TrendingUp, Users, XCircle, Zap} from 'lucide-react';
 import React, { useMemo } from 'react';
 import type { StressTestRecord } from '../../services/stressTestRecordService';
 

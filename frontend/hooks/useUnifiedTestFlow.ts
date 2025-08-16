@@ -2,9 +2,9 @@
  * 统一的测试数据流管理Hook
  */
 
-import { useState, useCallback, useRef } from 'react';
-import { testService } from '../services/unifiedTestService';
-import { TestConfig, TestResult, TestProgress, TestError } from '../types';
+import {useState, useCallback, useRef} from 'react';
+import {testService} from '../services/unifiedTestService';
+import {TestConfig, TestResult, TestProgress, TestError} from '../types/index';
 
 export interface UseUnifiedTestFlowReturn<T extends TestResult = TestResult> {
   // 状态

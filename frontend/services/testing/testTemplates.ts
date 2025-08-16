@@ -323,7 +323,7 @@ export class TestTemplateService {
   static saveCustomTemplate(template: Omit<TestTemplate, 'id' | 'createdAt' | 'updatedAt' | 'usage'>): TestTemplate {
     const newTemplate: TestTemplate = {
       ...template,
-      id: `custom_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `custom_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       usage: 0,

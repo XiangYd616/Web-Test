@@ -15,7 +15,7 @@ import {
   Info,
   Clock
 } from 'lucide-react';
-import { defaultPasswordPolicyService } from '../../services/auth/passwordPolicyService';
+import {defaultPasswordPolicyService} from '../../services/auth/passwordPolicyService';
 import type { PasswordStrength, PasswordValidationResult } from '../../services/auth/passwordPolicyService';
 
 // ==================== 类型定义 ====================

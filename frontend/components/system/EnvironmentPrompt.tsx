@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, Download, Monitor, Globe } from 'lucide-react';
+import {AlertTriangle, Download, Monitor, Globe} from 'lucide-react';
 
 interface EnvironmentPromptProps {
   feature: string;

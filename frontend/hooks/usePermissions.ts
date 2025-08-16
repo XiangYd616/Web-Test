@@ -4,8 +4,8 @@
  * 版本: v2.0.0
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { authManager } from '../services/auth/enhancedAuthManager';
+import {useState, useEffect, useCallback, useMemo} from 'react';
+import {authManager} from '../services/auth/authManager';
 import type { 
   Permission, 
   Role, 

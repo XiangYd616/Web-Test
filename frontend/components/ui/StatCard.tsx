@@ -1,6 +1,6 @@
 import React from 'react';
-import { LucideIcon } from 'lucide-react';
-import { cn } from '../../utils/cn';
+import {LucideIcon} from 'lucide-react';
+import {cn} from '../../utils/cn';
 
 interface StatCardProps {
   title: string;

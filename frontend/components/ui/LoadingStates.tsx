@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Activity, CheckCircle, Clock, Loader, Target, Zap } from 'lucide-react';
+import {Activity, CheckCircle, Clock, Loader, Target, Zap} from 'lucide-react';
 
 // 基础加载组件
 export const BasicLoader: React.FC<{ size?: 'sm' | 'md' | 'lg'; className?: string }> = ({
@@ -344,7 +344,7 @@ export const useLoadingState = (initialState = false) => {
 };
 
 // 智能加载组件 - 根据内容类型自动选择合适的加载状态
-export const SmartLoader: React.FC<{
+export const Loader: React.FC<{
   type: 'test' | 'data' | 'chart' | 'report';
   testType?: 'stress' | 'content' | 'security' | 'api';
   progress?: number;
@@ -389,7 +389,7 @@ const LoadingStates = {
   SuccessState,
   EmptyState,
   TimeoutState,
-  SmartLoader,
+  Loader,
   useLoadingState
 };
 

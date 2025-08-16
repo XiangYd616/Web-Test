@@ -1,9 +1,9 @@
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardBody } from './Card';
-import { Button } from './Button';
-import { Badge, StatusBadge } from './Badge';
+import {Card, CardHeader, CardTitle, CardBody} from './Card';
+import {Button} from './Button';
+import {Badge, StatusBadge} from './Badge';
 
-import { Layout, Square, MessageSquare, Type, Award, Layers, ExternalLink, CheckCircle } from 'lucide-react';
+import {Layout, Square, Type, Award, Layers, ExternalLink, CheckCircle} from 'lucide-react';
 
 export const TestNavigation: React.FC = () => {
   const testPages = [

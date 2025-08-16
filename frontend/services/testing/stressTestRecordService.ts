@@ -695,7 +695,7 @@ class StressTestRecordService {
    * 生成唯一ID
    */
   private generateId(): string {
-    return `stress_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `stress_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   /**

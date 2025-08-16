@@ -988,7 +988,7 @@ class BackupService extends EventEmitter {
      * 生成备份ID
      */
     generateBackupId() {
-        return `backup_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        return `backup_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     }
 
     /**

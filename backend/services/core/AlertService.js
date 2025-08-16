@@ -577,7 +577,7 @@ class AlertService extends EventEmitter {
      * 生成告警ID
      */
     generateAlertId() {
-        return `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        return `alert_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
     }
 
     /**

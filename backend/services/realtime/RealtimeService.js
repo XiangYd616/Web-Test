@@ -784,7 +784,7 @@ class RealtimeService {
    * 生成通知ID
    */
   generateNotificationId() {
-    return `notification_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `notification_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   /**

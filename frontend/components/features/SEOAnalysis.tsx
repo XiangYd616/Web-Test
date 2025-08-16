@@ -1,16 +1,16 @@
-import { AlertTriangle, CheckCircle, Download, Info, Share2, XCircle } from 'lucide-react';
+import {AlertTriangle, CheckCircle, Download, Info, Share2, XCircle} from 'lucide-react';
 import React from 'react';
-import { TestResult } from '../../services/testEngine';
+import {TestResult} from '../../services/testing/testEngineService';
 
 // CSS样式已迁移到组件库，不再需要外部CSS文件
 
-interface EnhancedSEOAnalysisProps {
+interface SEOAnalysisProps {
   results: TestResult;
   onExportReport: (format: 'pdf' | 'html' | 'json' | 'csv') => void;
   onShareResults: () => void;
 }
 
-const EnhancedSEOAnalysis: React.FC<EnhancedSEOAnalysisProps> = ({
+const SEOAnalysis: React.FC<SEOAnalysisProps> = ({
   results,
   onExportReport,
   onShareResults
@@ -142,8 +142,8 @@ const EnhancedSEOAnalysis: React.FC<EnhancedSEOAnalysisProps> = ({
             <h4 className="text-lg font-semibold text-white">分项评分</h4>
             {Object.entries(results.scores || {}).map(([key, score]) => {
               const name = categoryNames[key as keyof typeof categoryNames] || key;
-              const numScore = typeof score === 'number' ? score : 0;
-              const color = getScoreBarColor(numScore);
+              const Score = typeof score === 'number' ? score : 0;
+              const color = getScoreBarColor(Score);
 
               return (
                 <div key={key} className="flex items-center justify-between">
@@ -152,10 +152,10 @@ const EnhancedSEOAnalysis: React.FC<EnhancedSEOAnalysisProps> = ({
                     <div className="w-20 h-2 bg-gray-600 rounded-full overflow-hidden">
                       <div
                         className={`h-full ${color} transition-all duration-500`}
-                        style={{ width: `${numScore}%` }}
+                        style={{ width: `${Score}%` }}
                       />
                     </div>
-                    <span className="text-sm text-white w-8">{numScore}</span>
+                    <span className="text-sm text-white w-8">{Score}</span>
                   </div>
                 </div>
               );
@@ -288,4 +288,4 @@ const EnhancedSEOAnalysis: React.FC<EnhancedSEOAnalysisProps> = ({
   );
 };
 
-export default EnhancedSEOAnalysis;
+export default SEOAnalysis;

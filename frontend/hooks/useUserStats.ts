@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
-import { ActivityItem, UserActivityStats, userStatsService } from '../services/user/userStatsService';
-import { useAuth } from './useAuth';
+import {useCallback, useEffect, useState} from 'react';
+import {ActivityItem, UserActivityStats, userStatsService} from '../services/user/userStatsService';
+import {useAuth} from './useAuth';
 
 export const useUserStats = () => {
   const { user, isAuthenticated } = useAuth();

@@ -3,8 +3,8 @@
  * 基于全局状态管理的测试功能
  */
 
-import { useCallback } from 'react';
-import { useAppContext } from '../contexts/AppContext';
+import {useCallback} from 'react';
+import {useAppContext} from '../contexts/AppContext';
 
 // 测试配置接口
 export interface TestConfig {

@@ -1,10 +1,10 @@
-import { format } from 'date-fns';
+import {format} from 'date-fns';
 import React, { useMemo, useState } from 'react';
 
-import { Area, AreaChart, Bar, BarChart, Brush, CartesianGrid, Cell, ComposedChart, Funnel, FunnelChart, LabelList, Legend, Line, LineChart, Pie, PieChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import {Area, AreaChart, Bar, BarChart, Brush, CartesianGrid, Cell, ComposedChart, Funnel, FunnelChart, LabelList, Legend, Line, LineChart, Pie, PieChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
 
 // 高级压力测试图表
-interface AdvancedStressTestChartProps {
+interface StressTestChartProps {
   data?: Array<{
     time: string | number;
     timestamp?: number;
@@ -28,7 +28,7 @@ interface AdvancedStressTestChartProps {
   realTime?: boolean;
 }
 
-export const AdvancedStressTestChart: React.FC<AdvancedStressTestChartProps> = ({
+export const StressTestChart: React.FC<StressTestChartProps> = ({
   data = [],
   showAdvancedMetrics = false,
   height = 400,
@@ -354,7 +354,7 @@ export const AdvancedStressTestChart: React.FC<AdvancedStressTestChartProps> = (
 };
 
 // 高级性能分数图表
-interface AdvancedPerformanceChartProps {
+interface PerformanceChartProps {
   scores?: {
     performance: number;
     seo: number;
@@ -385,7 +385,7 @@ interface AdvancedPerformanceChartProps {
   height?: number;
 }
 
-export const AdvancedPerformanceChart: React.FC<AdvancedPerformanceChartProps> = ({
+export const PerformanceChart: React.FC<PerformanceChartProps> = ({
   scores,
   theme = 'dark',
   showDetails = false,
@@ -599,7 +599,7 @@ export const AdvancedPerformanceChart: React.FC<AdvancedPerformanceChartProps> =
 };
 
 // 高级安全检查图表
-interface AdvancedSecurityChartProps {
+interface SecurityChartProps {
   data?: Array<{
     category: string;
     passed: number;
@@ -619,7 +619,7 @@ interface AdvancedSecurityChartProps {
   height?: number;
 }
 
-export const AdvancedSecurityChart: React.FC<AdvancedSecurityChartProps> = ({
+export const SecurityChart: React.FC<SecurityChartProps> = ({
   data,
   theme = 'dark',
   showDetails = false,
@@ -909,7 +909,7 @@ export const AdvancedSecurityChart: React.FC<AdvancedSecurityChartProps> = ({
 };
 
 // 高级饼图组件
-interface AdvancedPieChartProps {
+interface PieChartProps {
   data?: Array<{
     name: string;
     value: number;
@@ -926,7 +926,7 @@ interface AdvancedPieChartProps {
   chartType?: 'pie' | 'donut' | 'funnel';
 }
 
-export const AdvancedPieChart: React.FC<AdvancedPieChartProps> = ({
+export const PieChart: React.FC<PieChartProps> = ({
   data,
   title = "数据分布",
   theme = 'dark',
@@ -1101,7 +1101,7 @@ export const AdvancedPieChart: React.FC<AdvancedPieChartProps> = ({
 };
 
 // 高级趋势图表
-interface AdvancedTrendChartProps {
+interface TrendChartProps {
   data?: Array<{
     date: string;
     value: number;
@@ -1120,7 +1120,7 @@ interface AdvancedTrendChartProps {
   timeRange?: 'day' | 'week' | 'month' | 'year';
 }
 
-export const AdvancedTrendChart: React.FC<AdvancedTrendChartProps> = ({
+export const TrendChart: React.FC<TrendChartProps> = ({
   data,
   title = "趋势分析",
   color = "#3B82F6",
@@ -1577,8 +1577,8 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
 };
 
 // 向后兼容的导出
-export const SimpleStressTestChart = AdvancedStressTestChart;
-export const SimplePerformanceChart = AdvancedPerformanceChart;
-export const SimpleSecurityChart = AdvancedSecurityChart;
-export const SimplePieChart = AdvancedPieChart;
-export const SimpleTrendChart = AdvancedTrendChart;
+export const SimpleStressTestChart = StressTestChart;
+export const SimplePerformanceChart = PerformanceChart;
+export const SimpleSecurityChart = SecurityChart;
+export const SimplePieChart = PieChart;
+export const SimpleTrendChart = TrendChart;

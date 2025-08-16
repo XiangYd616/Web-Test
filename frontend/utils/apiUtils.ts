@@ -139,7 +139,7 @@ export function buildQueryString(params: Record<string, any>): string {
  * @returns 唯一的请求ID
  */
 function generateRequestId(): string {
-    return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `req_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
 
 /**

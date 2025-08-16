@@ -21,7 +21,7 @@ import {
   AlertTriangle,
   Info
 } from 'lucide-react';
-import { useRBAC } from '../../services/auth/rbacService';
+import {useRBAC} from '../../services/auth/rbacService';
 import type { Role, Permission, UserPermissions } from '../../services/auth/rbacService';
 
 // ==================== 类型定义 ====================

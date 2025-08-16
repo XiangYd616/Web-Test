@@ -53,7 +53,7 @@ export type {
 // API 响应类型
 export type {
   ErrorCode,
-  ErrorSeverity, ExtendedApiError
+  ErrorSeverity, ApiError
 } from './apiResponse';
 
 // API 响应工具函数
@@ -66,7 +66,7 @@ export {
 } from './apiResponse';
 
 // 默认导出常用类型的联合
-export type UnifiedModels = {
+export type Models = {
   User: User;
   AuthResponse: AuthResponse;
   ApiResponse: ApiResponse;

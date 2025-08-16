@@ -7,10 +7,10 @@
 const puppeteer = require('puppeteer');
 const SQLInjectionAnalyzer = require('./analyzers/SQLInjectionAnalyzer');
 const XSSAnalyzer = require('./analyzers/XSSAnalyzer');
-const SSLAnalyzer = require('./analyzers/SSLAnalyzer');
-const AdvancedSSLAnalyzer = require('./analyzers/SSLAnalyzer');
-const SecurityHeadersAnalyzer = require('./analyzers/SecurityHeadersAnalyzer');
-const AdvancedSecurityHeadersAnalyzer = require('./analyzers/SecurityHeadersAnalyzer');
+const SSLAnalyzer = require('../analyzers/sslAnalyzer');
+const SSLAnalyzer = require('../analyzers/sslAnalyzer');
+const SecurityHeadersAnalyzer = require('../analyzers/securityHeadersAnalyzer');
+const SecurityHeadersAnalyzer = require('../analyzers/securityHeadersAnalyzer');
 const SecurityRiskAssessment = require('./utils/securityRiskAssessment');
 
 class SecurityAnalyzer {
@@ -30,9 +30,9 @@ class SecurityAnalyzer {
     this.sqlInjectionAnalyzer = new SQLInjectionAnalyzer();
     this.xssAnalyzer = new XSSAnalyzer();
     this.sslAnalyzer = new SSLAnalyzer();
-    this.advancedSSLAnalyzer = new AdvancedSSLAnalyzer();
+    this.advancedSSLAnalyzer = new SSLAnalyzer();
     this.securityHeadersAnalyzer = new SecurityHeadersAnalyzer();
-    this.advancedSecurityHeadersAnalyzer = new AdvancedSecurityHeadersAnalyzer();
+    this.advancedSecurityHeadersAnalyzer = new SecurityHeadersAnalyzer();
     this.riskAssessment = new SecurityRiskAssessment();
   }
 

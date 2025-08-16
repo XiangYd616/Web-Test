@@ -1,10 +1,10 @@
 
-import { AlertCircle, CheckCircle, Loader, Play, RotateCcw, Square, XCircle } from 'lucide-react';
+import {AlertCircle, CheckCircle, Loader, Play, RotateCcw, Square, XCircle} from 'lucide-react';
 import React from 'react';
-import { TestPhase, TestState } from '../../services/testing/testStateManager';
+import {TestPhase, TestState} from '../../services/testing/testStateManager';
 
 // 控制组件属性接口
-export interface OptimizedTestControlsProps {
+export interface TestControlsProps {
   testState: TestState;
   testPhase: TestPhase;
   progress: { progress: number; message: string };
@@ -110,7 +110,7 @@ const phaseDescriptions: Record<TestPhase, string> = {
   [TestPhase.CLEANUP]: '清理中...'
 };
 
-export const OptimizedTestControls: React.FC<OptimizedTestControlsProps> = ({
+export const TestControls: React.FC<TestControlsProps> = ({
   testState,
   testPhase,
   progress,

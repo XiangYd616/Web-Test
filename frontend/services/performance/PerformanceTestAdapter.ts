@@ -1,6 +1,6 @@
 
-import { PERFORMANCE_CONFIG_PRESETS, PerformanceTestProgress, PerformanceTestResult, UnifiedPerformanceConfig } from '../../types/performance';
-import { performanceTestCore } from './performanceTestCore';
+import {PERFORMANCE_CONFIG_PRESETS, PerformanceTestProgress, PerformanceTestResult, PerformanceConfig} from '../../types/performance';
+import {performanceTestCore} from './performanceTestCore';
 
 // ==================== 兼容性接口定义 ====================
 
@@ -85,7 +85,7 @@ export class PerformanceTestAdapter {
       includeAccessibility?: boolean;
     } = {}
   ): Promise<any> {
-    const config: Partial<UnifiedPerformanceConfig> = {
+    const config: Partial<PerformanceConfig> = {
       level: options.level || 'standard',
       device: options.device || 'desktop',
       pageSpeed: true,
@@ -135,7 +135,7 @@ export class PerformanceTestAdapter {
       checkMobile?: boolean;
     } = {}
   ): Promise<any> {
-    const config: Partial<UnifiedPerformanceConfig> = {
+    const config: Partial<PerformanceConfig> = {
       level: 'basic', // SEO测试使用基础性能检测
       device: options.device || 'desktop',
       pageSpeed: true,
@@ -181,7 +181,7 @@ export class PerformanceTestAdapter {
       retries?: number;
     } = {}
   ): Promise<any> {
-    const config: Partial<UnifiedPerformanceConfig> = {
+    const config: Partial<PerformanceConfig> = {
       level: 'basic',
       device: 'desktop',
       pageSpeed: true,
@@ -218,7 +218,7 @@ export class PerformanceTestAdapter {
   /**
    * 转换旧配置到新配置
    */
-  private static convertLegacyConfig(legacy: LegacyPerformanceTestConfig): Partial<UnifiedPerformanceConfig> {
+  private static convertLegacyConfig(legacy: LegacyPerformanceTestConfig): Partial<PerformanceConfig> {
     return {
       level: legacy.mode === 'lighthouse' ? 'comprehensive' : legacy.mode,
       pageSpeed: legacy.checkPageSpeed,
@@ -304,7 +304,7 @@ export async function getPerformanceMetrics(
   vitals?: any;
   mobile?: any;
 }> {
-  const config: Partial<UnifiedPerformanceConfig> = {
+  const config: Partial<PerformanceConfig> = {
     level: 'basic',
     pageSpeed: true,
     coreWebVitals: options.includeVitals || false,

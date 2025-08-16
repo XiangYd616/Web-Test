@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { TestPageTemplate } from '../../../components/testing/UnifiedTestPageTemplate';
-import { SecurityTestConfig } from '../../../components/testing/specialized/SecurityTestConfig';
-import { testService } from '../../../services/testService';
-import { configService } from '../../../services/configService';
-import { useAuthCheck } from '../../../hooks/useAuthCheck';
-import { useUserStats } from '../../../hooks/useUserStats';
-import { Shield, AlertTriangle, Lock, Eye } from 'lucide-react';
+import {TestPageTemplate} from '../../../components/testing/TestPage';
+import {SecurityTestConfig} from '../../../components/testing/specialized/SecurityTestConfig';
+import {testService} from '../../../services/testService';
+import {configService} from '../../../services/configService';
+import {useAuthCheck} from '../../../hooks/useAuth';
+import {useUserStats} from '../../../hooks/useUserStats';
+import {Shield, AlertTriangle, Lock, Eye} from 'lucide-react';
 
 interface SecurityTestRefactoredProps {}
 
@@ -115,7 +115,7 @@ const SecurityTestRefactored: React.FC<SecurityTestRefactoredProps> = () => {
   }
 
   return (
-    <UnifiedTestPageTemplate
+    <TestPageTemplate
       testType="security"
       testName="安全测试"
       onTestStart={handleTestStart}
@@ -216,7 +216,7 @@ const SecurityTestRefactored: React.FC<SecurityTestRefactoredProps> = () => {
           </div>
         </div>
       </div>
-    </UnifiedTestPageTemplate>
+    </TestPageTemplate>
   );
 };
 

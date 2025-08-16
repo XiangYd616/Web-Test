@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, AlertTriangle, Lock, Eye, EyeOff } from 'lucide-react';
+import {Shield, AlertTriangle, Lock, Eye} from 'lucide-react';
 
 interface SecurityTestConfigProps {
   config: any;

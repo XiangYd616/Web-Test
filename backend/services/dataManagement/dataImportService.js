@@ -1340,7 +1340,7 @@ class DataImportService extends EventEmitter {
    * 生成任务ID
    */
   generateTaskId() {
-    return `import_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `import_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   /**

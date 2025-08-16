@@ -1,11 +1,11 @@
-import { Clock, Play, Square, Target } from 'lucide-react';
+import {Clock, Play, Square, Target} from 'lucide-react';
 import React, { useCallback, useState } from 'react';
-import { TestResult, TestType } from '../../services/testing/testEngine';
-import { ButtonFeedback } from '../tools/InteractiveFeedback.tsx';
-import { ErrorDisplay, useErrorHandler, useNotifications } from '../system/ErrorHandling';
-import { SmartLoader, useLoadingState } from '../ui/LoadingStates';
+import {TestResult, TestType} from '../../services/testing/testEngine';
+import {ButtonFeedback} from '../tools/InteractiveFeedback.tsx';
+import {ErrorDisplay, useErrorHandler, useNotifications} from '../system/ErrorHandling';
+import {Loader, useLoadingState} from '../ui/LoadingStates';
 
-interface UnifiedTestInterfaceProps {
+interface TestInterfaceProps {
   testType: TestType;
   title: string;
   description: string;
@@ -16,7 +16,7 @@ interface UnifiedTestInterfaceProps {
   className?: string;
 }
 
-const UnifiedTestInterface: React.FC<UnifiedTestInterfaceProps> = ({
+const TestInterface: React.FC<TestInterfaceProps> = ({
   testType,
   title,
   description,
@@ -325,7 +325,7 @@ const UnifiedTestInterface: React.FC<UnifiedTestInterfaceProps> = ({
 
       {/* 进度显示 */}
       {isLoading && (
-        <SmartLoader
+        <Loader
           type="test"
           testType={testType as 'stress' | 'content' | 'security' | 'api'}
           progress={progress}
@@ -340,4 +340,4 @@ const UnifiedTestInterface: React.FC<UnifiedTestInterfaceProps> = ({
   );
 };
 
-export default UnifiedTestInterface;
+export default TestInterface;

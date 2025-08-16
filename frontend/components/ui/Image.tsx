@@ -4,9 +4,9 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { useDevicePerformance, useLazyImage, useNetworkStatus } from '../../hooks/usePerformanceOptimization';
+import {useDevicePerformance, useLazyImage, useNetworkStatus} from '../../hooks/usePerformanceOptimization';
 
-interface OptimizedImageProps {
+interface ImageProps {
     src: string;
     alt: string;
     className?: string;
@@ -24,7 +24,7 @@ interface OptimizedImageProps {
     onError?: () => void;
 }
 
-const OptimizedImage: React.FC<OptimizedImageProps> = ({
+const Image: React.FC<ImageProps> = ({
     src,
     alt,
     className = '',
@@ -200,4 +200,4 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
     );
 };
 
-export default OptimizedImage;
+export default Image;

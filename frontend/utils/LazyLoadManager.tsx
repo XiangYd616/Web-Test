@@ -4,9 +4,9 @@
  */
 
 import React, { ComponentType, LazyExoticComponent, ReactNode, Suspense } from 'react';
-import ErrorBoundary from '../components/system/EnhancedErrorBoundary';
-import { enhancedConfigManager } from '../config/ConfigManager';
-import { performanceMonitor } from './performanceMonitor';
+import ErrorBoundary from '../components/system/ErrorBoundary';
+import {enhancedConfigManager} from '../config/ConfigManager';
+// import {performanceMonitor} from './performanceMonitor';
 
 /**
  * 懒加载配置
@@ -85,7 +85,7 @@ export class LazyLoadManager {
       loadingState.isLoading = true;
       loadingState.error = null;
 
-      const componentName = chunkName || 'unknown';
+      const componentName = chunkName || 'unknown'; // 已删除
 
       // 记录开始加载
       performanceMonitor.startMeasure(`lazy-load-${componentName}`);
@@ -184,9 +184,9 @@ export class LazyLoadManager {
 
       if (errorBoundary) {
         return (
-          <EnhancedErrorBoundary level="component">
+          <ErrorBoundary level="component">
             {content}
-          </EnhancedErrorBoundary>
+          </ErrorBoundary>
         );
       }
 

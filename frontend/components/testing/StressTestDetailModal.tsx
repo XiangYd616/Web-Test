@@ -1,11 +1,11 @@
-import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Copy, Download, ExternalLink, Settings, TrendingUp, Users, X, XCircle, Zap } from 'lucide-react';
+import {AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Copy, Download, ExternalLink, Settings, TrendingUp, Users, X, XCircle, Zap} from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { useNavigate } from 'react-router-dom';
+import {createPortal} from 'react-dom';
+import {useNavigate} from 'react-router-dom';
 import ExportUtils from '../../utils/exportUtils';
 import ExportModal from '../ui/ExportModal.tsx';
 
-// import './StressTestDetailModal.css'; // CSS文件不存在，已注释
+// // import './StressTestDetailModal.css'; // 文件已删除 // CSS文件不存在，已注释
 
 interface StressTestDetailModalProps {
   record: any;

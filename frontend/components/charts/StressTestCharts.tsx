@@ -1,8 +1,8 @@
 
-import { RotateCcw } from 'lucide-react';
+import {RotateCcw} from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Bar, BarChart, Brush, CartesianGrid, Cell, ComposedChart, Legend, Line, Pie, PieChart, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import {Bar, BarChart, Brush, CartesianGrid, Cell, ComposedChart, Legend, Line, Pie, PieChart, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
 
 interface TestPhase {
   name: string;
@@ -13,7 +13,7 @@ interface TestPhase {
 }
 
 // 增强的实时数据接口
-interface EnhancedRealTimeData {
+interface RealTimeData {
   timestamp: number;
   responseTime: number;
   status: number;
@@ -47,9 +47,9 @@ interface BaselineData {
 }
 
 // 主组件属性
-interface EnhancedStressTestChartsProps {
+interface StressTestChartsProps {
   // 实时数据（测试进行中）
-  realTimeData?: EnhancedRealTimeData[];
+  realTimeData?: RealTimeData[];
 
   testResultData?: TestResultData[];
 
@@ -86,7 +86,7 @@ interface EnhancedStressTestChartsProps {
   };
 }
 
-export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> = ({
+export const StressTestCharts: React.FC<StressTestChartsProps> = ({
   realTimeData = [],
   testResultData = [],
   isRunning,
@@ -121,7 +121,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
     // 明确区分数据源：实时数据用于实时监控，测试结果数据用于结果视图
     let sourceData: any[] = [];
 
-    console.log('🎯 EnhancedStressTestCharts 数据处理开始:', {
+    console.log('🎯 StressTestCharts 数据处理开始:', {
       chartType,
       realTimeDataLength: realTimeData?.length || 0,
       testResultDataLength: testResultData?.length || 0,
@@ -137,19 +137,19 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
       sourceData = realTimeData;
       // 只在数据量变化时打印日志
       if (realTimeData.length % 100 === 0 || realTimeData.length < 10) {
-        console.log('📊 EnhancedStressTestCharts 使用实时数据:', sourceData.length, '个数据点');
+        console.log('📊 StressTestCharts 使用实时数据:', sourceData.length, '个数据点');
       }
     } else if (testResultData && testResultData.length > 0) {
       // 使用测试结果数据（用于测试结果视图）
       sourceData = testResultData;
-      console.log('📊 EnhancedStressTestCharts 使用测试结果数据:', sourceData.length, '个数据点');
+      console.log('📊 StressTestCharts 使用测试结果数据:', sourceData.length, '个数据点');
     } else {
       // 减少空数据警告的频率，只在组件首次渲染时打印
-      console.log('⚠️ EnhancedStressTestCharts: 没有可用数据');
+      console.log('⚠️ StressTestCharts: 没有可用数据');
     }
 
     if (!sourceData || sourceData.length === 0) {
-      console.log('❌ EnhancedStressTestCharts: 返回空数据');
+      console.log('❌ StressTestCharts: 返回空数据');
       return [];
     }
 
@@ -159,7 +159,7 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
 
     // 只在数据量变化时打印处理结果
     if (filtered.length % 50 === 0 || filtered.length < 10) {
-      console.log('📊 EnhancedStressTestCharts 处理后数据:', filtered.length, '个数据点', filtered.slice(0, 2));
+      console.log('📊 StressTestCharts 处理后数据:', filtered.length, '个数据点', filtered.slice(0, 2));
     }
 
     return filtered;
@@ -583,4 +583,4 @@ export const EnhancedStressTestCharts: React.FC<EnhancedStressTestChartsProps> =
   );
 };
 
-export default EnhancedStressTestCharts;
+export default StressTestCharts;

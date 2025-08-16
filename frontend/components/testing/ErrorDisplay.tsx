@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 
-import { AlertTriangle, ChevronDown, ChevronRight, ExternalLink, HelpCircle, RefreshCw, X, Zap, Shield, Globe, Clock } from 'lucide-react';
+import {AlertTriangle, ChevronDown, ChevronRight, ExternalLink, HelpCircle, RefreshCw, X, Zap, Shield, Globe, Clock} from 'lucide-react';
 
 export interface ErrorSolution {
   title: string;
@@ -15,7 +15,7 @@ export interface ErrorSolution {
   }>;
 }
 
-export interface EnhancedError {
+export interface Error {
   type: 'network' | 'validation' | 'security' | 'timeout' | 'server' | 'unknown';
   title: string;
   message: string;
@@ -29,8 +29,8 @@ export interface EnhancedError {
   }>;
 }
 
-interface EnhancedErrorDisplayProps {
-  error: EnhancedError;
+interface ErrorDisplayProps {
+  error: Error;
   onDismiss?: () => void;
   onRetry?: () => void;
   className?: string;
@@ -90,7 +90,7 @@ const DIFFICULTY_LABELS = {
   hard: { label: '困难', color: 'text-red-400', time: '15-30分钟' }
 };
 
-export const EnhancedErrorDisplay: React.FC<EnhancedErrorDisplayProps> = ({
+export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
   error,
   onDismiss,
   onRetry,
@@ -283,4 +283,4 @@ export const EnhancedErrorDisplay: React.FC<EnhancedErrorDisplayProps> = ({
   );
 };
 
-export default EnhancedErrorDisplay;
+export default ErrorDisplay;

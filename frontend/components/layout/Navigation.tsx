@@ -1,7 +1,7 @@
-import { BarChart3, Bell, Calendar, ChevronDown, Code, Database, Eye, FileText, Gauge, Globe, HelpCircle, LogOut, Menu, Monitor, Search, Settings, Shield, User, Wifi, X, Zap } from 'lucide-react';
+import {BarChart3, Bell, ChevronDown, Code, Database, Eye, FileText, Gauge, Globe, HelpCircle, LogOut, Menu, Monitor, Search, Settings, Shield, TestTube, User, X, Zap} from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import {Link, useLocation, useNavigate} from 'react-router-dom';
+import {useAuth} from '../../contexts/AuthContext';
 
 interface NavigationItem {
   name: string;
@@ -23,71 +23,58 @@ const ModernNavigation: React.FC = () => {
 
   const testingTools: NavigationItem[] = [
     {
-      name: '网站测试',
-      href: '/website-test',
-      icon: Zap,
-      description: '综合网站测试平台'
-    },
-
-    {
-      name: 'SEO测试',
-      href: '/seo-test',
-      icon: Search,
-      description: '搜索引擎优化检测'
-    },
-    {
-      name: '安全检测',
-      href: '/security-test',
-      icon: Shield,
-      description: '安全漏洞扫描'
+      name: 'API测试',
+      href: '/testing/api',
+      icon: Code,
+      description: 'REST API端点测试和验证'
     },
     {
       name: '性能测试',
-      href: '/performance-test',
+      href: '/testing/performance',
       icon: Gauge,
-      description: '网站性能分析'
+      description: 'Lighthouse性能分析'
+    },
+    {
+      name: '安全测试',
+      href: '/testing/security',
+      icon: Shield,
+      description: 'SSL证书和安全头部检查'
+    },
+    {
+      name: 'SEO测试',
+      href: '/testing/seo',
+      icon: Search,
+      description: 'Meta标签和SEO优化分析'
+    },
+    {
+      name: '压力测试',
+      href: '/testing/stress',
+      icon: Zap,
+      description: '负载和并发性能测试'
+    },
+    {
+      name: '基础设施测试',
+      href: '/testing/infrastructure',
+      icon: Database,
+      description: 'DNS解析和端口连接检查'
+    },
+    {
+      name: 'UX测试',
+      href: '/testing/ux',
+      icon: Eye,
+      description: '用户体验和可访问性测试'
     },
     {
       name: '兼容性测试',
-      href: '/compatibility-test',
+      href: '/testing/compatibility',
       icon: Globe,
-      description: '跨浏览器兼容性检测'
+      description: '跨浏览器和设备兼容性'
     },
     {
-      name: 'API测试',
-      href: '/api-test',
-      icon: Code,
-      description: 'RESTful API接口测试'
-    },
-    {
-      name: '用户体验测试',
-      href: '/ux-test',
-      icon: Eye,
-      description: 'Core Web Vitals分析'
-    },
-    {
-      name: '数据库测试',
-      href: '/database-test',
-      icon: Database,
-      description: '数据库性能和完整性检测'
-    },
-    {
-      name: '网络测试',
-      href: '/network-test',
-      icon: Wifi,
-      description: '网络延迟和带宽测试'
-    },
-    {
-      name: '实时监控',
-      href: '/dashboard',
+      name: '网站综合测试',
+      href: '/testing/website',
       icon: Monitor,
-      description: '7x24小时网站监控'
-    },
-    {
-      name: '测试调度',
-      href: '/test-schedule',
-      icon: Calendar,
-      description: '定时和批量测试管理'
+      description: '全面的网站质量评估'
     }
   ];
 
@@ -96,6 +83,11 @@ const ModernNavigation: React.FC = () => {
       name: '仪表板',
       href: '/',
       icon: Monitor
+    },
+    {
+      name: '测试工具',
+      href: '/testing',
+      icon: TestTube
     },
     {
       name: '传统仪表板',

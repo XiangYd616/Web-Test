@@ -1,16 +1,16 @@
 
-import { AlertTriangle, Award, CheckCircle, ChevronDown, ChevronRight, Clock, Download, Eye, EyeOff, FileText, Info, Lock, Network, Shield, Target, TrendingUp, Zap } from 'lucide-react';
+import {AlertTriangle, Award, CheckCircle, ChevronDown, ChevronRight, Clock, Download, Eye, EyeOff, FileText, Info, Lock, Network, Shield, Target, TrendingUp, Zap} from 'lucide-react';
 import React, { useState } from 'react';
 
-import { SecurityTestResult } from '../../services/unifiedSecurityEngine';
+import {SecurityTestResult} from '../../services/testing/securityTestService';
 
-interface UnifiedSecurityResultsProps {
+interface SecurityResultsProps {
   result: SecurityTestResult;
   onExport?: (format: 'json' | 'html' | 'pdf') => void;
   onRetry?: () => void;
 }
 
-const SecurityResults: React.FC<UnifiedSecurityResultsProps> = ({
+const SecurityResults: React.FC<SecurityResultsProps> = ({
   result,
   onExport,
   onRetry
@@ -478,4 +478,4 @@ const SecurityResults: React.FC<UnifiedSecurityResultsProps> = ({
 };
 
 export default SecurityResults;
-export { SecurityResults as UnifiedSecurityResults };
+export { SecurityResults as SecurityResults };

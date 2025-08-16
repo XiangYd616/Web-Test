@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from './useAuth';
+import {useAuth} from './useAuth';
 import type { User } from '../types/user';
 
 interface AdminAuthState {

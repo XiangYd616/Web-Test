@@ -8,7 +8,7 @@ export interface AnalyticsData {
   insights: AnalyticsInsight[];
   trends: TrendAnalysis;
   comparisons: ComparisonData[];
-  recommendations: SmartRecommendation[];
+  recommendations: Recommendation[];
   diagnostics: DiagnosticResult[];
 }
 
@@ -91,7 +91,7 @@ export interface TrendDataPoint {
   };
 }
 
-export interface SmartRecommendation {
+export interface Recommendation {
   id: string;
   category: 'performance' | 'security' | 'accessibility' | 'seo' | 'user-experience';
   priority: 'critical' | 'high' | 'medium' | 'low';
@@ -147,7 +147,7 @@ export interface ComparisonData {
   }[];
 }
 
-export class AdvancedAnalyticsService {
+export class AnalyticsService {
   private static readonly ANALYTICS_STORAGE_KEY = 'advanced_analytics_data';
   private static readonly TRENDS_STORAGE_KEY = 'analytics_trends_data';
 
@@ -274,8 +274,8 @@ export class AdvancedAnalyticsService {
   }
 
   // 生成智能建议
-  private static async generateSmartRecommendations(testResult: any): Promise<SmartRecommendation[]> {
-    const recommendations: SmartRecommendation[] = [];
+  private static async generateSmartRecommendations(testResult: any): Promise<Recommendation[]> {
+    const recommendations: Recommendation[] = [];
 
     // 基于性能数据生成建议
     if (testResult.metrics?.performance) {
@@ -296,8 +296,8 @@ export class AdvancedAnalyticsService {
   }
 
   // 生成性能建议
-  private static generatePerformanceRecommendations(performanceData: any): SmartRecommendation[] {
-    const recommendations: SmartRecommendation[] = [];
+  private static generatePerformanceRecommendations(performanceData: any): Recommendation[] {
+    const recommendations: Recommendation[] = [];
 
     if (performanceData.largestContentfulPaint > 2500) {
       recommendations.push({
@@ -547,7 +547,7 @@ export class AdvancedAnalyticsService {
   private static analyzeStructuredData(testResult: any): any { return {}; }
   private static generateSecurityInsights(securityData: any): AnalyticsInsight[] { return []; }
   private static generateAccessibilityInsights(accessibilityData: any): AnalyticsInsight[] { return []; }
-  private static generateSecurityRecommendations(securityData: any): SmartRecommendation[] { return []; }
+  private static generateSecurityRecommendations(securityData: any): Recommendation[] { return []; }
   private static runSecurityDiagnostics(testResult: any): DiagnosticResult[] { return []; }
   private static runAccessibilityDiagnostics(testResult: any): DiagnosticResult[] { return []; }
   private static generateComparisons(testResult: any): Promise<ComparisonData[]> { return Promise.resolve([]); }

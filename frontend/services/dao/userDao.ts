@@ -3,7 +3,7 @@
  * 提供用户相关的数据库操作
  */
 
-import { CreateUserData, UpdateUserData, User } from '../../types/user';
+import {CreateUserData, UpdateUserData, User} from '../../types/user';
 
 // 模拟用户数据存储
 const users: User[] = [

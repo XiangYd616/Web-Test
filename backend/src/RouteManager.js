@@ -263,8 +263,8 @@ class UnifiedRouteManager {
       // 具体测试路由 - 必须在通用测试路由之前
       {
         path: '/api/test/history',
-        module: '../routes/testHistory.js',
-        description: '测试历史API',
+        module: '../routes/unifiedTestHistory.js',
+        description: '统一测试历史API',
         group: 'testSpecific'
       },
 
@@ -282,6 +282,22 @@ class UnifiedRouteManager {
         module: '../routes/seo.js',
         description: 'SEO测试API',
         group: 'testSpecific'
+      },
+
+      // 引擎状态路由
+      {
+        path: '/api/engines',
+        module: '../routes/engineStatus.js',
+        description: '测试引擎状态API',
+        group: 'system'
+      },
+
+      // 存储管理路由
+      {
+        path: '/api/storage',
+        module: '../routes/storageManagement.js',
+        description: '存储管理API',
+        group: 'system'
       },
 
       // 数据管理路由

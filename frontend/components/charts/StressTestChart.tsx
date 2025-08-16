@@ -1,9 +1,9 @@
 
-import { BarChart3, Download, Settings, TrendingUp } from 'lucide-react';
+import {BarChart3, Download, Settings, TrendingUp} from 'lucide-react';
 import React, { useMemo, useState } from 'react';
-import { TestPhase, TestState, type RealTimeMetrics, type TestDataPoint } from '../../services/testing/testStateManager';
+import {TestPhase, TestState} from '../../services/testing/testStateManager';
 
-import '../../styles/optimized-charts.css';
+import '../../styles/components.css';
 
 // 图表配置接口
 export interface ChartConfig {
@@ -19,7 +19,7 @@ export interface ChartConfig {
 }
 
 // 组件属性接口
-export interface OptimizedStressTestChartProps {
+export interface StressTestChartProps {
   testState: TestState;
   testPhase: TestPhase;
   dataPoints: TestDataPoint[];
@@ -43,7 +43,7 @@ const defaultConfig: ChartConfig = {
   showLegend: true
 };
 
-export const OptimizedStressTestChart: React.FC<OptimizedStressTestChartProps> = ({
+export const StressTestChart: React.FC<StressTestChartProps> = ({
   testState,
   testPhase,
   dataPoints,
