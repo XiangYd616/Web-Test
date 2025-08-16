@@ -7,6 +7,17 @@ interface SecurityTestGuideProps {
 }
 
 const SecurityTestGuide: React.FC<SecurityTestGuideProps> = ({ isOpen, onClose }) => {
+  
+  const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    if (disabled || loading) return;
+    onClick?.(event);
+  }, [disabled, loading, onClick]);
+  
+  const memoizedHandleChange = useMemo(() => 
+    debounce((value: any) => {
+      onChange?.(value);
+    }, 300), [onChange]
+  );
   const [expandedSection, setExpandedSection] = useState<string | null>('getting-started');
 
   const toggleSection = (section: string) => {

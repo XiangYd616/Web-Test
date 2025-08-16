@@ -23,6 +23,17 @@ const CancelTestConfirmDialog: React.FC<CancelTestConfirmDialogProps> = ({
   testProgress,
   isLoading = false
 }) => {
+  
+  const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    if (disabled || loading) return;
+    onClick?.(event);
+  }, [disabled, loading, onClick]);
+  
+  const memoizedHandleChange = useMemo(() => 
+    debounce((value: any) => {
+      onChange?.(value);
+    }, 300), [onChange]
+  );
   const [selectedReason, setSelectedReason] = useState('user_cancelled');
   const [preserveData, setPreserveData] = useState(true);
   const [customReason, setCustomReason] = useState('');

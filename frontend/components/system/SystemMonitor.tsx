@@ -3,6 +3,40 @@ import React, { useEffect, useState } from 'react';
 import { adminService } from '../../services/adminService';
 import type { SystemMonitor as SystemMonitorType } from '../../types/admin';
 
+
+export interface SystemMonitorProps {
+  // 基础属性
+  className?: string;
+  style?: React.CSSProperties;
+  children?: React.ReactNode;
+  
+  // 事件处理
+  onClick?: (event: React.MouseEvent<HTMLElement>) => void;
+  onChange?: (value: any) => void;
+  onFocus?: (event: React.FocusEvent<HTMLElement>) => void;
+  onBlur?: (event: React.FocusEvent<HTMLElement>) => void;
+  
+  // 状态属性
+  disabled?: boolean;
+  loading?: boolean;
+  error?: string | boolean;
+  
+  // 数据属性
+  value?: any;
+  defaultValue?: any;
+  
+  // 配置属性
+  size?: 'small' | 'medium' | 'large';
+  variant?: 'primary' | 'secondary' | 'outline';
+  
+  // 可访问性
+  'aria-label'?: string;
+  'aria-describedby'?: string;
+  role?: string;
+  tabIndex?: number;
+}
+
+
 // 自动保护配置接口
 interface AutoProtectionConfig {
   enabled: boolean;
@@ -26,7 +60,18 @@ interface ActiveTest {
   warnings: string[];
 }
 
-const SystemMonitor: React.FC = () => {
+const SystemMonitor: React.FC<SystemMonitorProps> = (props) => {
+  
+  const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    if (disabled || loading) return;
+    onClick?.(event);
+  }, [disabled, loading, onClick]);
+  
+  const memoizedHandleChange = useMemo(() => 
+    debounce((value: any) => {
+      onChange?.(value);
+    }, 300), [onChange]
+  );
   const [monitor, setMonitor] = useState<SystemMonitorType | null>(null);
   const [loading, setLoading] = useState(true);
   const [autoRefresh, setAutoRefresh] = useState(true);

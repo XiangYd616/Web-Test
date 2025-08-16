@@ -1,6 +1,40 @@
 import { AlertTriangle, CheckCircle, Clock, Database, Download, File, FileText, Folder, Upload, X } from 'lucide-react';
 import React, { useRef, useState } from 'react';
 
+
+export interface ImportExportProps {
+  // 基础属性
+  className?: string;
+  style?: React.CSSProperties;
+  children?: React.ReactNode;
+  
+  // 事件处理
+  onClick?: (event: React.MouseEvent<HTMLElement>) => void;
+  onChange?: (value: any) => void;
+  onFocus?: (event: React.FocusEvent<HTMLElement>) => void;
+  onBlur?: (event: React.FocusEvent<HTMLElement>) => void;
+  
+  // 状态属性
+  disabled?: boolean;
+  loading?: boolean;
+  error?: string | boolean;
+  
+  // 数据属性
+  value?: any;
+  defaultValue?: any;
+  
+  // 配置属性
+  size?: 'small' | 'medium' | 'large';
+  variant?: 'primary' | 'secondary' | 'outline';
+  
+  // 可访问性
+  'aria-label'?: string;
+  'aria-describedby'?: string;
+  role?: string;
+  tabIndex?: number;
+}
+
+
 interface ImportTask {
   id: string;
   fileName: string;
@@ -21,7 +55,18 @@ interface ExportTask {
   downloadUrl?: string;
 }
 
-const ImportExport: React.FC = () => {
+const ImportExport: React.FC<ImportExportProps> = (props) => {
+  
+  const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    if (disabled || loading) return;
+    onClick?.(event);
+  }, [disabled, loading, onClick]);
+  
+  const memoizedHandleChange = useMemo(() => 
+    debounce((value: any) => {
+      onChange?.(value);
+    }, 300), [onChange]
+  );
   const [importTasks, setImportTasks] = useState<ImportTask[]>([]);
   const [exportTasks, setExportTasks] = useState<ExportTask[]>([]);
   const [dragOver, setDragOver] = useState(false);

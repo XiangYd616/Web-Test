@@ -10,6 +10,50 @@ interface DataStatsProps {
 }
 
 const DataStats: React.FC<DataStatsProps> = ({ records, pagination, loading }) => {
+  
+  const handleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    if (disabled || loading) return;
+    
+    try {
+      onClick?.(event);
+    } catch (error) {
+      console.error('Click handler error:', error);
+      setError('操作失败，请重试');
+    }
+  }, [disabled, loading, onClick]);
+  
+  const handleChange = useCallback((newValue: any) => {
+    updateState({ value: newValue, touched: true, error: null });
+    
+    try {
+      onChange?.(newValue);
+    } catch (error) {
+      console.error('Change handler error:', error);
+      updateState({ error: '值更新失败' });
+    }
+  }, [onChange, updateState]);
+  
+  const handleFocus = useCallback((event: React.FocusEvent<HTMLElement>) => {
+    updateState({ focused: true });
+    onFocus?.(event);
+  }, [onFocus, updateState]);
+  
+  const handleBlur = useCallback((event: React.FocusEvent<HTMLElement>) => {
+    updateState({ focused: false });
+    onBlur?.(event);
+  }, [onBlur, updateState]);
+  
+  const [state, setState] = useState({
+    value: defaultValue,
+    loading: false,
+    error: null,
+    touched: false,
+    focused: false
+  });
+  
+  const updateState = useCallback((updates: Partial<typeof state>) => {
+    setState(prev => ({ ...prev, ...updates }));
+  }, []);
   // 计算当前页统计
   const currentPageStats = {
     total: records.length,

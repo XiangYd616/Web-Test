@@ -16,6 +16,17 @@ const LoginPrompt: React.FC<LoginPromptProps> = ({
   feature = "此功能",
   description = "使用高级测试功能"
 }) => {
+  
+  const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    if (disabled || loading) return;
+    onClick?.(event);
+  }, [disabled, loading, onClick]);
+  
+  const memoizedHandleChange = useMemo(() => 
+    debounce((value: any) => {
+      onChange?.(value);
+    }, 300), [onChange]
+  );
   const navigate = useNavigate();
 
   if (!isOpen) return null;

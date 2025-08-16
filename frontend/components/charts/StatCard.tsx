@@ -32,6 +32,61 @@ const StatCard: React.FC<StatCardProps> = ({
   loading = false,
   className = ''
 }) => {
+  
+  const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    if (disabled || loading) return;
+    onClick?.(event);
+  }, [disabled, loading, onClick]);
+  
+  const memoizedHandleChange = useMemo(() => 
+    debounce((value: any) => {
+      onChange?.(value);
+    }, 300), [onChange]
+  );
+  
+  const handleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    if (disabled || loading) return;
+    
+    try {
+      onClick?.(event);
+    } catch (error) {
+      console.error('Click handler error:', error);
+      setError('操作失败，请重试');
+    }
+  }, [disabled, loading, onClick]);
+  
+  const handleChange = useCallback((newValue: any) => {
+    updateState({ value: newValue, touched: true, error: null });
+    
+    try {
+      onChange?.(newValue);
+    } catch (error) {
+      console.error('Change handler error:', error);
+      updateState({ error: '值更新失败' });
+    }
+  }, [onChange, updateState]);
+  
+  const handleFocus = useCallback((event: React.FocusEvent<HTMLElement>) => {
+    updateState({ focused: true });
+    onFocus?.(event);
+  }, [onFocus, updateState]);
+  
+  const handleBlur = useCallback((event: React.FocusEvent<HTMLElement>) => {
+    updateState({ focused: false });
+    onBlur?.(event);
+  }, [onBlur, updateState]);
+  
+  const [state, setState] = useState({
+    value: defaultValue,
+    loading: false,
+    error: null,
+    touched: false,
+    focused: false
+  });
+  
+  const updateState = useCallback((updates: Partial<typeof state>) => {
+    setState(prev => ({ ...prev, ...updates }));
+  }, []);
   const { actualTheme } = useTheme();
   const getTrendIcon = () => {
     if (!trend) return null;

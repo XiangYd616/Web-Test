@@ -70,6 +70,38 @@ function DataTableCompat<T extends Record<string, any>>({
 
   // 处理排序变化
   const handleSortChange = (field: string | null, order: 'ascend' | 'descend' | null) => {
+  
+  const handleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    if (disabled || loading) return;
+    
+    try {
+      onClick?.(event);
+    } catch (error) {
+      console.error('Click handler error:', error);
+      setError('操作失败，请重试');
+    }
+  }, [disabled, loading, onClick]);
+  
+  const handleChange = useCallback((newValue: any) => {
+    updateState({ value: newValue, touched: true, error: null });
+    
+    try {
+      onChange?.(newValue);
+    } catch (error) {
+      console.error('Change handler error:', error);
+      updateState({ error: '值更新失败' });
+    }
+  }, [onChange, updateState]);
+  
+  const handleFocus = useCallback((event: React.FocusEvent<HTMLElement>) => {
+    updateState({ focused: true });
+    onFocus?.(event);
+  }, [onFocus, updateState]);
+  
+  const handleBlur = useCallback((event: React.FocusEvent<HTMLElement>) => {
+    updateState({ focused: false });
+    onBlur?.(event);
+  }, [onBlur, updateState]);
     if (onSort && field && order) {
       const dataTableOrder = order === 'ascend' ? 'asc' : 'desc';
       onSort(field as keyof T, dataTableOrder);

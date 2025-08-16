@@ -68,6 +68,83 @@ const MetricCard: React.FC<MetricCardProps> = ({
   critical,
   description
 }) => {
+  
+  const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    if (disabled || loading) return;
+    onClick?.(event);
+  }, [disabled, loading, onClick]);
+  
+  const memoizedHandleChange = useMemo(() => 
+    debounce((value: any) => {
+      onChange?.(value);
+    }, 300), [onChange]
+  );
+  
+  const componentId = useId();
+  const errorId = `${componentId}-error`;
+  const descriptionId = `${componentId}-description`;
+  
+  const ariaProps = {
+    id: componentId,
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledBy,
+    'aria-describedby': [
+      error ? errorId : null,
+      description ? descriptionId : null,
+      ariaDescribedBy
+    ].filter(Boolean).join(' ') || undefined,
+    'aria-invalid': !!error,
+    'aria-disabled': disabled,
+    'aria-busy': loading,
+    'aria-expanded': expanded,
+    'aria-selected': selected,
+    role: role,
+    tabIndex: disabled ? -1 : (tabIndex ?? 0)
+  };
+  
+  const handleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    if (disabled || loading) return;
+    
+    try {
+      onClick?.(event);
+    } catch (error) {
+      console.error('Click handler error:', error);
+      setError('操作失败，请重试');
+    }
+  }, [disabled, loading, onClick]);
+  
+  const handleChange = useCallback((newValue: any) => {
+    updateState({ value: newValue, touched: true, error: null });
+    
+    try {
+      onChange?.(newValue);
+    } catch (error) {
+      console.error('Change handler error:', error);
+      updateState({ error: '值更新失败' });
+    }
+  }, [onChange, updateState]);
+  
+  const handleFocus = useCallback((event: React.FocusEvent<HTMLElement>) => {
+    updateState({ focused: true });
+    onFocus?.(event);
+  }, [onFocus, updateState]);
+  
+  const handleBlur = useCallback((event: React.FocusEvent<HTMLElement>) => {
+    updateState({ focused: false });
+    onBlur?.(event);
+  }, [onBlur, updateState]);
+  
+  const [state, setState] = useState({
+    value: defaultValue,
+    loading: false,
+    error: null,
+    touched: false,
+    focused: false
+  });
+  
+  const updateState = useCallback((updates: Partial<typeof state>) => {
+    setState(prev => ({ ...prev, ...updates }));
+  }, []);
   const getCardStyle = () => {
     if (critical) return 'bg-red-500/20 border-red-500/50';
     if (warning) return 'bg-yellow-500/20 border-yellow-500/50';

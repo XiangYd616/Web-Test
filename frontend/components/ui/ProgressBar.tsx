@@ -30,6 +30,50 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   label,
   striped = false
 }) => {
+  
+  const handleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    if (disabled || loading) return;
+    
+    try {
+      onClick?.(event);
+    } catch (error) {
+      console.error('Click handler error:', error);
+      setError('操作失败，请重试');
+    }
+  }, [disabled, loading, onClick]);
+  
+  const handleChange = useCallback((newValue: any) => {
+    updateState({ value: newValue, touched: true, error: null });
+    
+    try {
+      onChange?.(newValue);
+    } catch (error) {
+      console.error('Change handler error:', error);
+      updateState({ error: '值更新失败' });
+    }
+  }, [onChange, updateState]);
+  
+  const handleFocus = useCallback((event: React.FocusEvent<HTMLElement>) => {
+    updateState({ focused: true });
+    onFocus?.(event);
+  }, [onFocus, updateState]);
+  
+  const handleBlur = useCallback((event: React.FocusEvent<HTMLElement>) => {
+    updateState({ focused: false });
+    onBlur?.(event);
+  }, [onBlur, updateState]);
+  
+  const [state, setState] = useState({
+    value: defaultValue,
+    loading: false,
+    error: null,
+    touched: false,
+    focused: false
+  });
+  
+  const updateState = useCallback((updates: Partial<typeof state>) => {
+    setState(prev => ({ ...prev, ...updates }));
+  }, []);
   // 确保值在0-100范围内
   const clampedValue = Math.max(0, Math.min(100, value));
 

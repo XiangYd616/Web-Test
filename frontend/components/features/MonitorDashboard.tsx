@@ -79,6 +79,28 @@ const intervalOptions: SelectOption[] = [
 export const MonitorDashboard: React.FC<MonitorDashboardProps> = ({
     className = ''
 }) => {
+  
+  const componentId = useId();
+  const errorId = `${componentId}-error`;
+  const descriptionId = `${componentId}-description`;
+  
+  const ariaProps = {
+    id: componentId,
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledBy,
+    'aria-describedby': [
+      error ? errorId : null,
+      description ? descriptionId : null,
+      ariaDescribedBy
+    ].filter(Boolean).join(' ') || undefined,
+    'aria-invalid': !!error,
+    'aria-disabled': disabled,
+    'aria-busy': loading,
+    'aria-expanded': expanded,
+    'aria-selected': selected,
+    role: role,
+    tabIndex: disabled ? -1 : (tabIndex ?? 0)
+  };
     // 状态管理
     const [targets, setTargets] = useState<MonitorTarget[]>([]);
     const [stats, setStats] = useState<MonitorStats | null>(null);

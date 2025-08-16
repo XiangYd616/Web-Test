@@ -17,6 +17,17 @@ const TestTemplateSelector: React.FC<TestTemplateSelectorProps> = ({
   category,
   className = ''
 }) => {
+  
+  const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    if (disabled || loading) return;
+    onClick?.(event);
+  }, [disabled, loading, onClick]);
+  
+  const memoizedHandleChange = useMemo(() => 
+    debounce((value: any) => {
+      onChange?.(value);
+    }, 300), [onChange]
+  );
   const [templates, setTemplates] = useState<TestTemplate[]>([]);
   const [filteredTemplates, setFilteredTemplates] = useState<TestTemplate[]>([]);
   const [searchQuery, setSearchQuery] = useState('');

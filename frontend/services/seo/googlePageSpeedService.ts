@@ -38,6 +38,20 @@ export interface PageSpeedResult {
 }
 
 class GooglePageSpeedService {
+  private async retryRequest(fn: () => Promise<any>, maxRetries: number = 3): Promise<any> {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await fn();
+      } catch (error) {
+        if (attempt === maxRetries) {
+          throw error;
+        }
+        
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+    await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+  }
+}
+  }
   private readonly API_KEY = process.env.REACT_APP_GOOGLE_PAGESPEED_API_KEY;
   private readonly BASE_URL = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
 

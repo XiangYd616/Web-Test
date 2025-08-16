@@ -8,6 +8,40 @@ import { Download, Play, Plus, Settings, Trash2 } from 'lucide-react';
 import { ThemeProvider } from '../../../contexts/ThemeContext';
 import { Button, DeleteButton, GhostButton, IconButton, OutlineButton, PrimaryButton, SecondaryButton } from '../Button';
 
+
+export interface Button.storiesProps {
+  // 基础属性
+  className?: string;
+  style?: React.CSSProperties;
+  children?: React.ReactNode;
+  
+  // 事件处理
+  onClick?: (event: React.MouseEvent<HTMLElement>) => void;
+  onChange?: (value: any) => void;
+  onFocus?: (event: React.FocusEvent<HTMLElement>) => void;
+  onBlur?: (event: React.FocusEvent<HTMLElement>) => void;
+  
+  // 状态属性
+  disabled?: boolean;
+  loading?: boolean;
+  error?: string | boolean;
+  
+  // 数据属性
+  value?: any;
+  defaultValue?: any;
+  
+  // 配置属性
+  size?: 'small' | 'medium' | 'large';
+  variant?: 'primary' | 'secondary' | 'outline';
+  
+  // 可访问性
+  'aria-label'?: string;
+  'aria-describedby'?: string;
+  role?: string;
+  tabIndex?: number;
+}
+
+
 const meta: Meta<typeof Button> = {
     title: 'UI组件/Button',
     component: Button,
@@ -272,6 +306,17 @@ export const LoadingAnimation: Story = {
         const [loading, setLoading] = React.useState(false);
 
         const handleClick = () => {
+  
+  const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    if (disabled || loading) return;
+    onClick?.(event);
+  }, [disabled, loading, onClick]);
+  
+  const memoizedHandleChange = useMemo(() => 
+    debounce((value: any) => {
+      onChange?.(value);
+    }, 300), [onChange]
+  );
             setLoading(true);
             setTimeout(() => setLoading(false), 2000);
         };
