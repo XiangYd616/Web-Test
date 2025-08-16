@@ -102,7 +102,8 @@ router.get('/recommendations', async (req, res) => {
     const { url } = req.query;
 
     if (!url) {
-      return res.status(400).json({
+      
+        return res.status(400).json({
         success: false,
         error: 'URL参数是必需的'
       });
@@ -199,7 +200,8 @@ router.get('/:testId/export', async (req, res) => {
     const { format = 'html' } = req.query;
 
     if (!testId) {
-      return res.status(400).json({
+      
+        return res.status(400).json({
         success: false,
         error: '测试ID是必需的'
       });
@@ -293,7 +295,8 @@ router.get('/keyboard', async (req, res) => {
     const { url } = req.query;
 
     if (!url) {
-      return res.status(400).json({
+      
+        return res.status(400).json({
         success: false,
         error: 'URL参数是必需的'
       });
@@ -336,7 +339,8 @@ router.get('/screen-reader', async (req, res) => {
     const { url } = req.query;
 
     if (!url) {
-      return res.status(400).json({
+      
+        return res.status(400).json({
         success: false,
         error: 'URL参数是必需的'
       });
@@ -380,7 +384,8 @@ router.get('/contrast', async (req, res) => {
     const { url, level = 'AA' } = req.query;
 
     if (!url) {
-      return res.status(400).json({
+      
+        return res.status(400).json({
         success: false,
         error: 'URL参数是必需的'
       });

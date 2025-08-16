@@ -101,10 +101,11 @@ router.post('/insights', asyncHandler(async (req, res) => {
   const { dataType, timeRange = '7d' } = req.body;
 
   if (!dataType) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '需要指定数据类型'
-    });
+      });
   }
 
   try {

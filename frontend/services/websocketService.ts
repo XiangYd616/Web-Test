@@ -31,11 +31,13 @@ export class WebSocketService {
   connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       if (this.ws?.readyState === WebSocket.OPEN) {
+        
         resolve();
         return;
       }
 
       if (this.isConnecting) {
+        
         reject(new Error('WebSocket连接正在进行中'));
         return;
       }
@@ -220,7 +222,7 @@ export class WebSocketService {
   private getWebSocketURL(): string {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.host;
-    return `${protocol}//${host}`;
+    return `${protocol}/${host}`;
   }
 
   /**

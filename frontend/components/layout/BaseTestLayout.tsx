@@ -33,11 +33,13 @@ export const BaseTestLayout: React.FC<BaseTestLayoutProps> = ({
 
   // 如果需要认证但未登录，显示登录提示
   if (requireAuth && !authCheck.isAuthenticated) {
-    return (
+    
+        return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
-            {/* 页面头部 */}
+            {/* 页面头部 */
+      }
             <div className="text-center mb-8">
               <div className="flex items-center justify-center mb-4">
                 {Icon && <Icon className="w-12 h-12 text-blue-400 mr-4" />}

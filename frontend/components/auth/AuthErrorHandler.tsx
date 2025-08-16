@@ -161,12 +161,13 @@ const AuthErrorHandler: React.FC<AuthErrorHandlerProps> = ({
 
 export const parseAuthError = (error: any): AuthErrorType => {
   if (typeof error === 'string') {
-    // 尝试从错误消息中推断错误类型
+    
+        // 尝试从错误消息中推断错误类型
     const message = error.toLowerCase();
 
     if (message.includes('token') && message.includes('missing')) {
       return AuthErrorType.TOKEN_MISSING;
-    }
+      }
     if (message.includes('token') && message.includes('invalid')) {
       return AuthErrorType.TOKEN_INVALID;
     }
@@ -191,20 +192,24 @@ export const parseAuthError = (error: any): AuthErrorType => {
   }
 
   if (error?.response?.status === 401) {
-    return AuthErrorType.TOKEN_INVALID;
-  }
+    
+        return AuthErrorType.TOKEN_INVALID;
+      }
 
   if (error?.response?.status === 403) {
-    return AuthErrorType.INSUFFICIENT_PERMISSIONS;
-  }
+    
+        return AuthErrorType.INSUFFICIENT_PERMISSIONS;
+      }
 
   if (error?.response?.status >= 500) {
-    return AuthErrorType.SERVER_ERROR;
-  }
+    
+        return AuthErrorType.SERVER_ERROR;
+      }
 
   if (error?.code === 'NETWORK_ERROR' || !navigator.onLine) {
-    return AuthErrorType.NETWORK_ERROR;
-  }
+    
+        return AuthErrorType.NETWORK_ERROR;
+      }
 
   return AuthErrorType.SERVER_ERROR;
 };

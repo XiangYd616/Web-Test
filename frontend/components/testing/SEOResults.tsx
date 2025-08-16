@@ -92,14 +92,15 @@ const SEOResults: React.FC<SEOResultsProps> = ({ results, onExport }) => {
 
   // 安全检查：确保 results 存在
   if (!results) {
-    return (
+    
+        return (
       <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
         <div className="text-center text-gray-500 dark:text-gray-400">
           暂无分析结果
         </div>
       </div>
     );
-  }
+      }
 
   const getScoreColor = (score: number) => {
     if (score >= 90) return 'text-green-600 dark:text-green-400';
@@ -254,7 +255,8 @@ const SEOResults: React.FC<SEOResultsProps> = ({ results, onExport }) => {
 
   const renderTechnicalAnalysis = () => {
     if (!results.technicalSEO) {
-      return (
+      
+        return (
         <div className="text-center py-8">
           <div className="text-gray-500 dark:text-gray-400">暂无技术SEO检查数据</div>
           <div className="text-sm text-gray-400 mt-2">
@@ -262,19 +264,20 @@ const SEOResults: React.FC<SEOResultsProps> = ({ results, onExport }) => {
           </div>
         </div>
       );
-    }
+      }
 
     return <TechnicalResults results={results.technicalSEO} />;
   };
 
   const renderContentAnalysis = () => {
     if (!results.contentQuality) {
-      return (
+      
+        return (
         <div className="text-center py-8">
           <div className="text-gray-500 dark:text-gray-400">暂无内容分析数据</div>
         </div>
       );
-    }
+      }
 
     const { contentQuality } = results;
 
@@ -508,12 +511,13 @@ const SEOResults: React.FC<SEOResultsProps> = ({ results, onExport }) => {
 
   const renderPerformanceAnalysis = () => {
     if (!results.performance) {
-      return (
+      
+        return (
         <div className="text-center py-8">
           <div className="text-gray-500 dark:text-gray-400">暂无性能分析数据</div>
         </div>
       );
-    }
+      }
 
     return <PerformanceResults results={results.performance} />;
   };

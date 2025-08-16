@@ -21,11 +21,13 @@ export class TestErrorHandler {
   static handleTestError(error: any, testType: string): TestError {
     // 网络错误
     if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
-      return new TestError(
+      
+        return new TestError(
         '无法连接到目标服务器，请检查URL是否正确',
         'NETWORK_ERROR',
         true,
-        { originalError: error.code }
+        { originalError: error.code
+      }
       );
     }
 

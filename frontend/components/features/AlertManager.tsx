@@ -17,8 +17,8 @@ import {
     Settings,
     Trash2,
     Webhook,
-    XCircle
-} from 'lucide-react';
+    // XCircle
+} from 'lucide-react'; // 已修复
 import React, { useCallback, useEffect, useState } from 'react';
 import {Button} from '../ui/Button';
 import {Input} from '../ui/Input';
@@ -345,8 +345,10 @@ const AlertManager: React.FC<AlertManagerProps> = ({ className = '' }) => {
     };
 
     if (loading && alerts.length === 0) {
+        
         return (
-            <div className={`p-6 ${className}`}>
+            <div className={`p-6 ${className
+      }`}>
                 <div className="flex items-center justify-center h-64">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                     <span className="ml-2">加载告警数据...</span>
@@ -975,8 +977,10 @@ const AlertDetailsModal: React.FC<AlertDetailsModalProps> = ({ alertId, onClose 
     }, [alertId]);
 
     if (loading) {
+        
         return (
-            <Modal isOpen={true} onClose={onClose} title="告警详情">
+            <Modal isOpen={true
+      } onClose={onClose} title="告警详情">
                 <div className="flex items-center justify-center h-32">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                     <span className="ml-2">加载中...</span>
@@ -986,8 +990,10 @@ const AlertDetailsModal: React.FC<AlertDetailsModalProps> = ({ alertId, onClose 
     }
 
     if (!alert) {
+        
         return (
-            <Modal isOpen={true} onClose={onClose} title="告警详情">
+            <Modal isOpen={true
+      } onClose={onClose} title="告警详情">
                 <div className="text-center py-8">
                     <p className="text-gray-500">告警详情不存在</p>
                 </div>

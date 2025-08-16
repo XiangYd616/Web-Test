@@ -22,10 +22,11 @@ router.post('/advanced-test', asyncHandler(async (req, res) => {
   const { url, testTypes = ['all'], depth = 'standard', options = {} } = req.body;
 
   if (!url) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '需要提供测试URL'
-    });
+      });
   }
 
   // 验证URL格式
@@ -76,10 +77,11 @@ router.post('/quick-check', asyncHandler(async (req, res) => {
   const { url } = req.body;
 
   if (!url) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '需要提供测试URL'
-    });
+      });
   }
 
   try {
@@ -303,10 +305,11 @@ router.post('/export-report', asyncHandler(async (req, res) => {
   const userId = req.user.id;
 
   if (!testId) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '需要提供测试ID'
-    });
+      });
   }
 
   try {

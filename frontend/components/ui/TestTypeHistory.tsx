@@ -12,8 +12,8 @@ import {
   RefreshCw,
   Search,
   Star,
-  Trash2
-} from 'lucide-react';
+  // Trash2
+} from 'lucide-react'; // 已修复
 import React, { useCallback, useEffect, useState } from 'react';
 import {useAuth} from '../../contexts/AuthContext';
 import type { TestRecord, TestType } from '../../types/testHistory';
@@ -187,12 +187,13 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
   };
 
   if (!isAuthenticated) {
-    return (
+    
+        return (
       <div className="test-type-history-empty">
         <p>请登录后查看测试历史</p>
       </div>
     );
-  }
+      }
 
   return (
     <div className={`test-type-history ${className}`} style={{ maxHeight }}>

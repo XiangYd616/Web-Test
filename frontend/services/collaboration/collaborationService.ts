@@ -69,13 +69,14 @@ class CollaborationService {
    */
   async connect(): Promise<void> {
     if (this.isConnected) {
-      return;
-    }
+      
+        return;
+      }
 
     return new Promise((resolve, reject) => {
       try {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsUrl = `${protocol}//${window.location.host}/ws/collaboration`;
+        const wsUrl = `${protocol}/${window.location.host}/ws/collaboration`;
         
         this.ws = new WebSocket(wsUrl);
         
@@ -168,9 +169,10 @@ class CollaborationService {
    */
   editDocument(operation: any, content?: string): void {
     if (!this.currentDocument || !this.document) {
-      console.warn('没有活跃的文档');
+      
+        console.warn('没有活跃的文档');
       return;
-    }
+      }
 
     this.send({
       type: 'document_edit',
@@ -197,9 +199,10 @@ class CollaborationService {
    */
   addComment(position: number, content: string, parentId?: string): void {
     if (!this.currentDocument) {
-      console.warn('没有活跃的文档');
+      
+        console.warn('没有活跃的文档');
       return;
-    }
+      }
 
     this.send({
       type: 'add_comment',
@@ -236,9 +239,10 @@ class CollaborationService {
    */
   createShareLink(permissions: string = 'read', expiresAt?: Date): void {
     if (!this.currentDocument) {
-      console.warn('没有活跃的文档');
+      
+        console.warn('没有活跃的文档');
       return;
-    }
+      }
 
     this.send({
       type: 'create_share_link',
@@ -468,9 +472,10 @@ class CollaborationService {
    */
   private attemptReconnect(): void {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('达到最大重连次数，停止重连');
+      
+        console.error('达到最大重连次数，停止重连');
       return;
-    }
+      }
 
     this.reconnectAttempts++;
     const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);

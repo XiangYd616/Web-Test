@@ -508,8 +508,9 @@ class StressTestQueueManager {
    */
   private canStartTest(test: QueuedTest): boolean {
     if (test.testType === 'stress') {
-      return this.canStartStressTest();
-    } else {
+      
+        return this.canStartStressTest();
+      } else {
       return this.canStartRegularTest();
     }
   }
@@ -548,6 +549,7 @@ class StressTestQueueManager {
     this.queue = this.queue.filter(test => {
       const isTimeout = now - test.queuedAt.getTime() > this.config.queueTimeout;
       if (isTimeout) {
+        
         this.handleTestFailure(test, new Error('队列超时'));
         return false;
       }

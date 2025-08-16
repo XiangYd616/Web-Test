@@ -4,19 +4,19 @@
  * 版本: v1.0.0
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  Eye, 
-  EyeOff, 
-  Shield, 
-  AlertTriangle, 
-  CheckCircle, 
-  XCircle,
+import {
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  Eye,
+  EyeOff,
   Info,
-  Clock
+  Shield,
+  XCircle
 } from 'lucide-react';
-import {defaultPasswordPolicyService} from '../../services/auth/passwordPolicyService';
-import type { PasswordStrength, PasswordValidationResult } from '../../services/auth/passwordPolicyService';
+import React, { useEffect, useMemo, useState } from 'react';
+import type { PasswordValidationResult } from '../../services/auth/passwordPolicyService';
+import { defaultPasswordPolicyService } from '../../services/auth/passwordPolicyService';
 
 // ==================== 类型定义 ====================
 
@@ -127,6 +127,7 @@ export const PasswordStrengthIndicator: React.FC<PasswordStrengthIndicatorProps>
   }, [validation, onValidationChange]);
 
   if (!password || !validation) {
+
     return null;
   }
 
@@ -147,7 +148,7 @@ export const PasswordStrengthIndicator: React.FC<PasswordStrengthIndicatorProps>
             </span>
           </div>
         </div>
-        
+
         <div className="w-full bg-gray-700 rounded-full h-2">
           <div
             className={`h-2 rounded-full transition-all duration-300 ${config.color}`}
@@ -290,7 +291,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
           id={id}
           className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 pr-12 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         />
-        
+
         <button
           type="button"
           onClick={togglePasswordVisibility}
@@ -322,8 +323,8 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
 
 // ==================== 密码策略显示组件 ====================
 
-export const PasswordPolicyDisplay: React.FC<{ className?: string }> = ({ 
-  className = '' 
+export const PasswordPolicyDisplay: React.FC<{ className?: string }> = ({
+  className = ''
 }) => {
   const policy = defaultPasswordPolicyService.getPasswordPolicy();
 
@@ -333,55 +334,55 @@ export const PasswordPolicyDisplay: React.FC<{ className?: string }> = ({
         <Shield className="w-4 h-4 mr-2" />
         密码要求
       </h3>
-      
+
       <ul className="space-y-2 text-sm text-gray-400">
         <li className="flex items-center space-x-2">
           <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
           <span>长度: {policy.minLength}-{policy.maxLength} 个字符</span>
         </li>
-        
+
         {policy.requireUppercase && (
           <li className="flex items-center space-x-2">
             <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
             <span>包含大写字母 (A-Z)</span>
           </li>
         )}
-        
+
         {policy.requireLowercase && (
           <li className="flex items-center space-x-2">
             <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
             <span>包含小写字母 (a-z)</span>
           </li>
         )}
-        
+
         {policy.requireNumbers && (
           <li className="flex items-center space-x-2">
             <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
             <span>包含数字 (0-9)</span>
           </li>
         )}
-        
+
         {policy.requireSpecialChars && (
           <li className="flex items-center space-x-2">
             <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
             <span>包含特殊字符 (!@#$%^&*)</span>
           </li>
         )}
-        
+
         {policy.forbidCommonPasswords && (
           <li className="flex items-center space-x-2">
             <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
             <span>不能使用常见密码</span>
           </li>
         )}
-        
+
         {policy.forbidPersonalInfo && (
           <li className="flex items-center space-x-2">
             <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
             <span>不能包含个人信息</span>
           </li>
         )}
-        
+
         {policy.passwordHistory > 0 && (
           <li className="flex items-center space-x-2">
             <span className="w-1 h-1 bg-gray-500 rounded-full"></span>

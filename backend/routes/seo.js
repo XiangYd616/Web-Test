@@ -7,7 +7,7 @@ const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const rateLimit = require('express-rate-limit');
-// const cacheMiddleware = require('./cache.js'); // 已删除
+// // const cacheMiddleware = require('./cache.js'); // 已删除 // 已删除
 
 const router = express.Router();
 
@@ -79,10 +79,11 @@ router.post('/fetch-page',
       const { url } = req.body;
 
       if (!url) {
+        
         return res.status(400).json({
           success: false,
           error: '缺少URL参数'
-        });
+      });
       }
 
       const cleanedUrl = cleanUrl(url);
@@ -175,10 +176,11 @@ router.post('/fetch-robots',
       const { baseUrl } = req.body;
 
       if (!baseUrl) {
+        
         return res.status(400).json({
           success: false,
           error: '缺少baseUrl参数'
-        });
+      });
       }
 
       const robotsUrl = `${baseUrl}/robots.txt`;
@@ -224,10 +226,11 @@ router.post('/fetch-sitemap',
       const { sitemapUrl } = req.body;
 
       if (!sitemapUrl) {
+        
         return res.status(400).json({
           success: false,
           error: '缺少sitemapUrl参数'
-        });
+      });
       }
 
       console.log(`🗺️ 获取sitemap: ${sitemapUrl}`);

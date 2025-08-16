@@ -259,8 +259,9 @@ export class TTLEvictionStrategy<T = any> implements EvictionStrategy<T> {
       .map(([key]) => key);
     
     if (expiredEntries.length >= targetCount) {
-      return expiredEntries.slice(0, targetCount);
-    }
+      
+        return expiredEntries.slice(0, targetCount);
+      }
     
     // 如果过期条目不够，按剩余TTL排序
     const sortedByTTL = Array.from(entries.entries())
@@ -326,6 +327,7 @@ export class CacheManager<T = any> {
       const entry = await this.storage.get(key);
       
       if (!entry) {
+        
         this.stats.missCount++;
         return null;
       }
@@ -556,6 +558,7 @@ export function cached<T extends (...args: any[]) => Promise<ApiResponse<any>>>(
       // 尝试从缓存获取
       const cachedResult = await cacheManager.get(cacheKey);
       if (cachedResult) {
+        
         return cachedResult;
       }
 

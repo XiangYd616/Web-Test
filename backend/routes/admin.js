@@ -106,10 +106,11 @@ router.put('/users/:userId/status', asyncHandler(async (req, res) => {
   const { isActive } = req.body;
 
   if (typeof isActive !== 'boolean') {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '状态值必须是布尔类型'
-    });
+      });
   }
 
   try {
@@ -119,7 +120,8 @@ router.put('/users/:userId/status', asyncHandler(async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({
+      
+        return res.status(404).json({
         success: false,
         message: '用户不存在'
       });

@@ -86,9 +86,13 @@ const TestResultDetail: React.FC = () => {
     if (!duration) return '-';
 
     if (duration < 1000) {
-      return `${duration}ms`;
+      
+        return `${duration
+      }ms`;
     } else if (duration < 60000) {
-      return `${(duration / 1000).toFixed(1)}s`;
+      
+        return `${(duration / 1000).toFixed(1)
+      }s`;
     } else {
       return `${(duration / 60000).toFixed(1)}m`;
     }
@@ -135,7 +139,8 @@ const TestResultDetail: React.FC = () => {
   };
 
   if (loading) {
-    return (
+    
+        return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
@@ -143,15 +148,17 @@ const TestResultDetail: React.FC = () => {
         </div>
       </div>
     );
-  }
+      }
 
   if (error || !testResult) {
-    return (
+    
+        return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <XCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">加载失败</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
+          <p className="text-gray-600 mb-4">{error
+      }</p>
           <button
             onClick={() => navigate('/test-history')}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"

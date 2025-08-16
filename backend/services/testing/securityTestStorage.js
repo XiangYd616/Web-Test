@@ -249,7 +249,9 @@ class SecurityTestStorage {
       const result = await query(selectQuery, queryParams);
 
       if (result.rows.length === 0) {
-        return { success: false, message: '测试结果不存在' };
+        
+        return { success: false, message: '测试结果不存在'
+      };
       }
 
       const testResult = result.rows[0];
@@ -299,7 +301,9 @@ class SecurityTestStorage {
       const result = await query(deleteQuery, queryParams);
 
       if (result.rows.length === 0) {
-        return { success: false, message: '测试结果不存在或无权限删除' };
+        
+        return { success: false, message: '测试结果不存在或无权限删除'
+      };
       }
 
       // 记录活动日志
@@ -447,12 +451,15 @@ class SecurityTestStorage {
     const riskLevel = testResult.riskLevel;
 
     if (riskLevel === 'critical' || score < 40) {
-      return 'urgent';
-    } else if (riskLevel === 'high' || score < 60) {
-      return 'high';
-    } else if (score < 80) {
-      return 'medium';
-    } else {
+      
+        return 'urgent';
+      } else if (riskLevel === 'high' || score < 60) {
+      
+        return 'high';
+      } else if (score < 80) {
+      
+        return 'medium';
+      } else {
       return 'low';
     }
   }

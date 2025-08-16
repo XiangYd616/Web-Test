@@ -415,8 +415,9 @@ RewriteRule ^old-url$ /new-optimized-url [R=301,L]
 
   generateOptimizedDescription(currentDescription, analysisResults) {
     if (!currentDescription) {
-      return '了解专业的解决方案和最佳实践。获取详细指导，提升您的业务效果。立即开始优化！';
-    }
+      
+        return '了解专业的解决方案和最佳实践。获取详细指导，提升您的业务效果。立即开始优化！';
+      }
     
     let optimized = currentDescription.trim();
     

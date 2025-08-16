@@ -48,8 +48,9 @@ router.post('/register', registerRateLimiter, asyncHandler(async (req, res) => {
   }
 
   if (errors.length > 0) {
-    return res.validationError(errors);
-  }
+    
+        return res.validationError(errors);
+      }
 
   try {
     // 检查用户是否已存在
@@ -59,8 +60,9 @@ router.post('/register', registerRateLimiter, asyncHandler(async (req, res) => {
     );
 
     if (existingUser.rows.length > 0) {
-      return res.conflict('用户', '用户名或邮箱已存在');
-    }
+      
+        return res.conflict('用户', '用户名或邮箱已存在');
+      }
 
     // 加密密码
     const saltRounds = parseInt(process.env.BCRYPT_ROUNDS) || 12;
@@ -122,8 +124,9 @@ router.post('/login', loginRateLimiter, asyncHandler(async (req, res) => {
   if (!password) errors.push({ field: 'password', message: '密码是必填的' });
 
   if (errors.length > 0) {
-    return res.validationError(errors);
-  }
+    
+        return res.validationError(errors);
+      }
 
   try {
     // 查找用户
@@ -264,7 +267,8 @@ router.post('/verify', asyncHandler(async (req, res) => {
     const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
-      return res.status(401).json({
+      
+        return res.status(401).json({
         success: false,
         error: 'NO_TOKEN',
         message: '未提供访问令牌'
@@ -292,7 +296,8 @@ router.post('/verify', asyncHandler(async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(401).json({
+      
+        return res.status(401).json({
         success: false,
         error: 'USER_NOT_FOUND',
         message: '用户不存在或已被禁用'
@@ -303,7 +308,8 @@ router.post('/verify', asyncHandler(async (req, res) => {
 
     // 检查用户状态
     if (!user.is_active) {
-      return res.status(401).json({
+      
+        return res.status(401).json({
         success: false,
         error: 'USER_INACTIVE',
         message: '用户账户已被禁用'
@@ -348,7 +354,8 @@ router.get('/me', authMiddleware, asyncHandler(async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({
+      
+        return res.status(404).json({
         success: false,
         message: '用户不存在'
       });
@@ -409,24 +416,27 @@ router.put('/change-password', authMiddleware, asyncHandler(async (req, res) => 
 
   // 验证输入
   if (!currentPassword || !newPassword || !confirmPassword) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '所有字段都是必填的'
-    });
+      });
   }
 
   if (newPassword !== confirmPassword) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '新密码确认不匹配'
-    });
+      });
   }
 
   if (newPassword.length < 6) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '新密码长度至少6位'
-    });
+      });
   }
 
   try {
@@ -437,7 +447,8 @@ router.put('/change-password', authMiddleware, asyncHandler(async (req, res) => 
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({
+      
+        return res.status(404).json({
         success: false,
         message: '用户不存在'
       });
@@ -496,10 +507,11 @@ router.post('/forgot-password', asyncHandler(async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '邮箱地址是必需的'
-    });
+      });
   }
 
   try {
@@ -511,7 +523,8 @@ router.post('/forgot-password', asyncHandler(async (req, res) => {
 
     // 无论用户是否存在，都返回成功消息（安全考虑）
     if (userResult.rows.length === 0) {
-      return res.json({
+      
+        return res.json({
         success: true,
         message: '如果该邮箱地址存在，我们已发送重置密码的邮件'
       });
@@ -555,24 +568,27 @@ router.post('/reset-password', asyncHandler(async (req, res) => {
   const { token, newPassword, confirmPassword } = req.body;
 
   if (!token || !newPassword || !confirmPassword) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '所有字段都是必需的'
-    });
+      });
   }
 
   if (newPassword !== confirmPassword) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '密码确认不匹配'
-    });
+      });
   }
 
   if (newPassword.length < 6) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '密码长度至少为6个字符'
-    });
+      });
   }
 
   try {
@@ -583,7 +599,8 @@ router.post('/reset-password', asyncHandler(async (req, res) => {
     );
 
     if (userResult.rows.length === 0) {
-      return res.status(400).json({
+      
+        return res.status(400).json({
         success: false,
         message: '重置令牌无效或已过期'
       });
@@ -623,7 +640,8 @@ router.post('/send-verification', authMiddleware, asyncHandler(async (req, res) 
     const user = req.user;
 
     if (user.email_verified) {
-      return res.status(400).json({
+      
+        return res.status(400).json({
         success: false,
         message: '邮箱已经验证过了'
       });
@@ -665,10 +683,11 @@ router.post('/verify-email', asyncHandler(async (req, res) => {
   const { token } = req.body;
 
   if (!token) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '验证令牌是必需的'
-    });
+      });
   }
 
   try {
@@ -679,7 +698,8 @@ router.post('/verify-email', asyncHandler(async (req, res) => {
     );
 
     if (userResult.rows.length === 0) {
-      return res.status(400).json({
+      
+        return res.status(400).json({
         success: false,
         message: '验证令牌无效或已过期'
       });

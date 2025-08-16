@@ -148,11 +148,12 @@ export class BaseApiService {
       const text = await response.text();
 
       if (!text) {
+        
         return {
           success: response.ok,
           data: undefined as T,
           message: response.ok ? '请求成功' : '请求失败'
-        };
+      };
       }
 
       const data = JSON.parse(text);

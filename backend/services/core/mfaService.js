@@ -99,7 +99,9 @@ class MFAService {
       `, [userId]);
 
       if (result.rows.length === 0) {
-        return { success: false, message: 'TOTP设置未找到或已启用' };
+        
+        return { success: false, message: 'TOTP设置未找到或已启用'
+      };
       }
 
       const secret = result.rows[0].secret;
@@ -150,7 +152,9 @@ class MFAService {
       // 这里应该验证当前密码
       // const isPasswordValid = await this.verifyPassword(userId, currentPassword);
       // if (!isPasswordValid) {
-      //   return { success: false, message: '当前密码错误' };
+      
+        //   return { success: false, message: '当前密码错误'
+      };
       // }
 
       await pool.query(`
@@ -293,7 +297,9 @@ class MFAService {
       const challenge = this.activeChallenges.get(challengeId);
 
       if (!challenge) {
-        return { success: false, message: '验证码已过期或无效' };
+        
+        return { success: false, message: '验证码已过期或无效'
+      };
       }
 
       // 检查过期时间
@@ -304,16 +310,20 @@ class MFAService {
 
       // 检查尝试次数
       if (challenge.attempts >= MFA_CONFIG.maxAttempts) {
+        
         this.activeChallenges.delete(challengeId);
-        return { success: false, message: '验证失败次数过多，请重新获取验证码' };
+        return { success: false, message: '验证失败次数过多，请重新获取验证码'
+      };
       }
 
       // 验证码码
       const hashedCode = crypto.createHash('sha256').update(code).digest('hex');
 
       if (challenge.code !== hashedCode) {
+        
         challenge.attempts++;
-        return { success: false, message: '验证码错误' };
+        return { success: false, message: '验证码错误'
+      };
       }
 
       // 验证成功，清除挑战
@@ -356,7 +366,9 @@ class MFAService {
       `, [userId]);
 
       if (result.rows.length === 0) {
-        return { success: false, message: 'TOTP未启用' };
+        
+        return { success: false, message: 'TOTP未启用'
+      };
       }
 
       const secret = result.rows[0].secret;
@@ -395,7 +407,9 @@ class MFAService {
       `, [userId]);
 
       if (result.rows.length === 0) {
-        return { success: false, message: '备用码未设置' };
+        
+        return { success: false, message: '备用码未设置'
+      };
       }
 
       const backupCodes = JSON.parse(result.rows[0].secret);
@@ -405,7 +419,9 @@ class MFAService {
       const codeIndex = backupCodes.findIndex(bc => bc.code === hashedCode && !bc.used);
 
       if (codeIndex === -1) {
-        return { success: false, message: '备用码无效或已使用' };
+        
+        return { success: false, message: '备用码无效或已使用'
+      };
       }
 
       // 标记备用码为已使用

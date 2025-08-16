@@ -38,9 +38,10 @@ class MonitoringSystem {
    */
   start() {
     if (this.isMonitoring) {
-      Logger.warn('监控系统已在运行');
+      
+        Logger.warn('监控系统已在运行');
       return;
-    }
+      }
 
     Logger.info('启动系统监控');
     this.isMonitoring = true;
@@ -59,8 +60,9 @@ class MonitoringSystem {
    */
   stop() {
     if (!this.isMonitoring) {
-      return;
-    }
+      
+        return;
+      }
 
     Logger.info('停止系统监控');
     this.isMonitoring = false;

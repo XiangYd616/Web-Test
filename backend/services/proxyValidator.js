@@ -122,6 +122,7 @@ class ProxyValidator {
     } catch (error) {
       // 如果快速测试失败且使用的是HTTP，尝试HTTPS
       if (useFastTest && error.code !== 'ABORT_ERR') {
+        
         return await this.testProxyConnection(proxyConfig, false);
       }
       return false;
@@ -178,7 +179,8 @@ class ProxyValidator {
     const proxyType = this.detectProxyType(proxyConfig);
 
     if (proxyType === 'local' || proxyType === 'vpn') {
-      return {
+      
+        return {
         mode: 'client',
         reason: '本地/VPN代理建议使用客户端测试模式',
         benefits: [

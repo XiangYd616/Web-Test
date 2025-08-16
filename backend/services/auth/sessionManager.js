@@ -104,7 +104,9 @@ class SessionManager {
       `, [sessionId, userId]);
 
       if (result.rows.length === 0) {
-        return { valid: false, reason: 'SESSION_NOT_FOUND' };
+        
+        return { valid: false, reason: 'SESSION_NOT_FOUND'
+      };
       }
 
       const session = result.rows[0];

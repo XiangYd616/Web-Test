@@ -221,8 +221,10 @@ const SEOAnalysis: React.FC<SEOAnalysisProps> = ({
               <div className="space-y-3 max-h-96 overflow-y-auto">
                 {results.recommendations.slice(0, 8).map((rec, index) => {
                   if (typeof rec === 'string') {
-                    return (
-                      <div key={index} className="p-3 rounded-lg border-l-4 bg-blue-500/10 border-blue-500">
+                    
+        return (
+                      <div key={index
+      } className="p-3 rounded-lg border-l-4 bg-blue-500/10 border-blue-500">
                         <p className="text-sm text-white">{rec}</p>
                       </div>
                     );

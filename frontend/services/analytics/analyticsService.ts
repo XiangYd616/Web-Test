@@ -432,10 +432,11 @@ export class AnalyticsService {
 
   private static rateMetric(value: number, thresholds: [number, number], inverse = false): 'good' | 'needs-improvement' | 'poor' {
     if (inverse) {
-      if (value <= thresholds[0]) return 'good';
+      
+        if (value <= thresholds[0]) return 'good';
       if (value <= thresholds[1]) return 'needs-improvement';
       return 'poor';
-    } else {
+      } else {
       if (value <= thresholds[0]) return 'good';
       if (value <= thresholds[1]) return 'needs-improvement';
       return 'poor';
@@ -455,6 +456,7 @@ export class AnalyticsService {
     const benchmark = benchmarks[metric] || [0, 1000, 2000, 3000];
     for (let i = 0; i < benchmark.length; i++) {
       if (value <= benchmark[i]) {
+        
         return Math.round((i / benchmark.length) * 100);
       }
     }

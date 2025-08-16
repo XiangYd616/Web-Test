@@ -83,9 +83,10 @@ class DatabaseMonitoringService extends EventEmitter {
      */
     startMonitoring() {
         if (this.isMonitoring) {
-            this.logger.warn('数据库监控已在运行');
+            
+        this.logger.warn('数据库监控已在运行');
             return;
-        }
+      }
 
         this.isMonitoring = true;
         this.logger.info('启动数据库监控');
@@ -113,8 +114,9 @@ class DatabaseMonitoringService extends EventEmitter {
      */
     stopMonitoring() {
         if (!this.isMonitoring) {
-            return;
-        }
+            
+        return;
+      }
 
         this.isMonitoring = false;
         this.logger.info('停止数据库监控');

@@ -15,8 +15,8 @@ import {
   Settings,
   TestTube,
   Upload,
-  X
-} from 'lucide-react';
+  // X
+} from 'lucide-react'; // 已修复
 import React, { useEffect, useState } from 'react';
 // 暂时注释掉缺失的导入
 // import {
@@ -265,14 +265,15 @@ const UserPreferencesPanel: React.FC<UserPreferencesPanelProps> = ({ onClose }) 
   };
 
   if (!preferences) {
-    return (
+    
+        return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-gray-800 rounded-lg p-6">
           <div className="text-white">加载偏好设置...</div>
         </div>
       </div>
     );
-  }
+      }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

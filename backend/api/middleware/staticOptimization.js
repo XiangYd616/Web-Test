@@ -18,6 +18,7 @@ const createCompressionMiddleware = (options = {}) => {
     filter: (req, res) => {
       // 默认压缩过滤器
       if (req.headers['x-no-compression']) {
+        
         return false;
       }
       
@@ -80,8 +81,9 @@ const createCacheControlMiddleware = (options = {}) => {
     
     // 只处理GET请求
     if (method !== 'GET') {
-      return next();
-    }
+      
+        return next();
+      }
     
     // 查找匹配的缓存策略
     let strategy = config.strategies.default;
@@ -169,9 +171,10 @@ const createETagMiddleware = (options = {}) => {
         // 检查If-None-Match头
         const ifNoneMatch = req.headers['if-none-match'];
         if (ifNoneMatch && ifNoneMatch === etag) {
-          res.status(304);
+          
+        res.status(304);
           return res.end();
-        }
+      }
       }
       
       return originalSend.call(this, data);
@@ -260,8 +263,9 @@ const createCDNMiddleware = (options = {}) => {
   const config = { ...defaultOptions, ...options };
   
   if (!config.enabled || !config.cdnDomain) {
-    return (req, res, next) => next();
-  }
+    
+        return (req, res, next) => next();
+      }
   
   return (req, res, next) => {
     // 重写静态资源URL

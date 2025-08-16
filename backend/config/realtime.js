@@ -56,6 +56,7 @@ class RealtimeConfig {
       console.log('🚀 初始化实时通信系统...');
       
       if (this.isInitialized) {
+        
         console.warn('实时通信系统已初始化');
         return this.getServices();
       }
@@ -147,6 +148,7 @@ class RealtimeConfig {
   async handleTestProgress(testId, progress) {
     try {
       if (!this.realtimeService) {
+        
         console.warn('实时服务未初始化，无法发送测试进度');
         return false;
       }
@@ -164,6 +166,7 @@ class RealtimeConfig {
   async handleTestComplete(testId, result) {
     try {
       if (!this.realtimeService) {
+        
         console.warn('实时服务未初始化，无法发送测试完成通知');
         return false;
       }
@@ -181,6 +184,7 @@ class RealtimeConfig {
   async handleTestFailed(testId, error) {
     try {
       if (!this.realtimeService) {
+        
         console.warn('实时服务未初始化，无法发送测试失败通知');
         return false;
       }
@@ -198,6 +202,7 @@ class RealtimeConfig {
   async sendSystemNotification(message, options = {}) {
     try {
       if (!this.realtimeService) {
+        
         console.warn('实时服务未初始化，无法发送系统通知');
         return null;
       }
@@ -214,7 +219,8 @@ class RealtimeConfig {
    */
   getOnlineStats() {
     if (!this.socketManager) {
-      return {
+      
+        return {
         totalConnections: 0,
         activeConnections: 0,
         rooms: 0
@@ -229,7 +235,8 @@ class RealtimeConfig {
    */
   getRealtimeStats() {
     if (!this.realtimeService) {
-      return {
+      
+        return {
         subscribers: 0,
         activeTests: 0,
         queueSize: 0

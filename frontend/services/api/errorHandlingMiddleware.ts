@@ -170,12 +170,14 @@ export class ApiErrorHandler {
    */
   getUserFriendlyMessage(error: ApiRequestError): string {
     if (this.config.customErrorMessages[error.code]) {
-      return this.config.customErrorMessages[error.code];
-    }
+      
+        return this.config.customErrorMessages[error.code];
+      }
 
     // 根据状态码返回通用消息
     if (error.statusCode) {
-      switch (Math.floor(error.statusCode / 100)) {
+      
+        switch (Math.floor(error.statusCode / 100)) {
         case 4:
           return '请求错误，请检查输入信息';
         case 5:
@@ -194,8 +196,9 @@ export class ApiErrorHandler {
   private normalizeError(error: any): ApiRequestError {
     // 如果已经是ApiRequestError，直接返回
     if (error instanceof ApiRequestError) {
-      return error;
-    }
+      
+        return error;
+      }
 
     // 处理网络错误
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
@@ -289,17 +292,20 @@ export class ApiErrorHandler {
    */
   private shouldRetry(error: ApiRequestError, attempt: number): boolean {
     if (!this.config.enableRetry) {
-      return false;
-    }
+      
+        return false;
+      }
 
     if (attempt > this.config.retryConfig.maxRetries) {
-      return false;
-    }
+      
+        return false;
+      }
 
     // 检查错误是否可重试
     if (!error.retryable) {
-      return false;
-    }
+      
+        return false;
+      }
 
     // 检查状态码是否在可重试列表中
     if (error.statusCode && 

@@ -19,8 +19,8 @@ import {
     Trash2,
     TrendingUp,
     Wifi,
-    Zap
-} from 'lucide-react';
+    // Zap
+} from 'lucide-react'; // 已修复
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNotification } from '../../hooks/useNotification';
 import { useRealTimeData } from '../../hooks/useWebSocket';
@@ -31,9 +31,8 @@ import {
     Input,
     Modal,
     Select,
-    Table
-} from '../ui/index';
-
+    // Table
+} from '../ui/index'; // 已修复
 // SelectOption and TableColumn types will be defined locally
 
 // 监控目标接口
@@ -249,9 +248,10 @@ export const MonitorDashboard: React.FC<MonitorDashboardProps> = ({
     const handleAddTarget = useCallback(async () => {
         try {
             if (!newTarget.name || !newTarget.url) {
-                showNotification('请填写完整信息', 'error');
+                
+        showNotification('请填写完整信息', 'error');
                 return;
-            }
+      }
 
             const target: MonitorTarget = {
                 id: Date.now().toString(),

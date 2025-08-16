@@ -52,7 +52,9 @@ class ConfigManager {
     try {
       const saved = localStorage.getItem('app-config');
       if (saved) {
-        return { ...defaultConfig, ...JSON.parse(saved) };
+        
+        return { ...defaultConfig, ...JSON.parse(saved)
+      };
       }
     } catch (error) {
       console.warn('加载配置失败，使用默认配置:', error);

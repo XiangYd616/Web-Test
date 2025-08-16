@@ -51,12 +51,14 @@ function calculateVisibleRange(
   overscan: number = 5
 ): VisibleRange {
   if (typeof itemHeight === 'number') {
-    // 固定高度
+    
+        // 固定高度
     const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
     const visibleItems = Math.ceil(containerHeight / itemHeight) + overscan * 2;
     const endIndex = Math.min(totalItems - 1, startIndex + visibleItems);
     
-    return { startIndex, endIndex, visibleItems };
+    return { startIndex, endIndex, visibleItems
+      };
   } else {
     // 动态高度 - 简化实现，实际项目中需要更复杂的计算
     const startIndex = Math.max(0, Math.floor(scrollTop / 50) - overscan);
@@ -75,8 +77,9 @@ function calculateTotalHeight(
   itemHeight: number | ((index: number) => number)
 ): number {
   if (typeof itemHeight === 'number') {
-    return itemCount * itemHeight;
-  } else {
+    
+        return itemCount * itemHeight;
+      } else {
     // 动态高度 - 简化实现
     let totalHeight = 0;
     for (let i = 0; i < itemCount; i++) {
@@ -94,8 +97,9 @@ function calculateItemOffset(
   itemHeight: number | ((index: number) => number)
 ): number {
   if (typeof itemHeight === 'number') {
-    return index * itemHeight;
-  } else {
+    
+        return index * itemHeight;
+      } else {
     let offset = 0;
     for (let i = 0; i < index; i++) {
       offset += itemHeight(i);
@@ -270,9 +274,11 @@ export const VirtualScroll = <T,>({
   
   // 如果没有数据且有空状态组件
   if (data.length === 0 && emptyComponent) {
-    return (
+    
+        return (
       <div 
-        className={`flex items-center justify-center ${className}`}
+        className={`flex items-center justify-center ${className
+      }`}
         style={{ height: containerHeight, ...style }}
       >
         {emptyComponent}

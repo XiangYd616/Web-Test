@@ -47,7 +47,8 @@ const StressTestRecordDetail: React.FC<StressTestRecordDetailProps> = ({
 
   // 错误边界处理
   if (!record) {
-    return (
+    
+        return (
       <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <div className="flex items-center justify-center py-12">
           <AlertCircle className="w-12 h-12 text-red-400 mb-4" />
@@ -58,10 +59,11 @@ const StressTestRecordDetail: React.FC<StressTestRecordDetailProps> = ({
         </div>
       </div>
     );
-  }
+      }
 
   if (!hasValidData) {
-    return (
+    
+        return (
       <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <div className="flex items-center justify-center py-12">
           <AlertCircle className="w-12 h-12 text-yellow-400 mb-4" />
@@ -72,7 +74,7 @@ const StressTestRecordDetail: React.FC<StressTestRecordDetailProps> = ({
         </div>
       </div>
     );
-  }
+      }
 
   // 格式化时间
   const formatTime = (timestamp?: string) => {

@@ -24,17 +24,23 @@ export const formatPercentage = (value: number, total: number, decimals: number 
 
 export const formatDuration = (milliseconds: number): string => {
   if (milliseconds < 1000) {
-    return `${Math.round(milliseconds)}ms`;
+    
+        return `${Math.round(milliseconds)
+      }ms`;
   }
 
   const seconds = milliseconds / 1000;
   if (seconds < 60) {
-    return `${formatNumber(seconds, 1)}s`;
+    
+        return `${formatNumber(seconds, 1)
+      }s`;
   }
 
   const minutes = seconds / 60;
   if (minutes < 60) {
-    return `${formatNumber(minutes, 1)}m`;
+    
+        return `${formatNumber(minutes, 1)
+      }m`;
   }
 
   const hours = minutes / 60;
@@ -43,15 +49,20 @@ export const formatDuration = (milliseconds: number): string => {
 
 export const formatLargeNumber = (num: number): string => {
   if (num < 1000) {
-    return num.toString();
-  }
+    
+        return num.toString();
+      }
 
   if (num < 1000000) {
-    return `${formatNumber(num / 1000, 1)}K`;
+    
+        return `${formatNumber(num / 1000, 1)
+      }K`;
   }
 
   if (num < 1000000000) {
-    return `${formatNumber(num / 1000000, 1)}M`;
+    
+        return `${formatNumber(num / 1000000, 1)
+      }M`;
   }
 
   return `${formatNumber(num / 1000000000, 1)}B`;
@@ -64,18 +75,24 @@ export const formatScore = (score: number, maxScore: number = 100): string => {
 
 export const formatResponseTime = (ms: number): string => {
   if (ms < 1000) {
-    return `${Math.round(ms)}ms`;
+    
+        return `${Math.round(ms)
+      }ms`;
   }
   return `${formatNumber(ms / 1000, 2)}s`;
 };
 
 export const formatThroughput = (requestsPerSecond: number): string => {
   if (requestsPerSecond < 1) {
-    return `${formatNumber(requestsPerSecond, 2)} req/s`;
+    
+        return `${formatNumber(requestsPerSecond, 2)
+      } req/s`;
   }
 
   if (requestsPerSecond < 1000) {
-    return `${formatNumber(requestsPerSecond, 1)} req/s`;
+    
+        return `${formatNumber(requestsPerSecond, 1)
+      } req/s`;
   }
 
   return `${formatNumber(requestsPerSecond / 1000, 1)}K req/s`;
@@ -118,15 +135,21 @@ export const formatRelativeTime = (timestamp: number): string => {
   const days = Math.floor(hours / 24);
 
   if (days > 0) {
-    return `${days}天前`;
+    
+        return `${days
+      }天前`;
   }
 
   if (hours > 0) {
-    return `${hours}小时前`;
+    
+        return `${hours
+      }小时前`;
   }
 
   if (minutes > 0) {
-    return `${minutes}分钟前`;
+    
+        return `${minutes
+      }分钟前`;
   }
 
   return `${seconds}秒前`;

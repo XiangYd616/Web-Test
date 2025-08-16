@@ -434,6 +434,7 @@ class ScoreCalculator {
   getGrade(score) {
     for (const [grade, threshold] of Object.entries(this.gradeThresholds)) {
       if (score >= threshold) {
+        
         return grade;
       }
     }

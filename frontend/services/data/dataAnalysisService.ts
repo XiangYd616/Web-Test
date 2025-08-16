@@ -299,6 +299,7 @@ export class DataAnalysisService {
       const data = await response.json();
 
       if (!data.success) {
+        
         console.warn('Backend not available, using sample data');
         return this.generateSamplePerformanceData();
       }
@@ -307,6 +308,7 @@ export class DataAnalysisService {
 
       // 如果没有网站测试数据，生成示例数据
       if (websiteTests.length === 0) {
+        
         console.log('No website test data found, generating sample data');
         return this.generateSamplePerformanceData();
       }

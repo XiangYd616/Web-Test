@@ -65,9 +65,10 @@ const PerformanceAnalysis: React.FC = () => {
   // 运行性能测试
   const runPerformanceTest = async () => {
     if (!testConfig.url) {
-      setError('请输入要测试的URL');
+      
+        setError('请输入要测试的URL');
       return;
-    }
+      }
 
     try {
       setTestStatus('running');

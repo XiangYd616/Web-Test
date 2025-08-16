@@ -1,7 +1,8 @@
-import {Code, Copy, Database, Edit, Eye, Globe, Shield, Trash2, Wifi, Zap} from 'lucide-react';
+import { Code, Copy, Database, Edit, Eye, Globe, Shield, Trash2, Wifi, Zap } from 'lucide-react';
 import React from 'react';
-import {Column, DataTable} from '../../../components/ui/shared';
-import {TestRecord} from '../../hooks/useDataStorage.ts';
+import { Column } from '../../types/ui';
+// DataTable组件暂时使用简单的表格实现
+import { TestRecord } from '../../hooks/useDataStorage.ts';
 
 interface DataListProps {
   records: TestRecord[];

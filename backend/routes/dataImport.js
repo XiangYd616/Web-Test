@@ -94,8 +94,9 @@ const validateImportRequest = (req, res, next) => {
     }
 
     if (errors.length > 0) {
+        
         return res.status(400).json(formatResponse(false, null, '请求验证失败', errors));
-    }
+      }
 
     next();
 };
@@ -146,8 +147,9 @@ router.get('/task/:taskId/status',
             const result = await req.importService.getTaskStatus(taskId, userId);
 
             if (!result.success) {
-                return res.status(404).json(formatResponse(false, null, result.error));
-            }
+                
+        return res.status(404).json(formatResponse(false, null, result.error));
+      }
 
             res.json(formatResponse(true, result.data, '获取任务状态成功'));
 
@@ -170,13 +172,15 @@ router.get('/task/:taskId/preview',
             const result = await req.importService.getTaskStatus(taskId, userId);
 
             if (!result.success) {
-                return res.status(404).json(formatResponse(false, null, result.error));
-            }
+                
+        return res.status(404).json(formatResponse(false, null, result.error));
+      }
 
             const previewData = result.data.previewData;
             if (!previewData) {
-                return res.status(404).json(formatResponse(false, null, '预览数据不可用'));
-            }
+                
+        return res.status(404).json(formatResponse(false, null, '预览数据不可用'));
+      }
 
             res.json(formatResponse(true, previewData, '获取预览数据成功'));
 
@@ -199,8 +203,9 @@ router.post('/task/:taskId/start',
             const result = await req.importService.startImport(taskId, userId);
 
             if (!result.success) {
-                return res.status(400).json(formatResponse(false, null, result.error));
-            }
+                
+        return res.status(400).json(formatResponse(false, null, result.error));
+      }
 
             logger.info(`用户 ${userId} 开始导入任务 ${taskId}`);
             res.json(formatResponse(true, null, result.message));
@@ -249,8 +254,9 @@ router.post('/task/:taskId/cancel',
             const result = await req.importService.cancelTask(taskId, userId);
 
             if (!result.success) {
-                return res.status(400).json(formatResponse(false, null, result.error));
-            }
+                
+        return res.status(400).json(formatResponse(false, null, result.error));
+      }
 
             logger.info(`用户 ${userId} 取消导入任务 ${taskId}`);
             res.json(formatResponse(true, null, result.message));
@@ -275,8 +281,9 @@ router.delete('/task/:taskId',
             const taskResult = await req.importService.getTaskStatus(taskId, userId);
 
             if (!taskResult.success) {
-                return res.status(404).json(formatResponse(false, null, '任务不存在或无权限访问'));
-            }
+                
+        return res.status(404).json(formatResponse(false, null, '任务不存在或无权限访问'));
+      }
 
             const task = taskResult.data;
 
@@ -373,8 +380,9 @@ router.get('/mapping-template/:dataType',
 
             const template = templates[dataType];
             if (!template) {
-                return res.status(404).json(formatResponse(false, null, '不支持的数据类型'));
-            }
+                
+        return res.status(404).json(formatResponse(false, null, '不支持的数据类型'));
+      }
 
             res.json(formatResponse(true, template, '获取映射模板成功'));
 

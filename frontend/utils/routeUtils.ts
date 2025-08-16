@@ -84,13 +84,15 @@ export const isAdminRoute = (path: string): boolean => {
 
 export const getNavigationRoutes = (isAuthenticated: boolean, isAdmin: boolean): RouteInfo[] => {
   if (!isAuthenticated) {
-    return publicRoutes;
-  }
+    
+        return publicRoutes;
+      }
 
   return routes.filter(route => {
     if (route.requiresAdmin && !isAdmin) {
-      return false;
-    }
+      
+        return false;
+      }
     return true;
   });
 };

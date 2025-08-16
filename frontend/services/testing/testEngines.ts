@@ -22,20 +22,22 @@ export class K6Engine implements TestEngine {
     // 如果缓存还有效，直接返回缓存结果
     const now = Date.now();
     if (now - this.lastCheckTime < this.cacheTimeout) {
-      return this.isAvailable;
-    }
+      
+        return this.isAvailable;
+      }
 
     try {
       // 通过API检查后端k6引擎状态
       const response = await fetch('/api/test/k6/status');
       if (response.ok) {
+        
         const result = await response.json();
         if (result.success && result.data) {
           this.version = result.data.version || 'unknown';
           this.isAvailable = result.data.available || result.data.isAvailable || false;
           this.lastCheckTime = now;
           return this.isAvailable;
-        }
+      }
       }
       this.lastCheckTime = now;
       return false;
@@ -60,6 +62,7 @@ export class K6Engine implements TestEngine {
       });
 
       if (response.ok) {
+        
         return await this.checkAvailability();
       }
       return false;
@@ -112,19 +115,21 @@ export class LighthouseEngine implements TestEngine {
     // 如果缓存还有效，直接返回缓存结果
     const now = Date.now();
     if (now - this.lastCheckTime < this.cacheTimeout) {
-      return this.isAvailable;
-    }
+      
+        return this.isAvailable;
+      }
 
     try {
       const response = await fetch('/api/test/lighthouse/status');
       if (response.ok) {
+        
         const result = await response.json();
         if (result.success && result.data) {
           this.version = result.data.version || 'unknown';
           this.isAvailable = result.data.available || result.data.isAvailable || false;
           this.lastCheckTime = now;
           return this.isAvailable;
-        }
+      }
       }
       this.lastCheckTime = now;
       return false;
@@ -148,6 +153,7 @@ export class LighthouseEngine implements TestEngine {
       });
 
       if (response.ok) {
+        
         return await this.checkAvailability();
       }
       return false;
@@ -197,19 +203,21 @@ export class PlaywrightEngine implements TestEngine {
     // 如果缓存还有效，直接返回缓存结果
     const now = Date.now();
     if (now - this.lastCheckTime < this.cacheTimeout) {
-      return this.isAvailable;
-    }
+      
+        return this.isAvailable;
+      }
 
     try {
       const response = await fetch('/api/test/playwright/status');
       if (response.ok) {
+        
         const result = await response.json();
         if (result.success && result.data) {
           this.version = result.data.version || 'unknown';
           this.isAvailable = result.data.available || result.data.isAvailable || false;
           this.lastCheckTime = now;
           return this.isAvailable;
-        }
+      }
       }
       this.lastCheckTime = now;
       return false;
@@ -233,6 +241,7 @@ export class PlaywrightEngine implements TestEngine {
       });
 
       if (response.ok) {
+        
         return await this.checkAvailability();
       }
       return false;
@@ -289,15 +298,17 @@ export class TestEngineManager {
   async initializeEngines(): Promise<void> {
     // 如果已经初始化过，直接返回
     if (this.isInitialized) {
-      console.log('🔄 Test engines already initialized');
+      
+        console.log('🔄 Test engines already initialized');
       return;
-    }
+      }
 
     // 如果正在初始化，等待初始化完成
     if (this.initializationPromise) {
-      console.log('⏳ Waiting for ongoing initialization...');
+      
+        console.log('⏳ Waiting for ongoing initialization...');
       return this.initializationPromise;
-    }
+      }
 
     // 开始初始化
     this.initializationPromise = this.doInitialization();

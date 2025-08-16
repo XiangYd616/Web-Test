@@ -46,7 +46,8 @@ class UserStatsService {
     // 如果API失败，从本地存储获取
     const stored = localStorage.getItem(`${this.STORAGE_KEY}_${userId}`);
     if (stored) {
-      try {
+      
+        try {
         const stats = JSON.parse(stored);
         // 确保数据结构完整
         return {
@@ -60,7 +61,8 @@ class UserStatsService {
           averageScore: 0,
           totalTestTime: 0,
           mostUsedTestType: '压力测试',
-          testsByType: {},
+          testsByType: {
+      },
           recentActivity: [],
           ...stats
         };
@@ -94,6 +96,7 @@ class UserStatsService {
 
       const result = await response.json();
       if (result.success && result.data) {
+        
         return this.normalizeStatsData(result.data);
       }
 
@@ -253,7 +256,8 @@ class UserStatsService {
   getRecentActivity(userId: string): ActivityItem[] {
     const stored = localStorage.getItem(`${this.ACTIVITY_KEY}_${userId}`);
     if (stored) {
-      try {
+      
+        try {
         return JSON.parse(stored);
       } catch (error) {
         console.error('Failed to parse user activity:', error);

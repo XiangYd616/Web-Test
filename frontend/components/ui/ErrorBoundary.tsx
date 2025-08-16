@@ -89,7 +89,8 @@ class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
-      // 如果提供了自定义fallback，使用它
+      
+        // 如果提供了自定义fallback，使用它
       if (this.props.fallback) {
         return this.props.fallback;
       }

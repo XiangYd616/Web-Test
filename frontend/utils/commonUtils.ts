@@ -11,13 +11,15 @@ export const formatDuration = (ms: number): string => {
   const minutes = Math.floor(seconds / 60);
   
   if (minutes > 0) {
-    return `${minutes}m ${seconds % 60}s`;
+    
+        return `${minutes
+      }m ${seconds % 60}s`;
   }
   return `${seconds}s`;
 };
 
 export const generateId = (): string => {
-  return `id_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return `id_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 };
 
 export const debounce = <T extends (...args: any[]) => any>(

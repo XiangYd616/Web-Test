@@ -74,6 +74,7 @@ export class BrowserJWT {
     try {
       const parts = token.split('.');
       if (parts.length !== 3) {
+        
         return null;
       }
 
@@ -94,20 +95,23 @@ export class BrowserJWT {
   public isTokenValid(token: string): boolean {
     const parsed = this.parseToken(token);
     if (!parsed) {
-      return false;
-    }
+      
+        return false;
+      }
 
     const now = Math.floor(Date.now() / 1000);
 
     // 检查是否过期
     if (parsed.payload.exp && parsed.payload.exp < now) {
-      return false;
-    }
+      
+        return false;
+      }
 
     // 检查是否在有效期内
     if (parsed.payload.iat && parsed.payload.iat > now) {
-      return false;
-    }
+      
+        return false;
+      }
 
     return true;
   }
@@ -118,8 +122,9 @@ export class BrowserJWT {
   public getTokenRemainingTime(token: string): number {
     const parsed = this.parseToken(token);
     if (!parsed || !parsed.payload.exp) {
-      return 0;
-    }
+      
+        return 0;
+      }
 
     const now = Math.floor(Date.now() / 1000);
     return Math.max(0, parsed.payload.exp - now);
@@ -131,8 +136,9 @@ export class BrowserJWT {
   public refreshToken(token: string, expiresIn: number = 3600): string | null {
     const parsed = this.parseToken(token);
     if (!parsed) {
-      return null;
-    }
+      
+        return null;
+      }
 
     // 创建新的payload，保留原有数据但更新时间
     const newPayload = {
@@ -210,8 +216,9 @@ export class BrowserJWT {
   public getTokenInfo(token: string): any {
     const parsed = this.parseToken(token);
     if (!parsed) {
-      return null;
-    }
+      
+        return null;
+      }
 
     const now = Math.floor(Date.now() / 1000);
     const remainingTime = this.getTokenRemainingTime(token);

@@ -51,11 +51,13 @@ class WebSocketService {
   connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       if (this.ws?.readyState === WebSocket.OPEN) {
+        
         resolve();
         return;
       }
 
       if (this.isConnecting) {
+        
         reject(new Error('Connection already in progress'));
         return;
       }
@@ -254,7 +256,7 @@ class WebSocketService {
    * 生成消息ID
    */
   private generateMessageId(): string {
-    return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 }
 

@@ -187,6 +187,7 @@ class I18nService {
 
       // 如果回退语言也不存在，返回key
       if (!translations) {
+        
         return key;
       }
 
@@ -200,14 +201,16 @@ class I18nService {
         } else {
           // 如果找不到，尝试回退语言
           if (locale !== this.fallbackLocale) {
-            return this.translate(key, this.fallbackLocale, params);
-          }
+            
+        return this.translate(key, this.fallbackLocale, params);
+      }
           return key;
         }
       }
 
       // 如果value不是字符串，返回key
       if (typeof value !== 'string') {
+        
         return key;
       }
 
@@ -273,10 +276,11 @@ class I18nService {
       const translations = this.translations.get(locale);
       
       if (!translations) {
+        
         return {
           success: false,
           error: '不支持的语言'
-        };
+      };
       }
 
       return {
@@ -375,6 +379,7 @@ class I18nService {
   detectLocale(acceptLanguage) {
     try {
       if (!acceptLanguage) {
+        
         return this.defaultLocale;
       }
 
@@ -401,8 +406,9 @@ class I18nService {
           locale.startsWith(prefix)
         );
         if (match) {
-          return match;
-        }
+          
+        return match;
+      }
       }
 
       return this.defaultLocale;
@@ -420,10 +426,11 @@ class I18nService {
       const translations = this.translations.get(locale);
       
       if (!translations) {
+        
         return {
           success: false,
           error: '语言不存在'
-        };
+      };
       }
 
       let content;

@@ -190,10 +190,12 @@ const dynamicRateLimiter = (options = {}) => {
     max: (req) => {
       // 管理员用户更高的限制
       if (req.user && req.user.role === 'admin') {
+        
         return options.adminMax || 1000;
       }
       // 认证用户的限制
       if (req.user) {
+        
         return options.userMax || 200;
       }
       // 匿名用户的限制
@@ -229,8 +231,9 @@ const ipWhitelist = (whitelist = []) => {
 
     // 开发环境跳过检查
     if (process.env.NODE_ENV === 'development') {
-      return next();
-    }
+      
+        return next();
+      }
 
     if (whitelist.length > 0 && !whitelist.includes(clientIP)) {
       securityLogger('ip_not_whitelisted', {

@@ -203,14 +203,16 @@ export function useDataState<T = any>(config: DataOperationConfig = {}): [
   // 重试函数
   const retry = useCallback(async (): Promise<T | null> => {
     if (!lastFetcherRef.current) {
-      console.warn('No fetcher available for retry');
+      
+        console.warn('No fetcher available for retry');
       return null;
-    }
+      }
     
     if (state.retryCount >= finalConfig.maxRetries) {
-      console.warn('Maximum retry attempts reached');
+      
+        console.warn('Maximum retry attempts reached');
       return null;
-    }
+      }
     
     // 调用重试回调
     finalConfig.onRetry(state.retryCount + 1);
@@ -346,8 +348,9 @@ export function usePaginatedDataState<T = any>(config: DataOperationConfig = {})
   // 加载更多数据
   const loadMore = useCallback(async (): Promise<T[] | null> => {
     if (!lastFetcherRef.current || !paginationState.hasNext || loadingMore) {
-      return null;
-    }
+      
+        return null;
+      }
     
     setLoadingMore(true);
     
@@ -374,8 +377,9 @@ export function usePaginatedDataState<T = any>(config: DataOperationConfig = {})
   // 刷新数据
   const refresh = useCallback(async (): Promise<T[] | null> => {
     if (!lastFetcherRef.current) {
-      return null;
-    }
+      
+        return null;
+      }
     
     // 重置到第一页
     setPaginationState(prev => ({ ...prev, page: 1 }));

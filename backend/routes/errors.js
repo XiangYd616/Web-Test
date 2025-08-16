@@ -32,10 +32,11 @@ router.post('/report', asyncHandler(async (req, res) => {
 
   // 验证必要字段
   if (!id || !type || !message) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '缺少必要的错误信息字段'
-    });
+      });
   }
 
   // 记录前端错误
@@ -177,13 +178,15 @@ function determinePriority(errorReport) {
 
   // 严重程度判断
   if (severity === 'CRITICAL' || severity === 'HIGH') {
-    return 'high';
-  }
+    
+        return 'high';
+      }
 
   // 错误类型判断
   if (type === 'SERVER' || type === 'AUTHENTICATION') {
-    return 'medium';
-  }
+    
+        return 'medium';
+      }
 
   return 'low';
 }

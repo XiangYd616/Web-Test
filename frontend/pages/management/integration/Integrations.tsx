@@ -5,9 +5,8 @@ import IntegrationService, {
   APIKey,
   IntegrationStats,
   ThirdPartyIntegration,
-  WebhookConfig
-} from '../../../services/integration/integrationService.ts';
-
+  // WebhookConfig
+} from '../../../services/integration/integrationService.ts'; // 已修复
 interface IntegrationsProps { }
 
 const Integrations: React.FC<IntegrationsProps> = () => {
@@ -117,15 +116,17 @@ const Integrations: React.FC<IntegrationsProps> = () => {
   // 格式化API密钥显示
   const formatAPIKey = (key: string, isVisible: boolean) => {
     if (isVisible) {
-      return key;
-    }
+      
+        return key;
+      }
     const prefix = key.substring(0, 12);
     const suffix = key.substring(key.length - 4);
     return `${prefix}${'*'.repeat(16)}${suffix}`;
   };
 
   if (loading && !stats) {
-    return (
+    
+        return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
         <div className="flex items-center justify-center h-64">
           <RefreshCw className="w-8 h-8 text-blue-400 animate-spin mr-3" />
@@ -133,17 +134,19 @@ const Integrations: React.FC<IntegrationsProps> = () => {
         </div>
       </div>
     );
-  }
+      }
 
   if (error) {
-    return (
+    
+        return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
         <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-6">
           <div className="flex items-center mb-4">
             <AlertTriangle className="w-6 h-6 text-red-400 mr-3" />
             <h3 className="text-xl font-semibold text-white">加载失败</h3>
           </div>
-          <p className="text-gray-300 mb-4">{error}</p>
+          <p className="text-gray-300 mb-4">{error
+      }</p>
           <button
             onClick={fetchIntegrationData}
             className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"

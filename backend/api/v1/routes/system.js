@@ -220,8 +220,9 @@ router.delete('/config/:category/:key', requireRole(ROLES.ADMIN), asyncHandler(a
   );
 
   if (result.rows.length === 0) {
-    return res.notFound('配置项不存在');
-  }
+    
+        return res.notFound('配置项不存在');
+      }
 
   res.success(null, '配置删除成功');
 }));
@@ -271,8 +272,9 @@ router.put('/engines/:type', requireRole(ROLES.ADMIN), asyncHandler(async (req, 
   );
 
   if (result.rows.length === 0) {
-    return res.notFound('引擎不存在');
-  }
+    
+        return res.notFound('引擎不存在');
+      }
 
   res.success(result.rows[0], '引擎状态更新成功');
 }));

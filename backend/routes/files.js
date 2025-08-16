@@ -70,10 +70,11 @@ const upload = multer({
  */
 router.post('/upload', authMiddleware, upload.single('file'), asyncHandler(async (req, res) => {
   if (!req.file) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       error: '没有上传文件'
-    });
+      });
   }
 
   try {
@@ -199,7 +200,8 @@ router.get('/download/:id', authMiddleware, asyncHandler(async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({
+      
+        return res.status(404).json({
         success: false,
         error: '文件不存在'
       });
@@ -249,7 +251,8 @@ router.delete('/:id', authMiddleware, asyncHandler(async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({
+      
+        return res.status(404).json({
         success: false,
         error: '文件不存在'
       });
@@ -298,7 +301,8 @@ router.put('/:id/metadata', authMiddleware, asyncHandler(async (req, res) => {
     );
 
     if (checkResult.rows.length === 0) {
-      return res.status(404).json({
+      
+        return res.status(404).json({
         success: false,
         error: '文件不存在'
       });
@@ -325,7 +329,8 @@ router.put('/:id/metadata', authMiddleware, asyncHandler(async (req, res) => {
     }
 
     if (updateFields.length === 0) {
-      return res.status(400).json({
+      
+        return res.status(400).json({
         success: false,
         error: '没有提供要更新的字段'
       });

@@ -127,7 +127,9 @@ export const GridLayout: React.FC<GridLayoutProps> = ({
 }) => {
   const getGridCols = () => {
     if (!responsive) {
-      return `grid-cols-${columns}`;
+      
+        return `grid-cols-${columns
+      }`;
     }
 
     const responsiveMap = {
@@ -345,14 +347,18 @@ export const Divider: React.FC<DividerProps> = ({
   label
 }) => {
   if (orientation === 'vertical') {
-    return (
-      <div className={`w-px bg-gray-200 ${className}`} />
+    
+        return (
+      <div className={`w-px bg-gray-200 ${className
+      }`} />
     );
   }
 
   if (label) {
-    return (
-      <div className={`relative ${className}`}>
+    
+        return (
+      <div className={`relative ${className
+      }`}>
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-gray-200" />
         </div>

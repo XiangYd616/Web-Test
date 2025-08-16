@@ -193,7 +193,8 @@ class CoreWebVitalsAnalyzer {
    */
   analyzeLCP(lcpValue) {
     if (!lcpValue) {
-      return {
+      
+        return {
         value: null,
         score: 0,
         rating: 'poor',
@@ -230,7 +231,8 @@ class CoreWebVitalsAnalyzer {
    */
   analyzeFID(fidValue) {
     if (fidValue === null || fidValue === undefined) {
-      return {
+      
+        return {
         value: null,
         score: 75, // 默认给一个中等分数
         rating: 'needs-improvement',
@@ -267,7 +269,8 @@ class CoreWebVitalsAnalyzer {
    */
   analyzeCLS(clsValue) {
     if (clsValue === null || clsValue === undefined) {
-      return {
+      
+        return {
         value: null,
         score: 75,
         rating: 'needs-improvement',
@@ -304,7 +307,8 @@ class CoreWebVitalsAnalyzer {
    */
   analyzeFCP(fcpValue) {
     if (!fcpValue) {
-      return {
+      
+        return {
         value: null,
         score: 0,
         rating: 'poor',
@@ -340,7 +344,8 @@ class CoreWebVitalsAnalyzer {
    */
   analyzeTTFB(ttfbValue) {
     if (!ttfbValue) {
-      return {
+      
+        return {
         value: null,
         score: 0,
         rating: 'poor',
@@ -410,10 +415,12 @@ class CoreWebVitalsAnalyzer {
   // 描述和建议方法
   getLCPDescription(value) {
     if (value <= this.thresholds.lcp.good) {
-      return '最大内容绘制时间优秀，用户能快速看到主要内容';
-    } else if (value <= this.thresholds.lcp.needsImprovement) {
-      return '最大内容绘制时间需要改进，可能影响用户体验';
-    } else {
+      
+        return '最大内容绘制时间优秀，用户能快速看到主要内容';
+      } else if (value <= this.thresholds.lcp.needsImprovement) {
+      
+        return '最大内容绘制时间需要改进，可能影响用户体验';
+      } else {
       return '最大内容绘制时间过长，严重影响用户体验';
     }
   }
@@ -434,10 +441,12 @@ class CoreWebVitalsAnalyzer {
 
   getFIDDescription(value) {
     if (value <= this.thresholds.fid.good) {
-      return '首次输入延迟优秀，页面响应迅速';
-    } else if (value <= this.thresholds.fid.needsImprovement) {
-      return '首次输入延迟需要改进，可能影响交互体验';
-    } else {
+      
+        return '首次输入延迟优秀，页面响应迅速';
+      } else if (value <= this.thresholds.fid.needsImprovement) {
+      
+        return '首次输入延迟需要改进，可能影响交互体验';
+      } else {
       return '首次输入延迟过长，严重影响交互体验';
     }
   }
@@ -458,10 +467,12 @@ class CoreWebVitalsAnalyzer {
 
   getCLSDescription(value) {
     if (value <= this.thresholds.cls.good) {
-      return '累积布局偏移优秀，页面布局稳定';
-    } else if (value <= this.thresholds.cls.needsImprovement) {
-      return '累积布局偏移需要改进，可能影响用户体验';
-    } else {
+      
+        return '累积布局偏移优秀，页面布局稳定';
+      } else if (value <= this.thresholds.cls.needsImprovement) {
+      
+        return '累积布局偏移需要改进，可能影响用户体验';
+      } else {
       return '累积布局偏移过大，严重影响用户体验';
     }
   }
@@ -482,30 +493,36 @@ class CoreWebVitalsAnalyzer {
 
   getFCPDescription(value) {
     if (value <= this.thresholds.fcp.good) {
-      return '首次内容绘制时间优秀';
-    } else if (value <= this.thresholds.fcp.needsImprovement) {
-      return '首次内容绘制时间需要改进';
-    } else {
+      
+        return '首次内容绘制时间优秀';
+      } else if (value <= this.thresholds.fcp.needsImprovement) {
+      
+        return '首次内容绘制时间需要改进';
+      } else {
       return '首次内容绘制时间过长';
     }
   }
 
   getTTFBDescription(value) {
     if (value <= this.thresholds.ttfb.good) {
-      return '首字节时间优秀';
-    } else if (value <= this.thresholds.ttfb.needsImprovement) {
-      return '首字节时间需要改进';
-    } else {
+      
+        return '首字节时间优秀';
+      } else if (value <= this.thresholds.ttfb.needsImprovement) {
+      
+        return '首字节时间需要改进';
+      } else {
       return '首字节时间过长';
     }
   }
 
   getOverallDescription(score) {
     if (score >= 90) {
-      return 'Core Web Vitals表现优秀，用户体验良好';
-    } else if (score >= 50) {
-      return 'Core Web Vitals表现一般，有改进空间';
-    } else {
+      
+        return 'Core Web Vitals表现优秀，用户体验良好';
+      } else if (score >= 50) {
+      
+        return 'Core Web Vitals表现一般，有改进空间';
+      } else {
       return 'Core Web Vitals表现较差，需要重点优化';
     }
   }

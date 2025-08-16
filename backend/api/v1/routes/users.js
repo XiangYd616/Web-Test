@@ -80,14 +80,15 @@ router.put('/profile', updateProfileValidation, asyncHandler(async (req, res) =>
 
   // 检查用户名是否已被使用
   if (username && username !== req.user.username) {
-    const existingUser = await pool.query(
+    
+        const existingUser = await pool.query(
       'SELECT id FROM users WHERE username = $1 AND id != $2',
       [username, userId]
     );
 
     if (existingUser.rows.length > 0) {
       return res.conflict('该用户名已被使用');
-    }
+      }
   }
 
   // 更新用户信息
@@ -134,8 +135,9 @@ router.put('/preferences', asyncHandler(async (req, res) => {
 
   // 验证偏好设置格式
   if (typeof preferences !== 'object' || preferences === null) {
-    return res.badRequest('偏好设置必须是有效的JSON对象');
-  }
+    
+        return res.badRequest('偏好设置必须是有效的JSON对象');
+      }
 
   // 更新偏好设置
   const result = await pool.query(
@@ -242,20 +244,23 @@ router.put('/:id/status', requireRole(ROLES.ADMIN), asyncHandler(async (req, res
   );
 
   if (userResult.rows.length === 0) {
-    return res.notFound('用户不存在');
-  }
+    
+        return res.notFound('用户不存在');
+      }
 
   const targetUser = userResult.rows[0];
 
   // 防止管理员禁用自己
   if (targetUserId === req.user.id) {
-    return res.badRequest('不能修改自己的状态');
-  }
+    
+        return res.badRequest('不能修改自己的状态');
+      }
 
   // 防止普通管理员修改超级管理员状态
   if (targetUser.role === ROLES.ADMIN && req.user.role !== ROLES.ADMIN) {
-    return res.forbidden('权限不足');
-  }
+    
+        return res.forbidden('权限不足');
+      }
 
   // 更新用户状态
   const result = await pool.query(
@@ -284,20 +289,23 @@ router.delete('/:id', requireRole(ROLES.ADMIN), asyncHandler(async (req, res) =>
   );
 
   if (userResult.rows.length === 0) {
-    return res.notFound('用户不存在');
-  }
+    
+        return res.notFound('用户不存在');
+      }
 
   const targetUser = userResult.rows[0];
 
   // 防止管理员删除自己
   if (targetUserId === req.user.id) {
-    return res.badRequest('不能删除自己的账户');
-  }
+    
+        return res.badRequest('不能删除自己的账户');
+      }
 
   // 防止删除其他管理员
   if (targetUser.role === ROLES.ADMIN) {
-    return res.forbidden('不能删除管理员账户');
-  }
+    
+        return res.forbidden('不能删除管理员账户');
+      }
 
   // 删除用户（级联删除相关数据）
   await pool.query('DELETE FROM users WHERE id = $1', [targetUserId]);

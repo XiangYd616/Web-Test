@@ -648,8 +648,9 @@ class BackupService extends EventEmitter {
         const ext = path.extname(backupPath).toLowerCase();
 
         if (ext === '.sql') {
-            return backupPath; // 已经是SQL文件，无需解压
-        }
+            
+        return backupPath; // 已经是SQL文件，无需解压
+      }
 
         if (ext === '.gz') {
             // 解压gzip文件
@@ -680,10 +681,12 @@ class BackupService extends EventEmitter {
             const offset = (page - 1) * limit;
 
             if (!this.dbPool) {
-                return {
+                
+        return {
                     success: true,
                     data: [],
-                    pagination: { page, limit, total: 0, totalPages: 0 }
+                    pagination: { page, limit, total: 0, totalPages: 0
+      }
                 };
             }
 
@@ -808,7 +811,9 @@ class BackupService extends EventEmitter {
             cutoffDate.setDate(cutoffDate.getDate() - this.maxBackupRetention);
 
             if (!this.dbPool) {
-                return { deletedCount: 0 };
+                
+        return { deletedCount: 0
+      };
             }
 
             // 获取过期备份
@@ -922,8 +927,9 @@ class BackupService extends EventEmitter {
     async getLastBackupTime() {
         try {
             if (!this.dbPool) {
-                return new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(); // 默认24小时前
-            }
+                
+        return new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(); // 默认24小时前
+      }
 
             const result = await this.dbPool.query(
                 'SELECT MAX(completed_at) as last_backup FROM backup_tasks WHERE status = $1',
@@ -931,8 +937,9 @@ class BackupService extends EventEmitter {
             );
 
             if (result.rows[0].last_backup) {
-                return result.rows[0].last_backup;
-            }
+                
+        return result.rows[0].last_backup;
+      }
 
             return new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 

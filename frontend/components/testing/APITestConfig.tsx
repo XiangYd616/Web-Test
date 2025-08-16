@@ -22,9 +22,8 @@ import {
   ChevronUp,
   Copy,
   Download,
-  Upload
-} from 'lucide-react';
-
+  // Upload
+} from 'lucide-react'; // 已修复
 interface APIEndpoint {
   id: string;
   name: string;

@@ -186,8 +186,9 @@ router.post('/send-alert', async (req, res) => {
     const { title, message, severity, type, channels } = req.body;
     
     if (!title || !message) {
-      return res.error('标题和消息不能为空', 400);
-    }
+      
+        return res.error('标题和消息不能为空', 400);
+      }
     
     const alert = {
       id: `manual_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
@@ -251,8 +252,9 @@ router.post('/alert-rules', async (req, res) => {
     const { name, condition, alertLevel, channels, throttle } = req.body;
     
     if (!name || !condition || !alertLevel) {
-      return res.error('规则名称、条件和告警级别不能为空', 400);
-    }
+      
+        return res.error('规则名称、条件和告警级别不能为空', 400);
+      }
     
     // 这里需要实现条件解析逻辑
     // 为了安全起见，可以限制条件的复杂度
@@ -363,8 +365,9 @@ router.post('/cleanup', async (req, res) => {
     const { days = 30 } = req.body;
     
     if (days < 1 || days > 365) {
-      return res.error('清理天数必须在1-365之间', 400);
-    }
+      
+        return res.error('清理天数必须在1-365之间', 400);
+      }
     
     // 这里可以实现日志清理逻辑
     // 由于当前使用文件存储，可以删除过期的日志文件

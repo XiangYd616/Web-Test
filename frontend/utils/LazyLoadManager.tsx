@@ -6,7 +6,7 @@
 import React, { ComponentType, LazyExoticComponent, ReactNode, Suspense } from 'react';
 import ErrorBoundary from '../components/system/ErrorBoundary';
 import {enhancedConfigManager} from '../config/ConfigManager';
-// import {performanceMonitor} from './performanceMonitor';
+// // import {performanceMonitor} from './performanceMonitor';
 
 /**
  * 懒加载配置
@@ -85,7 +85,7 @@ export class LazyLoadManager {
       loadingState.isLoading = true;
       loadingState.error = null;
 
-      const componentName = chunkName || 'unknown'; // 已删除
+      const componentName = chunkName || 'unknown'; // 已删除 // 已删除
 
       // 记录开始加载
       performanceMonitor.startMeasure(`lazy-load-${componentName}`);
@@ -183,9 +183,11 @@ export class LazyLoadManager {
       );
 
       if (errorBoundary) {
+        
         return (
           <ErrorBoundary level="component">
-            {content}
+            {content
+      }
           </ErrorBoundary>
         );
       }
@@ -220,8 +222,9 @@ export class LazyLoadManager {
    */
   private async startPreloading(): Promise<void> {
     if (this.isPreloading || this.preloadQueue.length === 0) {
-      return;
-    }
+      
+        return;
+      }
 
     this.isPreloading = true;
 
@@ -235,6 +238,7 @@ export class LazyLoadManager {
       );
 
       if (isSlowConnection) {
+        
         console.log('Slow connection detected, skipping preload');
         return;
       }

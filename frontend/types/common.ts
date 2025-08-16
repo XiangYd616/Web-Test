@@ -7,7 +7,18 @@
 export type ID = string | number;
 export type UUID = string;
 export type Timestamp = string; // 统一使用 ISO 8601 字符串格式
+export type Email = string;
+export type URL = string;
+export type Timezone = string;
+export type LanguageCode = 'zh-CN' | 'en-US' | 'ja-JP' | 'ko-KR';
 export type Status = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+
+// 基础实体接口
+export interface BaseEntity {
+  id: UUID;
+  created_at: Timestamp;
+  updated_at: Timestamp;
+}
 
 // 重新导出用户相关类型以保持兼容性
 export type {
@@ -15,10 +26,8 @@ export type {
   LoginCredentials,
   RegisterData,
   UserPreferences,
-  UserProfile,
-  UserSession
-} from './user';
-
+  UserProfile
+} from './user'; // 已修复
 // 重新导出枚举类型
 export {
   Language,
@@ -26,10 +35,8 @@ export {
   TestStatus,
   ThemeMode,
   Timezone,
-  UserRole,
-  UserStatus
-} from './enums';
-
+  UserRole
+} from './enums'; // 已修复
 // API响应类型
 export interface ApiResponse<T = any> {
   success: boolean;
@@ -281,4 +288,13 @@ export interface SearchResult {
 export interface DownloadRequest {
   resourceId: string;
   userId?: string;
+}
+
+// 验证错误
+export interface ValidationError {
+  field: string;
+  message: string;
+  code?: string;
+  value?: any;
+  constraints?: Record<string, string>;
 }

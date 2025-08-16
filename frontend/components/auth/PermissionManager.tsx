@@ -4,25 +4,24 @@
  * 版本: v1.0.0
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
 import {
-  Shield,
-  Users,
-  Key,
-  Plus,
-  Edit,
-  Trash2,
-  Search,
-  Filter,
+  AlertTriangle,
+  Check,
   ChevronDown,
   ChevronRight,
-  Check,
-  X,
-  AlertTriangle,
-  Info
+  Edit,
+  Info,
+  Key,
+  Plus,
+  Search,
+  Shield,
+  Trash2,
+  Users,
+  X
 } from 'lucide-react';
-import {useRBAC} from '../../services/auth/rbacService';
-import type { Role, Permission, UserPermissions } from '../../services/auth/rbacService';
+import React, { useEffect, useMemo, useState } from 'react';
+import type { Permission, Role, UserPermissions } from '../../services/auth/rbacService';
+import { useRBAC } from '../../services/auth/rbacService';
 
 // ==================== 类型定义 ====================
 
@@ -145,7 +144,7 @@ const PermissionTree: React.FC<PermissionTreeProps> = ({
                       disabled={readonly}
                       className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
                     />
-                    
+
                     <div className="flex items-center space-x-2 flex-1">
                       {getResourceIcon(permission.resource)}
                       <div className="flex-1">
@@ -202,18 +201,16 @@ const RoleCard: React.FC<RoleCardProps> = ({
 
   return (
     <div
-      className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-        isSelected
+      className={`border rounded-lg p-4 cursor-pointer transition-colors ${isSelected
           ? 'border-blue-500 bg-blue-900/20'
           : 'border-gray-600 bg-gray-800 hover:border-gray-500'
-      }`}
+        }`}
       onClick={() => onSelect?.(role)}
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center space-x-3">
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-            role.isSystem ? 'bg-yellow-600' : 'bg-blue-600'
-          }`}>
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${role.isSystem ? 'bg-yellow-600' : 'bg-blue-600'
+            }`}>
             <Shield className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -293,7 +290,7 @@ const RoleCard: React.FC<RoleCardProps> = ({
               禁用
             </span>
           )}
-          
+
           {role.isSystem && (
             <span className="text-xs bg-yellow-600 px-2 py-1 rounded">
               系统角色
@@ -329,7 +326,7 @@ export const PermissionManager: React.FC<PermissionManagerProps> = ({
     try {
       const allRoles = rbacService.getAllRoles();
       const allPermissions = rbacService.getAllPermissions();
-      
+
       setRoles(allRoles);
       setPermissions(allPermissions);
 
@@ -380,6 +377,7 @@ export const PermissionManager: React.FC<PermissionManagerProps> = ({
   };
 
   if (isLoading) {
+
     return (
       <div className="flex items-center justify-center p-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
@@ -389,11 +387,13 @@ export const PermissionManager: React.FC<PermissionManagerProps> = ({
   }
 
   if (error) {
+
     return (
       <div className="bg-red-900/20 border border-red-700 rounded-lg p-4">
         <div className="flex items-center space-x-2">
           <AlertTriangle className="w-5 h-5 text-red-400" />
-          <span className="text-red-300">加载失败: {error}</span>
+          <span className="text-red-300">加载失败: {error
+          }</span>
         </div>
       </div>
     );
@@ -425,11 +425,10 @@ export const PermissionManager: React.FC<PermissionManagerProps> = ({
             <button
               key={tab}
               onClick={() => setActiveTab(tab as any)}
-              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === tab
+              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab
                   ? 'border-blue-500 text-blue-400'
                   : 'border-transparent text-gray-400 hover:text-gray-300'
-              }`}
+                }`}
             >
               {tab === 'roles' && '角色管理'}
               {tab === 'permissions' && '权限管理'}
@@ -454,7 +453,7 @@ export const PermissionManager: React.FC<PermissionManagerProps> = ({
                   </button>
                 )}
               </div>
-              
+
               <div className="space-y-3 max-h-96 overflow-y-auto">
                 {filteredRoles.map(role => (
                   <RoleCard
@@ -513,7 +512,7 @@ export const PermissionManager: React.FC<PermissionManagerProps> = ({
                   <PermissionTree
                     permissions={permissions.filter(p => selectedRole.permissions.includes(p.id))}
                     selectedPermissions={selectedRole.permissions}
-                    onPermissionToggle={() => {}}
+                    onPermissionToggle={() => { }}
                     readonly={true}
                   />
                 </div>
@@ -536,7 +535,7 @@ export const PermissionManager: React.FC<PermissionManagerProps> = ({
           {activeTab === 'users' && userPermissions && (
             <div className="bg-gray-800 rounded-lg p-6">
               <h3 className="text-lg font-medium text-white mb-6">用户权限详情</h3>
-              
+
               <div className="space-y-6">
                 <div>
                   <h4 className="text-md font-medium text-gray-300 mb-3">分配的角色</h4>

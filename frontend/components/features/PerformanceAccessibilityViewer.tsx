@@ -25,8 +25,8 @@ import {
     PointElement,
     RadialLinearScale,
     Title,
-    Tooltip
-} from 'chart.js';
+    // Tooltip
+} from 'chart.js'; // 已修复
 import {
     Activity,
     AlertTriangle,
@@ -36,8 +36,8 @@ import {
     Shield,
     Target,
     TrendingUp,
-    Zap
-} from 'lucide-react';
+    // Zap
+} from 'lucide-react'; // 已修复
 import React, { useEffect, useState } from 'react';
 import { Bar, Doughnut, Radar } from 'react-chartjs-2';
 

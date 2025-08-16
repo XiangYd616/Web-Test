@@ -131,8 +131,10 @@ export const StressTestMetrics: React.FC<StressTestMetricsProps> = ({
   className = ''
 }) => {
   if (!metrics) {
-    return (
-      <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 ${className}`}>
+    
+        return (
+      <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 ${className
+      }`}>
         {[
           { title: '总请求数', icon: BarChart3, color: 'text-blue-400' },
           { title: '成功率', icon: CheckCircle, color: 'text-green-400' },

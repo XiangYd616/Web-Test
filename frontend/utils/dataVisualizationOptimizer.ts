@@ -243,7 +243,8 @@ class DataVisualizationOptimizer {
     const responseTimeThreshold = originalStats.avgResponseTime * 0.05; // 5%阈值
 
     if (responseTimeDiff > responseTimeThreshold && originalData.length > sampledData.length) {
-      // 找到被遗漏的中等响应时间数据点
+      
+        // 找到被遗漏的中等响应时间数据点
       const sampledIndices = new Set(sampledData.map((_, i) => {
         // 找到原始数据中对应的索引
         return originalData.findIndex(orig =>

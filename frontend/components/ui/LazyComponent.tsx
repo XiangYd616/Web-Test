@@ -5,7 +5,7 @@
 
 import React, { ComponentType, Suspense, lazy, useEffect, useState } from 'react';
 import { LoadingSpinner } from './LoadingSpinner';
-// import ErrorBoundary from './ErrorBoundary';
+// // import ErrorBoundary from './ErrorBoundary';
 
 // 懒加载组件的配置选项
 interface LazyComponentOptions {
@@ -20,14 +20,14 @@ interface LazyComponentOptions {
   /** 是否在视口中才加载 */
   loadOnVisible?: boolean;
   /** 预加载策略 */
-  preload?: 'immediate' | 'hover' | 'idle' | 'none'; // 已删除
+  preload?: 'immediate' | 'hover' | 'idle' | 'none'; // 已删除 // 已删除
 }
 
 /**
  * 创建懒加载组件
  */
 export function createLazyComponent<T extends ComponentType<any>>(
-  // importFn: () => Promise<{ default: T }>,
+  // // importFn: () => Promise<{ default: T }>,
   options: LazyComponentOptions = {}
 ) {
   const {
@@ -48,9 +48,10 @@ export function createLazyComponent<T extends ComponentType<any>>(
 
       // 确保最小加载时间，防止闪烁
       if (loadTime < minLoadTime) {
+        
         return new Promise(resolve => {
           setTimeout(() => resolve(module), minLoadTime - loadTime);
-        });
+      });
       }
 
       return module;
@@ -78,7 +79,7 @@ export function createLazyComponent<T extends ComponentType<any>>(
         { threshold: 0.1 }
       );
 
-      const element = document.getElementById(`lazy-component-${Math.random()}`); // 已删除
+      const element = document.getElementById(`lazy-component-${Math.random()}`); // 已删除 // 已删除
       if (element) {
         observer.observe(element);
       }
@@ -120,9 +121,11 @@ export function createLazyComponent<T extends ComponentType<any>>(
 
     // 如果需要等待可见性
     if (loadOnVisible && !isVisible) {
-      return (
+      
+        return (
         <div
-          id={`lazy-component-${Math.random()}`}
+          id={`lazy-component-${Math.random()
+      }`}
           className="min-h-[100px] flex items-center justify-center"
         >
           <div className="text-gray-500 text-sm">组件准备加载...</div>
@@ -132,8 +135,9 @@ export function createLazyComponent<T extends ComponentType<any>>(
 
     // 如果不应该加载
     if (!shouldLoad) {
-      return loadingFallback;
-    }
+      
+        return loadingFallback;
+      }
 
     return (
       <ErrorBoundary
@@ -235,7 +239,7 @@ export const LazyContainer: React.FC<LazyContainerProps> = ({
  * 图表懒加载组件示例
  */
 export const LazyChart = createLazyComponent(
-  () => import('../charts/Chart'), // 修复语法错误
+  () => import('../charts/Chart'),
   {
     delay: 100,
     minLoadTime: 300,
@@ -263,7 +267,7 @@ export const LazyDataTable = createLazyComponent(
       </div>
     )
   }
-); // 已删除
+); // 已删除 // 已删除
 
 /**
  * 代码编辑器懒加载组件示例

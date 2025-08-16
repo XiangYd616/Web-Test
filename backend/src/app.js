@@ -30,11 +30,10 @@ const adminRoutes = require('../routes/admin.js');
 // const { authMiddleware } = require('../middleware/auth.js'); // 已移除，不再需要
 const dataManagementRoutes = require('../routes/dataManagement.js');
 const testHistoryRoutes = require('../routes/testHistory.js');
-const unifiedTestHistoryRoutes = require('../routes/unifiedTestHistory.js');
 const monitoringRoutes = require('../routes/monitoring.js');
 const reportRoutes = require('../routes/reports.js');
 const integrationRoutes = require('../routes/integrations.js');
-// // // const cacheRoutes = require('../config/cache.js'); // 已删除 // 已删除 // 已移除，使用SmartCacheService
+// // // // // const cacheRoutes = require('../config/cache.js'); // 已删除 // 已删除 // 已删除 // 已删除 // 已移除，使用CacheService
 const errorRoutes = require('../routes/errors.js');
 const performanceRoutes = require('../routes/performance.js');
 const filesRoutes = require('../routes/files.js');
@@ -54,13 +53,13 @@ const {
 // 导入数据库连接
 const { connectDB, testConnection } = require('../config/database.js');
 // 注意：这些服务文件已被删除，需要使用替代方案
-// const databaseService = require('../services/databaseService');
+// const databaseService = require('../services/database/databaseService');
 // const webSocketService = require('../services/webSocketService');
-// const testQueueService = require('../services/testQueueService');
+// const testQueueService = require('../services/queue/queueService');
 
 // 导入缓存和性能优化系统
-// // // const cacheConfig = require('../config/cache.js'); // 已删除 // 已删除 // 已移除，使用SmartCacheService
-// // // const CacheManager = require('../services/cache/CacheManager.js'); // 已删除 // 已删除 // 已移除，使用SmartCacheService
+// // // // // const cacheConfig = require('../config/cache.js'); // 已删除 // 已删除 // 已删除 // 已删除 // 已移除，使用CacheService
+// // // // // const CacheManager = require('../services/cache/CacheManager.js'); // 已删除 // 已删除 // 已删除 // 已删除 // 已移除，使用CacheService
 const { createCacheMiddleware } = require('../middleware/cacheMiddleware.js');
 const {
   createCompressionMiddleware,
@@ -73,7 +72,7 @@ const {
 const realtimeConfig = require('../config/realtime.js');
 
 // 导入Redis服务
-// // const redisConnection = require('../services/redis/connection.js'); // 已删除 // 已移除，使用SmartCacheService
+// // // const redisConnection = require('../services/redis/connection.js'); // 已删除 // 已删除 // 已移除，使用CacheService
 const cacheMonitoring = require('../routes/monitoring.js');
 
 // 导入测试历史服务将在启动时动态加载
@@ -149,7 +148,7 @@ app.use(cors({
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  optionsSuccessStatus: 200 // 一些旧版浏览器（IE11, 各种SmartTVs）在204上有问题
+  optionsSuccessStatus: 200 // 一些旧版浏览器（IE11, 各种TVs）在204上有问题
 }));
 
 // 基础中间件 - 使用优化的压缩中间件
@@ -191,7 +190,7 @@ app.use('/exports', express.static(path.join(__dirname, 'exports')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // 初始化错误处理系统
-const { initializeErrorHandlingSystem, unifiedErrorHandler } = require('../utils/ErrorHandler');
+const { initializeErrorHandlingSystem, unifiedErrorHandler } = require('../utils/errorHandler');
 
 // 使用统一路由管理器 - 修复API路由架构问题
 const RouteManager = require('./RouteManager.js');
@@ -404,6 +403,7 @@ app.post('/realtime/notify', async (req, res) => {
     const { message, level, targetUsers, targetRoles } = req.body;
 
     if (!message) {
+
       return res.status(400).json({
         success: false,
         error: '消息内容不能为空'
@@ -505,16 +505,16 @@ const startServer = async () => {
     //   // 继续启动，但记录错误
     // }
 
-    // 初始化新的缓存系统 - 已移除，使用SmartCacheService
+    // 初始化新的缓存系统 - 已移除，使用CacheService
     // try {
     //   const cacheManager = new CacheManager(dbPool);
     //   const initialized = await cacheManager.initialize();
-    //   // ... 缓存管理器代码已移除，使用SmartCacheService替代
+    //   // ... 缓存管理器代码已移除，使用CacheService替代
     // } catch (error) {
     //   console.warn('⚠️ 缓存系统初始化失败，继续使用无缓存模式:', error.message);
     // }
 
-    console.log('✅ 使用新的SmartCacheService缓存系统');
+    console.log('✅ 使用新的CacheService缓存系统');
 
     // 初始化实时通信系统 - 使用现有的Socket.IO实例
     try {
@@ -589,7 +589,7 @@ const startServer = async () => {
     // 清理旧的测试房间
     setTimeout(async () => {
       try {
-//         const { RealStressTestEngine } = require('../engines/stress/realStressTestEngine'); // 已删除
+        // //         const { RealStressTestEngine } = require('../engines/stress/StressTestEngine'); // 已删除 // 已删除
         const stressTestEngine = new RealStressTestEngine();
         try {
           stressTestEngine.io = io; // 设置WebSocket实例
@@ -765,12 +765,13 @@ function setupWebSocketHandlers(io) {
         const { testId, reason = '用户手动取消' } = data;
 
         if (!testId) {
+
           console.warn('⚠️ WebSocket取消事件缺少testId');
           return;
         }
 
         // 获取测试引擎实例
-//         const { RealStressTestEngine } = require('../engines/stress/realStressTestEngine'); // 已删除
+        // //         const { RealStressTestEngine } = require('../engines/stress/StressTestEngine'); // 已删除 // 已删除
         const stressTestEngine = new RealStressTestEngine();
         stressTestEngine.io = io;
 

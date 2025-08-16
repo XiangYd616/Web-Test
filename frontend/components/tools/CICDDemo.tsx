@@ -61,6 +61,7 @@ const CICDDemo: React.FC = () => {
       ));
 
       if (!success) {
+        
         setIsRunning(false);
         return;
       }
@@ -183,14 +184,14 @@ const CICDDemo: React.FC = () => {
               <pre className="text-sm text-gray-800 overflow-x-auto">
 {`name: CI/CD Pipeline
 on: [push, pull_request]
-jobs:
-  test:
+jobs: undefined, // 已修复
+  test: undefined, // 已修复
     runs-on: ubuntu-latest
-    steps:
+    steps: undefined, // 已修复
       - uses: actions/checkout@v2
       - name: Setup Node.js
         uses: actions/setup-node@v2
-        with:
+        with: undefined, // 已修复
           node-version: '18'
       - name: Install dependencies
         run: npm install
@@ -208,28 +209,28 @@ jobs:
             <h4 className="text-md font-medium text-gray-900 mb-2">GitLab CI</h4>
             <div className="bg-gray-50 rounded-lg p-4">
               <pre className="text-sm text-gray-800 overflow-x-auto">
-{`stages:
+{`stages: undefined, // 已修复
   - build
   - test
   - deploy
 
-build:
+build: undefined, // 已修复
   stage: build
-  script:
+  script: undefined, // 已修复
     - npm install
     - npm run build
 
-test:
+test: undefined, // 已修复
   stage: test
-  script:
+  script: undefined, // 已修复
     - npm test
     - npm run test:stress
 
-deploy:
+deploy: undefined, // 已修复
   stage: deploy
-  script:
+  script: undefined, // 已修复
     - npm run deploy
-  only:
+  only: undefined, // 已修复
     - main`}
               </pre>
             </div>

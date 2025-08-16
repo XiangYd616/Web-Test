@@ -51,7 +51,8 @@ const updateSiteSchema = Joi.object({
  */
 router.get('/sites', authMiddleware, asyncHandler(async (req, res) => {
   if (!monitoringService) {
-    return res.status(503).json({
+    
+        return res.status(503).json({
       success: false,
       error: {
         code: 'SERVICE_UNAVAILABLE',
@@ -82,7 +83,8 @@ router.get('/sites', authMiddleware, asyncHandler(async (req, res) => {
  */
 router.post('/sites', authMiddleware, validateRequest(addSiteSchema), asyncHandler(async (req, res) => {
   if (!monitoringService) {
-    return res.status(503).json({
+    
+        return res.status(503).json({
       success: false,
       error: {
         code: 'SERVICE_UNAVAILABLE',
@@ -111,7 +113,8 @@ router.post('/sites', authMiddleware, validateRequest(addSiteSchema), asyncHandl
  */
 router.get('/sites/:id', authMiddleware, asyncHandler(async (req, res) => {
   if (!monitoringService) {
-    return res.status(503).json({
+    
+        return res.status(503).json({
       success: false,
       error: {
         code: 'SERVICE_UNAVAILABLE',
@@ -127,7 +130,8 @@ router.get('/sites/:id', authMiddleware, asyncHandler(async (req, res) => {
   const site = await monitoringService.getMonitoringTarget(siteId, userId);
 
   if (!site) {
-    return res.status(404).json({
+    
+        return res.status(404).json({
       success: false,
       error: {
         code: 'NOT_FOUND',
@@ -148,7 +152,8 @@ router.get('/sites/:id', authMiddleware, asyncHandler(async (req, res) => {
  */
 router.put('/sites/:id', authMiddleware, validateRequest(updateSiteSchema), asyncHandler(async (req, res) => {
   if (!monitoringService) {
-    return res.status(503).json({
+    
+        return res.status(503).json({
       success: false,
       error: {
         code: 'SERVICE_UNAVAILABLE',
@@ -164,7 +169,8 @@ router.put('/sites/:id', authMiddleware, validateRequest(updateSiteSchema), asyn
   const updatedSite = await monitoringService.updateMonitoringTarget(siteId, userId, updateData);
 
   if (!updatedSite) {
-    return res.status(404).json({
+    
+        return res.status(404).json({
       success: false,
       error: {
         code: 'NOT_FOUND',
@@ -186,7 +192,8 @@ router.put('/sites/:id', authMiddleware, validateRequest(updateSiteSchema), asyn
  */
 router.delete('/sites/:id', authMiddleware, asyncHandler(async (req, res) => {
   if (!monitoringService) {
-    return res.status(503).json({
+    
+        return res.status(503).json({
       success: false,
       error: {
         code: 'SERVICE_UNAVAILABLE',
@@ -201,7 +208,8 @@ router.delete('/sites/:id', authMiddleware, asyncHandler(async (req, res) => {
   const deleted = await monitoringService.removeMonitoringTarget(siteId, userId);
 
   if (!deleted) {
-    return res.status(404).json({
+    
+        return res.status(404).json({
       success: false,
       error: {
         code: 'NOT_FOUND',
@@ -222,7 +230,8 @@ router.delete('/sites/:id', authMiddleware, asyncHandler(async (req, res) => {
  */
 router.post('/sites/:id/check', authMiddleware, asyncHandler(async (req, res) => {
   if (!monitoringService) {
-    return res.status(503).json({
+    
+        return res.status(503).json({
       success: false,
       error: {
         code: 'SERVICE_UNAVAILABLE',
@@ -249,7 +258,8 @@ router.post('/sites/:id/check', authMiddleware, asyncHandler(async (req, res) =>
  */
 router.get('/sites/:id/history', authMiddleware, asyncHandler(async (req, res) => {
   if (!monitoringService) {
-    return res.status(503).json({
+    
+        return res.status(503).json({
       success: false,
       error: {
         code: 'SERVICE_UNAVAILABLE',
@@ -281,7 +291,8 @@ router.get('/sites/:id/history', authMiddleware, asyncHandler(async (req, res) =
  */
 router.get('/alerts', authMiddleware, asyncHandler(async (req, res) => {
   if (!monitoringService) {
-    return res.status(503).json({
+    
+        return res.status(503).json({
       success: false,
       error: {
         code: 'SERVICE_UNAVAILABLE',
@@ -313,7 +324,8 @@ router.get('/alerts', authMiddleware, asyncHandler(async (req, res) => {
  */
 router.put('/alerts/:id/read', authMiddleware, asyncHandler(async (req, res) => {
   if (!monitoringService) {
-    return res.status(503).json({
+    
+        return res.status(503).json({
       success: false,
       error: {
         code: 'SERVICE_UNAVAILABLE',
@@ -328,7 +340,8 @@ router.put('/alerts/:id/read', authMiddleware, asyncHandler(async (req, res) => 
   const updated = await monitoringService.markAlertAsRead(alertId, userId);
 
   if (!updated) {
-    return res.status(404).json({
+    
+        return res.status(404).json({
       success: false,
       error: {
         code: 'NOT_FOUND',
@@ -349,7 +362,8 @@ router.put('/alerts/:id/read', authMiddleware, asyncHandler(async (req, res) => 
  */
 router.post('/alerts/batch', authMiddleware, asyncHandler(async (req, res) => {
   if (!monitoringService) {
-    return res.status(503).json({
+    
+        return res.status(503).json({
       success: false,
       error: {
         code: 'SERVICE_UNAVAILABLE',
@@ -386,7 +400,8 @@ router.post('/alerts/batch', authMiddleware, asyncHandler(async (req, res) => {
  */
 router.get('/stats', authMiddleware, asyncHandler(async (req, res) => {
   if (!monitoringService) {
-    return res.status(503).json({
+    
+        return res.status(503).json({
       success: false,
       error: {
         code: 'SERVICE_UNAVAILABLE',
@@ -419,7 +434,8 @@ router.get('/stats', authMiddleware, asyncHandler(async (req, res) => {
  */
 router.get('/health', authMiddleware, asyncHandler(async (req, res) => {
   if (!monitoringService) {
-    return res.status(503).json({
+    
+        return res.status(503).json({
       success: false,
       error: {
         code: 'SERVICE_UNAVAILABLE',
@@ -442,7 +458,8 @@ router.get('/health', authMiddleware, asyncHandler(async (req, res) => {
  */
 router.get('/analytics', authMiddleware, asyncHandler(async (req, res) => {
   if (!monitoringService) {
-    return res.status(503).json({
+    
+        return res.status(503).json({
       success: false,
       error: {
         code: 'SERVICE_UNAVAILABLE',
@@ -471,7 +488,8 @@ router.get('/analytics', authMiddleware, asyncHandler(async (req, res) => {
  */
 router.get('/export', authMiddleware, asyncHandler(async (req, res) => {
   if (!monitoringService) {
-    return res.status(503).json({
+    
+        return res.status(503).json({
       success: false,
       error: {
         code: 'SERVICE_UNAVAILABLE',
@@ -508,7 +526,8 @@ router.get('/export', authMiddleware, asyncHandler(async (req, res) => {
  */
 router.post('/reports', authMiddleware, asyncHandler(async (req, res) => {
   if (!monitoringService) {
-    return res.status(503).json({
+    
+        return res.status(503).json({
       success: false,
       error: {
         code: 'SERVICE_UNAVAILABLE',
@@ -549,7 +568,8 @@ router.post('/reports', authMiddleware, asyncHandler(async (req, res) => {
  */
 router.get('/reports', authMiddleware, asyncHandler(async (req, res) => {
   if (!monitoringService) {
-    return res.status(503).json({
+    
+        return res.status(503).json({
       success: false,
       error: {
         code: 'SERVICE_UNAVAILABLE',
@@ -579,7 +599,8 @@ router.get('/reports', authMiddleware, asyncHandler(async (req, res) => {
  */
 router.get('/reports/:id/download', authMiddleware, asyncHandler(async (req, res) => {
   if (!monitoringService) {
-    return res.status(503).json({
+    
+        return res.status(503).json({
       success: false,
       error: {
         code: 'SERVICE_UNAVAILABLE',
@@ -594,7 +615,8 @@ router.get('/reports/:id/download', authMiddleware, asyncHandler(async (req, res
   const reportFile = await monitoringService.downloadReport(reportId, userId);
 
   if (!reportFile) {
-    return res.status(404).json({
+    
+        return res.status(404).json({
       success: false,
       error: {
         code: 'NOT_FOUND',

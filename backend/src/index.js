@@ -88,7 +88,8 @@ app.post('/api/seo/fetch-page', async (req, res) => {
     const { url } = req.body;
     
     if (!url) {
-      return res.status(400).json({
+      
+        return res.status(400).json({
         success: false,
         error: '缺少URL参数'
       });
@@ -173,7 +174,8 @@ app.post('/api/seo/fetch-robots', async (req, res) => {
     const { baseUrl } = req.body;
     
     if (!baseUrl) {
-      return res.status(400).json({
+      
+        return res.status(400).json({
         success: false,
         error: '缺少baseUrl参数'
       });
@@ -214,7 +216,8 @@ app.post('/api/seo/fetch-sitemap', async (req, res) => {
     const { sitemapUrl } = req.body;
     
     if (!sitemapUrl) {
-      return res.status(400).json({
+      
+        return res.status(400).json({
         success: false,
         error: '缺少sitemapUrl参数'
       });

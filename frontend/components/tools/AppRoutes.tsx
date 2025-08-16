@@ -1,17 +1,17 @@
 import React, { Suspense, lazy } from 'react';
-import {Navigate, Route, Routes} from 'react-router-dom';
-import {AdminGuard, ProtectedRoute} from '../auth/index';
-import {Layout} from '../layout/index';
-import {EnhancedErrorBoundary, LoadingSpinner} from '../ui/index';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import { AdminGuard, ProtectedRoute } from '../auth/index';
+import { Layout } from '../layout/index';
+import { ErrorBoundary, LoadingSpinner } from '../ui/index';
 
 // 认证页面 - 也使用懒加载以减少初始包大小
 const Login = lazy(() => import('../../pages/core/auth/Login'));
 const Register = lazy(() => import('../../pages/core/auth/Register'));
 
 // 懒加载页面组件
-const ModernDashboard = lazy(() => import('../../pages/core/dashboard/ModernDashboard'));
+const Dashboard = lazy(() => import('../../pages/core/dashboard/Dashboard'));
 const TestingDashboard = lazy(() => import('../../pages/core/testing/TestingDashboard'));
-const UnifiedTestPage = lazy(() => import('../../pages/core/testing/UnifiedTestPage'));
+const TestPage = lazy(() => import('../../pages/testing/TestPage'));
 const WebsiteTest = lazy(() => import('../../pages/core/testing/WebsiteTest'));
 
 // 分析页面（推荐使用）
@@ -39,8 +39,7 @@ const UXTest = lazy(() => import('../../pages/core/testing/UXTest'));
 const DataStorage = lazy(() => import('../../pages/management/admin/DataStorage'));
 const DataManagement = lazy(() => import('../../pages/management/admin/DataManagement'));
 const Statistics = lazy(() => import('../../pages/data/reports/Statistics'));
-const Analytics = lazy(() => import('../../pages/data/reports/Analytics'));
-const AdvancedAnalytics = lazy(() => import('../../pages/analytics/AnalyticsPage'));
+const Analytics = lazy(() => import('../../pages/analytics/AnalyticsPage'));
 const MonitoringDashboard = lazy(() => import('../../pages/data/reports/MonitoringDashboard'));
 
 // 报告和历史
@@ -89,7 +88,7 @@ interface LazyPageWrapperProps {
 }
 
 const LazyPageWrapper: React.FC<LazyPageWrapperProps> = ({ children }) => (
-  <EnhancedErrorBoundary>
+  <ErrorBoundary>
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <LoadingSpinner size="lg" text="加载页面..." />
@@ -97,7 +96,7 @@ const LazyPageWrapper: React.FC<LazyPageWrapperProps> = ({ children }) => (
     }>
       {children}
     </Suspense>
-  </EnhancedErrorBoundary>
+  </ErrorBoundary>
 );
 
 const AppRoutes: React.FC = () => {
@@ -129,7 +128,7 @@ const AppRoutes: React.FC = () => {
         {/* 统一测试页面 */}
         <Route path="testing/:testType" element={
           <LazyPageWrapper>
-            <UnifiedTestPage />
+            <TestPage />
           </LazyPageWrapper>
         } />
 
@@ -146,7 +145,7 @@ const AppRoutes: React.FC = () => {
           </LazyPageWrapper>
         } />
         {/* 性能分析（推荐） */}
-        <Route path="performance-test" element={
+        <Route path="performance-analysis" element={
           <LazyPageWrapper>
             <PerformanceAnalysis />
           </LazyPageWrapper>
@@ -263,7 +262,7 @@ const AppRoutes: React.FC = () => {
       <Route path="dashboard" element={
         <ProtectedRoute>
           <LazyPageWrapper>
-            <ModernDashboard />
+            <Dashboard />
           </LazyPageWrapper>
         </ProtectedRoute>
       } />
@@ -301,7 +300,7 @@ const AppRoutes: React.FC = () => {
       <Route path="advanced-analytics" element={
         <ProtectedRoute>
           <LazyPageWrapper>
-            <AdvancedAnalytics />
+            <Analytics />
           </LazyPageWrapper>
         </ProtectedRoute>
       } />

@@ -139,11 +139,13 @@ const VirtualizedResultList: React.FC<VirtualizedResultListProps> = memo(({
 
   // 如果结果数量较少，使用普通渲染
   if (results.length <= 20) {
-    return (
+    
+        return (
       <div className="space-y-4">
         {results.map((result) => (
           <ResultCard
-            key={result.id}
+            key={result.id
+      }
             result={result}
             isSelected={selectedResults.has(result.id)}
             showDetails={showDetails[result.id] || false}

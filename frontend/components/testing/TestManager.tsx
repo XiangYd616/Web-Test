@@ -175,9 +175,10 @@ const TestManager: React.FC = () => {
 
   const handleStartTests = async () => {
     if (selectedTools.length === 0) {
-      alert('请选择至少一个测试工具');
+      
+        alert('请选择至少一个测试工具');
       return;
-    }
+      }
 
     setIsRunning(true);
     setProgress({});

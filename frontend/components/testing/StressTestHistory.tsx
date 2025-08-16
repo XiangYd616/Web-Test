@@ -7,16 +7,16 @@ import {
   calculateTestCompletion,
   getStatusConfig,
   getStatusStyleClasses,
-  getStatusText
-} from '../../utils/testStatusUtils';
+  // getStatusText
+} from '../../utils/testStatusUtils'; // 已修复
 import {DeleteConfirmDialog} from '../ui/DeleteConfirmDialog.tsx';
 import ExportModal from '../ui/ExportModal.tsx';
 import {showToast} from '../ui/Toast.tsx';
 import StressTestDetailModal from './StressTestDetailModal';
 
 import '../../styles/pagination.css';
-// // import './StatusLabel.css'; // 文件已删除 // CSS文件不存在，已注释
-// // import './StressTestHistory.css'; // 文件已删除 // CSS文件不存在，已注释
+// // // import './StatusLabel.css'; // 文件已删除 // 文件已删除 // CSS文件不存在，已注释
+// // // import './StressTestHistory.css'; // 文件已删除 // 文件已删除 // CSS文件不存在，已注释
 
 interface TestRecord {
   id: string;
@@ -350,9 +350,10 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
   // 格式化持续时间
   const formatDuration = (record: TestRecord) => {
     // 🔧 修复：对于运行中的测试，不显示时长，避免显示配置时长造成混淆
-    if (record.status === 'running' || record.status === 'starting') { // 🔧 简化：使用starting替代pending
+    if (record.status === 'running' || record.status === 'starting') { 
+        // 🔧 简化：使用starting替代pending
       return '-';
-    }
+      }
 
     // 优先使用 duration
     let seconds = record.duration;
@@ -392,7 +393,9 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     if (minutes > 0) {
-      return `${minutes}分${remainingSeconds}秒`;
+      
+        return `${minutes
+      }分${remainingSeconds}秒`;
     } else {
       return `${remainingSeconds}秒`;
     }
@@ -495,36 +498,42 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
   const getTotalRequests = (record: TestRecord) => {
     // 优先使用顶层的 totalRequests
     if (record.totalRequests !== undefined && record.totalRequests !== null && record.totalRequests > 0) {
-      return record.totalRequests;
-    }
+      
+        return record.totalRequests;
+      }
 
     // 尝试从 results.metrics 获取
     if (record.results?.metrics?.totalRequests !== undefined && record.results.metrics.totalRequests > 0) {
-      return record.results.metrics.totalRequests;
-    }
+      
+        return record.results.metrics.totalRequests;
+      }
 
     // 尝试从 results.summary 获取
     if (record.results?.summary?.totalRequests !== undefined && record.results.summary.totalRequests > 0) {
-      return record.results.summary.totalRequests;
-    }
+      
+        return record.results.summary.totalRequests;
+      }
 
     // 尝试从 results 直接获取
     if (record.results?.totalRequests !== undefined && record.results.totalRequests > 0) {
-      return record.results.totalRequests;
-    }
+      
+        return record.results.totalRequests;
+      }
 
     // 尝试计算成功请求数 + 失败请求数
     const successful = record.successfulRequests || record.results?.metrics?.successfulRequests || record.results?.successfulRequests || 0;
     const failed = record.failedRequests || record.results?.metrics?.failedRequests || record.results?.failedRequests || 0;
 
     if (successful > 0 || failed > 0) {
-      return successful + failed;
-    }
+      
+        return successful + failed;
+      }
 
     // 如果有配置信息，尝试从配置中获取预期的请求数
     if (record.config?.totalRequests && record.config.totalRequests > 0) {
-      return record.config.totalRequests;
-    }
+      
+        return record.config.totalRequests;
+      }
 
     return undefined;
   };
@@ -533,33 +542,39 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
   const getAverageResponseTime = (record: TestRecord) => {
     // 优先使用顶层的 averageResponseTime
     if (record.averageResponseTime !== undefined && record.averageResponseTime !== null && record.averageResponseTime > 0) {
-      return record.averageResponseTime;
-    }
+      
+        return record.averageResponseTime;
+      }
 
     // 尝试从 results.metrics 获取
     if (record.results?.metrics?.averageResponseTime !== undefined && record.results.metrics.averageResponseTime > 0) {
-      return record.results.metrics.averageResponseTime;
-    }
+      
+        return record.results.metrics.averageResponseTime;
+      }
 
     // 尝试从 results.summary 获取
     if (record.results?.summary?.averageResponseTime !== undefined && record.results.summary.averageResponseTime > 0) {
-      return record.results.summary.averageResponseTime;
-    }
+      
+        return record.results.summary.averageResponseTime;
+      }
 
     // 尝试从 results 直接获取
     if (record.results?.averageResponseTime !== undefined && record.results.averageResponseTime > 0) {
-      return record.results.averageResponseTime;
-    }
+      
+        return record.results.averageResponseTime;
+      }
 
     // 尝试从 results.avgResponseTime 获取（可能的字段名变体）
     if (record.results?.avgResponseTime !== undefined && record.results.avgResponseTime > 0) {
-      return record.results.avgResponseTime;
-    }
+      
+        return record.results.avgResponseTime;
+      }
 
     // 尝试从 results.responseTime 获取
     if (record.results?.responseTime !== undefined && record.results.responseTime > 0) {
-      return record.results.responseTime;
-    }
+      
+        return record.results.responseTime;
+      }
 
     return undefined;
   };
@@ -568,26 +583,30 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
   const getErrorRate = (record: TestRecord) => {
     // 优先使用已计算的错误率
     if (record.errorRate !== undefined && record.errorRate !== null) {
-      return record.errorRate;
-    }
+      
+        return record.errorRate;
+      }
 
     // 尝试从 results.metrics 获取
     if (record.results?.metrics?.errorRate !== undefined && record.results?.metrics?.errorRate !== null) {
-      return record.results.metrics.errorRate;
-    }
+      
+        return record.results.metrics.errorRate;
+      }
 
     // 尝试从 results.summary 获取
     if (record.results?.summary?.errorRate !== undefined && record.results?.summary?.errorRate !== null) {
-      return record.results.summary.errorRate;
-    }
+      
+        return record.results.summary.errorRate;
+      }
 
     // 从失败请求数和总请求数计算
     const failed = record.failedRequests || record.results?.metrics?.failedRequests || 0;
     const total = getTotalRequests(record);
 
     if (total && total > 0) {
-      return (failed / total) * 100;
-    }
+      
+        return (failed / total) * 100;
+      }
 
     return 0; // 默认返回0%
   };
@@ -615,9 +634,10 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
   // 打开批量删除确认对话框
   const openBatchDeleteDialog = () => {
     if (selectedRecords.size === 0) {
-      showToast.error('请先选择要删除的记录');
+      
+        showToast.error('请先选择要删除的记录');
       return;
-    }
+      }
 
     const recordsToDelete = records.filter(r => selectedRecords.has(r.id));
     const recordNames = recordsToDelete.map(r => r.testName);
@@ -688,6 +708,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
       const data = await response.json();
 
       if (data.success) {
+        
         console.log('✅ 测试记录删除成功:', recordId);
 
         // 从本地状态中移除记录
@@ -696,7 +717,7 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
           const newSet = new Set(prev);
           newSet.delete(recordId);
           return newSet;
-        });
+      });
 
         // 更新总记录数
         setTotalRecords(prev => Math.max(0, prev - 1));
@@ -723,9 +744,10 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
   // 批量删除记录
   const batchDeleteRecords = async () => {
     if (selectedRecords.size === 0) {
-      alert('请先选择要删除的记录');
+      
+        alert('请先选择要删除的记录');
       return;
-    }
+      }
 
     const recordsToDelete = records.filter(r => selectedRecords.has(r.id));
     const recordNames = recordsToDelete.map(r => r.testName).join('、');
@@ -877,8 +899,10 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
 
   // 未登录状态显示
   if (!isAuthenticated) {
-    return (
-      <div className={`test-records-container bg-gray-800/30 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/40 dark:border-gray-600/30 shadow-lg ${className}`}>
+    
+        return (
+      <div className={`test-records-container bg-gray-800/30 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/40 dark:border-gray-600/30 shadow-lg ${className
+      }`}>
         <div className="p-12 text-center">
           <div className="bg-gray-700/30 backdrop-blur-sm rounded-xl border border-gray-600/40 p-8 max-w-md mx-auto">
             <Activity className="w-16 h-16 mx-auto mb-6 text-blue-400" />

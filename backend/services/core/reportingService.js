@@ -258,7 +258,9 @@ class ReportingService {
     const performanceData = testData.filter(test => test.type === 'performance');
     
     if (performanceData.length === 0) {
-      return { title: '性能指标', message: '无性能测试数据' };
+      
+        return { title: '性能指标', message: '无性能测试数据'
+      };
     }
 
     const metrics = this.calculatePerformanceMetrics(performanceData);
@@ -352,12 +354,15 @@ class ReportingService {
    */
   formatSectionContent(section) {
     if (section.content) {
-      return `<p>${section.content}</p>`;
+      
+        return `<p>${section.content
+      }</p>`;
     }
 
     if (section.metrics) {
-      return this.formatMetrics(section.metrics);
-    }
+      
+        return this.formatMetrics(section.metrics);
+      }
 
     return '<p>暂无数据</p>';
   }
@@ -388,10 +393,11 @@ class ReportingService {
       const report = this.reports.get(reportId);
       
       if (!report) {
+        
         return {
           success: false,
           error: '报告不存在'
-        };
+      };
       }
 
       return {
@@ -543,7 +549,9 @@ class ReportingService {
 
   getTimeStatistics(testData) {
     if (testData.length === 0) {
-      return { range: '无数据', avgDuration: 0 };
+      
+        return { range: '无数据', avgDuration: 0
+      };
     }
 
     const durations = testData.map(test => test.duration || 0);

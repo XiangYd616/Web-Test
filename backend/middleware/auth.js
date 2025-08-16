@@ -43,8 +43,9 @@ const authMiddleware = async (req, res, next) => {
     const token = authHeader?.replace('Bearer ', '');
 
     if (!token) {
-      return res.unauthorized('访问被拒绝，需要认证令牌');
-    }
+      
+        return res.unauthorized('访问被拒绝，需要认证令牌');
+      }
 
     // 使用JWT服务验证令牌
     const decoded = jwtService.verifyAccessToken(token);
@@ -56,14 +57,16 @@ const authMiddleware = async (req, res, next) => {
     );
 
     if (userResult.rows.length === 0) {
-      return res.unauthorized('令牌无效，用户不存在');
-    }
+      
+        return res.unauthorized('令牌无效，用户不存在');
+      }
 
     const user = userResult.rows[0];
 
     if (!user.is_active) {
-      return res.forbidden('用户账户已被禁用');
-    }
+      
+        return res.forbidden('用户账户已被禁用');
+      }
 
     // 将用户信息添加到请求对象
     req.user = {
@@ -86,10 +89,12 @@ const authMiddleware = async (req, res, next) => {
     console.error('认证中间件错误:', error);
 
     if (error.code === ErrorCodes.TOKEN_EXPIRED) {
-      return res.error(ErrorCodes.TOKEN_EXPIRED, '令牌已过期，请重新登录');
-    } else if (error.code === ErrorCodes.TOKEN_INVALID) {
-      return res.error(ErrorCodes.TOKEN_INVALID, '令牌无效');
-    }
+      
+        return res.error(ErrorCodes.TOKEN_EXPIRED, '令牌已过期，请重新登录');
+      } else if (error.code === ErrorCodes.TOKEN_INVALID) {
+      
+        return res.error(ErrorCodes.TOKEN_INVALID, '令牌无效');
+      }
 
     return res.serverError('认证过程中发生错误');
   }
@@ -104,9 +109,10 @@ const optionalAuth = async (req, res, next) => {
     const token = authHeader?.replace('Bearer ', '');
 
     if (!token) {
-      req.user = null;
+      
+        req.user = null;
       return next();
-    }
+      }
 
     // 使用JWT服务验证令牌
     const decoded = jwtService.verifyAccessToken(token);
@@ -142,15 +148,17 @@ const optionalAuth = async (req, res, next) => {
  */
 const adminAuth = async (req, res, next) => {
   if (!req.user) {
-    return res.unauthorized('需要认证');
-  }
+    
+        return res.unauthorized('需要认证');
+      }
 
   try {
     const isAdmin = await permissionService.isAdmin(req.user.id);
 
     if (!isAdmin) {
-      return res.forbidden('需要管理员权限');
-    }
+      
+        return res.forbidden('需要管理员权限');
+      }
 
     next();
   } catch (error) {
@@ -165,8 +173,9 @@ const adminAuth = async (req, res, next) => {
 const requireRole = (roles) => {
   return (req, res, next) => {
     if (!req.user) {
-      return res.unauthorized('需要认证');
-    }
+      
+        return res.unauthorized('需要认证');
+      }
 
     const userRoles = Array.isArray(req.user.role) ? req.user.role : [req.user.role];
     const requiredRoles = Array.isArray(roles) ? roles : [roles];
@@ -174,7 +183,9 @@ const requireRole = (roles) => {
     const hasPermission = requiredRoles.some(role => userRoles.includes(role));
 
     if (!hasPermission) {
-      return res.forbidden(`需要以下角色之一: ${requiredRoles.join(', ')}`);
+      
+        return res.forbidden(`需要以下角色之一: ${requiredRoles.join(', ')
+      }`);
     }
 
     next();
@@ -187,8 +198,9 @@ const requireRole = (roles) => {
 const requirePermission = (permissions, requireAll = true) => {
   return async (req, res, next) => {
     if (!req.user) {
-      return res.unauthorized('需要认证');
-    }
+      
+        return res.unauthorized('需要认证');
+      }
 
     try {
       const hasPermission = await permissionService.hasPermission(
@@ -256,8 +268,9 @@ const refreshToken = async (req, res, next) => {
     const { refreshToken: refreshTokenValue } = req.body;
 
     if (!refreshTokenValue) {
-      return res.error(ErrorCodes.MISSING_PARAMETER, '缺少刷新令牌');
-    }
+      
+        return res.error(ErrorCodes.MISSING_PARAMETER, '缺少刷新令牌');
+      }
 
     // 使用JWT服务刷新令牌
     const tokenPair = await jwtService.refreshAccessToken(refreshTokenValue);
@@ -274,10 +287,12 @@ const refreshToken = async (req, res, next) => {
     console.error('刷新令牌错误:', error);
 
     if (error.code === ErrorCodes.TOKEN_EXPIRED) {
-      return res.error(ErrorCodes.TOKEN_EXPIRED, '刷新令牌已过期，请重新登录');
-    } else if (error.code === ErrorCodes.TOKEN_INVALID) {
-      return res.error(ErrorCodes.TOKEN_INVALID, '刷新令牌无效');
-    }
+      
+        return res.error(ErrorCodes.TOKEN_EXPIRED, '刷新令牌已过期，请重新登录');
+      } else if (error.code === ErrorCodes.TOKEN_INVALID) {
+      
+        return res.error(ErrorCodes.TOKEN_INVALID, '刷新令牌无效');
+      }
 
     return res.serverError('刷新令牌失败');
   }

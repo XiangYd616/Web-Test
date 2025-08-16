@@ -78,7 +78,9 @@ const RealTimeProgressBar: React.FC<RealTimeProgressBarProps> = ({
     const remainingSeconds = seconds % 60;
 
     if (minutes > 0) {
-      return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+      
+        return `${minutes
+      }:${remainingSeconds.toString().padStart(2, '0')}`;
     }
     return `${remainingSeconds}s`;
   };

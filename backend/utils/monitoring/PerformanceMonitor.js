@@ -53,9 +53,10 @@ class PerformanceMonitor {
    */
   startMonitoring(intervalMs = 60000) { // 默认1分钟
     if (this.isMonitoring) {
-      console.warn('性能监控已在运行中');
+      
+        console.warn('性能监控已在运行中');
       return;
-    }
+      }
     
     console.log('🔍 启动性能监控系统...');
     
@@ -73,8 +74,9 @@ class PerformanceMonitor {
    */
   stopMonitoring() {
     if (!this.isMonitoring) {
-      return;
-    }
+      
+        return;
+      }
     
     console.log('⏹️ 停止性能监控系统');
     

@@ -142,8 +142,9 @@ export const userDao = {
   async update(id: string, updateData: UpdateUserData): Promise<User | null> {
     const userIndex = users.findIndex(u => u.id === id);
     if (userIndex === -1) {
-      return null;
-    }
+      
+        return null;
+      }
 
     const user = users[userIndex];
     const updatedUser: User = {
@@ -166,8 +167,9 @@ export const userDao = {
   async delete(id: string): Promise<boolean> {
     const userIndex = users.findIndex(u => u.id === id);
     if (userIndex === -1) {
-      return false;
-    }
+      
+        return false;
+      }
 
     users.splice(userIndex, 1);
     return true;
@@ -197,14 +199,16 @@ export const userDao = {
   async validateCredentials(username: string, password: string): Promise<User | null> {
     const user = await this.findByUsername(username) || await this.findByEmail(username);
     if (!user || !user.isActive) {
-      return null;
-    }
+      
+        return null;
+      }
 
     // 在实际应用中，这里应该使用 bcrypt 比较密码
     // 这里为了简化，直接比较（不安全，仅用于演示）
     if (user.password === password) {
-      return user;
-    }
+      
+        return user;
+      }
 
     return null;
   },

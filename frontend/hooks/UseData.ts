@@ -89,8 +89,9 @@ export const useRealTimeData = (channel: string, config: RealTimeDataConfig = {}
     // 连接WebSocket
     const connect = useCallback(() => {
         if (wsRef.current?.readyState === WebSocket.OPEN) {
-            return;
-        }
+            
+        return;
+      }
 
         try {
             updateState({ connectionStatus: 'connecting', error: null });

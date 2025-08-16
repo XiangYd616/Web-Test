@@ -26,7 +26,9 @@ const ProtectedFeature: React.FC<ProtectedFeatureProps> = ({
 
   // 如果用户已登录，直接显示内容
   if (isAuthenticated) {
-    return <div className={className}>{children}</div>;
+    
+        return <div className={className
+      }>{children}</div>;
   }
 
   // 未登录用户的界面

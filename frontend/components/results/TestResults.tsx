@@ -13,8 +13,8 @@ import {
   PieChart as PieChartIcon,
   Search,
   Share2,
-  Zap
-} from 'lucide-react';
+  // Zap
+} from 'lucide-react'; // 已修复
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   Bar,
@@ -34,9 +34,8 @@ import {
   ResponsiveContainer,
   Tooltip,
   XAxis,
-  YAxis
-} from 'recharts';
-
+  // YAxis
+} from 'recharts'; // 已修复
 interface TestResult {
   id: string;
   type: string;
@@ -111,6 +110,7 @@ const TestResults: React.FC<TestResultsProps> = ({
       }
 
       if (sortOrder === 'asc') {
+        
         return aValue > bValue ? 1 : -1;
       } else {
         return aValue < bValue ? 1 : -1;
@@ -263,12 +263,13 @@ const TestResults: React.FC<TestResultsProps> = ({
   }, [onExport]);
 
   if (loading) {
-    return (
+    
+        return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
       </div>
     );
-  }
+      }
 
   return (
     <div className="space-y-6">

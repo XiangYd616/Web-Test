@@ -38,6 +38,7 @@ class WebSocketService {
       const token = url.searchParams.get('token');
       
       if (!token) {
+        
         console.log('❌ WebSocket连接被拒绝: 缺少token');
         return false;
       }
@@ -266,8 +267,9 @@ class WebSocketService {
   sendToClient(clientId, message) {
     const client = this.clients.get(clientId);
     if (!client || client.ws.readyState !== WebSocket.OPEN) {
-      return false;
-    }
+      
+        return false;
+      }
 
     try {
       client.ws.send(JSON.stringify({

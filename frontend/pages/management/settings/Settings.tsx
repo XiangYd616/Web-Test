@@ -590,10 +590,11 @@ const AccountSettings: React.FC = () => {
 
         // 首先尝试使用useAuth中的用户信息
         if (user) {
-          setUserInfo(user);
+          
+        setUserInfo(user);
           setLoading(false);
           return;
-        }
+      }
 
         // 如果useAuth中没有用户信息，尝试从API获取
         const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
@@ -634,7 +635,8 @@ const AccountSettings: React.FC = () => {
   }, [user]);
 
   if (loading) {
-    return (
+    
+        return (
       <div className="space-y-8">
         <div className="flex items-center space-x-3 mb-6">
           <div className="p-2 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-lg border border-blue-500/30">
@@ -649,7 +651,7 @@ const AccountSettings: React.FC = () => {
         </div>
       </div>
     );
-  }
+      }
 
   return (
     <div className="space-y-8">

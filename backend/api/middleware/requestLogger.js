@@ -37,8 +37,9 @@ const getRequestSize = (req) => {
  */
 const filterSensitiveData = (obj, sensitiveFields = ['password', 'token', 'secret', 'key']) => {
   if (!obj || typeof obj !== 'object') {
-    return obj;
-  }
+    
+        return obj;
+      }
   
   const filtered = Array.isArray(obj) ? [] : {};
   
@@ -131,10 +132,11 @@ const shouldLogRequest = (req) => {
   
   // 开发环境跳过某些请求
   if (process.env.NODE_ENV === 'development') {
-    const devSkipPaths = ['/api/v1/health', '/api/v1/metrics'];
+    
+        const devSkipPaths = ['/api/v1/health', '/api/v1/metrics'];
     if (devSkipPaths.some(path => req.path === path)) {
       return false;
-    }
+      }
   }
   
   return true;
@@ -146,18 +148,21 @@ const shouldLogRequest = (req) => {
 const getLogLevel = (statusCode, responseTime) => {
   // 错误级别
   if (statusCode >= 500) {
-    return 'error';
-  }
+    
+        return 'error';
+      }
   
   // 警告级别
   if (statusCode >= 400 || responseTime > 5000) {
-    return 'warn';
-  }
+    
+        return 'warn';
+      }
   
   // 信息级别
   if (statusCode >= 200 && statusCode < 300) {
-    return 'info';
-  }
+    
+        return 'info';
+      }
   
   // 调试级别
   return 'debug';

@@ -135,8 +135,10 @@ export const LineChart: React.FC<LineChartProps> = ({
   };
 
   if (!isReady || !Line) {
-    return (
-      <div className={`modern-chart-container ${className}`} style={{ height }}>
+    
+        return (
+      <div className={`modern-chart-container ${className
+      }`} style={{ height }}>
         <div className="flex items-center justify-center h-full text-gray-500">
           加载图表�?..
         </div>
@@ -176,8 +178,10 @@ export const BarChart: React.FC<BarChartProps> = ({
   };
 
   if (!isReady || !Bar) {
-    return (
-      <div className={`modern-chart-container ${className}`} style={{ height }}>
+    
+        return (
+      <div className={`modern-chart-container ${className
+      }`} style={{ height }}>
         <div className="flex items-center justify-center h-full text-gray-500">
           加载图表�?..
         </div>
@@ -251,8 +255,10 @@ export const DoughnutChart: React.FC<DoughnutChartProps> = ({
   };
 
   if (!isReady || !Doughnut) {
-    return (
-      <div className={`modern-chart-container ${className}`} style={{ height: size, width: size }}>
+    
+        return (
+      <div className={`modern-chart-container ${className
+      }`} style={{ height: size, width: size }}>
         <div className="flex items-center justify-center h-full text-gray-500">
           加载图表�?..
         </div>

@@ -4,7 +4,7 @@
  */
 
 const crypto = require('crypto');
-// // // // const smartCacheService = require('../services/smartCacheService'); // 已删除 // 已删除 // 服务已删除 // 服务已删除
+// // // // // // const smartCacheService = require('../services/smartCacheService'); // 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除
 
 /**
  * 创建缓存中间件
@@ -32,9 +32,10 @@ function createCacheMiddleware(options = {}) {
             const cachedResponse = await smartCacheService.get(cacheKey, 'api_response');
             
             if (cachedResponse) {
-                res.set('X-Cache', 'HIT');
+                
+        res.set('X-Cache', 'HIT');
                 return res.json(cachedResponse);
-            }
+      }
 
             // 设置缓存未命中标记
             res.set('X-Cache', 'MISS');

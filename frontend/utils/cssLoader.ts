@@ -13,10 +13,11 @@ export const loadCSS = (href: string, id?: string): Promise<void> => {
     // 检查是否已经存在相同的link元素
     const existingLink = document.querySelector(`link[href="${href}"]`);
     if (existingLink) {
-      loadedCSS.add(href);
+      
+        loadedCSS.add(href);
       resolve();
       return;
-    }
+      }
 
     // 创建link元素
     const link = document.createElement('link');
@@ -51,8 +52,9 @@ export const preloadCSS = (href: string): void => {
   // 检查是否已经存在相同的preload元素
   const existingPreload = document.querySelector(`link[href="${href}"][rel="preload"]`);
   if (existingPreload) {
-    return;
-  }
+    
+        return;
+      }
 
   // 创建preload link元素
   const link = document.createElement('link');
@@ -77,8 +79,9 @@ const pageCSS: Record<string, string[]> = {
 export const loadPageCSS = async (pageName: string): Promise<void> => {
   const cssFiles = pageCSS[pageName];
   if (!cssFiles || cssFiles.length === 0) {
-    return;
-  }
+    
+        return;
+      }
 
   try {
     await Promise.all(cssFiles.map(href => loadCSS(href)));
@@ -90,8 +93,9 @@ export const loadPageCSS = async (pageName: string): Promise<void> => {
 export const preloadPageCSS = (pageName: string): void => {
   const cssFiles = pageCSS[pageName];
   if (!cssFiles || cssFiles.length === 0) {
-    return;
-  }
+    
+        return;
+      }
 
   cssFiles.forEach(href => preloadCSS(href));
 };
@@ -104,8 +108,9 @@ const componentCSS: Record<string, string> = {
 export const loadComponentCSS = async (componentName: string): Promise<void> => {
   const cssFile = componentCSS[componentName];
   if (!cssFile) {
-    return;
-  }
+    
+        return;
+      }
 
   try {
     await loadCSS(cssFile);

@@ -45,8 +45,9 @@ class UserTestManager {
   getUserTestEngine(userId, testId) {
     const userTests = this.userTests.get(userId);
     if (!userTests) {
-      return null;
-    }
+      
+        return null;
+      }
     return userTests.get(testId);
   }
 
@@ -125,8 +126,9 @@ class UserTestManager {
   getUserTestStatus(userId, testId) {
     const testEngine = this.getUserTestEngine(userId, testId);
     if (!testEngine) {
-      return null;
-    }
+      
+        return null;
+      }
     return testEngine.getTestStatus(testId);
   }
 

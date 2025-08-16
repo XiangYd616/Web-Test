@@ -133,8 +133,9 @@ const validatePassword = async (email, password) => {
 
   const user = result.rows[0];
   if (!user) {
-    return null;
-  }
+    
+        return null;
+      }
 
   // 检查账户是否被锁定
   if (user.locked_until && new Date(user.locked_until) > new Date()) {
@@ -144,7 +145,8 @@ const validatePassword = async (email, password) => {
   // 验证密码
   const isValid = await bcrypt.compare(password, user.password_hash);
   if (!isValid) {
-    // 增加失败登录次数
+    
+        // 增加失败登录次数
     await pool.query(
       `UPDATE users 
        SET failed_login_attempts = failed_login_attempts + 1,
@@ -157,7 +159,7 @@ const validatePassword = async (email, password) => {
     );
 
     return null;
-  }
+      }
 
   // 重置失败登录次数
   await pool.query(
@@ -192,12 +194,14 @@ router.post('/register', registerValidation, asyncHandler(async (req, res) => {
   // 检查用户是否已存在
   const existingUser = await checkUserExists(email, username);
   if (existingUser) {
-    if (existingUser.email === email) {
+    
+        if (existingUser.email === email) {
       return res.conflict('该邮箱地址已被注册');
-    }
+      }
     if (existingUser.username === username) {
-      return res.conflict('该用户名已被使用');
-    }
+      
+        return res.conflict('该用户名已被使用');
+      }
   }
 
   // 创建新用户
@@ -235,12 +239,15 @@ router.post('/login', loginValidation, asyncHandler(async (req, res) => {
     const user = await validatePassword(email, password);
 
     if (!user) {
-      return res.error(ERROR_CODES.INVALID_CREDENTIALS, '邮箱或密码错误', null, 401);
-    }
+      
+        return res.error(ERROR_CODES.INVALID_CREDENTIALS, '邮箱或密码错误', null, 401);
+      }
 
     // 检查账户状态
     if (user.status !== 'active') {
-      return res.error(ERROR_CODES.ACCOUNT_LOCKED, '账户已被禁用', { status: user.status }, 403);
+      
+        return res.error(ERROR_CODES.ACCOUNT_LOCKED, '账户已被禁用', { status: user.status
+      }, 403);
     }
 
     // 生成JWT token
@@ -258,8 +265,9 @@ router.post('/login', loginValidation, asyncHandler(async (req, res) => {
 
   } catch (error) {
     if (error.message === 'ACCOUNT_LOCKED') {
-      return res.error(ERROR_CODES.ACCOUNT_LOCKED, '账户已被锁定，请15分钟后重试', null, 423);
-    }
+      
+        return res.error(ERROR_CODES.ACCOUNT_LOCKED, '账户已被锁定，请15分钟后重试', null, 423);
+      }
     throw error;
   }
 }));
@@ -272,16 +280,18 @@ router.post('/refresh', asyncHandler(async (req, res) => {
   const { refreshToken } = req.body;
 
   if (!refreshToken) {
-    return res.badRequest('缺少刷新令牌');
-  }
+    
+        return res.badRequest('缺少刷新令牌');
+      }
 
   try {
     // 验证刷新令牌
     const decoded = verifyToken(refreshToken);
 
     if (decoded.type !== 'refresh') {
-      return res.error(ERROR_CODES.TOKEN_INVALID, '无效的刷新令牌', null, 401);
-    }
+      
+        return res.error(ERROR_CODES.TOKEN_INVALID, '无效的刷新令牌', null, 401);
+      }
 
     // 获取用户信息
     const pool = getPool();
@@ -294,8 +304,9 @@ router.post('/refresh', asyncHandler(async (req, res) => {
 
     const user = result.rows[0];
     if (!user) {
-      return res.error(ERROR_CODES.USER_NOT_FOUND, '用户不存在或已被禁用', null, 401);
-    }
+      
+        return res.error(ERROR_CODES.USER_NOT_FOUND, '用户不存在或已被禁用', null, 401);
+      }
 
     // 生成新的访问令牌
     const newToken = generateToken(user);
@@ -309,10 +320,12 @@ router.post('/refresh', asyncHandler(async (req, res) => {
 
   } catch (error) {
     if (error.message === 'TOKEN_EXPIRED') {
-      return res.error(ERROR_CODES.TOKEN_EXPIRED, '刷新令牌已过期，请重新登录', null, 401);
-    } else if (error.message === 'TOKEN_INVALID') {
-      return res.error(ERROR_CODES.TOKEN_INVALID, '无效的刷新令牌', null, 401);
-    }
+      
+        return res.error(ERROR_CODES.TOKEN_EXPIRED, '刷新令牌已过期，请重新登录', null, 401);
+      } else if (error.message === 'TOKEN_INVALID') {
+      
+        return res.error(ERROR_CODES.TOKEN_INVALID, '无效的刷新令牌', null, 401);
+      }
     throw error;
   }
 }));
@@ -361,8 +374,9 @@ router.put('/change-password', authMiddleware, changePasswordValidation, asyncHa
   const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password_hash);
 
   if (!isCurrentPasswordValid) {
-    return res.badRequest('当前密码错误');
-  }
+    
+        return res.badRequest('当前密码错误');
+      }
 
   // 加密新密码
   const saltRounds = parseInt(process.env.BCRYPT_ROUNDS) || 12;
@@ -385,8 +399,9 @@ router.post('/verify-token', asyncHandler(async (req, res) => {
   const { token } = req.body;
 
   if (!token) {
-    return res.badRequest('缺少令牌');
-  }
+    
+        return res.badRequest('缺少令牌');
+      }
 
   try {
     const decoded = verifyToken(token);
@@ -400,8 +415,9 @@ router.post('/verify-token', asyncHandler(async (req, res) => {
 
     const user = result.rows[0];
     if (!user || user.status !== 'active') {
-      return res.error(ERROR_CODES.TOKEN_INVALID, '令牌对应的用户不存在或已被禁用', null, 401);
-    }
+      
+        return res.error(ERROR_CODES.TOKEN_INVALID, '令牌对应的用户不存在或已被禁用', null, 401);
+      }
 
     res.success({
       valid: true,
@@ -418,10 +434,12 @@ router.post('/verify-token', asyncHandler(async (req, res) => {
 
   } catch (error) {
     if (error.message === 'TOKEN_EXPIRED') {
-      return res.error(ERROR_CODES.TOKEN_EXPIRED, '令牌已过期', null, 401);
-    } else if (error.message === 'TOKEN_INVALID') {
-      return res.error(ERROR_CODES.TOKEN_INVALID, '无效的令牌', null, 401);
-    }
+      
+        return res.error(ERROR_CODES.TOKEN_EXPIRED, '令牌已过期', null, 401);
+      } else if (error.message === 'TOKEN_INVALID') {
+      
+        return res.error(ERROR_CODES.TOKEN_INVALID, '无效的令牌', null, 401);
+      }
     throw error;
   }
 }));

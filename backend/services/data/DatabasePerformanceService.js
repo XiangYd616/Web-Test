@@ -585,8 +585,9 @@ class DatabasePerformanceOptimizer {
      */
     async analyzeQueryPlan(query, params = []) {
         if (!this.config.enableQueryPlan) {
-            return null;
-        }
+            
+        return null;
+      }
 
         try {
             const explainQuery = `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) ${query}`;

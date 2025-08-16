@@ -1,7 +1,7 @@
+import { BarChart3, CheckCircle, Database, XCircle } from 'lucide-react';
 import React from 'react';
-import {BarChart3, CheckCircle, Database, XCircle} from 'lucide-react';
-import {StatCard} from '../../../components/ui/shared';
-import {PaginationInfo, TestRecord} from '../../hooks/useDataStorage.ts';
+// StatCard组件暂时使用简单的卡片实现
+import { PaginationInfo, TestRecord } from '../../hooks/useDataStorage.ts';
 
 interface DataStatsProps {
   records: TestRecord[];

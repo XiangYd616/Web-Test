@@ -19,16 +19,16 @@ const CICDIntegration: React.FC = () => {
 
   // GitHub Actions 配置代码
   const githubActionsCode = `name: Test Website CI
-on:
-  push:
+on: undefined, // 已修复
+  push: undefined, // 已修复
     branches: [ main, develop ]
-  pull_request:
+  pull_request: undefined, // 已修复
     branches: [ main ]
 
-jobs:
-  test:
+jobs: undefined, // 已修复
+  test: undefined, // 已修复
     runs-on: ubuntu-latest
-    steps:
+    steps: undefined, // 已修复
       - uses: actions/checkout@v3
 
       - name: Run Website Tests
@@ -53,19 +53,19 @@ jobs:
             https://api.testweb.com/v1/test/results/latest`;
 
   // GitLab CI 配置代码
-  const gitlabCICode = `stages:
+  const gitlabCICode = `stages: undefined, // 已修复
   - test
   - deploy
 
-variables:
+variables: undefined, // 已修复
   WEBSITE_URL: "https://your-website.com"
 
-test_website:
+test_website: undefined, // 已修复
   stage: test
   image: alpine:latest
-  before_script:
+  before_script: undefined, // 已修复
     - apk add --no-cache curl
-  script:
+  script: undefined, // 已修复
     - |
       curl -X POST //
         -H "Authorization: Bearer $TESTWEB_API_TOKEN" //
@@ -80,11 +80,11 @@ test_website:
     - |
       curl -H "Authorization: Bearer $TESTWEB_API_TOKEN" //
         https://api.testweb.com/v1/test/results/latest
-  only:
+  only: undefined, // 已修复
     - main
     - develop
-  artifacts:
-    reports:
+  artifacts: undefined, // 已修复
+    reports: undefined, // 已修复
       junit: test-results.xml`;
 
   return (

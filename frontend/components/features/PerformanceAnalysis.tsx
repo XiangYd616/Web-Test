@@ -96,23 +96,25 @@ const PerformanceAnalysisComponent: React.FC = () => {
   };
 
   if (loading) {
-    return (
+    
+        return (
       <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
         <span className="ml-3 text-gray-400">加载性能数据...</span>
       </div>
     );
-  }
+      }
 
   if (!performanceData) {
-    return (
+    
+        return (
       <div className="text-center py-12">
         <Gauge className="w-16 h-16 text-gray-600 mx-auto mb-4" />
         <h3 className="text-xl font-semibold text-white mb-2">暂无性能数据</h3>
         <p className="text-gray-400">请先运行一些网站测试以查看性能分析</p>
       </div>
     );
-  }
+      }
 
   // 准备雷达图数据
   const radarData = [

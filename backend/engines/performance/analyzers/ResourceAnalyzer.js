@@ -459,6 +459,7 @@ class ResourceAnalyzer {
   calculateCompressionSavings(resources) {
     return resources.reduce((savings, r) => {
       if (r.decodedSize > r.encodedSize) {
+        
         return savings + (r.decodedSize - r.encodedSize);
       }
       return savings;

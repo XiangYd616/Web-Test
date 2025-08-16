@@ -18,8 +18,9 @@ const BackgroundTestNotifications: React.FC = () => {
   };
 
   if (notifications.length === 0) {
-    return null;
-  }
+    
+        return null;
+      }
 
   return (
     <div className="fixed top-20 right-4 z-30 space-y-2">

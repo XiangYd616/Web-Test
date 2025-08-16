@@ -173,12 +173,13 @@ class ApiService {
           body: JSON.stringify(credentials)
         });
         if (response.success && response.data) {
-          return {
+          
+        return {
             success: true,
             user: response.data.user,
             token: response.data.token,
             message: response.message || '登录成功'
-          };
+      };
         } else {
           return {
             success: false,
@@ -199,7 +200,8 @@ class ApiService {
 
   async register(data: RegisterData): Promise<AuthResponse> {
     if (this.useRemoteApi) {
-      try {
+      
+        try {
         const remoteApi = await getRemoteApiService();
         const response = await remoteApi.register(data);
         if (response.success && response.data) {
@@ -208,7 +210,7 @@ class ApiService {
             user: response.data.user,
             token: response.data.token,
             message: response.message || '注册成功'
-          };
+      };
         } else {
           return {
             success: false,
@@ -243,12 +245,13 @@ class ApiService {
 
   async getCurrentUser(): Promise<User | null> {
     if (this.useRemoteApi) {
-      try {
+      
+        try {
         const remoteApi = await getRemoteApiService();
         const response = await remoteApi.getCurrentUser();
         if (response.success && response.data) {
           return response.data.user;
-        }
+      }
       } catch (error) {
         console.warn('远程 API 获取用户信息失败，使用本地信息:', error);
       }
@@ -259,7 +262,8 @@ class ApiService {
 
   async updateProfile(updates: Partial<User>): Promise<AuthResponse> {
     if (this.useRemoteApi) {
-      try {
+      
+        try {
         const remoteApi = await getRemoteApiService();
         const response = await remoteApi.updateUserProfile(updates);
         if (response.success && response.data) {
@@ -267,7 +271,7 @@ class ApiService {
             success: true,
             user: response.data.user,
             message: response.message || '更新成功'
-          };
+      };
         } else {
           return {
             success: false,
@@ -284,13 +288,14 @@ class ApiService {
 
   async changePassword(data: { currentPassword: string; newPassword: string; confirmNewPassword: string }): Promise<AuthResponse> {
     if (this.useRemoteApi) {
-      try {
+      
+        try {
         const remoteApi = await getRemoteApiService();
         const response = await remoteApi.changePassword(data);
         return {
           success: response.success,
           message: response.message || (response.success ? '密码修改成功' : '密码修改失败')
-        };
+      };
       } catch (error) {
         console.warn('远程 API 修改密码失败:', error);
         return {
@@ -310,12 +315,13 @@ class ApiService {
   // 用户数据相关方法
   async getUserSettings(): Promise<any> {
     if (this.useRemoteApi) {
-      try {
+      
+        try {
         const remoteApi = await getRemoteApiService();
         const response = await remoteApi.getUserSettings();
         if (response.success) {
           return response.data;
-        }
+      }
       } catch (error) {
         console.warn('远程 API 获取设置失败:', error);
       }
@@ -335,7 +341,8 @@ class ApiService {
 
   async updateUserSettings(settings: any): Promise<boolean> {
     if (this.useRemoteApi) {
-      try {
+      
+        try {
         const remoteApi = await getRemoteApiService();
         const response = await remoteApi.updateUserSettings(settings);
         return response.success;
@@ -356,12 +363,13 @@ class ApiService {
 
   async getUserTests(): Promise<any[]> {
     if (this.useRemoteApi) {
-      try {
+      
+        try {
         const remoteApi = await getRemoteApiService();
         const response = await remoteApi.getUserTests();
         if (response.success && response.data) {
           return response.data.tests || [];
-        }
+      }
       } catch (error) {
         console.warn('远程 API 获取测试历史失败:', error);
       }
@@ -379,12 +387,13 @@ class ApiService {
 
   async getUserStats(): Promise<any> {
     if (this.useRemoteApi) {
-      try {
+      
+        try {
         const remoteApi = await getRemoteApiService();
         const response = await remoteApi.getUserStats();
         if (response.success && response.data) {
           return response.data.stats;
-        }
+      }
       } catch (error) {
         console.warn('远程 API 获取统计失败:', error);
       }
@@ -409,8 +418,9 @@ class ApiService {
     const remoteApi = await getRemoteApiService();
     const response = await remoteApi.getAdminDashboard();
     if (response.success) {
-      return response.data;
-    }
+      
+        return response.data;
+      }
     throw new Error(response.error || '获取管理员面板数据失败');
   }
 
@@ -422,8 +432,9 @@ class ApiService {
     const remoteApi = await getRemoteApiService();
     const response = await remoteApi.getAdminUsers(page, limit);
     if (response.success) {
-      return response.data;
-    }
+      
+        return response.data;
+      }
     throw new Error(response.error || '获取用户列表失败');
   }
 
@@ -435,8 +446,9 @@ class ApiService {
     const remoteApi = await getRemoteApiService();
     const response = await remoteApi.createUser(userData);
     if (response.success && response.data) {
-      return response.data.user;
-    }
+      
+        return response.data.user;
+      }
     throw new Error(response.error || '创建用户失败');
   }
 
@@ -448,8 +460,9 @@ class ApiService {
     const remoteApi = await getRemoteApiService();
     const response = await remoteApi.updateUser(userId, userData);
     if (response.success && response.data) {
-      return response.data.user;
-    }
+      
+        return response.data.user;
+      }
     throw new Error(response.error || '更新用户失败');
   }
 
@@ -468,12 +481,13 @@ class ApiService {
   // 系统信息
   async getSystemInfo(): Promise<any> {
     if (this.useRemoteApi) {
-      try {
+      
+        try {
         const remoteApi = await getRemoteApiService();
         const response = await remoteApi.getSystemInfo();
         if (response.success) {
           return response.data;
-        }
+      }
       } catch (error) {
         console.warn('获取系统信息失败:', error);
       }
@@ -494,7 +508,8 @@ class ApiService {
   // 健康检查
   async checkHealth(): Promise<boolean> {
     if (this.useRemoteApi) {
-      try {
+      
+        try {
         const remoteApi = await getRemoteApiService();
         const response = await remoteApi.getHealth();
         return response.success;

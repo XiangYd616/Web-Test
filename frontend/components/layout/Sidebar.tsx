@@ -14,12 +14,12 @@ interface SidebarItem {
   children?: SidebarItem[];
 }
 
-interface ModernSidebarProps {
+interface SidebarProps {
   collapsed?: boolean;
   onToggle?: () => void;
 }
 
-const ModernSidebar: React.FC<ModernSidebarProps> = ({
+const Sidebar: React.FC<SidebarProps> = ({
   collapsed = false,
   onToggle
 }) => {
@@ -194,7 +194,8 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
 
   const toggleGroup = (groupId: string) => {
     if (collapsed) {
-      // 收起状态下点击图标：展开侧边栏并展开该组
+      
+        // 收起状态下点击图标：展开侧边栏并展开该组
       onToggle?.();
       setExpandedGroups(prev =>
         prev.includes(groupId)
@@ -202,7 +203,7 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
           : [...prev, groupId]
       );
       return;
-    }
+      }
 
     setExpandedGroups(prev =>
       prev.includes(groupId)
@@ -224,8 +225,9 @@ const isGroupActive = (item: SidebarItem) => {
   // 如果组本身有href且匹配，则直接活�?    if (item.href && isActive(item.href)) return true;
   // 如果有子项且子项中有活跃的，则组活跃
   if (item.children) {
-    return item.children.some(child => isActive(child.href));
-  }
+    
+        return item.children.some(child => isActive(child.href));
+      }
   return false;
 };
 
@@ -234,8 +236,9 @@ const isGroupActiveByChild = (item: SidebarItem) => {
   // 组本身不直接活跃，但包含活跃子项
   if (item.href && isActive(item.href)) return false;
   if (item.children) {
-    return item.children.some(child => isActive(child.href));
-  }
+    
+        return item.children.some(child => isActive(child.href));
+      }
   return false;
 };
 
@@ -360,12 +363,14 @@ const renderSidebarItem = (item: SidebarItem, level = 0) => {
   const active = isActive(item.href);
 
   if (hasChildren) {
-    const groupActive = isGroupActive(item);
+    
+        const groupActive = isGroupActive(item);
     const groupActiveByChild = isGroupActiveByChild(item);
     const directlyActive = item.href && isActive(item.href);
 
     return (
-      <div key={item.id} className="mb-1 relative group">
+      <div key={item.id
+      } className="mb-1 relative group">
         <button
           type="button"
           onClick={() => {
@@ -581,8 +586,10 @@ const renderSidebarItem = (item: SidebarItem, level = 0) => {
                   {item.children.map((child) => {
                     // 如果子项有自己的子菜单，显示为分组
                     if (child.children && child.children.length > 0) {
-                      return (
-                        <div key={child.id} className="mb-2">
+                      
+        return (
+                        <div key={child.id
+      } className="mb-2">
                           <div className="px-3 py-1 text-xs font-medium text-gray-400 uppercase tracking-wider">
                             {child.name}
                           </div>
@@ -661,4 +668,4 @@ const renderSidebarItem = (item: SidebarItem, level = 0) => {
   );
 };
 
-export default ModernSidebar;
+export default Sidebar;

@@ -111,10 +111,12 @@ const AuthLoadingState: React.FC<AuthLoadingStateProps> = ({
 
   // 如果是覆盖层模式
   if (overlay) {
-    return (
+    
+        return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg shadow-lg">
-          {content}
+          {content
+      }
         </div>
       </div>
     );

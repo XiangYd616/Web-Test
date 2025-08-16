@@ -46,12 +46,13 @@ const testNotificationSchema = Joi.object({
  */
 router.get('/', authMiddleware, validateQuery(alertQuerySchema), asyncHandler(async (req, res) => {
     if (!alertService) {
+        
         return res.status(503).json({
             success: false,
             error: {
                 code: 'SERVICE_UNAVAILABLE',
                 message: '告警服务未启动'
-            }
+      }
         });
     }
 
@@ -61,12 +62,13 @@ router.get('/', authMiddleware, validateQuery(alertQuerySchema), asyncHandler(as
     // 从监控服务获取告警（因为告警数据存储在监控服务中）
     const monitoringService = global.monitoringService;
     if (!monitoringService) {
+        
         return res.status(503).json({
             success: false,
             error: {
                 code: 'SERVICE_UNAVAILABLE',
                 message: '监控服务未启动'
-            }
+      }
         });
     }
 
@@ -90,12 +92,13 @@ router.get('/', authMiddleware, validateQuery(alertQuerySchema), asyncHandler(as
  */
 router.get('/stats', authMiddleware, asyncHandler(async (req, res) => {
     if (!alertService) {
+        
         return res.status(503).json({
             success: false,
             error: {
                 code: 'SERVICE_UNAVAILABLE',
                 message: '告警服务未启动'
-            }
+      }
         });
     }
 
@@ -116,12 +119,13 @@ router.get('/stats', authMiddleware, asyncHandler(async (req, res) => {
  */
 router.put('/:id/acknowledge', authMiddleware, asyncHandler(async (req, res) => {
     if (!alertService) {
+        
         return res.status(503).json({
             success: false,
             error: {
                 code: 'SERVICE_UNAVAILABLE',
                 message: '告警服务未启动'
-            }
+      }
         });
     }
 
@@ -131,12 +135,13 @@ router.put('/:id/acknowledge', authMiddleware, asyncHandler(async (req, res) => 
     const updated = await alertService.acknowledgeAlert(alertId, userId);
 
     if (!updated) {
+        
         return res.status(404).json({
             success: false,
             error: {
                 code: 'NOT_FOUND',
                 message: '告警不存在'
-            }
+      }
         });
     }
 
@@ -152,12 +157,13 @@ router.put('/:id/acknowledge', authMiddleware, asyncHandler(async (req, res) => 
  */
 router.put('/:id/resolve', authMiddleware, asyncHandler(async (req, res) => {
     if (!alertService) {
+        
         return res.status(503).json({
             success: false,
             error: {
                 code: 'SERVICE_UNAVAILABLE',
                 message: '告警服务未启动'
-            }
+      }
         });
     }
 
@@ -167,12 +173,13 @@ router.put('/:id/resolve', authMiddleware, asyncHandler(async (req, res) => {
     const updated = await alertService.resolveAlert(alertId, userId);
 
     if (!updated) {
+        
         return res.status(404).json({
             success: false,
             error: {
                 code: 'NOT_FOUND',
                 message: '告警不存在'
-            }
+      }
         });
     }
 
@@ -188,12 +195,13 @@ router.put('/:id/resolve', authMiddleware, asyncHandler(async (req, res) => {
  */
 router.post('/batch', authMiddleware, validateRequest(batchActionSchema), asyncHandler(async (req, res) => {
     if (!alertService) {
+        
         return res.status(503).json({
             success: false,
             error: {
                 code: 'SERVICE_UNAVAILABLE',
                 message: '告警服务未启动'
-            }
+      }
         });
     }
 
@@ -234,12 +242,13 @@ router.post('/batch', authMiddleware, validateRequest(batchActionSchema), asyncH
  */
 router.get('/:id', authMiddleware, asyncHandler(async (req, res) => {
     if (!alertService) {
+        
         return res.status(503).json({
             success: false,
             error: {
                 code: 'SERVICE_UNAVAILABLE',
                 message: '告警服务未启动'
-            }
+      }
         });
     }
 
@@ -249,12 +258,13 @@ router.get('/:id', authMiddleware, asyncHandler(async (req, res) => {
     const alert = await alertService.getAlertDetails(alertId, userId);
 
     if (!alert) {
+        
         return res.status(404).json({
             success: false,
             error: {
                 code: 'NOT_FOUND',
                 message: '告警不存在'
-            }
+      }
         });
     }
 
@@ -270,12 +280,13 @@ router.get('/:id', authMiddleware, asyncHandler(async (req, res) => {
  */
 router.delete('/:id', authMiddleware, asyncHandler(async (req, res) => {
     if (!alertService) {
+        
         return res.status(503).json({
             success: false,
             error: {
                 code: 'SERVICE_UNAVAILABLE',
                 message: '告警服务未启动'
-            }
+      }
         });
     }
 
@@ -285,12 +296,13 @@ router.delete('/:id', authMiddleware, asyncHandler(async (req, res) => {
     const deleted = await alertService.deleteAlert(alertId, userId);
 
     if (!deleted) {
+        
         return res.status(404).json({
             success: false,
             error: {
                 code: 'NOT_FOUND',
                 message: '告警不存在'
-            }
+      }
         });
     }
 
@@ -306,12 +318,13 @@ router.delete('/:id', authMiddleware, asyncHandler(async (req, res) => {
  */
 router.post('/test-notification', authMiddleware, validateRequest(testNotificationSchema), asyncHandler(async (req, res) => {
     if (!alertService) {
+        
         return res.status(503).json({
             success: false,
             error: {
                 code: 'SERVICE_UNAVAILABLE',
                 message: '告警服务未启动'
-            }
+      }
         });
     }
 
@@ -332,12 +345,13 @@ router.post('/test-notification', authMiddleware, validateRequest(testNotificati
  */
 router.get('/rules', authMiddleware, asyncHandler(async (req, res) => {
     if (!alertService) {
+        
         return res.status(503).json({
             success: false,
             error: {
                 code: 'SERVICE_UNAVAILABLE',
                 message: '告警服务未启动'
-            }
+      }
         });
     }
 
@@ -357,12 +371,13 @@ router.get('/rules', authMiddleware, asyncHandler(async (req, res) => {
  */
 router.put('/rules', authMiddleware, asyncHandler(async (req, res) => {
     if (!alertService) {
+        
         return res.status(503).json({
             success: false,
             error: {
                 code: 'SERVICE_UNAVAILABLE',
                 message: '告警服务未启动'
-            }
+      }
         });
     }
 
@@ -384,12 +399,13 @@ router.put('/rules', authMiddleware, asyncHandler(async (req, res) => {
  */
 router.get('/history/stats', authMiddleware, asyncHandler(async (req, res) => {
     if (!alertService) {
+        
         return res.status(503).json({
             success: false,
             error: {
                 code: 'SERVICE_UNAVAILABLE',
                 message: '告警服务未启动'
-            }
+      }
         });
     }
 

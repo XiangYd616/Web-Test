@@ -306,6 +306,7 @@ class BatchTestingService {
       const response = await fetch(`${this.baseUrl}/${batchId}/export?${params}`);
 
       if (format === 'json') {
+        
         const data = await response.json();
         return data.success ? data.downloadUrl : '';
       } else {
@@ -489,9 +490,13 @@ class BatchTestingService {
     const hours = Math.floor(minutes / 60);
 
     if (hours > 0) {
-      return `${hours}小时${minutes % 60}分钟`;
+      
+        return `${hours
+      }小时${minutes % 60}分钟`;
     } else if (minutes > 0) {
-      return `${minutes}分钟${seconds % 60}秒`;
+      
+        return `${minutes
+      }分钟${seconds % 60}秒`;
     } else {
       return `${seconds}秒`;
     }

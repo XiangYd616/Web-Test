@@ -11,7 +11,7 @@ interface NavigationItem {
   badge?: string;
 }
 
-const ModernNavigation: React.FC = () => {
+const Navigation: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isTestMenuOpen, setIsTestMenuOpen] = useState(false);
@@ -138,8 +138,9 @@ const ModernNavigation: React.FC = () => {
 
   const isActivePath = (path: string) => {
     if (path === '/') {
-      return location.pathname === '/';
-    }
+      
+        return location.pathname === '/';
+      }
     return location.pathname.startsWith(path);
   };
 
@@ -370,4 +371,4 @@ const ModernNavigation: React.FC = () => {
   );
 };
 
-export default ModernNavigation;
+export default Navigation;

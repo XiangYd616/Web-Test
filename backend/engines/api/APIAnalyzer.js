@@ -223,13 +223,16 @@ class APIAnalyzer {
    */
   getBaseUrl(spec) {
     if (spec.servers && spec.servers.length > 0) {
-      return spec.servers[0].url;
-    }
+      
+        return spec.servers[0].url;
+      }
 
     if (spec.host) {
-      const scheme = spec.schemes && spec.schemes.length > 0 ? spec.schemes[0] : 'http';
+      
+        const scheme = spec.schemes && spec.schemes.length > 0 ? spec.schemes[0] : 'http';
       const basePath = spec.basePath || '';
-      return `${scheme}://${spec.host}${basePath}`;
+      return `${scheme
+      }://${spec.host}${basePath}`;
     }
 
     return '';
@@ -360,9 +363,11 @@ class APIAnalyzer {
   buildRequestBody(endpoint, config) {
     if (['POST', 'PUT', 'PATCH'].includes(endpoint.method)) {
       if (endpoint.requestBody) {
+        
         // 从OpenAPI规范生成示例数据
         return this.generateExampleFromSchema(endpoint.requestBody);
       } else if (config.defaultRequestBody) {
+        
         return config.defaultRequestBody;
       }
     }
@@ -398,7 +403,8 @@ class APIAnalyzer {
    */
   getExpectedStatusCodes(endpoint) {
     if (endpoint.responses) {
-      const statusCodes = Object.keys(endpoint.responses)
+      
+        const statusCodes = Object.keys(endpoint.responses)
         .filter(code => code !== 'default')
         .map(code => parseInt(code))
         .filter(code => code >= 200 && code < 400);
@@ -424,9 +430,10 @@ class APIAnalyzer {
    */
   generateExampleFromSchema(requestBody) {
     if (requestBody.content && requestBody.content['application/json']) {
-      const schema = requestBody.content['application/json'].schema;
+      
+        const schema = requestBody.content['application/json'].schema;
       return this.generateDataFromSchema(schema);
-    }
+      }
 
     return {};
   }
@@ -474,7 +481,8 @@ class APIAnalyzer {
       .map(result => result.timing.responseTime);
 
     if (responseTimes.length === 0) {
-      return {
+      
+        return {
         averageResponseTime: 0,
         minResponseTime: 0,
         maxResponseTime: 0,
@@ -887,8 +895,9 @@ class APIAnalyzer {
     const documentation = await this.documentationGenerator.generateAPIDocumentation(testResults, options);
 
     if (options.outputDir && options.formats) {
-      return await this.documentationGenerator.exportDocumentation(documentation, options);
-    }
+      
+        return await this.documentationGenerator.exportDocumentation(documentation, options);
+      }
 
     return documentation;
   }

@@ -27,8 +27,9 @@ const globalErrorNotifier = new ErrorNotificationHelper('System');
 const errorHandler = (err, req, res, next) => {
   // 如果响应已经发送，则跳过
   if (res.headersSent) {
-    return next(err);
-  }
+    
+        return next(err);
+      }
 
   // 记录错误日志
   logError(err, req);
@@ -176,14 +177,17 @@ class AppError extends Error {
  */
 const handleDatabaseError = (err) => {
   if (err.code === '23505') {
-    return new AppError('数据已存在', 409);
-  }
+    
+        return new AppError('数据已存在', 409);
+      }
   if (err.code === '23503') {
-    return new AppError('关联数据不存在', 400);
-  }
+    
+        return new AppError('关联数据不存在', 400);
+      }
   if (err.code === '23502') {
-    return new AppError('必填字段不能为空', 400);
-  }
+    
+        return new AppError('必填字段不能为空', 400);
+      }
   return new AppError('数据库操作失败', 500);
 };
 

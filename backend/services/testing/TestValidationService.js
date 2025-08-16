@@ -33,22 +33,25 @@ class TestValidationService {
      */
     async validateTestConfig(testType, config) {
         if (!config || typeof config !== 'object') {
-            return {
+            
+        return {
                 isValid: false,
                 errors: [{
                     field: 'config',
                     message: '测试配置是必需的'
-                }]
+      }]
             };
         }
 
         const validator = this.validators.get(testType);
         if (!validator) {
-            return {
+            
+        return {
                 isValid: false,
                 errors: [{
                     field: 'testType',
-                    message: `不支持的测试类型: ${testType}`
+                    message: `不支持的测试类型: ${testType
+      }`
                 }]
             };
         }

@@ -81,8 +81,9 @@ const validateExportRequest = (req, res, next) => {
     }
 
     if (errors.length > 0) {
+        
         return res.status(400).json(formatResponse(false, null, '请求验证失败', errors));
-    }
+      }
 
     next();
 };
@@ -132,8 +133,9 @@ router.get('/task/:taskId/status',
             const result = await req.exportService.getTaskStatus(taskId, userId);
 
             if (!result.success) {
-                return res.status(404).json(formatResponse(false, null, result.error));
-            }
+                
+        return res.status(404).json(formatResponse(false, null, result.error));
+      }
 
             res.json(formatResponse(true, result.data, '获取任务状态成功'));
 
@@ -181,8 +183,9 @@ router.post('/task/:taskId/cancel',
             const result = await req.exportService.cancelTask(taskId, userId);
 
             if (!result.success) {
-                return res.status(400).json(formatResponse(false, null, result.error));
-            }
+                
+        return res.status(400).json(formatResponse(false, null, result.error));
+      }
 
             logger.info(`用户 ${userId} 取消导出任务 ${taskId}`);
             res.json(formatResponse(true, null, result.message));
@@ -207,18 +210,21 @@ router.get('/task/:taskId/download',
             const taskResult = await req.exportService.getTaskStatus(taskId, userId);
 
             if (!taskResult.success) {
-                return res.status(404).json(formatResponse(false, null, '任务不存在或无权限访问'));
-            }
+                
+        return res.status(404).json(formatResponse(false, null, '任务不存在或无权限访问'));
+      }
 
             const task = taskResult.data;
 
             if (task.status !== 'completed') {
-                return res.status(400).json(formatResponse(false, null, '任务未完成，无法下载'));
-            }
+                
+        return res.status(400).json(formatResponse(false, null, '任务未完成，无法下载'));
+      }
 
             if (!task.filePath) {
-                return res.status(404).json(formatResponse(false, null, '文件不存在'));
-            }
+                
+        return res.status(404).json(formatResponse(false, null, '文件不存在'));
+      }
 
             // 检查文件是否存在
             try {
@@ -264,8 +270,9 @@ router.delete('/task/:taskId',
             const taskResult = await req.exportService.getTaskStatus(taskId, userId);
 
             if (!taskResult.success) {
-                return res.status(404).json(formatResponse(false, null, '任务不存在或无权限访问'));
-            }
+                
+        return res.status(404).json(formatResponse(false, null, '任务不存在或无权限访问'));
+      }
 
             const task = taskResult.data;
 
@@ -305,8 +312,9 @@ router.post('/cleanup',
         try {
             // 只允许管理员执行清理操作
             if (req.user.role !== 'admin') {
-                return res.status(403).json(formatResponse(false, null, '权限不足'));
-            }
+                
+        return res.status(403).json(formatResponse(false, null, '权限不足'));
+      }
 
             const retentionDays = parseInt(req.body.retentionDays) || 7;
             const result = await req.exportService.cleanupExpiredFiles(retentionDays);

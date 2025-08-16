@@ -463,7 +463,8 @@ export class RBACService {
   ): Promise<PermissionResult> {
     const userPerms = this.userPermissions.get(userId);
     if (!userPerms) {
-      return {
+      
+        return {
         granted: false,
         reason: '用户权限信息不存在',
         matchedPermissions: []
@@ -486,13 +487,14 @@ export class RBACService {
 
         // 检查条件
         if (permission.conditions && permission.conditions.length > 0) {
-          if (!check.context || !PermissionCalculator.checkConditions(permission.conditions, check.context)) {
+          
+        if (!check.context || !PermissionCalculator.checkConditions(permission.conditions, check.context)) {
             return {
               granted: false,
               reason: '不满足权限条件',
               matchedPermissions: [permission],
               conditions: permission.conditions
-            };
+      };
           }
         }
 
@@ -501,7 +503,8 @@ export class RBACService {
     }
 
     if (matchedPermissions.length > 0) {
-      return {
+      
+        return {
         granted: true,
         reason: '权限检查通过',
         matchedPermissions
@@ -578,11 +581,12 @@ export class RBACService {
 
     // 计算层级
     if (role.inheritFrom) {
-      const maxParentLevel = Math.max(
+      
+        const maxParentLevel = Math.max(
         ...role.inheritFrom.map(parentId => {
           const parentHierarchy = this.roleHierarchies.get(parentId);
           return parentHierarchy ? parentHierarchy.level : 0;
-        })
+      })
       );
       hierarchy.level = maxParentLevel + 1;
     }

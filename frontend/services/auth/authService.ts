@@ -76,7 +76,8 @@ export class AuthService {
   // 检查 token 是否有效
   private isTokenValid(token: string): boolean {
     if (canUseDatabase && jwt) {
-      try {
+      
+        try {
         const secret = process.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
         jwt.verify(token, secret);
         return true;
@@ -92,7 +93,8 @@ export class AuthService {
   // 生成 JWT token
   private generateToken(user: User): string {
     if (canUseDatabase && jwt) {
-      const secret = process.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
+      
+        const secret = process.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
       const expiresIn = process.env.JWT_EXPIRES_IN || '24h';
 
       return jwt.default?.sign ? jwt.default.sign(
@@ -102,7 +104,7 @@ export class AuthService {
           email: user.email,
           role: user.role,
           iat: Math.floor(Date.now() / 1000),
-        },
+      },
         secret,
         { expiresIn }
       ) : jwt.sign(
@@ -131,7 +133,8 @@ export class AuthService {
   // 生成刷新 token
   private generateRefreshToken(user: User): string {
     if (canUseDatabase && jwt) {
-      const secret = process.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
+      
+        const secret = process.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
       const expiresIn = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
 
       return jwt.default?.sign ? jwt.default.sign(
@@ -139,7 +142,7 @@ export class AuthService {
           sub: user.id,
           type: 'refresh',
           iat: Math.floor(Date.now() / 1000),
-        },
+      },
         secret,
         { expiresIn }
       ) : jwt.sign(
@@ -410,6 +413,7 @@ export class AuthService {
       const result = await response.json();
 
       if (!response.ok || !result.success) {
+        
         console.log('❌ API登录失败:', result.error || result.message);
         return null;
       }
@@ -736,7 +740,9 @@ export class AuthService {
   // 更新用户信息
   async updateProfile(updates: UpdateUserData): Promise<AuthResponse> {
     if (!this.currentUser) {
-      return { success: false, message: '用户未登录' };
+      
+        return { success: false, message: '用户未登录'
+      };
     }
 
     try {
@@ -804,34 +810,42 @@ export class AuthService {
   // 修改密码
   async changePassword(data: ChangePasswordData): Promise<AuthResponse> {
     if (!this.currentUser) {
-      return { success: false, message: '用户未登录' };
+      
+        return { success: false, message: '用户未登录'
+      };
     }
 
     try {
       // 验证当前密码
       const isCurrentPasswordValid = await this.validateCurrentPassword(data.currentPassword);
       if (!isCurrentPasswordValid) {
+        
         return {
           success: false,
           message: '当前密码错误',
-          errors: { currentPassword: '当前密码错误' }
+          errors: { currentPassword: '当前密码错误'
+      }
         };
       }
 
       // 验证新密码
       if (data.newPassword.length < 6) {
+        
         return {
           success: false,
           message: '新密码至少需要6个字符',
-          errors: { newPassword: '新密码至少需要6个字符' }
+          errors: { newPassword: '新密码至少需要6个字符'
+      }
         };
       }
 
       if (data.newPassword !== data.confirmPassword) {
+        
         return {
           success: false,
           message: '两次输入的密码不一致',
-          errors: { confirmPassword: '两次输入的密码不一致' }
+          errors: { confirmPassword: '两次输入的密码不一致'
+      }
         };
       }
 
@@ -885,9 +899,10 @@ export class AuthService {
     if (!this.currentUser) return false;
 
     if (isNode) {
-      const validation = await userDao.validatePassword(this.currentUser.username, password);
+      
+        const validation = await userDao.validatePassword(this.currentUser.username, password);
       return validation.valid;
-    } else {
+      } else {
       // 在浏览器环境中验证
       const passwords = JSON.parse(localStorage.getItem('test_web_app_passwords') || '{}');
       return passwords[this.currentUser.username] === password;
@@ -973,7 +988,9 @@ export class AuthService {
   // 数据迁移：从本地存储迁移到数据库
   async migrateLocalDataToDatabase(): Promise<{ success: boolean; message: string; migrated: number }> {
     if (!isNode) {
-      return { success: false, message: '只能在 Node.js 环境中执行数据迁移', migrated: 0 };
+      
+        return { success: false, message: '只能在 Node.js 环境中执行数据迁移', migrated: 0
+      };
     }
 
     try {
@@ -991,9 +1008,10 @@ export class AuthService {
   // 清除所有认证数据（调试用）
   clearAllAuthData(): void {
     if (process.env.NODE_ENV !== 'development') {
-      console.warn('⚠️ 只能在开发环境中清除认证数据');
+      
+        console.warn('⚠️ 只能在开发环境中清除认证数据');
       return;
-    }
+      }
 
     try {
       // 清除本地存储

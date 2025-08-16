@@ -245,7 +245,9 @@ const getEngineStatus = async (testType) => {
 
     const engine = result.rows[0];
     if (!engine) {
-      return { status: 'unknown', available: false };
+      
+        return { status: 'unknown', available: false
+      };
     }
 
     // 检查引擎是否在5分钟内有响应
@@ -360,8 +362,9 @@ router.get('/:id', authMiddleware, asyncHandler(async (req, res) => {
   );
 
   if (testResult.rows.length === 0) {
-    return res.notFound('测试记录不存在');
-  }
+    
+        return res.notFound('测试记录不存在');
+      }
 
   const test = testResult.rows[0];
 
@@ -437,9 +440,11 @@ router.post('/:type/start', authMiddleware, startTestValidation, asyncHandler(as
   // 检查引擎状态
   const engineStatus = await getEngineStatus(testType);
   if (!engineStatus.available) {
-    return res.error(
+    
+        return res.error(
       ERROR_CODES.ENGINE_UNAVAILABLE,
-      `${testType}测试引擎当前不可用`,
+      `${testType
+      }测试引擎当前不可用`,
       engineStatus,
       503
     );
@@ -488,8 +493,9 @@ router.delete('/:id', authMiddleware, asyncHandler(async (req, res) => {
   );
 
   if (testResult.rows.length === 0) {
-    return res.notFound('测试记录不存在');
-  }
+    
+        return res.notFound('测试记录不存在');
+      }
 
   const test = testResult.rows[0];
 

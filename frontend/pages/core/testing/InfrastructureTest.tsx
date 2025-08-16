@@ -132,9 +132,10 @@ const InfrastructureTest: React.FC = () => {
   // 开始测试
   const handleStartTest = async () => {
     if (!isAuthenticated) {
-      requireLogin();
+      
+        requireLogin();
       return;
-    }
+      }
 
     setTestStatus('running');
     setError(null);

@@ -29,10 +29,11 @@ export const ButtonFeedback: React.FC<{
 
   useEffect(() => {
     if (feedback) {
-      setShowFeedback(true);
+      
+        setShowFeedback(true);
       const timer = setTimeout(() => setShowFeedback(false), feedbackDuration);
       return () => clearTimeout(timer);
-    }
+      }
     return undefined;
   }, [feedback, feedbackDuration]);
 
@@ -456,10 +457,12 @@ export const FeedbackCollector: React.FC<{
   };
 
   if (!isOpen) {
-    return (
+    
+        return (
       <button
         type="button"
-        onClick={() => setIsOpen(true)}
+        onClick={() => setIsOpen(true)
+      }
         className={`
           inline-flex items-center space-x-2 px-3 py-2 text-sm
           bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200

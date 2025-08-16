@@ -63,8 +63,9 @@ class ErrorMonitoringManager extends EventEmitter {
    */
   async initialize() {
     if (this.isInitialized) {
-      return;
-    }
+      
+        return;
+      }
 
     try {
       // 创建日志目录
@@ -392,13 +393,14 @@ class ErrorMonitoringManager extends EventEmitter {
   resolveError(errorId, resolvedBy) {
     const error = this.errors.get(errorId);
     if (error) {
-      error.resolved = true;
+      
+        error.resolved = true;
       error.resolvedAt = new Date();
       error.resolvedBy = resolvedBy;
 
       this.emit('errorResolved', error);
       return true;
-    }
+      }
     return false;
   }
 

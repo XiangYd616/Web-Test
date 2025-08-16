@@ -75,8 +75,9 @@ function createCacheMiddleware(ttl = 300, keyGenerator = null) {
   return (req, res, next) => {
     // 只缓存GET请求
     if (req.method !== 'GET') {
-      return next();
-    }
+      
+        return next();
+      }
 
     // 生成缓存键
     const cacheKey = keyGenerator
@@ -86,8 +87,9 @@ function createCacheMiddleware(ttl = 300, keyGenerator = null) {
     // 尝试从缓存获取数据
     const cachedData = cache.get(cacheKey);
     if (cachedData) {
-      return res.json(cachedData);
-    }
+      
+        return res.json(cachedData);
+      }
 
     // 重写res.json方法以缓存响应
     const originalJson = res.json;

@@ -120,12 +120,14 @@ export const SimpleChart: React.FC<SimpleChartProps> = ({
   placeholder = '暂无数据'
 }) => {
   if (!data || data.length === 0) {
-    return (
+    
+        return (
       <div
         className={cn(
           'flex items-center justify-center bg-gray-700/30 rounded border border-gray-600/50',
           className
-        )}
+        )
+      }
         style={{ height: `${height}px` }}
       >
         <span className="text-sm text-gray-400">{placeholder}</span>
@@ -135,11 +137,13 @@ export const SimpleChart: React.FC<SimpleChartProps> = ({
 
   // 简单的条形图实现
   if (type === 'bar') {
-    const maxValue = Math.max(...data.map(d => d.value));
+    
+        const maxValue = Math.max(...data.map(d => d.value));
 
     return (
       <div
-        className={cn('p-4 bg-gray-700/30 rounded border border-gray-600/50', className)}
+        className={cn('p-4 bg-gray-700/30 rounded border border-gray-600/50', className)
+      }
         style={{ height: `${height}px` }}
       >
         <div className="flex items-end justify-between h-full gap-2">

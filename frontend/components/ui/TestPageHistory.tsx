@@ -192,12 +192,13 @@ export const TestPageHistory: React.FC<TestPageHistoryProps> = ({
   };
 
   if (!isAuthenticated) {
-    return (
+    
+        return (
       <div className="test-page-history-empty">
         <p className="text-gray-400">请登录后查看测试历史</p>
       </div>
     );
-  }
+      }
 
   return (
     <div className={`test-page-history bg-gray-800/30 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/40 dark:border-gray-600/30 shadow-lg ${className}`}>

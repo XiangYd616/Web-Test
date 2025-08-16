@@ -113,8 +113,10 @@ export const TestHistoryPanel: React.FC<TestHistoryPanelProps> = ({
   };
 
   if (loading) {
-    return (
-      <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 ${className}`}>
+    
+        return (
+      <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 ${className
+      }`}>
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           <span className="ml-2 text-gray-600 dark:text-gray-400">加载历史记录...</span>

@@ -5,10 +5,9 @@ import type {
   ApiError,
   ApiResponse,
   PaginatedResponse,
-  PaginationInfo,
-  ValidationError
+  PaginationInfo
 } from '../api';
-
+import type { ValidationError } from '../common';
 // 重新导出所有 API 响应类型
 export type {
   ApiError,
@@ -21,10 +20,8 @@ export type {
 // 重新导出 API 响应工具函数
 export {
   extractData,
-  extractError,
-  extractPagination, isApiErrorResponse, isApiSuccessResponse, isPaginatedResponse
-} from '../apiResponse';
-
+  extractError
+} from '../apiResponse'; // 已修复
 // 错误代码枚举
 export enum ErrorCode {
   // 通用错误

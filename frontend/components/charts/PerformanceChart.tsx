@@ -40,7 +40,8 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
   // 优化数据处理
   const optimizedData = useMemo(() => {
     if (!enableOptimization || data.length <= maxDataPoints) {
-      return {
+      
+        return {
         data: data,
         originalCount: data.length,
         optimizedCount: data.length,
@@ -116,9 +117,11 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
   // 优化的工具提示格式化
   const formatTooltip = useCallback((value: any, name: string) => {
     if (name === dataKey) {
-      const unit = dataKey === 'responseTime' ? 'ms' :
+      
+        const unit = dataKey === 'responseTime' ? 'ms' :
         dataKey === 'throughput' || dataKey === 'tps' ? '' : '';
-      return [`${typeof value === 'number' ? value.toFixed(3) : value}${unit}`, name];
+      return [`${typeof value === 'number' ? value.toFixed(3) : value
+      }${unit}`, name];
     }
     return [value, name];
   }, [dataKey]);
@@ -150,12 +153,13 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
   }, [optimizedData.data.length]);
 
   if (isLoading) {
-    return (
+    
+        return (
       <div className="flex items-center justify-center h-64">
         <div className="text-gray-400">优化数据中...</div>
       </div>
     );
-  }
+      }
 
   return (
     <div className="relative">

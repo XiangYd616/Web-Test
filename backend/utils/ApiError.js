@@ -90,46 +90,54 @@ class ErrorFactory {
    */
   static fromError(error) {
     if (error instanceof ApiError) {
-      return error;
-    }
+      
+        return error;
+      }
 
     // 数据库错误
     if (error.name === 'SequelizeError' || error.name === 'SequelizeDatabaseError') {
-      return new ApiError(
+      
+        return new ApiError(
         ErrorCodes.DATABASE_ERROR,
         '数据库操作失败',
         500,
-        { originalError: error.message }
+        { originalError: error.message
+      }
       );
     }
 
     // 验证错误
     if (error.name === 'ValidationError') {
-      return new ApiError(
+      
+        return new ApiError(
         ErrorCodes.VALIDATION_ERROR,
         error.message || '数据验证失败',
         400,
         error.details
       );
-    }
+      }
 
     // 网络错误
     if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
-      return new ApiError(
+      
+        return new ApiError(
         ErrorCodes.CONNECTION_ERROR,
         '连接失败',
         503,
-        { code: error.code }
+        { code: error.code
+      }
       );
     }
 
     // 超时错误
     if (error.code === 'ETIMEDOUT') {
-      return new ApiError(
+      
+        return new ApiError(
         ErrorCodes.TIMEOUT_ERROR,
         '请求超时',
         408,
-        { code: error.code }
+        { code: error.code
+      }
       );
     }
 
@@ -256,8 +264,9 @@ class ErrorUtils {
    */
   static getStatusCode(error) {
     if (error instanceof ApiError) {
-      return error.statusCode;
-    }
+      
+        return error.statusCode;
+      }
     return 500;
   }
 
@@ -266,8 +275,9 @@ class ErrorUtils {
    */
   static getUserFriendlyMessage(error) {
     if (error instanceof ApiError) {
-      return error.message;
-    }
+      
+        return error.message;
+      }
     return '服务器内部错误，请稍后重试';
   }
 }

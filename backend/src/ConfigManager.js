@@ -189,8 +189,9 @@ class ConfigManager {
     const value = process.env[key];
     
     if (value === undefined || value === '') {
-      return defaultValue;
-    }
+      
+        return defaultValue;
+      }
 
     try {
       switch (type) {

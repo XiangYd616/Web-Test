@@ -9,9 +9,8 @@ import {
     useMemoryMonitor,
     useNetworkStatus,
     usePerformanceMonitor,
-    useVisibility
-} from '../../hooks/usePerformanceOptimization';
-
+    // useVisibility
+} from '../../hooks/usePerformanceOptimization'; // 已修复
 interface PerformanceMonitorProps {
     className?: string;
     showDetails?: boolean;
@@ -32,13 +31,15 @@ const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
 
     // 在生产环境且设置了自动隐藏时不显示
     if (autoHide && process.env.NODE_ENV === 'production') {
+        
         return null;
-    }
+      }
 
     // 页面不可见时不更新
     if (!isVisible) {
+        
         return null;
-    }
+      }
 
     // 获取性能等级颜色
     const getPerformanceColor = (value: number, thresholds: { good: number; needs: number }) => {

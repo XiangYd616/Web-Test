@@ -151,8 +151,9 @@ class PermissionService {
             const user = userResult.rows[0];
 
             if (!user.is_active) {
-                return []; // 非活跃用户没有任何权限
-            }
+                
+        return []; // 非活跃用户没有任何权限
+      }
 
             // 获取基于角色的权限
             let permissions = ROLE_PERMISSIONS[user.role] || [];
@@ -196,8 +197,9 @@ class PermissionService {
             const permissions = Array.isArray(requiredPermissions) ? requiredPermissions : [requiredPermissions];
 
             if (requireAll) {
-                return permissions.every(permission => userPermissions.includes(permission));
-            } else {
+                
+        return permissions.every(permission => userPermissions.includes(permission));
+      } else {
                 return permissions.some(permission => userPermissions.includes(permission));
             }
         } catch (error) {
@@ -219,8 +221,9 @@ class PermissionService {
             );
 
             if (userResult.rows.length === 0) {
-                return false;
-            }
+                
+        return false;
+      }
 
             return userResult.rows[0].role === 'admin';
         } catch (error) {
@@ -314,10 +317,11 @@ class PermissionService {
             return true;
         } catch (error) {
             if (error.code === '42P01') {
-                // 表不存在，忽略错误
+                
+        // 表不存在，忽略错误
                 console.warn('用户权限表不存在，跳过自定义权限添加');
                 return false;
-            }
+      }
             throw ErrorFactory.fromError(error);
         }
     }
@@ -341,10 +345,11 @@ class PermissionService {
             return true;
         } catch (error) {
             if (error.code === '42P01') {
-                // 表不存在，忽略错误
+                
+        // 表不存在，忽略错误
                 console.warn('用户权限表不存在，跳过自定义权限移除');
                 return false;
-            }
+      }
             throw ErrorFactory.fromError(error);
         }
     }

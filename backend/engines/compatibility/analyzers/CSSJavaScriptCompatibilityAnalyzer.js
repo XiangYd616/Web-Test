@@ -345,9 +345,10 @@ class CSSJavaScriptCompatibilityAnalyzer {
 
       scripts.forEach(script => {
         if (script.src) {
-          // 外部脚本，无法直接分析内容
+          
+        // 外部脚本，无法直接分析内容
           return;
-        }
+      }
         allScriptContent += script.textContent + '/n';
       });
 

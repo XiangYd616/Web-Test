@@ -138,6 +138,7 @@ class ReportService {
       const data = await response.json();
 
       if (data.success) {
+        
         this.reports = data.data;
         return this.reports;
       }
@@ -158,6 +159,7 @@ class ReportService {
       });
 
       if (response.ok) {
+        
         this.reports = this.reports.filter(report => report.id !== reportId);
         return;
       }
@@ -479,6 +481,7 @@ class ReportService {
     try {
       const stored = localStorage.getItem('generated_reports');
       if (stored) {
+        
         this.reports = JSON.parse(stored);
         return this.reports;
       }

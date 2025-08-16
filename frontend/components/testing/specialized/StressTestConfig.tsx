@@ -64,8 +64,9 @@ export const StressTestConfig: React.FC<StressTestConfigProps> = ({
     const { duration, concurrency, requestsPerSecond, thinkTime } = loadSettings;
 
     if (requestsPerSecond > 0) {
-      return duration * requestsPerSecond;
-    } else {
+      
+        return duration * requestsPerSecond;
+      } else {
       // 基于并发用户和思考时间计算
       const requestsPerUser = duration / (thinkTime / 1000);
       return Math.round(requestsPerUser * concurrency);

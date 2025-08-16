@@ -27,12 +27,14 @@ export function withAuthCheck<P extends object>(
 
     // 如果强制要求登录且用户未登录，显示登录提示
     if (requireAuth && !isAuthenticated) {
-      return (
+      
+        return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
           <div className="text-center">
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-8 max-w-md">
               <h2 className="text-2xl font-bold text-white mb-4">需要登录</h2>
-              <p className="text-gray-300 mb-6">{description}需要登录账户</p>
+              <p className="text-gray-300 mb-6">{description
+      }需要登录账户</p>
               <LoginPrompt
                 isOpen={true}
                 onClose={() => {}}
@@ -52,9 +54,10 @@ export function withAuthCheck<P extends object>(
       showLoginPrompt: () => setShowLoginPrompt(true),
       requireLogin: () => {
         if (!isAuthenticated && showPrompt) {
-          setShowLoginPrompt(true);
+          
+        setShowLoginPrompt(true);
           return false;
-        }
+      }
         return true;
       }
     } as P & {

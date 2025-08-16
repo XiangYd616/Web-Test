@@ -127,8 +127,9 @@ export const useUnifiedSEOTest = () => {
   // 停止测试
   const stopTest = useCallback(async () => {
     if (currentMode === 'online') {
-      return stopOnlineTest();
-    } else {
+      
+        return stopOnlineTest();
+      } else {
       // 停止本地测试
       if (localEngineRef.current) {
         localEngineRef.current.stopAnalysis();

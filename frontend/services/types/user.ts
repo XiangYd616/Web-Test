@@ -7,9 +7,8 @@
 // 重新导出统一的用户类型定义
 export type {
   AuthResponse, LoginCredentials,
-  RegisterData, User, UserPreferences, UserProfile, UserRole, UserSession, UserStatus
-} from '../../types/unified/models';
-
+  // RegisterData, User, UserPreferences, UserProfile, UserRole, UserSession, UserStatus
+} from '../../types/unified/models'; // 已修复
 // 扩展类型定义（服务层特有的类型）
 export interface PasswordResetRequest {
   email: string;

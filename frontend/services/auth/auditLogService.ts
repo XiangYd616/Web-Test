@@ -267,13 +267,15 @@ class SecurityEventDetector {
     const recentFailures = this.getRecentEvents(key, 'login_failed', 15 * 60 * 1000); // 15分钟内
 
     if (recentFailures.length >= 5) {
-      return {
+      
+        return {
         id: this.generateAlertId(),
         timestamp: new Date().toISOString(),
         type: 'brute_force',
         severity: 'high',
         title: '检测到暴力破解攻击',
-        description: `IP地址 ${entry.ipAddress} 在15分钟内尝试登录失败${recentFailures.length}次`,
+        description: `IP地址 ${entry.ipAddress
+      } 在15分钟内尝试登录失败${recentFailures.length}次`,
         userId: entry.userId,
         username: entry.username,
         ipAddress: entry.ipAddress,
@@ -356,13 +358,15 @@ class SecurityEventDetector {
   private static detectSuspiciousPattern(entry: AuditLogEntry): SecurityAlert | null {
     // 检查高风险分数
     if (entry.riskScore && entry.riskScore > 70) {
-      return {
+      
+        return {
         id: this.generateAlertId(),
         timestamp: new Date().toISOString(),
         type: 'suspicious_pattern',
         severity: entry.riskScore > 90 ? 'critical' : 'high',
         title: '检测到可疑活动模式',
-        description: `检测到高风险活动，风险分数: ${entry.riskScore}`,
+        description: `检测到高风险活动，风险分数: ${entry.riskScore
+      }`,
         userId: entry.userId,
         username: entry.username,
         ipAddress: entry.ipAddress,
@@ -679,6 +683,7 @@ export class AuditLogService {
       }
 
       if (sortOrder === 'asc') {
+        
         return aValue > bValue ? 1 : -1;
       } else {
         return aValue < bValue ? 1 : -1;
@@ -779,8 +784,9 @@ export class AuditLogService {
    */
   getSecurityAlerts(resolved?: boolean): SecurityAlert[] {
     if (resolved !== undefined) {
-      return this.alerts.filter(alert => alert.isResolved === resolved);
-    }
+      
+        return this.alerts.filter(alert => alert.isResolved === resolved);
+      }
     return [...this.alerts];
   }
 

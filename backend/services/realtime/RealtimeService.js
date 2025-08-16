@@ -372,13 +372,15 @@ class RealtimeService {
    */
   startQueueProcessor() {
     if (this.isProcessingQueue) {
-      return;
-    }
+      
+        return;
+      }
 
     this.isProcessingQueue = true;
 
     const processQueue = async () => {
       if (this.messageQueue.length === 0) {
+        
         setTimeout(processQueue, this.options.processInterval);
         return;
       }
@@ -435,8 +437,9 @@ class RealtimeService {
    */
   validateProgress(progress) {
     if (!progress || typeof progress !== 'object') {
-      return null;
-    }
+      
+        return null;
+      }
 
     const validated = {
       percentage: Math.max(0, Math.min(100, progress.percentage || 0)),
@@ -454,8 +457,9 @@ class RealtimeService {
    */
   validateTestResult(result) {
     if (!result || typeof result !== 'object') {
-      return null;
-    }
+      
+        return null;
+      }
 
     return {
       testId: result.testId,

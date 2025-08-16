@@ -134,19 +134,22 @@ class ApiErrorInterceptor {
    */
   private parseErrorResponse(error: AxiosError): ApiErrorResponse | null {
     if (!error.response) {
-      return null;
-    }
+      
+        return null;
+      }
 
     const data = error.response.data;
     
     // 标准API错误格式
     if (data && typeof data === 'object' && 'success' in data) {
-      return data as ApiErrorResponse;
-    }
+      
+        return data as ApiErrorResponse;
+      }
 
     // 简单字符串错误
     if (typeof data === 'string') {
-      return {
+      
+        return {
         success: false,
         message: data
       };

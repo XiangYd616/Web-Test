@@ -33,9 +33,10 @@ class MonitoringScheduler extends EventEmitter {
      */
     start() {
         if (this.isRunning) {
-            logger.warn('监控调度器已在运行中');
+            
+        logger.warn('监控调度器已在运行中');
             return;
-        }
+      }
 
         logger.info('启动监控任务调度器...');
 
@@ -53,8 +54,9 @@ class MonitoringScheduler extends EventEmitter {
      */
     stop() {
         if (!this.isRunning) {
-            return;
-        }
+            
+        return;
+      }
 
         logger.info('停止监控任务调度器...');
 
@@ -119,13 +121,15 @@ class MonitoringScheduler extends EventEmitter {
     shouldExecuteTask(task, now) {
         // 任务已在运行中
         if (task.isRunning) {
-            return false;
-        }
+            
+        return false;
+      }
 
         // 任务被暂停
         if (task.status === 'paused') {
-            return false;
-        }
+            
+        return false;
+      }
 
         // 检查执行间隔
         const timeSinceLastRun = now - (task.lastExecuted || 0);
@@ -133,10 +137,11 @@ class MonitoringScheduler extends EventEmitter {
 
         // 检查重试逻辑
         if (task.lastFailed && task.retryCount < task.maxRetries) {
-            const timeSinceFailure = now - task.lastFailed;
+            
+        const timeSinceFailure = now - task.lastFailed;
             const shouldRetry = timeSinceFailure >= this.config.retryDelay;
             return shouldRetry;
-        }
+      }
 
         return shouldRun;
     }
@@ -248,8 +253,9 @@ class MonitoringScheduler extends EventEmitter {
      */
     handleTaskTimeout(task) {
         if (!task.isRunning) {
-            return;
-        }
+            
+        return;
+      }
 
         const duration = Date.now() - task.startTime;
         const timeoutError = new Error(`任务执行超时: ${duration}ms`);
@@ -375,8 +381,9 @@ class MonitoringScheduler extends EventEmitter {
         const task = this.tasks.get(taskId);
 
         if (!task) {
-            return false;
-        }
+            
+        return false;
+      }
 
         task.status = 'paused';
 
@@ -397,8 +404,9 @@ class MonitoringScheduler extends EventEmitter {
         const task = this.tasks.get(taskId);
 
         if (!task) {
-            return false;
-        }
+            
+        return false;
+      }
 
         task.status = 'active';
         task.retryCount = 0; // 重置重试计数
@@ -467,8 +475,9 @@ class MonitoringScheduler extends EventEmitter {
         const task = this.tasks.get(taskId);
 
         if (!task) {
-            return false;
-        }
+            
+        return false;
+      }
 
         // 允许更新的字段
         const allowedUpdates = ['name', 'interval', 'maxRetries'];

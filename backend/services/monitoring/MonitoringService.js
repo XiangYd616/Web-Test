@@ -37,9 +37,10 @@ class MonitoringService extends EventEmitter {
     async start() {
         try {
             if (this.isRunning) {
-                logger.warn('监控服务已在运行中');
+                
+        logger.warn('监控服务已在运行中');
                 return;
-            }
+      }
 
             logger.info('启动监控服务...');
 
@@ -68,8 +69,9 @@ class MonitoringService extends EventEmitter {
     async stop() {
         try {
             if (!this.isRunning) {
-                return;
-            }
+                
+        return;
+      }
 
             logger.info('停止监控服务...');
 
@@ -252,22 +254,26 @@ class MonitoringService extends EventEmitter {
 
             // 判断错误类型
             if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
-                return {
+                
+        return {
                     status: 'timeout',
                     response_time: Math.round(duration),
                     status_code: null,
                     error_message: '请求超时',
-                    results: { timeout: true, duration }
+                    results: { timeout: true, duration
+      }
                 };
             }
 
             if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
-                return {
+                
+        return {
                     status: 'down',
                     response_time: Math.round(duration),
                     status_code: null,
                     error_message: '无法连接到服务器',
-                    results: { connection_error: true, code: error.code }
+                    results: { connection_error: true, code: error.code
+      }
                 };
             }
 
@@ -312,8 +318,9 @@ class MonitoringService extends EventEmitter {
         const uptimeResult = await this.performUptimeCheck(target, timeout);
 
         if (uptimeResult.status !== 'up') {
-            return uptimeResult;
-        }
+            
+        return uptimeResult;
+      }
 
         // 添加性能指标
         const performanceMetrics = {
@@ -348,8 +355,9 @@ class MonitoringService extends EventEmitter {
         const uptimeResult = await this.performUptimeCheck(target, timeout);
 
         if (uptimeResult.status !== 'up') {
-            return uptimeResult;
-        }
+            
+        return uptimeResult;
+      }
 
         const securityChecks = {
             https: target.url.startsWith('https://'),
@@ -386,8 +394,9 @@ class MonitoringService extends EventEmitter {
         const uptimeResult = await this.performUptimeCheck(target, timeout);
 
         if (uptimeResult.status !== 'up') {
-            return uptimeResult;
-        }
+            
+        return uptimeResult;
+      }
 
         // 简单的SEO检查（可以扩展）
         const seoChecks = {
@@ -507,8 +516,9 @@ class MonitoringService extends EventEmitter {
             const isFailure = ['down', 'timeout', 'error'].includes(result.status);
 
             if (!isFailure) {
-                return;
-            }
+                
+        return;
+      }
 
             // 获取当前连续失败次数
             const query = `
@@ -520,8 +530,9 @@ class MonitoringService extends EventEmitter {
             const queryResult = await this.dbPool.query(query, [target.id]);
 
             if (queryResult.rows.length === 0) {
-                return;
-            }
+                
+        return;
+      }
 
             const { consecutive_failures, notification_settings } = queryResult.rows[0];
             const alertThreshold = this.config.maxConsecutiveFailures;
@@ -705,23 +716,27 @@ class MonitoringService extends EventEmitter {
     determineOverallHealth(stats) {
         // 数据库不健康
         if (stats.databaseStatus !== 'healthy') {
-            return 'critical';
-        }
+            
+        return 'critical';
+      }
 
         // 内存使用过高
         if (stats.resources.memory.usage > 90) {
-            return 'degraded';
-        }
+            
+        return 'degraded';
+      }
 
         // 有卡住的任务
         if (stats.taskStats.stuck > 0) {
-            return 'degraded';
-        }
+            
+        return 'degraded';
+      }
 
         // 错误任务过多
         if (stats.taskStats.error > stats.taskStats.total * 0.5) {
-            return 'degraded';
-        }
+            
+        return 'degraded';
+      }
 
         return 'healthy';
     }
@@ -1669,25 +1684,28 @@ class MonitoringService extends EventEmitter {
         const filename = `monitoring-report-${reportType}-${timestamp}.${format}`;
 
         if (format === 'json') {
-            return {
+            
+        return {
                 filename,
                 data: JSON.stringify(reportData, null, 2),
                 contentType: 'application/json'
-            };
+      };
         } else if (format === 'csv') {
-            const csvData = this.convertToCSV(reportData);
+            
+        const csvData = this.convertToCSV(reportData);
             return {
                 filename: filename.replace('.csv', '.csv'),
                 data: csvData,
                 contentType: 'text/csv'
-            };
+      };
         } else if (format === 'pdf') {
-            // 这里可以集成PDF生成库，暂时返回JSON格式
+            
+        // 这里可以集成PDF生成库，暂时返回JSON格式
             return {
                 filename: filename.replace('.pdf', '.json'),
                 data: JSON.stringify(reportData, null, 2),
                 contentType: 'application/json'
-            };
+      };
         }
 
         throw new Error(`不支持的报告格式: ${format}`);
@@ -1770,9 +1788,10 @@ class MonitoringService extends EventEmitter {
         } catch (error) {
             // 如果表不存在，先创建表
             if (error.code === '42P01') {
-                await this.createReportsTable();
+                
+        await this.createReportsTable();
                 return this.saveReportRecord(userId, reportInfo);
-            }
+      }
             throw error;
         }
     }
@@ -1861,8 +1880,9 @@ class MonitoringService extends EventEmitter {
             const result = await this.dbPool.query(query, [reportId, userId]);
 
             if (result.rows.length === 0) {
-                return null;
-            }
+                
+        return null;
+      }
 
             const report = result.rows[0];
 

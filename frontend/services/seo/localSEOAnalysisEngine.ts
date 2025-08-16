@@ -42,7 +42,7 @@ export class LocalSEOAnalysisEngine {
       const dom = this.parseHTML(htmlContent);
 
       // 创建虚拟URL用于分析
-      const virtualUrl = `file:/\${mainFile.name}`;
+      const virtualUrl = `file:/${mainFile.name}`;
 
       // 执行各项检测
       const results: Partial<SEOAnalysisResult> = {
@@ -297,7 +297,8 @@ export class LocalSEOAnalysisEngine {
     const issues: string[] = [];
 
     if (canonicalLinks.length === 0) {
-      issues.push('建议添加canonical标签，部署后指向正确的URL');
+      
+        issues.push('建议添加canonical标签，部署后指向正确的URL');
       return {
         present: false,
         correct: false,
@@ -311,8 +312,10 @@ export class LocalSEOAnalysisEngine {
 
     const canonicalUrl = canonicalLinks[0].getAttribute('href');
     if (!canonicalUrl) {
-      issues.push('canonical标签缺少href属性');
-      return { present: true, correct: false, issues };
+      
+        issues.push('canonical标签缺少href属性');
+      return { present: true, correct: false, issues
+      };
     }
 
     // 对于本地文件，给出部署建议
@@ -339,7 +342,8 @@ export class LocalSEOAnalysisEngine {
     const issues: string[] = [];
 
     if (!metaRobots) {
-      return {
+      
+        return {
         present: false,
         content: '',
         issues: ['建议添加meta robots标签以控制搜索引擎行为']
@@ -376,7 +380,8 @@ export class LocalSEOAnalysisEngine {
     const issues: string[] = [];
 
     if (hreflangLinks.length === 0) {
-      return {
+      
+        return {
         present: false,
         correct: false,
         issues: ['如果是多语言网站，建议添加hreflang标签']
@@ -524,7 +529,8 @@ export class LocalSEOAnalysisEngine {
     const issues: string[] = [];
 
     if (!title) {
-      return {
+      
+        return {
         present: false,
         length: 0,
         optimal: false,
@@ -572,7 +578,8 @@ export class LocalSEOAnalysisEngine {
     const issues: string[] = [];
 
     if (!metaDesc) {
-      return {
+      
+        return {
         present: false,
         length: 0,
         optimal: false,
@@ -1243,7 +1250,8 @@ export class LocalSEOAnalysisEngine {
     const viewport = dom.querySelector('meta[name="viewport"]');
 
     if (!viewport) {
-      return {
+      
+        return {
         present: false,
         correct: false,
         content: ''

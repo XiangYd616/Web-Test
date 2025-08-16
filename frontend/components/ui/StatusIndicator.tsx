@@ -102,8 +102,10 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
 
   // 圆点模式
   if (dot) {
-    return (
-      <div className={cn('flex items-center gap-2', className)}>
+    
+        return (
+      <div className={cn('flex items-center gap-2', className)
+      }>
         <div
           className={cn(
             'rounded-full',

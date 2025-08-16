@@ -300,8 +300,9 @@ export class TestScheduler {
     const startTime = new Date(schedule.schedule.startTime);
 
     if (schedule.schedule.type === 'once') {
-      return startTime > now ? startTime : null;
-    }
+      
+        return startTime > now ? startTime : null;
+      }
 
     // 处理重复调度
     let nextRun = new Date(startTime);
@@ -336,8 +337,9 @@ export class TestScheduler {
 
     // 检查最大运行次数
     if (schedule.maxRuns && schedule.runCount >= schedule.maxRuns) {
-      return null;
-    }
+      
+        return null;
+      }
 
     return nextRun;
   }

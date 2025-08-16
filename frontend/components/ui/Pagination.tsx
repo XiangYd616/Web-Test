@@ -11,8 +11,8 @@ import {
   ChevronsLeft, 
   ChevronsRight,
   MoreHorizontal,
-  Loader2
-} from 'lucide-react';
+  // Loader2
+} from 'lucide-react'; // 已修复
 import type { PaginationInfo } from '../../types/common';
 
 // ==================== 类型定义 ====================
@@ -103,8 +103,9 @@ export function usePagination(options: UsePaginationOptions = {}) {
     const newTotalPages = Math.ceil(state.total / newPageSize);
     
     if (page < 1 || page > newTotalPages) {
-      return;
-    }
+      
+        return;
+      }
 
     setState(prev => ({
       ...prev,
@@ -322,8 +323,10 @@ export const Pagination: React.FC<PaginationProps> = ({
   // 渲染页码按钮
   const renderPageButton = (page: number | 'ellipsis', index: number) => {
     if (page === 'ellipsis') {
-      return (
-        <span key={`ellipsis-${index}`} className="px-2 py-2 text-gray-400">
+      
+        return (
+        <span key={`ellipsis-${index
+      }`} className="px-2 py-2 text-gray-400">
           <MoreHorizontal className="w-4 h-4" />
         </span>
       );
@@ -341,8 +344,10 @@ export const Pagination: React.FC<PaginationProps> = ({
     `;
 
     if (renderPageItem) {
-      return (
-        <div key={page} onClick={() => !disabled && handlePageChange(page)}>
+      
+        return (
+        <div key={page
+      } onClick={() => !disabled && handlePageChange(page)}>
           {renderPageItem(page, 'page')}
         </div>
       );

@@ -17,15 +17,18 @@ export class ErrorHandler {
     const timestamp = new Date().toISOString();
 
     if (error.response) {
-      // HTTP错误响应
+      
+        // HTTP错误响应
       return {
-        code: `HTTP_${error.response.status}`,
+        code: `HTTP_${error.response.status
+      }`,
         message: error.response.data?.message || '请求失败',
         details: error.response.data,
         timestamp
       };
     } else if (error.request) {
-      // 网络错误
+      
+        // 网络错误
       return {
         code: 'NETWORK_ERROR',
         message: '网络连接失败，请检查网络设置',

@@ -18,12 +18,13 @@ export function formatApiResponse<T>(
     const timestamp = new Date().toISOString();
 
     if (error) {
+        
         return {
             success: false,
             error: {
                 code: 'UNKNOWN_ERROR',
                 message: error.message,
-            },
+      },
             meta: {
                 timestamp,
                 requestId: generateRequestId(),
@@ -51,58 +52,64 @@ export function formatApiResponse<T>(
 export function handleApiError(error: any) {
     // 网络错误
     if (error.code === 'NETWORK_ERROR' || !error.response) {
+        
         return {
             type: 'network',
             message: '网络连接失败，请检查网络设置',
             canRetry: true,
-        };
+      };
     }
 
     const status = error.response?.status;
 
     // 认证错误
     if (status === 401) {
+        
         return {
             type: 'auth',
             message: '登录已过期，请重新登录',
             canRetry: false,
-        };
+      };
     }
 
     // 权限错误
     if (status === 403) {
+        
         return {
             type: 'permission',
             message: '没有权限执行此操作',
             canRetry: false,
-        };
+      };
     }
 
     // 资源不存在
     if (status === 404) {
+        
         return {
             type: 'notFound',
             message: '请求的资源不存在',
             canRetry: false,
-        };
+      };
     }
 
     // 请求错误
     if (status >= 400 && status < 500) {
+        
         return {
             type: 'client',
             message: error.response?.data?.message || '请求参数错误',
             canRetry: false,
-        };
+      };
     }
 
     // 服务器错误
     if (status >= 500) {
+        
         return {
             type: 'server',
             message: '服务器错误，请稍后重试',
             canRetry: true,
-        };
+      };
     }
 
     // 未知错误

@@ -174,8 +174,9 @@ const responseFormatter = (req, res, next) => {
 const errorResponseFormatter = (err, req, res, next) => {
     // 如果响应已经发送，则跳过
     if (res.headersSent) {
+        
         return next(err);
-    }
+      }
 
     console.error('API错误:', {
         requestId: req.requestId,

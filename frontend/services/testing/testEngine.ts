@@ -564,8 +564,9 @@ class TestEngine extends BrowserEventEmitter {
   private calculateOverallScore(result: any, testType: string): number {
     // 优先使用后端计算的总体分数
     if (result.overallScore !== undefined && result.overallScore !== null) {
-      return result.overallScore;
-    }
+      
+        return result.overallScore;
+      }
 
     // 根据测试类型计算总体分数
     switch (testType) {
@@ -596,8 +597,9 @@ class TestEngine extends BrowserEventEmitter {
 
   private calculatePerformanceScore(result: any): number {
     if (result.lighthouse?.categories?.performance) {
-      return result.lighthouse.categories.performance.score * 100;
-    }
+      
+        return result.lighthouse.categories.performance.score * 100;
+      }
     // 基于Core Web Vitals计算
     const metrics = result.metrics || {};
     let score = 100;
@@ -628,15 +630,17 @@ class TestEngine extends BrowserEventEmitter {
 
   private calculateSEOScore(result: any): number {
     if (result.lighthouse?.categories?.seo) {
-      return result.lighthouse.categories.seo.score * 100;
-    }
+      
+        return result.lighthouse.categories.seo.score * 100;
+      }
     return result.seoScore || 0;
   }
 
   private calculateAccessibilityScore(result: any): number {
     if (result.lighthouse?.categories?.accessibility) {
-      return result.lighthouse.categories.accessibility.score * 100;
-    }
+      
+        return result.lighthouse.categories.accessibility.score * 100;
+      }
     return result.accessibilityScore || 0;
   }
 
@@ -761,11 +765,12 @@ class TestEngine extends BrowserEventEmitter {
   async stopTest(testId: string): Promise<boolean> {
     const test = this.activeTests.get(testId);
     if (test) {
-      backgroundTestManager.cancelTest(test.backgroundTestId);
+      
+        backgroundTestManager.cancelTest(test.backgroundTestId);
       this.activeTests.delete(testId);
       this.emit('testCancelled', testId);
       return true;
-    }
+      }
     return false;
   }
 

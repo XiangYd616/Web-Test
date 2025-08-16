@@ -211,10 +211,11 @@ export class PerformanceTestCore {
         });
 
         if (response.ok) {
-          const data = await response.json();
+          
+        const data = await response.json();
           if (data.success) {
             return data.data;
-          }
+      }
         }
       } catch (apiError) {
         console.warn('API调用失败，使用客户端分析:', apiError);

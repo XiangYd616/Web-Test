@@ -43,9 +43,10 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
   // 处理数据
   const processedData = useMemo(() => {
     if (!data || data.length === 0) {
-      // 返回空数组，不生成模拟数据
+      
+        // 返回空数组，不生成模拟数据
       return [];
-    }
+      }
 
     // 过滤时间范围
     let filteredData = data;
@@ -65,8 +66,9 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
 
     // 🔧 修复：使用相对时间显示，基于过滤后数据的实际时间范围
     if (filteredData.length === 0) {
-      return [];
-    }
+      
+        return [];
+      }
 
     // 使用过滤后数据的第一个时间点作为相对时间的起点
     const startTime = filteredData[0].timestamp || new Date(filteredData[0].time).getTime();
@@ -1368,8 +1370,9 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
   // 处理实时数据为图表格式
   const chartData = useMemo(() => {
     if (!realTimeData || realTimeData.length === 0) {
-      return [];
-    }
+      
+        return [];
+      }
 
     // 按时间分组数据（每秒一个数据点）
     const groupedData = new Map();

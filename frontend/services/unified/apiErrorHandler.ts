@@ -13,14 +13,15 @@ export const defaultErrorHandler = {
     }
 
     if (error instanceof Error) {
-      return {
+      
+        return {
         code: 'UNKNOWN_ERROR',
         message: error.message || '未知错误',
         timestamp: new Date().toISOString(),
         details: {
           stack: error.stack,
           name: error.name
-        }
+      }
       };
     }
 
@@ -102,24 +103,26 @@ export const defaultErrorHandler = {
    */
   handleNetworkError(error: any): ApiError {
     if (error.name === 'NetworkError' || error.code === 'NETWORK_ERROR') {
-      return {
+      
+        return {
         code: 'NETWORK_ERROR',
         message: '网络连接失败，请检查网络设置',
         timestamp: new Date().toISOString(),
         details: {
           originalError: error.message
-        }
+      }
       };
     }
 
     if (error.name === 'TimeoutError' || error.code === 'TIMEOUT') {
-      return {
+      
+        return {
         code: 'REQUEST_TIMEOUT',
         message: '请求超时，请稍后重试',
         timestamp: new Date().toISOString(),
         details: {
           timeout: error.timeout || 'unknown'
-        }
+      }
       };
     }
 

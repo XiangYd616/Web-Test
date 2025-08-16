@@ -161,13 +161,14 @@ export const SecurityTestHistory = React.forwardRef<
   }));
 
   if (isLoading) {
-    return (
+    
+        return (
       <div className="flex items-center justify-center p-8">
         <RefreshCw className="h-6 w-6 animate-spin text-blue-600 mr-2" />
         <span className="text-gray-600 dark:text-gray-400">加载历史记录...</span>
       </div>
     );
-  }
+      }
 
   return (
     <div className="security-test-history space-y-4">

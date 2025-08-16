@@ -121,10 +121,11 @@ class TestEngineService {
   cancelTest(testId: string): boolean {
     const abortController = this.runningTests.get(testId);
     if (abortController) {
-      abortController.abort();
+      
+        abortController.abort();
       this.runningTests.delete(testId);
       return true;
-    }
+      }
     return false;
   }
 
@@ -410,7 +411,7 @@ class TestEngineService {
    * 生成测试ID
    */
   private generateTestId(): string {
-    return `engine_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `engine_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 }
 

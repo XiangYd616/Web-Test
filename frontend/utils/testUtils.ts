@@ -163,7 +163,8 @@ export class PerformanceTester {
    */
   testMemoryUsage(): PerformanceTestResult | null {
     if ('memory' in performance) {
-      const memory = (performance as any).memory;
+      
+        const memory = (performance as any).memory;
       const usedMB = memory.usedJSHeapSize / 1024 / 1024;
 
       return {
@@ -248,7 +249,8 @@ export class UXTester {
   async testFormValidation(formSelector: string): Promise<UXTestResult> {
     const form = document.querySelector(formSelector) as HTMLFormElement;
     if (!form) {
-      return {
+      
+        return {
         component: 'Form',
         interaction: 'Validation',
         responseTime: -1,

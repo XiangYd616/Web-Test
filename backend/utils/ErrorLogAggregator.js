@@ -527,20 +527,24 @@ class ErrorLogAggregator extends EventEmitter {
    */
   matchesCriteria(logEntry, criteria) {
     if (criteria.level && logEntry.level !== criteria.level) {
-      return false;
-    }
+      
+        return false;
+      }
     
     if (criteria.type && logEntry.type !== criteria.type) {
-      return false;
-    }
+      
+        return false;
+      }
     
     if (criteria.severity && logEntry.severity !== criteria.severity) {
-      return false;
-    }
+      
+        return false;
+      }
     
     if (criteria.userId && logEntry.userId !== criteria.userId) {
-      return false;
-    }
+      
+        return false;
+      }
     
     if (criteria.startTime && new Date(logEntry.timestamp) < new Date(criteria.startTime)) {
       return false;

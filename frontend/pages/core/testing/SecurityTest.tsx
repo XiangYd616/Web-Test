@@ -111,9 +111,10 @@ const SecurityTest: React.FC = () => {
 
   const handleStartTest = async () => {
     if (!config.url) {
-      alert('请输入测试URL');
+      
+        alert('请输入测试URL');
       return;
-    }
+      }
 
     setIsRunning(true);
     setProgress(0);
@@ -125,9 +126,10 @@ const SecurityTest: React.FC = () => {
       const progressInterval = setInterval(() => {
         setProgress(prev => {
           if (prev >= 100) {
-            clearInterval(progressInterval);
+            
+        clearInterval(progressInterval);
             return 100;
-          }
+      }
           return prev + 10;
         });
       }, 500);
@@ -335,12 +337,14 @@ const SecurityTest: React.FC = () => {
 
   const renderResults = () => {
     if (isRunning) {
-      return (
+      
+        return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
           <div className="text-center">
             <LoadingStates
               type="progress"
-              progress={progress}
+              progress={progress
+      }
               message="正在执行安全扫描，请稍候..."
             />
             <div className="mt-4">
@@ -354,12 +358,14 @@ const SecurityTest: React.FC = () => {
     }
 
     if (error) {
-      return (
+      
+        return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
           <div className="text-center text-red-600 dark:text-red-400">
             <AlertTriangle className="w-12 h-12 mx-auto mb-2" />
             <h3 className="text-lg font-semibold mb-2">安全扫描失败</h3>
-            <p className="mb-4">{error}</p>
+            <p className="mb-4">{error
+      }</p>
             <Button variant="primary" onClick={() => { setError(null); handleStartTest(); }}>
               重新扫描
             </Button>
@@ -369,9 +375,11 @@ const SecurityTest: React.FC = () => {
     }
 
     if (result) {
-      return (
+      
+        return (
         <div className="space-y-6">
-          {/* 安全评分概览 */}
+          {/* 安全评分概览 */
+      }
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">

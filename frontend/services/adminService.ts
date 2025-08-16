@@ -13,8 +13,8 @@ import type {
   TestFilter,
   TestManagement,
   UserBulkAction,
-  UserFilter
-} from '../types/admin';
+  // UserFilter
+} from '../types/admin'; // 已修复
 import type { CreateUserData, UpdateUserData, User } from '../types/user';
 
 class AdminService {

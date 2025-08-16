@@ -330,6 +330,7 @@ class BrowserManager {
     try {
       const pageInstance = this.activePages.get(pageKey);
       if (!pageInstance) {
+        
         return false;
       }
       
@@ -357,6 +358,7 @@ class BrowserManager {
       const browserInstance = this.activeBrowsers.get(browserKey);
       
       if (!browserInstance) {
+        
         return false;
       }
       

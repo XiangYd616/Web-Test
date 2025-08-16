@@ -100,7 +100,8 @@ class ErrorService {
 
     // 处理不同类型的错误输入
     if (typeof error === 'string') {
-      return {
+      
+        return {
         id,
         type: ErrorType.UNKNOWN,
         severity: ErrorSeverity.MEDIUM,
@@ -113,7 +114,8 @@ class ErrorService {
     }
 
     if (error instanceof Error) {
-      const type = this.determineErrorType(error);
+      
+        const type = this.determineErrorType(error);
       const severity = this.determineSeverity(error, type);
       
       return {
@@ -132,7 +134,8 @@ class ErrorService {
 
     // 处理API错误响应
     if (error?.response || error?.status) {
-      const status = error.status || error.response?.status;
+      
+        const status = error.status || error.response?.status;
       const message = error.message || error.response?.data?.message || '请求失败';
       
       return {

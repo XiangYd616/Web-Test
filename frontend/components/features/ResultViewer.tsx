@@ -14,8 +14,8 @@ import {
     Eye,
     Filter,
     Share2,
-    TrendingUp
-} from 'lucide-react';
+    // TrendingUp
+} from 'lucide-react'; // 已修复
 import React, { useMemo, useState } from 'react';
 import {
     Badge,
@@ -24,9 +24,8 @@ import {
     Input,
     Modal,
     Select,
-    Table
-} from '../ui/index';
-
+    // Table
+} from '../ui/index'; // 已修复
 // SelectOption and TableColumn types will be defined locally
 import { TestResult } from './TestRunner';
 

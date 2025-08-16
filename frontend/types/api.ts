@@ -486,8 +486,7 @@ export interface SearchResponse extends PaginatedResponse<{
 }> { }
 
 // 重新导出 ApiResponse 以解决导入问题
-export type { ApiResponse } from './common';
-
+// export type { ApiResponse } from './common'; // 已修复
 // 成功响应类型
 export interface ApiSuccessResponse<T = any> extends ApiResponse<T> {
   success: true;

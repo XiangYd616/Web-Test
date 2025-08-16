@@ -139,9 +139,10 @@ class DataCleanupManager {
    */
   async runScheduledCleanup() {
     if (this.isRunning) {
-      console.log('⚠️ 清理任务正在运行中，跳过本次执行');
+      
+        console.log('⚠️ 清理任务正在运行中，跳过本次执行');
       return;
-    }
+      }
 
     try {
       this.isRunning = true;
@@ -575,8 +576,9 @@ class DataCleanupManager {
     }
 
     if (engineType) {
-      return await this.cleanupEngineData(engineType);
-    } else {
+      
+        return await this.cleanupEngineData(engineType);
+      } else {
       return await this.runScheduledCleanup();
     }
   }

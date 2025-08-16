@@ -54,7 +54,8 @@ export class ChromeCompatibilityHelper {
     const supportsCSS = typeof CSS !== 'undefined' && CSS.supports;
 
     if (!supportsCSS) {
-      // 如果CSS.supports不可用，返回默认值
+      
+        // 如果CSS.supports不可用，返回默认值
       return {
         backdropFilter: true,
         grid: true,
@@ -83,8 +84,9 @@ export class ChromeCompatibilityHelper {
   static applyChromeCompatibilityFixes() {
     // 检查是否在浏览器环境中
     if (typeof document === 'undefined' || typeof window === 'undefined') {
-      return;
-    }
+      
+        return;
+      }
 
     if (!this.isChrome()) {
       return;
@@ -266,7 +268,9 @@ export class ChromeCompatibilityHelper {
   static initialize() {
     // 检查是否在浏览器环境中
     if (typeof document === 'undefined' || typeof window === 'undefined') {
-      return { browserInfo: {}, cssSupport: {}, issues: [] as string[], needsFixes: false };
+      
+        return { browserInfo: {
+      }, cssSupport: {}, issues: [] as string[], needsFixes: false };
     }
 
     // 等待DOM加载完成

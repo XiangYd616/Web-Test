@@ -7,8 +7,9 @@ const errorHandler = {
     console.error('Error:', error);
 
     if (res.headersSent) {
-      return next(error);
-    }
+      
+        return next(error);
+      }
 
     res.status(500).json({
       error: 'Internal Server Error',

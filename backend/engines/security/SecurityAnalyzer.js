@@ -330,13 +330,15 @@ class SecurityAnalyzer {
    */
   calculateModuleScore(moduleResults) {
     if (!moduleResults || moduleResults.error) {
-      return 50; // 检测失败给中等分数
-    }
+      
+        return 50; // 检测失败给中等分数
+      }
 
     const vulnerabilities = moduleResults.vulnerabilities || [];
     if (vulnerabilities.length === 0) {
-      return 100; // 无漏洞
-    }
+      
+        return 100; // 无漏洞
+      }
 
     let score = 100;
 
@@ -365,12 +367,14 @@ class SecurityAnalyzer {
    */
   calculateSSLScore(sslResults) {
     if (!sslResults || sslResults.error) {
-      return 50;
-    }
+      
+        return 50;
+      }
 
     if (!sslResults.summary.httpsEnabled) {
-      return 0; // 未启用HTTPS
-    }
+      
+        return 0; // 未启用HTTPS
+      }
 
     return this.calculateModuleScore(sslResults);
   }
@@ -380,13 +384,15 @@ class SecurityAnalyzer {
    */
   calculateHeadersScore(headerResults) {
     if (!headerResults || headerResults.error) {
-      return 50;
-    }
+      
+        return 50;
+      }
 
     // 如果是高级分析结果，使用其评分
     if (headerResults.securityScore !== undefined) {
-      return headerResults.securityScore;
-    }
+      
+        return headerResults.securityScore;
+      }
 
     // 否则使用传统评分方法
     return headerResults.summary?.securityScore || this.calculateModuleScore(headerResults);

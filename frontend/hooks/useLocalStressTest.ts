@@ -205,8 +205,9 @@ export const useLocalStressTest = () => {
    */
   const getStatus = useCallback(async () => {
     if (!isAvailable || !window.environment?.localStressTest?.getStatus) {
-      return null;
-    }
+      
+        return null;
+      }
 
     try {
       const status = await window.environment.localStressTest.getStatus();

@@ -19,7 +19,8 @@ const AdminGuard: React.FC<AdminGuardProps> = ({
 
   // 加载中状态
   if (isLoading) {
-    return (
+    
+        return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
@@ -27,11 +28,13 @@ const AdminGuard: React.FC<AdminGuardProps> = ({
         </div>
       </div>
     );
-  }
+      }
 
   // 未登录用户重定向到登录页
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    
+        return <Navigate to="/login" state={{ from: location
+      }} replace />;
   }
 
   // 检查管理员权限
@@ -39,9 +42,11 @@ const AdminGuard: React.FC<AdminGuardProps> = ({
   const hasAdminPermission = user?.permissions?.includes('admin:access');
 
   if (!isAdmin && !hasAdminPermission) {
-    // 如果不显示回退页面，直接重定向
+    
+        // 如果不显示回退页面，直接重定向
     if (!showFallback) {
-      return <Navigate to={fallbackPath} replace />;
+      return <Navigate to={fallbackPath
+      } replace />;
     }
 
     // 显示权限不足页面

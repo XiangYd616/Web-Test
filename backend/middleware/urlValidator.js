@@ -50,8 +50,9 @@ function isValidDomain(hostname) {
   // 检查是否有有效的顶级域名
   const parts = hostname.split('.');
   if (parts.length < 2) {
-    return false;
-  }
+    
+        return false;
+      }
 
   const tld = parts[parts.length - 1];
   return tld.length >= 2 && /^[a-zA-Z]+$/.test(tld);
@@ -105,15 +106,17 @@ async function validateURL(urlString, options = {}) {
 
   // 基本格式检查
   if (!urlString || typeof urlString !== 'string') {
-    result.errors.push('请输入有效的URL');
+    
+        result.errors.push('请输入有效的URL');
     return result;
-  }
+      }
 
   const trimmedUrl = urlString.trim();
   if (!trimmedUrl) {
-    result.errors.push('URL不能为空');
+    
+        result.errors.push('URL不能为空');
     return result;
-  }
+      }
 
   // 自动添加协议
   let processedUrl = trimmedUrl;
@@ -140,15 +143,17 @@ async function validateURL(urlString, options = {}) {
 
   // HTTPS要求检查
   if (opts.requireHTTPS && urlObj.protocol !== 'https:') {
-    result.errors.push('必须使用HTTPS协议');
+    
+        result.errors.push('必须使用HTTPS协议');
     return result;
-  }
+      }
 
   // 主机名检查
   if (!urlObj.hostname) {
-    result.errors.push('缺少有效的主机名');
+    
+        result.errors.push('缺少有效的主机名');
     return result;
-  }
+      }
 
   // localhost检查
   if (!opts.allowLocalhost && (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1')) {
@@ -169,11 +174,12 @@ async function validateURL(urlString, options = {}) {
 
   // 端口检查
   if (urlObj.port) {
-    const port = parseInt(urlObj.port);
+    
+        const port = parseInt(urlObj.port);
     if (port < 1 || port > 65535) {
       result.errors.push('端口号无效');
       return result;
-    }
+      }
   }
 
   // 如果到这里没有错误，基本验证通过
@@ -210,7 +216,8 @@ function validateURLMiddleware(options = {}) {
     const targetUrl = url || baseUrl;
 
     if (!targetUrl) {
-      return res.status(400).json({
+      
+        return res.status(400).json({
         success: false,
         message: 'URL或baseUrl是必填的',
         error: 'MISSING_URL'
@@ -221,6 +228,7 @@ function validateURLMiddleware(options = {}) {
       const validationResult = await validateURL(targetUrl, options);
 
       if (!validationResult.isValid) {
+        
         return res.status(400).json({
           success: false,
           message: '无效的URL格式',
@@ -228,7 +236,7 @@ function validateURLMiddleware(options = {}) {
           warnings: validationResult.warnings,
           suggestions: validationResult.suggestions,
           error: 'INVALID_URL'
-        });
+      });
       }
 
       // 将验证结果添加到请求对象中
@@ -282,7 +290,8 @@ function validateAPIURLMiddleware(options = {}) {
     console.log('🔍 解析结果:', { testUrl, hasEndpoints: !!endpoints, configKeys: Object.keys(config) });
 
     if (!testUrl) {
-      console.log('❌ 缺少URL参数');
+      
+        console.log('❌ 缺少URL参数');
       return res.status(400).json({
         success: false,
         message: 'URL或baseUrl是必填的',
@@ -294,6 +303,7 @@ function validateAPIURLMiddleware(options = {}) {
       const validationResult = await validateURL(testUrl, options);
 
       if (!validationResult.isValid) {
+        
         console.log('❌ URL格式无效:', testUrl, validationResult.errors);
         return res.status(400).json({
           success: false,
@@ -302,7 +312,7 @@ function validateAPIURLMiddleware(options = {}) {
           warnings: validationResult.warnings,
           suggestions: validationResult.suggestions,
           error: 'INVALID_URL'
-        });
+      });
       }
 
       console.log('✅ URL格式验证通过:', testUrl);
@@ -339,12 +349,16 @@ function validateURLSync(urlString, options = {}) {
   const opts = { ...DEFAULT_OPTIONS, ...options };
 
   if (!urlString || typeof urlString !== 'string') {
-    return { isValid: false, error: '请输入有效的URL' };
+    
+        return { isValid: false, error: '请输入有效的URL'
+      };
   }
 
   const trimmedUrl = urlString.trim();
   if (!trimmedUrl) {
-    return { isValid: false, error: 'URL不能为空' };
+    
+        return { isValid: false, error: 'URL不能为空'
+      };
   }
 
   // 自动添加协议
@@ -363,11 +377,15 @@ function validateURLSync(urlString, options = {}) {
     }
 
     if (opts.requireHTTPS && urlObj.protocol !== 'https:') {
-      return { isValid: false, error: '必须使用HTTPS协议' };
+      
+        return { isValid: false, error: '必须使用HTTPS协议'
+      };
     }
 
     if (!urlObj.hostname) {
-      return { isValid: false, error: '缺少有效的主机名' };
+      
+        return { isValid: false, error: '缺少有效的主机名'
+      };
     }
 
     if (!opts.allowLocalhost && (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1')) {

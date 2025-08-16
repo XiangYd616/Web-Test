@@ -184,9 +184,10 @@ export async function validateUrlEnhanced(
 
   // 基本检查
   if (!url || typeof url !== 'string') {
-    result.errors.push('请输入有效的URL');
+    
+        result.errors.push('请输入有效的URL');
     return result;
-  }
+      }
 
   if (!url.trim()) {
     result.errors.push('URL不能为空');
@@ -201,22 +202,25 @@ export async function validateUrlEnhanced(
   // 格式验证
   const formatCheck = validateUrlFormat(fixed);
   if (!formatCheck.isValid) {
-    result.errors.push(formatCheck.error || 'URL格式无效');
+    
+        result.errors.push(formatCheck.error || 'URL格式无效');
     return result;
-  }
+      }
 
   const urlObj = formatCheck.urlObj!;
 
   // 协议检查
   if (!opts.allowHttp && urlObj.protocol === 'http:') {
-    result.errors.push('不允许使用HTTP协议，请使用HTTPS');
+    
+        result.errors.push('不允许使用HTTP协议，请使用HTTPS');
     return result;
-  }
+      }
 
   if (opts.requireHttps && urlObj.protocol !== 'https:') {
-    result.errors.push('必须使用HTTPS协议');
+    
+        result.errors.push('必须使用HTTPS协议');
     return result;
-  }
+      }
 
   // 主机名检查
   if (!opts.allowLocalhost && (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1')) {
@@ -257,9 +261,10 @@ export function validateUrlSync(url: string, options: URLValidationOptions = {})
   };
 
   if (!url || typeof url !== 'string') {
-    result.errors.push('请输入有效的URL');
+    
+        result.errors.push('请输入有效的URL');
     return result;
-  }
+      }
 
   if (!url.trim()) {
     result.errors.push('URL不能为空');
@@ -272,22 +277,25 @@ export function validateUrlSync(url: string, options: URLValidationOptions = {})
 
   const formatCheck = validateUrlFormat(fixed);
   if (!formatCheck.isValid) {
-    result.errors.push(formatCheck.error || 'URL格式无效');
+    
+        result.errors.push(formatCheck.error || 'URL格式无效');
     return result;
-  }
+      }
 
   const urlObj = formatCheck.urlObj!;
 
   // 基本验证检查
   if (!opts.allowHttp && urlObj.protocol === 'http:') {
-    result.errors.push('不允许使用HTTP协议');
+    
+        result.errors.push('不允许使用HTTP协议');
     return result;
-  }
+      }
 
   if (opts.requireHttps && urlObj.protocol !== 'https:') {
-    result.errors.push('必须使用HTTPS协议');
+    
+        result.errors.push('必须使用HTTPS协议');
     return result;
-  }
+      }
 
   if (!opts.allowLocalhost && (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1')) {
     result.errors.push('不允许使用localhost地址');

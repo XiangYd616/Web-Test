@@ -7,7 +7,7 @@ const { SpecializedStorageManager } = require('./SpecializedStorageManager');
 const { DataArchiveManager } = require('./DataArchiveManager');
 const { DataCleanupManager } = require('./DataCleanupManager');
 
-class UnifiedStorageService {
+class StorageService {
   constructor(config = {}) {
     this.config = {
       storage: config.storage || {},
@@ -40,6 +40,7 @@ class UnifiedStorageService {
    */
   async initialize() {
     if (this.isInitialized) {
+
       return;
     }
 
@@ -468,9 +469,9 @@ class UnifiedStorageService {
 }
 
 // 创建全局实例
-const unifiedStorageService = new UnifiedStorageService();
+const storageService = new StorageService();
 
 module.exports = {
-  UnifiedStorageService,
-  unifiedStorageService
+  StorageService,
+  storageService
 };

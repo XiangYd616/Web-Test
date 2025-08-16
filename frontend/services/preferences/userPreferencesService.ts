@@ -416,11 +416,12 @@ class UserPreferencesService {
       });
 
       if (response.ok) {
+        
         const result = await response.json();
         if (result.success) {
           this.notifyListeners();
           return true;
-        }
+      }
       }
 
       // 即使服务器保存失败，本地保存成功也算成功
@@ -491,8 +492,10 @@ class UserPreferencesService {
     try {
       const stored = localStorage.getItem(this.localStorageKey);
       if (stored) {
+        
         const parsed = JSON.parse(stored);
-        return { ...this.getDefaultPreferences(), ...parsed };
+        return { ...this.getDefaultPreferences(), ...parsed
+      };
       }
     } catch (error) {
       console.warn('从本地存储加载偏好设置失败:', error);

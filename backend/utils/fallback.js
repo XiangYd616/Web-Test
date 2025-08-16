@@ -33,6 +33,7 @@ class FallbackHandler {
       const item = this.memoryCache.get(key);
       
       if (!item) {
+        
         return null;
       }
       
@@ -97,6 +98,7 @@ class FallbackHandler {
       const item = this.memoryCache.get(key);
       
       if (!item) {
+        
         return false;
       }
       
@@ -187,6 +189,7 @@ class FallbackHandler {
       // 先尝试从内存缓存获取
       const cached = await this.memoryGet(cacheKey);
       if (cached !== null) {
+        
         return cached;
       }
       
@@ -212,6 +215,7 @@ class FallbackHandler {
       // 先尝试从内存缓存获取
       const cached = await this.memoryGet(cacheKey);
       if (cached !== null) {
+        
         return cached;
       }
       
@@ -236,9 +240,10 @@ class FallbackHandler {
     const cacheKey = `session_${sessionId}`;
     
     if (sessionData !== null) {
-      // 设置会话数据
+      
+        // 设置会话数据
       return await this.memorySet(cacheKey, sessionData, 1800000); // 30分钟
-    } else {
+      } else {
       // 获取会话数据
       return await this.memoryGet(cacheKey);
     }
@@ -260,7 +265,8 @@ class FallbackHandler {
     
     // 检查是否超过限制
     if (requests.length >= limit) {
-      return {
+      
+        return {
         allowed: false,
         remaining: 0,
         resetTime: Math.min(...requests) + window

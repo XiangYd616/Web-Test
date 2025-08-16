@@ -88,8 +88,10 @@ const RealTimeMonitoring: React.FC<RealTimeMonitoringProps> = ({
     const statusIcon = getStatusIcon(value, thresholds);
 
     if (compactMode) {
-      return (
-        <div className={`flex items-center gap-2 p-2 rounded border ${statusColor}`}>
+      
+        return (
+        <div className={`flex items-center gap-2 p-2 rounded border ${statusColor
+      }`}>
           {icon}
           <div className="flex-1 min-w-0">
             <div className="text-xs font-medium truncate">{title}</div>

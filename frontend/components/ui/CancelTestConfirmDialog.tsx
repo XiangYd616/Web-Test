@@ -56,9 +56,10 @@ const CancelTestConfirmDialog: React.FC<CancelTestConfirmDialogProps> = ({
 
     // 🔧 修复：直接使用实际配置，如果没有配置说明测试有问题
     if (!testProgress.totalDuration || testProgress.totalDuration <= 0) {
-      console.error('测试配置错误：无法获取总测试时长');
+      
+        console.error('测试配置错误：无法获取总测试时长');
       return 0; // 配置错误时返回0%
-    }
+      }
 
     // 基于时间计算进度：已运行时间 / 总测试时间
     const timeProgress = (testProgress.duration / testProgress.totalDuration) * 100;

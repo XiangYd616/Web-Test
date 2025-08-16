@@ -82,7 +82,8 @@ const ImportExport: React.FC = () => {
     const processInterval = setInterval(() => {
       setImportTasks(prev => prev.map(task => {
         if (task.id === taskId && task.status === 'processing') {
-          const newProgress = Math.min(task.progress + Math.random() * 15, 100);
+          
+        const newProgress = Math.min(task.progress + Math.random() * 15, 100);
           if (newProgress >= 100) {
             clearInterval(processInterval);
             // 完成处理
@@ -93,7 +94,7 @@ const ImportExport: React.FC = () => {
               progress: 100,
               recordsImported: success ? Math.floor(Math.random() * 100) + 10 : undefined,
               errors: success ? undefined : ['数据格式不正确', '缺少必需字段']
-            };
+      };
           }
           return { ...task, progress: newProgress };
         }
@@ -145,7 +146,8 @@ const ImportExport: React.FC = () => {
       const exportInterval = setInterval(() => {
         setExportTasks(prev => prev.map(task => {
           if (task.id === taskId && task.status === 'exporting') {
-            const newProgress = Math.min(task.progress + Math.random() * 10, 100);
+            
+        const newProgress = Math.min(task.progress + Math.random() * 10, 100);
             if (newProgress >= 100) {
               clearInterval(exportInterval);
               return {
@@ -153,7 +155,7 @@ const ImportExport: React.FC = () => {
                 status: 'completed',
                 progress: 100,
                 downloadUrl: '#'
-              };
+      };
             }
             return { ...task, progress: newProgress };
           }

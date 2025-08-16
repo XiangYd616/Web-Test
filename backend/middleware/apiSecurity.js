@@ -343,8 +343,9 @@ class ApiSecurity {
     const cacheKey = `api_key_${apiKey}`;
     const cached = await cacheManager.get(cacheKey);
     if (cached !== null) {
-      return cached;
-    }
+      
+        return cached;
+      }
 
     // 这里应该查询数据库验证API密钥
     // 目前返回模拟结果

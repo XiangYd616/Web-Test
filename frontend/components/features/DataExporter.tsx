@@ -12,9 +12,8 @@ import {
     FileSpreadsheet,
     FileText,
     Filter,
-    Settings
-} from 'lucide-react';
-import React, { useCallback, useState } from 'react';
+} from 'lucide-react'; // 已修复
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNotification } from '../../hooks/useNotification';
 import {
     Badge,
@@ -24,9 +23,7 @@ import {
     Input,
     Modal,
     ProgressBar,
-    Select
-} from '../ui/index';
-
+} from '../ui/index'; // 已修复
 // SelectOption type will be defined locally
 
 // 导出格式类型

@@ -227,7 +227,9 @@ class PasswordSecurityService {
       );
 
       if (userResult.rows.length === 0) {
-        return { success: false, message: '用户不存在' };
+        
+        return { success: false, message: '用户不存在'
+      };
       }
 
       const user = userResult.rows[0];
@@ -235,7 +237,9 @@ class PasswordSecurityService {
       // 验证当前密码
       const isCurrentPasswordValid = await this.verifyPassword(currentPassword, user.password_hash);
       if (!isCurrentPasswordValid) {
-        return { success: false, message: '当前密码错误' };
+        
+        return { success: false, message: '当前密码错误'
+      };
       }
 
       // 验证新密码强度
@@ -245,19 +249,22 @@ class PasswordSecurityService {
       });
 
       if (!strengthCheck.isValid) {
+        
         return {
           success: false,
           message: '新密码不符合安全要求',
           errors: strengthCheck.errors
-        };
+      };
       }
 
       // 检查密码历史
       const isReused = await this.checkPasswordHistory(userId, newPassword);
       if (isReused) {
+        
         return {
           success: false,
-          message: `新密码不能与最近${PASSWORD_CONFIG.preventReuse}次使用的密码相同`
+          message: `新密码不能与最近${PASSWORD_CONFIG.preventReuse
+      }次使用的密码相同`
         };
       }
 
@@ -307,8 +314,9 @@ class PasswordSecurityService {
       for (const row of result.rows) {
         const isMatch = await this.verifyPassword(newPassword, row.password_hash);
         if (isMatch) {
-          return true;
-        }
+          
+        return true;
+      }
       }
 
       return false;
@@ -454,12 +462,14 @@ class PasswordSecurityService {
       );
 
       if (result.rows.length === 0) {
+        
         return false;
       }
 
       const { locked_until } = result.rows[0];
       
       if (!locked_until) {
+        
         return false;
       }
 
@@ -467,6 +477,7 @@ class PasswordSecurityService {
       const lockExpiry = new Date(locked_until);
 
       if (now >= lockExpiry) {
+        
         // 锁定已过期，自动解锁
         await this.resetLoginAttempts(userId);
         return false;
@@ -497,8 +508,10 @@ class PasswordSecurityService {
       );
 
       if (userResult.rows.length === 0) {
+        
         // 为了安全，即使用户不存在也返回成功
-        return { success: true, message: '如果邮箱存在，重置链接已发送' };
+        return { success: true, message: '如果邮箱存在，重置链接已发送'
+      };
       }
 
       const user = userResult.rows[0];
@@ -543,7 +556,9 @@ class PasswordSecurityService {
       `, [token]);
 
       if (result.rows.length === 0) {
-        return { valid: false, message: '重置令牌无效或已过期' };
+        
+        return { valid: false, message: '重置令牌无效或已过期'
+      };
       }
 
       const tokenData = result.rows[0];
@@ -570,7 +585,9 @@ class PasswordSecurityService {
       // 验证令牌
       const tokenValidation = await this.validatePasswordResetToken(token);
       if (!tokenValidation.valid) {
-        return { success: false, message: tokenValidation.message };
+        
+        return { success: false, message: tokenValidation.message
+      };
       }
 
       const { userId, email, username } = tokenValidation;
@@ -578,19 +595,22 @@ class PasswordSecurityService {
       // 验证新密码强度
       const strengthCheck = this.validatePasswordStrength(newPassword, { username, email });
       if (!strengthCheck.isValid) {
+        
         return {
           success: false,
           message: '新密码不符合安全要求',
           errors: strengthCheck.errors
-        };
+      };
       }
 
       // 检查密码历史
       const isReused = await this.checkPasswordHistory(userId, newPassword);
       if (isReused) {
+        
         return {
           success: false,
-          message: `新密码不能与最近${PASSWORD_CONFIG.preventReuse}次使用的密码相同`
+          message: `新密码不能与最近${PASSWORD_CONFIG.preventReuse
+      }次使用的密码相同`
         };
       }
 

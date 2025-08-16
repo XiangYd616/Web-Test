@@ -164,10 +164,11 @@ class ApiDocumentationService {
       const routeInfo = this.apiRoutes.get(routeKey);
 
       if (!routeInfo) {
+        
         return {
           success: false,
           error: '路由不存在'
-        };
+      };
       }
 
       return {

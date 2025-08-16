@@ -251,7 +251,8 @@ export class ApiErrorHandler {
     
     // 网络错误
     if (!response && request) {
-      const errorInfo = ERROR_MESSAGES['NETWORK_ERROR'];
+      
+        const errorInfo = ERROR_MESSAGES['NETWORK_ERROR'];
       return {
         code: 'NETWORK_ERROR',
         message: errorInfo.message,
@@ -262,14 +263,15 @@ export class ApiErrorHandler {
           ...context,
           url: error.config?.url,
           method: error.config?.method?.toUpperCase()
-        },
+      },
         originalError: error
       };
     }
     
     // 超时错误
     if (code === 'ECONNABORTED') {
-      const errorInfo = ERROR_MESSAGES['TIMEOUT_ERROR'];
+      
+        const errorInfo = ERROR_MESSAGES['TIMEOUT_ERROR'];
       return {
         code: 'TIMEOUT_ERROR',
         message: errorInfo.message,
@@ -283,8 +285,9 @@ export class ApiErrorHandler {
     
     // HTTP状态码错误
     if (response) {
-      return this.processHttpStatusError(response, context, error);
-    }
+      
+        return this.processHttpStatusError(response, context, error);
+      }
     
     // 其他错误
     const errorInfo = ERROR_MESSAGES['UNKNOWN_ERROR'];

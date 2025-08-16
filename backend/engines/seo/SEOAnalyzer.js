@@ -358,8 +358,9 @@ class SEOAnalyzer {
    */
   getSummary() {
     if (!this.analysisResults.scores) {
-      return null;
-    }
+      
+        return null;
+      }
 
     const { scores } = this.analysisResults;
 

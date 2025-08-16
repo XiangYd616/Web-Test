@@ -300,7 +300,9 @@ class DataManagementService {
       const result = await this.executeQuery('SELECT 1 as health_check', [], 'Health check');
 
       if (result.rows.length > 0) {
-        return this.handleSuccess({ status: 'healthy' }, 'Database connection is healthy');
+        
+        return this.handleSuccess({ status: 'healthy'
+      }, 'Database connection is healthy');
       } else {
         throw new Error('No response from database');
       }

@@ -86,13 +86,15 @@ const extractToken = (req) => {
   
   // 从Cookie提取（可选）
   if (req.cookies && req.cookies.token) {
-    return req.cookies.token;
-  }
+    
+        return req.cookies.token;
+      }
   
   // 从查询参数提取（仅用于特殊情况，如WebSocket）
   if (req.query && req.query.token) {
-    return req.query.token;
-  }
+    
+        return req.query.token;
+      }
   
   return null;
 };
@@ -122,8 +124,9 @@ const authMiddleware = async (req, res, next) => {
     const token = extractToken(req);
     
     if (!token) {
-      return res.unauthorized('缺少认证令牌');
-    }
+      
+        return res.unauthorized('缺少认证令牌');
+      }
     
     // 验证token
     let decoded;
@@ -131,8 +134,10 @@ const authMiddleware = async (req, res, next) => {
       decoded = verifyToken(token);
     } catch (error) {
       if (error.message === 'TOKEN_EXPIRED') {
+        
         return res.error(ERROR_CODES.TOKEN_EXPIRED, '认证令牌已过期', null, 401);
       } else if (error.message === 'TOKEN_INVALID') {
+        
         return res.error(ERROR_CODES.TOKEN_INVALID, '无效的认证令牌', null, 401);
       } else {
         return res.unauthorized('令牌验证失败');
@@ -143,13 +148,15 @@ const authMiddleware = async (req, res, next) => {
     const user = await getUserById(decoded.id);
     
     if (!user) {
-      return res.error(ERROR_CODES.USER_NOT_FOUND, '用户不存在或已被禁用', null, 401);
-    }
+      
+        return res.error(ERROR_CODES.USER_NOT_FOUND, '用户不存在或已被禁用', null, 401);
+      }
     
     // 检查邮箱验证状态
     if (!user.email_verified && process.env.REQUIRE_EMAIL_VERIFICATION === 'true') {
-      return res.error(ERROR_CODES.EMAIL_NOT_VERIFIED, '请先验证邮箱', null, 401);
-    }
+      
+        return res.error(ERROR_CODES.EMAIL_NOT_VERIFIED, '请先验证邮箱', null, 401);
+      }
     
     // 将用户信息添加到请求对象
     req.user = user;
@@ -197,8 +204,9 @@ const optionalAuthMiddleware = async (req, res, next) => {
 const requireRole = (...roles) => {
   return (req, res, next) => {
     if (!req.user) {
-      return res.unauthorized('需要认证');
-    }
+      
+        return res.unauthorized('需要认证');
+      }
     
     if (!roles.includes(req.user.role)) {
       return res.error(
@@ -219,8 +227,9 @@ const requireRole = (...roles) => {
 const requirePlan = (...plans) => {
   return (req, res, next) => {
     if (!req.user) {
-      return res.unauthorized('需要认证');
-    }
+      
+        return res.unauthorized('需要认证');
+      }
     
     if (!plans.includes(req.user.plan)) {
       return res.error(
@@ -240,14 +249,17 @@ const requirePlan = (...plans) => {
  */
 const requireActiveUser = (req, res, next) => {
   if (!req.user) {
-    return res.unauthorized('需要认证');
-  }
+    
+        return res.unauthorized('需要认证');
+      }
   
   if (req.user.status !== 'active') {
-    return res.error(
+    
+        return res.error(
       ERROR_CODES.ACCOUNT_LOCKED,
       '账户已被锁定或禁用',
-      { status: req.user.status },
+      { status: req.user.status
+      },
       403
     );
   }

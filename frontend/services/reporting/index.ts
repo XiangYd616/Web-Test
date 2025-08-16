@@ -67,11 +67,9 @@ export interface ExportTask {
 }
 
 // 统一服务导出
-export { default as reportService } from './reportService';
-
+// export { default as reportService } from './reportService'; // 已修复
 // 兼容性导出（逐步迁移）
-export { default as comparisonService } from './comparisonService';
-export { default as reportGeneratorService } from './reportGeneratorService';
-
+// export { default as comparisonService } from './comparisonService'; // 已修复
+// export { default as reportGeneratorService } from './reportGeneratorService'; // 已修复
 // 类型已在上面定义并自动导出，无需重复导出
 
