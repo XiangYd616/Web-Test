@@ -2,11 +2,11 @@
  * Input组件Storybook文档
  */
 
-import {action} from '@storybook/addon-actions';
+import { action } from '@storybook/addon-actions';
 import type { Meta, StoryObj } from '@storybook/react';
-import {Lock, Mail, Phone, Search, User} from 'lucide-react';
-import {ThemeProvider} from '../../../contexts/ThemeContext';
-import {Input, NumberInput, PasswordInput, SearchInput, Select, Textarea} from '../Input';
+import { Lock, Mail, Phone, Search, User } from 'lucide-react';
+import { ThemeProvider } from '../../../contexts/ThemeContext';
+import { Input, NumberInput, PasswordInput, SearchInput, Select, Textarea } from '../Input';
 
 const meta: Meta<typeof Input> = {
     title: 'UI组件/Input',

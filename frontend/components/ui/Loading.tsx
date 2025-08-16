@@ -1,6 +1,6 @@
 import React from 'react';
-import {Loader2} from 'lucide-react';
-import {cn} from '../../utils/cn';
+import { Loader2 } from 'lucide-react';
+import { cn } from '../../utils/cn';
 
 // 加载类型
 export type LoadingType = 'spinner' | 'dots' | 'pulse' | 'bars' | 'ring' | 'wave';

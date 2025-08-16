@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import {useDevicePerformance, useLazyImage, useNetworkStatus} from '../../hooks/usePerformanceOptimization';
+import { useDevicePerformance, useLazyImage, useNetworkStatus } from '../../hooks/usePerformanceOptimization';
 
 interface ImageProps {
     src: string;
@@ -133,7 +133,7 @@ const Image: React.FC<ImageProps> = ({
 
     // 占位符样式
     const placeholderStyle: React.CSSProperties = {
-        backgroundColor: '#f3f4f6',
+        backgroundColor: 'var(--color-gray-100)',
         backgroundImage: blurDataURL ? `url(${blurDataURL})` : undefined,
         backgroundSize: 'cover',
         backgroundPosition: 'center',

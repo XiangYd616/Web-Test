@@ -1,5 +1,5 @@
 import React from 'react';
-import {Play, Pause, Square, Clock, Activity, AlertCircle} from 'lucide-react';
+import { Play, Pause, Square, Clock, Activity, AlertCircle } from 'lucide-react';
 
 interface TestProgressPanelProps {
   testType: string;

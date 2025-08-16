@@ -1,5 +1,5 @@
 import React from 'react';
-import {cn} from '../../utils/cn';
+import { cn } from '../../utils/cn';
 
 interface ProgressBarProps {
   /** 进度值 (0-100) */
@@ -116,8 +116,8 @@ export const CircularProgressBar: React.FC<CircularProgressBarProps> = ({
   value,
   size = 120,
   strokeWidth = 8,
-  color = '#3b82f6',
-  backgroundColor = '#374151',
+  color = 'var(--color-primary)',
+  backgroundColor = 'var(--color-gray-700)',
   showPercentage = true,
   className
 }) => {

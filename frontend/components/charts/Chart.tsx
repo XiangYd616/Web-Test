@@ -39,10 +39,10 @@ const initializeChartJS = async () => {
 // 现代化图表配色方案
 export const chartColors = {
   primary: '#4f46e5',
-  success: '#10b981',
-  warning: '#f59e0b',
-  error: '#ef4444',
-  info: '#3b82f6',
+  success: 'var(--color-success)',
+  warning: 'var(--color-warning)',
+  error: 'var(--color-danger)',
+  info: 'var(--color-primary)',
   purple: '#8b5cf6',
   cyan: '#06b6d4',
   pink: '#ec4899'
@@ -64,7 +64,7 @@ const defaultOptions = {
     },
     tooltip: {
       backgroundColor: '#2a2f3e',
-      titleColor: '#ffffff',
+      titleColor: 'var(--color-white)',
       bodyColor: '#b4b7c1',
       borderColor: '#3a3f4e',
       borderWidth: 1,
@@ -234,7 +234,7 @@ export const DoughnutChart: React.FC<DoughnutChartProps> = ({
       },
       tooltip: {
         backgroundColor: '#2a2f3e',
-        titleColor: '#ffffff',
+        titleColor: 'var(--color-white)',
         bodyColor: '#b4b7c1',
         borderColor: '#3a3f4e',
         borderWidth: 1,

@@ -1,18 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart3, TrendingUp, Users, Globe, Clock, AlertCircle } from 'lucide-react';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  // ArcElement,
-} from 'chart.js'; // 已修复
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, // ArcElement,  } from 'chart.js'; // 已修复
 ChartJS.register(
   CategoryScale,
   LinearScale,

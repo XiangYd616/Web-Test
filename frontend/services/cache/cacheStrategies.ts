@@ -5,7 +5,7 @@ import { handleAsyncError } from '../utils/errorHandler';
  * 版本: v1.0.0
  */
 
-import {CacheStrategy} from './cacheManager';
+import { CacheStrategy } from './cacheManager';
 
 // 数据类型枚举
 export enum DataType {
@@ -377,4 +377,4 @@ export const CacheKeys = {
 };
 
 // 导入缓存管理器（避免循环依赖）
-import {cacheManager} from './cacheManager';
+import { cacheManager } from './cacheManager';

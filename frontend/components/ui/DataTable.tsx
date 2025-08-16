@@ -1,5 +1,5 @@
 import React from 'react';
-import {ChevronDown, ChevronUp, SortAsc} from 'lucide-react';
+import { ChevronDown, ChevronUp, SortAsc } from 'lucide-react';
 
 import '../../styles/components.css';
 

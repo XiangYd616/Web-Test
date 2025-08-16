@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import {TestProgress, TestStatus, TestType} from '../../types/testConfig';
+import { TestProgress, TestStatus, TestType } from '../../types/testConfig';
 
 interface RealTimeTestProgressProps {
   testId: string;

@@ -1,6 +1,6 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import backgroundTestManager from '../services/testing/backgroundTestManager.ts';
-import {testAPI} from '../services/testing/testService';
+import { testAPI } from '../services/testing/testService';
 
 export interface StressTestConfig {
   url: string;

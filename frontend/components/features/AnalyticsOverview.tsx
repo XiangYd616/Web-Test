@@ -1,9 +1,9 @@
-import {Activity, AlertTriangle, BarChart3, Calendar, CheckCircle, Download, Filter, Globe, RefreshCw, TrendingDown, TrendingUp} from 'lucide-react';
+import { Activity, AlertTriangle, BarChart3, Calendar, CheckCircle, Download, Filter, Globe, RefreshCw, TrendingDown, TrendingUp } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import {Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
-import {AnalyticsData, dataAnalysisService} from '../../services/data/dataAnalysisService';
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { AnalyticsData, dataAnalysisService } from '../../services/data/dataAnalysisService';
 
-const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
+const COLORS = ['var(--color-primary)', 'var(--color-success)', 'var(--color-warning)', 'var(--color-danger)', '#8B5CF6'];
 
 interface StatCardProps {
   title: string;
@@ -359,20 +359,20 @@ const AnalyticsOverview: React.FC = () => {
           <h3 className="text-lg font-semibold text-white mb-4">每日测试趋势</h3>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={analyticsData.dailyTests}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
               <XAxis
                 dataKey="date"
-                stroke="#9CA3AF"
+                stroke="var(--color-gray-400)"
                 fontSize={12}
                 tickFormatter={(value) => new Date(value).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}
               />
-              <YAxis stroke="#9CA3AF" fontSize={12} />
+              <YAxis stroke="var(--color-gray-400)" fontSize={12} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#1F2937',
-                  border: '1px solid #374151',
+                  backgroundColor: 'var(--color-gray-800)',
+                  border: '1px solid var(--color-gray-700)',
                   borderRadius: '8px',
-                  color: '#F9FAFB'
+                  color: 'var(--color-gray-50)'
                 }}
                 labelFormatter={(value) => new Date(value).toLocaleDateString('zh-CN')}
               />
@@ -380,8 +380,8 @@ const AnalyticsOverview: React.FC = () => {
                 type="monotone"
                 dataKey="count"
                 stackId="1"
-                stroke="#3B82F6"
-                fill="#3B82F6"
+                stroke="var(--color-primary)"
+                fill="var(--color-primary)"
                 fillOpacity={0.6}
                 name="总测试"
               />
@@ -389,8 +389,8 @@ const AnalyticsOverview: React.FC = () => {
                 type="monotone"
                 dataKey="successCount"
                 stackId="2"
-                stroke="#10B981"
-                fill="#10B981"
+                stroke="var(--color-success)"
+                fill="var(--color-success)"
                 fillOpacity={0.6}
                 name="成功测试"
               />
@@ -419,10 +419,10 @@ const AnalyticsOverview: React.FC = () => {
               </Pie>
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#1F2937',
-                  border: '1px solid #374151',
+                  backgroundColor: 'var(--color-gray-800)',
+                  border: '1px solid var(--color-gray-700)',
                   borderRadius: '8px',
-                  color: '#F9FAFB'
+                  color: 'var(--color-gray-50)'
                 }}
               />
             </PieChart>
@@ -434,29 +434,29 @@ const AnalyticsOverview: React.FC = () => {
           <h3 className="text-lg font-semibold text-white mb-4">性能趋势</h3>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={analyticsData.performanceTrends}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
               <XAxis
                 dataKey="date"
-                stroke="#9CA3AF"
+                stroke="var(--color-gray-400)"
                 fontSize={12}
                 tickFormatter={(value) => new Date(value).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}
               />
-              <YAxis stroke="#9CA3AF" fontSize={12} />
+              <YAxis stroke="var(--color-gray-400)" fontSize={12} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#1F2937',
-                  border: '1px solid #374151',
+                  backgroundColor: 'var(--color-gray-800)',
+                  border: '1px solid var(--color-gray-700)',
                   borderRadius: '8px',
-                  color: '#F9FAFB'
+                  color: 'var(--color-gray-50)'
                 }}
                 labelFormatter={(value) => new Date(value).toLocaleDateString('zh-CN')}
               />
               <Line
                 type="monotone"
                 dataKey="avgScore"
-                stroke="#3B82F6"
+                stroke="var(--color-primary)"
                 strokeWidth={2}
-                dot={{ fill: '#3B82F6', strokeWidth: 2, r: 4 }}
+                dot={{ fill: 'var(--color-primary)', strokeWidth: 2, r: 4 }}
                 name="平均分数"
               />
             </LineChart>
@@ -468,18 +468,18 @@ const AnalyticsOverview: React.FC = () => {
           <h3 className="text-lg font-semibold text-white mb-4">分数分布</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={analyticsData.scoreDistribution}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis dataKey="range" stroke="#9CA3AF" fontSize={12} />
-              <YAxis stroke="#9CA3AF" fontSize={12} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
+              <XAxis dataKey="range" stroke="var(--color-gray-400)" fontSize={12} />
+              <YAxis stroke="var(--color-gray-400)" fontSize={12} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#1F2937',
-                  border: '1px solid #374151',
+                  backgroundColor: 'var(--color-gray-800)',
+                  border: '1px solid var(--color-gray-700)',
                   borderRadius: '8px',
-                  color: '#F9FAFB'
+                  color: 'var(--color-gray-50)'
                 }}
               />
-              <Bar dataKey="count" fill="#3B82F6" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="count" fill="var(--color-primary)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

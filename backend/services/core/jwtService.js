@@ -283,15 +283,15 @@ class JwtService {
      */
     async cleanupExpiredTokens(userId = null) {
         try {
-            let query_text = 'DELETE FROM refresh_tokens WHERE expires_at < NOW()';
+            let queryText = 'DELETE FROM refresh_tokens WHERE expires_at < NOW()';
             let params = [];
 
             if (userId) {
-                query_text += ' AND user_id = $1';
+                queryText += ' AND user_id = $1';
                 params.push(userId);
             }
 
-            await query(query_text, params);
+            await query(queryText, params);
         } catch (error) {
             console.error('清理过期令牌失败:', error);
         }

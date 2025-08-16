@@ -3,7 +3,7 @@
  * 处理实时测试进度更新和通信
  */
 
-import {TestProgress, TestResult, TestError} from '../types/testConfig';
+import { TestProgress, TestResult, TestError } from '../types/testConfig';
 
 export interface WebSocketMessage {
   type: 'progress' | 'complete' | 'error' | 'ping' | 'pong';

@@ -4,12 +4,9 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { 
-  Play, Pause, RotateCcw, Wifi, WifiOff, Bell, BellOff,
-  // TrendingUp, Activity, Clock, AlertCircle
-} from 'lucide-react'; // 已修复
+import { Play, Pause, RotateCcw, Wifi, WifiOff, Bell, BellOff, // TrendingUp, Activity, Clock, AlertCircle } from 'lucide-react'; // 已修复
 import TestResults from './TestResults';
-import {createApiUrl} from '../../config/api';
+import { createApiUrl } from '../../config/api';
 
 interface TestResult {
   id: string;

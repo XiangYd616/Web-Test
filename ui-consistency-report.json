@@ -1,11 +1,11 @@
 {
-  "timestamp": "2025-08-16T07:09:54.204Z",
+  "timestamp": "2025-08-16T07:25:41.993Z",
   "summary": {
-    "totalIssues": 11,
+    "totalIssues": 15,
     "categories": {
       "design_system": 1,
       "color_consistency": 0,
-      "responsive_consistency": 9,
+      "responsive_consistency": 13,
       "component_style_consistency": 0,
       "theme_consistency": 1
     }
@@ -74,22 +74,12 @@
       "#00f2fe",
       "#43e97b",
       "#38f9d7",
-      "#3b82f6",
-      "#10b981",
-      "#f59e0b",
-      "#ef4444",
-      "#4b5563",
       "rgba(0, 0, 0, 0.1)",
       "rgba(0, 0, 0, 0.06)",
       "rgba(0, 0, 0, 0.05)",
-      "#2563eb",
-      "#1d4ed8",
       "#dbeafe",
-      "#6b7280",
-      "#059669",
       "#d1fae5",
       "#047857",
-      "#d97706",
       "#fef3c7",
       "#b45309",
       "#fee2e2",
@@ -97,13 +87,25 @@
       "#0891b2",
       "#cffafe",
       "#0e7490",
-      "#e5e7eb",
       "rgba(0, 0, 0, 0.75)",
       "rgba(0, 0, 0, 0.04)",
       "rgba(59, 130, 246, 0.1)",
       "rgba(239, 68, 68, 0.1)",
       "rgba(255, 255, 255, 0.1)",
       "rgba(255, 255, 255, 0.2)",
+      "#000000",
+      "#e5e7eb",
+      "#6b7280",
+      "#4b5563",
+      "#3b82f6",
+      "#2563eb",
+      "#1d4ed8",
+      "#10b981",
+      "#059669",
+      "#f59e0b",
+      "#d97706",
+      "#ef4444",
+      "#0000",
       "#eff6ff",
       "#1e3a8a",
       "#fef2f2",
@@ -150,8 +152,7 @@
       "rgba(59, 130, 246, 0.25)",
       "rgba(239, 68, 68, 0.15)",
       "rgba(239, 68, 68, 0.4)",
-      "#fca5a5",
-      "#000000"
+      "#fca5a5"
     ],
     "spacing": [
       "1rem",
@@ -165,6 +166,8 @@
       "1921px",
       "2561px",
       "640px",
+      "641px",
+      "1025px",
       "480px",
       "360px"
     ]
@@ -174,7 +177,7 @@
       "category": "design_system",
       "type": "too_many_hardcoded_values",
       "file": "project",
-      "message": "硬编码值过多: 66% (434/660)",
+      "message": "硬编码值过多: 38% (340/895)",
       "severity": "medium"
     },
     {
@@ -202,21 +205,42 @@
       "category": "responsive_consistency",
       "type": "too_many_fixed_units",
       "file": "frontend\\styles\\base\\scrollbar.css",
-      "message": "固定单位使用过多，可能影响响应式效果: px(8) vs responsive(0)",
+      "message": "固定单位使用过多，可能影响响应式效果: px(2) vs responsive(0)",
       "severity": "medium"
     },
     {
       "category": "responsive_consistency",
       "type": "too_many_fixed_units",
       "file": "frontend\\styles\\base\\typography.css",
-      "message": "固定单位使用过多，可能影响响应式效果: px(12) vs responsive(0)",
+      "message": "固定单位使用过多，可能影响响应式效果: px(7) vs responsive(2)",
+      "severity": "medium"
+    },
+    {
+      "category": "responsive_consistency",
+      "type": "too_many_fixed_units",
+      "file": "frontend\\styles\\breakpoints.css",
+      "message": "固定单位使用过多，可能影响响应式效果: px(27) vs responsive(1)",
+      "severity": "medium"
+    },
+    {
+      "category": "responsive_consistency",
+      "type": "too_many_fixed_units",
+      "file": "frontend\\styles\\design-system-unified.css",
+      "message": "固定单位使用过多，可能影响响应式效果: px(8) vs responsive(2)",
       "severity": "medium"
     },
     {
       "category": "responsive_consistency",
       "type": "too_many_fixed_units",
       "file": "frontend\\styles\\design-system.css",
-      "message": "固定单位使用过多，可能影响响应式效果: px(66) vs responsive(22)",
+      "message": "固定单位使用过多，可能影响响应式效果: px(62) vs responsive(24)",
+      "severity": "medium"
+    },
+    {
+      "category": "responsive_consistency",
+      "type": "too_many_fixed_units",
+      "file": "frontend\\styles\\design-tokens-unified.css",
+      "message": "固定单位使用过多，可能影响响应式效果: px(56) vs responsive(14)",
       "severity": "medium"
     },
     {
@@ -229,15 +253,22 @@
     {
       "category": "responsive_consistency",
       "type": "too_many_fixed_units",
+      "file": "frontend\\styles\\responsive-utilities.css",
+      "message": "固定单位使用过多，可能影响响应式效果: px(26) vs responsive(11)",
+      "severity": "medium"
+    },
+    {
+      "category": "responsive_consistency",
+      "type": "too_many_fixed_units",
       "file": "frontend\\styles\\theme-config.css",
-      "message": "固定单位使用过多，可能影响响应式效果: px(88) vs responsive(29)",
+      "message": "固定单位使用过多，可能影响响应式效果: px(87) vs responsive(30)",
       "severity": "medium"
     },
     {
       "category": "responsive_consistency",
       "type": "too_many_breakpoints",
       "file": "project",
-      "message": "断点过多，可能导致维护困难: 8个不同断点",
+      "message": "断点过多，可能导致维护困难: 10个不同断点",
       "severity": "low"
     },
     {

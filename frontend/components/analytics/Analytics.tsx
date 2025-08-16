@@ -3,18 +3,7 @@
  * 提供趋势分析、对比分析等高级分析功能
  */
 
-import {
-  Activity,
-  AlertTriangle,
-  BarChart3,
-  CheckCircle,
-  LineChart,
-  RefreshCw,
-  Target,
-  TrendingDown,
-  TrendingUp,
-  Zap
-} from 'lucide-react';
+import { Activity, AlertTriangle, BarChart3, CheckCircle, LineChart, RefreshCw, Target, TrendingDown, TrendingUp, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 // 暂时注释掉缺失的导入
 // advancedAnalyticsService,
@@ -229,12 +218,12 @@ const Analytics: React.FC<AnalyticsProps> = ({
             <h3 className="text-white font-medium mb-4">趋势预测图</h3>
             <ResponsiveContainer width="100%" height={300}>
               <RechartsLineChart data={formatChartData(trendData.prediction)}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="time" stroke="#9CA3AF" />
-                <YAxis stroke="#9CA3AF" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
+                <XAxis dataKey="time" stroke="var(--color-gray-400)" />
+                <YAxis stroke="var(--color-gray-400)" />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#374151',
+                    backgroundColor: 'var(--color-gray-700)',
                     border: 'none',
                     borderRadius: '8px',
                     color: '#fff'
@@ -243,9 +232,9 @@ const Analytics: React.FC<AnalyticsProps> = ({
                 <Line
                   type="monotone"
                   dataKey="value"
-                  stroke="#3B82F6"
+                  stroke="var(--color-primary)"
                   strokeWidth={2}
-                  dot={{ fill: '#3B82F6', strokeWidth: 2, r: 4 }}
+                  dot={{ fill: 'var(--color-primary)', strokeWidth: 2, r: 4 }}
                 />
               </RechartsLineChart>
             </ResponsiveContainer>
@@ -310,12 +299,12 @@ const Analytics: React.FC<AnalyticsProps> = ({
                 comparison: comparisonData.comparison[index]?.value || 0,
                 difference: comparisonData.differences.absolute[index]
               }))}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="index" stroke="#9CA3AF" />
-                <YAxis stroke="#9CA3AF" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
+                <XAxis dataKey="index" stroke="var(--color-gray-400)" />
+                <YAxis stroke="var(--color-gray-400)" />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#374151',
+                    backgroundColor: 'var(--color-gray-700)',
                     border: 'none',
                     borderRadius: '8px',
                     color: '#fff'
@@ -339,12 +328,12 @@ const Analytics: React.FC<AnalyticsProps> = ({
               </h3>
               <ResponsiveContainer width="100%" height={200}>
                 <RechartsLineChart data={formatChartData(data)}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <XAxis dataKey="time" stroke="#9CA3AF" />
-                  <YAxis stroke="#9CA3AF" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
+                  <XAxis dataKey="time" stroke="var(--color-gray-400)" />
+                  <YAxis stroke="var(--color-gray-400)" />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: '#374151',
+                      backgroundColor: 'var(--color-gray-700)',
                       border: 'none',
                       borderRadius: '8px',
                       color: '#fff'

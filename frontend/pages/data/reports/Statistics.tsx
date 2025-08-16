@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import {Activity, BarChart3, Calendar, PieChart, TrendingUp} from 'lucide-react';
+import { Activity, BarChart3, Calendar, PieChart, TrendingUp } from 'lucide-react';
 
 interface StatisticsData {
   overview: {

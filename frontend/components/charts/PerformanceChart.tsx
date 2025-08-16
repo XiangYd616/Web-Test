@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
-import {DataPoint, dataVisualizationOptimizer, OptimizationConfig} from '../../utils/DataVisualizationOptimizer';
+import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { DataPoint, dataVisualizationOptimizer, OptimizationConfig } from '../../utils/DataVisualizationOptimizer';
 
 interface PerformanceChartProps {
   data: DataPoint[];
@@ -178,32 +178,32 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
 
       <ResponsiveContainer width="100%" height={height}>
         <LineChart data={optimizedData.data} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
           <XAxis
             dataKey="timestamp"
-            tick={{ fontSize: 12, fill: '#9CA3AF' }}
+            tick={{ fontSize: 12, fill: 'var(--color-gray-400)' }}
             tickFormatter={formatTime}
             interval={tickInterval}
             label={{
               value: '测试时间 (分:秒)',
               position: 'insideBottom',
               offset: -5,
-              style: { textAnchor: 'middle', fill: '#9CA3AF' }
+              style: { textAnchor: 'middle', fill: 'var(--color-gray-400)' }
             }}
           />
           <YAxis
-            tick={{ fontSize: 12, fill: '#9CA3AF' }}
+            tick={{ fontSize: 12, fill: 'var(--color-gray-400)' }}
             label={{
               value: name,
               angle: -90,
               position: 'insideLeft',
-              style: { textAnchor: 'middle', fill: '#9CA3AF' }
+              style: { textAnchor: 'middle', fill: 'var(--color-gray-400)' }
             }}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: '#1F2937',
-              border: '1px solid #374151',
+              backgroundColor: 'var(--color-gray-800)',
+              border: '1px solid var(--color-gray-700)',
               borderRadius: '8px',
               color: '#fff'
             }}
@@ -215,13 +215,13 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
           {showAverage && averageValue !== null && (
             <ReferenceLine
               y={averageValue}
-              stroke="#f59e0b"
+              stroke="var(--color-warning)"
               strokeDasharray="5 5"
               strokeWidth={2}
               label={{
                 value: `平均: ${averageValue.toFixed(3)}`,
                 position: 'topRight',
-                style: { fill: '#f59e0b', fontSize: '12px' }
+                style: { fill: 'var(--color-warning)', fontSize: '12px' }
               }}
             />
           )}

@@ -1,8 +1,8 @@
-import {AlertTriangle, Archive, Bell, CheckCircle, Clock, Database, Download, FileText, Globe, Info, Lock, Mail, Monitor, Pause, Play, RefreshCw, RotateCcw, Server, Settings, Settings as SettingsIcon, Shield, Trash2, Upload, User} from 'lucide-react';
+import { AlertTriangle, Archive, Bell, CheckCircle, Clock, Database, Download, FileText, Globe, Info, Lock, Mail, Monitor, Pause, Play, RefreshCw, RotateCcw, Server, Settings, Settings as SettingsIcon, Shield, Trash2, Upload, User } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import {useAuth} from '../../../contexts/AuthContext.tsx';
-import {useTheme} from '../../../contexts/ThemeContext.tsx';
-import {SettingsService} from '../../../services/system/settingsService.ts';
+import { useAuth } from '../../../contexts/AuthContext.tsx';
+import { useTheme } from '../../../contexts/ThemeContext.tsx';
+import { SettingsService } from '../../../services/system/settingsService.ts';
 
 import BackupManagement from '../../../components/system/BackupManagement.tsx';
 import SecurityCenter from '../../../components/system/SecurityCenter.tsx';

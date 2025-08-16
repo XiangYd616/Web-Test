@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import {Activity, AlertTriangle, BarChart3, Server, TestTube, Users} from 'lucide-react';
-import {useNotifications} from '../ui/NotificationSystem';
+import { Activity, AlertTriangle, BarChart3, Server, TestTube, Users } from 'lucide-react';
+import { useNotifications } from '../ui/NotificationSystem';
 import SystemHealthCheck from './SystemHealthCheck';
 
 interface SystemMetrics {

@@ -1,7 +1,7 @@
 import React from 'react';
-import {Download, Play, RotateCcw, Settings, Share2, Square} from 'lucide-react';
-import {cn} from '../../utils/cn';
-import {Button} from './Button';
+import { Download, Play, RotateCcw, Settings, Share2, Square } from 'lucide-react';
+import { cn } from '../../utils/cn';
+import { Button } from './Button';
 
 interface TestingToolbarProps {
   /** 是否正在运行测试 */

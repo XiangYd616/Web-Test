@@ -1,8 +1,8 @@
 
-import {useCallback, useEffect, useRef, useState} from 'react';
-import {stressTestQueueManager} from '../services/testing/stressTestQueueManager';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { stressTestQueueManager } from '../services/testing/stressTestQueueManager';
 
-import {stressTestRecordService} from '../services/testing/stressTestRecordService';
+import { stressTestRecordService } from '../services/testing/stressTestRecordService';
 
 export interface UseStressTestRecordOptions {
   autoLoad?: boolean;

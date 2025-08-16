@@ -1,7 +1,7 @@
 import type { ApiResponse } from '../../types/unified/apiResponse';
 
 import type { AuthResponse, LoginCredentials, RegisterData, User } from '../../types/user';
-import {isDesktopEnvironment} from '../../utils/environment';
+import { isDesktopEnvironment } from '../../utils/environment';
 
 // 延迟导入以避免循环依赖
 let authService: any = null;

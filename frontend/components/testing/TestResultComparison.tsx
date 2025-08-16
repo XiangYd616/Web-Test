@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import {TestResult, TestType} from '../../types/testConfig';
+import { TestResult, TestType } from '../../types/testConfig';
 
 interface TestResultComparisonProps {
   testType: TestType;

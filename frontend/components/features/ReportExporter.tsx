@@ -1,6 +1,6 @@
-import {AlertCircle, CheckCircle, Download, Eye, FileText, Layout, Loader, Settings, Table} from 'lucide-react';
+import { AlertCircle, CheckCircle, Download, Eye, FileText, Layout, Loader, Settings, Table } from 'lucide-react';
 import React, { useState } from 'react';
-import {ReportGenerator, ExportFormat, ReportConfig, ReportData} from '../../services/reporting/reportGeneratorService';
+import { ReportGenerator, ExportFormat, ReportConfig, ReportData } from '../../services/reporting/reportGeneratorService';
 
 interface ReportExporterProps {
   testResults: any[];

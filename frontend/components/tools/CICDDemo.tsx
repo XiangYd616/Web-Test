@@ -1,6 +1,6 @@
 import { handleAsyncError } from '../utils/errorHandler';
 import React, { useState } from 'react';
-import {Play, GitBranch, CheckCircle, XCircle, Clock, Code} from 'lucide-react';
+import { Play, GitBranch, CheckCircle, XCircle, Clock, Code } from 'lucide-react';
 
 interface PipelineStep {
   id: string;

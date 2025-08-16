@@ -1,4 +1,4 @@
-import {AlertCircle, CheckCircle, Loader2, Square} from 'lucide-react';
+import { AlertCircle, CheckCircle, Loader2, Square } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 interface CancelProgressFeedbackProps {

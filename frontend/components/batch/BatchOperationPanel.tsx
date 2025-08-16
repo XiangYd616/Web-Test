@@ -3,25 +3,10 @@
  * 提供批量测试、批量导出、批量管理等功能的用户界面
  */
 
-import {
-  AlertCircle,
-  CheckCircle,
-  Clock,
-  Download,
-  Minus,
-  Play,
-  Plus,
-  RotateCcw,
-  Settings,
-  X
-} from 'lucide-react';
+import { AlertCircle, CheckCircle, Clock, Download, Minus, Play, Plus, RotateCcw, Settings, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 // 暂时注释掉缺失的导入
-// import {
-//   batchOperationService,
-//   BatchTestConfig,
-//   BatchExportConfig,
-//   BatchOperation
+// import { //   batchOperationService, //   BatchTestConfig, //   BatchExportConfig, //   BatchOperation
 // } from '../../services/batch/batchOperationService';
 
 interface BatchOperationPanelProps {

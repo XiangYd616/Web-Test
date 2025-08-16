@@ -3,19 +3,10 @@
  * 提供完整的数据分析和洞察功能
  */
 
-import {
-  BarChart3,
-  Calendar,
-  Download,
-  Filter,
-  Settings,
-  Share2,
-  Target,
-  // TrendingUp
-} from 'lucide-react'; // 已修复
+import { BarChart3, Calendar, Download, Filter, Settings, Share2, Target, // TrendingUp } from 'lucide-react'; // 已修复
 import React, { useState } from 'react';
 import Analytics from '../../components/analytics/Analytics';
-import {useAuthCheck} from '../../components/auth/WithAuthCheck';
+import { useAuthCheck } from '../../components/auth/WithAuthCheck';
 
 const AnalyticsPage: React.FC = () => {
   useAuthCheck();

@@ -3,12 +3,12 @@
  * 展示和测试所有的性能优化和用户体验改进
  */
 
-import {AlertCircle, BarChart3, CheckCircle, Clock, Play, Users, Zap} from 'lucide-react';
+import { AlertCircle, BarChart3, CheckCircle, Clock, Play, Users, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import {useLoadingState} from '../../../components/ui/LoadingStates.tsx';
-import {Tooltip, useSmartNotification} from '../../../components/ui/UX.tsx';
-import {usePerformanceOptimization} from '../../../hooks/usePerformanceOptimization.ts';
-import {createTestRunner, PerformanceTestResult, TestResult, UXTestResult} from '../../../utils/testUtils.ts';
+import { useLoadingState } from '../../../components/ui/LoadingStates.tsx';
+import { Tooltip, useSmartNotification } from '../../../components/ui/UX.tsx';
+import { usePerformanceOptimization } from '../../../hooks/usePerformanceOptimization.ts';
+import { createTestRunner, PerformanceTestResult, TestResult, UXTestResult } from '../../../utils/testUtils.ts';
 
 interface TestResults {
   performance: PerformanceTestResult[];

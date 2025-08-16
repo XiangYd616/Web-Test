@@ -1,4 +1,4 @@
-import {Activity, AlertTriangle, CheckCircle, Edit, ExternalLink, Filter, Globe, Pause, Play, Plus, RefreshCw, Search, Send, Shield, Trash2, Webhook, XCircle} from 'lucide-react';
+import { Activity, AlertTriangle, CheckCircle, Edit, ExternalLink, Filter, Globe, Pause, Play, Plus, RefreshCw, Search, Send, Shield, Trash2, Webhook, XCircle } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import IntegrationService, { WebhookConfig } from '../../../services/integration/integrationService.ts';
 

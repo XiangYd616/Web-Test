@@ -3,7 +3,7 @@
  * 基于全局状态管理的认证功能
  */
 
-import {useCallback} from 'react';
+import { useCallback } from 'react';
 
 // 登录凭据接口
 export interface LoginCredentials {

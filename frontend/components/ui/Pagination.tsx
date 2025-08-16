@@ -5,14 +5,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  ChevronsLeft, 
-  ChevronsRight,
-  MoreHorizontal,
-  // Loader2
-} from 'lucide-react'; // 已修复
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, MoreHorizontal, // Loader2 } from 'lucide-react'; // 已修复
 import type { PaginationInfo } from '../../types/common';
 
 // ==================== 类型定义 ====================

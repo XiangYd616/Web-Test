@@ -1,6 +1,6 @@
 
-import {systemResourceMonitor} from '../system/systemResourceMonitor';
-import {stressTestRecordService} from './stressTestRecordService';
+import { systemResourceMonitor } from '../system/systemResourceMonitor';
+import { stressTestRecordService } from './stressTestRecordService';
 
 export interface QueuedTest {
   id: string;

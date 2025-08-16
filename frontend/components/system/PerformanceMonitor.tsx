@@ -4,13 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-    useDevicePerformance,
-    useMemoryMonitor,
-    useNetworkStatus,
-    usePerformanceMonitor,
-    // useVisibility
-} from '../../hooks/usePerformanceOptimization'; // 已修复
+import { useDevicePerformance, useMemoryMonitor, useNetworkStatus, usePerformanceMonitor, // useVisibility } from '../../hooks/usePerformanceOptimization'; // 已修复
 interface PerformanceMonitorProps {
     className?: string;
     showDetails?: boolean;

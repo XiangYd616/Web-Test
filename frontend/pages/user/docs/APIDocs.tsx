@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import {Copy, Key, Zap, Globe, BarChart3, CheckCircle, AlertTriangle, Play, Download, Github} from 'lucide-react';
+import { Copy, Key, Zap, Globe, BarChart3, CheckCircle, AlertTriangle, Play, Download, Github } from 'lucide-react';
 
 interface APIEndpoint {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';

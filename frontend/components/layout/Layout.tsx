@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import {Outlet} from 'react-router-dom';
-import {useTheme} from '../../contexts/ThemeContext';
+import { Outlet } from 'react-router-dom';
+import { useTheme } from '../../contexts/ThemeContext';
 import Sidebar from './Sidebar';
 import TopNavbar from './TopNavbar';
 

@@ -18,7 +18,7 @@ const toastConfig: ToastOptions = {
 const successConfig = {
   ...toastConfig,
   iconTheme: {
-    primary: '#10b981',
+    primary: 'var(--color-success)',
     secondary: '#fff',
   },
 };
@@ -26,7 +26,7 @@ const successConfig = {
 const errorConfig = {
   ...toastConfig,
   iconTheme: {
-    primary: '#ef4444',
+    primary: 'var(--color-danger)',
     secondary: '#fff',
   },
 };

@@ -5,8 +5,8 @@
 
 import React, { ComponentType, LazyExoticComponent, ReactNode, Suspense } from 'react';
 import ErrorBoundary from '../components/system/ErrorBoundary';
-import {enhancedConfigManager} from '../config/ConfigManager';
-// // import {performanceMonitor} from './performanceMonitor';
+import { enhancedConfigManager } from '../config/ConfigManager';
+// // import { performanceMonitor } from './performanceMonitor';
 
 /**
  * 懒加载配置

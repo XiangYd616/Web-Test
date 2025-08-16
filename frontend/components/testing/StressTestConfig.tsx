@@ -4,20 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Settings, 
-  Users, 
-  Clock, 
-  Zap, 
-  Shield, 
-  Globe, 
-  Database,
-  TrendingUp,
-  AlertTriangle,
-  Info,
-  ChevronDown,
-  // ChevronUp
-} from 'lucide-react'; // 已修复
+import { Settings, Users, Clock, Zap, Shield, Globe, Database, TrendingUp, AlertTriangle, Info, ChevronDown, // ChevronUp } from 'lucide-react'; // 已修复
 interface StressTestConfig {
   // 基础配置
   url: string;

@@ -1,7 +1,7 @@
-import {Activity, AlertTriangle, BarChart3, Bell, CheckCircle, Clock, Eye, Globe, Pause, Play, Plus, Settings, Shield, Target, Trash2, TrendingDown, TrendingUp, Wifi, Zap} from 'lucide-react';
+import { Activity, AlertTriangle, BarChart3, Bell, CheckCircle, Clock, Eye, Globe, Pause, Play, Plus, Settings, Shield, Target, Trash2, TrendingDown, TrendingUp, Wifi, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import {Area, AreaChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
-import {MonitoringData, monitoringService, MonitoringSite, MonitoringStats} from '../../services/monitoring/monitoringService';
+import { Area, AreaChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { MonitoringData, monitoringService, MonitoringSite, MonitoringStats } from '../../services/monitoring/monitoringService';
 
 interface AlertRule {
   id: string;
@@ -309,23 +309,23 @@ const RealTimeMonitoring: React.FC = () => {
           <h3 className="text-lg font-semibold text-white mb-4">实时响应时间</h3>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={realTimeData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
               <XAxis
                 dataKey="timestamp"
-                stroke="#9CA3AF"
+                stroke="var(--color-gray-400)"
                 fontSize={12}
                 tickFormatter={(value) => new Date(value).toLocaleTimeString('zh-CN', {
                   hour: '2-digit',
                   minute: '2-digit'
                 })}
               />
-              <YAxis stroke="#9CA3AF" fontSize={12} />
+              <YAxis stroke="var(--color-gray-400)" fontSize={12} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#1F2937',
-                  border: '1px solid #374151',
+                  backgroundColor: 'var(--color-gray-800)',
+                  border: '1px solid var(--color-gray-700)',
                   borderRadius: '8px',
-                  color: '#F9FAFB'
+                  color: 'var(--color-gray-50)'
                 }}
                 labelFormatter={(value) => new Date(value).toLocaleTimeString('zh-CN')}
                 formatter={(value: number) => [`${value.toFixed(0)}ms`, '响应时间']}
@@ -333,7 +333,7 @@ const RealTimeMonitoring: React.FC = () => {
               <Line
                 type="monotone"
                 dataKey="responseTime"
-                stroke="#3B82F6"
+                stroke="var(--color-primary)"
                 strokeWidth={2}
                 dot={false}
                 name="响应时间"
@@ -347,23 +347,23 @@ const RealTimeMonitoring: React.FC = () => {
           <h3 className="text-lg font-semibold text-white mb-4">服务可用性</h3>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={realTimeData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
               <XAxis
                 dataKey="timestamp"
-                stroke="#9CA3AF"
+                stroke="var(--color-gray-400)"
                 fontSize={12}
                 tickFormatter={(value) => new Date(value).toLocaleTimeString('zh-CN', {
                   hour: '2-digit',
                   minute: '2-digit'
                 })}
               />
-              <YAxis stroke="#9CA3AF" fontSize={12} domain={[95, 100]} />
+              <YAxis stroke="var(--color-gray-400)" fontSize={12} domain={[95, 100]} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#1F2937',
-                  border: '1px solid #374151',
+                  backgroundColor: 'var(--color-gray-800)',
+                  border: '1px solid var(--color-gray-700)',
                   borderRadius: '8px',
-                  color: '#F9FAFB'
+                  color: 'var(--color-gray-50)'
                 }}
                 labelFormatter={(value) => new Date(value).toLocaleTimeString('zh-CN')}
                 formatter={(value: number) => [`${value.toFixed(2)}%`, '可用性']}
@@ -371,8 +371,8 @@ const RealTimeMonitoring: React.FC = () => {
               <Area
                 type="monotone"
                 dataKey="uptime"
-                stroke="#10B981"
-                fill="#10B981"
+                stroke="var(--color-success)"
+                fill="var(--color-success)"
                 fillOpacity={0.6}
                 name="可用性"
               />

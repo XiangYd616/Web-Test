@@ -3,19 +3,9 @@
  * 用于在每个测试页面显示该测试类型的历史记录
  */
 
-import {
-  Calendar,
-  Download,
-  Eye,
-  Filter,
-  MoreHorizontal,
-  RefreshCw,
-  Search,
-  Star,
-  // Trash2
-} from 'lucide-react'; // 已修复
+import { Calendar, Download, Eye, Filter, MoreHorizontal, RefreshCw, Search, Star, // Trash2 } from 'lucide-react'; // 已修复
 import React, { useCallback, useEffect, useState } from 'react';
-import {useAuth} from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 import type { TestRecord, TestType } from '../../types/testHistory';
 
 interface TestTypeHistoryProps {
@@ -54,16 +44,16 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
 
   // 测试类型配置
   const testTypeConfig = {
-    stress: { name: '压力测试', icon: '⚡', color: '#ef4444' },
-    performance: { name: '性能测试', icon: '🚀', color: '#3b82f6' },
-    security: { name: '安全测试', icon: '🛡️', color: '#f59e0b' },
+    stress: { name: '压力测试', icon: '⚡', color: 'var(--color-danger)' },
+    performance: { name: '性能测试', icon: '🚀', color: 'var(--color-primary)' },
+    security: { name: '安全测试', icon: '🛡️', color: 'var(--color-warning)' },
     api: { name: 'API测试', icon: '🔌', color: '#8b5cf6' },
     compatibility: { name: '兼容性测试', icon: '🌐', color: '#06b6d4' },
-    seo: { name: 'SEO测试', icon: '📈', color: '#10b981' },
+    seo: { name: 'SEO测试', icon: '📈', color: 'var(--color-success)' },
     accessibility: { name: '可访问性测试', icon: '♿', color: '#6366f1' }
   };
 
-  const config = testTypeConfig[testType] || { name: '测试', icon: '🔧', color: '#6b7280' };
+  const config = testTypeConfig[testType] || { name: '测试', icon: '🔧', color: 'var(--color-gray-500)' };
 
   // 加载测试历史
   const loadTestHistory = useCallback(async (reset = false) => {
@@ -342,8 +332,8 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
       <style jsx>{`
         .test-type-history {
           background: white;
-          border-radius: 12px;
-          border: 1px solid #e5e7eb;
+          border-radius: var(--radius-2xl);
+          border: 1px solid var(--color-gray-200);
           overflow: hidden;
           display: flex;
           flex-direction: column;
@@ -353,46 +343,46 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 16px 20px;
-          border-bottom: 1px solid #f3f4f6;
+          padding: var(--spacing-4) 20px;
+          border-bottom: 1px solid var(--color-gray-100);
           background: #fafafa;
         }
 
         .header-title {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: var(--spacing-2);
         }
 
         .test-icon {
-          font-size: 20px;
+          font-size: var(--font-size-xl);
         }
 
         .header-title h3 {
           margin: 0;
-          font-size: 16px;
+          font-size: var(--font-size-base);
           font-weight: 600;
-          color: #1f2937;
+          color: var(--color-gray-800);
         }
 
         .test-count {
-          color: #6b7280;
-          font-size: 14px;
+          color: var(--color-gray-500);
+          font-size: var(--font-size-sm);
         }
 
         .header-actions {
           display: flex;
-          gap: 8px;
+          gap: var(--spacing-2);
         }
 
         .action-btn {
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 32px;
-          height: 32px;
-          border: 1px solid #d1d5db;
-          border-radius: 6px;
+          width: var(--spacing-8);
+          height: var(--spacing-8);
+          border: 1px solid var(--color-gray-300);
+          border-radius: var(--radius-lg);
           background: white;
           cursor: pointer;
           transition: all 0.2s;
@@ -410,8 +400,8 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
         }
 
         .icon {
-          width: 16px;
-          height: 16px;
+          width: var(--spacing-4);
+          height: var(--spacing-4);
         }
 
         .spinning {
@@ -424,32 +414,32 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
         }
 
         .history-filters {
-          padding: 16px 20px;
-          border-bottom: 1px solid #f3f4f6;
+          padding: var(--spacing-4) 20px;
+          border-bottom: 1px solid var(--color-gray-100);
           background: #fafafa;
         }
 
         .search-box {
           position: relative;
-          margin-bottom: 12px;
+          margin-bottom: var(--spacing-3);
         }
 
         .search-icon {
           position: absolute;
-          left: 12px;
+          left: var(--spacing-3);
           top: 50%;
           transform: translateY(-50%);
-          width: 16px;
-          height: 16px;
-          color: #9ca3af;
+          width: var(--spacing-4);
+          height: var(--spacing-4);
+          color: var(--color-gray-400);
         }
 
         .search-input {
           width: 100%;
-          padding: 8px 12px 8px 36px;
-          border: 1px solid #d1d5db;
-          border-radius: 6px;
-          font-size: 14px;
+          padding: var(--spacing-2) 12px 8px 36px;
+          border: 1px solid var(--color-gray-300);
+          border-radius: var(--radius-lg);
+          font-size: var(--font-size-sm);
         }
 
         .search-input:focus {
@@ -459,16 +449,16 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
 
         .status-filters {
           display: flex;
-          gap: 8px;
+          gap: var(--spacing-2);
           flex-wrap: wrap;
         }
 
         .status-filter {
-          padding: 4px 12px;
-          border: 1px solid #d1d5db;
-          border-radius: 16px;
+          padding: var(--spacing-1) 12px;
+          border: 1px solid var(--color-gray-300);
+          border-radius: var(--radius-3xl);
           background: white;
-          font-size: 12px;
+          font-size: var(--font-size-xs);
           cursor: pointer;
           transition: all 0.2s;
         }
@@ -486,33 +476,33 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
         .history-list {
           flex: 1;
           overflow-y: auto;
-          padding: 8px;
+          padding: var(--spacing-2);
         }
 
         .empty-state {
           text-align: center;
-          padding: 40px 20px;
-          color: #6b7280;
+          padding: var(--spacing-10) 20px;
+          color: var(--color-gray-500);
         }
 
         .empty-icon {
           font-size: 48px;
-          margin-bottom: 16px;
+          margin-bottom: var(--spacing-4);
         }
 
         .empty-hint {
-          font-size: 14px;
-          margin-top: 8px;
+          font-size: var(--font-size-sm);
+          margin-top: var(--spacing-2);
         }
 
         .history-item {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 12px 16px;
-          margin-bottom: 8px;
-          border: 1px solid #e5e7eb;
-          border-radius: 8px;
+          padding: var(--spacing-3) 16px;
+          margin-bottom: var(--spacing-2);
+          border: 1px solid var(--color-gray-200);
+          border-radius: var(--radius-xl);
           cursor: pointer;
           transition: all 0.2s;
         }
@@ -535,20 +525,20 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 8px;
+          margin-bottom: var(--spacing-2);
         }
 
         .test-name {
           margin: 0;
-          font-size: 14px;
+          font-size: var(--font-size-sm);
           font-weight: 500;
-          color: #1f2937;
+          color: var(--color-gray-800);
         }
 
         .status-badge {
-          padding: 2px 8px;
-          border-radius: 12px;
-          font-size: 12px;
+          padding: var(--spacing-0\.5) 8px;
+          border-radius: var(--radius-2xl);
+          font-size: var(--font-size-xs);
           font-weight: 500;
         }
 
@@ -556,8 +546,8 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
           display: flex;
           justify-content: space-between;
           align-items: center;
-          font-size: 12px;
-          color: #6b7280;
+          font-size: var(--font-size-xs);
+          color: var(--color-gray-500);
         }
 
         .test-url {
@@ -565,27 +555,27 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
-          margin-right: 12px;
+          margin-right: var(--spacing-3);
         }
 
         .test-time {
           display: flex;
           align-items: center;
-          gap: 4px;
+          gap: var(--spacing-1);
         }
 
         .time-icon {
-          width: 12px;
-          height: 12px;
+          width: var(--spacing-3);
+          height: var(--spacing-3);
         }
 
         .item-score {
           display: flex;
           align-items: center;
-          gap: 4px;
-          margin-top: 8px;
+          gap: var(--spacing-1);
+          margin-top: var(--spacing-2);
           color: ${config.color};
-          font-size: 14px;
+          font-size: var(--font-size-sm);
           font-weight: 500;
         }
 
@@ -596,27 +586,27 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
 
         .item-actions {
           display: flex;
-          gap: 4px;
-          margin-left: 12px;
+          gap: var(--spacing-1);
+          margin-left: var(--spacing-3);
         }
 
         .view-btn:hover {
-          color: #3b82f6;
-          border-color: #3b82f6;
+          color: var(--color-primary);
+          border-color: var(--color-primary);
         }
 
         .rerun-btn:hover {
-          color: #10b981;
-          border-color: #10b981;
+          color: var(--color-success);
+          border-color: var(--color-success);
         }
 
         .load-more-btn {
           width: 100%;
-          padding: 12px;
-          border: 1px dashed #d1d5db;
-          border-radius: 8px;
+          padding: var(--spacing-3);
+          border: 1px dashed var(--color-gray-300);
+          border-radius: var(--radius-xl);
           background: white;
-          color: #6b7280;
+          color: var(--color-gray-500);
           cursor: pointer;
           transition: all 0.2s;
         }
@@ -630,9 +620,9 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 8px;
-          padding: 20px;
-          color: #6b7280;
+          gap: var(--spacing-2);
+          padding: var(--spacing-5);
+          color: var(--color-gray-500);
         }
       `}</style>
     </div>

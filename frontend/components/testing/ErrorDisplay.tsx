@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 
-import {AlertTriangle, ChevronDown, ChevronRight, ExternalLink, HelpCircle, RefreshCw, X, Zap, Shield, Globe, Clock} from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronRight, ExternalLink, HelpCircle, RefreshCw, X, Zap, Shield, Globe, Clock } from 'lucide-react';
 
 export interface ErrorSolution {
   title: string;

@@ -1,7 +1,7 @@
-import {useCallback, useRef, useState} from 'react';
-import {LocalSEOAnalysisEngine, LocalSEOConfig} from '../services/seo/localSEOAnalysisEngine';
-import {SEOAnalysisResult} from '../services/seo/seoAnalysisEngine';
-import {useRealSEOTest} from './useRealSEOTest';
+import { useCallback, useRef, useState } from 'react';
+import { LocalSEOAnalysisEngine, LocalSEOConfig } from '../services/seo/localSEOAnalysisEngine';
+import { SEOAnalysisResult } from '../services/seo/seoAnalysisEngine';
+import { useRealSEOTest } from './useRealSEOTest';
 
 export type SEOTestMode = 'online' | 'local';
 

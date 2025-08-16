@@ -1,15 +1,5 @@
 import React from 'react';
-import {
-  Cell,
-  Line,
-  LineChart,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  // YAxis
-} from 'recharts'; // 已修复
+import { Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, // YAxis } from 'recharts'; // 已修复
 // Recharts线图组件
 export interface RechartsLineChartProps {
   data: Array<Record<string, any>> | {
@@ -40,7 +30,7 @@ export const RechartsLineChart: React.FC<RechartsLineChartProps> = ({
   xKey = 'name',
   yKey = 'value',
   title,
-  color = '#3B82F6',
+  color = 'var(--color-primary)',
   height = 300,
   showGrid = true,
   showTooltip = true
@@ -80,22 +70,22 @@ export const RechartsLineChart: React.FC<RechartsLineChartProps> = ({
                   dataKey={xKey}
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 12, fill: '#6B7280' }}
+                  tick={{ fontSize: 12, fill: 'var(--color-gray-500)' }}
                 />
                 <YAxis
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 12, fill: '#6B7280' }}
+                  tick={{ fontSize: 12, fill: 'var(--color-gray-500)' }}
                 />
               </>
             )}
             {showTooltip && (
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#1F2937',
+                  backgroundColor: 'var(--color-gray-800)',
                   border: 'none',
                   borderRadius: '8px',
-                  color: '#F9FAFB'
+                  color: 'var(--color-gray-50)'
                 }}
               />
             )}
@@ -173,7 +163,7 @@ export const RechartsDoughnutChart: React.FC<RechartsDoughnutChartProps> = ({
     return [];
   }, [data]);
   const COLORS = [
-    '#3B82F6', '#10B981', '#F59E0B', '#EF4444',
+    'var(--color-primary)', 'var(--color-success)', 'var(--color-warning)', 'var(--color-danger)',
     '#8B5CF6', '#06B6D4', '#84CC16', '#F97316'
   ];
 
@@ -264,7 +254,7 @@ export const RechartsBarChart: React.FC<RechartsBarChartProps> = ({
   xKey,
   yKey,
   title,
-  color = '#3B82F6',
+  color = 'var(--color-primary)',
   height = 300
 }) => {
   return (
@@ -279,19 +269,19 @@ export const RechartsBarChart: React.FC<RechartsBarChartProps> = ({
               dataKey={xKey}
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: '#6B7280' }}
+              tick={{ fontSize: 12, fill: 'var(--color-gray-500)' }}
             />
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: '#6B7280' }}
+              tick={{ fontSize: 12, fill: 'var(--color-gray-500)' }}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#1F2937',
+                backgroundColor: 'var(--color-gray-800)',
                 border: 'none',
                 borderRadius: '8px',
-                color: '#F9FAFB'
+                color: 'var(--color-gray-50)'
               }}
             />
             <Line

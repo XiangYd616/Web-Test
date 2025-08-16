@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from 'react';
-import {X} from 'lucide-react';
-import {createPortal} from 'react-dom';
-import {cn} from '../../utils/cn';
-import {Button, IconButton} from './Button';
+import { X } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { cn } from '../../utils/cn';
+import { Button, IconButton } from './Button';
 
 interface ModalProps {
   isOpen: boolean;

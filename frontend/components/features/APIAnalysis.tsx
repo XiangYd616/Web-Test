@@ -1,4 +1,4 @@
-import {AlertTriangle, CheckCircle, Clock, Shield, XCircle, Zap} from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Shield, XCircle, Zap } from 'lucide-react';
 import React from 'react';
 
 interface APITestResult {

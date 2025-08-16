@@ -1,7 +1,7 @@
-import {AlertCircle, Bookmark, Calendar, CheckCircle, Clock, Loader, Plus, Search, Star, Trash2, X} from 'lucide-react';
+import { AlertCircle, Bookmark, Calendar, CheckCircle, Clock, Loader, Plus, Search, Star, Trash2, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import {useTheme} from '../../../contexts/ThemeContext.tsx';
-import {BookmarkItem, userService} from '../../../services/user/userService.ts';
+import { useTheme } from '../../../contexts/ThemeContext.tsx';
+import { BookmarkItem, userService } from '../../../services/user/userService.ts';
 
 interface BookmarkCategory {
   id: string;

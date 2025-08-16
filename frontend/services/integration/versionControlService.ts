@@ -7,17 +7,7 @@
 import type {
   // Version
 } from '../types/versionTypes'; // 已修复
-import {
-  ApiVersionNegotiator,
-  AutoMigrationSystem,
-  autoMigrationSystem,
-  CompatibilityChecker,
-  DATA_MODEL_VERSION,
-  TypeVersionRegistry,
-  VERSION_INFO,
-  VersionChecker,
-  // VersionedDataWrapper
-} from '../types/versionTypes'; // 已修复
+import { ApiVersionNegotiator, AutoMigrationSystem, autoMigrationSystem, CompatibilityChecker, DATA_MODEL_VERSION, TypeVersionRegistry, VERSION_INFO, VersionChecker, // VersionedDataWrapper } from '../types/versionTypes'; // 已修复
 // 定义本地类型，避免重复导入
 export interface VersionedData {
   version: Version;
@@ -36,7 +26,7 @@ export interface ApiVersionNegotiation {
   serverVersion: Version;
   negotiatedVersion: Version;
 }
-// // // // // // import {defaultMemoryCache} from './cacheStrategy'; // 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除
+// // // // // // import { defaultMemoryCache } from './cacheStrategy'; // 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除
 
 // ==================== 版本控制配置 ====================
 
