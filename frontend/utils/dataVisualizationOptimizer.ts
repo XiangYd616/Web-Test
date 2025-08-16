@@ -3,7 +3,7 @@
  * 解决大量数据点导致的性能问题
  */
 
-export interface DataPoint {
+export interface DataPoint     {
   timestamp: string | number;
   responseTime?: number;
   throughput?: number;
@@ -13,7 +13,7 @@ export interface DataPoint {
   [key: string]: any;
 }
 
-export interface OptimizationConfig {
+export interface OptimizationConfig     {
   maxDataPoints: number;
   samplingStrategy: 'uniform' | 'adaptive' | 'importance';
   preserveKeyPoints: boolean;
@@ -21,7 +21,7 @@ export interface OptimizationConfig {
   performanceThreshold: number; // ms
 }
 
-export interface OptimizationResult {
+export interface OptimizationResult     {
   data: DataPoint[];
   originalCount: number;
   optimizedCount: number;
@@ -48,15 +48,14 @@ class DataVisualizationOptimizer {
   ): OptimizationResult {
     const startTime = performance.now();
 
-    const finalConfig: OptimizationConfig = {
+    const finalConfig: OptimizationConfig  = {
       maxDataPoints: 1000,
-      samplingStrategy: 'adaptive',
+      samplingStrategy: 'adaptive','
       preserveKeyPoints: true,
       enableCaching: true,
       performanceThreshold: 50,
       ...config
     };
-
     // 生成缓存键
     const cacheKey = this.generateCacheKey(data, finalConfig);
 
@@ -69,7 +68,7 @@ class DataVisualizationOptimizer {
 
     // 如果数据量小于阈值，直接返回
     if (data.length <= finalConfig.maxDataPoints) {
-      const result: OptimizationResult = {
+      const result: OptimizationResult  = {
         data: [...data],
         originalCount: data.length,
         optimizedCount: data.length,
@@ -84,13 +83,13 @@ class DataVisualizationOptimizer {
     let optimizedData: DataPoint[];
 
     switch (finalConfig.samplingStrategy) {
-      case 'uniform':
+      case 'uniform': ''
         optimizedData = this.uniformSampling(data, finalConfig.maxDataPoints);
         break;
-      case 'adaptive':
+      case 'adaptive': ''
         optimizedData = this.adaptiveSampling(data, finalConfig);
         break;
-      case 'importance':
+      case 'importance': ''
         optimizedData = this.importanceSampling(data, finalConfig);
         break;
       default:
@@ -99,7 +98,7 @@ class DataVisualizationOptimizer {
 
     const processingTime = performance.now() - startTime;
 
-    const result: OptimizationResult = {
+    const result: OptimizationResult  = {
       data: optimizedData,
       originalCount: data.length,
       optimizedCount: optimizedData.length,
@@ -107,7 +106,6 @@ class DataVisualizationOptimizer {
       processingTime,
       cacheHit: false
     };
-
     // 缓存结果
     if (finalConfig.enableCaching) {
       this.cache.set(cacheKey, result);
@@ -128,8 +126,7 @@ class DataVisualizationOptimizer {
     if (data.length <= maxPoints) return data;
 
     const step = data.length / maxPoints;
-    const result: DataPoint[] = [];
-
+    const result: DataPoint[]  = [];
     for (let i = 0; i < maxPoints; i++) {
       const index = Math.floor(i * step);
       result.push(data[index]);
@@ -267,8 +264,7 @@ class DataVisualizationOptimizer {
       });
 
       // 按时间戳重新排序
-      compensatedData.sort((a, b) =>
-        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      compensatedData.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
       );
 
       return compensatedData;
@@ -281,8 +277,7 @@ class DataVisualizationOptimizer {
    * 计算数据点重要性分数
    */
   private calculateImportanceScores(data: DataPoint[]): number[] {
-    const scores: number[] = new Array(data.length).fill(0);
-
+    const scores: number[]  = new Array(data.length).fill(0);
     for (let i = 1; i < data.length - 1; i++) {
       const prev = data[i - 1];
       const curr = data[i];
@@ -332,7 +327,7 @@ class DataVisualizationOptimizer {
     }));
 
     const configHash = this.simpleHash(JSON.stringify(config));
-    return `${dataHash}_${configHash}`;
+    return `${dataHash}_${configHash}`;`
   }
 
   /**

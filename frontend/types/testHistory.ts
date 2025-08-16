@@ -1,44 +1,42 @@
 
 
 export enum TestStatus {
-  IDLE = 'idle',
-  STARTING = 'starting',
-  RUNNING = 'running',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled',
-  FAILED = 'failed'
+  IDLE = 'idle','
+  STARTING = 'starting','
+  RUNNING = 'running','
+  COMPLETED = 'completed','
+  CANCELLED = 'cancelled','
+  FAILED = 'failed';
 }
 
 // 类型别名，用于与其他模块兼容 - 简化版本
-export type TestStatusType = 'idle' | 'starting' | 'running' | 'completed' | 'cancelled' | 'failed';
-
-export enum TestType {
-  API = 'api',
-  COMPATIBILITY = 'compatibility',
-  INFRASTRUCTURE = 'infrastructure',
-  SECURITY = 'security',
-  SEO = 'seo',
-  STRESS = 'stress',
-  UX = 'ux',
-  WEBSITE = 'website'
+export type TestStatusType   = 'idle' | 'starting' | 'running' | 'completed' | 'cancelled' | 'failed';export enum TestType {'
+  API = 'api','
+  COMPATIBILITY = 'compatibility','
+  INFRASTRUCTURE = 'infrastructure','
+  SECURITY = 'security','
+  SEO = 'seo','
+  STRESS = 'stress','
+  UX = 'ux','
+  WEBSITE = 'website';
 }
 
 export enum TestPriority {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical'
+  LOW = 'low','
+  MEDIUM = 'medium','
+  HIGH = 'high','
+  CRITICAL = 'critical';
 }
 
 export enum TestEnvironment {
-  DEVELOPMENT = 'development',
-  STAGING = 'staging',
-  PRODUCTION = 'production',
-  LOCAL = 'local'
+  DEVELOPMENT = 'development','
+  STAGING = 'staging','
+  PRODUCTION = 'production','
+  LOCAL = 'local';
 }
 
 // 新增：主从表设计相关类型
-export interface TestSession {
+export interface TestSession     {
   id: string;
   userId: string;
   testName: string;
@@ -66,7 +64,7 @@ export interface TestSession {
 }
 
 // 安全测试详情
-export interface SecurityTestDetails {
+export interface SecurityTestDetails     {
   sessionId: string;
   securityScore?: number;
   sslScore?: number;
@@ -86,7 +84,7 @@ export interface SecurityTestDetails {
 }
 
 // 性能测试详情
-export interface PerformanceTestDetails {
+export interface PerformanceTestDetails     {
   sessionId: string;
   firstContentfulPaint?: number;
   largestContentfulPaint?: number;
@@ -109,7 +107,7 @@ export interface PerformanceTestDetails {
 }
 
 // 压力测试详情
-export interface StressTestDetails {
+export interface StressTestDetails     {
   sessionId: string;
   concurrentUsers?: number;
   rampUpTime?: number;
@@ -142,7 +140,7 @@ export interface StressTestDetails {
 
 // TestHistoryQuery 接口已在下方定义
 
-export interface TestHistoryResponse {
+export interface TestHistoryResponse     {
   success: boolean;
   data: {
     tests: TestSession[];
@@ -158,7 +156,7 @@ export interface TestHistoryResponse {
 }
 
 // 详细测试结果（包含详情数据）
-export interface DetailedTestResult extends TestSession {
+export interface DetailedTestResult extends TestSession     {
   securityDetails?: SecurityTestDetails;
   performanceDetails?: PerformanceTestDetails;
   stressDetails?: StressTestDetails;
@@ -166,12 +164,12 @@ export interface DetailedTestResult extends TestSession {
 }
 
 // 测试详情响应
-export interface TestDetailsResponse {
+export interface TestDetailsResponse     {
   success: boolean;
   data: DetailedTestResult;
 }
 
-export interface TestStatistics {
+export interface TestStatistics     {
   totalTests: number;
   completedTests: number;
   failedTests: number;
@@ -179,7 +177,7 @@ export interface TestStatistics {
   testsByType: Record<TestType, number>;
 }
 
-export interface BatchOperationResult {
+export interface BatchOperationResult     {
   success: boolean;
   processed: number;
   failed: number;
@@ -187,7 +185,7 @@ export interface BatchOperationResult {
 }
 
 // 基础测试配置
-export interface BaseTestConfig {
+export interface BaseTestConfig     {
   timeout?: number;
   retries?: number;
   environment?: TestEnvironment;
@@ -205,7 +203,7 @@ export interface BaseTestConfig {
 }
 
 // 性能测试配置
-export interface PerformanceTestConfig extends BaseTestConfig {
+export interface PerformanceTestConfig extends BaseTestConfig     {
   device?: 'desktop' | 'mobile' | 'tablet';
   connection?: 'fast' | 'slow' | '3g' | '4g' | 'wifi';
   metrics?: string[];
@@ -216,7 +214,7 @@ export interface PerformanceTestConfig extends BaseTestConfig {
 }
 
 // 安全测试配置
-export interface SecurityTestConfig extends BaseTestConfig {
+export interface SecurityTestConfig extends BaseTestConfig     {
   modules?: string[];
   depth?: 'basic' | 'standard' | 'comprehensive';
   includeSubdomains?: boolean;
@@ -225,7 +223,7 @@ export interface SecurityTestConfig extends BaseTestConfig {
 }
 
 // SEO测试配置
-export interface SEOTestConfig extends BaseTestConfig {
+export interface SEOTestConfig extends BaseTestConfig     {
   includeImages?: boolean;
   checkLinks?: boolean;
   analyzeContent?: boolean;
@@ -234,7 +232,7 @@ export interface SEOTestConfig extends BaseTestConfig {
 }
 
 // 压力测试配置
-export interface StressTestConfig extends BaseTestConfig {
+export interface StressTestConfig extends BaseTestConfig     {
   virtualUsers?: number;
   duration?: number;
   rampUpTime?: number;
@@ -246,7 +244,7 @@ export interface StressTestConfig extends BaseTestConfig {
   };
 }
 
-export interface TestResultDetails {
+export interface TestResultDetails     {
   // 性能指标
   performance?: {
     loadTime?: number;
@@ -277,7 +275,7 @@ export interface TestResultDetails {
     metaTags?: Record<string, string>;
     headings?: Array<{ level: number; text: string }>;
     images?: Array<{ src: string; alt?: string; issues?: string[] }>;
-    links?: Array<{ href: string; text: string; type: 'internal' | 'external' }>;
+    links?: Array<{ href: string; text: string; type: 'internal' | 'external' }>;'
     structuredData?: any[];
     socialTags?: Record<string, string>;
   };
@@ -311,7 +309,7 @@ export interface TestResultDetails {
   };
 }
 
-export interface TestMetadata {
+export interface TestMetadata     {
   userAgent?: string;
   ipAddress?: string;
   location?: {
@@ -336,7 +334,7 @@ export interface TestMetadata {
 }
 
 // 增强的测试记录接口
-export interface TestRecord {
+export interface TestRecord     {
   // 基础信息
   id: string;
   testName: string;
@@ -404,7 +402,7 @@ export interface TestRecord {
   }>;
 }
 
-export interface TestHistoryQuery {
+export interface TestHistoryQuery     {
   // 分页
   page?: number;
   limit?: number;
@@ -436,7 +434,6 @@ export interface TestHistoryQuery {
   // 排序
   sortBy?: 'createdAt' | 'startTime' | 'endTime' | 'duration' | 'overallScore' | 'testName' | 'status';
   sortOrder?: 'asc' | 'desc';
-
   // 包含关联数据
   includeResults?: boolean;
   includeConfig?: boolean;
@@ -445,7 +442,7 @@ export interface TestHistoryQuery {
   includeAttachments?: boolean;
 }
 
-export interface TestHistoryResponse {
+export interface TestHistoryResponse     {
   success: boolean;
   data: {
     tests: TestRecord[];
@@ -476,7 +473,7 @@ export interface TestHistoryResponse {
   error?: string;
 }
 
-export interface TestHistoryStatistics {
+export interface TestHistoryStatistics     {
   overview: {
     totalTests: number;
     completedTests: number;
@@ -519,7 +516,7 @@ export interface TestHistoryStatistics {
 }
 
 // 导出选项
-export interface ExportOptions {
+export interface ExportOptions     {
   format: 'csv' | 'json' | 'pdf' | 'excel';
   fields?: string[];
   includeResults?: boolean;
@@ -532,7 +529,7 @@ export interface ExportOptions {
 }
 
 // 批量操作
-export interface BatchOperation {
+export interface BatchOperation     {
   action: 'delete' | 'archive' | 'tag' | 'category' | 'export';
   testIds: string[];
   options?: {
@@ -542,7 +539,7 @@ export interface BatchOperation {
   };
 }
 
-export interface TestComparison {
+export interface TestComparison     {
   baseTest: TestRecord;
   compareTests: TestRecord[];
   metrics: {

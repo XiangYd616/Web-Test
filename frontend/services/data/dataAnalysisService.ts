@@ -1,7 +1,5 @@
 
-import { format, subDays } from 'date-fns';
-
-export interface TestRecord {
+import { format, subDays    } from 'date-fns';export interface TestRecord     {'
   id: string;
   test_type: string;
   url?: string;
@@ -17,7 +15,7 @@ export interface TestRecord {
   created_at: string;
 }
 
-export interface AnalyticsData {
+export interface AnalyticsData     {
   totalTests: number;
   successRate: number;
   averageScore: number;
@@ -30,12 +28,12 @@ export interface AnalyticsData {
   recentActivity: TestRecord[];
 }
 
-export interface PerformanceAnalysis {
+export interface PerformanceAnalysis     {
   coreWebVitals: {
-    fcp: { average: number; trend: 'up' | 'down' | 'stable' };
-    lcp: { average: number; trend: 'up' | 'down' | 'stable' };
-    cls: { average: number; trend: 'up' | 'down' | 'stable' };
-    tti: { average: number; trend: 'up' | 'down' | 'stable' };
+    fcp: { average: number; trend: 'up' | 'down' | 'stable' };'
+    lcp: { average: number; trend: 'up' | 'down' | 'stable' };'
+    cls: { average: number; trend: 'up' | 'down' | 'stable' };'
+    tti: { average: number; trend: 'up' | 'down' | 'stable' };'
   };
   performanceScores: Array<{ date: string; performance: number; seo: number; accessibility: number }>;
   recommendations: Array<{
@@ -59,7 +57,7 @@ export class DataAnalysisService {
   private cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
   
   private getCacheKey(url: string, options: RequestInit): string {
-    return `${options.method || 'GET'}:${url}:${JSON.stringify(options.body || {})}`;
+    return `${options.method || 'GET'}:${url}:${JSON.stringify(options.body || {})}`;'`
   }
   
   private getFromCache(key: string): any | null {
@@ -90,13 +88,12 @@ export class DataAnalysisService {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
   }
-  private baseUrl = 'http://localhost:3001/api';
-
+  private baseUrl = "http://localhost:3001/api';'`
   /**
    * 处理测试数据 - 直接使用数据库字段名，避免不必要的映射
    */
@@ -113,7 +110,7 @@ export class DataAnalysisService {
 
       return this.analyzeTestData(filteredRecords);
     } catch (error) {
-      console.error('Error processing test data:', error);
+      console.error('Error processing test data: ', error);'
       throw error;
     }
   }
@@ -124,21 +121,20 @@ export class DataAnalysisService {
   async getAnalyticsData(dateRange: number = 30): Promise<AnalyticsData> {
     try {
       // 获取测试数据
-      const response = await fetch(`${this.baseUrl}/test/history`, {
+      const response = await fetch(`${this.baseUrl}/test/history`, {`
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
+          'Authorization": `Bearer ${localStorage.getItem('token')}`,'`
+          "Content-Type': 'application/json';'`
         }
       });
       const data = await response.json();
 
       if (!data.success) {
-        throw new Error(data.error || 'Failed to fetch test data');
+        throw new Error(data.error || 'Failed to fetch test data');'
       }
 
       // 处理API返回的数据结构
-      const testRecords: TestRecord[] = data.data.tests || data.data || [];
-
+      const testRecords: TestRecord[]  = data.data.tests || data.data || [];
       // 直接使用数据库字段，无需转换
       const normalizedRecords = testRecords;
 
@@ -150,7 +146,7 @@ export class DataAnalysisService {
 
       return this.analyzeTestData(filteredRecords);
     } catch (error) {
-      console.error('Failed to get analytics data:', error);
+      console.error('Failed to get analytics data: ', error);'
       throw error;
     }
   }
@@ -160,7 +156,7 @@ export class DataAnalysisService {
    */
   private analyzeTestData(records: any[]): AnalyticsData {
     const totalTests = records.length;
-    const completedTests = records.filter(r => r.status === 'completed');
+    const completedTests = records.filter(r => r.status === 'completed');'
     const successRate = totalTests > 0 ? (completedTests.length / totalTests) * 100 : 0;
 
     // 计算平均分数
@@ -170,14 +166,14 @@ export class DataAnalysisService {
       : 0;
 
     // 按类型统计
-    const testsByType: { [key: string]: number } = {};
+    const testsByType: { [key: string]: number }  = {};
     records.forEach(record => {
       const type = record.test_type || 'unknown';
       testsByType[type] = (testsByType[type] || 0) + 1;
     });
 
     // 按状态统计
-    const testsByStatus: { [key: string]: number } = {};
+    const testsByStatus: { [key: string]: number }  = {};
     records.forEach(record => {
       const status = record.status || 'unknown';
       testsByStatus[status] = (testsByStatus[status] || 0) + 1;
@@ -218,20 +214,19 @@ export class DataAnalysisService {
    * 获取每日测试统计
    */
   private getDailyTestStats(records: TestRecord[]): Array<{ date: string; count: number; successCount: number }> {
-    const dailyStats: { [key: string]: { count: number; successCount: number } } = {};
-
+    const dailyStats: { [key: string]: { count: number; successCount: number } }  = {};
     // 初始化最近30天的数据
     for (let i = 29; i >= 0; i--) {
-      const date = format(subDays(new Date(), i), 'yyyy-MM-dd');
+      const date = format(subDays(new Date(), i), 'yyyy-MM-dd');'
       dailyStats[date] = { count: 0, successCount: 0 };
     }
 
     // 统计每日数据
     records.forEach(record => {
-      const date = format(new Date(record.start_time || record.created_at), 'yyyy-MM-dd');
+      const date = format(new Date(record.start_time || record.created_at), 'yyyy-MM-dd');'
       if (dailyStats[date]) {
         dailyStats[date].count++;
-        if (record.status === 'completed') {
+        if (record.status === 'completed') {'
           dailyStats[date].successCount++;
         }
       }
@@ -249,21 +244,21 @@ export class DataAnalysisService {
    */
   private getScoreDistribution(records: TestRecord[]): Array<{ range: string; count: number }> {
     const distribution = {
-      '0-20': 0,
-      '21-40': 0,
-      '41-60': 0,
-      '61-80': 0,
-      '81-100': 0
+      '0-20': 0,'
+      '21-40': 0,'
+      '41-60': 0,'
+      '61-80': 0,'
+      '81-100': 0'
     };
 
     records.forEach(record => {
       if (record.overall_score !== undefined) {
         const score = record.overall_score;
-        if (score <= 20) distribution['0-20']++;
-        else if (score <= 40) distribution['21-40']++;
-        else if (score <= 60) distribution['41-60']++;
-        else if (score <= 80) distribution['61-80']++;
-        else distribution['81-100']++;
+        if (score <= 20) distribution['0-20']++;'
+        else if (score <= 40) distribution['21-40']++;'
+        else if (score <= 60) distribution['41-60']++;'
+        else if (score <= 80) distribution['61-80']++;'
+        else distribution['81-100']++;'
       }
     });
 
@@ -274,17 +269,16 @@ export class DataAnalysisService {
    * 获取性能趋势
    */
   private getPerformanceTrends(records: TestRecord[]): Array<{ date: string; avgScore: number; testCount: number }> {
-    const trends: { [key: string]: { scores: number[]; count: number } } = {};
-
+    const trends: { [key: string]: { scores: number[]; count: number } }  = {};
     // 初始化最近30天的数据
     for (let i = 29; i >= 0; i--) {
-      const date = format(subDays(new Date(), i), 'yyyy-MM-dd');
+      const date = format(subDays(new Date(), i), 'yyyy-MM-dd');'
       trends[date] = { scores: [], count: 0 };
     }
 
     // 收集每日分数数据
     records.forEach(record => {
-      const date = format(new Date(record.start_time || record.created_at), 'yyyy-MM-dd');
+      const date = format(new Date(record.start_time || record.created_at), 'yyyy-MM-dd');'
       if (trends[date] && record.overall_score !== undefined) {
         trends[date].scores.push(record.overall_score);
         trends[date].count++;
@@ -304,8 +298,7 @@ export class DataAnalysisService {
    * 获取热门URL
    */
   private getTopUrls(records: TestRecord[]): Array<{ url: string; count: number; avgScore: number }> {
-    const urlStats: { [key: string]: { count: number; scores: number[] } } = {};
-
+    const urlStats: { [key: string]: { count: number; scores: number[] } }  = {};
     records.forEach(record => {
       if (record.url) {
         if (!urlStats[record.url]) {
@@ -335,27 +328,26 @@ export class DataAnalysisService {
    */
   async getPerformanceAnalysis(): Promise<PerformanceAnalysis> {
     try {
-      const response = await fetch(`${this.baseUrl}/test-results?testType=website`);
+      const response = await fetch(`${this.baseUrl}/test-results?testType=website`);`
       const data = await response.json();
 
       if (!data.success) {
         
-        console.warn('Backend not available, using sample data');
+        console.warn("Backend not available, using sample data');'`
         return this.generateSamplePerformanceData();
       }
 
-      const websiteTests: TestRecord[] = data.data || [];
-
+      const websiteTests: TestRecord[]  = data.data || [];
       // 如果没有网站测试数据，生成示例数据
       if (websiteTests.length === 0) {
         
-        console.log('No website test data found, generating sample data');
+        console.log('No website test data found, generating sample data');'
         return this.generateSamplePerformanceData();
       }
 
       return this.analyzePerformanceData(websiteTests);
     } catch (error) {
-      console.error('Failed to get performance analysis, using sample data:', error);
+      console.error('Failed to get performance analysis, using sample data: ', error);'
       return this.generateSamplePerformanceData();
     }
   }
@@ -366,10 +358,10 @@ export class DataAnalysisService {
   private analyzePerformanceData(records: TestRecord[]): PerformanceAnalysis {
     // 模拟Core Web Vitals数据分析
     const coreWebVitals = {
-      fcp: { average: 1.2, trend: 'stable' as 'up' | 'down' | 'stable' },
-      lcp: { average: 2.1, trend: 'up' as 'up' | 'down' | 'stable' },
-      cls: { average: 0.05, trend: 'stable' as 'up' | 'down' | 'stable' },
-      tti: { average: 3.2, trend: 'down' as 'up' | 'down' | 'stable' }
+      fcp: { average: 1.2, trend: 'stable' as 'up' | 'down' | 'stable' },'
+      lcp: { average: 2.1, trend: 'up' as 'up' | 'down' | 'stable' },'
+      cls: { average: 0.05, trend: 'stable' as 'up' | 'down' | 'stable' },'
+      tti: { average: 3.2, trend: 'down' as 'up' | 'down' | 'stable' }'
     };
 
     // 性能分数趋势
@@ -393,17 +385,16 @@ export class DataAnalysisService {
    * 获取性能分数趋势
    */
   private getPerformanceScores(records: TestRecord[]): Array<{ date: string; performance: number; seo: number; accessibility: number }> {
-    const scores: { [key: string]: { performance: number[]; seo: number[]; accessibility: number[] } } = {};
-
+    const scores: { [key: string]: { performance: number[]; seo: number[]; accessibility: number[] } }  = {};
     // 初始化最近30天的数据
     for (let i = 29; i >= 0; i--) {
-      const date = format(subDays(new Date(), i), 'yyyy-MM-dd');
+      const date = format(subDays(new Date(), i), 'yyyy-MM-dd');'
       scores[date] = { performance: [], seo: [], accessibility: [] };
     }
 
     // 收集分数数据
     records.forEach(record => {
-      const date = format(new Date(record.start_time || record.created_at), 'yyyy-MM-dd');
+      const date = format(new Date(record.start_time || record.created_at), 'yyyy-MM-dd');'
       if (scores[date] && record.scores) {
         if (record.scores.performance) scores[date].performance.push(record.scores.performance);
         if (record.scores.seo) scores[date].seo.push(record.scores.seo);
@@ -437,32 +428,32 @@ export class DataAnalysisService {
   }> {
     return [
       {
-        category: '性能优化',
-        priority: 'high',
-        title: '优化图片加载',
-        description: '使用现代图片格式(WebP)和懒加载技术',
-        impact: '可提升LCP 20-30%'
+        category: '性能优化','
+        priority: 'high','
+        title: '优化图片加载','
+        description: '使用现代图片格式(WebP)和懒加载技术','
+        impact: '可提升LCP 20-30%';
       },
       {
-        category: '性能优化',
-        priority: 'medium',
-        title: '启用Gzip压缩',
-        description: '对文本资源启用Gzip或Brotli压缩',
-        impact: '可减少传输大小 60-80%'
+        category: '性能优化','
+        priority: 'medium','
+        title: '启用Gzip压缩','
+        description: '对文本资源启用Gzip或Brotli压缩','
+        impact: '可减少传输大小 60-80%';
       },
       {
-        category: 'SEO优化',
-        priority: 'medium',
-        title: '优化页面标题',
-        description: '确保每个页面都有唯一且描述性的标题',
-        impact: '提升搜索引擎排名'
+        category: 'SEO优化','
+        priority: 'medium','
+        title: '优化页面标题','
+        description: '确保每个页面都有唯一且描述性的标题','
+        impact: '提升搜索引擎排名';
       },
       {
-        category: '可访问性',
-        priority: 'low',
-        title: '增加Alt文本',
-        description: '为所有图片添加有意义的Alt属性',
-        impact: '提升可访问性评分'
+        category: '可访问性','
+        priority: 'low','
+        title: '增加Alt文本','
+        description: '为所有图片添加有意义的Alt属性','
+        impact: '提升可访问性评分';
       }
     ];
   }
@@ -477,8 +468,7 @@ export class DataAnalysisService {
     lastTested: string;
     trend: 'improving' | 'declining' | 'stable';
   }> {
-    const urlStats: { [key: string]: { scores: number[]; dates: string[] } } = {};
-
+    const urlStats: { [key: string]: { scores: number[]; dates: string[] } }  = {};
     records.forEach(record => {
       if (record.url && record.overall_score !== undefined) {
         if (!urlStats[record.url]) {
@@ -493,7 +483,6 @@ export class DataAnalysisService {
       .map(([url, stats]) => {
         const avgScore = stats.scores.reduce((sum, score) => sum + score, 0) / stats.scores.length;
         const lastTested = stats.dates.sort().pop() || '';
-
         // 简单的趋势分析
         let trend: 'improving' | 'declining' | 'stable' = 'stable';
         if (stats.scores.length >= 2) {
@@ -522,16 +511,16 @@ export class DataAnalysisService {
   private generateSamplePerformanceData(): PerformanceAnalysis {
     // 生成示例Core Web Vitals数据
     const coreWebVitals = {
-      fcp: { average: 1.2 + Math.random() * 0.5, trend: 'up' as 'up' | 'down' | 'stable' },
-      lcp: { average: 2.1 + Math.random() * 0.8, trend: 'stable' as 'up' | 'down' | 'stable' },
-      cls: { average: 0.05 + Math.random() * 0.1, trend: 'up' as 'up' | 'down' | 'stable' },
-      tti: { average: 3.2 + Math.random() * 1.0, trend: 'down' as 'up' | 'down' | 'stable' }
+      fcp: { average: 1.2 + Math.random() * 0.5, trend: 'up' as 'up' | 'down' | 'stable' },'
+      lcp: { average: 2.1 + Math.random() * 0.8, trend: 'stable' as 'up' | 'down' | 'stable' },'
+      cls: { average: 0.05 + Math.random() * 0.1, trend: 'up' as 'up' | 'down' | 'stable' },'
+      tti: { average: 3.2 + Math.random() * 1.0, trend: 'down' as 'up' | 'down' | 'stable' }'
     };
 
     // 生成示例性能分数趋势
     const performanceScores = [];
     for (let i = 29; i >= 0; i--) {
-      const date = format(subDays(new Date(), i), 'yyyy-MM-dd');
+      const date = format(subDays(new Date(), i), 'yyyy-MM-dd');'
       performanceScores.push({
         date,
         performance: 70 + Math.random() * 25,
@@ -543,57 +532,57 @@ export class DataAnalysisService {
     // 生成示例优化建议
     const recommendations = [
       {
-        category: '性能优化',
-        priority: 'high' as const,
-        title: '优化图片加载',
-        description: '使用现代图片格式(WebP)和懒加载技术，减少首屏加载时间',
-        impact: '可提升LCP 20-30%'
+        category: '性能优化','
+        priority: 'high' as const,'
+        title: '优化图片加载','
+        description: '使用现代图片格式(WebP)和懒加载技术，减少首屏加载时间','
+        impact: '可提升LCP 20-30%';
       },
       {
-        category: '性能优化',
-        priority: 'medium' as const,
-        title: '启用Gzip压缩',
-        description: '对文本资源启用Gzip或Brotli压缩，减少传输大小',
-        impact: '可减少传输大小 60-80%'
+        category: '性能优化','
+        priority: 'medium' as const,'
+        title: '启用Gzip压缩','
+        description: '对文本资源启用Gzip或Brotli压缩，减少传输大小','
+        impact: '可减少传输大小 60-80%';
       },
       {
-        category: 'SEO优化',
-        priority: 'medium' as const,
-        title: '优化页面标题',
-        description: '确保每个页面都有唯一且描述性的标题标签',
-        impact: '提升搜索引擎排名'
+        category: 'SEO优化','
+        priority: 'medium' as const,'
+        title: '优化页面标题','
+        description: '确保每个页面都有唯一且描述性的标题标签','
+        impact: '提升搜索引擎排名';
       },
       {
-        category: '可访问性',
-        priority: 'low' as const,
-        title: '增加Alt文本',
-        description: '为所有图片添加有意义的Alt属性，提升可访问性',
-        impact: '提升可访问性评分 10-15%'
+        category: '可访问性','
+        priority: 'low' as const,'
+        title: '增加Alt文本','
+        description: '为所有图片添加有意义的Alt属性，提升可访问性','
+        impact: '提升可访问性评分 10-15%';
       }
     ];
 
     // 生成示例URL性能数据
     const urlPerformance = [
       {
-        url: 'https://example.com',
+        url: 'https://example.com','
         avgScore: 85.2,
         testCount: 12,
         lastTested: new Date().toISOString(),
-        trend: 'improving' as const
+        trend: 'improving' as const'
       },
       {
-        url: 'https://example.com/about',
+        url: 'https://example.com/about','
         avgScore: 78.5,
         testCount: 8,
         lastTested: new Date(Date.now() - 86400000).toISOString(),
-        trend: 'stable' as const
+        trend: 'stable' as const'
       },
       {
-        url: 'https://example.com/contact',
+        url: 'https://example.com/contact','
         avgScore: 72.1,
         testCount: 5,
         lastTested: new Date(Date.now() - 172800000).toISOString(),
-        trend: 'declining' as const
+        trend: 'declining' as const'
       }
     ];
 
@@ -610,13 +599,13 @@ export class DataAnalysisService {
    */
   async getRealTimeAnalysis(): Promise<any> {
     try {
-      const response = await fetch('/api/data-management/stats');
+      const response = await fetch('/api/data-management/stats');'
       if (!response.ok) {
-        throw new Error('获取实时数据失败');
+        throw new Error('获取实时数据失败');'
       }
       return await response.json();
     } catch (error) {
-      console.error('获取实时数据分析失败:', error);
+      console.error('获取实时数据分析失败:', error);'
       throw error;
     }
   }
@@ -626,13 +615,13 @@ export class DataAnalysisService {
    */
   async getMonitoringAnalysis(): Promise<any> {
     try {
-      const response = await fetch('/api/monitoring/stats');
+      const response = await fetch('/api/monitoring/stats');'
       if (!response.ok) {
-        throw new Error('获取监控数据失败');
+        throw new Error('获取监控数据失败');'
       }
       return await response.json();
     } catch (error) {
-      console.error('获取监控数据分析失败:', error);
+      console.error('获取监控数据分析失败:', error);'
       throw error;
     }
   }
@@ -646,21 +635,21 @@ export class DataAnalysisService {
     includeSettings?: boolean;
   }): Promise<any> {
     try {
-      const response = await fetch('/api/data-management/backup', {
-        method: 'POST',
+      const response = await fetch('/api/data-management/backup', {'
+        method: 'POST','
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json','
         },
         body: JSON.stringify(options),
       });
 
       if (!response.ok) {
-        throw new Error('创建备份失败');
+        throw new Error('创建备份失败');'
       }
 
       return await response.json();
     } catch (error) {
-      console.error('创建数据备份失败:', error);
+      console.error('创建数据备份失败:', error);'
       throw error;
     }
   }
@@ -673,21 +662,21 @@ export class DataAnalysisService {
     dataTypes?: string[];
   }): Promise<any> {
     try {
-      const response = await fetch('/api/data-management/cleanup', {
-        method: 'POST',
+      const response = await fetch('/api/data-management/cleanup', {'
+        method: 'POST','
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json','
         },
         body: JSON.stringify(options),
       });
 
       if (!response.ok) {
-        throw new Error('数据清理失败');
+        throw new Error('数据清理失败');'
       }
 
       return await response.json();
     } catch (error) {
-      console.error('数据清理失败:', error);
+      console.error('数据清理失败:', error);'
       throw error;
     }
   }
@@ -709,21 +698,21 @@ export class DataAnalysisService {
     includeRawData?: boolean;
   }): Promise<any> {
     try {
-      const response = await fetch('/api/reports/generate', {
-        method: 'POST',
+      const response = await fetch('/api/reports/generate', {'
+        method: 'POST','
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json','
         },
         body: JSON.stringify(config),
       });
 
       if (!response.ok) {
-        throw new Error('生成报告失败');
+        throw new Error('生成报告失败');'
       }
 
       return await response.json();
     } catch (error) {
-      console.error('生成报告失败:', error);
+      console.error('生成报告失败:', error);'
       throw error;
     }
   }
@@ -733,13 +722,13 @@ export class DataAnalysisService {
    */
   async getReportTasks(): Promise<any> {
     try {
-      const response = await fetch('/api/reports/tasks');
+      const response = await fetch('/api/reports/tasks');'
       if (!response.ok) {
-        throw new Error('获取报告任务失败');
+        throw new Error('获取报告任务失败');'
       }
       return await response.json();
     } catch (error) {
-      console.error('获取报告任务失败:', error);
+      console.error("获取报告任务失败:', error);'
       throw error;
     }
   }
@@ -749,22 +738,22 @@ export class DataAnalysisService {
    */
   async downloadReport(taskId: string): Promise<void> {
     try {
-      const response = await fetch(`/api/reports/tasks/${taskId}/download`);
+      const response = await fetch(`/api/reports/tasks/${taskId}/download`);`
       if (!response.ok) {
-        throw new Error('下载报告失败');
+        throw new Error("下载报告失败');'`
       }
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement('a');'
       a.href = url;
-      a.download = `report_${taskId}.html`; // 默认文件名
+      a.download = `report_${taskId}.html`; // 默认文件名`
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
-      console.error('下载报告失败:', error);
+      console.error("下载报告失败:', error);'`
       throw error;
     }
   }
@@ -773,10 +762,10 @@ export class DataAnalysisService {
    * 获取认证头
    */
   private getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem('auth_token');'
     return {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` })
+      'Content-Type': 'application/json','
+      ...(token && { "Authorization': `Bearer ${token}` })'`
     };
   }
 
@@ -793,19 +782,19 @@ export class DataAnalysisService {
     headers?: { [key: string]: string };
   }): Promise<any> {
     try {
-      const response = await fetch('/api/monitoring/sites', {
-        method: 'POST',
+      const response = await fetch("/api/monitoring/sites', {'`
+        method: 'POST','
         headers: this.getAuthHeaders(),
         body: JSON.stringify(config),
       });
 
       if (!response.ok) {
-        throw new Error('添加监控站点失败');
+        throw new Error('添加监控站点失败');'
       }
 
       return await response.json();
     } catch (error) {
-      console.error('添加监控站点失败:', error);
+      console.error('添加监控站点失败:', error);'
       throw error;
     }
   }
@@ -815,15 +804,15 @@ export class DataAnalysisService {
    */
   async getMonitoringSites(): Promise<any> {
     try {
-      const response = await fetch('/api/monitoring/sites', {
+      const response = await fetch('/api/monitoring/sites', {'
         headers: this.getAuthHeaders()
       });
       if (!response.ok) {
-        throw new Error('获取监控站点失败');
+        throw new Error('获取监控站点失败');'
       }
       return await response.json();
     } catch (error) {
-      console.error('获取监控站点失败:', error);
+      console.error('获取监控站点失败:', error);'
       throw error;
     }
   }
@@ -833,15 +822,15 @@ export class DataAnalysisService {
    */
   async getMonitoringRealTimeData(): Promise<any> {
     try {
-      const response = await fetch('/api/monitoring/realtime', {
+      const response = await fetch('/api/monitoring/realtime', {'
         headers: this.getAuthHeaders()
       });
       if (!response.ok) {
-        throw new Error('获取监控实时数据失败');
+        throw new Error('获取监控实时数据失败');'
       }
       return await response.json();
     } catch (error) {
-      console.error('获取监控实时数据失败:', error);
+      console.error('获取监控实时数据失败:', error);'
       throw error;
     }
   }

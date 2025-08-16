@@ -1,9 +1,4 @@
-import React from 'react';
-import toast, { Toaster, ToastOptions } from 'react-hot-toast';
-
-
-
-interface ToastProps {
+import React from 'react';import toast, { Toaster, ToastOptions  } from 'react-hot-toast';interface ToastProps   {'
   className?: string;
   children?: React.ReactNode;
   style?: React.CSSProperties;
@@ -15,39 +10,38 @@ interface ToastProps {
   onChange?: (value: any) => void;
   onFocus?: (event: React.FocusEvent<HTMLElement>) => void;
   onBlur?: (event: React.FocusEvent<HTMLElement>) => void;
-  'data-testid'?: string;
-  'aria-label'?: string;
-  'aria-describedby'?: string;
+  'data-testid'?: string;'
+  'aria-label'?: string;'
+  'aria-describedby'?: string;'
   role?: string;
   tabIndex?: number;
 }
 // Toast 配置
-const toastConfig: ToastOptions = {
+const toastConfig: ToastOptions  = {
   duration: 4000,
-  position: 'top-right',
+  position: 'top-right','
   style: {
-    background: '#363636',
-    color: '#fff',
-    borderRadius: '8px',
-    fontSize: '14px',
-    maxWidth: '400px',
+    background: '#363636','
+    color: '#fff','
+    borderRadius: '8px','
+    fontSize: '14px','
+    maxWidth: '400px','
   },
 };
-
 // 成功和错误的特定配置
 const successConfig = {
   ...toastConfig,
   iconTheme: {
-    primary: 'var(--color-success)',
-    secondary: '#fff',
+    primary: 'var(--color-success)','
+    secondary: '#fff','
   },
 };
 
 const errorConfig = {
   ...toastConfig,
   iconTheme: {
-    primary: 'var(--color-danger)',
-    secondary: '#fff',
+    primary: 'var(--color-danger)','
+    secondary: '#fff','
   },
 };
 
@@ -59,54 +53,51 @@ export const ToastProvider: React.FC<ToastProps> = (props) => {
     className: combinedClassName,
     style: computedStyle,
     disabled,
-    'aria-label': ariaLabel,
-    'data-testid': testId
+    'aria-label': ariaLabel,'
+    "data-testid': testId'
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
   
   // 样式和主题支持
   const {
-    className = '',
+    className = '','
     style,
-    variant = 'primary',
-    size = 'medium'
+    variant = 'primary','
+    size = 'medium';
   } = props;
 
   const baseClasses = 'component-base';
-  const variantClasses = `component--${variant}`;
-  const sizeClasses = `component--${size}`;
+  const variantClasses = `component--${variant}`;`
+  const sizeClasses = `component--${size}`;`
   const stateClasses = [
-    disabled && 'component--disabled',
-    loading && 'component--loading'
-  ].filter(Boolean).join(' ');
-
+    disabled && "component--disabled','`
+    loading && 'component--loading';
+  ].filter(Boolean).join(' ');'
   const combinedClassName = [
     baseClasses,
     variantClasses,
     sizeClasses,
     stateClasses,
     className
-  ].filter(Boolean).join(' ');
-  
+  ].filter(Boolean).join(" ');'
   // 可访问性支持
   const {
-    'aria-label': ariaLabel,
-    'aria-describedby': ariaDescribedBy,
+    'aria-label': ariaLabel,'
+    'aria-describedby': ariaDescribedBy,'
     role,
-    tabIndex = 0,
-    'data-testid': testId
+    tabIndex  = 0,
+    'data-testid': testId'
   } = props;
-
   const accessibilityProps = {
-    'aria-label': ariaLabel,
-    'aria-describedby': ariaDescribedBy,
+    'aria-label': ariaLabel,'
+    'aria-describedby': ariaDescribedBy,'
     role,
     tabIndex: disabled ? -1 : tabIndex,
-    'data-testid': testId
+    "data-testid': testId'
   };
 
   // 键盘导航支持
   const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' || event.key === ' ') {
+    if (event.key === 'Enter' || event.key === ' ') {'
       event.preventDefault();
       onClick?.(event as any);
     }
@@ -114,14 +105,13 @@ export const ToastProvider: React.FC<ToastProps> = (props) => {
   return (
     <>
       {children}
-      <Toaster
-        position="top-right"
+      <Toaster position= 'top-right';
         reverseOrder={false}
         gutter={8}
-        containerClassName=""
+        containerClassName="';
         containerStyle={{}}
         toastOptions={toastConfig}
-      />
+         />
     </>
   );
 };
@@ -140,8 +130,7 @@ export const showToast = {
     return toast.loading(message, { ...toastConfig, ...options });
   },
 
-  promise: <T,>(
-    promise: Promise<T>,
+  promise: <T,>(promise: Promise<T>,
     messages: {
       loading: string;
       success: string | ((data: T) => string);

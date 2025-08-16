@@ -6,21 +6,17 @@
  * 更新时间: 2024-08-08
  */
 
-import { UserRole, UserStatus, UserPlan, TestType, TestStatus, TestGrade, TestPriority, ThemeMode, Language, // Timezone } from './enums'; // 已修复
+import { UserRole, UserStatus, UserPlan, TestType, TestStatus, TestGrade, TestPriority, ThemeMode, Language, // Timezone   } from './enums';// 已修复'
 // ==================== 基础类型定义 ====================
 
-export type UUID = string;
-export type Timestamp = string; // ISO 8601 格式: 2024-08-08T10:30:00.000Z
-export type URL = string;
-export type Email = string;
-
-// ==================== 用户相关接口 ====================
+export type UUID    = string;export type Timestamp  = string;// ISO 8601 格式: 2024-08-08T10: 30:00.000Z
+export type URL    = string;export type Email    = string;// ==================== 用户相关接口 ====================
 
 /**
  * 用户个人资料接口
  * 修复问题：统一profile字段结构
  */
-export interface UserProfile {
+export interface UserProfile        {
   firstName?: string;
   lastName?: string;
   fullName?: string;        // 计算字段：firstName + lastName
@@ -35,7 +31,7 @@ export interface UserProfile {
 /**
  * 通知设置接口
  */
-export interface NotificationSettings {
+export interface NotificationSettings        {
   email: boolean;
   sms: boolean;
   push: boolean;
@@ -49,7 +45,7 @@ export interface NotificationSettings {
 /**
  * 仪表板设置接口
  */
-export interface DashboardSettings {
+export interface DashboardSettings        {
   defaultView: 'overview' | 'tests' | 'reports' | 'analytics';
   layout: 'grid' | 'list' | 'cards';
   widgets: string[];
@@ -60,7 +56,7 @@ export interface DashboardSettings {
 /**
  * 测试设置接口
  */
-export interface TestingSettings {
+export interface TestingSettings        {
   defaultTimeout: number;     // 毫秒
   maxConcurrentTests: number;
   autoSaveResults: boolean;
@@ -70,7 +66,7 @@ export interface TestingSettings {
 /**
  * 隐私设置接口
  */
-export interface PrivacySettings {
+export interface PrivacySettings        {
   shareUsageData: boolean;
   allowCookies: boolean;
   trackingEnabled: boolean;
@@ -80,7 +76,7 @@ export interface PrivacySettings {
  * 用户偏好设置接口
  * 修复问题：统一preferences字段结构
  */
-export interface UserPreferences {
+export interface UserPreferences        {
   theme: ThemeMode;
   language: Language;
   timezone: Timezone;
@@ -101,7 +97,7 @@ export interface UserPreferences {
  * - 数据库使用 snake_case
  * - 通过转换函数进行映射
  */
-export interface User {
+export interface User        {
   // 基础标识信息
   id: UUID;
   username: string;
@@ -141,7 +137,7 @@ export interface User {
  * 数据库字段映射接口
  * 用于前后端数据转换，解决 camelCase vs snake_case 问题
  */
-export interface UserDatabaseFields {
+export interface UserDatabaseFields        {
   id: string;
   username: string;
   email: string;
@@ -170,7 +166,7 @@ export interface UserDatabaseFields {
  * 测试配置接口
  * 修复问题：统一不同测试类型的配置结构
  */
-export interface TestConfig {
+export interface TestConfig        {
   // 基础配置
   timeout?: number;                // 毫秒
   retries?: number;
@@ -230,14 +226,14 @@ export interface TestConfig {
   compatibility?: {
     browsers?: string[];
     devices?: string[];
-    viewports?: Array<{ width: number; height: number }>;
+    viewports?: Array<{ width: number; height: number ;}>;
   };
 }
 
 /**
  * 测试错误接口
  */
-export interface TestError {
+export interface TestError        {
   type: string;
   message: string;
   details?: any;
@@ -250,7 +246,7 @@ export interface TestError {
 /**
  * 测试警告接口
  */
-export interface TestWarning {
+export interface TestWarning        {
   type: string;
   message: string;
   details?: any;
@@ -260,7 +256,7 @@ export interface TestWarning {
 /**
  * 测试建议接口
  */
-export interface TestRecommendation {
+export interface TestRecommendation        {
   type: string;
   title: string;
   description: string;
@@ -278,7 +274,7 @@ export interface TestRecommendation {
 /**
  * 测试产物接口
  */
-export interface TestArtifact {
+export interface TestArtifact        {
   type: 'screenshot' | 'video' | 'report' | 'log' | 'trace';
   name: string;
   url: string;
@@ -290,7 +286,7 @@ export interface TestArtifact {
 /**
  * 测试指标接口
  */
-export interface TestMetrics {
+export interface TestMetrics        {
   // 性能指标
   responseTime?: number;           // 毫秒
   throughput?: number;             // 请求/秒
@@ -318,7 +314,7 @@ export interface TestMetrics {
  * - endTime -> completedAt
  * - score -> overallScore (更明确的命名)
  */
-export interface TestResult {
+export interface TestResult        {
   // 基础标识信息
   id: UUID;
   userId: UUID;

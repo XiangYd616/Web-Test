@@ -1,5 +1,5 @@
 
-export interface PageSpeedMetrics {
+export interface PageSpeedMetrics     {
   // Core Web Vitals
   lcp: number | null;  // Largest Contentful Paint
   fid: number | null;  // First Input Delay
@@ -30,7 +30,7 @@ export interface PageSpeedMetrics {
   }>;
 }
 
-export interface PageSpeedResult {
+export interface PageSpeedResult     {
   desktop: PageSpeedMetrics;
   mobile: PageSpeedMetrics;
   url: string;
@@ -47,14 +47,13 @@ class GooglePageSpeedService {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
   }
   private readonly API_KEY = process.env.REACT_APP_GOOGLE_PAGESPEED_API_KEY;
-  private readonly BASE_URL = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
-
+  private readonly BASE_URL = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed';'`
   /**
    * 分析页面性能 (桌面端和移动端)
    */
@@ -67,8 +66,8 @@ class GooglePageSpeedService {
 
     try {
       const [desktopResult, mobileResult] = await Promise.all([
-        this.fetchPageSpeedData(url, 'desktop'),
-        this.fetchPageSpeedData(url, 'mobile')
+        this.fetchPageSpeedData(url, 'desktop'),'
+        this.fetchPageSpeedData(url, 'mobile')'
       ]);
 
       return {
@@ -78,7 +77,7 @@ class GooglePageSpeedService {
         timestamp: Date.now()
       };
     } catch (error) {
-      console.warn('PageSpeed API failed, using mock data:', error);
+      console.warn('PageSpeed API failed, using mock data: ', error);'
       return this.getMockData(url);
     }
   }
@@ -86,19 +85,19 @@ class GooglePageSpeedService {
   /**
    * 获取单个设备类型的PageSpeed数据
    */
-  private async fetchPageSpeedData(url: string, strategy: 'desktop' | 'mobile') {
+  private async fetchPageSpeedData(url: string, strategy: 'desktop' | 'mobile') {'
     const params = new URLSearchParams({
       url: url,
       key: this.API_KEY!,
       strategy: strategy,
-      category: 'performance',
-      locale: 'zh_CN'
+      category: 'performance','
+      locale: 'zh_CN';
     });
 
-    const response = await fetch(`${this.BASE_URL}?${params}`);
+    const response = await fetch(`${this.BASE_URL}?${params}`);`
 
     if (!response.ok) {
-      throw new Error(`PageSpeed API error: ${response.status}`);
+      throw new Error(`PageSpeed API error: ${response.status}`);`
     }
 
     return response.json();
@@ -112,15 +111,13 @@ class GooglePageSpeedService {
     const audits = lighthouse?.audits || {};
 
     // Core Web Vitals
-    const lcp = audits['largest-contentful-paint']?.numericValue || null;
-    const fid = audits['max-potential-fid']?.numericValue || null;
-    const cls = audits['cumulative-layout-shift']?.numericValue || null;
-
+    const lcp = audits["largest-contentful-paint']?.numericValue || null;'`
+    const fid = audits['max-potential-fid']?.numericValue || null;'
+    const cls = audits['cumulative-layout-shift']?.numericValue || null;'
     // 其他性能指标
-    const fcp = audits['first-contentful-paint']?.numericValue || null;
-    const ttfb = audits['server-response-time']?.numericValue || null;
-    const si = audits['speed-index']?.numericValue || null;
-
+    const fcp = audits['first-contentful-paint']?.numericValue || null;'
+    const ttfb = audits['server-response-time']?.numericValue || null;'
+    const si = audits['speed-index']?.numericValue || null;'
     // 性能评分
     const performanceScore = lighthouse?.categories?.performance?.score
       ? Math.round(lighthouse.categories.performance.score * 100)
@@ -148,13 +145,13 @@ class GooglePageSpeedService {
   /**
    * 解析优化机会
    */
-  private parseOpportunities(audits: any): PageSpeedMetrics['opportunities'] {
+  private parseOpportunities(audits: any): PageSpeedMetrics['opportunities'] {'
     const opportunityKeys = [
-      'unused-css-rules',
-      'unused-javascript',
-      'modern-image-formats',
-      'offscreen-images',
-      'render-blocking-resources'
+      'unused-css-rules','
+      'unused-javascript','
+      'modern-image-formats','
+      'offscreen-images','
+      'render-blocking-resources';
     ];
 
     return opportunityKeys
@@ -170,18 +167,18 @@ class GooglePageSpeedService {
           impact: this.getImpactLevel(audit.details?.overallSavingsMs || 0)
         };
       })
-      .filter(Boolean) as PageSpeedMetrics['opportunities'];
+      .filter(Boolean) as PageSpeedMetrics['opportunities'];'
   }
 
   /**
    * 解析诊断信息
    */
-  private parseDiagnostics(audits: any): PageSpeedMetrics['diagnostics'] {
+  private parseDiagnostics(audits: any): PageSpeedMetrics['diagnostics'] {'
     const diagnosticKeys = [
-      'dom-size',
-      'critical-request-chains',
-      'mainthread-work-breakdown',
-      'bootup-time'
+      'dom-size','
+      'critical-request-chains','
+      'mainthread-work-breakdown','
+      'bootup-time';
     ];
 
     return diagnosticKeys
@@ -196,13 +193,13 @@ class GooglePageSpeedService {
           impact: this.getImpactLevel(audit.numericValue || 0)
         };
       })
-      .filter(Boolean) as PageSpeedMetrics['diagnostics'];
+      .filter(Boolean) as PageSpeedMetrics['diagnostics'];'
   }
 
   /**
    * 根据数值确定影响级别
    */
-  private getImpactLevel(value: number): 'high' | 'medium' | 'low' {
+  private getImpactLevel(value: number): 'high' | 'medium' | 'low' {'
     if (value > 1000) return 'high';
     if (value > 500) return 'medium';
     return 'low';
@@ -212,7 +209,7 @@ class GooglePageSpeedService {
    * 生成模拟数据 (当API不可用时)
    */
   private getMockData(url: string): PageSpeedResult {
-    const generateMockMetrics = (isMobile: boolean): PageSpeedMetrics => ({
+    const generateMockMetrics = (isMobile: boolean): PageSpeedMetrics  => ({
       lcp: 2500 + Math.random() * 2000,
       fid: 100 + Math.random() * 200,
       cls: Math.random() * 0.25,
@@ -222,19 +219,19 @@ class GooglePageSpeedService {
       performanceScore: Math.round(60 + Math.random() * 30),
       opportunities: [
         {
-          id: 'unused-css-rules',
-          title: '移除未使用的CSS',
-          description: '减少未使用的规则可以减少字节消耗',
+          id: 'unused-css-rules','
+          title: '移除未使用的CSS','
+          description: '减少未使用的规则可以减少字节消耗','
           savings: Math.round(500 + Math.random() * 1000),
-          impact: 'medium'
+          impact: 'medium';
         }
       ],
       diagnostics: [
         {
-          id: 'dom-size',
-          title: 'DOM大小过大',
-          description: '考虑减少DOM节点数量',
-          impact: 'medium'
+          id: 'dom-size','
+          title: 'DOM大小过大','
+          description: '考虑减少DOM节点数量','
+          impact: 'medium';
         }
       ]
     });
@@ -252,9 +249,9 @@ class GooglePageSpeedService {
    */
   static evaluateWebVitals(metrics: PageSpeedMetrics) {
     const evaluations = {
-      lcp: metrics.lcp ? (metrics.lcp <= 2500 ? 'good' : metrics.lcp <= 4000 ? 'needs-improvement' : 'poor') : 'unknown',
-      fid: metrics.fid ? (metrics.fid <= 100 ? 'good' : metrics.fid <= 300 ? 'needs-improvement' : 'poor') : 'unknown',
-      cls: metrics.cls ? (metrics.cls <= 0.1 ? 'good' : metrics.cls <= 0.25 ? 'needs-improvement' : 'poor') : 'unknown'
+      lcp: metrics.lcp ? (metrics.lcp <= 2500 ? 'good' : metrics.lcp <= 4000 ? 'needs-improvement' : 'poor') : 'unknown','
+      fid: metrics.fid ? (metrics.fid <= 100 ? 'good' : metrics.fid <= 300 ? 'needs-improvement' : 'poor') : 'unknown','
+      cls: metrics.cls ? (metrics.cls <= 0.1 ? 'good' : metrics.cls <= 0.25 ? 'needs-improvement' : 'poor') : 'unknown';
     };
 
     return evaluations;

@@ -2,7 +2,7 @@
 // 已加载的CSS文件缓存
 const loadedCSS = new Set<string>();
 
-export const loadCSS = (href: string, id?: string): Promise<void> => {
+export const loadCSS = (href: string, id?: string): Promise<void>  => {
   return new Promise((resolve, reject) => {
     // 如果已经加载过，直接返回
     if (loadedCSS.has(href)) {
@@ -11,7 +11,7 @@ export const loadCSS = (href: string, id?: string): Promise<void> => {
     }
 
     // 检查是否已经存在相同的link元素
-    const existingLink = document.querySelector(`link[href="${href}"]`);
+    const existingLink = document.querySelector(`link[href= '${href}']`);'`
     if (existingLink) {
       
         loadedCSS.add(href);
@@ -20,7 +20,7 @@ export const loadCSS = (href: string, id?: string): Promise<void> => {
       }
 
     // 创建link元素
-    const link = document.createElement('link');
+    const link = document.createElement("link');'`
     link.rel = 'stylesheet';
     link.href = href;
     if (id) {
@@ -35,7 +35,7 @@ export const loadCSS = (href: string, id?: string): Promise<void> => {
 
     // 设置加载失败回调
     link.onerror = () => {
-      reject(new Error(`Failed to load CSS: ${href}`));
+      reject(new Error(`Failed to load CSS: ${href}`));`
     };
 
     // 添加到head中
@@ -43,21 +43,21 @@ export const loadCSS = (href: string, id?: string): Promise<void> => {
   });
 };
 
-export const preloadCSS = (href: string): void => {
+export const preloadCSS = (href: string): void  => {
   // 如果已经加载过，直接返回
   if (loadedCSS.has(href)) {
     return;
   }
 
   // 检查是否已经存在相同的preload元素
-  const existingPreload = document.querySelector(`link[href="${href}"][rel="preload"]`);
+  const existingPreload = document.querySelector(`link[href= '${href}'][rel= 'preload']`);'`
   if (existingPreload) {
     
         return;
       }
 
   // 创建preload link元素
-  const link = document.createElement('link');
+  const link = document.createElement("link');'`
   link.rel = 'preload';
   link.as = 'style';
   link.href = href;
@@ -71,12 +71,11 @@ export const preloadCSS = (href: string): void => {
   document.head.appendChild(link);
 };
 
-const pageCSS: Record<string, string[]> = {
+const pageCSS: Record<string, string[]>  = {
   // 注意：所有页面特定CSS已迁移到组件库
   // 保留映射结构以防需要动态加载特定样式
 };
-
-export const loadPageCSS = async (pageName: string): Promise<void> => {
+export const loadPageCSS = async (pageName: string): Promise<void>  => {
   const cssFiles = pageCSS[pageName];
   if (!cssFiles || cssFiles.length === 0) {
     
@@ -86,11 +85,11 @@ export const loadPageCSS = async (pageName: string): Promise<void> => {
   try {
     await Promise.all(cssFiles.map(href => loadCSS(href)));
   } catch (error) {
-    console.warn(`Failed to load CSS for page: ${pageName}`, error);
+    console.warn(`Failed to load CSS for page: ${pageName}`, error);`
   }
 };
 
-export const preloadPageCSS = (pageName: string): void => {
+export const preloadPageCSS = (pageName: string): void  => {
   const cssFiles = pageCSS[pageName];
   if (!cssFiles || cssFiles.length === 0) {
     
@@ -100,12 +99,11 @@ export const preloadPageCSS = (pageName: string): void => {
   cssFiles.forEach(href => preloadCSS(href));
 };
 
-const componentCSS: Record<string, string> = {
+const componentCSS: Record<string, string>  = {
   // 注意：所有组件特定CSS已迁移到组件库
   // 保留映射结构以防需要动态加载特定样式
 };
-
-export const loadComponentCSS = async (componentName: string): Promise<void> => {
+export const loadComponentCSS = async (componentName: string): Promise<void>  => {
   const cssFile = componentCSS[componentName];
   if (!cssFile) {
     
@@ -115,25 +113,25 @@ export const loadComponentCSS = async (componentName: string): Promise<void> => 
   try {
     await loadCSS(cssFile);
   } catch (error) {
-    console.warn(`Failed to load CSS for component: ${componentName}`, error);
+    console.warn(`Failed to load CSS for component: ${componentName}`, error);`
   }
 };
 
-export const unloadCSS = (href: string): void => {
-  const link = document.querySelector(`link[href="${href}"]`);
+export const unloadCSS = (href: string): void  => {
+  const link = document.querySelector(`link[href= '${href}']`);'`
   if (link) {
     document.head.removeChild(link);
     loadedCSS.delete(href);
   }
 };
 
-export const getLoadedCSS = (): string[] => {
+export const getLoadedCSS = (): string[]  => {
   return Array.from(loadedCSS);
 };
 
-export const clearDynamicCSS = (): void => {
+export const clearDynamicCSS = (): void  => {
   loadedCSS.forEach(href => {
-    const link = document.querySelector(`link[href="${href}"]`);
+    const link = document.querySelector(`link[href= '${href}']`);'`
     if (link) {
       document.head.removeChild(link);
     }

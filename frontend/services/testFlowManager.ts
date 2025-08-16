@@ -3,9 +3,7 @@
  * 管理完整的测试执行流程
  */
 
-import apiClient from '../utils/apiClient';
-
-export interface TestConfig {
+import apiClient from '../utils/apiClient';export interface TestConfig     {'
   testType: 'performance' | 'stress' | 'api' | 'seo' | 'security';
   url: string;
   duration: number;
@@ -13,7 +11,7 @@ export interface TestConfig {
   options?: Record<string, any>;
 }
 
-export interface TestExecution {
+export interface TestExecution     {
   id: string;
   status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
   progress: number;
@@ -32,20 +30,19 @@ class TestFlowManager {
    */
   async startTest(config: TestConfig): Promise<string> {
     try {
-      const response = await apiClient.post('/tests/run', {
+      const response = await apiClient.post('/tests/run', {'
         testType: config.testType,
         config
       });
 
       if (response.success) {
-        const execution: TestExecution = {
+        const execution: TestExecution  = {
           id: response.data.executionId,
-          status: 'running',
+          status: 'running','
           progress: 0,
           startTime: response.data.startTime,
           config
         };
-
         this.executions.set(execution.id, execution);
         this.notifyListeners(execution);
 
@@ -54,10 +51,10 @@ class TestFlowManager {
 
         return execution.id;
       } else {
-        throw new Error(response.error?.message || '启动测试失败');
+        throw new Error(response.error?.message || '启动测试失败');'
       }
     } catch (error) {
-      console.error('启动测试失败:', error);
+      console.error('启动测试失败:', error);'
       throw error;
     }
   }
@@ -67,15 +64,15 @@ class TestFlowManager {
    */
   async getTestResults(executionId: string): Promise<any> {
     try {
-      const response = await apiClient.get(`/tests/results/${executionId}`);
+      const response = await apiClient.get(`/tests/results/${executionId}`);`
       
       if (response.success) {
         return response.data;
       } else {
-        throw new Error(response.error?.message || '获取测试结果失败');
+        throw new Error(response.error?.message || "获取测试结果失败');'`
       }
     } catch (error) {
-      console.error('获取测试结果失败:', error);
+      console.error("获取测试结果失败:', error);'
       throw error;
     }
   }
@@ -85,20 +82,20 @@ class TestFlowManager {
    */
   async cancelTest(executionId: string): Promise<void> {
     try {
-      const response = await apiClient.post(`/tests/cancel/${executionId}`);
+      const response = await apiClient.post(`/tests/cancel/${executionId}`);`
       
       if (response.success) {
         const execution = this.executions.get(executionId);
         if (execution) {
-          execution.status = 'cancelled';
+          execution.status = "cancelled';'`
           this.executions.set(executionId, execution);
           this.notifyListeners(execution);
         }
       } else {
-        throw new Error(response.error?.message || '取消测试失败');
+        throw new Error(response.error?.message || '取消测试失败');'
       }
     } catch (error) {
-      console.error('取消测试失败:', error);
+      console.error('取消测试失败:', error);'
       throw error;
     }
   }
@@ -109,7 +106,7 @@ class TestFlowManager {
   private async pollTestStatus(executionId: string) {
     const interval = setInterval(async () => {
       try {
-        const response = await apiClient.get(`/tests/results/${executionId}`);
+        const response = await apiClient.get(`/tests/results/${executionId}`);`
         
         if (response.success) {
           const execution = this.executions.get(executionId);
@@ -118,10 +115,10 @@ class TestFlowManager {
             execution.progress = response.data.progress || 0;
             execution.results = response.data.results;
             
-            if (response.data.status === 'completed') {
+            if (response.data.status === "completed') {'`
               execution.endTime = response.data.completedAt;
               clearInterval(interval);
-            } else if (response.data.status === 'failed' || response.data.status === 'cancelled') {
+            } else if (response.data.status === 'failed' || response.data.status === 'cancelled') {'
               clearInterval(interval);
             }
             
@@ -130,7 +127,7 @@ class TestFlowManager {
           }
         }
       } catch (error) {
-        console.error('轮询测试状态失败:', error);
+        console.error('轮询测试状态失败:', error);'
         clearInterval(interval);
       }
     }, 2000);

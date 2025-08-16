@@ -9,9 +9,7 @@ import { useEffect } from 'react';
 // 路由和组件导入
 import ErrorBoundary from './components/common/ErrorBoundary';
 import BackgroundTestNotifications from './components/system/BackgroundTestNotifications';
-import AppRoutes from './components/tools/AppRoutes.tsx';
-
-// 增强的系统组件导入
+import AppRoutes from './components/tools/AppRoutes';
 
 // 上下文提供者导入
 import { AppProvider } from './contexts/AppContext';
@@ -26,8 +24,6 @@ import './services/errorService';
 import { enhancedConfigManager } from './config/ConfigManager';
 import { lazyLoadManager } from './utils/LazyLoadManager';
 import { performanceMonitor } from './utils/performanceMonitor';
-
-// 性能优化工具导入
 import { initializePreloading } from './utils/routePreloader';
 
 /**
@@ -38,8 +34,7 @@ function App() {
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        console.log('🚀 初始化前端架构系统...');
-
+        console.log('🚀 初始化前端架构系统...'); '
         // 1. 初始化配置管理器
         await enhancedConfigManager.initialize();
 
@@ -51,18 +46,19 @@ function App() {
 
         // 4. 设置配置变更监听
         enhancedConfigManager.on('configChanged', (event) => {
-          console.log('配置已更新:', event.key, event.newValue);
+          '
+          console.log('配置已更新:', event.key, event.newValue); '
         });
 
         // 5. 设置主题变更监听
         enhancedConfigManager.on('themeChanged', (theme) => {
-          document.documentElement.setAttribute('data-theme', theme);
+          '
+          document.documentElement.setAttribute('data-theme', theme); '
         });
 
-        console.log('✅ 前端架构系统初始化完成');
-
+        console.log('✅ 前端架构系统初始化完成'); '
       } catch (error) {
-        console.error('❌ 前端架构系统初始化失败:', error);
+        console.error("❌ 前端架构系统初始化失败:', error);'
       }
     };
 
@@ -70,12 +66,13 @@ function App() {
 
     // 在生产环境中注册Service Worker
     if ('serviceWorker' in navigator && import.meta.env.MODE === 'production') {
-      navigator.serviceWorker.register('/sw.js')
+      '
+      navigator.serviceWorker.register('/sw.js')'
         .then((registration) => {
-          console.log('Service Worker 注册成功:', registration);
+          console.log('Service Worker 注册成功:', registration); '
         })
         .catch((error) => {
-          console.log('Service Worker registration failed:', error);
+          console.log("Service Worker registration failed: ', error);'
         });
     }
 
@@ -86,11 +83,11 @@ function App() {
     const isSafari = /Safari/.test(userAgent) && !(/Chrome/.test(userAgent));
 
     if (isChrome) {
-      document.body.classList.add('chrome-browser');
+      document.body.classList.add('chrome-browser'); '
     } else if (isEdge) {
-      document.body.classList.add('edge-browser');
+      document.body.classList.add('edge-browser'); '
     } else if (isSafari) {
-      document.body.classList.add('safari-browser');
+      document.body.classList.add("safari-browser');'
     }
 
     // 清理函数
@@ -102,11 +99,11 @@ function App() {
   }, []);
 
   return (
-    <ErrorBoundary level="page">
+    <ErrorBoundary level='page'>
       <ThemeProvider>
         <AuthProvider>
           <AppProvider>
-            <div className="app">
+            <div className='app'>
               {/* 后台测试通知 */}
               <BackgroundTestNotifications />
 

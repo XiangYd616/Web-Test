@@ -2,7 +2,7 @@
  * 版本控制相关类型定义
  */
 
-export interface Version {
+export interface Version     {
   major: number;
   minor: number;
   patch: number;
@@ -10,7 +10,7 @@ export interface Version {
   build?: string;
 }
 
-export interface VersionInfo {
+export interface VersionInfo     {
   version: Version;
   versionString: string;
   releaseDate: Date;
@@ -19,13 +19,13 @@ export interface VersionInfo {
   isLatest: boolean;
 }
 
-export interface VersionHistory {
+export interface VersionHistory     {
   versions: VersionInfo[];
   currentVersion: VersionInfo;
   latestVersion: VersionInfo;
 }
 
-export interface VersionComparison {
+export interface VersionComparison     {
   current: Version;
   target: Version;
   result: 'newer' | 'older' | 'same';
@@ -36,7 +36,7 @@ export interface VersionComparison {
   };
 }
 
-export interface VersionUpdate {
+export interface VersionUpdate     {
   available: boolean;
   currentVersion: string;
   latestVersion: string;
@@ -46,14 +46,14 @@ export interface VersionUpdate {
   releaseNotes?: string;
 }
 
-export interface VersionConfig {
+export interface VersionConfig     {
   checkInterval: number; // 检查更新间隔（毫秒）
   autoCheck: boolean;
   includePrerelease: boolean;
   updateChannel: 'stable' | 'beta' | 'alpha';
 }
 
-export interface VersionMetadata {
+export interface VersionMetadata     {
   buildNumber: string;
   buildDate: Date;
   commitHash: string;
@@ -63,7 +63,7 @@ export interface VersionMetadata {
   dependencies: Record<string, string>;
 }
 
-export interface VersionCompatibility {
+export interface VersionCompatibility     {
   minVersion: Version;
   maxVersion?: Version;
   supportedVersions: Version[];
@@ -71,7 +71,7 @@ export interface VersionCompatibility {
   incompatibleVersions: Version[];
 }
 
-export interface VersionMigration {
+export interface VersionMigration     {
   fromVersion: Version;
   toVersion: Version;
   migrationSteps: VersionMigrationStep[];
@@ -79,7 +79,7 @@ export interface VersionMigration {
   estimatedTime: number; // 预估迁移时间（分钟）
 }
 
-export interface VersionMigrationStep {
+export interface VersionMigrationStep     {
   id: string;
   title: string;
   description: string;
@@ -89,14 +89,14 @@ export interface VersionMigrationStep {
   rollback?: () => Promise<void>;
 }
 
-export interface VersionValidation {
+export interface VersionValidation     {
   isValid: boolean;
   errors: string[];
   warnings: string[];
   suggestions: string[];
 }
 
-export interface VersionRelease {
+export interface VersionRelease     {
   version: Version;
   releaseDate: Date;
   title: string;
@@ -109,7 +109,7 @@ export interface VersionRelease {
   security: VersionSecurityFix[];
 }
 
-export interface VersionFeature {
+export interface VersionFeature     {
   id: string;
   title: string;
   description: string;
@@ -118,7 +118,7 @@ export interface VersionFeature {
   documentation?: string;
 }
 
-export interface VersionBugFix {
+export interface VersionBugFix     {
   id: string;
   title: string;
   description: string;
@@ -127,7 +127,7 @@ export interface VersionBugFix {
   issueUrl?: string;
 }
 
-export interface VersionBreakingChange {
+export interface VersionBreakingChange     {
   id: string;
   title: string;
   description: string;
@@ -136,7 +136,7 @@ export interface VersionBreakingChange {
   affectedAPIs: string[];
 }
 
-export interface VersionDeprecation {
+export interface VersionDeprecation     {
   id: string;
   feature: string;
   deprecatedIn: Version;
@@ -145,7 +145,7 @@ export interface VersionDeprecation {
   migrationGuide?: string;
 }
 
-export interface VersionSecurityFix {
+export interface VersionSecurityFix     {
   id: string;
   title: string;
   description: string;
@@ -154,7 +154,7 @@ export interface VersionSecurityFix {
   affectedVersions: Version[];
 }
 
-export interface VersionNotification {
+export interface VersionNotification     {
   id: string;
   type: 'update' | 'security' | 'deprecation' | 'migration';
   title: string;
@@ -167,7 +167,7 @@ export interface VersionNotification {
   expiresAt?: Date;
 }
 
-export interface VersionAnalytics {
+export interface VersionAnalytics     {
   versionUsage: Record<string, number>;
   updateAdoption: {
     version: string;
@@ -183,7 +183,7 @@ export interface VersionAnalytics {
   errorRates: Record<string, number>;
 }
 
-export interface VersionPreferences {
+export interface VersionPreferences     {
   autoUpdate: boolean;
   updateChannel: 'stable' | 'beta' | 'alpha';
   notificationSettings: {
@@ -197,24 +197,12 @@ export interface VersionPreferences {
 }
 
 // 版本比较函数类型
-export type VersionComparator = (a: Version, b: Version) => number;
-
-// 版本格式化函数类型
-export type VersionFormatter = (version: Version) => string;
-
-// 版本解析函数类型
-export type VersionParser = (versionString: string) => Version | null;
-
-// 版本验证函数类型
-export type VersionValidator = (version: Version) => VersionValidation;
-
-// 版本更新检查函数类型
-export type VersionUpdateChecker = () => Promise<VersionUpdate>;
-
-// 版本迁移执行函数类型
-export type VersionMigrationExecutor = (migration: VersionMigration) => Promise<boolean>;
-
-// 常用版本常量
+export type VersionComparator   = (a: Version, b: Version) => number;// 版本格式化函数类型
+export type VersionFormatter   = (version: Version) => string;// 版本解析函数类型
+export type VersionParser   = (versionString: string) => Version | null;// 版本验证函数类型
+export type VersionValidator   = (version: Version) => VersionValidation;// 版本更新检查函数类型
+export type VersionUpdateChecker   = () => Promise<VersionUpdate>;// 版本迁移执行函数类型
+export type VersionMigrationExecutor   = (migration: VersionMigration) => Promise<boolean>;// 常用版本常量
 export const VERSION_PATTERNS = {
   SEMANTIC: /^(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*))?(?:\+([a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*))?$/,
   SIMPLE: /^(\d+)\.(\d+)\.(\d+)$/,
@@ -222,36 +210,36 @@ export const VERSION_PATTERNS = {
 } as const;
 
 export const VERSION_CHANNELS = {
-  STABLE: 'stable',
-  BETA: 'beta',
-  ALPHA: 'alpha',
-  NIGHTLY: 'nightly'
+  STABLE: 'stable','
+  BETA: 'beta','
+  ALPHA: 'alpha','
+  NIGHTLY: 'nightly';
 } as const;
 
 export const UPDATE_TYPES = {
-  MAJOR: 'major',
-  MINOR: 'minor',
-  PATCH: 'patch',
-  PRERELEASE: 'prerelease'
+  MAJOR: 'major','
+  MINOR: 'minor','
+  PATCH: 'patch','
+  PRERELEASE: 'prerelease';
 } as const;
 
 export const MIGRATION_TYPES = {
-  DATA: 'data',
-  CONFIG: 'config',
-  SCHEMA: 'schema',
-  CLEANUP: 'cleanup'
+  DATA: 'data','
+  CONFIG: 'config','
+  SCHEMA: 'schema','
+  CLEANUP: 'cleanup';
 } as const;
 
 export const NOTIFICATION_TYPES = {
-  UPDATE: 'update',
-  SECURITY: 'security',
-  DEPRECATION: 'deprecation',
-  MIGRATION: 'migration'
+  UPDATE: 'update','
+  SECURITY: 'security','
+  DEPRECATION: 'deprecation','
+  MIGRATION: 'migration';
 } as const;
 
 export const PRIORITY_LEVELS = {
-  LOW: 'low',
-  MEDIUM: 'medium',
-  HIGH: 'high',
-  CRITICAL: 'critical'
+  LOW: 'low','
+  MEDIUM: 'medium','
+  HIGH: 'high','
+  CRITICAL: 'critical';
 } as const;

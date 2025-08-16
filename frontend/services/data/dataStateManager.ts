@@ -4,14 +4,8 @@
  * 版本: v1.0.0
  */
 
-import { useState, useCallback, useRef, useEffect } from 'react';
-import type { ApiResponse, ApiError } from '../types/api';
-
-// ==================== 状态类型定义 ====================
-
-export type DataState = 'idle' | 'loading' | 'success' | 'error';
-
-export interface DataStateInfo<T = any> {
+import { useState, useCallback, useRef, useEffect    } from 'react';import type { ApiResponse, ApiError  } from '../types/api';// ==================== 状态类型定义 ==================== ''
+export type DataState   = 'idle' | 'loading' | 'success' | 'error';export interface DataStateInfo<T = any>     {'
   state: DataState;
   data: T | null;
   error: ApiError | null;
@@ -22,7 +16,7 @@ export interface DataStateInfo<T = any> {
   retryCount: number;
 }
 
-export interface DataStateOptions {
+export interface DataStateOptions     {
   initialData?: any;
   retryLimit?: number;
   autoRetry?: boolean;
@@ -32,7 +26,7 @@ export interface DataStateOptions {
   onStateChange?: (state: DataState) => void;
 }
 
-export interface AsyncOperation<T = any> {
+export interface AsyncOperation<T = any>     {
   (): Promise<ApiResponse<T>>;
 }
 
@@ -42,7 +36,7 @@ export function useDataState<T = any>(
   options: DataStateOptions = {}
 ): [
   DataStateInfo<T>,
-  {
+    {
     execute: (operation: AsyncOperation<T>) => Promise<T | null>;
     retry: () => Promise<T | null>;
     reset: () => void;
@@ -60,7 +54,7 @@ export function useDataState<T = any>(
     onStateChange
   } = options;
 
-  const [state, setState] = useState<DataState>('idle');
+  const [state, setState] = useState<DataState>('idle');'
   const [data, setData] = useState<T | null>(initialData);
   const [error, setError] = useState<ApiError | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
@@ -70,17 +64,16 @@ export function useDataState<T = any>(
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // 计算派生状态
-  const stateInfo: DataStateInfo<T> = {
+  const stateInfo: DataStateInfo<T>  = {
     state,
     data,
     error,
-    loading: state === 'loading',
-    success: state === 'success',
-    hasError: state === 'error',
+    loading: state === 'loading','
+    success: state === 'success','
+    hasError: state === 'error','
     lastUpdated,
     retryCount
   };
-
   // 状态变化回调
   useEffect(() => {
     onStateChange?.(state);
@@ -96,9 +89,9 @@ export function useDataState<T = any>(
   }, []);
 
   // 执行异步操作
-  const execute = useCallback(async (operation: AsyncOperation<T>): Promise<T | null> => {
+  const execute = useCallback(async (operation: AsyncOperation<T>): Promise<T | null>  => {
     lastOperationRef.current = operation;
-    setState('loading');
+    setState('loading');'
     setError(null);
 
     try {
@@ -108,28 +101,27 @@ export function useDataState<T = any>(
         
         const responseData = response.data;
         setData(responseData);
-        setState('success');
+        setState('success');'
         setLastUpdated(new Date().toISOString());
         setRetryCount(0);
         onSuccess?.(responseData);
         return responseData;
       } else {
-        const apiError: ApiError = response.error || {
-          code: 'UNKNOWN_ERROR',
-          message: 'Unknown error occurred',
+        const apiError: ApiError  = response.error || {
+          code: 'UNKNOWN_ERROR','
+          message: 'Unknown error occurred','
           timestamp: new Date().toISOString()
         };
         throw apiError;
       }
     } catch (err) {
-      const apiError: ApiError = err instanceof Error ? {
-        code: 'EXECUTION_ERROR',
+      const apiError: ApiError  = err instanceof Error ? {
+        code: 'EXECUTION_ERROR','
         message: err.message,
         timestamp: new Date().toISOString()
       } : err as ApiError;
-
       setError(apiError);
-      setState('error');
+      setState('error');'
       onError?.(apiError);
 
       // 自动重试逻辑
@@ -145,7 +137,7 @@ export function useDataState<T = any>(
   }, [autoRetry, retryCount, retryLimit, retryDelay, onSuccess, onError]);
 
   // 重试操作
-  const retry = useCallback(async (): Promise<T | null> => {
+  const retry = useCallback(async (): Promise<T | null>  => {
     if (lastOperationRef.current) {
       
         setRetryCount(prev => prev + 1);
@@ -156,7 +148,7 @@ export function useDataState<T = any>(
 
   // 重置状态
   const reset = useCallback(() => {
-    setState('idle');
+    setState('idle');'
     setData(initialData);
     setError(null);
     setLastUpdated(null);
@@ -172,7 +164,7 @@ export function useDataState<T = any>(
   // 手动设置数据
   const setDataManually = useCallback((newData: T) => {
     setData(newData);
-    setState('success');
+    setState('success');'
     setLastUpdated(new Date().toISOString());
     setError(null);
   }, []);
@@ -180,7 +172,7 @@ export function useDataState<T = any>(
   // 手动设置错误
   const setErrorManually = useCallback((newError: ApiError) => {
     setError(newError);
-    setState('error');
+    setState('error');'
     setData(null);
   }, []);
 
@@ -198,7 +190,7 @@ export function useDataState<T = any>(
 
 // ==================== 批量数据状态管理 ====================
 
-export interface BatchDataStateInfo {
+export interface BatchDataStateInfo     {
   states: Record<string, DataStateInfo>;
   globalState: DataState;
   allLoading: boolean;
@@ -214,7 +206,7 @@ export function useBatchDataState(
   options: DataStateOptions = {}
 ): [
   BatchDataStateInfo,
-  {
+    {
     execute: (key: string, operation: AsyncOperation) => Promise<any>;
     executeAll: (operations: Record<string, AsyncOperation>) => Promise<Record<string, any>>;
     retry: (key: string) => Promise<any>;
@@ -228,11 +220,11 @@ export function useBatchDataState(
   }, {} as Record<string, ReturnType<typeof useDataState>>);
 
   // 计算批量状态信息
-  const batchInfo: BatchDataStateInfo = {
+  const batchInfo: BatchDataStateInfo  = {
     states: Object.fromEntries(
       Object.entries(stateHooks).map(([key, [stateInfo]]) => [key, stateInfo])
     ),
-    globalState: 'idle',
+    globalState: 'idle','
     allLoading: false,
     allSuccess: false,
     hasAnyError: false,
@@ -240,7 +232,6 @@ export function useBatchDataState(
     totalCount: keys.length,
     progress: 0
   };
-
   // 计算全局状态
   const states = Object.values(batchInfo.states);
   batchInfo.allLoading = states.some(s => s.loading);
@@ -271,8 +262,7 @@ export function useBatchDataState(
 
   // 执行所有操作
   const executeAll = useCallback(async (operations: Record<string, AsyncOperation>) => {
-    const results: Record<string, any> = {};
-    
+    const results: Record<string, any>  = {};
     await Promise.allSettled(
       Object.entries(operations).map(async ([key, operation]) => {
         const result = await execute(key, operation);
@@ -295,8 +285,7 @@ export function useBatchDataState(
 
   // 重试所有失败的操作
   const retryAll = useCallback(async () => {
-    const results: Record<string, any> = {};
-    
+    const results: Record<string, any>  = {};
     await Promise.allSettled(
       Object.entries(stateHooks).map(async ([key, [stateInfo, actions]]) => {
         if (stateInfo.hasError) {
@@ -337,7 +326,7 @@ export function useBatchDataState(
 
 // ==================== 分页数据状态管理 ====================
 
-export interface PaginatedDataState<T = any> extends DataStateInfo<T[]> {
+export interface PaginatedDataState<T = any> extends DataStateInfo<T[]>     {
   page: number;
   limit: number;
   total: number;
@@ -354,7 +343,7 @@ export function usePaginatedDataState<T = any>(
   } = {}
 ): [
   PaginatedDataState<T>,
-  {
+    {
     loadPage: (operation: AsyncOperation<T[]>, page: number, limit?: number) => Promise<T[] | null>;
     loadMore: (operation: AsyncOperation<T[]>) => Promise<T[] | null>;
     refresh: () => Promise<T[] | null>;
@@ -376,7 +365,7 @@ export function usePaginatedDataState<T = any>(
   const hasNext = page < totalPages;
   const hasPrev = page > 1;
 
-  const paginatedState: PaginatedDataState<T> = {
+  const paginatedState: PaginatedDataState<T>  = {
     ...dataState,
     page,
     limit,
@@ -386,13 +375,12 @@ export function usePaginatedDataState<T = any>(
     hasPrev,
     isLoadingMore
   };
-
   // 加载指定页面
   const loadPage = useCallback(async (
     operation: AsyncOperation<T[]>, 
     targetPage: number, 
     targetLimit?: number
-  ): Promise<T[] | null> => {
+  ): Promise<T[] | null>  => {
     lastOperationRef.current = operation;
     setPage(targetPage);
     if (targetLimit) {
@@ -412,7 +400,7 @@ export function usePaginatedDataState<T = any>(
   }, [dataActions]);
 
   // 加载更多数据
-  const loadMore = useCallback(async (operation: AsyncOperation<T[]>): Promise<T[] | null> => {
+  const loadMore = useCallback(async (operation: AsyncOperation<T[]>): Promise<T[] | null>  => {
     if (!hasNext || isLoadingMore) {
       
         return null;
@@ -437,7 +425,7 @@ export function usePaginatedDataState<T = any>(
   }, [hasNext, isLoadingMore, page, loadPage, dataState.data, dataActions]);
 
   // 刷新当前页
-  const refresh = useCallback(async (): Promise<T[] | null> => {
+  const refresh = useCallback(async (): Promise<T[] | null>  => {
     if (lastOperationRef.current) {
       
         return loadPage(lastOperationRef.current, page, limit);
@@ -468,7 +456,7 @@ export function usePaginatedDataState<T = any>(
 
 // ==================== 实时数据状态管理 ====================
 
-export interface RealtimeDataState<T = any> extends DataStateInfo<T> {
+export interface RealtimeDataState<T = any> extends DataStateInfo<T>     {
   isConnected: boolean;
   lastSync: string | null;
   syncInterval: number;
@@ -481,7 +469,7 @@ export function useRealtimeDataState<T = any>(
   } = {}
 ): [
   RealtimeDataState<T>,
-  {
+    {
     startSync: (operation: AsyncOperation<T>) => void;
     stopSync: () => void;
     sync: () => Promise<T | null>;
@@ -497,15 +485,14 @@ export function useRealtimeDataState<T = any>(
   const syncIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const currentOperationRef = useRef<AsyncOperation<T> | null>(null);
 
-  const realtimeState: RealtimeDataState<T> = {
+  const realtimeState: RealtimeDataState<T>  = {
     ...dataState,
     isConnected,
     lastSync,
     syncInterval
   };
-
   // 同步数据
-  const sync = useCallback(async (): Promise<T | null> => {
+  const sync = useCallback(async (): Promise<T | null>  => {
     if (currentOperationRef.current) {
       const result = await dataActions.execute(currentOperationRef.current);
       if (result) {

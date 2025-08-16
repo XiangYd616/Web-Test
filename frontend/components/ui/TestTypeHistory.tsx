@@ -3,12 +3,8 @@
  * 用于在每个测试页面显示该测试类型的历史记录
  */
 
-import { Calendar, Download, Eye, Filter, MoreHorizontal, RefreshCw, Search, Star, // Trash2 } from 'lucide-react'; // 已修复
-import React, { useCallback, useEffect, useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import type { TestRecord, TestType } from '../../types/testHistory';
-
-interface TestTypeHistoryProps {
+import { Calendar, Download, Eye, Filter, MoreHorizontal, RefreshCw, Search, Star, // Trash2   } from 'lucide-react';// 已修复'
+import React, { useCallback, useEffect, useState    } from 'react';import { useAuth    } from '../../contexts/AuthContext';import type { TestRecord, TestType  } from '../../types/testHistory';interface TestTypeHistoryProps   {'
   testType: TestType;
   className?: string;
   compact?: boolean;
@@ -20,57 +16,56 @@ interface TestTypeHistoryProps {
 
 export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
   testType,
-  className = '',
+  className = '','
   compact = false,
-  maxHeight = '600px',
+  maxHeight = '600px','
   onTestSelect,
   onTestRerun,
   showActions = true
 }) => {
   
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState('');
-
+  const [pageTitle, setPageTitle] = useState("');'
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
-      document.title = `${pageTitle} - Test Web`;
+      document.title = `${pageTitle} - Test Web`;`
     }
   }, [pageTitle]);
 
   // 页面可见性检测
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === "visible') {'`
         // 页面变为可见时刷新数据
         fetchData?.();
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);'
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener("visibilitychange', handleVisibilityChange);'
     };
   }, [fetchData]);
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;
-  const descriptionId = `${componentId}-description`;
+  const errorId = `${componentId}-error`;`
+  const descriptionId = `${componentId}-description`;`
   
   const ariaProps = {
     id: componentId,
-    'aria-label': ariaLabel,
-    'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': [
+    "aria-label': ariaLabel,'`
+    'aria-labelledby': ariaLabelledBy,'
+    'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,
-    'aria-invalid': !!error,
-    'aria-disabled': disabled,
-    'aria-busy': loading,
-    'aria-expanded': expanded,
-    'aria-selected': selected,
+    ].filter(Boolean).join(' ') || undefined,'
+    'aria-invalid': !!error,'
+    'aria-disabled': disabled,'
+    'aria-busy': loading,'
+    'aria-expanded': expanded,'
+    "aria-selected': selected,'
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -79,8 +74,8 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
   // 状态管理
   const [tests, setTests] = useState<TestRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');'
+  const [statusFilter, setStatusFilter] = useState<string>("all');'
   const [showFilters, setShowFilters] = useState(false);
   const [selectedTest, setSelectedTest] = useState<string | null>(null);
 
@@ -91,17 +86,16 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
 
   // 测试类型配置
   const testTypeConfig = {
-    stress: { name: '压力测试', icon: '⚡', color: 'var(--color-danger)' },
-    performance: { name: '性能测试', icon: '🚀', color: 'var(--color-primary)' },
-    security: { name: '安全测试', icon: '🛡️', color: 'var(--color-warning)' },
-    api: { name: 'API测试', icon: '🔌', color: '#8b5cf6' },
-    compatibility: { name: '兼容性测试', icon: '🌐', color: '#06b6d4' },
-    seo: { name: 'SEO测试', icon: '📈', color: 'var(--color-success)' },
-    accessibility: { name: '可访问性测试', icon: '♿', color: '#6366f1' }
+    stress: { name: '压力测试', icon: '⚡', color: 'var(--color-danger)' },'
+    performance: { name: '性能测试', icon: '🚀', color: 'var(--color-primary)' },'
+    security: { name: '安全测试', icon: '🛡️', color: 'var(--color-warning)' },'
+    api: { name: 'API测试', icon: '🔌', color: '#8b5cf6' },'
+    compatibility: { name: '兼容性测试', icon: '🌐', color: '#06b6d4' },'
+    seo: { name: 'SEO测试', icon: '📈', color: 'var(--color-success)' },'
+    accessibility: { name: '可访问性测试', icon: '♿', color: '#6366f1' }'
   };
 
-  const config = testTypeConfig[testType] || { name: '测试', icon: '🔧', color: 'var(--color-gray-500)' };
-
+  const config = testTypeConfig[testType] || { name: '测试', icon: '🔧', color: 'var(--color-gray-500)' };'
   // 加载测试历史
   const loadTestHistory = useCallback(async (reset = false) => {
     if (!isAuthenticated) return;
@@ -115,19 +109,19 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
         limit: limit.toString(),
         testType,
         ...(searchQuery && { search: searchQuery }),
-        ...(statusFilter !== 'all' && { status: statusFilter })
+        ...(statusFilter !== 'all' && { status: statusFilter })'
       });
 
-      const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
-      const response = await fetch(`/api/test/history?${params}`, {
+      const token = localStorage.getItem('auth_token') || localStorage.getItem('token');'
+      const response = await fetch(`/api/test/history?${params}`, {`
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type': 'application/json','`
+          "Authorization': `Bearer ${token}`'`
         }
       });
 
       if (!response.ok) {
-        throw new Error('获取测试历史失败');
+        throw new Error("获取测试历史失败');'`
       }
 
       const data = await response.json();
@@ -142,7 +136,7 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
         setHasMore(data.data.pagination.hasNext);
       }
     } catch (error) {
-      console.error('获取测试历史失败:', error);
+      console.error("获取测试历史失败:', error);'
     } finally {
       setLoading(false);
     }
@@ -192,21 +186,21 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
 
-    if (diffMins < 1) return '刚刚';
-    if (diffMins < 60) return `${diffMins}分钟前`;
-    if (diffHours < 24) return `${diffHours}小时前`;
-    if (diffDays < 7) return `${diffDays}天前`;
-    return date.toLocaleDateString('zh-CN');
+    if (diffMins < 1) return "刚刚';
+    if (diffMins < 60) return `${diffMins}分钟前`;`
+    if (diffHours < 24) return `${diffHours}小时前`;`
+    if (diffDays < 7) return `${diffDays}天前`;`
+    return date.toLocaleDateString("zh-CN');'`
   };
 
   // 获取状态样式
   const getStatusStyle = (status: string) => {
     const styles = {
-      completed: 'bg-green-100 text-green-800',
-      running: 'bg-blue-100 text-blue-800',
-      failed: 'bg-red-100 text-red-800',
-      pending: 'bg-yellow-100 text-yellow-800',
-      cancelled: 'bg-gray-100 text-gray-800'
+      completed: 'bg-green-100 text-green-800','
+      running: 'bg-blue-100 text-blue-800','
+      failed: 'bg-red-100 text-red-800','
+      pending: 'bg-yellow-100 text-yellow-800','
+      cancelled: 'bg-gray-100 text-gray-800';
     };
     return styles[status as keyof typeof styles] || styles.pending;
   };
@@ -214,11 +208,11 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
   // 获取状态文本
   const getStatusText = (status: string) => {
     const texts = {
-      completed: '已完成',
-      running: '运行中',
-      failed: '失败',
-      pending: '等待中',
-      cancelled: '已取消'
+      completed: '已完成','
+      running: '运行中','
+      failed: '失败','
+      pending: '等待中','
+      cancelled: '已取消';
     };
     return texts[status as keyof typeof texts] || status;
   };
@@ -226,65 +220,62 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
   if (!isAuthenticated) {
     
         return (
-      <div className="test-type-history-empty">
+      <div className= 'test-type-history-empty'>
         <p>请登录后查看测试历史</p>
       </div>
     );
       }
 
   return (
-    <div className={`test-type-history ${className}`} style={{ maxHeight }}>
+    <div className={`test-type-history ${className}`} style={{ maxHeight }}>`
       {/* 头部 */}
-      <div className="history-header">
-        <div className="header-title">
-          <span className="test-icon">{config.icon}</span>
+      <div className= "history-header'>`
+        <div className= 'header-title'>
+          <span className= 'test-icon'>{config.icon}</span>
           <h3>{config.name}历史</h3>
-          <span className="test-count">({tests.length})</span>
+          <span className= 'test-count'>({tests.length})</span>
         </div>
         
-        {!compact && (
-          <div className="header-actions">
+        {!compact && (<div className= 'header-actions'>
             <button
               onClick={() => loadTestHistory(true)}
-              className="action-btn refresh-btn"
+              className= 'action-btn refresh-btn';
               disabled={loading}
             >
-              <RefreshCw className={`icon ${loading ? 'spinning' : ''}`} />
+              <RefreshCw className={`icon ${loading ? 'spinning' : "'}`}    />`
             </button>
             
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`action-btn filter-btn ${showFilters ? 'active' : ''}`}
+              className={`action-btn filter-btn ${showFilters ? 'active' : "'}`}'`
             >
-              <Filter className="icon" />
+              <Filter className= "icon'    />`
             </button>
           </div>
         )}
       </div>
 
       {/* 搜索和筛选 */}
-      {(!compact || showFilters) && (
-        <div className="history-filters">
-          <div className="search-box">
-            <Search className="search-icon" />
+      {(!compact || showFilters) && (<div className= 'history-filters'>
+          <div className= 'search-box'>
+            <Search className= 'search-icon'    />
             <input
-              type="text"
-              placeholder="搜索测试名称或URL..."
+              type= 'text';
+              placeholder= '搜索测试名称或URL...';
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
-              className="search-input"
+              className= 'search-input';
             />
           </div>
           
-          {showFilters && (
-            <div className="status-filters">
-              {['all', 'completed', 'running', 'failed'].map(status => (
+          {showFilters && (<div className= 'status-filters'>
+              {['all', 'completed', 'running', 'failed'].map(status => ('')
                 <button
                   key={status}
                   onClick={() => handleStatusFilter(status)}
-                  className={`status-filter ${statusFilter === status ? 'active' : ''}`}
+                  className={`status-filter ${statusFilter === status ? 'active' : "'}`}'`
                 >
-                  {status === 'all' ? '全部' : getStatusText(status)}
+                  {status === "all' ? '全部' : getStatusText(status)}'`
                 </button>
               ))}
             </div>
@@ -293,66 +284,62 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
       )}
 
       {/* 测试列表 */}
-      <div className="history-list">
-        {tests.length === 0 && !loading ? (
-          <div className="empty-state">
-            <div className="empty-icon">{config.icon}</div>
+      <div className= 'history-list'>
+        {tests.length === 0 && !loading ? (<div className= 'empty-state'>
+            <div className= 'empty-icon'>{config.icon}</div>
             <p>暂无{config.name}历史记录</p>
-            <p className="empty-hint">完成测试后，历史记录将显示在这里</p>
+            <p className= 'empty-hint'>完成测试后，历史记录将显示在这里</p>
           </div>
-        ) : (
-          tests.map(test => (
+        ): (tests.map(test  => (
             <div
               key={test.id}
-              className={`history-item ${selectedTest === test.id ? 'selected' : ''}`}
+              className={`history-item ${selectedTest === test.id ? 'selected' : "'}`}'`
               onClick={() => handleTestClick(test)}
             >
-              <div className="item-main">
-                <div className="item-header">
-                  <h4 className="test-name">{test.testName}</h4>
-                  <span className={`status-badge ${getStatusStyle(test.status)}`}>
+              <div className= "item-main'>`
+                <div className= 'item-header'>
+                  <h4 className= 'test-name'>{test.testName}</h4>
+                  <span className={`status-badge ${getStatusStyle(test.status)}`}>`
                     {getStatusText(test.status)}
                   </span>
                 </div>
                 
-                <div className="item-details">
-                  <span className="test-url">{test.url}</span>
-                  <span className="test-time">
-                    <Calendar className="time-icon" />
+                <div className= "item-details'>`
+                  <span className= 'test-url'>{test.url}</span>
+                  <span className= 'test-time'>
+                    <Calendar className= 'time-icon'    />
                     {formatTime(test.createdAt)}
                   </span>
                 </div>
                 
                 {test.overallScore && (
-                  <div className="item-score">
-                    <Star className="score-icon" />
-                    <span className="score-value">{test.overallScore}</span>
+                  <div className= 'item-score'>
+                    <Star className= 'score-icon'    />
+                    <span className= 'score-value'>{test.overallScore}</span>
                   </div>
                 )}
               </div>
               
-              {showActions && (
-                <div className="item-actions">
+              {showActions && (<div className= 'item-actions'>
                   <button
                     onClick={(e) => handleTestClick(test)}
-                    className="action-btn view-btn"
-                    title="查看详情"
+                    className= 'action-btn view-btn';
+                    title= '查看详情';
                   >
-                    <Eye className="icon" />
+                    <Eye className= 'icon'    />
                   </button>
                   
-                  {onTestRerun && test.status === 'completed' && (
-                    <button
+                  {onTestRerun && test.status === 'completed' && (<button'
                       onClick={(e) => handleRerun(test, e)}
-                      className="action-btn rerun-btn"
-                      title="重新运行"
+                      className= 'action-btn rerun-btn';
+                      title= '重新运行';
                     >
-                      <RefreshCw className="icon" />
+                      <RefreshCw className= 'icon'    />
                     </button>
                   )}
                   
-                  <button className="action-btn more-btn" title="更多操作">
-                    <MoreHorizontal className="icon" />
+                  <button className= 'action-btn more-btn' title= '更多操作'>
+                    <MoreHorizontal className= 'icon'    />
                   </button>
                 </div>
               )}
@@ -362,21 +349,21 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
         
         {/* 加载更多 */}
         {hasMore && !loading && (
-          <button onClick={loadMore} className="load-more-btn">
+          <button onClick={loadMore} className= 'load-more-btn'>
             加载更多
           </button>
         )}
         
         {loading && (
-          <div className="loading-indicator">
-            <RefreshCw className="spinning" />
+          <div className= 'loading-indicator'>
+            <RefreshCw className= 'spinning'    />
             <span>加载中...</span>
           </div>
         )}
       </div>
 
       {/* 样式 */}
-      <style jsx>{`
+      <style jsx>{``
         .test-type-history {
           background: white;
           border-radius: var(--radius-2xl);
@@ -671,7 +658,7 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
           padding: var(--spacing-5);
           color: var(--color-gray-500);
         }
-      `}</style>
+      `}</style>`
     </div>
   );
 };

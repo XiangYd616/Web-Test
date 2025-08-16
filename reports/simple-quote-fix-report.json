@@ -1,0 +1,2238 @@
+{
+  "timestamp": "2025-08-16T09:49:56.785Z",
+  "summary": {
+    "totalFixes": 446
+  },
+  "fixes": [
+    {
+      "file": "frontend\\App.tsx",
+      "description": "修复了 14 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.476Z"
+    },
+    {
+      "file": "frontend\\components\\analytics\\Analytics.tsx",
+      "description": "修复了 56 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.477Z"
+    },
+    {
+      "file": "frontend\\components\\auth\\AdminGuard.tsx",
+      "description": "修复了 16 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.478Z"
+    },
+    {
+      "file": "frontend\\components\\auth\\AuthErrorHandler.tsx",
+      "description": "修复了 65 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.479Z"
+    },
+    {
+      "file": "frontend\\components\\auth\\AuthGuard.tsx",
+      "description": "修复了 23 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.482Z"
+    },
+    {
+      "file": "frontend\\components\\auth\\AuthLoadingState.tsx",
+      "description": "修复了 58 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.482Z"
+    },
+    {
+      "file": "frontend\\components\\auth\\AuthStatusIndicator.tsx",
+      "description": "修复了 19 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.483Z"
+    },
+    {
+      "file": "frontend\\components\\auth\\LoginPrompt.tsx",
+      "description": "修复了 11 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.485Z"
+    },
+    {
+      "file": "frontend\\components\\auth\\MFASetup.tsx",
+      "description": "修复了 40 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.486Z"
+    },
+    {
+      "file": "frontend\\components\\auth\\PasswordStrengthIndicator.tsx",
+      "description": "修复了 53 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.487Z"
+    },
+    {
+      "file": "frontend\\components\\auth\\PermissionManager.tsx",
+      "description": "修复了 39 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.488Z"
+    },
+    {
+      "file": "frontend\\components\\auth\\ProtectedFeature.tsx",
+      "description": "修复了 15 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.489Z"
+    },
+    {
+      "file": "frontend\\components\\auth\\RoleGuard.tsx",
+      "description": "修复了 2 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.489Z"
+    },
+    {
+      "file": "frontend\\components\\auth\\WithAuthCheck.tsx",
+      "description": "修复了 35 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.490Z"
+    },
+    {
+      "file": "frontend\\components\\batch\\BatchOperationPanel.tsx",
+      "description": "修复了 90 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.491Z"
+    },
+    {
+      "file": "frontend\\components\\charts\\Chart.tsx",
+      "description": "修复了 66 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.492Z"
+    },
+    {
+      "file": "frontend\\components\\charts\\Charts.tsx",
+      "description": "修复了 281 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.493Z"
+    },
+    {
+      "file": "frontend\\components\\charts\\DashboardCharts.tsx",
+      "description": "修复了 38 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.494Z"
+    },
+    {
+      "file": "frontend\\components\\charts\\DataDensityControl.tsx",
+      "description": "修复了 38 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.494Z"
+    },
+    {
+      "file": "frontend\\components\\charts\\PerformanceChart.tsx",
+      "description": "修复了 32 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.495Z"
+    },
+    {
+      "file": "frontend\\components\\charts\\RechartsChart.tsx",
+      "description": "修复了 34 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.496Z"
+    },
+    {
+      "file": "frontend\\components\\charts\\StatCard.tsx",
+      "description": "修复了 20 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.496Z"
+    },
+    {
+      "file": "frontend\\components\\charts\\StressTestChart.tsx",
+      "description": "修复了 87 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.498Z"
+    },
+    {
+      "file": "frontend\\components\\charts\\StressTestCharts.tsx",
+      "description": "修复了 111 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.498Z"
+    },
+    {
+      "file": "frontend\\components\\charts\\StressTestMetrics.tsx",
+      "description": "修复了 52 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.499Z"
+    },
+    {
+      "file": "frontend\\components\\charts\\TestComparisonCharts.tsx",
+      "description": "修复了 75 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.500Z"
+    },
+    {
+      "file": "frontend\\components\\common\\ErrorBoundary.tsx",
+      "description": "修复了 43 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.501Z"
+    },
+    {
+      "file": "frontend\\components\\data\\DataManagement.tsx",
+      "description": "修复了 17 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.501Z"
+    },
+    {
+      "file": "frontend\\components\\data\\DataManager.tsx",
+      "description": "修复了 87 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.502Z"
+    },
+    {
+      "file": "frontend\\components\\DataTable.tsx",
+      "description": "修复了 13 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.503Z"
+    },
+    {
+      "file": "frontend\\components\\features\\AlertManager.tsx",
+      "description": "修复了 121 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.504Z"
+    },
+    {
+      "file": "frontend\\components\\features\\AnalyticsOverview.tsx",
+      "description": "修复了 94 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.505Z"
+    },
+    {
+      "file": "frontend\\components\\features\\APIAnalysis.tsx",
+      "description": "修复了 35 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.506Z"
+    },
+    {
+      "file": "frontend\\components\\features\\ContentAnalysis.tsx",
+      "description": "修复了 43 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.506Z"
+    },
+    {
+      "file": "frontend\\components\\features\\DataExporter.tsx",
+      "description": "修复了 101 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.507Z"
+    },
+    {
+      "file": "frontend\\components\\features\\DataFilters.tsx",
+      "description": "修复了 56 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.508Z"
+    },
+    {
+      "file": "frontend\\components\\features\\DataList.tsx",
+      "description": "修复了 86 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.508Z"
+    },
+    {
+      "file": "frontend\\components\\features\\DataManagement.tsx",
+      "description": "修复了 41 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.509Z"
+    },
+    {
+      "file": "frontend\\components\\features\\DataManager.tsx",
+      "description": "修复了 86 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.510Z"
+    },
+    {
+      "file": "frontend\\components\\features\\DataStateManager.tsx",
+      "description": "修复了 33 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.510Z"
+    },
+    {
+      "file": "frontend\\components\\features\\DataStats.tsx",
+      "description": "修复了 18 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.511Z"
+    },
+    {
+      "file": "frontend\\components\\features\\DataSyncManager.tsx",
+      "description": "修复了 96 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.512Z"
+    },
+    {
+      "file": "frontend\\components\\features\\ImportExport.tsx",
+      "description": "修复了 93 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.512Z"
+    },
+    {
+      "file": "frontend\\components\\features\\MonitorDashboard.tsx",
+      "description": "修复了 151 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.513Z"
+    },
+    {
+      "file": "frontend\\components\\features\\Monitoring.tsx",
+      "description": "修复了 77 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.514Z"
+    },
+    {
+      "file": "frontend\\components\\features\\PerformanceAccessibilityViewer.tsx",
+      "description": "修复了 59 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.515Z"
+    },
+    {
+      "file": "frontend\\components\\features\\PerformanceAnalysis.tsx",
+      "description": "修复了 74 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.516Z"
+    },
+    {
+      "file": "frontend\\components\\features\\RealTimeMonitoring.tsx",
+      "description": "修复了 59 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.516Z"
+    },
+    {
+      "file": "frontend\\components\\features\\ReportExporter.tsx",
+      "description": "修复了 77 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.517Z"
+    },
+    {
+      "file": "frontend\\components\\features\\ReportManagement.tsx",
+      "description": "修复了 68 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.518Z"
+    },
+    {
+      "file": "frontend\\components\\features\\ResultViewer.tsx",
+      "description": "修复了 89 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.518Z"
+    },
+    {
+      "file": "frontend\\components\\features\\SecurityAnalysis.tsx",
+      "description": "修复了 48 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.519Z"
+    },
+    {
+      "file": "frontend\\components\\features\\SEOAnalysis.tsx",
+      "description": "修复了 67 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.520Z"
+    },
+    {
+      "file": "frontend\\components\\features\\TestRunner.tsx",
+      "description": "修复了 84 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.521Z"
+    },
+    {
+      "file": "frontend\\components\\layout\\BaseTestLayout.tsx",
+      "description": "修复了 40 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.521Z"
+    },
+    {
+      "file": "frontend\\components\\layout\\Layout.tsx",
+      "description": "修复了 14 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.522Z"
+    },
+    {
+      "file": "frontend\\components\\layout\\Navigation.tsx",
+      "description": "修复了 79 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.522Z"
+    },
+    {
+      "file": "frontend\\components\\layout\\PageLayout.tsx",
+      "description": "修复了 68 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.523Z"
+    },
+    {
+      "file": "frontend\\components\\layout\\Sidebar.tsx",
+      "description": "修复了 101 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.524Z"
+    },
+    {
+      "file": "frontend\\components\\layout\\TopNavbar.tsx",
+      "description": "修复了 113 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.525Z"
+    },
+    {
+      "file": "frontend\\components\\layout\\UserDropdownMenu.tsx",
+      "description": "修复了 28 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.525Z"
+    },
+    {
+      "file": "frontend\\components\\layout\\UserMenu.tsx",
+      "description": "修复了 30 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.526Z"
+    },
+    {
+      "file": "frontend\\components\\navigation\\Breadcrumb.tsx",
+      "description": "修复了 10 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.526Z"
+    },
+    {
+      "file": "frontend\\components\\navigation\\MainNavigation.tsx",
+      "description": "修复了 8 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.527Z"
+    },
+    {
+      "file": "frontend\\components\\navigation\\SidebarNavigation.tsx",
+      "description": "修复了 7 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.527Z"
+    },
+    {
+      "file": "frontend\\components\\navigation\\UserNavigation.tsx",
+      "description": "修复了 23 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.528Z"
+    },
+    {
+      "file": "frontend\\components\\optimized\\OptimizedDataTable.tsx",
+      "description": "修复了 11 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.528Z"
+    },
+    {
+      "file": "frontend\\components\\preferences\\UserPreferencesPanel.tsx",
+      "description": "修复了 58 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.529Z"
+    },
+    {
+      "file": "frontend\\components\\results\\ResultCard.tsx",
+      "description": "修复了 37 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.530Z"
+    },
+    {
+      "file": "frontend\\components\\results\\ResultsDisplay.tsx",
+      "description": "修复了 50 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.530Z"
+    },
+    {
+      "file": "frontend\\components\\results\\TestResults.tsx",
+      "description": "修复了 80 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.531Z"
+    },
+    {
+      "file": "frontend\\components\\results\\VirtualizedResultList.tsx",
+      "description": "修复了 20 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.531Z"
+    },
+    {
+      "file": "frontend\\components\\routing\\AppRoutes.tsx",
+      "description": "修复了 30 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.532Z"
+    },
+    {
+      "file": "frontend\\components\\routing\\RouteManager.tsx",
+      "description": "修复了 6 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.533Z"
+    },
+    {
+      "file": "frontend\\components\\security\\SecurityTest.tsx",
+      "description": "修复了 76 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.533Z"
+    },
+    {
+      "file": "frontend\\components\\security\\UrlInput.tsx",
+      "description": "修复了 37 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.534Z"
+    },
+    {
+      "file": "frontend\\components\\system\\BackgroundTestNotifications.tsx",
+      "description": "修复了 34 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.534Z"
+    },
+    {
+      "file": "frontend\\components\\system\\BackupManagement.tsx",
+      "description": "修复了 84 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.535Z"
+    },
+    {
+      "file": "frontend\\components\\system\\CacheManager.tsx",
+      "description": "修复了 56 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.536Z"
+    },
+    {
+      "file": "frontend\\components\\system\\EnvironmentPrompt.tsx",
+      "description": "修复了 11 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.536Z"
+    },
+    {
+      "file": "frontend\\components\\system\\ErrorBoundary.tsx",
+      "description": "修复了 38 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.537Z"
+    },
+    {
+      "file": "frontend\\components\\system\\ErrorHandling.tsx",
+      "description": "修复了 120 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.538Z"
+    },
+    {
+      "file": "frontend\\components\\system\\MonitoringDashboard.tsx",
+      "description": "修复了 79 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.538Z"
+    },
+    {
+      "file": "frontend\\components\\system\\PerformanceMonitor.tsx",
+      "description": "修复了 25 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.539Z"
+    },
+    {
+      "file": "frontend\\components\\system\\SecurityCenter.tsx",
+      "description": "修复了 75 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.540Z"
+    },
+    {
+      "file": "frontend\\components\\system\\SystemHealthCheck.tsx",
+      "description": "修复了 72 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.540Z"
+    },
+    {
+      "file": "frontend\\components\\system\\SystemMonitor.tsx",
+      "description": "修复了 45 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.541Z"
+    },
+    {
+      "file": "frontend\\components\\system\\SystemResourceMonitor.tsx",
+      "description": "修复了 57 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.542Z"
+    },
+    {
+      "file": "frontend\\components\\system\\SystemSettings.tsx",
+      "description": "修复了 220 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.543Z"
+    },
+    {
+      "file": "frontend\\components\\system\\SystemStatusDashboard.tsx",
+      "description": "修复了 46 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.543Z"
+    },
+    {
+      "file": "frontend\\components\\system\\TestManagement.tsx",
+      "description": "修复了 44 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.544Z"
+    },
+    {
+      "file": "frontend\\components\\system\\UserManagement.tsx",
+      "description": "修复了 72 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.545Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\APITestConfig.tsx",
+      "description": "修复了 108 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.546Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\APITestResultAnalysis.tsx",
+      "description": "修复了 58 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.547Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\BaseTestPage.tsx",
+      "description": "修复了 16 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.547Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\ErrorDisplay.tsx",
+      "description": "修复了 60 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.548Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\FileUploadSEO.tsx",
+      "description": "修复了 47 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.548Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\LocalAnalysisPrompt.tsx",
+      "description": "修复了 14 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.549Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\LocalSEOResults.tsx",
+      "description": "修复了 48 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.549Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\NetworkErrorPrompt.tsx",
+      "description": "修复了 37 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.550Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\PerformanceResults.tsx",
+      "description": "修复了 26 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.550Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\ProgressBar.tsx",
+      "description": "修复了 48 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.551Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\SecurityResults.tsx",
+      "description": "修复了 78 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.552Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\SecurityTestComparison.tsx",
+      "description": "修复了 81 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.553Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\SecurityTestGuide.tsx",
+      "description": "修复了 110 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.553Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\SecurityTestHistory.tsx",
+      "description": "修复了 58 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.554Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\SecurityTestPanel.tsx",
+      "description": "修复了 88 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.555Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\SEOResults.tsx",
+      "description": "修复了 78 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.555Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\specialized\\APITestConfig.tsx",
+      "description": "修复了 65 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.556Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\specialized\\SecurityTestConfig.tsx",
+      "description": "修复了 85 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.556Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\specialized\\StressTestConfig.tsx",
+      "description": "修复了 71 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.557Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\StressTestConfig.tsx",
+      "description": "修复了 92 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.558Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\StressTestDetailModal.tsx",
+      "description": "修复了 90 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.559Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\StressTestHistory.tsx",
+      "description": "修复了 175 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.560Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\StressTestQueueStatus.tsx",
+      "description": "修复了 33 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.560Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\StressTestRecordDetail.tsx",
+      "description": "修复了 49 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.561Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\StressTestResultAnalysis.tsx",
+      "description": "修复了 72 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.562Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\TechnicalResults.tsx",
+      "description": "修复了 44 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.563Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\TestComponents.tsx",
+      "description": "修复了 44 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.564Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\TestConfig.tsx",
+      "description": "修复了 43 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.564Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\TestConfigPanel.tsx",
+      "description": "修复了 87 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.565Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\TestControls.tsx",
+      "description": "修复了 48 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.566Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\TestEngineStatus.tsx",
+      "description": "修复了 106 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.567Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\TestHeader.tsx",
+      "description": "修复了 33 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.568Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\TestHistoryPanel.tsx",
+      "description": "修复了 40 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.569Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\TestingComponents.tsx",
+      "description": "修复了 59 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.569Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\TestInterface.tsx",
+      "description": "修复了 64 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.570Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\TestManager.tsx",
+      "description": "修复了 122 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.571Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\TestPage.tsx",
+      "description": "修复了 51 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.572Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\TestPageWithHistory.tsx",
+      "description": "修复了 33 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.572Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\TestProgress.tsx",
+      "description": "修复了 50 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.573Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\TestProgressPanel.tsx",
+      "description": "修复了 39 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.574Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\TestResultComparison.tsx",
+      "description": "修复了 51 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.575Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\TestResultDisplay.tsx",
+      "description": "修复了 72 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.576Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\TestResults.tsx",
+      "description": "修复了 39 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.576Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\TestResultsPanel.tsx",
+      "description": "修复了 75 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.577Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\TestTemplateManager.tsx",
+      "description": "修复了 28 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.577Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\TestTemplateSelector.tsx",
+      "description": "修复了 62 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.578Z"
+    },
+    {
+      "file": "frontend\\components\\testing\\URLInput.tsx",
+      "description": "修复了 20 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.579Z"
+    },
+    {
+      "file": "frontend\\components\\TestResults.tsx",
+      "description": "修复了 25 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.579Z"
+    },
+    {
+      "file": "frontend\\components\\tools\\AppRoutes.tsx",
+      "description": "修复了 95 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.580Z"
+    },
+    {
+      "file": "frontend\\components\\tools\\CICDDemo.tsx",
+      "description": "修复了 42 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.581Z"
+    },
+    {
+      "file": "frontend\\components\\tools\\DataQueryPanel.tsx",
+      "description": "修复了 90 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.581Z"
+    },
+    {
+      "file": "frontend\\components\\tools\\GlobalSearch.tsx",
+      "description": "修复了 24 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.582Z"
+    },
+    {
+      "file": "frontend\\components\\tools\\InteractiveFeedback.tsx",
+      "description": "修复了 88 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.583Z"
+    },
+    {
+      "file": "frontend\\components\\tools\\PreloadLink.tsx",
+      "description": "修复了 39 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.583Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\Badge.tsx",
+      "description": "修复了 82 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.584Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\Button.tsx",
+      "description": "修复了 64 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.585Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\CancelProgressFeedback.tsx",
+      "description": "修复了 50 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.585Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\CancelTestConfirmDialog.tsx",
+      "description": "修复了 32 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.586Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\Card.tsx",
+      "description": "修复了 36 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.586Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\Chart.tsx",
+      "description": "修复了 24 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.587Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\Checkbox.tsx",
+      "description": "修复了 48 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.588Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\CodeEditor.tsx",
+      "description": "修复了 31 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.588Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\ConfirmDialog.tsx",
+      "description": "修复了 21 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.589Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\DataTable.tsx",
+      "description": "修复了 21 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.589Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\DataTableCompat.test.tsx",
+      "description": "修复了 44 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.590Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\DataTableCompat.tsx",
+      "description": "修复了 33 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.590Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\DeleteConfirmDialog.tsx",
+      "description": "修复了 17 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.591Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\DynamicChartBar.tsx",
+      "description": "修复了 11 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.591Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\DynamicProgressBar.tsx",
+      "description": "修复了 16 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.592Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\ErrorBoundary.tsx",
+      "description": "修复了 11 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.592Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\ErrorDisplay.tsx",
+      "description": "修复了 15 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.593Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\ExportButton.tsx",
+      "description": "修复了 63 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.593Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\ExportModal.tsx",
+      "description": "修复了 61 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.594Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\FeedbackWidget.tsx",
+      "description": "修复了 45 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.595Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\Image.tsx",
+      "description": "修复了 39 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.595Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\index.ts",
+      "description": "修复了 36 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.596Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\Input.tsx",
+      "description": "修复了 96 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.596Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\Layout.tsx",
+      "description": "修复了 91 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.597Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\LazyComponent.tsx",
+      "description": "修复了 22 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.598Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\LazyImage.tsx",
+      "description": "修复了 36 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.598Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\Loading.tsx",
+      "description": "修复了 89 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.599Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\LoadingSpinner.tsx",
+      "description": "修复了 64 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.600Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\LoadingStates.tsx",
+      "description": "修复了 69 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.600Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\Modal.tsx",
+      "description": "修复了 38 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.601Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\NotificationSystem.tsx",
+      "description": "修复了 31 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.602Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\Pagination.tsx",
+      "description": "修复了 42 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.603Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\ProgressBar.tsx",
+      "description": "修复了 36 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.603Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\Select.tsx",
+      "description": "修复了 19 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.604Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\SimpleURLInput.tsx",
+      "description": "修复了 21 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.605Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\StatCard.tsx",
+      "description": "修复了 55 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.606Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\StatusIndicator.tsx",
+      "description": "修复了 74 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.606Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\StopTestConfirmDialog.tsx",
+      "description": "修复了 18 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.607Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\stories\\Button.stories.tsx",
+      "description": "修复了 58 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.608Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\stories\\Input.stories.tsx",
+      "description": "修复了 211 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.609Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\Table.tsx",
+      "description": "修复了 68 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.609Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\TestHistory.tsx",
+      "description": "修复了 119 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.610Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\TestingTools.tsx",
+      "description": "修复了 60 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.611Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\TestNavigation.tsx",
+      "description": "修复了 54 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.612Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\TestPageHistory.tsx",
+      "description": "修复了 53 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.612Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\TestTypeHistory.tsx",
+      "description": "修复了 47 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.613Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+      "description": "修复了 135 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.614Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\ThemeProvider.tsx",
+      "description": "修复了 27 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.614Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\ThemeToggle.tsx",
+      "description": "修复了 36 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.615Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\Toast.tsx",
+      "description": "修复了 34 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.615Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\types.ts",
+      "description": "修复了 21 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.616Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\URLInput.tsx",
+      "description": "修复了 36 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.617Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\UX.tsx",
+      "description": "修复了 58 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.617Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\VirtualScroll.tsx",
+      "description": "修复了 28 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.618Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\VirtualScrollList.tsx",
+      "description": "修复了 16 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.619Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\VirtualTable.tsx",
+      "description": "修复了 30 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.620Z"
+    },
+    {
+      "file": "frontend\\config\\api.ts",
+      "description": "修复了 21 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.620Z"
+    },
+    {
+      "file": "frontend\\config\\browserCacheConfig.ts",
+      "description": "修复了 4 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.621Z"
+    },
+    {
+      "file": "frontend\\config\\codeSplitting.ts",
+      "description": "修复了 20 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.621Z"
+    },
+    {
+      "file": "frontend\\config\\codeSplittingConfig.ts",
+      "description": "修复了 31 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.622Z"
+    },
+    {
+      "file": "frontend\\config\\ConfigManager.ts",
+      "description": "修复了 42 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.622Z"
+    },
+    {
+      "file": "frontend\\config\\index.ts",
+      "description": "修复了 8 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.623Z"
+    },
+    {
+      "file": "frontend\\config\\lazyRoutes.ts",
+      "description": "修复了 72 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.624Z"
+    },
+    {
+      "file": "frontend\\config\\routes.tsx",
+      "description": "修复了 34 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.624Z"
+    },
+    {
+      "file": "frontend\\config\\security.ts",
+      "description": "修复了 26 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.625Z"
+    },
+    {
+      "file": "frontend\\contexts\\AppContext.tsx",
+      "description": "修复了 81 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.626Z"
+    },
+    {
+      "file": "frontend\\contexts\\AuthContext.tsx",
+      "description": "修复了 105 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.626Z"
+    },
+    {
+      "file": "frontend\\contexts\\ThemeContext.tsx",
+      "description": "修复了 64 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.627Z"
+    },
+    {
+      "file": "frontend\\design\\components\\Button.tsx",
+      "description": "修复了 7 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.627Z"
+    },
+    {
+      "file": "frontend\\design\\theme.ts",
+      "description": "修复了 28 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.628Z"
+    },
+    {
+      "file": "frontend\\design\\tokens.ts",
+      "description": "修复了 118 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.628Z"
+    },
+    {
+      "file": "frontend\\examples\\SecurityTestWithHistory.tsx",
+      "description": "修复了 21 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.629Z"
+    },
+    {
+      "file": "frontend\\hooks\\useAdminAuth.tsx",
+      "description": "修复了 9 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.630Z"
+    },
+    {
+      "file": "frontend\\hooks\\useAsyncErrorHandler.ts",
+      "description": "修复了 11 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.631Z"
+    },
+    {
+      "file": "frontend\\hooks\\useAuth.ts",
+      "description": "修复了 56 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.631Z"
+    },
+    {
+      "file": "frontend\\hooks\\useAuthFlow.ts",
+      "description": "修复了 15 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.632Z"
+    },
+    {
+      "file": "frontend\\hooks\\useCache.ts",
+      "description": "修复了 50 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.633Z"
+    },
+    {
+      "file": "frontend\\hooks\\useData.ts",
+      "description": "修复了 18 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.633Z"
+    },
+    {
+      "file": "frontend\\hooks\\useDataManagement.ts",
+      "description": "修复了 49 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.634Z"
+    },
+    {
+      "file": "frontend\\hooks\\useDataState.ts",
+      "description": "修复了 13 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.635Z"
+    },
+    {
+      "file": "frontend\\hooks\\useDataStorage.ts",
+      "description": "修复了 21 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.635Z"
+    },
+    {
+      "file": "frontend\\hooks\\useLocalStressTest.ts",
+      "description": "修复了 20 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.636Z"
+    },
+    {
+      "file": "frontend\\hooks\\useMonitoring.ts",
+      "description": "修复了 52 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.636Z"
+    },
+    {
+      "file": "frontend\\hooks\\useNotification.ts",
+      "description": "修复了 10 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.637Z"
+    },
+    {
+      "file": "frontend\\hooks\\useNotifications.ts",
+      "description": "修复了 93 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.638Z"
+    },
+    {
+      "file": "frontend\\hooks\\usePageTitle.ts",
+      "description": "修复了 16 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.638Z"
+    },
+    {
+      "file": "frontend\\hooks\\usePerformanceOptimization.ts",
+      "description": "修复了 31 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.639Z"
+    },
+    {
+      "file": "frontend\\hooks\\usePermissions.ts",
+      "description": "修复了 18 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.640Z"
+    },
+    {
+      "file": "frontend\\hooks\\useRealSEOTest.ts",
+      "description": "修复了 13 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.640Z"
+    },
+    {
+      "file": "frontend\\hooks\\useSEOTest.ts",
+      "description": "修复了 23 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.641Z"
+    },
+    {
+      "file": "frontend\\hooks\\useSimpleTestEngine.ts",
+      "description": "修复了 38 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.641Z"
+    },
+    {
+      "file": "frontend\\hooks\\useStressTestRecord.ts",
+      "description": "修复了 29 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.642Z"
+    },
+    {
+      "file": "frontend\\hooks\\useTest.ts",
+      "description": "修复了 35 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.643Z"
+    },
+    {
+      "file": "frontend\\hooks\\useTestEngine.ts",
+      "description": "修复了 37 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.644Z"
+    },
+    {
+      "file": "frontend\\hooks\\useWebSocket.ts",
+      "description": "修复了 23 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.645Z"
+    },
+    {
+      "file": "frontend\\main.tsx",
+      "description": "修复了 1 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.645Z"
+    },
+    {
+      "file": "frontend\\pages\\analytics\\AnalyticsPage.tsx",
+      "description": "修复了 37 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.646Z"
+    },
+    {
+      "file": "frontend\\pages\\core\\auth\\Login.tsx",
+      "description": "修复了 103 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.647Z"
+    },
+    {
+      "file": "frontend\\pages\\core\\auth\\Register.tsx",
+      "description": "修复了 117 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.647Z"
+    },
+    {
+      "file": "frontend\\pages\\core\\dashboard\\Dashboard.tsx",
+      "description": "修复了 103 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.648Z"
+    },
+    {
+      "file": "frontend\\pages\\core\\testing\\APITest.tsx",
+      "description": "修复了 7 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.648Z"
+    },
+    {
+      "file": "frontend\\pages\\core\\testing\\CompatibilityTest.tsx",
+      "description": "修复了 205 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.650Z"
+    },
+    {
+      "file": "frontend\\pages\\core\\testing\\InfrastructureTest.tsx",
+      "description": "修复了 41 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.650Z"
+    },
+    {
+      "file": "frontend\\pages\\core\\testing\\PerformanceTest.tsx",
+      "description": "修复了 74 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.651Z"
+    },
+    {
+      "file": "frontend\\pages\\core\\testing\\SecurityTest.tsx",
+      "description": "修复了 74 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.652Z"
+    },
+    {
+      "file": "frontend\\pages\\core\\testing\\SEOTest.tsx",
+      "description": "修复了 222 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.653Z"
+    },
+    {
+      "file": "frontend\\pages\\core\\testing\\StressTest.tsx",
+      "description": "修复了 1011 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.658Z"
+    },
+    {
+      "file": "frontend\\pages\\core\\testing\\TestingDashboard.tsx",
+      "description": "修复了 111 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.658Z"
+    },
+    {
+      "file": "frontend\\pages\\core\\testing\\TestPage.tsx",
+      "description": "修复了 51 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.659Z"
+    },
+    {
+      "file": "frontend\\pages\\core\\testing\\UXTest.tsx",
+      "description": "修复了 98 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.660Z"
+    },
+    {
+      "file": "frontend\\pages\\core\\testing\\WebsiteTest.tsx",
+      "description": "修复了 162 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.661Z"
+    },
+    {
+      "file": "frontend\\pages\\data\\reports\\Analytics.tsx",
+      "description": "修复了 42 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.662Z"
+    },
+    {
+      "file": "frontend\\pages\\data\\reports\\MonitoringDashboard.tsx",
+      "description": "修复了 41 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.662Z"
+    },
+    {
+      "file": "frontend\\pages\\data\\reports\\PerformanceAnalysis.tsx",
+      "description": "修复了 69 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.663Z"
+    },
+    {
+      "file": "frontend\\pages\\data\\reports\\Reports.tsx",
+      "description": "修复了 109 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.664Z"
+    },
+    {
+      "file": "frontend\\pages\\data\\reports\\Statistics.tsx",
+      "description": "修复了 33 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.665Z"
+    },
+    {
+      "file": "frontend\\pages\\data\\results\\SecurityReport.tsx",
+      "description": "修复了 82 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.666Z"
+    },
+    {
+      "file": "frontend\\pages\\data\\results\\StressTestDetail.tsx",
+      "description": "修复了 183 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.668Z"
+    },
+    {
+      "file": "frontend\\pages\\data\\results\\StressTestReport.tsx",
+      "description": "修复了 72 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.668Z"
+    },
+    {
+      "file": "frontend\\pages\\data\\results\\TestHistory.tsx",
+      "description": "修复了 12 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.669Z"
+    },
+    {
+      "file": "frontend\\pages\\data\\results\\TestResultDetail.tsx",
+      "description": "修复了 61 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.670Z"
+    },
+    {
+      "file": "frontend\\pages\\management\\admin\\Admin.tsx",
+      "description": "修复了 51 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.670Z"
+    },
+    {
+      "file": "frontend\\pages\\management\\admin\\DataManagement.tsx",
+      "description": "修复了 26 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.671Z"
+    },
+    {
+      "file": "frontend\\pages\\management\\admin\\DataStorage.tsx",
+      "description": "修复了 140 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.671Z"
+    },
+    {
+      "file": "frontend\\pages\\management\\admin\\SystemMonitor.tsx",
+      "description": "修复了 13 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.672Z"
+    },
+    {
+      "file": "frontend\\pages\\management\\integration\\APIKeys.tsx",
+      "description": "修复了 76 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.673Z"
+    },
+    {
+      "file": "frontend\\pages\\management\\integration\\CICDIntegration.tsx",
+      "description": "修复了 108 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.673Z"
+    },
+    {
+      "file": "frontend\\pages\\management\\integration\\Integrations.tsx",
+      "description": "修复了 87 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.674Z"
+    },
+    {
+      "file": "frontend\\pages\\management\\integration\\Notifications.tsx",
+      "description": "修复了 65 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.675Z"
+    },
+    {
+      "file": "frontend\\pages\\management\\integration\\Webhooks.tsx",
+      "description": "修复了 104 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.676Z"
+    },
+    {
+      "file": "frontend\\pages\\management\\scheduling\\ScheduledTasks.tsx",
+      "description": "修复了 62 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.676Z"
+    },
+    {
+      "file": "frontend\\pages\\management\\scheduling\\TestOptimizations.tsx",
+      "description": "修复了 31 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.677Z"
+    },
+    {
+      "file": "frontend\\pages\\management\\scheduling\\TestSchedule.tsx",
+      "description": "修复了 67 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.678Z"
+    },
+    {
+      "file": "frontend\\pages\\management\\settings\\Settings.tsx",
+      "description": "修复了 213 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.679Z"
+    },
+    {
+      "file": "frontend\\pages\\TestToolsHub.tsx",
+      "description": "修复了 18 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.680Z"
+    },
+    {
+      "file": "frontend\\pages\\user\\docs\\APIDocs.tsx",
+      "description": "修复了 85 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.680Z"
+    },
+    {
+      "file": "frontend\\pages\\user\\docs\\Help.tsx",
+      "description": "修复了 251 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.681Z"
+    },
+    {
+      "file": "frontend\\pages\\user\\index.ts",
+      "description": "修复了 9 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.681Z"
+    },
+    {
+      "file": "frontend\\pages\\user\\misc\\DownloadDesktop.tsx",
+      "description": "修复了 28 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.682Z"
+    },
+    {
+      "file": "frontend\\pages\\user\\misc\\Subscription.tsx",
+      "description": "修复了 64 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.683Z"
+    },
+    {
+      "file": "frontend\\pages\\user\\profile\\UserBookmarks.tsx",
+      "description": "修复了 82 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.683Z"
+    },
+    {
+      "file": "frontend\\pages\\user\\profile\\UserProfile.tsx",
+      "description": "修复了 126 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.684Z"
+    },
+    {
+      "file": "frontend\\services\\adapters\\testEngineAdapter.ts",
+      "description": "修复了 7 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.685Z"
+    },
+    {
+      "file": "frontend\\services\\adminService.ts",
+      "description": "修复了 76 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.686Z"
+    },
+    {
+      "file": "frontend\\services\\analytics\\analyticsService.ts",
+      "description": "修复了 89 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.687Z"
+    },
+    {
+      "file": "frontend\\services\\api\\apiErrorHandler.ts",
+      "description": "修复了 97 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.687Z"
+    },
+    {
+      "file": "frontend\\services\\api\\apiService.ts",
+      "description": "修复了 67 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.688Z"
+    },
+    {
+      "file": "frontend\\services\\api\\baseApiService.ts",
+      "description": "修复了 21 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.689Z"
+    },
+    {
+      "file": "frontend\\services\\api\\errorHandler.ts",
+      "description": "修复了 69 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.689Z"
+    },
+    {
+      "file": "frontend\\services\\api\\errorHandlingMiddleware.ts",
+      "description": "修复了 43 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.690Z"
+    },
+    {
+      "file": "frontend\\services\\api\\fileUploadService.ts",
+      "description": "修复了 22 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.690Z"
+    },
+    {
+      "file": "frontend\\services\\api\\index.ts",
+      "description": "修复了 2 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.691Z"
+    },
+    {
+      "file": "frontend\\services\\apiCacheManager.ts",
+      "description": "修复了 2 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.692Z"
+    },
+    {
+      "file": "frontend\\services\\apiErrorInterceptor.ts",
+      "description": "修复了 16 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.692Z"
+    },
+    {
+      "file": "frontend\\services\\apiMonitoringService.ts",
+      "description": "修复了 2 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.693Z"
+    },
+    {
+      "file": "frontend\\services\\auth\\auditLogService.ts",
+      "description": "修复了 131 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.693Z"
+    },
+    {
+      "file": "frontend\\services\\auth\\authManager.ts",
+      "description": "修复了 70 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.694Z"
+    },
+    {
+      "file": "frontend\\services\\auth\\authService.ts",
+      "description": "修复了 167 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.695Z"
+    },
+    {
+      "file": "frontend\\services\\auth\\jwtManager.ts",
+      "description": "修复了 47 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.696Z"
+    },
+    {
+      "file": "frontend\\services\\auth\\mfaService.ts",
+      "description": "修复了 49 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.696Z"
+    },
+    {
+      "file": "frontend\\services\\auth\\passwordPolicyService.ts",
+      "description": "修复了 66 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.697Z"
+    },
+    {
+      "file": "frontend\\services\\auth\\rbacService.ts",
+      "description": "修复了 47 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.698Z"
+    },
+    {
+      "file": "frontend\\services\\auth\\securityEngine.ts",
+      "description": "修复了 190 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.699Z"
+    },
+    {
+      "file": "frontend\\services\\auth\\sessionManager.ts",
+      "description": "修复了 61 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.699Z"
+    },
+    {
+      "file": "frontend\\services\\authService.ts",
+      "description": "修复了 16 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.700Z"
+    },
+    {
+      "file": "frontend\\services\\batch\\batchOperationService.ts",
+      "description": "修复了 33 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.700Z"
+    },
+    {
+      "file": "frontend\\services\\cache\\cacheManager.ts",
+      "description": "修复了 20 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.701Z"
+    },
+    {
+      "file": "frontend\\services\\cache\\cacheStrategies.ts",
+      "description": "修复了 59 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.702Z"
+    },
+    {
+      "file": "frontend\\services\\cache\\cacheStrategy.ts",
+      "description": "修复了 20 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.702Z"
+    },
+    {
+      "file": "frontend\\services\\collaboration\\collaborationService.ts",
+      "description": "修复了 49 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.703Z"
+    },
+    {
+      "file": "frontend\\services\\config\\configService.ts",
+      "description": "修复了 37 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.703Z"
+    },
+    {
+      "file": "frontend\\services\\dao\\userDao.ts",
+      "description": "修复了 38 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.704Z"
+    },
+    {
+      "file": "frontend\\services\\data\\dataAnalysisService.ts",
+      "description": "修复了 132 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.705Z"
+    },
+    {
+      "file": "frontend\\services\\data\\dataNormalizationPipeline.ts",
+      "description": "修复了 15 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.705Z"
+    },
+    {
+      "file": "frontend\\services\\data\\dataProcessor.ts",
+      "description": "修复了 38 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.706Z"
+    },
+    {
+      "file": "frontend\\services\\data\\dataService.ts",
+      "description": "修复了 70 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.707Z"
+    },
+    {
+      "file": "frontend\\services\\data\\dataStateManager.ts",
+      "description": "修复了 20 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.707Z"
+    },
+    {
+      "file": "frontend\\services\\dataFlowManager.ts",
+      "description": "修复了 16 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.708Z"
+    },
+    {
+      "file": "frontend\\services\\errorService.ts",
+      "description": "修复了 76 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.709Z"
+    },
+    {
+      "file": "frontend\\services\\help\\index.ts",
+      "description": "修复了 2 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.710Z"
+    },
+    {
+      "file": "frontend\\services\\helpService.ts",
+      "description": "修复了 30 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.710Z"
+    },
+    {
+      "file": "frontend\\services\\history\\historyManagement.ts",
+      "description": "修复了 32 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.711Z"
+    },
+    {
+      "file": "frontend\\services\\history\\testHistoryService.ts",
+      "description": "修复了 23 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.712Z"
+    },
+    {
+      "file": "frontend\\services\\historyService.ts",
+      "description": "修复了 35 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.712Z"
+    },
+    {
+      "file": "frontend\\services\\index.ts",
+      "description": "修复了 23 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.713Z"
+    },
+    {
+      "file": "frontend\\services\\integration\\integrationService.ts",
+      "description": "修复了 101 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.714Z"
+    },
+    {
+      "file": "frontend\\services\\integration\\notificationService.ts",
+      "description": "修复了 1 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.714Z"
+    },
+    {
+      "file": "frontend\\services\\integration\\proxyService.ts",
+      "description": "修复了 31 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.715Z"
+    },
+    {
+      "file": "frontend\\services\\integration\\versionControlService.ts",
+      "description": "修复了 19 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.716Z"
+    },
+    {
+      "file": "frontend\\services\\monitoring\\index.ts",
+      "description": "修复了 9 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.716Z"
+    },
+    {
+      "file": "frontend\\services\\monitoring\\monitoring.ts",
+      "description": "修复了 62 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.717Z"
+    },
+    {
+      "file": "frontend\\services\\monitoring\\monitoringService.ts",
+      "description": "修复了 32 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.717Z"
+    },
+    {
+      "file": "frontend\\services\\monitoring\\realtimeMonitoringService.ts",
+      "description": "修复了 46 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.718Z"
+    },
+    {
+      "file": "frontend\\services\\performance\\performanceTestAdapter.ts",
+      "description": "修复了 23 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.719Z"
+    },
+    {
+      "file": "frontend\\services\\performance\\PerformanceTestCore.ts",
+      "description": "修复了 159 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.719Z"
+    },
+    {
+      "file": "frontend\\services\\performanceMonitoringIntegration.ts",
+      "description": "修复了 17 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.720Z"
+    },
+    {
+      "file": "frontend\\services\\preferences\\userPreferencesService.ts",
+      "description": "修复了 160 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.721Z"
+    },
+    {
+      "file": "frontend\\services\\reporting\\comparisonService.ts",
+      "description": "修复了 36 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.722Z"
+    },
+    {
+      "file": "frontend\\services\\reporting\\index.ts",
+      "description": "修复了 10 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.722Z"
+    },
+    {
+      "file": "frontend\\services\\reporting\\reportGeneratorService.ts",
+      "description": "修复了 75 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.723Z"
+    },
+    {
+      "file": "frontend\\services\\reporting\\reportService.ts",
+      "description": "修复了 96 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.724Z"
+    },
+    {
+      "file": "frontend\\services\\search\\globalSearchService.ts",
+      "description": "修复了 166 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.724Z"
+    },
+    {
+      "file": "frontend\\services\\seo\\googlePageSpeedService.ts",
+      "description": "修复了 41 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.725Z"
+    },
+    {
+      "file": "frontend\\services\\seo\\localSEOAnalysisEngine.ts",
+      "description": "修复了 184 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.726Z"
+    },
+    {
+      "file": "frontend\\services\\seo\\seoAnalysisEngine.ts",
+      "description": "修复了 410 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.728Z"
+    },
+    {
+      "file": "frontend\\services\\smartCacheManager.ts",
+      "description": "修复了 17 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.728Z"
+    },
+    {
+      "file": "frontend\\services\\state\\testStateManager.ts",
+      "description": "修复了 19 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.729Z"
+    },
+    {
+      "file": "frontend\\services\\system\\scheduling.ts",
+      "description": "修复了 41 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.729Z"
+    },
+    {
+      "file": "frontend\\services\\system\\settingsService.ts",
+      "description": "修复了 42 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.730Z"
+    },
+    {
+      "file": "frontend\\services\\system\\systemResourceMonitor.ts",
+      "description": "修复了 23 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.731Z"
+    },
+    {
+      "file": "frontend\\services\\system\\systemService.ts",
+      "description": "修复了 162 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.731Z"
+    },
+    {
+      "file": "frontend\\services\\testFlowManager.ts",
+      "description": "修复了 12 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.732Z"
+    },
+    {
+      "file": "frontend\\services\\testing\\apiTestEngine.ts",
+      "description": "修复了 384 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.733Z"
+    },
+    {
+      "file": "frontend\\services\\testing\\backgroundTestManager.ts",
+      "description": "修复了 81 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.734Z"
+    },
+    {
+      "file": "frontend\\services\\testing\\batchTestingService.ts",
+      "description": "修复了 37 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.734Z"
+    },
+    {
+      "file": "frontend\\services\\testing\\browserTestEngineIntegrator.ts",
+      "description": "修复了 7 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.735Z"
+    },
+    {
+      "file": "frontend\\services\\testing\\stressTestQueueManager.ts",
+      "description": "修复了 31 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.736Z"
+    },
+    {
+      "file": "frontend\\services\\testing\\stressTestRecordService.ts",
+      "description": "修复了 108 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.737Z"
+    },
+    {
+      "file": "frontend\\services\\testing\\testApiService.ts",
+      "description": "修复了 51 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.737Z"
+    },
+    {
+      "file": "frontend\\services\\testing\\testEngine.ts",
+      "description": "修复了 102 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.738Z"
+    },
+    {
+      "file": "frontend\\services\\testing\\testEngines.ts",
+      "description": "修复了 56 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.739Z"
+    },
+    {
+      "file": "frontend\\services\\testing\\testEngineService.ts",
+      "description": "修复了 41 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.740Z"
+    },
+    {
+      "file": "frontend\\services\\testing\\testHistoryService.ts",
+      "description": "修复了 22 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.740Z"
+    },
+    {
+      "file": "frontend\\services\\testing\\testScheduler.ts",
+      "description": "修复了 41 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.741Z"
+    },
+    {
+      "file": "frontend\\services\\testing\\testService.ts",
+      "description": "修复了 19 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.741Z"
+    },
+    {
+      "file": "frontend\\services\\testing\\testStateManager.ts",
+      "description": "修复了 28 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.742Z"
+    },
+    {
+      "file": "frontend\\services\\testing\\testTemplates.ts",
+      "description": "修复了 86 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.742Z"
+    },
+    {
+      "file": "frontend\\services\\testResultHandler.ts",
+      "description": "修复了 21 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.743Z"
+    },
+    {
+      "file": "frontend\\services\\testService.ts",
+      "description": "修复了 10 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.744Z"
+    },
+    {
+      "file": "frontend\\services\\types\\versionTypes.ts",
+      "description": "修复了 32 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.744Z"
+    },
+    {
+      "file": "frontend\\services\\unified\\apiErrorHandler.ts",
+      "description": "修复了 29 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.745Z"
+    },
+    {
+      "file": "frontend\\services\\user\\index.ts",
+      "description": "修复了 4 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.745Z"
+    },
+    {
+      "file": "frontend\\services\\user\\userFeedbackService.ts",
+      "description": "修复了 65 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.746Z"
+    },
+    {
+      "file": "frontend\\services\\user\\userService.ts",
+      "description": "修复了 43 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.747Z"
+    },
+    {
+      "file": "frontend\\services\\user\\userStatsService.ts",
+      "description": "修复了 13 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.748Z"
+    },
+    {
+      "file": "frontend\\services\\websocket\\websocketClient.ts",
+      "description": "修复了 37 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.748Z"
+    },
+    {
+      "file": "frontend\\services\\websocketService.ts",
+      "description": "修复了 25 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.749Z"
+    },
+    {
+      "file": "frontend\\types\\admin.ts",
+      "description": "修复了 10 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.750Z"
+    },
+    {
+      "file": "frontend\\types\\api.ts",
+      "description": "修复了 26 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.750Z"
+    },
+    {
+      "file": "frontend\\types\\apiResponse.ts",
+      "description": "修复了 5 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.751Z"
+    },
+    {
+      "file": "frontend\\types\\auth.ts",
+      "description": "修复了 21 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.751Z"
+    },
+    {
+      "file": "frontend\\types\\common.ts",
+      "description": "修复了 22 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.752Z"
+    },
+    {
+      "file": "frontend\\types\\dataModels.ts",
+      "description": "修复了 10 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.753Z"
+    },
+    {
+      "file": "frontend\\types\\electron.d.ts",
+      "description": "修复了 1 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.753Z"
+    },
+    {
+      "file": "frontend\\types\\enums.ts",
+      "description": "修复了 83 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.754Z"
+    },
+    {
+      "file": "frontend\\types\\icons.ts",
+      "description": "修复了 39 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.754Z"
+    },
+    {
+      "file": "frontend\\types\\index.ts",
+      "description": "修复了 1 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.755Z"
+    },
+    {
+      "file": "frontend\\types\\interfaces.ts",
+      "description": "修复了 4 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.755Z"
+    },
+    {
+      "file": "frontend\\types\\models.ts",
+      "description": "修复了 19 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.756Z"
+    },
+    {
+      "file": "frontend\\types\\performance.ts",
+      "description": "修复了 17 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.757Z"
+    },
+    {
+      "file": "frontend\\types\\rbac.ts",
+      "description": "修复了 47 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.757Z"
+    },
+    {
+      "file": "frontend\\types\\routes.ts",
+      "description": "修复了 2 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.758Z"
+    },
+    {
+      "file": "frontend\\types\\system.ts",
+      "description": "修复了 15 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.759Z"
+    },
+    {
+      "file": "frontend\\types\\test.ts",
+      "description": "修复了 9 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.759Z"
+    },
+    {
+      "file": "frontend\\types\\testConfig.ts",
+      "description": "修复了 32 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.760Z"
+    },
+    {
+      "file": "frontend\\types\\testEngines.ts",
+      "description": "修复了 40 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.761Z"
+    },
+    {
+      "file": "frontend\\types\\testHistory.ts",
+      "description": "修复了 33 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.761Z"
+    },
+    {
+      "file": "frontend\\types\\testing.ts",
+      "description": "修复了 40 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.762Z"
+    },
+    {
+      "file": "frontend\\types\\testResult.ts",
+      "description": "修复了 41 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.762Z"
+    },
+    {
+      "file": "frontend\\types\\ui.ts",
+      "description": "修复了 28 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.763Z"
+    },
+    {
+      "file": "frontend\\types\\unified\\apiResponse.ts",
+      "description": "修复了 39 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.763Z"
+    },
+    {
+      "file": "frontend\\types\\unified\\models.ts",
+      "description": "修复了 10 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.764Z"
+    },
+    {
+      "file": "frontend\\types\\user.ts",
+      "description": "修复了 5 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.764Z"
+    },
+    {
+      "file": "frontend\\types\\userModels.ts",
+      "description": "修复了 28 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.765Z"
+    },
+    {
+      "file": "frontend\\types\\version.ts",
+      "description": "修复了 33 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.766Z"
+    },
+    {
+      "file": "frontend\\utils\\apiUtils.ts",
+      "description": "修复了 21 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.767Z"
+    },
+    {
+      "file": "frontend\\utils\\browserJwt.ts",
+      "description": "修复了 13 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.767Z"
+    },
+    {
+      "file": "frontend\\utils\\browserSupport.ts",
+      "description": "修复了 47 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.768Z"
+    },
+    {
+      "file": "frontend\\utils\\chromeCompatibility.ts",
+      "description": "修复了 24 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.768Z"
+    },
+    {
+      "file": "frontend\\utils\\codeSplitting.ts",
+      "description": "修复了 66 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.769Z"
+    },
+    {
+      "file": "frontend\\utils\\componentDocGenerator.ts",
+      "description": "修复了 20 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.770Z"
+    },
+    {
+      "file": "frontend\\utils\\componentOptimization.ts",
+      "description": "修复了 4 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.770Z"
+    },
+    {
+      "file": "frontend\\utils\\componentTester.tsx",
+      "description": "修复了 6 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.771Z"
+    },
+    {
+      "file": "frontend\\utils\\componentTestGenerator.ts",
+      "description": "修复了 39 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.771Z"
+    },
+    {
+      "file": "frontend\\utils\\componentTypeGenerator.ts",
+      "description": "修复了 28 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.772Z"
+    },
+    {
+      "file": "frontend\\utils\\cssLoader.ts",
+      "description": "修复了 4 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.772Z"
+    },
+    {
+      "file": "frontend\\utils\\dataOptimizer.ts",
+      "description": "修复了 1 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.773Z"
+    },
+    {
+      "file": "frontend\\utils\\dataProcessingUtils.ts",
+      "description": "修复了 42 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.773Z"
+    },
+    {
+      "file": "frontend\\utils\\dataVisualizationOptimizer.ts",
+      "description": "修复了 5 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.774Z"
+    },
+    {
+      "file": "frontend\\utils\\environment.ts",
+      "description": "修复了 13 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.774Z"
+    },
+    {
+      "file": "frontend\\utils\\exportUtils.ts",
+      "description": "修复了 255 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.775Z"
+    },
+    {
+      "file": "frontend\\utils\\LazyLoadManager.tsx",
+      "description": "修复了 8 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.776Z"
+    },
+    {
+      "file": "frontend\\utils\\numberFormatter.ts",
+      "description": "修复了 14 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.777Z"
+    },
+    {
+      "file": "frontend\\utils\\pageTemplateGenerator.ts",
+      "description": "修复了 34 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.777Z"
+    },
+    {
+      "file": "frontend\\utils\\pageTestingTool.ts",
+      "description": "修复了 5 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.778Z"
+    },
+    {
+      "file": "frontend\\utils\\performanceUtils.ts",
+      "description": "修复了 105 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.778Z"
+    },
+    {
+      "file": "frontend\\utils\\reportExporter.ts",
+      "description": "修复了 29 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.779Z"
+    },
+    {
+      "file": "frontend\\utils\\resourcePreloader.ts",
+      "description": "修复了 16 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.779Z"
+    },
+    {
+      "file": "frontend\\utils\\responsive.ts",
+      "description": "修复了 14 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.780Z"
+    },
+    {
+      "file": "frontend\\utils\\routePreloader.ts",
+      "description": "修复了 39 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.780Z"
+    },
+    {
+      "file": "frontend\\utils\\routeUtils.ts",
+      "description": "修复了 42 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.781Z"
+    },
+    {
+      "file": "frontend\\utils\\storage.ts",
+      "description": "修复了 20 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.781Z"
+    },
+    {
+      "file": "frontend\\utils\\testDataTransformer.ts",
+      "description": "修复了 53 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.782Z"
+    },
+    {
+      "file": "frontend\\utils\\testErrorHandler.ts",
+      "description": "修复了 42 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.782Z"
+    },
+    {
+      "file": "frontend\\utils\\testStatusUtils.ts",
+      "description": "修复了 55 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.783Z"
+    },
+    {
+      "file": "frontend\\utils\\testTemplates.ts",
+      "description": "修复了 77 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.783Z"
+    },
+    {
+      "file": "frontend\\utils\\testUtils.ts",
+      "description": "修复了 40 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.784Z"
+    },
+    {
+      "file": "frontend\\utils\\urlValidator.ts",
+      "description": "修复了 49 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.784Z"
+    },
+    {
+      "file": "frontend\\vite-env.d.ts",
+      "description": "修复了 1 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.785Z"
+    },
+    {
+      "file": "frontend\\__tests__\\setup.ts",
+      "description": "修复了 6 个引号问题",
+      "timestamp": "2025-08-16T09:49:56.785Z"
+    }
+  ]
+}

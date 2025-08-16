@@ -1,6 +1,6 @@
 // 用户统计数据服务
 
-export interface UserActivityStats {
+export interface UserActivityStats     {
   totalTests: number;
   testsToday: number;
   testsThisWeek: number;
@@ -16,7 +16,7 @@ export interface UserActivityStats {
   recentActivity: ActivityItem[];
 }
 
-export interface ActivityItem {
+export interface ActivityItem     {
   id: string;
   type: 'test_completed' | 'test_failed' | 'bookmark_added' | 'profile_updated';
   title: string;
@@ -62,7 +62,7 @@ class UserStatsService {
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics:', {
+    console.debug('API Metrics: ', {'
       url: info.url,
       method: info.method,
       status: info.status,
@@ -88,14 +88,13 @@ class UserStatsService {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
   }
-  private readonly STORAGE_KEY = 'user_activity_stats';
+  private readonly STORAGE_KEY = "user_activity_stats';'`
   private readonly ACTIVITY_KEY = 'user_recent_activity';
-
   // 获取用户统计数据
   async getUserStats(userId: string): Promise<UserActivityStats> {
     try {
@@ -103,15 +102,15 @@ class UserStatsService {
       const apiStats = await this.fetchStatsFromAPI(userId);
       if (apiStats) {
         // 保存到本地缓存
-        localStorage.setItem(`${this.STORAGE_KEY}_${userId}`, JSON.stringify(apiStats));
+        localStorage.setItem(`${this.STORAGE_KEY}_${userId}`, JSON.stringify(apiStats));`
         return apiStats;
       }
     } catch (error) {
-      console.warn('Failed to fetch stats from API, using cached data:', error);
+      console.warn("Failed to fetch stats from API, using cached data: ', error);'`
     }
 
     // 如果API失败，从本地存储获取
-    const stored = localStorage.getItem(`${this.STORAGE_KEY}_${userId}`);
+    const stored = localStorage.getItem(`${this.STORAGE_KEY}_${userId}`);`
     if (stored) {
       
         try {
@@ -127,14 +126,14 @@ class UserStatsService {
           failedTests: 0,
           averageScore: 0,
           totalTestTime: 0,
-          mostUsedTestType: '压力测试',
+          mostUsedTestType: "压力测试','`
           testsByType: {
       },
           recentActivity: [],
           ...stats
         };
       } catch (error) {
-        console.error('Failed to parse user stats:', error);
+        console.error('Failed to parse user stats: ', error);'
       }
     }
 
@@ -145,20 +144,20 @@ class UserStatsService {
   // 从API获取统计数据
   private async fetchStatsFromAPI(userId: string): Promise<UserActivityStats | null> {
     try {
-      const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token') || localStorage.getItem('token');'
       if (!token) {
-        throw new Error('No auth token available');
+        throw new Error('No auth token available');'
       }
 
-      const response = await fetch(`/api/user/stats/${userId}`, {
+      const response = await fetch(`/api/user/stats/${userId}`, {`
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Authorization': `Bearer ${token}`,'`
+          "Content-Type': "application/json';'`
         }
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);`
       }
 
       const result = await response.json();
@@ -169,7 +168,7 @@ class UserStatsService {
 
       return null;
     } catch (error) {
-      console.error('Failed to fetch user stats from API:', error);
+      console.error("Failed to fetch user stats from API: ', error);'`
       return null;
     }
   }
@@ -186,7 +185,7 @@ class UserStatsService {
       failedTests: apiData.failed_tests || apiData.failedTests || 0,
       averageScore: apiData.average_score || apiData.averageScore || 0,
       totalTestTime: apiData.total_test_time || apiData.totalTestTime || 0,
-      mostUsedTestType: apiData.most_used_test_type || apiData.mostUsedTestType || '压力测试',
+      mostUsedTestType: apiData.most_used_test_type || apiData.mostUsedTestType || '压力测试','
       testsByType: apiData.tests_by_type || apiData.testsByType || {},
       recentActivity: apiData.recent_activity || apiData.recentActivity || []
     };
@@ -204,7 +203,7 @@ class UserStatsService {
       failedTests: 0,
       averageScore: 0,
       totalTestTime: 0,
-      mostUsedTestType: '暂无',
+      mostUsedTestType: '暂无','
       testsByType: {},
       recentActivity: []
     };
@@ -216,9 +215,9 @@ class UserStatsService {
     const updatedStats = { ...currentStats, ...updates };
 
     try {
-      localStorage.setItem(`${this.STORAGE_KEY}_${userId}`, JSON.stringify(updatedStats));
+      localStorage.setItem(`${this.STORAGE_KEY}_${userId}`, JSON.stringify(updatedStats));`
     } catch (error) {
-      console.error('Failed to save user stats:', error);
+      console.error("Failed to save user stats: ', error);'`
     }
   }
 
@@ -260,8 +259,7 @@ class UserStatsService {
     stats.testsByType[testType] = (stats.testsByType[testType] || 0) + 1;
 
     // 更新最常用测试类型
-    const mostUsedType = Object.entries(stats.testsByType).reduce((a, b) =>
-      stats.testsByType[a[0]] > stats.testsByType[b[0]] ? a : b
+    const mostUsedType = Object.entries(stats.testsByType).reduce((a, b) => stats.testsByType[a[0]] > stats.testsByType[b[0]] ? a : b
     );
     stats.mostUsedTestType = mostUsedType[0];
 
@@ -270,12 +268,12 @@ class UserStatsService {
 
     // 添加活动记录
     this.addActivity(userId, {
-      id: `test_${Date.now()}`,
-      type: success ? 'test_completed' : 'test_failed',
-      title: `${testType}${success ? '完成' : '失败'}`,
+      id: `test_${Date.now()}`,`
+      type: success ? "test_completed' : 'test_failed','`
+      title: `${testType}${success ? '完成' : '失败'}`,'`
       description: success
-        ? `成功完成${testType}，评分：${score || 'N/A'}`
-        : `${testType}执行失败`,
+        ? `成功完成${testType}，评分：${score || "N/A'}`'`
+        : `${testType}执行失败`,`
       timestamp: now.toISOString(),
       metadata: { testType, success, score, duration }
     });
@@ -284,16 +282,16 @@ class UserStatsService {
   }
 
   // 记录收藏操作
-  async recordBookmarkAction(userId: string, action: 'add' | 'remove', itemTitle: string): Promise<void> {
+  async recordBookmarkAction(userId: string, action: "add' | 'remove', itemTitle: string): Promise<void> {'`
     const stats = await this.getUserStats(userId);
 
-    if (action === 'add') {
+    if (action === 'add') {'
       stats.favoriteTests += 1;
       this.addActivity(userId, {
-        id: `bookmark_${Date.now()}`,
-        type: 'bookmark_added',
-        title: '添加收藏',
-        description: `收藏了 ${itemTitle}`,
+        id: `bookmark_${Date.now()}`,`
+        type: "bookmark_added','`
+        title: '添加收藏','
+        description: `收藏了 ${itemTitle}`,`
         timestamp: new Date().toISOString(),
         metadata: { action, itemTitle }
       });
@@ -313,21 +311,21 @@ class UserStatsService {
     const recentActivities = activities.slice(0, 20);
 
     try {
-      localStorage.setItem(`${this.ACTIVITY_KEY}_${userId}`, JSON.stringify(recentActivities));
+      localStorage.setItem(`${this.ACTIVITY_KEY}_${userId}`, JSON.stringify(recentActivities));`
     } catch (error) {
-      console.error('Failed to save user activity:', error);
+      console.error("Failed to save user activity: ', error);'`
     }
   }
 
   // 获取最近活动
   getRecentActivity(userId: string): ActivityItem[] {
-    const stored = localStorage.getItem(`${this.ACTIVITY_KEY}_${userId}`);
+    const stored = localStorage.getItem(`${this.ACTIVITY_KEY}_${userId}`);`
     if (stored) {
       
         try {
         return JSON.parse(stored);
       } catch (error) {
-        console.error('Failed to parse user activity:', error);
+        console.error("Failed to parse user activity: ', error);'`
       }
     }
     return [];
@@ -345,7 +343,7 @@ class UserStatsService {
     );
 
     stats.testsThisWeek = weekActivities.filter(activity =>
-      activity.type === 'test_completed' || activity.type === 'test_failed'
+      activity.type === 'test_completed' || activity.type === 'test_failed';
     ).length;
 
     this.updateUserStats(userId, stats);
@@ -363,7 +361,7 @@ class UserStatsService {
     );
 
     stats.testsThisMonth = monthActivities.filter(activity =>
-      activity.type === 'test_completed' || activity.type === 'test_failed'
+      activity.type === 'test_completed' || activity.type === 'test_failed';
     ).length;
 
     this.updateUserStats(userId, stats);
@@ -371,8 +369,8 @@ class UserStatsService {
 
   // 重置统计数据
   resetUserStats(userId: string): void {
-    localStorage.removeItem(`${this.STORAGE_KEY}_${userId}`);
-    localStorage.removeItem(`${this.ACTIVITY_KEY}_${userId}`);
+    localStorage.removeItem(`${this.STORAGE_KEY}_${userId}`);`
+    localStorage.removeItem(`${this.ACTIVITY_KEY}_${userId}`);`
   }
 
   // 导出统计数据
@@ -395,11 +393,11 @@ class UserStatsService {
         this.updateUserStats(userId, imported.stats);
       }
       if (imported.activities) {
-        localStorage.setItem(`${this.ACTIVITY_KEY}_${userId}`, JSON.stringify(imported.activities));
+        localStorage.setItem(`${this.ACTIVITY_KEY}_${userId}`, JSON.stringify(imported.activities));`
       }
       return true;
     } catch (error) {
-      console.error('Failed to import user stats:', error);
+      console.error("Failed to import user stats:', error);'`
       return false;
     }
   }

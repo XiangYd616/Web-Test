@@ -1,6 +1,6 @@
 
 // 核心类型定义
-export interface MonitoringSite {
+export interface MonitoringSite     {
     id: string;
     name: string;
     url: string;
@@ -15,7 +15,7 @@ export interface MonitoringSite {
     createdAt: string;
 }
 
-export interface MonitoringData {
+export interface MonitoringData     {
     timestamp: string;
     siteId: string;
     status: 'online' | 'offline' | 'warning';
@@ -32,7 +32,7 @@ export interface MonitoringData {
     };
 }
 
-export interface MonitoringStats {
+export interface MonitoringStats     {
     totalSites: number;
     onlineSites: number;
     avgResponseTime: number;
@@ -43,7 +43,7 @@ export interface MonitoringStats {
     lastUpdated: string;
 }
 
-export interface AlertConfig {
+export interface AlertConfig     {
     id: string;
     siteId: string;
     type: 'uptime' | 'response_time' | 'status_code' | 'ssl_expiry';
@@ -59,7 +59,7 @@ export interface AlertConfig {
     createdAt: string;
 }
 
-export interface MonitoringIncident {
+export interface MonitoringIncident     {
     id: string;
     siteId: string;
     type: 'downtime' | 'slow_response' | 'error' | 'ssl_issue';
@@ -76,8 +76,8 @@ export interface MonitoringIncident {
 }
 
 // 统一服务导出
-// export { default as monitoring } from './monitoring'; // 已修复
+// export { default as monitoring } from './monitoring'; // 已修复'
 // 兼容性导出（逐步迁移）
-// export { monitoringService } from './monitoringService'; // 已修复
+// export { monitoringService } from './monitoringService'; // 已修复'
 // 类型已在上面定义并自动导出，无需重复导出
 

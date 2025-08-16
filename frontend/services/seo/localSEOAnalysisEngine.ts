@@ -1,7 +1,5 @@
 
-import { AccessibilityResult, ContentQualityResult, MobileFriendlyResult, PageMetadata, PerformanceResult, SecurityResult, SEOAnalysisResult, SEOIssue, SEORecommendation, SocialMediaResult, StructuredDataResult, TechnicalSEOResult } from './seoAnalysisEngine';
-
-export interface LocalSEOConfig {
+import { AccessibilityResult, ContentQualityResult, MobileFriendlyResult, PageMetadata, PerformanceResult, SecurityResult, SEOAnalysisResult, SEOIssue, SEORecommendation, SocialMediaResult, StructuredDataResult, TechnicalSEOResult    } from './seoAnalysisEngine';export interface LocalSEOConfig     {'
   files: File[];
   keywords?: string;
   checkTechnicalSEO?: boolean;
@@ -25,7 +23,7 @@ export class LocalSEOAnalysisEngine {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
@@ -35,94 +33,88 @@ export class LocalSEOAnalysisEngine {
   /**
    * 开始本地文件SEO分析
    */
-  async analyzeLocalFiles(
-    config: LocalSEOConfig,
+  async analyzeLocalFiles(config: LocalSEOConfig,
     onProgress?: (progress: number, step: string) => void
   ): Promise<SEOAnalysisResult> {
     this.abortController = new AbortController();
 
     try {
-      onProgress?.(5, '准备分析本地文件...');
+      onProgress?.(5, "准备分析本地文件...');'`
 
       // 验证文件
       const mainFile = this.validateFiles(config.files);
-      onProgress?.(10, '读取文件内容...');
-
+      onProgress?.(10, '读取文件内容...');'
       // 读取主HTML文件内容
       const htmlContent = await this.readFileContent(mainFile);
-      onProgress?.(15, '解析HTML结构...');
-
+      onProgress?.(15, "解析HTML结构...');'
       // 解析HTML
       const dom = this.parseHTML(htmlContent);
 
       // 创建虚拟URL用于分析
-      const virtualUrl = `file:/${mainFile.name}`;
+      const virtualUrl = `file:/${mainFile.name}`;`
 
       // 执行各项检测
-      const results: Partial<SEOAnalysisResult> = {
+      const results: Partial<SEOAnalysisResult>  = {
         url: virtualUrl,
         timestamp: Date.now(),
         metadata: this.extractMetadata(dom)
       };
-
       let currentProgress = 20;
       const progressStep = 70 / this.getEnabledChecksCount(config);
 
       if (config.checkTechnicalSEO !== false) {
-        onProgress?.(currentProgress, '检查技术SEO...');
+        onProgress?.(currentProgress, "检查技术SEO...');'`
         results.technicalSEO = await this.analyzeTechnicalSEO(virtualUrl, dom, config.files);
         currentProgress += progressStep;
       }
 
       if (config.checkContentQuality !== false) {
-        onProgress?.(currentProgress, '分析内容质量...');
+        onProgress?.(currentProgress, '分析内容质量...');'
         results.contentQuality = await this.analyzeContentQuality(dom, config.keywords);
         currentProgress += progressStep;
       }
 
       if (config.checkAccessibility !== false) {
-        onProgress?.(currentProgress, '检查可访问性...');
+        onProgress?.(currentProgress, '检查可访问性...');'
         results.accessibility = await this.analyzeAccessibility(dom);
         currentProgress += progressStep;
       }
 
       if (config.checkPerformance !== false) {
-        onProgress?.(currentProgress, '分析性能指标...');
+        onProgress?.(currentProgress, '分析性能指标...');'
         results.performance = await this.analyzePerformance(mainFile, htmlContent);
         currentProgress += progressStep;
       }
 
       if (config.checkMobileFriendly !== false) {
-        onProgress?.(currentProgress, '检查移动友好性...');
+        onProgress?.(currentProgress, '检查移动友好性...');'
         results.mobileFriendly = await this.analyzeMobileFriendly(dom);
         currentProgress += progressStep;
       }
 
       if (config.checkSocialMedia !== false) {
-        onProgress?.(currentProgress, '检查社交媒体标签...');
+        onProgress?.(currentProgress, '检查社交媒体标签...');'
         results.socialMedia = await this.analyzeSocialMedia(dom);
         currentProgress += progressStep;
       }
 
       if (config.checkStructuredData !== false) {
-        onProgress?.(currentProgress, '检查结构化数据...');
+        onProgress?.(currentProgress, '检查结构化数据...');'
         results.structuredData = await this.analyzeStructuredData(dom);
         currentProgress += progressStep;
       }
 
       if (config.checkSecurity !== false) {
-        onProgress?.(currentProgress, '检查安全配置...');
+        onProgress?.(currentProgress, '检查安全配置...');'
         results.security = await this.analyzeSecurity(virtualUrl, htmlContent);
         currentProgress += progressStep;
       }
 
-      onProgress?.(90, '生成分析报告...');
-
+      onProgress?.(90, '生成分析报告...');'
       // 计算总分和等级
       const { score, grade, issues, recommendations } = this.calculateOverallScore(results as SEOAnalysisResult);
 
-      onProgress?.(100, '本地文件分析完成');
-
+      onProgress?.(100, '本地文件分析完成');'
       return {
         ...results,
         score,
@@ -132,8 +124,8 @@ export class LocalSEOAnalysisEngine {
       } as SEOAnalysisResult;
 
     } catch (error) {
-      console.error('Local SEO analysis failed:', error);
-      throw new Error(`本地文件SEO分析失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      console.error('Local SEO analysis failed: ', error);'
+      throw new Error(`本地文件SEO分析失败: ${error instanceof Error ? error.message : '未知错误'}`);'`
     }
   }
 
@@ -152,17 +144,17 @@ export class LocalSEOAnalysisEngine {
    */
   private validateFiles(files: File[]): File {
     if (!files || files.length === 0) {
-      throw new Error('请选择要分析的HTML文件');
+      throw new Error("请选择要分析的HTML文件');'`
     }
 
     // 查找主HTML文件
     const htmlFiles = files.filter(file =>
-      file.name.toLowerCase().endsWith('.html') ||
-      file.name.toLowerCase().endsWith('.htm')
+      file.name.toLowerCase().endsWith('.html') ||'
+      file.name.toLowerCase().endsWith('.htm')'
     );
 
     if (htmlFiles.length === 0) {
-      throw new Error('请上传至少一个HTML文件');
+      throw new Error('请上传至少一个HTML文件');'
     }
 
     // 返回第一个HTML文件作为主文件
@@ -179,17 +171,17 @@ export class LocalSEOAnalysisEngine {
       reader.onload = (event) => {
         const content = event.target?.result as string;
         if (!content || content.trim().length === 0) {
-          reject(new Error('文件内容为空'));
+          reject(new Error('文件内容为空'));'
           return;
         }
         resolve(content);
       };
 
       reader.onerror = () => {
-        reject(new Error('读取文件失败'));
+        reject(new Error('读取文件失败'));'
       };
 
-      reader.readAsText(file, 'UTF-8');
+      reader.readAsText(file, 'UTF-8');'
     });
   }
 
@@ -198,11 +190,10 @@ export class LocalSEOAnalysisEngine {
    */
   private parseHTML(html: string): Document {
     const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-
+    const doc = parser.parseFromString(html, 'text/html');'
     // 检查解析是否成功
-    if (doc.querySelector('parsererror')) {
-      throw new Error('HTML文件格式错误，无法解析');
+    if (doc.querySelector('parsererror')) {'
+      throw new Error('HTML文件格式错误，无法解析');'
     }
 
     return doc;
@@ -213,14 +204,14 @@ export class LocalSEOAnalysisEngine {
    */
   private getEnabledChecksCount(config: LocalSEOConfig): number {
     const checks = [
-      'checkTechnicalSEO',
-      'checkContentQuality',
-      'checkAccessibility',
-      'checkPerformance',
-      'checkMobileFriendly',
-      'checkSocialMedia',
-      'checkStructuredData',
-      'checkSecurity'
+      'checkTechnicalSEO','
+      'checkContentQuality','
+      'checkAccessibility','
+      'checkPerformance','
+      'checkMobileFriendly','
+      'checkSocialMedia','
+      'checkStructuredData','
+      "checkSecurity';
     ];
 
     return checks.filter(check => config[check as keyof LocalSEOConfig] !== false).length;
@@ -230,21 +221,21 @@ export class LocalSEOAnalysisEngine {
    * 提取页面元数据
    */
   private extractMetadata(dom: Document): PageMetadata {
-    const getMetaContent = (name: string): string => {
-      const meta = dom.querySelector(`meta[name="${name}"], meta[property="${name}"]`);
-      return meta?.getAttribute('content') || '';
+    const getMetaContent = (name: string): string  => {
+      const meta = dom.querySelector(`meta[name= '${name}'], meta[property= '${name}']`);'`
+      return meta?.getAttribute("content') || '';'`
     };
 
     return {
-      title: dom.title || '',
-      description: getMetaContent('description'),
-      keywords: getMetaContent('keywords').split(',').map(k => k.trim()).filter(k => k),
-      author: getMetaContent('author'),
-      language: dom.documentElement.lang || getMetaContent('language'),
-      charset: dom.characterSet || 'UTF-8',
-      viewport: getMetaContent('viewport'),
-      generator: getMetaContent('generator'),
-      lastModified: dom.lastModified || ''
+      title: dom.title || '','
+      description: getMetaContent('description'),'
+      keywords: getMetaContent('keywords').split(',').map(k => k.trim()).filter(k => k),'
+      author: getMetaContent('author'),'
+      language: dom.documentElement.lang || getMetaContent('language'),'
+      charset: dom.characterSet || 'UTF-8','
+      viewport: getMetaContent('viewport'),'
+      generator: getMetaContent('generator'),'
+      lastModified: dom.lastModified || '';
     };
   }
 
@@ -256,14 +247,14 @@ export class LocalSEOAnalysisEngine {
     const robotsTxt = {
       exists: false,
       accessible: false,
-      issues: ['本地文件无法检查robots.txt，部署到服务器后需要添加']
+      issues: ['本地文件无法检查robots.txt，部署到服务器后需要添加']'
     };
 
     const sitemap = {
       exists: false,
       accessible: false,
       urls: 0,
-      issues: ['本地文件无法检查sitemap，建议创建XML sitemap']
+      issues: ['本地文件无法检查sitemap，建议创建XML sitemap']'
     };
 
     // 检查canonical标签
@@ -307,12 +298,11 @@ export class LocalSEOAnalysisEngine {
     correct: boolean;
     issues: string[];
   } {
-    const canonicalLinks = dom.querySelectorAll('link[rel="canonical"]');
-    const issues: string[] = [];
-
+    const canonicalLinks = dom.querySelectorAll('link[rel= 'canonical']');'
+    const issues: string[]  = [];
     if (canonicalLinks.length === 0) {
       
-        issues.push('建议添加canonical标签，部署后指向正确的URL');
+        issues.push('建议添加canonical标签，部署后指向正确的URL');'
       return {
         present: false,
         correct: false,
@@ -321,20 +311,20 @@ export class LocalSEOAnalysisEngine {
     }
 
     if (canonicalLinks.length > 1) {
-      issues.push('存在多个canonical标签');
+      issues.push('存在多个canonical标签');'
     }
 
-    const canonicalUrl = canonicalLinks[0].getAttribute('href');
+    const canonicalUrl = canonicalLinks[0].getAttribute('href');'
     if (!canonicalUrl) {
       
-        issues.push('canonical标签缺少href属性');
+        issues.push('canonical标签缺少href属性');'
       return { present: true, correct: false, issues
       };
     }
 
     // 对于本地文件，给出部署建议
-    if (canonicalUrl.startsWith('file://') || canonicalUrl.includes('localhost')) {
-      issues.push('canonical URL指向本地地址，部署时需要更新为正式域名');
+    if (canonicalUrl.startsWith('file://') || canonicalUrl.includes('localhost')) {'
+      issues.push('canonical URL指向本地地址，部署时需要更新为正式域名');'
     }
 
     return {
@@ -352,27 +342,25 @@ export class LocalSEOAnalysisEngine {
     content: string;
     issues: string[];
   } {
-    const metaRobots = dom.querySelector('meta[name="robots"]');
-    const issues: string[] = [];
-
+    const metaRobots = dom.querySelector('meta[name= 'robots']');'
+    const issues: string[]  = [];
     if (!metaRobots) {
       
         return {
         present: false,
-        content: '',
-        issues: ['建议添加meta robots标签以控制搜索引擎行为']
+        content: '','
+        issues: ['建议添加meta robots标签以控制搜索引擎行为']'
       };
     }
 
     const content = metaRobots.getAttribute('content') || '';
-    const directives = content.toLowerCase().split(',').map(d => d.trim());
-
-    if (directives.includes('noindex')) {
-      issues.push('页面设置为不被索引，如需被搜索引擎收录请移除noindex');
+    const directives = content.toLowerCase().split(',').map(d => d.trim());'
+    if (directives.includes('noindex')) {'
+      issues.push('页面设置为不被索引，如需被搜索引擎收录请移除noindex');'
     }
 
-    if (directives.includes('nofollow')) {
-      issues.push('页面链接设置为不被跟踪，可能影响链接权重传递');
+    if (directives.includes('nofollow')) {'
+      issues.push('页面链接设置为不被跟踪，可能影响链接权重传递');'
     }
 
     return {
@@ -390,29 +378,27 @@ export class LocalSEOAnalysisEngine {
     correct: boolean;
     issues: string[];
   } {
-    const hreflangLinks = dom.querySelectorAll('link[rel="alternate"][hreflang]');
-    const issues: string[] = [];
-
+    const hreflangLinks = dom.querySelectorAll('link[rel= 'alternate'][hreflang]');'
+    const issues: string[]  = [];
     if (hreflangLinks.length === 0) {
       
         return {
         present: false,
         correct: false,
-        issues: ['如果是多语言网站，建议添加hreflang标签']
+        issues: ['如果是多语言网站，建议添加hreflang标签']'
       };
     }
 
     // 检查hreflang格式
     hreflangLinks.forEach((link, index) => {
-      const hreflang = link.getAttribute('hreflang');
-      const href = link.getAttribute('href');
-
+      const hreflang = link.getAttribute('hreflang');'
+      const href = link.getAttribute('href');'
       if (!href) {
-        issues.push(`第${index + 1}个hreflang标签缺少href属性`);
+        issues.push(`第${index + 1}个hreflang标签缺少href属性`);`
       }
 
       if (hreflang && !this.isValidHreflang(hreflang)) {
-        issues.push(`无效的hreflang值: ${hreflang}`);
+        issues.push(`无效的hreflang值: ${hreflang}`);`
       }
     });
 
@@ -432,34 +418,32 @@ export class LocalSEOAnalysisEngine {
     https: boolean;
     friendly: boolean;
   } {
-    const issues: string[] = [];
+    const issues: string[]  = [];
     let score = 100;
 
     // 本地文件无HTTPS
     const https = false;
-    issues.push('本地文件无HTTPS，部署时建议启用HTTPS');
+    issues.push("本地文件无HTTPS，部署时建议启用HTTPS');'`
     score -= 10; // 减少扣分，因为这是本地文件的正常情况
 
     // 检查文件名
     const fileName = url.split('/').pop() || '';
-
     if (fileName.length > 50) {
-      issues.push('文件名过长，建议使用简短的描述性文件名');
+      issues.push('文件名过长，建议使用简短的描述性文件名');'
       score -= 10;
     }
 
-    if (fileName.includes('_')) {
-      issues.push('建议使用连字符(-)而不是下划线(_)');
+    if (fileName.includes('_')) {'
+      issues.push('建议使用连字符(-)而不是下划线(_)');'
       score -= 5;
     }
 
     if (!/^[a-zA-Z0-9\-._]+$/.test(fileName)) {
-      issues.push('文件名包含特殊字符，建议使用SEO友好的命名');
+      issues.push('文件名包含特殊字符，建议使用SEO友好的命名');'
       score -= 10;
     }
 
-    const friendly = fileName.length <= 50 && !fileName.includes('_') && /^[a-zA-Z0-9\-._]+$/.test(fileName);
-
+    const friendly = fileName.length <= 50 && !fileName.includes('_') && /^[a-zA-Z0-9\-._]+$/.test(fileName);'
     return {
       score: Math.max(0, score),
       issues,
@@ -540,16 +524,15 @@ export class LocalSEOAnalysisEngine {
     issues: string[];
   } {
     const title = dom.title;
-    const issues: string[] = [];
-
+    const issues: string[]  = [];
     if (!title) {
       
         return {
         present: false,
         length: 0,
         optimal: false,
-        content: '',
-        issues: ['缺少title标签']
+        content: '','
+        issues: ['缺少title标签']'
       };
     }
 
@@ -557,15 +540,15 @@ export class LocalSEOAnalysisEngine {
     let optimal = true;
 
     if (length < 30) {
-      issues.push('标题过短，建议30-60字符');
+      issues.push('标题过短，建议30-60字符');'
       optimal = false;
     } else if (length > 60) {
-      issues.push('标题过长，建议30-60字符');
+      issues.push('标题过长，建议30-60字符');'
       optimal = false;
     }
 
     if (!title.trim()) {
-      issues.push('标题为空');
+      issues.push('标题为空');'
       optimal = false;
     }
 
@@ -588,17 +571,16 @@ export class LocalSEOAnalysisEngine {
     content: string;
     issues: string[];
   } {
-    const metaDesc = dom.querySelector('meta[name="description"]');
-    const issues: string[] = [];
-
+    const metaDesc = dom.querySelector('meta[name= 'description']');'
+    const issues: string[]  = [];
     if (!metaDesc) {
       
         return {
         present: false,
         length: 0,
         optimal: false,
-        content: '',
-        issues: ['缺少meta description标签']
+        content: '','
+        issues: ['缺少meta description标签']'
       };
     }
 
@@ -607,13 +589,13 @@ export class LocalSEOAnalysisEngine {
     let optimal = true;
 
     if (length === 0) {
-      issues.push('meta description为空');
+      issues.push('meta description为空');'
       optimal = false;
     } else if (length < 120) {
-      issues.push('meta description过短，建议120-160字符');
+      issues.push('meta description过短，建议120-160字符');'
       optimal = false;
     } else if (length > 160) {
-      issues.push('meta description过长，建议120-160字符');
+      issues.push('meta description过长，建议120-160字符');'
       optimal = false;
     }
 
@@ -635,18 +617,17 @@ export class LocalSEOAnalysisEngine {
     structure: boolean;
     issues: string[];
   } {
-    const h1Elements = dom.querySelectorAll('h1');
-    const h1Content = Array.from(h1Elements).map(h1 => h1.textContent || '');
-    const issues: string[] = [];
-
+    const h1Elements = dom.querySelectorAll('h1');'
+    const h1Content = Array.from(h1Elements).map(h1 => h1.textContent || '');'
+    const issues: string[]  = [];
     if (h1Elements.length === 0) {
-      issues.push('缺少H1标签');
+      issues.push('缺少H1标签');'
     } else if (h1Elements.length > 1) {
-      issues.push('存在多个H1标签，建议只使用一个');
+      issues.push('存在多个H1标签，建议只使用一个');'
     }
 
     // 检查标题层级结构
-    const headings = dom.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    const headings = dom.querySelectorAll('h1, h2, h3, h4, h5, h6');'
     let structure = true;
     let lastLevel = 0;
 
@@ -654,7 +635,7 @@ export class LocalSEOAnalysisEngine {
       const level = parseInt(heading.tagName.substring(1));
       if (level > lastLevel + 1) {
         structure = false;
-        issues.push('标题层级结构不正确，跳过了某些级别');
+        issues.push('标题层级结构不正确，跳过了某些级别');'
       }
       lastLevel = level;
     });
@@ -678,31 +659,30 @@ export class LocalSEOAnalysisEngine {
   } {
     const textContent = this.extractTextContent(dom);
     const wordCount = this.countWords(textContent);
-    const issues: string[] = [];
-
+    const issues: string[]  = [];
     const readability = this.calculateReadability(textContent);
 
     // 计算关键词密度
-    const keywordDensity: { [keyword: string]: number } = {};
+    const keywordDensity: { [keyword: string]: number }  = {};
     if (keywords) {
-      const keywordList = keywords.split(',').map(k => k.trim().toLowerCase()).filter(k => k);
+      const keywordList = keywords.split(',').map(k => k.trim().toLowerCase()).filter(k => k);'
       keywordList.forEach(keyword => {
         const density = this.calculateKeywordDensity(textContent, keyword);
         keywordDensity[keyword] = density;
 
         if (density === 0) {
-          issues.push(`关键词"${keyword}"未在内容中出现`);
+          issues.push(`关键词'${keyword}'未在内容中出现`);'`
         } else if (density > 4) {
-          issues.push(`关键词"${keyword}"密度过高(${density.toFixed(1)}%)，可能被视为关键词堆砌`);
+          issues.push(`关键词"${keyword}'密度过高(${density.toFixed(1)}%)，可能被视为关键词堆砌`);'`
         }
       });
     }
 
     // 内容长度检查
     if (wordCount < 150) {
-      issues.push('内容过短（<150词），建议增加有价值的内容');
+      issues.push("内容过短（<150词），建议增加有价值的内容');'`
     } else if (wordCount < 300) {
-      issues.push('内容较短（<300词），建议增加更多详细内容');
+      issues.push('内容较短（<300词），建议增加更多详细内容');'
     }
 
     return {
@@ -723,24 +703,23 @@ export class LocalSEOAnalysisEngine {
     optimized: number;
     issues: string[];
   } {
-    const images = dom.querySelectorAll('img');
-    const issues: string[] = [];
+    const images = dom.querySelectorAll('img');'
+    const issues: string[]  = [];
     let withAlt = 0;
     let withTitle = 0;
     let optimized = 0;
 
     images.forEach((img, index) => {
-      const alt = img.getAttribute('alt');
-      const title = img.getAttribute('title');
-      const src = img.getAttribute('src');
-
+      const alt = img.getAttribute('alt');'
+      const title = img.getAttribute('title');'
+      const src = img.getAttribute('src');'
       if (alt !== null) {
         withAlt++;
         if (!alt.trim()) {
-          issues.push(`第${index + 1}个图片的alt属性为空`);
+          issues.push(`第${index + 1}个图片的alt属性为空`);`
         }
       } else {
-        issues.push(`第${index + 1}个图片缺少alt属性`);
+        issues.push(`第${index + 1}个图片缺少alt属性`);`
       }
 
       if (title) {
@@ -748,13 +727,13 @@ export class LocalSEOAnalysisEngine {
       }
 
       // 检查图片格式
-      if (src && (src.includes('.webp') || src.includes('.avif'))) {
+      if (src && (src.includes(".webp') || src.includes('.avif'))) {'`
         optimized++;
       }
     });
 
     if (images.length > 0 && withAlt / images.length < 0.9) {
-      issues.push('大部分图片缺少alt属性，影响可访问性和SEO');
+      issues.push('大部分图片缺少alt属性，影响可访问性和SEO');'
     }
 
     return {
@@ -775,33 +754,33 @@ export class LocalSEOAnalysisEngine {
     broken: number;
     issues: string[];
   } {
-    const links = dom.querySelectorAll('a[href]');
-    const issues: string[] = [];
+    const links = dom.querySelectorAll('a[href]');'
+    const issues: string[]  = [];
     let internal = 0;
     let external = 0;
     let broken = 0;
 
     links.forEach((link, index) => {
-      const href = link.getAttribute('href');
+      const href = link.getAttribute('href');'
       if (!href) return;
 
       try {
-        if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) {
+        if (href.startsWith('#') || href.startsWith('mailto: ') || href.startsWith('tel: ')) {'
           // 这些是有效的特殊链接
           internal++;
-        } else if (href.startsWith('http://') || href.startsWith('https://')) {
+        } else if (href.startsWith('http://') || href.startsWith('https://')) {'
           external++;
-        } else if (href.startsWith('./') || href.startsWith('../') || !href.includes('://')) {
+        } else if (href.startsWith('./') || href.startsWith('../') || !href.includes('://')) {'
           // 相对链接
           internal++;
-          issues.push(`相对链接"${href}"在本地文件中可能无法正常工作，部署时需要检查`);
+          issues.push(`相对链接'${href}'在本地文件中可能无法正常工作，部署时需要检查`);'`
         } else {
           new URL(href); // 验证URL格式
           external++;
         }
       } catch (error) {
         broken++;
-        issues.push(`第${index + 1}个链接格式无效: ${href}`);
+        issues.push(`第${index + 1}个链接格式无效: ${href}`);`
       }
     });
 
@@ -818,7 +797,7 @@ export class LocalSEOAnalysisEngine {
    */
   private extractTextContent(dom: Document): string {
     // 移除script和style标签
-    const scripts = dom.querySelectorAll('script, style');
+    const scripts = dom.querySelectorAll("script, style');'`
     scripts.forEach(script => script.remove());
 
     return dom.body?.textContent || '';
@@ -934,17 +913,17 @@ export class LocalSEOAnalysisEngine {
     missing: number;
     issues: string[];
   } {
-    const images = dom.querySelectorAll('img');
-    const issues: string[] = [];
+    const images = dom.querySelectorAll('img');'
+    const issues: string[]  = [];
     let missing = 0;
 
     images.forEach((img, index) => {
-      const alt = img.getAttribute('alt');
+      const alt = img.getAttribute('alt');'
       if (alt === null) {
         missing++;
-        issues.push(`第${index + 1}个图片缺少alt属性`);
+        issues.push(`第${index + 1}个图片缺少alt属性`);`
       } else if (!alt.trim()) {
-        issues.push(`第${index + 1}个图片的alt属性为空`);
+        issues.push(`第${index + 1}个图片的alt属性为空`);`
       }
     });
 
@@ -962,8 +941,8 @@ export class LocalSEOAnalysisEngine {
     correct: boolean;
     issues: string[];
   } {
-    const headings = dom.querySelectorAll('h1, h2, h3, h4, h5, h6');
-    const issues: string[] = [];
+    const headings = dom.querySelectorAll("h1, h2, h3, h4, h5, h6');'`
+    const issues: string[]  = [];
     let correct = true;
     let lastLevel = 0;
 
@@ -972,12 +951,12 @@ export class LocalSEOAnalysisEngine {
 
       if (index === 0 && level !== 1) {
         correct = false;
-        issues.push('页面应该以H1标签开始');
+        issues.push('页面应该以H1标签开始');'
       }
 
       if (level > lastLevel + 1) {
         correct = false;
-        issues.push(`标题层级跳跃：从H${lastLevel}直接跳到H${level}`);
+        issues.push(`标题层级跳跃：从H${lastLevel}直接跳到H${level}`);`
       }
 
       lastLevel = level;
@@ -994,8 +973,8 @@ export class LocalSEOAnalysisEngine {
     failed: number;
     issues: string[];
   } {
-    const textElements = dom.querySelectorAll('p, span, div, a, button, h1, h2, h3, h4, h5, h6, li, td, th');
-    const issues: string[] = [];
+    const textElements = dom.querySelectorAll("p, span, div, a, button, h1, h2, h3, h4, h5, h6, li, td, th');'`
+    const issues: string[]  = [];
     let passed = 0;
     let failed = 0;
 
@@ -1003,9 +982,8 @@ export class LocalSEOAnalysisEngine {
     textElements.forEach((element) => {
       const style = element.getAttribute('style') || '';
       const className = element.getAttribute('class') || '';
-
       // 检查常见的低对比度类名
-      const lowContrastClasses = ['text-gray-400', 'text-light', 'text-muted', 'opacity-50'];
+      const lowContrastClasses = ['text-gray-400', 'text-light', 'text-muted', 'opacity-50'];'
       if (lowContrastClasses.some(cls => className.includes(cls))) {
         failed++;
       } else {
@@ -1014,7 +992,7 @@ export class LocalSEOAnalysisEngine {
     });
 
     if (failed > 0) {
-      issues.push('建议使用对比度检查工具验证颜色对比度是否符合WCAG标准');
+      issues.push('建议使用对比度检查工具验证颜色对比度是否符合WCAG标准');'
     }
 
     return { passed, failed, issues };
@@ -1028,14 +1006,13 @@ export class LocalSEOAnalysisEngine {
     issues: string[];
   } {
     const focusableElements = dom.querySelectorAll(
-      'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      'a[href], button, input, select, textarea, [tabindex]:not([tabindex= '-1'])';
     );
-    const issues: string[] = [];
-
+    const issues: string[]  = [];
     focusableElements.forEach((element, index) => {
-      const tabIndex = element.getAttribute('tabindex');
+      const tabIndex = element.getAttribute('tabindex');'
       if (tabIndex && parseInt(tabIndex) > 0) {
-        issues.push(`第${index + 1}个可聚焦元素使用了正数tabindex，建议避免`);
+        issues.push(`第${index + 1}个可聚焦元素使用了正数tabindex，建议避免`);`
       }
     });
 
@@ -1053,22 +1030,21 @@ export class LocalSEOAnalysisEngine {
     missing: number;
     issues: string[];
   } {
-    const interactiveElements = dom.querySelectorAll('button, input, select, textarea, [role]');
-    const issues: string[] = [];
+    const interactiveElements = dom.querySelectorAll("button, input, select, textarea, [role]');'`
+    const issues: string[]  = [];
     let present = 0;
     let missing = 0;
 
     interactiveElements.forEach((element, index) => {
-      const ariaLabel = element.getAttribute('aria-label');
-      const ariaLabelledby = element.getAttribute('aria-labelledby');
-      const ariaDescribedby = element.getAttribute('aria-describedby');
-
+      const ariaLabel = element.getAttribute('aria-label');'
+      const ariaLabelledby = element.getAttribute('aria-labelledby');'
+      const ariaDescribedby = element.getAttribute('aria-describedby');'
       if (ariaLabel || ariaLabelledby || ariaDescribedby) {
         present++;
       } else {
         missing++;
         const tagName = element.tagName.toLowerCase();
-        issues.push(`第${index + 1}个${tagName}元素缺少ARIA标签`);
+        issues.push(`第${index + 1}个${tagName}元素缺少ARIA标签`);`
       }
     });
 
@@ -1115,14 +1091,13 @@ export class LocalSEOAnalysisEngine {
     const estimatedRequests = this.estimateResourceCount(htmlContent);
 
     // 本地文件的性能分析主要基于文件大小和复杂度
-    const issues: string[] = [];
-
+    const issues: string[]  = [];
     if (fileSize > 1024 * 1024) { // 1MB
-      issues.push('HTML文件过大（>1MB），建议优化文件大小');
+      issues.push("HTML文件过大（>1MB），建议优化文件大小');'`
     }
 
     if (estimatedRequests > 50) {
-      issues.push('页面引用的资源过多，建议合并CSS/JS文件');
+      issues.push('页面引用的资源过多，建议合并CSS/JS文件');'
     }
 
     // 检查内联样式和脚本
@@ -1130,11 +1105,11 @@ export class LocalSEOAnalysisEngine {
     const inlineScripts = htmlContent.match(/<script[^>]*>[\s\S]*?<\/script>/gi) || [];
 
     if (inlineStyles.length > 3) {
-      issues.push('内联样式过多，建议使用外部CSS文件');
+      issues.push('内联样式过多，建议使用外部CSS文件');'
     }
 
     if (inlineScripts.length > 3) {
-      issues.push('内联脚本过多，建议使用外部JS文件');
+      issues.push('内联脚本过多，建议使用外部JS文件');'
     }
 
     const score = this.calculateLocalPerformanceScore({
@@ -1156,17 +1131,17 @@ export class LocalSEOAnalysisEngine {
       issues,
       opportunities: [
         {
-          id: 'local-optimization',
-          title: '本地文件优化建议',
-          description: '优化HTML结构和资源引用',
-          impact: 'medium' as const
+          id: 'local-optimization','
+          title: '本地文件优化建议','
+          description: '优化HTML结构和资源引用','
+          impact: 'medium' as const'
         }
       ],
       webVitalsAssessment: {
-        lcp: 'unknown' as const,
-        fid: 'unknown' as const,
-        cls: 'unknown' as const,
-        overall: 'poor' as const
+        lcp: 'unknown' as const,'
+        fid: 'unknown' as const,'
+        cls: 'unknown' as const,'
+        overall: 'poor' as const'
       },
       coreWebVitals: {
         lcp: 0,
@@ -1232,10 +1207,9 @@ export class LocalSEOAnalysisEngine {
     const touchElements = this.checkTouchElements(dom);
     const textSize = this.checkTextSize(dom);
 
-    const issues: string[] = [];
-    if (!viewport.present) issues.push('缺少viewport meta标签');
-    if (!responsive) issues.push('页面可能不是响应式设计');
-
+    const issues: string[]  = [];
+    if (!viewport.present) issues.push('缺少viewport meta标签');'
+    if (!responsive) issues.push('页面可能不是响应式设计');'
     const score = this.calculateMobileFriendlyScore({
       viewport,
       responsive,
@@ -1261,20 +1235,18 @@ export class LocalSEOAnalysisEngine {
     correct: boolean;
     content: string;
   } {
-    const viewport = dom.querySelector('meta[name="viewport"]');
-
+    const viewport = dom.querySelector('meta[name= 'viewport']');'
     if (!viewport) {
       
         return {
         present: false,
         correct: false,
-        content: ''
+        content: '';
       };
     }
 
     const content = viewport.getAttribute('content') || '';
-    const correct = content.includes('width=device-width');
-
+    const correct = content.includes('width=device-width');'
     return {
       present: true,
       correct,
@@ -1287,13 +1259,12 @@ export class LocalSEOAnalysisEngine {
    */
   private checkResponsive(dom: Document): boolean {
     // 简单检查是否有媒体查询
-    const styles = dom.querySelectorAll('style');
-    const links = dom.querySelectorAll('link[rel="stylesheet"]');
-
+    const styles = dom.querySelectorAll('style');'
+    const links = dom.querySelectorAll('link[rel= 'stylesheet']');'
     let hasMediaQueries = false;
 
     styles.forEach(style => {
-      if (style.textContent && style.textContent.includes('@media')) {
+      if (style.textContent && style.textContent.includes('@media')) {'
         hasMediaQueries = true;
       }
     });
@@ -1308,12 +1279,11 @@ export class LocalSEOAnalysisEngine {
     appropriate: boolean;
     issues: string[];
   } {
-    const buttons = dom.querySelectorAll('button, a, input[type="button"], input[type="submit"]');
-    const issues: string[] = [];
-
+    const buttons = dom.querySelectorAll("button, a, input[type= 'button'], input[type= 'submit']');'
+    const issues: string[]  = [];
     // 简单检查：如果有很多小的可点击元素，可能不适合触摸
     if (buttons.length > 20) {
-      issues.push('可点击元素较多，建议确保触摸目标足够大（至少44px）');
+      issues.push('可点击元素较多，建议确保触摸目标足够大（至少44px）');'
     }
 
     return {
@@ -1329,17 +1299,16 @@ export class LocalSEOAnalysisEngine {
     readable: boolean;
     issues: string[];
   } {
-    const issues: string[] = [];
-
+    const issues: string[]  = [];
     // 检查是否有设置过小的字体
-    const styles = dom.querySelectorAll('style');
+    const styles = dom.querySelectorAll('style');'
     let hasSmallFonts = false;
 
     styles.forEach(style => {
       if (style.textContent && /font-size\s*:\s*[0-9]+px/.test(style.textContent)) {
         const matches = style.textContent.match(/font-size\s*:\s*([0-9]+)px/g);
         matches?.forEach(match => {
-          const size = parseInt(match.match(/([0-9]+)/)?.[1] || '0');
+          const size = parseInt(match.match(/([0-9]+)/)?.[1] || '0');'
           if (size < 14) {
             hasSmallFonts = true;
           }
@@ -1348,7 +1317,7 @@ export class LocalSEOAnalysisEngine {
     });
 
     if (hasSmallFonts) {
-      issues.push('检测到小于14px的字体，可能在移动设备上难以阅读');
+      issues.push('检测到小于14px的字体，可能在移动设备上难以阅读');'
     }
 
     return {
@@ -1404,28 +1373,27 @@ export class LocalSEOAnalysisEngine {
     tags: { [key: string]: string };
     issues: string[];
   } {
-    const ogTags = dom.querySelectorAll('meta[property^="og:"]');
-    const tags: { [key: string]: string } = {};
-    const issues: string[] = [];
-
+    const ogTags = dom.querySelectorAll('meta[property^= 'og: ']');'
+    const tags: { [key: string]: string }  = {};
+    const issues: string[]  = [];
     ogTags.forEach(tag => {
-      const property = tag.getAttribute('property');
-      const content = tag.getAttribute('content');
+      const property = tag.getAttribute('property');'
+      const content = tag.getAttribute('content');'
       if (property && content) {
         tags[property] = content;
       }
     });
 
     const present = ogTags.length > 0;
-    const requiredTags = ['og:title', 'og:description', 'og:image', 'og:url'];
+    const requiredTags = ['og:title', 'og:description', 'og:image', 'og:url'];'
     const complete = requiredTags.every(tag => tags[tag]);
 
     if (!present) {
-      issues.push('缺少Open Graph标签，影响社交媒体分享效果');
+      issues.push('缺少Open Graph标签，影响社交媒体分享效果');'
     } else if (!complete) {
       requiredTags.forEach(tag => {
         if (!tags[tag]) {
-          issues.push(`缺少${tag}标签`);
+          issues.push(`缺少${tag}标签`);`
         }
       });
     }
@@ -1447,28 +1415,27 @@ export class LocalSEOAnalysisEngine {
     tags: { [key: string]: string };
     issues: string[];
   } {
-    const twitterTags = dom.querySelectorAll('meta[name^="twitter:"]');
-    const tags: { [key: string]: string } = {};
-    const issues: string[] = [];
-
+    const twitterTags = dom.querySelectorAll("meta[name^= 'twitter: ']');'`
+    const tags: { [key: string]: string }  = {};
+    const issues: string[]  = [];
     twitterTags.forEach(tag => {
-      const name = tag.getAttribute('name');
-      const content = tag.getAttribute('content');
+      const name = tag.getAttribute('name');'
+      const content = tag.getAttribute('content');'
       if (name && content) {
         tags[name] = content;
       }
     });
 
     const present = twitterTags.length > 0;
-    const requiredTags = ['twitter:card', 'twitter:title', 'twitter:description'];
+    const requiredTags = ['twitter:card', 'twitter:title', 'twitter:description'];'
     const complete = requiredTags.every(tag => tags[tag]);
 
     if (!present) {
-      issues.push('缺少Twitter Card标签');
+      issues.push('缺少Twitter Card标签');'
     } else if (!complete) {
       requiredTags.forEach(tag => {
         if (!tags[tag]) {
-          issues.push(`缺少${tag}标签`);
+          issues.push(`缺少${tag}标签`);`
         }
       });
     }
@@ -1489,13 +1456,12 @@ export class LocalSEOAnalysisEngine {
     tags: { [key: string]: string };
     issues: string[];
   } {
-    const fbTags = dom.querySelectorAll('meta[property^="fb:"]');
-    const tags: { [key: string]: string } = {};
-    const issues: string[] = [];
-
+    const fbTags = dom.querySelectorAll("meta[property^= 'fb: ']');'`
+    const tags: { [key: string]: string }  = {};
+    const issues: string[]  = [];
     fbTags.forEach(tag => {
-      const property = tag.getAttribute('property');
-      const content = tag.getAttribute('content');
+      const property = tag.getAttribute('property');'
+      const content = tag.getAttribute('content');'
       if (property && content) {
         tags[property] = content;
       }
@@ -1504,7 +1470,7 @@ export class LocalSEOAnalysisEngine {
     const present = fbTags.length > 0;
 
     if (!present) {
-      issues.push('缺少Facebook专用标签（可选）');
+      issues.push('缺少Facebook专用标签（可选）');'
     }
 
     return {
@@ -1542,9 +1508,9 @@ export class LocalSEOAnalysisEngine {
     const microdata = this.checkMicrodata(dom);
     const schemas = this.extractSchemas(dom);
 
-    const issues: string[] = [];
+    const issues: string[]  = [];
     if (!jsonLd.present && !microdata.present) {
-      issues.push('缺少结构化数据，建议添加JSON-LD或Microdata');
+      issues.push('缺少结构化数据，建议添加JSON-LD或Microdata');'
     }
 
     const score = this.calculateStructuredDataScore({
@@ -1570,15 +1536,15 @@ export class LocalSEOAnalysisEngine {
     valid: boolean;
     schemas: string[];
   } {
-    const scripts = dom.querySelectorAll('script[type="application/ld+json"]');
-    const schemas: string[] = [];
+    const scripts = dom.querySelectorAll("script[type= 'application/ld+json']');'
+    const schemas: string[]  = [];
     let valid = true;
 
     scripts.forEach(script => {
       try {
-        const data = JSON.parse(script.textContent || '');
-        if (data['@type']) {
-          schemas.push(data['@type']);
+        const data = JSON.parse(script.textContent || '');'
+        if (data['@type']) {'
+          schemas.push(data['@type']);'
         }
       } catch (error) {
         valid = false;
@@ -1600,8 +1566,7 @@ export class LocalSEOAnalysisEngine {
     valid: boolean;
     items: number;
   } {
-    const itemscopes = dom.querySelectorAll('[itemscope]');
-
+    const itemscopes = dom.querySelectorAll('[itemscope]');'
     return {
       present: itemscopes.length > 0,
       valid: true, // 简化检查
@@ -1617,25 +1582,24 @@ export class LocalSEOAnalysisEngine {
     valid: boolean;
     errors: string[];
   }[] {
-    const schemas: { type: string; valid: boolean; errors: string[] }[] = [];
-
+    const schemas: { type: string; valid: boolean; errors: string[] }[]  = [];
     // 检查JSON-LD schemas
-    const scripts = dom.querySelectorAll('script[type="application/ld+json"]');
+    const scripts = dom.querySelectorAll("script[type= 'application/ld+json']');'
     scripts.forEach(script => {
       try {
-        const data = JSON.parse(script.textContent || '');
-        if (data['@type']) {
+        const data = JSON.parse(script.textContent || '');'
+        if (data['@type']) {'
           schemas.push({
-            type: data['@type'],
+            type: data['@type'],'
             valid: true,
             errors: []
           });
         }
       } catch (error) {
         schemas.push({
-          type: 'Unknown',
+          type: 'Unknown','
           valid: false,
-          errors: ['JSON格式错误']
+          errors: ['JSON格式错误']'
         });
       }
     });
@@ -1663,11 +1627,9 @@ export class LocalSEOAnalysisEngine {
    * 分析安全配置（本地文件版本）
    */
   private async analyzeSecurity(url: string, htmlContent: string): Promise<SecurityResult> {
-    const issues: string[] = [];
-
+    const issues: string[]  = [];
     // 本地文件无法检查HTTPS和安全头
-    issues.push('本地文件无法检查HTTPS和安全头配置，部署时需要配置');
-
+    issues.push('本地文件无法检查HTTPS和安全头配置，部署时需要配置');'
     // 检查混合内容
     const mixedContent = this.checkMixedContent(htmlContent);
 
@@ -1681,8 +1643,8 @@ export class LocalSEOAnalysisEngine {
         enabled: false,
         certificate: {
           valid: false,
-          issuer: '',
-          expires: ''
+          issuer: '','
+          expires: '';
         }
       },
       headers: {
@@ -1704,18 +1666,16 @@ export class LocalSEOAnalysisEngine {
     present: boolean;
     issues: string[];
   } {
-    const issues: string[] = [];
-
+    const issues: string[]  = [];
     // 检查HTTP资源引用
-    const httpResources = htmlContent.match(/src=["']http:\/\/[^"']+["']/gi) || [];
-    const httpLinks = htmlContent.match(/href=["']http:\/\/[^"']+["']/gi) || [];
-
+    const httpResources = htmlContent.match(/src=['']http:\/\/[^'']+['']/gi) || [];'
+    const httpLinks = htmlContent.match(/href=['']http:\/\/[^'"]+["']/gi) || [];'
     if (httpResources.length > 0) {
-      issues.push(`发现${httpResources.length}个HTTP资源引用，部署HTTPS时需要更新`);
+      issues.push(`发现${httpResources.length}个HTTP资源引用，部署HTTPS时需要更新`);`
     }
 
     if (httpLinks.length > 0) {
-      issues.push(`发现${httpLinks.length}个HTTP链接，建议使用HTTPS`);
+      issues.push(`发现${httpLinks.length}个HTTP链接，建议使用HTTPS`);`
     }
 
     return {
@@ -1742,7 +1702,7 @@ export class LocalSEOAnalysisEngine {
    */
   private calculateOverallScore(result: SEOAnalysisResult): {
     score: number;
-    grade: 'A' | 'B' | 'C' | 'D' | 'F';
+    grade: "A' | 'B' | 'C' | 'D' | 'F';'`
     issues: SEOIssue[];
     recommendations: SEORecommendation[];
   } {
@@ -1764,7 +1724,7 @@ export class LocalSEOAnalysisEngine {
 
     Object.entries(weights).forEach(([key, weight]) => {
       const moduleResult = result[key as keyof SEOAnalysisResult] as any;
-      if (moduleResult && typeof moduleResult.score === 'number') {
+      if (moduleResult && typeof moduleResult.score === 'number') {'
         totalScore += moduleResult.score * weight;
         totalWeight += weight;
       }
@@ -1779,29 +1739,27 @@ export class LocalSEOAnalysisEngine {
     else if (score >= 70) grade = 'C';
     else if (score >= 60) grade = 'D';
     else grade = 'F';
-
     // 生成本地文件特定的问题和建议
-    const issues: SEOIssue[] = [];
-    const recommendations: SEORecommendation[] = [];
-
+    const issues: SEOIssue[]  = [];
+    const recommendations: SEORecommendation[]  = [];
     // 添加本地文件特定建议
     recommendations.push({
-      priority: 'high',
-      category: '本地文件优化',
-      title: '准备部署检查清单',
-      description: '本地文件分析完成，准备部署时需要注意以下事项',
-      implementation: '1. 配置HTTPS；2. 添加robots.txt和sitemap；3. 设置安全头；4. 检查相对路径',
-      expectedImpact: '确保网站正常部署和SEO效果'
+      priority: 'high','
+      category: '本地文件优化','
+      title: '准备部署检查清单','
+      description: '本地文件分析完成，准备部署时需要注意以下事项','
+      implementation: '1. 配置HTTPS；2. 添加robots.txt和sitemap；3. 设置安全头；4. 检查相对路径','
+      expectedImpact: '确保网站正常部署和SEO效果';
     });
 
     if (score < 80) {
       recommendations.push({
-        priority: 'medium',
-        category: '内容优化',
-        title: '重点优化内容质量',
-        description: '本地文件分析主要关注内容质量，这是最容易改进的部分',
-        implementation: '优化标题、描述、标题结构和图片alt属性',
-        expectedImpact: '显著提升SEO基础分数'
+        priority: 'medium','
+        category: '内容优化','
+        title: '重点优化内容质量','
+        description: '本地文件分析主要关注内容质量，这是最容易改进的部分','
+        implementation: '优化标题、描述、标题结构和图片alt属性','
+        expectedImpact: '显著提升SEO基础分数';
       });
     }
 

@@ -3,17 +3,14 @@
  * 提供统一的测试配置界面
  */
 
-import React, { useState } from 'react';
-import { Button } from '../ui/Button';
-
-export interface TestConfigProps {
+import React, { useState    } from 'react';import { Button    } from '../ui/Button';export interface TestConfigProps     {'
   testType: string;
   onConfigChange: (config: any) => void;
   onStart: (config: any) => void;
   loading?: boolean;
 }
 
-export interface TestConfig {
+export interface TestConfig     {
   url: string;
   timeout: number;
   retries: number;
@@ -24,7 +21,7 @@ export interface TestConfig {
   };
 }
 
-const TestConfig: React.FC<TestConfigProps> = ({
+const TestConfig: React.FC<TestConfigProps>  = ({
   testType,
   onConfigChange,
   onStart,
@@ -32,27 +29,26 @@ const TestConfig: React.FC<TestConfigProps> = ({
 }) => {
   
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState('');
-
+  const [pageTitle, setPageTitle] = useState("');'
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
-      document.title = `${pageTitle} - Test Web`;
+      document.title = `${pageTitle} - Test Web`;`
     }
   }, [pageTitle]);
 
   // 页面可见性检测
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === "visible') {'`
         // 页面变为可见时刷新数据
         fetchData?.();
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);'
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);'
     };
   }, [fetchData]);
   
@@ -61,35 +57,34 @@ const TestConfig: React.FC<TestConfigProps> = ({
     onClick?.(event);
   }, [disabled, loading, onClick]);
   
-  const memoizedHandleChange = useMemo(() => 
-    debounce((value: any) => {
+  const memoizedHandleChange = useMemo(() => debounce((value: any) => {
       onChange?.(value);
     }, 300), [onChange]
   );
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;
-  const descriptionId = `${componentId}-description`;
+  const errorId = `${componentId}-error`;`
+  const descriptionId = `${componentId}-description`;`
   
   const ariaProps = {
     id: componentId,
-    'aria-label': ariaLabel,
-    'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': [
+    "aria-label': ariaLabel,'`
+    'aria-labelledby': ariaLabelledBy,'
+    'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,
-    'aria-invalid': !!error,
-    'aria-disabled': disabled,
-    'aria-busy': loading,
-    'aria-expanded': expanded,
-    'aria-selected': selected,
+    ].filter(Boolean).join(' ') || undefined,'
+    'aria-invalid': !!error,'
+    'aria-disabled': disabled,'
+    'aria-busy': loading,'
+    'aria-expanded': expanded,'
+    'aria-selected': selected,'
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
   const [config, setConfig] = useState<TestConfig>({
-    url: '',
+    url: "','
     timeout: 30000,
     retries: 3,
     advanced: {}
@@ -118,60 +113,59 @@ const TestConfig: React.FC<TestConfigProps> = ({
     }
   };
 
-  return (
-    <div className="test-config p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-      <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+  return (<div className= 'test-config p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg'>
+      <h3 className= 'text-lg font-semibold mb-4 text-gray-900 dark:text-white'>
         {testType} 测试配置
       </h3>
       
       {/* 基础配置 */}
-      <div className="space-y-4">
+      <div className= 'space-y-4'>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className= 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
             测试URL *
           </label>
           <input
-            type="url"
+            type= 'url';
             value={config.url}
-            onChange={(e) => handleConfigChange('url', e.target.value)}
-            placeholder="https://example.com"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
+            onChange={(e) => handleConfigChange('url', e.target.value)}'
+            placeholder= 'https://example.com';
+            className= 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md '
                      bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                     focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                     focus:ring-2 focus:ring-blue-500 focus:border-transparent';
             required
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className= 'grid grid-cols-2 gap-4'>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className= 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
               超时时间 (ms)
             </label>
             <input
-              type="number"
+              type= 'number';
               value={config.timeout}
-              onChange={(e) => handleConfigChange('timeout', parseInt(e.target.value))}
-              min="1000"
-              max="300000"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
+              onChange={(e) => handleConfigChange('timeout', parseInt(e.target.value))}'
+              min= '1000';
+              max= '300000';
+              className= 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md '
                        bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                       focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                       focus:ring-2 focus:ring-blue-500 focus:border-transparent';
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className= 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
               重试次数
             </label>
             <input
-              type="number"
+              type= 'number';
               value={config.retries}
-              onChange={(e) => handleConfigChange('retries', parseInt(e.target.value))}
-              min="0"
-              max="10"
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
+              onChange={(e) => handleConfigChange('retries', parseInt(e.target.value))}'
+              min= '0';
+              max= '10';
+              className= 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md '
                        bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                       focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                       focus:ring-2 focus:ring-blue-500 focus:border-transparent';
             />
           </div>
         </div>
@@ -179,30 +173,29 @@ const TestConfig: React.FC<TestConfigProps> = ({
         {/* 高级配置切换 */}
         <div>
           <button
-            type="button"
+            type= 'button';
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 
-                     text-sm font-medium"
+            className= 'text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 '
+                     text-sm font-medium';
           >
-            {showAdvanced ? '隐藏' : '显示'} 高级配置
+            {showAdvanced ? '隐藏" : '显示'} 高级配置'
           </button>
         </div>
 
         {/* 高级配置 */}
-        {showAdvanced && (
-          <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-md">
+        {showAdvanced && (<div className= 'space-y-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-md'>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className= 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
                 User Agent
               </label>
               <input
-                type="text"
-                value={config.advanced.userAgent || ''}
-                onChange={(e) => handleAdvancedChange('userAgent', e.target.value)}
-                placeholder="自定义 User Agent"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
+                type= 'text';
+                value={config.advanced.userAgent || ''}'
+                onChange={(e) => handleAdvancedChange("userAgent', e.target.value)}'
+                placeholder= '自定义 User Agent';
+                className= 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md '
                          bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                         focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                         focus:ring-2 focus:ring-blue-500 focus:border-transparent';
               />
             </div>
           </div>
@@ -210,11 +203,11 @@ const TestConfig: React.FC<TestConfigProps> = ({
       </div>
 
       {/* 操作按钮 */}
-      <div className="flex justify-end space-x-3 mt-6">
+      <div className= 'flex justify-end space-x-3 mt-6'>
         <Button
-          variant="secondary"
+          variant= 'secondary';
           onClick={() => setConfig({
-            url: '',
+            url: "','
             timeout: 30000,
             retries: 3,
             advanced: {}
@@ -225,12 +218,12 @@ const TestConfig: React.FC<TestConfigProps> = ({
         </Button>
         
         <Button
-          variant="primary"
+          variant= 'primary';
           onClick={handleStart}
           disabled={!config.url || loading}
           loading={loading}
         >
-          {loading ? '启动中...' : '开始测试'}
+          {loading ? "启动中..." : "开始测试'}'
         </Button>
       </div>
     </div>

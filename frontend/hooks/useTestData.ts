@@ -2,9 +2,7 @@
  * useTestData Hook
  */
 
-import { useState, useEffect } from 'react';
-
-export const useTestData = (testId?: string) => {
+import { useState, useEffect    } from 'react';export const useTestData = (testId?: string) => {'
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -17,7 +15,7 @@ export const useTestData = (testId?: string) => {
 
     // 模拟数据获取
     setTimeout(() => {
-      setData({ id: testId, status: 'completed', score: 85 });
+      setData({ id: testId, status: 'completed', score: 85 });'
       setLoading(false);
     }, 1000);
   }, [testId]);

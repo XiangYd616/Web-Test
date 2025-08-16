@@ -1,16 +1,4 @@
-import { CheckCircle, Clock, Gauge, Image, Play, Smartphone, Square, Timer, Zap } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { useAsyncErrorHandler } from '../hooks/useAsyncErrorHandler';
-import TestResults from '../components/TestResults';
-import React, { useState } from 'react';
-import { useAuthCheck } from '../../../components/auth/WithAuthCheck.tsx';
-import BaseTestPage from '../../../components/testing/BaseTestPage.tsx';
-import URLInput from '../../../components/testing/URLInput.tsx';
-import { useUserStats } from '../../../hooks/useUserStats.ts';
-import { apiService } from '../../../services/api/apiService.ts';
-import TestHistory from '../results/TestHistory.tsx';
-
-interface PerformanceTestConfig {
+import { CheckCircle, Clock, Gauge, Image, Play, Smartphone, Square, Timer, Zap    } from 'lucide-react';import { useState, useEffect    } from 'react';import { useAsyncErrorHandler    } from '../hooks/useAsyncErrorHandler';import TestResults from '../components/TestResults';import React, { useState    } from 'react';import { useAuthCheck    } from '../../../components/auth/WithAuthCheck.tsx';import BaseTestPage from '../../../components/testing/BaseTestPage.tsx';import URLInput from '../../../components/testing/URLInput.tsx';import { useUserStats    } from '../../../hooks/useUserStats.ts';import { apiService    } from '../../../services/api/apiService.ts';import TestHistory from '../results/TestHistory.tsx';interface PerformanceTestConfig   {'
   url: string;
   mode: 'basic' | 'standard' | 'comprehensive';
   checkPageSpeed: boolean;
@@ -21,7 +9,7 @@ interface PerformanceTestConfig {
   checkCompression: boolean;
 }
 
-interface PerformanceTestResult {
+interface PerformanceTestResult   {
   overallScore: number;
   grade: string;
   metrics: {
@@ -43,21 +31,19 @@ interface PerformanceTestResult {
 }
 
 type TestStatus = 'idle' | 'running' | 'completed' | 'failed';
-
-const PerformanceAnalysis: React.FC = () => {
+const PerformanceAnalysis: React.FC  = () => {
   
-  const [feedback, setFeedback] = useState({ type: '', message: '' });
-  
+  const [feedback, setFeedback] = useState({ type: '', message: '' });'
   const showFeedback = (type, message, duration = 3000) => {
     setFeedback({ type, message });
     setTimeout(() => {
-      setFeedback({ type: '', message: '' });
+      setFeedback({ type: '', message: '' });'
     }, duration);
   };
   
   useEffect(() => {
     if (state.error) {
-      showFeedback('error', state.error.message);
+      showFeedback('error', state.error.message);'
     }
   }, [state.error]);
   
@@ -95,13 +81,12 @@ const PerformanceAnalysis: React.FC = () => {
   
   const runTest = async (config) => {
     setIsRunning(true);
-    const result = await executeAsync(
-      () => fetch('/api/tests/run', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ testType: 'performance', config })
+    const result = await executeAsync(() => fetch('/api/tests/run', {'
+        method: 'POST','
+        headers: { 'Content-Type': 'application/json' },'
+        body: JSON.stringify({ testType: 'performance', config })'
       }).then(res => res.json()),
-      { context: 'TestExecution.runTest' }
+      { context: 'TestExecution.runTest' }'
     );
     
     if (result && result.success) {
@@ -115,11 +100,11 @@ const PerformanceAnalysis: React.FC = () => {
   const pollTestResult = async (executionId) => {
     const interval = setInterval(async () => {
       const result = await executeAsync(
-        () => fetch(`/api/tests/results/${executionId}`).then(res => res.json()),
-        { context: 'TestExecution.pollResult' }
+        () => fetch(`/api/tests/results/${executionId}`).then(res => res.json()),`
+        { context: "TestExecution.pollResult' }'`
       );
       
-      if (result && result.success && result.data.status === 'completed') {
+      if (result && result.success && result.data.status === 'completed') {'
         setTestResult(result.data);
         clearInterval(interval);
       }
@@ -132,8 +117,8 @@ const PerformanceAnalysis: React.FC = () => {
   useAuthCheck();
 
   const [testConfig, setTestConfig] = useState<PerformanceTestConfig>({
-    url: '',
-    mode: 'standard',
+    url: '','
+    mode: 'standard','
     checkPageSpeed: true,
     checkResourceOptimization: true,
     checkCoreWebVitals: true,
@@ -142,28 +127,27 @@ const PerformanceAnalysis: React.FC = () => {
     checkCompression: true
   });
 
-  const [testStatus, setTestStatus] = useState<TestStatus>('idle');
+  const [testStatus, setTestStatus] = useState<TestStatus>('idle');'
   const [testResults, setTestResults] = useState<PerformanceTestResult | null>(null);
-  const [error, setError] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<'test' | 'history'>('test');
-
+  const [error, setError] = useState<string>('');'
+  const [activeTab, setActiveTab] = useState<'test' | 'history'>("test');'
   const { recordTestCompletion } = useUserStats();
 
   // 运行性能测试
   const runPerformanceTest = async () => {
     if (!testConfig.url) {
       
-        setError('请输入要测试的URL');
+        setError('请输入要测试的URL');'
       return;
       }
 
     try {
-      setTestStatus('running');
-      setError('');
+      setTestStatus('running');'
+      setError("');'
       setTestResults(null);
 
       // 调用后端性能测试API
-      const response = await apiService.post('/api/test/real/performance', {
+      const response = await apiService.post('/api/test/real/performance', {'
         url: testConfig.url,
         options: {
           mode: testConfig.mode,
@@ -178,14 +162,14 @@ const PerformanceAnalysis: React.FC = () => {
 
       if (response.success) {
         setTestResults(response.data);
-        setTestStatus('completed');
-        recordTestCompletion('performance');
+        setTestStatus('completed');'
+        recordTestCompletion('performance');'
       } else {
-        throw new Error(response.message || '性能测试失败');
+        throw new Error(response.message || '性能测试失败');'
       }
     } catch (err: any) {
-      setTestStatus('failed');
-      setError(err.message || '测试过程中发生错误');
+      setTestStatus('failed');'
+      setError(err.message || '测试过程中发生错误');'
     }
   };
 
@@ -211,33 +195,32 @@ const PerformanceAnalysis: React.FC = () => {
   
   if (state.isLoading || loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-        <span className="ml-3 text-gray-600">加载中...</span>
+      <div className= 'flex justify-center items-center h-64'>
+        <div className= 'animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500'></div>
+        <span className= 'ml-3 text-gray-600'>加载中...</span>
       </div>
     );
   }
 
   if (state.error) {
-    return (
-      <div className="bg-red-50 border border-red-200 rounded-md p-4">
-        <div className="flex">
-          <div className="flex-shrink-0">
-            <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+    return (<div className= 'bg-red-50 border border-red-200 rounded-md p-4'>
+        <div className= 'flex'>
+          <div className= 'flex-shrink-0'>
+            <svg className= 'h-5 w-5 text-red-400' viewBox= '0 0 20 20' fill= 'currentColor'>
+              <path fillRule= 'evenodd' d= 'M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z' clipRule= 'evenodd' />
             </svg>
           </div>
-          <div className="ml-3">
-            <h3 className="text-sm font-medium text-red-800">
+          <div className= 'ml-3'>
+            <h3 className= 'text-sm font-medium text-red-800'>
               操作失败
             </h3>
-            <div className="mt-2 text-sm text-red-700">
+            <div className= 'mt-2 text-sm text-red-700'>
               <p>{state.error.message}</p>
             </div>
-            <div className="mt-4">
+            <div className= 'mt-4'>
               <button
                 onClick={() => window.location.reload()}
-                className="bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200"
+                className= 'bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200';
               >
                 重试
               </button>
@@ -248,31 +231,30 @@ const PerformanceAnalysis: React.FC = () => {
     );
   }
 
-  return (
-    <BaseTestPage
-      testType="performance"
-      title="性能分析"
-      description="全面分析网站性能指标，优化用户体验"
+  return (<BaseTestPage
+      testType= 'performance';
+      title= '性能分析';
+      description= '全面分析网站性能指标，优化用户体验';
       icon={Zap}
       headerExtra={
-        <div className="flex items-center space-x-4">
+        <div className= 'flex items-center space-x-4'>
           {/* 标签页切换 */}
-          <div className="flex items-center space-x-2">
+          <div className= 'flex items-center space-x-2'>
             <button
-              onClick={() => setActiveTab('test')}
-              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${activeTab === 'test'
-                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
-                }`}
+              onClick={() => setActiveTab('test')}'
+              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${activeTab === 'test';'`}
+                ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300';'`
+                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200';
+                }`}`
             >
               性能测试
             </button>
             <button
-              onClick={() => setActiveTab('history')}
-              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${activeTab === 'history'
-                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200'
-                }`}
+              onClick={() => setActiveTab("history')}'`
+              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${activeTab === 'history';'`}
+                ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300';'`
+                : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200';
+                }`}`
             >
               测试历史
             </button>
@@ -280,48 +262,47 @@ const PerformanceAnalysis: React.FC = () => {
         </div>
       }
     >
-      {activeTab === 'test' ? (
-        <div className="space-y-6">
+      {activeTab === "test' ? (<div className= 'space-y-6'>`
           {/* URL输入区域 */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          <div className= 'bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6'>
+            <h2 className= 'text-lg font-semibold text-gray-900 dark:text-white mb-4'>
               测试配置
             </h2>
 
-            <div className="space-y-4">
+            <div className= 'space-y-4'>
               <URLInput
                 value={testConfig.url}
-                onChange={(url) => handleConfigChange('url', url)}
-                placeholder="输入要测试的网站URL..."
-                disabled={testStatus === 'running'}
+                onChange={(url) => handleConfigChange("url', url)}'
+                placeholder= '输入要测试的网站URL...';
+                disabled={testStatus === 'running'}'
               />
 
               {/* 测试模式选择 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className= 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
                   测试模式
                 </label>
-                <div className="flex space-x-4">
+                <div className= 'flex space-x-4'>
                   {[
-                    { value: 'basic', label: '基础测试', desc: '快速检测核心指标' },
-                    { value: 'standard', label: '标准测试', desc: '全面性能分析' },
-                    { value: 'comprehensive', label: '深度测试', desc: '详细优化建议' }
+                    { value: 'basic', label: '基础测试', desc: '快速检测核心指标' },'
+                    { value: 'standard', label: '标准测试', desc: '全面性能分析' },'
+                    { value: 'comprehensive', label: '深度测试', desc: '详细优化建议' }'
                   ].map((mode) => (
-                    <label key={mode.value} className="flex items-center">
+                    <label key={mode.value} className= 'flex items-center'>
                       <input
-                        type="radio"
-                        name="mode"
+                        type= 'radio';
+                        name= 'mode';
                         value={mode.value}
                         checked={testConfig.mode === mode.value}
-                        onChange={(e) => handleConfigChange('mode', e.target.value)}
-                        disabled={testStatus === 'running'}
-                        className="mr-2"
+                        onChange={(e) => handleConfigChange('mode', e.target.value)}'
+                        disabled={testStatus === 'running'}'
+                        className= 'mr-2';
                       />
                       <div>
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">
+                        <div className= 'text-sm font-medium text-gray-900 dark:text-white'>
                           {mode.label}
                         </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                        <div className= 'text-xs text-gray-500 dark:text-gray-400'>
                           {mode.desc}
                         </div>
                       </div>
@@ -332,30 +313,29 @@ const PerformanceAnalysis: React.FC = () => {
 
               {/* 测试选项 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className= 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
                   测试项目
                 </label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className= 'grid grid-cols-2 md:grid-cols-3 gap-4'>
                   {[
-                    { key: 'checkPageSpeed', label: '页面速度', icon: Timer },
-                    { key: 'checkResourceOptimization', label: '资源优化', icon: Image },
-                    { key: 'checkCoreWebVitals', label: '核心指标', icon: Gauge },
-                    { key: 'checkMobilePerformance', label: '移动性能', icon: Smartphone },
-                    { key: 'checkCaching', label: '缓存策略', icon: Clock },
-                    { key: 'checkCompression', label: '压缩优化', icon: Square }
+                    { key: 'checkPageSpeed', label: '页面速度', icon: Timer },'
+                    { key: 'checkResourceOptimization', label: '资源优化', icon: Image },'
+                    { key: 'checkCoreWebVitals', label: '核心指标', icon: Gauge },'
+                    { key: 'checkMobilePerformance', label: '移动性能', icon: Smartphone },'
+                    { key: 'checkCaching', label: '缓存策略', icon: Clock },'
+                    { key: 'checkCompression', label: '压缩优化', icon: Square }'
                   ].map((option) => {
                     const IconComponent = option.icon;
-                    return (
-                      <label key={option.key} className="flex items-center space-x-2">
+                    return (<label key={option.key} className= 'flex items-center space-x-2'>
                         <input
-                          type="checkbox"
+                          type= 'checkbox';
                           checked={testConfig[option.key as keyof PerformanceTestConfig] as boolean}
                           onChange={(e) => handleConfigChange(option.key as keyof PerformanceTestConfig, e.target.checked)}
-                          disabled={testStatus === 'running'}
-                          className="rounded"
+                          disabled={testStatus === 'running'}'
+                          className= 'rounded';
                         />
-                        <IconComponent className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                        <IconComponent className= 'w-4 h-4 text-gray-500'    />
+                        <span className= 'text-sm text-gray-700 dark:text-gray-300'>
                           {option.label}
                         </span>
                       </label>
@@ -367,17 +347,17 @@ const PerformanceAnalysis: React.FC = () => {
               {/* 开始测试按钮 */}
               <button
                 onClick={runPerformanceTest}
-                disabled={!testConfig.url || testStatus === 'running'}
-                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                disabled={!testConfig.url || testStatus === 'running'}'
+                className= 'w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center space-x-2';
               >
-                {testStatus === 'running' ? (
+                {testStatus === 'running' ? ('')
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <div className= 'animate-spin rounded-full h-4 w-4 border-b-2 border-white'></div>
                     <span>测试进行中...</span>
                   </>
                 ) : (
                   <>
-                    <Play className="w-4 h-4" />
+                    <Play className= 'w-4 h-4'    />
                     <span>开始性能测试</span>
                   </>
                 )}
@@ -385,8 +365,8 @@ const PerformanceAnalysis: React.FC = () => {
 
               {/* 错误信息 */}
               {error && (
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-                  <p className="text-red-700 dark:text-red-400 text-sm">{error}</p>
+                <div className= 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4'>
+                  <p className= 'text-red-700 dark:text-red-400 text-sm'>{error}</p>
                 </div>
               )}
             </div>
@@ -394,47 +374,47 @@ const PerformanceAnalysis: React.FC = () => {
 
           {/* 测试结果 */}
           {testResults && (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <div className= 'bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6'>
+              <h2 className= 'text-lg font-semibold text-gray-900 dark:text-white mb-4'>
                 测试结果
               </h2>
 
               {/* 总体评分 */}
-              <div className="flex items-center justify-between mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className= 'flex items-center justify-between mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg'>
                 <div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <div className= 'text-2xl font-bold text-gray-900 dark:text-white'>
                     总体评分
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                  <div className= 'text-sm text-gray-600 dark:text-gray-400'>
                     基于多项性能指标综合评估
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className={`text-4xl font-bold ${getScoreColor(testResults.overallScore)}`}>
+                <div className= 'text-right'>
+                  <div className={`text-4xl font-bold ${getScoreColor(testResults.overallScore)}`}>`
                     {testResults.overallScore}
                   </div>
-                  <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getGradeColor(testResults.grade)}`}>
+                  <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getGradeColor(testResults.grade)}`}>`
                     {testResults.grade}
                   </div>
                 </div>
               </div>
 
               {/* 核心指标 */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+              <div className= "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6'>`
                 {Object.entries(testResults.metrics).map(([key, value]) => (
-                  <div key={key} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                      {key === 'loadTime' ? '加载时间' :
-                        key === 'firstContentfulPaint' ? 'FCP' :
-                          key === 'largestContentfulPaint' ? 'LCP' :
-                            key === 'cumulativeLayoutShift' ? 'CLS' :
-                              key === 'firstInputDelay' ? 'FID' :
-                                key === 'timeToInteractive' ? 'TTI' : key}
+                  <div key={key} className= 'bg-gray-50 dark:bg-gray-700 rounded-lg p-4'>
+                    <div className= 'text-sm text-gray-600 dark:text-gray-400 mb-1'>
+                      {key === 'loadTime' ? '加载时间' : ''
+                        key === 'firstContentfulPaint' ? 'FCP' : ''
+                          key === 'largestContentfulPaint' ? 'LCP' : ''
+                            key === 'cumulativeLayoutShift' ? 'CLS' : ''
+                              key === 'firstInputDelay' ? 'FID' : ''
+                                key === 'timeToInteractive' ? 'TTI' : key}'
                     </div>
-                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                      {typeof value === 'number' ?
-                        (key.includes('Time') || key.includes('Paint') || key === 'firstInputDelay' || key === 'timeToInteractive' ?
-                          `${value}ms` : value.toFixed(3)) :
+                    <div className= 'text-lg font-semibold text-gray-900 dark:text-white'>
+                      {typeof value === 'number' ?'
+                        (key.includes('Time') || key.includes('Paint') || key === 'firstInputDelay' || key === 'timeToInteractive' ?'
+                          `${value}ms` : value.toFixed(3)) :`
                         value}
                     </div>
                   </div>
@@ -442,16 +422,15 @@ const PerformanceAnalysis: React.FC = () => {
               </div>
 
               {/* 优化建议 */}
-              {testResults.recommendations.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-3">
+              {testResults.recommendations.length > 0 && (<div className= "mb-6'>`
+                  <h3 className= 'text-md font-semibold text-gray-900 dark:text-white mb-3'>
                     优化建议
                   </h3>
-                  <ul className="space-y-2">
+                  <ul className= 'space-y-2'>
                     {testResults.recommendations.map((recommendation, index) => (
-                      <li key={index} className="flex items-start space-x-2">
-                        <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                      <li key={index} className= 'flex items-start space-x-2'>
+                        <CheckCircle className= 'w-4 h-4 text-green-500 mt-0.5 flex-shrink-0'    />
+                        <span className= 'text-sm text-gray-700 dark:text-gray-300'>
                           {recommendation}
                         </span>
                       </li>
@@ -463,7 +442,7 @@ const PerformanceAnalysis: React.FC = () => {
           )}
         </div>
       ) : (
-        <TestHistory testType="performance" />
+        <TestHistory testType= 'performance'    />
       )}
     </BaseTestPage>
   );

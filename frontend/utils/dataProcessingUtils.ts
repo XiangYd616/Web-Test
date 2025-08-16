@@ -3,7 +3,7 @@
  * 整合项目中重复的数据处理逻辑
  */
 
-export interface TestDataPoint {
+export interface TestDataPoint     {
   timestamp: string | number;
   responseTime: number;
   activeUsers: number;
@@ -14,7 +14,7 @@ export interface TestDataPoint {
   phase?: string;
 }
 
-export interface ResponseTimeDistribution {
+export interface ResponseTimeDistribution     {
   range: string;
   count: number;
   percentage: number;
@@ -28,13 +28,11 @@ export class DataProcessingUtils {
   static normalizeTimestamp(timestamp: any): string {
     if (!timestamp) return new Date().toISOString();
 
-    if (typeof timestamp === 'string') {
-      
+    if (typeof timestamp === 'string') {'
         return new Date(timestamp).toISOString();
       }
 
-    if (typeof timestamp === 'number') {
-      
+    if (typeof timestamp === 'number') {'
         return new Date(timestamp).toISOString();
       }
 
@@ -62,7 +60,7 @@ export class DataProcessingUtils {
       errorRate: this.normalizeNumber(rawPoint.errorRate, 0, 100),
       status: rawPoint.status || (rawPoint.success ? 200 : 500),
       success: Boolean(rawPoint.success),
-      phase: rawPoint.phase || 'steady'
+      phase: rawPoint.phase || 'steady';
     };
   }
 
@@ -71,7 +69,7 @@ export class DataProcessingUtils {
    */
   static filterValidData(data: any[]): TestDataPoint[] {
     return data
-      .filter(item => item && typeof item === 'object')
+      .filter(item => item && typeof item === 'object')'
       .map(item => this.normalizeDataPoint(item))
       .filter(item => item.responseTime > 0 && item.timestamp);
   }
@@ -85,69 +83,69 @@ export class DataProcessingUtils {
     if (validData.length === 0) {
       
         return [
-        { range: '0-50ms', count: 0, percentage: 0, color: 'bg-green-400'
+        { range: '0-50ms', count: 0, percentage: 0, color: 'bg-green-400';
       },
-        { range: '50-100ms', count: 0, percentage: 0, color: 'bg-green-300' },
-        { range: '100-200ms', count: 0, percentage: 0, color: 'bg-yellow-400' },
-        { range: '200-500ms', count: 0, percentage: 0, color: 'bg-orange-400' },
-        { range: '500ms+', count: 0, percentage: 0, color: 'bg-red-400' }
+        { range: '50-100ms', count: 0, percentage: 0, color: 'bg-green-300' },'
+        { range: '100-200ms', count: 0, percentage: 0, color: 'bg-yellow-400' },'
+        { range: '200-500ms', count: 0, percentage: 0, color: 'bg-orange-400' },'
+        { range: '500ms+', count: 0, percentage: 0, color: 'bg-red-400' }'
       ];
     }
 
     const distribution = {
-      '0-50': 0,
-      '50-100': 0,
-      '100-200': 0,
-      '200-500': 0,
-      '500+': 0
+      '0-50': 0,'
+      '50-100': 0,'
+      '100-200': 0,'
+      '200-500': 0,'
+      '500+': 0'
     };
 
     validData.forEach(item => {
       const responseTime = item.responseTime;
       if (responseTime <= 50) {
-        distribution['0-50']++;
+        distribution['0-50']++;'
       } else if (responseTime <= 100) {
-        distribution['50-100']++;
+        distribution['50-100']++;'
       } else if (responseTime <= 200) {
-        distribution['100-200']++;
+        distribution['100-200']++;'
       } else if (responseTime <= 500) {
-        distribution['200-500']++;
+        distribution['200-500']++;'
       } else {
-        distribution['500+']++;
+        distribution['500+']++;'
       }
     });
 
     const totalCount = validData.length;
     return [
       {
-        range: '0-50ms',
-        count: distribution['0-50'],
-        percentage: totalCount > 0 ? (distribution['0-50'] / totalCount) * 100 : 0,
-        color: 'bg-green-400'
+        range: '0-50ms','
+        count: distribution['0-50'],'
+        percentage: totalCount > 0 ? (distribution['0-50'] / totalCount) * 100 : 0,'
+        color: 'bg-green-400';
       },
       {
-        range: '50-100ms',
-        count: distribution['50-100'],
-        percentage: totalCount > 0 ? (distribution['50-100'] / totalCount) * 100 : 0,
-        color: 'bg-green-300'
+        range: '50-100ms','
+        count: distribution['50-100'],'
+        percentage: totalCount > 0 ? (distribution['50-100'] / totalCount) * 100 : 0,'
+        color: 'bg-green-300';
       },
       {
-        range: '100-200ms',
-        count: distribution['100-200'],
-        percentage: totalCount > 0 ? (distribution['100-200'] / totalCount) * 100 : 0,
-        color: 'bg-yellow-400'
+        range: '100-200ms','
+        count: distribution['100-200'],'
+        percentage: totalCount > 0 ? (distribution['100-200'] / totalCount) * 100 : 0,'
+        color: 'bg-yellow-400';
       },
       {
-        range: '200-500ms',
-        count: distribution['200-500'],
-        percentage: totalCount > 0 ? (distribution['200-500'] / totalCount) * 100 : 0,
-        color: 'bg-orange-400'
+        range: '200-500ms','
+        count: distribution['200-500'],'
+        percentage: totalCount > 0 ? (distribution['200-500'] / totalCount) * 100 : 0,'
+        color: 'bg-orange-400';
       },
       {
-        range: '500ms+',
-        count: distribution['500+'],
-        percentage: totalCount > 0 ? (distribution['500+'] / totalCount) * 100 : 0,
-        color: 'bg-red-400'
+        range: '500ms+','
+        count: distribution['500+'],'
+        percentage: totalCount > 0 ? (distribution['500+'] / totalCount) * 100 : 0,'
+        color: 'bg-red-400';
       }
     ];
   }
@@ -202,14 +200,12 @@ export class DataProcessingUtils {
   static aggregateByTimeWindow(data: TestDataPoint[], windowMs: number = 5000): TestDataPoint[] {
     if (data.length === 0) return [];
 
-    const sortedData = [...data].sort((a, b) =>
-      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    const sortedData = [...data].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
     );
 
     const startTime = new Date(sortedData[0].timestamp).getTime();
     const endTime = new Date(sortedData[sortedData.length - 1].timestamp).getTime();
-    const aggregatedData: TestDataPoint[] = [];
-
+    const aggregatedData: TestDataPoint[]  = [];
     for (let windowStart = startTime; windowStart < endTime; windowStart += windowMs) {
       const windowEnd = windowStart + windowMs;
       const windowData = sortedData.filter(item => {
@@ -348,12 +344,12 @@ export class DataProcessingUtils {
    */
   static validateDataPoint(dataPoint: TestDataPoint): boolean {
     return (
-      typeof dataPoint.responseTime === 'number' &&
+      typeof dataPoint.responseTime === 'number' &&'
       dataPoint.responseTime >= 0 &&
       dataPoint.responseTime <= 60000 &&
-      typeof dataPoint.throughput === 'number' &&
+      typeof dataPoint.throughput === 'number' &&'
       dataPoint.throughput >= 0 &&
-      typeof dataPoint.activeUsers === 'number' &&
+      typeof dataPoint.activeUsers === 'number' &&'
       dataPoint.activeUsers >= 0
     );
   }

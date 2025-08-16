@@ -1,8 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { DataPoint, dataVisualizationOptimizer, OptimizationConfig } from '../../utils/DataVisualizationOptimizer';
-
-interface PerformanceChartProps {
+import React, { useCallback, useEffect, useMemo, useState    } from 'react';import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis    } from 'recharts';import { DataPoint, dataVisualizationOptimizer, OptimizationConfig    } from '../../utils/DataVisualizationOptimizer';interface PerformanceChartProps   {'
   data: DataPoint[];
   dataKey: string;
   name: string;
@@ -15,14 +11,14 @@ interface PerformanceChartProps {
   onOptimizationResult?: (result: any) => void;
 }
 
-interface PerformanceStats {
+interface PerformanceStats   {
   renderTime: number;
   dataPoints: number;
   compressionRatio: number;
   cacheHit: boolean;
 }
 
-const PerformanceChart: React.FC<PerformanceChartProps> = ({
+const PerformanceChart: React.FC<PerformanceChartProps>  = ({
   data,
   dataKey,
   name,
@@ -30,29 +26,29 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
   height = 300,
   showAverage = false,
   maxDataPoints = 1000,
-  samplingStrategy = 'adaptive',
+  samplingStrategy = 'adaptive','
   enableOptimization = true,
   onOptimizationResult
 }) => {
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;
-  const descriptionId = `${componentId}-description`;
+  const errorId = `${componentId}-error`;`
+  const descriptionId = `${componentId}-description`;`
   
   const ariaProps = {
     id: componentId,
-    'aria-label': ariaLabel,
-    'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': [
+    "aria-label': ariaLabel,'`
+    'aria-labelledby': ariaLabelledBy,'
+    'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,
-    'aria-invalid': !!error,
-    'aria-disabled': disabled,
-    'aria-busy': loading,
-    'aria-expanded': expanded,
-    'aria-selected': selected,
+    ].filter(Boolean).join(' ') || undefined,'
+    'aria-invalid': !!error,'
+    'aria-disabled': disabled,'
+    'aria-busy': loading,'
+    'aria-expanded': expanded,'
+    'aria-selected': selected,'
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -63,8 +59,8 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
     try {
       onClick?.(event);
     } catch (error) {
-      console.error('Click handler error:', error);
-      setError('操作失败，请重试');
+      console.error('Click handler error: ', error);'
+      setError('操作失败，请重试');'
     }
   }, [disabled, loading, onClick]);
   
@@ -74,8 +70,8 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
     try {
       onChange?.(newValue);
     } catch (error) {
-      console.error('Change handler error:', error);
-      updateState({ error: '值更新失败' });
+      console.error('Change handler error: ', error);'
+      updateState({ error: '值更新失败' });'
     }
   }, [onChange, updateState]);
   
@@ -108,14 +104,13 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
     const startTime = performance.now();
     setIsLoading(true);
 
-    const config: Partial<OptimizationConfig> = {
+    const config: Partial<OptimizationConfig>  = {
       maxDataPoints,
       samplingStrategy,
       preserveKeyPoints: true,
       enableCaching: true,
       performanceThreshold: 50
     };
-
     const result = dataVisualizationOptimizer.optimizeDataset(data, config);
 
     const renderTime = performance.now() - startTime;
@@ -150,8 +145,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
 
   // 🔧 改进：优化的时间格式化函数，提高到0.01秒精度
   const formatTime = useCallback((value: any) => {
-    if (!optimizedData.data.length) return '';
-
+    if (!optimizedData.data.length) return "';
     try {
       const startTime = new Date(optimizedData.data[0].timestamp).getTime();
       const currentTime = new Date(value).getTime();
@@ -161,10 +155,10 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
       const seconds = Math.floor(elapsedSeconds % 60);
       const ms = Math.floor((elapsedSeconds % 1) * 100); // 0.01秒精度
 
-      return minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}` : `${seconds}.${ms.toString().padStart(2, '0')}`;
+      return minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}` : `${seconds}.${ms.toString().padStart(2, "0')}`;'`
     } catch {
       const date = new Date(value);
-      return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+      return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, "0')}`;'`
     }
   }, [optimizedData.data]);
 
@@ -172,18 +166,17 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
   const formatTooltip = useCallback((value: any, name: string) => {
     if (name === dataKey) {
       
-        const unit = dataKey === 'responseTime' ? 'ms' :
+        const unit = dataKey === "responseTime' ? 'ms' : ''`
         dataKey === 'throughput' || dataKey === 'tps' ? '' : '';
-      return [`${typeof value === 'number' ? value.toFixed(3) : value
-      }${unit}`, name];
+      return [`${typeof value === 'number' ? value.toFixed(3) : value'`}
+      }${unit}`, name];`
     }
     return [value, name];
   }, [dataKey]);
 
   // 🔧 改进：优化的标签格式化，提高到0.1秒精度
   const formatLabel = useCallback((value: any) => {
-    if (!optimizedData.data.length) return '';
-
+    if (!optimizedData.data.length) return "';'`
     try {
       const startTime = new Date(optimizedData.data[0].timestamp).getTime();
       const currentTime = new Date(value).getTime();
@@ -193,11 +186,11 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
       const seconds = Math.floor(elapsedSeconds % 60);
       const ms = Math.floor((elapsedSeconds % 1) * 100); // 0.01秒精度
 
-      const timeStr = minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}` : `${seconds}.${ms.toString().padStart(2, '0')}`;
-      return `测试时间: ${timeStr}`;
+      const timeStr = minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, "0")}` : `${seconds}.${ms.toString().padStart(2, "0')}`;'`
+      return `测试时间: ${timeStr}`;`
     } catch {
       const date = new Date(value);
-      return `时间: ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+      return `时间: ${date.getHours().toString().padStart(2, "0')}:${date.getMinutes().toString().padStart(2, "0')}`;'`
     }
   }, [optimizedData.data]);
 
@@ -209,80 +202,75 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
   if (isLoading) {
     
         return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-400">优化数据中...</div>
+      <div className= "flex items-center justify-center h-64'>`
+        <div className= 'text-gray-400'>优化数据中...</div>
       </div>
     );
       }
 
   return (
-    <div className="relative">
+    <div className= 'relative'>
       {/* 性能统计信息 */}
       {performanceStats && (
-        <div className="absolute top-2 right-2 z-10 bg-gray-900/80 backdrop-blur-sm rounded px-2 py-1 text-xs text-gray-300">
+        <div className= 'absolute top-2 right-2 z-10 bg-gray-900/80 backdrop-blur-sm rounded px-2 py-1 text-xs text-gray-300'>
           <div>数据点: {performanceStats.dataPoints}</div>
           {performanceStats.compressionRatio > 1 && (
             <div>压缩比: {performanceStats.compressionRatio.toFixed(1)}x</div>
           )}
           {performanceStats.cacheHit && (
-            <div className="text-green-400">缓存命中</div>
+            <div className= 'text-green-400'>缓存命中</div>
           )}
         </div>
       )}
 
-      <ResponsiveContainer width="100%" height={height}>
+      <ResponsiveContainer width= '100%' height={height}>
         <LineChart data={optimizedData.data} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
-          <XAxis
-            dataKey="timestamp"
-            tick={{ fontSize: 12, fill: 'var(--color-gray-400)' }}
+          <CartesianGrid strokeDasharray= '3 3' stroke= 'var(--color-gray-700)'    />
+          <XAxis dataKey= 'timestamp';
+            tick={{ fontSize: 12, fill: 'var(--color-gray-400)' }}'
             tickFormatter={formatTime}
             interval={tickInterval}
             label={{
-              value: '测试时间 (分:秒)',
-              position: 'insideBottom',
+              value: '测试时间 (分:秒)','
+              position: 'insideBottom','
               offset: -5,
-              style: { textAnchor: 'middle', fill: 'var(--color-gray-400)' }
+              style: { textAnchor: 'middle', fill: 'var(--color-gray-400)' }'
             }}
-          />
-          <YAxis
-            tick={{ fontSize: 12, fill: 'var(--color-gray-400)' }}
+             />
+          <YAxis tick={{ fontSize: 12, fill: 'var(--color-gray-400)' }}'
             label={{
               value: name,
               angle: -90,
-              position: 'insideLeft',
-              style: { textAnchor: 'middle', fill: 'var(--color-gray-400)' }
+              position: 'insideLeft','
+              style: { textAnchor: 'middle', fill: 'var(--color-gray-400)' }'
             }}
-          />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: 'var(--color-gray-800)',
-              border: '1px solid var(--color-gray-700)',
-              borderRadius: '8px',
-              color: '#fff'
+             />
+          <Tooltip contentStyle={{
+              backgroundColor: 'var(--color-gray-800)','
+              border: '1px solid var(--color-gray-700)','
+              borderRadius: '8px','
+              color: '#fff';
             }}
             formatter={formatTooltip}
             labelFormatter={formatLabel}
-          />
+             />
 
           {/* 平均线 */}
           {showAverage && averageValue !== null && (
-            <ReferenceLine
-              y={averageValue}
-              stroke="var(--color-warning)"
-              strokeDasharray="5 5"
+            <ReferenceLine y={averageValue}
+              stroke= 'var(--color-warning)';
+              strokeDasharray= '5 5';
               strokeWidth={2}
               label={{
-                value: `平均: ${averageValue.toFixed(3)}`,
-                position: 'topRight',
-                style: { fill: 'var(--color-warning)', fontSize: '12px' }
+                value: `平均: ${averageValue.toFixed(3)}`,`
+                position: "topRight','`
+                style: { fill: 'var(--color-warning)', fontSize: '12px' }'
               }}
-            />
+               />
           )}
 
           {/* 数据线 */}
-          <Line
-            type="monotone"
+          <Line type= 'monotone';
             dataKey={dataKey}
             stroke={color}
             strokeWidth={2}
@@ -290,7 +278,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({
             activeDot={{ r: 5, stroke: color, strokeWidth: 2 }}
             strokeOpacity={0.8}
             connectNulls={false}
-          />
+             />
         </LineChart>
       </ResponsiveContainer>
     </div>
@@ -331,9 +319,9 @@ export const PerformanceMonitor: React.FC<{
   if (!stats) return null;
 
   return (
-    <div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-4 text-xs text-gray-300">
-      <h4 className="font-semibold mb-2">性能监控</h4>
-      <div className="grid grid-cols-2 gap-2">
+    <div className= 'bg-gray-800/50 backdrop-blur-sm rounded-lg p-4 text-xs text-gray-300'>
+      <h4 className= 'font-semibold mb-2'>性能监控</h4>
+      <div className= 'grid grid-cols-2 gap-2'>
         <div>缓存命中率: {(stats.hitRate * 100).toFixed(1)}%</div>
         <div>缓存大小: {stats.size}</div>
         <div>平均压缩比: {stats.averageCompressionRatio.toFixed(1)}x</div>

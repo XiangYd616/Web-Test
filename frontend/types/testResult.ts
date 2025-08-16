@@ -7,64 +7,61 @@
 
 // ==================== 基础类型定义 ====================
 
-export type UUID = string;
-export type Timestamp = string; // ISO 8601 格式
-export type URL = string;
-
-// ==================== 测试相关枚举定义 ====================
+export type UUID   = string;export type Timestamp  = string;// ISO 8601 格式
+export type URL   = string;// ==================== 测试相关枚举定义 ====================
 
 /**
  * 测试类型枚举 - 与数据库约束保持一致
  */
 export enum TestType {
-  API = 'api',
-  COMPATIBILITY = 'compatibility',
-  INFRASTRUCTURE = 'infrastructure',
-  SECURITY = 'security',
-  SEO = 'seo',
-  STRESS = 'stress',
-  UX = 'ux',
-  WEBSITE = 'website'
+  API = 'api','
+  COMPATIBILITY = 'compatibility','
+  INFRASTRUCTURE = 'infrastructure','
+  SECURITY = 'security','
+  SEO = 'seo','
+  STRESS = 'stress','
+  UX = 'ux','
+  WEBSITE = 'website';
 }
 
 /**
  * 测试状态枚举 - 与数据库约束保持一致
  */
 export enum TestStatus {
-  PENDING = 'pending',
-  RUNNING = 'running',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled'
+  PENDING = 'pending','
+  RUNNING = 'running','
+  COMPLETED = 'completed','
+  FAILED = 'failed','
+  CANCELLED = 'cancelled';
 }
 
 /**
  * 测试优先级枚举
  */
 export enum TestPriority {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical'
+  LOW = 'low','
+  MEDIUM = 'medium','
+  HIGH = 'high','
+  CRITICAL = 'critical';
 }
 
 /**
  * 测试等级枚举
  */
 export enum TestGrade {
-  A_PLUS = 'A+',
-  A = 'A',
-  B_PLUS = 'B+',
-  B = 'B',
-  C_PLUS = 'C+',
-  C = 'C',
-  D = 'D',
-  F = 'F'
+  A_PLUS = 'A+','
+  A = 'A','
+  B_PLUS = 'B+','
+  B = 'B','
+  C_PLUS = 'C+','
+  C = 'C','
+  D = 'D','
+  F = 'F';
 }
 
 // ==================== 测试配置接口 ====================
 
-export interface BaseTestConfig {
+export interface BaseTestConfig     {
   url: URL;
   timeout?: number; // 毫秒
   retries?: number;
@@ -74,7 +71,7 @@ export interface BaseTestConfig {
   metadata?: Record<string, any>;
 }
 
-export interface PerformanceTestConfig extends BaseTestConfig {
+export interface PerformanceTestConfig extends BaseTestConfig     {
   device?: 'desktop' | 'mobile' | 'tablet';
   throttling?: 'none' | '3g' | '4g' | 'slow-3g';
   location?: string;
@@ -82,7 +79,7 @@ export interface PerformanceTestConfig extends BaseTestConfig {
   metrics?: string[];
 }
 
-export interface SecurityTestConfig extends BaseTestConfig {
+export interface SecurityTestConfig extends BaseTestConfig     {
   scanDepth?: 'shallow' | 'medium' | 'deep';
   includeSubdomains?: boolean;
   checkSSL?: boolean;
@@ -90,7 +87,7 @@ export interface SecurityTestConfig extends BaseTestConfig {
   customPayloads?: string[];
 }
 
-export interface APITestConfig extends BaseTestConfig {
+export interface APITestConfig extends BaseTestConfig     {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   headers?: Record<string, string>;
   body?: any;
@@ -102,7 +99,7 @@ export interface APITestConfig extends BaseTestConfig {
   };
 }
 
-export interface StressTestConfig extends BaseTestConfig {
+export interface StressTestConfig extends BaseTestConfig     {
   concurrentUsers?: number;
   duration?: number; // 秒
   rampUpTime?: number; // 秒
@@ -111,7 +108,7 @@ export interface StressTestConfig extends BaseTestConfig {
 
 // ==================== 测试结果相关接口 ====================
 
-export interface TestError {
+export interface TestError     {
   code: string;
   message: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
@@ -122,7 +119,7 @@ export interface TestError {
   details?: Record<string, any>;
 }
 
-export interface TestWarning {
+export interface TestWarning     {
   code: string;
   message: string;
   category?: string;
@@ -130,7 +127,7 @@ export interface TestWarning {
   details?: Record<string, any>;
 }
 
-export interface TestRecommendation {
+export interface TestRecommendation     {
   id: string;
   category: string;
   priority: TestPriority;
@@ -142,7 +139,7 @@ export interface TestRecommendation {
   savings?: number; // 预期改进分数
 }
 
-export interface TestMetrics {
+export interface TestMetrics     {
   // 性能指标
   loadTime?: number;
   firstContentfulPaint?: number;
@@ -162,7 +159,7 @@ export interface TestMetrics {
   [key: string]: any;
 }
 
-export interface TestArtifact {
+export interface TestArtifact     {
   type: 'screenshot' | 'video' | 'report' | 'log' | 'trace' | 'har';
   name: string;
   url?: string;
@@ -178,7 +175,7 @@ export interface TestArtifact {
  * 统一测试结果接口 - 前后端共享
  * 字段名称与数据库字段保持映射关系
  */
-export interface TestResult {
+export interface TestResult     {
   // 基础标识信息
   id: UUID;
   userId: UUID;
@@ -236,7 +233,7 @@ export interface TestResult {
  * 数据库字段映射接口
  * 用于前后端数据转换
  */
-export interface TestResultDatabaseFields {
+export interface TestResultDatabaseFields     {
   id: string;
   user_id: string;
   test_type: string;
@@ -268,7 +265,7 @@ export interface TestResultDatabaseFields {
 
 // ==================== 测试历史相关接口 ====================
 
-export interface TestHistory {
+export interface TestHistory     {
   id: UUID;
   userId: UUID;
   testResults: TestResult[];
@@ -280,7 +277,7 @@ export interface TestHistory {
   updatedAt: Timestamp;
 }
 
-export interface TestSession {
+export interface TestSession     {
   id: UUID;
   userId: UUID;
   name: string;
@@ -294,7 +291,7 @@ export interface TestSession {
 
 // ==================== 测试查询和过滤 ====================
 
-export interface TestResultFilter {
+export interface TestResultFilter     {
   testType?: TestType | TestType[];
   status?: TestStatus | TestStatus[];
   userId?: UUID;
@@ -312,7 +309,7 @@ export interface TestResultFilter {
   hasWarnings?: boolean;
 }
 
-export interface TestResultQuery {
+export interface TestResultQuery     {
   page?: number;
   limit?: number;
   sortBy?: 'startedAt' | 'completedAt' | 'overallScore' | 'testName' | 'duration';
@@ -323,7 +320,7 @@ export interface TestResultQuery {
 
 // ==================== 测试统计信息 ====================
 
-export interface TestStats {
+export interface TestStats     {
   totalTests: number;
   completedTests: number;
   failedTests: number;
@@ -338,7 +335,7 @@ export interface TestStats {
 
 // ==================== 批量测试相关接口 ====================
 
-export interface BatchTestRequest {
+export interface BatchTestRequest     {
   name: string;
   description?: string;
   tests: Array<{
@@ -353,7 +350,7 @@ export interface BatchTestRequest {
   };
 }
 
-export interface BatchTestResult {
+export interface BatchTestResult     {
   id: UUID;
   name: string;
   description?: string;
@@ -373,19 +370,19 @@ export interface BatchTestResult {
 
 // ==================== 类型守卫函数 ====================
 
-export function isValidTestType(type: string): type is TestType {
+export function isValidTestType(type: string): type is TestType   {
   return Object.values(TestType).includes(type as TestType);
 }
 
-export function isValidTestStatus(status: string): status is TestStatus {
+export function isValidTestStatus(status: string): status is TestStatus   {
   return Object.values(TestStatus).includes(status as TestStatus);
 }
 
-export function isValidTestPriority(priority: string): priority is TestPriority {
+export function isValidTestPriority(priority: string): priority is TestPriority   {
   return Object.values(TestPriority).includes(priority as TestPriority);
 }
 
-export function isValidTestGrade(grade: string): grade is TestGrade {
+export function isValidTestGrade(grade: string): grade is TestGrade   {
   return Object.values(TestGrade).includes(grade as TestGrade);
 }
 
@@ -394,7 +391,7 @@ export function isValidTestGrade(grade: string): grade is TestGrade {
 /**
  * 将数据库字段转换为前端TestResult对象
  */
-export function fromDatabaseFields(dbData: TestResultDatabaseFields): TestResult {
+export function fromDatabaseFields(dbData: TestResultDatabaseFields): TestResult   {
   return {
     id: dbData.id,
     userId: dbData.user_id,
@@ -402,7 +399,7 @@ export function fromDatabaseFields(dbData: TestResultDatabaseFields): TestResult
     testName: dbData.test_name,
     url: dbData.url,
     status: dbData.status as TestStatus,
-    startedAt: dbData.started_at || '',
+    startedAt: dbData.started_at || '','
     completedAt: dbData.completed_at,
     duration: dbData.duration_ms,
     overallScore: dbData.overall_score,
@@ -429,7 +426,7 @@ export function fromDatabaseFields(dbData: TestResultDatabaseFields): TestResult
 /**
  * 将前端TestResult对象转换为数据库字段
  */
-export function toDatabaseFields(testResult: TestResult): TestResultDatabaseFields {
+export function toDatabaseFields(testResult: TestResult): TestResultDatabaseFields   {
   return {
     id: testResult.id,
     user_id: testResult.userId,

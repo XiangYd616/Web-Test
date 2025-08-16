@@ -38,7 +38,7 @@ export class SecurityTestError extends Error {
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics:', {
+    console.debug('API Metrics: ', {'
       url: info.url,
       method: info.method,
       status: info.status,
@@ -64,7 +64,7 @@ export class SecurityTestError extends Error {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
@@ -75,7 +75,7 @@ export class SecurityTestError extends Error {
 
   constructor(message: string, code: string, details?: any) {
     super(message);
-    this.name = 'SecurityTestError';
+    this.name = "SecurityTestError';'`
     this.code = code;
     this.details = details || {};
     this.timestamp = new Date().toISOString();
@@ -95,7 +95,7 @@ export class SecurityTestError extends Error {
 
 // ==================== 类型定义 ====================
 
-export interface SecurityTestConfig {
+export interface SecurityTestConfig     {
   // 基础配置
   url: string;
   timeout?: number;
@@ -123,7 +123,7 @@ export interface SecurityTestConfig {
   reportFormat?: 'json' | 'html' | 'pdf';
 }
 
-export interface SSLTestConfig {
+export interface SSLTestConfig     {
   enabled: boolean;
   checkCertificate?: boolean;
   checkProtocols?: boolean;
@@ -132,7 +132,7 @@ export interface SSLTestConfig {
   checkOCSP?: boolean;
 }
 
-export interface HeaderTestConfig {
+export interface HeaderTestConfig     {
   enabled: boolean;
   checkSecurity?: boolean;
   checkCSP?: boolean;
@@ -141,7 +141,7 @@ export interface HeaderTestConfig {
   customHeaders?: string[];
 }
 
-export interface VulnerabilityTestConfig {
+export interface VulnerabilityTestConfig     {
   enabled: boolean;
   checkXSS?: boolean;
   checkSQLInjection?: boolean;
@@ -154,7 +154,7 @@ export interface VulnerabilityTestConfig {
   customPayloads?: string[];
 }
 
-export interface CookieTestConfig {
+export interface CookieTestConfig     {
   enabled: boolean;
   checkSecure?: boolean;
   checkHttpOnly?: boolean;
@@ -162,7 +162,7 @@ export interface CookieTestConfig {
   checkExpiry?: boolean;
 }
 
-export interface ContentTestConfig {
+export interface ContentTestConfig     {
   enabled: boolean;
   checkMixedContent?: boolean;
   checkSensitiveData?: boolean;
@@ -170,7 +170,7 @@ export interface ContentTestConfig {
   checkForms?: boolean;
 }
 
-export interface NetworkTestConfig {
+export interface NetworkTestConfig     {
   enabled: boolean;
   checkDNS?: boolean;
   checkSubdomains?: boolean;
@@ -178,13 +178,13 @@ export interface NetworkTestConfig {
   checkServices?: boolean;
 }
 
-export interface ComplianceTestConfig {
+export interface ComplianceTestConfig     {
   enabled: boolean;
-  standards?: ('OWASP' | 'NIST' | 'ISO27001' | 'GDPR' | 'PCI-DSS')[];
+  standards?: ('OWASP' | 'NIST' | 'ISO27001' | 'GDPR' | 'PCI-DSS')[];'
   customRules?: ComplianceRule[];
 }
 
-export interface ComplianceRule {
+export interface ComplianceRule     {
   id: string;
   name: string;
   description: string;
@@ -194,19 +194,17 @@ export interface ComplianceRule {
 
 // ==================== 结果类型 ====================
 
-export interface SecurityTestResult {
+export interface SecurityTestResult     {
   // 基础信息
   id: string;
   url: string;
   timestamp: string;
   duration: number;
   status: 'completed' | 'failed' | 'partial';
-
   // 总体评估
   overallScore: number;
   riskLevel: 'low' | 'medium' | 'high' | 'critical';
   grade: 'A+' | 'A' | 'B' | 'C' | 'D' | 'F';
-
   // 模块结果
   modules: {
     ssl?: SSLTestResult;
@@ -234,7 +232,7 @@ export interface SecurityTestResult {
   rawData?: any;
 }
 
-export interface SecurityFinding {
+export interface SecurityFinding     {
   id: string;
   type: string;
   category: 'ssl' | 'headers' | 'vulnerabilities' | 'cookies' | 'content' | 'network' | 'compliance';
@@ -249,7 +247,7 @@ export interface SecurityFinding {
   references?: string[];
 }
 
-export interface SecurityRecommendation {
+export interface SecurityRecommendation     {
   id: string;
   category: string;
   priority: 'low' | 'medium' | 'high' | 'critical';
@@ -262,14 +260,14 @@ export interface SecurityRecommendation {
   code?: string;
 }
 
-export interface ComplianceResult {
+export interface ComplianceResult     {
   standard: string;
   score: number;
   status: 'compliant' | 'partial' | 'non-compliant';
   requirements: ComplianceRequirement[];
 }
 
-export interface ComplianceRequirement {
+export interface ComplianceRequirement     {
   id: string;
   name: string;
   status: 'pass' | 'fail' | 'warning' | 'info';
@@ -277,7 +275,7 @@ export interface ComplianceRequirement {
   evidence?: any;
 }
 
-export interface TestStatistics {
+export interface TestStatistics     {
   totalChecks: number;
   passedChecks: number;
   failedChecks: number;
@@ -290,7 +288,7 @@ export interface TestStatistics {
 
 // ==================== 模块结果类型 ====================
 
-export interface SSLTestResult {
+export interface SSLTestResult     {
   score: number;
   certificate: CertificateInfo;
   protocols: ProtocolInfo[];
@@ -299,7 +297,7 @@ export interface SSLTestResult {
   recommendations: string[];
 }
 
-export interface HeaderTestResult {
+export interface HeaderTestResult     {
   score: number;
   securityHeaders: HeaderCheck[];
   cspAnalysis?: CSPAnalysis;
@@ -307,7 +305,7 @@ export interface HeaderTestResult {
   recommendations: string[];
 }
 
-export interface VulnerabilityTestResult {
+export interface VulnerabilityTestResult     {
   score: number;
   vulnerabilities: VulnerabilityInfo[];
   testedPayloads: number;
@@ -315,14 +313,14 @@ export interface VulnerabilityTestResult {
   recommendations: string[];
 }
 
-export interface CookieTestResult {
+export interface CookieTestResult     {
   score: number;
   cookies: CookieInfo[];
   securityIssues: string[];
   recommendations: string[];
 }
 
-export interface ContentTestResult {
+export interface ContentTestResult     {
   score: number;
   mixedContent: MixedContentInfo[];
   sensitiveData: SensitiveDataInfo[];
@@ -330,7 +328,7 @@ export interface ContentTestResult {
   recommendations: string[];
 }
 
-export interface NetworkTestResult {
+export interface NetworkTestResult     {
   score: number;
   dnsRecords: DNSRecord[];
   subdomains: SubdomainInfo[];
@@ -339,7 +337,7 @@ export interface NetworkTestResult {
   recommendations: string[];
 }
 
-export interface ComplianceTestResult {
+export interface ComplianceTestResult     {
   score: number;
   standards: ComplianceResult[];
   overallCompliance: number;
@@ -348,7 +346,7 @@ export interface ComplianceTestResult {
 
 // ==================== 详细信息类型 ====================
 
-export interface CertificateInfo {
+export interface CertificateInfo     {
   valid: boolean;
   issuer: string;
   subject: string;
@@ -361,27 +359,27 @@ export interface CertificateInfo {
   chain: CertificateChainInfo[];
 }
 
-export interface CertificateChainInfo {
+export interface CertificateChainInfo     {
   subject: string;
   issuer: string;
   valid: boolean;
 }
 
-export interface ProtocolInfo {
+export interface ProtocolInfo     {
   version: string;
   supported: boolean;
   secure: boolean;
   deprecated: boolean;
 }
 
-export interface CipherInfo {
+export interface CipherInfo     {
   name: string;
   strength: 'weak' | 'medium' | 'strong';
   keySize: number;
   supported: boolean;
 }
 
-export interface HeaderCheck {
+export interface HeaderCheck     {
   name: string;
   present: boolean;
   value?: string;
@@ -389,21 +387,21 @@ export interface HeaderCheck {
   recommendation?: string;
 }
 
-export interface CSPAnalysis {
+export interface CSPAnalysis     {
   present: boolean;
   directives: CSPDirective[];
   issues: string[];
   score: number;
 }
 
-export interface CSPDirective {
+export interface CSPDirective     {
   name: string;
   value: string;
   secure: boolean;
   issues: string[];
 }
 
-export interface CORSAnalysis {
+export interface CORSAnalysis     {
   present: boolean;
   allowOrigin: string;
   allowCredentials: boolean;
@@ -412,7 +410,7 @@ export interface CORSAnalysis {
   issues: string[];
 }
 
-export interface VulnerabilityInfo {
+export interface VulnerabilityInfo     {
   type: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
   description: string;
@@ -423,7 +421,7 @@ export interface VulnerabilityInfo {
   cvss?: number;
 }
 
-export interface CookieInfo {
+export interface CookieInfo     {
   name: string;
   value: string;
   domain: string;
@@ -435,14 +433,14 @@ export interface CookieInfo {
   issues: string[];
 }
 
-export interface MixedContentInfo {
+export interface MixedContentInfo     {
   type: 'active' | 'passive';
   url: string;
   element: string;
   severity: 'low' | 'medium' | 'high';
 }
 
-export interface SensitiveDataInfo {
+export interface SensitiveDataInfo     {
   type: string;
   pattern: string;
   location: string;
@@ -450,7 +448,7 @@ export interface SensitiveDataInfo {
   severity: 'low' | 'medium' | 'high' | 'critical';
 }
 
-export interface MetadataInfo {
+export interface MetadataInfo     {
   title: string;
   description: string;
   keywords: string[];
@@ -459,14 +457,14 @@ export interface MetadataInfo {
   technologies: string[];
 }
 
-export interface DNSRecord {
+export interface DNSRecord     {
   type: string;
   name: string;
   value: string;
   ttl: number;
 }
 
-export interface SubdomainInfo {
+export interface SubdomainInfo     {
   subdomain: string;
   ip: string;
   status: number;
@@ -474,7 +472,7 @@ export interface SubdomainInfo {
   technologies: string[];
 }
 
-export interface PortInfo {
+export interface PortInfo     {
   port: number;
   protocol: string;
   state: 'open' | 'closed' | 'filtered';
@@ -482,7 +480,7 @@ export interface PortInfo {
   version?: string;
 }
 
-export interface ServiceInfo {
+export interface ServiceInfo     {
   name: string;
   version: string;
   port: number;
@@ -491,7 +489,7 @@ export interface ServiceInfo {
 
 // ==================== 进度回调类型 ====================
 
-export interface TestProgress {
+export interface TestProgress     {
   phase: 'initializing' | 'scanning' | 'analyzing' | 'reporting' | 'completed';
   progress: number; // 0-100
   currentModule: string;
@@ -500,9 +498,7 @@ export interface TestProgress {
   statistics?: Partial<TestStatistics>;
 }
 
-export type ProgressCallback = (progress: TestProgress) => void;
-
-// ==================== 核心引擎类 ====================
+export type ProgressCallback   = (progress: TestProgress) => void;// ==================== 核心引擎类 ====================
 
 class SecurityEngine {
   private static instance: SecurityEngine;
@@ -533,10 +529,10 @@ class SecurityEngine {
 
       // 初始化进度
       onProgress?.({
-        phase: 'initializing',
+        phase: 'initializing','
         progress: 0,
-        currentModule: 'initialization',
-        currentCheck: 'Preparing test environment'
+        currentModule: 'initialization','
+        currentCheck: 'Preparing test environment';
       });
 
       // 验证配置
@@ -546,15 +542,15 @@ class SecurityEngine {
       await this.checkNetworkConnectivity(config.url);
 
       // 创建结果对象
-      const result: SecurityTestResult = {
+      const result: SecurityTestResult  = {
         id: testId,
         url: config.url,
         timestamp: new Date().toISOString(),
         duration: 0,
-        status: 'completed',
+        status: 'completed','
         overallScore: 0,
-        riskLevel: 'low',
-        grade: 'A',
+        riskLevel: 'low','
+        grade: 'A','
         modules: {},
         findings: [],
         recommendations: [],
@@ -570,7 +566,6 @@ class SecurityEngine {
           errorCount: 0
         }
       };
-
       // 执行测试模块
       await this.executeTestModules(config, result, onProgress, abortController.signal);
 
@@ -585,10 +580,10 @@ class SecurityEngine {
       result.statistics.executionTime = result.duration;
 
       onProgress?.({
-        phase: 'completed',
+        phase: 'completed','
         progress: 100,
-        currentModule: 'completed',
-        currentCheck: 'Test completed successfully',
+        currentModule: 'completed','
+        currentCheck: 'Test completed successfully','
         statistics: result.statistics
       });
 
@@ -627,7 +622,7 @@ class SecurityEngine {
   getPresetConfigs(): Record<string, Partial<SecurityTestConfig>> {
     return {
       quick: {
-        depth: 'quick',
+        depth: 'quick','
         modules: {
           ssl: { enabled: true, checkCertificate: true },
           headers: { enabled: true, checkSecurity: true },
@@ -639,7 +634,7 @@ class SecurityEngine {
         }
       },
       standard: {
-        depth: 'standard',
+        depth: 'standard','
         modules: {
           ssl: { enabled: true, checkCertificate: true, checkProtocols: true },
           headers: { enabled: true, checkSecurity: true, checkCSP: true },
@@ -647,11 +642,11 @@ class SecurityEngine {
           cookies: { enabled: true, checkSecure: true, checkHttpOnly: true },
           content: { enabled: true, checkMixedContent: true, checkSensitiveData: true },
           network: { enabled: true, checkDNS: true },
-          compliance: { enabled: true, standards: ['OWASP'] }
+          compliance: { enabled: true, standards: ['OWASP'] }'
         }
       },
       comprehensive: {
-        depth: 'comprehensive',
+        depth: 'comprehensive','
         modules: {
           ssl: {
             enabled: true,
@@ -697,7 +692,7 @@ class SecurityEngine {
           },
           compliance: {
             enabled: true,
-            standards: ['OWASP', 'NIST', 'ISO27001']
+            standards: ['OWASP', 'NIST', "ISO27001']'
           }
         }
       }
@@ -705,7 +700,7 @@ class SecurityEngine {
   }
 
   private generateTestId(): string {
-    return `security-test-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+    return `security-test-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;`
   }
 
   // validateConfig方法已在文件末尾定义，删除重复实现
@@ -718,38 +713,38 @@ class SecurityEngine {
   ): Promise<void> {
     // 准备阶段
     onProgress?.({
-      phase: 'initializing',
+      phase: "initializing','`
       progress: 10,
-      currentModule: 'initialization',
-      currentCheck: 'Preparing security test'
+      currentModule: 'initialization','
+      currentCheck: 'Preparing security test';
     });
 
     if (signal?.aborted) {
-      throw new Error('Test was cancelled');
+      throw new Error('Test was cancelled');'
     }
 
     // 执行完整的安全测试
     onProgress?.({
-      phase: 'scanning',
+      phase: 'scanning','
       progress: 30,
-      currentModule: 'security',
-      currentCheck: 'Running comprehensive security scan'
+      currentModule: 'security','
+      currentCheck: 'Running comprehensive security scan';
     });
 
     try {
       await this.executeFullSecurityTest(config, result, onProgress, signal);
     } catch (error) {
-      console.error('Security test failed:', error);
+      console.error('Security test failed: ', error);'
       result.statistics.errorCount++;
       throw error;
     }
 
     // 分析阶段
     onProgress?.({
-      phase: 'analyzing',
+      phase: 'analyzing','
       progress: 90,
-      currentModule: 'analysis',
-      currentCheck: 'Analyzing results and generating report'
+      currentModule: 'analysis','
+      currentCheck: 'Analyzing results and generating report';
     });
   }
 
@@ -769,17 +764,17 @@ class SecurityEngine {
     };
 
     onProgress?.({
-      phase: 'scanning',
+      phase: 'scanning','
       progress: 50,
-      currentModule: 'security',
-      currentCheck: 'Executing security tests'
+      currentModule: 'security','
+      currentCheck: 'Executing security tests';
     });
 
     // 调用完整的安全测试API
-    const response = await fetch('/api/test/security', {
-      method: 'POST',
+    const response = await fetch('/api/test/security', {'
+      method: 'POST','
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json','
       },
       body: JSON.stringify({
         url: config.url,
@@ -788,20 +783,20 @@ class SecurityEngine {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`);`
     }
 
     const data = await response.json();
 
     if (!data.success) {
-      throw new Error(data.message || 'Security test failed');
+      throw new Error(data.message || "Security test failed');'`
     }
 
     onProgress?.({
-      phase: 'scanning',
+      phase: 'scanning','
       progress: 80,
-      currentModule: 'security',
-      currentCheck: 'Processing test results'
+      currentModule: 'security','
+      currentCheck: 'Processing test results';
     });
 
     // 处理完整的安全测试结果
@@ -911,12 +906,11 @@ class SecurityEngine {
   private calculateFinalScores(result: SecurityTestResult): void {
     // 计算总体分数
     const moduleScores = Object.values(result.modules)
-      .filter(module => module && typeof module.score === 'number')
+      .filter(module => module && typeof module.score === 'number')'
       .map(module => module.score);
 
     if (moduleScores.length > 0) {
-      result.overallScore = Math.round(
-        moduleScores.reduce((sum, score) => sum + score, 0) / moduleScores.length
+      result.overallScore = Math.round(moduleScores.reduce((sum, score) => sum + score, 0) / moduleScores.length
       );
     }
 
@@ -977,21 +971,20 @@ class SecurityEngine {
 
   private generateRecommendations(result: SecurityTestResult): void {
     // 基于发现的问题生成修复建议
-    const recommendations: SecurityRecommendation[] = [];
-
+    const recommendations: SecurityRecommendation[]  = [];
     // 从各个模块收集建议
     Object.values(result.modules).forEach(module => {
       if (module?.recommendations) {
         module.recommendations.forEach((rec, index) => {
           recommendations.push({
-            id: `rec-${recommendations.length + 1}`,
-            category: 'general',
-            priority: 'medium',
+            id: `rec-${recommendations.length + 1}`,`
+            category: "general','`
+            priority: 'medium','
             title: rec,
             description: rec,
             solution: rec,
-            effort: 'medium',
-            impact: 'medium'
+            effort: 'medium','
+            impact: 'medium';
           });
         });
       }
@@ -1007,21 +1000,20 @@ class SecurityEngine {
     if (!data.sslInfo.valid) return 20;
 
     let score = 100;
-    if (data.sslInfo.protocol?.includes('TLSv1.0')) score -= 30;
-    if (data.sslInfo.protocol?.includes('TLSv1.1')) score -= 20;
-
+    if (data.sslInfo.protocol?.includes('TLSv1.0')) score -= 30;'
+    if (data.sslInfo.protocol?.includes('TLSv1.1')) score -= 20;'
     return Math.max(0, score);
   }
 
   private extractCertificateInfo(sslInfo: any): CertificateInfo {
     return {
       valid: sslInfo.valid || false,
-      issuer: sslInfo.issuer?.CN || 'Unknown',
-      subject: sslInfo.subject?.CN || 'Unknown',
-      validFrom: sslInfo.validFrom || '',
-      validTo: sslInfo.validTo || '',
+      issuer: sslInfo.issuer?.CN || 'Unknown','
+      subject: sslInfo.subject?.CN || 'Unknown','
+      validFrom: sslInfo.validFrom || '','
+      validTo: sslInfo.validTo || '','
       daysUntilExpiry: this.calculateDaysUntilExpiry(sslInfo.validTo),
-      signatureAlgorithm: sslInfo.signatureAlgorithm || 'Unknown',
+      signatureAlgorithm: sslInfo.signatureAlgorithm || 'Unknown','
       keySize: sslInfo.keySize || 0,
       san: sslInfo.subjectAltName || [],
       chain: []
@@ -1037,11 +1029,10 @@ class SecurityEngine {
   }
 
   private extractSSLVulnerabilities(data: any): string[] {
-    const vulnerabilities: string[] = [];
-
+    const vulnerabilities: string[]  = [];
     if (data.vulnerabilities) {
       data.vulnerabilities.forEach((vuln: any) => {
-        if (vuln.type?.includes('SSL') || vuln.type?.includes('TLS')) {
+        if (vuln.type?.includes('SSL') || vuln.type?.includes('TLS')) {'
           vulnerabilities.push(vuln.description);
         }
       });
@@ -1051,14 +1042,13 @@ class SecurityEngine {
   }
 
   private generateSSLRecommendations(data: any): string[] {
-    const recommendations: string[] = [];
-
+    const recommendations: string[]  = [];
     if (!data.sslInfo?.valid) {
-      recommendations.push('修复SSL证书配置');
+      recommendations.push('修复SSL证书配置');'
     }
 
-    if (data.sslInfo?.protocol?.includes('TLSv1.0')) {
-      recommendations.push('升级到TLS 1.2或更高版本');
+    if (data.sslInfo?.protocol?.includes('TLSv1.0')) {'
+      recommendations.push('升级到TLS 1.2或更高版本');'
     }
 
     return recommendations;
@@ -1068,10 +1058,10 @@ class SecurityEngine {
     if (!data.securityHeaders) return 0;
 
     const requiredHeaders = [
-      'X-Frame-Options',
-      'X-Content-Type-Options',
-      'X-XSS-Protection',
-      'Strict-Transport-Security'
+      'X-Frame-Options','
+      'X-Content-Type-Options','
+      'X-XSS-Protection','
+      'Strict-Transport-Security';
     ];
 
     const presentHeaders = Object.keys(data.securityHeaders).filter(
@@ -1082,15 +1072,14 @@ class SecurityEngine {
   }
 
   private extractSecurityHeaders(headers: any): HeaderCheck[] {
-    const headerChecks: HeaderCheck[] = [];
-
+    const headerChecks: HeaderCheck[]  = [];
     const securityHeaders = [
-      'X-Frame-Options',
-      'X-Content-Type-Options',
-      'X-XSS-Protection',
-      'Strict-Transport-Security',
-      'Content-Security-Policy',
-      'Referrer-Policy'
+      'X-Frame-Options','
+      'X-Content-Type-Options','
+      'X-XSS-Protection','
+      'Strict-Transport-Security','
+      'Content-Security-Policy','
+      'Referrer-Policy';
     ];
 
     securityHeaders.forEach(headerName => {
@@ -1110,14 +1099,14 @@ class SecurityEngine {
     if (!value) return false;
 
     switch (headerName) {
-      case 'X-Frame-Options':
-        return value.toLowerCase().includes('deny') || value.toLowerCase().includes('sameorigin');
-      case 'X-Content-Type-Options':
-        return value.toLowerCase().includes('nosniff');
-      case 'X-XSS-Protection':
-        return value.includes('1');
-      case 'Strict-Transport-Security':
-        return value.includes('max-age');
+      case 'X-Frame-Options': ''
+        return value.toLowerCase().includes('deny') || value.toLowerCase().includes('sameorigin');'
+      case 'X-Content-Type-Options': ''
+        return value.toLowerCase().includes('nosniff');'
+      case 'X-XSS-Protection': ''
+        return value.includes('1');'
+      case 'Strict-Transport-Security': ''
+        return value.includes('max-age');'
       default:
         return true;
     }
@@ -1126,38 +1115,37 @@ class SecurityEngine {
   private getHeaderRecommendation(headerName: string, value: string): string | undefined {
     if (!value) {
       
-        return `添加 ${headerName
-      } 安全头`;
+        return `添加 ${headerName`}
+      } 安全头`;`
     }
 
     if (!this.isHeaderSecure(headerName, value)) {
-      return `优化 ${headerName} 配置`;
+      return `优化 ${headerName} 配置`;`
     }
 
     return undefined;
   }
 
   private generateHeaderRecommendations(data: any): string[] {
-    const recommendations: string[] = [];
-
+    const recommendations: string[]  = [];
     if (!data.securityHeaders) {
       
-        recommendations.push('配置基本的HTTP安全头');
+        recommendations.push("配置基本的HTTP安全头');'`
       return recommendations;
       }
 
     const headers = data.securityHeaders;
 
-    if (!headers['X-Frame-Options']) {
-      recommendations.push('添加 X-Frame-Options 防止点击劫持');
+    if (!headers['X-Frame-Options']) {'
+      recommendations.push('添加 X-Frame-Options 防止点击劫持');'
     }
 
-    if (!headers['Content-Security-Policy']) {
-      recommendations.push('配置内容安全策略(CSP)');
+    if (!headers['Content-Security-Policy']) {'
+      recommendations.push('配置内容安全策略(CSP)');'
     }
 
-    if (!headers['Strict-Transport-Security']) {
-      recommendations.push('启用HSTS强制HTTPS');
+    if (!headers['Strict-Transport-Security']) {'
+      recommendations.push('启用HSTS强制HTTPS');'
     }
 
     return recommendations;
@@ -1169,16 +1157,16 @@ class SecurityEngine {
     let score = 100;
     data.vulnerabilities.forEach((vuln: any) => {
       switch (vuln.severity) {
-        case '高':
-        case 'high':
+        case '高': ''
+        case 'high': ''
           score -= 20;
           break;
-        case '中':
-        case 'medium':
+        case '中': ''
+        case 'medium': ''
           score -= 12;
           break;
-        case '低':
-        case 'low':
+        case '低': ''
+        case 'low': ''
           score -= 5;
           break;
       }
@@ -1189,10 +1177,10 @@ class SecurityEngine {
 
   private extractVulnerabilities(vulnerabilities: any[]): VulnerabilityInfo[] {
     return vulnerabilities.map(vuln => ({
-      type: vuln.type || 'Unknown',
+      type: vuln.type || 'Unknown','
       severity: this.mapSeverity(vuln.severity),
-      description: vuln.description || '',
-      payload: vuln.payload || '',
+      description: vuln.description || '','
+      payload: vuln.payload || '','
       response: vuln.response,
       evidence: vuln.evidence || {},
       cwe: vuln.cwe,
@@ -1200,19 +1188,19 @@ class SecurityEngine {
     }));
   }
 
-  private mapSeverity(severity: string): 'low' | 'medium' | 'high' | 'critical' {
+  private mapSeverity(severity: string): 'low' | 'medium' | 'high' | 'critical' {'
     switch (severity?.toLowerCase()) {
-      case '高':
-      case 'high':
+      case '高': ''
+      case 'high': ''
         return 'high';
-      case '中':
-      case 'medium':
+      case '中': ''
+      case 'medium': ''
         return 'medium';
-      case '低':
-      case 'low':
+      case '低': ''
+      case 'low': ''
         return 'low';
-      case '严重':
-      case 'critical':
+      case '严重': ''
+      case 'critical': ''
         return 'critical';
       default:
         return 'medium';
@@ -1220,8 +1208,7 @@ class SecurityEngine {
   }
 
   private generateVulnerabilityRecommendations(data: any): string[] {
-    const recommendations: string[] = [];
-
+    const recommendations: string[]  = [];
     if (data.vulnerabilities) {
       data.vulnerabilities.forEach((vuln: any) => {
         if (vuln.recommendation) {
@@ -1251,39 +1238,37 @@ class SecurityEngine {
 
   private extractCookieInfo(cookieInfo: any[]): CookieInfo[] {
     return cookieInfo.map(cookie => ({
-      name: cookie.name || '',
-      value: cookie.value || '',
-      domain: cookie.domain || '',
-      path: cookie.path || '/',
+      name: cookie.name || '','
+      value: cookie.value || '','
+      domain: cookie.domain || '','
+      path: cookie.path || '/','
       secure: cookie.secure || false,
       httpOnly: cookie.httpOnly || false,
-      sameSite: cookie.sameSite || 'None',
+      sameSite: cookie.sameSite || 'None','
       expires: cookie.expires,
       issues: this.identifyCookieIssues(cookie)
     }));
   }
 
   private identifyCookieIssues(cookie: any): string[] {
-    const issues: string[] = [];
-
+    const issues: string[]  = [];
     if (!cookie.secure) {
-      issues.push('缺少Secure标志');
+      issues.push('缺少Secure标志');'
     }
 
     if (!cookie.httpOnly) {
-      issues.push('缺少HttpOnly标志');
+      issues.push('缺少HttpOnly标志');'
     }
 
-    if (!cookie.sameSite || cookie.sameSite === 'None') {
-      issues.push('SameSite属性配置不当');
+    if (!cookie.sameSite || cookie.sameSite === 'None') {'
+      issues.push('SameSite属性配置不当');'
     }
 
     return issues;
   }
 
   private extractCookieIssues(data: any): string[] {
-    const issues: string[] = [];
-
+    const issues: string[]  = [];
     if (data.cookieInfo) {
       data.cookieInfo.forEach((cookie: any) => {
         issues.push(...this.identifyCookieIssues(cookie));
@@ -1294,40 +1279,38 @@ class SecurityEngine {
   }
 
   private generateCookieRecommendations(data: any): string[] {
-    const recommendations: string[] = [];
-
+    const recommendations: string[]  = [];
     if (data.cookieInfo) {
       const hasInsecureCookies = data.cookieInfo.some((cookie: any) => !cookie.secure);
       const hasNonHttpOnlyCookies = data.cookieInfo.some((cookie: any) => !cookie.httpOnly);
 
       if (hasInsecureCookies) {
-        recommendations.push('为所有Cookie添加Secure标志');
+        recommendations.push('为所有Cookie添加Secure标志');'
       }
 
       if (hasNonHttpOnlyCookies) {
-        recommendations.push('为敏感Cookie添加HttpOnly标志');
+        recommendations.push('为敏感Cookie添加HttpOnly标志');'
       }
 
-      recommendations.push('配置适当的SameSite属性');
+      recommendations.push('配置适当的SameSite属性');'
     }
 
     return recommendations;
   }
 
   private extractFindings(data: any): SecurityFinding[] {
-    const findings: SecurityFinding[] = [];
-
+    const findings: SecurityFinding[]  = [];
     // 从漏洞中提取发现
     if (data.vulnerabilities) {
       data.vulnerabilities.forEach((vuln: any, index: number) => {
         findings.push({
-          id: `finding-${index + 1}`,
-          type: vuln.type || 'vulnerability',
-          category: 'vulnerabilities',
+          id: `finding-${index + 1}`,`
+          type: vuln.type || "vulnerability','`
+          category: 'vulnerabilities','
           severity: this.mapSeverity(vuln.severity),
-          title: vuln.type || 'Security Issue',
-          description: vuln.description || '',
-          impact: vuln.recommendation || vuln.impact || 'Security vulnerability detected',
+          title: vuln.type || 'Security Issue','
+          description: vuln.description || '','
+          impact: vuln.recommendation || vuln.impact || 'Security vulnerability detected','
           evidence: vuln.evidence || {},
           cwe: vuln.cwe,
           cvss: vuln.cvss
@@ -1338,13 +1321,13 @@ class SecurityEngine {
     // 从SSL问题中提取发现
     if (data.sslInfo && !data.sslInfo.valid) {
       findings.push({
-        id: `finding-ssl`,
-        type: 'ssl-certificate',
-        category: 'ssl',
-        severity: 'high',
-        title: 'SSL证书问题',
-        description: data.sslInfo.reason || 'SSL证书无效',
-        impact: '网站安全性受到影响，用户数据可能面临风险',
+        id: `finding-ssl`,`
+        type: "ssl-certificate','`
+        category: 'ssl','
+        severity: 'high','
+        title: 'SSL证书问题','
+        description: data.sslInfo.reason || 'SSL证书无效','
+        impact: '网站安全性受到影响，用户数据可能面临风险','
         evidence: data.sslInfo
       });
     }
@@ -1357,30 +1340,30 @@ class SecurityEngine {
    */
   private validateConfig(config: SecurityTestConfig): void {
     if (!config.url) {
-      throw new SecurityTestError('URL不能为空', 'INVALID_CONFIG', {
-        field: 'url',
+      throw new SecurityTestError('URL不能为空', 'INVALID_CONFIG', {'
+        field: 'url','
         value: config.url,
-        suggestion: '请提供有效的URL地址'
+        suggestion: '请提供有效的URL地址';
       });
     }
 
     try {
       new URL(config.url);
     } catch (error) {
-      throw new SecurityTestError('URL格式无效', 'INVALID_URL', {
-        field: 'url',
+      throw new SecurityTestError('URL格式无效', 'INVALID_URL', {'
+        field: 'url','
         value: config.url,
-        suggestion: '请提供有效的URL格式，如: https://example.com'
+        suggestion: '请提供有效的URL格式，如: https://example.com';
       });
     }
 
     // 检查协议
     const url = new URL(config.url);
-    if (!['http:', 'https:'].includes(url.protocol)) {
-      throw new SecurityTestError('不支持的协议', 'UNSUPPORTED_PROTOCOL', {
-        field: 'protocol',
+    if (!['http: ', 'https: '].includes(url.protocol)) {'
+      throw new SecurityTestError('不支持的协议', 'UNSUPPORTED_PROTOCOL', {'
+        field: 'protocol','
         value: url.protocol,
-        suggestion: '仅支持HTTP和HTTPS协议'
+        suggestion: '仅支持HTTP和HTTPS协议';
       });
     }
   }
@@ -1391,15 +1374,15 @@ class SecurityEngine {
   private async checkNetworkConnectivity(url: string): Promise<void> {
     try {
       const response = await fetch(url, {
-        method: 'HEAD',
+        method: 'HEAD','
         signal: AbortSignal.timeout(10000)
       });
 
       if (!response.ok && response.status >= 500) {
-        throw new SecurityTestError('服务器错误', 'SERVER_ERROR', {
+        throw new SecurityTestError('服务器错误', 'SERVER_ERROR', {'
           status: response.status,
           statusText: response.statusText,
-          suggestion: '目标服务器返回错误，请稍后重试'
+          suggestion: '目标服务器返回错误，请稍后重试';
         });
       }
     } catch (error) {
@@ -1407,30 +1390,30 @@ class SecurityEngine {
         throw error;
       }
 
-      if (error instanceof Error && error.name === 'AbortError') {
-        throw new SecurityTestError('连接超时', 'TIMEOUT', {
+      if (error instanceof Error && error.name === 'AbortError') {'
+        throw new SecurityTestError('连接超时', 'TIMEOUT', {'
           timeout: 10000,
-          suggestion: '网络连接超时，请检查网络状况或稍后重试'
+          suggestion: '网络连接超时，请检查网络状况或稍后重试';
         });
       }
 
-      if (error instanceof Error && (error as any).code === 'ENOTFOUND') {
-        throw new SecurityTestError('域名解析失败', 'DNS_ERROR', {
+      if (error instanceof Error && (error as any).code === 'ENOTFOUND') {'
+        throw new SecurityTestError('域名解析失败', 'DNS_ERROR', {'
           hostname: new URL(url).hostname,
-          suggestion: '无法解析域名，请检查URL是否正确'
+          suggestion: '无法解析域名，请检查URL是否正确';
         });
       }
 
-      if (error instanceof Error && (error as any).code === 'ECONNREFUSED') {
-        throw new SecurityTestError('连接被拒绝', 'CONNECTION_REFUSED', {
+      if (error instanceof Error && (error as any).code === 'ECONNREFUSED') {'
+        throw new SecurityTestError('连接被拒绝', 'CONNECTION_REFUSED', {'
           url: url,
-          suggestion: '目标服务器拒绝连接，请检查服务是否正常运行'
+          suggestion: '目标服务器拒绝连接，请检查服务是否正常运行';
         });
       }
 
-      throw new SecurityTestError('网络连接失败', 'NETWORK_ERROR', {
+      throw new SecurityTestError('网络连接失败', 'NETWORK_ERROR', {'
         originalError: error instanceof Error ? error.message : String(error),
-        suggestion: '网络连接失败，请检查网络设置'
+        suggestion: '网络连接失败，请检查网络设置';
       });
     }
   }
@@ -1449,26 +1432,26 @@ class SecurityEngine {
     let suggestion = '请联系技术支持';
     let details: any = {};
 
-    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {'
       errorType = 'FETCH_ERROR';
       suggestion = '网络请求失败，请检查网络连接';
-    } else if (error.name === 'SyntaxError') {
+    } else if (error.name === 'SyntaxError') {'
       errorType = 'PARSE_ERROR';
       suggestion = '响应数据解析失败，目标网站可能返回了无效数据';
-    } else if (error.code === 'ENOTFOUND') {
+    } else if (error.code === 'ENOTFOUND') {'
       errorType = 'DNS_ERROR';
       suggestion = '域名解析失败，请检查URL是否正确';
       details.hostname = new URL(config.url).hostname;
-    } else if (error.code === 'ECONNRESET') {
+    } else if (error.code === 'ECONNRESET') {'
       errorType = 'CONNECTION_RESET';
       suggestion = '连接被重置，目标服务器可能过载或配置问题';
-    } else if (error.code === 'ETIMEDOUT') {
+    } else if (error.code === 'ETIMEDOUT') {'
       errorType = 'TIMEOUT';
       suggestion = '请求超时，请稍后重试或检查网络状况';
     }
 
     return new SecurityTestError(
-      error.message || '安全测试执行失败',
+      error.message || '安全测试执行失败','
       errorType,
       {
         ...details,
@@ -1485,7 +1468,7 @@ class SecurityEngine {
    */
   private recordErrorStatistics(error: any, config: SecurityTestConfig): void {
     // 这里可以记录错误统计信息，用于后续分析和改进
-    console.warn('Security test error recorded:', {
+    console.warn('Security test error recorded:', {'
       error: error.message,
       url: config.url,
       timestamp: new Date().toISOString()

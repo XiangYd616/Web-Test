@@ -1,11 +1,4 @@
-import { BarChart3, ChevronRight, Code, Crown, Database, GitBranch, Globe, Home, Key, Link2, Monitor, Package, Search, Settings, Shield, TestTube, Zap } from 'lucide-react';
-import React, { useRef, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useAuth } from '../../hooks/useAuth';
-import AuthStatusIndicator from '../auth/AuthStatusIndicator';
-
-interface SidebarItem {
+import { BarChart3, ChevronRight, Code, Crown, Database, GitBranch, Globe, Home, Key, Link2, Monitor, Package, Search, Settings, Shield, TestTube, Zap    } from 'lucide-react';import React, { useRef, useState    } from 'react';import { Link, useLocation    } from 'react-router-dom';import { useTheme    } from '../../contexts/ThemeContext';import { useAuth    } from '../../hooks/useAuth';import AuthStatusIndicator from '../auth/AuthStatusIndicator';interface SidebarItem   {'
   id: string;
   name: string;
   icon: React.ComponentType<any>;
@@ -14,12 +7,12 @@ interface SidebarItem {
   children?: SidebarItem[];
 }
 
-interface SidebarProps {
+interface SidebarProps   {
   collapsed?: boolean;
   onToggle?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({
+const Sidebar: React.FC<SidebarProps>  = ({
   collapsed = false,
   onToggle
 }) => {
@@ -29,47 +22,44 @@ const Sidebar: React.FC<SidebarProps> = ({
     className: combinedClassName,
     style: computedStyle,
     disabled,
-    'aria-label': ariaLabel,
-    'data-testid': testId
+    'aria-label': ariaLabel,'
+    'data-testid': testId'
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
-  
   const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
     if (disabled || loading) return;
     onClick?.(event);
   }, [disabled, loading, onClick]);
   
-  const memoizedHandleChange = useMemo(() => 
-    debounce((value: any) => {
+  const memoizedHandleChange = useMemo(() => debounce((value: any) => {
       onChange?.(value);
     }, 300), [onChange]
   );
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;
-  const descriptionId = `${componentId}-description`;
+  const errorId = `${componentId}-error`;`
+  const descriptionId = `${componentId}-description`;`
   
   const ariaProps = {
     id: componentId,
-    'aria-label': ariaLabel,
-    'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': [
+    "aria-label': ariaLabel,'`
+    'aria-labelledby': ariaLabelledBy,'
+    'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,
-    'aria-invalid': !!error,
-    'aria-disabled': disabled,
-    'aria-busy': loading,
-    'aria-expanded': expanded,
-    'aria-selected': selected,
+    ].filter(Boolean).join(' ') || undefined,'
+    'aria-invalid': !!error,'
+    'aria-disabled': disabled,'
+    'aria-busy': loading,'
+    'aria-expanded': expanded,'
+    'aria-selected': selected,'
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
   const location = useLocation();
   const { user } = useAuth();
   const { actualTheme } = useTheme();
-  const [expandedGroups, setExpandedGroups] = useState<string[]>(['testing']);
-
+  const [expandedGroups, setExpandedGroups] = useState<string[]>(['testing']);'
   // 悬浮菜单状态管理
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [hoverPosition, setHoverPosition] = useState<{
@@ -83,154 +73,151 @@ const Sidebar: React.FC<SidebarProps> = ({
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const isAdmin = user?.role === 'admin';
-
-  const sidebarItems: SidebarItem[] = [
+  const sidebarItems: SidebarItem[]  = [
     {
-      id: 'dashboard',
-      name: '仪表板',
+      id: 'dashboard','
+      name: '仪表板','
       icon: Home,
-      href: '/'
+      href: '/';
     },
     {
-      id: 'testing',
-      name: '测试工具',
+      id: 'testing','
+      name: '测试工具','
       icon: TestTube,
-      href: '/testing',
-      badge: '全新',
+      href: '/testing','
+      badge: '全新','
       children: [
         {
-          id: 'api-test',
-          name: 'API测试',
+          id: 'api-test','
+          name: 'API测试','
           icon: Code,
-          href: '/testing/api'
+          href: '/testing/api';
         },
         {
-          id: 'performance-test',
-          name: '性能测试',
+          id: 'performance-test','
+          name: '性能测试','
           icon: Zap,
-          href: '/testing/performance'
+          href: '/testing/performance';
         },
         {
-          id: 'security-test',
-          name: '安全测试',
+          id: 'security-test','
+          name: '安全测试','
           icon: Shield,
-          href: '/testing/security'
+          href: '/testing/security';
         },
         {
-          id: 'seo-test',
-          name: 'SEO测试',
+          id: 'seo-test','
+          name: 'SEO测试','
           icon: Search,
-          href: '/testing/seo'
+          href: '/testing/seo';
         },
         {
-          id: 'stress-test',
-          name: '压力测试',
+          id: 'stress-test','
+          name: '压力测试','
           icon: Zap,
-          href: '/testing/stress'
+          href: '/testing/stress';
         },
         {
-          id: 'infrastructure-test',
-          name: '基础设施测试',
+          id: 'infrastructure-test','
+          name: '基础设施测试','
           icon: Database,
-          href: '/testing/infrastructure'
+          href: '/testing/infrastructure';
         },
         {
-          id: 'ux-test',
-          name: 'UX测试',
+          id: 'ux-test','
+          name: 'UX测试','
           icon: TestTube,
-          href: '/testing/ux'
+          href: '/testing/ux';
         },
         {
-          id: 'compatibility-test',
-          name: '兼容性测试',
+          id: 'compatibility-test','
+          name: '兼容性测试','
           icon: Monitor,
-          href: '/testing/compatibility'
+          href: '/testing/compatibility';
         },
         {
-          id: 'website-test',
-          name: '网站综合测试',
+          id: 'website-test','
+          name: '网站综合测试','
           icon: Globe,
-          href: '/testing/website'
+          href: '/testing/website';
         }
       ]
     },
     {
-      id: 'data',
-      name: '数据管理',
+      id: 'data','
+      name: '数据管理','
       icon: Database,
-      href: '#',
+      href: '#','
       children: [
         {
-          id: 'test-history',
-          name: '测试历史',
+          id: 'test-history','
+          name: '测试历史','
           icon: TestTube,
-          href: '/test-history',
-          badge: 'v2.0'
+          href: '/test-history','
+          badge: 'v2.0';
         },
         {
-          id: 'statistics',
-          name: '统计分析',
+          id: 'statistics','
+          name: '统计分析','
           icon: BarChart3,
-          href: '/statistics'
+          href: '/statistics';
         },
         {
-          id: 'data-center',
-          name: '数据中心',
+          id: 'data-center','
+          name: '数据中心','
           icon: Database,
-          href: '/data-storage'
+          href: '/data-storage';
         }
       ]
     },
     {
-      id: 'integration',
-      name: '集成配置',
+      id: 'integration','
+      name: '集成配置','
       icon: Package,
-      href: '#',
+      href: '#','
       children: [
         {
-          id: 'cicd',
-          name: 'CI/CD集成',
+          id: 'cicd','
+          name: 'CI/CD集成','
           icon: GitBranch,
-          href: '/cicd'
+          href: '/cicd';
         },
         {
-          id: 'api-keys',
-          name: 'API密钥',
+          id: 'api-keys','
+          name: 'API密钥','
           icon: Key,
-          href: '/api-keys'
+          href: '/api-keys';
         },
         {
-          id: 'webhooks',
-          name: 'Webhooks',
+          id: 'webhooks','
+          name: 'Webhooks','
           icon: Link2,
-          href: '/webhooks'
+          href: '/webhooks';
         },
         {
-          id: 'integrations',
-          name: '第三方集成',
+          id: 'integrations','
+          name: '第三方集成','
           icon: Package,
-          href: '/integrations'
+          href: '/integrations';
         }
       ]
     },
     {
-      id: 'settings',
-      name: '系统设置',
+      id: 'settings','
+      name: '系统设置','
       icon: Settings,
-      href: '/settings'
+      href: '/settings';
     }
   ];
-
   // 管理员菜单项
-  const adminItems: SidebarItem[] = isAdmin ? [
+  const adminItems: SidebarItem[]  = isAdmin ? [
     {
-      id: 'admin',
-      name: '后台管理',
+      id: 'admin','
+      name: '后台管理','
       icon: Crown,
-      href: '/admin'
+      href: '/admin';
     }
   ] : [];
-
   // 合并所有菜单项
   const allSidebarItems = [...sidebarItems, ...adminItems];
 
@@ -249,12 +236,11 @@ const Sidebar: React.FC<SidebarProps> = ({
 
     setExpandedGroups(prev =>
       prev.includes(groupId)
-        ? prev.filter(id => id !== groupId)
-        : [...prev, groupId]
+        ? prev.filter(id => id !== groupId): [...prev, groupId]
     );
   };
 
-  // 精确匹配路径，避免多个菜单项同时激�?  const isActive = (href: string) => {
+  // 精确匹配路径，避免多个菜单项同时激�?  const isActive = (href: string)  => {
   return location.pathname === href;
 };
 
@@ -358,10 +344,9 @@ useEffect(() => {
 // 智能展开包含活跃子项的组（仅在侧边栏展开时）
 useEffect(() => {
   if (!collapsed) {
-    const groupsToExpand: string[] = [];
-
+    const groupsToExpand: string[]  = [];
     // 递归查找包含活跃子项的组
-    const findActiveGroups = (items: SidebarItem[]): void => {
+    const findActiveGroups = (items: SidebarItem[]): void  => {
       items.forEach(item => {
         if (item.children) {
           // 检查直接子项是否活跃
@@ -410,64 +395,62 @@ const renderSidebarItem = (item: SidebarItem, level = 0) => {
     const groupActiveByChild = isGroupActiveByChild(item);
     const directlyActive = item.href && isActive(item.href);
 
-    return (
-      <div key={item.id
-      } className="mb-1 relative group">
+    return (<div key={item.id
+      } className= 'mb-1 relative group'>
         <button
-          type="button"
+          type= 'button';
           onClick={() => {
             handleButtonClick(item.id);
             toggleGroup(item.id);
           }}
           onMouseEnter={(e) => handleButtonHover(item.id, e)}
           onMouseLeave={handleButtonLeave}
-          className={`w-full sidebar-button-hover transition-all duration-200 ${collapsed
-            ? 'flex items-center justify-center p-3 rounded-lg'
+          className={`w-full sidebar-button-hover transition-all duration-200 ${collapsed`}
+            ? "flex items-center justify-center p-3 rounded-lg';'`
             : level > 0
-              ? 'flex items-center justify-between px-6 py-2 rounded-md text-left text-sm'
-              : 'flex items-center justify-between px-3 py-2.5 rounded-lg text-left'
-            } ${clickedItem === item.id
-              ? 'scale-95 bg-blue-600/30 text-blue-300 sidebar-button-clicked'
+              ? 'flex items-center justify-between px-6 py-2 rounded-md text-left text-sm';
+              : 'flex items-center justify-between px-3 py-2.5 rounded-lg text-left';
+            } ${clickedItem === item.id}
+              ? 'scale-95 bg-blue-600/30 text-blue-300 sidebar-button-clicked';
               : directlyActive
-                ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30 shadow-lg'
+                ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30 shadow-lg';
                 : groupActiveByChild
-                  ? 'bg-blue-500/10 text-blue-300 border border-blue-500/20'
+                  ? 'bg-blue-500/10 text-blue-300 border border-blue-500/20';
                   : level > 0
-                    ? 'text-gray-400 hover:bg-gray-700/30 hover:text-gray-200 hover:scale-[1.02]'
-                    : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:scale-[1.02]'
-            }`}
+                    ? 'text-gray-400 hover:bg-gray-700/30 hover:text-gray-200 hover:scale-[1.02]';
+                    : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:scale-[1.02]';
+            }`}`
           title={collapsed ? item.name : undefined}
         >
           {collapsed ? (
             // 收起状态：图标居中，选中框以图标为中心
-            <div className="relative flex items-center justify-center">
-              <item.icon className={`w-5 h-5 flex-shrink-0 transition-all duration-200 ${groupActive ? 'scale-110' : ''
-                }`} />
+            <div className= "relative flex items-center justify-center'>`
+              <item.icon className={`w-5 h-5 flex-shrink-0 transition-all duration-200 ${groupActive ? 'scale-110' : '';'`}
+                }`} />`
               {/* 收起状态下的活跃指示器 */}
               {directlyActive && (
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                <div className= "absolute -top-1 -right-1 w-2 h-2 bg-blue-400 rounded-full animate-pulse'></div>`
               )}
               {/* 收起状态下的子项活跃指示器 */}
               {groupActiveByChild && (
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-300 rounded-full"></div>
+                <div className= 'absolute -top-1 -right-1 w-2 h-2 bg-blue-300 rounded-full'></div>
               )}
             </div>
           ) : (
             // 展开状态：正常布局
             <>
-              <div className="flex items-center gap-3">
-                <item.icon className={`flex-shrink-0 ${level > 0 ? 'w-4 h-4' : 'w-5 h-5'}`} />
-                <span className={`${level > 0 ? 'font-normal' : 'font-medium'}`}>{item.name}</span>
+              <div className= 'flex items-center gap-3'>
+                <item.icon className={`flex-shrink-0 ${level > 0 ? "w-4 h-4' : 'w-5 h-5'}`} />`
+                <span className={`${level > 0 ? 'font-normal' : "font-medium'}`}>{item.name}</span>`
                 {item.badge && (
-                  <span className="px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full">
+                  <span className= "px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full'>`
                     {item.badge}
                   </span>
                 )}
               </div>
-              <ChevronRight
-                className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''
-                  }`}
-              />
+              <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-90' : "';'`}
+                  }`}`
+                 />
             </>
           )
           }
@@ -476,7 +459,7 @@ const renderSidebarItem = (item: SidebarItem, level = 0) => {
         {/* 展开状态下的子菜单 */}
         {
           !collapsed && isExpanded && (
-            <div className={`mt-1 space-y-1 border-l border-gray-700/30 ${level === 0 ? 'ml-0 pl-3' : 'ml-3 pl-3'}`}>
+            <div className={`mt-1 space-y-1 border-l border-gray-700/30 ${level === 0 ? 'ml-0 pl-3' : "ml-3 pl-3'}`}>`
               {item.children?.map(child => renderSidebarItem(child, level + 1))}
             </div>
           )
@@ -485,59 +468,58 @@ const renderSidebarItem = (item: SidebarItem, level = 0) => {
     );
   }
 
-  return (
-    <div key={item.id} className="mb-1 relative group">
+  return (<div key={item.id} className= "mb-1 relative group'>`
       <Link
         to={item.href}
         onClick={() => handleButtonClick(item.id)}
-        className={`sidebar-button-hover relative transition-all duration-200 ${collapsed
-          ? 'flex items-center justify-center p-3 rounded-lg'
+        className={`sidebar-button-hover relative transition-all duration-200 ${collapsed`}
+          ? "flex items-center justify-center p-3 rounded-lg';'`
           : level > 0
-            ? 'flex items-center gap-3 px-3 py-2 rounded-md text-sm'
-            : 'flex items-center gap-3 px-3 py-2.5 rounded-lg'
-          } ${clickedItem === item.id
-            ? 'scale-95 bg-blue-600/30 text-blue-300 sidebar-button-clicked'
+            ? 'flex items-center gap-3 px-3 py-2 rounded-md text-sm';
+            : 'flex items-center gap-3 px-3 py-2.5 rounded-lg';
+          } ${clickedItem === item.id}
+            ? 'scale-95 bg-blue-600/30 text-blue-300 sidebar-button-clicked';
             : active
               ? level > 0
-                ? 'bg-blue-600/30 text-blue-200 border-l-2 border-blue-400 shadow-md'
-                : 'bg-blue-500/20 text-blue-400 border border-blue-500/30 shadow-lg'
+                ? 'bg-blue-600/30 text-blue-200 border-l-2 border-blue-400 shadow-md';
+                : 'bg-blue-500/20 text-blue-400 border border-blue-500/30 shadow-lg';
               : level > 0
-                ? 'text-gray-400 hover:bg-gray-700/30 hover:text-gray-200 hover:border-l-2 hover:border-gray-500 hover:scale-[1.02]'
-                : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:scale-[1.02]'
-          }`}
+                ? 'text-gray-400 hover:bg-gray-700/30 hover:text-gray-200 hover:border-l-2 hover:border-gray-500 hover:scale-[1.02]';
+                : "text-gray-300 hover:bg-gray-700/50 hover:text-white hover:scale-[1.02]';
+          }`}`
         title={collapsed ? item.name : undefined}
       >
         {collapsed ? (
           // 收起状态：图标居中，选中框以图标为中心
-          <div className="relative flex items-center justify-center">
-            <item.icon className={`w-5 h-5 flex-shrink-0 transition-all duration-200 ${active ? 'scale-110' : ''
-              }`} />
+          <div className= "relative flex items-center justify-center'>`
+            <item.icon className={`w-5 h-5 flex-shrink-0 transition-all duration-200 ${active ? 'scale-110' : "';'`}
+              }`} />`
             {/* 收起状态下的活跃指示器 */}
             {active && (
-              <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+              <div className= "absolute -top-1 -right-1 w-2 h-2 bg-blue-400 rounded-full animate-pulse'></div>`
             )}
             {/* 收起状态下的badge指示器 */}
             {item.badge && !active && (
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center">
-                <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+              <div className= 'absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center'>
+                <div className= 'w-1.5 h-1.5 bg-white rounded-full'></div>
               </div>
             )}
           </div>
         ) : (
           // 展开状态：正常布局
           <>
-            <item.icon className={`flex-shrink-0 ${level > 0 ? 'w-4 h-4' : 'w-5 h-5'}`} />
-            <span className={`${level > 0 ? 'font-normal' : 'font-medium'} flex-1 min-w-0`}>{item.name}</span>
-            <div className="flex items-center gap-1 flex-shrink-0">
+            <item.icon className={`flex-shrink-0 ${level > 0 ? "w-4 h-4' : 'w-5 h-5'}`} />`
+            <span className={`${level > 0 ? 'font-normal' : "font-medium'} flex-1 min-w-0`}>{item.name}</span>`
+            <div className= "flex items-center gap-1 flex-shrink-0'>`
               {item.badge && (
-                <span className={`px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full ${level > 0 ? 'text-xs' : ''
-                  }`}>
+                <span className={`px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full ${level > 0 ? 'text-xs' : "';'`}
+                  }`}>`
                   {item.badge}
                 </span>
               )}
               {/* 子菜单项的活跃指示器 */}
               {active && level > 0 && (
-                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></div>
+                <div className= "w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse'></div>`
               )}
             </div>
           </>
@@ -548,18 +530,18 @@ const renderSidebarItem = (item: SidebarItem, level = 0) => {
       {/* 收起状态下的悬浮tooltip */}
       {
         collapsed && (
-          <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 px-3 py-2 bg-gray-900/95 backdrop-blur-md border border-gray-600/50 rounded-lg text-sm text-white whitespace-nowrap z-[9999] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-out pointer-events-none transform translate-x-2 group-hover:translate-x-0">
-            <div className="flex items-center gap-2">
-              <item.icon className="w-4 h-4" />
+          <div className= 'absolute left-full top-1/2 -translate-y-1/2 ml-4 px-3 py-2 bg-gray-900/95 backdrop-blur-md border border-gray-600/50 rounded-lg text-sm text-white whitespace-nowrap z-[9999] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-out pointer-events-none transform translate-x-2 group-hover:translate-x-0'>
+            <div className= 'flex items-center gap-2'>
+              <item.icon className= 'w-4 h-4' />
               {item.name}
               {item.badge && (
-                <span className="ml-2 px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full">
+                <span className= 'ml-2 px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full'>
                   {item.badge}
                 </span>
               )}
             </div>
             {/* tooltip箭头 */}
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-2 h-2 bg-gray-800 border-l border-t border-gray-700/50 rotate-45"></div>
+            <div className= 'absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-2 h-2 bg-gray-800 border-l border-t border-gray-700/50 rotate-45'></div>
           </div>
         )
       }
@@ -567,25 +549,24 @@ const renderSidebarItem = (item: SidebarItem, level = 0) => {
   );
 
   return (
-    <div className={`sidebar-container themed-sidebar transition-all duration-300 ${collapsed ? 'w-16' : 'w-56'
-      } flex flex-col h-full overflow-visible`}>
+    <div className={`sidebar-container themed-sidebar transition-all duration-300 ${collapsed ? 'w-16' : "w-56';'`}
+      } flex flex-col h-full overflow-visible`}>`
       {/* 导航菜单滚动区域 */}
-      <div className="flex-1 min-h-0">
-        <div className="h-full px-4 py-4 overflow-y-auto overflow-x-visible sidebar-scrollbar">
-          <nav className="space-y-1 overflow-visible sidebar-nav-container">
+      <div className= "flex-1 min-h-0'>`
+        <div className= 'h-full px-4 py-4 overflow-y-auto overflow-x-visible sidebar-scrollbar'>
+          <nav className= 'space-y-1 overflow-visible sidebar-nav-container'>
             {allSidebarItems.map(item => renderSidebarItem(item))}
           </nav>
 
           {/* 登录状态指示器 */}
-          <div className="mt-6 pt-4 border-t border-gray-700/50">
-            <AuthStatusIndicator
-              showInSidebar={true}
-              className="mb-4"
-            />
+          <div className= 'mt-6 pt-4 border-t border-gray-700/50'>
+            <AuthStatusIndicator showInSidebar={true}
+              className= 'mb-4';
+               />
 
             {/* 版本信息 */}
             {!collapsed && (
-              <div className="text-xs text-gray-400 text-center">
+              <div className= 'text-xs text-gray-400 text-center'>
                 <p>© 2025 Test Web App</p>
                 <p>v1.0.0</p>
               </div>
@@ -593,18 +574,18 @@ const renderSidebarItem = (item: SidebarItem, level = 0) => {
           </div>
 
           {/* 底部间距，确保最后一项可以完全显�?*/}
-          <div className="h-4"></div>
+          <div className= 'h-4'></div>
         </div>
       </div>
 
       {/* 悬浮子菜�?*/}
       {collapsed && hoveredItem && hoverPosition && (
         <div
-          className="fixed z-[9999] bg-gray-900/95 backdrop-blur-xl border border-gray-600/50 rounded-lg shadow-2xl w-48 py-2 max-h-96 overflow-y-auto"
+          className= 'fixed z-[9999] bg-gray-900/95 backdrop-blur-xl border border-gray-600/50 rounded-lg shadow-2xl w-48 py-2 max-h-96 overflow-y-auto';
           style={{
-            top: `${hoverPosition.top}px`,
-            left: `${hoverPosition.left}px`,
-            transform: 'translateY(-50%)', // 垂直居中
+            top: `${hoverPosition.top}px`,`
+            left: `${hoverPosition.left}px`,`
+            transform: "translateY(-50%)', // 垂直居中'`
           }}
           onMouseEnter={handleMenuHover}
           onMouseLeave={handleMenuLeave}
@@ -613,29 +594,28 @@ const renderSidebarItem = (item: SidebarItem, level = 0) => {
             const item = allSidebarItems.find(i => i.id === hoveredItem);
             if (!item?.children) return null;
 
-            return (
-              <>
+            return (<>
                 {/* 菜单标题 */}
-                <div className="px-3 py-2 border-b border-gray-700/50 mb-1">
-                  <div className="flex items-center gap-2 text-sm font-medium text-gray-300">
-                    <item.icon className="w-4 h-4 text-blue-400" />
+                <div className= 'px-3 py-2 border-b border-gray-700/50 mb-1'>
+                  <div className= 'flex items-center gap-2 text-sm font-medium text-gray-300'>
+                    <item.icon className= 'w-4 h-4 text-blue-400' />
                     <span>{item.name}</span>
                   </div>
                 </div>
 
                 {/* 子菜单项 */}
-                <div className="space-y-1 px-1">
+                <div className= 'space-y-1 px-1'>
                   {item.children.map((child) => {
                     // 如果子项有自己的子菜单，显示为分组
                     if (child.children && child.children.length > 0) {
                       
         return (
                         <div key={child.id
-      } className="mb-2">
-                          <div className="px-3 py-1 text-xs font-medium text-gray-400 uppercase tracking-wider">
+      } className= 'mb-2'>
+                          <div className= 'px-3 py-1 text-xs font-medium text-gray-400 uppercase tracking-wider'>
                             {child.name}
                           </div>
-                          <div className="space-y-1 ml-2">
+                          <div className= 'space-y-1 ml-2'>
                             {child.children.map((nestedChild) => (
                               <Link
                                 key={nestedChild.id}
@@ -645,22 +625,22 @@ const renderSidebarItem = (item: SidebarItem, level = 0) => {
                                   setHoveredItem(null);
                                   setHoverPosition(null);
                                 }}
-                                className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm sidebar-button-hover transition-all duration-200 ${clickedItem === nestedChild.id
-                                  ? 'scale-95 bg-blue-600/30 text-blue-300 sidebar-button-clicked'
+                                className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm sidebar-button-hover transition-all duration-200 ${clickedItem === nestedChild.id`}
+                                  ? "scale-95 bg-blue-600/30 text-blue-300 sidebar-button-clicked';'`
                                   : isActive(nestedChild.href)
-                                    ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                                    : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:scale-[1.02]'
-                                  }`}
+                                    ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30';
+                                    : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:scale-[1.02]';
+                                  }`}`
                               >
-                                <nestedChild.icon className="w-4 h-4 flex-shrink-0" />
-                                <span className="flex-1">{nestedChild.name}</span>
+                                <nestedChild.icon className= "w-4 h-4 flex-shrink-0' />`
+                                <span className= 'flex-1'>{nestedChild.name}</span>
                                 {nestedChild.badge && (
-                                  <span className="px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full">
+                                  <span className= 'px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full'>
                                     {nestedChild.badge}
                                   </span>
                                 )}
                                 {isActive(nestedChild.href) && (
-                                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                                  <div className= 'w-2 h-2 bg-blue-400 rounded-full'></div>
                                 )}
                               </Link>
                             ))}
@@ -670,8 +650,7 @@ const renderSidebarItem = (item: SidebarItem, level = 0) => {
                     }
 
                     // 普通子菜单项
-                    return (
-                      <Link
+                    return (<Link
                         key={child.id}
                         to={child.href}
                         onClick={() => {
@@ -679,22 +658,22 @@ const renderSidebarItem = (item: SidebarItem, level = 0) => {
                           setHoveredItem(null);
                           setHoverPosition(null);
                         }}
-                        className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm sidebar-button-hover transition-all duration-200 ${clickedItem === child.id
-                          ? 'scale-95 bg-blue-600/30 text-blue-300 sidebar-button-clicked'
+                        className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm sidebar-button-hover transition-all duration-200 ${clickedItem === child.id`}
+                          ? "scale-95 bg-blue-600/30 text-blue-300 sidebar-button-clicked';'`
                           : isActive(child.href)
-                            ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                            : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:scale-[1.02]'
-                          }`}
+                            ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30';
+                            : 'text-gray-300 hover:bg-gray-700/50 hover:text-white hover:scale-[1.02]';
+                          }`}`
                       >
-                        <child.icon className="w-4 h-4 flex-shrink-0" />
-                        <span className="flex-1">{child.name}</span>
+                        <child.icon className= "w-4 h-4 flex-shrink-0' />`
+                        <span className= 'flex-1'>{child.name}</span>
                         {child.badge && (
-                          <span className="px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full">
+                          <span className= 'px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full'>
                             {child.badge}
                           </span>
                         )}
                         {isActive(child.href) && (
-                          <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                          <div className= 'w-2 h-2 bg-blue-400 rounded-full'></div>
                         )}
                       </Link>
                     );

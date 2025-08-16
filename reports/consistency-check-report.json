@@ -1,15 +1,15 @@
 {
-  "timestamp": "2025-08-16T07:25:41.099Z",
+  "timestamp": "2025-08-16T09:33:23.511Z",
   "summary": {
-    "filesChecked": 2520,
-    "issuesFound": 965,
+    "filesChecked": 2716,
+    "issuesFound": 1249,
     "categories": {
-      "naming": 3,
+      "naming": 6,
       "imports": 0,
       "exports": 0,
       "functions": 0,
-      "variables": 268,
-      "components": 694
+      "variables": 311,
+      "components": 932
     }
   },
   "issues": [
@@ -25,6 +25,27 @@
       "type": "component_file",
       "file": "frontend\\components\\ui\\stories\\Button.stories.tsx",
       "message": "组件文件应使用PascalCase命名: Button.stories.tsx",
+      "severity": "medium"
+    },
+    {
+      "category": "naming",
+      "type": "component_file",
+      "file": "frontend\\components\\ui\\stories\\Input.stories.tsx",
+      "message": "组件文件应使用PascalCase命名: Input.stories.tsx",
+      "severity": "medium"
+    },
+    {
+      "category": "naming",
+      "type": "component_file",
+      "file": "frontend\\config\\routes.tsx",
+      "message": "组件文件应使用PascalCase命名: routes.tsx",
+      "severity": "medium"
+    },
+    {
+      "category": "naming",
+      "type": "component_file",
+      "file": "frontend\\utils\\componentTester.tsx",
+      "message": "组件文件应使用PascalCase命名: componentTester.tsx",
       "severity": "medium"
     },
     {
@@ -149,6 +170,34 @@
     {
       "category": "components",
       "type": "naming",
+      "file": "frontend\\components\\auth\\RoleGuard.tsx",
+      "message": "组件名称应使用PascalCase: hasRequiredRoles",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\auth\\RoleGuard.tsx",
+      "message": "组件名称应使用PascalCase: hasRequiredPermissions",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\auth\\RoleGuard.tsx",
+      "message": "组件名称应使用PascalCase: hasRequiredRoles",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\auth\\RoleGuard.tsx",
+      "message": "组件名称应使用PascalCase: hasRequiredPermissions",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
       "file": "frontend\\components\\auth\\WithAuthCheck.tsx",
       "message": "组件名称应使用PascalCase: requireLogin",
       "severity": "medium"
@@ -241,6 +290,13 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\components\\charts\\StressTestCharts.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\charts\\StressTestCharts.tsx",
       "message": "组件名称应使用PascalCase: renderRealTimeChart",
       "severity": "medium"
     },
@@ -262,6 +318,13 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\components\\charts\\StressTestMetrics.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\charts\\StressTestMetrics.tsx",
       "message": "组件名称应使用PascalCase: getCardStyle",
       "severity": "medium"
     },
@@ -277,6 +340,13 @@
       "type": "naming",
       "file": "frontend\\components\\charts\\StressTestMetrics.tsx",
       "message": "组件名称应使用PascalCase: getStatusIcon",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\charts\\TestComparisonCharts.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
       "severity": "medium"
     },
     {
@@ -326,6 +396,13 @@
       "type": "naming",
       "file": "frontend\\components\\charts\\TestComparisonCharts.tsx",
       "message": "组件名称应使用PascalCase: getTestColor",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\data\\DataManagement.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
       "severity": "medium"
     },
     {
@@ -549,6 +626,13 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\components\\features\\DataManagement.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\features\\DataManagement.tsx",
       "message": "组件名称应使用PascalCase: handleSearch",
       "severity": "medium"
     },
@@ -710,6 +794,13 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\components\\features\\MonitorDashboard.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\features\\MonitorDashboard.tsx",
       "message": "组件名称应使用PascalCase: getStatusIcon",
       "severity": "medium"
     },
@@ -829,6 +920,13 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\components\\features\\ReportExporter.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\features\\ReportExporter.tsx",
       "message": "组件名称应使用PascalCase: updateConfig",
       "severity": "medium"
     },
@@ -837,6 +935,13 @@
       "type": "naming",
       "file": "frontend\\components\\features\\ReportExporter.tsx",
       "message": "组件名称应使用PascalCase: updateSection",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\features\\ReportManagement.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
       "severity": "medium"
     },
     {
@@ -1004,6 +1109,13 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\components\\features\\TestRunner.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\features\\TestRunner.tsx",
       "message": "组件名称应使用PascalCase: getStatusColor",
       "severity": "medium"
     },
@@ -1026,6 +1138,13 @@
       "type": "naming",
       "file": "frontend\\components\\features\\TestRunner.tsx",
       "message": "组件名称应使用PascalCase: renderTestResult",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\layout\\BaseTestLayout.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
       "severity": "medium"
     },
     {
@@ -1276,6 +1395,83 @@
     {
       "category": "components",
       "type": "naming",
+      "file": "frontend\\components\\navigation\\Breadcrumb.tsx",
+      "message": "组件名称应使用PascalCase: useBreadcrumb",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\navigation\\Breadcrumb.tsx",
+      "message": "组件名称应使用PascalCase: setBreadcrumb",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\navigation\\Breadcrumb.tsx",
+      "message": "组件名称应使用PascalCase: addBreadcrumbItem",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\navigation\\MainNavigation.tsx",
+      "message": "组件名称应使用PascalCase: handleMobileMenuToggle",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\navigation\\MainNavigation.tsx",
+      "message": "组件名称应使用PascalCase: renderNavigationItem",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\navigation\\SidebarNavigation.tsx",
+      "message": "组件名称应使用PascalCase: toggleExpanded",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\navigation\\SidebarNavigation.tsx",
+      "message": "组件名称应使用PascalCase: renderNavigationItem",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\navigation\\UserNavigation.tsx",
+      "message": "组件名称应使用PascalCase: handleClickOutside",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\navigation\\UserNavigation.tsx",
+      "message": "组件名称应使用PascalCase: handleItemClick",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\navigation\\UserNavigation.tsx",
+      "message": "组件名称应使用PascalCase: toggleDropdown",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\navigation\\UserNavigation.tsx",
+      "message": "组件名称应使用PascalCase: getAvatarSizeClass",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
       "file": "frontend\\components\\preferences\\UserPreferencesPanel.tsx",
       "message": "组件名称应使用PascalCase: handleExport",
       "severity": "medium"
@@ -1319,6 +1515,13 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\components\\results\\TestResults.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\results\\TestResults.tsx",
       "message": "组件名称应使用PascalCase: getStatusColor",
       "severity": "medium"
     },
@@ -1341,6 +1544,13 @@
       "type": "naming",
       "file": "frontend\\components\\results\\VirtualizedResultList.tsx",
       "message": "组件名称应使用PascalCase: updateHeight",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\security\\SecurityTest.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
       "severity": "medium"
     },
     {
@@ -1375,7 +1585,21 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\components\\system\\BackgroundTestNotifications.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\system\\BackgroundTestNotifications.tsx",
       "message": "组件名称应使用PascalCase: getNotificationColor",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\system\\BackupManagement.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
       "severity": "medium"
     },
     {
@@ -1516,6 +1740,13 @@
       "type": "naming",
       "file": "frontend\\components\\system\\MonitoringDashboard.tsx",
       "message": "组件名称应使用PascalCase: getMonitoringServiceInstance",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\system\\MonitoringDashboard.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
       "severity": "medium"
     },
     {
@@ -1696,6 +1927,20 @@
     {
       "category": "components",
       "type": "naming",
+      "file": "frontend\\components\\system\\SystemSettings.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\system\\SystemStatusDashboard.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
       "file": "frontend\\components\\system\\SystemStatusDashboard.tsx",
       "message": "组件名称应使用PascalCase: getAlertIcon",
       "severity": "medium"
@@ -1705,6 +1950,13 @@
       "type": "naming",
       "file": "frontend\\components\\system\\SystemStatusDashboard.tsx",
       "message": "组件名称应使用PascalCase: getAlertColor",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\system\\TestManagement.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
       "severity": "medium"
     },
     {
@@ -1733,6 +1985,13 @@
       "type": "naming",
       "file": "frontend\\components\\system\\TestManagement.tsx",
       "message": "组件名称应使用PascalCase: getTypeColor",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\system\\UserManagement.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
       "severity": "medium"
     },
     {
@@ -1768,6 +2027,13 @@
       "type": "naming",
       "file": "frontend\\components\\system\\UserManagement.tsx",
       "message": "组件名称应使用PascalCase: getRoleColor",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\APITestConfig.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
       "severity": "medium"
     },
     {
@@ -1830,6 +2096,13 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\components\\testing\\APITestResultAnalysis.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\APITestResultAnalysis.tsx",
       "message": "组件名称应使用PascalCase: getStatusColor",
       "severity": "medium"
     },
@@ -1838,6 +2111,13 @@
       "type": "naming",
       "file": "frontend\\components\\testing\\APITestResultAnalysis.tsx",
       "message": "组件名称应使用PascalCase: getResponseTimeColor",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\BaseTestPage.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
       "severity": "medium"
     },
     {
@@ -2047,6 +2327,13 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\components\\testing\\SecurityTestComparison.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\SecurityTestComparison.tsx",
       "message": "组件名称应使用PascalCase: toggleSection",
       "severity": "medium"
     },
@@ -2076,6 +2363,13 @@
       "type": "naming",
       "file": "frontend\\components\\testing\\SecurityTestComparison.tsx",
       "message": "组件名称应使用PascalCase: formatDate",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\SecurityTestGuide.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
       "severity": "medium"
     },
     {
@@ -2145,6 +2439,13 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\components\\testing\\specialized\\APITestConfig.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\specialized\\APITestConfig.tsx",
       "message": "组件名称应使用PascalCase: addEndpoint",
       "severity": "medium"
     },
@@ -2167,6 +2468,13 @@
       "type": "naming",
       "file": "frontend\\components\\testing\\specialized\\APITestConfig.tsx",
       "message": "组件名称应使用PascalCase: updateEndpoint",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\specialized\\SecurityTestConfig.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
       "severity": "medium"
     },
     {
@@ -2201,6 +2509,13 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\components\\testing\\specialized\\StressTestConfig.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\specialized\\StressTestConfig.tsx",
       "message": "组件名称应使用PascalCase: handleLoadSettingChange",
       "severity": "medium"
     },
@@ -2222,6 +2537,13 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\components\\testing\\StressTestConfig.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\StressTestConfig.tsx",
       "message": "组件名称应使用PascalCase: updateConfig",
       "severity": "medium"
     },
@@ -2230,6 +2552,13 @@
       "type": "naming",
       "file": "frontend\\components\\testing\\StressTestConfig.tsx",
       "message": "组件名称应使用PascalCase: applyPreset",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\StressTestDetailModal.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
       "severity": "medium"
     },
     {
@@ -2314,6 +2643,13 @@
       "type": "naming",
       "file": "frontend\\components\\testing\\StressTestDetailModal.tsx",
       "message": "组件名称应使用PascalCase: modalContent",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\StressTestHistory.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
       "severity": "medium"
     },
     {
@@ -2488,6 +2824,13 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\components\\testing\\StressTestQueueStatus.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\StressTestQueueStatus.tsx",
       "message": "组件名称应使用PascalCase: getStatusColor",
       "severity": "medium"
     },
@@ -2496,6 +2839,13 @@
       "type": "naming",
       "file": "frontend\\components\\testing\\StressTestQueueStatus.tsx",
       "message": "组件名称应使用PascalCase: getStatusIcon",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\StressTestRecordDetail.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
       "severity": "medium"
     },
     {
@@ -2537,6 +2887,13 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\components\\testing\\StressTestResultAnalysis.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\StressTestResultAnalysis.tsx",
       "message": "组件名称应使用PascalCase: getGradeColor",
       "severity": "medium"
     },
@@ -2565,6 +2922,13 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\components\\testing\\TestConfig.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\TestConfig.tsx",
       "message": "组件名称应使用PascalCase: handleConfigChange",
       "severity": "medium"
     },
@@ -2580,6 +2944,13 @@
       "type": "naming",
       "file": "frontend\\components\\testing\\TestConfig.tsx",
       "message": "组件名称应使用PascalCase: handleStart",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\TestEngineStatus.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
       "severity": "medium"
     },
     {
@@ -2607,7 +2978,21 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\components\\testing\\TestHeader.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\TestHeader.tsx",
       "message": "组件名称应使用PascalCase: getTestButtonConfig",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\TestHistoryPanel.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
       "severity": "medium"
     },
     {
@@ -2656,6 +3041,13 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\components\\testing\\TestInterface.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\TestInterface.tsx",
       "message": "组件名称应使用PascalCase: getScoreColor",
       "severity": "medium"
     },
@@ -2691,6 +3083,13 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\components\\testing\\TestManager.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\TestManager.tsx",
       "message": "组件名称应使用PascalCase: handleToolToggle",
       "severity": "medium"
     },
@@ -2719,6 +3118,13 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\components\\testing\\TestPage.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\TestPage.tsx",
       "message": "组件名称应使用PascalCase: handleConfigChange",
       "severity": "medium"
     },
@@ -2734,6 +3140,13 @@
       "type": "naming",
       "file": "frontend\\components\\testing\\TestPage.tsx",
       "message": "组件名称应使用PascalCase: handleResultsExport",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\TestPageWithHistory.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
       "severity": "medium"
     },
     {
@@ -2767,6 +3180,20 @@
     {
       "category": "components",
       "type": "naming",
+      "file": "frontend\\components\\testing\\TestProgress.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\TestProgressPanel.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
       "file": "frontend\\components\\testing\\TestProgressPanel.tsx",
       "message": "组件名称应使用PascalCase: getStatusColor",
       "severity": "medium"
@@ -2790,6 +3217,20 @@
       "type": "naming",
       "file": "frontend\\components\\testing\\TestProgressPanel.tsx",
       "message": "组件名称应使用PascalCase: formatEstimatedTime",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\TestResultComparison.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\TestResultDisplay.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
       "severity": "medium"
     },
     {
@@ -2852,6 +3293,13 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\components\\testing\\TestResults.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\TestResults.tsx",
       "message": "组件名称应使用PascalCase: getStatusColor",
       "severity": "medium"
     },
@@ -2866,6 +3314,13 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\components\\testing\\TestTemplateManager.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\TestTemplateManager.tsx",
       "message": "组件名称应使用PascalCase: handleTemplateSelect",
       "severity": "medium"
     },
@@ -2874,6 +3329,13 @@
       "type": "naming",
       "file": "frontend\\components\\testing\\TestTemplateManager.tsx",
       "message": "组件名称应使用PascalCase: handleUseTemplate",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\testing\\TestTemplateSelector.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
       "severity": "medium"
     },
     {
@@ -2958,6 +3420,27 @@
       "type": "naming",
       "file": "frontend\\components\\testing\\URLInput.tsx",
       "message": "组件名称应使用PascalCase: getBorderColor",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\TestResults.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\TestResults.tsx",
+      "message": "组件名称应使用PascalCase: getStatusColor",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\TestResults.tsx",
+      "message": "组件名称应使用PascalCase: getScoreColor",
       "severity": "medium"
     },
     {
@@ -3076,6 +3559,13 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\components\\ui\\CancelTestConfirmDialog.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\ui\\CancelTestConfirmDialog.tsx",
       "message": "组件名称应使用PascalCase: handleConfirm",
       "severity": "medium"
     },
@@ -3182,6 +3672,34 @@
       "type": "naming",
       "file": "frontend\\components\\ui\\LazyComponent.tsx",
       "message": "组件名称应使用PascalCase: handleRetry",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\ui\\LazyComponentWrapper.tsx",
+      "message": "组件名称应使用PascalCase: useLazyComponent",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\ui\\LazyImage.tsx",
+      "message": "组件名称应使用PascalCase: handleLoad",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\ui\\LazyImage.tsx",
+      "message": "组件名称应使用PascalCase: handleError",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\ui\\LazyImage.tsx",
+      "message": "组件名称应使用PascalCase: getOptimizedSrc",
       "severity": "medium"
     },
     {
@@ -3300,6 +3818,13 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\components\\ui\\StopTestConfirmDialog.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\ui\\StopTestConfirmDialog.tsx",
       "message": "组件名称应使用PascalCase: formatDuration",
       "severity": "medium"
     },
@@ -3350,6 +3875,13 @@
       "type": "naming",
       "file": "frontend\\components\\ui\\Table.tsx",
       "message": "组件名称应使用PascalCase: handlePageSizeChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\ui\\TestHistory.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
       "severity": "medium"
     },
     {
@@ -3432,6 +3964,20 @@
     {
       "category": "components",
       "type": "naming",
+      "file": "frontend\\components\\ui\\TestingTools.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\ui\\TestPageHistory.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
       "file": "frontend\\components\\ui\\TestPageHistory.tsx",
       "message": "组件名称应使用PascalCase: handleSearch",
       "severity": "medium"
@@ -3490,6 +4036,13 @@
       "type": "naming",
       "file": "frontend\\components\\ui\\TestPageHistory.tsx",
       "message": "组件名称应使用PascalCase: getStatusText",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\ui\\TestTypeHistory.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
       "severity": "medium"
     },
     {
@@ -3614,6 +4167,34 @@
     {
       "category": "components",
       "type": "naming",
+      "file": "frontend\\components\\ui\\VirtualTable.tsx",
+      "message": "组件名称应使用PascalCase: renderHeader",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\components\\ui\\VirtualTable.tsx",
+      "message": "组件名称应使用PascalCase: renderRow",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\config\\lazyRoutes.ts",
+      "message": "组件名称应使用PascalCase: preloadHighPriorityRoutes",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\config\\lazyRoutes.ts",
+      "message": "组件名称应使用PascalCase: preloadRouteOnHover",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
       "file": "frontend\\contexts\\ThemeContext.tsx",
       "message": "组件名称应使用PascalCase: setTheme",
       "severity": "medium"
@@ -3699,6 +4280,13 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\pages\\analytics\\AnalyticsPage.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\analytics\\AnalyticsPage.tsx",
       "message": "组件名称应使用PascalCase: handleInsightClick",
       "severity": "medium"
     },
@@ -3713,7 +4301,49 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\pages\\core\\auth\\Login.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\auth\\Login.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\auth\\Login.tsx",
+      "message": "组件名称应使用PascalCase: validateForm",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\auth\\Login.tsx",
       "message": "组件名称应使用PascalCase: handleChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\auth\\Register.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\auth\\Register.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\auth\\Register.tsx",
+      "message": "组件名称应使用PascalCase: validateForm",
       "severity": "medium"
     },
     {
@@ -3741,6 +4371,20 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\pages\\core\\dashboard\\Dashboard.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\dashboard\\Dashboard.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\dashboard\\Dashboard.tsx",
       "message": "组件名称应使用PascalCase: getStatusIcon",
       "severity": "medium"
     },
@@ -3749,6 +4393,76 @@
       "type": "naming",
       "file": "frontend\\pages\\core\\dashboard\\Dashboard.tsx",
       "message": "组件名称应使用PascalCase: getStatusBadge",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\APITest.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\APITest.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\APITest.tsx",
+      "message": "组件名称应使用PascalCase: handleConfirmAction",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\APITest.tsx",
+      "message": "组件名称应使用PascalCase: setButtonLoading",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\APITest.tsx",
+      "message": "组件名称应使用PascalCase: setButtonDisabled",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\CompatibilityTest.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\CompatibilityTest.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\CompatibilityTest.tsx",
+      "message": "组件名称应使用PascalCase: handleConfirmAction",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\CompatibilityTest.tsx",
+      "message": "组件名称应使用PascalCase: setButtonLoading",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\CompatibilityTest.tsx",
+      "message": "组件名称应使用PascalCase: setButtonDisabled",
       "severity": "medium"
     },
     {
@@ -3825,6 +4539,41 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\pages\\core\\testing\\InfrastructureTest.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\InfrastructureTest.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\InfrastructureTest.tsx",
+      "message": "组件名称应使用PascalCase: handleConfirmAction",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\InfrastructureTest.tsx",
+      "message": "组件名称应使用PascalCase: setButtonLoading",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\InfrastructureTest.tsx",
+      "message": "组件名称应使用PascalCase: setButtonDisabled",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\InfrastructureTest.tsx",
       "message": "组件名称应使用PascalCase: handleTestSelect",
       "severity": "medium"
     },
@@ -3833,6 +4582,41 @@
       "type": "naming",
       "file": "frontend\\pages\\core\\testing\\InfrastructureTest.tsx",
       "message": "组件名称应使用PascalCase: handleTestRerun",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\PerformanceTest.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\PerformanceTest.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\PerformanceTest.tsx",
+      "message": "组件名称应使用PascalCase: handleConfirmAction",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\PerformanceTest.tsx",
+      "message": "组件名称应使用PascalCase: setButtonLoading",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\PerformanceTest.tsx",
+      "message": "组件名称应使用PascalCase: setButtonDisabled",
       "severity": "medium"
     },
     {
@@ -3874,6 +4658,41 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\pages\\core\\testing\\SecurityTest.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\SecurityTest.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\SecurityTest.tsx",
+      "message": "组件名称应使用PascalCase: handleConfirmAction",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\SecurityTest.tsx",
+      "message": "组件名称应使用PascalCase: setButtonLoading",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\SecurityTest.tsx",
+      "message": "组件名称应使用PascalCase: setButtonDisabled",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\SecurityTest.tsx",
       "message": "组件名称应使用PascalCase: handleConfigChange",
       "severity": "medium"
     },
@@ -3896,6 +4715,41 @@
       "type": "naming",
       "file": "frontend\\pages\\core\\testing\\SecurityTest.tsx",
       "message": "组件名称应使用PascalCase: renderResults",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\SEOTest.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\SEOTest.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\SEOTest.tsx",
+      "message": "组件名称应使用PascalCase: handleConfirmAction",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\SEOTest.tsx",
+      "message": "组件名称应使用PascalCase: setButtonLoading",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\SEOTest.tsx",
+      "message": "组件名称应使用PascalCase: setButtonDisabled",
       "severity": "medium"
     },
     {
@@ -3931,6 +4785,41 @@
       "type": "naming",
       "file": "frontend\\pages\\core\\testing\\SEOTest.tsx",
       "message": "组件名称应使用PascalCase: handleTestRerun",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\StressTest.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\StressTest.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\StressTest.tsx",
+      "message": "组件名称应使用PascalCase: handleConfirmAction",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\StressTest.tsx",
+      "message": "组件名称应使用PascalCase: setButtonLoading",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\StressTest.tsx",
+      "message": "组件名称应使用PascalCase: setButtonDisabled",
       "severity": "medium"
     },
     {
@@ -4069,6 +4958,76 @@
     {
       "category": "components",
       "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\TestingDashboard.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\TestingDashboard.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\TestingDashboard.tsx",
+      "message": "组件名称应使用PascalCase: handleConfirmAction",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\TestingDashboard.tsx",
+      "message": "组件名称应使用PascalCase: setButtonLoading",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\TestingDashboard.tsx",
+      "message": "组件名称应使用PascalCase: setButtonDisabled",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\TestPage.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\TestPage.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\TestPage.tsx",
+      "message": "组件名称应使用PascalCase: handleConfirmAction",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\TestPage.tsx",
+      "message": "组件名称应使用PascalCase: setButtonLoading",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\TestPage.tsx",
+      "message": "组件名称应使用PascalCase: setButtonDisabled",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
       "file": "frontend\\pages\\core\\testing\\TestPage.tsx",
       "message": "组件名称应使用PascalCase: handleRetryTest",
       "severity": "medium"
@@ -4085,6 +5044,41 @@
       "type": "naming",
       "file": "frontend\\pages\\core\\testing\\TestPage.tsx",
       "message": "组件名称应使用PascalCase: renderStepIndicator",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\UXTest.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\UXTest.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\UXTest.tsx",
+      "message": "组件名称应使用PascalCase: handleConfirmAction",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\UXTest.tsx",
+      "message": "组件名称应使用PascalCase: setButtonLoading",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\UXTest.tsx",
+      "message": "组件名称应使用PascalCase: setButtonDisabled",
       "severity": "medium"
     },
     {
@@ -4113,6 +5107,41 @@
       "type": "naming",
       "file": "frontend\\pages\\core\\testing\\UXTest.tsx",
       "message": "组件名称应使用PascalCase: getVitalStatus",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\WebsiteTest.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\WebsiteTest.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\WebsiteTest.tsx",
+      "message": "组件名称应使用PascalCase: handleConfirmAction",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\WebsiteTest.tsx",
+      "message": "组件名称应使用PascalCase: setButtonLoading",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\core\\testing\\WebsiteTest.tsx",
+      "message": "组件名称应使用PascalCase: setButtonDisabled",
       "severity": "medium"
     },
     {
@@ -4174,6 +5203,55 @@
     {
       "category": "components",
       "type": "naming",
+      "file": "frontend\\pages\\data\\reports\\Analytics.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\reports\\MonitoringDashboard.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\reports\\MonitoringDashboard.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\reports\\PerformanceAnalysis.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\reports\\PerformanceAnalysis.tsx",
+      "message": "组件名称应使用PascalCase: handleConfirmAction",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\reports\\PerformanceAnalysis.tsx",
+      "message": "组件名称应使用PascalCase: setButtonLoading",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\reports\\PerformanceAnalysis.tsx",
+      "message": "组件名称应使用PascalCase: setButtonDisabled",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
       "file": "frontend\\pages\\data\\reports\\PerformanceAnalysis.tsx",
       "message": "组件名称应使用PascalCase: handleConfigChange",
       "severity": "medium"
@@ -4190,6 +5268,20 @@
       "type": "naming",
       "file": "frontend\\pages\\data\\reports\\PerformanceAnalysis.tsx",
       "message": "组件名称应使用PascalCase: getGradeColor",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\reports\\Reports.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\reports\\Reports.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
       "severity": "medium"
     },
     {
@@ -4238,6 +5330,20 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\pages\\data\\reports\\Statistics.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\reports\\Statistics.tsx",
+      "message": "组件名称应使用PascalCase: validateForm",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\reports\\Statistics.tsx",
       "message": "组件名称应使用PascalCase: formatNumber",
       "severity": "medium"
     },
@@ -4260,6 +5366,20 @@
       "type": "naming",
       "file": "frontend\\pages\\data\\reports\\Statistics.tsx",
       "message": "组件名称应使用PascalCase: getStatusName",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\results\\SecurityReport.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\results\\SecurityReport.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
       "severity": "medium"
     },
     {
@@ -4295,6 +5415,41 @@
       "type": "naming",
       "file": "frontend\\pages\\data\\results\\StressTestDetail.tsx",
       "message": "组件名称应使用PascalCase: intelligentSampling",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\results\\StressTestDetail.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\results\\StressTestDetail.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\results\\StressTestDetail.tsx",
+      "message": "组件名称应使用PascalCase: handleConfirmAction",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\results\\StressTestDetail.tsx",
+      "message": "组件名称应使用PascalCase: setButtonLoading",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\results\\StressTestDetail.tsx",
+      "message": "组件名称应使用PascalCase: setButtonDisabled",
       "severity": "medium"
     },
     {
@@ -4448,6 +5603,41 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\pages\\data\\results\\StressTestReport.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\results\\StressTestReport.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\results\\StressTestReport.tsx",
+      "message": "组件名称应使用PascalCase: handleConfirmAction",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\results\\StressTestReport.tsx",
+      "message": "组件名称应使用PascalCase: setButtonLoading",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\results\\StressTestReport.tsx",
+      "message": "组件名称应使用PascalCase: setButtonDisabled",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\results\\StressTestReport.tsx",
       "message": "组件名称应使用PascalCase: getScoreColor",
       "severity": "medium"
     },
@@ -4491,6 +5681,76 @@
       "type": "naming",
       "file": "frontend\\pages\\data\\results\\StressTestReport.tsx",
       "message": "组件名称应使用PascalCase: handleShare",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\results\\TestHistory.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\results\\TestHistory.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\results\\TestHistory.tsx",
+      "message": "组件名称应使用PascalCase: handleConfirmAction",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\results\\TestHistory.tsx",
+      "message": "组件名称应使用PascalCase: setButtonLoading",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\results\\TestHistory.tsx",
+      "message": "组件名称应使用PascalCase: setButtonDisabled",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\results\\TestResultDetail.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\results\\TestResultDetail.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\results\\TestResultDetail.tsx",
+      "message": "组件名称应使用PascalCase: handleConfirmAction",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\results\\TestResultDetail.tsx",
+      "message": "组件名称应使用PascalCase: setButtonLoading",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\data\\results\\TestResultDetail.tsx",
+      "message": "组件名称应使用PascalCase: setButtonDisabled",
       "severity": "medium"
     },
     {
@@ -4552,6 +5812,55 @@
     {
       "category": "components",
       "type": "naming",
+      "file": "frontend\\pages\\management\\admin\\Admin.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\admin\\Admin.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\admin\\Admin.tsx",
+      "message": "组件名称应使用PascalCase: validateForm",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\admin\\DataManagement.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\admin\\DataManagement.tsx",
+      "message": "组件名称应使用PascalCase: handleConfirmAction",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\admin\\DataStorage.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\admin\\DataStorage.tsx",
+      "message": "组件名称应使用PascalCase: handleConfirmAction",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
       "file": "frontend\\pages\\management\\admin\\DataStorage.tsx",
       "message": "组件名称应使用PascalCase: applyFilters",
       "severity": "medium"
@@ -4608,6 +5917,41 @@
     {
       "category": "components",
       "type": "naming",
+      "file": "frontend\\pages\\management\\admin\\SystemMonitor.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\admin\\SystemMonitor.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\integration\\APIKeys.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\integration\\APIKeys.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\integration\\APIKeys.tsx",
+      "message": "组件名称应使用PascalCase: validateForm",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
       "file": "frontend\\pages\\management\\integration\\APIKeys.tsx",
       "message": "组件名称应使用PascalCase: toggleKeyVisibility",
       "severity": "medium"
@@ -4624,6 +5968,48 @@
       "type": "naming",
       "file": "frontend\\pages\\management\\integration\\APIKeys.tsx",
       "message": "组件名称应使用PascalCase: getPermissionColor",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\integration\\CICDIntegration.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\integration\\CICDIntegration.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\integration\\CICDIntegration.tsx",
+      "message": "组件名称应使用PascalCase: validateForm",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\integration\\Integrations.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\integration\\Integrations.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\integration\\Integrations.tsx",
+      "message": "组件名称应使用PascalCase: validateForm",
       "severity": "medium"
     },
     {
@@ -4652,6 +6038,27 @@
       "type": "naming",
       "file": "frontend\\pages\\management\\integration\\Integrations.tsx",
       "message": "组件名称应使用PascalCase: formatAPIKey",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\integration\\Notifications.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\integration\\Notifications.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\integration\\Notifications.tsx",
+      "message": "组件名称应使用PascalCase: validateForm",
       "severity": "medium"
     },
     {
@@ -4714,6 +6121,27 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\pages\\management\\integration\\Webhooks.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\integration\\Webhooks.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\integration\\Webhooks.tsx",
+      "message": "组件名称应使用PascalCase: validateForm",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\integration\\Webhooks.tsx",
       "message": "组件名称应使用PascalCase: getSuccessRate",
       "severity": "medium"
     },
@@ -4728,6 +6156,20 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\pages\\management\\scheduling\\ScheduledTasks.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\scheduling\\ScheduledTasks.tsx",
+      "message": "组件名称应使用PascalCase: handleConfirmAction",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\scheduling\\ScheduledTasks.tsx",
       "message": "组件名称应使用PascalCase: getTaskTypeIcon",
       "severity": "medium"
     },
@@ -4736,6 +6178,41 @@
       "type": "naming",
       "file": "frontend\\pages\\management\\scheduling\\ScheduledTasks.tsx",
       "message": "组件名称应使用PascalCase: getStatusIcon",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\scheduling\\TestOptimizations.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\scheduling\\TestOptimizations.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\scheduling\\TestOptimizations.tsx",
+      "message": "组件名称应使用PascalCase: handleConfirmAction",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\scheduling\\TestOptimizations.tsx",
+      "message": "组件名称应使用PascalCase: setButtonLoading",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\scheduling\\TestOptimizations.tsx",
+      "message": "组件名称应使用PascalCase: setButtonDisabled",
       "severity": "medium"
     },
     {
@@ -4757,6 +6234,41 @@
       "type": "naming",
       "file": "frontend\\pages\\management\\scheduling\\TestOptimizations.tsx",
       "message": "组件名称应使用PascalCase: renderTestResults",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\scheduling\\TestSchedule.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\scheduling\\TestSchedule.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\scheduling\\TestSchedule.tsx",
+      "message": "组件名称应使用PascalCase: handleConfirmAction",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\scheduling\\TestSchedule.tsx",
+      "message": "组件名称应使用PascalCase: setButtonLoading",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\scheduling\\TestSchedule.tsx",
+      "message": "组件名称应使用PascalCase: setButtonDisabled",
       "severity": "medium"
     },
     {
@@ -4805,6 +6317,27 @@
       "category": "components",
       "type": "naming",
       "file": "frontend\\pages\\management\\settings\\Settings.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\settings\\Settings.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\settings\\Settings.tsx",
+      "message": "组件名称应使用PascalCase: validateForm",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\management\\settings\\Settings.tsx",
       "message": "组件名称应使用PascalCase: renderTabContent",
       "severity": "medium"
     },
@@ -4832,6 +6365,62 @@
     {
       "category": "components",
       "type": "naming",
+      "file": "frontend\\pages\\TestToolsHub.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\TestToolsHub.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\TestToolsHub.tsx",
+      "message": "组件名称应使用PascalCase: handleConfirmAction",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\TestToolsHub.tsx",
+      "message": "组件名称应使用PascalCase: setButtonLoading",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\TestToolsHub.tsx",
+      "message": "组件名称应使用PascalCase: setButtonDisabled",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\user\\docs\\APIDocs.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\user\\docs\\APIDocs.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\user\\docs\\APIDocs.tsx",
+      "message": "组件名称应使用PascalCase: validateForm",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
       "file": "frontend\\pages\\user\\docs\\APIDocs.tsx",
       "message": "组件名称应使用PascalCase: copyToClipboard",
       "severity": "medium"
@@ -4841,6 +6430,27 @@
       "type": "naming",
       "file": "frontend\\pages\\user\\docs\\APIDocs.tsx",
       "message": "组件名称应使用PascalCase: getMethodColor",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\user\\docs\\Help.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\user\\docs\\Help.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\user\\docs\\Help.tsx",
+      "message": "组件名称应使用PascalCase: validateForm",
       "severity": "medium"
     },
     {
@@ -4860,6 +6470,41 @@
     {
       "category": "components",
       "type": "naming",
+      "file": "frontend\\pages\\user\\misc\\DownloadDesktop.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\user\\misc\\DownloadDesktop.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\user\\misc\\Subscription.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\user\\misc\\Subscription.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\user\\misc\\Subscription.tsx",
+      "message": "组件名称应使用PascalCase: validateForm",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
       "file": "frontend\\pages\\user\\misc\\Subscription.tsx",
       "message": "组件名称应使用PascalCase: handleUpgrade",
       "severity": "medium"
@@ -4869,6 +6514,48 @@
       "type": "naming",
       "file": "frontend\\pages\\user\\misc\\Subscription.tsx",
       "message": "组件名称应使用PascalCase: formatLimit",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\user\\profile\\UserBookmarks.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\user\\profile\\UserBookmarks.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\user\\profile\\UserBookmarks.tsx",
+      "message": "组件名称应使用PascalCase: validateForm",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\user\\profile\\UserProfile.tsx",
+      "message": "组件名称应使用PascalCase: handleVisibilityChange",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\user\\profile\\UserProfile.tsx",
+      "message": "组件名称应使用PascalCase: showFeedback",
+      "severity": "medium"
+    },
+    {
+      "category": "components",
+      "type": "naming",
+      "file": "frontend\\pages\\user\\profile\\UserProfile.tsx",
+      "message": "组件名称应使用PascalCase: validateForm",
       "severity": "medium"
     },
     {
@@ -5009,6 +6696,20 @@
       "type": "naming",
       "file": "frontend\\components\\layout\\TopNavbar.tsx",
       "message": "变量名称应使用camelCase或CONSTANT_CASE: IconComponent",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\components\\optimized\\OptimizedDataTable.tsx",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: OptimizedDataTableComponent",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\components\\optimized\\OptimizedDataTable.tsx",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: OptimizedDataTable",
       "severity": "low"
     },
     {
@@ -5574,6 +7275,13 @@
     {
       "category": "variables",
       "type": "naming",
+      "file": "frontend\\components\\ui\\LazyComponentWrapper.tsx",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: LazyComponent",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
       "file": "frontend\\components\\ui\\LoadingStates.tsx",
       "message": "变量名称应使用camelCase或CONSTANT_CASE: TestLoadingStates",
       "severity": "low"
@@ -5637,6 +7345,265 @@
     {
       "category": "variables",
       "type": "naming",
+      "file": "frontend\\components\\ui\\VirtualTable.tsx",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: VirtualTable",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\lazyRoutes.ts",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: LazyHome",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\lazyRoutes.ts",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: LazyDashboard",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\lazyRoutes.ts",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: LazyLogin",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\lazyRoutes.ts",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: LazyRegister",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\lazyRoutes.ts",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: LazyProfile",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\lazyRoutes.ts",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: LazySettings",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\lazyRoutes.ts",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: LazyPerformanceTest",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\lazyRoutes.ts",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: LazyStressTest",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\lazyRoutes.ts",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: LazyApiTest",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\lazyRoutes.ts",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: LazySeoTest",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\lazyRoutes.ts",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: LazySecurityTest",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\lazyRoutes.ts",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: LazyTestManagement",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\lazyRoutes.ts",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: LazyDataManagement",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\lazyRoutes.ts",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: LazyUserManagement",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\lazyRoutes.ts",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: LazyTestResults",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\lazyRoutes.ts",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: LazyAnalytics",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\lazyRoutes.ts",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: LazyReports",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\routes.tsx",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: Home",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\routes.tsx",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: Login",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\routes.tsx",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: Register",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\routes.tsx",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: Dashboard",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\routes.tsx",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: Profile",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\routes.tsx",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: Settings",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\routes.tsx",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: PerformanceTest",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\routes.tsx",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: StressTest",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\routes.tsx",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: ApiTest",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\routes.tsx",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: SeoTest",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\routes.tsx",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: SecurityTest",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\routes.tsx",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: TestManagement",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\routes.tsx",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: DataManagement",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\routes.tsx",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: UserManagement",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\routes.tsx",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: TestResults",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\routes.tsx",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: Analytics",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\routes.tsx",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: Reports",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\routes.tsx",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: NotFound",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\config\\routes.tsx",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: Unauthorized",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
       "file": "frontend\\contexts\\AppContext.tsx",
       "message": "变量名称应使用camelCase或CONSTANT_CASE: AppContext",
       "severity": "low"
@@ -5653,6 +7620,20 @@
       "type": "naming",
       "file": "frontend\\contexts\\ThemeContext.tsx",
       "message": "变量名称应使用camelCase或CONSTANT_CASE: ThemeContext",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\design\\components\\Button.tsx",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: StyledButton",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\design\\components\\Button.tsx",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: Button",
       "severity": "low"
     },
     {
@@ -5758,6 +7739,13 @@
       "type": "naming",
       "file": "frontend\\utils\\codeSplitting.ts",
       "message": "变量名称应使用camelCase或CONSTANT_CASE: LazyComponent",
+      "severity": "low"
+    },
+    {
+      "category": "variables",
+      "type": "naming",
+      "file": "frontend\\utils\\componentOptimization.ts",
+      "message": "变量名称应使用camelCase或CONSTANT_CASE: OptimizedComponent",
       "severity": "low"
     },
     {

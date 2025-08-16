@@ -4,10 +4,8 @@
  */
 
 // 存储类型
-export type StorageType = 'localStorage' | 'sessionStorage' | 'memory';
-
-// 缓存项接口
-export interface CacheItem<T = any> {
+export type StorageType   = 'localStorage' | 'sessionStorage' | 'memory';// 缓存项接口'
+export interface CacheItem<T = any>     {
     value: T;
     timestamp: number;
     expiry?: number;
@@ -21,7 +19,7 @@ export class StorageManager {
     private storageType: StorageType;
     private prefix: string;
 
-    constructor(storageType: StorageType = 'localStorage', prefix: string = 'app_') {
+    constructor(storageType: StorageType = 'localStorage', prefix: string = 'app_') {'
         this.storageType = storageType;
         this.prefix = prefix;
     }
@@ -30,36 +28,35 @@ export class StorageManager {
     private getStorage(): Storage | null {
         try {
             switch (this.storageType) {
-                case 'localStorage':
+                case 'localStorage': ''
                     return window.localStorage;
-                case 'sessionStorage':
+                case 'sessionStorage': ''
                     return window.sessionStorage;
-                case 'memory':
+                case 'memory': ''
                     return null; // 使用内存缓存
                 default:
                     return window.localStorage;
             }
         } catch (error) {
-            console.warn('Storage not available, falling back to memory cache');
+            console.warn('Storage not available, falling back to memory cache');'
             return null;
         }
     }
 
     // 生成完整的key
     private getKey(key: string): string {
-        return `${this.prefix}${key}`;
+        return `${this.prefix}${key}`;`
     }
 
     // 设置数据
     set<T>(key: string, value: T, expiry?: number): boolean {
         try {
             const fullKey = this.getKey(key);
-            const item: CacheItem<T> = {
+            const item: CacheItem<T>  = {
                 value,
                 timestamp: Date.now(),
                 expiry: expiry ? Date.now() + expiry : undefined
             };
-
             const storage = this.getStorage();
             if (storage) {
                 storage.setItem(fullKey, JSON.stringify(item));
@@ -70,7 +67,7 @@ export class StorageManager {
 
             return true;
         } catch (error) {
-            console.error('Storage set error:', error);
+            console.error("Storage set error: ', error);'`
             return false;
         }
     }
@@ -97,8 +94,7 @@ export class StorageManager {
         return defaultValue;
       }
 
-            const item: CacheItem<T> = JSON.parse(itemStr);
-
+            const item: CacheItem<T>  = JSON.parse(itemStr);
             // 检查是否过期
             if (item.expiry && Date.now() > item.expiry) {
                 this.remove(key);
@@ -107,7 +103,7 @@ export class StorageManager {
 
             return item.value;
         } catch (error) {
-            console.error('Storage get error:', error);
+            console.error('Storage get error: ', error);'
             return defaultValue;
         }
     }
@@ -126,7 +122,7 @@ export class StorageManager {
 
             return true;
         } catch (error) {
-            console.error('Storage remove error:', error);
+            console.error('Storage remove error: ', error);'
             return false;
         }
     }
@@ -155,7 +151,7 @@ export class StorageManager {
 
             return true;
         } catch (error) {
-            console.error('Storage clear error:', error);
+            console.error('Storage clear error: ', error);'
             return false;
         }
     }
@@ -177,7 +173,7 @@ export class StorageManager {
                     .map(key => key.substring(this.prefix.length));
             }
         } catch (error) {
-            console.error('Storage keys error:', error);
+            console.error('Storage keys error: ', error);'
             return [];
         }
     }
@@ -214,17 +210,16 @@ export class StorageManager {
                 return size;
             }
         } catch (error) {
-            console.error('Storage size error:', error);
+            console.error('Storage size error: ', error);'
             return 0;
         }
     }
 }
 
 // 默认存储实例
-export const localStorage = new StorageManager('localStorage', 'app_');
-export const sessionStorage = new StorageManager('sessionStorage', 'app_');
-export const memoryStorage = new StorageManager('memory', 'app_');
-
+export const localStorage = new StorageManager('localStorage', 'app_');'
+export const sessionStorage = new StorageManager('sessionStorage', 'app_');'
+export const memoryStorage = new StorageManager('memory', 'app_');'
 // 缓存管理器
 export class CacheManager {
     private storage: StorageManager;
@@ -246,8 +241,7 @@ export class CacheManager {
     }
 
     // 获取或设置缓存
-    async getOrSet<T>(
-        key: string,
+    async getOrSet<T>(key: string,
         factory: () => Promise<T> | T,
         expiry?: number
     ): Promise<T> {
@@ -280,14 +274,14 @@ export class CacheManager {
             });
             return true;
         } catch (error) {
-            console.error('Cache setMultiple error:', error);
+            console.error('Cache setMultiple error: ', error);'
             return false;
         }
     }
 
     // 批量获取
     getMultiple<T>(keys: string[]): Record<string, T | undefined> {
-        const result: Record<string, T | undefined> = {};
+        const result: Record<string, T | undefined>  = {};
         keys.forEach(key => {
             result[key] = this.get<T>(key);
         });
@@ -320,7 +314,7 @@ export class StatePersistence {
     private storage: StorageManager;
     private stateKey: string;
 
-    constructor(storage: StorageManager = localStorage, stateKey: string = 'appState') {
+    constructor(storage: StorageManager = localStorage, stateKey: string = 'appState') {'
         this.storage = storage;
         this.stateKey = stateKey;
     }
@@ -357,11 +351,11 @@ export const statePersistence = new StatePersistence();
 // 工具函数
 export const storageUtils = {
     // 检查存储是否可用
-    isStorageAvailable(type: 'localStorage' | 'sessionStorage'): boolean {
+    isStorageAvailable(type: 'localStorage' | 'sessionStorage'): boolean {'
         try {
             const storage = window[type];
             const testKey = '__storage_test__';
-            storage.setItem(testKey, 'test');
+            storage.setItem(testKey, 'test');'
             storage.removeItem(testKey);
             return true;
         } catch (error) {
@@ -370,7 +364,7 @@ export const storageUtils = {
     },
 
     // 获取存储使用情况
-    getStorageUsage(type: 'localStorage' | 'sessionStorage'): { used: number; total: number } {
+    getStorageUsage(type: 'localStorage' | 'sessionStorage'): { used: number; total: number } {'
         try {
             const storage = window[type];
             let used = 0;

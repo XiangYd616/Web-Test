@@ -5,13 +5,8 @@
  */
 
 // 导入基础类型
-import type { UserRole, UserStatus } from './enums';
-
-// 定义用户相关类型
-export type UUID = string;
-export type Timestamp = string;
-
-export interface User {
+import type { UserRole, UserStatus  } from './enums';// 定义用户相关类型'
+export type UUID   = string;export type Timestamp   = string;export interface User     {
   id: UUID;
   username: string;
   email: string;
@@ -34,7 +29,7 @@ export interface User {
   plan?: string; // 用户计划
 }
 
-export interface UserPreferences {
+export interface UserPreferences     {
   theme: 'light' | 'dark' | 'auto';
   language: string;
   timezone: string;
@@ -46,7 +41,7 @@ export interface UserPreferences {
   };
 }
 
-export interface UserProfile {
+export interface UserProfile     {
   id?: UUID;
   userId?: UUID;
   firstName?: string;
@@ -58,7 +53,7 @@ export interface UserProfile {
   preferences?: UserPreferences;
 }
 
-export interface UserSession {
+export interface UserSession     {
   id: UUID;
   userId: UUID;
   token: string;
@@ -66,7 +61,7 @@ export interface UserSession {
   createdAt: Timestamp;
 }
 
-export interface AuthResponse {
+export interface AuthResponse     {
   success: boolean;
   user?: User;
   token?: string;
@@ -79,7 +74,7 @@ export interface AuthResponse {
   requireMFA?: boolean; // 是否需要多因子认证
 }
 
-export interface LoginCredentials {
+export interface LoginCredentials     {
   username: string;
   email: string; // 支持邮箱登录
   password: string;
@@ -88,7 +83,7 @@ export interface LoginCredentials {
   deviceId?: string; // 设备标识
 }
 
-export interface RegisterData {
+export interface RegisterData     {
   username: string;
   email: string;
   password: string;
@@ -101,7 +96,7 @@ export interface RegisterData {
   captcha?: string; // 验证码
 }
 
-export interface CreateUserData {
+export interface CreateUserData     {
   username: string;
   email: string;
   password: string;
@@ -110,7 +105,7 @@ export interface CreateUserData {
   lastName?: string;
 }
 
-export interface UpdateUserData {
+export interface UpdateUserData     {
   username?: string;
   email?: string;
   role?: UserRole;
@@ -118,13 +113,13 @@ export interface UpdateUserData {
   profile?: Partial<UserProfile>;
 }
 
-export interface ChangePasswordData {
+export interface ChangePasswordData     {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
 }
 
-export interface UserActivityLog {
+export interface UserActivityLog     {
   id: UUID;
   userId: UUID;
   action: string;
@@ -134,7 +129,7 @@ export interface UserActivityLog {
   details?: Record<string, any>;
 }
 
-export interface UserStats {
+export interface UserStats     {
   totalUsers: number;
   activeUsers: number;
   newUsersToday: number;
@@ -143,9 +138,9 @@ export interface UserStats {
 }
 
 export const DEFAULT_USER_PREFERENCES: UserPreferences = {
-  theme: 'auto',
-  language: 'zh-CN',
-  timezone: 'Asia/Shanghai',
+  theme: 'auto','
+  language: 'zh-CN','
+  timezone: 'Asia/Shanghai','
   notifications: {
     email: true,
     push: true,
@@ -158,7 +153,7 @@ export const DEFAULT_USER_PREFERENCES: UserPreferences = {
 export type { User as UserInterface };
 
 // 扩展类型定义（不在通用类型中的特定用户管理类型）
-export interface CreateUserData {
+export interface CreateUserData     {
   username: string;
   email: string;
   password: string;
@@ -169,7 +164,7 @@ export interface CreateUserData {
   metadata?: Record<string, any>;
 }
 
-export interface UpdateUserData {
+export interface UpdateUserData     {
   username?: string;
   email?: string;
   fullName?: string;
@@ -180,7 +175,7 @@ export interface UpdateUserData {
   metadata?: Record<string, any>;
 }
 
-export interface ChangePasswordData {
+export interface ChangePasswordData     {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
@@ -188,7 +183,7 @@ export interface ChangePasswordData {
 
 // 重复定义已移除，使用上面的 UserActivityLog 和 UserStats 定义
 
-export interface Permission {
+export interface Permission     {
   id: string;
   name: string;
   description: string;
@@ -196,7 +191,7 @@ export interface Permission {
   isSystem: boolean;
 }
 
-export interface Role {
+export interface Role     {
   id: string;
   name: string;
   description: string;

@@ -3,9 +3,7 @@
  * 提供批量测试、批量导出、批量管理等功能
  */
 
-import { createApiUrl } from '../../config/api';
-
-export interface BatchTestConfig {
+import { createApiUrl    } from '../../config/api';export interface BatchTestConfig     {'
   urls: string[];
   testTypes: string[];
   options: {
@@ -17,7 +15,7 @@ export interface BatchTestConfig {
   };
 }
 
-export interface BatchExportConfig {
+export interface BatchExportConfig     {
   dataType: 'test-results' | 'test-history' | 'analytics' | 'reports';
   filters: {
     startDate?: string;
@@ -34,7 +32,7 @@ export interface BatchExportConfig {
   };
 }
 
-export interface BatchOperation {
+export interface BatchOperation     {
   id: string;
   type: 'test' | 'export' | 'delete' | 'update';
   status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
@@ -49,7 +47,7 @@ export interface BatchOperation {
   error?: string;
 }
 
-export interface BatchTestResult {
+export interface BatchTestResult     {
   operationId: string;
   results: Array<{
     url: string;
@@ -105,7 +103,7 @@ class BatchOperationService {
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics:', {
+    console.debug('API Metrics: ', {'
       url: info.url,
       method: info.method,
       status: info.status,
@@ -130,26 +128,26 @@ class BatchOperationService {
    */
   async startBatchTest(config: BatchTestConfig): Promise<string> {
     try {
-      const response = await fetch(createApiUrl('/api/batch/test'), {
-        method: 'POST',
+      const response = await fetch(createApiUrl('/api/batch/test'), {'
+        method: 'POST','
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Content-Type': 'application/json','
+          'Authorization': `Bearer ${localStorage.getItem('token')}`'`
         },
         body: JSON.stringify(config)
       });
 
       if (!response.ok) {
-        throw new Error(`批量测试启动失败: ${response.status}`);
+        throw new Error(`批量测试启动失败: ${response.status}`);`
       }
 
       const result = await response.json();
 
       if (result.success) {
-        const operation: BatchOperation = {
+        const operation: BatchOperation  = {
           id: result.data.operationId,
-          type: 'test',
-          status: 'pending',
+          type: "test','`
+          status: 'pending','
           progress: 0,
           totalItems: config.urls.length * config.testTypes.length,
           completedItems: 0,
@@ -157,16 +155,15 @@ class BatchOperationService {
           startTime: new Date().toISOString(),
           config
         };
-
         this.operations.set(operation.id, operation);
         this.startPolling(operation.id);
 
         return operation.id;
       } else {
-        throw new Error(result.message || '批量测试启动失败');
+        throw new Error(result.message || '批量测试启动失败');'
       }
     } catch (error) {
-      console.error('批量测试启动失败:', error);
+      console.error('批量测试启动失败:', error);'
       throw error;
     }
   }
@@ -176,26 +173,26 @@ class BatchOperationService {
    */
   async startBatchExport(config: BatchExportConfig): Promise<string> {
     try {
-      const response = await fetch(createApiUrl('/api/batch/export'), {
-        method: 'POST',
+      const response = await fetch(createApiUrl('/api/batch/export'), {'
+        method: 'POST','
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Content-Type': 'application/json','
+          'Authorization": `Bearer ${localStorage.getItem('token')}`'`
         },
         body: JSON.stringify(config)
       });
 
       if (!response.ok) {
-        throw new Error(`批量导出启动失败: ${response.status}`);
+        throw new Error(`批量导出启动失败: ${response.status}`);`
       }
 
       const result = await response.json();
 
       if (result.success) {
-        const operation: BatchOperation = {
+        const operation: BatchOperation  = {
           id: result.data.operationId,
-          type: 'export',
-          status: 'pending',
+          type: "export','`
+          status: 'pending','
           progress: 0,
           totalItems: result.data.totalItems || 1,
           completedItems: 0,
@@ -203,16 +200,15 @@ class BatchOperationService {
           startTime: new Date().toISOString(),
           config
         };
-
         this.operations.set(operation.id, operation);
         this.startPolling(operation.id);
 
         return operation.id;
       } else {
-        throw new Error(result.message || '批量导出启动失败');
+        throw new Error(result.message || '批量导出启动失败');'
       }
     } catch (error) {
-      console.error('批量导出启动失败:', error);
+      console.error('批量导出启动失败:', error);'
       throw error;
     }
   }
@@ -226,11 +222,11 @@ class BatchOperationService {
     options: { confirmDelete?: boolean } = {}
   ): Promise<string> {
     try {
-      const response = await fetch(createApiUrl('/api/batch/delete'), {
-        method: 'POST',
+      const response = await fetch(createApiUrl('/api/batch/delete'), {'
+        method: 'POST','
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Content-Type': 'application/json','
+          "Authorization": `Bearer ${localStorage.getItem('token')}`'`
         },
         body: JSON.stringify({
           dataType,
@@ -240,16 +236,16 @@ class BatchOperationService {
       });
 
       if (!response.ok) {
-        throw new Error(`批量删除启动失败: ${response.status}`);
+        throw new Error(`批量删除启动失败: ${response.status}`);`
       }
 
       const result = await response.json();
 
       if (result.success) {
-        const operation: BatchOperation = {
+        const operation: BatchOperation  = {
           id: result.data.operationId,
-          type: 'delete',
-          status: 'pending',
+          type: "delete','`
+          status: 'pending','
           progress: 0,
           totalItems: ids.length,
           completedItems: 0,
@@ -257,16 +253,15 @@ class BatchOperationService {
           startTime: new Date().toISOString(),
           config: { dataType, ids, options }
         };
-
         this.operations.set(operation.id, operation);
         this.startPolling(operation.id);
 
         return operation.id;
       } else {
-        throw new Error(result.message || '批量删除启动失败');
+        throw new Error(result.message || '批量删除启动失败');'
       }
     } catch (error) {
-      console.error('批量删除启动失败:', error);
+      console.error("批量删除启动失败:', error);'
       throw error;
     }
   }
@@ -276,14 +271,14 @@ class BatchOperationService {
    */
   async getOperationStatus(operationId: string): Promise<BatchOperation | null> {
     try {
-      const response = await fetch(createApiUrl(`/api/batch/status/${operationId}`), {
+      const response = await fetch(createApiUrl(`/api/batch/status/${operationId}`), {`
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization": `Bearer ${localStorage.getItem('token')}`'`
         }
       });
 
       if (!response.ok) {
-        throw new Error(`获取操作状态失败: ${response.status}`);
+        throw new Error(`获取操作状态失败: ${response.status}`);`
       }
 
       const result = await response.json();
@@ -295,10 +290,10 @@ class BatchOperationService {
         this.notifyListeners(operationId, operation);
         return operation;
       } else {
-        throw new Error(result.message || '获取操作状态失败');
+        throw new Error(result.message || "获取操作状态失败');'`
       }
     } catch (error) {
-      console.error('获取操作状态失败:', error);
+      console.error("获取操作状态失败:', error);'
       return null;
     }
   }
@@ -308,15 +303,15 @@ class BatchOperationService {
    */
   async cancelOperation(operationId: string): Promise<boolean> {
     try {
-      const response = await fetch(createApiUrl(`/api/batch/cancel/${operationId}`), {
-        method: 'POST',
+      const response = await fetch(createApiUrl(`/api/batch/cancel/${operationId}`), {`
+        method: "POST','`
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization": `Bearer ${localStorage.getItem('token')}`'`
         }
       });
 
       if (!response.ok) {
-        throw new Error(`取消操作失败: ${response.status}`);
+        throw new Error(`取消操作失败: ${response.status}`);`
       }
 
       const result = await response.json();
@@ -324,16 +319,16 @@ class BatchOperationService {
       if (result.success) {
         const operation = this.operations.get(operationId);
         if (operation) {
-          operation.status = 'cancelled';
+          operation.status = "cancelled';'`
           operation.endTime = new Date().toISOString();
           this.notifyListeners(operationId, operation);
         }
         return true;
       } else {
-        throw new Error(result.message || '取消操作失败');
+        throw new Error(result.message || '取消操作失败');'
       }
     } catch (error) {
-      console.error('取消操作失败:', error);
+      console.error("取消操作失败:', error);'
       return false;
     }
   }
@@ -343,14 +338,14 @@ class BatchOperationService {
    */
   async getOperationResults(operationId: string): Promise<any> {
     try {
-      const response = await fetch(createApiUrl(`/api/batch/results/${operationId}`), {
+      const response = await fetch(createApiUrl(`/api/batch/results/${operationId}`), {`
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization": `Bearer ${localStorage.getItem('token')}`'`
         }
       });
 
       if (!response.ok) {
-        throw new Error(`获取操作结果失败: ${response.status}`);
+        throw new Error(`获取操作结果失败: ${response.status}`);`
       }
 
       const result = await response.json();
@@ -359,10 +354,10 @@ class BatchOperationService {
         
         return result.data;
       } else {
-        throw new Error(result.message || '获取操作结果失败');
+        throw new Error(result.message || "获取操作结果失败');'`
       }
     } catch (error) {
-      console.error('获取操作结果失败:', error);
+      console.error("获取操作结果失败:', error);'
       throw error;
     }
   }
@@ -372,37 +367,37 @@ class BatchOperationService {
    */
   async downloadExportFile(operationId: string): Promise<void> {
     try {
-      const response = await fetch(createApiUrl(`/api/batch/download/${operationId}`), {
+      const response = await fetch(createApiUrl(`/api/batch/download/${operationId}`), {`
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization": `Bearer ${localStorage.getItem('token')}`'`
         }
       });
 
       if (!response.ok) {
-        throw new Error(`下载文件失败: ${response.status}`);
+        throw new Error(`下载文件失败: ${response.status}`);`
       }
 
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
 
       // 从响应头获取文件名
-      const contentDisposition = response.headers.get('Content-Disposition');
-      let filename = `export-${operationId}.zip`;
+      const contentDisposition = response.headers.get("Content-Disposition');'`
+      let filename = `export-${operationId}.zip`;`
       if (contentDisposition) {
-        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+        const filenameMatch = contentDisposition.match(/filename= "(.+)'/);'`
         if (filenameMatch) {
           filename = filenameMatch[1];
         }
       }
 
-      const a = document.createElement('a');
+      const a = document.createElement('a');'
       a.href = url;
       a.download = filename;
       a.click();
 
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('下载文件失败:', error);
+      console.error('下载文件失败:', error);'
       throw error;
     }
   }
@@ -411,8 +406,7 @@ class BatchOperationService {
    * 获取所有操作
    */
   getAllOperations(): BatchOperation[] {
-    return Array.from(this.operations.values()).sort((a, b) =>
-      new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
+    return Array.from(this.operations.values()).sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
     );
   }
 
@@ -445,7 +439,7 @@ class BatchOperationService {
     const poll = async () => {
       const operation = await this.getOperationStatus(operationId);
 
-      if (operation && ['completed', 'failed', 'cancelled'].includes(operation.status)) {
+      if (operation && ['completed', 'failed', 'cancelled'].includes(operation.status)) {'
         return; // 停止轮询
       }
 

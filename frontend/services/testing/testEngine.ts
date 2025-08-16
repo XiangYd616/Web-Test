@@ -1,8 +1,5 @@
 
-import backgroundTestManager from './backgroundTestManager';
-import { testAPI } from './testApiService';
-
-// 浏览器兼容的事件发射器
+import backgroundTestManager from './backgroundTestManager';import { testAPI    } from './testApiService';// 浏览器兼容的事件发射器'
 class BrowserEventEmitter {
   private async retryRequest(fn: () => Promise<any>, maxRetries: number = 3): Promise<any> {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -13,7 +10,7 @@ class BrowserEventEmitter {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
@@ -53,9 +50,9 @@ class BrowserEventEmitter {
   }
 }
 
-export interface TestConfig {
+export interface TestConfig     {
   url: string;
-  testType: 'website' | 'security' | 'performance' | 'compatibility' | 'seo' | 'accessibility' | 'api' | 'stress' | 'ux';
+  testType: "website' | 'security' | 'performance' | 'compatibility' | 'seo' | 'accessibility' | 'api' | 'stress' | 'ux';'`
   options: Record<string, any>;
   engine?: 'lighthouse' | 'playwright' | 'puppeteer' | 'k6' | 'auto';
   device?: 'desktop' | 'mobile' | 'both';
@@ -70,7 +67,7 @@ export interface TestConfig {
   timeout?: number;
 }
 
-export interface TestResult {
+export interface TestResult     {
   id: string;
   testType: string;
   url: string;
@@ -110,7 +107,7 @@ export interface TestResult {
   checks?: Record<string, SEOCheckResult>;
 }
 
-export interface SEORecommendation {
+export interface SEORecommendation     {
   category: string;
   priority: 'high' | 'medium' | 'low';
   title: string;
@@ -118,7 +115,7 @@ export interface SEORecommendation {
   actionItems?: string[];
 }
 
-export interface SEOIssue {
+export interface SEOIssue     {
   type: string;
   category: string;
   message: string;
@@ -126,7 +123,7 @@ export interface SEOIssue {
   severity: 'critical' | 'high' | 'medium' | 'low';
 }
 
-export interface SEOKeywordAnalysis {
+export interface SEOKeywordAnalysis     {
   density: Record<string, {
     count: number;
     density: number;
@@ -153,7 +150,7 @@ export interface SEOKeywordAnalysis {
   }>;
 }
 
-export interface SEOCheckResult {
+export interface SEOCheckResult     {
   category: string;
   score: number;
   checks: Array<{
@@ -166,7 +163,7 @@ export interface SEOCheckResult {
   types?: string[];
 }
 
-export interface TestFinding {
+export interface TestFinding     {
   type: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
   title: string;
@@ -177,7 +174,7 @@ export interface TestFinding {
   solution?: string;
 }
 
-export interface TestProgress {
+export interface TestProgress     {
   testId: string;
   progress: number;
   currentStep: string;
@@ -205,10 +202,10 @@ class TestEngine extends BrowserEventEmitter {
   async initializeEngines() {
     try {
       // 检查各种测试引擎的可用性
-      const response = await fetch('/api/test/status', {
-        method: 'GET',
+      const response = await fetch('/api/test/status', {'
+        method: 'GET','
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json','
           ...(this.getAuthHeaders())
         }
       });
@@ -223,7 +220,7 @@ class TestEngine extends BrowserEventEmitter {
             k6: result.data.k6?.available || false
           };
 
-          console.log('🔧 Test engines initialized:', this.engines);
+          console.log('🔧 Test engines initialized: ', this.engines);'
           return;
         }
       }
@@ -232,22 +229,21 @@ class TestEngine extends BrowserEventEmitter {
       await this.checkIndividualEngines();
 
     } catch (error) {
-      console.error('Failed to initialize test engines:', error);
+      console.error('Failed to initialize test engines: ', error);'
       // 回退到逐个检查
       await this.checkIndividualEngines();
     }
   }
 
   private async checkIndividualEngines() {
-    const engines = ['k6', 'lighthouse', 'playwright', 'puppeteer'];
-    const results: Record<string, boolean> = {};
-
+    const engines = ['k6', 'lighthouse', 'playwright', "puppeteer'];'
+    const results: Record<string, boolean>  = {};
     for (const engine of engines) {
       try {
-        const response = await fetch(`/api/test/${engine}/status`, {
-          method: 'GET',
+        const response = await fetch(`/api/test/${engine}/status`, {`
+          method: "GET','`
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json','
             ...(this.getAuthHeaders())
           }
         });
@@ -259,7 +255,7 @@ class TestEngine extends BrowserEventEmitter {
           results[engine] = false;
         }
       } catch (error) {
-        console.warn(`Failed to check ${engine} engine:`, error);
+        console.warn(`Failed to check ${engine} engine:`, error);`
         results[engine] = false;
       }
     }
@@ -271,12 +267,12 @@ class TestEngine extends BrowserEventEmitter {
       k6: results.k6 || false
     };
 
-    console.log('🔧 Individual engine check results:', this.engines);
+    console.log("🔧 Individual engine check results: ', this.engines);'`
   }
 
   private getAuthHeaders(): Record<string, string> {
-    const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
-    return token ? { 'Authorization': `Bearer ${token}` } : {};
+    const token = localStorage.getItem('auth_token') || localStorage.getItem('token');'
+    return token ? { "Authorization': `Bearer ${token}` } : {};'`
   }
 
   /**
@@ -287,19 +283,19 @@ class TestEngine extends BrowserEventEmitter {
     url: string;
     [key: string]: any;
   }): Promise<{ testId: string; promise: Promise<any> }> {
-    const testId = `test_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const testId = `test_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;`
     const selectedEngine = this.selectBestEngine(config.testType);
 
-    console.log(`🚀 Starting simple test ${testId} with engine: ${selectedEngine}`);
+    console.log(`🚀 Starting simple test ${testId} with engine: ${selectedEngine}`);`
 
     const testPromise = new Promise(async (resolve, reject) => {
       try {
         // 通知测试开始
-        this.emit('testProgress', {
+        this.emit("testProgress', {'`
           testId,
-          status: 'running',
+          status: 'running','
           progress: 0,
-          message: '正在启动测试...'
+          message: '正在启动测试...';
         });
 
         const result = await this.executeRealTest(config, selectedEngine, testId);
@@ -309,7 +305,7 @@ class TestEngine extends BrowserEventEmitter {
 
         resolve(result);
       } catch (error) {
-        console.error(`❌ Test ${testId} failed:`, error);
+        console.error(`❌ Test ${testId} failed:`, error);`
         reject(error);
       } finally {
         this.activeTests.delete(testId);
@@ -333,17 +329,17 @@ class TestEngine extends BrowserEventEmitter {
 
     try {
       // 通知测试进行中
-      this.emit('testProgress', {
+      this.emit("testProgress', {'`
         testId,
-        status: 'running',
+        status: 'running','
         progress: 25,
-        message: '正在执行测试...'
+        message: '正在执行测试...';
       });
 
       const response = await fetch(apiEndpoint, {
-        method: 'POST',
+        method: 'POST','
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': "application/json','
           ...(this.getAuthHeaders())
         },
         body: JSON.stringify({
@@ -355,32 +351,32 @@ class TestEngine extends BrowserEventEmitter {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);`
       }
 
       const result = await response.json();
 
       if (!result.success) {
-        throw new Error(result.error || '测试执行失败');
+        throw new Error(result.error || "测试执行失败');'`
       }
 
       // 通知测试完成
-      this.emit('testProgress', {
+      this.emit('testProgress', {'
         testId,
-        status: 'completed',
+        status: 'completed','
         progress: 100,
-        message: '测试完成'
+        message: '测试完成';
       });
 
       return this.formatTestResult(result.data, config);
 
     } catch (error) {
       // 通知测试失败
-      this.emit('testProgress', {
+      this.emit('testProgress', {'
         testId,
-        status: 'failed',
+        status: 'failed','
         progress: 0,
-        message: `测试失败: ${error.message}`
+        message: `测试失败: ${error.message}``
       });
 
       throw error;
@@ -388,42 +384,41 @@ class TestEngine extends BrowserEventEmitter {
   }
 
   private getTestEndpoint(testType: string): string {
-    const endpoints: Record<string, string> = {
-      'stress': '/api/test/stress',
-      'performance': '/api/test/performance',
-      'seo': '/api/test/seo',
-      'security': '/api/test/security',
-      'api': '/api/test/api',
-      'compatibility': '/api/test/compatibility',
-      'ux': '/api/test/ux',
-      'database': '/api/test/database'
+    const endpoints: Record<string, string>  = {
+      "stress': '/api/test/stress','`
+      'performance': '/api/test/performance','
+      'seo': '/api/test/seo','
+      'security': '/api/test/security','
+      'api': '/api/test/api','
+      'compatibility': '/api/test/compatibility','
+      'ux': '/api/test/ux','
+      'database': '/api/test/database';
     };
-
-    return endpoints[testType] || '/api/test/generic';
+    return endpoints[testType] || "/api/test/generic';
   }
 
   private formatTestResult(data: any, config: any): any {
     return {
-      id: data.id || `result_${Date.now()}`,
+      id: data.id || `result_${Date.now()}`,`
       testType: config.testType,
       url: config.url,
-      status: data.status || 'completed',
+      status: data.status || "completed','`
       score: data.score || 0,
       metrics: data.metrics || {},
       recommendations: data.recommendations || [],
       details: data.details || {},
       timestamp: new Date().toISOString(),
       duration: data.duration || 0,
-      engine: data.engine || 'unknown'
+      engine: data.engine || 'unknown';
     };
   }
 
   private async saveTestResult(testId: string, result: any): Promise<void> {
     try {
-      const response = await fetch('/api/test/history', {
-        method: 'POST',
+      const response = await fetch('/api/test/history', {'
+        method: 'POST','
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json','
           ...(this.getAuthHeaders())
         },
         body: JSON.stringify({
@@ -434,34 +429,33 @@ class TestEngine extends BrowserEventEmitter {
       });
 
       if (!response.ok) {
-        console.warn('Failed to save test result to backend:', response.statusText);
+        console.warn('Failed to save test result to backend: ', response.statusText);'
       }
     } catch (error) {
-      console.warn('Failed to save test result:', error);
+      console.warn('Failed to save test result: ', error);'
     }
   }
 
   async runAdvancedTest(config: TestConfig): Promise<{ testId: string; promise: Promise<TestResult> }> {
     if (this.activeTests.size >= this.maxConcurrentTests) {
-      throw new Error(`Maximum concurrent tests (${this.maxConcurrentTests}) reached`);
+      throw new Error(`Maximum concurrent tests (${this.maxConcurrentTests}) reached`);`
     }
 
-    const testId = `${config.testType}-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+    const testId = `${config.testType}-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;`
     const startTime = Date.now();
 
-    console.log(`🚀 Starting advanced ${config.testType} test:`, testId);
+    console.log(`🚀 Starting advanced ${config.testType} test:`, testId);`
 
     // 选择最佳引擎
-    const selectedEngine = config.engine === 'auto' ? this.selectBestEngine(config.testType) : config.engine || 'auto';
-
-    const testPromise = new Promise<TestResult>((resolve, reject) => {
+    const selectedEngine = config.engine === "auto' ? this.selectBestEngine(config.testType): config.engine || 'auto';'`
+    const testPromise = new Promise<TestResult>((resolve, reject)  => {
       // 使用后台测试管理器
       const backgroundTestId = backgroundTestManager.startTest(
         config.testType as any,
         config,
         // onProgress
         (progress: number, step: string, metrics?: any) => {
-          const progressData: TestProgress = {
+          const progressData: TestProgress  = {
             testId,
             progress,
             currentStep: step,
@@ -469,17 +463,17 @@ class TestEngine extends BrowserEventEmitter {
             estimatedTimeRemaining: this.estimateTimeRemaining(progress, startTime),
             metrics
           };
-          this.emit('testProgress', progressData);
+          this.emit('testProgress', progressData);'
         },
         // onComplete
         (result: any) => {
-          const testResult: TestResult = {
+          const testResult: TestResult  = {
             id: testId,
             testType: config.testType,
             url: config.url,
             timestamp: new Date(startTime).toISOString(),
             duration: (Date.now() - startTime) / 1000,
-            status: 'completed',
+            status: 'completed','
             overallScore: this.calculateOverallScore(result, config.testType),
             metrics: this.extractMetrics(result, config.testType),
             tests: result.tests, // 直接传递 tests 数据
@@ -491,25 +485,24 @@ class TestEngine extends BrowserEventEmitter {
             engine: selectedEngine,
             config
           };
-
           this.activeTests.delete(testId);
           this.testHistory.unshift(testResult);
           if (this.testHistory.length > 100) {
             this.testHistory = this.testHistory.slice(0, 100);
           }
 
-          this.emit('testCompleted', testResult);
+          this.emit('testCompleted', testResult);'
           resolve(testResult);
         },
         // onError
         (error: any) => {
-          const testResult: TestResult = {
+          const testResult: TestResult  = {
             id: testId,
             testType: config.testType,
             url: config.url,
             timestamp: new Date(startTime).toISOString(),
             duration: (Date.now() - startTime) / 1000,
-            status: 'failed',
+            status: 'failed','
             overallScore: 0,
             metrics: {},
             findings: [],
@@ -518,9 +511,8 @@ class TestEngine extends BrowserEventEmitter {
             engine: selectedEngine,
             config
           };
-
           this.activeTests.delete(testId);
-          this.emit('testFailed', testResult, error);
+          this.emit('testFailed', testResult, error);'
           reject(error);
         }
       );
@@ -539,29 +531,26 @@ class TestEngine extends BrowserEventEmitter {
 
   private selectBestEngine(testType: string): string {
     switch (testType) {
-      case 'performance':
-      case 'seo':
-      case 'accessibility':
-        return this.engines.lighthouse ? 'lighthouse' :
-          this.engines.playwright ? 'playwright' :
+      case 'performance': ''
+      case 'seo': ''
+      case 'accessibility': ''
+        return this.engines.lighthouse ? 'lighthouse' : ''
+          this.engines.playwright ? 'playwright' : ''
             this.engines.puppeteer ? 'puppeteer' : 'auto';
-
-      case 'stress':
-      case 'api':
-        return this.engines.k6 ? 'k6' :
+      case 'stress': ''
+      case 'api': ''
+        return this.engines.k6 ? 'k6' : ''
           this.engines.playwright ? 'playwright' : 'auto';
-
-      case 'security':
-      case 'compatibility':
-        return this.engines.playwright ? 'playwright' :
+      case 'security': ''
+      case 'compatibility': ''
+        return this.engines.playwright ? 'playwright' : ''
           this.engines.puppeteer ? 'puppeteer' : 'auto';
-
       default:
         return this.engines.lighthouse ? 'lighthouse' : 'auto';
     }
   }
 
-  private getTestPhase(progress: number): 'initializing' | 'running' | 'analyzing' | 'completing' {
+  private getTestPhase(progress: number): 'initializing' | 'running' | 'analyzing' | 'completing' {'
     if (progress < 10) return 'initializing';
     if (progress < 80) return 'running';
     if (progress < 95) return 'analyzing';
@@ -584,18 +573,18 @@ class TestEngine extends BrowserEventEmitter {
 
     // 根据测试类型计算总体分数
     switch (testType) {
-      case 'performance':
+      case 'performance': ''
         return this.calculatePerformanceScore(result);
-      case 'security':
+      case 'security': ''
         return this.calculateSecurityScore(result);
-      case 'seo':
+      case 'seo': ''
         return this.calculateSEOScore(result);
-      case 'accessibility':
+      case 'accessibility': ''
         return this.calculateAccessibilityScore(result);
-      case 'website':
+      case 'website': ''
         // 对于网站综合测试，如果有tests数据，计算平均分
         if (result.tests) {
-          const scores: number[] = [];
+          const scores: number[]  = [];
           Object.values(result.tests).forEach((test: any) => {
             if (test.score !== undefined && test.score !== null) {
               scores.push(test.score);
@@ -632,10 +621,10 @@ class TestEngine extends BrowserEventEmitter {
 
     findings.forEach((finding: TestFinding) => {
       switch (finding.severity) {
-        case 'critical': score -= 25; break;
-        case 'high': score -= 15; break;
-        case 'medium': score -= 10; break;
-        case 'low': score -= 5; break;
+        case 'critical': score -= 25; break;'
+        case 'high': score -= 15; break;'
+        case 'medium': score -= 10; break;'
+        case 'low': score -= 5; break;'
       }
     });
 
@@ -660,8 +649,7 @@ class TestEngine extends BrowserEventEmitter {
 
   private extractMetrics(result: any, _testType: string): Record<string, any> {
     // 根据测试类型提取相关指标
-    const metrics: Record<string, any> = {};
-
+    const metrics: Record<string, any>  = {};
     // 处理旧格式的 metrics
     if (result.metrics) {
       Object.assign(metrics, result.metrics);
@@ -710,15 +698,14 @@ class TestEngine extends BrowserEventEmitter {
       metrics.performanceScore = lhr.categories?.performance?.score * 100;
       metrics.seoScore = lhr.categories?.seo?.score * 100;
       metrics.accessibilityScore = lhr.categories?.accessibility?.score * 100;
-      metrics.bestPracticesScore = lhr.categories?.['best-practices']?.score * 100;
-
+      metrics.bestPracticesScore = lhr.categories?.['best-practices']?.score * 100;'
       // Core Web Vitals
       if (lhr.audits) {
-        metrics.lcp = lhr.audits['largest-contentful-paint']?.numericValue / 1000;
-        metrics.fid = lhr.audits['max-potential-fid']?.numericValue;
-        metrics.cls = lhr.audits['cumulative-layout-shift']?.numericValue;
-        metrics.fcp = lhr.audits['first-contentful-paint']?.numericValue / 1000;
-        metrics.ttfb = lhr.audits['server-response-time']?.numericValue;
+        metrics.lcp = lhr.audits['largest-contentful-paint']?.numericValue / 1000;'
+        metrics.fid = lhr.audits['max-potential-fid']?.numericValue;'
+        metrics.cls = lhr.audits['cumulative-layout-shift']?.numericValue;'
+        metrics.fcp = lhr.audits['first-contentful-paint']?.numericValue / 1000;'
+        metrics.ttfb = lhr.audits['server-response-time']?.numericValue;'
       }
     }
 
@@ -726,19 +713,18 @@ class TestEngine extends BrowserEventEmitter {
   }
 
   private extractFindings(result: any, _testType: string): TestFinding[] {
-    const findings: TestFinding[] = [];
-
+    const findings: TestFinding[]  = [];
     if (result.findings && Array.isArray(result.findings)) {
       findings.push(...result.findings);
     }
 
     if (result.userExperienceIssues && Array.isArray(result.userExperienceIssues)) {
       findings.push(...result.userExperienceIssues.map((issue: any) => ({
-        type: issue.type || 'ux',
-        severity: issue.severity || 'medium',
-        title: issue.description || issue.title || 'User Experience Issue',
-        description: issue.description || '',
-        recommendation: issue.recommendation || '',
+        type: issue.type || 'ux','
+        severity: issue.severity || 'medium','
+        title: issue.description || issue.title || 'User Experience Issue','
+        description: issue.description || '','
+        recommendation: issue.recommendation || '','
         details: issue
       })));
     }
@@ -747,27 +733,26 @@ class TestEngine extends BrowserEventEmitter {
   }
 
   private generateRecommendations(result: any, testType: string): string[] {
-    const recommendations: string[] = [];
-
+    const recommendations: string[]  = [];
     if (result.recommendations && Array.isArray(result.recommendations)) {
       recommendations.push(...result.recommendations);
     }
 
     // 基于测试类型生成通用建议
     switch (testType) {
-      case 'performance':
+      case 'performance': ''
         if (result.metrics?.loadTime > 3000) {
-          recommendations.push('优化页面加载时间：压缩资源、启用缓存、使用CDN');
+          recommendations.push('优化页面加载时间：压缩资源、启用缓存、使用CDN');'
         }
         break;
-      case 'security':
-        if (result.findings?.some((f: any) => f.type === 'ssl')) {
-          recommendations.push('加强SSL/TLS配置：使用强加密算法、及时更新证书');
+      case 'security': ''
+        if (result.findings?.some((f: any) => f.type === 'ssl')) {'
+          recommendations.push('加强SSL/TLS配置：使用强加密算法、及时更新证书');'
         }
         break;
-      case 'seo':
+      case 'seo': ''
         if (result.metrics?.seoScore < 80) {
-          recommendations.push('改善SEO：优化标题和描述、添加结构化数据、改善内链结构');
+          recommendations.push('改善SEO：优化标题和描述、添加结构化数据、改善内链结构');'
         }
         break;
     }
@@ -782,7 +767,7 @@ class TestEngine extends BrowserEventEmitter {
       
         backgroundTestManager.cancelTest(test.backgroundTestId);
       this.activeTests.delete(testId);
-      this.emit('testCancelled', testId);
+      this.emit('testCancelled', testId);'
       return true;
       }
     return false;
@@ -804,17 +789,17 @@ class TestEngine extends BrowserEventEmitter {
     return this.testHistory.find(test => test.id === testId) || null;
   }
 
-  async exportTestResult(testId: string, format: 'json' | 'csv' | 'pdf' | 'html'): Promise<any> {
+  async exportTestResult(testId: string, format: 'json' | 'csv' | 'pdf' | 'html'): Promise<any> {'
     const result = await this.getTestResult(testId);
     if (!result) {
-      throw new Error('Test result not found');
+      throw new Error('Test result not found');'
     }
 
     try {
       const response = await testAPI.exportTestResults(testId, format);
       return response.data;
     } catch (error) {
-      console.error('Failed to export test result:', error);
+      console.error('Failed to export test result:', error);'
       throw error;
     }
   }

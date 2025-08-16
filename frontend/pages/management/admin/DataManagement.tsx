@@ -1,34 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { Database, Download, Filter, RefreshCw, Trash2 } from 'lucide-react';
-import { useAuthCheck } from '../../../components/auth/WithAuthCheck.tsx';
-
-/**
+import React, { useState, useEffect    } from 'react';import { Database, Download, Filter, RefreshCw, Trash2    } from 'lucide-react';import { useAuthCheck    } from '../../../components/auth/WithAuthCheck.tsx';/**'
  * 数据管理页面 - 完整实现版
  */
-const DataManagement: React.FC = () => {
+const DataManagement: React.FC  = () => {
   
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState('');
-
+  const [pageTitle, setPageTitle] = useState("');'
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
-      document.title = `${pageTitle} - Test Web`;
+      document.title = `${pageTitle} - Test Web`;`
     }
   }, [pageTitle]);
 
   // 页面可见性检测
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === "visible') {'`
         // 页面变为可见时刷新数据
         fetchData?.();
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);'
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);'
     };
   }, [fetchData]);
   
@@ -51,20 +46,20 @@ const DataManagement: React.FC = () => {
   
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [filter, setFilter] = useState('');
+  const [filter, setFilter] = useState("');'
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
   // 加载数据
   const loadData = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/data-management/list');
+      const response = await fetch('/api/data-management/list');'
       const result = await response.json();
       if (result.success) {
         setData(result.data);
       }
     } catch (error) {
-      console.error('加载数据失败:', error);
+      console.error('加载数据失败:', error);'
     } finally {
       setLoading(false);
     }
@@ -77,22 +72,22 @@ const DataManagement: React.FC = () => {
   // 导出数据
   const handleExport = async () => {
     try {
-      const response = await fetch('/api/data-management/export', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch('/api/data-management/export', {'
+        method: 'POST','
+        headers: { 'Content-Type': 'application/json' },'
         body: JSON.stringify({ filter, selectedItems })
       });
       
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement('a');'
         a.href = url;
-        a.download = `data-export-${new Date().toISOString().split('T')[0]}.csv`;
+        a.download = `data-export-${new Date().toISOString().split('T')[0]}.csv`;'`
         a.click();
       }
     } catch (error) {
-      console.error('导出失败:', error);
+      console.error("导出失败:', error);'`
     }
   };
 
@@ -100,11 +95,11 @@ const DataManagement: React.FC = () => {
   const handleDelete = async () => {
     if (!selectedItems.length) return;
     
-    if (confirm(`确定要删除 ${selectedItems.length} 项数据吗？`)) {
+    if (confirm(`确定要删除 ${selectedItems.length} 项数据吗？`)) {`
       try {
-        const response = await fetch('/api/data-management/delete', {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
+        const response = await fetch("/api/data-management/delete', {'`
+          method: 'DELETE','
+          headers: { 'Content-Type': 'application/json' },'
           body: JSON.stringify({ ids: selectedItems })
         });
         
@@ -113,7 +108,7 @@ const DataManagement: React.FC = () => {
           loadData();
         }
       } catch (error) {
-        console.error('删除失败:', error);
+        console.error('删除失败:', error);'
       }
     }
   };
@@ -123,13 +118,13 @@ const DataManagement: React.FC = () => {
     
   if (state.isLoading || loading) {
     return (
-      <div className="space-y-4">
+      <div className= 'space-y-4'>
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="animate-pulse flex space-x-4 p-4 border rounded">
-            <div className="rounded-full bg-gray-200 h-10 w-10"></div>
-            <div className="flex-1 space-y-2 py-1">
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+          <div key={i} className= 'animate-pulse flex space-x-4 p-4 border rounded'>
+            <div className= 'rounded-full bg-gray-200 h-10 w-10'></div>
+            <div className= 'flex-1 space-y-2 py-1'>
+              <div className= 'h-4 bg-gray-200 rounded w-3/4'></div>
+              <div className= 'h-4 bg-gray-200 rounded w-1/2'></div>
             </div>
           </div>
         ))}
@@ -137,23 +132,22 @@ const DataManagement: React.FC = () => {
     );
   }
 
-  return (
-      <div className="bg-red-50 border border-red-200 rounded-md p-4">
-        <div className="flex">
-          <div className="flex-shrink-0">
-            <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+  return (<div className= 'bg-red-50 border border-red-200 rounded-md p-4'>
+        <div className= 'flex'>
+          <div className= 'flex-shrink-0'>
+            <svg className= 'h-5 w-5 text-red-400' viewBox= '0 0 20 20' fill= 'currentColor'>
+              <path fillRule= 'evenodd' d= 'M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z' clipRule= 'evenodd' />
             </svg>
           </div>
-          <div className="ml-3">
-            <h3 className="text-sm font-medium text-red-800">操作失败</h3>
-            <div className="mt-2 text-sm text-red-700">
+          <div className= 'ml-3'>
+            <h3 className= 'text-sm font-medium text-red-800'>操作失败</h3>
+            <div className= 'mt-2 text-sm text-red-700'>
               <p>{state.error.message}</p>
             </div>
-            <div className="mt-4">
+            <div className= 'mt-4'>
               <button
                 onClick={() => window.location.reload()}
-                className="bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200"
+                className= 'bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200';
               >
                 重试
               </button>
@@ -165,41 +159,41 @@ const DataManagement: React.FC = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className= 'p-6 space-y-6'>
       {/* 页面头部 */}
-      <div className="flex items-center justify-between">
+      <div className= 'flex items-center justify-between'>
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <Database className="w-6 h-6" />
+          <h1 className= 'text-2xl font-bold text-white flex items-center gap-2'>
+            <Database className= 'w-6 h-6'    />
             数据管理
           </h1>
-          <p className="text-gray-400 mt-1">管理测试数据、导入导出和批量操作</p>
+          <p className= 'text-gray-400 mt-1'>管理测试数据、导入导出和批量操作</p>
         </div>
         
-        <div className="flex gap-2">
+        <div className= 'flex gap-2'>
           <button
             onClick={loadData}
             disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+            className= 'px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2';
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : "'}`}    />`
             刷新
           </button>
           
           <button
             onClick={handleExport}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+            className= "px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2';'`
           >
-            <Download className="w-4 h-4" />
+            <Download className= 'w-4 h-4'    />
             导出
           </button>
           
           {selectedItems.length > 0 && (
             <button
               onClick={handleDelete}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+              className= 'px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2';
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className= 'w-4 h-4'    />
               删除 ({selectedItems.length})
             </button>
           )}
@@ -207,39 +201,38 @@ const DataManagement: React.FC = () => {
       </div>
 
       {/* 筛选器 */}
-      <div className="flex items-center gap-4">
-        <div className="flex-1">
+      <div className= 'flex items-center gap-4'>
+        <div className= 'flex-1'>
           <input
-            type="text"
-            placeholder="搜索数据..."
+            type= 'text';
+            placeholder= '搜索数据...';
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+            className= 'w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500';
           />
         </div>
-        <Filter className="w-5 h-5 text-gray-400" />
+        <Filter className= 'w-5 h-5 text-gray-400'    />
       </div>
 
       {/* 数据表格 */}
-      <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+      <div className= 'bg-gray-800 rounded-lg border border-gray-700 overflow-hidden'>
         {loading ? (
-          <div className="p-8 text-center text-gray-400">
-            <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2" />
+          <div className= 'p-8 text-center text-gray-400'>
+            <RefreshCw className= 'w-8 h-8 animate-spin mx-auto mb-2'    />
             加载中...
           </div>
         ) : data.length === 0 ? (
-          <div className="p-8 text-center text-gray-400">
-            <Database className="w-12 h-12 mx-auto mb-4 opacity-50" />
+          <div className= 'p-8 text-center text-gray-400'>
+            <Database className= 'w-12 h-12 mx-auto mb-4 opacity-50'    />
             <p>暂无数据</p>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-700">
+        ) : (<div className= 'overflow-x-auto'>
+            <table className= 'w-full'>
+              <thead className= 'bg-gray-700'>
                 <tr>
-                  <th className="px-4 py-3 text-left">
+                  <th className= 'px-4 py-3 text-left'>
                     <input
-                      type="checkbox"
+                      type= 'checkbox';
                       checked={selectedItems.length === data.length}
                       onChange={(e) => {
                         if (e.target.checked) {
@@ -248,22 +241,22 @@ const DataManagement: React.FC = () => {
                           setSelectedItems([]);
                         }
                       }}
-                      className="rounded"
+                      className= 'rounded';
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-gray-300">ID</th>
-                  <th className="px-4 py-3 text-left text-gray-300">类型</th>
-                  <th className="px-4 py-3 text-left text-gray-300">URL</th>
-                  <th className="px-4 py-3 text-left text-gray-300">状态</th>
-                  <th className="px-4 py-3 text-left text-gray-300">创建时间</th>
+                  <th className= 'px-4 py-3 text-left text-gray-300'>ID</th>
+                  <th className= 'px-4 py-3 text-left text-gray-300'>类型</th>
+                  <th className= 'px-4 py-3 text-left text-gray-300'>URL</th>
+                  <th className= 'px-4 py-3 text-left text-gray-300'>状态</th>
+                  <th className= 'px-4 py-3 text-left text-gray-300'>创建时间</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-700">
+              <tbody className= 'divide-y divide-gray-700'>
                 {data.map((item: any) => (
-                  <tr key={item.id} className="hover:bg-gray-700/50">
-                    <td className="px-4 py-3">
+                  <tr key={item.id} className= 'hover:bg-gray-700/50'>
+                    <td className= 'px-4 py-3'>
                       <input
-                        type="checkbox"
+                        type= 'checkbox';
                         checked={selectedItems.includes(item.id)}
                         onChange={(e) => {
                           if (e.target.checked) {
@@ -272,22 +265,22 @@ const DataManagement: React.FC = () => {
                             setSelectedItems(selectedItems.filter(id => id !== item.id));
                           }
                         }}
-                        className="rounded"
+                        className= 'rounded';
                       />
                     </td>
-                    <td className="px-4 py-3 text-gray-300">{item.id}</td>
-                    <td className="px-4 py-3 text-gray-300">{item.type}</td>
-                    <td className="px-4 py-3 text-gray-300">{item.url}</td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        item.status === 'completed' ? 'bg-green-500/20 text-green-400' :
-                        item.status === 'failed' ? 'bg-red-500/20 text-red-400' :
-                        'bg-yellow-500/20 text-yellow-400'
-                      }`}>
+                    <td className= 'px-4 py-3 text-gray-300'>{item.id}</td>
+                    <td className= 'px-4 py-3 text-gray-300'>{item.type}</td>
+                    <td className= 'px-4 py-3 text-gray-300'>{item.url}</td>
+                    <td className= 'px-4 py-3'>
+                      <span className={`px-2 py-1 rounded-full text-xs ${`}
+                        item.status === "completed' ? 'bg-green-500/20 text-green-400' : ''`
+                        item.status === 'failed' ? 'bg-red-500/20 text-red-400' : ''
+                        'bg-yellow-500/20 text-yellow-400';
+                      }`}>`
                         {item.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-300">
+                    <td className= "px-4 py-3 text-gray-300'>`
                       {new Date(item.created_at).toLocaleString()}
                     </td>
                   </tr>

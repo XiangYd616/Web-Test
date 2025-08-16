@@ -1,10 +1,5 @@
-import { format } from 'date-fns';
-import React, { useMemo, useState } from 'react';
-
-import { Area, AreaChart, Bar, BarChart, Brush, CartesianGrid, Cell, ComposedChart, Funnel, FunnelChart, LabelList, Legend, Line, LineChart, Pie, PieChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-
-// 高级压力测试图表
-interface StressTestChartProps {
+import { format    } from 'date-fns';import React, { useMemo, useState    } from 'react';import { Area, AreaChart, Bar, BarChart, Brush, CartesianGrid, Cell, ComposedChart, Funnel, FunnelChart, LabelList, Legend, Line, LineChart, Pie, PieChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis    } from 'recharts';// 高级压力测试图表'
+interface StressTestChartProps   {
   data?: Array<{
     time: string | number;
     timestamp?: number;
@@ -32,14 +27,13 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
   data = [],
   showAdvancedMetrics = false,
   height = 400,
-  theme = 'dark',
+  theme = 'dark','
   interactive = true,
   realTime = false
 }) => {
-  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['responseTime', 'throughput', 'errorRate']);
-  const [chartType, setChartType] = useState<'line' | 'area' | 'composed'>('line');
-  const [timeRange, setTimeRange] = useState<'all' | '1m' | '5m' | '15m'>('all');
-
+  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['responseTime', 'throughput', 'errorRate']);'
+  const [chartType, setChartType] = useState<'line' | 'area' | 'composed'>('line');'
+  const [timeRange, setTimeRange] = useState<'all' | '1m' | '5m' | '15m'>("all');'
   // 处理数据
   const processedData = useMemo(() => {
     if (!data || data.length === 0) {
@@ -50,12 +44,12 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
 
     // 过滤时间范围
     let filteredData = data;
-    if (timeRange !== 'all' && data.length > 0) {
+    if (timeRange !== 'all' && data.length > 0) {'
       const now = Date.now();
       const ranges = {
-        '1m': 60 * 1000,
-        '5m': 5 * 60 * 1000,
-        '15m': 15 * 60 * 1000
+        '1m': 60 * 1000,'
+        '5m': 5 * 60 * 1000,'
+        "15m': 15 * 60 * 1000'
       };
       const cutoff = now - ranges[timeRange];
       filteredData = data.filter(item => {
@@ -75,7 +69,7 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
 
     // 如果数据被时间范围过滤了，需要计算实际的测试开始时间偏移
     let testStartOffset = 0;
-    if (timeRange !== 'all' && data && data.length > 0) {
+    if (timeRange !== 'all' && data && data.length > 0) {'
       // 原始数据的第一个时间点
       const originalStartTime = data[0].timestamp || new Date(data[0].time).getTime();
       // 过滤后数据相对于原始数据的时间偏移
@@ -91,8 +85,8 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
       const ms = Math.floor((elapsedSeconds % 1) * 100);
 
       const relativeTime = minutes > 0 ?
-        `${minutes}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}` :
-        `${seconds}.${ms.toString().padStart(2, '0')}`;
+        `${minutes}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, "0')}` : ''`
+        `${seconds}.${ms.toString().padStart(2, '0')}`;'`
 
       return {
         ...item,
@@ -103,28 +97,28 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
 
   const colors = {
     dark: {
-      responseTime: 'var(--color-primary)',
-      throughput: 'var(--color-success)',
-      errors: 'var(--color-danger)',
-      users: 'var(--color-warning)',
-      p95ResponseTime: '#8B5CF6',
-      p99ResponseTime: '#EC4899',
-      errorRate: '#F97316',
-      bytesReceived: '#06B6D4',
-      bytesSent: '#84CC16',
-      connectionsActive: '#6366F1'
+      responseTime: "var(--color-primary)','`
+      throughput: 'var(--color-success)','
+      errors: 'var(--color-danger)','
+      users: 'var(--color-warning)','
+      p95ResponseTime: '#8B5CF6','
+      p99ResponseTime: '#EC4899','
+      errorRate: '#F97316','
+      bytesReceived: '#06B6D4','
+      bytesSent: '#84CC16','
+      connectionsActive: '#6366F1';
     },
     light: {
-      responseTime: 'var(--color-primary-hover)',
-      throughput: 'var(--color-success-hover)',
-      errors: 'var(--color-danger-hover)',
-      users: 'var(--color-warning-hover)',
-      p95ResponseTime: '#7C3AED',
-      p99ResponseTime: '#DB2777',
-      errorRate: '#EA580C',
-      bytesReceived: '#0891B2',
-      bytesSent: '#65A30D',
-      connectionsActive: '#4F46E5'
+      responseTime: 'var(--color-primary-hover)','
+      throughput: 'var(--color-success-hover)','
+      errors: 'var(--color-danger-hover)','
+      users: 'var(--color-warning-hover)','
+      p95ResponseTime: '#7C3AED','
+      p99ResponseTime: '#DB2777','
+      errorRate: '#EA580C','
+      bytesReceived: '#0891B2','
+      bytesSent: '#65A30D','
+      connectionsActive: '#4F46E5';
     }
   };
 
@@ -132,7 +126,6 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
   const bgColor = theme === 'dark' ? 'var(--color-gray-800)' : 'var(--color-white)';
   const textColor = theme === 'dark' ? 'var(--color-gray-50)' : 'var(--color-gray-900)';
   const gridColor = theme === 'dark' ? 'var(--color-gray-700)' : 'var(--color-gray-200)';
-
   const renderChart = () => {
     const commonProps = {
       data: processedData,
@@ -141,100 +134,93 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
 
     const tooltipStyle = {
       backgroundColor: bgColor,
-      border: `1px solid ${gridColor}`,
-      borderRadius: '8px',
+      border: `1px solid ${gridColor}`,`
+      borderRadius: "8px','`
       color: textColor,
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
     };
 
     switch (chartType) {
-      case 'area':
+      case 'area': ''
         return (
           <AreaChart {...commonProps}>
-            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-            <XAxis dataKey="time" stroke={textColor} fontSize={12} />
-            <YAxis stroke={textColor} fontSize={12} />
-            <Tooltip contentStyle={tooltipStyle} />
-            <Legend />
-            {interactive && <Brush dataKey="time" height={30} stroke={currentColors.responseTime} />}
-            {selectedMetrics.includes('responseTime') && (
-              <Area
-                type="monotone"
-                dataKey="responseTime"
-                stackId="1"
+            <CartesianGrid strokeDasharray= '3 3' stroke={gridColor}    />
+            <XAxis dataKey= 'time' stroke={textColor} fontSize={12}    />
+            <YAxis stroke={textColor} fontSize={12}    />
+            <Tooltip contentStyle={tooltipStyle}    />
+            <Legend  />
+            {interactive && <Brush dataKey= 'time' height={30} stroke={currentColors.responseTime}    />}'
+            {selectedMetrics.includes('responseTime') && ('')
+              <Area type= 'monotone';
+                dataKey= 'responseTime';
+                stackId= '1';
                 stroke={currentColors.responseTime}
                 fill={currentColors.responseTime}
                 fillOpacity={0.6}
-                name="响应时间 (ms)"
-              />
+                name= '响应时间 (ms)';
+                 />
             )}
-            {selectedMetrics.includes('throughput') && (
-              <Area
-                type="monotone"
-                dataKey="throughput"
-                stackId="2"
+            {selectedMetrics.includes('throughput') && ('')
+              <Area type= 'monotone';
+                dataKey= 'throughput';
+                stackId= '2';
                 stroke={currentColors.throughput}
                 fill={currentColors.throughput}
                 fillOpacity={0.6}
-                name="吞吐量 (req/s)"
-              />
+                name= '吞吐量 (req/s)';
+                 />
             )}
-            {selectedMetrics.includes('errorRate') && (
-              <Area
-                type="monotone"
-                dataKey="errorRate"
-                stackId="3"
+            {selectedMetrics.includes('errorRate') && ('')
+              <Area type= 'monotone';
+                dataKey= 'errorRate';
+                stackId= '3';
                 stroke={currentColors.errors}
                 fill={currentColors.errors}
                 fillOpacity={0.4}
-                name="错误率 (%)"
-              />
+                name= '错误率 (%)';
+                 />
             )}
           </AreaChart>
         );
 
-      case 'composed':
+      case 'composed': ''
         return (
           <ComposedChart {...commonProps}>
-            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-            <XAxis dataKey="time" stroke={textColor} fontSize={12} />
-            <YAxis yAxisId="left" stroke={textColor} fontSize={12} />
-            <YAxis yAxisId="right" orientation="right" stroke={textColor} fontSize={12} />
-            <Tooltip contentStyle={tooltipStyle} />
-            <Legend />
-            {interactive && <Brush dataKey="time" height={30} stroke={currentColors.responseTime} />}
-
-            {selectedMetrics.includes('responseTime') && (
-              <Line
-                yAxisId="left"
-                type="monotone"
-                dataKey="responseTime"
+            <CartesianGrid strokeDasharray= '3 3' stroke={gridColor}    />
+            <XAxis dataKey= 'time' stroke={textColor} fontSize={12}    />
+            <YAxis yAxisId= 'left' stroke={textColor} fontSize={12}    />
+            <YAxis yAxisId= 'right' orientation= 'right' stroke={textColor} fontSize={12}    />
+            <Tooltip contentStyle={tooltipStyle}    />
+            <Legend  />
+            {interactive && <Brush dataKey= 'time' height={30} stroke={currentColors.responseTime}    />}'
+            {selectedMetrics.includes('responseTime') && ('')
+              <Line yAxisId= 'left';
+                type= 'monotone';
+                dataKey= 'responseTime';
                 stroke={currentColors.responseTime}
                 strokeWidth={2}
-                name="响应时间 (ms)"
+                name= '响应时间 (ms)';
                 dot={false}
-              />
+                 />
             )}
-            {selectedMetrics.includes('throughput') && (
-              <Bar
-                yAxisId="right"
-                dataKey="throughput"
+            {selectedMetrics.includes('throughput') && ('')
+              <Bar yAxisId= 'right';
+                dataKey= 'throughput';
                 fill={currentColors.throughput}
-                name="吞吐量 (req/s)"
+                name= '吞吐量 (req/s)';
                 opacity={0.8}
-              />
+                 />
             )}
-            {selectedMetrics.includes('errorRate') && (
-              <Line
-                yAxisId="right"
-                type="monotone"
-                dataKey="errorRate"
+            {selectedMetrics.includes('errorRate') && ('')
+              <Line yAxisId= 'right';
+                type= 'monotone';
+                dataKey= 'errorRate';
                 stroke={currentColors.errors}
                 strokeWidth={2}
-                name="错误率 (%)"
+                name= '错误率 (%)';
                 dot={false}
-                strokeDasharray="4 2"
-              />
+                strokeDasharray= '4 2';
+                 />
             )}
           </ComposedChart>
         );
@@ -242,112 +228,105 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
       default:
         return (
           <LineChart {...commonProps}>
-            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-            <XAxis dataKey="time" stroke={textColor} fontSize={12} />
-            <YAxis stroke={textColor} fontSize={12} />
-            <Tooltip contentStyle={tooltipStyle} />
-            <Legend />
-            {interactive && <Brush dataKey="time" height={30} stroke={currentColors.responseTime} />}
-
-            {selectedMetrics.includes('responseTime') && (
-              <Line
-                type="monotone"
-                dataKey="responseTime"
+            <CartesianGrid strokeDasharray= '3 3' stroke={gridColor}    />
+            <XAxis dataKey= 'time' stroke={textColor} fontSize={12}    />
+            <YAxis stroke={textColor} fontSize={12}    />
+            <Tooltip contentStyle={tooltipStyle}    />
+            <Legend  />
+            {interactive && <Brush dataKey= 'time' height={30} stroke={currentColors.responseTime}    />}'
+            {selectedMetrics.includes('responseTime') && ('')
+              <Line type= 'monotone';
+                dataKey= 'responseTime';
                 stroke={currentColors.responseTime}
                 strokeWidth={2}
-                name="响应时间 (ms)"
+                name= '响应时间 (ms)';
                 dot={false}
-              />
+                 />
             )}
-            {selectedMetrics.includes('throughput') && (
-              <Line
-                type="monotone"
-                dataKey="throughput"
+            {selectedMetrics.includes('throughput') && ('')
+              <Line type= 'monotone';
+                dataKey= 'throughput';
                 stroke={currentColors.throughput}
                 strokeWidth={2}
-                name="吞吐量 (req/s)"
+                name= '吞吐量 (req/s)';
                 dot={false}
-              />
+                 />
             )}
-            {selectedMetrics.includes('errorRate') && (
-              <Line
-                type="monotone"
-                dataKey="errorRate"
+            {selectedMetrics.includes('errorRate') && ('')
+              <Line type= 'monotone';
+                dataKey= 'errorRate';
                 stroke={currentColors.errors}
                 strokeWidth={2}
-                name="错误率 (%)"
+                name= '错误率 (%)';
                 dot={false}
-                strokeDasharray="4 2"
-              />
+                strokeDasharray= '4 2';
+                 />
             )}
-            {showAdvancedMetrics && selectedMetrics.includes('p95ResponseTime') && (
-              <Line
-                type="monotone"
-                dataKey="p95ResponseTime"
+            {showAdvancedMetrics && selectedMetrics.includes('p95ResponseTime') && ('')
+              <Line type= 'monotone';
+                dataKey= 'p95ResponseTime';
                 stroke={currentColors.p95ResponseTime}
                 strokeWidth={1}
-                strokeDasharray="5 5"
-                name="P95响应时间 (ms)"
+                strokeDasharray= '5 5';
+                name= 'P95响应时间 (ms)';
                 dot={false}
-              />
+                 />
             )}
-            {showAdvancedMetrics && selectedMetrics.includes('p99ResponseTime') && (
-              <Line
-                type="monotone"
-                dataKey="p99ResponseTime"
+            {showAdvancedMetrics && selectedMetrics.includes('p99ResponseTime') && ('')
+              <Line type= 'monotone';
+                dataKey= 'p99ResponseTime';
                 stroke={currentColors.p99ResponseTime}
                 strokeWidth={1}
-                strokeDasharray="5 5"
-                name="P99响应时间 (ms)"
+                strokeDasharray= '5 5';
+                name= 'P99响应时间 (ms)';
                 dot={false}
-              />
+                 />
             )}
           </LineChart>
         );
     }
   };
 
-  return (
-    <div className={`p-6 rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border'}`}>
-      <div className="flex justify-between items-center mb-4">
-        <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-          压力测试实时数据 {realTime && <span className="text-green-500 text-sm">● 实时</span>}
+  return (<div className={`p-6 rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border'}`}>`
+      <div className= "flex justify-between items-center mb-4'>`
+        <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white" : 'text-gray-900'}`}>`
+          压力测试实时数据 {realTime && <span className= "text-green-500 text-sm'>● 实时</span>}'`
         </h3>
 
         {interactive && (
-          <div className="flex gap-2">
+          <div className= 'flex gap-2'>
             <select
-              id="chart-type-select"
+              id= 'chart-type-select';
               value={chartType}
               onChange={(e) => setChartType(e.target.value as any)}
-              className={`px-3 py-1 rounded text-sm ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'}`}
-              aria-label="选择图表类型"
-              title="选择图表类型"
+              className={`px-3 py-1 rounded text-sm ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'}`}'`
+              aria-label= "选择图表类型';'`
+              title= '选择图表类型';
             >
-              <option value="line">线图</option>
-              <option value="area">面积图</option>
-              <option value="composed">组合图</option>
+              <option value= 'line'>线图</option>
+              <option value= 'area'>面积图</option>
+              <option value= 'composed'>组合图</option>
             </select>
 
             <select
-              id="time-range-select"
+              id= 'time-range-select';
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value as any)}
-              className={`px-3 py-1 rounded text-sm ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'}`}
-              aria-label="选择时间范围"
-              title="选择时间范围"
+              className={`px-3 py-1 rounded text-sm ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'}`}'`
+              aria-label= "选择时间范围';'`
+              title= '选择时间范围';
             >
-              <option value="all">全部</option>
-              <option value="1m">1分钟</option>
-              <option value="5m">5分钟</option>
-              <option value="15m">15分钟</option>
+              <option value= 'all'>全部</option>
+              <option value= '1m'>1分钟</option>
+              <option value= '5m'>5分钟</option>
+              <option value= '15m'>15分钟</option>
             </select>
           </div>
         )}
       </div>
 
       <div style={{ height: height }}>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width= '100%' height= '100%'>
           {renderChart()}
         </ResponsiveContainer>
       </div>
@@ -356,7 +335,7 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
 };
 
 // 高级性能分数图表
-interface PerformanceChartProps {
+interface PerformanceChartProps   {
   scores?: {
     performance: number;
     seo: number;
@@ -389,13 +368,12 @@ interface PerformanceChartProps {
 
 export const PerformanceChart: React.FC<PerformanceChartProps> = ({
   scores,
-  theme = 'dark',
+  theme = 'dark','
   showDetails = false,
   interactive = true,
   height = 300
 }) => {
-  const [viewType, setViewType] = useState<'overview' | 'detailed' | 'radar'>('overview');
-
+  const [viewType, setViewType] = useState<'overview' | 'detailed' | 'radar'>('overview');'
   const defaultScores = {
     performance: 85,
     seo: 78,
@@ -430,134 +408,130 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
   };
 
   const overviewData = [
-    { name: '性能', score: data.performance, color: getScoreColor(data.performance), target: 90 },
-    { name: 'SEO', score: data.seo, color: getScoreColor(data.seo), target: 85 },
-    { name: '可访问性', score: data.accessibility, color: getScoreColor(data.accessibility), target: 95 },
-    { name: '最佳实践', score: data.bestPractices, color: getScoreColor(data.bestPractices), target: 90 },
-    { name: 'PWA', score: data.pwa || 0, color: getScoreColor(data.pwa || 0), target: 80 },
-    { name: '安全性', score: data.security || 0, color: getScoreColor(data.security || 0), target: 95 },
+    { name: '性能', score: data.performance, color: getScoreColor(data.performance), target: 90 },'
+    { name: 'SEO', score: data.seo, color: getScoreColor(data.seo), target: 85 },'
+    { name: '可访问性', score: data.accessibility, color: getScoreColor(data.accessibility), target: 95 },'
+    { name: '最佳实践', score: data.bestPractices, color: getScoreColor(data.bestPractices), target: 90 },'
+    { name: 'PWA', score: data.pwa || 0, color: getScoreColor(data.pwa || 0), target: 80 },'
+    { name: '安全性', score: data.security || 0, color: getScoreColor(data.security || 0), target: 95 },'
   ];
 
   const coreWebVitalsData = [
     {
-      name: 'LCP',
+      name: 'LCP','
       value: data.coreWebVitals?.lcp || 0,
       score: data.coreWebVitals?.lcp <= 2.5 ? 100 : data.coreWebVitals?.lcp <= 4.0 ? 70 : 30,
-      unit: 's',
+      unit: 's','
       threshold: 2.5
     },
     {
-      name: 'FID',
+      name: 'FID','
       value: data.coreWebVitals?.fid || 0,
       score: data.coreWebVitals?.fid <= 100 ? 100 : data.coreWebVitals?.fid <= 300 ? 70 : 30,
-      unit: 'ms',
+      unit: 'ms','
       threshold: 100
     },
     {
-      name: 'CLS',
+      name: 'CLS','
       value: data.coreWebVitals?.cls || 0,
       score: data.coreWebVitals?.cls <= 0.1 ? 100 : data.coreWebVitals?.cls <= 0.25 ? 70 : 30,
-      unit: '',
+      unit: '','
       threshold: 0.1
     },
     {
-      name: 'FCP',
+      name: 'FCP','
       value: data.coreWebVitals?.fcp || 0,
       score: data.coreWebVitals?.fcp <= 1.8 ? 100 : data.coreWebVitals?.fcp <= 3.0 ? 70 : 30,
-      unit: 's',
+      unit: 's','
       threshold: 1.8
     },
     {
-      name: 'TTFB',
+      name: 'TTFB','
       value: data.coreWebVitals?.ttfb || 0,
       score: data.coreWebVitals?.ttfb <= 0.8 ? 100 : data.coreWebVitals?.ttfb <= 1.8 ? 70 : 30,
-      unit: 's',
+      unit: 's','
       threshold: 0.8
     }
   ];
 
   const radarData = [
-    { metric: '性能', score: data.performance, fullMark: 100 },
-    { metric: 'SEO', score: data.seo, fullMark: 100 },
-    { metric: '可访问性', score: data.accessibility, fullMark: 100 },
-    { metric: '最佳实践', score: data.bestPractices, fullMark: 100 },
-    { metric: 'PWA', score: data.pwa || 0, fullMark: 100 },
-    { metric: '安全性', score: data.security || 0, fullMark: 100 }
+    { metric: '性能', score: data.performance, fullMark: 100 },'
+    { metric: 'SEO', score: data.seo, fullMark: 100 },'
+    { metric: '可访问性', score: data.accessibility, fullMark: 100 },'
+    { metric: '最佳实践', score: data.bestPractices, fullMark: 100 },'
+    { metric: 'PWA', score: data.pwa || 0, fullMark: 100 },'
+    { metric: '安全性', score: data.security || 0, fullMark: 100 }'
   ];
 
   const bgColor = theme === 'dark' ? 'var(--color-gray-800)' : 'var(--color-white)';
   const textColor = theme === 'dark' ? 'var(--color-gray-50)' : 'var(--color-gray-900)';
   const gridColor = theme === 'dark' ? 'var(--color-gray-700)' : 'var(--color-gray-200)';
-
   const tooltipStyle = {
     backgroundColor: bgColor,
-    border: `1px solid ${gridColor}`,
-    borderRadius: '8px',
+    border: `1px solid ${gridColor}`,`
+    borderRadius: "8px','`
     color: textColor,
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
   };
 
   const renderChart = () => {
     switch (viewType) {
-      case 'detailed':
+      case 'detailed': ''
         return (
           <ComposedChart data={coreWebVitalsData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-            <XAxis dataKey="name" stroke={textColor} fontSize={12} />
-            <YAxis yAxisId="left" stroke={textColor} fontSize={12} />
-            <YAxis yAxisId="right" orientation="right" stroke={textColor} fontSize={12} />
-            <Tooltip contentStyle={tooltipStyle} />
-            <Legend />
-            <Bar yAxisId="left" dataKey="score" fill="var(--color-primary)" name="评分" />
-            <Line yAxisId="right" type="monotone" dataKey="value" stroke="var(--color-danger)" strokeWidth={2} name="实际值" />
-            <ReferenceLine yAxisId="right" y={2.5} stroke="var(--color-success)" strokeDasharray="5 5" label="良好阈值" />
+            <CartesianGrid strokeDasharray= '3 3' stroke={gridColor}    />
+            <XAxis dataKey= 'name' stroke={textColor} fontSize={12}    />
+            <YAxis yAxisId= 'left' stroke={textColor} fontSize={12}    />
+            <YAxis yAxisId= 'right' orientation= 'right' stroke={textColor} fontSize={12}    />
+            <Tooltip contentStyle={tooltipStyle}    />
+            <Legend  />
+            <Bar yAxisId= 'left' dataKey= 'score' fill= 'var(--color-primary)' name= '评分'    />
+            <Line yAxisId= 'right' type= 'monotone' dataKey= 'value' stroke= 'var(--color-danger)' strokeWidth={2} name= '实际值'    />
+            <ReferenceLine yAxisId= 'right' y={2.5} stroke= 'var(--color-success)' strokeDasharray= '5 5' label= '良好阈值'    />
           </ComposedChart>
         );
 
-      case 'radar':
+      case 'radar': ''
         return (
           <RadarChart data={radarData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-            <PolarGrid stroke={gridColor} />
-            <PolarAngleAxis dataKey="metric" tick={{ fill: textColor, fontSize: 12 }} />
-            <PolarRadiusAxis
-              angle={90}
+            <PolarGrid stroke={gridColor}    />
+            <PolarAngleAxis dataKey= 'metric' tick={{ fill: textColor, fontSize: 12 }}    />
+            <PolarRadiusAxis angle={90}
               domain={[0, 100]}
               tick={{ fill: textColor, fontSize: 10 }}
               tickCount={6}
-            />
-            <Radar
-              name="性能评分"
-              dataKey="score"
-              stroke="var(--color-primary)"
-              fill="var(--color-primary)"
+               />
+            <Radar name= '性能评分';
+              dataKey= 'score';
+              stroke= 'var(--color-primary)';
+              fill= 'var(--color-primary)';
               fillOpacity={0.3}
               strokeWidth={2}
-            />
-            <Tooltip contentStyle={tooltipStyle} />
+               />
+            <Tooltip contentStyle={tooltipStyle}    />
           </RadarChart>
         );
 
       default:
         return (
           <BarChart data={overviewData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-            <XAxis dataKey="name" stroke={textColor} fontSize={12} />
-            <YAxis domain={[0, 100]} stroke={textColor} fontSize={12} />
-            <Tooltip contentStyle={tooltipStyle} />
-            <Legend />
-            <Bar dataKey="score" fill="var(--color-primary)" radius={[4, 4, 0, 0]} name="当前评分" />
-            <Bar dataKey="target" fill={gridColor} radius={[4, 4, 0, 0]} name="目标评分" opacity={0.3} />
-            <ReferenceLine y={90} stroke="var(--color-success)" strokeDasharray="5 5" label="优秀" />
-            <ReferenceLine y={70} stroke="var(--color-warning)" strokeDasharray="5 5" label="良好" />
+            <CartesianGrid strokeDasharray= '3 3' stroke={gridColor}    />
+            <XAxis dataKey= 'name' stroke={textColor} fontSize={12}    />
+            <YAxis domain={[0, 100]} stroke={textColor} fontSize={12}    />
+            <Tooltip contentStyle={tooltipStyle}    />
+            <Legend  />
+            <Bar dataKey= 'score' fill= 'var(--color-primary)' radius={[4, 4, 0, 0]} name= '当前评分'    />
+            <Bar dataKey= 'target' fill={gridColor} radius={[4, 4, 0, 0]} name= '目标评分' opacity={0.3}    />
+            <ReferenceLine y={90} stroke= 'var(--color-success)' strokeDasharray= '5 5' label= '优秀'    />
+            <ReferenceLine y={70} stroke= 'var(--color-warning)' strokeDasharray= '5 5' label= '良好'    />
           </BarChart>
         );
     }
   };
 
-  return (
-    <div className={`p-6 rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border'}`}>
-      <div className="flex justify-between items-center mb-4">
-        <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+  return (<div className={`p-6 rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border'}`}>`
+      <div className= "flex justify-between items-center mb-4'>`
+        <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white" : 'text-gray-900'}`}>`
           性能评分分析
         </h3>
 
@@ -565,31 +539,30 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
           <select
             value={viewType}
             onChange={(e) => setViewType(e.target.value as any)}
-            className={`px-3 py-1 rounded text-sm ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'}`}
-            title="选择图表类型"
+            className={`px-3 py-1 rounded text-sm ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'}`}'`
+            title= "选择图表类型';'`
           >
-            <option value="overview">总览</option>
-            <option value="detailed">Core Web Vitals</option>
-            <option value="radar">雷达图</option>
+            <option value= 'overview'>总览</option>
+            <option value= 'detailed'>Core Web Vitals</option>
+            <option value= 'radar'>雷达图</option>
           </select>
         )}
       </div>
 
-      <div className="chart-container" style={{ height: height }}>
-        <ResponsiveContainer width="100%" height="100%">
+      <div className= 'chart-container' style={{ height: height }}>
+        <ResponsiveContainer width= '100%' height= '100%'>
           {renderChart()}
         </ResponsiveContainer>
       </div>
 
-      {showDetails && (
-        <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
+      {showDetails && (<div className= 'mt-4 grid grid-cols-2 md:grid-cols-3 gap-4'>
           {overviewData.map((item) => (
-            <div key={item.name} className={`p-3 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
-              <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>{item.name}</div>
-              <div className={`text-xl font-bold ${item.score >= 90 ? 'text-green-500' : item.score >= 70 ? 'text-yellow-500' : 'text-red-500'}`}>
+            <div key={item.name} className={`p-3 rounded ${theme === 'dark' ? 'bg-gray-700' : "bg-gray-50'}`}>`
+              <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>{item.name}</div>`
+              <div className={`text-xl font-bold ${item.score >= 90 ? 'text-green-500' : item.score >= 70 ? 'text-yellow-500' : "text-red-500'}`}>`
                 {item.score}
               </div>
-              <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+              <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : "text-gray-500'}`}>`
                 目标: {item.target}
               </div>
             </div>
@@ -601,13 +574,13 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
 };
 
 // 高级安全检查图表
-interface SecurityChartProps {
+interface SecurityChartProps   {
   data?: Array<{
     category: string;
     passed: number;
     failed: number;
     warnings?: number;
-    severity?: 'low' | 'medium' | 'high' | 'critical';
+    severity?: "low' | 'medium' | 'high' | 'critical';'`
     details?: Array<{
       name: string;
       status: 'pass' | 'fail' | 'warning';
@@ -623,79 +596,79 @@ interface SecurityChartProps {
 
 export const SecurityChart: React.FC<SecurityChartProps> = ({
   data,
-  theme = 'dark',
+  theme = 'dark','
   showDetails = false,
   interactive = true,
   height = 350
 }) => {
-  const [viewType, setViewType] = useState<'overview' | 'detailed' | 'severity'>('overview');
+  const [viewType, setViewType] = useState<'overview' | 'detailed' | 'severity'>('overview');'
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const defaultData = [
     {
-      category: 'HTTPS/TLS',
+      category: 'HTTPS/TLS','
       passed: 8,
       failed: 1,
       warnings: 1,
-      severity: 'medium' as const,
+      severity: 'medium' as const,'
       details: [
-        { name: 'HTTPS重定向', status: 'pass' as const, description: '所有HTTP请求正确重定向到HTTPS' },
-        { name: 'TLS版本', status: 'pass' as const, description: '使用TLS 1.2+' },
-        { name: 'SSL证书', status: 'pass' as const, description: '证书有效且未过期' },
-        { name: '证书链', status: 'warning' as const, description: '中间证书缺失', recommendation: '安装完整证书链' },
-        { name: 'HSTS', status: 'fail' as const, description: '未启用HTTP严格传输安全', recommendation: '添加HSTS头部' }
+        { name: 'HTTPS重定向', status: 'pass' as const, description: '所有HTTP请求正确重定向到HTTPS' },'
+        { name: 'TLS版本', status: 'pass' as const, description: '使用TLS 1.2+' },'
+        { name: 'SSL证书', status: 'pass' as const, description: '证书有效且未过期' },'
+        { name: '证书链', status: 'warning' as const, description: '中间证书缺失', recommendation: '安装完整证书链' },'
+        { name: 'HSTS', status: 'fail' as const, description: '未启用HTTP严格传输安全', recommendation: '添加HSTS头部' }'
       ]
     },
     {
-      category: '安全头部',
+      category: '安全头部','
       passed: 5,
       failed: 3,
       warnings: 2,
-      severity: 'high' as const,
+      severity: 'high' as const,'
       details: [
-        { name: 'Content-Security-Policy', status: 'pass' as const },
-        { name: 'X-Frame-Options', status: 'pass' as const },
-        { name: 'X-Content-Type-Options', status: 'pass' as const },
-        { name: 'Referrer-Policy', status: 'warning' as const },
-        { name: 'Permissions-Policy', status: 'fail' as const }
+        { name: 'Content-Security-Policy', status: 'pass' as const },'
+        { name: 'X-Frame-Options', status: 'pass' as const },'
+        { name: 'X-Content-Type-Options', status: 'pass' as const },'
+        { name: 'Referrer-Policy', status: 'warning' as const },'
+        { name: 'Permissions-Policy', status: 'fail' as const }'
       ]
     },
     {
-      category: '身份验证',
+      category: '身份验证','
       passed: 6,
       failed: 2,
       warnings: 1,
-      severity: 'critical' as const,
+      severity: 'critical' as const,'
       details: [
-        { name: '密码策略', status: 'pass' as const },
-        { name: '会话管理', status: 'pass' as const },
-        { name: '多因素认证', status: 'fail' as const },
-        { name: '账户锁定', status: 'warning' as const }
+        { name: '密码策略', status: 'pass' as const },'
+        { name: '会话管理', status: 'pass' as const },'
+        { name: '多因素认证', status: 'fail' as const },'
+        { name: '账户锁定', status: 'warning' as const }'
       ]
     },
     {
-      category: '漏洞扫描',
+      category: '漏洞扫描','
       passed: 15,
       failed: 3,
       warnings: 2,
-      severity: 'medium' as const,
+      severity: 'medium' as const,'
       details: [
-        { name: 'SQL注入', status: 'pass' as const },
-        { name: 'XSS防护', status: 'pass' as const },
-        { name: 'CSRF防护', status: 'fail' as const },
-        { name: '文件上传安全', status: 'warning' as const }
+        { name: 'SQL注入', status: 'pass' as const },'
+        { name: 'XSS防护', status: 'pass' as const },'
+        { name: 'CSRF防护', status: 'fail' as const },'
+        { name: '文件上传安全', status: 'warning' as const }'
       ]
     },
     {
-      category: '数据保护',
+      category: '数据保护','
       passed: 7,
       failed: 1,
       warnings: 0,
-      severity: 'low' as const,
+      severity: 'low' as const,'
       details: [
-        { name: '数据加密', status: 'pass' as const },
-        { name: '敏感信息泄露', status: 'pass' as const },
-        { name: '备份安全', status: 'fail' as const }
+        { name: '数据加密', status: 'pass' as const },'
+        { name: '敏感信息泄露', status: 'pass' as const },'
+        { name: '备份安全', status: 'fail' as const }'
       ]
     }
   ];
@@ -705,16 +678,16 @@ export const SecurityChart: React.FC<SecurityChartProps> = ({
   const getSeverityColor = (severity: string) => {
     const colors = {
       dark: {
-        low: 'var(--color-success)',
-        medium: 'var(--color-warning)',
-        high: '#F97316',
-        critical: 'var(--color-danger)'
+        low: 'var(--color-success)','
+        medium: 'var(--color-warning)','
+        high: '#F97316','
+        critical: 'var(--color-danger)';
       },
       light: {
-        low: 'var(--color-success-hover)',
-        medium: 'var(--color-warning-hover)',
-        high: '#EA580C',
-        critical: 'var(--color-danger-hover)'
+        low: 'var(--color-success-hover)','
+        medium: 'var(--color-warning-hover)','
+        high: '#EA580C','
+        critical: 'var(--color-danger-hover)';
       }
     };
     return colors[theme][severity as keyof typeof colors.dark] || colors[theme].medium;
@@ -723,13 +696,12 @@ export const SecurityChart: React.FC<SecurityChartProps> = ({
   const bgColor = theme === 'dark' ? 'var(--color-gray-800)' : 'var(--color-white)';
   const textColor = theme === 'dark' ? 'var(--color-gray-50)' : 'var(--color-gray-900)';
   const gridColor = theme === 'dark' ? 'var(--color-gray-700)' : 'var(--color-gray-200)';
-
   const tooltipStyle = {
     backgroundColor: bgColor,
-    border: `1px solid ${gridColor}`,
-    borderRadius: '8px',
+    border: `1px solid ${gridColor}`,`
+    borderRadius: "8px','`
     color: textColor,
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
   };
 
   // 计算总体安全评分
@@ -743,93 +715,92 @@ export const SecurityChart: React.FC<SecurityChartProps> = ({
     category: item.category,
     score: item.passed / (item.passed + item.failed + (item.warnings || 0)) * 100,
     severity: item.severity,
-    color: getSeverityColor(item.severity || 'medium')
+    color: getSeverityColor(item.severity || 'medium')'
   }));
 
   const overallData = [
-    { name: '通过', value: totalPassed, color: 'var(--color-success)' },
-    { name: '警告', value: totalWarnings, color: 'var(--color-warning)' },
-    { name: '失败', value: totalFailed, color: 'var(--color-danger)' }
+    { name: '通过', value: totalPassed, color: 'var(--color-success)' },'
+    { name: '警告', value: totalWarnings, color: 'var(--color-warning)' },'
+    { name: '失败', value: totalFailed, color: 'var(--color-danger)' }'
   ];
 
   const renderChart = () => {
     switch (viewType) {
-      case 'detailed':
+      case 'detailed': ''
         return (
           <ComposedChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-            <XAxis dataKey="category" stroke={textColor} fontSize={12} />
-            <YAxis stroke={textColor} fontSize={12} />
-            <Tooltip contentStyle={tooltipStyle} />
-            <Legend />
-            <Bar dataKey="passed" stackId="a" fill="var(--color-success)" name="通过" />
-            <Bar dataKey="warnings" stackId="a" fill="var(--color-warning)" name="警告" />
-            <Bar dataKey="failed" stackId="a" fill="var(--color-danger)" name="失败" />
+            <CartesianGrid strokeDasharray= '3 3' stroke={gridColor}    />
+            <XAxis dataKey= 'category' stroke={textColor} fontSize={12}    />
+            <YAxis stroke={textColor} fontSize={12}    />
+            <Tooltip contentStyle={tooltipStyle}    />
+            <Legend  />
+            <Bar dataKey= 'passed' stackId= 'a' fill= 'var(--color-success)' name= '通过'    />
+            <Bar dataKey= 'warnings' stackId= 'a' fill= 'var(--color-warning)' name= '警告'    />
+            <Bar dataKey= 'failed' stackId= 'a' fill= 'var(--color-danger)' name= '失败'    />
             <Line
-              type="monotone"
+              type= 'monotone';
               dataKey={(data: any) => (data.passed / (data.passed + data.failed + (data.warnings || 0))) * 100}
-              stroke="var(--color-primary)"
+              stroke= 'var(--color-primary)';
               strokeWidth={2}
-              name="通过率 (%)"
+              name= '通过率 (%)';
             />
           </ComposedChart>
         );
 
-      case 'severity':
+      case 'severity': ''
         return (
           <BarChart data={severityData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-            <XAxis dataKey="category" stroke={textColor} fontSize={12} />
-            <YAxis domain={[0, 100]} stroke={textColor} fontSize={12} />
-            <Tooltip contentStyle={tooltipStyle} />
+            <CartesianGrid strokeDasharray= '3 3' stroke={gridColor}    />
+            <XAxis dataKey= 'category' stroke={textColor} fontSize={12}    />
+            <YAxis domain={[0, 100]} stroke={textColor} fontSize={12}    />
+            <Tooltip contentStyle={tooltipStyle}    />
             <Bar
-              dataKey="score"
-              fill="#8884d8"
+              dataKey= 'score';
+              fill= '#8884d8';
               radius={[4, 4, 0, 0]}
-              name="安全评分 (%)"
+              name= '安全评分 (%)';
             >
               {severityData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
+                <Cell key={`cell-${index}`} fill={entry.color}    />`
               ))}
             </Bar>
-            <ReferenceLine y={90} stroke="var(--color-success)" strokeDasharray="5 5" label="优秀" />
-            <ReferenceLine y={70} stroke="var(--color-warning)" strokeDasharray="5 5" label="良好" />
-            <ReferenceLine y={50} stroke="var(--color-danger)" strokeDasharray="5 5" label="需改进" />
+            <ReferenceLine y={90} stroke= "var(--color-success)' strokeDasharray= '5 5' label= '优秀'    />`
+            <ReferenceLine y={70} stroke= 'var(--color-warning)' strokeDasharray= '5 5' label= '良好'    />
+            <ReferenceLine y={50} stroke= 'var(--color-danger)' strokeDasharray= '5 5' label= '需改进'    />
           </BarChart>
         );
 
       default:
-        return (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+        return (<div className= 'grid grid-cols-1 lg:grid-cols-2 gap-6 h-full'>
             <div>
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width= '100%' height= '100%'>
                 <PieChart>
                   <Pie
                     data={overallData}
-                    cx="50%"
-                    cy="50%"
+                    cx= '50%';
+                    cy= '50%';
                     outerRadius={80}
-                    dataKey="value"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    dataKey= 'value';
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}`
                   >
                     {overallData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+                      <Cell key={`cell-${index}`} fill={entry.color}    />`
                     ))}
                   </Pie>
-                  <Tooltip contentStyle={tooltipStyle} />
+                  <Tooltip contentStyle={tooltipStyle}    />
                 </PieChart>
               </ResponsiveContainer>
             </div>
             <div>
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width= "100%' height= '100%'>`
                 <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-                  <XAxis dataKey="category" stroke={textColor} fontSize={10} />
-                  <YAxis stroke={textColor} fontSize={10} />
-                  <Tooltip contentStyle={tooltipStyle} />
-                  <Bar dataKey="passed" stackId="a" fill="var(--color-success)" name="通过" />
-                  <Bar dataKey="warnings" stackId="a" fill="var(--color-warning)" name="警告" />
-                  <Bar dataKey="failed" stackId="a" fill="var(--color-danger)" name="失败" />
+                  <CartesianGrid strokeDasharray= '3 3' stroke={gridColor}    />
+                  <XAxis dataKey= 'category' stroke={textColor} fontSize={10}    />
+                  <YAxis stroke={textColor} fontSize={10}    />
+                  <Tooltip contentStyle={tooltipStyle}    />
+                  <Bar dataKey= 'passed' stackId= 'a' fill= 'var(--color-success)' name= '通过'    />
+                  <Bar dataKey= 'warnings' stackId= 'a' fill= 'var(--color-warning)' name= '警告'    />
+                  <Bar dataKey= 'failed' stackId= 'a' fill= 'var(--color-danger)' name= '失败'    />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -838,18 +809,17 @@ export const SecurityChart: React.FC<SecurityChartProps> = ({
     }
   };
 
-  return (
-    <div className={`p-6 rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border'}`}>
-      <div className="flex justify-between items-center mb-4">
+  return (<div className={`p-6 rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border'}`}>`
+      <div className= "flex justify-between items-center mb-4'>`
         <div>
-          <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+          <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white" : 'text-gray-900'}`}>`
             安全检查结果
           </h3>
-          <div className="flex items-center gap-4 mt-2">
-            <div className={`text-2xl font-bold ${securityScore >= 90 ? 'text-green-500' : securityScore >= 70 ? 'text-yellow-500' : 'text-red-500'}`}>
+          <div className= "flex items-center gap-4 mt-2'>`
+            <div className={`text-2xl font-bold ${securityScore >= 90 ? "text-green-500' : securityScore >= 70 ? 'text-yellow-500' : 'text-red-500'}`}>`
               {securityScore}%
             </div>
-            <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+            <div className={`text-sm ${theme === 'dark' ? 'text-gray-300" : "text-gray-600'}`}>`
               总体安全评分
             </div>
           </div>
@@ -859,45 +829,45 @@ export const SecurityChart: React.FC<SecurityChartProps> = ({
           <select
             value={viewType}
             onChange={(e) => setViewType(e.target.value as any)}
-            className={`px-3 py-1 rounded text-sm ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'}`}
-            title="选择视图类型"
+            className={`px-3 py-1 rounded text-sm ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'}`}'`
+            title= "选择视图类型';'`
           >
-            <option value="overview">总览</option>
-            <option value="detailed">详细分析</option>
-            <option value="severity">严重程度</option>
+            <option value= 'overview'>总览</option>
+            <option value= 'detailed'>详细分析</option>
+            <option value= 'severity'>严重程度</option>
           </select>
         )}
       </div>
 
-      <div className="chart-container" style={{ height: height }}>
+      <div className= 'chart-container' style={{ height: height }}>
         {renderChart()}
       </div>
 
       {showDetails && selectedCategory && (
-        <div className="mt-4">
-          <h4 className={`text-md font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+        <div className= 'mt-4'>
+          <h4 className={`text-md font-semibold mb-2 ${theme === 'dark' ? 'text-white" : "text-gray-900'}`}>`
             {selectedCategory} 详细信息
           </h4>
-          <div className="space-y-2">
+          <div className= "space-y-2'>`
             {chartData.find(item => item.category === selectedCategory)?.details?.map((detail, index) => (
-              <div key={index} className={`p-3 rounded flex items-center justify-between ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full ${detail.status === 'pass' ? 'bg-green-500' :
-                    detail.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
-                    }`} />
+              <div key={index} className={`p-3 rounded flex items-center justify-between ${theme === 'dark' ? 'bg-gray-700' : "bg-gray-50'}`}>`
+                <div className= "flex items-center gap-3'>`
+                  <div className={`w-3 h-3 rounded-full ${detail.status === 'pass' ? 'bg-green-500' : ''`}
+                    detail.status === "warning' ? 'bg-yellow-500' : "bg-red-500';'`
+                    }`} />`
                   <div>
-                    <div className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    <div className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>`
                       {detail.name}
                     </div>
                     {(detail as any).description && (
-                      <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                      <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : "text-gray-600'}`}>`
                         {(detail as any).description}
                       </div>
                     )}
                   </div>
                 </div>
                 {(detail as any).recommendation && (
-                  <div className={`text-xs ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
+                  <div className={`text-xs ${theme === 'dark' ? 'text-blue-400' : "text-blue-600'}`}>`
                     {(detail as any).recommendation}
                   </div>
                 )}
@@ -911,7 +881,7 @@ export const SecurityChart: React.FC<SecurityChartProps> = ({
 };
 
 // 高级饼图组件
-interface PieChartProps {
+interface PieChartProps   {
   data?: Array<{
     name: string;
     value: number;
@@ -920,7 +890,7 @@ interface PieChartProps {
     trend?: number;
   }>;
   title?: string;
-  theme?: 'dark' | 'light';
+  theme?: "dark' | 'light';'`
   showLegend?: boolean;
   showPercentage?: boolean;
   interactive?: boolean;
@@ -930,23 +900,22 @@ interface PieChartProps {
 
 export const PieChart: React.FC<PieChartProps> = ({
   data,
-  title = "数据分布",
-  theme = 'dark',
+  title = '数据分布','
+  theme = 'dark','
   showLegend = true,
   showPercentage = true,
   interactive = true,
   height = 300,
-  chartType = 'pie'
+  chartType = 'pie';
 }) => {
   const [currentChartType, setCurrentChartType] = useState(chartType);
   const [selectedSegment, setSelectedSegment] = useState<string | null>(null);
 
-  const defaultColors = ['var(--color-primary)', 'var(--color-success)', 'var(--color-warning)', 'var(--color-danger)', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16'];
-
+  const defaultColors = ['var(--color-primary)', 'var(--color-success)', 'var(--color-warning)', 'var(--color-danger)', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16'];'
   const defaultData = [
-    { name: '成功', value: 85, color: 'var(--color-success)', description: '测试通过', trend: 5 },
-    { name: '警告', value: 10, color: 'var(--color-warning)', description: '需要注意', trend: -2 },
-    { name: '错误', value: 5, color: 'var(--color-danger)', description: '测试失败', trend: -1 },
+    { name: '成功', value: 85, color: 'var(--color-success)', description: '测试通过', trend: 5 },'
+    { name: '警告', value: 10, color: 'var(--color-warning)', description: '需要注意', trend: -2 },'
+    { name: '错误', value: 5, color: 'var(--color-danger)', description: '测试失败', trend: -1 },'
   ];
 
   const chartData = (data || defaultData).map((item, index) => ({
@@ -957,93 +926,87 @@ export const PieChart: React.FC<PieChartProps> = ({
   const bgColor = theme === 'dark' ? 'var(--color-gray-800)' : 'var(--color-white)';
   const textColor = theme === 'dark' ? 'var(--color-gray-50)' : 'var(--color-gray-900)';
   const gridColor = theme === 'dark' ? 'var(--color-gray-700)' : 'var(--color-gray-200)';
-
   const tooltipStyle = {
     backgroundColor: bgColor,
-    border: `1px solid ${gridColor}`,
-    borderRadius: '8px',
+    border: `1px solid ${gridColor}`,`
+    borderRadius: "8px','`
     color: textColor,
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
   };
 
   const renderChart = () => {
     switch (currentChartType) {
-      case 'donut':
+      case 'donut': ''
         return (
           <PieChart>
             <Pie
               data={chartData}
-              cx="50%"
-              cy="50%"
+              cx= '50%';
+              cy= '50%';
               innerRadius={60}
               outerRadius={100}
-              dataKey="value"
-              label={showPercentage ? ({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%` : undefined}
+              dataKey= 'value';
+              label={showPercentage ? ({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%` : undefined}`
               onClick={interactive ? (data: any) => setSelectedSegment(data.name) : undefined}
             >
               {chartData.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
+                <Cell key={`cell-${index}`}`
                   fill={entry.color}
-                  stroke={selectedSegment === entry.name ? 'var(--color-white)' : 'none'}
+                  stroke={selectedSegment === entry.name ? "var(--color-white)' : 'none'}'`
                   strokeWidth={selectedSegment === entry.name ? 2 : 0}
-                />
+                   />
               ))}
             </Pie>
-            <Tooltip contentStyle={tooltipStyle} />
-            {showLegend && <Legend />}
+            <Tooltip contentStyle={tooltipStyle}    />
+            {showLegend && <Legend  />}
           </PieChart>
         );
 
-      case 'funnel':
-        return (
-          <FunnelChart>
+      case 'funnel': ''
+        return (<FunnelChart>
             <Funnel
-              dataKey="value"
+              dataKey= 'value';
               data={chartData}
               isAnimationActive
             >
-              <LabelList position="center" fill="#fff" stroke="none" />
+              <LabelList position= 'center' fill= '#fff' stroke= 'none'    />
               {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
+                <Cell key={`cell-${index}`} fill={entry.color}    />`
               ))}
             </Funnel>
-            <Tooltip contentStyle={tooltipStyle} />
+            <Tooltip contentStyle={tooltipStyle}    />
           </FunnelChart>
         );
 
       default:
-        return (
-          <PieChart>
+        return (<PieChart>
             <Pie
               data={chartData}
-              cx="50%"
-              cy="50%"
+              cx= "50%';'`
+              cy= '50%';
               outerRadius={100}
-              dataKey="value"
-              label={showPercentage ? ({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%` : undefined}
+              dataKey= 'value';
+              label={showPercentage ? ({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%` : undefined}`
               onClick={interactive ? (data: any) => setSelectedSegment(data.name) : undefined}
             >
               {chartData.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
+                <Cell key={`cell-${index}`}`
                   fill={entry.color}
-                  stroke={selectedSegment === entry.name ? 'var(--color-white)' : 'none'}
+                  stroke={selectedSegment === entry.name ? "var(--color-white)' : 'none'}'`
                   strokeWidth={selectedSegment === entry.name ? 2 : 0}
-                />
+                   />
               ))}
             </Pie>
-            <Tooltip contentStyle={tooltipStyle} />
-            {showLegend && <Legend />}
+            <Tooltip contentStyle={tooltipStyle}    />
+            {showLegend && <Legend  />}
           </PieChart>
         );
     }
   };
 
-  return (
-    <div className={`p-6 rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border'}`}>
-      <div className="flex justify-between items-center mb-4">
-        <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+  return (<div className={`p-6 rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border'}`}>`
+      <div className= "flex justify-between items-center mb-4'>`
+        <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : "text-gray-900'}`}>`
           {title}
         </h3>
 
@@ -1051,46 +1014,46 @@ export const PieChart: React.FC<PieChartProps> = ({
           <select
             value={currentChartType}
             onChange={(e) => setCurrentChartType(e.target.value as any)}
-            className={`px-3 py-1 rounded text-sm ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'}`}
-            title="选择图表类型"
+            className={`px-3 py-1 rounded text-sm ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'}`}'`
+            title= "选择图表类型';'`
           >
-            <option value="pie">饼图</option>
-            <option value="donut">环形图</option>
-            <option value="funnel">漏斗图</option>
+            <option value= 'pie'>饼图</option>
+            <option value= 'donut'>环形图</option>
+            <option value= 'funnel'>漏斗图</option>
           </select>
         )}
       </div>
 
-      <div className="chart-container" style={{ height: height }}>
-        <ResponsiveContainer width="100%" height="100%">
+      <div className= 'chart-container' style={{ height: height }}>
+        <ResponsiveContainer width= '100%' height= '100%'>
           {renderChart()}
         </ResponsiveContainer>
       </div>
 
       {selectedSegment && (
-        <div className="mt-4">
+        <div className= 'mt-4'>
           {chartData.filter(item => item.name === selectedSegment).map((item, index) => (
-            <div key={index} className={`p-3 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
+            <div key={index} className={`p-3 rounded ${theme === 'dark' ? 'bg-gray-700' : "bg-gray-50'}`}>`
+              <div className= "flex items-center justify-between'>`
+                <div className= 'flex items-center gap-3'>
                   <div
-                    className="w-4 h-4 rounded-full"
+                    className= 'w-4 h-4 rounded-full';
                     style={{ backgroundColor: item.color }}
                   />
                   <div>
-                    <div className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    <div className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>`
                       {item.name}: {item.value}
                     </div>
                     {item.description && (
-                      <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                      <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : "text-gray-600'}`}>`
                         {item.description}
                       </div>
                     )}
                   </div>
                 </div>
                 {item.trend !== undefined && (
-                  <div className={`text-sm font-medium ${item.trend > 0 ? 'text-green-500' : item.trend < 0 ? 'text-red-500' : 'text-gray-500'}`}>
-                    {item.trend > 0 ? '+' : ''}{item.trend}%
+                  <div className={`text-sm font-medium ${item.trend > 0 ? 'text-green-500' : item.trend < 0 ? 'text-red-500' : 'text-gray-500'}`}>`
+                    {item.trend > 0 ? "+' : "'}{item.trend}%'`
                   </div>
                 )}
               </div>
@@ -1103,7 +1066,7 @@ export const PieChart: React.FC<PieChartProps> = ({
 };
 
 // 高级趋势图表
-interface TrendChartProps {
+interface TrendChartProps   {
   data?: Array<{
     date: string;
     value: number;
@@ -1124,24 +1087,24 @@ interface TrendChartProps {
 
 export const TrendChart: React.FC<TrendChartProps> = ({
   data,
-  title = "趋势分析",
-  color = "var(--color-primary)",
-  theme = 'dark',
+  title = '趋势分析','
+  color = 'var(--color-primary)','
+  theme = 'dark','
   showPrediction = false,
   showTarget = false,
   interactive = true,
   height = 300,
-  timeRange = 'month'
+  timeRange = 'month';
 }) => {
   const [selectedTimeRange, setSelectedTimeRange] = useState(timeRange);
   const [showConfidenceInterval, setShowConfidenceInterval] = useState(false);
 
   const generateDefaultData = () => {
     const ranges = {
-      day: { count: 24, format: (i: number) => `${i}:00` },
-      week: { count: 7, format: (i: number) => ['周一', '周二', '周三', '周四', '周五', '周六', '周日'][i] },
-      month: { count: 12, format: (i: number) => `${i + 1}月` },
-      year: { count: 5, format: (i: number) => `${2020 + i}年` }
+      day: { count: 24, format: (i: number) => `${i}:00` },`
+      week: { count: 7, format: (i: number) => ["周一", "周二", "周三", "周四", "周五", "周六", "周日'][i] },'`
+      month: { count: 12, format: (i: number) => `${i + 1}月` },`
+      year: { count: 5, format: (i: number) => `${2020 + i}年` }`
     };
 
     const range = ranges[selectedTimeRange];
@@ -1164,16 +1127,15 @@ export const TrendChart: React.FC<TrendChartProps> = ({
 
   const chartData = data || generateDefaultData();
 
-  const bgColor = theme === 'dark' ? 'var(--color-gray-800)' : 'var(--color-white)';
+  const bgColor = theme === "dark' ? 'var(--color-gray-800)' : 'var(--color-white)';'`
   const textColor = theme === 'dark' ? 'var(--color-gray-50)' : 'var(--color-gray-900)';
-  const gridColor = theme === 'dark' ? 'var(--color-gray-700)' : 'var(--color-gray-200)';
-
+  const gridColor = theme === 'dark' ? 'var(--color-gray-700)' : "var(--color-gray-200)';
   const tooltipStyle = {
     backgroundColor: bgColor,
-    border: `1px solid ${gridColor}`,
-    borderRadius: '8px',
+    border: `1px solid ${gridColor}`,`
+    borderRadius: "8px','`
     color: textColor,
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
   };
 
   // 计算趋势统计
@@ -1183,47 +1145,45 @@ export const TrendChart: React.FC<TrendChartProps> = ({
   const volatility = Math.sqrt(values.reduce((sum, val) => sum + Math.pow(val - avgValue, 2), 0) / values.length);
 
   return (
-    <div className={`p-6 rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border'}`}>
-      <div className="flex justify-between items-center mb-4">
+    <div className={`p-6 rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border'}`}>`
+      <div className= "flex justify-between items-center mb-4'>`
         <div>
-          <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+          <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : "text-gray-900'}`}>`
             {title}
           </h3>
-          <div className="flex items-center gap-4 mt-2">
-            <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-              平均值: <span className="font-medium">{avgValue.toFixed(1)}</span>
+          <div className= "flex items-center gap-4 mt-2'>`
+            <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : "text-gray-600'}`}>`
+              平均值: <span className= "font-medium'>{avgValue.toFixed(1)}</span>`
             </div>
-            <div className={`text-sm ${trend > 0 ? 'text-green-500' : trend < 0 ? 'text-red-500' : 'text-gray-500'}`}>
-              趋势: <span className="font-medium">{trend > 0 ? '+' : ''}{trend.toFixed(1)}%</span>
+            <div className={`text-sm ${trend > 0 ? 'text-green-500' : trend < 0 ? 'text-red-500" : 'text-gray-500'}`}>`
+              趋势: <span className= "font-medium'>{trend > 0 ? "+' : ''}{trend.toFixed(1)}%</span>`
             </div>
-            <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-              波动性: <span className="font-medium">{volatility.toFixed(1)}</span>
+            <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : "text-gray-600'}`}>`
+              波动性: <span className= "font-medium'>{volatility.toFixed(1)}</span>`
             </div>
           </div>
         </div>
 
-        {interactive && (
-          <div className="flex gap-2">
+        {interactive && (<div className= 'flex gap-2'>
             <select
               value={selectedTimeRange}
               onChange={(e) => setSelectedTimeRange(e.target.value as any)}
-              className={`px-3 py-1 rounded text-sm ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'}`}
-              title="选择时间范围"
+              className={`px-3 py-1 rounded text-sm ${theme === 'dark' ? 'bg-gray-700 text-white' : "bg-gray-100 text-gray-900'}`}'`
+              title= "选择时间范围';'`
             >
-              <option value="day">日</option>
-              <option value="week">周</option>
-              <option value="month">月</option>
-              <option value="year">年</option>
+              <option value= 'day'>日</option>
+              <option value= 'week'>周</option>
+              <option value= 'month'>月</option>
+              <option value= 'year'>年</option>
             </select>
 
-            {showPrediction && (
-              <button
+            {showPrediction && (<button
                 onClick={() => setShowConfidenceInterval(!showConfidenceInterval)}
-                className={`px-3 py-1 rounded text-sm ${showConfidenceInterval
-                  ? 'bg-blue-600 text-white'
-                  : theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'
-                  }`}
-                title="显示置信区间"
+                className={`px-3 py-1 rounded text-sm ${showConfidenceInterval`}
+                  ? "bg-blue-600 text-white';'`
+                  : theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900';
+                  }`}`
+                title= "显示置信区间';'`
               >
                 置信区间
               </button>
@@ -1232,61 +1192,57 @@ export const TrendChart: React.FC<TrendChartProps> = ({
         )}
       </div>
 
-      <div className="chart-container" style={{ height: height }}>
-        <ResponsiveContainer width="100%" height="100%">
+      <div className= 'chart-container' style={{ height: height }}>
+        <ResponsiveContainer width= '100%' height= '100%'>
           <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-            <XAxis dataKey="date" stroke={textColor} fontSize={12} />
-            <YAxis stroke={textColor} fontSize={12} />
-            <Tooltip contentStyle={tooltipStyle} />
-            <Legend />
+            <CartesianGrid strokeDasharray= '3 3' stroke={gridColor}    />
+            <XAxis dataKey= 'date' stroke={textColor} fontSize={12}    />
+            <YAxis stroke={textColor} fontSize={12}    />
+            <Tooltip contentStyle={tooltipStyle}    />
+            <Legend  />
 
             {/* 主要数据线 */}
-            <Line
-              type="monotone"
-              dataKey="value"
+            <Line type= 'monotone';
+              dataKey= 'value';
               stroke={color}
               strokeWidth={3}
               dot={{ fill: color, strokeWidth: 2, r: 4 }}
-              name="实际值"
-            />
+              name= '实际值';
+               />
 
             {/* 目标线 */}
             {showTarget && (
-              <Line
-                type="monotone"
-                dataKey="target"
-                stroke="var(--color-success)"
+              <Line type= 'monotone';
+                dataKey= 'target';
+                stroke= 'var(--color-success)';
                 strokeWidth={2}
-                strokeDasharray="5 5"
+                strokeDasharray= '5 5';
                 dot={false}
-                name="目标值"
-              />
+                name= '目标值';
+                 />
             )}
 
             {/* 预测线 */}
             {showPrediction && (
-              <Line
-                type="monotone"
-                dataKey="prediction"
-                stroke="var(--color-warning)"
+              <Line type= 'monotone';
+                dataKey= 'prediction';
+                stroke= 'var(--color-warning)';
                 strokeWidth={2}
-                strokeDasharray="3 3"
-                dot={{ fill: 'var(--color-warning)', strokeWidth: 2, r: 3 }}
-                name="预测值"
-              />
+                strokeDasharray= '3 3';
+                dot={{ fill: 'var(--color-warning)', strokeWidth: 2, r: 3 }}'
+                name= '预测值';
+                 />
             )}
 
             {/* 置信区间 */}
             {showPrediction && showConfidenceInterval && (
-              <Area
-                type="monotone"
-                dataKey="confidence"
-                stroke="none"
-                fill="var(--color-warning)"
+              <Area type= 'monotone';
+                dataKey= 'confidence';
+                stroke= 'none';
+                fill= 'var(--color-warning)';
                 fillOpacity={0.2}
-                name="置信区间"
-              />
+                name= '置信区间';
+                 />
             )}
           </LineChart>
         </ResponsiveContainer>
@@ -1296,7 +1252,7 @@ export const TrendChart: React.FC<TrendChartProps> = ({
 };
 
 // 增强的实时压力测试图表组件
-interface RealTimeStressTestChartProps {
+interface RealTimeStressTestChartProps   {
   realTimeData?: Array<{
     timestamp: number;
     responseTime: number;
@@ -1350,19 +1306,19 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
   height = 400,
   showAdvancedMetrics = true,
   enableZoom = true,
-  dataPointDensity = 'medium',
+  dataPointDensity = 'medium','
   testPhases = []
 }) => {
-  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['responseTime', 'throughput', 'activeUsers', 'errorRate']);
+  const [selectedMetrics, setSelectedMetrics] = useState<string[]>(['responseTime', 'throughput', 'activeUsers', 'errorRate']);'
   const [zoomDomain, setZoomDomain] = useState<{ startIndex?: number, endIndex?: number }>({});
   const [showErrorBreakdown, setShowErrorBreakdown] = useState(false);
 
   // 根据数据点密度控制显示的数据量
   const getDataPointStep = () => {
     switch (dataPointDensity) {
-      case 'low': return 5;
-      case 'medium': return 2;
-      case 'high': return 1;
+      case 'low': return 5;'
+      case 'medium': return 2;'
+      case "high': return 1;'
       default: return 2;
     }
   };
@@ -1421,7 +1377,7 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
       }
 
       chartData.push({
-        time: format(new Date(group.timestamp), 'HH:mm:ss'),
+        time: format(new Date(group.timestamp), "HH:mm:ss'),'
         timestamp: group.timestamp,
         responseTime: avgResponseTime,
         maxResponseTime,
@@ -1436,142 +1392,134 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
 
     // 根据密度控制数据点数量
     const step = getDataPointStep();
-    const maxPoints = dataPointDensity === 'low' ? 100 : dataPointDensity === 'medium' ? 250 : 500;
+    const maxPoints = dataPointDensity === 'low' ? 100 : dataPointDensity === 'medium' ? 250 : 500;'
     const filteredData = chartData.filter((_, index) => index % step === 0);
     return filteredData.slice(-maxPoints);
   }, [realTimeData]);
 
   return (
-    <div className="space-y-4">
+    <div className= 'space-y-4'>
       {/* 实时指标卡片 */}
       {metrics && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-          <div className="bg-gray-800 p-3 rounded-lg">
-            <div className="text-sm text-gray-400">总请求数</div>
-            <div className="text-xl font-bold text-white">{metrics.totalRequests}</div>
+        <div className= 'grid grid-cols-2 md:grid-cols-4 gap-4 mb-4'>
+          <div className= 'bg-gray-800 p-3 rounded-lg'>
+            <div className= 'text-sm text-gray-400'>总请求数</div>
+            <div className= 'text-xl font-bold text-white'>{metrics.totalRequests}</div>
           </div>
-          <div className="bg-gray-800 p-3 rounded-lg">
-            <div className="text-sm text-gray-400">平均响应时间</div>
-            <div className="text-xl font-bold text-blue-400">{metrics.averageResponseTime}ms</div>
+          <div className= 'bg-gray-800 p-3 rounded-lg'>
+            <div className= 'text-sm text-gray-400'>平均响应时间</div>
+            <div className= 'text-xl font-bold text-blue-400'>{metrics.averageResponseTime}ms</div>
           </div>
-          <div className="bg-gray-800 p-3 rounded-lg">
-            <div className="text-sm text-gray-400">错误率</div>
-            <div className="text-xl font-bold text-red-400">{metrics.errorRate}%</div>
+          <div className= 'bg-gray-800 p-3 rounded-lg'>
+            <div className= 'text-sm text-gray-400'>错误率</div>
+            <div className= 'text-xl font-bold text-red-400'>{metrics.errorRate}%</div>
           </div>
-          <div className="bg-gray-800 p-3 rounded-lg">
-            <div className="text-sm text-gray-400">活跃用户</div>
-            <div className="text-xl font-bold text-green-400">{metrics.activeUsers}</div>
+          <div className= 'bg-gray-800 p-3 rounded-lg'>
+            <div className= 'text-sm text-gray-400'>活跃用户</div>
+            <div className= 'text-xl font-bold text-green-400'>{metrics.activeUsers}</div>
           </div>
         </div>
       )}
 
       {/* 实时图表 */}
-      <div className="bg-gray-800 p-4 rounded-lg">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-white">实时性能监控</h3>
+      <div className= 'bg-gray-800 p-4 rounded-lg'>
+        <div className= 'flex items-center justify-between mb-4'>
+          <h3 className= 'text-lg font-semibold text-white'>实时性能监控</h3>
           {isRunning && (
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-sm text-green-400">实时监控中</span>
+            <div className= 'flex items-center space-x-2'>
+              <div className= 'w-2 h-2 bg-green-400 rounded-full animate-pulse'></div>
+              <span className= 'text-sm text-green-400'>实时监控中</span>
             </div>
           )}
         </div>
 
-        <ResponsiveContainer width="100%" height={height}>
+        <ResponsiveContainer width= '100%' height={height}>
           <ComposedChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
-            <XAxis
-              dataKey="time"
-              stroke="var(--color-gray-400)"
+            <CartesianGrid strokeDasharray= '3 3' stroke= 'var(--color-gray-700)'    />
+            <XAxis dataKey= 'time';
+              stroke= 'var(--color-gray-400)';
               fontSize={12}
-            />
-            <YAxis
-              yAxisId="left"
-              stroke="var(--color-gray-400)"
+               />
+            <YAxis yAxisId= 'left';
+              stroke= 'var(--color-gray-400)';
               fontSize={12}
-              label={{ value: '响应时间 (ms)', angle: -90, position: 'insideLeft' }}
-            />
-            <YAxis
-              yAxisId="right"
-              orientation="right"
-              stroke="var(--color-gray-400)"
+              label={{ value: '响应时间 (ms)', angle: -90, position: 'insideLeft' }}'
+               />
+            <YAxis yAxisId= 'right';
+              orientation= 'right';
+              stroke= 'var(--color-gray-400)';
               fontSize={12}
-              label={{ value: '用户数/吞吐量', angle: 90, position: 'insideRight' }}
-            />
+              label={{ value: '用户数/吞吐量', angle: 90, position: 'insideRight' }}'
+               />
             <Tooltip
               contentStyle={{
-                backgroundColor: 'var(--color-gray-800)',
-                border: '1px solid var(--color-gray-700)',
-                borderRadius: '8px',
-                color: 'var(--color-gray-50)'
+                backgroundColor: 'var(--color-gray-800)','
+                border: '1px solid var(--color-gray-700)','
+                borderRadius: '8px','
+                color: 'var(--color-gray-50)';
               }}
               formatter={(value, name) => {
                 const formatters: Record<string, (v: any) => string[]> = {
-                  responseTime: (v: any) => [`${v}ms`, '平均响应时间'],
-                  maxResponseTime: (v: any) => [`${v}ms`, '最大响应时间'],
-                  throughput: (v: any) => [`${v} req/s`, '吞吐量'],
-                  successRate: (v: any) => [`${v}%`, '成功率'],
-                  errorRate: (v: any) => [`${v}%`, '错误率'],
-                  activeUsers: (v: any) => [`${v}`, '活跃用户']
+                  responseTime: (v: any) => [`${v}ms`, "平均响应时间'],'`
+                  maxResponseTime: (v: any) => [`${v}ms`, "最大响应时间'],'`
+                  throughput: (v: any) => [`${v} req/s`, "吞吐量'],'`
+                  successRate: (v: any) => [`${v}%`, "成功率'],'`
+                  errorRate: (v: any) => [`${v}%`, "错误率'],'`
+                  activeUsers: (v: any) => [`${v}`, "活跃用户']'`
                 };
                 return formatters[name as string] ? formatters[name as string](value) : [value, name];
               }}
             />
-            <Legend />
+            <Legend  />
 
             {/* 响应时间线 */}
-            <Line
-              yAxisId="left"
-              type="monotone"
-              dataKey="responseTime"
-              stroke="var(--color-primary)"
+            <Line yAxisId= "left';'`
+              type= 'monotone';
+              dataKey= 'responseTime';
+              stroke= 'var(--color-primary)';
               strokeWidth={2}
               dot={false}
-              name="平均响应时间"
-            />
+              name= '平均响应时间';
+               />
 
             {/* 最大响应时间区域 */}
-            <Area
-              yAxisId="left"
-              type="monotone"
-              dataKey="maxResponseTime"
-              stroke="#8B5CF6"
-              fill="#8B5CF6"
+            <Area yAxisId= 'left';
+              type= 'monotone';
+              dataKey= 'maxResponseTime';
+              stroke= '#8B5CF6';
+              fill= '#8B5CF6';
               fillOpacity={0.1}
-              name="最大响应时间"
-            />
+              name= '最大响应时间';
+               />
 
             {/* 活跃用户柱状图 */}
-            <Bar
-              yAxisId="right"
-              dataKey="activeUsers"
-              fill="var(--color-success)"
+            <Bar yAxisId= 'right';
+              dataKey= 'activeUsers';
+              fill= 'var(--color-success)';
               fillOpacity={0.6}
-              name="活跃用户"
-            />
+              name= '活跃用户';
+               />
 
             {/* 吞吐量线 */}
-            <Line
-              yAxisId="right"
-              type="monotone"
-              dataKey="throughput"
-              stroke="var(--color-warning)"
+            <Line yAxisId= 'right';
+              type= 'monotone';
+              dataKey= 'throughput';
+              stroke= 'var(--color-warning)';
               strokeWidth={2}
               dot={false}
-              name="吞吐量"
-            />
+              name= '吞吐量';
+               />
 
             {/* 错误率线 */}
-            <Line
-              yAxisId="right"
-              type="monotone"
-              dataKey="errorRate"
-              stroke="var(--color-danger-hover)"
+            <Line yAxisId= 'right';
+              type= 'monotone';
+              dataKey= 'errorRate';
+              stroke= 'var(--color-danger-hover)';
               strokeWidth={2}
               dot={false}
-              name="错误率"
-              strokeDasharray="4 2"
-            />
+              name= '错误率';
+              strokeDasharray= '4 2';
+               />
           </ComposedChart>
         </ResponsiveContainer>
       </div>

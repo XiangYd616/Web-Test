@@ -3,7 +3,7 @@
  * 管理应用配置
  */
 
-export interface AppConfig {
+export interface AppConfig     {
   apiBaseUrl: string;
   timeout: number;
   retryAttempts: number;
@@ -11,7 +11,7 @@ export interface AppConfig {
 
 class ConfigService {
   private config: AppConfig = {
-    apiBaseUrl: process.env.REACT_APP_API_URL || 'http://localhost:3001',
+    apiBaseUrl: process.env.REACT_APP_API_URL || 'http://localhost:3001','
     timeout: 30000,
     retryAttempts: 3
   };

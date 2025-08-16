@@ -3,18 +3,14 @@
  * 管理各种测试引擎的执行和协调
  */
 
-import configService from '../configService';
-import testHistoryService from './testHistoryService';
-import testStateManager from '../state/testStateManager';
-
-export interface TestEngineConfig {
+import configService from '../configService';import testHistoryService from './testHistoryService';import testStateManager from '../state/testStateManager';export interface TestEngineConfig     {'
   timeout: number;
   retryAttempts: number;
   concurrentLimit: number;
   enableLogging: boolean;
 }
 
-export interface TestEngineResult {
+export interface TestEngineResult     {
   success: boolean;
   score?: number;
   issues: TestIssue[];
@@ -23,7 +19,7 @@ export interface TestEngineResult {
   duration: number;
 }
 
-export interface TestIssue {
+export interface TestIssue     {
   id: string;
   type: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
@@ -33,7 +29,7 @@ export interface TestIssue {
   recommendation?: string;
 }
 
-export interface TestRecommendation {
+export interface TestRecommendation     {
   id: string;
   category: string;
   title: string;
@@ -43,7 +39,7 @@ export interface TestRecommendation {
   priority: number;
 }
 
-export interface TestEngineOptions {
+export interface TestEngineOptions     {
   url: string;
   testType: 'performance' | 'security' | 'seo' | 'stress' | 'api' | 'compatibility';
   customSettings?: Record<string, any>;
@@ -88,7 +84,7 @@ class TestEngineService {
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics:', {
+    console.debug('API Metrics: ', {'
       url: info.url,
       method: info.method,
       status: info.status,
@@ -115,9 +111,9 @@ class TestEngineService {
   };
 
   if(success) {
-    console.log('API调用成功:', logData);
+    console.log('API调用成功:', logData);'
   } else {
-    console.error('API调用失败:', logData);
+    console.error('API调用失败:', logData);'
   }
 }
   private config: TestEngineConfig;
@@ -157,7 +153,7 @@ class TestEngineService {
       testHistoryService.addRecord({
         testType: options.testType,
         url: options.url,
-        status: 'completed',
+        status: 'completed','
         score: result.score,
         startTime: new Date(Date.now() - result.duration),
         endTime: new Date(),
@@ -170,7 +166,6 @@ class TestEngineService {
       
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      
       // 更新测试状态为失败
       const testState = testStateManager.getActiveTests().find(t => t.url === options.url);
       if (testState) {
@@ -216,24 +211,24 @@ class TestEngineService {
 
     try {
       switch (options.testType) {
-        case 'performance':
+        case 'performance': ''
           return await this.runPerformanceTest(options, testId, signal);
-        case 'security':
+        case 'security': ''
           return await this.runSecurityTest(options, testId, signal);
-        case 'seo':
+        case 'seo': ''
           return await this.runSEOTest(options, testId, signal);
-        case 'stress':
+        case 'stress': ''
           return await this.runStressTest(options, testId, signal);
-        case 'api':
+        case 'api': ''
           return await this.runAPITest(options, testId, signal);
-        case 'compatibility':
+        case 'compatibility': ''
           return await this.runCompatibilityTest(options, testId, signal);
         default:
-          throw new Error(`Unsupported test type: ${options.testType}`);
+          throw new Error(`Unsupported test type: ${options.testType}`);`
       }
     } catch (error) {
       const duration = Date.now() - startTime;
-      throw new Error(`Test execution failed after ${duration}ms: ${error}`);
+      throw new Error(`Test execution failed after ${duration}ms: ${error}`);`
     }
   }
 
@@ -258,22 +253,22 @@ class TestEngineService {
       score,
       issues: [
         {
-          id: 'perf_1',
-          type: 'performance',
-          severity: score < 70 ? 'high' : 'medium',
-          title: '页面加载时间',
-          description: `页面加载时间为 ${(duration / 1000).toFixed(2)} 秒`,
-          recommendation: '优化图片大小和启用压缩'
+          id: "perf_1','`
+          type: 'performance','
+          severity: score < 70 ? 'high' : 'medium','
+          title: '页面加载时间','
+          description: `页面加载时间为 ${(duration / 1000).toFixed(2)} 秒`,`
+          recommendation: "优化图片大小和启用压缩';'`
         }
       ],
       recommendations: [
         {
-          id: 'rec_1',
-          category: 'performance',
-          title: '启用图片压缩',
-          description: '压缩图片可以显著提升加载速度',
-          impact: 'high',
-          effort: 'medium',
+          id: 'rec_1','
+          category: 'performance','
+          title: '启用图片压缩','
+          description: '压缩图片可以显著提升加载速度','
+          impact: 'high','
+          effort: 'medium','
           priority: 1
         }
       ],
@@ -307,18 +302,18 @@ class TestEngineService {
       issues: [],
       recommendations: [
         {
-          id: 'sec_1',
-          category: 'security',
-          title: '启用HTTPS',
-          description: '使用HTTPS加密传输数据',
-          impact: 'high',
-          effort: 'low',
+          id: 'sec_1','
+          category: 'security','
+          title: '启用HTTPS','
+          description: '使用HTTPS加密传输数据','
+          impact: 'high','
+          effort: 'low','
           priority: 1
         }
       ],
       metadata: {
         vulnerabilities: 0,
-        securityHeaders: ['X-Frame-Options', 'X-XSS-Protection'],
+        securityHeaders: ['X-Frame-Options', 'X-XSS-Protection'],'
         httpsEnabled: true
       },
       duration
@@ -346,12 +341,12 @@ class TestEngineService {
       issues: [],
       recommendations: [
         {
-          id: 'seo_1',
-          category: 'seo',
-          title: '优化页面标题',
-          description: '确保每个页面都有唯一的标题',
-          impact: 'medium',
-          effort: 'low',
+          id: 'seo_1','
+          category: 'seo','
+          title: '优化页面标题','
+          description: '确保每个页面都有唯一的标题','
+          impact: 'medium','
+          effort: 'low','
           priority: 2
         }
       ],
@@ -443,7 +438,7 @@ class TestEngineService {
       issues: [],
       recommendations: [],
       metadata: {
-        browsers: ['Chrome', 'Firefox', 'Safari', 'Edge'],
+        browsers: ['Chrome', 'Firefox', 'Safari', 'Edge'],'
         compatibility: 95
       },
       duration
@@ -463,7 +458,7 @@ class TestEngineService {
 
     for (let i = 0; i < steps; i++) {
       if (signal.aborted) {
-        throw new Error('Test was cancelled');
+        throw new Error('Test was cancelled');'
       }
 
       // 更新进度
@@ -479,7 +474,7 @@ class TestEngineService {
    * 生成测试ID
    */
   private generateTestId(): string {
-    return `engine_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    return `engine_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;`
   }
 }
 

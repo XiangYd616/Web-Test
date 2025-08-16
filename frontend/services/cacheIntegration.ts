@@ -3,10 +3,7 @@
  * 集成智能缓存管理器到应用中
  */
 
-import { smartCacheManager } from './smartCacheManager';
-import { apiClient } from '../utils/apiClient';
-
-// 扩展API客户端以支持缓存
+import { smartCacheManager    } from './smartCacheManager';import { apiClient    } from '../utils/apiClient';// 扩展API客户端以支持缓存'
 const originalGet = apiClient.get;
 const originalPost = apiClient.post;
 const originalPut = apiClient.put;
@@ -16,29 +13,29 @@ const originalDelete = apiClient.delete;
 const cacheConfig = {
   // GET请求缓存配置
   get: {
-    strategy: 'api',
+    strategy: 'api','
     ttl: 5 * 60 * 1000, // 5分钟
-    priority: 'medium' as const
+    priority: 'medium' as const'
   },
 
   // 静态资源缓存配置
   static: {
-    strategy: 'static',
+    strategy: 'static','
     ttl: 24 * 60 * 60 * 1000, // 24小时
-    priority: 'low' as const
+    priority: 'low' as const'
   },
 
   // 用户数据缓存配置
   user: {
-    strategy: 'user',
+    strategy: 'user','
     ttl: 30 * 60 * 1000, // 30分钟
-    priority: 'high' as const
+    priority: 'high' as const'
   }
 };
 
 // 重写GET方法以支持缓存
 apiClient.get = async (url: string, config?: any) => {
-  const cacheKey = `get_${url}_${JSON.stringify(config?.params || {})}`;
+  const cacheKey = `get_${url}_${JSON.stringify(config?.params || {})}`;`
 
   // 尝试从缓存获取
   const cachedData = smartCacheManager.get(cacheKey);
@@ -54,7 +51,7 @@ apiClient.get = async (url: string, config?: any) => {
     strategy: cacheConfig.get.strategy,
     ttl: cacheConfig.get.ttl,
     priority: cacheConfig.get.priority,
-    tags: ['api', 'get', url.split('/')[1]]
+    tags: ["api', 'get', url.split('/')[1]]'`
   });
 
   return response;
@@ -62,7 +59,7 @@ apiClient.get = async (url: string, config?: any) => {
 
 // 重写POST/PUT/DELETE方法以清除相关缓存
 const clearRelatedCache = (url: string) => {
-  const resource = url.split('/')[1];
+  const resource = url.split('/')[1];'
   smartCacheManager.clearByTag(resource);
 };
 
@@ -94,7 +91,7 @@ export const cacheManager = {
 
   // 清除所有缓存
   clearAll: () => {
-    smartCacheManager.clearByTag('api');
+    smartCacheManager.clearByTag('api');'
   },
 
   // 获取缓存统计

@@ -2,7 +2,7 @@
  * 路由相关的类型定义
  */
 
-export interface RouteConfig {
+export interface RouteConfig        {
   path: string;
   component: string;
   exact?: boolean;
@@ -12,7 +12,7 @@ export interface RouteConfig {
   meta?: RouteMeta;
 }
 
-export interface RouteMeta {
+export interface RouteMeta        {
   title?: string;
   description?: string;
   keywords?: string[];
@@ -24,14 +24,14 @@ export interface RouteMeta {
   preload?: boolean;
 }
 
-export interface BreadcrumbItem {
+export interface BreadcrumbItem        {
   label: string;
   path?: string;
   icon?: string;
   active?: boolean;
 }
 
-export interface NavigationItem {
+export interface NavigationItem        {
   label: string;
   path?: string;
   icon?: string;
@@ -47,22 +47,21 @@ export interface NavigationItem {
   target?: '_blank' | '_self';
 }
 
-export interface RouteGuardContext {
+export interface RouteGuardContext        {
   user: any;
   isAuthenticated: boolean;
   userRoles: string[];
   permissions: string[];
 }
 
-export interface RouteTransition {
+export interface RouteTransition        {
   enter: string;
   exit: string;
   duration: number;
 }
 
-export type RouteChangeHandler = (to: string, from: string) => void | Promise<void>;
-
-export interface RouterState {
+export type RouteChangeHandler    = (to: string;from: string) => void | Promise<void>;
+export interface RouterState        {
   currentPath: string;
   previousPath: string;
   params: Record<string, string>;
@@ -72,7 +71,7 @@ export interface RouterState {
   error: string | null;
 }
 
-export interface RouteGuardResult {
+export interface RouteGuardResult        {
   allowed: boolean;
   redirectTo?: string;
   reason?: string;

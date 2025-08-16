@@ -1,10 +1,10 @@
 
-interface JWTHeader {
+interface JWTHeader   {
   alg: string;
   typ: string;
 }
 
-interface JWTPayload {
+interface JWTPayload   {
   sub?: string;
   iat?: number;
   exp?: number;
@@ -26,9 +26,9 @@ export class BrowserJWT {
    */
   private base64UrlEncode(str: string): string {
     return btoa(str)
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=/g, '');
+      .replace(/\+/g, '-')'
+      .replace(/\//g, '_')'
+      .replace(/=/g, '');'
   }
 
   /**
@@ -36,9 +36,9 @@ export class BrowserJWT {
    */
   private base64UrlDecode(str: string): string {
     // 补齐padding
-    str += '='.repeat((4 - str.length % 4) % 4);
+    str += '='.repeat((4 - str.length % 4) % 4);'
     // 替换字符
-    str = str.replace(/-/g, '+').replace(/_/g, '/');
+    str = str.replace(/-/g, '+').replace(/_/g, '/');'
     return atob(str);
   }
 
@@ -46,25 +46,23 @@ export class BrowserJWT {
    * 创建JWT Token（仅用于演示）
    */
   public createToken(payload: JWTPayload, expiresIn: number = 3600): string {
-    const header: JWTHeader = {
-      alg: 'HS256',
-      typ: 'JWT'
+    const header: JWTHeader  = {
+      alg: 'HS256','
+      typ: 'JWT';
     };
-
     const now = Math.floor(Date.now() / 1000);
-    const tokenPayload: JWTPayload = {
+    const tokenPayload: JWTPayload  = {
       ...payload,
       iat: now,
       exp: now + expiresIn
     };
-
     const encodedHeader = this.base64UrlEncode(JSON.stringify(header));
     const encodedPayload = this.base64UrlEncode(JSON.stringify(tokenPayload));
 
     // 在浏览器环境中，我们使用简单的签名（仅用于演示）
-    const signature = this.base64UrlEncode(`${encodedHeader}.${encodedPayload}.mock_signature`);
+    const signature = this.base64UrlEncode(`${encodedHeader}.${encodedPayload}.mock_signature`);`
 
-    return `${encodedHeader}.${encodedPayload}.${signature}`;
+    return `${encodedHeader}.${encodedPayload}.${signature}`;`
   }
 
   /**
@@ -72,7 +70,7 @@ export class BrowserJWT {
    */
   public parseToken(token: string): { header: JWTHeader; payload: JWTPayload; signature: string } | null {
     try {
-      const parts = token.split('.');
+      const parts = token.split(".');'`
       if (parts.length !== 3) {
         
         return null;
@@ -84,7 +82,7 @@ export class BrowserJWT {
 
       return { header, payload, signature };
     } catch (error) {
-      console.error('JWT解析失败:', error);
+      console.error('JWT解析失败:', error);'
       return null;
     }
   }
@@ -193,9 +191,9 @@ export class BrowserJWT {
    */
   public createGuestToken(): string {
     const payload = {
-      sub: 'guest',
-      username: 'Guest',
-      role: 'guest',
+      sub: 'guest','
+      username: 'Guest','
+      role: 'guest','
       isGuest: true
     };
 

@@ -1,10 +1,4 @@
-import React, { useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import LoginPrompt from './LoginPrompt';
-
-
-
-interface WithAuthCheckProps {
+import React, { useState    } from 'react';import { useAuth    } from '../../contexts/AuthContext';import LoginPrompt from './LoginPrompt';interface WithAuthCheckProps   {'
   className?: string;
   children?: React.ReactNode;
   style?: React.CSSProperties;
@@ -16,13 +10,13 @@ interface WithAuthCheckProps {
   onChange?: (value: any) => void;
   onFocus?: (event: React.FocusEvent<HTMLElement>) => void;
   onBlur?: (event: React.FocusEvent<HTMLElement>) => void;
-  'data-testid'?: string;
-  'aria-label'?: string;
-  'aria-describedby'?: string;
+  'data-testid'?: string;'
+  'aria-label'?: string;'
+  'aria-describedby'?: string;'
   role?: string;
   tabIndex?: number;
 }
-interface WithAuthCheckOptions {
+interface WithAuthCheckOptions   {
   feature?: string;
   description?: string;
   requireAuth?: boolean; // 是否强制要求登录
@@ -35,8 +29,8 @@ export function withAuthCheck<P extends object>(
   options: WithAuthCheckOptions = {}
 ) {
   const {
-    feature = "此功能",
-    description = "使用此功能",
+    feature = '此功能','
+    description = '使用此功能','
     requireAuth = false,
     showPrompt = true
   } = options;
@@ -48,12 +42,11 @@ export function withAuthCheck<P extends object>(
     // 如果强制要求登录且用户未登录，显示登录提示
     if (requireAuth && !isAuthenticated) {
       
-        return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
-          <div className="text-center">
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-8 max-w-md">
-              <h2 className="text-2xl font-bold text-white mb-4">需要登录</h2>
-              <p className="text-gray-300 mb-6">{description
+        return (<div className= 'min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center'>
+          <div className= 'text-center'>
+            <div className= 'bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-8 max-w-md'>
+              <h2 className= 'text-2xl font-bold text-white mb-4'>需要登录</h2>
+              <p className= 'text-gray-300 mb-6'>{description'
       }需要登录账户</p>
               <LoginPrompt
                 isOpen={true}
@@ -86,9 +79,8 @@ export function withAuthCheck<P extends object>(
       requireLogin: () => boolean;
     };
 
-    return (
-      <>
-        <WrappedComponent {...enhancedProps} />
+    return (<>
+        <WrappedComponent {...enhancedProps}    />
         {showPrompt && (
           <LoginPrompt
             isOpen={showLoginPrompt}
@@ -108,39 +100,38 @@ export function useAuthCheck(options: WithAuthCheckOptions = {}) {
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   const {
-    feature = "此功能",
-    description = "使用此功能",
+    feature = '此功能','
+    description = '使用此功能','
     showPrompt = true
   } = options;
 
-  const requireLogin: React.FC<WithAuthCheckProps> = (props) => {
+  const requireLogin: React.FC<WithAuthCheckProps>  = (props) => {
   
   // 性能优化
   const memoizedProps = useMemo(() => ({
     className: combinedClassName,
     style: computedStyle,
     disabled,
-    'aria-label': ariaLabel,
-    'data-testid': testId
+    'aria-label': ariaLabel,'
+    "data-testid': testId'
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
-  
   // 变体和主题支持
   const variantStyles = useMemo(() => {
     const styles = {
       primary: {
-        backgroundColor: '#007bff',
-        color: '#ffffff',
-        border: '1px solid #007bff'
+        backgroundColor: '#007bff','
+        color: '#ffffff','
+        border: '1px solid #007bff';
       },
       secondary: {
-        backgroundColor: '#6c757d',
-        color: '#ffffff',
-        border: '1px solid #6c757d'
+        backgroundColor: '#6c757d','
+        color: '#ffffff','
+        border: '1px solid #6c757d';
       },
       outline: {
-        backgroundColor: 'transparent',
-        color: '#007bff',
-        border: '1px solid #007bff'
+        backgroundColor: 'transparent','
+        color: '#007bff','
+        border: '1px solid #007bff';
       }
     };
 
@@ -150,16 +141,16 @@ export function useAuthCheck(options: WithAuthCheckOptions = {}) {
   const sizeStyles = useMemo(() => {
     const styles = {
       small: {
-        padding: '0.25rem 0.5rem',
-        fontSize: '0.875rem'
+        padding: '0.25rem 0.5rem','
+        fontSize: '0.875rem';
       },
       medium: {
-        padding: '0.5rem 1rem',
-        fontSize: '1rem'
+        padding: '0.5rem 1rem','
+        fontSize: '1rem';
       },
       large: {
-        padding: '0.75rem 1.5rem',
-        fontSize: '1.125rem'
+        padding: '0.75rem 1.5rem','
+        fontSize: '1.125rem';
       }
     };
 
@@ -177,30 +168,29 @@ export function useAuthCheck(options: WithAuthCheckOptions = {}) {
     onClick?.(event);
   }, [disabled, loading, onClick]);
   
-  const memoizedHandleChange = useMemo(() => 
-    debounce((value: any) => {
+  const memoizedHandleChange = useMemo(() => debounce((value: any) => {
       onChange?.(value);
     }, 300), [onChange]
   );
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;
-  const descriptionId = `${componentId}-description`;
+  const errorId = `${componentId}-error`;`
+  const descriptionId = `${componentId}-description`;`
   
   const ariaProps = {
     id: componentId,
-    'aria-label': ariaLabel,
-    'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': [
+    "aria-label': ariaLabel,'`
+    'aria-labelledby': ariaLabelledBy,'
+    'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,
-    'aria-invalid': !!error,
-    'aria-disabled': disabled,
-    'aria-busy': loading,
-    'aria-expanded': expanded,
-    'aria-selected': selected,
+    ].filter(Boolean).join(' ') || undefined,'
+    'aria-invalid': !!error,'
+    'aria-disabled': disabled,'
+    'aria-busy': loading,'
+    'aria-expanded': expanded,'
+    'aria-selected': selected,'
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -213,8 +203,7 @@ export function useAuthCheck(options: WithAuthCheckOptions = {}) {
     return true;
   };
 
-  const LoginPromptComponent = showPrompt ? (
-    <LoginPrompt
+  const LoginPromptComponent = showPrompt ? (<LoginPrompt
       isOpen={showLoginPrompt}
       onClose={() => setShowLoginPrompt(false)}
       feature={feature}

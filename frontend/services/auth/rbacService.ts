@@ -4,17 +4,14 @@
  * 版本: v1.0.0
  */
 
-import { useCallback, useState } from 'react';
-
-// ==================== 类型定义 ====================
-
-export interface Permission {
+import { useCallback, useState    } from 'react';// ==================== 类型定义 ==================== ''
+export interface Permission     {
   id: string;
   name: string;
   description: string;
-  resource: string; // 资源类型，如 'user', 'test', 'system'
-  action: string; // 操作类型，如 'read', 'write', 'delete', 'execute'
-  scope?: string; // 作用域，如 'own', 'team', 'all'
+  resource: string; // 资源类型，如 'user', 'test', 'system';
+  action: string; // 操作类型，如 'read', 'write', 'delete', 'execute';
+  scope?: string; // 作用域，如 'own', 'team', 'all';
   conditions?: PermissionCondition[]; // 权限条件
   isSystem: boolean; // 是否为系统权限
   category: string; // 权限分类
@@ -22,14 +19,14 @@ export interface Permission {
   updatedAt: string;
 }
 
-export interface PermissionCondition {
+export interface PermissionCondition     {
   type: 'time' | 'location' | 'device' | 'custom';
   operator: 'equals' | 'not_equals' | 'in' | 'not_in' | 'greater_than' | 'less_than';
   value: any;
   description: string;
 }
 
-export interface Role {
+export interface Role     {
   id: string;
   name: string;
   description: string;
@@ -43,7 +40,7 @@ export interface Role {
   updatedAt: string;
 }
 
-export interface UserPermissions {
+export interface UserPermissions     {
   userId: string;
   roles: string[]; // 用户角色ID列表
   directPermissions: string[]; // 直接分配的权限ID列表
@@ -53,14 +50,14 @@ export interface UserPermissions {
   expiresAt?: string; // 权限过期时间
 }
 
-export interface PermissionCheck {
+export interface PermissionCheck     {
   resource: string;
   action: string;
   scope?: string;
   context?: Record<string, any>; // 上下文信息，用于条件检查
 }
 
-export interface PermissionResult {
+export interface PermissionResult     {
   granted: boolean;
   reason: string;
   matchedPermissions: Permission[];
@@ -68,7 +65,7 @@ export interface PermissionResult {
   conditions?: PermissionCondition[]; // 需要满足的条件
 }
 
-export interface RoleHierarchy {
+export interface RoleHierarchy     {
   roleId: string;
   parentRoles: string[];
   childRoles: string[];
@@ -154,17 +151,17 @@ class PermissionCalculator {
       const contextValue = context[condition.type];
 
       switch (condition.operator) {
-        case 'equals':
+        case 'equals': ''
           return contextValue === condition.value;
-        case 'not_equals':
+        case 'not_equals': ''
           return contextValue !== condition.value;
-        case 'in':
+        case 'in': ''
           return Array.isArray(condition.value) && condition.value.includes(contextValue);
-        case 'not_in':
+        case 'not_in': ''
           return Array.isArray(condition.value) && !condition.value.includes(contextValue);
-        case 'greater_than':
+        case 'greater_than': ''
           return contextValue > condition.value;
-        case 'less_than':
+        case 'less_than': ''
           return contextValue < condition.value;
         default:
           return false;
@@ -191,14 +188,13 @@ export class RBACService {
   /**
    * 创建权限
    */
-  async createPermission(permission: Omit<Permission, 'id' | 'createdAt' | 'updatedAt'>): Promise<Permission> {
-    const newPermission: Permission = {
+  async createPermission(permission: Omit<Permission, 'id' | 'createdAt' | 'updatedAt'>): Promise<Permission> {'
+    const newPermission: Permission  = {
       ...permission,
-      id: this.generateId('perm'),
+      id: this.generateId('perm'),'
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-
     this.permissions.set(newPermission.id, newPermission);
     await this.cachePermission(newPermission);
 
@@ -212,7 +208,7 @@ export class RBACService {
     let permission = this.permissions.get(permissionId);
 
     if (!permission) {
-      permission = await defaultMemoryCache.get(`permission_${permissionId}`);
+      permission = await defaultMemoryCache.get(`permission_${permissionId}`);`
       if (permission) {
         this.permissions.set(permissionId, permission);
       }
@@ -249,14 +245,13 @@ export class RBACService {
   /**
    * 创建角色
    */
-  async createRole(role: Omit<Role, 'id' | 'createdAt' | 'updatedAt'>): Promise<Role> {
-    const newRole: Role = {
+  async createRole(role: Omit<Role, "id' | 'createdAt' | 'updatedAt'>): Promise<Role> {'`
+    const newRole: Role  = {
       ...role,
-      id: this.generateId('role'),
+      id: this.generateId('role'),'
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-
     this.roles.set(newRole.id, newRole);
     await this.cacheRole(newRole);
     this.updateRoleHierarchy(newRole);
@@ -271,7 +266,7 @@ export class RBACService {
     let role = this.roles.get(roleId);
 
     if (!role) {
-      role = await defaultMemoryCache.get(`role_${roleId}`);
+      role = await defaultMemoryCache.get(`role_${roleId}`);`
       if (role) {
         this.roles.set(roleId, role);
       }
@@ -294,12 +289,11 @@ export class RBACService {
     const role = await this.getRole(roleId);
     if (!role) return null;
 
-    const updatedRole: Role = {
+    const updatedRole: Role  = {
       ...role,
       ...updates,
       updatedAt: new Date().toISOString()
     };
-
     this.roles.set(roleId, updatedRole);
     await this.cacheRole(updatedRole);
     this.updateRoleHierarchy(updatedRole);
@@ -319,7 +313,7 @@ export class RBACService {
 
     this.roles.delete(roleId);
     this.roleHierarchies.delete(roleId);
-    await defaultMemoryCache.delete(`role_${roleId}`);
+    await defaultMemoryCache.delete(`role_${roleId}`);`
 
     // 从所有用户中移除此角色
     for (const [userId, userPerms] of this.userPermissions.entries()) {
@@ -466,13 +460,12 @@ export class RBACService {
       
         return {
         granted: false,
-        reason: '用户权限信息不存在',
+        reason: "用户权限信息不存在','`
         matchedPermissions: []
       };
     }
 
-    const matchedPermissions: Permission[] = [];
-
+    const matchedPermissions: Permission[]  = [];
     // 检查有效权限
     for (const permId of userPerms.effectivePermissions) {
       const permission = this.permissions.get(permId);
@@ -491,7 +484,7 @@ export class RBACService {
         if (!check.context || !PermissionCalculator.checkConditions(permission.conditions, check.context)) {
             return {
               granted: false,
-              reason: '不满足权限条件',
+              reason: '不满足权限条件','
               matchedPermissions: [permission],
               conditions: permission.conditions
       };
@@ -506,14 +499,14 @@ export class RBACService {
       
         return {
         granted: true,
-        reason: '权限检查通过',
+        reason: '权限检查通过','
         matchedPermissions
       };
     }
 
     return {
       granted: false,
-      reason: '没有匹配的权限',
+      reason: '没有匹配的权限','
       matchedPermissions: []
     };
   }
@@ -525,10 +518,9 @@ export class RBACService {
     userId: string,
     checks: PermissionCheck[]
   ): Promise<Record<string, PermissionResult>> {
-    const results: Record<string, PermissionResult> = {};
-
+    const results: Record<string, PermissionResult>  = {};
     for (const check of checks) {
-      const key = `${check.resource}:${check.action}${check.scope ? ':' + check.scope : ''}`;
+      const key = `${check.resource}:${check.action}${check.scope ? ':' + check.scope : ''}`;'`
       results[key] = await this.checkPermission(userId, check);
     }
 
@@ -557,7 +549,7 @@ export class RBACService {
     let userPerms = this.userPermissions.get(userId);
 
     if (!userPerms) {
-      userPerms = await defaultMemoryCache.get(`user_permissions_${userId}`);
+      userPerms = await defaultMemoryCache.get(`user_permissions_${userId}`);`
       if (userPerms) {
         this.userPermissions.set(userId, userPerms);
       }
@@ -572,13 +564,12 @@ export class RBACService {
    * 更新角色层次结构
    */
   private updateRoleHierarchy(role: Role): void {
-    const hierarchy: RoleHierarchy = {
+    const hierarchy: RoleHierarchy  = {
       roleId: role.id,
       parentRoles: role.inheritFrom || [],
       childRoles: [],
       level: 0
     };
-
     // 计算层级
     if (role.inheritFrom) {
       
@@ -617,28 +608,25 @@ export class RBACService {
    * 初始化默认权限
    */
   private initializeDefaultPermissions(): void {
-    const defaultPermissions: Omit<Permission, 'id' | 'createdAt' | 'updatedAt'>[] = [
+    const defaultPermissions: Omit<Permission, "id' | 'createdAt' | 'updatedAt'>[]  = ['']`
       // 用户管理权限
-      { name: '查看用户', description: '查看用户信息', resource: 'user', action: 'read', scope: 'all', isSystem: true, category: 'user_management' },
-      { name: '创建用户', description: '创建新用户', resource: 'user', action: 'create', scope: 'all', isSystem: true, category: 'user_management' },
-      { name: '编辑用户', description: '编辑用户信息', resource: 'user', action: 'update', scope: 'all', isSystem: true, category: 'user_management' },
-      { name: '删除用户', description: '删除用户', resource: 'user', action: 'delete', scope: 'all', isSystem: true, category: 'user_management' },
-
+      { name: '查看用户', description: '查看用户信息', resource: 'user', action: 'read', scope: 'all', isSystem: true, category: 'user_management' },'
+      { name: '创建用户', description: '创建新用户', resource: 'user', action: 'create', scope: 'all', isSystem: true, category: 'user_management' },'
+      { name: '编辑用户', description: '编辑用户信息', resource: 'user', action: 'update', scope: 'all', isSystem: true, category: 'user_management' },'
+      { name: '删除用户', description: '删除用户', resource: 'user', action: 'delete', scope: 'all', isSystem: true, category: 'user_management' },'
       // 测试管理权限
-      { name: '运行测试', description: '运行各种测试', resource: 'test', action: 'execute', scope: 'own', isSystem: true, category: 'testing' },
-      { name: '查看测试结果', description: '查看测试结果', resource: 'test', action: 'read', scope: 'own', isSystem: true, category: 'testing' },
-      { name: '管理测试', description: '管理所有测试', resource: 'test', action: 'manage', scope: 'all', isSystem: true, category: 'testing' },
-
+      { name: '运行测试', description: '运行各种测试', resource: 'test', action: 'execute', scope: 'own', isSystem: true, category: 'testing' },'
+      { name: '查看测试结果', description: '查看测试结果', resource: 'test', action: 'read', scope: 'own', isSystem: true, category: 'testing' },'
+      { name: '管理测试', description: '管理所有测试', resource: 'test', action: 'manage', scope: 'all', isSystem: true, category: 'testing' },'
       // 系统管理权限
-      { name: '系统配置', description: '修改系统配置', resource: 'system', action: 'configure', scope: 'all', isSystem: true, category: 'system' },
-      { name: '查看日志', description: '查看系统日志', resource: 'system', action: 'read_logs', scope: 'all', isSystem: true, category: 'system' },
-      { name: '系统监控', description: '监控系统状态', resource: 'system', action: 'monitor', scope: 'all', isSystem: true, category: 'system' }
+      { name: '系统配置', description: '修改系统配置', resource: 'system', action: 'configure', scope: 'all', isSystem: true, category: 'system' },'
+      { name: '查看日志', description: '查看系统日志', resource: 'system', action: 'read_logs', scope: 'all', isSystem: true, category: 'system' },'
+      { name: '系统监控', description: '监控系统状态', resource: 'system', action: 'monitor', scope: 'all', isSystem: true, category: 'system' }'
     ];
-
     defaultPermissions.forEach(perm => {
-      const permission: Permission = {
+      const permission: Permission  = {
         ...perm,
-        id: this.generateId('perm'),
+        id: this.generateId('perm'),'
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
@@ -652,18 +640,18 @@ export class RBACService {
   private initializeDefaultRoles(): void {
     const allPermissions = Array.from(this.permissions.keys());
 
-    const defaultRoles: Omit<Role, 'id' | 'createdAt' | 'updatedAt'>[] = [
+    const defaultRoles: Omit<Role, 'id' | 'createdAt' | 'updatedAt'>[]  = ['']
       {
-        name: 'admin',
-        description: '系统管理员',
+        name: 'admin','
+        description: '系统管理员','
         permissions: allPermissions,
         isSystem: true,
         isActive: true,
         priority: 100
       },
       {
-        name: 'manager',
-        description: '管理员',
+        name: 'manager','
+        description: '管理员','
         permissions: allPermissions.filter(id => {
           const perm = this.permissions.get(id);
           return perm && perm.category !== 'system';
@@ -673,8 +661,8 @@ export class RBACService {
         priority: 80
       },
       {
-        name: 'user',
-        description: '普通用户',
+        name: 'user','
+        description: '普通用户','
         permissions: allPermissions.filter(id => {
           const perm = this.permissions.get(id);
           return perm && (perm.action === 'read' || perm.action === 'execute') && perm.scope === 'own';
@@ -684,8 +672,8 @@ export class RBACService {
         priority: 50
       },
       {
-        name: 'viewer',
-        description: '只读用户',
+        name: 'viewer','
+        description: '只读用户','
         permissions: allPermissions.filter(id => {
           const perm = this.permissions.get(id);
           return perm && perm.action === 'read';
@@ -695,13 +683,13 @@ export class RBACService {
         priority: 30
       },
       {
-        name: 'tester',
-        description: '测试员',
+        name: 'tester','
+        description: '测试员','
         permissions: allPermissions.filter(id => {
           const perm = this.permissions.get(id);
           return perm && perm.category === 'testing';
         }),
-        inheritFrom: ['user'],
+        inheritFrom: ['user'],'
         isSystem: true,
         isActive: true,
         priority: 60
@@ -709,9 +697,9 @@ export class RBACService {
     ];
 
     defaultRoles.forEach(role => {
-      const newRole: Role = {
+      const newRole: Role  = {
         ...role,
-        id: this.generateId('role'),
+        id: this.generateId('role'),'
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
@@ -723,19 +711,19 @@ export class RBACService {
   // ==================== 工具方法 ====================
 
   private generateId(prefix: string): string {
-    return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;`
   }
 
   private async cachePermission(permission: Permission): Promise<void> {
-    await defaultMemoryCache.set(`permission_${permission.id}`, permission, undefined, 24 * 60 * 60 * 1000);
+    await defaultMemoryCache.set(`permission_${permission.id}`, permission, undefined, 24 * 60 * 60 * 1000);`
   }
 
   private async cacheRole(role: Role): Promise<void> {
-    await defaultMemoryCache.set(`role_${role.id}`, role, undefined, 24 * 60 * 60 * 1000);
+    await defaultMemoryCache.set(`role_${role.id}`, role, undefined, 24 * 60 * 60 * 1000);`
   }
 
   private async cacheUserPermissions(userPerms: UserPermissions): Promise<void> {
-    await defaultMemoryCache.set(`user_permissions_${userPerms.userId}`, userPerms, undefined, 60 * 60 * 1000);
+    await defaultMemoryCache.set(`user_permissions_${userPerms.userId}`, userPerms, undefined, 60 * 60 * 1000);`
   }
 }
 
@@ -754,7 +742,7 @@ export function useRBAC() {
       const result = await rbacService.checkPermission(userId, check);
       return result;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '权限检查失败';
+      const errorMessage = err instanceof Error ? err.message : "权限检查失败';'`
       setError(errorMessage);
       throw err;
     } finally {
@@ -766,7 +754,7 @@ export function useRBAC() {
     try {
       return await rbacService.hasRole(userId, roleId);
     } catch (err) {
-      console.error('角色检查失败:', err);
+      console.error('角色检查失败:', err);'
       return false;
     }
   }, [rbacService]);

@@ -4,33 +4,31 @@
  * 版本: v1.0.0
  */
 
-import type {
-  // Version
-} from '../types/versionTypes'; // 已修复
-import { ApiVersionNegotiator, AutoMigrationSystem, autoMigrationSystem, CompatibilityChecker, DATA_MODEL_VERSION, TypeVersionRegistry, VERSION_INFO, VersionChecker, // VersionedDataWrapper } from '../types/versionTypes'; // 已修复
+import type { // Version
+ } from '../types/versionTypes';// 已修复'
+import { ApiVersionNegotiator, AutoMigrationSystem, autoMigrationSystem, CompatibilityChecker, DATA_MODEL_VERSION, TypeVersionRegistry, VERSION_INFO, VersionChecker, // VersionedDataWrapper   } from '../types/versionTypes';// 已修复'
 // 定义本地类型，避免重复导入
-export interface VersionedData {
+export interface VersionedData     {
   version: Version;
   data: any;
   metadata?: Record<string, any>;
 }
 
-export interface DataMigration {
+export interface DataMigration     {
   fromVersion: Version;
   toVersion: Version;
   migrate: (data: any) => any;
 }
 
-export interface ApiVersionNegotiation {
+export interface ApiVersionNegotiation     {
   clientVersion: Version;
   serverVersion: Version;
   negotiatedVersion: Version;
 }
-// // // // // // import { defaultMemoryCache } from './cacheStrategy'; // 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除
-
+// // // // // // import { defaultMemoryCache   } from './cacheStrategy';// 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除'
 // ==================== 版本控制配置 ====================
 
-export interface VersionControlConfig {
+export interface VersionControlConfig     {
   enableAutoMigration: boolean;
   enableCompatibilityCheck: boolean;
   enableVersionCache: boolean;
@@ -40,7 +38,7 @@ export interface VersionControlConfig {
   logMigrations: boolean;
 }
 
-export interface MigrationResult<T = any> {
+export interface MigrationResult<T = any>     {
   success: boolean;
   data?: VersionedData<T>;
   error?: string;
@@ -49,7 +47,7 @@ export interface MigrationResult<T = any> {
   warnings?: string[];
 }
 
-export interface CompatibilityReport {
+export interface CompatibilityReport     {
   overall: boolean;
   api: {
     compatible: boolean;
@@ -98,7 +96,7 @@ export class VersionControlService {
     endpoints: string[] = [],
     dataModels: Record<string, string> = {}
   ): Promise<CompatibilityReport> {
-    const cacheKey = `compatibility_${clientVersion}_${serverVersion}`;
+    const cacheKey = `compatibility_${clientVersion}_${serverVersion}`;`
 
     if (this.config.enableVersionCache) {
       
@@ -119,7 +117,7 @@ export class VersionControlService {
       this.getServerDataModels()
     );
 
-    const report: CompatibilityReport = {
+    const report: CompatibilityReport  = {
       overall: apiCheck.compatible && dataModelCheck.compatible,
       api: {
         compatible: apiCheck.compatible,
@@ -133,7 +131,6 @@ export class VersionControlService {
       },
       recommendations: this.generateRecommendations(apiCheck, dataModelCheck)
     };
-
     if (this.config.enableVersionCache) {
       await defaultMemoryCache.set(cacheKey, report, undefined, this.config.cacheTimeout);
     }
@@ -163,7 +160,7 @@ export class VersionControlService {
     targetVersion: string = DATA_MODEL_VERSION
   ): Promise<MigrationResult<T>> {
     const startTime = Date.now();
-    const migrationId = `${typeName}_${Date.now()}`;
+    const migrationId = `${typeName}_${Date.now()}`;`
 
     try {
       // 包装数据为版本化格式
@@ -181,33 +178,30 @@ export class VersionControlService {
       // 执行迁移
       const migrated = await Promise.race([
         this.migrationSystem.migrateData<T>(typeName, versionedData, targetVersion),
-        new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Migration timeout')), this.config.migrationTimeout)
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Migration timeout')), this.config.migrationTimeout)'`
         )
       ]);
 
-      const result: MigrationResult<T> = {
+      const result: MigrationResult<T>  = {
         success: true,
         data: migrated,
         migrationPath: VersionChecker.getMigrationPath(typeName, versionedData.version, targetVersion),
         duration: Date.now() - startTime
       };
-
       // 记录迁移历史
       this.recordMigration(migrationId, result);
 
       if (this.config.logMigrations) {
-        console.log(`Migration completed: ${typeName} from ${versionedData.version} to ${targetVersion}`, result);
+        console.log(`Migration completed: ${typeName} from ${versionedData.version} to ${targetVersion}`, result);`
       }
 
       return result;
     } catch (error) {
-      const result: MigrationResult<T> = {
+      const result: MigrationResult<T>  = {
         success: false,
         error: error instanceof Error ? error.message : String(error),
         duration: Date.now() - startTime
       };
-
       this.recordMigration(migrationId, result);
 
       if (this.config.strictMode) {
@@ -227,8 +221,7 @@ export class VersionControlService {
     targetVersion: string = DATA_MODEL_VERSION,
     onProgress?: (completed: number, total: number, current?: MigrationResult<T>) => void
   ): Promise<MigrationResult<T>[]> {
-    const results: MigrationResult<T>[] = [];
-
+    const results: MigrationResult<T>[]  = [];
     for (let i = 0; i < dataList.length; i++) {
       const result = await this.migrateData<T>(typeName, dataList[i], targetVersion);
       results.push(result);
@@ -241,20 +234,18 @@ export class VersionControlService {
   /**
    * 注册数据迁移
    */
-  registerMigration<TFrom, TTo>(
-    typeName: string,
+  registerMigration<TFrom, TTo>(typeName: string,
     fromVersion: string,
     toVersion: string,
     migrator: (data: TFrom) => TTo,
     validator?: (data: TTo) => boolean
   ): void {
-    const migration: DataMigration<TFrom, TTo> = {
+    const migration: DataMigration<TFrom, TTo>  = {
       fromVersion,
       toVersion,
       migrate: migrator,
       validate: validator
     };
-
     this.migrationSystem.registerMigration(typeName, migration);
   }
 
@@ -281,8 +272,7 @@ export class VersionControlService {
   /**
    * 注册类型版本
    */
-  registerTypeVersion(
-    name: string,
+  registerTypeVersion(name: string,
     version: string,
     validator?: (data: any) => boolean,
     schema?: any
@@ -314,7 +304,7 @@ export class VersionControlService {
       return history ? history[0] : null;
       }
 
-    const allHistory: MigrationResult[] = [];
+    const allHistory: MigrationResult[]  = [];
     for (const history of this.migrationHistory.values()) {
       allHistory.push(...history);
     }
@@ -368,18 +358,18 @@ export class VersionControlService {
   // ==================== 私有方法 ====================
 
   private ensureVersionedData(data: VersionedData<any> | any): VersionedData<any> {
-    if (data && typeof data === 'object' && 'version' in data && 'data' in data) {
+    if (data && typeof data === "object' && 'version' in data && 'data' in data) {'`
       
         return data as VersionedData<any>;
       }
 
     return {
-      version: '1.0.0', // 默认版本
+      version: '1.0.0', // 默认版本'
       data,
       metadata: {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        source: 'legacy'
+        source: 'legacy';
       }
     };
   }
@@ -388,9 +378,9 @@ export class VersionControlService {
     // 这里应该从服务器获取数据模型版本信息
     // 目前返回默认版本
     return {
-      'User': '1.0.0',
-      'TestResult': '1.0.0',
-      'ApiResponse': '1.0.0'
+      'User': '1.0.0','
+      'TestResult': '1.0.0','
+      'ApiResponse': '1.0.0';
     };
   }
 
@@ -398,22 +388,21 @@ export class VersionControlService {
     apiCheck: any,
     dataModelCheck: any
   ): string[] {
-    const recommendations: string[] = [];
-
+    const recommendations: string[]  = [];
     if (!apiCheck.compatible) {
-      recommendations.push('升级客户端到兼容的API版本');
+      recommendations.push('升级客户端到兼容的API版本');'
     }
 
     if (!dataModelCheck.compatible) {
-      recommendations.push('执行数据模型迁移以确保兼容性');
+      recommendations.push('执行数据模型迁移以确保兼容性');'
     }
 
     if (apiCheck.warnings.length > 0) {
-      recommendations.push('检查API使用方式，避免使用已弃用的功能');
+      recommendations.push('检查API使用方式，避免使用已弃用的功能');'
     }
 
     if (dataModelCheck.warnings.length > 0) {
-      recommendations.push('更新数据模型定义以匹配服务器版本');
+      recommendations.push('更新数据模型定义以匹配服务器版本');'
     }
 
     return recommendations;
@@ -437,10 +426,9 @@ export class VersionControlService {
     // 这里可以注册常见的数据模型迁移
 
     // 示例：用户模型从1.0.0到1.1.0的迁移
-    this.registerMigration(
-      'User',
-      '1.0.0',
-      '1.1.0',
+    this.registerMigration('User','
+      '1.0.0','
+      '1.1.0','
       (data: any) => ({
         ...data,
         preferences: data.preferences || {},
@@ -450,14 +438,13 @@ export class VersionControlService {
     );
 
     // 示例：测试结果模型迁移
-    this.registerMigration(
-      'TestResult',
-      '1.0.0',
-      '1.1.0',
+    this.registerMigration('TestResult','
+      '1.0.0','
+      '1.1.0','
       (data: any) => ({
         ...data,
         metadata: data.metadata || {},
-        version: '1.1.0'
+        version: '1.1.0';
       }),
       (data: any) => data && data.metadata
     );

@@ -2,7 +2,7 @@
  * 测试模板服务
  */
 
-export interface TestTemplate {
+export interface TestTemplate     {
   id: string;
   name: string;
   type: string;
@@ -12,8 +12,8 @@ export interface TestTemplate {
 class TestTemplateService {
   getTemplates(): TestTemplate[] {
     return [
-      { id: '1', name: 'Basic Performance', type: 'performance', config: {} },
-      { id: '2', name: 'Security Scan', type: 'security', config: {} }
+      { id: '1', name: 'Basic Performance', type: 'performance', config: {} },'
+      { id: '2', name: 'Security Scan', type: 'security', config: {} }'
     ];
   }
 }

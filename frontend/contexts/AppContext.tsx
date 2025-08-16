@@ -3,10 +3,8 @@
  * 使用React Context + useReducer实现统一的状态管理
  */
 
-import React, { createContext, ReactNode, useContext, useEffect, useReducer } from 'react';
-
-// 用户状态接口
-export interface User {
+import React, { createContext, ReactNode, useContext, useEffect, useReducer    } from 'react';// 用户状态接口'
+export interface User     {
     id: string;
     username: string;
     email: string;
@@ -20,7 +18,7 @@ export interface User {
 }
 
 // 认证状态接口
-export interface AuthState {
+export interface AuthState     {
     user: User | null;
     token: string | null;
     isAuthenticated: boolean;
@@ -29,7 +27,7 @@ export interface AuthState {
 }
 
 // 测试状态接口
-export interface TestState {
+export interface TestState     {
     activeTests: Array<{
         id: string;
         type: string;
@@ -56,7 +54,7 @@ export interface TestState {
 }
 
 // 监控状态接口
-export interface MonitoringState {
+export interface MonitoringState     {
     targets: Array<{
         id: string;
         name: string;
@@ -82,7 +80,7 @@ export interface MonitoringState {
 }
 
 // UI状态接口
-export interface UIState {
+export interface UIState     {
     theme: 'light' | 'dark';
     sidebarCollapsed: boolean;
     notifications: Array<{
@@ -105,7 +103,7 @@ export interface UIState {
 }
 
 // 应用状态接口
-export interface AppState {
+export interface AppState     {
     auth: AuthState;
     test: TestState;
     monitoring: MonitoringState;
@@ -113,48 +111,42 @@ export interface AppState {
 }
 
 // Action类型定义
-export type AppAction =
-    // 认证相关
-    | { type: 'AUTH_LOGIN_START' }
-    | { type: 'AUTH_LOGIN_SUCCESS'; payload: { user: User; token: string } }
-    | { type: 'AUTH_LOGIN_FAILURE'; payload: { error: string } }
-    | { type: 'AUTH_LOGOUT' }
-    | { type: 'AUTH_UPDATE_USER'; payload: { user: Partial<User> } }
-    | { type: 'AUTH_CLEAR_ERROR' }
-
+export type AppAction   = // 认证相关
+    | { type: 'AUTH_LOGIN_START' }';| { type: 'AUTH_LOGIN_SUCCESS'; payload: { user: User; token: string } }'
+    | { type: 'AUTH_LOGIN_FAILURE'; payload: { error: string } }'
+    | { type: 'AUTH_LOGOUT' }'
+    | { type: 'AUTH_UPDATE_USER'; payload: { user: Partial<User> } }'
+    | { type: 'AUTH_CLEAR_ERROR' }'
     // 测试相关
-    | { type: 'TEST_START'; payload: { test: any } }
-    | { type: 'TEST_UPDATE_PROGRESS'; payload: { testId: string; progress: number } }
-    | { type: 'TEST_COMPLETE'; payload: { testId: string; result: any } }
-    | { type: 'TEST_FAIL'; payload: { testId: string; error: string } }
-    | { type: 'TEST_CANCEL'; payload: { testId: string } }
-    | { type: 'TEST_ADD_TO_HISTORY'; payload: { result: any } }
-    | { type: 'TEST_SAVE_CONFIGURATION'; payload: { config: any } }
-    | { type: 'TEST_CLEAR_ERROR' }
-
+    | { type: 'TEST_START'; payload: { test: any } }'
+    | { type: 'TEST_UPDATE_PROGRESS'; payload: { testId: string; progress: number } }'
+    | { type: 'TEST_COMPLETE'; payload: { testId: string; result: any } }'
+    | { type: 'TEST_FAIL'; payload: { testId: string; error: string } }'
+    | { type: 'TEST_CANCEL'; payload: { testId: string } }'
+    | { type: 'TEST_ADD_TO_HISTORY'; payload: { result: any } }'
+    | { type: 'TEST_SAVE_CONFIGURATION'; payload: { config: any } }'
+    | { type: 'TEST_CLEAR_ERROR' }'
     // 监控相关
-    | { type: 'MONITORING_START' }
-    | { type: 'MONITORING_STOP' }
-    | { type: 'MONITORING_ADD_TARGET'; payload: { target: any } }
-    | { type: 'MONITORING_UPDATE_TARGET'; payload: { targetId: string; updates: any } }
-    | { type: 'MONITORING_REMOVE_TARGET'; payload: { targetId: string } }
-    | { type: 'MONITORING_ADD_ALERT'; payload: { alert: any } }
-    | { type: 'MONITORING_RESOLVE_ALERT'; payload: { alertId: string } }
-    | { type: 'MONITORING_SET_CONNECTION'; payload: { isConnected: boolean } }
-    | { type: 'MONITORING_SET_ERROR'; payload: { error: string | null } }
-
+    | { type: 'MONITORING_START' }'
+    | { type: 'MONITORING_STOP' }'
+    | { type: 'MONITORING_ADD_TARGET'; payload: { target: any } }'
+    | { type: 'MONITORING_UPDATE_TARGET'; payload: { targetId: string; updates: any } }'
+    | { type: 'MONITORING_REMOVE_TARGET'; payload: { targetId: string } }'
+    | { type: 'MONITORING_ADD_ALERT'; payload: { alert: any } }'
+    | { type: 'MONITORING_RESOLVE_ALERT'; payload: { alertId: string } }'
+    | { type: 'MONITORING_SET_CONNECTION'; payload: { isConnected: boolean } }'
+    | { type: 'MONITORING_SET_ERROR'; payload: { error: string | null } }'
     // UI相关
-    | { type: 'UI_SET_THEME'; payload: { theme: 'light' | 'dark' } }
-    | { type: 'UI_TOGGLE_SIDEBAR' }
-    | { type: 'UI_ADD_NOTIFICATION'; payload: { notification: any } }
-    | { type: 'UI_REMOVE_NOTIFICATION'; payload: { notificationId: string } }
-    | { type: 'UI_MARK_NOTIFICATION_READ'; payload: { notificationId: string } }
-    | { type: 'UI_SET_LOADING'; payload: { key: keyof UIState['loading']; loading: boolean } }
-    | { type: 'UI_OPEN_MODAL'; payload: { modalId: string } }
-    | { type: 'UI_CLOSE_MODAL'; payload: { modalId: string } };
-
+    | { type: 'UI_SET_THEME'; payload: { theme: 'light' | 'dark' } }'
+    | { type: 'UI_TOGGLE_SIDEBAR' }'
+    | { type: 'UI_ADD_NOTIFICATION'; payload: { notification: any } }'
+    | { type: 'UI_REMOVE_NOTIFICATION'; payload: { notificationId: string } }'
+    | { type: 'UI_MARK_NOTIFICATION_READ'; payload: { notificationId: string } }'
+    | { type: 'UI_SET_LOADING'; payload: { key: keyof UIState['loading']; loading: boolean } }'
+    | { type: 'UI_OPEN_MODAL'; payload: { modalId: string } }'
+    | { type: 'UI_CLOSE_MODAL'; payload: { modalId: string } };'
 // 初始状态
-const initialState: AppState = {
+const initialState: AppState  = {
     auth: {
         user: null,
         token: null,
@@ -172,12 +164,12 @@ const initialState: AppState = {
     monitoring: {
         targets: [],
         alerts: [],
-        status: 'idle',
+        status: 'idle','
         isConnected: false,
         error: null
     },
     ui: {
-        theme: 'light',
+        theme: 'light','
         sidebarCollapsed: false,
         notifications: [],
         loading: {
@@ -189,12 +181,11 @@ const initialState: AppState = {
         modals: {}
     }
 };
-
 // Reducer函数
-const appReducer = (state: AppState, action: AppAction): AppState => {
+const appReducer = (state: AppState, action: AppAction): AppState  => {
     switch (action.type) {
         // 认证相关
-        case 'AUTH_LOGIN_START':
+        case 'AUTH_LOGIN_START': ''
             return {
                 ...state,
                 auth: {
@@ -204,7 +195,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 }
             };
 
-        case 'AUTH_LOGIN_SUCCESS':
+        case 'AUTH_LOGIN_SUCCESS': ''
             return {
                 ...state,
                 auth: {
@@ -217,7 +208,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 }
             };
 
-        case 'AUTH_LOGIN_FAILURE':
+        case 'AUTH_LOGIN_FAILURE': ''
             return {
                 ...state,
                 auth: {
@@ -230,7 +221,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 }
             };
 
-        case 'AUTH_LOGOUT':
+        case 'AUTH_LOGOUT': ''
             return {
                 ...state,
                 auth: {
@@ -238,7 +229,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 }
             };
 
-        case 'AUTH_UPDATE_USER':
+        case 'AUTH_UPDATE_USER': ''
             return {
                 ...state,
                 auth: {
@@ -247,7 +238,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 }
             };
 
-        case 'AUTH_CLEAR_ERROR':
+        case "AUTH_CLEAR_ERROR': ''
             return {
                 ...state,
                 auth: {
@@ -257,7 +248,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
             };
 
         // 测试相关
-        case 'TEST_START':
+        case 'TEST_START': ''
             return {
                 ...state,
                 test: {
@@ -268,7 +259,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 }
             };
 
-        case 'TEST_UPDATE_PROGRESS':
+        case 'TEST_UPDATE_PROGRESS': ''
             return {
                 ...state,
                 test: {
@@ -281,7 +272,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 }
             };
 
-        case 'TEST_COMPLETE':
+        case 'TEST_COMPLETE': ''
             return {
                 ...state,
                 test: {
@@ -293,7 +284,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 }
             };
 
-        case 'TEST_FAIL':
+        case 'TEST_FAIL': ''
             return {
                 ...state,
                 test: {
@@ -304,7 +295,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 }
             };
 
-        case 'TEST_CANCEL':
+        case 'TEST_CANCEL': ''
             return {
                 ...state,
                 test: {
@@ -314,7 +305,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 }
             };
 
-        case 'TEST_ADD_TO_HISTORY':
+        case 'TEST_ADD_TO_HISTORY': ''
             return {
                 ...state,
                 test: {
@@ -323,7 +314,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 }
             };
 
-        case 'TEST_SAVE_CONFIGURATION':
+        case 'TEST_SAVE_CONFIGURATION': ''
             return {
                 ...state,
                 test: {
@@ -332,7 +323,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 }
             };
 
-        case 'TEST_CLEAR_ERROR':
+        case "TEST_CLEAR_ERROR': ''
             return {
                 ...state,
                 test: {
@@ -342,26 +333,26 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
             };
 
         // 监控相关
-        case 'MONITORING_START':
+        case 'MONITORING_START': ''
             return {
                 ...state,
                 monitoring: {
                     ...state.monitoring,
-                    status: 'monitoring',
+                    status: 'monitoring','
                     error: null
                 }
             };
 
-        case 'MONITORING_STOP':
+        case 'MONITORING_STOP': ''
             return {
                 ...state,
                 monitoring: {
                     ...state.monitoring,
-                    status: 'idle'
+                    status: 'idle';
                 }
             };
 
-        case 'MONITORING_ADD_TARGET':
+        case 'MONITORING_ADD_TARGET': ''
             return {
                 ...state,
                 monitoring: {
@@ -370,7 +361,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 }
             };
 
-        case 'MONITORING_UPDATE_TARGET':
+        case 'MONITORING_UPDATE_TARGET': ''
             return {
                 ...state,
                 monitoring: {
@@ -383,7 +374,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 }
             };
 
-        case 'MONITORING_REMOVE_TARGET':
+        case 'MONITORING_REMOVE_TARGET': ''
             return {
                 ...state,
                 monitoring: {
@@ -392,7 +383,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 }
             };
 
-        case 'MONITORING_ADD_ALERT':
+        case 'MONITORING_ADD_ALERT': ''
             return {
                 ...state,
                 monitoring: {
@@ -401,7 +392,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 }
             };
 
-        case 'MONITORING_RESOLVE_ALERT':
+        case 'MONITORING_RESOLVE_ALERT': ''
             return {
                 ...state,
                 monitoring: {
@@ -414,7 +405,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 }
             };
 
-        case 'MONITORING_SET_CONNECTION':
+        case 'MONITORING_SET_CONNECTION': ''
             return {
                 ...state,
                 monitoring: {
@@ -423,7 +414,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 }
             };
 
-        case 'MONITORING_SET_ERROR':
+        case "MONITORING_SET_ERROR': ''
             return {
                 ...state,
                 monitoring: {
@@ -433,7 +424,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
             };
 
         // UI相关
-        case 'UI_SET_THEME':
+        case 'UI_SET_THEME': ''
             return {
                 ...state,
                 ui: {
@@ -442,7 +433,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 }
             };
 
-        case 'UI_TOGGLE_SIDEBAR':
+        case 'UI_TOGGLE_SIDEBAR': ''
             return {
                 ...state,
                 ui: {
@@ -451,7 +442,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 }
             };
 
-        case 'UI_ADD_NOTIFICATION':
+        case 'UI_ADD_NOTIFICATION': ''
             return {
                 ...state,
                 ui: {
@@ -460,7 +451,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 }
             };
 
-        case 'UI_REMOVE_NOTIFICATION':
+        case 'UI_REMOVE_NOTIFICATION': ''
             return {
                 ...state,
                 ui: {
@@ -469,7 +460,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 }
             };
 
-        case 'UI_MARK_NOTIFICATION_READ':
+        case 'UI_MARK_NOTIFICATION_READ': ''
             return {
                 ...state,
                 ui: {
@@ -480,7 +471,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 }
             };
 
-        case 'UI_SET_LOADING':
+        case 'UI_SET_LOADING': ''
             return {
                 ...state,
                 ui: {
@@ -492,7 +483,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 }
             };
 
-        case 'UI_OPEN_MODAL':
+        case 'UI_OPEN_MODAL': ''
             return {
                 ...state,
                 ui: {
@@ -504,7 +495,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
                 }
             };
 
-        case 'UI_CLOSE_MODAL':
+        case "UI_CLOSE_MODAL': ''
             return {
                 ...state,
                 ui: {
@@ -522,7 +513,7 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
 };
 
 // Context接口
-export interface AppContextValue {
+export interface AppContextValue     {
     state: AppState;
     dispatch: React.Dispatch<AppAction>;
 }
@@ -531,7 +522,7 @@ export interface AppContextValue {
 export const AppContext = createContext<AppContextValue | undefined>(undefined);
 
 // Provider组件属性
-export interface AppProviderProps {
+export interface AppProviderProps     {
     children: ReactNode;
 }
 
@@ -542,14 +533,14 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     // 状态持久化
     useEffect(() => {
         // 从localStorage加载状态
-        const savedState = localStorage.getItem('appState');
+        const savedState = localStorage.getItem('appState');'
         if (savedState) {
             try {
                 const parsedState = JSON.parse(savedState);
                 // 只恢复部分状态，避免恢复临时状态
                 if (parsedState.auth?.token) {
                     dispatch({
-                        type: 'AUTH_LOGIN_SUCCESS',
+                        type: 'AUTH_LOGIN_SUCCESS','
                         payload: {
                             user: parsedState.auth.user,
                             token: parsedState.auth.token
@@ -558,17 +549,17 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
                 }
                 if (parsedState.ui?.theme) {
                     dispatch({
-                        type: 'UI_SET_THEME',
+                        type: 'UI_SET_THEME','
                         payload: { theme: parsedState.ui.theme }
                     });
                 }
                 if (parsedState.ui?.sidebarCollapsed !== undefined) {
                     if (parsedState.ui.sidebarCollapsed) {
-                        dispatch({ type: 'UI_TOGGLE_SIDEBAR' });
+                        dispatch({ type: 'UI_TOGGLE_SIDEBAR' });'
                     }
                 }
             } catch (error) {
-                console.error('Failed to load saved state:', error);
+                console.error("Failed to load saved state: ', error);'
             }
         }
     }, []);
@@ -586,14 +577,13 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
                 sidebarCollapsed: state.ui.sidebarCollapsed
             }
         };
-        localStorage.setItem('appState', JSON.stringify(stateToSave));
+        localStorage.setItem('appState', JSON.stringify(stateToSave));'
     }, [state.auth.user, state.auth.token, state.auth.isAuthenticated, state.ui.theme, state.ui.sidebarCollapsed]);
 
-    const value: AppContextValue = {
+    const value: AppContextValue  = {
         state,
         dispatch
     };
-
     return (
         <AppContext.Provider value={value}>
             {children}
@@ -602,10 +592,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 };
 
 // Hook for using the context
-export const useAppContext = (): AppContextValue => {
+export const useAppContext = (): AppContextValue  => {
     const context = useContext(AppContext);
     if (context === undefined) {
-        throw new Error('useAppContext must be used within an AppProvider');
+        throw new Error('useAppContext must be used within an AppProvider');'
     }
     return context;
 };

@@ -6,10 +6,7 @@
  * 提供React组件中异步操作的统一错误处理
  */
 
-import { useCallback, useState, useRef } from 'react';
-import { errorService } from '../services/errorService';
-
-export interface AsyncErrorState {
+import { useCallback, useState, useRef    } from 'react';import { errorService    } from '../services/errorService';export interface AsyncErrorState     {'
   isLoading: boolean;
   error: Error | null;
   lastError: Error | null;
@@ -17,7 +14,7 @@ export interface AsyncErrorState {
   retryCount: number;
 }
 
-export interface AsyncErrorOptions {
+export interface AsyncErrorOptions     {
   maxRetries?: number;
   retryDelay?: number;
   showNotification?: boolean;
@@ -28,7 +25,7 @@ export interface AsyncErrorOptions {
   onSuccess?: () => void;
 }
 
-export interface UseAsyncErrorHandlerReturn {
+export interface UseAsyncErrorHandlerReturn     {
   state: AsyncErrorState;
   executeAsync: <T>(operation: () => Promise<T>, options?: AsyncErrorOptions) => Promise<T | null>;
   retry: () => Promise<void>;
@@ -41,7 +38,7 @@ export interface UseAsyncErrorHandlerReturn {
  */
 export function useAsyncErrorHandler(
   defaultOptions: AsyncErrorOptions = {}
-): UseAsyncErrorHandlerReturn {
+): UseAsyncErrorHandlerReturn   {
   const [state, setState] = useState<AsyncErrorState>({
     isLoading: false,
     error: null,
@@ -66,7 +63,7 @@ export function useAsyncErrorHandler(
       retryDelay = 1000,
       showNotification = true,
       logError = true,
-      context = 'Async operation',
+      context = 'Async operation','
       onError,
       onRetry,
       onSuccess
@@ -84,7 +81,7 @@ export function useAsyncErrorHandler(
 
     let currentRetry = 0;
 
-    const attemptOperation = async (): Promise<T | null> => {
+    const attemptOperation = async (): Promise<T | null>  => {
       try {
         const result = await operation();
         
@@ -103,7 +100,7 @@ export function useAsyncErrorHandler(
         const errorObj = error instanceof Error ? error : new Error(String(error));
         
         if (logError) {
-          console.error(`[${context}] Error (attempt ${currentRetry + 1}):`, errorObj);
+          console.error(`[${context}] Error (attempt ${currentRetry + 1}):`, errorObj);`
         }
 
         // 处理错误
@@ -144,7 +141,7 @@ export function useAsyncErrorHandler(
 
         if (showNotification) {
           // 这里可以集成通知系统
-          console.warn(`操作失败: ${errorObj.message}`);
+          console.warn(`操作失败: ${errorObj.message}`);`
         }
 
         return null;
@@ -157,7 +154,7 @@ export function useAsyncErrorHandler(
   /**
    * 重试上次操作
    */
-  const retry = useCallback(async (): Promise<void> => {
+  const retry = useCallback(async (): Promise<void>  => {
     if (lastOperationRef.current) {
       await executeAsync(lastOperationRef.current, lastOptionsRef.current);
     }
@@ -202,13 +199,13 @@ export function useAsyncErrorHandler(
  */
 function isRetryableError(error: Error): boolean {
   const retryablePatterns = [
-    'network',
-    'timeout',
-    'connection',
-    'fetch',
-    'ECONNRESET',
-    'ENOTFOUND',
-    'ETIMEDOUT'
+    "network','`
+    'timeout','
+    'connection','
+    'fetch','
+    'ECONNRESET','
+    'ENOTFOUND','
+    'ETIMEDOUT';
   ];
 
   const errorMessage = error.message.toLowerCase();
@@ -242,7 +239,7 @@ export function useApiErrorHandler() {
     retryDelay: 1000,
     showNotification: true,
     logError: true,
-    context: 'API call'
+    context: 'API call';
   });
 }
 
@@ -255,7 +252,7 @@ export function useFileErrorHandler() {
     retryDelay: 500,
     showNotification: true,
     logError: true,
-    context: 'File operation'
+    context: 'File operation';
   });
 }
 
@@ -268,6 +265,6 @@ export function useDatabaseErrorHandler() {
     retryDelay: 2000,
     showNotification: false,
     logError: true,
-    context: 'Database operation'
+    context: 'Database operation';
   });
 }

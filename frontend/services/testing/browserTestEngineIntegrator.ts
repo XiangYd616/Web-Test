@@ -1,4 +1,4 @@
-export interface ContentTestConfig {
+export interface ContentTestConfig     {
   url: string;
   checkSEO: boolean;
   checkPerformance: boolean;
@@ -15,7 +15,7 @@ export interface ContentTestConfig {
   depth?: number;
 }
 
-export interface ContentTestResult {
+export interface ContentTestResult     {
   seoScore: number;
   performanceScore: number;
   accessibilityScore: number;
@@ -54,7 +54,7 @@ export class BrowserTestEngineIntegrator {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
@@ -71,10 +71,10 @@ export class BrowserTestEngineIntegrator {
   public async runContentTest(config: ContentTestConfig): Promise<ContentTestResult> {
     try {
       // 调用真实的内容检测API
-      const response = await fetch('/api/content-test', {
-        method: 'POST',
+      const response = await fetch("/api/content-test', {'`
+        method: 'POST','
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': "application/json','
         },
         body: JSON.stringify({
           url: config.url,
@@ -93,13 +93,13 @@ export class BrowserTestEngineIntegrator {
       });
 
       if (!response.ok) {
-        throw new Error(`内容检测服务器响应错误: ${response.status}`);
+        throw new Error(`内容检测服务器响应错误: ${response.status}`);`
       }
 
       const realResult = await response.json();
 
       // 转换后端结果格式
-      const contentTestResult: ContentTestResult = {
+      const contentTestResult: ContentTestResult  = {
         seoScore: realResult.seoScore || 0,
         performanceScore: realResult.performanceScore || 0,
         accessibilityScore: realResult.accessibilityScore || 0,
@@ -118,11 +118,10 @@ export class BrowserTestEngineIntegrator {
         },
         timestamp: Date.now()
       };
-
       return contentTestResult;
     } catch (error) {
-      console.error('真实内容检测失败，回退到基础检测:', error);
-      throw new Error(`内容检测失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      console.error("真实内容检测失败，回退到基础检测:', error);'`
+      throw new Error(`内容检测失败: ${error instanceof Error ? error.message : '未知错误'}`);'`
     }
   }
 
@@ -142,7 +141,7 @@ export class BrowserTestEngineIntegrator {
       accessibilityAnalysis: true,
       contentAnalysis: true,
       mobileAnalysis: true,
-      realTimeAnalysis: typeof fetch !== 'undefined'
+      realTimeAnalysis: typeof fetch !== "undefined';'`
     };
   }
 }

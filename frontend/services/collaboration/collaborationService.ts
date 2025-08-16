@@ -3,7 +3,7 @@
  * 提供WebSocket连接和协作功能管理
  */
 
-export interface CollaborationUser {
+export interface CollaborationUser     {
   id: string;
   sessionId: string;
   name?: string;
@@ -15,7 +15,7 @@ export interface CollaborationUser {
   };
 }
 
-export interface CollaborationComment {
+export interface CollaborationComment     {
   id: string;
   documentId: string;
   position: number;
@@ -29,7 +29,7 @@ export interface CollaborationComment {
   replies: string[];
 }
 
-export interface CollaborationDocument {
+export interface CollaborationDocument     {
   id: string;
   content: string;
   version: number;
@@ -37,7 +37,7 @@ export interface CollaborationDocument {
   collaborators: Set<string>;
 }
 
-export interface ShareLink {
+export interface ShareLink     {
   id: string;
   documentId: string;
   url: string;
@@ -75,16 +75,16 @@ class CollaborationService {
 
     return new Promise((resolve, reject) => {
       try {
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsUrl = `${protocol}/${window.location.host}/ws/collaboration`;
+        const protocol = window.location.protocol === 'https: ' ? 'wss: ' : 'ws: ';
+        const wsUrl = `${protocol}/${window.location.host}/ws/collaboration`;`
         
         this.ws = new WebSocket(wsUrl);
         
         this.ws.onopen = () => {
-          console.log('✅ 协作服务连接成功');
+          console.log("✅ 协作服务连接成功');'`
           this.isConnected = true;
           this.reconnectAttempts = 0;
-          this.emit('connected');
+          this.emit('connected');'
           resolve();
         };
         
@@ -93,20 +93,20 @@ class CollaborationService {
         };
         
         this.ws.onclose = () => {
-          console.log('❌ 协作服务连接断开');
+          console.log('❌ 协作服务连接断开');'
           this.isConnected = false;
-          this.emit('disconnected');
+          this.emit('disconnected');'
           this.attemptReconnect();
         };
         
         this.ws.onerror = (error) => {
-          console.error('WebSocket错误:', error);
-          this.emit('error', error);
+          console.error('WebSocket错误:', error);'
+          this.emit('error', error);'
           reject(error);
         };
         
       } catch (error) {
-        console.error('连接协作服务失败:', error);
+        console.error('连接协作服务失败:', error);'
         reject(error);
       }
     });
@@ -137,7 +137,7 @@ class CollaborationService {
     }
 
     this.send({
-      type: 'join_room',
+      type: 'join_room','
       roomId,
       documentId
     });
@@ -152,7 +152,7 @@ class CollaborationService {
   leaveRoom(): void {
     if (this.currentRoom) {
       this.send({
-        type: 'leave_room',
+        type: 'leave_room','
         roomId: this.currentRoom
       });
       
@@ -170,12 +170,12 @@ class CollaborationService {
   editDocument(operation: any, content?: string): void {
     if (!this.currentDocument || !this.document) {
       
-        console.warn('没有活跃的文档');
+        console.warn('没有活跃的文档');'
       return;
       }
 
     this.send({
-      type: 'document_edit',
+      type: 'document_edit','
       documentId: this.currentDocument,
       operation,
       content,
@@ -188,7 +188,7 @@ class CollaborationService {
    */
   updateCursor(position: number, selection?: { start: number; end: number }): void {
     this.send({
-      type: 'cursor_update',
+      type: 'cursor_update','
       position,
       selection
     });
@@ -200,12 +200,12 @@ class CollaborationService {
   addComment(position: number, content: string, parentId?: string): void {
     if (!this.currentDocument) {
       
-        console.warn('没有活跃的文档');
+        console.warn('没有活跃的文档');'
       return;
       }
 
     this.send({
-      type: 'add_comment',
+      type: 'add_comment','
       documentId: this.currentDocument,
       position,
       content,
@@ -218,7 +218,7 @@ class CollaborationService {
    */
   updateComment(commentId: string, content: string): void {
     this.send({
-      type: 'update_comment',
+      type: 'update_comment','
       commentId,
       content
     });
@@ -229,7 +229,7 @@ class CollaborationService {
    */
   deleteComment(commentId: string): void {
     this.send({
-      type: 'delete_comment',
+      type: 'delete_comment','
       commentId
     });
   }
@@ -237,15 +237,15 @@ class CollaborationService {
   /**
    * 创建分享链接
    */
-  createShareLink(permissions: string = 'read', expiresAt?: Date): void {
+  createShareLink(permissions: string = 'read', expiresAt?: Date): void {'
     if (!this.currentDocument) {
       
-        console.warn('没有活跃的文档');
+        console.warn('没有活跃的文档');'
       return;
       }
 
     this.send({
-      type: 'create_share_link',
+      type: 'create_share_link','
       documentId: this.currentDocument,
       permissions,
       expiresAt: expiresAt?.toISOString()
@@ -260,64 +260,64 @@ class CollaborationService {
       const message = JSON.parse(data);
       
       switch (message.type) {
-        case 'connection_established':
+        case 'connection_established': ''
           this.sessionId = message.sessionId;
-          this.emit('session_established', message);
+          this.emit('session_established', message);'
           break;
           
-        case 'room_joined':
+        case 'room_joined': ''
           this.handleRoomJoined(message);
           break;
           
-        case 'user_joined':
+        case 'user_joined': ''
           this.handleUserJoined(message);
           break;
           
-        case 'user_left':
+        case 'user_left': ''
           this.handleUserLeft(message);
           break;
           
-        case 'document_updated':
+        case 'document_updated': ''
           this.handleDocumentUpdated(message);
           break;
           
-        case 'cursor_updated':
+        case 'cursor_updated': ''
           this.handleCursorUpdated(message);
           break;
           
-        case 'comment_added':
+        case 'comment_added': ''
           this.handleCommentAdded(message);
           break;
           
-        case 'comment_updated':
+        case 'comment_updated': ''
           this.handleCommentUpdated(message);
           break;
           
-        case 'comment_deleted':
+        case 'comment_deleted': ''
           this.handleCommentDeleted(message);
           break;
           
-        case 'share_link_created':
+        case 'share_link_created': ''
           this.handleShareLinkCreated(message);
           break;
           
-        case 'version_conflict':
+        case 'version_conflict': ''
           this.handleVersionConflict(message);
           break;
           
-        case 'error':
+        case 'error': ''
           this.handleError(message);
           break;
           
-        case 'pong':
+        case 'pong': ''
           // 心跳响应
           break;
           
         default:
-          console.warn('未知消息类型:', message.type);
+          console.warn('未知消息类型:', message.type);'
       }
     } catch (error) {
-      console.error('处理消息失败:', error);
+      console.error('处理消息失败:', error);'
     }
   }
 
@@ -343,7 +343,7 @@ class CollaborationService {
       });
     });
 
-    this.emit('room_joined', {
+    this.emit('room_joined', {'
       roomId: this.currentRoom,
       document: this.document,
       users: Array.from(this.users.values())
@@ -354,13 +354,12 @@ class CollaborationService {
    * 处理用户加入
    */
   private handleUserJoined(message: any): void {
-    const user: CollaborationUser = {
+    const user: CollaborationUser  = {
       id: message.userId,
       sessionId: message.sessionId
     };
-    
     this.users.set(message.sessionId, user);
-    this.emit('user_joined', user);
+    this.emit('user_joined', user);'
   }
 
   /**
@@ -370,7 +369,7 @@ class CollaborationService {
     const user = this.users.get(message.sessionId);
     if (user) {
       this.users.delete(message.sessionId);
-      this.emit('user_left', user);
+      this.emit('user_left', user);'
     }
   }
 
@@ -384,7 +383,7 @@ class CollaborationService {
       this.document.lastModified = new Date();
     }
 
-    this.emit('document_updated', {
+    this.emit('document_updated', {'
       operation: message.operation,
       content: message.content,
       version: message.version,
@@ -403,7 +402,7 @@ class CollaborationService {
         timestamp: new Date(message.cursor.timestamp)
       };
       
-      this.emit('cursor_updated', {
+      this.emit('cursor_updated', {'
         user,
         cursor: user.cursor
       });
@@ -414,34 +413,32 @@ class CollaborationService {
    * 处理评论添加
    */
   private handleCommentAdded(message: any): void {
-    const comment: CollaborationComment = {
+    const comment: CollaborationComment  = {
       ...message.comment,
       createdAt: new Date(message.comment.createdAt),
       updatedAt: new Date(message.comment.updatedAt)
     };
-    
     this.comments.set(comment.id, comment);
-    this.emit('comment_added', comment);
+    this.emit('comment_added', comment);'
   }
 
   /**
    * 处理分享链接创建
    */
   private handleShareLinkCreated(message: any): void {
-    const shareLink: ShareLink = {
+    const shareLink: ShareLink  = {
       ...message.shareLink,
       createdAt: new Date(message.shareLink.createdAt),
       expiresAt: message.shareLink.expiresAt ? new Date(message.shareLink.expiresAt) : undefined
     };
-    
-    this.emit('share_link_created', shareLink);
+    this.emit('share_link_created', shareLink);'
   }
 
   /**
    * 处理版本冲突
    */
   private handleVersionConflict(message: any): void {
-    this.emit('version_conflict', {
+    this.emit('version_conflict', {'
       documentId: message.documentId,
       currentVersion: message.currentVersion,
       yourVersion: message.yourVersion
@@ -452,8 +449,8 @@ class CollaborationService {
    * 处理错误
    */
   private handleError(message: any): void {
-    console.error('协作服务错误:', message.message);
-    this.emit('error', new Error(message.message));
+    console.error('协作服务错误:', message.message);'
+    this.emit('error', new Error(message.message));'
   }
 
   /**
@@ -463,7 +460,7 @@ class CollaborationService {
     if (this.ws && this.isConnected) {
       this.ws.send(JSON.stringify(message));
     } else {
-      console.warn('WebSocket未连接，无法发送消息');
+      console.warn('WebSocket未连接，无法发送消息');'
     }
   }
 
@@ -473,18 +470,18 @@ class CollaborationService {
   private attemptReconnect(): void {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       
-        console.error('达到最大重连次数，停止重连');
+        console.error('达到最大重连次数，停止重连');'
       return;
       }
 
     this.reconnectAttempts++;
     const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
     
-    console.log(`${delay}ms后尝试第${this.reconnectAttempts}次重连...`);
+    console.log(`${delay}ms后尝试第${this.reconnectAttempts}次重连...`);`
     
     setTimeout(() => {
       this.connect().catch(error => {
-        console.error('重连失败:', error);
+        console.error("重连失败:', error);'`
       });
     }, delay);
   }
@@ -492,7 +489,7 @@ class CollaborationService {
   /**
    * 事件监听
    */
-  on(event: string, callback: Function): () => void {
+  on(event: string, callback: Function): ()  => void {
     if (!this.eventListeners.has(event)) {
       this.eventListeners.set(event, []);
     }
@@ -540,7 +537,7 @@ class CollaborationService {
    * 发送心跳
    */
   ping(): void {
-    this.send({ type: 'ping' });
+    this.send({ type: 'ping' });'
   }
 }
 

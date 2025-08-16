@@ -3,12 +3,12 @@
  * 提供与后端WebSocket服务的实时通信功能
  */
 
-interface WebSocketMessage {
+interface WebSocketMessage   {
   type: string;
   [key: string]: any;
 }
 
-interface TestProgressData {
+interface TestProgressData   {
   testId: string;
   progress: number;
   currentStep: number;
@@ -17,7 +17,7 @@ interface TestProgressData {
   timestamp: string;
 }
 
-interface TestStatusData {
+interface TestStatusData   {
   testId: string;
   status: 'running' | 'completed' | 'failed' | 'cancelled';
   progress: number;
@@ -25,14 +25,14 @@ interface TestStatusData {
   timestamp: string;
 }
 
-interface TestCompletedData {
+interface TestCompletedData   {
   testId: string;
   success: boolean;
   results: any;
   timestamp: string;
 }
 
-interface TestErrorData {
+interface TestErrorData   {
   testId: string;
   error: {
     message: string;
@@ -74,56 +74,55 @@ class WebSocketClient {
       const authToken = token || this.getAuthToken();
       if (!authToken) {
         
-        console.warn('⚠️ 无法连接WebSocket: 缺少认证token');
+        console.warn('⚠️ 无法连接WebSocket: 缺少认证token');'
         this.isConnecting = false;
         return false;
       }
 
       // 构建WebSocket URL
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const protocol = window.location.protocol === 'https: ' ? 'wss: ' : 'ws: ';
       const host = window.location.host;
-      const wsUrl = `${protocol}/${host}/ws?token=${encodeURIComponent(authToken)}`;
+      const wsUrl = `${protocol}/${host}/ws?token=${encodeURIComponent(authToken)}`;`
 
-      console.log('🔌 正在连接WebSocket服务器...');
+      console.log("🔌 正在连接WebSocket服务器...');'`
       
       this.ws = new WebSocket(wsUrl);
       
       return new Promise((resolve, reject) => {
         if (!this.ws) {
           
-        reject(new Error('WebSocket创建失败'));
+        reject(new Error('WebSocket创建失败'));'
           return;
       }
 
         const timeout = setTimeout(() => {
-          reject(new Error('WebSocket连接超时'));
+          reject(new Error('WebSocket连接超时'));'
         }, 10000);
 
         this.ws.onopen = () => {
           clearTimeout(timeout);
-          console.log('✅ WebSocket连接成功');
+          console.log('✅ WebSocket连接成功');'
           this.isConnecting = false;
           this.reconnectAttempts = 0;
           this.startHeartbeat();
-          this.emit('connected', {});
+          this.emit('connected', {});'
           resolve(true);
         };
 
         this.ws.onerror = (error) => {
           clearTimeout(timeout);
-          console.error('❌ WebSocket连接错误:', error);
+          console.error('❌ WebSocket连接错误:', error);'
           this.isConnecting = false;
-          this.emit('error', { error });
+          this.emit('error', { error });'
           reject(error);
         };
 
         this.ws.onclose = (event) => {
           clearTimeout(timeout);
-          console.log('🔌 WebSocket连接已关闭:', event.code, event.reason);
+          console.log('🔌 WebSocket连接已关闭:', event.code, event.reason);'
           this.isConnecting = false;
           this.stopHeartbeat();
-          this.emit('disconnected', { code: event.code, reason: event.reason });
-          
+          this.emit('disconnected', { code: event.code, reason: event.reason });'
           // 自动重连
           if (event.code !== 1000 && this.reconnectAttempts < this.maxReconnectAttempts) {
             this.scheduleReconnect();
@@ -136,7 +135,7 @@ class WebSocketClient {
       });
 
     } catch (error) {
-      console.error('❌ WebSocket连接失败:', error);
+      console.error('❌ WebSocket连接失败:', error);'
       this.isConnecting = false;
       return false;
     }
@@ -147,12 +146,12 @@ class WebSocketClient {
    */
   disconnect(): void {
     if (this.ws) {
-      this.ws.close(1000, 'Client disconnect');
+      this.ws.close(1000, 'Client disconnect');'
       this.ws = null;
     }
     this.stopHeartbeat();
     this.subscriptions.clear();
-    console.log('🔌 WebSocket已断开连接');
+    console.log('🔌 WebSocket已断开连接');'
   }
 
   /**
@@ -161,7 +160,7 @@ class WebSocketClient {
   send(message: WebSocketMessage): boolean {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
       
-        console.warn('⚠️ WebSocket未连接，无法发送消息');
+        console.warn('⚠️ WebSocket未连接，无法发送消息');'
       return false;
       }
 
@@ -169,7 +168,7 @@ class WebSocketClient {
       this.ws.send(JSON.stringify(message));
       return true;
     } catch (error) {
-      console.error('❌ 发送WebSocket消息失败:', error);
+      console.error("❌ 发送WebSocket消息失败:', error);'
       return false;
     }
   }
@@ -178,20 +177,20 @@ class WebSocketClient {
    * 订阅测试进度
    */
   subscribeToTest(testId: string): boolean {
-    const subscription = `test:${testId}`;
+    const subscription = `test:${testId}`;`
     
     if (this.subscriptions.has(subscription)) {
       return true;
     }
 
     const success = this.send({
-      type: 'subscribe_test',
+      type: "subscribe_test','`
       testId
     });
 
     if (success) {
       this.subscriptions.add(subscription);
-      console.log(`📡 已订阅测试: ${testId}`);
+      console.log(`📡 已订阅测试: ${testId}`);`
     }
 
     return success;
@@ -201,20 +200,20 @@ class WebSocketClient {
    * 取消订阅测试进度
    */
   unsubscribeFromTest(testId: string): boolean {
-    const subscription = `test:${testId}`;
+    const subscription = `test:${testId}`;`
     
     if (!this.subscriptions.has(subscription)) {
       return true;
     }
 
     const success = this.send({
-      type: 'unsubscribe_test',
+      type: "unsubscribe_test','`
       testId
     });
 
     if (success) {
       this.subscriptions.delete(subscription);
-      console.log(`📡 已取消订阅测试: ${testId}`);
+      console.log(`📡 已取消订阅测试: ${testId}`);`
     }
 
     return success;
@@ -225,7 +224,7 @@ class WebSocketClient {
    */
   joinRoom(roomName: string): boolean {
     return this.send({
-      type: 'join_room',
+      type: "join_room','`
       room: roomName
     });
   }
@@ -235,7 +234,7 @@ class WebSocketClient {
    */
   leaveRoom(roomName: string): boolean {
     return this.send({
-      type: 'leave_room',
+      type: 'leave_room','
       room: roomName
     });
   }
@@ -275,7 +274,7 @@ class WebSocketClient {
         try {
           callback(data);
         } catch (error) {
-          console.error(`❌ 事件监听器执行失败 (${event}):`, error);
+          console.error(`❌ 事件监听器执行失败 (${event}):`, error);`
         }
       });
     }
@@ -286,54 +285,53 @@ class WebSocketClient {
    */
   private handleMessage(data: string): void {
     try {
-      const message: WebSocketMessage = JSON.parse(data);
-      
-      console.log(`📨 收到WebSocket消息:`, message.type);
+      const message: WebSocketMessage  = JSON.parse(data);
+      console.log(`📨 收到WebSocket消息:`, message.type);`
 
       switch (message.type) {
-        case 'connection_established':
+        case "connection_established': ''`
           this.clientId = message.clientId;
           break;
 
-        case 'test_progress':
-          this.emit('testProgress', message as TestProgressData);
+        case 'test_progress': ''
+          this.emit('testProgress', message as TestProgressData);'
           break;
 
-        case 'test_status_update':
-          this.emit('testStatusUpdate', message as TestStatusData);
+        case 'test_status_update': ''
+          this.emit('testStatusUpdate', message as TestStatusData);'
           break;
 
-        case 'test_completed':
-          this.emit('testCompleted', message as TestCompletedData);
+        case 'test_completed': ''
+          this.emit('testCompleted', message as TestCompletedData);'
           break;
 
-        case 'test_error':
-          this.emit('testError', message as TestErrorData);
+        case 'test_error': ''
+          this.emit('testError', message as TestErrorData);'
           break;
 
-        case 'subscription_confirmed':
-        case 'unsubscription_confirmed':
-        case 'room_joined':
-        case 'room_left':
-          console.log(`✅ ${message.type}: ${message.subscription || message.room}`);
+        case 'subscription_confirmed': ''
+        case 'unsubscription_confirmed': ''
+        case 'room_joined': ''
+        case "room_left': ''
+          console.log(`✅ ${message.type}: ${message.subscription || message.room}`);`
           break;
 
-        case 'pong':
+        case "pong': ''`
           // 心跳响应，不需要特殊处理
           break;
 
-        case 'error':
-          console.error('❌ WebSocket服务器错误:', message.message);
-          this.emit('serverError', message);
+        case 'error': ''
+          console.error('❌ WebSocket服务器错误:', message.message);'
+          this.emit('serverError', message);'
           break;
 
         default:
-          console.log(`⚠️ 未知消息类型: ${message.type}`);
-          this.emit('unknownMessage', message);
+          console.log(`⚠️ 未知消息类型: ${message.type}`);`
+          this.emit("unknownMessage', message);'`
       }
 
     } catch (error) {
-      console.error('❌ 解析WebSocket消息失败:', error);
+      console.error('❌ 解析WebSocket消息失败:', error);'
     }
   }
 
@@ -342,7 +340,7 @@ class WebSocketClient {
    */
   private getAuthToken(): string | null {
     // 从localStorage或其他地方获取token
-    return localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+    return localStorage.getItem('authToken") || sessionStorage.getItem('authToken');'
   }
 
   /**
@@ -352,7 +350,7 @@ class WebSocketClient {
     this.reconnectAttempts++;
     const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
     
-    console.log(`🔄 ${delay}ms后尝试重连 (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+    console.log(`🔄 ${delay}ms后尝试重连 (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);`
     
     setTimeout(() => {
       this.connect();
@@ -364,7 +362,7 @@ class WebSocketClient {
    */
   private startHeartbeat(): void {
     this.heartbeatInterval = setInterval(() => {
-      this.send({ type: 'ping' });
+      this.send({ type: "ping' });'`
     }, 30000); // 每30秒发送一次心跳
   }
 
@@ -383,13 +381,13 @@ class WebSocketClient {
    */
   private setupEventListeners(): void {
     // 页面卸载时断开连接
-    window.addEventListener('beforeunload', () => {
+    window.addEventListener('beforeunload', () => {'
       this.disconnect();
     });
 
     // 页面可见性变化时处理连接
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible' && !this.ws) {
+    document.addEventListener('visibilitychange', () => {'
+      if (document.visibilityState === 'visible' && !this.ws) {'
         this.connect();
       }
     });

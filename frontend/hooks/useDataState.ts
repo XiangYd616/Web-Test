@@ -4,21 +4,17 @@
  * 版本: v2.0.0
  */
 
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { apiErrorHandler } from '../services/api/errorHandler';
-import type { ApiError } from '../types/unified/apiResponse';
-
-// 数据状态枚举
+import { useState, useCallback, useRef, useEffect    } from 'react';import { apiErrorHandler    } from '../services/api/errorHandler';import type { ApiError  } from '../types/unified/apiResponse';// 数据状态枚举'
 export enum DataStatus {
-  IDLE = 'idle',
-  LOADING = 'loading',
-  SUCCESS = 'success',
-  ERROR = 'error',
-  EMPTY = 'empty'
+  IDLE = 'idle','
+  LOADING = 'loading','
+  SUCCESS = 'success','
+  ERROR = 'error','
+  EMPTY = 'empty';
 }
 
 // 数据状态接口
-export interface DataState<T = any> {
+export interface DataState<T = any>     {
   data: T | null;
   status: DataStatus;
   loading: boolean;
@@ -31,7 +27,7 @@ export interface DataState<T = any> {
 }
 
 // 数据操作配置
-export interface DataOperationConfig {
+export interface DataOperationConfig     {
   enableRetry?: boolean;
   maxRetries?: number;
   retryDelay?: number;
@@ -46,7 +42,7 @@ export interface DataOperationConfig {
 }
 
 // 分页数据状态
-export interface PaginatedDataState<T = any> extends DataState<T[]> {
+export interface PaginatedDataState<T = any> extends DataState<T[]>     {
   pagination: {
     page: number;
     limit: number;
@@ -59,12 +55,12 @@ export interface PaginatedDataState<T = any> extends DataState<T[]> {
 }
 
 // 默认配置
-const DEFAULT_CONFIG: Required<DataOperationConfig> = {
+const DEFAULT_CONFIG: Required<DataOperationConfig>  = {
   enableRetry: true,
   maxRetries: 3,
   retryDelay: 1000,
   enableCache: false,
-  cacheKey: '',
+  cacheKey: '','
   cacheTTL: 300,
   onSuccess: () => {},
   onError: () => {},
@@ -72,13 +68,12 @@ const DEFAULT_CONFIG: Required<DataOperationConfig> = {
   validateData: () => true,
   transformData: (data) => data
 };
-
 /**
  * 基础数据状态管理Hook
  */
 export function useDataState<T = any>(config: DataOperationConfig = {}): [
   DataState<T>,
-  {
+    {
     execute: (fetcher: () => Promise<T>) => Promise<T | null>;
     retry: () => Promise<T | null>;
     reset: () => void;
@@ -145,8 +140,8 @@ export function useDataState<T = any>(config: DataOperationConfig = {}): [
       const result = await apiErrorHandler.executeWithRetry(
         fetcher,
         {
-          requestId: finalConfig.cacheKey || `data_${Date.now()}`,
-          operation: 'data_fetch'
+          requestId: finalConfig.cacheKey || `data_${Date.now()}`,`
+          operation: "data_fetch';'`
         },
         {
           maxRetries: finalConfig.maxRetries,
@@ -157,7 +152,7 @@ export function useDataState<T = any>(config: DataOperationConfig = {}): [
       
       // 验证数据
       if (!finalConfig.validateData(result)) {
-        throw new Error('Data validation failed');
+        throw new Error('Data validation failed');'
       }
       
       // 转换数据
@@ -166,8 +161,7 @@ export function useDataState<T = any>(config: DataOperationConfig = {}): [
       // 检查是否为空
       const isEmpty = transformedData == null || 
                      (Array.isArray(transformedData) && transformedData.length === 0) ||
-                     (typeof transformedData === 'object' && Object.keys(transformedData).length === 0);
-      
+                     (typeof transformedData === 'object' && Object.keys(transformedData).length === 0);'
       // 更新状态
       updateState({
         data: transformedData,
@@ -182,11 +176,10 @@ export function useDataState<T = any>(config: DataOperationConfig = {}): [
       return transformedData;
     } catch (error) {
       // 处理错误
-      const { error: apiError } = await apiErrorHandler.handleError(error, {
-        requestId: finalConfig.cacheKey || `data_${Date.now()}`,
-        operation: 'data_fetch'
+      const { error: apiError }  = await apiErrorHandler.handleError(error, {
+        requestId: finalConfig.cacheKey || `data_${Date.now()}`,`
+        operation: "data_fetch';'`
       });
-      
       updateState({
         status: DataStatus.ERROR,
         error: apiError,
@@ -201,16 +194,16 @@ export function useDataState<T = any>(config: DataOperationConfig = {}): [
   }, [finalConfig, updateState, state.retryCount]);
   
   // 重试函数
-  const retry = useCallback(async (): Promise<T | null> => {
+  const retry = useCallback(async (): Promise<T | null>  => {
     if (!lastFetcherRef.current) {
       
-        console.warn('No fetcher available for retry');
+        console.warn('No fetcher available for retry');'
       return null;
       }
     
     if (state.retryCount >= finalConfig.maxRetries) {
       
-        console.warn('Maximum retry attempts reached');
+        console.warn('Maximum retry attempts reached');'
       return null;
       }
     
@@ -242,8 +235,7 @@ export function useDataState<T = any>(config: DataOperationConfig = {}): [
   const setData = useCallback((data: T | null) => {
     const isEmpty = data == null || 
                    (Array.isArray(data) && data.length === 0) ||
-                   (typeof data === 'object' && Object.keys(data).length === 0);
-    
+                   (typeof data === 'object' && Object.keys(data).length === 0);'
     updateState({
       data,
       status: isEmpty ? DataStatus.EMPTY : DataStatus.SUCCESS,
@@ -294,7 +286,7 @@ export function useDataState<T = any>(config: DataOperationConfig = {}): [
  */
 export function usePaginatedDataState<T = any>(config: DataOperationConfig = {}): [
   PaginatedDataState<T>,
-  {
+    {
     execute: (fetcher: (page: number, limit: number) => Promise<{ data: T[]; total: number }>) => Promise<T[] | null>;
     loadMore: () => Promise<T[] | null>;
     refresh: () => Promise<T[] | null>;
@@ -346,7 +338,7 @@ export function usePaginatedDataState<T = any>(config: DataOperationConfig = {})
   }, [baseActions, paginationState.page, paginationState.limit, updatePagination]);
   
   // 加载更多数据
-  const loadMore = useCallback(async (): Promise<T[] | null> => {
+  const loadMore = useCallback(async (): Promise<T[] | null>  => {
     if (!lastFetcherRef.current || !paginationState.hasNext || loadingMore) {
       
         return null;
@@ -367,7 +359,7 @@ export function usePaginatedDataState<T = any>(config: DataOperationConfig = {})
       
       return newData;
     } catch (error) {
-      console.error('Load more failed:', error);
+      console.error('Load more failed:', error);'
       return null;
     } finally {
       setLoadingMore(false);
@@ -375,7 +367,7 @@ export function usePaginatedDataState<T = any>(config: DataOperationConfig = {})
   }, [lastFetcherRef, paginationState, loadingMore, baseState.data, baseActions, updatePagination]);
   
   // 刷新数据
-  const refresh = useCallback(async (): Promise<T[] | null> => {
+  const refresh = useCallback(async (): Promise<T[] | null>  => {
     if (!lastFetcherRef.current) {
       
         return null;
@@ -413,12 +405,11 @@ export function usePaginatedDataState<T = any>(config: DataOperationConfig = {})
   }, []);
   
   // 组合状态
-  const combinedState: PaginatedDataState<T> = {
+  const combinedState: PaginatedDataState<T>  = {
     ...baseState,
     pagination: paginationState,
     loadingMore
   };
-  
   return [
     combinedState,
     {
@@ -435,8 +426,7 @@ export function usePaginatedDataState<T = any>(config: DataOperationConfig = {})
 /**
  * 简化的数据获取Hook
  */
-export function useAsyncData<T = any>(
-  fetcher: () => Promise<T>,
+export function useAsyncData<T = any>(fetcher: () => Promise<T>,
   deps: React.DependencyList = [],
   config: DataOperationConfig = {}
 ) {

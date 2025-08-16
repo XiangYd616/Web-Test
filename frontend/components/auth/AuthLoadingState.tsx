@@ -1,32 +1,29 @@
-import React from 'react';
-import { Loader2, Shield, User, Key, Mail, RefreshCw } from 'lucide-react';
-
-export enum AuthLoadingType {
-  LOGIN = 'login',
-  REGISTER = 'register',
-  LOGOUT = 'logout',
-  VERIFY_TOKEN = 'verify_token',
-  REFRESH_TOKEN = 'refresh_token',
-  CHANGE_PASSWORD = 'change_password',
-  FORGOT_PASSWORD = 'forgot_password',
-  RESET_PASSWORD = 'reset_password',
-  VERIFY_EMAIL = 'verify_email',
-  SEND_VERIFICATION = 'send_verification',
-  UPDATE_PROFILE = 'update_profile'
+import React from 'react';import { Loader2, Shield, User, Key, Mail, RefreshCw    } from 'lucide-react';export enum AuthLoadingType {'
+  LOGIN = 'login','
+  REGISTER = 'register','
+  LOGOUT = 'logout','
+  VERIFY_TOKEN = 'verify_token','
+  REFRESH_TOKEN = 'refresh_token','
+  CHANGE_PASSWORD = 'change_password','
+  FORGOT_PASSWORD = 'forgot_password','
+  RESET_PASSWORD = 'reset_password','
+  VERIFY_EMAIL = 'verify_email','
+  SEND_VERIFICATION = 'send_verification','
+  UPDATE_PROFILE = 'update_profile';
 }
 
 const LOADING_MESSAGES = {
-  [AuthLoadingType.LOGIN]: '正在登录...',
-  [AuthLoadingType.REGISTER]: '正在注册...',
-  [AuthLoadingType.LOGOUT]: '正在登出...',
-  [AuthLoadingType.VERIFY_TOKEN]: '验证登录状态...',
-  [AuthLoadingType.REFRESH_TOKEN]: '刷新登录状态...',
-  [AuthLoadingType.CHANGE_PASSWORD]: '正在修改密码...',
-  [AuthLoadingType.FORGOT_PASSWORD]: '正在发送重置邮件...',
-  [AuthLoadingType.RESET_PASSWORD]: '正在重置密码...',
-  [AuthLoadingType.VERIFY_EMAIL]: '正在验证邮箱...',
-  [AuthLoadingType.SEND_VERIFICATION]: '正在发送验证邮件...',
-  [AuthLoadingType.UPDATE_PROFILE]: '正在更新资料...'
+  [AuthLoadingType.LOGIN]: "正在登录...','
+  [AuthLoadingType.REGISTER]: "正在注册...','
+  [AuthLoadingType.LOGOUT]: "正在登出...','
+  [AuthLoadingType.VERIFY_TOKEN]: "验证登录状态...','
+  [AuthLoadingType.REFRESH_TOKEN]: "刷新登录状态...','
+  [AuthLoadingType.CHANGE_PASSWORD]: "正在修改密码...','
+  [AuthLoadingType.FORGOT_PASSWORD]: "正在发送重置邮件...','
+  [AuthLoadingType.RESET_PASSWORD]: "正在重置密码...','
+  [AuthLoadingType.VERIFY_EMAIL]: "正在验证邮箱...','
+  [AuthLoadingType.SEND_VERIFICATION]: "正在发送验证邮件...','
+  [AuthLoadingType.UPDATE_PROFILE]: '正在更新资料...';
 };
 
 const LOADING_ICONS = {
@@ -43,7 +40,7 @@ const LOADING_ICONS = {
   [AuthLoadingType.UPDATE_PROFILE]: User
 };
 
-interface AuthLoadingStateProps {
+interface AuthLoadingStateProps   {
   type?: AuthLoadingType;
   message?: string;
   size?: 'sm' | 'md' | 'lg';
@@ -52,12 +49,12 @@ interface AuthLoadingStateProps {
   overlay?: boolean;
 }
 
-const AuthLoadingState: React.FC<AuthLoadingStateProps> = ({
+const AuthLoadingState: React.FC<AuthLoadingStateProps>  = ({
   type = AuthLoadingType.LOGIN,
   message,
-  size = 'md',
+  size = 'md','
   showIcon = true,
-  className = "",
+  className = '','
   overlay = false
 }) => {
   
@@ -66,30 +63,29 @@ const AuthLoadingState: React.FC<AuthLoadingStateProps> = ({
     onClick?.(event);
   }, [disabled, loading, onClick]);
   
-  const memoizedHandleChange = useMemo(() => 
-    debounce((value: any) => {
+  const memoizedHandleChange = useMemo(() => debounce((value: any) => {
       onChange?.(value);
     }, 300), [onChange]
   );
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;
-  const descriptionId = `${componentId}-description`;
+  const errorId = `${componentId}-error`;`
+  const descriptionId = `${componentId}-description`;`
   
   const ariaProps = {
     id: componentId,
-    'aria-label': ariaLabel,
-    'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': [
+    "aria-label': ariaLabel,'`
+    'aria-labelledby': ariaLabelledBy,'
+    'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,
-    'aria-invalid': !!error,
-    'aria-disabled': disabled,
-    'aria-busy': loading,
-    'aria-expanded': expanded,
-    'aria-selected': selected,
+    ].filter(Boolean).join(' ') || undefined,'
+    'aria-invalid': !!error,'
+    'aria-disabled': disabled,'
+    'aria-busy': loading,'
+    'aria-expanded': expanded,'
+    'aria-selected': selected,'
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -100,8 +96,8 @@ const AuthLoadingState: React.FC<AuthLoadingStateProps> = ({
     try {
       onClick?.(event);
     } catch (error) {
-      console.error('Click handler error:', error);
-      setError('操作失败，请重试');
+      console.error('Click handler error: ', error);'
+      setError('操作失败，请重试');'
     }
   }, [disabled, loading, onClick]);
   
@@ -111,8 +107,8 @@ const AuthLoadingState: React.FC<AuthLoadingStateProps> = ({
     try {
       onChange?.(newValue);
     } catch (error) {
-      console.error('Change handler error:', error);
-      updateState({ error: '值更新失败' });
+      console.error('Change handler error: ', error);'
+      updateState({ error: '值更新失败' });'
     }
   }, [onChange, updateState]);
   
@@ -131,44 +127,44 @@ const AuthLoadingState: React.FC<AuthLoadingStateProps> = ({
   // 尺寸配置
   const sizeConfig = {
     sm: {
-      spinner: 'w-4 h-4',
-      icon: 'w-4 h-4',
-      text: 'text-sm',
-      container: 'p-2'
+      spinner: 'w-4 h-4','
+      icon: 'w-4 h-4','
+      text: 'text-sm','
+      container: 'p-2';
     },
     md: {
-      spinner: 'w-6 h-6',
-      icon: 'w-5 h-5',
-      text: 'text-base',
-      container: 'p-4'
+      spinner: 'w-6 h-6','
+      icon: 'w-5 h-5','
+      text: 'text-base','
+      container: 'p-4';
     },
     lg: {
-      spinner: 'w-8 h-8',
-      icon: 'w-6 h-6',
-      text: 'text-lg',
-      container: 'p-6'
+      spinner: 'w-8 h-8','
+      icon: 'w-6 h-6','
+      text: 'text-lg','
+      container: 'p-6';
     }
   };
 
   const config = sizeConfig[size];
 
   const content = (
-    <div className={`flex items-center justify-center space-x-3 ${config.container} ${className}`}>
+    <div className={`flex items-center justify-center space-x-3 ${config.container} ${className}`}>`
       {/* 加载图标 */}
-      <div className="relative">
+      <div className= "relative'>`
         {/* 旋转的加载器 */}
-        <Loader2 className={`${config.spinner} animate-spin text-blue-600`} />
+        <Loader2 className={`${config.spinner} animate-spin text-blue-600`}    />`
 
         {/* 功能图标（可选） */}
         {showIcon && IconComponent && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <IconComponent className={`${config.icon} text-blue-400 opacity-60`} />
+          <div className= "absolute inset-0 flex items-center justify-center'>`
+            <IconComponent className={`${config.icon} text-blue-400 opacity-60`}    />`
           </div>
         )}
       </div>
 
       {/* 加载消息 */}
-      <span className={`${config.text} text-gray-700 font-medium`}>
+      <span className={`${config.text} text-gray-700 font-medium`}>`
         {loadingMessage}
       </span>
     </div>
@@ -178,8 +174,8 @@ const AuthLoadingState: React.FC<AuthLoadingStateProps> = ({
   if (overlay) {
     
         return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg shadow-lg">
+      <div className= "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>`
+        <div className= 'bg-white rounded-lg shadow-lg'>
           {content
       }
         </div>
@@ -191,17 +187,17 @@ const AuthLoadingState: React.FC<AuthLoadingStateProps> = ({
 };
 
 export const AuthSpinner: React.FC<{
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm' | 'md' | 'lg';
   className?: string;
-}> = ({ size = 'md', className = "" }) => {
+}> = ({ size = 'md', className = '' }) => {'
   const sizeClasses = {
-    sm: 'w-4 h-4',
-    md: 'w-6 h-6',
-    lg: 'w-8 h-8'
+    sm: 'w-4 h-4','
+    md: 'w-6 h-6','
+    lg: 'w-8 h-8';
   };
 
   return (
-    <Loader2 className={`${sizeClasses[size]} animate-spin text-blue-600 ${className}`} />
+    <Loader2 className={`${sizeClasses[size]} animate-spin text-blue-600 ${className}`}    />`
   );
 };
 
@@ -212,8 +208,8 @@ export const InlineAuthLoading: React.FC<{
   const loadingMessage = message || LOADING_MESSAGES[type];
 
   return (
-    <div className="flex items-center space-x-2 text-sm text-gray-600">
-      <AuthSpinner size="sm" />
+    <div className= "flex items-center space-x-2 text-sm text-gray-600'>`
+      <AuthSpinner size= 'sm'    />
       <span>{loadingMessage}</span>
     </div>
   );
@@ -229,7 +225,7 @@ export const ButtonLoading: React.FC<{
   type = AuthLoadingType.LOGIN,
   message,
   disabled = true,
-  className = "",
+  className = "','
   children
 }) => {
   const loadingMessage = message || LOADING_MESSAGES[type];
@@ -237,11 +233,11 @@ export const ButtonLoading: React.FC<{
   return (
     <button
       disabled={disabled}
-      className={`inline-flex items-center justify-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium transition-colors ${
-        disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
-      } ${className}`}
+      className={`inline-flex items-center justify-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium transition-colors ${`}
+        disabled ? "opacity-50 cursor-not-allowed' : 'hover:bg-blue-700';'`
+      } ${className}`}`
     >
-      <AuthSpinner size="sm" className="text-white" />
+      <AuthSpinner size= "sm' className= 'text-white'    />`
       <span>{children || loadingMessage}</span>
     </button>
   );
@@ -259,19 +255,18 @@ export const PageAuthLoading: React.FC<{
   const loadingMessage = message || LOADING_MESSAGES[type];
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <div className="mb-6">
-          <AuthLoadingState
-            type={type}
+    <div className= 'min-h-screen bg-gray-50 flex items-center justify-center'>
+      <div className= 'text-center'>
+        <div className= 'mb-6'>
+          <AuthLoadingState type={type}
             message={loadingMessage}
-            size="lg"
+            size= 'lg';
             showIcon={true}
-          />
+             />
         </div>
 
         {description && (
-          <p className="text-gray-500 text-sm max-w-md mx-auto">
+          <p className= 'text-gray-500 text-sm max-w-md mx-auto'>
             {description}
           </p>
         )}
@@ -284,16 +279,15 @@ export const CardAuthLoading: React.FC<{
   type?: AuthLoadingType;
   message?: string;
   className?: string;
-}> = ({ type = AuthLoadingType.LOGIN, message, className = "" }) => {
+}> = ({ type = AuthLoadingType.LOGIN, message, className = '' }) => {'
   return (
-    <div className={`bg-white rounded-lg border border-gray-200 shadow-sm ${className}`}>
-      <AuthLoadingState
-        type={type}
+    <div className={`bg-white rounded-lg border border-gray-200 shadow-sm ${className}`}>`
+      <AuthLoadingState type={type}
         message={message}
-        size="md"
+        size= "md';'`
         showIcon={true}
-        className="py-8"
-      />
+        className= 'py-8';
+         />
     </div>
   );
 };

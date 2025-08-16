@@ -3,13 +3,9 @@
  * 提供WebSocket连接和实时数据更新功能
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-
-// 连接状态类型
-export type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'error';
-
-// 实时数据Hook配置
-export interface RealTimeDataConfig {
+import { useCallback, useEffect, useRef, useState    } from 'react';// 连接状态类型'
+export type ConnectionStatus   = 'connecting' | 'connected' | 'disconnected' | 'error';// 实时数据Hook配置'
+export interface RealTimeDataConfig     {
     url?: string;
     reconnectInterval?: number;
     maxReconnectAttempts?: number;
@@ -17,7 +13,7 @@ export interface RealTimeDataConfig {
 }
 
 // 实时数据Hook状态
-export interface RealTimeDataState {
+export interface RealTimeDataState     {
     data: any;
     isConnected: boolean;
     connectionStatus: ConnectionStatus;
@@ -26,13 +22,12 @@ export interface RealTimeDataState {
 }
 
 // 默认配置
-const DEFAULT_CONFIG: Required<RealTimeDataConfig> = {
-    url: 'ws://localhost:3001',
+const DEFAULT_CONFIG: Required<RealTimeDataConfig>  = {
+    url: 'ws://localhost:3001','
     reconnectInterval: 3000,
     maxReconnectAttempts: 5,
     heartbeatInterval: 30000
 };
-
 // 实时数据Hook
 export const useRealTimeData = (channel: string, config: RealTimeDataConfig = {}) => {
     const finalConfig = { ...DEFAULT_CONFIG, ...config };
@@ -40,7 +35,7 @@ export const useRealTimeData = (channel: string, config: RealTimeDataConfig = {}
     const [state, setState] = useState<RealTimeDataState>({
         data: null,
         isConnected: false,
-        connectionStatus: 'disconnected',
+        connectionStatus: 'disconnected','
         error: null,
         reconnectAttempts: 0
     });
@@ -73,7 +68,7 @@ export const useRealTimeData = (channel: string, config: RealTimeDataConfig = {}
     const sendHeartbeat = useCallback(() => {
         if (wsRef.current?.readyState === WebSocket.OPEN) {
             wsRef.current.send(JSON.stringify({
-                type: 'heartbeat',
+                type: 'heartbeat','
                 channel,
                 timestamp: Date.now()
             }));
@@ -94,20 +89,19 @@ export const useRealTimeData = (channel: string, config: RealTimeDataConfig = {}
       }
 
         try {
-            updateState({ connectionStatus: 'connecting', error: null });
-
+            updateState({ connectionStatus: 'connecting', error: null });'
             // 在实际环境中，这里应该连接到真实的WebSocket服务器
             // 现在我们模拟WebSocket连接
             const mockWs = {
                 readyState: WebSocket.OPEN,
                 send: (data: string) => {
-                    console.log('Mock WebSocket send:', data);
+                    console.log('Mock WebSocket send: ', data);'
                 },
                 close: () => {
-                    console.log('Mock WebSocket close');
+                    console.log('Mock WebSocket close');'
                 },
                 addEventListener: (event: string, handler: Function) => {
-                    if (event === 'open') {
+                    if (event === 'open') {'
                         setTimeout(() => handler(), 100);
                     }
                 },
@@ -121,7 +115,7 @@ export const useRealTimeData = (channel: string, config: RealTimeDataConfig = {}
                 if (mountedRef.current) {
                     updateState({
                         isConnected: true,
-                        connectionStatus: 'connected',
+                        connectionStatus: 'connected','
                         reconnectAttempts: 0
                     });
                     startHeartbeat();
@@ -130,12 +124,12 @@ export const useRealTimeData = (channel: string, config: RealTimeDataConfig = {}
                     const mockDataInterval = setInterval(() => {
                         if (mountedRef.current && wsRef.current) {
                             const mockData = {
-                                type: 'data_update',
+                                type: 'data_update','
                                 channel,
                                 data: {
                                     timestamp: new Date().toISOString(),
                                     value: Math.random() * 100,
-                                    status: Math.random() > 0.8 ? 'warning' : 'normal'
+                                    status: Math.random() > 0.8 ? 'warning' : 'normal';
                                 }
                             };
                             updateState({ data: mockData });
@@ -149,7 +143,7 @@ export const useRealTimeData = (channel: string, config: RealTimeDataConfig = {}
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : '连接失败';
             updateState({
-                connectionStatus: 'error',
+                connectionStatus: 'error','
                 error: errorMessage,
                 isConnected: false
             });
@@ -168,7 +162,7 @@ export const useRealTimeData = (channel: string, config: RealTimeDataConfig = {}
 
         updateState({
             isConnected: false,
-            connectionStatus: 'disconnected',
+            connectionStatus: 'disconnected','
             error: null
         });
     }, [clearTimers, updateState]);
@@ -177,8 +171,8 @@ export const useRealTimeData = (channel: string, config: RealTimeDataConfig = {}
     const scheduleReconnect = useCallback(() => {
         if (state.reconnectAttempts >= finalConfig.maxReconnectAttempts) {
             updateState({
-                connectionStatus: 'error',
-                error: '超过最大重连次数'
+                connectionStatus: 'error','
+                error: '超过最大重连次数';
             });
             return;
         }
@@ -198,7 +192,7 @@ export const useRealTimeData = (channel: string, config: RealTimeDataConfig = {}
     const sendData = useCallback((data: any) => {
         if (wsRef.current?.readyState === WebSocket.OPEN) {
             const message = {
-                type: 'client_message',
+                type: 'client_message','
                 channel,
                 data,
                 timestamp: Date.now()
@@ -213,11 +207,11 @@ export const useRealTimeData = (channel: string, config: RealTimeDataConfig = {}
     const subscribe = useCallback((eventType: string, callback: (data: any) => void) => {
         // 在实际实现中，这里会设置事件监听器
         // 现在我们只是模拟订阅
-        console.log(`Subscribed to ${eventType} on channel ${channel}`);
+        console.log(`Subscribed to ${eventType} on channel ${channel}`);`
 
         // 返回取消订阅函数
         return () => {
-            console.log(`Unsubscribed from ${eventType} on channel ${channel}`);
+            console.log(`Unsubscribed from ${eventType} on channel ${channel}`);`
         };
     }, [channel]);
 

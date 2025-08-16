@@ -1,19 +1,9 @@
-import { Activity, AlertTriangle, ArrowRight, BarChart3, Bell, Book, Check, CheckCircle, ChevronDown, Clock, Code, Crown, Download, ExternalLink, FileText, Globe, HelpCircle, Home, Info, Key, Lock, Menu, Monitor, MoreVertical, Package, Play, Search, Settings, Shield, TestTube, Trash2, TrendingUp, Upload, User, X, Zap } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { useTheme } from '../../contexts/ThemeContext';
-import { NotificationItem, useNotifications } from '../../hooks/useNotifications';
-import { globalSearchService, SearchResult } from '../../services/search/globalSearchService';
-import { ThemeToggle } from '../ui/index';
-import UserDropdownMenu from './UserDropdownMenu';
-
-interface TopNavbarProps {
+import { Activity, AlertTriangle, ArrowRight, BarChart3, Bell, Book, Check, CheckCircle, ChevronDown, Clock, Code, Crown, Download, ExternalLink, FileText, Globe, HelpCircle, Home, Info, Key, Lock, Menu, Monitor, MoreVertical, Package, Play, Search, Settings, Shield, TestTube, Trash2, TrendingUp, Upload, User, X, Zap    } from 'lucide-react';import React, { useEffect, useRef, useState    } from 'react';import { Link, useLocation    } from 'react-router-dom';import { useAuth    } from '../../contexts/AuthContext';import { useTheme    } from '../../contexts/ThemeContext';import { NotificationItem, useNotifications    } from '../../hooks/useNotifications';import { globalSearchService, SearchResult    } from '../../services/search/globalSearchService';import { ThemeToggle    } from '../ui/index';import UserDropdownMenu from './UserDropdownMenu';interface TopNavbarProps   {'
   sidebarCollapsed: boolean;
   onToggleSidebar: () => void;
 }
 
-interface QuickAction {
+interface QuickAction   {
   id: string;
   name: string;
   icon: React.ComponentType<any>;
@@ -21,46 +11,44 @@ interface QuickAction {
   color: string;
 }
 
-const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar }) => {
+const TopNavbar: React.FC<TopNavbarProps>  = ({ sidebarCollapsed, onToggleSidebar }) => {
   
   // 性能优化
   const memoizedProps = useMemo(() => ({
     className: combinedClassName,
     style: computedStyle,
     disabled,
-    'aria-label': ariaLabel,
-    'data-testid': testId
+    'aria-label': ariaLabel,'
+    'data-testid': testId'
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
-  
   const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
     if (disabled || loading) return;
     onClick?.(event);
   }, [disabled, loading, onClick]);
   
-  const memoizedHandleChange = useMemo(() => 
-    debounce((value: any) => {
+  const memoizedHandleChange = useMemo(() => debounce((value: any) => {
       onChange?.(value);
     }, 300), [onChange]
   );
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;
-  const descriptionId = `${componentId}-description`;
+  const errorId = `${componentId}-error`;`
+  const descriptionId = `${componentId}-description`;`
   
   const ariaProps = {
     id: componentId,
-    'aria-label': ariaLabel,
-    'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': [
+    "aria-label': ariaLabel,'`
+    'aria-labelledby': ariaLabelledBy,'
+    'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,
-    'aria-invalid': !!error,
-    'aria-disabled': disabled,
-    'aria-busy': loading,
-    'aria-expanded': expanded,
-    'aria-selected': selected,
+    ].filter(Boolean).join(' ') || undefined,'
+    'aria-invalid': !!error,'
+    'aria-disabled': disabled,'
+    'aria-busy': loading,'
+    'aria-expanded': expanded,'
+    'aria-selected': selected,'
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -79,41 +67,37 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');'
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [selectedSearchIndex, setSelectedSearchIndex] = useState(-1);
   const [isSearching, setIsSearching] = useState(false);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
-  const [notificationFilter, setNotificationFilter] = useState<'all' | 'unread'>('all');
-
+  const [notificationFilter, setNotificationFilter] = useState<'all' | 'unread'>('all');'
   const notificationRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const quickActionsRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
   const isAdmin = user?.role === 'admin';
-
   // 快捷操作
-  const quickActions: QuickAction[] = [
-    { id: 'testing-dashboard', name: '测试工具', icon: Activity, href: '/testing', color: 'blue' },
-    { id: 'api-test', name: 'API测试', icon: Package, href: '/testing/api', color: 'purple' },
-    { id: 'performance-test', name: '性能测试', icon: Activity, href: '/testing/performance', color: 'green' },
-    { id: 'security-test', name: '安全测试', icon: AlertTriangle, href: '/testing/security', color: 'red' },
-    { id: 'monitoring', name: '实时监控', icon: Monitor, href: '/monitoring', color: 'yellow' },
+  const quickActions: QuickAction[]  = [
+    { id: 'testing-dashboard', name: '测试工具', icon: Activity, href: '/testing', color: 'blue' },'
+    { id: 'api-test', name: 'API测试', icon: Package, href: '/testing/api', color: 'purple' },'
+    { id: 'performance-test', name: '性能测试', icon: Activity, href: '/testing/performance', color: 'green' },'
+    { id: 'security-test', name: '安全测试', icon: AlertTriangle, href: '/testing/security', color: 'red' },'
+    { id: 'monitoring', name: '实时监控', icon: Monitor, href: '/monitoring', color: 'yellow' },'
     {
-      id: 'system-status', name: '系统状态', icon: Settings, href: '/system-status', color: 'gray'
+      id: 'system-status', name: '系统状态', icon: Settings, href: '/system-status', color: 'gray';
     },
-    { id: 'reports', name: '测试报告', icon: FileText, href: '/reports', color: 'indigo' }
+    { id: 'reports', name: '测试报告', icon: FileText, href: '/reports', color: 'indigo' }'
   ];
-
   // 获取要显示的通知列表
-  const displayNotifications = notificationFilter === 'unread'
-    ? notifications.filter(n => !n.read)
-    : getRecentNotifications(10);
+  const displayNotifications = notificationFilter === 'unread';
+    ? notifications.filter(n => !n.read): getRecentNotifications(10);
 
   // 点击外部关闭下拉菜单
-  useEffect(() => {
+  useEffect(()  => {
     const handleClickOutside = (event: MouseEvent) => {
       if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
         setShowNotifications(false);
@@ -129,16 +113,16 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);'
+    return () => document.removeEventListener("mousedown', handleClickOutside);'
   }, []);
 
   // 全局键盘快捷�?  useEffect(() => {
   const handleKeyDown = (event: KeyboardEvent) => {
     // Ctrl+K �?Cmd+K 打开搜索
-    if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+    if ((event.ctrlKey || event.metaKey) && event.key === 'k') {'
       event.preventDefault();
-      const searchInput = document.querySelector('input[placeholder*="搜索"]') as HTMLInputElement;
+      const searchInput = document.querySelector("input[placeholder*= '搜索']') as HTMLInputElement;'
       if (searchInput) {
         searchInput.focus();
         setShowSearchDropdown(true);
@@ -147,9 +131,9 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
   };
 
   useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown);'
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("keydown', handleKeyDown);'
     };
   }, []);
 
@@ -174,7 +158,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
         setSearchResults(results);
         setSelectedSearchIndex(-1);
       } catch (error) {
-        console.error('Search failed:', error);
+        console.error('Search failed: ', error);'
         setSearchResults([]);
       } finally {
         setIsSearching(false);
@@ -187,10 +171,10 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'success': return <CheckCircle className="w-4 h-4 text-green-400" />;
-      case 'warning': return <AlertTriangle className="w-4 h-4 text-yellow-400" />;
-      case 'error': return <X className="w-4 h-4 text-red-400" />;
-      default: return <Info className="w-4 h-4 text-blue-400" />;
+      case 'success": return <CheckCircle className= 'w-4 h-4 text-green-400'    />;'
+      case 'warning": return <AlertTriangle className= 'w-4 h-4 text-yellow-400'    />;'
+      case 'error": return <X className= 'w-4 h-4 text-red-400'    />;'
+      default: return <Info className= 'w-4 h-4 text-blue-400'    />;'
     }
   };
 
@@ -234,13 +218,13 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
     // 可以在这里添加更多操作菜单
     const actions = [
       {
-        label: '标记为已读', action: () => markAsRead(notification.id)
+        label: '标记为已读', action: () => markAsRead(notification.id)'
       },
-      { label: '删除通知', action: () => deleteNotification(notification.id) },
-      { label: '查看详情', action: () => notification.actionUrl && (window.location.href = notification.actionUrl) }
+      { label: '删除通知', action: () => deleteNotification(notification.id) },'
+      { label: '查看详情', action: () => notification.actionUrl && (window.location.href = notification.actionUrl) }'
     ];
 
-    // 简单的确认对话框实�?    const actionText = notification.read ? '删除此通知�? : '标记为已读并删除�?;
+    // 简单的确认对话框实�?    const actionText = notification.read ? "删除此通知�? : '标记为已读并删除�?;'
     if (confirm(actionText)) {
       deleteNotification(notification.id);
     }
@@ -263,7 +247,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
     globalSearchService.recordSearch(searchQuery);
     setSearchHistory(globalSearchService.getSearchHistory());
     setShowSearchDropdown(false);
-    setSearchQuery('');
+    setSearchQuery("');'
     // 这里可以添加路由跳转逻辑
     window.location.href = result.url;
   };
@@ -274,7 +258,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
       setSearchHistory(globalSearchService.getSearchHistory());
       setShowSearchDropdown(false);
       // 如果没有精确匹配的结果，导航到帮助页面进行搜�?      if (searchResults.length === 0) {
-      window.location.href = `/help?search=${encodeURIComponent(query)}`;
+      window.location.href = `/help?search=${encodeURIComponent(query)}`;`
     } else {
       // 导航到第一个结�?        handleSearchResultClick(searchResults[0]);
     }
@@ -288,85 +272,84 @@ const clearSearchHistory = () => {
 
 // 渲染搜索图标
 const renderSearchIcon = (iconName: string) => {
-  const iconMap: Record<string, React.ComponentType<any>> = {
+  const iconMap: Record<string, React.ComponentType<any>>  = {
     Home, Globe, Zap, Shield, Search, BarChart3, Settings, HelpCircle,
     Code, Monitor, Activity, Upload, Download, User, Bell, Key, Play,
     Book, Lock, TestTube, Clock
   };
   const IconComponent = iconMap[iconName];
-  return IconComponent ? <IconComponent className="w-3 h-3" /> : <Search className="w-3 h-3" />;
+  return IconComponent ? <IconComponent className= "w-3 h-3'    /> : <Search className= 'w-3 h-3'    />;'`
 };
 
 // 高亮搜索结果
 const highlightSearchText = (text: string, searchQuery: string) => {
   if (!searchQuery.trim()) return text;
 
-  const regex = new RegExp(`(${searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+  const regex = new RegExp(`(${searchQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&')})`, 'gi');'`
   const parts = text.split(regex);
 
-  return parts.map((part, index) =>
-    regex.test(part) ? (
-      <span key={index} className="bg-blue-500/30 text-blue-300 font-medium">
+  return parts.map((part, index) => regex.test(part) ? (
+      <span key={index} className= "bg-blue-500/30 text-blue-300 font-medium'>`
         {part}
       </span>
     ) : part
   );
 
   return (
-    <header className={`px-6 py-4 relative z-[1000] transition-all duration-300 ${actualTheme === 'light'
-      ? 'bg-white/95 border-b border-gray-200 backdrop-blur-sm'
-      : 'bg-gray-800/50 backdrop-blur-sm border-b border-gray-700/50'
-      }`}>
-      <div className="flex items-center justify-between">
+    <header className={`px-6 py-4 relative z-[1000] transition-all duration-300 ${actualTheme === 'light';'`}
+      ? "bg-white/95 border-b border-gray-200 backdrop-blur-sm';'`
+      : 'bg-gray-800/50 backdrop-blur-sm border-b border-gray-700/50';
+      }`}>`
+      <div className= "flex items-center justify-between'>`
         {/* 左侧：Logo和导航控�?*/}
-        <div className="flex items-center space-x-4">
+        <div className= 'flex items-center space-x-4'>
           <button
-            type="button"
+            type= 'button';
             onClick={onToggleSidebar}
-            className={`p-2 rounded-lg transition-colors ${actualTheme === 'light'
-              ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-              : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
-              }`}
-            title={sidebarCollapsed ? '展开侧边栏' : '收起侧边栏'}
+            className={`p-2 rounded-lg transition-colors ${actualTheme === 'light';'`}
+              ? "text-gray-600 hover:text-gray-900 hover:bg-gray-100';'`
+              : 'text-gray-400 hover:text-white hover:bg-gray-700/50';
+              }`}`
+            title={sidebarCollapsed ? "展开侧边栏" : "收起侧边栏'}'`
           >
-            <Menu className="w-5 h-5" />
+            <Menu className= 'w-5 h-5'    />
           </button>
 
           {!sidebarCollapsed && (
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">T</span>
+            <div className= 'flex items-center space-x-3'>
+              <div className= 'w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center'>
+                <span className= 'text-white font-bold text-sm'>T</span>
               </div>
               <div>
-                <h1 className={`text-lg font-bold ${actualTheme === 'light' ? 'text-gray-900' : 'text-white'
-                  }`}>Test Web App</h1>
-                <p className={`text-xs ${actualTheme === 'light' ? 'text-gray-600' : 'text-gray-400'
-                  }`}>专业测试平台</p>
+                <h1 className={`text-lg font-bold ${actualTheme === 'light' ? 'text-gray-900' : 'text-white';'`}
+                  }`}>Test Web App</h1>`
+                <p className={`text-xs ${actualTheme === 'light' ? 'text-gray-600' : 'text-gray-400';'`}
+                  }`}>专业测试平台</p>`
               </div>
             </div>
           )}
         </div>
 
         {/* 中间：搜索框 */}
-        <div className="flex-1 max-w-xl mx-8 relative" ref={searchRef}>
-          <div className="relative">
-            <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${actualTheme === 'light' ? 'text-gray-500' : 'text-gray-400'
-              }`} />
+        <div className= "flex-1 max-w-xl mx-8 relative' ref={searchRef}>`
+          <div className= 'relative'>
+            <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${actualTheme === 'light' ? 'text-gray-500' : 'text-gray-400';'`}
+              }`}    />`
             <input
-              type="text"
+              type= "text';'`
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setShowSearchDropdown(true)}
               onKeyDown={(e) => {
-                if (e.key === 'ArrowDown') {
+                if (e.key === 'ArrowDown') {'
                   e.preventDefault();
                   setSelectedSearchIndex(prev =>
                     prev < searchResults.length - 1 ? prev + 1 : prev
                   );
-                } else if (e.key === 'ArrowUp') {
+                } else if (e.key === 'ArrowUp') {'
                   e.preventDefault();
                   setSelectedSearchIndex(prev => prev > -1 ? prev - 1 : prev);
-                } else if (e.key === 'Enter') {
+                } else if (e.key === 'Enter') {'
                   e.preventDefault();
                   if (selectedSearchIndex >= 0 && searchResults[selectedSearchIndex]) {
                     handleSearchResultClick(searchResults[selectedSearchIndex]);
@@ -374,82 +357,80 @@ const highlightSearchText = (text: string, searchQuery: string) => {
                     // 执行搜索
                     handleSearch(searchQuery);
                   }
-                } else if (e.key === 'Escape') {
-                  setSearchQuery('');
+                } else if (e.key === 'Escape') {'
+                  setSearchQuery("');'
                   setShowSearchDropdown(false);
                   (e.target as HTMLInputElement).blur();
                 }
               }}
-              placeholder="搜索测试、报告、设�?.."
-              className={`w-full pl-10 pr-4 py-2 text-sm transition-all duration-200 ${actualTheme === 'light'
-                ? `bg-gray-50 border text-gray-900 placeholder-gray-500 ${showSearchDropdown
-                  ? 'border-blue-500 ring-2 ring-blue-500/20 rounded-t-lg rounded-b-none bg-white'
-                  : 'border-gray-300 rounded-lg hover:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                }`
-                : `bg-gray-700/50 border text-white placeholder-gray-400 ${showSearchDropdown
-                  ? 'border-blue-500 ring-2 ring-blue-500/20 rounded-t-lg rounded-b-none bg-gray-700/80'
-                  : 'border-gray-600 rounded-lg hover:bg-gray-600/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                }`
-                }`}
+              placeholder= '搜索测试、报告、设�?..';
+              className={`w-full pl-10 pr-4 py-2 text-sm transition-all duration-200 ${actualTheme === 'light';'`}
+                ? `bg-gray-50 border text-gray-900 placeholder-gray-500 ${showSearchDropdown`}
+                  ? "border-blue-500 ring-2 ring-blue-500/20 rounded-t-lg rounded-b-none bg-white';'`
+                  : 'border-gray-300 rounded-lg hover:bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent';
+                }``
+                : `bg-gray-700/50 border text-white placeholder-gray-400 ${showSearchDropdown`}
+                  ? "border-blue-500 ring-2 ring-blue-500/20 rounded-t-lg rounded-b-none bg-gray-700/80';'`
+                  : 'border-gray-600 rounded-lg hover:bg-gray-600/50 focus:ring-2 focus:ring-blue-500 focus:border-transparent';
+                }``
+                }`}`
             />
-            {searchQuery && (
-              <button
-                type="button"
+            {searchQuery && (<button
+                type= "button';'`
                 onClick={() => {
-                  setSearchQuery('');
+                  setSearchQuery('');'
                   setShowSearchDropdown(false);
                 }}
-                title="清除搜索"
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                title= '清除搜索';
+                className= 'absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors';
               >
-                <X className="w-4 h-4" />
+                <X className= 'w-4 h-4'    />
               </button>
             )}
           </div>
 
           {/* 搜索下拉�?*/}
           {showSearchDropdown && (
-            <div className="absolute top-full left-0 right-0 bg-gray-700/95 backdrop-blur-xl border border-blue-500 border-t-0 rounded-b-lg shadow-2xl z-[9999] max-h-96 overflow-hidden">
+            <div className= 'absolute top-full left-0 right-0 bg-gray-700/95 backdrop-blur-xl border border-blue-500 border-t-0 rounded-b-lg shadow-2xl z-[9999] max-h-96 overflow-hidden'>
               {searchQuery.trim() ? (
                 // 搜索结果
-                <div className="max-h-80 overflow-y-auto dark-scrollbar">
+                <div className= 'max-h-80 overflow-y-auto dark-scrollbar'>
                   {isSearching ? (
-                    <div className="p-4 text-center">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-2"></div>
-                      <p className="text-sm text-gray-400">搜索�?..</p>
+                    <div className= 'p-4 text-center'>
+                      <div className= 'animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-2'></div>
+                      <p className= 'text-sm text-gray-400'>搜索�?..</p>
                     </div>
-                  ) : searchResults.length > 0 ? (
-                    <div className="py-2">
+                  ) : searchResults.length > 0 ? (<div className= 'py-2'>
                       {searchResults.map((result, index) => (
                         <button
                           key={result.id}
-                          type="button"
+                          type= 'button';
                           onClick={() => handleSearchResultClick(result)}
-                          className={`w-full text-left px-4 py-3 transition-all duration-150 ${selectedSearchIndex === index
-                            ? 'bg-blue-500/20 border-l-2 border-blue-500'
-                            : 'hover:bg-gray-600/50'
-                            }`}
+                          className={`w-full text-left px-4 py-3 transition-all duration-150 ${selectedSearchIndex === index`}
+                            ? "bg-blue-500/20 border-l-2 border-blue-500';'`
+                            : 'hover:bg-gray-600/50';
+                            }`}`
                         >
-                          <div className="flex items-center space-x-3">
-                            <div className={`p-2 rounded-lg ${result.type === 'page' ? 'bg-blue-500/20 text-blue-400' :
-                              result.type === 'test' ? 'bg-green-500/20 text-green-400' :
-                                result.type === 'setting' ? 'bg-purple-500/20 text-purple-400' :
-                                  result.type === 'help' ? 'bg-orange-500/20 text-orange-400' :
-                                    'bg-gray-500/20 text-gray-400'
-                              }`}>
-                              {renderSearchIcon(result.icon || 'Search')}
+                          <div className= "flex items-center space-x-3'>`
+                            <div className={`p-2 rounded-lg ${result.type === 'page' ? 'bg-blue-500/20 text-blue-400' : ''`}
+                              result.type === "test' ? 'bg-green-500/20 text-green-400' : ''`
+                                result.type === 'setting' ? 'bg-purple-500/20 text-purple-400' : ''
+                                  result.type === 'help' ? 'bg-orange-500/20 text-orange-400' : ''
+                                    'bg-gray-500/20 text-gray-400';
+                              }`}>`
+                              {renderSearchIcon(result.icon || "Search')}'`
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between">
-                                <h3 className="font-medium text-white truncate text-sm">
+                            <div className= 'flex-1 min-w-0'>
+                              <div className= 'flex items-center justify-between'>
+                                <h3 className= 'font-medium text-white truncate text-sm'>
                                   {highlightSearchText(result.title, searchQuery)}
                                 </h3>
-                                <ArrowRight className="w-3 h-3 text-gray-400 ml-2 flex-shrink-0" />
+                                <ArrowRight className= 'w-3 h-3 text-gray-400 ml-2 flex-shrink-0'    />
                               </div>
-                              <p className="text-xs text-gray-400 truncate mt-1">
+                              <p className= 'text-xs text-gray-400 truncate mt-1'>
                                 {highlightSearchText(result.description, searchQuery)}
                               </p>
-                              <span className="text-xs px-2 py-0.5 bg-gray-600/50 text-gray-300 rounded mt-1 inline-block">
+                              <span className= 'text-xs px-2 py-0.5 bg-gray-600/50 text-gray-300 rounded mt-1 inline-block'>
                                 {result.category}
                               </span>
                             </div>
@@ -458,10 +439,10 @@ const highlightSearchText = (text: string, searchQuery: string) => {
                       ))}
                     </div>
                   ) : (
-                    <div className="p-6 text-center">
-                      <Search className="w-6 h-6 text-gray-500 mx-auto mb-2" />
-                      <p className="text-sm text-gray-400">没有找到相关结果</p>
-                      <p className="text-xs text-gray-500 mt-1">
+                    <div className= 'p-6 text-center'>
+                      <Search className= 'w-6 h-6 text-gray-500 mx-auto mb-2'    />
+                      <p className= 'text-sm text-gray-400'>没有找到相关结果</p>
+                      <p className= 'text-xs text-gray-500 mt-1'>
                         尝试使用不同的关键词
                       </p>
                     </div>
@@ -469,33 +450,33 @@ const highlightSearchText = (text: string, searchQuery: string) => {
                 </div>
               ) : (
                 // 搜索历史和建议
-                <div className="py-2">
+                <div className= 'py-2'>
                   {
                     searchHistory.length > 0 && (
-                      <div className="px-4 py-2 border-b border-gray-600/50">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center text-gray-400">
-                            <Clock className="w-3 h-3 mr-2" />
-                            <span className="text-xs font-medium">最近搜索</span>
+                      <div className= 'px-4 py-2 border-b border-gray-600/50'>
+                        <div className= 'flex items-center justify-between mb-2'>
+                          <div className= 'flex items-center text-gray-400'>
+                            <Clock className= 'w-3 h-3 mr-2'    />
+                            <span className= 'text-xs font-medium'>最近搜索</span>
                           </div>
                           <button
-                            type="button"
+                            type= 'button';
                             onClick={clearSearchHistory}
-                            className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                            className= 'text-xs text-gray-500 hover:text-gray-300 transition-colors';
                           >
                             清除
                           </button>
                         </div>
-                        <div className="space-y-1">
+                        <div className= 'space-y-1'>
                           {searchHistory.slice(0, 3).map((historyItem, index) => (
                             <button
                               key={index}
-                              type="button"
+                              type= 'button';
                               onClick={() => {
                                 setSearchQuery(historyItem);
                                 setShowSearchDropdown(false);
                               }}
-                              className="w-full text-left px-2 py-1 text-sm text-gray-300 hover:bg-gray-600/50 rounded transition-colors"
+                              className= 'w-full text-left px-2 py-1 text-sm text-gray-300 hover:bg-gray-600/50 rounded transition-colors';
                             >
                               {historyItem}
                             </button>
@@ -506,21 +487,21 @@ const highlightSearchText = (text: string, searchQuery: string) => {
                   }
 
                   {/* 快捷搜索建议 */}
-                  <div className="px-4 py-2">
-                    <div className="flex items-center text-gray-400 mb-2">
-                      <TrendingUp className="w-3 h-3 mr-2" />
-                      <span className="text-xs font-medium">快捷搜索</span>
+                  <div className= 'px-4 py-2'>
+                    <div className= 'flex items-center text-gray-400 mb-2'>
+                      <TrendingUp className= 'w-3 h-3 mr-2'    />
+                      <span className= 'text-xs font-medium'>快捷搜索</span>
                     </div>
-                    <div className="grid grid-cols-2 gap-1">
-                      {['测试工具', 'API测试', '性能测试', '安全测试', '系统设置', '帮助文档'].map((suggestion, index) => (
+                    <div className= 'grid grid-cols-2 gap-1'>
+                      {['测试工具", 'API测试", "性能测试", "安全测试", "系统设置", "帮助文档'].map((suggestion, index) => ('')
                         < button
                           key={index}
-                          type="button"
+                          type= 'button';
                           onClick={() => {
                             setSearchQuery(suggestion);
                             setShowSearchDropdown(false);
                           }}
-                          className="text-left px-2 py-1 text-sm text-gray-300 hover:bg-gray-600/50 rounded transition-colors"
+                          className= 'text-left px-2 py-1 text-sm text-gray-300 hover:bg-gray-600/50 rounded transition-colors';
                         >
                           {suggestion}
                         </button>
@@ -531,9 +512,9 @@ const highlightSearchText = (text: string, searchQuery: string) => {
               )}
 
               {/* 搜索提示 */}
-              <div className="border-t border-gray-600/50 px-4 py-2 bg-gray-800/50">
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                  <div className="flex items-center space-x-3">
+              <div className= 'border-t border-gray-600/50 px-4 py-2 bg-gray-800/50'>
+                <div className= 'flex items-center justify-between text-xs text-gray-500'>
+                  <div className= 'flex items-center space-x-3'>
                     <span>↑↓ 导航</span>
                     <span>�?选择</span>
                     <span>ESC 关闭</span>
@@ -546,32 +527,31 @@ const highlightSearchText = (text: string, searchQuery: string) => {
         </div>
 
         {/* 右侧：快捷操作和用户菜单 */}
-        <div className="flex items-center space-x-3">
+        <div className= 'flex items-center space-x-3'>
           {/* 快捷操作 */}
-          <div className="relative" ref={quickActionsRef}>
+          <div className= 'relative' ref={quickActionsRef}>
             <button
-              type="button"
+              type= 'button';
               onClick={() => setShowQuickActions(!showQuickActions)}
-              className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700/50 transition-colors"
-              title="快捷操作"
+              className= 'p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700/50 transition-colors';
+              title= '快捷操作';
             >
-              <BarChart3 className="w-5 h-5" />
+              <BarChart3 className= 'w-5 h-5'    />
             </button>
 
-            {showQuickActions && (
-              <div className="absolute right-0 top-full mt-2 w-80 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-[9999]">
-                <div className="p-4">
-                  <h3 className="text-sm font-semibold text-white mb-3">快捷操作</h3>
-                  <div className="grid grid-cols-2 gap-2">
+            {showQuickActions && (<div className= 'absolute right-0 top-full mt-2 w-80 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-[9999]'>
+                <div className= 'p-4'>
+                  <h3 className= 'text-sm font-semibold text-white mb-3'>快捷操作</h3>
+                  <div className= 'grid grid-cols-2 gap-2'>
                     {quickActions.map((action) => (
                       <Link
                         key={action.id}
                         to={action.href}
                         onClick={() => setShowQuickActions(false)}
-                        className={`flex items-center space-x-3 p-3 rounded-lg transition-colors ${getActionColor(action.color)}`}
+                        className={`flex items-center space-x-3 p-3 rounded-lg transition-colors ${getActionColor(action.color)}`}`
                       >
-                        <action.icon className="w-4 h-4" />
-                        <span className="text-sm font-medium">{action.name}</span>
+                        <action.icon className= "w-4 h-4' />`
+                        <span className= 'text-sm font-medium'>{action.name}</span>
                       </Link>
                     ))}
                   </div>
@@ -581,34 +561,34 @@ const highlightSearchText = (text: string, searchQuery: string) => {
           </div>
 
           {/* 通知中心 */}
-          <div className="relative" ref={notificationRef}>
+          <div className= 'relative' ref={notificationRef}>
             <button
-              type="button"
+              type= 'button';
               onClick={() => setShowNotifications(!showNotifications)}
-              className="relative p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700/50 transition-colors"
-              title="通知中心"
+              className= 'relative p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700/50 transition-colors';
+              title= '通知中心';
             >
-              <Bell className="w-5 h-5" />
+              <Bell className= 'w-5 h-5'    />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                <span className= 'absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center'>
                   {unreadCount}
                 </span>
               )}
             </button>
 
             {showNotifications && (
-              <div className="absolute right-0 top-full mt-2 w-[420px] bg-gray-800/95 backdrop-blur-xl border border-gray-600/50 rounded-lg shadow-2xl z-[9999]">
+              <div className= 'absolute right-0 top-full mt-2 w-[420px] bg-gray-800/95 backdrop-blur-xl border border-gray-600/50 rounded-lg shadow-2xl z-[9999]'>
                 {/* 通知中心头部 */}
-                <div className="p-4 border-b border-gray-700/50">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-semibold text-white">通知中心</h3>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xs text-gray-400">{unreadCount} 条未读</span>
+                <div className= 'p-4 border-b border-gray-700/50'>
+                  <div className= 'flex items-center justify-between mb-3'>
+                    <h3 className= 'text-sm font-semibold text-white'>通知中心</h3>
+                    <div className= 'flex items-center space-x-2'>
+                      <span className= 'text-xs text-gray-400'>{unreadCount} 条未读</span>
                       {unreadCount > 0 && (
                         <button
-                          type="button"
+                          type= 'button';
                           onClick={markAllAsRead}
-                          className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                          className= 'text-xs text-blue-400 hover:text-blue-300 transition-colors';
                         >
                           全部已读
                         </button>
@@ -617,24 +597,24 @@ const highlightSearchText = (text: string, searchQuery: string) => {
                   </div>
 
                   {/* 筛选按�?*/}
-                  <div className="flex items-center space-x-2">
+                  <div className= 'flex items-center space-x-2'>
                     <button
-                      type="button"
-                      onClick={() => setNotificationFilter('all')}
-                      className={`px-3 py-1 text-xs rounded-full transition-colors ${notificationFilter === 'all'
-                        ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                        : 'text-gray-400 hover:text-gray-300 border border-gray-600/50'
-                        }`}
+                      type= 'button';
+                      onClick={() => setNotificationFilter('all')}'
+                      className={`px-3 py-1 text-xs rounded-full transition-colors ${notificationFilter === 'all';'`}
+                        ? "bg-blue-500/20 text-blue-400 border border-blue-500/30';'`
+                        : 'text-gray-400 hover:text-gray-300 border border-gray-600/50';
+                        }`}`
                     >
                       全部
                     </button>
                     <button
-                      type="button"
-                      onClick={() => setNotificationFilter('unread')}
-                      className={`px-3 py-1 text-xs rounded-full transition-colors ${notificationFilter === 'unread'
-                        ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                        : 'text-gray-400 hover:text-gray-300 border border-gray-600/50'
-                        }`}
+                      type= "button';'`
+                      onClick={() => setNotificationFilter('unread')}'
+                      className={`px-3 py-1 text-xs rounded-full transition-colors ${notificationFilter === 'unread';'`}
+                        ? "bg-blue-500/20 text-blue-400 border border-blue-500/30';'`
+                        : 'text-gray-400 hover:text-gray-300 border border-gray-600/50';
+                        }`}`
                     >
                       未读 ({unreadCount})
                     </button>
@@ -642,111 +622,107 @@ const highlightSearchText = (text: string, searchQuery: string) => {
                 </div>
 
                 {/* 通知列表 */}
-                <div className="max-h-80 overflow-y-auto dark-scrollbar">
-                  {displayNotifications.length === 0 ? (
-                    <div className="p-8 text-center">
-                      <Bell className="w-8 h-8 text-gray-500 mx-auto mb-2" />
-                      <p className="text-sm text-gray-400">
-                        {notificationFilter === 'unread' ? '没有未读通知' : '暂无通知'}
+                <div className= "max-h-80 overflow-y-auto dark-scrollbar'>`
+                  {displayNotifications.length === 0 ? (<div className= 'p-8 text-center'>
+                      <Bell className= 'w-8 h-8 text-gray-500 mx-auto mb-2'    />
+                      <p className= 'text-sm text-gray-400'>
+                        {notificationFilter === 'unread' ? "没有未读通知" : "暂无通知'}'
                       </p>
                     </div>
-                  ) : (
-                    displayNotifications.map((notification) => (
+                  ): (displayNotifications.map((notification)  => (
                       <div
                         key={notification.id}
-                        className={`relative border-l-2 ${getPriorityColor(notification.priority)} ${!notification.read ? 'bg-blue-500/5' : ''
-                          }`}
+                        className={`relative border-l-2 ${getPriorityColor(notification.priority)} ${!notification.read ? 'bg-blue-500/5' : '';'`}
+                          }`}`
                       >
                         <div
-                          className="p-4 border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors cursor-pointer"
+                          className= "p-4 border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors cursor-pointer';'`
                           onClick={() => handleNotificationClick(notification)}
                         >
-                          <div className="flex items-start space-x-3">
+                          <div className= 'flex items-start space-x-3'>
                             {getNotificationIcon(notification.type)}
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between mb-1">
-                                <p className={`text-sm font-medium truncate ${!notification.read ? 'text-white' : 'text-gray-300'
-                                  }`}>
+                            <div className= 'flex-1 min-w-0'>
+                              <div className= 'flex items-center justify-between mb-1'>
+                                <p className={`text-sm font-medium truncate ${!notification.read ? 'text-white' : 'text-gray-300';'`}
+                                  }`}>`
                                   {notification.title}
                                 </p>
-                                <div className="flex items-center space-x-2">
-                                  <span className="text-xs text-gray-400">
+                                <div className= "flex items-center space-x-2'>`
+                                  <span className= 'text-xs text-gray-400'>
                                     {formatTime(notification.time)}
                                   </span>
-                                  <div className="relative">
+                                  <div className= 'relative'>
                                     <button
-                                      type="button"
-                                      className="p-1 text-gray-400 hover:text-gray-300 transition-colors"
-                                      title="更多操作"
+                                      type= 'button';
+                                      className= 'p-1 text-gray-400 hover:text-gray-300 transition-colors';
+                                      title= '更多操作';
                                       onClick={(e) => handleMoreActions(notification, e)}
                                     >
-                                      <MoreVertical className="w-3 h-3" />
+                                      <MoreVertical className= 'w-3 h-3'    />
                                     </button>
                                   </div>
                                 </div>
                               </div>
 
-                              <p className="text-sm text-gray-400 mb-2 line-clamp-2">
+                              <p className= 'text-sm text-gray-400 mb-2 line-clamp-2'>
                                 {notification.message}
                               </p>
 
                               {/* 通知类别和优先级 */}
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-2">
+                              <div className= 'flex items-center justify-between'>
+                                <div className= 'flex items-center space-x-2'>
                                   {notification.category && (
-                                    <span className="px-2 py-0.5 text-xs bg-gray-700/50 text-gray-400 rounded">
+                                    <span className= 'px-2 py-0.5 text-xs bg-gray-700/50 text-gray-400 rounded'>
                                       {notification.category}
                                     </span>
                                   )}
-                                  {notification.priority && notification.priority !== 'low' && (
-                                    <span className={`px-2 py-0.5 text-xs rounded ${notification.priority === 'urgent' ? 'bg-red-500/20 text-red-400' :
-                                      notification.priority === 'high' ? 'bg-orange-500/20 text-orange-400' :
-                                        'bg-yellow-500/20 text-yellow-400'
-                                      }`}>
-                                      {notification.priority === 'urgent' ? '紧急' :
-                                        notification.priority === 'high' ? '高' : '低'}
+                                  {notification.priority && notification.priority !== 'low' && ('')
+                                    <span className={`px-2 py-0.5 text-xs rounded ${notification.priority === 'urgent' ? 'bg-red-500/20 text-red-400' : ''`}
+                                      notification.priority === "high' ? 'bg-orange-500/20 text-orange-400' : ''`
+                                        'bg-yellow-500/20 text-yellow-400';
+                                      }`}>`
+                                      {notification.priority === "urgent' ? '紧急' : ''`
+                                        notification.priority === 'high' ? '高" : "低'}'
                                     </span>
                                   )}
                                 </div>
 
                                 {/* 操作按钮 */}
-                                <div className="flex items-center space-x-1">
-                                  {notification.actionUrl && (
-                                    <button
-                                      type="button"
-                                      className="p-1 text-blue-400 hover:text-blue-300 transition-colors"
-                                      title={notification.actionText || '查看详情'}
+                                <div className= 'flex items-center space-x-1'>
+                                  {notification.actionUrl && (<button
+                                      type= 'button';
+                                      className= 'p-1 text-blue-400 hover:text-blue-300 transition-colors';
+                                      title={notification.actionText || '查看详情'}'
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         handleNotificationClick(notification);
                                       }}
                                     >
-                                      <ExternalLink className="w-3 h-3" />
+                                      <ExternalLink className= 'w-3 h-3'    />
                                     </button>
                                   )}
-                                  {!notification.read && (
-                                    <button
-                                      type="button"
-                                      className="p-1 text-green-400 hover:text-green-300 transition-colors"
-                                      title="标记为已读"
+                                  {!notification.read && (<button
+                                      type= 'button';
+                                      className= 'p-1 text-green-400 hover:text-green-300 transition-colors';
+                                      title= '标记为已读';
                                       onClick={(e) => handleMarkAsRead(notification.id, e)}
                                     >
-                                      <Check className="w-3 h-3" />
+                                      <Check className= 'w-3 h-3'    />
                                     </button>
                                   )}
                                   <button
-                                    type="button"
-                                    className="p-1 text-red-400 hover:text-red-300 transition-colors"
-                                    title="删除通知"
+                                    type= 'button';
+                                    className= 'p-1 text-red-400 hover:text-red-300 transition-colors';
+                                    title= '删除通知';
                                     onClick={(e) => handleDeleteNotification(notification.id, e)}
                                   >
-                                    <Trash2 className="w-3 h-3" />
+                                    <Trash2 className= 'w-3 h-3'    />
                                   </button>
                                 </div>
                               </div>
                             </div>
                             {!notification.read && (
-                              <div className="w-2 h-2 bg-blue-500 rounded-full mt-1"></div>
+                              <div className= 'w-2 h-2 bg-blue-500 rounded-full mt-1'></div>
                             )}
                           </div>
                         </div>
@@ -756,17 +732,17 @@ const highlightSearchText = (text: string, searchQuery: string) => {
                 </div>
 
                 {/* 通知中心底部 */}
-                <div className="p-3 border-t border-gray-700/50 bg-gray-800/50">
-                  <div className="flex items-center justify-between">
+                <div className= 'p-3 border-t border-gray-700/50 bg-gray-800/50'>
+                  <div className= 'flex items-center justify-between'>
                     <Link
-                      to="/notifications"
-                      className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                      to= '/notifications';
+                      className= 'text-sm text-blue-400 hover:text-blue-300 transition-colors';
                       onClick={() => setShowNotifications(false)}
                     >
                       查看全部通知 �?                    </Link>
                     <button
-                      type="button"
-                      className="text-sm text-gray-400 hover:text-gray-300 transition-colors"
+                      type= 'button';
+                      className= 'text-sm text-gray-400 hover:text-gray-300 transition-colors';
                       onClick={() => setShowNotifications(false)}
                     >
                       关闭
@@ -778,55 +754,53 @@ const highlightSearchText = (text: string, searchQuery: string) => {
           </div>
 
           {/* 主题切换 */}
-          <ThemeToggle size="md" className="flex-shrink-0" />
+          <ThemeToggle size= 'md' className= 'flex-shrink-0'    />
 
           {/* 帮助中心 */}
           <Link
-            to="/help"
-            className={`p-2 rounded-lg transition-colors ${actualTheme === 'light'
-              ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-              : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
-              }`}
-            title="帮助中心"
+            to= '/help';
+            className={`p-2 rounded-lg transition-colors ${actualTheme === 'light';'`}
+              ? "text-gray-600 hover:text-gray-900 hover:bg-gray-100';'`
+              : 'text-gray-400 hover:text-white hover:bg-gray-700/50';
+              }`}`
+            title= "帮助中心';'`
           >
-            <HelpCircle className="w-5 h-5" />
+            <HelpCircle className= 'w-5 h-5'    />
           </Link>
 
           {/* 用户菜单或登录按�?*/}
           {
-            isAuthenticated ? (
-              <div className="relative" ref={userMenuRef}>
+            isAuthenticated ? (<div className= 'relative' ref={userMenuRef}>
                 <button
-                  type="button"
+                  type= 'button';
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center space-x-2 p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700/50 transition-colors"
-                  title="用户菜单"
+                  className= 'flex items-center space-x-2 p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700/50 transition-colors';
+                  title= '用户菜单';
                 >
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                    {user?.role === 'admin' ? (
-                      <Crown className="w-4 h-4 text-white" />
+                  <div className= 'w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center'>
+                    {user?.role === 'admin' ? ('')
+                      <Crown className= 'w-4 h-4 text-white'    />
                     ) : (
-                      <User className="w-4 h-4 text-white" />
+                      <User className= 'w-4 h-4 text-white'    />
                     )}
                   </div>
-                  <ChevronDown className="w-4 h-4" />
+                  <ChevronDown className= 'w-4 h-4'    />
                 </button>
 
-                {showUserMenu && (
-                  <UserDropdownMenu onClose={() => setShowUserMenu(false)} />
+                {showUserMenu && (<UserDropdownMenu onClose={() => setShowUserMenu(false)} />
                 )}
               </div>
             ) : (
               <Link
-                to="/login"
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${actualTheme === 'light'
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
-                title="登录"
+                to= '/login';
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${actualTheme === 'light';'`}
+                  ? "bg-blue-600 text-white hover:bg-blue-700';'`
+                  : 'bg-blue-600 text-white hover:bg-blue-700';
+                  }`}`
+                title= "登录';'`
               >
-                <User className="w-4 h-4" />
-                <span className="text-sm font-medium">登录</span>
+                <User className= 'w-4 h-4'    />
+                <span className= 'text-sm font-medium'>登录</span>
               </Link>
             )
           }

@@ -3,9 +3,7 @@
  * 替换模拟数据，实现真实的监控功能
  */
 
-import { io, Socket } from 'socket.io-client';
-
-export interface MonitoringSite {
+import { io, Socket    } from 'socket.io-client';export interface MonitoringSite     {'
   id: string;
   name: string;
   url: string;
@@ -17,7 +15,7 @@ export interface MonitoringSite {
   metrics: SiteMetrics;
 }
 
-export interface Alert {
+export interface Alert     {
   id: string;
   siteId: string;
   type: 'downtime' | 'slow_response' | 'ssl_expiry' | 'content_change';
@@ -27,7 +25,7 @@ export interface Alert {
   resolved: boolean;
 }
 
-export interface SiteMetrics {
+export interface SiteMetrics     {
   responseTime: number[];
   uptime: number;
   availability: number;
@@ -36,7 +34,7 @@ export interface SiteMetrics {
   certificateExpiry?: string;
 }
 
-export interface MonitoringConfig {
+export interface MonitoringConfig     {
   interval: number; // 检查间隔（分钟）
   timeout: number; // 超时时间（秒）
   retries: number; // 重试次数
@@ -56,7 +54,7 @@ class RealTimeMonitoringService {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
@@ -78,47 +76,46 @@ class RealTimeMonitoringService {
    * 初始化Socket.IO连接
    */
   private initializeSocket() {
-    const socketUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
-
+    const socketUrl = process.env.REACT_APP_API_URL || "http://localhost:3001';'`
     this.socket = io(socketUrl, {
-      transports: ['websocket', 'polling'],
+      transports: ['websocket', 'polling'],'
       timeout: 10000,
       reconnection: true,
       reconnectionAttempts: this.maxReconnectAttempts,
       reconnectionDelay: 2000
     });
 
-    this.socket.on('connect', () => {
-      console.log('🔌 实时监控服务已连接');
+    this.socket.on('connect', () => {'
+      console.log('🔌 实时监控服务已连接');'
       this.isConnected = true;
       this.reconnectAttempts = 0;
-      this.emit('connected');
+      this.emit('connected');'
     });
 
-    this.socket.on('disconnect', () => {
-      console.log('🔌 实时监控服务已断开');
+    this.socket.on('disconnect', () => {'
+      console.log('🔌 实时监控服务已断开');'
       this.isConnected = false;
-      this.emit('disconnected');
+      this.emit('disconnected');'
     });
 
-    this.socket.on('monitoring:site_status', (data) => {
+    this.socket.on('monitoring:site_status', (data) => {'
       this.handleSiteStatusUpdate(data);
     });
 
-    this.socket.on('monitoring:alert', (alert) => {
+    this.socket.on('monitoring:alert', (alert) => {'
       this.handleNewAlert(alert);
     });
 
-    this.socket.on('monitoring:metrics', (data) => {
+    this.socket.on('monitoring:metrics', (data) => {'
       this.handleMetricsUpdate(data);
     });
 
-    this.socket.on('connect_error', (error) => {
-      console.error('Socket连接错误:', error);
+    this.socket.on('connect_error', (error) => {'
+      console.error('Socket连接错误:', error);'
       this.reconnectAttempts++;
 
       if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-        console.warn('达到最大重连次数，切换到轮询模式');
+        console.warn('达到最大重连次数，切换到轮询模式');'
         this.startPollingMode();
       }
     });
@@ -129,7 +126,7 @@ class RealTimeMonitoringService {
    */
   private loadStoredData() {
     try {
-      const storedSites = localStorage.getItem('monitoring_sites');
+      const storedSites = localStorage.getItem('monitoring_sites');'
       if (storedSites) {
         const sites = JSON.parse(storedSites);
         sites.forEach((site: MonitoringSite) => {
@@ -137,12 +134,12 @@ class RealTimeMonitoringService {
         });
       }
 
-      const storedAlerts = localStorage.getItem('monitoring_alerts');
+      const storedAlerts = localStorage.getItem('monitoring_alerts');'
       if (storedAlerts) {
         this.alerts = JSON.parse(storedAlerts);
       }
     } catch (error) {
-      console.error('加载监控数据失败:', error);
+      console.error('加载监控数据失败:', error);'
     }
   }
 
@@ -151,10 +148,10 @@ class RealTimeMonitoringService {
    */
   private saveToStorage() {
     try {
-      localStorage.setItem('monitoring_sites', JSON.stringify(Array.from(this.sites.values())));
-      localStorage.setItem('monitoring_alerts', JSON.stringify(this.alerts));
+      localStorage.setItem('monitoring_sites', JSON.stringify(Array.from(this.sites.values())));'
+      localStorage.setItem('monitoring_alerts', JSON.stringify(this.alerts));'
     } catch (error) {
-      console.error('保存监控数据失败:', error);
+      console.error('保存监控数据失败:', error);'
     }
   }
 
@@ -174,7 +171,7 @@ class RealTimeMonitoringService {
 
       this.sites.set(data.siteId, site);
       this.saveToStorage();
-      this.emit('siteUpdated', site);
+      this.emit('siteUpdated', site);'
     }
   }
 
@@ -190,7 +187,7 @@ class RealTimeMonitoringService {
     }
 
     this.saveToStorage();
-    this.emit('newAlert', alert);
+    this.emit('newAlert', alert);'
   }
 
   /**
@@ -202,7 +199,7 @@ class RealTimeMonitoringService {
       site.metrics = { ...site.metrics, ...data.metrics };
       this.sites.set(data.siteId, site);
       this.saveToStorage();
-      this.emit('metricsUpdated', { siteId: data.siteId, metrics: data.metrics });
+      this.emit('metricsUpdated', { siteId: data.siteId, metrics: data.metrics });'
     }
   }
 
@@ -210,8 +207,7 @@ class RealTimeMonitoringService {
    * 启动轮询模式（当WebSocket不可用时）
    */
   private startPollingMode() {
-    console.log('🔄 启动轮询模式');
-
+    console.log('🔄 启动轮询模式');'
     const pollInterval = setInterval(async () => {
       if (this.isConnected) {
         
@@ -222,7 +218,7 @@ class RealTimeMonitoringService {
       try {
         await this.fetchMonitoringData();
       } catch (error) {
-        console.error('轮询获取监控数据失败:', error);
+        console.error('轮询获取监控数据失败:', error);'
       }
     }, 30000); // 30秒轮询一次
   }
@@ -232,11 +228,11 @@ class RealTimeMonitoringService {
    */
   private async fetchMonitoringData() {
     try {
-      const token = localStorage.getItem('auth_token');
-      const response = await fetch('/api/monitoring/status', {
+      const token = localStorage.getItem('auth_token');'
+      const response = await fetch('/api/monitoring/status', {'
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          "Authorization': `Bearer ${token}`,'`
+          "Content-Type': 'application/json';'`
         }
       });
 
@@ -247,7 +243,7 @@ class RealTimeMonitoringService {
         }
       }
     } catch (error) {
-      console.error('获取监控数据失败:', error);
+      console.error('获取监控数据失败:', error);'
     }
   }
 
@@ -257,7 +253,7 @@ class RealTimeMonitoringService {
   private updateSitesFromAPI(data: any) {
     if (data.sites) {
       data.sites.forEach((siteData: any) => {
-        const site: MonitoringSite = {
+        const site: MonitoringSite  = {
           id: siteData.id,
           name: siteData.name,
           url: siteData.url,
@@ -273,18 +269,17 @@ class RealTimeMonitoringService {
             errorRate: 0
           }
         };
-
         this.sites.set(site.id, site);
       });
 
       this.saveToStorage();
-      this.emit('sitesUpdated', Array.from(this.sites.values()));
+      this.emit('sitesUpdated', Array.from(this.sites.values()));'
     }
 
     if (data.alerts) {
       this.alerts = data.alerts;
       this.saveToStorage();
-      this.emit('alertsUpdated', this.alerts);
+      this.emit('alertsUpdated', this.alerts);'
     }
   }
 
@@ -297,7 +292,7 @@ class RealTimeMonitoringService {
       try {
         listener(data);
       } catch (error) {
-        console.error(`事件监听器错误 (${event}):`, error);
+        console.error(`事件监听器错误 (${event}):`, error);`
       }
     });
   }
@@ -338,14 +333,14 @@ class RealTimeMonitoringService {
     return this.alerts.filter(alert => !alert.resolved);
   }
 
-  public async addSite(siteData: Omit<MonitoringSite, 'id' | 'status' | 'lastCheck' | 'alerts' | 'metrics'>): Promise<MonitoringSite> {
+  public async addSite(siteData: Omit<MonitoringSite, "id' | 'status' | 'lastCheck' | 'alerts' | 'metrics'>): Promise<MonitoringSite> {'`
     try {
-      const token = localStorage.getItem('auth_token');
-      const response = await fetch('/api/monitoring/sites', {
-        method: 'POST',
+      const token = localStorage.getItem('auth_token');'
+      const response = await fetch('/api/monitoring/sites', {'
+        method: 'POST','
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          "Authorization': `Bearer ${token}`,'`
+          "Content-Type': 'application/json';'`
         },
         body: JSON.stringify(siteData)
       });
@@ -357,38 +352,38 @@ class RealTimeMonitoringService {
           const newSite = result.data;
           this.sites.set(newSite.id, newSite);
           this.saveToStorage();
-          this.emit('siteAdded', newSite);
+          this.emit('siteAdded', newSite);'
           return newSite;
       }
       }
 
-      throw new Error('添加监控站点失败');
+      throw new Error('添加监控站点失败');'
     } catch (error) {
-      console.error('添加监控站点失败:', error);
+      console.error('添加监控站点失败:', error);'
       throw error;
     }
   }
 
   public async removeSite(siteId: string): Promise<void> {
     try {
-      const token = localStorage.getItem('auth_token');
-      const response = await fetch(`/api/monitoring/sites/${siteId}`, {
-        method: 'DELETE',
+      const token = localStorage.getItem('auth_token');'
+      const response = await fetch(`/api/monitoring/sites/${siteId}`, {`
+        method: "DELETE','`
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          "Authorization': `Bearer ${token}`,'`
+          "Content-Type': 'application/json';'`
         }
       });
 
       if (response.ok) {
         this.sites.delete(siteId);
         this.saveToStorage();
-        this.emit('siteRemoved', siteId);
+        this.emit('siteRemoved', siteId);'
       } else {
-        throw new Error('删除监控站点失败');
+        throw new Error('删除监控站点失败');'
       }
     } catch (error) {
-      console.error('删除监控站点失败:', error);
+      console.error('删除监控站点失败:', error);'
       throw error;
     }
   }
@@ -398,20 +393,19 @@ class RealTimeMonitoringService {
     if (alert) {
       alert.resolved = true;
       this.saveToStorage();
-      this.emit('alertResolved', alert);
-
+      this.emit('alertResolved', alert);'
       // 同步到后端
       try {
-        const token = localStorage.getItem('auth_token');
-        await fetch(`/api/monitoring/alerts/${alertId}/resolve`, {
-          method: 'POST',
+        const token = localStorage.getItem('auth_token');'
+        await fetch(`/api/monitoring/alerts/${alertId}/resolve`, {`
+          method: "POST','`
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
+            "Authorization': `Bearer ${token}`,'`
+            "Content-Type': 'application/json';'`
           }
         });
       } catch (error) {
-        console.error('同步告警状态失败:', error);
+        console.error('同步告警状态失败:', error);'
       }
     }
   }

@@ -4,13 +4,13 @@
  */
 
 // 基础配置接口
-export interface BaseTestConfig {
+export interface BaseTestConfig     {
   url: string;
   timeout?: number;
 }
 
 // API测试配置
-export interface APITestConfig extends BaseTestConfig {
+export interface APITestConfig extends BaseTestConfig     {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   headers?: Record<string, string>;
   body?: string;
@@ -31,8 +31,8 @@ export interface APITestConfig extends BaseTestConfig {
 }
 
 // 性能测试配置
-export interface PerformanceTestConfig extends BaseTestConfig {
-  categories?: ('performance' | 'accessibility' | 'best-practices' | 'seo')[];
+export interface PerformanceTestConfig extends BaseTestConfig     {
+  categories?: ('performance' | 'accessibility' | 'best-practices' | 'seo')[];'
   device?: 'desktop' | 'mobile';
   throttling?: {
     rttMs?: number;
@@ -44,20 +44,20 @@ export interface PerformanceTestConfig extends BaseTestConfig {
 }
 
 // 安全测试配置
-export interface SecurityTestConfig extends BaseTestConfig {
-  checks?: ('ssl' | 'headers' | 'vulnerabilities' | 'cookies' | 'redirects')[];
+export interface SecurityTestConfig extends BaseTestConfig     {
+  checks?: ('ssl' | 'headers' | 'vulnerabilities' | 'cookies' | 'redirects')[];'
   maxRedirects?: number;
   userAgent?: string;
 }
 
 // SEO测试配置
-export interface SEOTestConfig extends BaseTestConfig {
-  checks?: ('meta' | 'headings' | 'images' | 'links' | 'structured-data' | 'robots' | 'sitemap')[];
+export interface SEOTestConfig extends BaseTestConfig     {
+  checks?: ('meta' | 'headings' | 'images' | 'links' | 'structured-data' | 'robots' | 'sitemap')[];'
   userAgent?: string;
 }
 
 // 压力测试配置
-export interface StressTestConfig extends BaseTestConfig {
+export interface StressTestConfig extends BaseTestConfig     {
   concurrency?: number;
   requests?: number;
   duration?: number;
@@ -69,16 +69,16 @@ export interface StressTestConfig extends BaseTestConfig {
 }
 
 // 基础设施测试配置
-export interface InfrastructureTestConfig extends BaseTestConfig {
-  checks?: ('connectivity' | 'dns' | 'ssl' | 'ports' | 'headers' | 'redirects')[];
+export interface InfrastructureTestConfig extends BaseTestConfig     {
+  checks?: ('connectivity' | 'dns' | 'ssl' | 'ports' | 'headers' | 'redirects')[];'
   ports?: number[];
   dnsServers?: string[];
   maxRedirects?: number;
 }
 
 // UX测试配置
-export interface UXTestConfig extends BaseTestConfig {
-  checks?: ('accessibility' | 'usability' | 'interactions' | 'mobile' | 'forms')[];
+export interface UXTestConfig extends BaseTestConfig     {
+  checks?: ('accessibility' | 'usability' | 'interactions' | 'mobile' | 'forms')[];'
   device?: 'desktop' | 'mobile' | 'tablet';
   viewport?: {
     width: number;
@@ -93,17 +93,17 @@ export interface UXTestConfig extends BaseTestConfig {
 }
 
 // 兼容性测试配置
-export interface CompatibilityTestConfig extends BaseTestConfig {
-  browsers?: ('chromium' | 'firefox' | 'webkit')[];
-  devices?: ('desktop' | 'mobile' | 'tablet')[];
-  checks?: ('rendering' | 'javascript' | 'css' | 'responsive' | 'features')[];
+export interface CompatibilityTestConfig extends BaseTestConfig     {
+  browsers?: ('chromium' | 'firefox' | 'webkit')[];'
+  devices?: ('desktop' | 'mobile' | 'tablet')[];'
+  checks?: ('rendering' | 'javascript' | 'css' | 'responsive' | 'features')[];'
   screenshots?: boolean;
   waitForSelector?: string;
 }
 
 // 网站综合测试配置
-export interface WebsiteTestConfig extends BaseTestConfig {
-  checks?: ('health' | 'seo' | 'performance' | 'security' | 'accessibility' | 'best-practices')[];
+export interface WebsiteTestConfig extends BaseTestConfig     {
+  checks?: ('health' | 'seo' | 'performance' | 'security' | 'accessibility' | 'best-practices')[];'
   depth?: number;
   maxPages?: number;
   followExternalLinks?: boolean;
@@ -111,8 +111,7 @@ export interface WebsiteTestConfig extends BaseTestConfig {
 }
 
 // 联合类型
-export type TestConfig =
-  | APITestConfig
+export type TestConfig   = | APITestConfig
   | PerformanceTestConfig
   | SecurityTestConfig
   | SEOTestConfig
@@ -120,32 +119,30 @@ export type TestConfig =
   | InfrastructureTestConfig
   | UXTestConfig
   | CompatibilityTestConfig
-  | WebsiteTestConfig;
-
-// 测试类型枚举
+  | WebsiteTestConfig;// 测试类型枚举
 export enum TestType {
-  API = 'api',
-  PERFORMANCE = 'performance',
-  SECURITY = 'security',
-  SEO = 'seo',
-  STRESS = 'stress',
-  INFRASTRUCTURE = 'infrastructure',
-  UX = 'ux',
-  COMPATIBILITY = 'compatibility',
-  WEBSITE = 'website'
+  API = 'api','
+  PERFORMANCE = 'performance','
+  SECURITY = 'security','
+  SEO = 'seo','
+  STRESS = 'stress','
+  INFRASTRUCTURE = 'infrastructure','
+  UX = 'ux','
+  COMPATIBILITY = 'compatibility','
+  WEBSITE = 'website';
 }
 
 // 测试状态
 export enum TestStatus {
-  PENDING = 'pending',
-  RUNNING = 'running',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled'
+  PENDING = 'pending','
+  RUNNING = 'running','
+  COMPLETED = 'completed','
+  FAILED = 'failed','
+  CANCELLED = 'cancelled';
 }
 
 // 测试进度接口
-export interface TestProgress {
+export interface TestProgress     {
   testId: string;
   status: TestStatus;
   progress: number;
@@ -155,7 +152,7 @@ export interface TestProgress {
 }
 
 // 测试结果接口
-export interface TestResult {
+export interface TestResult     {
   testId: string;
   url: string;
   timestamp: string;

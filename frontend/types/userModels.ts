@@ -7,44 +7,41 @@
 
 // ==================== 基础类型定义 ====================
 
-export type UUID = string;
-export type Timestamp = string; // ISO 8601 格式
-export type Email = string;
-
-// ==================== 枚举定义 ====================
+export type UUID   = string;export type Timestamp  = string;// ISO 8601 格式
+export type Email   = string;// ==================== 枚举定义 ====================
 
 /**
  * 用户角色枚举 - 与数据库约束保持一致
  */
 export enum UserRole {
-  USER = 'user',
-  ADMIN = 'admin',
-  MODERATOR = 'moderator',
-  TESTER = 'tester',
-  MANAGER = 'manager'
+  USER = 'user','
+  ADMIN = 'admin','
+  MODERATOR = 'moderator','
+  TESTER = 'tester','
+  MANAGER = 'manager';
 }
 
 /**
  * 用户状态枚举 - 与数据库约束保持一致
  */
 export enum UserStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  SUSPENDED = 'suspended'
+  ACTIVE = 'active','
+  INACTIVE = 'inactive','
+  SUSPENDED = 'suspended';
 }
 
 /**
  * 用户计划枚举 - 与数据库约束保持一致
  */
 export enum UserPlan {
-  FREE = 'free',
-  PRO = 'pro',
-  ENTERPRISE = 'enterprise'
+  FREE = 'free','
+  PRO = 'pro','
+  ENTERPRISE = 'enterprise';
 }
 
 // ==================== 用户偏好设置 ====================
 
-export interface NotificationSettings {
+export interface NotificationSettings     {
   email: boolean;
   sms: boolean;
   push: boolean;
@@ -55,7 +52,7 @@ export interface NotificationSettings {
   securityAlert: boolean;
 }
 
-export interface DashboardSettings {
+export interface DashboardSettings     {
   defaultView: string;
   layout: 'grid' | 'list' | 'cards';
   widgets: string[];
@@ -63,20 +60,20 @@ export interface DashboardSettings {
   showTips: boolean;
 }
 
-export interface TestingSettings {
+export interface TestingSettings     {
   defaultTimeout: number; // 毫秒
   maxConcurrentTests: number;
   autoSaveResults: boolean;
   enableAdvancedFeatures: boolean;
 }
 
-export interface PrivacySettings {
+export interface PrivacySettings     {
   shareUsageData: boolean;
   allowCookies: boolean;
   trackingEnabled: boolean;
 }
 
-export interface UserPreferences {
+export interface UserPreferences     {
   theme: 'light' | 'dark' | 'auto';
   language: 'zh-CN' | 'en-US' | 'ja-JP';
   timezone: string;
@@ -90,7 +87,7 @@ export interface UserPreferences {
 
 // ==================== 用户档案信息 ====================
 
-export interface UserProfile {
+export interface UserProfile     {
   firstName?: string;
   lastName?: string;
   fullName?: string; // 计算字段，由firstName + lastName生成
@@ -104,7 +101,7 @@ export interface UserProfile {
 
 // ==================== 用户会话信息 ====================
 
-export interface UserSession {
+export interface UserSession     {
   id: UUID;
   userId: UUID;
   sessionToken: string;
@@ -124,7 +121,7 @@ export interface UserSession {
  * 统一用户接口 - 前后端共享
  * 字段名称与数据库字段保持映射关系
  */
-export interface User {
+export interface User     {
   // 基础标识信息
   id: UUID;
   username: string;
@@ -166,7 +163,7 @@ export interface User {
  * 数据库字段映射接口
  * 用于前后端数据转换
  */
-export interface UserDatabaseFields {
+export interface UserDatabaseFields     {
   id: string;
   username: string;
   email: string;
@@ -190,7 +187,7 @@ export interface UserDatabaseFields {
 
 // ==================== 用户操作相关接口 ====================
 
-export interface CreateUserData {
+export interface CreateUserData     {
   username: string;
   email: Email;
   password: string;
@@ -201,7 +198,7 @@ export interface CreateUserData {
   metadata?: Record<string, any>;
 }
 
-export interface UpdateUserData {
+export interface UpdateUserData     {
   username?: string;
   email?: Email;
   profile?: Partial<UserProfile>;
@@ -212,7 +209,7 @@ export interface UpdateUserData {
   metadata?: Record<string, any>;
 }
 
-export interface ChangePasswordData {
+export interface ChangePasswordData     {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
@@ -220,14 +217,14 @@ export interface ChangePasswordData {
 
 // ==================== 认证相关接口 ====================
 
-export interface LoginCredentials {
+export interface LoginCredentials     {
   username: string;
   password: string;
   rememberMe?: boolean;
   twoFactorCode?: string;
 }
 
-export interface RegisterData {
+export interface RegisterData     {
   username: string;
   email: Email;
   password: string;
@@ -236,7 +233,7 @@ export interface RegisterData {
   acceptTerms: boolean;
 }
 
-export interface AuthResponse {
+export interface AuthResponse     {
   success: boolean;
   user?: User;
   token?: string;
@@ -248,7 +245,7 @@ export interface AuthResponse {
 
 // ==================== 用户查询和过滤 ====================
 
-export interface UserFilter {
+export interface UserFilter     {
   role?: UserRole | UserRole[];
   status?: UserStatus | UserStatus[];
   plan?: UserPlan | UserPlan[];
@@ -261,7 +258,7 @@ export interface UserFilter {
   lastLoginBefore?: Timestamp;
 }
 
-export interface UserListQuery {
+export interface UserListQuery     {
   page?: number;
   limit?: number;
   sortBy?: 'createdAt' | 'lastLoginAt' | 'username' | 'email';
@@ -271,7 +268,7 @@ export interface UserListQuery {
 
 // ==================== 用户统计信息 ====================
 
-export interface UserStats {
+export interface UserStats     {
   totalUsers: number;
   activeUsers: number;
   newUsersToday: number;
@@ -284,7 +281,7 @@ export interface UserStats {
 
 // ==================== 用户活动日志 ====================
 
-export interface UserActivityLog {
+export interface UserActivityLog     {
   id: UUID;
   userId: UUID;
   action: string;
@@ -299,11 +296,11 @@ export interface UserActivityLog {
 // ==================== 默认值定义 ====================
 
 export const DEFAULT_USER_PREFERENCES: UserPreferences = {
-  theme: 'auto',
-  language: 'zh-CN',
-  timezone: 'Asia/Shanghai',
-  dateFormat: 'YYYY-MM-DD',
-  timeFormat: '24h',
+  theme: 'auto','
+  language: 'zh-CN','
+  timezone: 'Asia/Shanghai','
+  dateFormat: 'YYYY-MM-DD','
+  timeFormat: '24h','
   notifications: {
     email: true,
     sms: false,
@@ -315,8 +312,8 @@ export const DEFAULT_USER_PREFERENCES: UserPreferences = {
     securityAlert: true
   },
   dashboard: {
-    defaultView: 'overview',
-    layout: 'grid',
+    defaultView: 'overview','
+    layout: 'grid','
     widgets: [],
     refreshInterval: 30,
     showTips: true
@@ -335,20 +332,20 @@ export const DEFAULT_USER_PREFERENCES: UserPreferences = {
 };
 
 export const DEFAULT_USER_PROFILE: UserProfile = {
-  timezone: 'Asia/Shanghai'
+  timezone: 'Asia/Shanghai';
 };
 
 // ==================== 类型守卫函数 ====================
 
-export function isValidUserRole(role: string): role is UserRole {
+export function isValidUserRole(role: string): role is UserRole   {
   return Object.values(UserRole).includes(role as UserRole);
 }
 
-export function isValidUserStatus(status: string): status is UserStatus {
+export function isValidUserStatus(status: string): status is UserStatus   {
   return Object.values(UserStatus).includes(status as UserStatus);
 }
 
-export function isValidUserPlan(plan: string): plan is UserPlan {
+export function isValidUserPlan(plan: string): plan is UserPlan   {
   return Object.values(UserPlan).includes(plan as UserPlan);
 }
 
@@ -357,7 +354,7 @@ export function isValidUserPlan(plan: string): plan is UserPlan {
 /**
  * 将数据库字段转换为前端User对象
  */
-export function fromDatabaseFields(dbData: UserDatabaseFields): User {
+export function fromDatabaseFields(dbData: UserDatabaseFields): User   {
   return {
     id: dbData.id,
     username: dbData.username,
@@ -370,9 +367,9 @@ export function fromDatabaseFields(dbData: UserDatabaseFields): User {
       firstName: dbData.first_name,
       lastName: dbData.last_name,
       fullName: dbData.first_name && dbData.last_name
-        ? `${dbData.first_name} ${dbData.last_name}`
+        ? `${dbData.first_name} ${dbData.last_name}``
         : undefined,
-      timezone: 'Asia/Shanghai' // 默认值
+      timezone: "Asia/Shanghai' // 默认值'`
     },
     preferences: dbData.preferences ? JSON.parse(dbData.preferences) : DEFAULT_USER_PREFERENCES,
     emailVerified: dbData.email_verified,
@@ -390,12 +387,12 @@ export function fromDatabaseFields(dbData: UserDatabaseFields): User {
 /**
  * 将前端User对象转换为数据库字段
  */
-export function toDatabaseFields(user: User, passwordHash?: string): UserDatabaseFields {
+export function toDatabaseFields(user: User, passwordHash?: string): UserDatabaseFields   {
   return {
     id: user.id,
     username: user.username,
     email: user.email,
-    password_hash: passwordHash || '', // 需要单独处理
+    password_hash: passwordHash || '', // 需要单独处理'
     first_name: user.profile.firstName,
     last_name: user.profile.lastName,
     role: user.role,

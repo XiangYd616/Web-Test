@@ -1,10 +1,10 @@
 {
-  "timestamp": "2025-08-16T07:25:41.469Z",
+  "timestamp": "2025-08-16T09:33:23.903Z",
   "summary": {
-    "totalIssues": 15,
+    "totalIssues": 28,
     "categories": {
       "api_calls": 0,
-      "error_handling": 15,
+      "error_handling": 28,
       "state_management": 0,
       "module_consistency": 0
     }
@@ -25,6 +25,10 @@
         "pattern": "try-catch"
       },
       {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\auth\\AuthLoadingState.tsx",
+        "pattern": "try-catch"
+      },
+      {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\auth\\MFASetup.tsx",
         "pattern": "try-catch"
       },
@@ -41,7 +45,27 @@
         "pattern": "try-catch"
       },
       {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\charts\\DashboardCharts.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\charts\\DataDensityControl.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\charts\\DataDensityControl.tsx",
+        "pattern": "custom-handler"
+      },
+      {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\charts\\PerformanceChart.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\charts\\StatCard.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\charts\\StressTestMetrics.tsx",
         "pattern": "try-catch"
       },
       {
@@ -51,6 +75,14 @@
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\common\\ErrorBoundary.tsx",
         "pattern": "error-boundary"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\data\\DataManagement.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\data\\DataManagement.tsx",
+        "pattern": "custom-handler"
       },
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\data\\DataManager.tsx",
@@ -65,15 +97,35 @@
         "pattern": "try-catch"
       },
       {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\features\\APIAnalysis.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\features\\ContentAnalysis.tsx",
+        "pattern": "try-catch"
+      },
+      {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\features\\DataExporter.tsx",
         "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\features\\DataFilters.tsx",
+        "pattern": "custom-handler"
       },
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\features\\DataManagement.tsx",
         "pattern": "try-catch"
       },
       {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\features\\DataManagement.tsx",
+        "pattern": "custom-handler"
+      },
+      {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\features\\DataManager.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\features\\DataStats.tsx",
         "pattern": "try-catch"
       },
       {
@@ -90,6 +142,10 @@
       },
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\features\\PerformanceAnalysis.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\features\\RealTimeMonitoring.tsx",
         "pattern": "try-catch"
       },
       {
@@ -119,6 +175,14 @@
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\results\\ResultsDisplay.tsx",
         "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\results\\VirtualizedResultList.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\routing\\RouteManager.tsx",
+        "pattern": "error-boundary"
       },
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\security\\SecurityTest.tsx",
@@ -189,6 +253,34 @@
         "pattern": "try-catch"
       },
       {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\APITestResultAnalysis.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\APITestResultAnalysis.tsx",
+        "pattern": "custom-handler"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\BaseTestPage.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\BaseTestPage.tsx",
+        "pattern": "custom-handler"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\PerformanceResults.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\SecurityTestGuide.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\SecurityTestGuide.tsx",
+        "pattern": "custom-handler"
+      },
+      {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\SecurityTestHistory.tsx",
         "pattern": "try-catch"
       },
@@ -213,8 +305,20 @@
         "pattern": "try-catch"
       },
       {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\StressTestQueueStatus.tsx",
+        "pattern": "try-catch"
+      },
+      {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\StressTestRecordDetail.tsx",
         "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\TestComponents.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\TestComponents.tsx",
+        "pattern": "custom-handler"
       },
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\TestConfigPanel.tsx",
@@ -223,6 +327,14 @@
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\TestEngineStatus.tsx",
         "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\TestHeader.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\TestHeader.tsx",
+        "pattern": "custom-handler"
       },
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\TestHistoryPanel.tsx",
@@ -253,6 +365,30 @@
         "pattern": "try-catch"
       },
       {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\TestProgressPanel.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\TestProgressPanel.tsx",
+        "pattern": "custom-handler"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\TestResultDisplay.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\TestResultDisplay.tsx",
+        "pattern": "custom-handler"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\TestResults.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\TestResults.tsx",
+        "pattern": "custom-handler"
+      },
+      {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\TestTemplateManager.tsx",
         "pattern": "try-catch"
       },
@@ -262,6 +398,18 @@
       },
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\URLInput.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\TestResults.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\TestResults.tsx",
+        "pattern": "custom-handler"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\tools\\AppRoutes.tsx",
         "pattern": "try-catch"
       },
       {
@@ -277,11 +425,35 @@
         "pattern": "custom-handler"
       },
       {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\tools\\DataQueryPanel.tsx",
+        "pattern": "custom-handler"
+      },
+      {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\tools\\GlobalSearch.tsx",
         "pattern": "try-catch"
       },
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\tools\\InteractiveFeedback.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\tools\\PreloadLink.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\ui\\Button.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\ui\\Checkbox.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\ui\\DataTableCompat.test.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\ui\\DataTableCompat.tsx",
         "pattern": "try-catch"
       },
       {
@@ -301,6 +473,10 @@
         "pattern": "try-catch"
       },
       {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\ui\\Image.tsx",
+        "pattern": "try-catch"
+      },
+      {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\ui\\index.ts",
         "pattern": "error-boundary"
       },
@@ -309,12 +485,56 @@
         "pattern": "error-boundary"
       },
       {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\ui\\LazyComponentWrapper.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\ui\\LazyComponentWrapper.tsx",
+        "pattern": "error-boundary"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\ui\\LazyImage.tsx",
+        "pattern": "custom-handler"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\ui\\Loading.tsx",
+        "pattern": "try-catch"
+      },
+      {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\ui\\Pagination.tsx",
         "pattern": "try-catch"
       },
       {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\ui\\ProgressBar.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\ui\\StopTestConfirmDialog.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\ui\\StopTestConfirmDialog.tsx",
+        "pattern": "custom-handler"
+      },
+      {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\ui\\TestHistory.tsx",
         "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\ui\\TestingTools.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\ui\\TestingTools.tsx",
+        "pattern": "custom-handler"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\ui\\TestNavigation.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\ui\\TestNavigation.tsx",
+        "pattern": "custom-handler"
       },
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\ui\\TestPageHistory.tsx",
@@ -327,6 +547,18 @@
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\ui\\URLInput.tsx",
         "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\ui\\VirtualScroll.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\ui\\VirtualScrollList.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\ui\\VirtualTable.tsx",
+        "pattern": "custom-handler"
       },
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\config\\ConfigManager.ts",
@@ -553,12 +785,24 @@
         "pattern": "try-catch"
       },
       {
+        "file": "D:\\myproject\\Test-Web\\frontend\\pages\\management\\admin\\SystemMonitor.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\pages\\management\\admin\\SystemMonitor.tsx",
+        "pattern": "custom-handler"
+      },
+      {
         "file": "D:\\myproject\\Test-Web\\frontend\\pages\\management\\integration\\APIKeys.tsx",
         "pattern": "try-catch"
       },
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\pages\\management\\integration\\CICDIntegration.tsx",
         "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\pages\\management\\integration\\CICDIntegration.tsx",
+        "pattern": "custom-handler"
       },
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\pages\\management\\integration\\Integrations.tsx",
@@ -571,6 +815,10 @@
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\pages\\management\\scheduling\\ScheduledTasks.tsx",
         "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\pages\\management\\scheduling\\ScheduledTasks.tsx",
+        "pattern": "custom-handler"
       },
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\pages\\management\\scheduling\\TestOptimizations.tsx",
@@ -705,6 +953,10 @@
         "pattern": "try-catch"
       },
       {
+        "file": "D:\\myproject\\Test-Web\\frontend\\services\\authService.ts",
+        "pattern": "try-catch"
+      },
+      {
         "file": "D:\\myproject\\Test-Web\\frontend\\services\\batch\\batchOperationService.ts",
         "pattern": "try-catch"
       },
@@ -762,6 +1014,10 @@
       },
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\services\\data\\dataStateManager.ts",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\services\\dataFlowManager.ts",
         "pattern": "try-catch"
       },
       {
@@ -857,6 +1113,10 @@
         "pattern": "try-catch"
       },
       {
+        "file": "D:\\myproject\\Test-Web\\frontend\\services\\smartCacheManager.ts",
+        "pattern": "try-catch"
+      },
+      {
         "file": "D:\\myproject\\Test-Web\\frontend\\services\\state\\testStateManager.ts",
         "pattern": "try-catch"
       },
@@ -874,6 +1134,10 @@
       },
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\services\\system\\systemService.ts",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\services\\testFlowManager.ts",
         "pattern": "try-catch"
       },
       {
@@ -958,6 +1222,10 @@
       },
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\services\\unified\\apiErrorHandler.ts",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\services\\unified\\apiErrorHandler.ts",
         "pattern": "custom-handler"
       },
       {
@@ -985,6 +1253,10 @@
         "pattern": "try-catch"
       },
       {
+        "file": "D:\\myproject\\Test-Web\\frontend\\utils\\apiClient.ts",
+        "pattern": "try-catch"
+      },
+      {
         "file": "D:\\myproject\\Test-Web\\frontend\\utils\\browserJwt.ts",
         "pattern": "try-catch"
       },
@@ -997,11 +1269,23 @@
         "pattern": "try-catch"
       },
       {
+        "file": "D:\\myproject\\Test-Web\\frontend\\utils\\componentTester.tsx",
+        "pattern": "try-catch"
+      },
+      {
         "file": "D:\\myproject\\Test-Web\\frontend\\utils\\cssLoader.ts",
         "pattern": "try-catch"
       },
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\utils\\dataOptimizer.ts",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\utils\\dynamicImport.ts",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\utils\\enhancedApiClient.ts",
         "pattern": "try-catch"
       },
       {
@@ -1030,6 +1314,14 @@
       },
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\utils\\logger.ts",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\utils\\pageTemplateGenerator.ts",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\utils\\pageTestingTool.ts",
         "pattern": "try-catch"
       },
       {
@@ -1763,6 +2055,83 @@
     {
       "category": "error_handling",
       "type": "missing_async_error_handling",
+      "file": "frontend\\hooks\\useAuthFlow.ts",
+      "message": "异步操作缺少错误处理",
+      "severity": "medium"
+    },
+    {
+      "category": "error_handling",
+      "type": "missing_async_error_handling",
+      "file": "frontend\\hooks\\useBusinessFlow.ts",
+      "message": "异步操作缺少错误处理",
+      "severity": "medium"
+    },
+    {
+      "category": "error_handling",
+      "type": "missing_async_error_handling",
+      "file": "frontend\\pages\\core\\testing\\APITest.tsx",
+      "message": "异步操作缺少错误处理",
+      "severity": "medium"
+    },
+    {
+      "category": "error_handling",
+      "type": "missing_async_error_handling",
+      "file": "frontend\\pages\\data\\reports\\Reports.tsx",
+      "message": "异步操作缺少错误处理",
+      "severity": "medium"
+    },
+    {
+      "category": "error_handling",
+      "type": "missing_async_error_handling",
+      "file": "frontend\\pages\\data\\results\\SecurityReport.tsx",
+      "message": "异步操作缺少错误处理",
+      "severity": "medium"
+    },
+    {
+      "category": "error_handling",
+      "type": "missing_async_error_handling",
+      "file": "frontend\\pages\\data\\results\\TestHistory.tsx",
+      "message": "异步操作缺少错误处理",
+      "severity": "medium"
+    },
+    {
+      "category": "error_handling",
+      "type": "missing_async_error_handling",
+      "file": "frontend\\pages\\management\\integration\\Notifications.tsx",
+      "message": "异步操作缺少错误处理",
+      "severity": "medium"
+    },
+    {
+      "category": "error_handling",
+      "type": "missing_async_error_handling",
+      "file": "frontend\\pages\\TestToolsHub.tsx",
+      "message": "异步操作缺少错误处理",
+      "severity": "medium"
+    },
+    {
+      "category": "error_handling",
+      "type": "missing_async_error_handling",
+      "file": "frontend\\pages\\user\\docs\\APIDocs.tsx",
+      "message": "异步操作缺少错误处理",
+      "severity": "medium"
+    },
+    {
+      "category": "error_handling",
+      "type": "missing_async_error_handling",
+      "file": "frontend\\pages\\user\\misc\\Subscription.tsx",
+      "message": "异步操作缺少错误处理",
+      "severity": "medium"
+    },
+    {
+      "category": "error_handling",
+      "type": "missing_async_error_handling",
+      "file": "frontend\\services\\cacheIntegration.ts",
+      "message": "异步操作缺少错误处理",
+      "severity": "medium"
+    },
+    {
+      "category": "error_handling",
+      "type": "missing_async_error_handling",
       "file": "frontend\\services\\integration\\configService.ts",
       "message": "异步操作缺少错误处理",
       "severity": "medium"
@@ -1785,6 +2154,13 @@
       "category": "error_handling",
       "type": "missing_async_error_handling",
       "file": "frontend\\types\\version.ts",
+      "message": "异步操作缺少错误处理",
+      "severity": "medium"
+    },
+    {
+      "category": "error_handling",
+      "type": "missing_async_error_handling",
+      "file": "frontend\\utils\\componentTestGenerator.ts",
       "message": "异步操作缺少错误处理",
       "severity": "medium"
     },
@@ -1848,6 +2224,13 @@
       "category": "error_handling",
       "type": "missing_async_error_handling",
       "file": "backend\\routes\\performance.js",
+      "message": "异步操作缺少错误处理",
+      "severity": "medium"
+    },
+    {
+      "category": "error_handling",
+      "type": "missing_async_error_handling",
+      "file": "backend\\routes\\tests.js",
       "message": "异步操作缺少错误处理",
       "severity": "medium"
     },

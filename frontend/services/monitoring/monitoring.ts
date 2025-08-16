@@ -1,5 +1,5 @@
 // 实时监控和告警系统
-export interface MonitoringTarget {
+export interface MonitoringTarget     {
   id: string;
   name: string;
   url: string;
@@ -15,29 +15,29 @@ export interface MonitoringTarget {
   status: 'healthy' | 'warning' | 'critical' | 'unknown';
 }
 
-export interface MonitoringThresholds {
+export interface MonitoringThresholds     {
   responseTime: { warning: number; critical: number };
   availability: { warning: number; critical: number };
   errorRate: { warning: number; critical: number };
   customMetrics?: { [key: string]: { warning: number; critical: number } };
 }
 
-export interface NotificationConfig {
+export interface NotificationConfig     {
   id: string;
   type: 'email' | 'webhook' | 'sms' | 'slack' | 'teams';
   enabled: boolean;
   config: {
     email?: { recipients: string[]; subject?: string };
-    webhook?: { url: string; method: 'POST' | 'GET'; headers?: Record<string, string> };
+    webhook?: { url: string; method: 'POST' | 'GET'; headers?: Record<string, string> };'
     slack?: { webhook: string; channel?: string };
     teams?: { webhook: string };
     sms?: { numbers: string[] };
   };
-  triggers: ('down' | 'slow' | 'error' | 'recovery')[];
+  triggers: ('down' | 'slow' | 'error' | 'recovery')[];'
   cooldown: number; // 冷却时间（分钟）
 }
 
-export interface MonitoringResult {
+export interface MonitoringResult     {
   id: string;
   targetId: string;
   timestamp: string;
@@ -55,7 +55,7 @@ export interface MonitoringResult {
   userAgent: string;
 }
 
-export interface Alert {
+export interface Alert     {
   id: string;
   targetId: string;
   type: 'down' | 'slow' | 'error' | 'recovery';
@@ -71,7 +71,7 @@ export interface Alert {
   metadata: Record<string, any>;
 }
 
-export interface MonitoringStats {
+export interface MonitoringStats     {
   totalTargets: number;
   activeTargets: number;
   healthyTargets: number;
@@ -94,7 +94,7 @@ export class RealTimeMonitoringService {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
@@ -119,14 +119,13 @@ export class RealTimeMonitoringService {
   }
 
   // 添加监控目标
-  public addTarget(target: Omit<MonitoringTarget, 'id' | 'createdAt' | 'status'>): MonitoringTarget {
-    const newTarget: MonitoringTarget = {
+  public addTarget(target: Omit<MonitoringTarget, "id' | 'createdAt' | 'status'>): MonitoringTarget {'`
+    const newTarget: MonitoringTarget  = {
       ...target,
       id: this.generateId(),
       createdAt: new Date().toISOString(),
-      status: 'unknown'
+      status: 'unknown';
     };
-
     this.targets.set(newTarget.id, newTarget);
     this.saveToStorage();
 
@@ -134,7 +133,7 @@ export class RealTimeMonitoringService {
       this.startMonitoring(newTarget.id);
     }
 
-    this.emit('targetAdded', newTarget);
+    this.emit('targetAdded', newTarget);'
     return newTarget;
   }
 
@@ -155,7 +154,7 @@ export class RealTimeMonitoringService {
       this.startMonitoring(id);
     }
 
-    this.emit('targetUpdated', updatedTarget);
+    this.emit('targetUpdated', updatedTarget);'
     return true;
   }
 
@@ -169,7 +168,7 @@ export class RealTimeMonitoringService {
     this.results.delete(id);
     this.saveToStorage();
 
-    this.emit('targetRemoved', { id, target });
+    this.emit('targetRemoved', { id, target });'
     return true;
   }
 
@@ -194,7 +193,7 @@ export class RealTimeMonitoringService {
       }
     });
 
-    this.emit('monitoringStarted');
+    this.emit('monitoringStarted');'
   }
 
   // 停止全局监控
@@ -206,7 +205,7 @@ export class RealTimeMonitoringService {
       this.stopMonitoring(id);
     });
 
-    this.emit('monitoringStopped');
+    this.emit('monitoringStopped');'
   }
 
   // 启动单个目标监控
@@ -258,8 +257,8 @@ export class RealTimeMonitoringService {
           responseTime,
           errorRate: response.ok ? 0 : 100
         },
-        location: 'local',
-        userAgent: 'TestWeb-Monitor/1.0'
+        location: 'local','
+        userAgent: 'TestWeb-Monitor/1.0';
       };
 
     } catch (error) {
@@ -268,16 +267,16 @@ export class RealTimeMonitoringService {
         id: this.generateId(),
         targetId,
         timestamp: new Date().toISOString(),
-        status: 'error',
+        status: 'error','
         responseTime,
-        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        errorMessage: error instanceof Error ? error.message : 'Unknown error','
         metrics: {
           availability: 0,
           responseTime,
           errorRate: 100
         },
-        location: 'local',
-        userAgent: 'TestWeb-Monitor/1.0'
+        location: 'local','
+        userAgent: 'TestWeb-Monitor/1.0';
       };
     }
 
@@ -290,7 +289,7 @@ export class RealTimeMonitoringService {
     // 检查告警条件
     this.checkAlertConditions(target, result);
 
-    this.emit('checkCompleted', { target, result });
+    this.emit('checkCompleted', { target, result });'
   }
 
   // 发起HTTP请求
@@ -300,11 +299,11 @@ export class RealTimeMonitoringService {
 
     try {
       const response = await fetch(target.url, {
-        method: 'GET',
+        method: 'GET','
         signal: controller.signal,
         headers: {
-          'User-Agent': 'TestWeb-Monitor/1.0',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+          'User-Agent': 'TestWeb-Monitor/1.0','
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
         }
       });
 
@@ -317,7 +316,7 @@ export class RealTimeMonitoringService {
   }
 
   // 确定状态
-  private determineStatus(response: Response, responseTime: number, thresholds: MonitoringThresholds): 'success' | 'warning' | 'error' {
+  private determineStatus(response: Response, responseTime: number, thresholds: MonitoringThresholds): 'success' | 'warning' | 'error' {'
     if (!response.ok) return 'error';
     if (responseTime > thresholds.responseTime.critical) return 'error';
     if (responseTime > thresholds.responseTime.warning) return 'warning';
@@ -344,15 +343,15 @@ export class RealTimeMonitoringService {
     const target = this.targets.get(targetId);
     if (!target) return;
 
-    let status: MonitoringTarget['status'];
+    let status: MonitoringTarget['status'];'
     switch (result.status) {
-      case 'success':
+      case 'success': ''
         status = 'healthy';
         break;
-      case 'warning':
+      case 'warning': ''
         status = 'warning';
         break;
-      case 'error':
+      case 'error': ''
         status = 'critical';
         break;
       default:
@@ -369,24 +368,24 @@ export class RealTimeMonitoringService {
     const recentResults = this.getRecentResults(target.id, 5);
 
     // 检查是否需要触发告警
-    if (result.status === 'error') {
-      this.createAlert(target, 'down', 'critical', '服务不可用', `${target.name} 无法访问`);
-    } else if (result.status === 'warning') {
-      this.createAlert(target, 'slow', 'warning', '响应缓慢', `${target.name} 响应时间过长: ${result.responseTime}ms`);
-    } else if (result.status === 'success') {
+    if (result.status === 'error') {'
+      this.createAlert(target, 'down', 'critical', "服务不可用', `${target.name} 无法访问`);'`
+    } else if (result.status === "warning') {'`
+      this.createAlert(target, 'slow', 'warning', '响应缓慢', `${target.name} 响应时间过长: ${result.responseTime}ms`);'`
+    } else if (result.status === "success') {'`
       // 检查是否需要发送恢复通知
       const hasActiveAlert = Array.from(this.alerts.values()).some(
         alert => alert.targetId === target.id && !alert.resolved
       );
       if (hasActiveAlert) {
-        this.createAlert(target, 'recovery', 'warning', '服务恢复', `${target.name} 已恢复正常`);
+        this.createAlert(target, 'recovery', 'warning', "服务恢复', `${target.name} 已恢复正常`);'`
       }
     }
   }
 
   // 创建告警
-  private createAlert(target: MonitoringTarget, type: Alert['type'], severity: Alert['severity'], title: string, message: string): void {
-    const alert: Alert = {
+  private createAlert(target: MonitoringTarget, type: Alert["type'], severity: Alert['severity'], title: string, message: string): void {'`
+    const alert: Alert  = {
       id: this.generateId(),
       targetId: target.id,
       type,
@@ -395,17 +394,16 @@ export class RealTimeMonitoringService {
       message,
       timestamp: new Date().toISOString(),
       acknowledged: false,
-      resolved: type === 'recovery',
-      resolvedAt: type === 'recovery' ? new Date().toISOString() : undefined,
+      resolved: type === 'recovery','
+      resolvedAt: type === 'recovery' ? new Date().toISOString() : undefined,'
       metadata: { targetName: target.name, targetUrl: target.url }
     };
-
     this.alerts.set(alert.id, alert);
 
     // 发送通知
     this.sendNotifications(target, alert);
 
-    this.emit('alertCreated', alert);
+    this.emit('alertCreated', alert);'
   }
 
   // 发送通知
@@ -418,7 +416,7 @@ export class RealTimeMonitoringService {
       try {
         await this.sendNotification(notification, alert, target);
       } catch (error) {
-        console.error('Failed to send notification:', error);
+        console.error('Failed to send notification: ', error);'
       }
     }
   }
@@ -426,13 +424,13 @@ export class RealTimeMonitoringService {
   // 发送单个通知
   private async sendNotification(config: NotificationConfig, alert: Alert, target: MonitoringTarget): Promise<void> {
     switch (config.type) {
-      case 'email':
+      case 'email': ''
         await this.sendEmailNotification(config, alert, target);
         break;
-      case 'webhook':
+      case 'webhook': ''
         await this.sendWebhookNotification(config, alert, target);
         break;
-      case 'slack':
+      case 'slack': ''
         await this.sendSlackNotification(config, alert, target);
         break;
       // 其他通知类型的实现...
@@ -441,10 +439,10 @@ export class RealTimeMonitoringService {
 
   // 邮件通知（模拟实现）
   private async sendEmailNotification(config: NotificationConfig, alert: Alert, target: MonitoringTarget): Promise<void> {
-    console.log('Sending email notification:', {
+    console.log('Sending email notification: ', {'
       to: config.config.email?.recipients,
-      subject: `[${alert.severity.toUpperCase()}] ${alert.title}`,
-      body: `目标: ${target.name}/nURL: ${target.url}/n消息: ${alert.message}/n时间: ${alert.timestamp}`
+      subject: `[${alert.severity.toUpperCase()}] ${alert.title}`,`
+      body: `目标: ${target.name}/nURL: ${target.url}/n消息: ${alert.message}/n时间: ${alert.timestamp}``
     });
   }
 
@@ -459,9 +457,9 @@ export class RealTimeMonitoringService {
     };
 
     await fetch(config.config.webhook.url, {
-      method: config.config.webhook.method || 'POST',
+      method: config.config.webhook.method || "POST','`
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json','
         ...config.config.webhook.headers
       },
       body: JSON.stringify(payload)
@@ -479,16 +477,16 @@ export class RealTimeMonitoringService {
         title: alert.title,
         text: alert.message,
         fields: [
-          { title: '目标', value: target.name, short: true },
-          { title: 'URL', value: target.url, short: true },
-          { title: '时间', value: alert.timestamp, short: true }
+          { title: '目标', value: target.name, short: true },'
+          { title: 'URL', value: target.url, short: true },'
+          { title: '时间', value: alert.timestamp, short: true }'
         ]
       }]
     };
 
     await fetch(config.config.slack.webhook, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST','
+      headers: { 'Content-Type': 'application/json' },'
       body: JSON.stringify(payload)
     });
   }
@@ -507,9 +505,9 @@ export class RealTimeMonitoringService {
     return {
       totalTargets: targets.length,
       activeTargets: targets.filter(t => t.enabled).length,
-      healthyTargets: targets.filter(t => t.status === 'healthy').length,
-      warningTargets: targets.filter(t => t.status === 'warning').length,
-      criticalTargets: targets.filter(t => t.status === 'critical').length,
+      healthyTargets: targets.filter(t => t.status === 'healthy').length,'
+      warningTargets: targets.filter(t => t.status === 'warning').length,'
+      criticalTargets: targets.filter(t => t.status === 'critical').length,'
       totalChecks: Array.from(this.results.values()).reduce((sum, results) => sum + results.length, 0),
       avgResponseTime: this.calculateAverageResponseTime(),
       overallAvailability: this.calculateOverallAvailability(),
@@ -545,7 +543,7 @@ export class RealTimeMonitoringService {
 
   // 辅助方法
   private generateId(): string {
-    return `${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    return `${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;`
   }
 
   private calculateAverageResponseTime(): number {
@@ -560,35 +558,35 @@ export class RealTimeMonitoringService {
     const allResults = Array.from(this.results.values()).flat();
     if (allResults.length === 0) return 100;
 
-    const successCount = allResults.filter(result => result.status === 'success').length;
+    const successCount = allResults.filter(result => result.status === "success').length;'`
     return Math.round((successCount / allResults.length) * 100 * 100) / 100;
   }
 
   // 数据持久化
   private saveToStorage(): void {
     try {
-      localStorage.setItem('monitoring_targets', JSON.stringify(Array.from(this.targets.entries())));
-      localStorage.setItem('monitoring_alerts', JSON.stringify(Array.from(this.alerts.entries())));
+      localStorage.setItem('monitoring_targets', JSON.stringify(Array.from(this.targets.entries())));'
+      localStorage.setItem('monitoring_alerts', JSON.stringify(Array.from(this.alerts.entries())));'
     } catch (error) {
-      console.error('Failed to save monitoring data:', error);
+      console.error('Failed to save monitoring data: ', error);'
     }
   }
 
   private loadFromStorage(): void {
     try {
-      const targetsData = localStorage.getItem('monitoring_targets');
+      const targetsData = localStorage.getItem('monitoring_targets');'
       if (targetsData) {
         const entries = JSON.parse(targetsData);
         this.targets = new Map(entries);
       }
 
-      const alertsData = localStorage.getItem('monitoring_alerts');
+      const alertsData = localStorage.getItem('monitoring_alerts');'
       if (alertsData) {
         const entries = JSON.parse(alertsData);
         this.alerts = new Map(entries);
       }
     } catch (error) {
-      console.error('Failed to load monitoring data:', error);
+      console.error('Failed to load monitoring data:', error);'
     }
   }
 }
@@ -597,4 +595,4 @@ export class RealTimeMonitoringService {
 export const realTimeMonitoring = RealTimeMonitoringService.getInstance();
 
 // 类型导出
-export type RealTimeMonitoring = RealTimeMonitoringService;
+export type RealTimeMonitoring   = RealTimeMonitoringService;

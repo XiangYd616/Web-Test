@@ -1,30 +1,30 @@
 
 
 export enum TestState {
-  IDLE = 'idle',
-  STARTING = 'starting',
-  RUNNING = 'running',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled'
+  IDLE = 'idle','
+  STARTING = 'starting','
+  RUNNING = 'running','
+  COMPLETED = 'completed','
+  FAILED = 'failed','
+  CANCELLED = 'cancelled';
 }
 
 export enum TestPhase {
-  INITIALIZATION = 'initialization',
-  RAMP_UP = 'ramp-up',
-  STEADY_STATE = 'steady',
-  RAMP_DOWN = 'ramp-down',
-  CLEANUP = 'cleanup'
+  INITIALIZATION = 'initialization','
+  RAMP_UP = 'ramp-up','
+  STEADY_STATE = 'steady','
+  RAMP_DOWN = 'ramp-down','
+  CLEANUP = 'cleanup';
 }
 
 // 数据源类型
 export enum DataSource {
-  WEBSOCKET = 'websocket',
-  API_POLLING = 'api-polling',
-  BACKGROUND_MANAGER = 'background-manager'
+  WEBSOCKET = 'websocket','
+  API_POLLING = 'api-polling','
+  BACKGROUND_MANAGER = 'background-manager';
 }
 
-export interface TestConfig {
+export interface TestConfig     {
   url: string;
   users: number;
   duration: number;
@@ -43,11 +43,11 @@ export interface TestConfig {
   maxRedirects?: number;
   keepAlive?: boolean;
   compression?: boolean;
-  protocols?: ('http1' | 'http2' | 'http3')[];
+  protocols?: ('http1' | 'http2' | 'http3')[];'
 }
 
 // 实时指标接口
-export interface RealTimeMetrics {
+export interface RealTimeMetrics     {
   totalRequests: number;
   successfulRequests: number;
   failedRequests: number;
@@ -74,7 +74,7 @@ export interface RealTimeMetrics {
   maxResponseTime?: number;
 }
 
-export interface TestDataPoint {
+export interface TestDataPoint     {
   timestamp: number;
   responseTime: number;
   activeUsers: number;
@@ -92,7 +92,7 @@ export interface TestDataPoint {
 }
 
 // 状态变更事件接口
-export interface StateChangeEvent {
+export interface StateChangeEvent     {
   previousState: TestState;
   currentState: TestState;
   timestamp: number;
@@ -101,7 +101,7 @@ export interface StateChangeEvent {
 }
 
 // 状态管理器配置
-export interface StateManagerConfig {
+export interface StateManagerConfig     {
   maxDataPoints: number;
   dataRetentionTime: number; // 毫秒
   autoCleanupInterval: number; // 毫秒
@@ -118,7 +118,7 @@ export class TestStateManager {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
@@ -131,7 +131,7 @@ export class TestStateManager {
   private dataPoints: TestDataPoint[] = [];
   private error: Error | null = null;
   private progress: number = 0;
-  private progressMessage: string = '';
+  private progressMessage: string = "';'`
   private startTime: number | null = null;
   private endTime: number | null = null;
 
@@ -240,7 +240,7 @@ export class TestStateManager {
    */
   startTest(testId: string, config: TestConfig): void {
     if (this.state !== TestState.IDLE) {
-      throw new Error(`Cannot start test in state: ${this.state}`);
+      throw new Error(`Cannot start test in state: ${this.state}`);`
     }
 
     const previousState = this.state;
@@ -250,13 +250,13 @@ export class TestStateManager {
     this.config = config;
     this.error = null;
     this.progress = 0;
-    this.progressMessage = '正在初始化测试...';
+    this.progressMessage = "正在初始化测试...';'`
     this.startTime = Date.now();
     this.endTime = null;
     this.dataPoints = [];
     this.metrics = null;
 
-    this.log(`Test started: ${testId}`);
+    this.log(`Test started: ${testId}`);`
     this.notifyStateChange(previousState, this.state);
   }
 
@@ -265,15 +265,14 @@ export class TestStateManager {
    */
   setRunning(): void {
     if (this.state !== TestState.STARTING) {
-      throw new Error(`Cannot set running from state: ${this.state}`);
+      throw new Error(`Cannot set running from state: ${this.state}`);`
     }
 
     const previousState = this.state;
     this.state = TestState.RUNNING;
     this.phase = TestPhase.RAMP_UP;
-    this.progressMessage = '测试正在运行...';
-
-    this.log('Test is now running');
+    this.progressMessage = "测试正在运行...';'`
+    this.log('Test is now running');'
     this.notifyStateChange(previousState, this.state);
   }
 
@@ -282,7 +281,7 @@ export class TestStateManager {
    */
   completeTest(result?: any): void {
     if (this.state !== TestState.RUNNING) {
-      throw new Error(`Cannot complete test from state: ${this.state}`);
+      throw new Error(`Cannot complete test from state: ${this.state}`);`
     }
 
     const previousState = this.state;
@@ -290,9 +289,8 @@ export class TestStateManager {
     this.phase = TestPhase.CLEANUP;
     this.endTime = Date.now();
     this.progress = 100;
-    this.progressMessage = '测试完成';
-
-    this.log('Test completed successfully');
+    this.progressMessage = "测试完成';'`
+    this.log('Test completed successfully');'
     this.notifyStateChange(previousState, this.state);
   }
 
@@ -304,9 +302,9 @@ export class TestStateManager {
     this.state = TestState.FAILED;
     this.error = error;
     this.endTime = Date.now();
-    this.progressMessage = `测试失败: ${error.message}`;
+    this.progressMessage = `测试失败: ${error.message}`;`
 
-    this.log(`Test failed: ${error.message}`);
+    this.log(`Test failed: ${error.message}`);`
     this.notifyStateChange(previousState, this.state, error.message, error);
   }
 
@@ -322,9 +320,8 @@ export class TestStateManager {
     const previousState = this.state;
     this.state = TestState.CANCELLED;
     this.endTime = Date.now();
-    this.progressMessage = '测试已取消';
-
-    this.log('Test cancelled');
+    this.progressMessage = "测试已取消';'`
+    this.log('Test cancelled');'
     this.notifyStateChange(previousState, this.state);
   }
 
@@ -345,7 +342,7 @@ export class TestStateManager {
     this.startTime = null;
     this.endTime = null;
 
-    this.log('State reset to idle');
+    this.log('State reset to idle');'
     this.notifyStateChange(previousState, this.state);
   }
 
@@ -355,7 +352,7 @@ export class TestStateManager {
   updateProgress(progress: number, message: string): void {
     this.progress = Math.max(0, Math.min(100, progress));
     this.progressMessage = message;
-    this.log(`Progress updated: ${progress}% - ${message}`);
+    this.log(`Progress updated: ${progress}% - ${message}`);`
   }
 
   /**
@@ -363,7 +360,7 @@ export class TestStateManager {
    */
   updatePhase(phase: TestPhase): void {
     this.phase = phase;
-    this.log(`Phase updated: ${phase}`);
+    this.log(`Phase updated: ${phase}`);`
   }
 
   /**
@@ -372,7 +369,7 @@ export class TestStateManager {
   addDataPoint(dataPoint: TestDataPoint): void {
     // 数据验证
     if (!this.isValidDataPoint(dataPoint)) {
-      this.log('Invalid data point received, skipping');
+      this.log("Invalid data point received, skipping');'`
       return;
     }
 
@@ -384,7 +381,7 @@ export class TestStateManager {
     }
 
     this.notifyDataUpdate(dataPoint);
-    this.log(`Data point added: ${dataPoint.timestamp}`);
+    this.log(`Data point added: ${dataPoint.timestamp}`);`
   }
 
   /**
@@ -393,7 +390,7 @@ export class TestStateManager {
   updateMetrics(metrics: RealTimeMetrics): void {
     this.metrics = { ...metrics, timestamp: Date.now() };
     this.notifyMetricsUpdate(this.metrics);
-    this.log(`Metrics updated: TPS=${metrics.currentTPS}, RT=${metrics.averageResponseTime}ms`);
+    this.log(`Metrics updated: TPS=${metrics.currentTPS}, RT=${metrics.averageResponseTime}ms`);`
   }
 
   /**
@@ -401,7 +398,7 @@ export class TestStateManager {
    */
   switchDataSource(source: DataSource): void {
     this.currentDataSource = source;
-    this.log(`Data source switched to: ${source}`);
+    this.log(`Data source switched to: ${source}`);`
   }
 
   /**
@@ -444,19 +441,18 @@ export class TestStateManager {
 
   // 私有方法
   private notifyStateChange(previousState: TestState, currentState: TestState, reason?: string, error?: Error): void {
-    const event: StateChangeEvent = {
+    const event: StateChangeEvent  = {
       previousState,
       currentState,
       timestamp: Date.now(),
       reason,
       error
     };
-
     this.stateChangeListeners.forEach(listener => {
       try {
         listener(event);
       } catch (err) {
-        console.error('Error in state change listener:', err);
+        console.error("Error in state change listener: ', err);'`
       }
     });
   }
@@ -466,7 +462,7 @@ export class TestStateManager {
       try {
         listener(dataPoint);
       } catch (err) {
-        console.error('Error in data update listener:', err);
+        console.error('Error in data update listener: ', err);'
       }
     });
   }
@@ -476,17 +472,17 @@ export class TestStateManager {
       try {
         listener(metrics);
       } catch (err) {
-        console.error('Error in metrics update listener:', err);
+        console.error('Error in metrics update listener: ', err);'
       }
     });
   }
 
   private isValidDataPoint(dataPoint: TestDataPoint): boolean {
     return (
-      typeof dataPoint.timestamp === 'number' &&
-      typeof dataPoint.responseTime === 'number' &&
-      typeof dataPoint.activeUsers === 'number' &&
-      typeof dataPoint.throughput === 'number' &&
+      typeof dataPoint.timestamp === 'number' &&'
+      typeof dataPoint.responseTime === 'number' &&'
+      typeof dataPoint.activeUsers === 'number' &&'
+      typeof dataPoint.throughput === 'number' &&'
       dataPoint.timestamp > 0 &&
       dataPoint.responseTime >= 0 &&
       dataPoint.activeUsers >= 0 &&
@@ -507,13 +503,13 @@ export class TestStateManager {
     this.dataPoints = this.dataPoints.filter(point => point.timestamp > cutoffTime);
 
     if (this.dataPoints.length < originalLength) {
-      this.log(`Cleaned up ${originalLength - this.dataPoints.length} old data points`);
+      this.log(`Cleaned up ${originalLength - this.dataPoints.length} old data points`);`
     }
   }
 
   private log(message: string): void {
     if (this.config_.enableLogging) {
-      console.log(`[TestStateManager] ${message}`);
+      console.log(`[TestStateManager] ${message}`);`
     }
   }
 
@@ -530,7 +526,7 @@ export class TestStateManager {
     this.dataUpdateListeners = [];
     this.metricsUpdateListeners = [];
 
-    this.log('TestStateManager destroyed');
+    this.log("TestStateManager destroyed');'`
   }
 }
 

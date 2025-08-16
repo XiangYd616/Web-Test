@@ -1,8 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
-import { ActivityItem, UserActivityStats, userStatsService } from '../services/user/userStatsService';
-import { useAuth } from './useAuth';
-
-export const useUserStats = () => {
+import { useCallback, useEffect, useState    } from 'react';import { ActivityItem, UserActivityStats, userStatsService    } from '../services/user/userStatsService';import { useAuth    } from './useAuth';export const useUserStats = () => {'
   const { user, isAuthenticated } = useAuth();
   const [stats, setStats] = useState<UserActivityStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,7 +22,7 @@ export const useUserStats = () => {
       const updatedStats = userStatsService.getUserStats(user.id);
       setStats(updatedStats);
     } catch (error) {
-      console.error('Failed to load user stats:', error);
+      console.error('Failed to load user stats: ', error);'
       setStats(null);
     } finally {
       setLoading(false);
@@ -57,7 +53,7 @@ export const useUserStats = () => {
   }, [user?.id, loadStats]);
 
   // 记录收藏操作
-  const recordBookmarkAction = useCallback((action: 'add' | 'remove', itemTitle: string) => {
+  const recordBookmarkAction = useCallback((action: 'add' | 'remove', itemTitle: string) => {'
     if (!user?.id) return;
 
     userStatsService.recordBookmarkAction(user.id, action, itemTitle);
@@ -65,21 +61,20 @@ export const useUserStats = () => {
   }, [user?.id, loadStats]);
 
   // 添加活动记录
-  const addActivity = useCallback((activity: Omit<ActivityItem, 'id' | 'timestamp'>) => {
+  const addActivity = useCallback((activity: Omit<ActivityItem, 'id' | 'timestamp'>) => {'
     if (!user?.id) return;
 
-    const fullActivity: ActivityItem = {
+    const fullActivity: ActivityItem  = {
       ...activity,
-      id: `activity_${Date.now()}`,
+      id: `activity_${Date.now()}`,`
       timestamp: new Date().toISOString()
     };
-
     userStatsService.addActivity(user.id, fullActivity);
     loadStats(); // 重新加载统计数据
   }, [user?.id, loadStats]);
 
   // 获取最近活动
-  const getRecentActivity = useCallback((): ActivityItem[] => {
+  const getRecentActivity = useCallback((): ActivityItem[]  => {
     if (!user?.id) return [];
     return userStatsService.getRecentActivity(user.id);
   }, [user?.id]);
@@ -93,13 +88,13 @@ export const useUserStats = () => {
   }, [user?.id, loadStats]);
 
   // 导出统计数据
-  const exportStats = useCallback((): string | null => {
+  const exportStats = useCallback((): string | null  => {
     if (!user?.id) return null;
     return userStatsService.exportUserStats(user.id);
   }, [user?.id]);
 
   // 导入统计数据
-  const importStats = useCallback((data: string): boolean => {
+  const importStats = useCallback((data: string): boolean  => {
     if (!user?.id) return false;
 
     const success = userStatsService.importUserStats(user.id, data);

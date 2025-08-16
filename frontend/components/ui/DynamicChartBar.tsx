@@ -1,7 +1,5 @@
 
-import React from 'react';
-
-interface DynamicChartBarProps {
+import React from 'react';interface DynamicChartBarProps   {'
   value: number;
   maxValue: number;
   maxHeight?: number;
@@ -14,8 +12,8 @@ export const DynamicChartBar: React.FC<DynamicChartBarProps> = ({
   value,
   maxValue,
   maxHeight = 80,
-  color = 'blue',
-  className = '',
+  color = 'blue','
+  className = '','
   animated = true
 }) => {
   
@@ -24,15 +22,15 @@ export const DynamicChartBar: React.FC<DynamicChartBarProps> = ({
     className: combinedClassName,
     style: computedStyle,
     disabled,
-    'aria-label': ariaLabel,
-    'data-testid': testId
+    "aria-label': ariaLabel,'
+    'data-testid': testId'
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
   const colorClasses = {
-    blue: 'bg-blue-500',
-    green: 'bg-green-500',
-    red: 'bg-red-500',
-    yellow: 'bg-yellow-500',
-    purple: 'bg-purple-500'
+    blue: 'bg-blue-500','
+    green: 'bg-green-500','
+    red: 'bg-red-500','
+    yellow: 'bg-yellow-500','
+    purple: 'bg-purple-500';
   };
 
   const heightPercentage = maxValue > 0 ? (value / maxValue) * 100 : 0;
@@ -40,13 +38,13 @@ export const DynamicChartBar: React.FC<DynamicChartBarProps> = ({
 
   return (
     <div
-      className={`chart-bar-dynamic rounded-t ${colorClasses[color]} ${
-        animated ? 'transition-all duration-300' : ''
-      } ${className}`}
-      style={{ height: `${heightPx}px` }}
-      title={`值: ${value.toFixed(2)}`}
-      role="img"
-      aria-label={`图表条: ${value.toFixed(2)}`}
+      className={`chart-bar-dynamic rounded-t ${colorClasses[color]} ${`}
+        animated ? "transition-all duration-300' : '';'`
+      } ${className}`}`
+      style={{ height: `${heightPx}px` }}`
+      title={`值: ${value.toFixed(2)}`}`
+      role= "img';'`
+      aria-label={`图表条: ${value.toFixed(2)}`}`
     />
   );
 };

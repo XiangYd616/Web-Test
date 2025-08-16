@@ -4,7 +4,7 @@ export class ChromeCompatibilityHelper {
    * 检测是否为Chrome浏览器
    */
   static isChrome(): boolean {
-    if (typeof navigator === 'undefined') return false;
+    if (typeof navigator === 'undefined') return false;'
     return /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
   }
 
@@ -12,7 +12,7 @@ export class ChromeCompatibilityHelper {
    * 检测是否为Edge浏览器
    */
   static isEdge(): boolean {
-    if (typeof navigator === 'undefined') return false;
+    if (typeof navigator === 'undefined') return false;'
     return /Edg/.test(navigator.userAgent);
   }
 
@@ -20,7 +20,7 @@ export class ChromeCompatibilityHelper {
    * 检测是否为Safari浏览器
    */
   static isSafari(): boolean {
-    if (typeof navigator === 'undefined') return false;
+    if (typeof navigator === 'undefined') return false;'
     return /Safari/.test(navigator.userAgent) && /Apple Computer/.test(navigator.vendor);
   }
 
@@ -28,7 +28,7 @@ export class ChromeCompatibilityHelper {
    * 检测是否为Firefox浏览器
    */
   static isFirefox(): boolean {
-    if (typeof navigator === 'undefined') return false;
+    if (typeof navigator === 'undefined') return false;'
     return /Firefox/.test(navigator.userAgent);
   }
 
@@ -41,8 +41,8 @@ export class ChromeCompatibilityHelper {
       isEdge: this.isEdge(),
       isSafari: this.isSafari(),
       isFirefox: this.isFirefox(),
-      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
-      vendor: typeof navigator !== 'undefined' ? navigator.vendor : ''
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '','
+      vendor: typeof navigator !== 'undefined' ? navigator.vendor : '';
     };
   }
 
@@ -51,8 +51,7 @@ export class ChromeCompatibilityHelper {
    */
   static checkCSSSupport() {
     // 安全检查CSS.supports是否可用
-    const supportsCSS = typeof CSS !== 'undefined' && CSS.supports;
-
+    const supportsCSS = typeof CSS !== 'undefined' && CSS.supports;'
     if (!supportsCSS) {
       
         // 如果CSS.supports不可用，返回默认值
@@ -68,13 +67,13 @@ export class ChromeCompatibilityHelper {
     }
 
     return {
-      backdropFilter: CSS.supports('backdrop-filter', 'blur(10px)') || CSS.supports('-webkit-backdrop-filter', 'blur(10px)'),
-      grid: CSS.supports('display', 'grid'),
-      flexbox: CSS.supports('display', 'flex'),
-      customProperties: CSS.supports('color', 'var(--test)'),
-      transforms: CSS.supports('transform', 'translateX(10px)'),
-      animations: CSS.supports('animation', 'test 1s'),
-      filters: CSS.supports('filter', 'blur(5px)')
+      backdropFilter: CSS.supports('backdrop-filter', 'blur(10px)') || CSS.supports('-webkit-backdrop-filter', 'blur(10px)'),'
+      grid: CSS.supports('display', 'grid'),'
+      flexbox: CSS.supports('display', 'flex'),'
+      customProperties: CSS.supports('color', 'var(--test)'),'
+      transforms: CSS.supports('transform', 'translateX(10px)'),'
+      animations: CSS.supports('animation', 'test 1s'),'
+      filters: CSS.supports('filter', 'blur(5px)')'
     };
   }
 
@@ -83,8 +82,7 @@ export class ChromeCompatibilityHelper {
    */
   static applyChromeCompatibilityFixes() {
     // 检查是否在浏览器环境中
-    if (typeof document === 'undefined' || typeof window === 'undefined') {
-      
+    if (typeof document === 'undefined' || typeof window === 'undefined') {'
         return;
       }
 
@@ -93,8 +91,7 @@ export class ChromeCompatibilityHelper {
     }
 
     // 添加Chrome特定的CSS类
-    document.documentElement.classList.add('chrome-browser');
-
+    document.documentElement.classList.add('chrome-browser');'
     // 修复backdrop-filter
     this.fixBackdropFilter();
 
@@ -107,15 +104,15 @@ export class ChromeCompatibilityHelper {
     // 修复颜色渲染
     this.fixColorRendering();
 
-    console.log('Chrome兼容性修复已应用');
+    console.log('Chrome兼容性修复已应用');'
   }
 
   /**
    * 修复backdrop-filter支持
    */
   private static fixBackdropFilter() {
-    const style = document.createElement('style');
-    style.textContent = `
+    const style = document.createElement('style');'
+    style.textContent = ``
       .chrome-browser .backdrop-blur-xl,
       .chrome-browser .backdrop-blur-lg,
       .chrome-browser .backdrop-blur-md,
@@ -123,7 +120,7 @@ export class ChromeCompatibilityHelper {
         -webkit-backdrop-filter: blur(24px) !important;
         backdrop-filter: blur(24px) !important;
       }
-    `;
+    `;`
     document.head.appendChild(style);
   }
 
@@ -131,8 +128,8 @@ export class ChromeCompatibilityHelper {
    * 修复Grid布局
    */
   private static fixGridLayout() {
-    const style = document.createElement('style');
-    style.textContent = `
+    const style = document.createElement("style');'`
+    style.textContent = ``
       .chrome-browser .grid {
         display: -ms-grid !important;
         display: grid !important;
@@ -157,7 +154,7 @@ export class ChromeCompatibilityHelper {
         gap: 0.5rem !important;
         grid-gap: 0.5rem !important;
       }
-    `;
+    `;`
     document.head.appendChild(style);
   }
 
@@ -165,8 +162,8 @@ export class ChromeCompatibilityHelper {
    * 修复Flexbox
    */
   private static fixFlexbox() {
-    const style = document.createElement('style');
-    style.textContent = `
+    const style = document.createElement("style');'`
+    style.textContent = ``
       .chrome-browser .flex {
         display: -webkit-box !important;
         display: -ms-flexbox !important;
@@ -191,7 +188,7 @@ export class ChromeCompatibilityHelper {
         -ms-flex-pack: justify !important;
         justify-content: space-between !important;
       }
-    `;
+    `;`
     document.head.appendChild(style);
   }
 
@@ -199,8 +196,8 @@ export class ChromeCompatibilityHelper {
    * 修复颜色渲染
    */
   private static fixColorRendering() {
-    const style = document.createElement('style');
-    style.textContent = `
+    const style = document.createElement("style');'`
+    style.textContent = ``
       .chrome-browser .border-green-500 {
         border-color: #10b981 !important;
       }
@@ -232,7 +229,7 @@ export class ChromeCompatibilityHelper {
       .chrome-browser .bg-purple-50 {
         background-color: rgba(139, 92, 246, 0.1) !important;
       }
-    `;
+    `;`
     document.head.appendChild(style);
   }
 
@@ -243,14 +240,13 @@ export class ChromeCompatibilityHelper {
     const browserInfo = this.getBrowserInfo();
     const cssSupport = this.checkCSSSupport();
 
-    const issues: string[] = [];
-
+    const issues: string[]  = [];
     if (browserInfo.isChrome) {
       if (!cssSupport.backdropFilter) {
-        issues.push('backdrop-filter不支持');
+        issues.push("backdrop-filter不支持');'`
       }
       if (!cssSupport.grid) {
-        issues.push('CSS Grid不支持');
+        issues.push('CSS Grid不支持');'
       }
     }
 
@@ -267,15 +263,14 @@ export class ChromeCompatibilityHelper {
    */
   static initialize() {
     // 检查是否在浏览器环境中
-    if (typeof document === 'undefined' || typeof window === 'undefined') {
-      
+    if (typeof document === 'undefined' || typeof window === 'undefined') {'
         return { browserInfo: {
       }, cssSupport: {}, issues: [] as string[], needsFixes: false };
     }
 
     // 等待DOM加载完成
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
+    if (document.readyState === 'loading') {'
+      document.addEventListener('DOMContentLoaded', () => {'
         this.applyChromeCompatibilityFixes();
       });
     } else {
@@ -286,7 +281,7 @@ export class ChromeCompatibilityHelper {
     const compatibility = this.detectCompatibilityIssues();
 
     if (compatibility.needsFixes) {
-      console.warn('检测到浏览器兼容性问题:', compatibility.issues);
+      console.warn('检测到浏览器兼容性问题:', compatibility.issues);'
     }
 
     return compatibility;
@@ -294,7 +289,7 @@ export class ChromeCompatibilityHelper {
 }
 
 // 自动初始化
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined') {'
   ChromeCompatibilityHelper.initialize();
 }
 

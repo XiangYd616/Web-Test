@@ -1,6 +1,6 @@
 // Electron API类型声明
 declare global {
-  interface Window {
+  interface Window   {
     electronAPI?: {
       // 应用信息
       getAppVersion: () => Promise<string>;
@@ -64,7 +64,7 @@ declare global {
 }
 
 // 本地压力测试配置接口
-interface LocalStressTestConfig {
+interface LocalStressTestConfig   {
   url: string;
   users: number;
   duration: number;
@@ -78,7 +78,7 @@ interface LocalStressTestConfig {
 }
 
 // 本地压力测试结果接口
-interface LocalStressTestResults {
+interface LocalStressTestResults   {
   totalRequests: number;
   successfulRequests: number;
   failedRequests: number;
@@ -98,7 +98,7 @@ interface LocalStressTestResults {
 }
 
 // 系统使用情况接口
-interface SystemUsage {
+interface SystemUsage   {
   memory: {
     used: number;
     total: number;

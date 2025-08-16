@@ -3,21 +3,21 @@
  * 管理与后端的实时数据通信
  */
 
-export interface WebSocketMessage {
+export interface WebSocketMessage     {
   type: string;
   data: any;
   timestamp: number;
   id?: string;
 }
 
-export interface WebSocketConfig {
+export interface WebSocketConfig     {
   url: string;
   reconnectInterval: number;
   maxReconnectAttempts: number;
   heartbeatInterval: number;
 }
 
-export interface WebSocketEventHandlers {
+export interface WebSocketEventHandlers     {
   onOpen?: (event: Event) => void;
   onMessage?: (message: WebSocketMessage) => void;
   onClose?: (event: CloseEvent) => void;
@@ -37,7 +37,7 @@ class WebSocketService {
 
   constructor(config?: Partial<WebSocketConfig>) {
     this.config = {
-      url: process.env.REACT_APP_WS_URL || 'ws://localhost:3001/ws',
+      url: process.env.REACT_APP_WS_URL || 'ws://localhost:3001/ws','
       reconnectInterval: 5000,
       maxReconnectAttempts: 5,
       heartbeatInterval: 30000,
@@ -58,7 +58,7 @@ class WebSocketService {
 
       if (this.isConnecting) {
         
-        reject(new Error('Connection already in progress'));
+        reject(new Error('Connection already in progress'));'
         return;
       }
 
@@ -82,12 +82,12 @@ class WebSocketService {
 
         this.ws.onmessage = (event) => {
           try {
-            const message: WebSocketMessage = JSON.parse(event.data);
+            const message: WebSocketMessage  = JSON.parse(event.data);
             if (this.handlers.onMessage) {
               this.handlers.onMessage(message);
             }
           } catch (error) {
-            console.error('Failed to parse WebSocket message:', error);
+            console.error('Failed to parse WebSocket message: ', error);'
           }
         };
 
@@ -112,7 +112,7 @@ class WebSocketService {
             this.handlers.onError(event);
           }
           
-          reject(new Error('WebSocket connection failed'));
+          reject(new Error('WebSocket connection failed'));'
         };
 
       } catch (error) {
@@ -134,7 +134,7 @@ class WebSocketService {
     this.stopHeartbeat();
 
     if (this.ws) {
-      this.ws.close(1000, 'Client disconnect');
+      this.ws.close(1000, 'Client disconnect');'
       this.ws = null;
     }
 
@@ -144,13 +144,12 @@ class WebSocketService {
   /**
    * 发送消息
    */
-  send(message: Omit<WebSocketMessage, 'timestamp' | 'id'>): void {
-    const fullMessage: WebSocketMessage = {
+  send(message: Omit<WebSocketMessage, 'timestamp' | 'id'>): void {'
+    const fullMessage: WebSocketMessage  = {
       ...message,
       timestamp: Date.now(),
       id: this.generateMessageId()
     };
-
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(fullMessage));
     } else {
@@ -223,7 +222,7 @@ class WebSocketService {
     this.heartbeatTimer = setInterval(() => {
       if (this.isConnected()) {
         this.send({
-          type: 'ping',
+          type: 'ping','
           data: { timestamp: Date.now() }
         });
       }
@@ -256,7 +255,7 @@ class WebSocketService {
    * 生成消息ID
    */
   private generateMessageId(): string {
-    return `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    return `msg_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;`
   }
 }
 

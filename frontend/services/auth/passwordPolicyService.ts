@@ -1,5 +1,4 @@
-import { handleAsyncError } from '../utils/errorHandler';
-/**
+import { handleAsyncError    } from '../utils/errorHandler';/**'
  * 密码策略和安全验证服务
  * 提供密码强度检查、安全问题、账户锁定等功能
  * 版本: v1.0.0
@@ -8,7 +7,7 @@ import { handleAsyncError } from '../utils/errorHandler';
 
 // ==================== 类型定义 ====================
 
-export interface PasswordPolicy {
+export interface PasswordPolicy     {
   minLength: number;
   maxLength: number;
   requireUppercase: boolean;
@@ -24,7 +23,7 @@ export interface PasswordPolicy {
   expiryDays: number; // 密码过期天数，0表示不过期
 }
 
-export interface PasswordStrength {
+export interface PasswordStrength     {
   score: number; // 0-100
   level: 'very_weak' | 'weak' | 'fair' | 'good' | 'strong' | 'very_strong';
   feedback: string[];
@@ -34,14 +33,14 @@ export interface PasswordStrength {
   entropy: number;
 }
 
-export interface SecurityQuestion {
+export interface SecurityQuestion     {
   id: string;
   question: string;
   category: 'personal' | 'preference' | 'history' | 'custom';
   isActive: boolean;
 }
 
-export interface UserSecurityQuestions {
+export interface UserSecurityQuestions     {
   userId: string;
   questions: Array<{
     questionId: string;
@@ -54,7 +53,7 @@ export interface UserSecurityQuestions {
   updatedAt: string;
 }
 
-export interface AccountLockInfo {
+export interface AccountLockInfo     {
   userId: string;
   isLocked: boolean;
   lockReason: 'failed_login' | 'failed_mfa' | 'suspicious_activity' | 'admin_lock' | 'password_expired';
@@ -66,7 +65,7 @@ export interface AccountLockInfo {
   metadata?: Record<string, any>;
 }
 
-export interface LoginAttempt {
+export interface LoginAttempt     {
   userId: string;
   timestamp: string;
   success: boolean;
@@ -79,7 +78,7 @@ export interface LoginAttempt {
   };
 }
 
-export interface PasswordValidationResult {
+export interface PasswordValidationResult     {
   isValid: boolean;
   strength: PasswordStrength;
   violations: string[];
@@ -90,26 +89,25 @@ export interface PasswordValidationResult {
 
 class PasswordAnalyzer {
   private static readonly COMMON_PASSWORDS = [
-    'password', '123456', '123456789', 'qwerty', 'abc123', 'password123',
-    'admin', 'letmein', 'welcome', 'monkey', '1234567890', 'password1',
-    'qwerty123', 'admin123', '123123', 'welcome123', 'password!', 'qwertyuiop'
+    'password', '123456', '123456789', 'qwerty', 'abc123', 'password123','
+    'admin', 'letmein', 'welcome', 'monkey', '1234567890', 'password1','
+    'qwerty123', 'admin123', '123123', 'welcome123', 'password!', 'qwertyuiop';
   ];
 
   private static readonly SEQUENTIAL_PATTERNS = [
-    'abcdefghijklmnopqrstuvwxyz',
-    'qwertyuiopasdfghjklzxcvbnm',
-    '1234567890',
-    '0987654321'
+    'abcdefghijklmnopqrstuvwxyz','
+    'qwertyuiopasdfghjklzxcvbnm','
+    '1234567890','
+    '0987654321';
   ];
 
   /**
    * 分析密码强度
    */
   static analyzePassword(password: string, userInfo?: { email?: string; username?: string; name?: string }): PasswordStrength {
-    const feedback: string[] = [];
-    const warnings: string[] = [];
-    const suggestions: string[] = [];
-
+    const feedback: string[]  = [];
+    const warnings: string[]  = [];
+    const suggestions: string[]  = [];
     let score = 0;
     let entropy = 0;
 
@@ -117,57 +115,56 @@ class PasswordAnalyzer {
     if (password.length >= 8) {
       score += 20;
     } else {
-      warnings.push('密码长度不足8位');
-      suggestions.push('使用至少8个字符');
+      warnings.push('密码长度不足8位');'
+      suggestions.push('使用至少8个字符');'
     }
 
     if (password.length >= 12) {
       score += 10;
-      feedback.push('密码长度良好');
+      feedback.push('密码长度良好');'
     }
 
     if (password.length >= 16) {
       score += 10;
-      feedback.push('密码长度优秀');
+      feedback.push('密码长度优秀');'
     }
 
     // 字符类型检查
     const hasLowercase = /[a-z]/.test(password);
     const hasUppercase = /[A-Z]/.test(password);
     const hasNumbers = /\d/.test(password);
-    const hasSpecialChars = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
-
+    const hasSpecialChars = /[!@#$%^&*()_+\-=\[\]{};':'\\|,.<>\/?]/.test(password);'
     let charsetSize = 0;
     if (hasLowercase) {
       score += 10;
       charsetSize += 26;
-      feedback.push('包含小写字母');
+      feedback.push('包含小写字母');'
     } else {
-      suggestions.push('添加小写字母');
+      suggestions.push('添加小写字母');'
     }
 
     if (hasUppercase) {
       score += 10;
       charsetSize += 26;
-      feedback.push('包含大写字母');
+      feedback.push('包含大写字母');'
     } else {
-      suggestions.push('添加大写字母');
+      suggestions.push('添加大写字母');'
     }
 
     if (hasNumbers) {
       score += 10;
       charsetSize += 10;
-      feedback.push('包含数字');
+      feedback.push('包含数字');'
     } else {
-      suggestions.push('添加数字');
+      suggestions.push('添加数字');'
     }
 
     if (hasSpecialChars) {
       score += 15;
       charsetSize += 32;
-      feedback.push('包含特殊字符');
+      feedback.push('包含特殊字符');'
     } else {
-      suggestions.push('添加特殊字符 (!@#$%^&* 等)');
+      suggestions.push('添加特殊字符 (!@#$%^&* 等)');'
     }
 
     // 计算熵值
@@ -178,23 +175,23 @@ class PasswordAnalyzer {
     // 常见密码检查
     if (this.COMMON_PASSWORDS.includes(password.toLowerCase())) {
       score -= 30;
-      warnings.push('这是一个常见密码');
-      suggestions.push('避免使用常见密码');
+      warnings.push('这是一个常见密码');'
+      suggestions.push('避免使用常见密码');'
     }
 
     // 重复字符检查
     const repeatingPattern = this.findRepeatingPattern(password);
     if (repeatingPattern.length > 3) {
       score -= 15;
-      warnings.push('包含重复字符模式');
-      suggestions.push('避免重复字符');
+      warnings.push('包含重复字符模式');'
+      suggestions.push('避免重复字符');'
     }
 
     // 顺序字符检查
     if (this.hasSequentialChars(password)) {
       score -= 10;
-      warnings.push('包含顺序字符');
-      suggestions.push('避免使用键盘顺序或字母顺序');
+      warnings.push('包含顺序字符');'
+      suggestions.push('避免使用键盘顺序或字母顺序');'
     }
 
     // 个人信息检查
@@ -206,8 +203,8 @@ class PasswordAnalyzer {
       for (const info of personalInfo) {
         if (password.toLowerCase().includes(info)) {
           score -= 20;
-          warnings.push('包含个人信息');
-          suggestions.push('避免使用个人信息作为密码');
+          warnings.push('包含个人信息');'
+          suggestions.push('避免使用个人信息作为密码');'
           break;
         }
       }
@@ -217,14 +214,13 @@ class PasswordAnalyzer {
     score = Math.max(0, Math.min(100, score));
 
     // 确定强度等级
-    let level: PasswordStrength['level'];
+    let level: PasswordStrength['level'];'
     if (score < 20) level = 'very_weak';
     else if (score < 40) level = 'weak';
     else if (score < 60) level = 'fair';
     else if (score < 80) level = 'good';
     else if (score < 95) level = 'strong';
     else level = 'very_strong';
-
     // 估算破解时间
     const estimatedCrackTime = this.estimateCrackTime(entropy);
 
@@ -244,11 +240,10 @@ class PasswordAnalyzer {
    */
   private static findRepeatingPattern(password: string): string {
     let longestPattern = '';
-
     for (let i = 0; i < password.length; i++) {
       for (let j = i + 1; j <= password.length; j++) {
         const pattern = password.slice(i, j);
-        const regex = new RegExp(pattern, 'g');
+        const regex = new RegExp(pattern, 'g');'
         const matches = password.match(regex);
 
         if (matches && matches.length > 1 && pattern.length > longestPattern.length) {
@@ -269,8 +264,7 @@ class PasswordAnalyzer {
     for (const pattern of this.SEQUENTIAL_PATTERNS) {
       for (let i = 0; i <= pattern.length - 3; i++) {
         const sequence = pattern.slice(i, i + 3);
-        const reverseSequence = sequence.split('').reverse().join('');
-
+        const reverseSequence = sequence.split('').reverse().join('');'
         if (lowerPassword.includes(sequence) || lowerPassword.includes(reverseSequence)) {
           return true;
         }
@@ -291,12 +285,12 @@ class PasswordAnalyzer {
     const seconds = averageAttempts / attemptsPerSecond;
 
     if (seconds < 1) return '瞬间';
-    if (seconds < 60) return `${Math.round(seconds)}秒`;
-    if (seconds < 3600) return `${Math.round(seconds / 60)}分钟`;
-    if (seconds < 86400) return `${Math.round(seconds / 3600)}小时`;
-    if (seconds < 31536000) return `${Math.round(seconds / 86400)}天`;
-    if (seconds < 31536000000) return `${Math.round(seconds / 31536000)}年`;
-    return '数千年';
+    if (seconds < 60) return `${Math.round(seconds)}秒`;`
+    if (seconds < 3600) return `${Math.round(seconds / 60)}分钟`;`
+    if (seconds < 86400) return `${Math.round(seconds / 3600)}小时`;`
+    if (seconds < 31536000) return `${Math.round(seconds / 86400)}天`;`
+    if (seconds < 31536000000) return `${Math.round(seconds / 31536000)}年`;`
+    return "数千年';'`
   }
 }
 
@@ -341,41 +335,40 @@ export class PasswordPolicyService {
     userInfo?: { email?: string; username?: string; name?: string },
     userId?: string
   ): PasswordValidationResult {
-    const violations: string[] = [];
-    const suggestions: string[] = [];
-
+    const violations: string[]  = [];
+    const suggestions: string[]  = [];
     // 长度检查
     if (password.length < this.policy.minLength) {
-      violations.push(`密码长度不能少于${this.policy.minLength}位`);
+      violations.push(`密码长度不能少于${this.policy.minLength}位`);`
     }
 
     if (password.length > this.policy.maxLength) {
-      violations.push(`密码长度不能超过${this.policy.maxLength}位`);
+      violations.push(`密码长度不能超过${this.policy.maxLength}位`);`
     }
 
     // 字符类型检查
     if (this.policy.requireUppercase && !/[A-Z]/.test(password)) {
-      violations.push('密码必须包含大写字母');
+      violations.push("密码必须包含大写字母');'`
     }
 
     if (this.policy.requireLowercase && !/[a-z]/.test(password)) {
-      violations.push('密码必须包含小写字母');
+      violations.push('密码必须包含小写字母');'
     }
 
     if (this.policy.requireNumbers && !/\d/.test(password)) {
-      violations.push('密码必须包含数字');
+      violations.push('密码必须包含数字');'
     }
 
-    if (this.policy.requireSpecialChars && !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-      violations.push('密码必须包含特殊字符');
+    if (this.policy.requireSpecialChars && !/[!@#$%^&*()_+\-=\[\]{};':'\\|,.<>\/?]/.test(password)) {'
+      violations.push('密码必须包含特殊字符');'
     }
 
     // 常见密码检查
     if (this.policy.forbidCommonPasswords) {
       // 这里可以集成更完整的常见密码库
-      const commonPasswords = ['password', '123456', 'qwerty', 'admin'];
+      const commonPasswords = ['password', '123456', 'qwerty', 'admin'];'
       if (commonPasswords.includes(password.toLowerCase())) {
-        violations.push('不能使用常见密码');
+        violations.push('不能使用常见密码');'
       }
     }
 
@@ -387,7 +380,7 @@ export class PasswordPolicyService {
 
       for (const info of personalInfo) {
         if (password.toLowerCase().includes(info)) {
-          violations.push('密码不能包含个人信息');
+          violations.push('密码不能包含个人信息');'
           break;
         }
       }
@@ -397,13 +390,13 @@ export class PasswordPolicyService {
     if (this.policy.forbidRepeatingChars) {
       const repeatingPattern = this.findLongestRepeatingChar(password);
       if (repeatingPattern.length > this.policy.maxRepeatingChars) {
-        violations.push(`不能包含超过${this.policy.maxRepeatingChars}个重复字符`);
+        violations.push(`不能包含超过${this.policy.maxRepeatingChars}个重复字符`);`
       }
     }
 
     // 顺序字符检查
     if (this.policy.forbidSequentialChars && this.hasSequentialChars(password)) {
-      violations.push('不能包含顺序字符（如abc、123）');
+      violations.push("不能包含顺序字符（如abc、123）');'`
     }
 
     // 密码历史检查
@@ -412,7 +405,7 @@ export class PasswordPolicyService {
       const passwordHash = this.hashPassword(password);
 
       if (history.includes(passwordHash)) {
-        violations.push(`不能重复使用最近${this.policy.passwordHistory}个密码`);
+        violations.push(`不能重复使用最近${this.policy.passwordHistory}个密码`);`
       }
     }
 
@@ -420,8 +413,8 @@ export class PasswordPolicyService {
     const strength = PasswordAnalyzer.analyzePassword(password, userInfo);
 
     // 根据强度等级添加建议
-    if (strength.level === 'very_weak' || strength.level === 'weak') {
-      suggestions.push('建议使用更强的密码');
+    if (strength.level === "very_weak' || strength.level === 'weak') {'`
+      suggestions.push('建议使用更强的密码');'
     }
 
     return {
@@ -462,7 +455,7 @@ export class PasswordPolicyService {
     userAgent: string,
     failureReason?: string
   ): void {
-    const attempt: LoginAttempt = {
+    const attempt: LoginAttempt  = {
       userId,
       timestamp: new Date().toISOString(),
       success,
@@ -470,7 +463,6 @@ export class PasswordPolicyService {
       userAgent,
       failureReason
     };
-
     const attempts = this.loginAttempts.get(userId) || [];
     attempts.unshift(attempt);
 
@@ -504,7 +496,7 @@ export class PasswordPolicyService {
     const lockDuration = 30 * 60; // 锁定30分钟
 
     if (recentFailures.length >= maxAttempts) {
-      this.lockAccount(userId, 'failed_login', lockDuration, {
+      this.lockAccount(userId, 'failed_login', lockDuration, {'
         failedAttempts: recentFailures.length,
         lastFailureTime: recentFailures[0].timestamp
       });
@@ -516,11 +508,11 @@ export class PasswordPolicyService {
    */
   lockAccount(
     userId: string,
-    reason: AccountLockInfo['lockReason'],
+    reason: AccountLockInfo['lockReason'],'
     duration: number,
     metadata?: Record<string, any>
   ): void {
-    const lockInfo: AccountLockInfo = {
+    const lockInfo: AccountLockInfo  = {
       userId,
       isLocked: true,
       lockReason: reason,
@@ -531,11 +523,10 @@ export class PasswordPolicyService {
       lockDuration: duration,
       metadata
     };
-
     this.accountLocks.set(userId, lockInfo);
 
     // 缓存锁定信息
-    defaultMemoryCache.set(`account_lock_${userId}`, lockInfo, undefined, duration * 1000);
+    defaultMemoryCache.set(`account_lock_${userId}`, lockInfo, undefined, duration * 1000);`
   }
 
   /**
@@ -543,7 +534,7 @@ export class PasswordPolicyService {
    */
   unlockAccount(userId: string): void {
     this.accountLocks.delete(userId);
-    defaultMemoryCache.delete(`account_lock_${userId}`);
+    defaultMemoryCache.delete(`account_lock_${userId}`);`
   }
 
   /**
@@ -556,9 +547,9 @@ export class PasswordPolicyService {
     // 如果内存中没有，检查缓存
     if (!lockInfo) {
       lockInfo = try {
-  await defaultMemoryCache.get(`account_lock_${userId}`);
+  await defaultMemoryCache.get(`account_lock_${userId}`);`
 } catch (error) {
-  console.error('Await error:', error);
+  console.error("Await error: ', error);'`
   throw error;
 }
     }
@@ -592,14 +583,14 @@ export class PasswordPolicyService {
    */
   private initializeSecurityQuestions(): void {
     this.securityQuestions = [
-      { id: 'q1', question: '您的第一只宠物叫什么名字？', category: 'personal', isActive: true },
-      { id: 'q2', question: '您母亲的娘家姓是什么？', category: 'personal', isActive: true },
-      { id: 'q3', question: '您出生的城市是哪里？', category: 'personal', isActive: true },
-      { id: 'q4', question: '您最喜欢的电影是什么？', category: 'preference', isActive: true },
-      { id: 'q5', question: '您小学最好朋友的名字是什么？', category: 'history', isActive: true },
-      { id: 'q6', question: '您第一份工作的公司名称是什么？', category: 'history', isActive: true },
-      { id: 'q7', question: '您最喜欢的食物是什么？', category: 'preference', isActive: true },
-      { id: 'q8', question: '您的第一辆车是什么品牌？', category: 'history', isActive: true }
+      { id: 'q1', question: '您的第一只宠物叫什么名字？', category: 'personal', isActive: true },'
+      { id: 'q2', question: '您母亲的娘家姓是什么？', category: 'personal', isActive: true },'
+      { id: 'q3', question: '您出生的城市是哪里？', category: 'personal', isActive: true },'
+      { id: 'q4', question: '您最喜欢的电影是什么？', category: 'preference', isActive: true },'
+      { id: 'q5', question: '您小学最好朋友的名字是什么？', category: 'history', isActive: true },'
+      { id: 'q6', question: '您第一份工作的公司名称是什么？', category: 'history', isActive: true },'
+      { id: 'q7', question: '您最喜欢的食物是什么？', category: 'preference', isActive: true },'
+      { id: 'q8', question: '您的第一辆车是什么品牌？', category: 'history', isActive: true }'
     ];
   }
 
@@ -617,25 +608,24 @@ export class PasswordPolicyService {
     userId: string,
     questions: Array<{ questionId: string; answer: string }>
   ): Promise<void> {
-    const userQuestions: UserSecurityQuestions = {
+    const userQuestions: UserSecurityQuestions  = {
       userId,
       questions: questions.map(q => ({
         questionId: q.questionId,
-        question: this.securityQuestions.find(sq => sq.id === q.questionId)?.question || '',
+        question: this.securityQuestions.find(sq => sq.id === q.questionId)?.question || "','
         answerHash: this.hashPassword(q.answer.toLowerCase().trim()),
         createdAt: new Date().toISOString()
       })),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-
     this.userSecurityQuestions.set(userId, userQuestions);
 
     // 缓存用户安全问题
     try {
-  await defaultMemoryCache.set(`security_questions_${userId}`, userQuestions, undefined, 24 * 60 * 60 * 1000);
+  await defaultMemoryCache.set(`security_questions_${userId}`, userQuestions, undefined, 24 * 60 * 60 * 1000);`
 } catch (error) {
-  console.error('Await error:', error);
+  console.error("Await error: ', error);'`
   throw error;
 }
   }
@@ -649,9 +639,9 @@ export class PasswordPolicyService {
   ): Promise<boolean> {
     const userQuestions = this.userSecurityQuestions.get(userId) ||
       try {
-  await defaultMemoryCache.get(`security_questions_${userId}`);
+  await defaultMemoryCache.get(`security_questions_${userId}`);`
 } catch (error) {
-  console.error('Await error:', error);
+  console.error("Await error: ', error);'`
   throw error;
 }
 
@@ -690,7 +680,6 @@ export class PasswordPolicyService {
   private findLongestRepeatingChar(password: string): string {
     let longest = '';
     let current = '';
-
     for (let i = 0; i < password.length; i++) {
       if (i === 0 || password[i] === password[i - 1]) {
         current += password[i];
@@ -713,13 +702,11 @@ export class PasswordPolicyService {
    * 检查顺序字符
    */
   private hasSequentialChars(password: string): boolean {
-    const sequences = ['abcdefghijklmnopqrstuvwxyz', '1234567890', 'qwertyuiop'];
-
+    const sequences = ['abcdefghijklmnopqrstuvwxyz', '1234567890', 'qwertyuiop'];'
     for (const sequence of sequences) {
       for (let i = 0; i <= sequence.length - 3; i++) {
         const subseq = sequence.slice(i, i + 3);
-        const reverseSubseq = subseq.split('').reverse().join('');
-
+        const reverseSubseq = subseq.split('').reverse().join('');'
         if (password.toLowerCase().includes(subseq) ||
           password.toLowerCase().includes(reverseSubseq)) {
           return true;

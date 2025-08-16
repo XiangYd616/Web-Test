@@ -3,14 +3,14 @@
  */
 
 // 简单的类型定义和导出
-export interface ButtonProps {
+export interface ButtonProps     {
   children?: React.ReactNode;
   onClick?: () => void;
   disabled?: boolean;
   className?: string;
 }
 
-export interface InputProps {
+export interface InputProps     {
   value?: string;
   onChange?: (value: string) => void;
   placeholder?: string;

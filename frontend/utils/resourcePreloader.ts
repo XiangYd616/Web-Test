@@ -3,7 +3,7 @@
  * 智能预加载关键资源
  */
 
-export interface PreloadOptions {
+export interface PreloadOptions     {
   priority?: 'high' | 'medium' | 'low';
   crossOrigin?: 'anonymous' | 'use-credentials';
   as?: 'script' | 'style' | 'image' | 'font' | 'fetch';
@@ -25,7 +25,7 @@ class ResourcePreloader {
         return;
       }
 
-      const link = document.createElement('link');
+      const link = document.createElement('link');'
       link.rel = 'preload';
       link.href = url;
 
@@ -39,7 +39,7 @@ class ResourcePreloader {
       };
 
       link.onerror = () => {
-        reject(new Error(`Failed to preload: ${url}`));
+        reject(new Error(`Failed to preload: ${url}`));`
       };
 
       document.head.appendChild(link);
@@ -64,7 +64,7 @@ class ResourcePreloader {
         resolve(img);
       };
       img.onerror = () => {
-        reject(new Error(`Failed to preload image: ${src}`));
+        reject(new Error(`Failed to preload image: ${src}`));`
       };
       img.src = src;
     });
@@ -73,11 +73,11 @@ class ResourcePreloader {
   /**
    * 预加载字体
    */
-  preloadFont(url: string, format: string = 'woff2'): Promise<void> {
+  preloadFont(url: string, format: string = "woff2'): Promise<void> {'`
     return this.preload(url, {
-      as: 'font',
-      type: `font/${format}`,
-      crossOrigin: 'anonymous'
+      as: 'font','
+      type: `font/${format}`,`
+      crossOrigin: "anonymous';'`
     });
   }
 
@@ -85,23 +85,22 @@ class ResourcePreloader {
    * 预加载脚本
    */
   preloadScript(url: string): Promise<void> {
-    return this.preload(url, { as: 'script' });
+    return this.preload(url, { as: 'script' });'
   }
 
   /**
    * 预加载样式表
    */
   preloadStylesheet(url: string): Promise<void> {
-    return this.preload(url, { as: 'style' });
+    return this.preload(url, { as: 'style' });'
   }
 
   /**
    * 批量预加载资源
    */
   async preloadBatch(resources: Array<{ url: string; options?: PreloadOptions }>): Promise<void> {
-    const promises = resources.map(({ url, options }) =>
-      this.preload(url, options).catch(error => {
-        console.warn(`Failed to preload ${url}:`, error);
+    const promises = resources.map(({ url, options }) => this.preload(url, options).catch(error => {
+        console.warn(`Failed to preload ${url}:`, error);`
       })
     );
 
@@ -111,22 +110,22 @@ class ResourcePreloader {
   /**
    * 智能预加载（基于用户行为）
    */
-  smartPreload(urls: string[], userBehavior: 'hover' | 'idle' | 'visible'): void {
+  smartPreload(urls: string[], userBehavior: "hover' | 'idle' | 'visible'): void {'`
     switch (userBehavior) {
-      case 'hover':
+      case 'hover': ''
         // 鼠标悬停时预加载
-        document.addEventListener('mouseover', (e) => {
+        document.addEventListener('mouseover', (e) => {'
           const target = e.target as HTMLElement;
-          const href = target.getAttribute('href');
+          const href = target.getAttribute('href');'
           if (href && urls.includes(href)) {
             this.preload(href);
           }
         });
         break;
 
-      case 'idle':
+      case 'idle': ''
         // 浏览器空闲时预加载
-        if ('requestIdleCallback' in window) {
+        if ('requestIdleCallback' in window) {'
           requestIdleCallback(() => {
             this.preloadBatch(urls.map(url => ({ url })));
           });
@@ -137,13 +136,13 @@ class ResourcePreloader {
         }
         break;
 
-      case 'visible':
+      case 'visible': ''
         // 元素可见时预加载
         const observer = new IntersectionObserver((entries) => {
           entries.forEach(entry => {
             if (entry.isIntersecting) {
               const element = entry.target as HTMLElement;
-              const src = element.getAttribute('data-preload-src');
+              const src = element.getAttribute('data-preload-src');'
               if (src) {
                 this.preload(src);
                 observer.unobserve(element);
@@ -153,7 +152,7 @@ class ResourcePreloader {
         });
 
         // 观察所有带有 data-preload-src 属性的元素
-        document.querySelectorAll('[data-preload-src]').forEach(el => {
+        document.querySelectorAll('[data-preload-src]').forEach(el => {'
           observer.observe(el);
         });
         break;

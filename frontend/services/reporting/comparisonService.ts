@@ -3,7 +3,7 @@
  * 提供测试结果比较、性能对比、趋势分析功能
  */
 
-export interface ComparisonResult {
+export interface ComparisonResult     {
   test1: TestResult;
   test2: TestResult;
   comparison: {
@@ -15,7 +15,7 @@ export interface ComparisonResult {
   summary: ComparisonSummary;
 }
 
-export interface TestResult {
+export interface TestResult     {
   id: string;
   url: string;
   testType: string;
@@ -24,14 +24,14 @@ export interface TestResult {
   status: string;
 }
 
-export interface MetricComparison {
+export interface MetricComparison     {
   before: number;
   after: number;
   change: number;
   changeType: 'improvement' | 'regression' | 'unchanged';
 }
 
-export interface ComparisonSummary {
+export interface ComparisonSummary     {
   totalMetrics: number;
   improvements: number;
   regressions: number;
@@ -39,13 +39,13 @@ export interface ComparisonSummary {
   overallTrend: 'improved' | 'regressed' | 'stable';
 }
 
-export interface TrendAnalysis {
+export interface TrendAnalysis     {
   trends: Record<string, TrendData>;
   analysis: TrendInsight[];
   recommendations: Recommendation[];
 }
 
-export interface TrendData {
+export interface TrendData     {
   direction: 'increasing' | 'decreasing' | 'stable';
   slope: number;
   average: number;
@@ -54,14 +54,14 @@ export interface TrendData {
   variance: number;
 }
 
-export interface TrendInsight {
+export interface TrendInsight     {
   metric: string;
   direction: string;
   severity: 'high' | 'medium' | 'low';
   description: string;
 }
 
-export interface Recommendation {
+export interface Recommendation     {
   metric: string;
   priority: 'high' | 'medium' | 'low';
   recommendation: string;
@@ -77,12 +77,12 @@ class ComparisonService {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
   }
-  private baseUrl = '/api/comparison';
+  private baseUrl = "/api/comparison';'`
   private cache = new Map<string, any>();
   private cacheTimeout = 5 * 60 * 1000; // 5分钟缓存
 
@@ -91,10 +91,10 @@ class ComparisonService {
    */
   async compareTestResults(testId1: string, testId2: string): Promise<ComparisonResult> {
     try {
-      const response = await fetch(`${this.baseUrl}/compare`, {
-        method: 'POST',
+      const response = await fetch(`${this.baseUrl}/compare`, {`
+        method: "POST','`
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json';
         },
         body: JSON.stringify({ testId1, testId2 })
       });
@@ -102,12 +102,12 @@ class ComparisonService {
       const data = await response.json();
 
       if (!data.success) {
-        throw new Error(data.error || '比较测试结果失败');
+        throw new Error(data.error || '比较测试结果失败');'
       }
 
       return data.data;
     } catch (error) {
-      console.error('比较测试结果失败:', error);
+      console.error('比较测试结果失败:', error);'
       throw error;
     }
   }
@@ -122,10 +122,10 @@ class ComparisonService {
     summary: any;
   }> {
     try {
-      const response = await fetch(`${this.baseUrl}/batch-compare`, {
-        method: 'POST',
+      const response = await fetch(`${this.baseUrl}/batch-compare`, {`
+        method: "POST','`
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json';
         },
         body: JSON.stringify({ testIds })
       });
@@ -133,12 +133,12 @@ class ComparisonService {
       const data = await response.json();
 
       if (!data.success) {
-        throw new Error(data.error || '批量比较测试结果失败');
+        throw new Error(data.error || '批量比较测试结果失败');'
       }
 
       return data.data;
     } catch (error) {
-      console.error('批量比较测试结果失败:', error);
+      console.error("批量比较测试结果失败:', error);'
       throw error;
     }
   }
@@ -151,7 +151,7 @@ class ComparisonService {
     url: string,
     timeRange: number = 30
   ): Promise<TrendAnalysis> {
-    const cacheKey = `trends-${testType}-${url}-${timeRange}`;
+    const cacheKey = `trends-${testType}-${url}-${timeRange}`;`
     
     // 检查缓存
     if (this.cache.has(cacheKey)) {
@@ -168,11 +168,11 @@ class ComparisonService {
         timeRange: timeRange.toString()
       });
 
-      const response = await fetch(`${this.baseUrl}/trends?${params}`);
+      const response = await fetch(`${this.baseUrl}/trends?${params}`);`
       const data = await response.json();
 
       if (!data.success) {
-        throw new Error(data.error || '性能趋势分析失败');
+        throw new Error(data.error || "性能趋势分析失败');'`
       }
 
       const trends = data.data;
@@ -185,7 +185,7 @@ class ComparisonService {
 
       return trends;
     } catch (error) {
-      console.error('性能趋势分析失败:', error);
+      console.error('性能趋势分析失败:', error);'
       throw error;
     }
   }
@@ -206,16 +206,16 @@ class ComparisonService {
         limit: pagination.limit.toString()
       });
 
-      const response = await fetch(`${this.baseUrl}/history?${params}`);
+      const response = await fetch(`${this.baseUrl}/history?${params}`);`
       const data = await response.json();
 
       if (!data.success) {
-        throw new Error(data.error || '获取比较历史失败');
+        throw new Error(data.error || "获取比较历史失败');'`
       }
 
       return data.data;
     } catch (error) {
-      console.error('获取比较历史失败:', error);
+      console.error("获取比较历史失败:', error);'
       throw error;
     }
   }
@@ -232,10 +232,10 @@ class ComparisonService {
     }
   ): Promise<{ id: string }> {
     try {
-      const response = await fetch(`${this.baseUrl}/save`, {
-        method: 'POST',
+      const response = await fetch(`${this.baseUrl}/save`, {`
+        method: "POST','`
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json';
         },
         body: JSON.stringify(comparisonData)
       });
@@ -243,12 +243,12 @@ class ComparisonService {
       const data = await response.json();
 
       if (!data.success) {
-        throw new Error(data.error || '保存比较结果失败');
+        throw new Error(data.error || '保存比较结果失败');'
       }
 
       return data.data;
     } catch (error) {
-      console.error('保存比较结果失败:', error);
+      console.error('保存比较结果失败:', error);'
       throw error;
     }
   }
@@ -258,20 +258,20 @@ class ComparisonService {
    */
   async deleteComparison(comparisonId: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/${comparisonId}`, {
-        method: 'DELETE'
+      const response = await fetch(`${this.baseUrl}/${comparisonId}`, {`
+        method: "DELETE';'`
       });
 
       const data = await response.json();
 
       if (!data.success) {
-        throw new Error(data.error || '删除比较结果失败');
+        throw new Error(data.error || '删除比较结果失败');'
       }
 
       // 清除相关缓存
       this.clearCache();
     } catch (error) {
-      console.error('删除比较结果失败:', error);
+      console.error('删除比较结果失败:', error);'
       throw error;
     }
   }
@@ -281,13 +281,13 @@ class ComparisonService {
    */
   async exportComparison(
     comparisonId: string,
-    format: 'json' | 'csv' | 'pdf' = 'json'
+    format: 'json' | 'csv' | 'pdf' = 'json';
   ): Promise<string> {
     try {
       const params = new URLSearchParams({ format });
-      const response = await fetch(`${this.baseUrl}/${comparisonId}/export?${params}`);
+      const response = await fetch(`${this.baseUrl}/${comparisonId}/export?${params}`);`
 
-      if (format === 'json') {
+      if (format === "json') {'`
         
         const data = await response.json();
         return data.success ? data.downloadUrl : '';
@@ -297,7 +297,7 @@ class ComparisonService {
         return url;
       }
     } catch (error) {
-      console.error('导出比较结果失败:', error);
+      console.error('导出比较结果失败:', error);'
       throw error;
     }
   }
@@ -320,7 +320,6 @@ class ComparisonService {
     };
   }> {
     const cacheKey = 'comparison-stats';
-    
     if (this.cache.has(cacheKey)) {
       const cached = this.cache.get(cacheKey);
       if (Date.now() - cached.timestamp < this.cacheTimeout) {
@@ -329,11 +328,11 @@ class ComparisonService {
     }
 
     try {
-      const response = await fetch(`${this.baseUrl}/stats`);
+      const response = await fetch(`${this.baseUrl}/stats`);`
       const data = await response.json();
 
       if (!data.success) {
-        throw new Error(data.error || '获取统计信息失败');
+        throw new Error(data.error || "获取统计信息失败');'`
       }
 
       const stats = data.data;
@@ -344,7 +343,7 @@ class ComparisonService {
 
       return stats;
     } catch (error) {
-      console.error('获取统计信息失败:', error);
+      console.error('获取统计信息失败:', error);'
       throw error;
     }
   }
@@ -361,10 +360,10 @@ class ComparisonService {
     } = {}
   ): Promise<string> {
     try {
-      const response = await fetch(`${this.baseUrl}/${comparisonId}/report`, {
-        method: 'POST',
+      const response = await fetch(`${this.baseUrl}/${comparisonId}/report`, {`
+        method: "POST','`
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json';
         },
         body: JSON.stringify(options)
       });
@@ -372,12 +371,12 @@ class ComparisonService {
       const data = await response.json();
 
       if (!data.success) {
-        throw new Error(data.error || '生成比较报告失败');
+        throw new Error(data.error || '生成比较报告失败');'
       }
 
       return data.data.reportUrl;
     } catch (error) {
-      console.error('生成比较报告失败:', error);
+      console.error('生成比较报告失败:', error);'
       throw error;
     }
   }
@@ -400,7 +399,7 @@ class ComparisonService {
   /**
    * 判断变化类型
    */
-  getChangeType(metric: string, change: number): 'improvement' | 'regression' | 'unchanged' {
+  getChangeType(metric: string, change: number): 'improvement' | 'regression' | 'unchanged' {'
     const threshold = 5; // 5%阈值
     
     if (Math.abs(change) < threshold) {
@@ -408,10 +407,9 @@ class ComparisonService {
     }
 
     // 正向指标（越高越好）
-    const positiveMetrics = ['throughput', 'score', 'successRate'];
+    const positiveMetrics = ['throughput', 'score', 'successRate'];'
     // 负向指标（越低越好）
-    const negativeMetrics = ['responseTime', 'errorRate', 'cpuUsage', 'memoryUsage'];
-
+    const negativeMetrics = ['responseTime', 'errorRate', 'cpuUsage', 'memoryUsage'];'
     if (positiveMetrics.includes(metric)) {
       return change > 0 ? 'improvement' : 'regression';
     } else if (negativeMetrics.includes(metric)) {
@@ -427,13 +425,12 @@ class ComparisonService {
   formatChange(change: number, metric: string): string {
     const absChange = Math.abs(change);
     const direction = change > 0 ? '+' : '';
-    
-    if (metric.includes('Time') || metric.includes('Duration')) {
-      return `${direction}${absChange.toFixed(0)}ms`;
-    } else if (metric.includes('Rate') || metric.includes('Percentage')) {
-      return `${direction}${absChange.toFixed(1)}%`;
+    if (metric.includes('Time') || metric.includes('Duration')) {'
+      return `${direction}${absChange.toFixed(0)}ms`;`
+    } else if (metric.includes("Rate") || metric.includes('Percentage')) {'`
+      return `${direction}${absChange.toFixed(1)}%`;`
     } else {
-      return `${direction}${absChange.toFixed(2)}`;
+      return `${direction}${absChange.toFixed(2)}`;`
     }
   }
 }

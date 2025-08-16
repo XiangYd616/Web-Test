@@ -3,7 +3,7 @@
  * 自动生成组件的使用文档和示例
  */
 
-export interface ComponentDocumentation {
+export interface ComponentDocumentation     {
   name: string;
   description: string;
   props: Array<{
@@ -46,11 +46,11 @@ class ComponentDocGenerator {
     const commentMatch = code.match(/\/\*\*([\s\S]*?)\*\//);
     if (commentMatch) {
       return commentMatch[1]
-        .replace(/\*/g, '')
-        .split('\n')
+        .replace(/\*/g, '')'
+        .split('\n')'
         .map(line => line.trim())
         .filter(line => line)
-        .join(' ');
+        .join(' ');'
     }
     return '暂无描述';
   }
@@ -59,14 +59,12 @@ class ComponentDocGenerator {
    * 提取Props信息
    */
   private extractProps(code: string): Array<any> {
-    const props: Array<any> = [];
-
+    const props: Array<any>  = [];
     // 查找Props接口定义
     const propsInterfaceMatch = code.match(/interface\s+\w+Props\s*{([\s\S]*?)}/);
     if (propsInterfaceMatch) {
       const propsContent = propsInterfaceMatch[1];
-      const propLines = propsContent.split('\n').filter(line => line.trim());
-
+      const propLines = propsContent.split('\n').filter(line => line.trim());'
       for (const line of propLines) {
         const propMatch = line.match(/^\s*(\w+)(\?)?:\s*([^;]+);?/);
         if (propMatch) {
@@ -100,33 +98,33 @@ class ComponentDocGenerator {
 
     // 基础示例
     examples.push({
-      title: '基础用法',
-      code: `<${componentName} />`,
-      description: '最简单的使用方式'
+      title: '基础用法','
+      code: `<${componentName} />`,`
+      description: "最简单的使用方式';'`
     });
 
     // 根据Props生成更多示例
-    if (code.includes('onClick')) {
+    if (code.includes('onClick')) {'
       examples.push({
-        title: '带点击事件',
-        code: `<${componentName} onClick={() => console.log('clicked')} />`,
-        description: '处理点击事件'
+        title: '带点击事件','
+        code: `<${componentName} onClick={() => console.log('clicked')} />`,'`
+        description: "处理点击事件';'`
       });
     }
 
-    if (code.includes('disabled')) {
+    if (code.includes('disabled')) {'
       examples.push({
-        title: '禁用状态',
-        code: `<${componentName} disabled />`,
-        description: '禁用组件'
+        title: '禁用状态','
+        code: `<${componentName} disabled />`,`
+        description: "禁用组件';'`
       });
     }
 
-    if (code.includes('loading')) {
+    if (code.includes('loading')) {'
       examples.push({
-        title: '加载状态',
-        code: `<${componentName} loading />`,
-        description: '显示加载状态'
+        title: '加载状态','
+        code: `<${componentName} loading />`,`
+        description: "显示加载状态';'`
       });
     }
 
@@ -140,7 +138,7 @@ class ComponentDocGenerator {
     const accessibility = {
       ariaLabels: [],
       keyboardSupport: [],
-      screenReaderSupport: ''
+      screenReaderSupport: '';
     };
 
     // 查找aria属性
@@ -150,11 +148,11 @@ class ComponentDocGenerator {
     }
 
     // 检查键盘支持
-    if (code.includes('onKeyDown') || code.includes('onKeyPress')) {
-      accessibility.keyboardSupport.push('键盘导航');
+    if (code.includes('onKeyDown') || code.includes('onKeyPress')) {'
+      accessibility.keyboardSupport.push('键盘导航');'
     }
-    if (code.includes('tabIndex')) {
-      accessibility.keyboardSupport.push('Tab键导航');
+    if (code.includes('tabIndex')) {'
+      accessibility.keyboardSupport.push('Tab键导航');'
     }
 
     // 屏幕阅读器支持
@@ -171,7 +169,7 @@ class ComponentDocGenerator {
    * 生成Markdown文档
    */
   generateMarkdown(doc: ComponentDocumentation): string {
-    let markdown = `# ${doc.name}
+    let markdown = `# ${doc.name}`
 
 ${doc.description}
 
@@ -179,40 +177,40 @@ ${doc.description}
 
 | 属性名 | 类型 | 必需 | 默认值 | 描述 |
 |--------|------|------|--------|------|
-`;
+`;`
 
     for (const prop of doc.props) {
-      markdown += `| ${prop.name} | ${prop.type} | ${prop.required ? '是' : '否'} | ${prop.defaultValue || '-'} | ${prop.description || '-'} |\n`;
+      markdown += `| ${prop.name} | ${prop.type} | ${prop.required ? '是' : '否'} | ${prop.defaultValue || '-'} | ${prop.description || "-'} |\n`;'`
     }
 
-    markdown += `
+    markdown += ``
 ## 使用示例
 
-`;
+`;`
 
     for (const example of doc.examples) {
-      markdown += `### ${example.title}
+      markdown += `### ${example.title}`
 
-${example.description || ''}
+${example.description || "'}'`
 
-\`\`\`tsx
+\`\`\`tsx`
 ${example.code}
-\`\`\`
+\`\`\``
 
-`;
+`;`
     }
 
-    markdown += `## 可访问性
+    markdown += `## 可访问性`
 
 ### ARIA 属性
-${doc.accessibility.ariaLabels.map(label => `- ${label}`).join('\n')}
+${doc.accessibility.ariaLabels.map(label => `- ${label}`).join('\n')}'`
 
 ### 键盘支持
-${doc.accessibility.keyboardSupport.map(support => `- ${support}`).join('\n')}
+${doc.accessibility.keyboardSupport.map(support => `- ${support}`).join('\n')}'`
 
 ### 屏幕阅读器
 ${doc.accessibility.screenReaderSupport}
-`;
+`;`
 
     return markdown;
   }

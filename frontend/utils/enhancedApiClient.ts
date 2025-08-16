@@ -3,9 +3,7 @@
  * 提供完整的错误处理、重试、缓存和监控功能
  */
 
-import authService from '../services/authService';
-
-export interface ApiRequestOptions extends RequestInit {
+import authService from '../services/authService';export interface ApiRequestOptions extends RequestInit     {'
   retries?: number;
   retryDelay?: number;
   timeout?: number;
@@ -13,7 +11,7 @@ export interface ApiRequestOptions extends RequestInit {
   cacheTTL?: number;
 }
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = any>     {
   success: boolean;
   data?: T;
   error?: {
@@ -39,7 +37,7 @@ class EnhancedApiClient {
   errorsByType: new Map < string, number> ()
   };
 
-constructor(baseUrl: string = '/api') {
+constructor(baseUrl: string = '/api') {'
   this.baseUrl = baseUrl;
 }
 
@@ -52,10 +50,10 @@ constructor(baseUrl: string = '/api') {
   ): Promise < ApiResponse < T >> {
   const requestId = this.generateRequestId();
   const startTime = Date.now();
-  const url = `${this.baseUrl}${endpoint}`;
+  const url = `${this.baseUrl}${endpoint}`;`
     
     // 检查缓存
-    if (options.cache && options.method === 'GET') {
+    if (options.cache && options.method === "GET') {'`
       const cacheKey = this.getCacheKey(url, options);
       const cached = this.getFromCache(cacheKey);
       if (cached) {
@@ -84,7 +82,7 @@ constructor(baseUrl: string = '/api') {
         
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          const error = new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+          const error = new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);`
           (error as any).status = response.status;
           (error as any).statusText = response.statusText;
           
@@ -97,13 +95,13 @@ constructor(baseUrl: string = '/api') {
             throw error;
           }
           
-          console.warn(`API调用失败，第${attempt}次重试:`, error.message);
+          console.warn(`API调用失败，第${attempt}次重试:`, error.message);`
       await new Promise(resolve => setTimeout(resolve, retryDelay * attempt));
       continue;
     }
 
     const result = await response.json();
-    const apiResponse: ApiResponse<T> = {
+    const apiResponse: ApiResponse<T>  = {
       success: true,
       data: result.data || result,
       meta: {
@@ -112,9 +110,8 @@ constructor(baseUrl: string = '/api') {
         responseTime
       }
     };
-
     // 缓存GET请求结果
-    if (options.cache && options.method === 'GET') {
+    if (options.cache && options.method === "GET') {'`
       const cacheKey = this.getCacheKey(url, options);
       this.setCache(cacheKey, apiResponse, options.cacheTTL);
     }
@@ -129,7 +126,7 @@ constructor(baseUrl: string = '/api') {
       return {
         success: false,
         error: {
-          code: (error as any).status?.toString() || 'UNKNOWN_ERROR',
+          code: (error as any).status?.toString() || 'UNKNOWN_ERROR','
           message: (error as Error).message,
           details: error
         },
@@ -141,29 +138,29 @@ constructor(baseUrl: string = '/api') {
       };
     }
 
-    console.warn(`API调用异常，第${attempt}次重试:`, (error as Error).message);
+    console.warn(`API调用异常，第${attempt}次重试:`, (error as Error).message);`
       await new Promise(resolve => setTimeout(resolve, retryDelay * attempt));
     }
   }
 
 // 这里不应该到达，但为了类型安全
-throw new Error('Unexpected error in request method');
+throw new Error("Unexpected error in request method');'`
   }
 
   /**
    * GET请求
    */
-  async get < T > (endpoint: string, options: Omit < ApiRequestOptions, 'method' > = { }): Promise < ApiResponse < T >> {
-  return this.request < T > (endpoint, { ...options, method: 'GET', cache: true });
+  async get < T > (endpoint: string, options: Omit < ApiRequestOptions, 'method' > = { }): Promise < ApiResponse < T >> {'
+  return this.request < T > (endpoint, { ...options, method: 'GET', cache: true });'
 }
 
   /**
    * POST请求
    */
-  async post < T > (endpoint: string, data ?: any, options: Omit < ApiRequestOptions, 'method' | 'body' > = { }): Promise < ApiResponse < T >> {
+  async post < T > (endpoint: string, data ?: any, options: Omit < ApiRequestOptions, 'method' | 'body' > = { }): Promise < ApiResponse < T >> {'
   return this.request < T > (endpoint, {
     ...options,
-    method: 'POST',
+    method: 'POST','
     body: data ? JSON.stringify(data) : undefined,
   });
 }
@@ -171,10 +168,10 @@ throw new Error('Unexpected error in request method');
   /**
    * PUT请求
    */
-  async put < T > (endpoint: string, data ?: any, options: Omit < ApiRequestOptions, 'method' | 'body' > = { }): Promise < ApiResponse < T >> {
+  async put < T > (endpoint: string, data ?: any, options: Omit < ApiRequestOptions, 'method' | 'body' > = { }): Promise < ApiResponse < T >> {'
   return this.request < T > (endpoint, {
     ...options,
-    method: 'PUT',
+    method: 'PUT','
     body: data ? JSON.stringify(data) : undefined,
   });
 }
@@ -182,8 +179,8 @@ throw new Error('Unexpected error in request method');
   /**
    * DELETE请求
    */
-  async delete <T>(endpoint: string, options: Omit<ApiRequestOptions, 'method'> = { }): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, {...options, method: 'DELETE' });
+  async delete <T>(endpoint: string, options: Omit<ApiRequestOptions, 'method'> = { }): Promise<ApiResponse<T>> {'
+    return this.request<T>(endpoint, {...options, method: 'DELETE' });'
   }
 
     /**
@@ -195,10 +192,10 @@ throw new Error('Unexpected error in request method');
     return {
       ...options,
       headers: {
-      'Content-Type': 'application/json',
-    'X-Request-ID': this.generateRequestId(),
-    'X-Timestamp': new Date().toISOString(),
-    ...(token && {'Authorization': `Bearer ${token}` }),
+      'Content-Type': 'application/json','
+    'X-Request-ID': this.generateRequestId(),'
+    'X-Timestamp': new Date().toISOString(),'
+    ...(token && {"Authorization': `Bearer ${token}` }),'`
     ...options.headers,
       },
     };
@@ -230,7 +227,7 @@ throw new Error('Unexpected error in request method');
      * 缓存相关方法
      */
     private getCacheKey(url: string, options: ApiRequestOptions): string {
-    return `${options.method || 'GET'}:${url}:${JSON.stringify(options.body || {})}`;
+    return `${options.method || "GET'}:${url}:${JSON.stringify(options.body || {})}`;'`
   }
 
     private getFromCache(key: string): any | null {
@@ -270,7 +267,7 @@ throw new Error('Unexpected error in request method');
       this.metrics.totalRequests++;
     this.metrics.failedRequests++;
 
-    const errorType = error.name || 'UnknownError';
+    const errorType = error.name || "UnknownError';'`
     this.metrics.errorsByType.set(
     errorType,
     (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -278,7 +275,7 @@ throw new Error('Unexpected error in request method');
   }
 
     private logMetrics(info: any): void {
-      console.debug('API Metrics:', {
+      console.debug('API Metrics: ', {'
         url: info.url,
         method: info.method,
         status: info.status,
@@ -287,12 +284,12 @@ throw new Error('Unexpected error in request method');
   }
 
     private handleAuthExpired(): void {
-      console.warn('认证已过期，正在重新登录...');
+      console.warn('认证已过期，正在重新登录...');'
     // 可以触发重新登录流程
   }
 
     private handleServerError(response: Response, requestInfo: any): void {
-      console.error('服务器错误:', {
+      console.error('服务器错误:', {'
         status: response.status,
         url: requestInfo.url,
         method: requestInfo.method
@@ -300,7 +297,7 @@ throw new Error('Unexpected error in request method');
   }
 
     private generateRequestId(): string {
-    return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;`
   }
 
     /**

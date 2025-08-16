@@ -3,17 +3,13 @@
  * 提供认证流程的状态管理和操作
  */
 
-import { useState, useCallback } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useAsyncErrorHandler } from './useAsyncErrorHandler';
-
-export interface LoginFormData {
+import { useState, useCallback    } from 'react';import { useAuth    } from '../contexts/AuthContext';import { useAsyncErrorHandler    } from './useAsyncErrorHandler';export interface LoginFormData     {'
   email: string;
   password: string;
   rememberMe?: boolean;
 }
 
-export interface RegisterFormData {
+export interface RegisterFormData     {
   username: string;
   email: string;
   password: string;
@@ -27,8 +23,7 @@ export const useAuthFlow = () => {
 
   // 验证登录表单
   const validateLoginForm = useCallback((data: LoginFormData) => {
-    const errors: Record<string, string> = {};
-
+    const errors: Record<string, string>  = {};
     if (!data.email || !data.email.trim()) {
       errors.email = '邮箱不能为空';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
@@ -46,8 +41,7 @@ export const useAuthFlow = () => {
 
   // 验证注册表单
   const validateRegisterForm = useCallback((data: RegisterFormData) => {
-    const errors: Record<string, string> = {};
-
+    const errors: Record<string, string>  = {};
     if (!data.username || !data.username.trim()) {
       errors.username = '用户名不能为空';
     } else if (data.username.length < 3) {
@@ -82,12 +76,11 @@ export const useAuthFlow = () => {
       return false;
     }
 
-    const result = await executeAsync(
-      () => login({
+    const result = await executeAsync(() => login({
         username: formData.email, // 使用邮箱作为用户名
         password: formData.password
       }),
-      { context: 'AuthFlow.login' }
+      { context: 'AuthFlow.login' }'
     );
 
     return !!result;
@@ -102,13 +95,12 @@ export const useAuthFlow = () => {
       return false;
     }
 
-    const result = await executeAsync(
-      () => register({
+    const result = await executeAsync(() => register({
         username: formData.username,
         email: formData.email,
         password: formData.password
       }),
-      { context: 'AuthFlow.register' }
+      { context: 'AuthFlow.register' }'
     );
 
     return !!result;
@@ -118,7 +110,7 @@ export const useAuthFlow = () => {
   const handleLogout = useCallback(async () => {
     const result = await executeAsync(
       () => logout(),
-      { context: 'AuthFlow.logout' }
+      { context: 'AuthFlow.logout' }'
     );
 
     return !!result;

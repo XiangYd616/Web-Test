@@ -1,20 +1,17 @@
-import { AlertCircle, CheckCircle, Loader2, Square } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
-
-interface CancelProgressFeedbackProps {
+import { AlertCircle, CheckCircle, Loader2, Square    } from 'lucide-react';import React, { useEffect, useState    } from 'react';interface CancelProgressFeedbackProps   {'
   isVisible: boolean;
   onComplete: () => void;
   testId?: string;
 }
 
-interface CancelStep {
+interface CancelStep   {
   id: string;
   label: string;
   status: 'pending' | 'running' | 'completed' | 'error';
   message?: string;
 }
 
-const CancelProgressFeedback: React.FC<CancelProgressFeedbackProps> = ({
+const CancelProgressFeedback: React.FC<CancelProgressFeedbackProps>  = ({
   isVisible,
   onComplete,
   testId
@@ -25,27 +22,26 @@ const CancelProgressFeedback: React.FC<CancelProgressFeedbackProps> = ({
     className: combinedClassName,
     style: computedStyle,
     disabled,
-    'aria-label': ariaLabel,
-    'data-testid': testId
+    'aria-label': ariaLabel,'
+    "data-testid': testId'
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
-  
   // 变体和主题支持
   const variantStyles = useMemo(() => {
     const styles = {
       primary: {
-        backgroundColor: '#007bff',
-        color: '#ffffff',
-        border: '1px solid #007bff'
+        backgroundColor: '#007bff','
+        color: '#ffffff','
+        border: '1px solid #007bff';
       },
       secondary: {
-        backgroundColor: '#6c757d',
-        color: '#ffffff',
-        border: '1px solid #6c757d'
+        backgroundColor: '#6c757d','
+        color: '#ffffff','
+        border: '1px solid #6c757d';
       },
       outline: {
-        backgroundColor: 'transparent',
-        color: '#007bff',
-        border: '1px solid #007bff'
+        backgroundColor: 'transparent','
+        color: '#007bff','
+        border: '1px solid #007bff';
       }
     };
 
@@ -55,16 +51,16 @@ const CancelProgressFeedback: React.FC<CancelProgressFeedbackProps> = ({
   const sizeStyles = useMemo(() => {
     const styles = {
       small: {
-        padding: '0.25rem 0.5rem',
-        fontSize: '0.875rem'
+        padding: '0.25rem 0.5rem','
+        fontSize: '0.875rem';
       },
       medium: {
-        padding: '0.5rem 1rem',
-        fontSize: '1rem'
+        padding: '0.5rem 1rem','
+        fontSize: '1rem';
       },
       large: {
-        padding: '0.75rem 1.5rem',
-        fontSize: '1.125rem'
+        padding: '0.75rem 1.5rem','
+        fontSize: '1.125rem';
       }
     };
 
@@ -82,39 +78,38 @@ const CancelProgressFeedback: React.FC<CancelProgressFeedbackProps> = ({
     onClick?.(event);
   }, [disabled, loading, onClick]);
   
-  const memoizedHandleChange = useMemo(() => 
-    debounce((value: any) => {
+  const memoizedHandleChange = useMemo(() => debounce((value: any) => {
       onChange?.(value);
     }, 300), [onChange]
   );
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;
-  const descriptionId = `${componentId}-description`;
+  const errorId = `${componentId}-error`;`
+  const descriptionId = `${componentId}-description`;`
   
   const ariaProps = {
     id: componentId,
-    'aria-label': ariaLabel,
-    'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': [
+    "aria-label': ariaLabel,'`
+    'aria-labelledby': ariaLabelledBy,'
+    'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,
-    'aria-invalid': !!error,
-    'aria-disabled': disabled,
-    'aria-busy': loading,
-    'aria-expanded': expanded,
-    'aria-selected': selected,
+    ].filter(Boolean).join(' ') || undefined,'
+    'aria-invalid': !!error,'
+    'aria-disabled': disabled,'
+    'aria-busy': loading,'
+    'aria-expanded': expanded,'
+    'aria-selected': selected,'
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
   const [steps, setSteps] = useState<CancelStep[]>([
-    { id: 'stop_requests', label: '停止新请求', status: 'pending' },
-    { id: 'cleanup_connections', label: '清理连接', status: 'pending' },
-    { id: 'save_data', label: '保存测试数据', status: 'pending' },
-    { id: 'update_status', label: '更新测试状态', status: 'pending' },
-    { id: 'notify_completion', label: '完成取消操作', status: 'pending' }
+    { id: 'stop_requests', label: '停止新请求', status: 'pending' },'
+    { id: 'cleanup_connections', label: '清理连接', status: 'pending' },'
+    { id: 'save_data', label: '保存测试数据', status: 'pending' },'
+    { id: 'update_status', label: '更新测试状态', status: 'pending' },'
+    { id: 'notify_completion', label: '完成取消操作', status: 'pending' }'
   ]);
 
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -124,7 +119,7 @@ const CancelProgressFeedback: React.FC<CancelProgressFeedbackProps> = ({
   useEffect(() => {
     if (!isVisible) {
       // 重置状态
-      setSteps(steps.map(step => ({ ...step, status: 'pending' })));
+      setSteps(steps.map(step => ({ ...step, status: 'pending' })));'
       setCurrentStepIndex(0);
       setIsCompleted(false);
       setHasError(false);
@@ -137,7 +132,7 @@ const CancelProgressFeedback: React.FC<CancelProgressFeedbackProps> = ({
         // 更新当前步骤为运行中
         setSteps(prev => prev.map((step, index) => ({
           ...step,
-          status: index === i ? 'running' : index < i ? 'completed' : 'pending'
+          status: index === i ? 'running' : index < i ? 'completed' : 'pending';
         })));
         setCurrentStepIndex(i);
 
@@ -148,7 +143,7 @@ const CancelProgressFeedback: React.FC<CancelProgressFeedbackProps> = ({
         // 标记当前步骤完成
         setSteps(prev => prev.map((step, index) => ({
           ...step,
-          status: index <= i ? 'completed' : 'pending'
+          status: index <= i ? 'completed' : 'pending';
         })));
       }
 
@@ -164,31 +159,31 @@ const CancelProgressFeedback: React.FC<CancelProgressFeedbackProps> = ({
       setHasError(true);
       setSteps(prev => prev.map((step, index) => ({
         ...step,
-        status: index === currentStepIndex ? 'error' : step.status
+        status: index === currentStepIndex ? 'error' : step.status'
       })));
     });
   }, [isVisible]);
 
   const getStepIcon = (step: CancelStep) => {
     switch (step.status) {
-      case 'running':
-        return <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />;
-      case 'completed':
-        return <CheckCircle className="w-4 h-4 text-green-400" />;
-      case 'error':
-        return <AlertCircle className="w-4 h-4 text-red-400" />;
+      case 'running': ''
+        return <Loader2 className= 'w-4 h-4 text-blue-400 animate-spin'    />;'
+      case 'completed': ''
+        return <CheckCircle className= 'w-4 h-4 text-green-400'    />;'
+      case 'error': ''
+        return <AlertCircle className= 'w-4 h-4 text-red-400'    />;'
       default:
-        return <div className="w-4 h-4 border-2 border-gray-600 rounded-full" />;
+        return <div className= 'w-4 h-4 border-2 border-gray-600 rounded-full' />;'
     }
   };
 
   const getStepTextColor = (step: CancelStep) => {
     switch (step.status) {
-      case 'running':
+      case 'running': ''
         return 'text-blue-300';
-      case 'completed':
+      case 'completed': ''
         return 'text-green-300';
-      case 'error':
+      case 'error': ''
         return 'text-red-300';
       default:
         return 'text-gray-400';
@@ -197,58 +192,57 @@ const CancelProgressFeedback: React.FC<CancelProgressFeedbackProps> = ({
 
   if (!isVisible) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999]">
-      <div className="bg-gray-800 rounded-xl shadow-2xl max-w-md w-full mx-4 border border-gray-700 max-h-[90vh] overflow-y-auto">
+  return (<div className= 'fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999]'>
+      <div className= 'bg-gray-800 rounded-xl shadow-2xl max-w-md w-full mx-4 border border-gray-700 max-h-[90vh] overflow-y-auto'>
         {/* 头部 */}
-        <div className="flex items-center space-x-3 p-6 border-b border-gray-700">
-          <div className="p-2 bg-red-500/20 rounded-lg">
-            <Square className="w-6 h-6 text-red-400" />
+        <div className= 'flex items-center space-x-3 p-6 border-b border-gray-700'>
+          <div className= 'p-2 bg-red-500/20 rounded-lg'>
+            <Square className= 'w-6 h-6 text-red-400'    />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-white">正在取消测试</h3>
-            <p className="text-sm text-gray-400">
-              {isCompleted ? '取消完成' : hasError ? '取消过程中出现错误' : '请稍候，正在安全停止测试...'}
+            <h3 className= 'text-lg font-semibold text-white'>正在取消测试</h3>
+            <p className= 'text-sm text-gray-400'>
+              {isCompleted ? "取消完成" : hasError ? "取消过程中出现错误" : "请稍候，正在安全停止测试...'}'
             </p>
           </div>
         </div>
 
         {/* 进度步骤 */}
-        <div className="p-6">
-          <div className="space-y-4">
+        <div className= 'p-6'>
+          <div className= 'space-y-4'>
             {steps.map((step, index) => (
-              <div key={step.id} className="flex items-center space-x-3">
+              <div key={step.id} className= 'flex items-center space-x-3'>
                 {getStepIcon(step)}
-                <div className="flex-1">
-                  <div className={`text-sm font-medium ${getStepTextColor(step)}`}>
+                <div className= 'flex-1'>
+                  <div className={`text-sm font-medium ${getStepTextColor(step)}`}>`
                     {step.label}
                   </div>
                   {step.message && (
-                    <div className="text-xs text-gray-500 mt-1">{step.message}</div>
+                    <div className= "text-xs text-gray-500 mt-1'>{step.message}</div>`
                   )}
                 </div>
-                {step.status === 'completed' && (
-                  <div className="text-xs text-green-400">✓</div>
+                {step.status === 'completed' && ('')
+                  <div className= 'text-xs text-green-400'>✓</div>
                 )}
-                {step.status === 'error' && (
-                  <div className="text-xs text-red-400">✗</div>
+                {step.status === 'error' && ('')
+                  <div className= 'text-xs text-red-400'>✗</div>
                 )}
               </div>
             ))}
           </div>
 
           {/* 整体进度条 */}
-          <div className="mt-6">
-            <div className="flex justify-between text-xs text-gray-400 mb-2">
+          <div className= 'mt-6'>
+            <div className= 'flex justify-between text-xs text-gray-400 mb-2'>
               <span>取消进度</span>
               <span>{Math.round(((currentStepIndex + (isCompleted ? 1 : 0)) / steps.length) * 100)}%</span>
             </div>
-            <div className="w-full bg-gray-700 rounded-full h-2">
+            <div className= 'w-full bg-gray-700 rounded-full h-2'>
               <div
-                className={`h-2 rounded-full transition-all duration-500 ${hasError ? 'bg-red-500' : isCompleted ? 'bg-green-500' : 'bg-blue-500'
-                  }`}
+                className={`h-2 rounded-full transition-all duration-500 ${hasError ? 'bg-red-500' : isCompleted ? 'bg-green-500' : 'bg-blue-500';'`}
+                  }`}`
                 style={{
-                  width: `${((currentStepIndex + (isCompleted ? 1 : 0)) / steps.length) * 100}%`
+                  width: `${((currentStepIndex + (isCompleted ? 1 : 0)) / steps.length) * 100}%``
                 }}
               />
             </div>
@@ -256,20 +250,20 @@ const CancelProgressFeedback: React.FC<CancelProgressFeedbackProps> = ({
 
           {/* 测试ID信息 */}
           {testId && (
-            <div className="mt-4 p-3 bg-gray-750 rounded-lg">
-              <div className="text-xs text-gray-400">测试ID</div>
-              <div className="text-sm text-gray-300 font-mono">{testId}</div>
+            <div className= "mt-4 p-3 bg-gray-750 rounded-lg'>`
+              <div className= 'text-xs text-gray-400'>测试ID</div>
+              <div className= 'text-sm text-gray-300 font-mono'>{testId}</div>
             </div>
           )}
 
           {/* 完成状态 */}
           {isCompleted && (
-            <div className="mt-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="w-5 h-5 text-green-400" />
+            <div className= 'mt-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg'>
+              <div className= 'flex items-center space-x-2'>
+                <CheckCircle className= 'w-5 h-5 text-green-400'    />
                 <div>
-                  <div className="text-sm font-medium text-green-300">取消成功</div>
-                  <div className="text-xs text-green-400/80">测试已安全停止，数据已保存</div>
+                  <div className= 'text-sm font-medium text-green-300'>取消成功</div>
+                  <div className= 'text-xs text-green-400/80'>测试已安全停止，数据已保存</div>
                 </div>
               </div>
             </div>
@@ -277,12 +271,12 @@ const CancelProgressFeedback: React.FC<CancelProgressFeedbackProps> = ({
 
           {/* 错误状态 */}
           {hasError && (
-            <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-              <div className="flex items-center space-x-2">
-                <AlertCircle className="w-5 h-5 text-red-400" />
+            <div className= 'mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg'>
+              <div className= 'flex items-center space-x-2'>
+                <AlertCircle className= 'w-5 h-5 text-red-400'    />
                 <div>
-                  <div className="text-sm font-medium text-red-300">取消过程中出现问题</div>
-                  <div className="text-xs text-red-400/80">测试可能仍在运行，请稍后检查状态</div>
+                  <div className= 'text-sm font-medium text-red-300'>取消过程中出现问题</div>
+                  <div className= 'text-xs text-red-400/80'>测试可能仍在运行，请稍后检查状态</div>
                 </div>
               </div>
             </div>
@@ -291,8 +285,8 @@ const CancelProgressFeedback: React.FC<CancelProgressFeedbackProps> = ({
 
         {/* 底部信息 */}
         {!isCompleted && !hasError && (
-          <div className="px-6 pb-6">
-            <div className="text-xs text-gray-500 text-center">
+          <div className= 'px-6 pb-6'>
+            <div className= 'text-xs text-gray-500 text-center'>
               取消操作通常需要 2-5 秒完成，请耐心等待
             </div>
           </div>

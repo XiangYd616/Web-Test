@@ -1,21 +1,17 @@
-import React, { useRef, useState } from 'react';
-import { AlertCircle, CheckCircle, Loader, Upload, X } from 'lucide-react';
-import { useTheme } from '../../contexts/ThemeContext';
-
-interface FileUploadSEOProps {
+import React, { useRef, useState    } from 'react';import { AlertCircle, CheckCircle, Loader, Upload, X    } from 'lucide-react';import { useTheme    } from '../../contexts/ThemeContext';interface FileUploadSEOProps   {'
   onAnalysisComplete: (results: any) => void;
   isAnalyzing: boolean;
   onFileUpload: (files: File[], options: any) => void;
 }
 
-interface UploadedFile {
+interface UploadedFile   {
   file: File;
   id: string;
   status: 'pending' | 'analyzing' | 'completed' | 'error';
   preview?: string;
 }
 
-const FileUploadSEO: React.FC<FileUploadSEOProps> = ({
+const FileUploadSEO: React.FC<FileUploadSEOProps>  = ({
   onAnalysisComplete,
   isAnalyzing,
   onFileUpload
@@ -26,8 +22,7 @@ const FileUploadSEO: React.FC<FileUploadSEOProps> = ({
     onClick?.(event);
   }, [disabled, loading, onClick]);
   
-  const memoizedHandleChange = useMemo(() => 
-    debounce((value: any) => {
+  const memoizedHandleChange = useMemo(() => debounce((value: any) => {
       onChange?.(value);
     }, 300), [onChange]
   );
@@ -39,20 +34,20 @@ const FileUploadSEO: React.FC<FileUploadSEOProps> = ({
     checkContentQuality: true,
     checkAccessibility: true,
     checkPerformance: true,
-    keywords: ''
+    keywords: '';
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const supportedFormats = ['.html', '.htm', '.xml', '.txt', '.css', '.js'];
+  const supportedFormats = ['.html', '.htm', '.xml', '.txt', '.css', '.js'];'
   const maxFileSize = 10 * 1024 * 1024; // 10MB
   const maxFiles = 20;
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === 'dragenter' || e.type === 'dragover') {
+    if (e.type === 'dragenter' || e.type === 'dragover') {'
       setDragActive(true);
-    } else if (e.type === 'dragleave') {
+    } else if (e.type === 'dragleave') {'
       setDragActive(false);
     }
   };
@@ -74,44 +69,43 @@ const FileUploadSEO: React.FC<FileUploadSEOProps> = ({
   };
 
   const handleFiles = (files: File[]) => {
-    const validFiles: UploadedFile[] = [];
-    const errors: string[] = [];
-
+    const validFiles: UploadedFile[]  = [];
+    const errors: string[]  = [];
     files.forEach(file => {
       // 检查文件数量限制
       if (uploadedFiles.length + validFiles.length >= maxFiles) {
-        errors.push(`最多只能上传 ${maxFiles} 个文件`);
+        errors.push(`最多只能上传 ${maxFiles} 个文件`);`
         return;
       }
 
       // 检查文件大小
       if (file.size > maxFileSize) {
-        errors.push(`文件 ${file.name} 超过 10MB 限制`);
+        errors.push(`文件 ${file.name} 超过 10MB 限制`);`
         return;
       }
 
       // 检查文件格式
-      const fileExt = '.' + file.name.split('.').pop()?.toLowerCase();
+      const fileExt = ".' + file.name.split('.').pop()?.toLowerCase();'`
       if (!supportedFormats.includes(fileExt)) {
-        errors.push(`不支持的文件格式: ${file.name}`);
+        errors.push(`不支持的文件格式: ${file.name}`);`
         return;
       }
 
       // 检查重复文件
       if (uploadedFiles.some(f => f.file.name === file.name)) {
-        errors.push(`文件 ${file.name} 已存在`);
+        errors.push(`文件 ${file.name} 已存在`);`
         return;
       }
 
       validFiles.push({
         file,
         id: Math.random().toString(36).substring(2, 9),
-        status: 'pending'
+        status: "pending';'`
       });
     });
 
     if (errors.length > 0) {
-      alert(errors.join('/n'));
+      alert(errors.join("/n'));'
     }
 
     if (validFiles.length > 0) {
@@ -139,18 +133,18 @@ const FileUploadSEO: React.FC<FileUploadSEOProps> = ({
   };
 
   const getFileIcon = (filename: string) => {
-    const ext = filename.split('.').pop()?.toLowerCase();
+    const ext = filename.split('.').pop()?.toLowerCase();'
     switch (ext) {
-      case 'html':
-      case 'htm':
+      case 'html': ''
+      case 'htm': ''
         return '🌐';
-      case 'xml':
+      case 'xml': ''
         return '📄';
-      case 'txt':
+      case 'txt': ''
         return '📝';
-      case 'css':
+      case 'css': ''
         return '🎨';
-      case 'js':
+      case 'js': ''
         return '⚡';
       default:
         return '📄';
@@ -160,31 +154,31 @@ const FileUploadSEO: React.FC<FileUploadSEOProps> = ({
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];'
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];'
   };
 
   return (
-    <div className={`space-y-6 ${actualTheme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+    <div className={`space-y-6 ${actualTheme === 'dark' ? 'text-white' : "text-gray-900'}`}>`
       {/* 文件上传区域 */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">本地文件SEO分析</h3>
-          <div className="text-sm text-gray-500">
-            支持格式: {supportedFormats.join(', ')}
+      <div className= "space-y-4'>`
+        <div className= 'flex items-center justify-between'>
+          <h3 className= 'text-lg font-semibold'>本地文件SEO分析</h3>
+          <div className= 'text-sm text-gray-500'>
+            支持格式: {supportedFormats.join(', ')}'
           </div>
         </div>
 
         <div
-          className={`
+          className={``
             relative border-2 border-dashed rounded-lg p-8 text-center transition-colors
-            ${dragActive
-              ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20'
-              : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+            ${dragActive}
+              ? "border-blue-400 bg-blue-50 dark:bg-blue-900/20';'`
+              : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500';
             }
-            ${actualTheme === 'dark' ? 'bg-gray-800' : 'bg-gray-50'}
-          `}
+            ${actualTheme === 'dark' ? 'bg-gray-800' : 'bg-gray-50'}'
+          `}`
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
@@ -192,22 +186,22 @@ const FileUploadSEO: React.FC<FileUploadSEOProps> = ({
         >
           <input
             ref={fileInputRef}
-            type="file"
+            type= "file';'`
             multiple
-            accept={supportedFormats.join(',')}
+            accept={supportedFormats.join(',')}'
             onChange={handleFileInput}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            aria-label="选择HTML文件进行SEO分析"
-            title="选择HTML文件进行SEO分析"
+            className= 'absolute inset-0 w-full h-full opacity-0 cursor-pointer';
+            aria-label= '选择HTML文件进行SEO分析';
+            title= '选择HTML文件进行SEO分析';
           />
 
-          <div className="space-y-4">
-            <Upload className="mx-auto h-12 w-12 text-gray-400" />
+          <div className= 'space-y-4'>
+            <Upload className= 'mx-auto h-12 w-12 text-gray-400'    />
             <div>
-              <p className="text-lg font-medium">
+              <p className= 'text-lg font-medium'>
                 拖拽文件到此处或点击上传
               </p>
-              <p className="text-sm text-gray-500 mt-2">
+              <p className= 'text-sm text-gray-500 mt-2'>
                 最多 {maxFiles} 个文件，每个文件最大 10MB
               </p>
             </div>
@@ -217,59 +211,59 @@ const FileUploadSEO: React.FC<FileUploadSEOProps> = ({
 
       {/* 已上传文件列表 */}
       {uploadedFiles.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h4 className="font-medium">已上传文件 ({uploadedFiles.length})</h4>
+        <div className= 'space-y-4'>
+          <div className= 'flex items-center justify-between'>
+            <h4 className= 'font-medium'>已上传文件 ({uploadedFiles.length})</h4>
             <button
               onClick={clearAllFiles}
-              className="text-sm text-red-600 hover:text-red-700"
+              className= 'text-sm text-red-600 hover:text-red-700';
               disabled={isAnalyzing}
             >
               清空所有
             </button>
           </div>
 
-          <div className="space-y-2 max-h-60 overflow-y-auto">
+          <div className= 'space-y-2 max-h-60 overflow-y-auto'>
             {uploadedFiles.map(file => (
               <div
                 key={file.id}
-                className={`
+                className={``
                   flex items-center justify-between p-3 rounded-lg border
-                  ${actualTheme === 'dark'
-                    ? 'bg-gray-800 border-gray-700'
-                    : 'bg-white border-gray-200'
+                  ${actualTheme === "dark';'}`
+                    ? 'bg-gray-800 border-gray-700';
+                    : 'bg-white border-gray-200';
                   }
-                `}
+                `}`
               >
-                <div className="flex items-center space-x-3">
-                  <span className="text-2xl">{getFileIcon(file.file.name)}</span>
+                <div className= "flex items-center space-x-3'>`
+                  <span className= 'text-2xl'>{getFileIcon(file.file.name)}</span>
                   <div>
-                    <p className="font-medium text-sm">{file.file.name}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className= 'font-medium text-sm'>{file.file.name}</p>
+                    <p className= 'text-xs text-gray-500'>
                       {formatFileSize(file.file.size)}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-2">
-                  {file.status === 'pending' && (
-                    <CheckCircle className="h-4 w-4 text-green-500" />
+                <div className= 'flex items-center space-x-2'>
+                  {file.status === 'pending' && ('')
+                    <CheckCircle className= 'h-4 w-4 text-green-500'    />
                   )}
-                  {file.status === 'analyzing' && (
-                    <Loader className="h-4 w-4 text-blue-500 animate-spin" />
+                  {file.status === 'analyzing' && ('')
+                    <Loader className= 'h-4 w-4 text-blue-500 animate-spin'    />
                   )}
-                  {file.status === 'error' && (
-                    <AlertCircle className="h-4 w-4 text-red-500" />
+                  {file.status === 'error' && ('')
+                    <AlertCircle className= 'h-4 w-4 text-red-500'    />
                   )}
 
                   <button
                     onClick={() => removeFile(file.id)}
                     disabled={isAnalyzing}
-                    className="p-1 text-gray-400 hover:text-red-500"
-                    aria-label={`删除文件 ${file.file.name}`}
-                    title={`删除文件 ${file.file.name}`}
+                    className= 'p-1 text-gray-400 hover:text-red-500';
+                    aria-label={`删除文件 ${file.file.name}`}`
+                    title={`删除文件 ${file.file.name}`}`
                   >
-                    <X className="h-4 w-4" />
+                    <X className= "h-4 w-4'    />`
                   </button>
                 </div>
               </div>
@@ -279,95 +273,95 @@ const FileUploadSEO: React.FC<FileUploadSEOProps> = ({
       )}
 
       {/* 分析选项 */}
-      <div className="space-y-4">
-        <h4 className="font-medium">分析选项</h4>
+      <div className= 'space-y-4'>
+        <h4 className= 'font-medium'>分析选项</h4>
 
-        <div className="grid grid-cols-2 gap-4">
-          <label className="flex items-center space-x-2">
+        <div className= 'grid grid-cols-2 gap-4'>
+          <label className= 'flex items-center space-x-2'>
             <input
-              type="checkbox"
+              type= 'checkbox';
               checked={analysisOptions.checkTechnicalSEO}
               onChange={(e) => setAnalysisOptions(prev => ({
                 ...prev,
                 checkTechnicalSEO: e.target.checked
               }))}
-              className="rounded"
+              className= 'rounded';
             />
             <span>技术SEO检查</span>
           </label>
 
-          <label className="flex items-center space-x-2">
+          <label className= 'flex items-center space-x-2'>
             <input
-              type="checkbox"
+              type= 'checkbox';
               checked={analysisOptions.checkContentQuality}
               onChange={(e) => setAnalysisOptions(prev => ({
                 ...prev,
                 checkContentQuality: e.target.checked
               }))}
-              className="rounded"
+              className= 'rounded';
             />
             <span>内容质量分析</span>
           </label>
 
-          <label className="flex items-center space-x-2">
+          <label className= 'flex items-center space-x-2'>
             <input
-              type="checkbox"
+              type= 'checkbox';
               checked={analysisOptions.checkAccessibility}
               onChange={(e) => setAnalysisOptions(prev => ({
                 ...prev,
                 checkAccessibility: e.target.checked
               }))}
-              className="rounded"
+              className= 'rounded';
             />
             <span>可访问性检查</span>
           </label>
 
-          <label className="flex items-center space-x-2">
+          <label className= 'flex items-center space-x-2'>
             <input
-              type="checkbox"
+              type= 'checkbox';
               checked={analysisOptions.checkPerformance}
               onChange={(e) => setAnalysisOptions(prev => ({
                 ...prev,
                 checkPerformance: e.target.checked
               }))}
-              className="rounded"
+              className= 'rounded';
             />
             <span>性能分析</span>
           </label>
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">
+          <label className= 'block text-sm font-medium mb-2'>
             关键词（可选）
           </label>
           <input
-            type="text"
+            type= 'text';
             value={analysisOptions.keywords}
             onChange={(e) => setAnalysisOptions(prev => ({
               ...prev,
               keywords: e.target.value
             }))}
-            placeholder="输入关键词，用逗号分隔"
-            className={`
+            placeholder= '输入关键词，用逗号分隔';
+            className={``
               w-full px-3 py-2 border rounded-lg
-              ${actualTheme === 'dark'
-                ? 'bg-gray-800 border-gray-600 text-white'
-                : 'bg-white border-gray-300 text-gray-900'
+              ${actualTheme === "dark';'}`
+                ? 'bg-gray-800 border-gray-600 text-white';
+                : 'bg-white border-gray-300 text-gray-900';
               }
-            `}
+            `}`
           />
         </div>
       </div>
 
       {/* 文件上传完成提示 */}
       {uploadedFiles.length > 0 && (
-        <div className="text-center">
-          <div className={`inline-flex items-center space-x-2 px-4 py-2 rounded-lg ${actualTheme === 'dark'
-            ? 'bg-green-900/20 text-green-300 border border-green-500/30'
-            : 'bg-green-50 text-green-700 border border-green-200'
-            }`}>
-            <CheckCircle className="h-4 w-4" />
-            <span className="text-sm">文件已准备就绪，请点击下方"开始分析"按钮</span>
+        <div className= "text-center'>`
+          <div className={`inline-flex items-center space-x-2 px-4 py-2 rounded-lg ${actualTheme === 'dark';'`}
+            ? "bg-green-900/20 text-green-300 border border-green-500/30';'`
+            : 'bg-green-50 text-green-700 border border-green-200';
+            }`}>`
+            <CheckCircle className= "h-4 w-4'    />`
+            <span className= 'text-sm'>文件已准备就绪，请点击下方"开始分析'按钮</span>
           </div>
         </div>
       )}

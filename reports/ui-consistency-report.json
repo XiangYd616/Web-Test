@@ -1,13 +1,13 @@
 {
-  "timestamp": "2025-08-16T07:25:41.993Z",
+  "timestamp": "2025-08-16T09:33:24.489Z",
   "summary": {
-    "totalIssues": 15,
+    "totalIssues": 18,
     "categories": {
       "design_system": 1,
       "color_consistency": 0,
       "responsive_consistency": 13,
       "component_style_consistency": 0,
-      "theme_consistency": 1
+      "theme_consistency": 4
     }
   },
   "stylePatterns": {
@@ -276,6 +276,27 @@
       "type": "insufficient_theme_variables",
       "file": "frontend\\components\\ui\\theme\\ThemeSystem.ts",
       "message": "主题变量定义不足: 0个",
+      "severity": "low"
+    },
+    {
+      "category": "theme_consistency",
+      "type": "insufficient_theme_variables",
+      "file": "frontend\\design\\theme.ts",
+      "message": "主题变量定义不足: 0个",
+      "severity": "low"
+    },
+    {
+      "category": "theme_consistency",
+      "type": "insufficient_theme_variables",
+      "file": "frontend\\design\\tokens.ts",
+      "message": "主题变量定义不足: 0个",
+      "severity": "low"
+    },
+    {
+      "category": "theme_consistency",
+      "type": "missing_dark_theme",
+      "file": "frontend\\design\\tokens.ts",
+      "message": "缺少深色主题支持",
       "severity": "low"
     }
   ]

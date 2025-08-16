@@ -12,22 +12,18 @@ export {
   StandardApiResponse as ApiResponse,
   StandardApiSuccessResponse as ApiSuccessResponse, StandardCreatedResponse as CreatedResponse, StandardErrorCode as ErrorCode, StandardErrorMessages as ErrorMessages, HttpStatusCode, isStandardApiErrorResponse as isApiErrorResponse, isStandardApiSuccessResponse as isApiSuccessResponse, StandardNoContentResponse as NoContentResponse, StandardPaginatedResponse as PaginatedResponse, PaginationMeta, StandardStatusCodeMap as StatusCodeMap, Timestamp, UUID, ValidationError
 } from '../../shared/types/standardApiResponse';
-
 // ==================== 向后兼容的类型别名 ====================
 
 // 为了向后兼容，保留一些旧的类型别名
-export type PaginationInfo = PaginationMeta;
-
-// ==================== 向后兼容的工具函数 ====================
+export type PaginationInfo   = PaginationMeta;// ==================== 向后兼容的工具函数 ====================
 
 // 重新导出一些常用的工具函数，保持向后兼容性
 export {
   createCreatedResponse, createErrorResponse, createNoContentResponse, createPaginatedResponse, createPaginationMeta as createPagination, createSuccessResponse, generateRequestId
 } from '../../shared/utils/apiResponseBuilder';
-
 // ==================== 前端特有的接口定义 ====================
 
-export interface RequestConfig {
+export interface RequestConfig     {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
   headers?: Record<string, string>;
   body?: string | FormData | URLSearchParams | Record<string, any>;
@@ -38,14 +34,14 @@ export interface RequestConfig {
   cacheTTL?: number;
 }
 
-export interface AuthConfig {
+export interface AuthConfig     {
   token?: string;
   apiKey?: string;
   basicAuth?: { username: string; password: string };
   oauth2?: { accessToken: string; refreshToken?: string };
 }
 
-export interface QueryParams {
+export interface QueryParams     {
   page?: number;
   limit?: number;
   sort?: string;
@@ -54,13 +50,13 @@ export interface QueryParams {
   filters?: Record<string, any>;
 }
 
-export interface PaginatedRequest extends QueryParams {
+export interface PaginatedRequest extends QueryParams     {
   // 继承查询参数
 }
 
 // ==================== 前端API客户端接口 ====================
 
-export interface ApiClient {
+export interface ApiClient     {
   get<T>(url: string, config?: RequestConfig): Promise<ApiResponse<T>>;
   post<T>(url: string, data?: any, config?: RequestConfig): Promise<ApiResponse<T>>;
   put<T>(url: string, data?: any, config?: RequestConfig): Promise<ApiResponse<T>>;
@@ -86,22 +82,22 @@ export const DEFAULT_PAGINATION: PaginationInfo = {
 /**
  * 提取响应数据
  */
-export function extractData<T>(response: ApiResponse<T>): T | null {
+export function extractData<T>(response: ApiResponse<T>): T | null   {
   return isApiSuccessResponse(response) ? response.data : null;
 }
 
 /**
  * 提取错误信息
  */
-export function extractError<T>(response: ApiResponse<T>): ApiError | null {
+export function extractError<T>(response: ApiResponse<T>): ApiError | null   {
   return isApiErrorResponse(response) ? response.error : null;
 }
 
 /**
  * 提取分页信息
  */
-export function extractPagination<T>(response: ApiResponse<T>): PaginationMeta | null {
-  if (isApiSuccessResponse(response) && 'pagination' in response.meta) {
+export function extractPagination<T>(response: ApiResponse<T>): PaginationMeta | null   {
+  if (isApiSuccessResponse(response) && 'pagination' in response.meta) {'
     return (response.meta as any).pagination;
   }
   return null;

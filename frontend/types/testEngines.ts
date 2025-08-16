@@ -4,21 +4,16 @@
  * 版本: v1.0.0
  */
 
-import type { TestPriority } from './enums';
-
-// 定义缺失的基础类型
-export type UUID = string;
-export type URL = string;
-
-export interface BaseTestConfig {
+import type { TestPriority  } from './enums';// 定义缺失的基础类型'
+export type UUID   = string;export type URL   = string;export interface BaseTestConfig     {
   // 基础测试配置
 }
 
-export interface BaseTestResult {
+export interface BaseTestResult     {
   // 基础测试结果
 }
 
-export interface TestError {
+export interface TestError     {
   code: string;
   message: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
@@ -26,14 +21,14 @@ export interface TestError {
   column?: number;
 }
 
-export interface TestWarning {
+export interface TestWarning     {
   code: string;
   message: string;
   severity: 'info' | 'warning';
   suggestion?: string;
 }
 
-export interface TestRecommendation {
+export interface TestRecommendation     {
   id: string;
   title: string;
   description: string;
@@ -45,7 +40,7 @@ export interface TestRecommendation {
 
 // ==================== SEO 测试类型 ====================
 
-export interface SEOTestConfig extends BaseTestConfig {
+export interface SEOTestConfig extends BaseTestConfig     {
   includeImages?: boolean;
   checkInternalLinks?: boolean;
   checkExternalLinks?: boolean;
@@ -55,7 +50,7 @@ export interface SEOTestConfig extends BaseTestConfig {
   socialMediaTags?: boolean;
 }
 
-export interface SEOTestResult extends BaseTestResult {
+export interface SEOTestResult extends BaseTestResult     {
   testType: 'seo';
   seoScore: number;
   metaTags: MetaTagsAnalysis;
@@ -68,7 +63,7 @@ export interface SEOTestResult extends BaseTestResult {
   mobile: MobileOptimizationAnalysis;
 }
 
-export interface MetaTagsAnalysis {
+export interface MetaTagsAnalysis     {
   title: { present: boolean; length: number; content?: string; };
   description: { present: boolean; length: number; content?: string; };
   keywords: { present: boolean; content?: string; };
@@ -78,14 +73,14 @@ export interface MetaTagsAnalysis {
   twitterCard: Record<string, any>;
 }
 
-export interface HeadingAnalysis {
+export interface HeadingAnalysis     {
   h1Count: number;
   h1Content: string[];
   structure: Array<{ level: number; text: string; }>;
   issues: string[];
 }
 
-export interface ImageAnalysis {
+export interface ImageAnalysis     {
   totalImages: number;
   imagesWithAlt: number;
   imagesWithoutAlt: number;
@@ -93,7 +88,7 @@ export interface ImageAnalysis {
   optimizationSuggestions: string[];
 }
 
-export interface LinkAnalysis {
+export interface LinkAnalysis     {
   totalLinks: number;
   internalLinks: number;
   externalLinks: number;
@@ -102,7 +97,7 @@ export interface LinkAnalysis {
   issues: string[];
 }
 
-export interface ContentAnalysis {
+export interface ContentAnalysis     {
   wordCount: number;
   readabilityScore: number;
   keywordDensity: Record<string, number>;
@@ -110,21 +105,21 @@ export interface ContentAnalysis {
   contentQuality: 'poor' | 'fair' | 'good' | 'excellent';
 }
 
-export interface StructuredDataAnalysis {
+export interface StructuredDataAnalysis     {
   present: boolean;
   types: string[];
   errors: string[];
   warnings: string[];
 }
 
-export interface SocialMediaAnalysis {
+export interface SocialMediaAnalysis     {
   openGraph: { present: boolean; complete: boolean; };
   twitterCard: { present: boolean; complete: boolean; };
   facebookPixel: boolean;
   googleAnalytics: boolean;
 }
 
-export interface MobileOptimizationAnalysis {
+export interface MobileOptimizationAnalysis     {
   responsive: boolean;
   viewportMeta: boolean;
   mobileSpeed: number;
@@ -134,7 +129,7 @@ export interface MobileOptimizationAnalysis {
 
 // ==================== 性能测试类型 ====================
 
-export interface PerformanceTestConfig extends BaseTestConfig {
+export interface PerformanceTestConfig extends BaseTestConfig     {
   device?: 'desktop' | 'mobile' | 'tablet';
   connection?: 'fast' | 'slow' | '3g' | '4g';
   location?: string;
@@ -144,7 +139,7 @@ export interface PerformanceTestConfig extends BaseTestConfig {
   categories?: string[];
 }
 
-export interface PerformanceTestResult extends BaseTestResult {
+export interface PerformanceTestResult extends BaseTestResult     {
   testType: 'performance';
   performanceScore: number;
   coreWebVitals: CoreWebVitals;
@@ -154,15 +149,15 @@ export interface PerformanceTestResult extends BaseTestResult {
   diagnostics: PerformanceDiagnostic[];
 }
 
-export interface CoreWebVitals {
-  lcp: { value: number; rating: 'good' | 'needs-improvement' | 'poor'; };
-  fid: { value: number; rating: 'good' | 'needs-improvement' | 'poor'; };
-  cls: { value: number; rating: 'good' | 'needs-improvement' | 'poor'; };
-  fcp: { value: number; rating: 'good' | 'needs-improvement' | 'poor'; };
-  ttfb: { value: number; rating: 'good' | 'needs-improvement' | 'poor'; };
+export interface CoreWebVitals     {
+  lcp: { value: number; rating: 'good' | 'needs-improvement' | 'poor'; };'
+  fid: { value: number; rating: 'good' | 'needs-improvement' | 'poor'; };'
+  cls: { value: number; rating: 'good' | 'needs-improvement' | 'poor'; };'
+  fcp: { value: number; rating: 'good' | 'needs-improvement' | 'poor'; };'
+  ttfb: { value: number; rating: 'good' | 'needs-improvement' | 'poor'; };'
 }
 
-export interface LighthouseMetrics {
+export interface LighthouseMetrics     {
   performance: number;
   accessibility: number;
   bestPractices: number;
@@ -177,7 +172,7 @@ export interface LighthouseMetrics {
   cumulativeLayoutShift: number;
 }
 
-export interface ResourceAnalysis {
+export interface ResourceAnalysis     {
   totalSize: number;
   totalRequests: number;
   byType: Record<string, { size: number; count: number; }>;
@@ -185,7 +180,7 @@ export interface ResourceAnalysis {
   unusedResources: Array<{ url: string; wastedBytes: number; }>;
 }
 
-export interface PerformanceOpportunity {
+export interface PerformanceOpportunity     {
   id: string;
   title: string;
   description: string;
@@ -194,7 +189,7 @@ export interface PerformanceOpportunity {
   effort: 'low' | 'medium' | 'high';
 }
 
-export interface PerformanceDiagnostic {
+export interface PerformanceDiagnostic     {
   id: string;
   title: string;
   description: string;
@@ -204,7 +199,7 @@ export interface PerformanceDiagnostic {
 
 // ==================== 安全测试类型 ====================
 
-export interface SecurityTestConfig extends BaseTestConfig {
+export interface SecurityTestConfig extends BaseTestConfig     {
   depth?: number;
   includeSubdomains?: boolean;
   checkSSL?: boolean;
@@ -214,7 +209,7 @@ export interface SecurityTestConfig extends BaseTestConfig {
   customChecks?: string[];
 }
 
-export interface SecurityTestResult extends BaseTestResult {
+export interface SecurityTestResult extends BaseTestResult     {
   testType: 'security';
   securityScore: number;
   riskLevel: 'low' | 'medium' | 'high' | 'critical';
@@ -225,7 +220,7 @@ export interface SecurityTestResult extends BaseTestResult {
   contentSecurityPolicy: CSPAnalysis;
 }
 
-export interface SecurityVulnerability {
+export interface SecurityVulnerability     {
   id: string;
   type: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
@@ -238,7 +233,7 @@ export interface SecurityVulnerability {
   evidence?: string[];
 }
 
-export interface SecurityHeaders {
+export interface SecurityHeaders     {
   contentSecurityPolicy: boolean;
   strictTransportSecurity: boolean;
   xFrameOptions: boolean;
@@ -249,7 +244,7 @@ export interface SecurityHeaders {
   expectCT: boolean;
 }
 
-export interface SSLInfo {
+export interface SSLInfo     {
   isSecure: boolean;
   protocol: string;
   cipher: string;
@@ -261,7 +256,7 @@ export interface SSLInfo {
   certificateChain: SSLCertificate[];
 }
 
-export interface SSLCertificate {
+export interface SSLCertificate     {
   subject: string;
   issuer: string;
   validFrom: string;
@@ -269,7 +264,7 @@ export interface SSLCertificate {
   fingerprint: string;
 }
 
-export interface CookieAnalysis {
+export interface CookieAnalysis     {
   totalCookies: number;
   secureCookies: number;
   httpOnlyCookies: number;
@@ -277,7 +272,7 @@ export interface CookieAnalysis {
   issues: string[];
 }
 
-export interface CSPAnalysis {
+export interface CSPAnalysis     {
   present: boolean;
   directives: Record<string, string[]>;
   issues: string[];
@@ -286,7 +281,7 @@ export interface CSPAnalysis {
 
 // ==================== API 测试类型 ====================
 
-export interface APITestConfig extends BaseTestConfig {
+export interface APITestConfig extends BaseTestConfig     {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
   headers?: Record<string, string>;
   body?: any;
@@ -297,12 +292,12 @@ export interface APITestConfig extends BaseTestConfig {
   followRedirects?: boolean;
 }
 
-export interface APIAuthentication {
+export interface APIAuthentication     {
   type: 'none' | 'basic' | 'bearer' | 'apikey' | 'oauth2';
   credentials?: Record<string, string>;
 }
 
-export interface APITestResult extends BaseTestResult {
+export interface APITestResult extends BaseTestResult     {
   testType: 'api';
   method: string;
   statusCode: number;
@@ -314,7 +309,7 @@ export interface APITestResult extends BaseTestResult {
   performance: APIPerformanceMetrics;
 }
 
-export interface APIValidation {
+export interface APIValidation     {
   type: string;
   passed: boolean;
   message: string;
@@ -322,7 +317,7 @@ export interface APIValidation {
   actual?: any;
 }
 
-export interface APIPerformanceMetrics {
+export interface APIPerformanceMetrics     {
   dnsLookup: number;
   tcpConnection: number;
   tlsHandshake: number;
@@ -333,7 +328,7 @@ export interface APIPerformanceMetrics {
 
 // ==================== 兼容性测试类型 ====================
 
-export interface CompatibilityTestConfig extends BaseTestConfig {
+export interface CompatibilityTestConfig extends BaseTestConfig     {
   browsers?: BrowserConfig[];
   devices?: DeviceConfig[];
   viewports?: ViewportConfig[];
@@ -341,27 +336,27 @@ export interface CompatibilityTestConfig extends BaseTestConfig {
   includeScreenshots?: boolean;
 }
 
-export interface BrowserConfig {
+export interface BrowserConfig     {
   name: string;
   version: string;
   platform: string;
 }
 
-export interface DeviceConfig {
+export interface DeviceConfig     {
   name: string;
   type: 'desktop' | 'tablet' | 'mobile';
   userAgent: string;
   viewport: { width: number; height: number; };
 }
 
-export interface ViewportConfig {
+export interface ViewportConfig     {
   name: string;
   width: number;
   height: number;
   devicePixelRatio?: number;
 }
 
-export interface CompatibilityTestResult extends BaseTestResult {
+export interface CompatibilityTestResult extends BaseTestResult     {
   testType: 'compatibility';
   overallScore: number;
   browserResults: BrowserTestResult[];
@@ -370,7 +365,7 @@ export interface CompatibilityTestResult extends BaseTestResult {
   featureSupport: FeatureSupportResult[];
 }
 
-export interface BrowserTestResult {
+export interface BrowserTestResult     {
   browser: BrowserConfig;
   score: number;
   success: boolean;
@@ -381,7 +376,7 @@ export interface BrowserTestResult {
   features: Record<string, boolean>;
 }
 
-export interface DeviceTestResult {
+export interface DeviceTestResult     {
   device: DeviceConfig;
   score: number;
   success: boolean;
@@ -391,7 +386,7 @@ export interface DeviceTestResult {
   screenshot?: string;
 }
 
-export interface ResponsiveTestResult {
+export interface ResponsiveTestResult     {
   viewport: ViewportConfig;
   score: number;
   layoutScore: number;
@@ -401,7 +396,7 @@ export interface ResponsiveTestResult {
   screenshot?: string;
 }
 
-export interface FeatureSupportResult {
+export interface FeatureSupportResult     {
   feature: string;
   supported: boolean;
   browserSupport: Record<string, boolean>;
@@ -409,21 +404,21 @@ export interface FeatureSupportResult {
   impact: 'low' | 'medium' | 'high';
 }
 
-export interface LayoutIssue {
+export interface LayoutIssue     {
   type: string;
   element: string;
   description: string;
   severity: 'low' | 'medium' | 'high';
 }
 
-export interface TouchIssue {
+export interface TouchIssue     {
   type: string;
   element: string;
   description: string;
   severity: 'low' | 'medium' | 'high';
 }
 
-export interface ResponsiveIssue {
+export interface ResponsiveIssue     {
   type: string;
   description: string;
   severity: 'low' | 'medium' | 'high';
@@ -432,7 +427,7 @@ export interface ResponsiveIssue {
 
 // ==================== 无障碍测试类型 ====================
 
-export interface AccessibilityTestConfig extends BaseTestConfig {
+export interface AccessibilityTestConfig extends BaseTestConfig     {
   level?: 'A' | 'AA' | 'AAA';
   categories?: string[];
   includeScreenshots?: boolean;
@@ -440,7 +435,7 @@ export interface AccessibilityTestConfig extends BaseTestConfig {
   checkScreenReader?: boolean;
 }
 
-export interface AccessibilityTestResult extends BaseTestResult {
+export interface AccessibilityTestResult extends BaseTestResult     {
   testType: 'accessibility';
   level: string;
   complianceLevel: 'poor' | 'fair' | 'good' | 'excellent';
@@ -449,7 +444,7 @@ export interface AccessibilityTestResult extends BaseTestResult {
   summary: AccessibilitySummary;
 }
 
-export interface AccessibilityViolation {
+export interface AccessibilityViolation     {
   id: string;
   impact: 'minor' | 'moderate' | 'serious' | 'critical';
   description: string;
@@ -459,14 +454,14 @@ export interface AccessibilityViolation {
   nodes: AccessibilityNode[];
 }
 
-export interface AccessibilityPass {
+export interface AccessibilityPass     {
   id: string;
   description: string;
   help: string;
   nodes: AccessibilityNode[];
 }
 
-export interface AccessibilityNode {
+export interface AccessibilityNode     {
   html: string;
   target: string[];
   failureSummary?: string;
@@ -475,14 +470,14 @@ export interface AccessibilityNode {
   none?: AccessibilityCheck[];
 }
 
-export interface AccessibilityCheck {
+export interface AccessibilityCheck     {
   id: string;
   impact: string;
   message: string;
   data: any;
 }
 
-export interface AccessibilitySummary {
+export interface AccessibilitySummary     {
   totalViolations: number;
   totalPasses: number;
   violationsByImpact: {
@@ -497,7 +492,7 @@ export interface AccessibilitySummary {
 
 // ==================== 压力测试类型 ====================
 
-export interface StressTestConfig extends BaseTestConfig {
+export interface StressTestConfig extends BaseTestConfig     {
   duration: number; // 秒
   concurrency: number;
   rampUp?: number;
@@ -508,13 +503,13 @@ export interface StressTestConfig extends BaseTestConfig {
   scenarios?: StressTestScenario[];
 }
 
-export interface StressTestScenario {
+export interface StressTestScenario     {
   name: string;
   weight: number;
   steps: StressTestStep[];
 }
 
-export interface StressTestStep {
+export interface StressTestStep     {
   name: string;
   url: string;
   method: string;
@@ -524,13 +519,13 @@ export interface StressTestStep {
   assertions?: StressTestAssertion[];
 }
 
-export interface StressTestAssertion {
+export interface StressTestAssertion     {
   type: 'status' | 'response_time' | 'body_contains' | 'header_exists';
   value: any;
   operator?: 'equals' | 'less_than' | 'greater_than' | 'contains';
 }
 
-export interface StressTestResult extends BaseTestResult {
+export interface StressTestResult extends BaseTestResult     {
   testType: 'stress';
   metrics: StressTestMetrics;
   errors: StressTestError[];
@@ -538,7 +533,7 @@ export interface StressTestResult extends BaseTestResult {
   timeline: StressTestTimelinePoint[];
 }
 
-export interface StressTestMetrics extends Record<string, number> {
+export interface StressTestMetrics extends Record<string, number>     {
   totalRequests: number;
   successfulRequests: number;
   failedRequests: number;
@@ -554,7 +549,7 @@ export interface StressTestMetrics extends Record<string, number> {
   concurrentUsers: number;
 }
 
-export interface StressTestError {
+export interface StressTestError     {
   timestamp: string;
   type: string;
   message: string;
@@ -563,13 +558,13 @@ export interface StressTestError {
   count: number;
 }
 
-export interface StressTestSummary {
+export interface StressTestSummary     {
   passed: boolean;
   performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F';
   bottlenecks: string[];
 }
 
-export interface StressTestTimelinePoint {
+export interface StressTestTimelinePoint     {
   timestamp: string;
   activeUsers: number;
   requestsPerSecond: number;
@@ -580,17 +575,13 @@ export interface StressTestTimelinePoint {
 
 // ==================== 统一测试引擎接口 ====================
 
-export type TestConfig =
-  | SEOTestConfig
+export type TestConfig   = | SEOTestConfig
   | PerformanceTestConfig
   | SecurityTestConfig
   | APITestConfig
   | CompatibilityTestConfig
   | AccessibilityTestConfig
-  | StressTestConfig;
-
-export type TestResult =
-  | SEOTestResult
+  | StressTestConfig;export type TestResult   = | SEOTestResult
   | PerformanceTestResult
   | SecurityTestResult
   | APITestResult
