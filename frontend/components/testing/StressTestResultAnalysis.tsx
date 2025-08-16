@@ -72,6 +72,31 @@ const StressTestResultAnalysis: React.FC<StressTestResultAnalysisProps> = ({
   className = ''
 }) => {
   
+  // 页面级功能
+  const [pageTitle, setPageTitle] = useState('');
+
+  // 设置页面标题
+  useEffect(() => {
+    if (pageTitle) {
+      document.title = `${pageTitle} - Test Web`;
+    }
+  }, [pageTitle]);
+
+  // 页面可见性检测
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // 页面变为可见时刷新数据
+        fetchData?.();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [fetchData]);
+  
   const componentId = useId();
   const errorId = `${componentId}-error`;
   const descriptionId = `${componentId}-description`;

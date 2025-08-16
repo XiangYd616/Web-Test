@@ -82,6 +82,15 @@ export function usePagination(options: UsePaginationOptions = {}) {
   // 更新分页信息
   const updatePagination = useCallback((pagination: Partial<PaginationInfo>) => {
   
+  // 性能优化
+  const memoizedProps = useMemo(() => ({
+    className: combinedClassName,
+    style: computedStyle,
+    disabled,
+    'aria-label': ariaLabel,
+    'data-testid': testId
+  }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
+  
   const componentId = useId();
   const errorId = `${componentId}-error`;
   const descriptionId = `${componentId}-description`;

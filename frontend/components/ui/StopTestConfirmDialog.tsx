@@ -19,6 +19,50 @@ export const StopTestConfirmDialog: React.FC<StopTestConfirmDialogProps> = ({
   dataCollected = 0
 }) => {
   
+  // 页面级功能
+  const [pageTitle, setPageTitle] = useState('');
+
+  // 设置页面标题
+  useEffect(() => {
+    if (pageTitle) {
+      document.title = `${pageTitle} - Test Web`;
+    }
+  }, [pageTitle]);
+
+  // 页面可见性检测
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // 页面变为可见时刷新数据
+        fetchData?.();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [fetchData]);
+  
+  // 测试业务逻辑
+  const [testConfig, setTestConfig] = useState({});
+  const [testResults, setTestResults] = useState(null);
+  const [isRunning, setIsRunning] = useState(false);
+
+  const runTest = useCallback(async (config) => {
+    try {
+      setIsRunning(true);
+      setTestResults(null);
+
+      const response = await apiClient.post('/api/tests/run', config);
+      setTestResults(response.data);
+    } catch (err) {
+      handleError(err, 'test execution');
+    } finally {
+      setIsRunning(false);
+    }
+  }, [handleError]);
+  
   const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
     if (disabled || loading) return;
     onClick?.(event);

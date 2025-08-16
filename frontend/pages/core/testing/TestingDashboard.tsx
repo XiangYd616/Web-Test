@@ -13,6 +13,57 @@ import { TestService } from '../../../services/unifiedTestService';
 
 const TestingDashboard: React.FC = () => {
   
+  // 页面级功能
+  const [pageTitle, setPageTitle] = useState('');
+
+  // 设置页面标题
+  useEffect(() => {
+    if (pageTitle) {
+      document.title = `${pageTitle} - Test Web`;
+    }
+  }, [pageTitle]);
+
+  // 页面可见性检测
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // 页面变为可见时刷新数据
+        fetchData?.();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [fetchData]);
+  
+  // 图表和数据可视化
+  const [chartData, setChartData] = useState(null);
+  const [chartType, setChartType] = useState('line');
+
+  const processChartData = useCallback((rawData) => {
+    if (!rawData) return null;
+
+    // 处理数据为图表格式
+    return {
+      labels: rawData.map(item => item.label),
+      datasets: [{
+        label: '数据',
+        data: rawData.map(item => item.value),
+        borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+      }]
+    };
+  }, []);
+
+  useEffect(() => {
+    if (data) {
+      const processed = processChartData(data);
+      setChartData(processed);
+    }
+  }, [data, processChartData]);
+  
   const [feedback, setFeedback] = useState({ type: '', message: '' });
   
   const showFeedback = (type, message, duration = 3000) => {

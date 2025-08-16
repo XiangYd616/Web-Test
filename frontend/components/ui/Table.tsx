@@ -70,6 +70,15 @@ export const Table = <T extends Record<string, any>>({
   emptyText = '暂无数据'
 }: TableProps<T>) => {
   
+  // 性能优化
+  const memoizedProps = useMemo(() => ({
+    className: combinedClassName,
+    style: computedStyle,
+    disabled,
+    'aria-label': ariaLabel,
+    'data-testid': testId
+  }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
+  
   const componentId = useId();
   const errorId = `${componentId}-error`;
   const descriptionId = `${componentId}-description`;

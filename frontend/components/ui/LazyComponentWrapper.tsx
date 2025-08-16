@@ -24,6 +24,40 @@ export const LazyComponentWrapper: React.FC<LazyComponentWrapperProps> = ({
   onLoad,
   onError
 }) => {
+  
+  // 性能优化
+  const memoizedProps = useMemo(() => ({
+    className: combinedClassName,
+    style: computedStyle,
+    disabled,
+    'aria-label': ariaLabel,
+    'data-testid': testId
+  }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
+  
+  // 可访问性支持
+  const {
+    'aria-label': ariaLabel,
+    'aria-describedby': ariaDescribedBy,
+    role,
+    tabIndex = 0,
+    'data-testid': testId
+  } = props;
+
+  const accessibilityProps = {
+    'aria-label': ariaLabel,
+    'aria-describedby': ariaDescribedBy,
+    role,
+    tabIndex: disabled ? -1 : tabIndex,
+    'data-testid': testId
+  };
+
+  // 键盘导航支持
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onClick?.(event as any);
+    }
+  }, [onClick]);
   // 预加载组件
   React.useEffect(() => {
     if (preload) {
@@ -105,4 +139,4 @@ export const useLazyComponent = (
   };
 };
 
-export default LazyComponentWrapper;
+export default React.memo(LazyComponentWrapper);

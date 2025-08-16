@@ -28,6 +28,63 @@ const DataDensityControl: React.FC<DataDensityControlProps> = ({
   onOptimizationToggle,
   performanceStats
 }) => {
+  
+  // 性能优化
+  const memoizedProps = useMemo(() => ({
+    className: combinedClassName,
+    style: computedStyle,
+    disabled,
+    'aria-label': ariaLabel,
+    'data-testid': testId
+  }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
+  
+  // 错误处理
+  const [error, setError] = useState<string | null>(null);
+
+  const handleError = useCallback((err: Error | string) => {
+    const errorMessage = typeof err === 'string' ? err : err.message;
+    setError(errorMessage);
+
+    // 可选：发送错误报告
+    if (process.env.NODE_ENV === 'production') {
+      console.error('Component error:', errorMessage);
+    }
+  }, []);
+
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
+  // 错误边界效果
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        clearError();
+      }, 5000); // 5秒后自动清除错误
+
+      return () => clearTimeout(timer);
+    }
+  }, [error, clearError]);
+  
+  // 加载状态管理
+  const [isLoading, setIsLoading] = useState(loading || false);
+
+  useEffect(() => {
+    setIsLoading(loading || false);
+  }, [loading]);
+
+  const withLoading = useCallback(async (asyncOperation: () => Promise<any>) => {
+    try {
+      setIsLoading(true);
+      const result = await asyncOperation();
+      return result;
+    } catch (err) {
+      handleError(err as Error);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [handleError]);
   const [isExpanded, setIsExpanded] = useState(false);
 
   const compressionRatio = totalDataPoints > 0 ? totalDataPoints / currentDataPoints : 1;

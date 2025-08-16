@@ -33,6 +33,43 @@ const DataQueryPanel: React.FC<DataQueryPanelProps> = ({
   isLoading = false
 }) => {
   
+  // 性能优化
+  const memoizedProps = useMemo(() => ({
+    className: combinedClassName,
+    style: computedStyle,
+    disabled,
+    'aria-label': ariaLabel,
+    'data-testid': testId
+  }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
+  
+  // 错误处理
+  const [error, setError] = useState<string | null>(null);
+
+  const handleError = useCallback((err: Error | string) => {
+    const errorMessage = typeof err === 'string' ? err : err.message;
+    setError(errorMessage);
+
+    // 可选：发送错误报告
+    if (process.env.NODE_ENV === 'production') {
+      console.error('Component error:', errorMessage);
+    }
+  }, []);
+
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
+  // 错误边界效果
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        clearError();
+      }, 5000); // 5秒后自动清除错误
+
+      return () => clearTimeout(timer);
+    }
+  }, [error, clearError]);
+  
   const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
     if (disabled || loading) return;
     onClick?.(event);

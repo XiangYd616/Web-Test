@@ -19,6 +19,81 @@ export const DataManagement: React.FC<DataManagementProps> = ({
   defaultTab = 'history'
 }) => {
   
+  // 页面级功能
+  const [pageTitle, setPageTitle] = useState('');
+
+  // 设置页面标题
+  useEffect(() => {
+    if (pageTitle) {
+      document.title = `${pageTitle} - Test Web`;
+    }
+  }, [pageTitle]);
+
+  // 页面可见性检测
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // 页面变为可见时刷新数据
+        fetchData?.();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [fetchData]);
+  
+  // CRUD操作
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+
+  const handleCreate = useCallback(async (newItem) => {
+    try {
+      setLoading(true);
+      const response = await apiClient.post('/api/items', newItem);
+      setData(prev => [...(prev || []), response.data]);
+      setIsCreating(false);
+    } catch (err) {
+      handleError(err, 'create');
+    } finally {
+      setLoading(false);
+    }
+  }, [handleError]);
+
+  const handleUpdate = useCallback(async (id, updates) => {
+    try {
+      setLoading(true);
+      const response = await apiClient.put(`/api/items/${id}`, updates);
+      setData(prev => prev?.map(item =>
+        item.id === id ? response.data : item
+      ));
+      setIsEditing(false);
+      setSelectedItem(null);
+    } catch (err) {
+      handleError(err, 'update');
+    } finally {
+      setLoading(false);
+    }
+  }, [handleError]);
+
+  const handleDelete = useCallback(async (id) => {
+    if (!window.confirm('确定要删除这个项目吗？')) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await apiClient.delete(`/api/items/${id}`);
+      setData(prev => prev?.filter(item => item.id !== id));
+    } catch (err) {
+      handleError(err, 'delete');
+    } finally {
+      setLoading(false);
+    }
+  }, [handleError]);
+  
   const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
     if (disabled || loading) return;
     onClick?.(event);

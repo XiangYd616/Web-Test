@@ -18,6 +18,15 @@ export const DynamicChartBar: React.FC<DynamicChartBarProps> = ({
   className = '',
   animated = true
 }) => {
+  
+  // 性能优化
+  const memoizedProps = useMemo(() => ({
+    className: combinedClassName,
+    style: computedStyle,
+    disabled,
+    'aria-label': ariaLabel,
+    'data-testid': testId
+  }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
   const colorClasses = {
     blue: 'bg-blue-500',
     green: 'bg-green-500',

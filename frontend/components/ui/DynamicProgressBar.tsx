@@ -16,6 +16,15 @@ export const DynamicProgressBar: React.FC<DynamicProgressBarProps> = ({
   color = 'blue',
   animated = true
 }) => {
+  
+  // 性能优化
+  const memoizedProps = useMemo(() => ({
+    className: combinedClassName,
+    style: computedStyle,
+    disabled,
+    'aria-label': ariaLabel,
+    'data-testid': testId
+  }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
   const heightClasses = {
     sm: 'h-1',
     md: 'h-2',

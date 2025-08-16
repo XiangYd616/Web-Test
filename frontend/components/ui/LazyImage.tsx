@@ -34,6 +34,40 @@ export const LazyImage: React.FC<LazyImageProps> = ({
   quality = 75,
   priority = false
 }) => {
+  
+  // 性能优化
+  const memoizedProps = useMemo(() => ({
+    className: combinedClassName,
+    style: computedStyle,
+    disabled,
+    'aria-label': ariaLabel,
+    'data-testid': testId
+  }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
+  
+  // 可访问性支持
+  const {
+    'aria-label': ariaLabel,
+    'aria-describedby': ariaDescribedBy,
+    role,
+    tabIndex = 0,
+    'data-testid': testId
+  } = props;
+
+  const accessibilityProps = {
+    'aria-label': ariaLabel,
+    'aria-describedby': ariaDescribedBy,
+    role,
+    tabIndex: disabled ? -1 : tabIndex,
+    'data-testid': testId
+  };
+
+  // 键盘导航支持
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onClick?.(event as any);
+    }
+  }, [onClick]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(priority);
   const [hasError, setHasError] = useState(false);
@@ -164,4 +198,4 @@ export const LazyImage: React.FC<LazyImageProps> = ({
   );
 };
 
-export default LazyImage;
+export default React.memo(LazyImage);
