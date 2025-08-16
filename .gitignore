@@ -89,7 +89,6 @@ playwright/.cache/
 # Server logs
 backend/logs/
 backend/runtime/logs/
-docs
 
 # Vite cache
 .vite/
