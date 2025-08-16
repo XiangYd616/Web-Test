@@ -214,12 +214,12 @@ app.use(compression({
                   title: '动态导入',
                   code: `// 按需加载模块
 async function loadFeature() {
-  const { feature } = await import('./feature.js');
+  const { feature } = await // // // // // import('./feature.js'); // 已删除 // 已删除 // 服务已删除 // 服务已删除
   return feature;
 }
 
 // React代码分割
-const LazyComponent = React.lazy(() => import('./LazyComponent'));
+const LazyComponent = React.lazy(() => // // // import('./LazyComponent')); // 已删除 // 已删除 // 服务已删除 // 服务已删除
 
 function App() {
   return (

@@ -15,7 +15,7 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 // 统一配置管理
 const { configManager } = require('./ConfigManager.js');
-const { unifiedTestEngineManager } = require('../engines/UnifiedTestEngineManager.js');
+const { testEngineManager } = require('../engines/core/TestEngineManager.js');
 
 // 导入路由
 const authRoutes = require('../routes/auth.js');
@@ -30,10 +30,11 @@ const adminRoutes = require('../routes/admin.js');
 // const { authMiddleware } = require('../middleware/auth.js'); // 已移除，不再需要
 const dataManagementRoutes = require('../routes/dataManagement.js');
 const testHistoryRoutes = require('../routes/testHistory.js');
+const unifiedTestHistoryRoutes = require('../routes/unifiedTestHistory.js');
 const monitoringRoutes = require('../routes/monitoring.js');
 const reportRoutes = require('../routes/reports.js');
 const integrationRoutes = require('../routes/integrations.js');
-// const cacheRoutes = require('../config/cache.js'); // 已移除，使用SmartCacheService
+// // // const cacheRoutes = require('../config/cache.js'); // 已删除 // 已删除 // 已移除，使用SmartCacheService
 const errorRoutes = require('../routes/errors.js');
 const performanceRoutes = require('../routes/performance.js');
 const filesRoutes = require('../routes/files.js');
@@ -58,8 +59,8 @@ const { connectDB, testConnection } = require('../config/database.js');
 // const testQueueService = require('../services/testQueueService');
 
 // 导入缓存和性能优化系统
-// const cacheConfig = require('../config/cache.js'); // 已移除，使用SmartCacheService
-// const CacheManager = require('../services/cache/CacheManager.js'); // 已移除，使用SmartCacheService
+// // // const cacheConfig = require('../config/cache.js'); // 已删除 // 已删除 // 已移除，使用SmartCacheService
+// // // const CacheManager = require('../services/cache/CacheManager.js'); // 已删除 // 已删除 // 已移除，使用SmartCacheService
 const { createCacheMiddleware } = require('../middleware/cacheMiddleware.js');
 const {
   createCompressionMiddleware,
@@ -72,7 +73,7 @@ const {
 const realtimeConfig = require('../config/realtime.js');
 
 // 导入Redis服务
-// const redisConnection = require('../services/redis/connection.js'); // 已移除，使用SmartCacheService
+// // const redisConnection = require('../services/redis/connection.js'); // 已删除 // 已移除，使用SmartCacheService
 const cacheMonitoring = require('../routes/monitoring.js');
 
 // 导入测试历史服务将在启动时动态加载
@@ -205,13 +206,18 @@ async function initializeApp() {
     // 2. 设置全局错误处理中间件
     app.use(unifiedErrorHandler.expressMiddleware());
 
-    // 3. 初始化路由管理器
+    // 3. 初始化统一测试引擎管理器
+    console.log('🔧 初始化测试引擎管理器...');
+    await testEngineManager.initialize();
+    console.log('✅ 测试引擎管理器初始化完成');
+
+    // 4. 初始化路由管理器
     await routeManager.initialize();
 
-    // 4. 注册所有标准路由
+    // 5. 注册所有标准路由
     routeManager.registerStandardRoutes();
 
-    // 5. 应用所有路由
+    // 6. 应用所有路由
     routeManager.applyRoutes();
 
     console.log('✅ Application systems initialized successfully');
@@ -230,13 +236,22 @@ app.get('/health', async (req, res) => {
     // 检查数据库连接
     await testConnection();
 
-    // 检查Redis连接
-    const redisHealth = await redisConnection.healthCheck();
-
-    // 检查实时通信系统
-    const realtimeHealth = realtimeConfig.isReady() ?
-      await realtimeConfig.healthCheck() :
-      { status: 'not_initialized' };
+    // 检查测试引擎状态
+    let engineHealth = { status: 'not_initialized' };
+    try {
+      if (testEngineManager.isInitialized) {
+        const healthStatus = testEngineManager.getHealthStatus();
+        const totalEngines = Object.keys(healthStatus).length;
+        const healthyEngines = Object.values(healthStatus).filter(status => status.healthy).length;
+        engineHealth = {
+          status: healthyEngines === totalEngines ? 'healthy' : 'degraded',
+          healthyEngines,
+          totalEngines
+        };
+      }
+    } catch (error) {
+      engineHealth = { status: 'error', error: error.message };
+    }
 
     res.json({
       status: 'healthy',
@@ -245,7 +260,7 @@ app.get('/health', async (req, res) => {
       version: APP_VERSION,
       environment: process.env.NODE_ENV || 'development',
       database: 'connected',
-      redis: redisHealth,
+      engines: engineHealth,
       cache: global.cacheManager ? 'initialized' : 'not_initialized',
       realtime: realtimeHealth.status,
       uptime: process.uptime(),
@@ -574,7 +589,7 @@ const startServer = async () => {
     // 清理旧的测试房间
     setTimeout(async () => {
       try {
-        const { RealStressTestEngine } = require('../engines/stress/realStressTestEngine');
+//         const { RealStressTestEngine } = require('../engines/stress/realStressTestEngine'); // 已删除
         const stressTestEngine = new RealStressTestEngine();
         try {
           stressTestEngine.io = io; // 设置WebSocket实例
@@ -755,7 +770,7 @@ function setupWebSocketHandlers(io) {
         }
 
         // 获取测试引擎实例
-        const { RealStressTestEngine } = require('../engines/stress/realStressTestEngine');
+//         const { RealStressTestEngine } = require('../engines/stress/realStressTestEngine'); // 已删除
         const stressTestEngine = new RealStressTestEngine();
         stressTestEngine.io = io;
 

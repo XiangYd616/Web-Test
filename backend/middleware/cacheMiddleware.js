@@ -1,10 +1,10 @@
 /**
  * 简化的缓存中间件
- * 使用SmartCacheService提供基础缓存功能
+ * 使用CacheService提供基础缓存功能
  */
 
 const crypto = require('crypto');
-const smartCacheService = require('../services/smartCacheService');
+// // // // const smartCacheService = require('../services/smartCacheService'); // 已删除 // 已删除 // 服务已删除 // 服务已删除
 
 /**
  * 创建缓存中间件
