@@ -244,6 +244,22 @@ class RouteManager {
         group: 'auth'
       },
 
+      // 测试执行路由 - 新增
+      {
+        path: '/api/tests',
+        module: '../routes/tests.js',
+        description: '测试执行API',
+        group: 'testSpecific'
+      },
+
+      // 数据管理路由 - 新增
+      {
+        path: '/api/data',
+        module: '../routes/data.js',
+        description: '数据管理API',
+        group: 'dataSpecific'
+      },
+
       // 配置管理路由 - 高优先级
       {
         path: '/api/config',
