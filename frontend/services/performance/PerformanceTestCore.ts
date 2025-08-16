@@ -1,5 +1,5 @@
 
-import { CacheAnalysis, CompressionAnalysis, CoreWebVitals, PageSpeedMetrics, PERFORMANCE_CONFIG_PRESETS, PerformanceIssue, PerformanceRecommendation, PerformanceTestCallback, PerformanceTestOptions, PerformanceTestProgress, PerformanceTestResult, ResourceAnalysis, UnifiedPerformanceConfig } from '../../types/performance';
+import {CacheAnalysis, CompressionAnalysis, CoreWebVitals, PageSpeedMetrics, PERFORMANCE_CONFIG_PRESETS, PerformanceConfig, PerformanceIssue, PerformanceRecommendation, PerformanceTestCallback, PerformanceTestOptions, PerformanceTestProgress, PerformanceTestResult, ResourceAnalysis} from '../../types/performance';
 
 export class PerformanceTestCore {
   private activeTests = new Map<string, any>();
@@ -10,7 +10,7 @@ export class PerformanceTestCore {
    */
   async runPerformanceTest(
     url: string,
-    config: Partial<UnifiedPerformanceConfig> = {},
+    config: Partial<PerformanceConfig> = {},
     options: PerformanceTestOptions = {}
   ): Promise<PerformanceTestResult> {
     // 合并配置
@@ -105,7 +105,7 @@ export class PerformanceTestCore {
    */
   private async executePerformanceChecks(
     url: string,
-    config: UnifiedPerformanceConfig,
+    config: PerformanceConfig,
     result: PerformanceTestResult,
     onProgress?: PerformanceTestCallback
   ): Promise<void> {
@@ -139,7 +139,7 @@ export class PerformanceTestCore {
   private async executeSpecificCheck(
     checkType: string,
     url: string,
-    config: UnifiedPerformanceConfig,
+    config: PerformanceConfig,
     result: PerformanceTestResult
   ): Promise<void> {
     switch (checkType) {
@@ -176,7 +176,7 @@ export class PerformanceTestCore {
   /**
    * 页面速度检测
    */
-  private async checkPageSpeed(url: string, config: UnifiedPerformanceConfig): Promise<PageSpeedMetrics> {
+  private async checkPageSpeed(url: string, config: PerformanceConfig): Promise<PageSpeedMetrics> {
     try {
       const response = await fetch(`${this.apiBaseUrl}/performance/page-speed`, {
         method: 'POST',
@@ -200,7 +200,7 @@ export class PerformanceTestCore {
   /**
    * Core Web Vitals检测
    */
-  private async checkCoreWebVitals(url: string, config: UnifiedPerformanceConfig): Promise<CoreWebVitals> {
+  private async checkCoreWebVitals(url: string, config: PerformanceConfig): Promise<CoreWebVitals> {
     try {
       // 首先尝试API调用
       try {
@@ -241,7 +241,7 @@ export class PerformanceTestCore {
   /**
    * 资源分析
    */
-  private async analyzeResources(url: string, config: UnifiedPerformanceConfig): Promise<ResourceAnalysis> {
+  private async analyzeResources(url: string, config: PerformanceConfig): Promise<ResourceAnalysis> {
     try {
       const response = await fetch(`${this.apiBaseUrl}/performance/resources`, {
         method: 'POST',
@@ -265,7 +265,7 @@ export class PerformanceTestCore {
   /**
    * 缓存分析
    */
-  private async analyzeCaching(url: string, config: UnifiedPerformanceConfig): Promise<CacheAnalysis> {
+  private async analyzeCaching(url: string, config: PerformanceConfig): Promise<CacheAnalysis> {
     // 实现缓存分析逻辑
     return this.getDefaultCacheAnalysis();
   }
@@ -273,7 +273,7 @@ export class PerformanceTestCore {
   /**
    * 压缩分析
    */
-  private async analyzeCompression(url: string, config: UnifiedPerformanceConfig): Promise<CompressionAnalysis> {
+  private async analyzeCompression(url: string, config: PerformanceConfig): Promise<CompressionAnalysis> {
     // 实现压缩分析逻辑
     return this.getDefaultCompressionAnalysis();
   }
@@ -281,7 +281,7 @@ export class PerformanceTestCore {
   /**
    * 移动端性能检测
    */
-  private async checkMobilePerformance(url: string, config: UnifiedPerformanceConfig) {
+  private async checkMobilePerformance(url: string, config: PerformanceConfig) {
     // 实现移动端性能检测逻辑
     return {
       score: Math.floor(Math.random() * 40) + 60,
@@ -295,7 +295,7 @@ export class PerformanceTestCore {
   /**
    * 合并配置
    */
-  private mergeConfig(config: Partial<UnifiedPerformanceConfig>): UnifiedPerformanceConfig {
+  private mergeConfig(config: Partial<PerformanceConfig>): PerformanceConfig {
     const preset = config.level ? PERFORMANCE_CONFIG_PRESETS[config.level] : PERFORMANCE_CONFIG_PRESETS.standard;
     return { ...preset, ...config };
   }
@@ -304,7 +304,7 @@ export class PerformanceTestCore {
    * 生成测试ID
    */
   private generateTestId(): string {
-    return `perf_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `perf_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   /**
@@ -321,7 +321,7 @@ export class PerformanceTestCore {
   /**
    * 获取启用的检测项
    */
-  private getEnabledChecks(config: UnifiedPerformanceConfig): string[] {
+  private getEnabledChecks(config: PerformanceConfig): string[] {
     const checks: string[] = [];
     if (config.pageSpeed) checks.push('pageSpeed');
     if (config.coreWebVitals) checks.push('coreWebVitals');
@@ -335,7 +335,7 @@ export class PerformanceTestCore {
   /**
    * 获取已完成的检测项
    */
-  private getCompletedChecks(config: UnifiedPerformanceConfig): string[] {
+  private getCompletedChecks(config: PerformanceConfig): string[] {
     return this.getEnabledChecks(config);
   }
 
@@ -667,7 +667,7 @@ export class PerformanceTestCore {
   /**
    * 现代Web功能检查
    */
-  private async checkModernWebFeatures(url: string, config: UnifiedPerformanceConfig) {
+  private async checkModernWebFeatures(url: string, config: PerformanceConfig) {
     try {
       const response = await fetch(url);
       const html = await response.text();
@@ -722,7 +722,7 @@ export class PerformanceTestCore {
   /**
    * 网络优化分析
    */
-  private async analyzeNetworkOptimization(url: string, config: UnifiedPerformanceConfig) {
+  private async analyzeNetworkOptimization(url: string, config: PerformanceConfig) {
     try {
       const response = await fetch(url);
       const headers = response.headers;
@@ -798,7 +798,7 @@ export class PerformanceTestCore {
   /**
    * 第三方影响分析
    */
-  private async analyzeThirdPartyImpact(url: string, config: UnifiedPerformanceConfig) {
+  private async analyzeThirdPartyImpact(url: string, config: PerformanceConfig) {
     try {
       const response = await fetch(url);
       const html = await response.text();
@@ -894,7 +894,7 @@ export class PerformanceTestCore {
 
   private detectAnalytics(html: string): string[] {
     const patterns = [
-      { name: 'Google Analytics', pattern: /google-analytics|gtag|ga/(/ },
+      { name: 'Google Analytics', pattern: /google-analytics|gtag|ga/ },
       { name: 'Adobe Analytics', pattern: /omniture|s_code|adobe/ },
       { name: 'Mixpanel', pattern: /mixpanel/ },
       { name: 'Hotjar', pattern: /hotjar/ },
@@ -906,10 +906,10 @@ export class PerformanceTestCore {
 
   private detectSocialMedia(html: string): string[] {
     const patterns = [
-      { name: 'Facebook Pixel', pattern: /facebook/.net|fbevents/ },
-      { name: 'Twitter', pattern: /twitter/.com//widgets/ },
-      { name: 'LinkedIn', pattern: /linkedin/.com/ },
-      { name: 'Pinterest', pattern: /pinterest/.com/ }
+      { name: 'Facebook Pixel', pattern: /facebook\.net|fbevents/ },
+      { name: 'Twitter', pattern: /twitter\.com\/widgets/ },
+      { name: 'LinkedIn', pattern: /linkedin\.com/ },
+      { name: 'Pinterest', pattern: /pinterest\.com/ }
     ];
 
     return patterns.filter(p => p.pattern.test(html)).map(p => p.name);
@@ -919,7 +919,7 @@ export class PerformanceTestCore {
     const patterns = [
       { name: 'Google Ads', pattern: /googleadservices|googlesyndication/ },
       { name: 'Amazon Associates', pattern: /amazon-adsystem/ },
-      { name: 'Media.net', pattern: /media/.net/ }
+      { name: 'Media.net', pattern: /media\.net/ }
     ];
 
     return patterns.filter(p => p.pattern.test(html)).map(p => p.name);
@@ -927,8 +927,8 @@ export class PerformanceTestCore {
 
   private detectWebFonts(html: string): string[] {
     const patterns = [
-      { name: 'Google Fonts', pattern: /fonts/.googleapis/.com/ },
-      { name: 'Adobe Fonts', pattern: /typekit/.net|use/.typekit/ },
+      { name: 'Google Fonts', pattern: /fonts\.googleapis\.com/ },
+      { name: 'Adobe Fonts', pattern: /typekit\.net|use\.typekit/ },
       { name: 'Font Awesome', pattern: /fontawesome/ }
     ];
 
@@ -937,7 +937,7 @@ export class PerformanceTestCore {
 
   private detectMaps(html: string): string[] {
     const patterns = [
-      { name: 'Google Maps', pattern: /maps/.googleapis/.com/ },
+      { name: 'Google Maps', pattern: /maps\.googleapis\.com/ },
       { name: 'Mapbox', pattern: /mapbox/ },
       { name: 'OpenStreetMap', pattern: /openstreetmap/ }
     ];
@@ -957,8 +957,8 @@ export class PerformanceTestCore {
 
   private detectVideoPlayers(html: string): string[] {
     const patterns = [
-      { name: 'YouTube', pattern: /youtube/.com//embed/ },
-      { name: 'Vimeo', pattern: /vimeo/.com/ },
+      { name: 'YouTube', pattern: /youtube\.com\/embed/ },
+      { name: 'Vimeo', pattern: /vimeo\.com/ },
       { name: 'Wistia', pattern: /wistia/ }
     ];
 

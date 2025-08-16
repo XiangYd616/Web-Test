@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '../../utils/cn';
+import {cn} from '../../utils/cn';
 
 interface ProgressBarProps {
   /** 进度值 (0-100) */

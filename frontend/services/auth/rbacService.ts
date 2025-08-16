@@ -5,7 +5,6 @@
  */
 
 import { useCallback, useState } from 'react';
-import { defaultMemoryCache } from '../cacheStrategy';
 
 // ==================== 类型定义 ====================
 
@@ -720,7 +719,7 @@ export class RBACService {
   // ==================== 工具方法 ====================
 
   private generateId(prefix: string): string {
-    return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   private async cachePermission(permission: Permission): Promise<void> {

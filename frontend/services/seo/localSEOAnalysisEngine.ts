@@ -1,5 +1,5 @@
 
-import { AccessibilityResult, ContentQualityResult, MobileFriendlyResult, PageMetadata, PerformanceResult, SecurityResult, SEOAnalysisResult, SEOIssue, SEORecommendation, SocialMediaResult, StructuredDataResult, TechnicalSEOResult } from './seoAnalysisEngine';
+import {AccessibilityResult, ContentQualityResult, MobileFriendlyResult, PageMetadata, PerformanceResult, SecurityResult, SEOAnalysisResult, SEOIssue, SEORecommendation, SocialMediaResult, StructuredDataResult, TechnicalSEOResult} from './seoAnalysisEngine';
 
 export interface LocalSEOConfig {
   files: File[];

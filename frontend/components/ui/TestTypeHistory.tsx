@@ -15,16 +15,16 @@ import {
   Trash2
 } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import type { EnhancedTestRecord, TestType } from '../../types/testHistory';
+import {useAuth} from '../../contexts/AuthContext';
+import type { TestRecord, TestType } from '../../types/testHistory';
 
 interface TestTypeHistoryProps {
   testType: TestType;
   className?: string;
   compact?: boolean;
   maxHeight?: string;
-  onTestSelect?: (test: EnhancedTestRecord) => void;
-  onTestRerun?: (test: EnhancedTestRecord) => void;
+  onTestSelect?: (test: TestRecord) => void;
+  onTestRerun?: (test: TestRecord) => void;
   showActions?: boolean;
 }
 
@@ -40,7 +40,7 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
   const { isAuthenticated } = useAuth();
   
   // 状态管理
-  const [tests, setTests] = useState<EnhancedTestRecord[]>([]);
+  const [tests, setTests] = useState<TestRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -135,13 +135,13 @@ export const TestTypeHistory: React.FC<TestTypeHistoryProps> = ({
   };
 
   // 处理测试选择
-  const handleTestClick = (test: EnhancedTestRecord) => {
+  const handleTestClick = (test: TestRecord) => {
     setSelectedTest(test.id);
     onTestSelect?.(test);
   };
 
   // 处理重新运行
-  const handleRerun = (test: EnhancedTestRecord, e: React.MouseEvent) => {
+  const handleRerun = (test: TestRecord, e: React.MouseEvent) => {
     e.stopPropagation();
     onTestRerun?.(test);
   };

@@ -1,10 +1,10 @@
 import React, { Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { LoadingSpinner } from '../ui/LoadingSpinner';
-import { ProtectedRoute } from '../auth/ProtectedRoute';
+import {Routes, Route, Navigate} from 'react-router-dom';
+import {LoadingSpinner} from '../ui/LoadingSpinner';
+import {ProtectedRoute} from '../auth/ProtectedRoute';
 
 // Lazy load pages
-const Dashboard = React.lazy(() => import('../../pages/core/dashboard/ModernDashboard'));
+const Dashboard = React.lazy(() => import('../../pages/core/dashboard/Dashboard'));
 const Login = React.lazy(() => import('../../pages/core/auth/Login'));
 const Register = React.lazy(() => import('../../pages/core/auth/Register'));
 const APITest = React.lazy(() => import('../../pages/core/testing/APITest'));

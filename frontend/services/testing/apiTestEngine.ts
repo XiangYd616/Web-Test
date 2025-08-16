@@ -305,7 +305,7 @@ export class APITestEngine {
     } catch (error: unknown) {
       result.status = 'failed';
       const errorMessage = error instanceof Error ? error.message : '未知错误';
-      throw new Error(`API测试失败: ${errorMessage}`);
+      throw new Error('API测试失败: ' + errorMessage);
     }
   }
 
@@ -341,7 +341,7 @@ export class APITestEngine {
           responseTime: false,
           customValidations: []
         },
-        errors: [`请求失败: ${error instanceof Error ? error.message : '未知错误'}`],
+        errors: ['请求失败: ' + error instanceof Error ? error.message : '未知错误'],
         warnings: [],
         performanceData: this.extractPerformanceData(responseTime),
         securityChecks: {
@@ -503,7 +503,7 @@ export class APITestEngine {
     result.validationResults.statusCode = expectedStatuses.includes(result.statusCode);
 
     if (!result.validationResults.statusCode) {
-      result.errors.push(`期望状态码 ${expectedStatuses.join('/')}, 实际收到 ${result.statusCode}`);
+      result.errors.push('期望状态码 ${expectedStatuses.join(' / ')}, 实际收到 ' + result.statusCode);
       result.status = 'fail';
     }
 
@@ -512,7 +512,7 @@ export class APITestEngine {
     result.validationResults.responseTime = result.responseTime < timeoutThreshold;
 
     if (!result.validationResults.responseTime) {
-      result.errors.push(`响应时间 ${result.responseTime}ms 超过阈值 ${timeoutThreshold}ms`);
+      result.errors.push('响应时间 ${result.responseTime}ms 超过阈值 ' + timeoutThreshold + 'ms');
       result.status = 'fail';
     }
 
@@ -535,7 +535,7 @@ export class APITestEngine {
         result.validationResults.customValidations.push(validationResult);
 
         if (!validationResult.passed) {
-          result.errors.push(validationResult.message || `自定义验证失败: ${validation.field}`);
+          result.errors.push(validationResult.message || '自定义验证失败: ' + validation.field);
           if (result.status === 'pass') {
             result.status = 'warning';
           }
@@ -545,7 +545,7 @@ export class APITestEngine {
 
     // 性能警告
     if (result.responseTime > this.performanceThresholds.good) {
-      result.warnings.push(`响应时间较慢: ${result.responseTime}ms`);
+      result.warnings.push('响应时间较慢: ' + result.responseTime + 'ms');
       if (result.status === 'pass') {
         result.status = 'warning';
       }
@@ -663,14 +663,14 @@ export class APITestEngine {
         name: `${validation.type}:${validation.field}`,
         passed,
         message: passed
-          ? `验证通过: ${validation.field} ${validation.operator} ${validation.value}`
-          : `验证失败: ${validation.field} 期望 ${validation.operator} ${validation.value}, 实际值 ${actualValue}`
+          ? '验证通过: ${validation.field} ${validation.operator} ' + validation.value
+          : '验证失败: ${validation.field} 期望 ${validation.operator} ${validation.value}, 实际值 ' + actualValue
       };
     } catch (error) {
       return {
         name: `${validation.type}:${validation.field}`,
         passed: false,
-        message: `验证执行失败: ${error instanceof Error ? error.message : 'Unknown error'}`
+        message: '验证执行失败: ' + error instanceof Error ? error.message : 'Unknown error'
       };
     }
   }
@@ -730,7 +730,7 @@ export class APITestEngine {
       const phaseUsers = Math.ceil(concurrentUsers * (phase + 1) / 3);
       const phaseDuration = testDuration / 3;
 
-      console.log(`🔄 负载测试阶段 ${phase + 1}/3，并发用户: ${phaseUsers}`);
+      console.log('🔄 负载测试阶段 ${phase + 1}/3，并发用户: ' + phaseUsers);
 
       // 并发请求模拟
       const phasePromises = [];
@@ -748,7 +748,7 @@ export class APITestEngine {
     // 分析负载测试结果
     this.analyzeLoadTestResults(loadTestResults, result, testDuration);
 
-    console.log(`🚀 负载测试完成，总请求: ${loadTestResults.length}，成功率: ${((loadTestResults.filter(r => r.success).length / loadTestResults.length) * 100).toFixed(2)}%`);
+    console.log('🚀 负载测试完成，总请求: ${loadTestResults.length}，成功率: ' + ((loadTestResults.filter(r => r.success).length / loadTestResults.length) * 100).toFixed(2) + '%');
   }
 
   private async simulateUserLoad(userId: number, config: APITestConfig, duration: number, startTime: number): Promise<Array<{
@@ -868,7 +868,7 @@ export class APITestEngine {
     const timeWindows = this.analyzePerformanceOverTime(loadTestResults, 10); // 10秒窗口
     const performanceDegradation = this.detectPerformanceDegradation(timeWindows);
 
-    console.log(`📊 负载测试分析: 吞吐量 ${throughput.toFixed(2)} req/min, 错误率 ${errorRate.toFixed(2)}%, P95 ${p95}ms`);
+    console.log('📊 负载测试分析: 吞吐量 ${throughput.toFixed(2)} req/min, 错误率 ${errorRate.toFixed(2)}%, P95 ' + p95 + 'ms');
   }
 
   private analyzePerformanceOverTime(results: any[], windowSizeSeconds: number): Array<{
@@ -1041,7 +1041,7 @@ export class APITestEngine {
     );
     result.summary.dataValidation = validationPassed.length === result.endpointResults.length ? 'pass' : 'fail';
 
-    console.log(`📊 性能分析完成，平均响应时间: ${result.averageResponseTime}ms，错误率: ${result.performanceMetrics.errorRate}%`);
+    console.log('📊 性能分析完成，平均响应时间: ${result.averageResponseTime}ms，错误率: ' + result.performanceMetrics.errorRate + '%');
   }
 
   private async performSecurityAnalysis(config: APITestConfig, result: APITestResult): Promise<void> {
@@ -1148,8 +1148,8 @@ export class APITestEngine {
         vulnerabilities.push({
           type: 'missing_security_header',
           severity: 'medium' as const,
-          description: `需要检测安全头 ${header}: ${description}`,
-          recommendation: `添加 ${header} 头以增强安全性`
+          description: '需要检测安全头 ${header}: ' + description,
+          recommendation: '添加 ' + header + ' 头以增强安全性'
         });
       }
     }
@@ -1189,7 +1189,7 @@ export class APITestEngine {
       result.summary.security = 'poor';
     }
 
-    console.log(`🔒 安全分析完成，评分: ${result.securityAnalysis.securityScore}/100`);
+    console.log('🔒 安全分析完成，评分: ' + result.securityAnalysis.securityScore + '/100');
   }
 
   private async performReliabilityTest(config: APITestConfig, result: APITestResult): Promise<void> {
@@ -1303,7 +1303,7 @@ export class APITestEngine {
       result.summary.reliability = 'poor';
     }
 
-    console.log(`🔄 可靠性测试完成，可用性: ${result.reliabilityMetrics.uptime.toFixed(2)}%`);
+    console.log('🔄 可靠性测试完成，可用性: ' + result.reliabilityMetrics.uptime.toFixed(2) + '%');
   }
 
   private generateAPIDocumentation(config: APITestConfig, result: APITestResult): void {
@@ -1329,7 +1329,7 @@ export class APITestEngine {
     // 生成Schema文档
     config.endpoints.forEach(endpoint => {
       if (endpoint.expectedSchema) {
-        result.documentation.schemas[`${endpoint.method}_${endpoint.path.replace(////g, '_')}`] = endpoint.expectedSchema;
+        result.documentation.schemas[endpoint.method + '_' + endpoint.path.replace(/\//g, '_')] = endpoint.expectedSchema;
       }
     });
   }
@@ -1373,7 +1373,7 @@ export class APITestEngine {
       examples.push({
         statusCode: status,
         description: this.getStatusDescription(status),
-        example: { message: `Mock response for ${endpoint.path}`, status: status }
+        example: { message: 'Mock response for ' + endpoint.path, status: status }
       });
     });
 
@@ -1385,7 +1385,7 @@ export class APITestEngine {
 
     if (endpoint.body) {
       examples.push({
-        description: `${endpoint.method} 请求示例`,
+        description: endpoint.method + ' 请求示例',
         request: {
           method: endpoint.method,
           url: endpoint.path,
@@ -1458,7 +1458,7 @@ export class APITestEngine {
     this.generateMonitoringRecommendations(result, recommendations);
 
     result.recommendations = recommendations;
-    console.log(`💡 生成了 ${recommendations.length} 条优化建议`);
+    console.log('💡 生成了 ' + recommendations.length + ' 条优化建议');
   }
 
   private generatePerformanceRecommendations(result: APITestResult, recommendations: any[]): void {
@@ -1472,7 +1472,7 @@ export class APITestEngine {
         category: 'performance' as const,
         priority: 'critical' as const,
         title: '紧急优化响应时间',
-        description: `平均响应时间 ${avgResponseTime}ms 严重超标，严重影响用户体验`,
+        description: '平均响应时间 ' + avgResponseTime + 'ms 严重超标，严重影响用户体验',
         solution: '立即检查数据库查询性能、添加索引、优化算法复杂度、考虑使用缓存',
         impact: '大幅提升用户体验，减少用户流失',
         estimatedImprovement: '响应时间可降低60-80%'
@@ -1482,7 +1482,7 @@ export class APITestEngine {
         category: 'performance' as const,
         priority: 'high' as const,
         title: '优化API响应时间',
-        description: `平均响应时间 ${avgResponseTime}ms 偏高，需要优化`,
+        description: '平均响应时间 ' + avgResponseTime + 'ms 偏高，需要优化',
         solution: '优化数据库查询、添加Redis缓存、压缩响应数据、使用CDN',
         impact: '提升用户体验，提高系统吞吐量',
         estimatedImprovement: '响应时间可降低30-50%'
@@ -1495,7 +1495,7 @@ export class APITestEngine {
         category: 'performance' as const,
         priority: 'medium' as const,
         title: '优化响应时间稳定性',
-        description: `P95响应时间 ${p95ResponseTime}ms 是平均值的${(p95ResponseTime / avgResponseTime).toFixed(1)}倍，存在性能不稳定`,
+        description: 'P95响应时间 ' + p95ResponseTime + 'ms 是平均值的' + (p95ResponseTime / avgResponseTime).toFixed(1) + ' 倍，存在性能不稳定',
         solution: '分析慢查询日志、优化数据库连接池、实施请求限流、添加性能监控',
         impact: '提高系统稳定性，减少超时错误',
         estimatedImprovement: '减少50%的性能波动'
@@ -1508,7 +1508,7 @@ export class APITestEngine {
         category: 'performance' as const,
         priority: 'high' as const,
         title: '优化慢端点',
-        description: `发现 ${slowEndpoints.length} 个慢端点：${slowEndpoints.map(ep => ep.path).join(', ')}`,
+        description: '发现 ${slowEndpoints.length} 个慢端点：' + slowEndpoints.map(ep => ep.path).join(', ') + ' ',
         solution: '针对性优化慢端点：重构复杂逻辑、优化数据查询、添加异步处理',
         impact: '显著提升整体API性能',
         estimatedImprovement: '整体性能提升20-40%'
@@ -1521,7 +1521,7 @@ export class APITestEngine {
         category: 'performance' as const,
         priority: 'medium' as const,
         title: '提升系统吞吐量',
-        description: `当前吞吐量 ${result.performanceMetrics.throughput} req/min 较低`,
+        description: '当前吞吐量 ' + result.performanceMetrics.throughput + ' req / min 较低',
         solution: '增加服务器实例、优化数据库连接池、使用负载均衡、实施水平扩展',
         impact: '提高系统处理能力，支持更多并发用户',
         estimatedImprovement: '吞吐量可提升2-5倍'
@@ -1540,7 +1540,7 @@ export class APITestEngine {
         category: 'security' as const,
         priority: 'critical' as const,
         title: '修复关键安全漏洞',
-        description: `发现 ${criticalVulns.length} 个关键安全漏洞，需要立即修复`,
+        description: '发现 ' + criticalVulns.length + ' 个关键安全漏洞，需要立即修复',
         solution: criticalVulns.map(v => v.recommendation).join('；'),
         impact: '防止数据泄露和恶意攻击',
         estimatedImprovement: '安全评分可提升20-30分'
@@ -1570,7 +1570,7 @@ export class APITestEngine {
         category: 'security' as const,
         priority: 'high' as const,
         title: '添加安全响应头',
-        description: `缺少 ${missingHeaders.length} 个重要安全头：${missingHeaders.slice(0, 3).join(', ')}等`,
+        description: '缺少 ${missingHeaders.length} 个重要安全头：' + missingHeaders.slice(0, 3).join(', ') + ' 等',
         solution: '在Web服务器或应用层添加安全头配置，使用安全头中间件',
         impact: '防止XSS、点击劫持等常见Web攻击',
         estimatedImprovement: '安全评分可提升10-15分'
@@ -1603,10 +1603,10 @@ export class APITestEngine {
         category: 'reliability' as const,
         priority: uptime < 95 ? 'critical' as const : 'high' as const,
         title: '提升系统可用性',
-        description: `当前可用性 ${uptime.toFixed(2)}% 低于行业标准`,
+        description: '当前可用性 ' + uptime.toFixed(2) + '% 低于行业标准',
         solution: '实施服务冗余、添加健康检查、配置自动故障转移、优化错误恢复机制',
         impact: '减少服务中断，提高用户满意度',
-        estimatedImprovement: `可用性可提升至 ${Math.min(99.9, uptime + 2).toFixed(1)}%`
+        estimatedImprovement: '可用性可提升至 ' + Math.min(99.9, uptime + 2).toFixed(1) + '% '
       });
     }
 
@@ -1616,7 +1616,7 @@ export class APITestEngine {
         category: 'reliability' as const,
         priority: 'high' as const,
         title: '降低API错误率',
-        description: `当前错误率 ${errorRate.toFixed(2)}% 过高，影响用户体验`,
+        description: '当前错误率 ' + errorRate.toFixed(2) + '% 过高，影响用户体验',
         solution: '改进错误处理逻辑、添加输入验证、实施断路器模式、优化依赖服务调用',
         impact: '提高API稳定性，减少用户遇到的错误',
         estimatedImprovement: '错误率可降低至2%以下'
@@ -1630,7 +1630,7 @@ export class APITestEngine {
         category: 'reliability' as const,
         priority: 'medium' as const,
         title: '修复高影响错误模式',
-        description: `发现高影响错误模式：${highImpactErrors.map(p => p.pattern).join(', ')}`,
+        description: '发现高影响错误模式：' + highImpactErrors.map(p => p.pattern).join(', ') + ' ',
         solution: '分析错误根因、实施预防措施、添加监控告警、制定应急预案',
         impact: '减少系统故障，提高服务稳定性',
         estimatedImprovement: '减少70%的高影响错误'
@@ -1643,7 +1643,7 @@ export class APITestEngine {
         category: 'reliability' as const,
         priority: 'medium' as const,
         title: '优化重试机制',
-        description: `重试成功率 ${result.reliabilityMetrics.retrySuccessRate.toFixed(1)}% 偏低`,
+        description: '重试成功率 ' + result.reliabilityMetrics.retrySuccessRate.toFixed(1) + '% 偏低',
         solution: '实施指数退避重试、添加熔断器、优化重试策略、区分可重试和不可重试错误',
         impact: '提高临时故障的恢复能力',
         estimatedImprovement: '重试成功率可提升至95%以上'
@@ -1661,7 +1661,7 @@ export class APITestEngine {
         category: 'error_handling' as const,
         priority: 'high' as const,
         title: '改进错误处理机制',
-        description: `${failedEndpoints.length} 个端点测试失败，错误处理需要改进`,
+        description: failedEndpoints.length + ' 个端点测试失败，错误处理需要改进',
         solution: '统一错误响应格式、添加详细错误码、实施优雅降级、改进异常捕获',
         impact: '提高API健壮性，改善开发者体验',
         estimatedImprovement: '减少50%的错误发生率'
@@ -1673,7 +1673,7 @@ export class APITestEngine {
         category: 'error_handling' as const,
         priority: 'medium' as const,
         title: '优化认证错误处理',
-        description: `${authErrors.length} 个端点存在认证问题`,
+        description: authErrors.length + ' 个端点存在认证问题',
         solution: '完善认证流程、添加Token刷新机制、改进权限验证逻辑',
         impact: '减少认证相关错误，提升用户体验',
         estimatedImprovement: '认证成功率可提升至98%以上'
@@ -1685,7 +1685,7 @@ export class APITestEngine {
         category: 'error_handling' as const,
         priority: 'critical' as const,
         title: '修复服务器错误',
-        description: `${serverErrors.length} 个端点出现服务器错误`,
+        description: serverErrors.length + ' 个端点出现服务器错误',
         solution: '检查服务器日志、修复代码缺陷、优化资源配置、添加监控告警',
         impact: '提高系统稳定性，减少服务中断',
         estimatedImprovement: '服务器错误可减少90%以上'
@@ -1704,7 +1704,7 @@ export class APITestEngine {
         category: 'architecture' as const,
         priority: 'medium' as const,
         title: '考虑微服务架构',
-        description: `API端点数量 ${totalEndpoints} 较多，建议考虑微服务拆分`,
+        description: 'API端点数量 ' + totalEndpoints + ' 较多，建议考虑微服务拆分',
         solution: '按业务域拆分服务、实施API网关、添加服务发现、使用容器化部署',
         impact: '提高系统可维护性和扩展性',
         estimatedImprovement: '开发效率可提升30%，系统扩展性显著改善'
@@ -1717,7 +1717,7 @@ export class APITestEngine {
         category: 'architecture' as const,
         priority: 'medium' as const,
         title: '优化数据传输',
-        description: `平均数据传输量 ${(avgDataPerRequest / 1024).toFixed(1)}KB 较大`,
+        description: '平均数据传输量 ' + (avgDataPerRequest / 1024).toFixed(1) + 'KB 较大',
         solution: '实施数据分页、使用GraphQL、添加字段过滤、启用gzip压缩',
         impact: '减少网络传输时间，提升移动端体验',
         estimatedImprovement: '数据传输量可减少40-60%'
@@ -1853,7 +1853,7 @@ export class APITestEngine {
     }
 
     result.overallScore = Math.round(Math.max(0, Math.min(100, score)));
-    console.log(`🎯 综合评分计算完成: ${result.overallScore}/100`);
+    console.log('🎯 综合评分计算完成: ' + result.overallScore + '/100');
   }
 }
 

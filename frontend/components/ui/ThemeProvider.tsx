@@ -1,5 +1,5 @@
 import React from 'react';
-import { ThemeProvider as BaseThemeProvider } from '../../contexts/ThemeContext';
+import {ThemeProvider as BaseThemeProvider} from '../../contexts/ThemeContext';
 
 interface ThemeProviderProps {
   children: React.ReactNode;

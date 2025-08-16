@@ -1,11 +1,11 @@
-import { Activity, AlertTriangle, BarChart3, CheckCircle, Clock, Download, Globe, TestTube } from 'lucide-react';
+import {Activity, AlertTriangle, BarChart3, CheckCircle, Clock, Download, Globe, TestTube} from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { ModernDoughnutChart, ModernLineChart } from '../../../components/charts/ModernChart.tsx';
-import { useTheme } from '../../../contexts/ThemeContext.tsx';
+import {DoughnutChart, LineChart} from '../../../components/charts/Chart.tsx';
+import {useTheme} from '../../../contexts/ThemeContext.tsx';
 
 // CSS样式已迁移到组件库和主题配置中
 
-const ModernDashboard: React.FC = () => {
+const Dashboard: React.FC = () => {
   const { actualTheme } = useTheme();
   const [loading, setLoading] = useState(true);
 
@@ -275,7 +275,7 @@ const ModernDashboard: React.FC = () => {
               {loading ? (
                 <div className="loading-shimmer w-full h-64 rounded-lg"></div>
               ) : (
-                <ModernLineChart data={lineChartData} height={300} />
+                <LineChart data={lineChartData} height={300} />
               )}
             </div>
           </div>
@@ -296,7 +296,7 @@ const ModernDashboard: React.FC = () => {
               ) : (
                 <div className="flex flex-col items-center">
                   <div className="relative">
-                    <ModernDoughnutChart data={doughnutData} size={200} />
+                    <DoughnutChart data={doughnutData} size={200} />
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center">
                         <div className="text-3xl font-bold text-blue-600">85%</div>
@@ -445,4 +445,4 @@ const ModernDashboard: React.FC = () => {
   );
 };
 
-export default ModernDashboard;
+export default Dashboard;

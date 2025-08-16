@@ -4,7 +4,7 @@
  */
 
 import axios, { AxiosError, AxiosResponse } from 'axios';
-import { errorService, ErrorType, ErrorSeverity } from './errorService';
+import {errorService} from './errorService';
 
 // API错误响应接口
 interface ApiErrorResponse {
@@ -305,7 +305,7 @@ class ApiErrorInterceptor {
    * 生成请求ID
    */
   private generateRequestId(): string {
-    return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `req_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   /**

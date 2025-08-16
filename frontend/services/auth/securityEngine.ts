@@ -437,17 +437,17 @@ export type ProgressCallback = (progress: TestProgress) => void;
 
 // ==================== 核心引擎类 ====================
 
-class UnifiedSecurityEngine {
-  private static instance: UnifiedSecurityEngine;
+class SecurityEngine {
+  private static instance: SecurityEngine;
   private activeTests = new Map<string, AbortController>();
 
   private constructor() { }
 
-  public static getInstance(): UnifiedSecurityEngine {
-    if (!UnifiedSecurityEngine.instance) {
-      UnifiedSecurityEngine.instance = new UnifiedSecurityEngine();
+  public static getInstance(): SecurityEngine {
+    if (!SecurityEngine.instance) {
+      SecurityEngine.instance = new SecurityEngine();
     }
-    return UnifiedSecurityEngine.instance;
+    return SecurityEngine.instance;
   }
 
   /**
@@ -1422,5 +1422,5 @@ class UnifiedSecurityEngine {
 }
 
 // 导出单例实例
-export const unifiedSecurityEngine = UnifiedSecurityEngine.getInstance();
+export const unifiedSecurityEngine = SecurityEngine.getInstance();
 export default unifiedSecurityEngine;

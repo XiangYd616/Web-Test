@@ -4,8 +4,8 @@
  */
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { enhancedConfigManager } from '../../config/ConfigManager';
-import { performanceMonitor } from '../../utils/performanceMonitor';
+import {enhancedConfigManager} from '../../config/ConfigManager';
+import {performanceMonitor} from '../../utils/performanceMonitor';
 
 /**
  * 错误信息接口
@@ -50,7 +50,7 @@ interface ErrorBoundaryProps {
 /**
  * 增强的错误边界组件
  */
-export class EnhancedErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   private retryTimeouts: number[] = [];
   private errorReportingEnabled: boolean;
 
@@ -72,7 +72,7 @@ export class EnhancedErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
    * 捕获错误
    */
   static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
-    const errorId = `err_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const errorId = `err_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
     return {
       hasError: true,
@@ -484,9 +484,9 @@ export function withErrorBoundary<P extends object>(
   errorBoundaryProps?: Omit<ErrorBoundaryProps, 'children'>
 ) {
   const WrappedComponent = (props: P) => (
-    <EnhancedErrorBoundary {...errorBoundaryProps}>
+    <ErrorBoundary {...errorBoundaryProps}>
       <Component {...props} />
-    </EnhancedErrorBoundary>
+    </ErrorBoundary>
   );
 
   WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name})`;
@@ -494,4 +494,4 @@ export function withErrorBoundary<P extends object>(
   return WrappedComponent;
 }
 
-export default EnhancedErrorBoundary;
+export default ErrorBoundary;

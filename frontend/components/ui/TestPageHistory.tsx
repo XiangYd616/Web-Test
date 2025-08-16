@@ -3,10 +3,10 @@
  * 基于压力测试历史的设计，适配所有测试类型
  */
 
-import { BarChart3, Calendar, Eye, MoreHorizontal, RefreshCw, Search, Star } from 'lucide-react';
+import {BarChart3, Calendar, Eye, MoreHorizontal, RefreshCw, Search, Star} from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import {useNavigate} from 'react-router-dom';
+import {useAuth} from '../../contexts/AuthContext';
 
 interface TestRecord {
   id: string;

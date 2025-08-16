@@ -3,7 +3,7 @@
  * 提供前端测试、性能测试、用户体验测试等工具
  */
 
-import { errorService } from '../services/errorService';
+import {errorService} from '../services/errorService';
 
 // 测试结果接口
 interface TestResult {

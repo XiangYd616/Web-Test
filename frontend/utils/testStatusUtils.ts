@@ -1,4 +1,4 @@
-import { Activity, AlertCircle, CheckCircle, Pause, Play, XCircle } from 'lucide-react';
+import {Activity, AlertCircle, CheckCircle, Pause, Play, XCircle} from 'lucide-react';
 import React from 'react';
 
 // 测试状态类型 - 简化版本

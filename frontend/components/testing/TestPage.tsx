@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { TestHistoryPanel } from './TestHistoryPanel';
-import { TestConfigPanel } from './TestConfigPanel';
-import { TestResultsPanel } from './TestResultsPanel';
-import { TestProgressPanel } from './TestProgressPanel';
-import { testService } from '../../services/testService';
-import { historyService } from '../../services/historyService';
-import { configService } from '../../services/configService';
+import {TestHistoryPanel} from './TestHistoryPanel';
+import {TestConfigPanel} from './TestConfigPanel';
+import {TestResultsPanel} from './TestResultsPanel';
+import {TestProgressPanel} from './TestProgressPanel';
+import {testService} from '../../services/testService';
+import {configService} from '../../services/configService';
 
-interface UnifiedTestPageTemplateProps {
+interface TestPageTemplateProps {
   testType: string;
   testName: string;
   children?: React.ReactNode;
@@ -18,7 +17,7 @@ interface UnifiedTestPageTemplateProps {
   className?: string;
 }
 
-export const UnifiedTestPageTemplate: React.FC<UnifiedTestPageTemplateProps> = ({
+export const TestPageTemplate: React.FC<TestPageTemplateProps> = ({
   testType,
   testName,
   children,
@@ -348,4 +347,4 @@ export const UnifiedTestPageTemplate: React.FC<UnifiedTestPageTemplateProps> = (
   );
 };
 
-export default UnifiedTestPageTemplate;
+export default TestPageTemplate;

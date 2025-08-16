@@ -642,7 +642,7 @@ export function initializePerformanceOptimization() {
 }
 
 // 工具函数 - 使用 lodash 实现以避免重复
-import { debounce, throttle } from 'lodash';
+import {debounce, throttle} from 'lodash';
 
 export const performanceUtils = {
     // 重新导出 lodash 的防抖和节流函数

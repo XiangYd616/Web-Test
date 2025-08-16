@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { DataPoint, dataVisualizationOptimizer, OptimizationConfig } from '../../utils/DataVisualizationOptimizer';
+import {CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
+import {DataPoint, dataVisualizationOptimizer, OptimizationConfig} from '../../utils/DataVisualizationOptimizer';
 
-interface OptimizedPerformanceChartProps {
+interface PerformanceChartProps {
   data: DataPoint[];
   dataKey: string;
   name: string;
@@ -22,7 +22,7 @@ interface PerformanceStats {
   cacheHit: boolean;
 }
 
-const OptimizedPerformanceChart: React.FC<OptimizedPerformanceChartProps> = ({
+const PerformanceChart: React.FC<PerformanceChartProps> = ({
   data,
   dataKey,
   name,
@@ -239,7 +239,7 @@ const OptimizedPerformanceChart: React.FC<OptimizedPerformanceChartProps> = ({
   );
 };
 
-export default React.memo(OptimizedPerformanceChart);
+export default React.memo(PerformanceChart);
 
 // 导出性能监控组件
 export const PerformanceMonitor: React.FC<{

@@ -82,7 +82,7 @@ class XSSAnalyzer {
     ];
     
     // 唯一标识符生成器
-    this.uniqueId = () => `XSS_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    this.uniqueId = () => `XSS_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   /**

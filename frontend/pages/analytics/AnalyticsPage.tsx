@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import React, { useState } from 'react';
 import Analytics from '../../components/analytics/Analytics';
-import { useAuthCheck } from '../../components/auth/WithAuthCheck';
+import {useAuthCheck} from '../../components/auth/WithAuthCheck';
 
 const AnalyticsPage: React.FC = () => {
   useAuthCheck();

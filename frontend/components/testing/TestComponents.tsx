@@ -1,4 +1,4 @@
-import { Download, History, Play, RotateCcw, Save, Share2 } from 'lucide-react';
+import {Download, History, Play, RotateCcw, Save, Share2} from 'lucide-react';
 import React from 'react';
 
 // 测试配置面板组件

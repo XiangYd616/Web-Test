@@ -2,5 +2,5 @@
 export { authService, default, unifiedAuthService } from './authService';
 
 // 类型导出
-export type { UnifiedAuthService } from './authService';
+export type { AuthService } from './authService';
 

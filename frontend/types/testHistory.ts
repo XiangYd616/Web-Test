@@ -336,7 +336,7 @@ export interface TestMetadata {
 }
 
 // 增强的测试记录接口
-export interface EnhancedTestRecord {
+export interface TestRecord {
   // 基础信息
   id: string;
   testName: string;
@@ -448,7 +448,7 @@ export interface TestHistoryQuery {
 export interface TestHistoryResponse {
   success: boolean;
   data: {
-    tests: EnhancedTestRecord[];
+    tests: TestRecord[];
     pagination: {
       page: number;
       limit: number;
@@ -543,8 +543,8 @@ export interface BatchOperation {
 }
 
 export interface TestComparison {
-  baseTest: EnhancedTestRecord;
-  compareTests: EnhancedTestRecord[];
+  baseTest: TestRecord;
+  compareTests: TestRecord[];
   metrics: {
     scoreComparison: Array<{
       testId: string;

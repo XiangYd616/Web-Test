@@ -1,5 +1,5 @@
 import React from 'react';
-import { Loader2, Shield, User, Key, Mail, RefreshCw } from 'lucide-react';
+import {Loader2, Shield, User, Key, Mail, RefreshCw} from 'lucide-react';
 
 export enum AuthLoadingType {
   LOGIN = 'login',

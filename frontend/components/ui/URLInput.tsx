@@ -1,7 +1,7 @@
-import { AlertCircle, CheckCircle, ExternalLink, Globe, Zap } from 'lucide-react';
+import {AlertCircle, CheckCircle, ExternalLink, Globe, Zap} from 'lucide-react';
 import React, { forwardRef, useCallback, useEffect, useState } from 'react';
-import { cn } from '../../utils/cn';
-import { Input } from './Input';
+import {cn} from '../../utils/cn';
+import {Input} from './Input';
 
 // URL输入组件的接口
 interface URLInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | 'type'> {

@@ -1,10 +1,10 @@
-import { Activity, AlertCircle, ArrowLeft, BarChart3, Calendar, CheckCircle, Clock, Download, Settings, Share2, TrendingUp, Users, XCircle, Zap } from 'lucide-react';
+import {Activity, AlertCircle, ArrowLeft, BarChart3, Calendar, CheckCircle, Clock, Download, Settings, Share2, TrendingUp, Users, XCircle, Zap} from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import {useNavigate, useParams} from 'react-router-dom';
+import {Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
 
-// import '../../../components/stress/StatusLabel.css'; // CSS文件不存在，已注释
-import { DataProcessingUtils } from '../../../utils/dataProcessingUtils.ts';
+// // import '../../../components/stress/StatusLabel.css'; // 文件已删除 // CSS文件不存在，已注释
+import {DataProcessingUtils} from '../../../utils/dataProcessingUtils.ts';
 
 // 智能数据采样函数 - 移到组件外部避免 hooks 顺序问题
 const intelligentSampling = (data: any[], maxPoints: number) => {

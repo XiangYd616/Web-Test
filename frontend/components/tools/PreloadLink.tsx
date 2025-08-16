@@ -4,8 +4,8 @@
  */
 
 import React, { useRef, useEffect } from 'react';
-import { Link, LinkProps } from 'react-router-dom';
-import { routePreloader, routeImports } from '../../utils/routePreloader';
+import {Link, LinkProps} from 'react-router-dom';
+import {routePreloader, routeImports} from '../../utils/routePreloader';
 
 interface PreloadLinkProps extends LinkProps {
   /** 预加载策略 */

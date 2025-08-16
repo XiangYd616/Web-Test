@@ -73,7 +73,7 @@ class PerformanceTestEngine {
    * 执行性能测试
    */
   async runPerformanceTest(config) {
-    const testId = `perf_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const testId = `perf_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
     try {
       const validatedConfig = this.validateConfig(config);

@@ -59,7 +59,7 @@ export enum ErrorSeverity {
 }
 
 // 扩展的 API 错误接口
-export interface ExtendedApiError extends ApiError {
+export interface ApiError extends ApiError {
   severity?: ErrorSeverity;
   category?: string;
   context?: Record<string, any>;
@@ -69,7 +69,7 @@ export interface ExtendedApiError extends ApiError {
 
 // API 错误构建器
 export class ApiErrorBuilder {
-  private error: Partial<ExtendedApiError>;
+  private error: Partial<ApiError>;
 
   constructor(code: string, message: string) {
     this.error = {
@@ -124,13 +124,13 @@ export class ApiErrorBuilder {
     return this;
   }
 
-  build(): ExtendedApiError {
+  build(): ApiError {
     return {
       code: this.error.code!,
       message: this.error.message!,
       timestamp: this.error.timestamp!,
       ...this.error
-    } as ExtendedApiError;
+    } as ApiError;
   }
 }
 

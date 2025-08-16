@@ -10,7 +10,7 @@
 
 const express = require('express');
 const router = express.Router();
-const PerformanceAccessibilityEngine = require('../engines/performance/PerformanceAccessibilityEngine.js');
+const PerformanceAccessibilityEngine = require('../engines/performance/PerformanceAnalyzer.js');
 const { body, validationResult } = require('express-validator');
 const { authMiddleware } = require('../middleware/auth');
 

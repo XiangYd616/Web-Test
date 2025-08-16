@@ -1,12 +1,12 @@
-import { Activity, Archive, BarChart3, Copy, Database, Download, Edit, Eye, FileText, Filter, HardDrive, RefreshCw, RotateCcw, Search, Settings, Shield, TestTube, Trash2, Users } from 'lucide-react';
+import {Activity, Archive, BarChart3, Copy, Database, Download, Edit, Eye, FileText, Filter, HardDrive, RefreshCw, RotateCcw, Search, Settings, Shield, TestTube, Trash2, Users} from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { advancedDataManager, DataAnalysisResult, DataQuery, DataRecord } from '../../services/dataService';
+import {advancedDataManager, DataAnalysisResult, DataQuery, DataRecord} from '../../services/data/dataService';
 
-interface AdvancedDataManagerProps {
+interface DataManagerProps {
   className?: string;
 }
 
-const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '' }) => {
+const DataManager: React.FC<DataManagerProps> = ({ className = '' }) => {
   const [activeTab, setActiveTab] = useState<'browse' | 'analytics' | 'backup' | 'sync' | 'settings'>('browse');
   const [records, setRecords] = useState<DataRecord[]>([]);
   const [analytics, setAnalytics] = useState<DataAnalysisResult | null>(null);
@@ -578,4 +578,4 @@ const AdvancedDataManager: React.FC<AdvancedDataManagerProps> = ({ className = '
   );
 };
 
-export default AdvancedDataManager;
+export default DataManager;

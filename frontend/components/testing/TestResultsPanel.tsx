@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BarChart3, Download, Share2, RefreshCw, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+import {BarChart3, Download, Share2, RefreshCw, AlertCircle, CheckCircle, XCircle} from 'lucide-react';
 
 interface TestResultsPanelProps {
   testType: string;

@@ -614,7 +614,7 @@ class ReportGenerator {
 <script>
 // 懒加载模块
 const loadModule = async () => {
-  const { default: module } = await import('./heavy-module.js');
+  const { default: module } = await // // // // import('./heavy-module.js'); // 已删除 // 已删除 // 服务已删除 // 服务已删除
   return module;
 };
 

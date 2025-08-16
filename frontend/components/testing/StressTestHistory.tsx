@@ -1,7 +1,7 @@
-import { Activity, BarChart3, Download, ExternalLink, Eye, RefreshCw, Search, Trash2 } from 'lucide-react';
+import {Activity, BarChart3, Download, ExternalLink, Eye, RefreshCw, Search, Trash2} from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import {useNavigate} from 'react-router-dom';
+import {useAuth} from '../../contexts/AuthContext';
 import ExportUtils from '../../utils/exportUtils';
 import {
   calculateTestCompletion,
@@ -9,14 +9,14 @@ import {
   getStatusStyleClasses,
   getStatusText
 } from '../../utils/testStatusUtils';
-import { DeleteConfirmDialog } from '../ui/DeleteConfirmDialog.tsx';
+import {DeleteConfirmDialog} from '../ui/DeleteConfirmDialog.tsx';
 import ExportModal from '../ui/ExportModal.tsx';
-import { showToast } from '../ui/Toast.tsx';
+import {showToast} from '../ui/Toast.tsx';
 import StressTestDetailModal from './StressTestDetailModal';
 
 import '../../styles/pagination.css';
-// import './StatusLabel.css'; // CSS文件不存在，已注释
-// import './StressTestHistory.css'; // CSS文件不存在，已注释
+// // import './StatusLabel.css'; // 文件已删除 // CSS文件不存在，已注释
+// // import './StressTestHistory.css'; // 文件已删除 // CSS文件不存在，已注释
 
 interface TestRecord {
   id: string;

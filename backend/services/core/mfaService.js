@@ -11,8 +11,8 @@ const crypto = require('crypto');
 // npm install speakeasy qrcode
 const { getPool } = require('../../config/database.js');
 const Logger = require('../../middleware/logger.js');
-const emailService = require('./emailService');
-const smsService = require('./smsService');
+const emailService = require('../email/emailService');
+const smsService = require('../sms/smsService');
 
 // ==================== 配置 ====================
 

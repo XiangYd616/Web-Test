@@ -729,7 +729,7 @@ class DataExportService extends EventEmitter {
    * 生成任务ID
    */
   generateTaskId() {
-    return `export_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `export_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   /**

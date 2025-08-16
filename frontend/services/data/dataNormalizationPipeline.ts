@@ -1,5 +1,24 @@
 
-import { RealTimeMetrics, TestDataPoint, TestPhase } from './TestStateManager';
+
+// 定义本地类型，避免循环依赖
+export interface RealTimeMetrics {
+  timestamp: number;
+  value: number;
+  type: string;
+}
+
+export interface TestDataPoint {
+  timestamp: number;
+  value: any;
+  metadata?: Record<string, any>;
+}
+
+export interface TestPhase {
+  name: string;
+  startTime: number;
+  endTime?: number;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+}
 
 // 原始数据源接口
 export interface RawWebSocketData {

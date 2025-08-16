@@ -1,8 +1,8 @@
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { stressTestQueueManager, type QueueStats } from '../services/testing/stressTestQueueManager';
+import {useCallback, useEffect, useRef, useState} from 'react';
+import {stressTestQueueManager} from '../services/testing/stressTestQueueManager';
 
-import { stressTestRecordService, type StressTestRecord, type TestRecordQuery } from '../services/testing/stressTestRecordService';
+import {stressTestRecordService} from '../services/testing/stressTestRecordService';
 
 export interface UseStressTestRecordOptions {
   autoLoad?: boolean;
@@ -503,7 +503,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
     const authToken = localStorage.getItem('auth_token');
     if (!authToken) {
       // 如果没有认证令牌，生成一个本地ID并跳过服务器记录
-      const localId = `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const localId = `local_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
       console.warn('⚠️ 未登录用户，跳过服务器记录创建，使用本地ID:', localId);
 
       // 创建本地记录
@@ -540,7 +540,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
       // 如果服务器记录创建失败，回退到本地记录
       console.warn('⚠️ 服务器记录创建失败，回退到本地记录:', error.message);
 
-      const localId = `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const localId = `local_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
       const localRecord: StressTestRecord = {
         id: localId,
         testName: testData.testName || '未命名测试',

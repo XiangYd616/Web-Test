@@ -18,7 +18,7 @@ const Logger = {
     }
 };
 
-class EnhancedDatabaseConnectionManager extends EventEmitter {
+class DatabaseConnectionManager extends EventEmitter {
     constructor(config = {}) {
         super();
 
@@ -626,4 +626,4 @@ class EnhancedDatabaseConnectionManager extends EventEmitter {
     }
 }
 
-module.exports = EnhancedDatabaseConnectionManager;
+module.exports = DatabaseConnectionManager;

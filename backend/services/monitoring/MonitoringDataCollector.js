@@ -415,7 +415,7 @@ class MonitoringDataCollector extends EventEmitter {
      * 生成数据ID
      */
     generateDataId() {
-        return `data_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        return `data_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
     }
 
     /**

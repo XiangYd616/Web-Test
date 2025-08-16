@@ -4,7 +4,7 @@
  */
 
 import React, { Component, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react';
+import {AlertTriangle, RefreshCw, Home, Bug} from 'lucide-react';
 
 interface ErrorInfo {
   componentStack: string;
@@ -53,7 +53,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     return {
       hasError: true,
       error,
-      errorId: `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      errorId: `error_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
     };
   }
 

@@ -1,7 +1,7 @@
 
-import { Calendar, ChevronDown, ChevronRight, Clock, Eye, RefreshCw, Search, Shield, Trash2, TrendingDown, TrendingUp } from 'lucide-react';
+import {Calendar, ChevronDown, ChevronRight, Clock, Eye, RefreshCw, Search, Shield, Trash2, TrendingDown, TrendingUp} from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { SecurityTestResult } from '../../services/unifiedSecurityEngine';
+import {SecurityTestResult} from '../../services/testing/securityTestService';
 
 interface SecurityTestHistoryProps {
   onSelectTest?: (result: SecurityTestResult) => void;

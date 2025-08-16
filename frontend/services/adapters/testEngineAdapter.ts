@@ -8,7 +8,7 @@ export interface TestEngineAdapter {
   getTestResult(testId: string): Promise<any>;
 }
 
-export class UnifiedTestEngineAdapter implements TestEngineAdapter {
+export class TestEngineAdapter implements TestEngineAdapter {
   async startTest(config: any): Promise<string> {
     // 统一的测试启动接口
     const response = await fetch('/api/test/start', {
@@ -36,4 +36,4 @@ export class UnifiedTestEngineAdapter implements TestEngineAdapter {
   }
 }
 
-export const testEngineAdapter = new UnifiedTestEngineAdapter();
+export const testEngineAdapter = new TestEngineAdapter();

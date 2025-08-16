@@ -470,7 +470,7 @@ class DataManagementService extends EventEmitter {
    * 辅助方法
    */
   generateId() {
-    return `data_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `data_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   validateData(type, data) {

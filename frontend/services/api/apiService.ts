@@ -1,7 +1,7 @@
 import type { ApiResponse } from '../../types/unified/apiResponse';
 
 import type { AuthResponse, LoginCredentials, RegisterData, User } from '../../types/user';
-import { isDesktopEnvironment } from '../../utils/environment';
+import {isDesktopEnvironment} from '../../utils/environment';
 
 // 延迟导入以避免循环依赖
 let authService: any = null;
@@ -43,7 +43,7 @@ const getRemoteApiService = async () => {
   return remoteApiService;
 };
 
-class UnifiedApiService {
+class ApiService {
   private useRemoteApi: boolean;
   private baseURL: string;
 
@@ -507,6 +507,6 @@ class UnifiedApiService {
   }
 }
 
-export const unifiedApiService = new UnifiedApiService();
+export const unifiedApiService = new ApiService();
 export const apiService = unifiedApiService; // 兼容性导出
 export default unifiedApiService;

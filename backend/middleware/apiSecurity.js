@@ -8,7 +8,7 @@ const helmet = require('helmet');
 const validator = require('validator');
 const { AppError } = require('./errorHandler');
 const Logger = require('../utils/logger');
-const { cacheManager } = require('../utils/cacheManager');
+// // const { cacheManager } = require('../utils/cacheManager'); // 服务已删除 // 服务已删除
 
 class ApiSecurity {
   constructor() {

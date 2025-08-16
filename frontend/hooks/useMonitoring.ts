@@ -3,8 +3,8 @@
  * 基于全局状态管理的监控功能
  */
 
-import { useCallback } from 'react';
-import { useAppContext } from '../contexts/AppContext';
+import {useCallback} from 'react';
+import {useAppContext} from '../contexts/AppContext';
 
 // 监控目标接口
 export interface MonitoringTarget {

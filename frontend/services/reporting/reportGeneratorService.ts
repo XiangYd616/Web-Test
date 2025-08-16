@@ -263,7 +263,7 @@ export class ReportGeneratorService {
   }
 
   private generateReportId(): string {
-    return `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `report_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   private processReportData(data: ReportData): any {
@@ -433,6 +433,6 @@ export class ReportGeneratorService {
 
 // 导出单例实例
 export const reportGeneratorService = new ReportGeneratorService();
-export const EnhancedReportGenerator = reportGeneratorService; // 兼容性导出
+export const ReportGenerator = reportGeneratorService; // 兼容性导出
 
 export default reportGeneratorService;

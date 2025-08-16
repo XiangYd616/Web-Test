@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import { Check, Copy, Download, Share2, Heart, ThumbsUp, ThumbsDown, Star, Bookmark, BookmarkCheck, Eye, EyeOff, Volume2, VolumeX, Zap, Sparkles, Target, TrendingUp, Award, Gift } from 'lucide-react';
+import {Check, Copy, Heart, ThumbsUp, Star, Bookmark, BookmarkCheck, Sparkles, Award} from 'lucide-react';
 
 // 按钮状态反馈组件
 export const ButtonFeedback: React.FC<{

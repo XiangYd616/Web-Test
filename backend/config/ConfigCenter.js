@@ -77,7 +77,7 @@ class ConfigHistory {
       oldValue,
       newValue,
       source,
-      id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      id: `${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
     };
 
     this.history.unshift(change);

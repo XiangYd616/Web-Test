@@ -1,14 +1,14 @@
-import { AlertCircle, CheckCircle, Clock, Eye, FileText, Globe, HardDrive, Image, Link, Loader, MapPin, Search, Settings, Share2, Smartphone, Square, XCircle, Zap } from 'lucide-react';
+import {AlertCircle, CheckCircle, Clock, Eye, FileText, Globe, HardDrive, Image, Link, Loader, MapPin, Search, Settings, Share2, Smartphone, Square, XCircle, Zap} from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { useAuthCheck } from '../../../components/auth/WithAuthCheck.tsx';
+import {useAuthCheck} from '../../../components/auth/WithAuthCheck.tsx';
 import BaseTestPage from '../../../components/testing/BaseTestPage.tsx';
 import FileUploadSEO from '../../../components/testing/FileUploadSEO.tsx';
 import LocalSEOResults from '../../../components/testing/LocalSEOResults.tsx';
 import NetworkErrorPrompt from '../../../components/testing/NetworkErrorPrompt.tsx';
 import SEOResults from '../../../components/testing/SEOResults.tsx';
 import URLInput from '../../../components/testing/URLInput';
-import type { SEOTestMode } from '../../../hooks/useUnifiedSEOTest.ts';
-import { useUnifiedSEOTest } from '../../../hooks/useUnifiedSEOTest.ts';
+import type { SEOTestMode } from '../../../hooks/useSEOTest';
+import {useUnifiedSEOTest} from '../../../hooks/useSEOTest';
 
 // CSS样式已迁移到组件库中
 
@@ -533,7 +533,7 @@ const SEOTest: React.FC = () => {
 
   // 历史记录处理
   const handleTestSelect = (test: any) => {
-    // 历史测试选择由UnifiedTestPageLayout处理
+    // 历史测试选择由TestPageLayout处理
     console.log('Selected test:', test);
   };
 

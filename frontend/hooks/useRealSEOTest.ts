@@ -1,5 +1,5 @@
-import { useCallback, useRef, useState } from 'react';
-import { RealSEOAnalysisEngine, SEOAnalysisResult } from '../services/seo/seoAnalysisEngine';
+import {useCallback, useRef, useState} from 'react';
+import {RealSEOAnalysisEngine, SEOAnalysisResult} from '../services/seo/seoAnalysisEngine';
 
 const getPerformanceMetrics = async (url: string, options: any) => {
 

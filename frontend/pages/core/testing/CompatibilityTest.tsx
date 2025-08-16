@@ -1,20 +1,16 @@
-import { AlertTriangle, CheckCircle, Clock, Eye, Globe, Grid, Loader, Lock, Monitor, Play, RotateCcw, Settings, Smartphone, Square, Tablet, XCircle } from 'lucide-react';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useAuthCheck } from '../../../components/auth/WithAuthCheck.tsx';
-import { TestCharts } from '../../../components/charts/TestCharts.tsx';
-import URLInput from '../../../components/testing/URLInput';
-import BaseTestPage from '../../../components/testing/BaseTestPage.tsx';
-import { ProgressBar } from '../../../components/ui/ProgressBar.tsx';
-import { useUserStats } from '../../../hooks/useUserStats.ts';
+/**
+ * 兼容性测试页面 - 使用统一的测试组件
+ */
 
-// CSS样式已迁移到组件库中
-// 进度条样式已集成到ProgressBar组件
+import React from 'react';
+import {TestType} from '../../../types/testConfig';
+import {TestPage} from '../TestPage';
 
-// 兼容性测试相关类型定义
-type BrowserType = 'chrome' | 'firefox' | 'safari' | 'edge' | 'ie' | 'opera';
-type MobileBrowserType = 'ios-safari' | 'android-chrome' | 'samsung-browser' | 'mobile-firefox';
-type DeviceType = 'desktop' | 'mobile' | 'tablet';
-type CompatibilityEngine = 'caniuse' | 'browserstack' | 'local' | 'feature-detection';
+const CompatibilityTest: React.FC = () => {
+  return <TestPage testType={TestType.COMPATIBILITY} />;
+};
+
+export default CompatibilityTest;
 
 // 浏览器版本信息
 interface BrowserVersion {
@@ -338,8 +334,8 @@ const CompatibilityTest: React.FC = () => {
     ];
 
     // 随机选择一些问题
-    const numIssues = Math.floor(Math.random() * 3);
-    for (let i = 0; i < numIssues; i++) {
+    const Issues = Math.floor(Math.random() * 3);
+    for (let i = 0; i < Issues; i++) {
       if (commonIssues[i]) {
         issues.push(commonIssues[i]);
       }

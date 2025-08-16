@@ -3,7 +3,7 @@
  * 提供前端错误处理、日志记录、用户通知的统一接口
  */
 
-import { toast } from 'react-hot-toast';
+import {toast} from 'react-hot-toast';
 
 // 错误类型枚举
 export enum ErrorType {
@@ -371,7 +371,7 @@ class ErrorService {
    * 生成错误ID
    */
   private generateErrorId(): string {
-    return `err_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `err_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   /**

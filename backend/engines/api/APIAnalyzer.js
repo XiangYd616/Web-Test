@@ -4,11 +4,11 @@
  * 提供完整的API测试和分析功能
  */
 
-const TestCaseManager = require('./managers/TestCaseManager');
-const HTTPClient = require('./clients/HTTPClient');
-const APITestAutomation = require('./automation/APITestAutomation');
-const APIPerformanceTester = require('./performance/APIPerformanceTester');
-const APIDocumentationGenerator = require('./documentation/APIDocumentationGenerator');
+const TestCaseManager = require('../managers/testCaseManager');
+const HTTPClient = require('../clients/httpClient');
+const APITestAutomation = require('../automation/apiTestAutomation');
+const APIPerformanceTester = require('../performance/apiPerformanceTester');
+const APIDocumentationGenerator = require('../documentation/apiDocumentationGenerator');
 
 class APIAnalyzer {
   constructor(options = {}) {

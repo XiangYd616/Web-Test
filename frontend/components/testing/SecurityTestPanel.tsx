@@ -1,25 +1,25 @@
 
-import { AlertTriangle, Award, Eye, FileText, Lock, Network, Settings, Shield, Target, Zap } from 'lucide-react';
+import {AlertTriangle, Award, Eye, FileText, Lock, Network, Settings, Shield, Target, Zap} from 'lucide-react';
 import React, { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
-import { SecurityTestConfig, SecurityTestResult, TestProgress, unifiedSecurityEngine } from '../../services/auth/securityEngine';
-// import { createCommonErrors, createError } from '../../utils/errorHandler'; // 函数不存在，已注释
-import { URLValidationResult } from '../../utils/urlValidator';
-import { EnhancedError } from './ErrorDisplay';
+import {SecurityTestConfig, SecurityTestResult, TestProgress, unifiedSecurityEngine} from '../../services/auth/securityEngine';
+// import {createCommonErrors, createError} from '../../utils/errorHandler'; // 函数不存在，已注释
+import {URLValidationResult} from '../../utils/urlValidator';
+import {Error} from './ErrorDisplay';
 
-interface UnifiedSecurityTestPanelProps {
+interface SecurityTestPanelProps {
   onTestStart?: () => void;
   onTestProgress?: (progress: TestProgress) => void;
   onTestComplete?: (result: SecurityTestResult) => void;
   onTestError?: (error: string) => void;
 }
 
-export interface UnifiedSecurityTestPanelRef {
+export interface SecurityTestPanelRef {
   startTest: () => void;
   canStartTest: () => boolean;
   getConfig: () => SecurityTestConfig;
 }
 
-export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, UnifiedSecurityTestPanelProps>(({
+export const SecurityTestPanel = forwardRef<SecurityTestPanelRef, SecurityTestPanelProps>(({
   onTestStart,
   onTestProgress,
   onTestComplete,
@@ -46,7 +46,7 @@ export const SecurityTestPanel = forwardRef<UnifiedSecurityTestPanelRef, Unified
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState<TestProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [enhancedError, setEnhancedError] = useState<EnhancedError | null>(null);
+  const [enhancedError, setEnhancedError] = useState<Error | null>(null);
   const [currentTestId, setCurrentTestId] = useState<string | null>(null);
   const [urlValidation, setUrlValidation] = useState<URLValidationResult | null>(null);
   const [isUrlValid, setIsUrlValid] = useState(false);

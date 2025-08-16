@@ -1,5 +1,5 @@
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import { parseAuthError } from '../components/auth/AuthErrorHandler';
+import {parseAuthError} from '../components/auth/AuthErrorHandler';
 import type { AuthContextType, User } from '../types/auth';
 
 interface LoginCredentials {

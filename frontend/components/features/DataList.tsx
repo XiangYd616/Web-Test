@@ -1,7 +1,7 @@
-import { Code, Copy, Database, Edit, Eye, Globe, Shield, Trash2, Wifi, Zap } from 'lucide-react';
+import {Code, Copy, Database, Edit, Eye, Globe, Shield, Trash2, Wifi, Zap} from 'lucide-react';
 import React from 'react';
-import { Column, DataTable } from '../../../components/shared';
-import { TestRecord } from '../../hooks/useDataStorage.ts';
+import {Column, DataTable} from '../../../components/ui/shared';
+import {TestRecord} from '../../hooks/useDataStorage.ts';
 
 interface DataListProps {
   records: TestRecord[];

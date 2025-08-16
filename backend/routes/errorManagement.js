@@ -4,7 +4,7 @@
  */
 
 const express = require('express');
-const { unifiedErrorHandler } = require('../utils/ErrorHandler');
+const { unifiedErrorHandler } = require('../utils/errorHandler');
 const { errorLogAggregator } = require('../utils/ErrorLogAggregator');
 const { errorMonitoringSystem } = require('../utils/ErrorMonitoringSystem');
 
@@ -190,7 +190,7 @@ router.post('/send-alert', async (req, res) => {
     }
     
     const alert = {
-      id: `manual_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `manual_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       title,
       message,
       severity: severity || 'medium',

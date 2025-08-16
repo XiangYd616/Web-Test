@@ -2,7 +2,7 @@
  * 性能优化相关的React Hook
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
   frontendCache,
   lazyImageLoader,

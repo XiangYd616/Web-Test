@@ -398,7 +398,7 @@ class CICDIntegrationService extends EventEmitter {
    * 辅助方法
    */
   generateIntegrationId() {
-    return `integration_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `integration_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   generateWebhookSecret() {

@@ -1,6 +1,6 @@
-import { LucideIcon } from 'lucide-react';
+import {LucideIcon} from 'lucide-react';
 import React from 'react';
-import { useAuthCheck } from '../auth/WithAuthCheck';
+import {useAuthCheck} from '../auth/WithAuthCheck';
 
 // 基础测试页面布局 - 提供共同的结构但允许完全自定义内容
 interface BaseTestLayoutProps {

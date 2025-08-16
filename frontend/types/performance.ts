@@ -29,7 +29,7 @@ declare global {
 
 // ==================== 性能配置接口 ====================
 
-export interface UnifiedPerformanceConfig {
+export interface PerformanceConfig {
   /** 检测级别 */
   level: 'basic' | 'standard' | 'comprehensive';
 
@@ -218,7 +218,7 @@ export interface PerformanceTestResult {
   timestamp: number;
 
   /** 测试配置 */
-  config: UnifiedPerformanceConfig;
+  config: PerformanceConfig;
 
   /** 总体评分 (0-100) */
   overallScore: number;
@@ -332,7 +332,7 @@ export interface PerformanceTestProgress {
 
 // ==================== 预设配置模板 ====================
 
-export const PERFORMANCE_CONFIG_PRESETS: Record<string, UnifiedPerformanceConfig> = {
+export const PERFORMANCE_CONFIG_PRESETS: Record<string, PerformanceConfig> = {
   basic: {
     level: 'basic',
     pageSpeed: true,

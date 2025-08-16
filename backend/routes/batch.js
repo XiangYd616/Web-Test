@@ -18,7 +18,7 @@ const batchOperations = new Map();
  * 生成操作ID
  */
 function generateOperationId() {
-  return `batch_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return `batch_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
 
 /**

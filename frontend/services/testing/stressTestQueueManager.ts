@@ -1,6 +1,6 @@
 
-import { systemResourceMonitor } from '../system/systemResourceMonitor';
-import { stressTestRecordService } from './stressTestRecordService';
+import {systemResourceMonitor} from '../system/systemResourceMonitor';
+import {stressTestRecordService} from './stressTestRecordService';
 
 export interface QueuedTest {
   id: string;
@@ -578,7 +578,7 @@ class StressTestQueueManager {
    * 生成队列ID
    */
   private generateQueueId(): string {
-    return `queue_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `queue_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   /**

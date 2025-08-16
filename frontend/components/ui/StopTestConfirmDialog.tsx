@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, Square, Clock, Database } from 'lucide-react';
+import {AlertTriangle, Square, Clock, Database} from 'lucide-react';
 
 interface StopTestConfirmDialogProps {
   isOpen: boolean;

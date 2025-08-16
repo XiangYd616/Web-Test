@@ -1,4 +1,4 @@
-import { unifiedApiService } from '../api/apiService';
+import {unifiedApiService} from '../api/apiService';
 
 export interface UserProfile {
   id: string;

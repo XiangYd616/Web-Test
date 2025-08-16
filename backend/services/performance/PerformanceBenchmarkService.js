@@ -582,11 +582,11 @@ class PerformanceBenchmarkService extends EventEmitter {
   }
 
   generateBenchmarkId() {
-    return `benchmark_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `benchmark_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   generateTestId() {
-    return `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `test_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   async ensureDirectories() {

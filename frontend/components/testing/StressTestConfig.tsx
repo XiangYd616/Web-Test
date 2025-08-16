@@ -70,7 +70,7 @@ interface StressTestConfig {
   };
 }
 
-interface AdvancedStressTestConfigProps {
+interface StressTestConfigProps {
   config: StressTestConfig;
   onChange: (config: StressTestConfig) => void;
   onStart: () => void;
@@ -78,7 +78,7 @@ interface AdvancedStressTestConfigProps {
   className?: string;
 }
 
-const AdvancedStressTestConfig: React.FC<AdvancedStressTestConfigProps> = ({
+const StressTestConfig: React.FC<StressTestConfigProps> = ({
   config,
   onChange,
   onStart,
@@ -384,4 +384,4 @@ const AdvancedStressTestConfig: React.FC<AdvancedStressTestConfigProps> = ({
   );
 };
 
-export default AdvancedStressTestConfig;
+export default StressTestConfig;

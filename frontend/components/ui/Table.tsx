@@ -1,6 +1,6 @@
-import { ChevronDown, ChevronUp, Filter } from 'lucide-react';
+import {ChevronDown, ChevronUp, Filter} from 'lucide-react';
 import React, { useMemo, useState } from 'react';
-import { cn } from '../../utils/cn';
+import {cn} from '../../utils/cn';
 
 // 表格列定义接口
 export interface TableColumn<T = any> {

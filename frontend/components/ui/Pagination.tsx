@@ -13,12 +13,11 @@ import {
   MoreHorizontal,
   Loader2
 } from 'lucide-react';
-import { defaultMemoryCache } from '../../services/cacheStrategy';
 import type { PaginationInfo } from '../../types/common';
 
 // ==================== 类型定义 ====================
 
-export interface EnhancedPaginationProps {
+export interface PaginationProps {
   current: number;
   total: number;
   pageSize: number;
@@ -193,7 +192,7 @@ export function usePagination(options: UsePaginationOptions = {}) {
 
 // ==================== 增强分页组件 ====================
 
-export const EnhancedPagination: React.FC<EnhancedPaginationProps> = ({
+export const Pagination: React.FC<PaginationProps> = ({
   current,
   total,
   pageSize,
@@ -496,4 +495,4 @@ export const EnhancedPagination: React.FC<EnhancedPaginationProps> = ({
   );
 };
 
-export default EnhancedPagination;
+export default Pagination;

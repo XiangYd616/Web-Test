@@ -1,6 +1,6 @@
-import { AlertCircle, CheckCircle, Eye, EyeOff } from 'lucide-react';
+import {AlertCircle, CheckCircle, Eye, EyeOff} from 'lucide-react';
 import React, { forwardRef } from 'react';
-import { cn } from '../../utils/cn';
+import {cn} from '../../utils/cn';
 
 // 基础Input组件
 interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {

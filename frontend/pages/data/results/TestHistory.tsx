@@ -3,9 +3,9 @@
  * 使用统一的测试历史组件和布局
  */
 
-import { FileText } from 'lucide-react';
+import {FileText} from 'lucide-react';
 import React from 'react';
-import { PageLayout } from '../../../components/layout/PageLayout.tsx';
+import {PageLayout} from '../../../components/layout/PageLayout.tsx';
 import TestHistoryComponent from './TestHistory.tsx';
 
 const TestHistory: React.FC = () => {

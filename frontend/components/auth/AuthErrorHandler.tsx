@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, X, RefreshCw, LogIn } from 'lucide-react';
+import {AlertTriangle, X, RefreshCw, LogIn} from 'lucide-react';
 
 export enum AuthErrorType {
   TOKEN_MISSING = 'TOKEN_MISSING',

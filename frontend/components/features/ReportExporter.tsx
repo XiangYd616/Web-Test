@@ -1,6 +1,6 @@
-import { AlertCircle, CheckCircle, Download, Eye, FileText, Layout, Loader, Settings, Table } from 'lucide-react';
+import {AlertCircle, CheckCircle, Download, Eye, FileText, Layout, Loader, Settings, Table} from 'lucide-react';
 import React, { useState } from 'react';
-import { EnhancedReportGenerator, ExportFormat, ReportConfig, ReportData } from '../../services/reportGeneratorService';
+import {ReportGenerator, ExportFormat, ReportConfig, ReportData} from '../../services/reporting/reportGeneratorService';
 
 interface ReportExporterProps {
   testResults: any[];
@@ -18,7 +18,7 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('html');
   const [config, setConfig] = useState<ReportConfig>(() =>
-    EnhancedReportGenerator.getDefaultConfig()
+    ReportGenerator.getDefaultConfig()
   );
   const [isGenerating, setIsGenerating] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
@@ -61,7 +61,7 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
     }
   ];
 
-  const templates = EnhancedReportGenerator.getAvailableTemplates();
+  const templates = ReportGenerator.getAvailableTemplates();
   const templatesMap = templates.reduce((acc, template) => {
     acc[template.id] = template;
     return acc;
@@ -102,8 +102,8 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
         }
       };
 
-      const reportId = await EnhancedReportGenerator.generateReport(reportData, config);
-      const result = await EnhancedReportGenerator.exportReport(reportId, { format: selectedFormat });
+      const reportId = await ReportGenerator.generateReport(reportData, config);
+      const result = await ReportGenerator.exportReport(reportId, { format: selectedFormat });
 
       // 下载文件
       const blob = typeof result === 'string' ? new Blob([result], { type: 'text/plain' }) : result;

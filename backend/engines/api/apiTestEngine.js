@@ -69,7 +69,7 @@ class ApiTestEngine {
    * 执行API测试
    */
   async runApiTest(config) {
-    const testId = `api_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const testId = `api_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
     
     try {
       const validatedConfig = this.validateConfig(config);

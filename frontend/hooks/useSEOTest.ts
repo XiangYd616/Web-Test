@@ -1,7 +1,7 @@
-import { useCallback, useRef, useState } from 'react';
-import { LocalSEOAnalysisEngine, LocalSEOConfig } from '../services/seo/localSEOAnalysisEngine';
-import { SEOAnalysisResult } from '../services/seo/seoAnalysisEngine';
-import { useRealSEOTest } from './useRealSEOTest';
+import {useCallback, useRef, useState} from 'react';
+import {LocalSEOAnalysisEngine, LocalSEOConfig} from '../services/seo/localSEOAnalysisEngine';
+import {SEOAnalysisResult} from '../services/seo/seoAnalysisEngine';
+import {useRealSEOTest} from './useRealSEOTest';
 
 export type SEOTestMode = 'online' | 'local';
 
@@ -19,7 +19,7 @@ interface OnlineSEOConfig {
   depth?: 'basic' | 'standard' | 'comprehensive';
 }
 
-interface UnifiedSEOTestConfig {
+interface SEOTestConfig {
   mode: SEOTestMode;
   online?: OnlineSEOConfig;
   local?: LocalSEOConfig;
@@ -59,7 +59,7 @@ export const useUnifiedSEOTest = () => {
   const error = currentMode === 'online' ? onlineError : localError;
 
   // 开始统一测试
-  const startTest = useCallback(async (config: UnifiedSEOTestConfig) => {
+  const startTest = useCallback(async (config: SEOTestConfig) => {
     setCurrentMode(config.mode);
 
     if (config.mode === 'online' && config.online) {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { Check, X, Star, Zap, Shield, Globe, BarChart3, Users, Clock, Headphones, Crown, Sparkles, ArrowRight, CreditCard, Gift } from 'lucide-react';
+import {Check, X, Star, Crown} from 'lucide-react';
 
 interface PlanFeature {
   name: string;

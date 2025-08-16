@@ -1,8 +1,8 @@
-import { History } from 'lucide-react';
+import {History} from 'lucide-react';
 import React, { ReactNode, useEffect, useState } from 'react';
-import { TestPageHistory } from '../ui/TestPageHistory.tsx';
+import {TestPageHistory} from '../ui/TestPageHistory.tsx';
 
-interface UnifiedTestPageWithHistoryProps {
+interface TestPageWithHistoryProps {
   // 页面基本信息
   testType: 'stress' | 'security' | 'api' | 'performance' | 'compatibility' | 'seo' | 'accessibility';
   testTypeName: string;
@@ -22,7 +22,7 @@ interface UnifiedTestPageWithHistoryProps {
   additionalComponents?: ReactNode;
 }
 
-export const UnifiedTestPageWithHistory: React.FC<UnifiedTestPageWithHistoryProps> = ({
+export const TestPageWithHistory: React.FC<TestPageWithHistoryProps> = ({
   testType,
   testTypeName,
   testIcon: TestIcon,
@@ -167,4 +167,4 @@ export const UnifiedTestPageWithHistory: React.FC<UnifiedTestPageWithHistoryProp
   );
 };
 
-export default UnifiedTestPageWithHistory;
+export default TestPageWithHistory;

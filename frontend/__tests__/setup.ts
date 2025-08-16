@@ -4,8 +4,8 @@
  */
 
 import '@testing-library/jest-dom';
-import { cleanup } from '@testing-library/react';
-import { afterEach, vi } from 'vitest';
+import {cleanup} from '@testing-library/react';
+import {afterEach, vi} from 'vitest';
 
 // Jest DOM 匹配器已通过导入自动扩展
 

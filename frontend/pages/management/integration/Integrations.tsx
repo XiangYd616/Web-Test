@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { Activity, AlertTriangle, BarChart3, Copy, Edit, Eye, EyeOff, Globe, Key, Package, Plus, RefreshCw, Trash2, Webhook, Zap } from 'lucide-react';
+import {Activity, AlertTriangle, BarChart3, Copy, Edit, Eye, EyeOff, Globe, Key, Package, Plus, RefreshCw, Trash2, Webhook, Zap} from 'lucide-react';
 import IntegrationService, {
   APIKey,
   IntegrationStats,

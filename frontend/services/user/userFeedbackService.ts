@@ -229,16 +229,16 @@ export class UserFeedbackService {
     // 检测浏览器
     if (ua.includes('Chrome')) {
       browserName = 'Chrome';
-      browserVersion = ua.match(/Chrome/\([0-9.]+)/)?.[1] || 'Unknown';
+      browserVersion = ua.match(/Chrome\/([0-9.]+)/)?.[1] || 'Unknown';
     } else if (ua.includes('Firefox')) {
       browserName = 'Firefox';
-      browserVersion = ua.match(/Firefox/\([0-9.]+)/)?.[1] || 'Unknown';
+      browserVersion = ua.match(/Firefox\/([0-9.]+)/)?.[1] || 'Unknown';
     } else if (ua.includes('Safari')) {
       browserName = 'Safari';
-      browserVersion = ua.match(/Version/\([0-9.]+)/)?.[1] || 'Unknown';
+      browserVersion = ua.match(/Version\/([0-9.]+)/)?.[1] || 'Unknown';
     } else if (ua.includes('Edge')) {
       browserName = 'Edge';
-      browserVersion = ua.match(/Edg/\([0-9.]+)/)?.[1] || 'Unknown';
+      browserVersion = ua.match(/Edg\/([0-9.]+)/)?.[1] || 'Unknown';
     }
 
     // 检测操作系统
@@ -264,14 +264,14 @@ export class UserFeedbackService {
    * 生成会话ID
    */
   private generateSessionId(): string {
-    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   /**
    * 生成唯一ID
    */
   private generateId(): string {
-    return `feedback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `feedback_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   /**

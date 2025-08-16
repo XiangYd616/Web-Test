@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Activity, AlertTriangle, CheckCircle, Clock, Database, Server, Users, Zap } from 'lucide-react';
+import {Activity, AlertTriangle, CheckCircle, Clock, Database, Server, Users, Zap} from 'lucide-react';
 
 export interface MonitoringMetrics {
   activeUsers: number;

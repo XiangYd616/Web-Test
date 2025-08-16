@@ -1,6 +1,6 @@
 
 import backgroundTestManager from './backgroundTestManager';
-import { testAPI } from './testApiService';
+import {testAPI} from './testApiService';
 
 // 浏览器兼容的事件发射器
 class BrowserEventEmitter {
@@ -39,7 +39,7 @@ class BrowserEventEmitter {
   }
 }
 
-export interface AdvancedTestConfig {
+export interface TestConfig {
   url: string;
   testType: 'website' | 'security' | 'performance' | 'compatibility' | 'seo' | 'accessibility' | 'api' | 'stress' | 'ux';
   options: Record<string, any>;
@@ -72,7 +72,7 @@ export interface TestResult {
   videoPath?: string;
   rawData?: any;
   engine: string;
-  config: AdvancedTestConfig;
+  config: TestConfig;
 
   // SEO特定属性
   scores?: Record<string, number>;
@@ -172,7 +172,7 @@ export interface TestProgress {
   metrics?: Record<string, any>;
 }
 
-class AdvancedTestEngine extends BrowserEventEmitter {
+class TestEngine extends BrowserEventEmitter {
   private activeTests = new Map<string, any>();
   private testHistory: TestResult[] = [];
   private maxConcurrentTests = 10;
@@ -273,7 +273,7 @@ class AdvancedTestEngine extends BrowserEventEmitter {
     url: string;
     [key: string]: any;
   }): Promise<{ testId: string; promise: Promise<any> }> {
-    const testId = `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const testId = `test_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
     const selectedEngine = this.selectBestEngine(config.testType);
 
     console.log(`🚀 Starting simple test ${testId} with engine: ${selectedEngine}`);
@@ -427,7 +427,7 @@ class AdvancedTestEngine extends BrowserEventEmitter {
     }
   }
 
-  async runAdvancedTest(config: AdvancedTestConfig): Promise<{ testId: string; promise: Promise<TestResult> }> {
+  async runAdvancedTest(config: TestConfig): Promise<{ testId: string; promise: Promise<TestResult> }> {
     if (this.activeTests.size >= this.maxConcurrentTests) {
       throw new Error(`Maximum concurrent tests (${this.maxConcurrentTests}) reached`);
     }
@@ -802,5 +802,5 @@ class AdvancedTestEngine extends BrowserEventEmitter {
 }
 
 // 创建单例实例
-export const advancedTestEngine = new AdvancedTestEngine();
+export const advancedTestEngine = new TestEngine();
 export default advancedTestEngine;

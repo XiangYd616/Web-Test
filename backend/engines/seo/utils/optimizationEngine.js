@@ -4,7 +4,7 @@
  * 提供具体的代码示例、实施步骤和效果预估
  */
 
-class SmartOptimizationEngine {
+class OptimizationEngine {
   constructor() {
     this.optimizationTemplates = {
       title: {
@@ -572,4 +572,4 @@ RewriteRule ^old-url$ /new-optimized-url [R=301,L]
   }
 }
 
-module.exports = SmartOptimizationEngine;
+module.exports = OptimizationEngine;

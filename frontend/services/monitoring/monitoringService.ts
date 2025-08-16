@@ -1,4 +1,3 @@
-import { format } from 'date-fns';
 
 export interface MonitoringSite {
   id: string;

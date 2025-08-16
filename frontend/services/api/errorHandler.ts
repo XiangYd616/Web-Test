@@ -4,9 +4,9 @@
  * 版本: v2.0.0 - 完善的错误处理和重试机制
  */
 
-import { ErrorCode } from '../../types/enums';
-import { ApiError } from '../../types/unified/apiResponse';
-import { enhanceError, ErrorContext as UtilsErrorContext } from '../../utils/errorHandler';
+import {ErrorCode} from '../../types/enums';
+import {ApiError} from '../../types/unified/apiResponse';
+import {enhanceError, ErrorContext as UtilsErrorContext} from '../../utils/errorHandler';
 
 // 错误处理配置
 export interface ErrorHandlerConfig {
@@ -432,7 +432,7 @@ export class ApiErrorHandler {
    * 生成请求ID
    */
   private generateRequestId(): string {
-    return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `req_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   /**

@@ -1,7 +1,7 @@
-import { AlertTriangle, CheckCircle, Database, Eye, EyeOff, Globe, Info, Lock, RefreshCw, Settings, Shield, XCircle } from 'lucide-react';
+import {AlertTriangle, CheckCircle, Database, Eye, EyeOff, Globe, Info, Lock, RefreshCw, Settings, Shield, XCircle} from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { currentSecurityConfig, SecurityConfigValidator } from '../../../config/security.ts';
-import { useAuth } from '../../../contexts/AuthContext.tsx';
+import {currentSecurityConfig, SecurityConfigValidator} from '../../../config/security.ts';
+import {useAuth} from '../../../contexts/AuthContext.tsx';
 
 interface SecurityStatus {
   level: 'high' | 'medium' | 'low';

@@ -1,7 +1,7 @@
-import { UserRole, UserStatus } from '../../types/enums';
-import { AuthResponse, ChangePasswordData, CreateUserData, LoginCredentials, RegisterData, UpdateUserData, User } from '../../types/user';
-import { browserJwt } from '../../utils/browserJwt';
-import { canUseDatabase } from '../../utils/environment';
+import {UserRole, UserStatus} from '../../types/enums';
+import {AuthResponse, ChangePasswordData, CreateUserData, LoginCredentials, RegisterData, UpdateUserData, User} from '../../types/user';
+import {browserJwt} from '../../utils/browserJwt';
+import {canUseDatabase} from '../../utils/environment';
 
 // 动态导入数据库模块（避免前端构建时的依赖问题）
 let jwt: any, userDao: any;
@@ -24,7 +24,7 @@ const isElectron = typeof window !== 'undefined' && (window as any).process?.typ
 const isBrowser = typeof window !== 'undefined' && !isElectron;
 const isNode = typeof window === 'undefined';
 
-export class UnifiedAuthService {
+export class AuthService {
   private readonly TOKEN_KEY = 'test_web_app_token';
   private readonly USER_KEY = 'test_web_app_user';
   private readonly REFRESH_TOKEN_KEY = 'test_web_app_refresh_token';
@@ -1017,6 +1017,6 @@ export class UnifiedAuthService {
 }
 
 // 创建全局统一认证服务实例
-export const unifiedAuthService = new UnifiedAuthService();
+export const unifiedAuthService = new AuthService();
 export const authService = unifiedAuthService; // 添加别名导出
 export default unifiedAuthService; // 导出实例而不是类

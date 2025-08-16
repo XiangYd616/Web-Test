@@ -3,7 +3,7 @@
  * 提供统一的通知消息管理功能
  */
 
-import { useCallback, useState } from 'react';
+import {useCallback, useState} from 'react';
 
 // 通知类型
 export type NotificationType = 'success' | 'error' | 'warning' | 'info';
@@ -40,7 +40,7 @@ const DEFAULT_DURATION = 4000;
 const DEFAULT_TYPE: NotificationType = 'info';
 
 // 生成唯一ID
-const generateId = () => `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+const generateId = () => `notification-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
 // 通知Hook
 export const useNotification = () => {

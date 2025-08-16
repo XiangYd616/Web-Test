@@ -1,5 +1,5 @@
 
-import { ProxyResponse, proxyService } from '../integration/proxyService';
+import {ProxyResponse, proxyService} from '../integration/proxyService';
 
 // SEO分析结果接口
 export interface SEOAnalysisResult {

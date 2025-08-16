@@ -1,4 +1,4 @@
-import { AlertCircle, BarChart3, CheckCircle, Clock, Database, Download, Eye, FileText, Globe, Shield, TrendingDown, TrendingUp, Wifi, XCircle, Zap } from 'lucide-react';
+import {AlertCircle, BarChart3, CheckCircle, Clock, Database, Download, Eye, FileText, Globe, Shield, TrendingDown, TrendingUp, Wifi, XCircle, Zap} from 'lucide-react';
 import React from 'react';
 
 interface TestResult {

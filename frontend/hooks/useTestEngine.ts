@@ -3,7 +3,7 @@
  * 提供统一的测试执行和管理功能
  */
 
-import { useCallback, useState } from 'react';
+import {useCallback, useState} from 'react';
 
 // 测试配置接口
 export interface TestConfig {

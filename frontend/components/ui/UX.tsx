@@ -4,8 +4,8 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { AlertTriangle, CheckCircle, Info, X, ChevronRight, HelpCircle, Lightbulb } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import {AlertTriangle, CheckCircle, Info, X, ChevronRight, HelpCircle, Lightbulb} from 'lucide-react';
+import {toast} from 'react-hot-toast';
 
 // 通知类型
 type NotificationType = 'success' | 'error' | 'warning' | 'info';
@@ -52,7 +52,7 @@ interface UserGuideProps {
 /**
  * 增强通知组件
  */
-export const EnhancedNotification: React.FC<NotificationProps> = ({
+export const Notification: React.FC<NotificationProps> = ({
   type,
   title,
   message,
@@ -149,7 +149,7 @@ export const EnhancedNotification: React.FC<NotificationProps> = ({
 /**
  * 智能工具提示组件
  */
-export const SmartTooltip: React.FC<TooltipProps> = ({
+export const Tooltip: React.FC<TooltipProps> = ({
   content,
   children,
   position = 'top',
@@ -372,7 +372,7 @@ export const useSmartNotification = () => {
     }
   ) => {
     const notification = (
-      <EnhancedNotification
+      <Notification
         type={type}
         title={title}
         message={message}
@@ -414,8 +414,8 @@ export const useSmartNotification = () => {
 };
 
 export default {
-  EnhancedNotification,
-  SmartTooltip,
+  Notification,
+  Tooltip,
   UserGuide,
   EmptyState,
   useSmartNotification

@@ -6,7 +6,7 @@
 const { getPool } = require('../config/database');
 const { USER_FIELD_MAPPING, TEST_FIELD_MAPPING, FieldMapper } = require('../config/fieldMapping');
 
-class OptimizedQueries {
+class Queries {
   /**
    * 优化的用户查询 - 直接返回 camelCase 字段
    */
@@ -165,4 +165,4 @@ class OptimizedQueries {
   }
 }
 
-module.exports = OptimizedQueries;
+module.exports = Queries;

@@ -4,7 +4,6 @@
  */
 
 import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
-import { FixedSizeList as List } from 'react-window';
 import ResultCard from './ResultCard';
 
 interface TestResult {

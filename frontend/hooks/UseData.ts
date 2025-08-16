@@ -3,7 +3,7 @@
  * 提供WebSocket连接和实时数据更新功能
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 
 // 连接状态类型
 export type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'error';

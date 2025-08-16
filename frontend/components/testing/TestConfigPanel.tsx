@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Save, RotateCcw, Copy, Upload, Download } from 'lucide-react';
+import {Settings, Save, RotateCcw} from 'lucide-react';
 
 interface TestConfigPanelProps {
   testType: string;

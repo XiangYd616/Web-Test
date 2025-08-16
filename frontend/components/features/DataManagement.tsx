@@ -13,17 +13,15 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import TestHistory from '../ui/TestHistory.tsx';
-// import { TestStatisticsPanel } from './TestStatisticsPanel';
-// import { DataExportPanel } from './DataExportPanel';
-import { unifiedTestHistoryService } from '../../services/unifiedTestHistoryService';
+import {unifiedTestHistoryService} from '../../services/testing/testHistoryService';
 import type { TestStatistics, TestType } from '../../types/testHistory';
 
-interface UnifiedDataManagementProps {
+interface DataManagementProps {
   className?: string;
   defaultTab?: 'history' | 'statistics' | 'export';
 }
 
-export const DataManagement: React.FC<UnifiedDataManagementProps> = ({
+export const DataManagement: React.FC<DataManagementProps> = ({
   className = '',
   defaultTab = 'history'
 }) => {

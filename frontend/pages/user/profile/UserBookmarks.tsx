@@ -1,7 +1,7 @@
-import { AlertCircle, Bookmark, Calendar, CheckCircle, Clock, Loader, Plus, Search, Star, Trash2, X } from 'lucide-react';
+import {AlertCircle, Bookmark, Calendar, CheckCircle, Clock, Loader, Plus, Search, Star, Trash2, X} from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { useTheme } from '../../../contexts/ThemeContext.tsx';
-import { BookmarkItem, userService } from '../../../services/user/userService.ts';
+import {useTheme} from '../../../contexts/ThemeContext.tsx';
+import {BookmarkItem, userService} from '../../../services/user/userService.ts';
 
 interface BookmarkCategory {
   id: string;
@@ -10,7 +10,7 @@ interface BookmarkCategory {
   count: number;
 }
 
-interface NewBookmarkForm {
+interface BookmarkForm {
   title: string;
   url: string;
   description: string;
@@ -35,7 +35,7 @@ const UserBookmarks: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingBookmark, setEditingBookmark] = useState<BookmarkItem | null>(null);
 
-  const [newBookmarkForm, setNewBookmarkForm] = useState<NewBookmarkForm>({
+  const [newBookmarkForm, setNewBookmarkForm] = useState<BookmarkForm>({
     title: '',
     url: '',
     description: '',

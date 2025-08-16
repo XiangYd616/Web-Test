@@ -4,8 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '../ui/Button';
-import { LoadingStates } from '../ui/LoadingStates';
+import {Button} from '../ui/Button';
 
 interface TestTool {
   id: string;
@@ -26,7 +25,7 @@ interface TestSuite {
   estimatedTime: number;
 }
 
-const UnifiedTestManager: React.FC = () => {
+const TestManager: React.FC = () => {
   const [selectedTools, setSelectedTools] = useState<string[]>([]);
   const [selectedSuite, setSelectedSuite] = useState<string>('');
   const [isRunning, setIsRunning] = useState(false);
@@ -478,4 +477,4 @@ const UnifiedTestManager: React.FC = () => {
   );
 };
 
-export default UnifiedTestManager;
+export default TestManager;

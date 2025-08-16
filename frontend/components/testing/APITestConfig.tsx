@@ -87,7 +87,7 @@ interface APITestConfig {
   };
 }
 
-interface AdvancedAPITestConfigProps {
+interface APITestConfigProps {
   config: APITestConfig;
   onChange: (config: APITestConfig) => void;
   onStart: () => void;
@@ -95,7 +95,7 @@ interface AdvancedAPITestConfigProps {
   className?: string;
 }
 
-const AdvancedAPITestConfig: React.FC<AdvancedAPITestConfigProps> = ({
+const APITestConfig: React.FC<APITestConfigProps> = ({
   config,
   onChange,
   onStart,
@@ -585,4 +585,4 @@ const AdvancedAPITestConfig: React.FC<AdvancedAPITestConfigProps> = ({
   );
 };
 
-export default AdvancedAPITestConfig;
+export default APITestConfig;
