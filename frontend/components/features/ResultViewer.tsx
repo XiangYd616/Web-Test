@@ -24,10 +24,10 @@ import {
     Input,
     Modal,
     Select,
-    Table,
-    type SelectOption,
-    type TableColumn
-} from '../ui';
+    Table
+} from '../ui/index';
+
+// SelectOption and TableColumn types will be defined locally
 import { TestResult } from './TestRunner';
 
 // 结果详情接口

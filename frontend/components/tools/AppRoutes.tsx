@@ -1,8 +1,8 @@
 import React, { Suspense, lazy } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
-import { AdminGuard, ProtectedRoute } from '../auth';
-import { Layout } from '../layout';
-import { EnhancedErrorBoundary, LoadingSpinner } from '../ui';
+import {Navigate, Route, Routes} from 'react-router-dom';
+import {AdminGuard, ProtectedRoute} from '../auth/index';
+import {Layout} from '../layout/index';
+import {EnhancedErrorBoundary, LoadingSpinner} from '../ui/index';
 
 // 认证页面 - 也使用懒加载以减少初始包大小
 const Login = lazy(() => import('../../pages/core/auth/Login'));
@@ -10,6 +10,8 @@ const Register = lazy(() => import('../../pages/core/auth/Register'));
 
 // 懒加载页面组件
 const ModernDashboard = lazy(() => import('../../pages/core/dashboard/ModernDashboard'));
+const TestingDashboard = lazy(() => import('../../pages/core/testing/TestingDashboard'));
+const UnifiedTestPage = lazy(() => import('../../pages/core/testing/UnifiedTestPage'));
 const WebsiteTest = lazy(() => import('../../pages/core/testing/WebsiteTest'));
 
 // 分析页面（推荐使用）
@@ -117,8 +119,22 @@ const AppRoutes: React.FC = () => {
 
       {/* 公开路由 - 测试工具页面 */}
       <Route path="/" element={<Layout />}>
+        {/* 测试工具仪表板 */}
+        <Route path="testing" element={
+          <LazyPageWrapper>
+            <TestingDashboard />
+          </LazyPageWrapper>
+        } />
+
+        {/* 统一测试页面 */}
+        <Route path="testing/:testType" element={
+          <LazyPageWrapper>
+            <UnifiedTestPage />
+          </LazyPageWrapper>
+        } />
+
         {/* 测试工具 - 公开访问，但功能需要登录 */}
-        <Route path="test" element={<Navigate to="/website-test" replace />} />
+        <Route path="test" element={<Navigate to="/testing" replace />} />
         <Route path="website-test" element={
           <LazyPageWrapper>
             <WebsiteTest />

@@ -24,9 +24,10 @@ import {
     Input,
     Modal,
     ProgressBar,
-    Select,
-    type SelectOption
-} from '../ui';
+    Select
+} from '../ui/index';
+
+// SelectOption type will be defined locally
 
 // 导出格式类型
 export type ExportFormat = 'pdf' | 'excel' | 'xlsx' | 'csv' | 'json';
@@ -282,7 +283,7 @@ export const DataExporter: React.FC<DataExporterProps> = ({
             const contentDisposition = response.headers.get('Content-Disposition');
             let filename = `${task.name}.${task.config.format}`;
             if (contentDisposition) {
-                const matches = contentDisposition.match(/filename[^;=/n]*=((['"]).*?/2|[^;/n]*)/);
+                const matches = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
                 if (matches && matches[1]) {
                     filename = matches[1].replace(/['"]/g, '');
                 }

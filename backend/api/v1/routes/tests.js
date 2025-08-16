@@ -13,15 +13,15 @@ const { asyncHandler } = require('../../middleware/errorHandler.js');
 const { formatValidationErrors, createPagination, ERROR_CODES } = require('../../middleware/responseFormatter.js');
 
 // 导入测试引擎
-const seoEngine = require('../../../engines/seo');
-const performanceEngine = require('../../../engines/performance');
-const securityEngine = require('../../../engines/security');
-const stressEngine = require('../../../engines/stress');
-const apiEngine = require('../../../engines/api');
-const compatibilityEngine = require('../../../engines/compatibility');
-const uxEngine = require('../../../engines/ux');
-const infrastructureEngine = require('../../../engines/infrastructure');
-const websiteEngine = require('../../../engines/website');
+const seoEngine = require('../../../engines/seo/index');
+const performanceEngine = require('../../../engines/performance/index');
+const securityEngine = require('../../../engines/security/index');
+const stressEngine = require('../../../engines/stress/index');
+const apiEngine = require('../../../engines/api/index');
+const compatibilityEngine = require('../../../engines/compatibility/index');
+const uxEngine = require('../../../engines/ux/index');
+const infrastructureEngine = require('../../../engines/infrastructure/index');
+const websiteEngine = require('../../../engines/website/index');
 
 const router = express.Router();
 

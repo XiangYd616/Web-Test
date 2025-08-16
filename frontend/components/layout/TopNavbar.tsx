@@ -1,11 +1,11 @@
-import { Activity, AlertTriangle, ArrowRight, BarChart3, Bell, Book, Check, CheckCircle, ChevronDown, Clock, Code, Crown, Download, ExternalLink, FileText, Globe, HelpCircle, Home, Info, Key, Lock, Menu, Monitor, MoreVertical, Package, Play, Search, Settings, Shield, TestTube, Trash2, TrendingUp, Upload, User, X, Zap } from 'lucide-react';
+import {Activity, AlertTriangle, ArrowRight, BarChart3, Bell, Book, Check, CheckCircle, ChevronDown, Clock, Code, Crown, Download, ExternalLink, FileText, Globe, HelpCircle, Home, Info, Key, Lock, Menu, Monitor, MoreVertical, Package, Play, Search, Settings, Shield, TestTube, Trash2, TrendingUp, Upload, User, X, Zap} from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { useTheme } from '../../contexts/ThemeContext';
-import { NotificationItem, useNotifications } from '../../hooks/useNotifications';
-import { globalSearchService, SearchResult } from '../../services/search/globalSearchService';
-import { ThemeToggle } from '../ui';
+import {Link, useLocation} from 'react-router-dom';
+import {useAuth} from '../../contexts/AuthContext';
+import {useTheme} from '../../contexts/ThemeContext';
+import {NotificationItem, useNotifications} from '../../hooks/useNotifications';
+import {globalSearchService, SearchResult} from '../../services/search/globalSearchService';
+import {ThemeToggle} from '../ui/index';
 import UserDropdownMenu from './UserDropdownMenu';
 
 interface TopNavbarProps {
@@ -54,10 +54,10 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ sidebarCollapsed, onToggleSidebar
 
   // 快捷操作
   const quickActions: QuickAction[] = [
-    { id: 'stress-test', name: '压力测试', icon: Activity, href: '/stress-test', color: 'blue' },
-    { id: 'security-test', name: '安全检测', icon: AlertTriangle, href: '/security-test', color: 'red' },
-    { id: 'seo-analysis', name: 'SEO分析', icon: Search, href: '/content-test', color: 'green' },
-    { id: 'api-test', name: 'API测试', icon: Package, href: '/api-test', color: 'purple' },
+    { id: 'testing-dashboard', name: '测试工具', icon: Activity, href: '/testing', color: 'blue' },
+    { id: 'api-test', name: 'API测试', icon: Package, href: '/testing/api', color: 'purple' },
+    { id: 'performance-test', name: '性能测试', icon: Activity, href: '/testing/performance', color: 'green' },
+    { id: 'security-test', name: '安全测试', icon: AlertTriangle, href: '/testing/security', color: 'red' },
     { id: 'monitoring', name: '实时监控', icon: Monitor, href: '/monitoring', color: 'yellow' },
     {
       id: 'system-status', name: '系统状态', icon: Settings, href: '/system-status', color: 'gray'
@@ -470,7 +470,7 @@ const highlightSearchText = (text: string, searchQuery: string) => {
                       <span className="text-xs font-medium">快捷搜索</span>
                     </div>
                     <div className="grid grid-cols-2 gap-1">
-                      {['网站测试', '安全检测', 'API测试', '实时监控', '系统设置', '帮助文档'].map((suggestion, index) => (
+                      {['测试工具', 'API测试', '性能测试', '安全测试', '系统设置', '帮助文档'].map((suggestion, index) => (
                         < button
                           key={index}
                           type="button"
