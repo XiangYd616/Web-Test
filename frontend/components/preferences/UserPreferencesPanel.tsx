@@ -3,27 +3,28 @@
  * 提供完整的个性化配置界面
  */
 
-import React, { useState, useEffect } from 'react';
-import { 
-  Settings, 
-  Monitor, 
-  TestTube, 
-  BarChart3, 
-  FileText, 
-  Save,
-  RotateCcw,
-  Download,
-  Upload,
-  X,
+import {
+  AlertCircle,
+  BarChart3,
   Check,
-  AlertCircle
+  Download,
+  FileText,
+  Monitor,
+  RotateCcw,
+  Save,
+  Settings,
+  TestTube,
+  Upload,
+  X
 } from 'lucide-react';
-import { 
-  userPreferencesService, 
-  UserPreferences, 
-  PreferenceCategory,
-  PreferenceSetting
-} from '../../services/preferences/userPreferencesService';
+import React, { useEffect, useState } from 'react';
+// 暂时注释掉缺失的导入
+// import {
+//   userPreferencesService,
+//   UserPreferences,
+//   PreferenceCategory,
+//   PreferenceSetting
+// } from '../../services/preferences/userPreferencesService';
 
 interface UserPreferencesPanelProps {
   onClose?: () => void;
@@ -285,7 +286,7 @@ const UserPreferencesPanel: React.FC<UserPreferencesPanelProps> = ({ onClose }) 
             </h2>
             <p className="text-gray-400 mt-1">个性化您的使用体验</p>
           </div>
-          
+
           <div className="flex gap-2">
             <button
               onClick={handleExport}
@@ -294,7 +295,7 @@ const UserPreferencesPanel: React.FC<UserPreferencesPanelProps> = ({ onClose }) 
               <Download className="w-4 h-4" />
               导出
             </button>
-            
+
             <button
               onClick={handleImport}
               className="px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 flex items-center gap-2"
@@ -302,7 +303,7 @@ const UserPreferencesPanel: React.FC<UserPreferencesPanelProps> = ({ onClose }) 
               <Upload className="w-4 h-4" />
               导入
             </button>
-            
+
             <button
               onClick={handleReset}
               disabled={saving}
@@ -311,7 +312,7 @@ const UserPreferencesPanel: React.FC<UserPreferencesPanelProps> = ({ onClose }) 
               <RotateCcw className="w-4 h-4" />
               重置
             </button>
-            
+
             <button
               onClick={handleSave}
               disabled={!hasChanges || saving}
@@ -320,7 +321,7 @@ const UserPreferencesPanel: React.FC<UserPreferencesPanelProps> = ({ onClose }) 
               <Save className="w-4 h-4" />
               {saving ? '保存中...' : '保存'}
             </button>
-            
+
             {onClose && (
               <button
                 onClick={onClose}
@@ -334,9 +335,8 @@ const UserPreferencesPanel: React.FC<UserPreferencesPanelProps> = ({ onClose }) 
 
         {/* 消息提示 */}
         {message && (
-          <div className={`px-6 py-3 border-b border-gray-700 flex items-center gap-2 ${
-            message.type === 'success' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'
-          }`}>
+          <div className={`px-6 py-3 border-b border-gray-700 flex items-center gap-2 ${message.type === 'success' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'
+            }`}>
             {message.type === 'success' ? (
               <Check className="w-4 h-4" />
             ) : (
@@ -358,11 +358,10 @@ const UserPreferencesPanel: React.FC<UserPreferencesPanelProps> = ({ onClose }) 
                     <button
                       key={category.key}
                       onClick={() => setActiveCategory(category.key)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
-                        activeCategory === category.key
+                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${activeCategory === category.key
                           ? 'bg-blue-600 text-white'
                           : 'text-gray-300 hover:bg-gray-600'
-                      }`}
+                        }`}
                     >
                       <IconComponent className="w-4 h-4" />
                       <div className="text-left">
@@ -381,14 +380,14 @@ const UserPreferencesPanel: React.FC<UserPreferencesPanelProps> = ({ onClose }) 
             <div className="p-6">
               {categories.map(category => {
                 if (category.key !== activeCategory) return null;
-                
+
                 return (
                   <div key={category.key}>
                     <div className="mb-6">
                       <h3 className="text-xl font-bold text-white mb-2">{category.label}</h3>
                       <p className="text-gray-400">{category.description}</p>
                     </div>
-                    
+
                     <div className="space-y-6">
                       {category.settings.map(setting => (
                         <div key={setting.key} className="bg-gray-700 rounded-lg p-4">

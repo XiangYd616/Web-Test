@@ -3,37 +3,37 @@
  * 提供详细的API测试结果分析和可视化
  */
 
-import React, { useState, useMemo } from 'react';
 import {
-  Globe,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Zap,
-  AlertTriangle,
-  Shield,
-  FileText,
-  BarChart3,
-  TrendingUp,
   Activity,
+  AlertTriangle,
+  BarChart3,
+  CheckCircle,
+  Clock,
+  Code,
   Download,
   Eye,
-  Code
+  FileText,
+  Globe,
+  Shield,
+  TrendingUp,
+  XCircle,
+  Zap
 } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
 import {
-  BarChart,
   Bar,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
+  BarChart,
   CartesianGrid,
-  Tooltip,
+  Cell,
   Legend,
-  ResponsiveContainer
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
 } from 'recharts';
 
 interface APITestEndpointResult {
@@ -49,7 +49,7 @@ interface APITestEndpointResult {
   error?: string;
   response?: any;
   headers?: Record<string, string>;
-  
+
   // 性能指标
   performance: {
     dns: number;
@@ -58,7 +58,7 @@ interface APITestEndpointResult {
     download: number;
     total: number;
   };
-  
+
   // 安全检查
   security: {
     https: boolean;
@@ -70,7 +70,7 @@ interface APITestEndpointResult {
       strictTransportSecurity: boolean;
     };
   };
-  
+
   // 验证结果
   validations: {
     statusCode: boolean;
@@ -86,7 +86,7 @@ interface APITestResult {
   startTime: string;
   endTime: string;
   duration: number;
-  
+
   // 总体统计
   summary: {
     totalEndpoints: number;
@@ -96,10 +96,10 @@ interface APITestResult {
     totalResponseTime: number;
     successRate: number;
   };
-  
+
   // 端点结果
   endpoints: APITestEndpointResult[];
-  
+
   // 性能分析
   performance: {
     fastest: APITestEndpointResult;
@@ -107,14 +107,14 @@ interface APITestResult {
     averageResponseTime: number;
     totalDataTransferred: number;
   };
-  
+
   // 安全分析
   security: {
     httpsUsage: number;
     securityHeaders: number;
     vulnerabilities: string[];
   };
-  
+
   // 可靠性分析
   reliability: {
     uptime: number;
@@ -156,12 +156,12 @@ const APITestResultAnalysis: React.FC<APITestResultAnalysisProps> = ({
       const statusRange = `${Math.floor(endpoint.statusCode / 100)}xx`;
       distribution[statusRange] = (distribution[statusRange] || 0) + 1;
     });
-    
+
     return Object.entries(distribution).map(([range, count]) => ({
       name: range,
       value: count,
-      color: range === '2xx' ? '#10b981' : range === '3xx' ? '#3b82f6' : 
-             range === '4xx' ? '#f59e0b' : range === '5xx' ? '#ef4444' : '#6b7280'
+      color: range === '2xx' ? '#10b981' : range === '3xx' ? '#3b82f6' :
+        range === '4xx' ? '#f59e0b' : range === '5xx' ? '#ef4444' : '#6b7280'
     }));
   }, [result.endpoints]);
 
@@ -171,12 +171,12 @@ const APITestResultAnalysis: React.FC<APITestResultAnalysisProps> = ({
     result.endpoints.forEach(endpoint => {
       distribution[endpoint.method] = (distribution[endpoint.method] || 0) + 1;
     });
-    
+
     return Object.entries(distribution).map(([method, count]) => ({
       name: method,
       value: count,
       color: method === 'GET' ? '#10b981' : method === 'POST' ? '#3b82f6' :
-             method === 'PUT' ? '#f59e0b' : method === 'DELETE' ? '#ef4444' : '#6b7280'
+        method === 'PUT' ? '#f59e0b' : method === 'DELETE' ? '#ef4444' : '#6b7280'
     }));
   }, [result.endpoints]);
 
@@ -203,7 +203,7 @@ const APITestResultAnalysis: React.FC<APITestResultAnalysisProps> = ({
               {result.baseUrl} - {new Date(result.startTime).toLocaleString()}
             </p>
           </div>
-          
+
           {/* 总体状态 */}
           <div className="flex items-center space-x-4">
             <div className="text-center">
@@ -212,7 +212,7 @@ const APITestResultAnalysis: React.FC<APITestResultAnalysisProps> = ({
               </div>
               <div className="text-xs text-gray-600">成功率</div>
             </div>
-            
+
             <div className="text-center">
               <div className="text-2xl font-bold text-gray-900">
                 {result.summary.averageResponseTime.toFixed(0)}ms
@@ -234,11 +234,10 @@ const APITestResultAnalysis: React.FC<APITestResultAnalysisProps> = ({
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key as any)}
-            className={`flex items-center space-x-2 px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === tab.key
+            className={`flex items-center space-x-2 px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.key
                 ? 'border-blue-500 text-blue-600'
                 : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}
+              }`}
           >
             {tab.icon}
             <span>{tab.label}</span>
@@ -303,8 +302,8 @@ const APITestResultAnalysis: React.FC<APITestResultAnalysisProps> = ({
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Bar 
-                    dataKey="responseTime" 
+                  <Bar
+                    dataKey="responseTime"
                     fill="#3b82f6"
                     name="响应时间 (ms)"
                   />
@@ -390,13 +389,12 @@ const APITestResultAnalysis: React.FC<APITestResultAnalysisProps> = ({
                     <tr key={endpoint.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <span className={`px-2 py-1 text-xs font-medium rounded mr-2 ${
-                            endpoint.method === 'GET' ? 'bg-green-100 text-green-800' :
-                            endpoint.method === 'POST' ? 'bg-blue-100 text-blue-800' :
-                            endpoint.method === 'PUT' ? 'bg-yellow-100 text-yellow-800' :
-                            endpoint.method === 'DELETE' ? 'bg-red-100 text-red-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
+                          <span className={`px-2 py-1 text-xs font-medium rounded mr-2 ${endpoint.method === 'GET' ? 'bg-green-100 text-green-800' :
+                              endpoint.method === 'POST' ? 'bg-blue-100 text-blue-800' :
+                                endpoint.method === 'PUT' ? 'bg-yellow-100 text-yellow-800' :
+                                  endpoint.method === 'DELETE' ? 'bg-red-100 text-red-800' :
+                                    'bg-gray-100 text-gray-800'
+                            }`}>
                             {endpoint.method}
                           </span>
                           <div>
@@ -423,12 +421,11 @@ const APITestResultAnalysis: React.FC<APITestResultAnalysisProps> = ({
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs font-medium rounded ${
-                          endpoint.statusCode >= 200 && endpoint.statusCode < 300 ? 'bg-green-100 text-green-800' :
-                          endpoint.statusCode >= 300 && endpoint.statusCode < 400 ? 'bg-blue-100 text-blue-800' :
-                          endpoint.statusCode >= 400 && endpoint.statusCode < 500 ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
+                        <span className={`px-2 py-1 text-xs font-medium rounded ${endpoint.statusCode >= 200 && endpoint.statusCode < 300 ? 'bg-green-100 text-green-800' :
+                            endpoint.statusCode >= 300 && endpoint.statusCode < 400 ? 'bg-blue-100 text-blue-800' :
+                              endpoint.statusCode >= 400 && endpoint.statusCode < 500 ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-red-100 text-red-800'
+                          }`}>
                           {endpoint.statusCode}
                         </span>
                       </td>
@@ -565,10 +562,10 @@ const APITestResultAnalysis: React.FC<APITestResultAnalysisProps> = ({
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Line 
-                    type="monotone" 
-                    dataKey="responseTime" 
-                    stroke="#3b82f6" 
+                  <Line
+                    type="monotone"
+                    dataKey="responseTime"
+                    stroke="#3b82f6"
                     strokeWidth={2}
                     name="响应时间 (ms)"
                   />

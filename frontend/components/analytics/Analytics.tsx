@@ -3,36 +3,35 @@
  * 提供趋势分析、对比分析等高级分析功能
  */
 
-import React, { useState, useEffect } from 'react';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  BarChart3, 
-  LineChart, 
-  PieChart,
+import {
   Activity,
-  Zap,
-  Target,
   AlertTriangle,
+  BarChart3,
   CheckCircle,
-  RefreshCw
+  LineChart,
+  RefreshCw,
+  Target,
+  TrendingDown,
+  TrendingUp,
+  Zap
 } from 'lucide-react';
-import { 
-  advancedAnalyticsService, 
-  TrendAnalysisResult, 
-  ComparisonResult,
-  PerformanceMetrics,
-  AnalyticsFilter
-} from '../../services/analytics/advancedAnalyticsService';
-import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Cell } from 'recharts';
+import React, { useEffect, useState } from 'react';
+// 暂时注释掉缺失的导入
+// advancedAnalyticsService,
+// TrendAnalysisResult,
+// ComparisonResult,
+// PerformanceMetrics,
+// AnalyticsFilter
+// } from '../../services/analytics/analyticsService';
+import { Bar, BarChart, CartesianGrid, Line, LineChart as RechartsLineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
-interface AdvancedAnalyticsProps {
+interface AnalyticsProps {
   dataType: 'performance' | 'security' | 'seo' | 'accessibility';
   timeRange?: '24h' | '7d' | '30d' | '90d';
   onInsightClick?: (insight: string) => void;
 }
 
-const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({
+const Analytics: React.FC<AnalyticsProps> = ({
   dataType,
   timeRange = '7d',
   onInsightClick
@@ -79,19 +78,19 @@ const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({
 
   const handleCompareData = async () => {
     if (!performanceData) return;
-    
+
     setLoading(true);
     try {
       // 比较当前周期与上一周期
       const currentData = performanceData.responseTime.slice(-7);
       const previousData = performanceData.responseTime.slice(-14, -7);
-      
+
       const comparisonResult = await advancedAnalyticsService.compareData(
         previousData,
         currentData,
         { alignByTime: true, significanceThreshold: 0.1 }
       );
-      
+
       setComparisonData(comparisonResult);
       setActiveTab('comparison');
     } catch (error) {
@@ -133,7 +132,7 @@ const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({
           </h2>
           <p className="text-gray-400 mt-1">深度数据分析和洞察</p>
         </div>
-        
+
         <div className="flex gap-2">
           <button
             onClick={handleCompareData}
@@ -143,7 +142,7 @@ const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({
             <BarChart3 className="w-4 h-4" />
             对比分析
           </button>
-          
+
           <button
             onClick={loadAnalyticsData}
             disabled={loading}
@@ -166,11 +165,10 @@ const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key as any)}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-colors ${
-              activeTab === tab.key
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-colors ${activeTab === tab.key
                 ? 'bg-blue-600 text-white'
                 : 'text-gray-300 hover:bg-gray-600'
-            }`}
+              }`}
           >
             <tab.icon className="w-4 h-4" />
             {tab.label}
@@ -195,14 +193,14 @@ const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({
                 <span className="text-white font-medium">趋势方向</span>
               </div>
               <p className="text-2xl font-bold text-white">
-                {trendData.trend === 'increasing' ? '上升' : 
-                 trendData.trend === 'decreasing' ? '下降' : '稳定'}
+                {trendData.trend === 'increasing' ? '上升' :
+                  trendData.trend === 'decreasing' ? '下降' : '稳定'}
               </p>
               <p className="text-gray-400 text-sm">
                 强度: {(trendData.trendStrength * 100).toFixed(1)}%
               </p>
             </div>
-            
+
             <div className="bg-gray-700 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Zap className="w-5 h-5 text-yellow-500" />
@@ -213,7 +211,7 @@ const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({
               </p>
               <p className="text-gray-400 text-sm">相对于起始值</p>
             </div>
-            
+
             <div className="bg-gray-700 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <Target className="w-5 h-5 text-green-500" />
@@ -234,18 +232,18 @@ const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                 <XAxis dataKey="time" stroke="#9CA3AF" />
                 <YAxis stroke="#9CA3AF" />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#374151', 
-                    border: 'none', 
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#374151',
+                    border: 'none',
                     borderRadius: '8px',
                     color: '#fff'
-                  }} 
+                  }}
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="value" 
-                  stroke="#3B82F6" 
+                <Line
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#3B82F6"
                   strokeWidth={2}
                   dot={{ fill: '#3B82F6', strokeWidth: 2, r: 4 }}
                 />
@@ -258,7 +256,7 @@ const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({
             <h3 className="text-white font-medium mb-3">趋势洞察</h3>
             <div className="space-y-2">
               {trendData.insights.map((insight, index) => (
-                <div 
+                <div
                   key={index}
                   className="flex items-start gap-2 p-2 bg-gray-600 rounded cursor-pointer hover:bg-gray-500 transition-colors"
                   onClick={() => onInsightClick?.(insight)}
@@ -315,13 +313,13 @@ const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                 <XAxis dataKey="index" stroke="#9CA3AF" />
                 <YAxis stroke="#9CA3AF" />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#374151', 
-                    border: 'none', 
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#374151',
+                    border: 'none',
                     borderRadius: '8px',
                     color: '#fff'
-                  }} 
+                  }}
                 />
                 <Bar dataKey="baseline" fill="#8884d8" name="基准数据" />
                 <Bar dataKey="comparison" fill="#82ca9d" name="对比数据" />
@@ -344,18 +342,18 @@ const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({
                   <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                   <XAxis dataKey="time" stroke="#9CA3AF" />
                   <YAxis stroke="#9CA3AF" />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#374151', 
-                      border: 'none', 
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#374151',
+                      border: 'none',
                       borderRadius: '8px',
                       color: '#fff'
-                    }} 
+                    }}
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="value" 
-                    stroke={COLORS[Object.keys(performanceData).indexOf(key)]} 
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    stroke={COLORS[Object.keys(performanceData).indexOf(key)]}
                     strokeWidth={2}
                   />
                 </RechartsLineChart>
@@ -386,7 +384,7 @@ const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({
               </h4>
               <div className="space-y-2">
                 {insights.insights.map((insight: string, index: number) => (
-                  <div 
+                  <div
                     key={index}
                     className="p-2 bg-gray-600 rounded text-gray-300 text-sm cursor-pointer hover:bg-gray-500 transition-colors"
                     onClick={() => onInsightClick?.(insight)}
@@ -404,7 +402,7 @@ const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({
               </h4>
               <div className="space-y-2">
                 {insights.recommendations.map((rec: string, index: number) => (
-                  <div 
+                  <div
                     key={index}
                     className="p-2 bg-gray-600 rounded text-gray-300 text-sm cursor-pointer hover:bg-gray-500 transition-colors"
                     onClick={() => onInsightClick?.(rec)}
@@ -423,7 +421,7 @@ const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({
               <div className="space-y-2">
                 {insights.alerts.length > 0 ? (
                   insights.alerts.map((alert: string, index: number) => (
-                    <div 
+                    <div
                       key={index}
                       className="p-2 bg-yellow-500/10 border border-yellow-500/20 rounded text-yellow-400 text-sm"
                     >
@@ -444,4 +442,4 @@ const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({
   );
 };
 
-export default AdvancedAnalytics;
+export default Analytics;

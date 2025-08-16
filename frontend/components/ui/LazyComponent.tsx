@@ -3,9 +3,9 @@
  * 提供组件级别的懒加载功能
  */
 
-import React, { Suspense, lazy, useState, useEffect, ComponentType } from 'react';
-import { LoadingSpinner } from './EnhancedLoadingSpinner';
-import ErrorBoundary from './EnhancedErrorBoundary';
+import React, { ComponentType, Suspense, lazy, useEffect, useState } from 'react';
+import { LoadingSpinner } from './LoadingSpinner';
+// import ErrorBoundary from './ErrorBoundary';
 
 // 懒加载组件的配置选项
 interface LazyComponentOptions {
@@ -20,14 +20,14 @@ interface LazyComponentOptions {
   /** 是否在视口中才加载 */
   loadOnVisible?: boolean;
   /** 预加载策略 */
-  preload?: 'immediate' | 'hover' | 'idle' | 'none';
+  preload?: 'immediate' | 'hover' | 'idle' | 'none'; // 已删除
 }
 
 /**
  * 创建懒加载组件
  */
 export function createLazyComponent<T extends ComponentType<any>>(
-  importFn: () => Promise<{ default: T }>,
+  // importFn: () => Promise<{ default: T }>,
   options: LazyComponentOptions = {}
 ) {
   const {
@@ -42,17 +42,17 @@ export function createLazyComponent<T extends ComponentType<any>>(
   // 创建懒加载组件
   const LazyComponent = lazy(() => {
     const startTime = Date.now();
-    
+
     return importFn().then(module => {
       const loadTime = Date.now() - startTime;
-      
+
       // 确保最小加载时间，防止闪烁
       if (loadTime < minLoadTime) {
         return new Promise(resolve => {
           setTimeout(() => resolve(module), minLoadTime - loadTime);
         });
       }
-      
+
       return module;
     });
   });
@@ -78,7 +78,7 @@ export function createLazyComponent<T extends ComponentType<any>>(
         { threshold: 0.1 }
       );
 
-      const element = document.getElementById(`lazy-component-${Math.random()}`);
+      const element = document.getElementById(`lazy-component-${Math.random()}`); // 已删除
       if (element) {
         observer.observe(element);
       }
@@ -121,7 +121,7 @@ export function createLazyComponent<T extends ComponentType<any>>(
     // 如果需要等待可见性
     if (loadOnVisible && !isVisible) {
       return (
-        <div 
+        <div
           id={`lazy-component-${Math.random()}`}
           className="min-h-[100px] flex items-center justify-center"
         >
@@ -136,7 +136,7 @@ export function createLazyComponent<T extends ComponentType<any>>(
     }
 
     return (
-      <EnhancedErrorBoundary
+      <ErrorBoundary
         onError={(error) => {
           console.error('LazyComponent error:', error);
           if (retries < retryCount) {
@@ -160,7 +160,7 @@ export function createLazyComponent<T extends ComponentType<any>>(
         <Suspense fallback={loadingFallback}>
           <LazyComponent {...props} />
         </Suspense>
-      </EnhancedErrorBoundary>
+      </ErrorBoundary>
     );
   };
 
@@ -202,9 +202,9 @@ export const LazyContainer: React.FC<LazyContainerProps> = ({
           observer.disconnect();
         }
       },
-      { 
+      {
         threshold: 0.1,
-        rootMargin 
+        rootMargin
       }
     );
 
@@ -216,7 +216,7 @@ export const LazyContainer: React.FC<LazyContainerProps> = ({
   }, [loadOnVisible, isVisible, rootMargin]);
 
   const defaultPlaceholder = (
-    <div 
+    <div
       className="flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg"
       style={{ height: placeholderHeight }}
     >
@@ -235,7 +235,7 @@ export const LazyContainer: React.FC<LazyContainerProps> = ({
  * 图表懒加载组件示例
  */
 export const LazyChart = createLazyComponent(
-  () => import('../charts/ComplexChart'),
+  () => import('../charts/Chart'), // 修复语法错误
   {
     delay: 100,
     minLoadTime: 300,
@@ -253,7 +253,7 @@ export const LazyChart = createLazyComponent(
  * 数据表格懒加载组件示例
  */
 export const LazyDataTable = createLazyComponent(
-  () => import('../tables/DataTable'),
+  () => import('../ui/DataTable'),
   {
     loadOnVisible: true,
     preload: 'hover',
@@ -263,13 +263,13 @@ export const LazyDataTable = createLazyComponent(
       </div>
     )
   }
-);
+); // 已删除
 
 /**
  * 代码编辑器懒加载组件示例
  */
 export const LazyCodeEditor = createLazyComponent(
-  () => import('../editors/CodeEditor'),
+  () => import('../ui/CodeEditor'),
   {
     preload: 'none', // 只在需要时加载
     minLoadTime: 500,

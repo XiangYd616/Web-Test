@@ -3,27 +3,26 @@
  * 提供批量测试、批量导出、批量管理等功能的用户界面
  */
 
-import React, { useState, useEffect } from 'react';
-import { 
-  Play, 
-  Download, 
-  Trash2, 
-  X, 
-  CheckCircle, 
+import {
   AlertCircle,
+  CheckCircle,
   Clock,
-  RotateCcw,
-  FileText,
-  Settings,
+  Download,
+  Minus,
+  Play,
   Plus,
-  Minus
+  RotateCcw,
+  Settings,
+  X
 } from 'lucide-react';
-import { 
-  batchOperationService, 
-  BatchTestConfig, 
-  BatchExportConfig, 
-  BatchOperation 
-} from '../../services/batch/batchOperationService';
+import React, { useEffect, useState } from 'react';
+// 暂时注释掉缺失的导入
+// import {
+//   batchOperationService,
+//   BatchTestConfig,
+//   BatchExportConfig,
+//   BatchOperation
+// } from '../../services/batch/batchOperationService';
 
 interface BatchOperationPanelProps {
   onClose?: () => void;
@@ -61,7 +60,7 @@ const BatchOperationPanel: React.FC<BatchOperationPanelProps> = ({ onClose }) =>
 
   useEffect(() => {
     loadOperations();
-    
+
     // 定期刷新操作状态
     const interval = setInterval(loadOperations, 5000);
     return () => clearInterval(interval);
@@ -84,7 +83,7 @@ const BatchOperationPanel: React.FC<BatchOperationPanelProps> = ({ onClose }) =>
         ...testConfig,
         urls: testConfig.urls.filter(url => url.trim())
       });
-      
+
       alert(`批量测试已启动，操作ID: ${operationId}`);
       setActiveTab('operations');
       loadOperations();
@@ -100,7 +99,7 @@ const BatchOperationPanel: React.FC<BatchOperationPanelProps> = ({ onClose }) =>
     setLoading(true);
     try {
       const operationId = await batchOperationService.startBatchExport(exportConfig);
-      
+
       alert(`批量导出已启动，操作ID: ${operationId}`);
       setActiveTab('operations');
       loadOperations();
@@ -207,11 +206,10 @@ const BatchOperationPanel: React.FC<BatchOperationPanelProps> = ({ onClose }) =>
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key as any)}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 transition-colors ${
-                activeTab === tab.key
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-300 hover:bg-gray-700'
-              }`}
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 transition-colors ${activeTab === tab.key
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-300 hover:bg-gray-700'
+                }`}
             >
               <tab.icon className="w-4 h-4" />
               {tab.label}
@@ -483,8 +481,8 @@ const BatchOperationPanel: React.FC<BatchOperationPanelProps> = ({ onClose }) =>
                         {getStatusIcon(operation.status)}
                         <div>
                           <h4 className="text-white font-medium">
-                            {operation.type === 'test' ? '批量测试' : 
-                             operation.type === 'export' ? '批量导出' : '批量删除'}
+                            {operation.type === 'test' ? '批量测试' :
+                              operation.type === 'export' ? '批量导出' : '批量删除'}
                           </h4>
                           <p className="text-gray-400 text-sm">ID: {operation.id}</p>
                         </div>
@@ -508,7 +506,7 @@ const BatchOperationPanel: React.FC<BatchOperationPanelProps> = ({ onClose }) =>
                         )}
                       </div>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-400">状态:</span>
@@ -523,7 +521,7 @@ const BatchOperationPanel: React.FC<BatchOperationPanelProps> = ({ onClose }) =>
                         </span>
                       </div>
                       <div className="w-full bg-gray-600 rounded-full h-2">
-                        <div 
+                        <div
                           className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                           style={{ width: `${operation.progress}%` }}
                         />

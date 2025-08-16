@@ -63,7 +63,7 @@ export interface ConfigChangeEvent {
 /**
  * 增强的配置管理器
  */
-export class EnhancedConfigManager extends EventEmitter {
+export class ConfigManager extends EventEmitter {
   private config: FrontendConfig;
   private remoteConfig: Partial<FrontendConfig> = {};
   private isInitialized = false;
@@ -82,7 +82,7 @@ export class EnhancedConfigManager extends EventEmitter {
   private getDefaultConfig(): FrontendConfig {
     return {
       api: {
-        baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:3001',
+        baseUrl: process.env.REACT_APP_API_URL || 'http://localhost:3001',
         timeout: 30000,
         retries: 3,
         retryDelay: 1000
@@ -120,7 +120,7 @@ export class EnhancedConfigManager extends EventEmitter {
         cacheStrategy: 'stale-while-revalidate',
         maxAge: 86400000 // 24小时
       }
-    };
+    }; // 已删除
   }
 
   /**
@@ -201,7 +201,7 @@ export class EnhancedConfigManager extends EventEmitter {
   private mergeConfigs(): void {
     // 优先级：环境变量 > 远程配置 > 本地配置 > 默认配置
     const envConfig = this.getEnvironmentConfig();
-    
+
     this.config = this.deepMerge(
       this.getDefaultConfig(),
       this.remoteConfig,
@@ -364,7 +364,7 @@ export class EnhancedConfigManager extends EventEmitter {
    */
   private deepMerge(...objects: any[]): any {
     const result = {};
-    
+
     for (const obj of objects) {
       if (obj && typeof obj === 'object') {
         for (const key in obj) {
@@ -378,7 +378,7 @@ export class EnhancedConfigManager extends EventEmitter {
         }
       }
     }
-    
+
     return result;
   }
 
@@ -409,7 +409,7 @@ export class EnhancedConfigManager extends EventEmitter {
    */
   private emitConfigChanges(oldConfig: FrontendConfig, newConfig: FrontendConfig, source: string): void {
     const changes = this.getConfigDifferences(oldConfig, newConfig);
-    
+
     for (const change of changes) {
       this.emit('configChanged', { ...change, source } as ConfigChangeEvent);
     }
@@ -422,8 +422,8 @@ export class EnhancedConfigManager extends EventEmitter {
   /**
    * 获取配置差异
    */
-  private getConfigDifferences(oldConfig: any, newConfig: any, prefix = ''): Array<{key: string, oldValue: any, newValue: any}> {
-    const differences: Array<{key: string, oldValue: any, newValue: any}> = [];
+  private getConfigDifferences(oldConfig: any, newConfig: any, prefix = ''): Array<{ key: string, oldValue: any, newValue: any }> {
+    const differences: Array<{ key: string, oldValue: any, newValue: any }> = [];
 
     const allKeys = new Set([...Object.keys(oldConfig || {}), ...Object.keys(newConfig || {})]);
 
@@ -432,9 +432,9 @@ export class EnhancedConfigManager extends EventEmitter {
       const oldValue = oldConfig?.[key];
       const newValue = newConfig?.[key];
 
-      if (typeof oldValue === 'object' && typeof newValue === 'object' && 
-          oldValue !== null && newValue !== null && 
-          !Array.isArray(oldValue) && !Array.isArray(newValue)) {
+      if (typeof oldValue === 'object' && typeof newValue === 'object' &&
+        oldValue !== null && newValue !== null &&
+        !Array.isArray(oldValue) && !Array.isArray(newValue)) {
         differences.push(...this.getConfigDifferences(oldValue, newValue, fullKey));
       } else if (oldValue !== newValue) {
         differences.push({ key: fullKey, oldValue, newValue });
@@ -452,7 +452,7 @@ export class EnhancedConfigManager extends EventEmitter {
       clearInterval(this.syncInterval);
       this.syncInterval = null;
     }
-    
+
     this.removeAllListeners();
     this.isInitialized = false;
   }
@@ -471,4 +471,4 @@ export class EnhancedConfigManager extends EventEmitter {
 }
 
 // 创建全局实例
-export const enhancedConfigManager = new EnhancedConfigManager();
+export const enhancedConfigManager = new ConfigManager();

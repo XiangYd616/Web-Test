@@ -8,33 +8,32 @@ import React, { ComponentType, lazy } from 'react';
 // 大型组件的动态导入映射
 export const largeComponentImports = {
   // SEO 相关组件 - 按功能分割
-  'SEOResults': () => import('../components/seo/SEOResults'),
-  'LocalSEOResults': () => import('../components/seo/LocalSEOResults'),
-  'FileUploadSEO': () => import('../components/seo/FileUploadSEO'),
-  'NetworkErrorPrompt': () => import('../components/seo/NetworkErrorPrompt'),
+  // 'SEOResults': () => import('../components/seo/SEOResults'), // 已删除
+  // 'LocalSEOResults': () => import('../components/seo/LocalSEOResults'), // 已删除
+  // 'FileUploadSEO': () => import('../components/seo/FileUploadSEO'), // 已删除
+  // 'NetworkErrorPrompt': () => import('../components/seo/NetworkErrorPrompt'), // 已删除
 
   // 测试相关组件 - 按测试类型分割
-  'UnifiedTestInterface': () => import('../components/testing/UnifiedTestInterface'),
-  'TestResultDisplay': () => import('../components/testing/TestResultDisplay'),
-  'TestEngineStatus': () => import('../components/testing/TestEngineStatus'),
+  // 'TestInterface': () => import('../components/testing/TestInterface'), // 已删除
+  // 'TestResultDisplay': () => import('../components/testing/TestResultDisplay'), // 已删除
+  // 'TestEngineStatus': () => import('../components/testing/TestEngineStatus'), // 已删除
 
   // 数据管理组件 - 按功能分割
-  'DataList': () => import('../components/data/DataList'),
+  // 'DataList': () => import('../components/data/DataList'), // 已删除
   'DataManager': () => import('../components/data/DataManager'),
-  'DataManagement': () => import('../components/data/DataManagement'),
-  'DataStats': () => import('../components/data/DataStats'),
+  // 'DataManagement': () => import('../components/data/DataManagement'), // 已删除
+  // 'DataStats': () => import('../components/data/DataStats'), // 已删除
 
   // 图表组件 - 按图表类型分割
-  'Charts': () => import('../components/charts/Charts'),
-  'PerformanceChart': () => import('../components/charts/PerformanceChart'),
-  'StressTestChart': () => import('../components/charts/StressTestChart'),
-  'TestCharts': () => import('../components/charts/TestCharts'),
+  // 'Charts': () => import('../components/charts/Charts'), // 已删除
+  // 'PerformanceChart': () => import('../components/charts/PerformanceChart'), // 已删除
+  // 'StressTestChart': () => import('../components/charts/StressTestChart'), // 已删除
 
   // 现代化组件 - 按复杂度分割
-  'Layout': () => import('../components/modern/Layout'),
-  'Chart': () => import('../components/modern/Chart'),
-  'StatCard': () => import('../components/modern/StatCard'),
-  'Card': () => import('../components/ui/Card'),
+  // 'Layout': () => import('../components/modern/Layout'), // 已删除
+  // 'Chart': () => import('../components/modern/Chart'), // 已删除
+  // 'StatCard': () => import('../components/modern/StatCard'), // 已删除
+  // 'Card': () => import('../components/ui/Card'), // 已删除
 };
 
 // 创建带分析的懒加载组件
@@ -42,7 +41,7 @@ export function createAnalyzedLazyComponent<T extends ComponentType<any>>(
   componentName: string,
   importFn: () => Promise<{ default: T }>,
   options: {
-    priority?: 'high' | 'medium' | 'low';
+    priority?: 'high' | 'medium' | 'low'; // 已删除
     preload?: boolean;
     chunkName?: string;
   } = {}
@@ -258,9 +257,9 @@ export const aggressivePreloader = new AggressivePreloader();
 export const initializeAggressiveCodeSplitting = () => {
   // 预加载高优先级组件
   const highPriorityComponents = [
-    'UnifiedTestInterface',
+    'TestInterface',
     'TestResultsDisplay',
-    'ModernChart',
+    'Chart',
     'StatCard'
   ];
 
