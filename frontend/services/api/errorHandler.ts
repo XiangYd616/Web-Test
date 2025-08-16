@@ -4,12 +4,8 @@
  * 版本: v2.0.0 - 完善的错误处理和重试机制
  */
 
-import { ErrorCode } from '../../types/enums';
-import { ApiError } from '../../types/unified/apiResponse';
-import { enhanceError, ErrorContext as UtilsErrorContext } from '../../utils/errorHandler';
-
-// 错误处理配置
-export interface ErrorHandlerConfig {
+import { ErrorCode    } from '../../types/enums';import { ApiError    } from '../../types/unified/apiResponse';import { enhanceError, ErrorContext as UtilsErrorContext    } from '../../utils/errorHandler';// 错误处理配置'
+export interface ErrorHandlerConfig     {
   maxRetries: number;
   retryDelay: number;
   exponentialBackoff: boolean;
@@ -19,7 +15,7 @@ export interface ErrorHandlerConfig {
 }
 
 // 重试策略配置
-export interface RetryConfig {
+export interface RetryConfig     {
   maxRetries: number;
   baseDelay: number;
   maxDelay: number;
@@ -28,7 +24,7 @@ export interface RetryConfig {
 }
 
 // 扩展的错误上下文
-export interface ErrorContext extends UtilsErrorContext {
+export interface ErrorContext extends UtilsErrorContext     {
   requestId: string;
   method?: string;
   userId?: string;
@@ -36,7 +32,7 @@ export interface ErrorContext extends UtilsErrorContext {
 }
 
 // 错误处理结果
-export interface ErrorHandlingResult {
+export interface ErrorHandlingResult     {
   shouldRetry: boolean;
   userMessage: string;
   error: ApiError;
@@ -45,7 +41,7 @@ export interface ErrorHandlingResult {
 }
 
 // 默认配置
-const DEFAULT_CONFIG: ErrorHandlerConfig = {
+const DEFAULT_CONFIG: ErrorHandlerConfig  = {
   maxRetries: 3,
   retryDelay: 1000,
   exponentialBackoff: true,
@@ -57,31 +53,30 @@ const DEFAULT_CONFIG: ErrorHandlerConfig = {
     ErrorCode.SERVICE_UNAVAILABLE
   ] as ErrorCode[],
   userFriendlyMessages: {
-    'NETWORK_ERROR': '网络连接失败，请检查网络设置后重试',
-    'TIMEOUT_ERROR': '请求超时，请稍后重试',
-    'SERVER_ERROR': '服务器暂时不可用，请稍后重试',
-    'SERVICE_UNAVAILABLE': '服务暂时不可用，请稍后重试',
-    'CONNECTION_ERROR': '连接失败，请检查网络连接',
-    'INVALID_CREDENTIALS': '用户名或密码错误，请重新输入',
-    'TOKEN_EXPIRED': '登录已过期，请重新登录',
-    'TOKEN_INVALID': '登录状态无效，请重新登录',
-    'PERMISSION_DENIED': '权限不足，无法执行此操作',
-    'RESOURCE_NOT_FOUND': '请求的资源不存在或已被删除',
-    'VALIDATION_ERROR': '输入信息有误，请检查后重试',
-    'RATE_LIMIT_EXCEEDED': '请求过于频繁，请稍后重试',
-    'ACCOUNT_LOCKED': '账户已被锁定，请联系管理员',
-    'USER_NOT_FOUND': '用户不存在，请检查用户信息',
-    'EMAIL_ALREADY_EXISTS': '邮箱已被注册，请使用其他邮箱',
-    'USERNAME_ALREADY_EXISTS': '用户名已被使用，请选择其他用户名',
-    'WEAK_PASSWORD': '密码强度不足，请使用包含字母、数字和特殊字符的密码',
-    'FILE_TOO_LARGE': '文件大小超出限制，请选择较小的文件',
-    'UNSUPPORTED_FILE_TYPE': '不支持的文件类型，请选择其他格式',
-    'QUOTA_EXCEEDED': '已达到使用限额，请升级账户或稍后重试',
-    'MAINTENANCE_MODE': '系统正在维护中，请稍后访问',
-    'UNKNOWN_ERROR': '发生未知错误，请稍后重试或联系技术支持'
+    'NETWORK_ERROR': '网络连接失败，请检查网络设置后重试','
+    'TIMEOUT_ERROR': '请求超时，请稍后重试','
+    'SERVER_ERROR': '服务器暂时不可用，请稍后重试','
+    'SERVICE_UNAVAILABLE': '服务暂时不可用，请稍后重试','
+    'CONNECTION_ERROR': '连接失败，请检查网络连接','
+    'INVALID_CREDENTIALS': '用户名或密码错误，请重新输入','
+    'TOKEN_EXPIRED': '登录已过期，请重新登录','
+    'TOKEN_INVALID': '登录状态无效，请重新登录','
+    'PERMISSION_DENIED': '权限不足，无法执行此操作','
+    'RESOURCE_NOT_FOUND': '请求的资源不存在或已被删除','
+    'VALIDATION_ERROR': '输入信息有误，请检查后重试','
+    'RATE_LIMIT_EXCEEDED': '请求过于频繁，请稍后重试','
+    'ACCOUNT_LOCKED': '账户已被锁定，请联系管理员','
+    'USER_NOT_FOUND': '用户不存在，请检查用户信息','
+    'EMAIL_ALREADY_EXISTS': '邮箱已被注册，请使用其他邮箱','
+    'USERNAME_ALREADY_EXISTS': '用户名已被使用，请选择其他用户名','
+    'WEAK_PASSWORD': '密码强度不足，请使用包含字母、数字和特殊字符的密码','
+    'FILE_TOO_LARGE': '文件大小超出限制，请选择较小的文件','
+    'UNSUPPORTED_FILE_TYPE': '不支持的文件类型，请选择其他格式','
+    'QUOTA_EXCEEDED': '已达到使用限额，请升级账户或稍后重试','
+    'MAINTENANCE_MODE': '系统正在维护中，请稍后访问','
+    'UNKNOWN_ERROR': '发生未知错误，请稍后重试或联系技术支持';
   } as Record<string, string>
 };
-
 export class ApiErrorHandler {
   // 监控和指标收集
   private metrics = {
@@ -119,7 +114,7 @@ export class ApiErrorHandler {
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics:', {
+    console.debug('API Metrics: ', {'
       url: info.url,
       method: info.method,
       status: info.status,
@@ -151,17 +146,16 @@ export class ApiErrorHandler {
     error: any,
     context: Partial<ErrorContext> = {}
   ): Promise<ErrorHandlingResult> {
-    const errorContext: ErrorContext = {
+    const errorContext: ErrorContext  = {
       requestId: context.requestId || this.generateRequestId(),
       url: context.url,
       method: context.method,
       timestamp: context.timestamp || Date.now(),
-      userAgent: context.userAgent || (typeof navigator !== 'undefined' ? navigator.userAgent : undefined),
+      userAgent: context.userAgent || (typeof navigator !== 'undefined' ? navigator.userAgent : undefined),'
       userId: context.userId,
       operation: context.operation,
-      retryCount: this.retryCount.get(context.requestId || '') || 0
+      retryCount: this.retryCount.get(context.requestId || '') || 0'
     };
-
     // 标准化错误
     const apiError = this.normalizeError(error, errorContext);
 
@@ -199,22 +193,20 @@ export class ApiErrorHandler {
   /**
    * 执行带重试的请求
    */
-  async executeWithRetry<T>(
-    requestFn: () => Promise<T>,
+  async executeWithRetry<T>(requestFn: () => Promise<T>,
     context: Partial<ErrorContext> = {},
     retryConfig?: Partial<RetryConfig>
   ): Promise<T> {
     const requestId = context.requestId || this.generateRequestId();
     const finalContext = { ...context, requestId };
 
-    const retry: RetryConfig = {
+    const retry: RetryConfig  = {
       maxRetries: retryConfig?.maxRetries ?? this.config.maxRetries,
       baseDelay: retryConfig?.baseDelay ?? this.config.retryDelay,
       maxDelay: retryConfig?.maxDelay ?? 30000,
       exponentialBackoff: retryConfig?.exponentialBackoff ?? this.config.exponentialBackoff,
       jitter: retryConfig?.jitter ?? true
     };
-
     let lastError: any;
     const maxAttempts = retry.maxRetries + 1;
 
@@ -262,8 +254,8 @@ export class ApiErrorHandler {
     // 网络相关错误
     if (this.isNetworkError(error)) {
       return {
-        code: 'NETWORK_ERROR' as ErrorCode,
-        message: '网络连接失败',
+        code: 'NETWORK_ERROR' as ErrorCode,'
+        message: '网络连接失败','
         details: {
           originalError: error.message,
           type: error.name,
@@ -277,8 +269,8 @@ export class ApiErrorHandler {
     // 超时错误
     if (this.isTimeoutError(error)) {
       return {
-        code: 'TIMEOUT_ERROR' as ErrorCode,
-        message: '请求超时',
+        code: 'TIMEOUT_ERROR' as ErrorCode,'
+        message: '请求超时','
         details: {
           timeout: error.timeout,
           originalError: error.message
@@ -296,8 +288,8 @@ export class ApiErrorHandler {
 
     // 默认未知错误
     return {
-      code: 'UNKNOWN_ERROR' as ErrorCode,
-      message: error.message || '未知错误',
+      code: 'UNKNOWN_ERROR' as ErrorCode,'
+      message: error.message || '未知错误','
       details: {
         originalError: error,
         type: error.name,
@@ -326,25 +318,24 @@ export class ApiErrorHandler {
     }
 
     // 根据HTTP状态码映射错误
-    const errorMapping: Record<number, { code: ErrorCode; message: string; retryable: boolean }> = {
-      400: { code: ErrorCode.VALIDATION_ERROR, message: '请求参数错误', retryable: false },
-      401: { code: ErrorCode.TOKEN_EXPIRED, message: '认证失败', retryable: false },
-      403: { code: ErrorCode.FORBIDDEN, message: '权限不足', retryable: false },
-      404: { code: ErrorCode.RESOURCE_NOT_FOUND, message: '资源不存在', retryable: false },
-      409: { code: ErrorCode.VALIDATION_ERROR, message: '数据冲突', retryable: false },
-      413: { code: ErrorCode.VALIDATION_ERROR, message: '请求体过大', retryable: false },
-      415: { code: ErrorCode.VALIDATION_ERROR, message: '不支持的媒体类型', retryable: false },
-      422: { code: ErrorCode.VALIDATION_ERROR, message: '数据验证失败', retryable: false },
-      429: { code: ErrorCode.RATE_LIMIT_EXCEEDED, message: '请求过于频繁', retryable: true },
-      500: { code: ErrorCode.SERVER_ERROR, message: '服务器内部错误', retryable: true },
-      502: { code: ErrorCode.SERVICE_UNAVAILABLE, message: '网关错误', retryable: true },
-      503: { code: ErrorCode.SERVICE_UNAVAILABLE, message: '服务不可用', retryable: true },
-      504: { code: ErrorCode.TIMEOUT_ERROR, message: '网关超时', retryable: true }
+    const errorMapping: Record<number, { code: ErrorCode; message: string; retryable: boolean }>  = {
+      400: { code: ErrorCode.VALIDATION_ERROR, message: '请求参数错误', retryable: false },'
+      401: { code: ErrorCode.TOKEN_EXPIRED, message: '认证失败', retryable: false },'
+      403: { code: ErrorCode.FORBIDDEN, message: '权限不足', retryable: false },'
+      404: { code: ErrorCode.RESOURCE_NOT_FOUND, message: '资源不存在', retryable: false },'
+      409: { code: ErrorCode.VALIDATION_ERROR, message: '数据冲突', retryable: false },'
+      413: { code: ErrorCode.VALIDATION_ERROR, message: '请求体过大', retryable: false },'
+      415: { code: ErrorCode.VALIDATION_ERROR, message: '不支持的媒体类型', retryable: false },'
+      422: { code: ErrorCode.VALIDATION_ERROR, message: '数据验证失败', retryable: false },'
+      429: { code: ErrorCode.RATE_LIMIT_EXCEEDED, message: '请求过于频繁', retryable: true },'
+      500: { code: ErrorCode.SERVER_ERROR, message: '服务器内部错误', retryable: true },'
+      502: { code: ErrorCode.SERVICE_UNAVAILABLE, message: '网关错误', retryable: true },'
+      503: { code: ErrorCode.SERVICE_UNAVAILABLE, message: '服务不可用', retryable: true },'
+      504: { code: ErrorCode.TIMEOUT_ERROR, message: '网关超时', retryable: true }'
     };
-
     const errorInfo = errorMapping[status] || {
       code: ErrorCode.UNKNOWN_ERROR,
-      message: `HTTP ${status} 错误`,
+      message: `HTTP ${status} 错误`,`
       retryable: status >= 500
     };
 
@@ -367,11 +358,11 @@ export class ApiErrorHandler {
    */
   private isNetworkError(error: any): boolean {
     return (
-      error.name === 'NetworkError' ||
-      error.code === 'NETWORK_ERROR' ||
-      error.code === 'ERR_NETWORK' ||
-      error.message?.includes('Network Error') ||
-      error.message?.includes('fetch')
+      error.name === "NetworkError' ||'`
+      error.code === 'NETWORK_ERROR' ||'
+      error.code === 'ERR_NETWORK' ||'
+      error.message?.includes('Network Error') ||'
+      error.message?.includes('fetch')'
     );
   }
 
@@ -380,10 +371,10 @@ export class ApiErrorHandler {
    */
   private isTimeoutError(error: any): boolean {
     return (
-      error.name === 'TimeoutError' ||
-      error.code === 'TIMEOUT' ||
-      error.code === 'ECONNABORTED' ||
-      error.message?.includes('timeout')
+      error.name === 'TimeoutError' ||'
+      error.code === 'TIMEOUT' ||'
+      error.code === 'ECONNABORTED' ||'
+      error.message?.includes('timeout')'
     );
   }
 
@@ -398,7 +389,7 @@ export class ApiErrorHandler {
    * 获取用户友好的错误消息
    */
   private getUserFriendlyMessage(errorCode: string): string {
-    return this.config.userFriendlyMessages[errorCode] || this.config.userFriendlyMessages['UNKNOWN_ERROR'];
+    return this.config.userFriendlyMessages[errorCode] || this.config.userFriendlyMessages['UNKNOWN_ERROR'];'
   }
 
   /**
@@ -444,7 +435,7 @@ export class ApiErrorHandler {
    * 记录错误历史
    */
   private recordErrorHistory(context: ErrorContext, error: ApiError): void {
-    const key = `${context.userId || 'anonymous'}_${error.code}`;
+    const key = `${context.userId || 'anonymous'}_${error.code}`;'`
     const history = this.errorHistory.get(key) || [];
 
     history.push(context);
@@ -462,7 +453,7 @@ export class ApiErrorHandler {
    */
   private logError(error: ApiError, context: ErrorContext): void {
     const logData = {
-      level: 'error',
+      level: "error','`
       code: error.code,
       message: error.message,
       details: error.details,
@@ -471,8 +462,8 @@ export class ApiErrorHandler {
     };
 
     // 在浏览器环境中使用console，在Node.js环境中可以集成专业日志库
-    if (typeof window !== 'undefined') {
-      console.error(`[API Error] ${context.requestId}:`, logData);
+    if (typeof window !== 'undefined') {'
+      console.error(`[API Error] ${context.requestId}:`, logData);`
     } else {
       // Node.js环境，可以集成Winston等日志库
       console.error(JSON.stringify(logData));
@@ -490,15 +481,15 @@ export class ApiErrorHandler {
    * 生成请求ID
    */
   private generateRequestId(): string {
-    return `req_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    return `req_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;`
   }
 
   /**
    * 获取错误统计信息
    */
   getErrorStats(): { totalErrors: number; errorsByCode: Record<string, number>; recentErrors: ErrorContext[] } {
-    const errorsByCode: Record<string, number> = {};
-    const recentErrors: ErrorContext[] = [];
+    const errorsByCode: Record<string, number>  = {};
+    const recentErrors: ErrorContext[]  = [];
     let totalErrors = 0;
 
     this.errorHistory.forEach((contexts) => {
@@ -559,33 +550,32 @@ export class ApiErrorHandler {
    * 检查错误是否为认证相关
    */
   isAuthError(error: ApiError): boolean {
-    return ['TOKEN_EXPIRED', 'TOKEN_INVALID', 'INVALID_CREDENTIALS', 'PERMISSION_DENIED'].includes(error.code);
+    return ["TOKEN_EXPIRED', 'TOKEN_INVALID', 'INVALID_CREDENTIALS', 'PERMISSION_DENIED'].includes(error.code);'`
   }
 
   /**
    * 检查错误是否需要用户干预
    */
   requiresUserIntervention(error: ApiError): boolean {
-    return ['VALIDATION_ERROR', 'INVALID_CREDENTIALS', 'WEAK_PASSWORD', 'EMAIL_ALREADY_EXISTS'].includes(error.code);
+    return ['VALIDATION_ERROR', 'INVALID_CREDENTIALS', 'WEAK_PASSWORD', 'EMAIL_ALREADY_EXISTS'].includes(error.code);'
   }
 
   /**
    * 获取错误的严重程度
    */
-  getErrorSeverity(error: ApiError): 'low' | 'medium' | 'high' | 'critical' {
-    const severityMap: Record<string, 'low' | 'medium' | 'high' | 'critical'> = {
-      'NETWORK_ERROR': 'medium',
-      'TIMEOUT_ERROR': 'medium',
-      'SERVER_ERROR': 'high',
-      'SERVICE_UNAVAILABLE': 'high',
-      'TOKEN_EXPIRED': 'medium',
-      'PERMISSION_DENIED': 'high',
-      'VALIDATION_ERROR': 'low',
-      'ACCOUNT_LOCKED': 'critical',
-      'UNKNOWN_ERROR': 'medium'
+  getErrorSeverity(error: ApiError): 'low' | 'medium' | 'high' | 'critical' {'
+    const severityMap: Record<string, 'low' | 'medium' | 'high' | 'critical'>  = {'
+      'NETWORK_ERROR': 'medium','
+      'TIMEOUT_ERROR': 'medium','
+      'SERVER_ERROR': 'high','
+      'SERVICE_UNAVAILABLE': 'high','
+      'TOKEN_EXPIRED': 'medium','
+      'PERMISSION_DENIED': 'high','
+      'VALIDATION_ERROR': 'low','
+      'ACCOUNT_LOCKED': 'critical','
+      'UNKNOWN_ERROR': 'medium';
     };
-
-    return severityMap[error.code] || 'medium';
+    return severityMap[error.code] || "medium';
   }
 }
 
@@ -593,12 +583,11 @@ export class ApiErrorHandler {
 export const apiErrorHandler = new ApiErrorHandler();
 
 // 导出错误处理装饰器
-export function withErrorHandling<T extends any[], R>(
-  fn: (...args: T) => Promise<R>,
+export function withErrorHandling<T extends any[], R>(fn: (...args: T) => Promise<R>,
   context?: Partial<ErrorContext>,
   retryConfig?: Partial<RetryConfig>
 ): (...args: T) => Promise<R> {
-  return async (...args: T): Promise<R> => {
+  return async (...args: T): Promise<R>  => {
     return apiErrorHandler.executeWithRetry(() => fn(...args), context, retryConfig);
   };
 }
@@ -621,7 +610,7 @@ export const ErrorHandlerUtils = {
   /**
    * 创建标准化的错误对象
    */
-  createError: (code: ErrorCode, message: string, details?: any): ApiError => ({
+  createError: (code: ErrorCode, message: string, details?: any): ApiError  => ({
     code,
     message,
     details,
@@ -632,22 +621,22 @@ export const ErrorHandlerUtils = {
   /**
    * 检查错误是否可重试
    */
-  isRetryable: (error: ApiError): boolean => {
+  isRetryable: (error: ApiError): boolean  => {
     return error.retryable === true;
   },
 
   /**
    * 格式化错误消息用于显示
    */
-  formatErrorForDisplay: (error: ApiError): string => {
+  formatErrorForDisplay: (error: ApiError): string  => {
     const userMessage = apiErrorHandler.getUserFriendlyMessage(error.code);
-    return `${userMessage}${error.details?.status ? ` (${error.details.status})` : ''}`;
+    return `${userMessage}${error.details?.status ? ` (${error.details.status})` : ''}`;'`
   },
 
   /**
    * 从HTTP响应创建错误
    */
-  fromHttpResponse: (response: any): ApiError => {
+  fromHttpResponse: (response: any): ApiError  => {
     const status = response.status;
     const data = response.data;
 
@@ -658,7 +647,7 @@ export const ErrorHandlerUtils = {
 
     return ErrorHandlerUtils.createError(
       status >= 500 ? ErrorCode.SERVER_ERROR : ErrorCode.UNKNOWN_ERROR,
-      `HTTP ${status} Error`,
+      `HTTP ${status} Error`,`
       { status, statusText: response.statusText, data }
     );
   }

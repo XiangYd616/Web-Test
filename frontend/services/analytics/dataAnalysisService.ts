@@ -1,9 +1,8 @@
-import { handleAsyncError } from '../utils/errorHandler';
-/**
+import { handleAsyncError    } from '../utils/errorHandler';/**'
  * 数据分析服务
  */
 
-export interface AnalysisResult {
+export interface AnalysisResult     {
   summary: any;
   trends: any[];
   insights: any[];
@@ -14,7 +13,7 @@ class DataAnalysisService {
     try {
   await new Promise(resolve => setTimeout(resolve, 500));
 } catch (error) {
-  console.error('Await error:', error);
+  console.error('Await error:', error);'
   throw error;
 }
 

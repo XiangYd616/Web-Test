@@ -3,13 +3,10 @@
  * 提供组件级性能优化策略
  */
 
-import React, { memo, forwardRef, ComponentType } from 'react';
-
-/**
+import React, { memo, forwardRef, ComponentType    } from 'react';/**'
  * 高阶组件：性能优化包装器
  */
-export const withPerformanceOptimization = <P extends object>(
-  Component: ComponentType<P>,
+export const withPerformanceOptimization = <P extends object>(Component: ComponentType<P>,
   options: {
     memoize?: boolean;
     displayName?: string;
@@ -40,15 +37,14 @@ export const withPerformanceOptimization = <P extends object>(
 /**
  * 深度比较函数
  */
-export const deepEqual = (obj1: any, obj2: any): boolean => {
+export const deepEqual = (obj1: any, obj2: any): boolean  => {
   if (obj1 === obj2) return true;
 
   if (obj1 == null || obj2 == null) return false;
 
   if (typeof obj1 !== typeof obj2) return false;
 
-  if (typeof obj1 !== 'object') return obj1 === obj2;
-
+  if (typeof obj1 !== 'object') return obj1 === obj2;'
   const keys1 = Object.keys(obj1);
   const keys2 = Object.keys(obj2);
 
@@ -65,7 +61,7 @@ export const deepEqual = (obj1: any, obj2: any): boolean => {
 /**
  * 浅比较函数
  */
-export const shallowEqual = (obj1: any, obj2: any): boolean => {
+export const shallowEqual = (obj1: any, obj2: any): boolean  => {
   if (obj1 === obj2) return true;
 
   if (obj1 == null || obj2 == null) return false;
@@ -85,21 +81,20 @@ export const shallowEqual = (obj1: any, obj2: any): boolean => {
 /**
  * 组件性能分析器
  */
-export const withProfiler = <P extends object>(
-  Component: ComponentType<P>,
+export const withProfiler = <P extends object>(Component: ComponentType<P>,
   id: string
 ) => {
   return forwardRef<any, P>((props, ref) => {
     const onRender = (
       id: string,
-      phase: 'mount' | 'update',
+      phase: 'mount' | 'update','
       actualDuration: number,
       baseDuration: number,
       startTime: number,
       commitTime: number
     ) => {
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`Profiler [${id}] ${phase}:`, {
+      if (process.env.NODE_ENV === 'development') {'
+        console.log(`Profiler [${id}] ${phase}:`, {`
           actualDuration,
           baseDuration,
           startTime,
@@ -110,7 +105,7 @@ export const withProfiler = <P extends object>(
 
     return (
       <React.Profiler id={id} onRender={onRender}>
-        <Component {...props} ref={ref} />
+        <Component {...props} ref={ref}   />
       </React.Profiler>
     );
   });
@@ -127,7 +122,7 @@ export const ConditionalRender: React.FC<{
 }> = ({ condition, children, fallback = null, keepMounted = false }) => {
   if (keepMounted) {
     return (
-      <div style={{ display: condition ? 'block' : 'none' }}>
+      <div style={{ display: condition ? "block' : 'none' }}>'`
         {children}
       </div>
     );

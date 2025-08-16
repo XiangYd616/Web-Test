@@ -4,11 +4,8 @@
  * 版本: v1.0.0
  */
 
-import type { ApiResponse, ApiError } from '../../types/unified/apiResponse';
-
-// ==================== 错误处理配置 ====================
-
-export interface RetryConfig {
+import type { ApiResponse, ApiError  } from '../../types/unified/apiResponse';// ==================== 错误处理配置 ==================== ''
+export interface RetryConfig     {
   maxRetries: number;
   retryDelay: number; // 毫秒
   retryDelayMultiplier: number; // 指数退避倍数
@@ -16,7 +13,7 @@ export interface RetryConfig {
   retryableErrorCodes: string[];
 }
 
-export interface ErrorHandlingConfig {
+export interface ErrorHandlingConfig     {
   showUserFriendlyMessages: boolean;
   logErrors: boolean;
   enableRetry: boolean;
@@ -32,10 +29,10 @@ export const DEFAULT_RETRY_CONFIG: RetryConfig = {
   retryDelayMultiplier: 2,
   retryableStatusCodes: [408, 429, 500, 502, 503, 504],
   retryableErrorCodes: [
-    'NETWORK_ERROR',
-    'TIMEOUT_ERROR',
-    'SERVER_ERROR',
-    'RATE_LIMIT_EXCEEDED'
+    'NETWORK_ERROR','
+    'TIMEOUT_ERROR','
+    'SERVER_ERROR','
+    'RATE_LIMIT_EXCEEDED';
   ]
 };
 
@@ -45,15 +42,15 @@ export const DEFAULT_ERROR_HANDLING_CONFIG: ErrorHandlingConfig = {
   enableRetry: true,
   retryConfig: DEFAULT_RETRY_CONFIG,
   customErrorMessages: {
-    'NETWORK_ERROR': '网络连接失败，请检查网络设置',
-    'TIMEOUT_ERROR': '请求超时，请稍后重试',
-    'UNAUTHORIZED': '登录已过期，请重新登录',
-    'FORBIDDEN': '权限不足，无法执行此操作',
-    'NOT_FOUND': '请求的资源不存在',
-    'VALIDATION_ERROR': '输入数据格式错误，请检查后重试',
-    'RATE_LIMIT_EXCEEDED': '请求过于频繁，请稍后重试',
-    'SERVER_ERROR': '服务器内部错误，请稍后重试',
-    'MAINTENANCE': '系统维护中，请稍后访问'
+    'NETWORK_ERROR': '网络连接失败，请检查网络设置','
+    'TIMEOUT_ERROR': '请求超时，请稍后重试','
+    'UNAUTHORIZED': '登录已过期，请重新登录','
+    'FORBIDDEN': '权限不足，无法执行此操作','
+    'NOT_FOUND': '请求的资源不存在','
+    'VALIDATION_ERROR': '输入数据格式错误，请检查后重试','
+    'RATE_LIMIT_EXCEEDED': '请求过于频繁，请稍后重试','
+    'SERVER_ERROR': '服务器内部错误，请稍后重试','
+    'MAINTENANCE': '系统维护中，请稍后访问';
   }
 };
 
@@ -96,7 +93,7 @@ export class ApiRequestError extends Error {
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics:', {
+    console.debug('API Metrics: ', {'
       url: info.url,
       method: info.method,
       status: info.status,
@@ -183,8 +180,7 @@ export class ApiErrorHandler {
   /**
    * 执行带重试的请求
    */
-  async executeWithRetry<T>(
-    requestFn: () => Promise<T>,
+  async executeWithRetry<T>(requestFn: () => Promise<T>,
     requestInfo?: any
   ): Promise<T> {
     let lastError: any;
@@ -207,7 +203,7 @@ export class ApiErrorHandler {
         // 计算延迟时间
         const delay = this.calculateRetryDelay(attempt);
         
-        console.warn(`请求失败，${delay}ms后进行第${attempt}次重试:`, apiError.message);
+        console.warn(`请求失败，${delay}ms后进行第${attempt}次重试:`, apiError.message);`
         
         // 等待重试
         await this.sleep(delay);
@@ -232,7 +228,7 @@ export class ApiErrorHandler {
       
         switch (Math.floor(error.statusCode / 100)) {
         case 4:
-          return '请求错误，请检查输入信息';
+          return "请求错误，请检查输入信息';'`
         case 5:
           return '服务器错误，请稍后重试';
         default:
@@ -254,10 +250,10 @@ export class ApiErrorHandler {
       }
 
     // 处理网络错误
-    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {'
       return new ApiRequestError(
-        'NETWORK_ERROR',
-        '网络连接失败',
+        'NETWORK_ERROR','
+        '网络连接失败','
         undefined,
         error,
         true
@@ -265,10 +261,10 @@ export class ApiErrorHandler {
     }
 
     // 处理超时错误
-    if (error.name === 'AbortError' || error.message.includes('timeout')) {
+    if (error.name === 'AbortError' || error.message.includes('timeout')) {'
       return new ApiRequestError(
-        'TIMEOUT_ERROR',
-        '请求超时',
+        'TIMEOUT_ERROR','
+        '请求超时','
         408,
         error,
         true
@@ -281,13 +277,13 @@ export class ApiErrorHandler {
       const responseData = error.response.data;
       
       let code = 'HTTP_ERROR';
-      let message = `HTTP ${statusCode} 错误`;
+      let message = `HTTP ${statusCode} 错误`;`
       let retryable = false;
 
       // 根据状态码确定错误类型
       switch (statusCode) {
         case 401:
-          code = 'UNAUTHORIZED';
+          code = "UNAUTHORIZED';'`
           message = '未授权访问';
           break;
         case 403:
@@ -332,8 +328,8 @@ export class ApiErrorHandler {
 
     // 处理其他类型的错误
     return new ApiRequestError(
-      'UNKNOWN_ERROR',
-      error.message || '未知错误',
+      'UNKNOWN_ERROR','
+      error.message || '未知错误','
       undefined,
       error,
       false
@@ -398,10 +394,9 @@ export class ApiErrorHandler {
       url: window.location.href
     };
 
-    console.error('API Error:', logData);
-
+    console.error('API Error: ', logData);'
     // 在生产环境中，可以发送到错误监控服务
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === 'production') {'
       // 发送到错误监控服务（如Sentry、LogRocket等）
       // this.sendToErrorMonitoring(logData);
     }
@@ -415,7 +410,7 @@ export class ApiErrorHandler {
       try {
         listener(error);
       } catch (err) {
-        console.error('Error in error listener:', err);
+        console.error('Error in error listener:', err);'
       }
     });
   }
@@ -446,8 +441,7 @@ export function withErrorHandling<T extends (...args: any[]) => Promise<any>>(
 
   descriptor.value = async function (...args: any[]) {
     try {
-      return await globalErrorHandler.executeWithRetry(
-        () => originalMethod.apply(this, args),
+      return await globalErrorHandler.executeWithRetry(() => originalMethod.apply(this, args),
         { method: propertyKey, args }
       );
     } catch (error) {

@@ -6,57 +6,54 @@
 
 // ==================== 基础类型 ====================
 
-export type UUID = string;
-export type Timestamp = string;
-
-// ==================== 权限相关枚举 ====================
+export type UUID   = string;export type Timestamp   = string;// ==================== 权限相关枚举 ====================
 
 /**
  * 权限操作类型
  */
 export enum PermissionAction {
-  CREATE = 'create',
-  READ = 'read',
-  UPDATE = 'update',
-  DELETE = 'delete',
-  EXECUTE = 'execute',
-  MANAGE = 'manage',
-  APPROVE = 'approve',
-  EXPORT = 'export',
-  IMPORT = 'import'
+  CREATE = 'create','
+  READ = 'read','
+  UPDATE = 'update','
+  DELETE = 'delete','
+  EXECUTE = 'execute','
+  MANAGE = 'manage','
+  APPROVE = 'approve','
+  EXPORT = 'export','
+  IMPORT = 'import';
 }
 
 /**
  * 资源类型
  */
 export enum ResourceType {
-  USER = 'user',
-  ROLE = 'role',
-  PERMISSION = 'permission',
-  TEST = 'test',
-  REPORT = 'report',
-  SYSTEM = 'system',
-  ANALYTICS = 'analytics',
-  SETTINGS = 'settings',
-  AUDIT = 'audit',
-  API = 'api'
+  USER = 'user','
+  ROLE = 'role','
+  PERMISSION = 'permission','
+  TEST = 'test','
+  REPORT = 'report','
+  SYSTEM = 'system','
+  ANALYTICS = 'analytics','
+  SETTINGS = 'settings','
+  AUDIT = 'audit','
+  API = 'api';
 }
 
 /**
  * 权限效果
  */
 export enum PermissionEffect {
-  ALLOW = 'allow',
-  DENY = 'deny'
+  ALLOW = 'allow','
+  DENY = 'deny';
 }
 
 /**
  * 角色类型
  */
 export enum RoleType {
-  SYSTEM = 'system',     // 系统角色，不可删除
-  CUSTOM = 'custom',     // 自定义角色
-  INHERITED = 'inherited' // 继承角色
+  SYSTEM = 'system',     // 系统角色，不可删除'
+  CUSTOM = 'custom',     // 自定义角色'
+  INHERITED = 'inherited' // 继承角色'
 }
 
 // ==================== 权限接口 ====================
@@ -64,7 +61,7 @@ export enum RoleType {
 /**
  * 权限定义
  */
-export interface Permission {
+export interface Permission     {
   id: UUID;
   name: string;
   description: string;
@@ -80,7 +77,7 @@ export interface Permission {
 /**
  * 权限条件
  */
-export interface PermissionCondition {
+export interface PermissionCondition     {
   field: string;
   operator: 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'in' | 'nin' | 'contains' | 'regex';
   value: any;
@@ -90,7 +87,7 @@ export interface PermissionCondition {
 /**
  * 角色定义
  */
-export interface Role {
+export interface Role     {
   id: UUID;
   name: string;
   description: string;
@@ -110,7 +107,7 @@ export interface Role {
 /**
  * 用户角色关联
  */
-export interface UserRole {
+export interface UserRole     {
   id: UUID;
   userId: UUID;
   roleId: UUID;
@@ -125,7 +122,7 @@ export interface UserRole {
 /**
  * 权限策略
  */
-export interface PermissionPolicy {
+export interface PermissionPolicy     {
   id: UUID;
   name: string;
   description: string;
@@ -139,7 +136,7 @@ export interface PermissionPolicy {
 /**
  * 权限规则
  */
-export interface PermissionRule {
+export interface PermissionRule     {
   id: UUID;
   resource: ResourceType;
   action: PermissionAction;
@@ -153,7 +150,7 @@ export interface PermissionRule {
 /**
  * 权限检查请求
  */
-export interface PermissionCheckRequest {
+export interface PermissionCheckRequest     {
   userId: UUID;
   resource: ResourceType;
   action: PermissionAction;
@@ -164,7 +161,7 @@ export interface PermissionCheckRequest {
 /**
  * 权限检查结果
  */
-export interface PermissionCheckResult {
+export interface PermissionCheckResult     {
   allowed: boolean;
   reason?: string;
   matchedRules: PermissionRule[];
@@ -176,7 +173,7 @@ export interface PermissionCheckResult {
 /**
  * 批量权限检查请求
  */
-export interface BatchPermissionCheckRequest {
+export interface BatchPermissionCheckRequest     {
   userId: UUID;
   checks: Array<{
     resource: ResourceType;
@@ -189,7 +186,7 @@ export interface BatchPermissionCheckRequest {
 /**
  * 批量权限检查结果
  */
-export interface BatchPermissionCheckResult {
+export interface BatchPermissionCheckResult     {
   results: Record<string, PermissionCheckResult>;
   summary: {
     total: number;
@@ -203,7 +200,7 @@ export interface BatchPermissionCheckResult {
 /**
  * 权限审计日志
  */
-export interface PermissionAuditLog {
+export interface PermissionAuditLog     {
   id: UUID;
   userId: UUID;
   action: string;
@@ -223,7 +220,7 @@ export interface PermissionAuditLog {
 /**
  * 角色变更审计
  */
-export interface RoleAuditLog {
+export interface RoleAuditLog     {
   id: UUID;
   roleId: UUID;
   userId: UUID; // 执行操作的用户
@@ -241,7 +238,7 @@ export interface RoleAuditLog {
 /**
  * 权限管理器接口
  */
-export interface PermissionManager {
+export interface PermissionManager     {
   // 权限检查
   checkPermission(request: PermissionCheckRequest): Promise<PermissionCheckResult>;
   checkBatchPermissions(request: BatchPermissionCheckRequest): Promise<BatchPermissionCheckResult>;
@@ -251,20 +248,20 @@ export interface PermissionManager {
   getUserRoles(userId: UUID): Promise<Role[]>;
   
   // 角色管理
-  createRole(role: Omit<Role, 'id' | 'createdAt' | 'updatedAt'>): Promise<Role>;
+  createRole(role: Omit<Role, 'id' | 'createdAt' | 'updatedAt'>): Promise<Role>;'
   updateRole(roleId: UUID, updates: Partial<Role>): Promise<Role>;
   deleteRole(roleId: UUID): Promise<boolean>;
   assignRole(userId: UUID, roleId: UUID, assignedBy: UUID, expiresAt?: Timestamp): Promise<boolean>;
   revokeRole(userId: UUID, roleId: UUID, revokedBy: UUID): Promise<boolean>;
   
   // 权限管理
-  createPermission(permission: Omit<Permission, 'id' | 'createdAt' | 'updatedAt'>): Promise<Permission>;
+  createPermission(permission: Omit<Permission, 'id' | 'createdAt' | 'updatedAt'>): Promise<Permission>;'
   updatePermission(permissionId: UUID, updates: Partial<Permission>): Promise<Permission>;
   deletePermission(permissionId: UUID): Promise<boolean>;
   
   // 审计日志
-  logPermissionCheck(log: Omit<PermissionAuditLog, 'id' | 'timestamp'>): Promise<void>;
-  logRoleChange(log: Omit<RoleAuditLog, 'id' | 'timestamp'>): Promise<void>;
+  logPermissionCheck(log: Omit<PermissionAuditLog, 'id' | 'timestamp'>): Promise<void>;'
+  logRoleChange(log: Omit<RoleAuditLog, 'id' | 'timestamp'>): Promise<void>;'
 }
 
 // ==================== 权限装饰器和中间件 ====================
@@ -272,7 +269,7 @@ export interface PermissionManager {
 /**
  * 权限装饰器选项
  */
-export interface RequirePermissionOptions {
+export interface RequirePermissionOptions     {
   resource: ResourceType;
   action: PermissionAction;
   resourceIdParam?: string; // 从请求参数中获取资源ID的字段名
@@ -283,7 +280,7 @@ export interface RequirePermissionOptions {
 /**
  * 权限中间件选项
  */
-export interface PermissionMiddlewareOptions {
+export interface PermissionMiddlewareOptions     {
   resource: ResourceType;
   action: PermissionAction;
   optional?: boolean; // 是否为可选权限检查
@@ -295,7 +292,7 @@ export interface PermissionMiddlewareOptions {
 /**
  * 权限上下文
  */
-export interface PermissionContext {
+export interface PermissionContext     {
   user: {
     id: UUID;
     roles: Role[];
@@ -324,7 +321,7 @@ export interface PermissionContext {
 /**
  * 权限数据库字段映射
  */
-export interface PermissionDatabaseFields {
+export interface PermissionDatabaseFields     {
   id: string;
   name: string;
   description: string;
@@ -340,7 +337,7 @@ export interface PermissionDatabaseFields {
 /**
  * 角色数据库字段映射
  */
-export interface RoleDatabaseFields {
+export interface RoleDatabaseFields     {
   id: string;
   name: string;
   description: string;
@@ -359,7 +356,7 @@ export interface RoleDatabaseFields {
 /**
  * 用户角色关联数据库字段映射
  */
-export interface UserRoleDatabaseFields {
+export interface UserRoleDatabaseFields     {
   id: string;
   user_id: string;
   role_id: string;
@@ -376,7 +373,7 @@ export interface UserRoleDatabaseFields {
 /**
  * 将数据库字段转换为Permission对象
  */
-export function permissionFromDatabase(dbData: PermissionDatabaseFields): Permission {
+export function permissionFromDatabase(dbData: PermissionDatabaseFields): Permission   {
   return {
     id: dbData.id,
     name: dbData.name,
@@ -394,7 +391,7 @@ export function permissionFromDatabase(dbData: PermissionDatabaseFields): Permis
 /**
  * 将Permission对象转换为数据库字段
  */
-export function permissionToDatabase(permission: Permission): PermissionDatabaseFields {
+export function permissionToDatabase(permission: Permission): PermissionDatabaseFields   {
   return {
     id: permission.id,
     name: permission.name,
@@ -402,8 +399,8 @@ export function permissionToDatabase(permission: Permission): PermissionDatabase
     resource: permission.resource,
     action: permission.action,
     effect: permission.effect,
-    conditions: permission.conditions ? JSON.stringify(permission.conditions) : '',
-    metadata: permission.metadata ? JSON.stringify(permission.metadata) : '',
+    conditions: permission.conditions ? JSON.stringify(permission.conditions) : '','
+    metadata: permission.metadata ? JSON.stringify(permission.metadata) : '','
     created_at: permission.createdAt,
     updated_at: permission.updatedAt
   };
@@ -412,7 +409,7 @@ export function permissionToDatabase(permission: Permission): PermissionDatabase
 /**
  * 将数据库字段转换为Role对象
  */
-export function roleFromDatabase(dbData: RoleDatabaseFields, permissions: Permission[] = []): Role {
+export function roleFromDatabase(dbData: RoleDatabaseFields, permissions: Permission[] = []): Role   {
   return {
     id: dbData.id,
     name: dbData.name,
@@ -434,7 +431,7 @@ export function roleFromDatabase(dbData: RoleDatabaseFields, permissions: Permis
 /**
  * 将Role对象转换为数据库字段
  */
-export function roleToDatabase(role: Role): RoleDatabaseFields {
+export function roleToDatabase(role: Role): RoleDatabaseFields   {
   return {
     id: role.id,
     name: role.name,
@@ -444,7 +441,7 @@ export function roleToDatabase(role: Role): RoleDatabaseFields {
     parent_role_id: role.parentRoleId,
     is_active: role.isActive,
     is_system: role.isSystem,
-    metadata: role.metadata ? JSON.stringify(role.metadata) : '',
+    metadata: role.metadata ? JSON.stringify(role.metadata) : '','
     created_at: role.createdAt,
     updated_at: role.updatedAt,
     created_by: role.createdBy,
@@ -457,31 +454,31 @@ export function roleToDatabase(role: Role): RoleDatabaseFields {
 /**
  * 验证权限条件
  */
-export function validatePermissionCondition(condition: PermissionCondition, context: any): boolean {
+export function validatePermissionCondition(condition: PermissionCondition, context: any): boolean   {
   const { field, operator, value } = condition;
   const fieldValue = getNestedValue(context, field);
 
   switch (operator) {
-    case 'eq':
+    case 'eq': ''
       return fieldValue === value;
-    case 'ne':
+    case 'ne': ''
       return fieldValue !== value;
-    case 'gt':
+    case 'gt': ''
       return fieldValue > value;
-    case 'gte':
+    case 'gte': ''
       return fieldValue >= value;
-    case 'lt':
+    case 'lt': ''
       return fieldValue < value;
-    case 'lte':
+    case 'lte': ''
       return fieldValue <= value;
-    case 'in':
+    case 'in': ''
       return Array.isArray(value) && value.includes(fieldValue);
-    case 'nin':
+    case 'nin': ''
       return Array.isArray(value) && !value.includes(fieldValue);
-    case 'contains':
-      return typeof fieldValue === 'string' && fieldValue.includes(value);
-    case 'regex':
-      return typeof fieldValue === 'string' && new RegExp(value).test(fieldValue);
+    case 'contains': ''
+      return typeof fieldValue === 'string' && fieldValue.includes(value);'
+    case 'regex': ''
+      return typeof fieldValue === 'string' && new RegExp(value).test(fieldValue);'
     default:
       return false;
   }
@@ -491,7 +488,7 @@ export function validatePermissionCondition(condition: PermissionCondition, cont
  * 获取嵌套对象的值
  */
 function getNestedValue(obj: any, path: string): any {
-  return path.split('.').reduce((current, key) => current?.[key], obj);
+  return path.split('.').reduce((current, key) => current?.[key], obj);'
 }
 
 /**
@@ -502,7 +499,7 @@ export function isPermissionMatch(
   resource: ResourceType,
   action: PermissionAction,
   context?: any
-): boolean {
+): boolean   {
   // 检查资源和操作是否匹配
   if (permission.resource !== resource || permission.action !== action) {
     

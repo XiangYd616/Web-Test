@@ -3,10 +3,7 @@
  * 支持WebSocket实时更新和完整的测试生命周期管理
  */
 
-import axios from 'axios';
-import { TestConfig, TestError, TestProgress, TestResult } from '../types/testConfig';
-
-export class TestService {
+import axios from 'axios';import { TestConfig, TestError, TestProgress, TestResult    } from '../types/testConfig';export class TestService {'
   // 监控和指标收集
   private metrics = {
     totalRequests: 0,
@@ -43,7 +40,7 @@ export class TestService {
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics:', {
+    console.debug('API Metrics: ', {'
       url: info.url,
       method: info.method,
       status: info.status,
@@ -69,7 +66,7 @@ export class TestService {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
@@ -79,7 +76,7 @@ export class TestService {
   private wsConnections: Map<string, WebSocket> = new Map();
   private progressCallbacks: Map<string, (progress: TestProgress) => void> = new Map();
 
-  constructor(baseURL: string = '/api/v1', timeout: number = 300000) {
+  constructor(baseURL: string = "/api/v1', timeout: number = 300000) {'`
     this.baseURL = baseURL;
     this.timeout = timeout;
   }
@@ -90,7 +87,7 @@ export class TestService {
   async startTest(testType: string, config: TestConfig): Promise<{ testId: string }> {
     try {
       const response = await axios.post(
-        `${this.baseURL}/tests/${testType}/start`,
+        `${this.baseURL}/tests/${testType}/start`,`
         config,
         { timeout: this.timeout }
       );
@@ -104,8 +101,7 @@ export class TestService {
   /**
    * 启动测试并建立WebSocket连接进行实时更新
    */
-  async startTestWithRealTimeUpdates(
-    testType: string,
+  async startTestWithRealTimeUpdates(testType: string,
     config: TestConfig,
     onProgress: (progress: TestProgress) => void,
     onComplete: (result: TestResult) => void,
@@ -128,44 +124,43 @@ export class TestService {
   /**
    * 建立WebSocket连接
    */
-  private connectWebSocket(
-    testId: string,
+  private connectWebSocket(testId: string,
     onProgress: (progress: TestProgress) => void,
     onComplete: (result: TestResult) => void,
     onError: (error: TestError) => void
   ): void {
-    const wsUrl = `${this.getWebSocketURL()}/tests/${testId}/progress`;
+    const wsUrl = `${this.getWebSocketURL()}/tests/${testId}/progress`;`
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
-      console.log(`WebSocket connected for test ${testId}`);
+      console.log(`WebSocket connected for test ${testId}`);`
     };
 
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
 
-        if (data.type === 'progress') {
+        if (data.type === "progress') {'`
           onProgress(data.payload as TestProgress);
-        } else if (data.type === 'complete') {
+        } else if (data.type === 'complete') {'
           onComplete(data.payload as TestResult);
           this.closeWebSocket(testId);
-        } else if (data.type === 'error') {
+        } else if (data.type === 'error') {'
           onError(new TestError(data.payload.message, data.payload.code));
           this.closeWebSocket(testId);
         }
       } catch (error) {
-        console.error('WebSocket message parsing error:', error);
+        console.error('WebSocket message parsing error: ', error);'
       }
     };
 
     ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-      onError(new TestError('WebSocket连接错误', 'WEBSOCKET_ERROR'));
+      console.error('WebSocket error: ', error);'
+      onError(new TestError('WebSocket连接错误', 'WEBSOCKET_ERROR'));'
     };
 
     ws.onclose = () => {
-      console.log(`WebSocket closed for test ${testId}`);
+      console.log(`WebSocket closed for test ${testId}`);`
       this.wsConnections.delete(testId);
     };
 
@@ -187,9 +182,9 @@ export class TestService {
    * 获取WebSocket URL
    */
   private getWebSocketURL(): string {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const protocol = window.location.protocol === "https: ' ? 'wss: ' : 'ws: ';'`
     const host = window.location.host;
-    return `${protocol}/${host}`;
+    return `${protocol}/${host}`;`
   }
 
   /**
@@ -198,7 +193,7 @@ export class TestService {
   async getTestProgress(testType: string, testId: string): Promise<TestProgress> {
     try {
       const response = await axios.get(
-        `${this.baseURL}/tests/${testType}/${testId}/progress`
+        `${this.baseURL}/tests/${testType}/${testId}/progress``
       );
 
       return response.data;
@@ -213,7 +208,7 @@ export class TestService {
   async getTestResult(testType: string, testId: string): Promise<TestResult> {
     try {
       const response = await axios.get(
-        `${this.baseURL}/tests/${testType}/${testId}/result`
+        `${this.baseURL}/tests/${testType}/${testId}/result``
       );
 
       return response.data;
@@ -228,7 +223,7 @@ export class TestService {
   async cancelTest(testType: string, testId: string): Promise<void> {
     try {
       await axios.post(
-        `${this.baseURL}/tests/${testType}/${testId}/cancel`
+        `${this.baseURL}/tests/${testType}/${testId}/cancel``
       );
     } catch (error) {
       throw this.handleAPIError(error, testType);
@@ -241,12 +236,12 @@ export class TestService {
   async getTestHistory(testType: string, limit: number = 50): Promise<TestResult[]> {
     try {
       const response = await axios.get(
-        `${this.baseURL}/test/history`,
+        `${this.baseURL}/test/history`,`
         { params: { type: testType, limit } }
       );
 
       // 使用数据转换器转换格式
-      const { TestDataTransformer } = await import('../utils/testDataTransformer');
+      const { TestDataTransformer } = await import("../utils/testDataTransformer');'`
       const historyItems = response.data.data?.tests || response.data.data || [];
 
       return historyItems.map((item: any) => TestDataTransformer.transformBackendToFrontend(item));
@@ -260,7 +255,7 @@ export class TestService {
    */
   async deleteHistoryItem(testType: string, testId: string): Promise<void> {
     try {
-      await axios.delete(`${this.baseURL}/test/history/${testId}`);
+      await axios.delete(`${this.baseURL}/test/history/${testId}`);`
     } catch (error) {
       throw this.handleAPIError(error, testType);
     }
@@ -272,7 +267,7 @@ export class TestService {
   async checkEngineAvailability(testType: string): Promise<{ available: boolean; dependencies?: string[] }> {
     try {
       const response = await axios.get(
-        `${this.baseURL}/tests/${testType}/availability`
+        `${this.baseURL}/tests/${testType}/availability``
       );
       return response.data;
     } catch (error) {
@@ -286,7 +281,7 @@ export class TestService {
   async validateConfig(testType: string, config: TestConfig): Promise<{ valid: boolean; errors?: string[] }> {
     try {
       const response = await axios.post(
-        `${this.baseURL}/tests/${testType}/validate`,
+        `${this.baseURL}/tests/${testType}/validate`,`
         config
       );
       return response.data;
@@ -298,18 +293,18 @@ export class TestService {
   /**
    * 导出测试报告
    */
-  async exportReport(testId: string, format: 'pdf' | 'html' | 'json' = 'pdf'): Promise<Blob> {
+  async exportReport(testId: string, format: "pdf' | 'html' | 'json' = 'pdf'): Promise<Blob> {'`
     try {
       const response = await axios.get(
-        `${this.baseURL}/tests/reports/${testId}/export`,
+        `${this.baseURL}/tests/reports/${testId}/export`,`
         {
           params: { format },
-          responseType: 'blob'
+          responseType: "blob';'`
         }
       );
       return response.data;
     } catch (error) {
-      throw this.handleAPIError(error, 'export');
+      throw this.handleAPIError(error, 'export');'
     }
   }
 
@@ -319,7 +314,7 @@ export class TestService {
   async getTestTemplates(testType: string): Promise<Array<{ name: string; config: TestConfig; description: string }>> {
     try {
       const response = await axios.get(
-        `${this.baseURL}/tests/${testType}/templates`
+        `${this.baseURL}/tests/${testType}/templates``
       );
       return response.data;
     } catch (error) {
@@ -338,7 +333,7 @@ export class TestService {
   ): Promise<void> {
     try {
       await axios.post(
-        `${this.baseURL}/tests/${testType}/templates`,
+        `${this.baseURL}/tests/${testType}/templates`,`
         { name, config, description }
       );
     } catch (error) {
@@ -354,12 +349,12 @@ export class TestService {
   ): Promise<{ batchId: string; testIds: string[] }> {
     try {
       const response = await axios.post(
-        `${this.baseURL}/tests/batch/start`,
+        `${this.baseURL}/tests/batch/start`,`
         { tests }
       );
       return response.data;
     } catch (error) {
-      throw this.handleAPIError(error, 'batch');
+      throw this.handleAPIError(error, "batch');'`
     }
   }
 
@@ -374,11 +369,11 @@ export class TestService {
   }> {
     try {
       const response = await axios.get(
-        `${this.baseURL}/tests/batch/${batchId}/status`
+        `${this.baseURL}/tests/batch/${batchId}/status``
       );
       return response.data;
     } catch (error) {
-      throw this.handleAPIError(error, 'batch');
+      throw this.handleAPIError(error, "batch');'`
     }
   }
 
@@ -405,29 +400,29 @@ export class TestService {
       const message = error.response.data?.message || error.message;
 
       if (status === 400) {
-        return new TestError(`配置错误: ${message
-      }`, 'CONFIG_ERROR', true);
+        return new TestError(`配置错误: ${message`}
+      }`, "CONFIG_ERROR', true);'`
       } else if (status === 404) {
         
-        return new TestError(`${testType
-      }测试服务不存在`, 'SERVICE_NOT_FOUND', false);
+        return new TestError(`${testType`}
+      }测试服务不存在`, "SERVICE_NOT_FOUND', false);'`
       } else if (status === 500) {
         
-        return new TestError(`服务器内部错误: ${message
-      }`, 'SERVER_ERROR', true);
+        return new TestError(`服务器内部错误: ${message`}
+      }`, "SERVER_ERROR', true);'`
       } else if (status === 503) {
         
-        return new TestError(`${testType
-      }测试服务暂时不可用`, 'SERVICE_UNAVAILABLE', true);
+        return new TestError(`${testType`}
+      }测试服务暂时不可用`, 'SERVICE_UNAVAILABLE', true);'`
       }
     } else if (error.request) {
       
         // 网络错误
-      return new TestError('网络连接失败，请检查网络状态', 'NETWORK_ERROR', true);
+      return new TestError("网络连接失败，请检查网络状态', 'NETWORK_ERROR', true);'`
       }
 
     // 其他错误
-    return new TestError(error.message || '未知错误', 'UNKNOWN_ERROR', true);
+    return new TestError(error.message || '未知错误', 'UNKNOWN_ERROR', true);'
   }
 }
 

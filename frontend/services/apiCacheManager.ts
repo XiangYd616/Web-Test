@@ -3,7 +3,7 @@
     * 提供智能的API响应缓存功能
     */
 
-    export interface CacheEntry {
+    export interface CacheEntry     {
       data: any;
     timestamp: number;
     ttl: number;
@@ -11,7 +11,7 @@
     lastAccessed: number;
 }
 
-    export interface CacheConfig {
+    export interface CacheConfig     {
       defaultTTL: number;
     maxSize: number;
     enableCompression: boolean;
@@ -40,14 +40,13 @@
         this.evictLeastRecentlyUsed();
     }
 
-      const entry: CacheEntry = {
+      const entry: CacheEntry  = {
         data: this.config.enableCompression ? this.compress(data) : data,
       timestamp: Date.now(),
       ttl: ttl || this.config.defaultTTL,
       hits: 0,
       lastAccessed: Date.now()
     };
-
       this.cache.set(key, entry);
   }
 
@@ -195,9 +194,9 @@
       /**
        * 生成缓存键
        */
-      static generateKey(url: string, method: string = 'GET', params?: any): string {
+      static generateKey(url: string, method: string = 'GET', params?: any): string {'
     const paramStr = params ? JSON.stringify(params) : '';
-      return `${method}:${url}:${paramStr}`;
+      return `${method}:${url}:${paramStr}`;`
   }
 }
 

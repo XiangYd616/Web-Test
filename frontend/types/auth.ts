@@ -2,28 +2,28 @@
 // ==================== 基础类型 ====================
 
 export enum UserRole {
-  ADMIN = 'admin',
-  USER = 'user',
-  TESTER = 'tester',
-  MANAGER = 'manager',
-  VIEWER = 'viewer'
+  ADMIN = 'admin','
+  USER = 'user','
+  TESTER = 'tester','
+  MANAGER = 'manager','
+  VIEWER = 'viewer';
 }
 
 export enum UserStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  SUSPENDED = 'suspended',
-  PENDING = 'pending'
+  ACTIVE = 'active','
+  INACTIVE = 'inactive','
+  SUSPENDED = 'suspended','
+  PENDING = 'pending';
 }
 
 export enum AuthStatus {
-  AUTHENTICATED = 'authenticated',
-  UNAUTHENTICATED = 'unauthenticated',
-  LOADING = 'loading',
-  ERROR = 'error'
+  AUTHENTICATED = 'authenticated','
+  UNAUTHENTICATED = 'unauthenticated','
+  LOADING = 'loading','
+  ERROR = 'error';
 }
 
-export interface Permission {
+export interface Permission     {
   id: string;
   name: string;
   description: string;
@@ -31,7 +31,7 @@ export interface Permission {
   isSystem?: boolean;
 }
 
-export interface Role {
+export interface Role     {
   id: string;
   name: string;
   description: string;
@@ -42,7 +42,7 @@ export interface Role {
 
 // ==================== 用户相关类型 ====================
 
-export interface UserPreferences {
+export interface UserPreferences     {
   theme: 'light' | 'dark' | 'auto';
   language: 'zh-CN' | 'en-US' | 'ja-JP';
   timezone: string;
@@ -78,7 +78,7 @@ export interface UserPreferences {
   };
 }
 
-export interface UserProfile {
+export interface UserProfile     {
   firstName?: string;
   lastName?: string;
   fullName?: string;
@@ -89,7 +89,7 @@ export interface UserProfile {
   avatar?: string;
 }
 
-export interface User {
+export interface User     {
   id: string;
   username: string;
   email: string;
@@ -121,7 +121,7 @@ export interface User {
 
 // ==================== 认证相关类型 ====================
 
-export interface LoginCredentials {
+export interface LoginCredentials     {
   email: string;
   username?: string; // 支持用户名登录（向后兼容）
   password: string;
@@ -129,7 +129,7 @@ export interface LoginCredentials {
   twoFactorCode?: string;
 }
 
-export interface RegisterData {
+export interface RegisterData     {
   username: string;
   email: string;
   password: string;
@@ -139,7 +139,7 @@ export interface RegisterData {
   inviteCode?: string;
 }
 
-export interface AuthResponse {
+export interface AuthResponse     {
   success: boolean;
   message: string;
   user?: User;
@@ -149,7 +149,7 @@ export interface AuthResponse {
   errors?: Record<string, string>;
 }
 
-export interface UserSession {
+export interface UserSession     {
   id: string;
   userId: string;
   token: string;
@@ -167,17 +167,17 @@ export interface UserSession {
   };
 }
 
-export interface PasswordResetRequest {
+export interface PasswordResetRequest     {
   email: string;
 }
 
-export interface PasswordReset {
+export interface PasswordReset     {
   token: string;
   newPassword: string;
   confirmPassword: string;
 }
 
-export interface ChangePasswordData {
+export interface ChangePasswordData     {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
@@ -185,7 +185,7 @@ export interface ChangePasswordData {
 
 // ==================== 用户管理类型 ====================
 
-export interface CreateUserData {
+export interface CreateUserData     {
   username: string;
   email: string;
   password: string;
@@ -196,7 +196,7 @@ export interface CreateUserData {
   metadata?: Record<string, any>;
 }
 
-export interface UpdateUserData {
+export interface UpdateUserData     {
   username?: string;
   email?: string;
   fullName?: string;
@@ -207,7 +207,7 @@ export interface UpdateUserData {
   metadata?: Record<string, any>;
 }
 
-export interface UserFilter {
+export interface UserFilter     {
   role?: UserRole | UserRole[];
   status?: UserStatus | UserStatus[];
   search?: string;
@@ -219,7 +219,7 @@ export interface UserFilter {
   lastLoginBefore?: string;
 }
 
-export interface UserStats {
+export interface UserStats     {
   totalUsers: number;
   activeUsers: number;
   newUsersToday: number;
@@ -231,7 +231,7 @@ export interface UserStats {
 
 // ==================== 认证上下文类型 ====================
 
-export interface AuthContextType {
+export interface AuthContextType     {
   // 状态
   user: User | null;
   isLoading: boolean;
@@ -266,7 +266,7 @@ export interface AuthContextType {
 
 // ==================== 认证检查类型 ====================
 
-export interface AuthCheckOptions {
+export interface AuthCheckOptions     {
   feature?: string;
   description?: string;
   requireAuth?: boolean;
@@ -275,7 +275,7 @@ export interface AuthCheckOptions {
   requiredPermissions?: string[];
 }
 
-export interface AuthCheckResult {
+export interface AuthCheckResult     {
   isAuthenticated: boolean;
   hasPermission: boolean;
   requireLogin: () => boolean;
@@ -286,7 +286,7 @@ export interface AuthCheckResult {
 
 // ==================== API 响应类型 ====================
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = any>     {
   success: boolean;
   data?: T;
   message?: string;
@@ -294,7 +294,7 @@ export interface ApiResponse<T = any> {
   errors?: Record<string, string>;
 }
 
-export interface PaginatedResponse<T = any> extends ApiResponse<T> {
+export interface PaginatedResponse<T = any> extends ApiResponse<T>     {
   pagination?: {
     page: number;
     limit: number;
@@ -307,7 +307,7 @@ export interface PaginatedResponse<T = any> extends ApiResponse<T> {
 
 // ==================== 安全相关类型 ====================
 
-export interface LoginAttempt {
+export interface LoginAttempt     {
   id: string;
   email: string;
   ipAddress: string;
@@ -317,7 +317,7 @@ export interface LoginAttempt {
   timestamp: string;
 }
 
-export interface SecurityEvent {
+export interface SecurityEvent     {
   id: string;
   userId?: string;
   type: 'login' | 'logout' | 'password_change' | 'permission_change' | 'suspicious_activity';
@@ -329,7 +329,7 @@ export interface SecurityEvent {
   metadata?: Record<string, any>;
 }
 
-export interface TwoFactorAuth {
+export interface TwoFactorAuth     {
   enabled: boolean;
   method: 'totp' | 'sms' | 'email';
   backupCodes?: string[];

@@ -1,7 +1,5 @@
 
-import { ProxyResponse, proxyService } from '../integration/proxyService';
-
-// SEO分析结果接口
+import { ProxyResponse, proxyService  } from '../integration/proxyService';// SEO分析结果接口'
 export interface SEOAnalysisResult {
   url: string;
   timestamp: number;
@@ -291,19 +289,18 @@ export class RealSEOAnalysisEngine {
         if (attempt === maxRetries) {
           throw error;
         }
-        
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);
-    await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-  }
-}
+
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+      }
+    }
   }
   private abortController: AbortController | null = null;
 
   /**
    * 开始SEO分析
    */
-  async analyzeSEO(
-    url: string,
+  async analyzeSEO(url: string,
     config: {
       keywords?: string;
       checkTechnicalSEO?: boolean;
@@ -314,7 +311,7 @@ export class RealSEOAnalysisEngine {
       checkSocialMedia?: boolean;
       checkStructuredData?: boolean;
       checkSecurity?: boolean;
-      depth?: 'basic' | 'standard' | 'comprehensive';
+      depth?: "basic' | 'standard' | 'comprehensive';'`
       externalPerformanceData?: any;
     },
     onProgress?: (progress: number, step: string) => void
@@ -324,14 +321,13 @@ export class RealSEOAnalysisEngine {
     try {
       // 验证URL
       const validatedUrl = this.validateAndNormalizeUrl(url);
-      onProgress?.(5, '验证URL...');
-
+      onProgress?.(5, '验证URL...');'
       // 获取页面内容
-      onProgress?.(10, '获取页面内容...');
+      onProgress?.(10, '获取页面内容...');'
       const pageContent = await this.fetchPageContent(validatedUrl);
 
       // 解析HTML
-      onProgress?.(15, '解析HTML结构...');
+      onProgress?.(15, '解析HTML结构...');'
       const dom = this.parseHTML(pageContent.html);
 
       // 执行各项检测
@@ -340,31 +336,29 @@ export class RealSEOAnalysisEngine {
         timestamp: Date.now(),
         metadata: this.extractMetadata(dom)
       };
-
       let currentProgress = 20;
       const progressStep = 70 / this.getEnabledChecksCount(config);
 
       if (config.checkTechnicalSEO !== false) {
-        onProgress?.(currentProgress, '检查技术SEO...');
+        onProgress?.(currentProgress, '检查技术SEO...');'
         results.technicalSEO = await this.analyzeTechnicalSEO(validatedUrl, dom);
         currentProgress += progressStep;
       }
 
       if (config.checkContentQuality !== false) {
-        onProgress?.(currentProgress, '分析内容质量...');
+        onProgress?.(currentProgress, '分析内容质量...');'
         results.contentQuality = await this.analyzeContentQuality(dom, config.keywords);
         currentProgress += progressStep;
       }
 
       if (config.checkAccessibility !== false) {
-        onProgress?.(currentProgress, '检查可访问性...');
+        onProgress?.(currentProgress, '检查可访问性...');'
         results.accessibility = await this.analyzeAccessibility(dom);
         currentProgress += progressStep;
       }
 
       if (config.checkPerformance !== false) {
-        onProgress?.(currentProgress, '分析性能指标...');
-
+        onProgress?.(currentProgress, '分析性能指标...');'
         // 如果有外部性能数据，使用外部数据；否则进行内部检测
         if (config.externalPerformanceData) {
           results.performance = this.convertExternalPerformanceData(config.externalPerformanceData);
@@ -376,57 +370,55 @@ export class RealSEOAnalysisEngine {
       }
 
       if (config.checkMobileFriendly !== false) {
-        onProgress?.(currentProgress, '检查移动友好性...');
+        onProgress?.(currentProgress, '检查移动友好性...');'
         results.mobileFriendly = await this.analyzeMobileFriendly(dom);
         currentProgress += progressStep;
       }
 
       if (config.checkSocialMedia !== false) {
-        onProgress?.(currentProgress, '检查社交媒体标签...');
+        onProgress?.(currentProgress, '检查社交媒体标签...');'
         results.socialMedia = await this.analyzeSocialMedia(dom);
         currentProgress += progressStep;
       }
 
       if (config.checkStructuredData !== false) {
-        onProgress?.(currentProgress, '检查结构化数据...');
+        onProgress?.(currentProgress, '检查结构化数据...');'
         results.structuredData = await this.analyzeStructuredData(dom);
         currentProgress += progressStep;
       }
 
       if (config.checkSecurity !== false) {
-        onProgress?.(currentProgress, '检查安全配置...');
+        onProgress?.(currentProgress, '检查安全配置...');'
         results.security = await this.analyzeSecurity(validatedUrl, pageContent);
         currentProgress += progressStep;
       }
 
       // 新增：Core Web Vitals检查
-      if (config.depth === 'comprehensive') {
-        onProgress?.(currentProgress, '检查Core Web Vitals...');
+      if (config.depth === 'comprehensive') {'
+        onProgress?.(currentProgress, '检查Core Web Vitals...');'
         results.coreWebVitals = await this.analyzeCoreWebVitals(validatedUrl, pageContent);
         currentProgress += progressStep;
       }
 
       // 新增：国际化SEO检查
-      if (config.depth === 'comprehensive') {
-        onProgress?.(currentProgress, '检查国际化SEO...');
+      if (config.depth === 'comprehensive') {'
+        onProgress?.(currentProgress, '检查国际化SEO...');'
         results.internationalization = await this.analyzeInternationalization(dom);
         currentProgress += progressStep;
       }
 
       // 新增：本地SEO检查
-      if (config.depth === 'comprehensive') {
-        onProgress?.(currentProgress, '检查本地SEO...');
+      if (config.depth === 'comprehensive') {'
+        onProgress?.(currentProgress, '检查本地SEO...');'
         results.localSEO = await this.analyzeLocalSEO(dom);
         currentProgress += progressStep;
       }
 
-      onProgress?.(90, '生成分析报告...');
-
+      onProgress?.(90, '生成分析报告...');'
       // 计算总分和等级
       const { score, grade, issues, recommendations } = this.calculateOverallScore(results as SEOAnalysisResult);
 
-      onProgress?.(100, '分析完成');
-
+      onProgress?.(100, '分析完成');'
       return {
         ...results,
         score,
@@ -436,8 +428,8 @@ export class RealSEOAnalysisEngine {
       } as SEOAnalysisResult;
 
     } catch (error) {
-      console.error('SEO analysis failed:', error);
-      throw new Error(`SEO分析失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      console.error("SEO analysis failed: ', error);'
+      throw new Error(`SEO分析失败: ${error instanceof Error ? error.message : '未知错误'}`);'`
     }
   }
 
@@ -457,14 +449,14 @@ export class RealSEOAnalysisEngine {
   private validateAndNormalizeUrl(url: string): string {
     try {
       // 如果没有协议，默认添加https
-      if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        url = 'https://' + url;
+      if (!url.startsWith("http://') && !url.startsWith('https://')) {'`
+        url = 'https://' + url;'
       }
 
       const urlObj = new URL(url);
       return urlObj.toString();
     } catch (error) {
-      throw new Error('无效的URL格式');
+      throw new Error('无效的URL格式');'
     }
   }
 
@@ -477,38 +469,38 @@ export class RealSEOAnalysisEngine {
 
       // 验证响应内容
       if (!response.html || response.html.trim().length === 0) {
-        throw new Error(`📄 获取到的页面内容为空，无法进行SEO分析。
+        throw new Error(`📄 获取到的页面内容为空，无法进行SEO分析。`
 
-💡 建议：使用本地文件分析功能，上传完整的HTML文件进行详细的SEO检测。`);
+💡 建议：使用本地文件分析功能，上传完整的HTML文件进行详细的SEO检测。`);`
       }
 
       // 检查是否为有效的HTML内容
-      if (!response.html.includes('<html') && !response.html.includes('<HTML')) {
-        throw new Error(`❌ 获取到的内容不是有效的HTML页面，无法进行SEO分析。
+      if (!response.html.includes("<html') && !response.html.includes('<HTML')) {'`
+        throw new Error(`❌ 获取到的内容不是有效的HTML页面，无法进行SEO分析。`
 
-💡 建议：切换到本地文件分析模式，直接上传HTML文件进行准确的SEO检测。`);
+💡 建议：切换到本地文件分析模式，直接上传HTML文件进行准确的SEO检测。`);`
       }
 
       return response;
     } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        throw new Error('分析已取消');
+      if (error instanceof Error && error.name === "AbortError') {'`
+        throw new Error('分析已取消');'
       }
 
       // 如果是代理服务错误，提供更友好的错误信息
       if (error instanceof Error) {
-        if (error.message.includes('建议：切换到本地文件分析模式')) {
+        if (error.message.includes('建议：切换到本地文件分析模式')) {'
           // 代理服务的错误信息已经包含了本地分析建议
           throw error;
         }
 
-        if (error.message.includes('CORS') ||
-          error.message.includes('ERR_QUIC_PROTOCOL_ERROR') ||
-          error.message.includes('ERR_CONNECTION_TIMED_OUT') ||
-          error.message.includes('Failed to fetch') ||
-          error.message.includes('ERR_NETWORK') ||
-          error.message.includes('ERR_INTERNET_DISCONNECTED')) {
-          throw new Error(`🚫 无法访问目标网站 ${url}
+        if (error.message.includes('CORS') ||'
+          error.message.includes('ERR_QUIC_PROTOCOL_ERROR') ||'
+          error.message.includes('ERR_CONNECTION_TIMED_OUT') ||'
+          error.message.includes('Failed to fetch') ||'
+          error.message.includes('ERR_NETWORK') ||'
+          error.message.includes('ERR_INTERNET_DISCONNECTED')) {'
+          throw new Error(`🚫 无法访问目标网站 ${url}`
 
 可能的原因：
 • 网站的CORS策略阻止了跨域访问
@@ -525,7 +517,7 @@ export class RealSEOAnalysisEngine {
 • 支持完整的SEO检测项目
 • 可以分析任何HTML文件
 
-💡 操作提示：点击下方"立即使用本地分析"按钮，上传您的HTML文件即可开始分析。`);
+💡 操作提示：点击下方'立即使用本地分析'按钮，上传您的HTML文件即可开始分析。`);'`
         }
       }
 
@@ -538,7 +530,7 @@ export class RealSEOAnalysisEngine {
    */
   private parseHTML(html: string): Document {
     const parser = new DOMParser();
-    return parser.parseFromString(html, 'text/html');
+    return parser.parseFromString(html, "text/html');'`
   }
 
   /**
@@ -546,14 +538,14 @@ export class RealSEOAnalysisEngine {
    */
   private getEnabledChecksCount(config: any): number {
     const checks = [
-      'checkTechnicalSEO',
-      'checkContentQuality',
-      'checkAccessibility',
-      'checkPerformance',
-      'checkMobileFriendly',
-      'checkSocialMedia',
-      'checkStructuredData',
-      'checkSecurity'
+      'checkTechnicalSEO','
+      'checkContentQuality','
+      'checkAccessibility','
+      'checkPerformance','
+      'checkMobileFriendly','
+      'checkSocialMedia','
+      'checkStructuredData','
+      "checkSecurity';
     ];
 
     return checks.filter(check => config[check] !== false).length;
@@ -563,21 +555,21 @@ export class RealSEOAnalysisEngine {
    * 提取页面元数据
    */
   private extractMetadata(dom: Document): PageMetadata {
-    const getMetaContent = (name: string): string => {
-      const meta = dom.querySelector(`meta[name="${name}"], meta[property="${name}"]`);
-      return meta?.getAttribute('content') || '';
+    const getMetaContent = (name: string): string  => {
+      const meta = dom.querySelector(`meta[name= '${name}'], meta[property= '${name}']`);'`
+      return meta?.getAttribute("content') || '';'`
     };
 
     return {
-      title: dom.title || '',
-      description: getMetaContent('description'),
-      keywords: getMetaContent('keywords').split(',').map(k => k.trim()).filter(k => k),
-      author: getMetaContent('author'),
-      language: dom.documentElement.lang || getMetaContent('language'),
-      charset: dom.characterSet || 'UTF-8',
-      viewport: getMetaContent('viewport'),
-      generator: getMetaContent('generator'),
-      lastModified: dom.lastModified || ''
+      title: dom.title || '','
+      description: getMetaContent('description'),'
+      keywords: getMetaContent('keywords').split(',').map(k => k.trim()).filter(k => k),'
+      author: getMetaContent('author'),'
+      language: dom.documentElement.lang || getMetaContent('language'),'
+      charset: dom.characterSet || 'UTF-8','
+      viewport: getMetaContent('viewport'),'
+      generator: getMetaContent('generator'),'
+      lastModified: dom.lastModified || '';
     };
   }
 
@@ -591,17 +583,17 @@ export class RealSEOAnalysisEngine {
     recommendations: SEORecommendation[];
   } {
     // 检查是否为搜索引擎网站并调整评分
-    const isSearchEngine = this.isSearchEngineWebsite(result.url || '');
+    const isSearchEngine = this.isSearchEngineWebsite(result.url || '');'
     if (isSearchEngine) {
       // 为搜索引擎网站调整特定模块的评分
       if (result.structuredData) {
-        result.structuredData.score = this.adjustScoreForSearchEngine(result.structuredData.score, 'structuredData');
+        result.structuredData.score = this.adjustScoreForSearchEngine(result.structuredData.score, 'structuredData');'
       }
       if (result.socialMedia) {
-        result.socialMedia.score = this.adjustScoreForSearchEngine(result.socialMedia.score, 'socialMedia');
+        result.socialMedia.score = this.adjustScoreForSearchEngine(result.socialMedia.score, 'socialMedia');'
       }
       if (result.contentQuality) {
-        result.contentQuality.score = this.adjustScoreForSearchEngine(result.contentQuality.score, 'contentQuality');
+        result.contentQuality.score = this.adjustScoreForSearchEngine(result.contentQuality.score, 'contentQuality');'
       }
     }
 
@@ -623,7 +615,7 @@ export class RealSEOAnalysisEngine {
 
     Object.entries(weights).forEach(([key, weight]) => {
       const moduleResult = result[key as keyof SEOAnalysisResult] as any;
-      if (moduleResult && typeof moduleResult.score === 'number') {
+      if (moduleResult && typeof moduleResult.score === 'number') {'
         totalScore += moduleResult.score * weight;
         totalWeight += weight;
       }
@@ -638,11 +630,9 @@ export class RealSEOAnalysisEngine {
     else if (score >= 70) grade = 'C';
     else if (score >= 60) grade = 'D';
     else grade = 'F';
-
     // 收集所有问题和建议
     const issues: SEOIssue[] = [];
     const recommendations: SEORecommendation[] = [];
-
     // 从技术SEO收集问题和建议
     if (result.technicalSEO) {
       const tech = result.technicalSEO;
@@ -650,24 +640,24 @@ export class RealSEOAnalysisEngine {
       // robots.txt问题
       if (!tech.robotsTxt.exists) {
         issues.push({
-          type: 'warning',
-          category: '技术SEO',
-          title: '缺少robots.txt文件',
-          description: '网站没有robots.txt文件，可能影响搜索引擎爬取',
-          impact: 'medium',
-          recommendation: '创建robots.txt文件，指导搜索引擎如何爬取您的网站'
+          type: 'warning','
+          category: '技术SEO','
+          title: '缺少robots.txt文件','
+          description: '网站没有robots.txt文件，可能影响搜索引擎爬取','
+          impact: 'medium','
+          recommendation: '创建robots.txt文件，指导搜索引擎如何爬取您的网站';
         });
       }
 
       // sitemap问题
       if (!tech.sitemap.exists) {
         issues.push({
-          type: 'warning',
-          category: '技术SEO',
-          title: '缺少XML Sitemap',
-          description: 'XML Sitemap帮助搜索引擎更好地发现和索引您的页面',
-          impact: 'medium',
-          recommendation: '创建并提交XML Sitemap到搜索引擎'
+          type: 'warning','
+          category: '技术SEO','
+          title: '缺少XML Sitemap','
+          description: 'XML Sitemap帮助搜索引擎更好地发现和索引您的页面','
+          impact: 'medium','
+          recommendation: '创建并提交XML Sitemap到搜索引擎';
         });
       }
 
@@ -675,12 +665,12 @@ export class RealSEOAnalysisEngine {
       if (tech.canonicalTags.issues && tech.canonicalTags.issues.length > 0) {
         tech.canonicalTags.issues.forEach(issue => {
           issues.push({
-            type: 'error',
-            category: '技术SEO',
-            title: 'Canonical标签问题',
+            type: 'error','
+            category: '技术SEO','
+            title: 'Canonical标签问题','
             description: issue,
-            impact: 'high',
-            recommendation: '修复canonical标签配置，避免重复内容问题'
+            impact: 'high','
+            recommendation: '修复canonical标签配置，避免重复内容问题';
           });
         });
       }
@@ -693,22 +683,22 @@ export class RealSEOAnalysisEngine {
       // 标题问题
       if (!content.titleTag.present) {
         issues.push({
-          type: 'error',
-          category: '内容质量',
-          title: '缺少页面标题',
-          description: '页面没有title标签，这是最重要的SEO元素之一',
-          impact: 'high',
-          recommendation: '为页面添加描述性的title标签'
+          type: 'error','
+          category: '内容质量','
+          title: '缺少页面标题','
+          description: '页面没有title标签，这是最重要的SEO元素之一','
+          impact: 'high','
+          recommendation: '为页面添加描述性的title标签';
         });
       } else if (!content.titleTag.optimal) {
         content.titleTag.issues?.forEach(issue => {
           issues.push({
-            type: 'warning',
-            category: '内容质量',
-            title: '标题优化建议',
+            type: 'warning','
+            category: '内容质量','
+            title: '标题优化建议','
             description: issue,
-            impact: 'medium',
-            recommendation: '优化页面标题长度和内容，建议30-60字符'
+            impact: 'medium','
+            recommendation: '优化页面标题长度和内容，建议30-60字符';
           });
         });
       }
@@ -716,22 +706,22 @@ export class RealSEOAnalysisEngine {
       // Meta描述问题
       if (!content.metaDescription.present) {
         issues.push({
-          type: 'warning',
-          category: '内容质量',
-          title: '缺少Meta描述',
-          description: 'Meta描述影响搜索结果的点击率',
-          impact: 'medium',
-          recommendation: '添加吸引人的meta description，建议120-160字符'
+          type: 'warning','
+          category: '内容质量','
+          title: '缺少Meta描述','
+          description: 'Meta描述影响搜索结果的点击率','
+          impact: 'medium','
+          recommendation: '添加吸引人的meta description，建议120-160字符';
         });
       } else if (!content.metaDescription.optimal) {
         content.metaDescription.issues?.forEach(issue => {
           issues.push({
-            type: 'warning',
-            category: '内容质量',
-            title: 'Meta描述优化建议',
+            type: 'warning','
+            category: '内容质量','
+            title: 'Meta描述优化建议','
             description: issue,
-            impact: 'medium',
-            recommendation: '优化meta description长度和内容'
+            impact: 'medium','
+            recommendation: '优化meta description长度和内容';
           });
         });
       }
@@ -739,21 +729,21 @@ export class RealSEOAnalysisEngine {
       // H1标签问题
       if (content.headings.h1Count === 0) {
         issues.push({
-          type: 'error',
-          category: '内容质量',
-          title: '缺少H1标签',
-          description: '页面没有H1标签，影响内容结构和SEO',
-          impact: 'high',
-          recommendation: '为页面添加一个描述性的H1标签'
+          type: 'error','
+          category: '内容质量','
+          title: '缺少H1标签','
+          description: '页面没有H1标签，影响内容结构和SEO','
+          impact: 'high','
+          recommendation: '为页面添加一个描述性的H1标签';
         });
       } else if (content.headings.h1Count > 1) {
         issues.push({
-          type: 'warning',
-          category: '内容质量',
-          title: '多个H1标签',
-          description: '页面有多个H1标签，可能影响SEO效果',
-          impact: 'medium',
-          recommendation: '确保每个页面只有一个H1标签'
+          type: 'warning','
+          category: '内容质量','
+          title: '多个H1标签','
+          description: '页面有多个H1标签，可能影响SEO效果','
+          impact: 'medium','
+          recommendation: '确保每个页面只有一个H1标签';
         });
       }
     }
@@ -761,12 +751,12 @@ export class RealSEOAnalysisEngine {
     // 从性能分析收集问题和建议
     if (result.performance && result.performance.score < 70) {
       issues.push({
-        type: 'warning',
-        category: '性能优化',
-        title: '页面性能需要改进',
-        description: `页面性能评分为${result.performance.score}分，低于推荐标准`,
-        impact: 'medium',
-        recommendation: '优化图片、压缩资源、使用CDN等方式提升页面加载速度'
+        type: 'warning','
+        category: '性能优化','
+        title: '页面性能需要改进','
+        description: `页面性能评分为${result.performance.score}分，低于推荐标准`,`
+        impact: "medium','`
+        recommendation: '优化图片、压缩资源、使用CDN等方式提升页面加载速度';
       });
     }
 
@@ -774,12 +764,12 @@ export class RealSEOAnalysisEngine {
     if (result.mobileFriendly && result.mobileFriendly.score < 80) {
       if (!result.mobileFriendly.viewport.present) {
         issues.push({
-          type: 'error',
-          category: '移动友好性',
-          title: '缺少viewport标签',
-          description: '页面没有viewport meta标签，影响移动端显示',
-          impact: 'high',
-          recommendation: '添加viewport meta标签：<meta name="viewport" content="width=device-width, initial-scale=1">'
+          type: 'error','
+          category: '移动友好性','
+          title: '缺少viewport标签','
+          description: '页面没有viewport meta标签，影响移动端显示','
+          impact: 'high','
+          recommendation: '添加viewport meta标签：<meta name= 'viewport' content= 'width=device-width, initial-scale=1'>';
         });
       }
     }
@@ -788,12 +778,12 @@ export class RealSEOAnalysisEngine {
     if (result.security) {
       if (!result.security.https.enabled) {
         issues.push({
-          type: 'error',
-          category: '安全配置',
-          title: '未启用HTTPS',
-          description: 'HTTPS是现代网站的基本要求，影响SEO排名',
-          impact: 'high',
-          recommendation: '启用HTTPS加密，确保网站安全'
+          type: 'error','
+          category: '安全配置','
+          title: '未启用HTTPS','
+          description: 'HTTPS是现代网站的基本要求，影响SEO排名','
+          impact: 'high','
+          recommendation: '启用HTTPS加密，确保网站安全';
         });
       }
     }
@@ -801,30 +791,30 @@ export class RealSEOAnalysisEngine {
     // 生成优化建议
     if (score >= 90) {
       recommendations.push({
-        priority: 'low',
-        category: '持续优化',
-        title: '保持优秀表现',
-        description: '您的网站SEO表现优秀，继续保持当前的优化策略',
-        implementation: '定期监控SEO指标，及时发现和解决新问题',
-        expectedImpact: '维持良好的搜索引擎排名'
+        priority: 'low','
+        category: '持续优化','
+        title: '保持优秀表现','
+        description: '您的网站SEO表现优秀，继续保持当前的优化策略','
+        implementation: '定期监控SEO指标，及时发现和解决新问题','
+        expectedImpact: '维持良好的搜索引擎排名';
       });
     } else if (score >= 70) {
       recommendations.push({
-        priority: 'medium',
-        category: '进一步优化',
-        title: '提升SEO表现',
-        description: '您的网站有良好的SEO基础，可以进一步优化',
-        implementation: '重点关注内容质量和技术SEO的改进',
-        expectedImpact: '提升搜索引擎排名和流量'
+        priority: 'medium','
+        category: '进一步优化','
+        title: '提升SEO表现','
+        description: '您的网站有良好的SEO基础，可以进一步优化','
+        implementation: '重点关注内容质量和技术SEO的改进','
+        expectedImpact: '提升搜索引擎排名和流量';
       });
     } else {
       recommendations.push({
-        priority: 'high',
-        category: '紧急优化',
-        title: '需要立即改进',
-        description: '您的网站存在重要的SEO问题，需要立即处理',
-        implementation: '优先解决高优先级问题，特别是技术SEO和内容质量',
-        expectedImpact: '显著提升搜索引擎可见性'
+        priority: 'high','
+        category: '紧急优化','
+        title: '需要立即改进','
+        description: '您的网站存在重要的SEO问题，需要立即处理','
+        implementation: '优先解决高优先级问题，特别是技术SEO和内容质量','
+        expectedImpact: '显著提升搜索引擎可见性';
       });
     }
 
@@ -836,7 +826,7 @@ export class RealSEOAnalysisEngine {
    */
   private async analyzeTechnicalSEO(url: string, dom: Document): Promise<TechnicalSEOResult> {
     const urlObj = new URL(url);
-    const baseUrl = `${urlObj.protocol}/${urlObj.host}`;
+    const baseUrl = `${urlObj.protocol}/${urlObj.host}`;`
 
     // 检查robots.txt
     const robotsTxt = await this.checkRobotsTxt(baseUrl);
@@ -888,13 +878,12 @@ export class RealSEOAnalysisEngine {
     try {
       const result = await proxyService.fetchRobotsTxt(baseUrl, this.abortController?.signal);
       const issues: string[] = [];
-
       if (!result.exists) {
-        issues.push('robots.txt文件不存在');
+        issues.push("robots.txt文件不存在');'`
       } else if (!result.accessible) {
-        issues.push('robots.txt文件无法访问');
+        issues.push('robots.txt文件无法访问');'
       } else if (!result.content.trim()) {
-        issues.push('robots.txt文件为空');
+        issues.push('robots.txt文件为空');'
       }
 
       return {
@@ -906,7 +895,7 @@ export class RealSEOAnalysisEngine {
       return {
         exists: false,
         accessible: false,
-        issues: ['🔍 无法在线检查robots.txt文件。💡 建议：使用本地文件分析功能，可以检查HTML文件中的meta robots标签和其他SEO配置。']
+        issues: ['🔍 无法在线检查robots.txt文件。💡 建议：使用本地文件分析功能，可以检查HTML文件中的meta robots标签和其他SEO配置。']'
       };
     }
   }
@@ -926,11 +915,10 @@ export class RealSEOAnalysisEngine {
     let urls = 0;
 
     // 检查HTML中的sitemap链接
-    const sitemapLinks = dom.querySelectorAll('link[rel="sitemap"]');
+    const sitemapLinks = dom.querySelectorAll('link[rel= 'sitemap']');'
     const sitemapUrls: string[] = [];
-
     sitemapLinks.forEach(link => {
-      const href = link.getAttribute('href');
+      const href = link.getAttribute('href');'
       if (href) {
         sitemapUrls.push(new URL(href, baseUrl).toString());
       }
@@ -939,9 +927,9 @@ export class RealSEOAnalysisEngine {
     // 如果没有找到，尝试常见的sitemap位置
     if (sitemapUrls.length === 0) {
       sitemapUrls.push(
-        `${baseUrl}/sitemap.xml`,
-        `${baseUrl}/sitemap_index.xml`,
-        `${baseUrl}/sitemap.txt`
+        `${baseUrl}/sitemap.xml`,`
+        `${baseUrl}/sitemap_index.xml`,`
+        `${baseUrl}/sitemap.txt``
       );
     }
 
@@ -962,11 +950,11 @@ export class RealSEOAnalysisEngine {
     }
 
     if (!exists) {
-      issues.push('🗺️ 未找到sitemap文件。💡 建议：使用本地文件分析功能，可以详细检查HTML文件中的内部链接结构和导航架构。');
+      issues.push("🗺️ 未找到sitemap文件。💡 建议：使用本地文件分析功能，可以详细检查HTML文件中的内部链接结构和导航架构。');'`
     } else if (!accessible) {
-      issues.push('🗺️ sitemap文件无法访问。💡 建议：使用本地文件分析功能，可以完整分析HTML文件中的链接结构。');
+      issues.push('🗺️ sitemap文件无法访问。💡 建议：使用本地文件分析功能，可以完整分析HTML文件中的链接结构。');'
     } else if (urls === 0) {
-      issues.push('sitemap文件中没有URL');
+      issues.push('sitemap文件中没有URL');'
     }
 
     return { exists, accessible, urls, issues };
@@ -978,12 +966,12 @@ export class RealSEOAnalysisEngine {
   private isSearchEngineWebsite(baseUrl: string): boolean {
     const url = baseUrl.toLowerCase();
     const searchEngines = [
-      'baidu.com',
-      'google.com',
-      'bing.com',
-      'yahoo.com',
-      'yandex.com',
-      'duckduckgo.com'
+      'baidu.com','
+      'google.com','
+      'bing.com','
+      'yahoo.com','
+      'yandex.com','
+      'duckduckgo.com';
     ];
 
     return searchEngines.some(domain => url.includes(domain));
@@ -995,13 +983,13 @@ export class RealSEOAnalysisEngine {
   private adjustScoreForSearchEngine(score: number, category: string): number {
     // 对于搜索引擎网站，某些SEO标准不适用，给予适当的分数调整
     switch (category) {
-      case 'structuredData':
+      case 'structuredData': ''
         // 搜索引擎网站可能不需要传统的结构化数据
         return Math.max(score, 60);
-      case 'socialMedia':
+      case 'socialMedia': ''
         // 搜索引擎网站通常不需要社交媒体标签
         return Math.max(score, 70);
-      case 'contentQuality':
+      case 'contentQuality': ''
         // 搜索引擎首页内容简洁是正常的
         return Math.max(score, 60);
       default:
@@ -1017,27 +1005,27 @@ export class RealSEOAnalysisEngine {
     correct: boolean;
     issues: string[];
   } {
-    const canonicalLinks = dom.querySelectorAll('link[rel="canonical"]');
+    const canonicalLinks = dom.querySelectorAll('link[rel= 'canonical']');'
     const issues: string[] = [];
-
     if (canonicalLinks.length === 0) {
-      
-        return {
+
+      return {
         present: false,
         correct: false,
-        issues: ['缺少canonical标签']
+        issues: ['缺少canonical标签']'
       };
     }
 
     if (canonicalLinks.length > 1) {
-      issues.push('存在多个canonical标签');
+      issues.push('存在多个canonical标签');'
     }
 
-    const canonicalUrl = canonicalLinks[0].getAttribute('href');
+    const canonicalUrl = canonicalLinks[0].getAttribute('href');'
     if (!canonicalUrl) {
-      
-        issues.push('canonical标签缺少href属性');
-      return { present: true, correct: false, issues
+
+      issues.push('canonical标签缺少href属性');'
+      return {
+        present: true, correct: false, issues
       };
     }
 
@@ -1047,10 +1035,10 @@ export class RealSEOAnalysisEngine {
       const current = new URL(currentUrl);
 
       if (canonical.toString() !== current.toString()) {
-        issues.push('canonical URL与当前URL不匹配');
+        issues.push('canonical URL与当前URL不匹配');'
       }
     } catch (error) {
-      issues.push('canonical URL格式无效');
+      issues.push('canonical URL格式无效');'
     }
 
     return {
@@ -1068,29 +1056,26 @@ export class RealSEOAnalysisEngine {
     content: string;
     issues: string[];
   } {
-    const metaRobots = dom.querySelector('meta[name="robots"]');
+    const metaRobots = dom.querySelector('meta[name= 'robots']');'
     const issues: string[] = [];
-
     if (!metaRobots) {
-      
-        return {
+
+      return {
         present: false,
-        content: '',
-        issues: ['缺少meta robots标签']
+        content: '','
+        issues: ['缺少meta robots标签']'
       };
     }
 
     const content = metaRobots.getAttribute('content') || '';
-
     // 检查常见的robots指令
-    const directives = content.toLowerCase().split(',').map(d => d.trim());
-
-    if (directives.includes('noindex')) {
-      issues.push('页面设置为不被索引');
+    const directives = content.toLowerCase().split(',').map(d => d.trim());'
+    if (directives.includes('noindex')) {'
+      issues.push('页面设置为不被索引');'
     }
 
-    if (directives.includes('nofollow')) {
-      issues.push('页面链接设置为不被跟踪');
+    if (directives.includes('nofollow')) {'
+      issues.push('页面链接设置为不被跟踪');'
     }
 
     return {
@@ -1108,29 +1093,27 @@ export class RealSEOAnalysisEngine {
     correct: boolean;
     issues: string[];
   } {
-    const hreflangLinks = dom.querySelectorAll('link[rel="alternate"][hreflang]');
+    const hreflangLinks = dom.querySelectorAll('link[rel= 'alternate'][hreflang]');'
     const issues: string[] = [];
-
     if (hreflangLinks.length === 0) {
-      
-        return {
+
+      return {
         present: false,
         correct: false,
-        issues: ['没有hreflang标签（如果是多语言网站建议添加）']
+        issues: ['没有hreflang标签（如果是多语言网站建议添加）']'
       };
     }
 
     // 检查hreflang格式
     hreflangLinks.forEach((link, index) => {
-      const hreflang = link.getAttribute('hreflang');
-      const href = link.getAttribute('href');
-
+      const hreflang = link.getAttribute('hreflang');'
+      const href = link.getAttribute('href');'
       if (!href) {
-        issues.push(`第${index + 1}个hreflang标签缺少href属性`);
+        issues.push(`第${index + 1}个hreflang标签缺少href属性`);`
       }
 
       if (hreflang && !this.isValidHreflang(hreflang)) {
-        issues.push(`无效的hreflang值: ${hreflang}`);
+        issues.push(`无效的hreflang值: ${hreflang}`);`
       }
     });
 
@@ -1155,41 +1138,40 @@ export class RealSEOAnalysisEngine {
     let score = 100;
 
     // 检查是否使用HTTPS
-    const https = urlObj.protocol === 'https:';
+    const https = urlObj.protocol === "https: ';'`
     if (!https) {
-      issues.push('建议使用HTTPS协议');
+      issues.push('建议使用HTTPS协议');'
       score -= 20;
     }
 
     // 检查URL长度
     if (url.length > 100) {
-      issues.push('URL过长，建议控制在100字符以内');
+      issues.push('URL过长，建议控制在100字符以内');'
       score -= 10;
     }
 
     // 检查URL中是否包含特殊字符
-    const hasSpecialChars = /[^a-zA-Z0-9\-._~:/?#[\]@!$&'()*+,;=]/.test(urlObj.pathname);
+    const hasSpecialChars = /[^a-zA-Z0-9\-._~:/?#[\]@!$&'()*+,;=]/.test(urlObj.pathname);'
     if (hasSpecialChars) {
-      issues.push('URL包含特殊字符，建议使用SEO友好的URL');
+      issues.push('URL包含特殊字符，建议使用SEO友好的URL');'
       score -= 15;
     }
 
     // 检查是否使用下划线
-    if (urlObj.pathname.includes('_')) {
-      issues.push('建议使用连字符(-)而不是下划线(_)');
+    if (urlObj.pathname.includes('_')) {'
+      issues.push('建议使用连字符(-)而不是下划线(_)');'
       score -= 5;
     }
 
     // 检查路径深度
-    const pathDepth = urlObj.pathname.split('/').filter(p => p).length;
+    const pathDepth = urlObj.pathname.split('/').filter(p => p).length;'
     if (pathDepth > 4) {
-      issues.push('URL路径层级过深，建议控制在4层以内');
+      issues.push('URL路径层级过深，建议控制在4层以内');'
       score -= 10;
     }
 
     // 判断URL是否友好
-    const friendly = https && url.length <= 100 && !hasSpecialChars && !urlObj.pathname.includes('_') && pathDepth <= 4;
-
+    const friendly = https && url.length <= 100 && !hasSpecialChars && !urlObj.pathname.includes('_') && pathDepth <= 4;'
     return {
       score: Math.max(0, score),
       issues,
@@ -1290,15 +1272,14 @@ export class RealSEOAnalysisEngine {
   } {
     const title = dom.title;
     const issues: string[] = [];
-
     if (!title) {
-      
-        return {
+
+      return {
         present: false,
         length: 0,
         optimal: false,
-        content: '',
-        issues: ['缺少title标签']
+        content: '','
+        issues: ['缺少title标签']'
       };
     }
 
@@ -1306,15 +1287,15 @@ export class RealSEOAnalysisEngine {
     let optimal = true;
 
     if (length < 30) {
-      issues.push('标题过短，建议30-60字符');
+      issues.push('标题过短，建议30-60字符');'
       optimal = false;
     } else if (length > 60) {
-      issues.push('标题过长，建议30-60字符');
+      issues.push('标题过长，建议30-60字符');'
       optimal = false;
     }
 
     if (!title.trim()) {
-      issues.push('标题为空');
+      issues.push('标题为空');'
       optimal = false;
     }
 
@@ -1337,17 +1318,16 @@ export class RealSEOAnalysisEngine {
     content: string;
     issues: string[];
   } {
-    const metaDesc = dom.querySelector('meta[name="description"]');
+    const metaDesc = dom.querySelector('meta[name= 'description']');'
     const issues: string[] = [];
-
     if (!metaDesc) {
-      
-        return {
+
+      return {
         present: false,
         length: 0,
         optimal: false,
-        content: '',
-        issues: ['缺少meta description标签']
+        content: '','
+        issues: ['缺少meta description标签']'
       };
     }
 
@@ -1356,13 +1336,13 @@ export class RealSEOAnalysisEngine {
     let optimal = true;
 
     if (length === 0) {
-      issues.push('meta description为空');
+      issues.push('meta description为空');'
       optimal = false;
     } else if (length < 120) {
-      issues.push('meta description过短，建议120-160字符');
+      issues.push('meta description过短，建议120-160字符');'
       optimal = false;
     } else if (length > 160) {
-      issues.push('meta description过长，建议120-160字符');
+      issues.push('meta description过长，建议120-160字符');'
       optimal = false;
     }
 
@@ -1384,18 +1364,17 @@ export class RealSEOAnalysisEngine {
     structure: boolean;
     issues: string[];
   } {
-    const h1Elements = dom.querySelectorAll('h1');
-    const h1Content = Array.from(h1Elements).map(h1 => h1.textContent || '');
+    const h1Elements = dom.querySelectorAll('h1');'
+    const h1Content = Array.from(h1Elements).map(h1 => h1.textContent || '');'
     const issues: string[] = [];
-
     if (h1Elements.length === 0) {
-      issues.push('缺少H1标签');
+      issues.push('缺少H1标签');'
     } else if (h1Elements.length > 1) {
-      issues.push('存在多个H1标签，建议只使用一个');
+      issues.push('存在多个H1标签，建议只使用一个');'
     }
 
     // 检查标题层级结构
-    const headings = dom.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    const headings = dom.querySelectorAll('h1, h2, h3, h4, h5, h6');'
     let structure = true;
     let lastLevel = 0;
 
@@ -1403,7 +1382,7 @@ export class RealSEOAnalysisEngine {
       const level = parseInt(heading.tagName.substring(1));
       if (level > lastLevel + 1) {
         structure = false;
-        issues.push('标题层级结构不正确，跳过了某些级别');
+        issues.push('标题层级结构不正确，跳过了某些级别');'
       }
       lastLevel = level;
     });
@@ -1428,7 +1407,6 @@ export class RealSEOAnalysisEngine {
     const textContent = this.extractTextContent(dom);
     const wordCount = this.countWords(textContent);
     const issues: string[] = [];
-
     // 真实的可读性分析
     const readability = this.calculateAdvancedReadability(textContent, dom);
 
@@ -1448,7 +1426,7 @@ export class RealSEOAnalysisEngine {
     this.checkContentQuality(textContent, contentQuality, issues);
 
     if (contentQuality.technicalTermsRatio < 0.02 && wordCount > 500) {
-      issues.push('内容可能缺乏专业深度，建议增加相关专业术语和详细说明');
+      issues.push('内容可能缺乏专业深度，建议增加相关专业术语和详细说明');'
     }
 
     return {
@@ -1464,23 +1442,22 @@ export class RealSEOAnalysisEngine {
    */
   private analyzeKeywordDensity(textContent: string, keywords?: string, issues: string[] = []): { [keyword: string]: number } {
     const keywordDensity: { [keyword: string]: number } = {};
-
     if (!keywords) {
-      
-        return keywordDensity;
-      }
 
-    const keywordList = keywords.split(',').map(k => k.trim().toLowerCase()).filter(k => k);
+      return keywordDensity;
+    }
+
+    const keywordList = keywords.split(',').map(k => k.trim().toLowerCase()).filter(k => k);'
     keywordList.forEach(keyword => {
       const density = this.calculateKeywordDensity(textContent, keyword);
       keywordDensity[keyword] = density;
 
       if (density === 0) {
-        issues.push(`关键词"${keyword}"未在内容中出现，建议自然地融入相关内容`);
+        issues.push(`关键词'${keyword}'未在内容中出现，建议自然地融入相关内容`);'`
       } else if (density > 4) {
-        issues.push(`关键词"${keyword}"密度过高(${density.toFixed(1)}%)，可能被视为关键词堆砌，建议控制在1-3%`);
+        issues.push(`关键词"${keyword}'密度过高(${density.toFixed(1)}%)，可能被视为关键词堆砌，建议控制在1-3%`);'`
       } else if (density > 3) {
-        issues.push(`关键词"${keyword}"密度较高(${density.toFixed(1)}%)，建议适当减少使用频率`);
+        issues.push(`关键词'${keyword}'密度较高(${density.toFixed(1)}%)，建议适当减少使用频率`);'`
       }
     });
 
@@ -1492,11 +1469,11 @@ export class RealSEOAnalysisEngine {
    */
   private checkContentLength(wordCount: number, issues: string[]): void {
     if (wordCount < 150) {
-      issues.push('内容过短（<150词），搜索引擎可能认为页面价值不足');
+      issues.push("内容过短（<150词），搜索引擎可能认为页面价值不足');'`
     } else if (wordCount < 300) {
-      issues.push('内容较短（<300词），建议增加有价值的内容以提升SEO效果');
+      issues.push('内容较短（<300词），建议增加有价值的内容以提升SEO效果');'
     } else if (wordCount > 3000) {
-      issues.push('内容过长（>3000词），建议考虑分页或分章节以提升用户体验');
+      issues.push('内容过长（>3000词），建议考虑分页或分章节以提升用户体验');'
     }
   }
 
@@ -1504,9 +1481,9 @@ export class RealSEOAnalysisEngine {
    * 检查内容结构
    */
   private checkContentStructure(dom: Document, wordCount: number, issues: string[]): void {
-    const paragraphs = dom.querySelectorAll('p');
+    const paragraphs = dom.querySelectorAll('p');'
     if (paragraphs.length === 0 && wordCount > 100) {
-      issues.push('内容缺少段落结构，建议使用<p>标签分段提升可读性');
+      issues.push('内容缺少段落结构，建议使用<p>标签分段提升可读性');'
     }
   }
 
@@ -1517,12 +1494,12 @@ export class RealSEOAnalysisEngine {
     // 检查内容重复
     const duplicateRatio = this.checkContentDuplication(textContent);
     if (duplicateRatio > 0.3) {
-      issues.push(`内容重复率较高(${(duplicateRatio * 100).toFixed(1)}%)，建议增加原创内容`);
+      issues.push(`内容重复率较高(${(duplicateRatio * 100).toFixed(1)}%)，建议增加原创内容`);`
     }
 
     // 检查内容深度
     if (contentQuality.averageSentenceLength > 25) {
-      issues.push('句子平均长度过长，建议使用更简洁的表达方式');
+      issues.push("句子平均长度过长，建议使用更简洁的表达方式');'`
     }
   }
 
@@ -1536,24 +1513,23 @@ export class RealSEOAnalysisEngine {
     optimized: number;
     issues: string[];
   } {
-    const images = dom.querySelectorAll('img');
+    const images = dom.querySelectorAll('img');'
     const issues: string[] = [];
     let withAlt = 0;
     let withTitle = 0;
     let optimized = 0;
 
     images.forEach((img, index) => {
-      const alt = img.getAttribute('alt');
-      const title = img.getAttribute('title');
-      const src = img.getAttribute('src');
-
+      const alt = img.getAttribute('alt');'
+      const title = img.getAttribute('title');'
+      const src = img.getAttribute('src');'
       if (alt !== null) {
         withAlt++;
         if (!alt.trim()) {
-          issues.push(`第${index + 1}个图片的alt属性为空`);
+          issues.push(`第${index + 1}个图片的alt属性为空`);`
         }
       } else {
-        issues.push(`第${index + 1}个图片缺少alt属性`);
+        issues.push(`第${index + 1}个图片缺少alt属性`);`
       }
 
       if (title) {
@@ -1561,13 +1537,13 @@ export class RealSEOAnalysisEngine {
       }
 
       // 简单检查图片格式优化
-      if (src && (src.includes('.webp') || src.includes('.avif'))) {
+      if (src && (src.includes(".webp') || src.includes('.avif'))) {'`
         optimized++;
       }
     });
 
     if (images.length > 0 && withAlt / images.length < 0.9) {
-      issues.push('大部分图片缺少alt属性，影响可访问性和SEO');
+      issues.push('大部分图片缺少alt属性，影响可访问性和SEO');'
     }
 
     return {
@@ -1588,7 +1564,7 @@ export class RealSEOAnalysisEngine {
     broken: number;
     issues: string[];
   } {
-    const links = dom.querySelectorAll('a[href]');
+    const links = dom.querySelectorAll('a[href]');'
     const issues: string[] = [];
     let internal = 0;
     let external = 0;
@@ -1597,7 +1573,7 @@ export class RealSEOAnalysisEngine {
     const currentDomain = window.location.hostname;
 
     links.forEach((link, index) => {
-      const href = link.getAttribute('href');
+      const href = link.getAttribute('href');'
       if (!href) return;
 
       try {
@@ -1608,24 +1584,24 @@ export class RealSEOAnalysisEngine {
         } else {
           external++;
 
-          // 检查外部链接是否有rel="nofollow"
-          const rel = link.getAttribute('rel');
-          if (!rel || !rel.includes('nofollow')) {
+          // 检查外部链接是否有rel= 'nofollow';
+          const rel = link.getAttribute('rel');'
+          if (!rel || !rel.includes('nofollow')) {'
             // 这里可以添加建议，但不一定是问题
           }
         }
       } catch (error) {
-        if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) {
+        if (href.startsWith('#') || href.startsWith('mailto: ') || href.startsWith('tel: ')) {'
           // 这些是有效的特殊链接
         } else {
           broken++;
-          issues.push(`第${index + 1}个链接格式无效: ${href}`);
+          issues.push(`第${index + 1}个链接格式无效: ${href}`);`
         }
       }
     });
 
     if (internal === 0 && external > 0) {
-      issues.push('缺少内部链接，建议添加相关页面链接');
+      issues.push("缺少内部链接，建议添加相关页面链接');'`
     }
 
     return {
@@ -1641,7 +1617,7 @@ export class RealSEOAnalysisEngine {
    */
   private extractTextContent(dom: Document): string {
     // 移除script和style标签
-    const scripts = dom.querySelectorAll('script, style');
+    const scripts = dom.querySelectorAll('script, style');'
     scripts.forEach(script => script.remove());
 
     return dom.body?.textContent || '';
@@ -1758,17 +1734,17 @@ export class RealSEOAnalysisEngine {
     missing: number;
     issues: string[];
   } {
-    const images = dom.querySelectorAll('img');
+    const images = dom.querySelectorAll('img');'
     const issues: string[] = [];
     let missing = 0;
 
     images.forEach((img, index) => {
-      const alt = img.getAttribute('alt');
+      const alt = img.getAttribute('alt');'
       if (alt === null) {
         missing++;
-        issues.push(`第${index + 1}个图片缺少alt属性`);
+        issues.push(`第${index + 1}个图片缺少alt属性`);`
       } else if (!alt.trim()) {
-        issues.push(`第${index + 1}个图片的alt属性为空`);
+        issues.push(`第${index + 1}个图片的alt属性为空`);`
       }
     });
 
@@ -1786,7 +1762,7 @@ export class RealSEOAnalysisEngine {
     correct: boolean;
     issues: string[];
   } {
-    const headings = dom.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    const headings = dom.querySelectorAll("h1, h2, h3, h4, h5, h6');'`
     const issues: string[] = [];
     let correct = true;
     let lastLevel = 0;
@@ -1796,12 +1772,12 @@ export class RealSEOAnalysisEngine {
 
       if (index === 0 && level !== 1) {
         correct = false;
-        issues.push('页面应该以H1标签开始');
+        issues.push('页面应该以H1标签开始');'
       }
 
       if (level > lastLevel + 1) {
         correct = false;
-        issues.push(`标题层级跳跃：从H${lastLevel}直接跳到H${level}`);
+        issues.push(`标题层级跳跃：从H${lastLevel}直接跳到H${level}`);`
       }
 
       lastLevel = level;
@@ -1818,7 +1794,7 @@ export class RealSEOAnalysisEngine {
     failed: number;
     issues: string[];
   } {
-    const textElements = dom.querySelectorAll('p, span, div, a, button, h1, h2, h3, h4, h5, h6, li, td, th');
+    const textElements = dom.querySelectorAll("p, span, div, a, button, h1, h2, h3, h4, h5, h6, li, td, th');'`
     const issues: string[] = [];
     let passed = 0;
     let failed = 0;
@@ -1826,8 +1802,7 @@ export class RealSEOAnalysisEngine {
     // 检查常见的对比度问题
     textElements.forEach((element, index) => {
       const style = element.getAttribute('style') || '';
-      const className = element.getAttribute('class') || '';
-
+      const className = element.getAttribute('class') || "';
       // 检查内联样式中的颜色问题（简化版本）
       const hasLightText = /color\s*:\s*(#[fF]{3,6}|white|#fff)/i.test(style);
       const hasLightBackground = /background(-color)?\s*:\s*(#[fF]{3,6}|white|#fff)/i.test(style);
@@ -1838,27 +1813,27 @@ export class RealSEOAnalysisEngine {
       if ((hasLightText && hasLightBackground) || (hasDarkText && hasDarkBackground)) {
         failed++;
         if (failed <= 5) { // 只报告前5个问题
-          issues.push(`元素 ${element.tagName.toLowerCase()}${className ? '.' + className.split(' ')[0] : ''} 可能存在颜色对比度问题`);
+          issues.push(`元素 ${element.tagName.toLowerCase()}${className ? '.' + className.split(' ')[0] : ''} 可能存在颜色对比度问题`);'`
         }
       } else {
         passed++;
       }
 
       // 检查常见的低对比度类名
-      const lowContrastClasses = ['text-gray-400', 'text-light', 'text-muted', 'opacity-50'];
+      const lowContrastClasses = ["text-gray-400', 'text-light', 'text-muted', 'opacity-50'];'`
       if (lowContrastClasses.some(cls => className.includes(cls))) {
         const textContent = element.textContent?.trim();
         if (textContent && textContent.length > 10) { // 只检查有意义的文本
           failed++;
           if (issues.length < 10) {
-            issues.push(`文本内容"${textContent.substring(0, 30)}..."可能对比度不足`);
+            issues.push(`文本内容'${textContent.substring(0, 30)}...'可能对比度不足`);'`
           }
         }
       }
     });
 
     // 检查链接的可见性
-    const links = dom.querySelectorAll('a');
+    const links = dom.querySelectorAll("a');'`
     links.forEach(link => {
       const style = link.getAttribute('style') || '';
       const hasTextDecoration = /text-decoration\s*:\s*none/i.test(style);
@@ -1867,7 +1842,7 @@ export class RealSEOAnalysisEngine {
       if (hasTextDecoration && !hasColorDifference) {
         failed++;
         if (issues.length < 15) {
-          issues.push('链接缺少视觉区分（无下划线且颜色未区分）');
+          issues.push('链接缺少视觉区分（无下划线且颜色未区分）');'
         }
       }
     });
@@ -1877,7 +1852,7 @@ export class RealSEOAnalysisEngine {
       passed = Math.floor(textElements.length * 0.85);
       failed = textElements.length - passed;
       if (failed > 0) {
-        issues.push('建议使用对比度检查工具验证颜色对比度是否符合WCAG标准');
+        issues.push('建议使用对比度检查工具验证颜色对比度是否符合WCAG标准');'
       }
     }
 
@@ -1892,14 +1867,13 @@ export class RealSEOAnalysisEngine {
     issues: string[];
   } {
     const focusableElements = dom.querySelectorAll(
-      'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      'a[href], button, input, select, textarea, [tabindex]:not([tabindex= ' - 1'])';
     );
     const issues: string[] = [];
-
     focusableElements.forEach((element, index) => {
-      const tabIndex = element.getAttribute('tabindex');
+      const tabIndex = element.getAttribute('tabindex');'
       if (tabIndex && parseInt(tabIndex) > 0) {
-        issues.push(`第${index + 1}个可聚焦元素使用了正数tabindex，建议避免`);
+        issues.push(`第${index + 1}个可聚焦元素使用了正数tabindex，建议避免`);`
       }
     });
 
@@ -1917,22 +1891,21 @@ export class RealSEOAnalysisEngine {
     missing: number;
     issues: string[];
   } {
-    const interactiveElements = dom.querySelectorAll('button, input, select, textarea, [role]');
+    const interactiveElements = dom.querySelectorAll("button, input, select, textarea, [role]');'`
     const issues: string[] = [];
     let present = 0;
     let missing = 0;
 
     interactiveElements.forEach((element, index) => {
-      const ariaLabel = element.getAttribute('aria-label');
-      const ariaLabelledby = element.getAttribute('aria-labelledby');
-      const ariaDescribedby = element.getAttribute('aria-describedby');
-
+      const ariaLabel = element.getAttribute('aria-label');'
+      const ariaLabelledby = element.getAttribute('aria-labelledby');'
+      const ariaDescribedby = element.getAttribute('aria-describedby');'
       if (ariaLabel || ariaLabelledby || ariaDescribedby) {
         present++;
       } else {
         missing++;
         const tagName = element.tagName.toLowerCase();
-        issues.push(`第${index + 1}个${tagName}元素缺少ARIA标签`);
+        issues.push(`第${index + 1}个${tagName}元素缺少ARIA标签`);`
       }
     });
 
@@ -1985,69 +1958,68 @@ export class RealSEOAnalysisEngine {
 
       // pageSpeedData = await googlePageSpeedService.analyzePageSpeed(url);
     } catch (error) {
-      console.warn('Failed to get PageSpeed data:', error);
+      console.warn("Failed to get PageSpeed data: ', error);'`
     }
 
     const issues: string[] = [];
-    const opportunities: PerformanceResult['opportunities'] = [];
-
+    const opportunities: PerformanceResult['opportunities'] = [];'
     // 只使用真实的PageSpeed数据，不进行估算
     if (pageSpeedData) {
       // 使用真实的Core Web Vitals数据
       const mobileMetrics = pageSpeedData.mobile;
 
       if (mobileMetrics.lcp && mobileMetrics.lcp > 4000) {
-        issues.push('LCP指标差（>4秒），严重影响用户体验，需要优化关键资源加载');
+        issues.push('LCP指标差（>4秒），严重影响用户体验，需要优化关键资源加载');'
       } else if (mobileMetrics.lcp && mobileMetrics.lcp > 2500) {
-        issues.push('LCP指标需要改进（>2.5秒），建议优化关键资源加载');
+        issues.push('LCP指标需要改进（>2.5秒），建议优化关键资源加载');'
       }
 
       if (mobileMetrics.cls && mobileMetrics.cls > 0.25) {
-        issues.push('CLS指标差（>0.25），页面布局不稳定，建议为图片和广告预留空间');
+        issues.push('CLS指标差（>0.25），页面布局不稳定，建议为图片和广告预留空间');'
       } else if (mobileMetrics.cls && mobileMetrics.cls > 0.1) {
-        issues.push('CLS指标需要改进（>0.1），建议优化布局稳定性');
+        issues.push('CLS指标需要改进（>0.1），建议优化布局稳定性');'
       }
 
       if (mobileMetrics.fid && mobileMetrics.fid > 300) {
-        issues.push('FID指标差（>300ms），交互响应慢，建议优化JavaScript执行');
+        issues.push('FID指标差（>300ms），交互响应慢，建议优化JavaScript执行');'
       } else if (mobileMetrics.fid && mobileMetrics.fid > 100) {
-        issues.push('FID指标需要改进（>100ms），建议优化交互响应');
+        issues.push('FID指标需要改进（>100ms），建议优化交互响应');'
       }
 
       // 添加PageSpeed的优化建议
       opportunities.push(...mobileMetrics.opportunities);
     } else {
       // 无法获取真实性能数据时，提示用户使用本地分析
-      issues.push('⚡ 在线分析无法获取完整的性能数据。💡 建议：使用本地文件分析功能进行详细的性能检查。');
+      issues.push('⚡ 在线分析无法获取完整的性能数据。💡 建议：使用本地文件分析功能进行详细的性能检查。');'
       opportunities.push({
-        id: 'use-local-analysis',
-        title: '🚀 切换到本地分析获取完整性能数据',
-        description: '在线分析受到API和网络限制，无法获取完整的性能指标。本地文件分析可以提供：• 详细的资源加载分析 • 完整的HTML结构检查 • 准确的SEO优化建议。立即切换到本地分析模式！',
-        impact: 'high' as const
+        id: 'use-local-analysis','
+        title: '🚀 切换到本地分析获取完整性能数据','
+        description: '在线分析受到API和网络限制，无法获取完整的性能指标。本地文件分析可以提供：• 详细的资源加载分析 • 完整的HTML结构检查 • 准确的SEO优化建议。立即切换到本地分析模式！','
+        impact: 'high' as const'
       });
     }
 
     // 通用检查
     if (pageSize > 2 * 1024 * 1024) {
-      issues.push('页面大小过大（>2MB），建议压缩HTML、CSS、JS和图片资源');
+      issues.push('页面大小过大（>2MB），建议压缩HTML、CSS、JS和图片资源');'
     } else if (pageSize > 1024 * 1024) {
-      issues.push('页面大小较大（>1MB），建议优化资源大小');
+      issues.push('页面大小较大（>1MB），建议优化资源大小');'
     }
 
     if (requests > 100) {
-      issues.push('HTTP请求数量过多（>100个），建议合并CSS/JS文件，使用CSS Sprites');
+      issues.push('HTTP请求数量过多（>100个），建议合并CSS/JS文件，使用CSS Sprites');'
     } else if (requests > 50) {
-      issues.push('HTTP请求数量较多（>50个），建议减少资源请求');
+      issues.push('HTTP请求数量较多（>50个），建议减少资源请求');'
     }
 
     // Web Vitals评估 - 只基于真实数据
     const webVitalsAssessment = pageSpeedData
       ? this.assessWebVitals(pageSpeedData.mobile)
       : {
-        lcp: 'unknown' as const,
-        fid: 'unknown' as const,
-        cls: 'unknown' as const,
-        overall: 'poor' as const
+        lcp: 'unknown' as const,'
+        fid: 'unknown' as const,'
+        cls: 'unknown' as const,'
+        overall: 'poor' as const'
       };
 
     const score = this.calculateBasicPerformanceScore({
@@ -2086,16 +2058,14 @@ export class RealSEOAnalysisEngine {
   /**
    * 评估Web Vitals（基于真实PageSpeed数据）
    */
-  private assessWebVitals(metrics: any): PerformanceResult['webVitalsAssessment'] {
-    const lcp = metrics.lcp ? (metrics.lcp <= 2500 ? 'good' : metrics.lcp <= 4000 ? 'needs-improvement' : 'poor') : 'unknown';
+  private assessWebVitals(metrics: any): PerformanceResult['webVitalsAssessment'] {'
+    const lcp = metrics.lcp ? (metrics.lcp <= 2500 ? 'good' : metrics.lcp <= 4000 ? 'needs-improvement' : 'poor'): 'unknown';
     const fid = metrics.fid ? (metrics.fid <= 100 ? 'good' : metrics.fid <= 300 ? 'needs-improvement' : 'poor') : 'unknown';
     const cls = metrics.cls ? (metrics.cls <= 0.1 ? 'good' : metrics.cls <= 0.25 ? 'needs-improvement' : 'poor') : 'unknown';
-
     // 计算总体评估
-    const scores = [lcp, fid, cls].filter(score => score !== 'unknown');
-    const goodCount = scores.filter(score => score === 'good').length;
-    const poorCount = scores.filter(score => score === 'poor').length;
-
+    const scores = [lcp, fid, cls].filter(score => score !== 'unknown');'
+    const goodCount = scores.filter(score => score === 'good').length;'
+    const poorCount = scores.filter(score  => score === 'poor').length;'
     let overall: 'good' | 'needs-improvement' | 'poor';
     if (poorCount > 0) {
       overall = 'poor';
@@ -2119,9 +2089,9 @@ export class RealSEOAnalysisEngine {
   }): number {
     // 如果没有真实的PageSpeed数据，返回较低分数并提示使用本地分析
     if (!params.hasPageSpeedData) {
-      
-        return 30; // 低分数表示数据不完整
-      }
+
+      return 30; // 低分数表示数据不完整
+    }
 
     // 基于基础指标的简单评分
     let score = 100;
@@ -2154,13 +2124,13 @@ export class RealSEOAnalysisEngine {
 
     // 检查图片优化
     const images = html.match(/<img[^>]+>/gi) || [];
-    const webpImages = images.filter(img => img.includes('.webp')).length;
+    const webpImages = images.filter(img => img.includes('.webp')).length;'
     const totalImages = images.length;
 
     if (totalImages > 0) {
       const webpRatio = webpImages / totalImages;
       if (webpRatio < 0.5) {
-        issues.push('建议使用WebP格式图片以提升加载速度');
+        issues.push('建议使用WebP格式图片以提升加载速度');'
         optimizationScore -= 10;
       }
     }
@@ -2168,24 +2138,24 @@ export class RealSEOAnalysisEngine {
     // 检查CSS优化
     const inlineStyles = (html.match(/style\s*=/gi) || []).length;
     if (inlineStyles > 10) {
-      issues.push('内联样式过多，建议使用外部CSS文件');
+      issues.push('内联样式过多，建议使用外部CSS文件');'
       optimizationScore -= 5;
     }
 
     // 检查JavaScript优化
     const inlineScripts = (html.match(/<script(?![^>]*src)[^>]*>/gi) || []).length;
     if (inlineScripts > 5) {
-      issues.push('内联脚本过多，建议使用外部JavaScript文件');
+      issues.push('内联脚本过多，建议使用外部JavaScript文件');'
       optimizationScore -= 5;
     }
 
     // 检查压缩
     const htmlSize = html.length;
-    const minifiedSize = html.replace(/\s+/g, ' ').length;
+    const minifiedSize = html.replace(/\s+/g, ' ').length;'
     const compressionRatio = (htmlSize - minifiedSize) / htmlSize;
 
     if (compressionRatio > 0.2) {
-      issues.push('HTML代码可以进一步压缩以减少传输大小');
+      issues.push('HTML代码可以进一步压缩以减少传输大小');'
       optimizationScore -= 5;
     }
 
@@ -2273,23 +2243,22 @@ export class RealSEOAnalysisEngine {
     const textSize = this.checkTextSize(dom);
 
     const issues: string[] = [];
-
     if (!viewport.present) {
-      issues.push('缺少viewport meta标签');
+      issues.push('缺少viewport meta标签');'
     } else if (!viewport.correct) {
-      issues.push('viewport配置不正确');
+      issues.push('viewport配置不正确');'
     }
 
     if (!responsive) {
-      issues.push('页面可能不是响应式设计');
+      issues.push('页面可能不是响应式设计');'
     }
 
     if (!touchElements.appropriate) {
-      issues.push('触摸元素大小可能不合适');
+      issues.push('触摸元素大小可能不合适');'
     }
 
     if (!textSize.readable) {
-      issues.push('文本大小可能在移动设备上不易阅读');
+      issues.push('文本大小可能在移动设备上不易阅读');'
     }
 
     const score = this.calculateMobileFriendlyScore({
@@ -2317,17 +2286,16 @@ export class RealSEOAnalysisEngine {
     correct: boolean;
     content: string;
   } {
-    const viewportMeta = dom.querySelector('meta[name="viewport"]');
-
+    const viewportMeta = dom.querySelector("meta[name= 'viewport']');'
     if (!viewportMeta) {
-      
-        return { present: false, correct: false, content: ''
+
+      return {
+        present: false, correct: false, content: '';
       };
     }
 
     const content = viewportMeta.getAttribute('content') || '';
-    const correct = content.includes('width=device-width') && content.includes('initial-scale=1');
-
+    const correct = content.includes('width=device-width') && content.includes('initial-scale=1');'
     return { present: true, correct, content };
   }
 
@@ -2336,10 +2304,9 @@ export class RealSEOAnalysisEngine {
    */
   private checkResponsive(dom: Document): boolean {
     // 简化的响应式检查
-    const hasMediaQueries = dom.querySelectorAll('style, link[rel="stylesheet"]').length > 0;
-    const hasFlexbox = dom.querySelector('[style*="flex"], [class*="flex"]') !== null;
-    const hasGrid = dom.querySelector('[style*="grid"], [class*="grid"]') !== null;
-
+    const hasMediaQueries = dom.querySelectorAll('style, link[rel= 'stylesheet']').length > 0;'
+    const hasFlexbox = dom.querySelector('[style*= 'flex'], [class*= 'flex']') !== null;'
+    const hasGrid = dom.querySelector('[style*= 'grid'], [class*= 'grid']') !== null;'
     return hasMediaQueries || hasFlexbox || hasGrid;
   }
 
@@ -2350,13 +2317,13 @@ export class RealSEOAnalysisEngine {
     appropriate: boolean;
     issues: string[];
   } {
-    const touchElements = dom.querySelectorAll('button, a, input[type="button"], input[type="submit"]');
+    const touchElements = dom.querySelectorAll("button, a, input[type= 'button'], input[type= 'submit']');'
     const issues: string[] = [];
     let appropriate = true;
 
     // 简化的触摸元素检查
     if (touchElements.length === 0) {
-      issues.push('页面缺少可交互元素');
+      issues.push('页面缺少可交互元素');'
       appropriate = false;
     }
 
@@ -2370,14 +2337,14 @@ export class RealSEOAnalysisEngine {
     readable: boolean;
     issues: string[];
   } {
-    const textElements = dom.querySelectorAll('p, span, div, a, button');
+    const textElements = dom.querySelectorAll('p, span, div, a, button');'
     const issues: string[] = [];
     let readable = true;
 
     // 简化的文本大小检查
     // 实际实现需要检查CSS样式中的font-size
     if (textElements.length === 0) {
-      issues.push('页面缺少文本内容');
+      issues.push('页面缺少文本内容');'
       readable = false;
     }
 
@@ -2437,25 +2404,24 @@ export class RealSEOAnalysisEngine {
     tags: { [key: string]: string };
     issues: string[];
   } {
-    const ogTags = dom.querySelectorAll('meta[property^="og:"]');
+    const ogTags = dom.querySelectorAll('meta[property^= 'og: ']');'
     const tags: { [key: string]: string } = {};
     const issues: string[] = [];
-
     ogTags.forEach(tag => {
-      const property = tag.getAttribute('property');
-      const content = tag.getAttribute('content');
+      const property = tag.getAttribute('property');'
+      const content = tag.getAttribute('content');'
       if (property && content) {
         tags[property] = content;
       }
     });
 
     const present = ogTags.length > 0;
-    const requiredTags = ['og:title', 'og:description', 'og:image', 'og:url'];
+    const requiredTags = ['og:title', 'og:description', 'og:image', 'og:url'];'
     const complete = requiredTags.every(tag => tags[tag]);
 
     requiredTags.forEach(tag => {
       if (!tags[tag]) {
-        issues.push(`缺少${tag}标签`);
+        issues.push(`缺少${tag}标签`);`
       }
     });
 
@@ -2471,25 +2437,24 @@ export class RealSEOAnalysisEngine {
     tags: { [key: string]: string };
     issues: string[];
   } {
-    const twitterTags = dom.querySelectorAll('meta[name^="twitter:"]');
+    const twitterTags = dom.querySelectorAll("meta[name^= 'twitter: ']');'`
     const tags: { [key: string]: string } = {};
     const issues: string[] = [];
-
     twitterTags.forEach(tag => {
-      const name = tag.getAttribute('name');
-      const content = tag.getAttribute('content');
+      const name = tag.getAttribute('name');'
+      const content = tag.getAttribute('content');'
       if (name && content) {
         tags[name] = content;
       }
     });
 
     const present = twitterTags.length > 0;
-    const requiredTags = ['twitter:card', 'twitter:title', 'twitter:description'];
+    const requiredTags = ['twitter:card', 'twitter:title', "twitter:description'];'
     const complete = requiredTags.every(tag => tags[tag]);
 
     requiredTags.forEach(tag => {
       if (!tags[tag]) {
-        issues.push(`缺少${tag}标签`);
+        issues.push(`缺少${tag}标签`);`
       }
     });
 
@@ -2504,13 +2469,12 @@ export class RealSEOAnalysisEngine {
     tags: { [key: string]: string };
     issues: string[];
   } {
-    const fbTags = dom.querySelectorAll('meta[property^="fb:"]');
+    const fbTags = dom.querySelectorAll("meta[property^= 'fb: ']');'`
     const tags: { [key: string]: string } = {};
     const issues: string[] = [];
-
     fbTags.forEach(tag => {
-      const property = tag.getAttribute('property');
-      const content = tag.getAttribute('content');
+      const property = tag.getAttribute('property');'
+      const content = tag.getAttribute('content');'
       if (property && content) {
         tags[property] = content;
       }
@@ -2519,7 +2483,7 @@ export class RealSEOAnalysisEngine {
     const present = fbTags.length > 0;
 
     if (!present) {
-      issues.push('缺少Facebook特定的meta标签');
+      issues.push('缺少Facebook特定的meta标签');'
     }
 
     return { present, tags, issues };
@@ -2554,9 +2518,8 @@ export class RealSEOAnalysisEngine {
     const microdata = this.checkMicrodata(dom);
 
     const issues: string[] = [];
-
     if (schemas.length === 0 && !jsonLd.present && !microdata.present) {
-      issues.push('页面缺少结构化数据标记');
+      issues.push('页面缺少结构化数据标记');'
     }
 
     const score = this.calculateStructuredDataScore({
@@ -2583,16 +2546,15 @@ export class RealSEOAnalysisEngine {
     errors: string[];
   }[] {
     const schemas: { type: string; valid: boolean; errors: string[] }[] = [];
-
     // 检查itemscope和itemtype
-    const itemScopes = dom.querySelectorAll('[itemscope]');
+    const itemScopes = dom.querySelectorAll('[itemscope]');'
     itemScopes.forEach(element => {
-      const itemType = element.getAttribute('itemtype');
+      const itemType = element.getAttribute('itemtype');'
       if (itemType) {
         schemas.push({
           type: itemType,
-          valid: itemType.includes('schema.org'),
-          errors: itemType.includes('schema.org') ? [] : ['无效的schema.org类型']
+          valid: itemType.includes('schema.org'),'
+          errors: itemType.includes('schema.org') ? [] : ['无效的schema.org类型']'
         });
       }
     });
@@ -2608,15 +2570,15 @@ export class RealSEOAnalysisEngine {
     valid: boolean;
     schemas: string[];
   } {
-    const jsonLdScripts = dom.querySelectorAll('script[type="application/ld+json"]');
+    const jsonLdScripts = dom.querySelectorAll("script[type= 'application/ld+json']');'
     const schemas: string[] = [];
     let valid = true;
 
     jsonLdScripts.forEach(script => {
       try {
-        const data = JSON.parse(script.textContent || '');
-        if (data['@type']) {
-          schemas.push(data['@type']);
+        const data = JSON.parse(script.textContent || '');'
+        if (data['@type']) {'
+          schemas.push(data['@type']);'
         }
       } catch (error) {
         valid = false;
@@ -2638,9 +2600,8 @@ export class RealSEOAnalysisEngine {
     valid: boolean;
     items: number;
   } {
-    const microdataElements = dom.querySelectorAll('[itemscope], [itemprop], [itemtype]');
-    const itemScopes = dom.querySelectorAll('[itemscope]');
-
+    const microdataElements = dom.querySelectorAll('[itemscope], [itemprop], [itemtype]');'
+    const itemScopes = dom.querySelectorAll('[itemscope]');'
     return {
       present: microdataElements.length > 0,
       valid: itemScopes.length > 0,
@@ -2683,24 +2644,22 @@ export class RealSEOAnalysisEngine {
     const urlObj = new URL(url);
     const https = this.checkHttps(urlObj, pageContent);
     const headers = this.checkSecurityHeaders(pageContent.headers);
-    const mixedContent = this.checkMixedContent(pageContent.html, urlObj.protocol === 'https:');
-
+    const mixedContent = this.checkMixedContent(pageContent.html, urlObj.protocol === 'https: ');'
     const issues: string[] = [];
-
     if (!https.enabled) {
-      issues.push('网站未启用HTTPS');
+      issues.push('网站未启用HTTPS');'
     }
 
     if (!headers.contentSecurityPolicy) {
-      issues.push('缺少Content-Security-Policy头');
+      issues.push('缺少Content-Security-Policy头');'
     }
 
     if (!headers.strictTransportSecurity && https.enabled) {
-      issues.push('缺少Strict-Transport-Security头');
+      issues.push('缺少Strict-Transport-Security头');'
     }
 
     if (mixedContent.present) {
-      issues.push('存在混合内容问题');
+      issues.push('存在混合内容问题');'
     }
 
     const score = this.calculateSecurityScore({
@@ -2729,13 +2688,12 @@ export class RealSEOAnalysisEngine {
       expires: string;
     };
   } {
-    const enabled = urlObj.protocol === 'https:';
-
+    const enabled = urlObj.protocol === 'https: ';
     // 简化的证书检查
     const certificate = {
       valid: enabled,
-      issuer: enabled ? 'Unknown CA' : '',
-      expires: enabled ? 'Unknown' : ''
+      issuer: enabled ? 'Unknown CA' : '','
+      expires: enabled ? 'Unknown' : '';
     };
 
     return { enabled, certificate };
@@ -2754,11 +2712,11 @@ export class RealSEOAnalysisEngine {
     const headerKeys = Object.keys(headers).map(k => k.toLowerCase());
 
     return {
-      contentSecurityPolicy: headerKeys.includes('content-security-policy'),
-      strictTransportSecurity: headerKeys.includes('strict-transport-security'),
-      xFrameOptions: headerKeys.includes('x-frame-options'),
-      xContentTypeOptions: headerKeys.includes('x-content-type-options'),
-      referrerPolicy: headerKeys.includes('referrer-policy')
+      contentSecurityPolicy: headerKeys.includes('content-security-policy'),'
+      strictTransportSecurity: headerKeys.includes('strict-transport-security'),'
+      xFrameOptions: headerKeys.includes('x-frame-options'),'
+      xContentTypeOptions: headerKeys.includes('x-content-type-options'),'
+      referrerPolicy: headerKeys.includes('referrer-policy')'
     };
   }
 
@@ -2770,22 +2728,22 @@ export class RealSEOAnalysisEngine {
     issues: string[];
   } {
     const issues: string[] = [];
-
     if (!isHttps) {
-      
-        return { present: false, issues
+
+      return {
+        present: false, issues
       };
     }
 
     // 检查HTTP资源
     const httpResources = [
-      ...html.match(/src=["']http:\/\/[^"']+/gi) || [],
-      ...html.match(/href=["']http:\/\/[^"']+/gi) || [],
-      ...html.match(/url\(["']?http:\/\/[^"')]+/gi) || []
+      ...html.match(/src=['']http:\/\/[^'']+/gi) || [],'
+      ...html.match(/href=['']http:\/\/[^'']+/gi) || [],'
+      ...html.match(/url\(['']?http:\/\/[^'')]+/gi) || []'
     ];
 
     if (httpResources.length > 0) {
-      issues.push(`发现${httpResources.length}个HTTP资源`);
+      issues.push(`发现${httpResources.length}个HTTP资源`);`
     }
 
     return {
@@ -2853,7 +2811,7 @@ export class RealSEOAnalysisEngine {
 
     words.forEach(word => {
       // 移除标点符号
-      word = word.replace(/[^a-z]/g, '');
+      word = word.replace(/[^a-z]/g, "');'`
       if (word.length === 0) return;
 
       // 简单的音节计算规则
@@ -2861,7 +2819,7 @@ export class RealSEOAnalysisEngine {
       let count = vowels ? vowels.length : 1;
 
       // 调整规则
-      if (word.endsWith('e')) count--;
+      if (word.endsWith('e')) count--;'
       if (count === 0) count = 1;
 
       syllableCount += count;
@@ -2877,19 +2835,19 @@ export class RealSEOAnalysisEngine {
     let bonus = 0;
 
     // 标题结构加分
-    const headings = dom.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    const headings = dom.querySelectorAll('h1, h2, h3, h4, h5, h6');'
     if (headings.length > 0) bonus += 5;
 
     // 列表结构加分
-    const lists = dom.querySelectorAll('ul, ol');
+    const lists = dom.querySelectorAll('ul, ol');'
     if (lists.length > 0) bonus += 3;
 
     // 段落结构加分
-    const paragraphs = dom.querySelectorAll('p');
+    const paragraphs = dom.querySelectorAll('p');'
     if (paragraphs.length > 2) bonus += 2;
 
     // 强调标签加分
-    const emphasis = dom.querySelectorAll('strong, b, em, i');
+    const emphasis = dom.querySelectorAll('strong, b, em, i');'
     if (emphasis.length > 0) bonus += 2;
 
     return Math.min(10, bonus); // 最多加10分
@@ -3002,10 +2960,10 @@ export class RealSEOAnalysisEngine {
       pageSpeedData: externalData,
       opportunities: [],
       webVitalsAssessment: {
-        lcp: 'unknown' as const,
-        fid: 'unknown' as const,
-        cls: 'unknown' as const,
-        overall: 'poor' as const
+        lcp: 'unknown' as const,'
+        fid: 'unknown' as const,'
+        cls: 'unknown' as const,'
+        overall: 'poor' as const'
       },
       coreWebVitals: {
         lcp: externalData.vitals?.lcp || 0,
@@ -3032,28 +2990,28 @@ export class RealSEOAnalysisEngine {
 
       // LCP评估
       if (vitals.largestContentfulPaint > 4000) {
-        issues.push('最大内容绘制时间过长 (>4秒)');
+        issues.push('最大内容绘制时间过长 (>4秒)');'
         score -= 25;
       } else if (vitals.largestContentfulPaint > 2500) {
-        issues.push('最大内容绘制时间需要改进 (>2.5秒)');
+        issues.push('最大内容绘制时间需要改进 (>2.5秒)');'
         score -= 15;
       }
 
       // FID评估
       if (vitals.firstInputDelay > 300) {
-        issues.push('首次输入延迟过长 (>300ms)');
+        issues.push('首次输入延迟过长 (>300ms)');'
         score -= 20;
       } else if (vitals.firstInputDelay > 100) {
-        issues.push('首次输入延迟需要改进 (>100ms)');
+        issues.push('首次输入延迟需要改进 (>100ms)');'
         score -= 10;
       }
 
       // CLS评估
       if (vitals.cumulativeLayoutShift > 0.25) {
-        issues.push('累积布局偏移过大 (>0.25)');
+        issues.push('累积布局偏移过大 (>0.25)');'
         score -= 20;
       } else if (vitals.cumulativeLayoutShift > 0.1) {
-        issues.push('累积布局偏移需要改进 (>0.1)');
+        issues.push('累积布局偏移需要改进 (>0.1)');'
         score -= 10;
       }
 
@@ -3065,11 +3023,11 @@ export class RealSEOAnalysisEngine {
       };
 
     } catch (error) {
-      console.error('Core Web Vitals analysis failed:', error);
+      console.error('Core Web Vitals analysis failed: ', error);'
       return {
         score: 0,
         vitals: {},
-        issues: ['Core Web Vitals检查失败'],
+        issues: ['Core Web Vitals检查失败'],'
         recommendations: []
       };
     }
@@ -3083,30 +3041,29 @@ export class RealSEOAnalysisEngine {
     let score = 100;
 
     // 检查lang属性
-    const htmlLang = dom.documentElement.getAttribute('lang');
+    const htmlLang = dom.documentElement.getAttribute('lang');'
     if (!htmlLang) {
-      issues.push('HTML元素缺少lang属性');
+      issues.push('HTML元素缺少lang属性');'
       score -= 20;
     }
 
     // 检查hreflang标签
-    const hreflangLinks = dom.querySelectorAll('link[rel="alternate"][hreflang]');
+    const hreflangLinks = dom.querySelectorAll('link[rel= 'alternate'][hreflang]');'
     const hasHreflang = hreflangLinks.length > 0;
 
     // 检查多语言内容
-    const metaLanguage = dom.querySelector('meta[http-equiv="content-language"]');
+    const metaLanguage = dom.querySelector('meta[http-equiv= 'content - language']');'
     const hasMetaLanguage = !!metaLanguage;
 
     // 检查字符编码
-    const charset = dom.querySelector('meta[charset]') || dom.querySelector('meta[http-equiv="content-type"]');
+    const charset = dom.querySelector('meta[charset]') || dom.querySelector('meta[http-equiv= 'content - type']');'
     if (!charset) {
-      issues.push('缺少字符编码声明');
+      issues.push('缺少字符编码声明');'
       score -= 15;
     }
 
     // 检查RTL支持
     const hasRTL = dom.documentElement.getAttribute('dir') === 'rtl';
-
     return {
       score: Math.max(0, score),
       htmlLang,
@@ -3128,7 +3085,7 @@ export class RealSEOAnalysisEngine {
     let score = 100;
 
     // 检查结构化数据中的本地业务信息
-    const jsonLdScripts = dom.querySelectorAll('script[type="application/ld+json"]');
+    const jsonLdScripts = dom.querySelectorAll("script[type= 'application/ld+json']');'
     let hasLocalBusiness = false;
     let hasAddress = false;
     let hasPhone = false;
@@ -3136,8 +3093,8 @@ export class RealSEOAnalysisEngine {
 
     jsonLdScripts.forEach(script => {
       try {
-        const data = JSON.parse(script.textContent || '');
-        if (data['@type'] === 'LocalBusiness' || data['@type'] === 'Organization') {
+        const data = JSON.parse(script.textContent || '');'
+        if (data['@type'] === 'LocalBusiness' || data['@type'] === 'Organization') {'
           hasLocalBusiness = true;
           if (data.address) hasAddress = true;
           if (data.telephone) hasPhone = true;
@@ -3154,24 +3111,23 @@ export class RealSEOAnalysisEngine {
     const hasAddressKeywords = /地址|address|street|avenue|road|boulevard/i.test(textContent);
 
     // 检查地图嵌入
-    const hasGoogleMaps = dom.querySelector('iframe[src*="google.com/maps"]') ||
-      dom.querySelector('iframe[src*="maps.google.com"]');
-
+    const hasGoogleMaps = dom.querySelector('iframe[src*= 'google.com / maps']') ||'
+      dom.querySelector('iframe[src*= 'maps.google.com']');'
     // 评分
     if (!hasLocalBusiness) {
-      issues.push('缺少本地业务结构化数据');
+      issues.push('缺少本地业务结构化数据');'
       score -= 30;
     }
     if (!hasAddress && !hasAddressKeywords) {
-      issues.push('页面中未找到地址信息');
+      issues.push('页面中未找到地址信息');'
       score -= 20;
     }
     if (!hasPhone && !hasPhoneInContent) {
-      issues.push('页面中未找到电话信息');
+      issues.push('页面中未找到电话信息');'
       score -= 15;
     }
     if (!hasGoogleMaps) {
-      issues.push('建议添加地图嵌入');
+      issues.push('建议添加地图嵌入');'
       score -= 10;
     }
 
@@ -3192,23 +3148,22 @@ export class RealSEOAnalysisEngine {
    */
   private generateCoreWebVitalsRecommendations(vitals: any, issues: string[]): string[] {
     const recommendations: string[] = [];
-
     if (vitals.largestContentfulPaint > 2500) {
-      recommendations.push('优化图片大小和格式，使用WebP格式');
-      recommendations.push('启用图片懒加载');
-      recommendations.push('优化服务器响应时间');
+      recommendations.push('优化图片大小和格式，使用WebP格式');'
+      recommendations.push('启用图片懒加载');'
+      recommendations.push('优化服务器响应时间');'
     }
 
     if (vitals.firstInputDelay > 100) {
-      recommendations.push('减少JavaScript执行时间');
-      recommendations.push('使用Web Workers处理复杂计算');
-      recommendations.push('优化第三方脚本加载');
+      recommendations.push('减少JavaScript执行时间');'
+      recommendations.push('使用Web Workers处理复杂计算');'
+      recommendations.push('优化第三方脚本加载');'
     }
 
     if (vitals.cumulativeLayoutShift > 0.1) {
-      recommendations.push('为图片和视频设置明确的尺寸');
-      recommendations.push('避免在现有内容上方插入内容');
-      recommendations.push('使用CSS aspect-ratio属性');
+      recommendations.push('为图片和视频设置明确的尺寸');'
+      recommendations.push('避免在现有内容上方插入内容');'
+      recommendations.push('使用CSS aspect-ratio属性');'
     }
 
     return recommendations;
@@ -3219,18 +3174,16 @@ export class RealSEOAnalysisEngine {
    */
   private generateInternationalizationRecommendations(issues: string[]): string[] {
     const recommendations: string[] = [];
-
-    if (issues.some(issue => issue.includes('lang属性'))) {
-      recommendations.push('在HTML元素上添加lang属性，如<html lang="zh-CN">');
+    if (issues.some(issue => issue.includes('lang属性'))) {'
+      recommendations.push('在HTML元素上添加lang属性，如<html lang= 'zh - CN'>');'
     }
 
-    if (issues.some(issue => issue.includes('字符编码'))) {
-      recommendations.push('添加字符编码声明：<meta charset="UTF-8">');
+    if (issues.some(issue => issue.includes('字符编码'))) {'
+      recommendations.push('添加字符编码声明：<meta charset= 'UTF - 8'>');'
     }
 
-    recommendations.push('考虑添加hreflang标签支持多语言版本');
-    recommendations.push('使用适当的字体支持目标语言');
-
+    recommendations.push('考虑添加hreflang标签支持多语言版本');'
+    recommendations.push('使用适当的字体支持目标语言');'
     return recommendations;
   }
 
@@ -3239,26 +3192,24 @@ export class RealSEOAnalysisEngine {
    */
   private generateLocalSEORecommendations(issues: string[]): string[] {
     const recommendations: string[] = [];
-
-    if (issues.some(issue => issue.includes('本地业务结构化数据'))) {
-      recommendations.push('添加LocalBusiness结构化数据');
+    if (issues.some(issue => issue.includes('本地业务结构化数据'))) {'
+      recommendations.push('添加LocalBusiness结构化数据');'
     }
 
-    if (issues.some(issue => issue.includes('地址信息'))) {
-      recommendations.push('在页面中明确显示完整地址');
+    if (issues.some(issue => issue.includes('地址信息'))) {'
+      recommendations.push('在页面中明确显示完整地址');'
     }
 
-    if (issues.some(issue => issue.includes('电话信息'))) {
-      recommendations.push('在页面中显示联系电话');
+    if (issues.some(issue => issue.includes('电话信息'))) {'
+      recommendations.push('在页面中显示联系电话');'
     }
 
-    if (issues.some(issue => issue.includes('地图嵌入'))) {
-      recommendations.push('嵌入Google Maps显示业务位置');
+    if (issues.some(issue => issue.includes('地图嵌入'))) {'
+      recommendations.push('嵌入Google Maps显示业务位置');'
     }
 
-    recommendations.push('在Google My Business上注册并优化');
-    recommendations.push('获取本地目录和评论网站的引用');
-
+    recommendations.push('在Google My Business上注册并优化');'
+    recommendations.push('获取本地目录和评论网站的引用');'
     return recommendations;
   }
 
@@ -3269,15 +3220,14 @@ export class RealSEOAnalysisEngine {
     try {
       // 分析HTML内容获取性能指标
       const html = pageContent.data;
-      const dom = new DOMParser().parseFromString(html, 'text/html');
-
+      const dom = new DOMParser().parseFromString(html, 'text/html');'
       // 计算页面大小
       const pageSize = new Blob([html]).size;
 
       // 分析资源数量
-      const images = dom.querySelectorAll('img').length;
-      const scripts = dom.querySelectorAll('script').length;
-      const stylesheets = dom.querySelectorAll('link[rel="stylesheet"]').length;
+      const images = dom.querySelectorAll('img').length;'
+      const scripts = dom.querySelectorAll('script').length;'
+      const stylesheets = dom.querySelectorAll('link[rel= 'stylesheet']').length;'
       const totalResources = images + scripts + stylesheets;
 
       // 基于实际内容估算性能指标
@@ -3291,7 +3241,7 @@ export class RealSEOAnalysisEngine {
 
       return vitals;
     } catch (error) {
-      console.error('Core Web Vitals measurement failed:', error);
+      console.error('Core Web Vitals measurement failed: ', error);'
       // 返回基于页面复杂度的估算值
       return {
         largestContentfulPaint: 2500,
@@ -3318,11 +3268,11 @@ export class RealSEOAnalysisEngine {
     baseLCP += imageCount * 50;
 
     // 检查是否有大图片
-    const images = dom.querySelectorAll('img');
+    const images = dom.querySelectorAll('img');'
     let hasLargeImages = false;
     images.forEach(img => {
-      const src = img.getAttribute('src');
-      if (src && (src.includes('banner') || src.includes('hero') || img.hasAttribute('width') && parseInt(img.getAttribute('width') || '0') > 800)) {
+      const src = img.getAttribute('src');'
+      if (src && (src.includes('banner') || src.includes('hero') || img.hasAttribute('width') && parseInt(img.getAttribute('width') || '0') > 800)) {'
         hasLargeImages = true;
       }
     });
@@ -3330,7 +3280,7 @@ export class RealSEOAnalysisEngine {
     if (hasLargeImages) baseLCP += 800;
 
     // 检查是否使用了现代图片格式
-    const hasWebP = Array.from(images).some(img => img.getAttribute('src')?.includes('.webp'));
+    const hasWebP = Array.from(images).some(img => img.getAttribute('src')?.includes('.webp'));'
     if (!hasWebP && imageCount > 5) baseLCP += 500;
 
     return Math.min(baseLCP, 6000); // 最大6秒
@@ -3359,15 +3309,15 @@ export class RealSEOAnalysisEngine {
     let baseCLS = 0.05; // 基础CLS值
 
     // 检查没有尺寸的图片
-    const imagesWithoutDimensions = dom.querySelectorAll('img:not([width]):not([height])').length;
+    const imagesWithoutDimensions = dom.querySelectorAll('img:not([width]):not([height])').length;'
     baseCLS += imagesWithoutDimensions * 0.02;
 
     // 检查动态内容
-    const dynamicElements = dom.querySelectorAll('[style*="position: absolute"], [style*="position: fixed"]').length;
+    const dynamicElements = dom.querySelectorAll('[style*= 'position: absolute'], [style*= 'position: fixed']').length;'
     baseCLS += dynamicElements * 0.01;
 
     // 检查广告位
-    const adElements = dom.querySelectorAll('[class*="ad"], [id*="ad"], [class*="banner"]').length;
+    const adElements = dom.querySelectorAll('[class*= 'ad'], [id*= 'ad'], [class*= 'banner']').length;'
     baseCLS += adElements * 0.03;
 
     return Math.min(baseCLS, 0.25); // 最大0.25

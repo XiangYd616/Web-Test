@@ -1,10 +1,5 @@
-import { AlertCircle, CheckCircle, ExternalLink, Globe, Zap } from 'lucide-react';
-import React, { forwardRef, useCallback, useEffect, useState } from 'react';
-import { cn } from '../../utils/cn';
-import { Input } from './Input';
-
-// URL输入组件的接口
-interface URLInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | 'type'> {
+import { AlertCircle, CheckCircle, ExternalLink, Globe, Zap    } from 'lucide-react';import React, { forwardRef, useCallback, useEffect, useState    } from 'react';import { cn    } from '../../utils/cn';import { Input    } from './Input';// URL输入组件的接口'
+interface URLInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | "type'>   {'
   /** 输入值 */
   value: string;
   /** 值变化回调 */
@@ -28,52 +23,51 @@ interface URLInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>
 }
 
 export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
-  value = '',
+  value = '','
   onChange,
   enableValidation = true,
   showProtocolSuggestion = true,
   autoAddProtocol = true,
   onValidationChange,
-  size = 'md',
+  size = 'md','
   showExternalLink = true,
   showAutoFix = true,
-  placeholder = '输入要进行压力测试的网站URL...',
+  placeholder = '输入要进行压力测试的网站URL...','
   className,
   disabled,
   ...props
 }, ref) => {
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;
-  const descriptionId = `${componentId}-description`;
+  const errorId = `${componentId}-error`;`
+  const descriptionId = `${componentId}-description`;`
   
   const ariaProps = {
     id: componentId,
-    'aria-label': ariaLabel,
-    'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': [
+    "aria-label': ariaLabel,'`
+    'aria-labelledby': ariaLabelledBy,'
+    'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,
-    'aria-invalid': !!error,
-    'aria-disabled': disabled,
-    'aria-busy': loading,
-    'aria-expanded': expanded,
-    'aria-selected': selected,
+    ].filter(Boolean).join(' ') || undefined,'
+    'aria-invalid': !!error,'
+    'aria-disabled': disabled,'
+    'aria-busy': loading,'
+    'aria-expanded': expanded,'
+    'aria-selected': selected,'
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
   const [isValid, setIsValid] = useState<boolean | null>(null);
-  const [suggestion, setSuggestion] = useState<string>('');
-  const [correctedUrl, setCorrectedUrl] = useState<string>('');
-
+  const [suggestion, setSuggestion] = useState<string>('');'
+  const [correctedUrl, setCorrectedUrl] = useState<string>("');'
   // URL验证函数
   const validateURL = useCallback((url: string) => {
     if (!url.trim()) {
       setIsValid(null);
-      setSuggestion('');
-      setCorrectedUrl('');
+      setSuggestion('');'
+      setCorrectedUrl("');'
       onValidationChange?.(false);
       return;
     }
@@ -84,7 +78,7 @@ export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
       let needsProtocol = false;
 
       if (!url.match(/^https?:\/\//)) {
-        testUrl = `https://${url}`;
+        testUrl = `https://${url}`;`
         needsProtocol = true;
       }
 
@@ -92,30 +86,29 @@ export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
       const urlObj = new URL(testUrl);
 
       // 检查是否是有效的域名格式
-      if (urlObj.hostname && urlObj.hostname.includes('.')) {
+      if (urlObj.hostname && urlObj.hostname.includes(".')) {'`
         setIsValid(true);
         setCorrectedUrl(testUrl);
 
         if (needsProtocol && showProtocolSuggestion) {
-          setSuggestion(`建议使用完整URL: ${testUrl}`);
+          setSuggestion(`建议使用完整URL: ${testUrl}`);`
         } else {
-          setSuggestion('');
+          setSuggestion("');'`
         }
 
         onValidationChange?.(true, testUrl);
       } else {
-        throw new Error('Invalid hostname');
+        throw new Error('Invalid hostname');'
       }
     } catch {
       setIsValid(false);
-      setCorrectedUrl('');
-
+      setCorrectedUrl("');'
       if (showProtocolSuggestion && !url.match(/^https?:\/\//)) {
-        const suggestedUrl = `https://${url}`;
-        setSuggestion(`尝试添加协议: ${suggestedUrl}`);
+        const suggestedUrl = `https://${url}`;`
+        setSuggestion(`尝试添加协议: ${suggestedUrl}`);`
         setCorrectedUrl(suggestedUrl);
       } else {
-        setSuggestion('请输入有效的URL格式（如：https://example.com）');
+        setSuggestion("请输入有效的URL格式（如：https://example.com）');'`
       }
 
       onValidationChange?.(false);
@@ -147,7 +140,7 @@ export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
   const openInNewTab = useCallback(() => {
     if (isValid && (correctedUrl || value)) {
       const urlToOpen = correctedUrl || value;
-      window.open(urlToOpen, '_blank', 'noopener,noreferrer');
+      window.open(urlToOpen, '_blank', "noopener,noreferrer');'
     }
   }, [isValid, correctedUrl, value]);
 
@@ -159,11 +152,11 @@ export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
     if (enableValidation && isValid !== null) {
       if (isValid) {
         icons.push(
-          <CheckCircle key="check" className="w-4 h-4 text-green-400" />
+          <CheckCircle key= 'check' className= 'w-4 h-4 text-green-400'    />
         );
       } else {
         icons.push(
-          <AlertCircle key="alert" className="w-4 h-4 text-red-400" />
+          <AlertCircle key= 'alert' className= 'w-4 h-4 text-red-400'    />
         );
       }
     }
@@ -172,13 +165,13 @@ export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
     if (showAutoFix && suggestion && correctedUrl && correctedUrl !== value && !disabled) {
       icons.push(
         <button
-          key="fix"
-          type="button"
+          key= 'fix';
+          type= 'button';
           onClick={applySuggestion}
-          className="p-1 hover:bg-gray-600/50 rounded transition-colors"
-          title="自动修复URL"
+          className= 'p-1 hover:bg-gray-600/50 rounded transition-colors';
+          title= '自动修复URL';
         >
-          <Zap className="w-4 h-4 text-yellow-400" />
+          <Zap className= 'w-4 h-4 text-yellow-400'    />
         </button>
       );
     }
@@ -187,13 +180,13 @@ export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
     if (showExternalLink && isValid && !disabled) {
       icons.push(
         <button
-          key="external"
-          type="button"
+          key= 'external';
+          type= 'button';
           onClick={openInNewTab}
-          className="p-1 hover:bg-gray-600/50 rounded transition-colors"
-          title="在新窗口打开"
+          className= 'p-1 hover:bg-gray-600/50 rounded transition-colors';
+          title= '在新窗口打开';
         >
-          <ExternalLink className="w-4 h-4 text-blue-400" />
+          <ExternalLink className= 'w-4 h-4 text-blue-400'    />
         </button>
       );
     }
@@ -202,7 +195,7 @@ export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
     if (icons.length === 1) return icons[0];
 
     return (
-      <div className="flex items-center space-x-1">
+      <div className= 'flex items-center space-x-1'>
         {icons}
       </div>
     );
@@ -219,29 +212,28 @@ export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
     if (isValid) {
       
         return {
-        success: 'URL格式正确'
+        success: 'URL格式正确';
       };
     } else {
       return {
-        error: 'URL格式无效'
+        error: 'URL格式无效';
       };
     }
   };
 
   return (
-    <div className={cn('w-full space-y-2', className)}>
-      <div className="w-full">
-        <Input
-          ref={ref}
-          type="url"
+    <div className={cn("w-full space-y-2', className)}>
+      <div className= 'w-full'>
+        <Input ref={ref}
+          type= 'url';
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          leftIcon={<Globe className="w-4 h-4 text-gray-400" />}
+          leftIcon={<Globe className= 'w-4 h-4 text-gray-400'    />}'
           rightIcon={getRightIcon()}
           size={size}
           disabled={disabled}
-          className="w-full"
+          className= 'w-full';
           {...getStatusProps()}
           {...props}
         />
@@ -249,16 +241,16 @@ export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
 
       {/* 建议提示 */}
       {suggestion && enableValidation && (
-        <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-          <div className="flex items-center space-x-2 min-w-0 flex-1">
-            <AlertCircle className="w-4 h-4 text-blue-400 flex-shrink-0" />
-            <span className="text-sm text-blue-300 break-words">{suggestion}</span>
+        <div className= 'w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg'>
+          <div className= 'flex items-center space-x-2 min-w-0 flex-1'>
+            <AlertCircle className= 'w-4 h-4 text-blue-400 flex-shrink-0'    />
+            <span className= 'text-sm text-blue-300 break-words'>{suggestion}</span>
           </div>
           {correctedUrl && correctedUrl !== value && (
             <button
-              type="button"
+              type= 'button';
               onClick={applySuggestion}
-              className="px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-sm rounded transition-colors flex-shrink-0 w-full sm:w-auto text-center"
+              className= 'px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-sm rounded transition-colors flex-shrink-0 w-full sm:w-auto text-center';
             >
               应用
             </button>
@@ -270,5 +262,4 @@ export const URLInput = forwardRef<HTMLInputElement, URLInputProps>(({
 });
 
 URLInput.displayName = 'URLInput';
-
 export default URLInput;

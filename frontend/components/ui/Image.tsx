@@ -3,10 +3,7 @@
  * 支持懒加载、WebP格式、响应式图片等功能
  */
 
-import React, { useEffect, useState } from 'react';
-import { useDevicePerformance, useLazyImage, useNetworkStatus } from '../../hooks/usePerformanceOptimization';
-
-interface ImageProps {
+import React, { useEffect, useState    } from 'react';import { useDevicePerformance, useLazyImage, useNetworkStatus    } from '../../hooks/usePerformanceOptimization';interface ImageProps   {'
     src: string;
     alt: string;
     className?: string;
@@ -24,10 +21,10 @@ interface ImageProps {
     onError?: () => void;
 }
 
-const Image: React.FC<ImageProps> = ({
+const Image: React.FC<ImageProps>  = ({
     src,
     alt,
-    className = '',
+    className = '','
     width,
     height,
     sizes,
@@ -35,9 +32,9 @@ const Image: React.FC<ImageProps> = ({
     placeholder,
     blurDataURL,
     quality = 75,
-    format = 'auto',
+    format = 'auto','
     responsive = true,
-    loading = 'lazy',
+    loading = 'lazy','
     onLoad,
     onError
 }) => {
@@ -47,30 +44,29 @@ const Image: React.FC<ImageProps> = ({
     onClick?.(event);
   }, [disabled, loading, onClick]);
   
-  const memoizedHandleChange = useMemo(() => 
-    debounce((value: any) => {
+  const memoizedHandleChange = useMemo(() => debounce((value: any) => {
       onChange?.(value);
     }, 300), [onChange]
   );
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;
-  const descriptionId = `${componentId}-description`;
+  const errorId = `${componentId}-error`;`
+  const descriptionId = `${componentId}-description`;`
   
   const ariaProps = {
     id: componentId,
-    'aria-label': ariaLabel,
-    'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': [
+    "aria-label': ariaLabel,'`
+    'aria-labelledby': ariaLabelledBy,'
+    'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,
-    'aria-invalid': !!error,
-    'aria-disabled': disabled,
-    'aria-busy': loading,
-    'aria-expanded': expanded,
-    'aria-selected': selected,
+    ].filter(Boolean).join(' ') || undefined,'
+    'aria-invalid': !!error,'
+    'aria-disabled': disabled,'
+    'aria-busy': loading,'
+    'aria-expanded': expanded,'
+    'aria-selected': selected,'
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -81,8 +77,8 @@ const Image: React.FC<ImageProps> = ({
     try {
       onClick?.(event);
     } catch (error) {
-      console.error('Click handler error:', error);
-      setError('操作失败，请重试');
+      console.error('Click handler error: ', error);'
+      setError('操作失败，请重试');'
     }
   }, [disabled, loading, onClick]);
   
@@ -92,8 +88,8 @@ const Image: React.FC<ImageProps> = ({
     try {
       onChange?.(newValue);
     } catch (error) {
-      console.error('Change handler error:', error);
-      updateState({ error: '值更新失败' });
+      console.error('Change handler error: ', error);'
+      updateState({ error: '值更新失败' });'
     }
   }, [onChange, updateState]);
   
@@ -109,13 +105,13 @@ const Image: React.FC<ImageProps> = ({
     const { imgRef, loaded, error } = useLazyImage();
     const { isSlowNetwork } = useNetworkStatus();
     const { performanceLevel } = useDevicePerformance();
-    const [currentSrc, setCurrentSrc] = useState<string>('');
+    const [currentSrc, setCurrentSrc] = useState<string>("');'
     const [showPlaceholder, setShowPlaceholder] = useState(true);
 
     // 根据网络状况和设备性能调整图片质量
     const getOptimizedQuality = () => {
         if (isSlowNetwork) return Math.min(quality, 50);
-        if (performanceLevel === 'low') return Math.min(quality, 60);
+        if (performanceLevel === 'low') return Math.min(quality, 60);'
         return quality;
     };
 
@@ -125,22 +121,20 @@ const Image: React.FC<ImageProps> = ({
         const params = new URLSearchParams();
 
         // 添加质量参数
-        params.set('q', getOptimizedQuality().toString());
-
+        params.set("q', getOptimizedQuality().toString());'
         // 添加格式参数
-        if (format !== 'auto') {
-            params.set('f', format);
+        if (format !== 'auto') {'
+            params.set("f', format);'
         } else {
             // 自动选择最佳格式
             if (supportsWebP()) {
-                params.set('f', 'webp');
+                params.set('f', "webp');'
             }
         }
 
         // 添加尺寸参数
-        if (width) params.set('w', width.toString());
-        if (height) params.set('h', height.toString());
-
+        if (width) params.set('w', width.toString());'
+        if (height) params.set("h', height.toString());'
         // 如果有参数，添加到URL
         if (params.toString()) {
             url.search = params.toString();
@@ -151,10 +145,10 @@ const Image: React.FC<ImageProps> = ({
 
     // 检查浏览器是否支持WebP
     const supportsWebP = () => {
-        const canvas = document.createElement('canvas');
+        const canvas = document.createElement('canvas');'
         canvas.width = 1;
         canvas.height = 1;
-        return canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0;
+        return canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0;'
     };
 
     // 生成响应式图片的srcset
@@ -167,19 +161,19 @@ const Image: React.FC<ImageProps> = ({
                 const scaledWidth = Math.round(width * ratio);
                 const optimizedUrl = generateOptimizedUrl(src);
                 const url = new URL(optimizedUrl);
-                url.searchParams.set('w', scaledWidth.toString());
-                return `${url.toString()} ${ratio}x`;
+                url.searchParams.set("w', scaledWidth.toString());'
+                return `${url.toString()} ${ratio}x`;`
             })
-            .join(', ');
+            .join(", ');'`
     };
 
     useEffect(() => {
-        if (priority || loading === 'eager') {
+        if (priority || loading === 'eager') {'
             // 优先加载的图片立即设置src
             setCurrentSrc(generateOptimizedUrl(src));
         } else {
             // 懒加载图片使用data-src
-            setCurrentSrc('');
+            setCurrentSrc("');'
         }
     }, [src, priority, loading]);
 
@@ -197,40 +191,38 @@ const Image: React.FC<ImageProps> = ({
     }, [error, onError]);
 
     // 占位符样式
-    const placeholderStyle: React.CSSProperties = {
-        backgroundColor: 'var(--color-gray-100)',
-        backgroundImage: blurDataURL ? `url(${blurDataURL})` : undefined,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        filter: blurDataURL ? 'blur(10px)' : undefined,
-        transition: 'opacity 0.3s ease-in-out'
+    const placeholderStyle: React.CSSProperties  = {
+        backgroundColor: 'var(--color-gray-100)','
+        backgroundImage: blurDataURL ? `url(${blurDataURL})` : undefined,`
+        backgroundSize: "cover','`
+        backgroundPosition: 'center','
+        filter: blurDataURL ? 'blur(10px)' : undefined,'
+        transition: 'opacity 0.3s ease-in-out';
     };
-
     // 图片样式
-    const imageStyle: React.CSSProperties = {
-        transition: 'opacity 0.3s ease-in-out',
+    const imageStyle: React.CSSProperties  = {
+        transition: 'opacity 0.3s ease-in-out','
         opacity: loaded ? 1 : 0
     };
-
     return (
         <div
-            className={`relative overflow-hidden ${className}`}
+            className={`relative overflow-hidden ${className}`}`
             style={{ width, height }}
         >
             {/* 占位符 */}
             {showPlaceholder && (
                 <div
-                    className="absolute inset-0 flex items-center justify-center"
+                    className= "absolute inset-0 flex items-center justify-center';'`
                     style={placeholderStyle}
                 >
                     {placeholder ? (
                         <img
                             src={placeholder}
-                            alt=""
-                            className="w-full h-full object-cover"
+                            alt="';
+                            className= 'w-full h-full object-cover';
                         />
                     ) : (
-                        <div className="w-8 h-8 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+                        <div className= 'w-8 h-8 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin' />
                     )}
                 </div>
             )}
@@ -238,26 +230,26 @@ const Image: React.FC<ImageProps> = ({
             {/* 主图片 */}
             <img
                 ref={imgRef}
-                src={priority || loading === 'eager' ? currentSrc : undefined}
-                data-src={priority || loading === 'eager' ? undefined : generateOptimizedUrl(src)}
+                src={priority || loading === 'eager' ? currentSrc : undefined}'
+                data-src={priority || loading === 'eager' ? undefined : generateOptimizedUrl(src)}'
                 srcSet={generateSrcSet()}
                 sizes={sizes}
                 alt={alt}
                 width={width}
                 height={height}
-                className={`w-full h-full object-cover lazy-loading ${loaded ? 'lazy-loaded' : ''}`}
+                className={`w-full h-full object-cover lazy-loading ${loaded ? 'lazy-loaded' : "'}`}'`
                 style={imageStyle}
                 loading={loading}
             />
 
             {/* 错误状态 */}
             {error && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-                    <div className="text-center text-gray-500">
-                        <svg className="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <div className= "absolute inset-0 flex items-center justify-center bg-gray-100'>`
+                    <div className= 'text-center text-gray-500'>
+                        <svg className= 'w-12 h-12 mx-auto mb-2' fill= 'none' stroke= 'currentColor' viewBox= '0 0 24 24'>
+                            <path strokeLinecap= 'round' strokeLinejoin= 'round' strokeWidth={2} d= 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' />
                         </svg>
-                        <p className="text-sm">图片加载失败</p>
+                        <p className= 'text-sm'>图片加载失败</p>
                     </div>
                 </div>
             )}

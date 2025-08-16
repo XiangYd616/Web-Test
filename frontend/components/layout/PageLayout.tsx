@@ -1,6 +1,4 @@
-import React from 'react';
-
-interface PageLayoutProps {
+import React from 'react';interface PageLayoutProps   {'
   children: React.ReactNode;
   title?: string;
   description?: string;
@@ -12,7 +10,7 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
   children,
   title,
   description,
-  className = '',
+  className = '','
   compact = true
 }) => {
   
@@ -21,8 +19,8 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
     className: combinedClassName,
     style: computedStyle,
     disabled,
-    'aria-label': ariaLabel,
-    'data-testid': testId
+    'aria-label': ariaLabel,'
+    'data-testid': testId'
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
   
   const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
@@ -30,30 +28,29 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
     onClick?.(event);
   }, [disabled, loading, onClick]);
   
-  const memoizedHandleChange = useMemo(() => 
-    debounce((value: any) => {
+  const memoizedHandleChange = useMemo(() => debounce((value: any) => {
       onChange?.(value);
     }, 300), [onChange]
   );
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;
-  const descriptionId = `${componentId}-description`;
+  const errorId = `${componentId}-error`;`
+  const descriptionId = `${componentId}-description`;`
   
   const ariaProps = {
     id: componentId,
-    'aria-label': ariaLabel,
-    'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': [
+    "aria-label': ariaLabel,'`
+    'aria-labelledby': ariaLabelledBy,'
+    'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,
-    'aria-invalid': !!error,
-    'aria-disabled': disabled,
-    'aria-busy': loading,
-    'aria-expanded': expanded,
-    'aria-selected': selected,
+    ].filter(Boolean).join(' ') || undefined,'
+    'aria-invalid': !!error,'
+    'aria-disabled': disabled,'
+    'aria-busy': loading,'
+    'aria-expanded': expanded,'
+    "aria-selected': selected,'
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -70,21 +67,21 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
     setState(prev => ({ ...prev, ...updates }));
   }, []);
   return (
-    <div className={`
-      ${compact ? 'compact-layout' : ''}
+    <div className={``
+      ${compact ? "compact-layout' : "'}'`
       min-h-screen
       ${className}
-    `}>
+    `}>`
       {/* 页面头部 */}
       {(title || description) && (
-        <div className="mb-4 lg:mb-6">
+        <div className= "mb-4 lg:mb-6'>`
           {title && (
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
+            <h1 className= 'text-2xl lg:text-3xl font-bold text-gray-900 mb-2'>
               {title}
             </h1>
           )}
           {description && (
-            <p className="text-gray-600 text-sm lg:text-base">
+            <p className= 'text-gray-600 text-sm lg:text-base'>
               {description}
             </p>
           )}
@@ -92,14 +89,14 @@ export const PageLayout: React.FC<PageLayoutProps> = ({
       )}
 
       {/* 主要内容 */}
-      <div className="space-y-4 lg:space-y-6">
+      <div className= 'space-y-4 lg:space-y-6'>
         {children}
       </div>
     </div>
   );
 };
 
-interface SectionProps {
+interface SectionProps   {
   children: React.ReactNode;
   title?: string;
   className?: string;
@@ -109,17 +106,17 @@ interface SectionProps {
 export const PageSection: React.FC<SectionProps> = ({
   children,
   title,
-  className = '',
+  className = '','
   compact = true
 }) => {
   return (
-    <section className={`
+    <section className={``
       bg-white rounded-lg shadow-sm border border-gray-200
-      ${compact ? 'p-4 lg:p-6' : 'p-6 lg:p-8'}
+      ${compact ? "p-4 lg:p-6' : "p-6 lg:p-8'}'`
       ${className}
-    `}>
+    `}>`
       {title && (
-        <h2 className="text-lg lg:text-xl font-semibold text-gray-900 mb-3 lg:mb-4">
+        <h2 className= "text-lg lg:text-xl font-semibold text-gray-900 mb-3 lg:mb-4'>`
           {title}
         </h2>
       )}
@@ -128,7 +125,7 @@ export const PageSection: React.FC<SectionProps> = ({
   );
 };
 
-interface GridLayoutProps {
+interface GridLayoutProps   {
   children: React.ReactNode;
   columns?: 1 | 2 | 3 | 4;
   gap?: 'sm' | 'md' | 'lg';
@@ -138,8 +135,8 @@ interface GridLayoutProps {
 export const GridLayout: React.FC<GridLayoutProps> = ({
   children,
   columns = 2,
-  gap = 'md',
-  className = ''
+  gap = 'md','
+  className = '';
 }) => {
   const getGridCols = () => {
     switch (columns) {
@@ -161,18 +158,18 @@ export const GridLayout: React.FC<GridLayoutProps> = ({
   };
 
   return (
-    <div className={`
+    <div className={``
       grid ${getGridCols()} ${getGap()}
       ${className}
-    `}>
+    `}>`
       {children}
     </div>
   );
 };
 
-interface FlexLayoutProps {
+interface FlexLayoutProps   {
   children: React.ReactNode;
-  direction?: 'row' | 'col';
+  direction?: "row' | 'col';'`
   gap?: 'sm' | 'md' | 'lg';
   align?: 'start' | 'center' | 'end' | 'stretch';
   justify?: 'start' | 'center' | 'end' | 'between' | 'around';
@@ -181,14 +178,13 @@ interface FlexLayoutProps {
 
 export const FlexLayout: React.FC<FlexLayoutProps> = ({
   children,
-  direction = 'row',
-  gap = 'md',
-  align = 'start',
-  justify = 'start',
-  className = ''
+  direction = 'row','
+  gap = 'md','
+  align = 'start','
+  justify = 'start','
+  className = '';
 }) => {
   const getDirection = () => direction === 'row' ? 'flex-row' : 'flex-col';
-
   const getGap = () => {
     switch (gap) {
       case 'sm': return 'gap-2 lg:gap-3';
@@ -215,32 +211,32 @@ export const FlexLayout: React.FC<FlexLayoutProps> = ({
       case 'end': return 'justify-end';
       case 'between': return 'justify-between';
       case 'around': return 'justify-around';
-      default: return 'justify-start';
+      default: return "justify-start';
     }
   };
 
   return (
-    <div className={`
+    <div className={``
       flex ${getDirection()} ${getGap()} ${getAlign()} ${getJustify()}
       ${className}
-    `}>
+    `}>`
       {children}
     </div>
   );
 };
 
-interface CompactCardProps {
+interface CompactCardProps   {
   children: React.ReactNode;
   title?: string;
   className?: string;
-  padding?: 'sm' | 'md' | 'lg';
+  padding?: "sm' | 'md' | 'lg';'`
 }
 
 export const CompactCard: React.FC<CompactCardProps> = ({
   children,
   title,
-  className = '',
-  padding = 'md'
+  className = '','
+  padding = 'md';
 }) => {
   const getPadding = () => {
     switch (padding) {
@@ -252,13 +248,13 @@ export const CompactCard: React.FC<CompactCardProps> = ({
   };
 
   return (
-    <div className={`
+    <div className={``
       bg-white rounded-lg shadow-sm border border-gray-200
       ${getPadding()}
       ${className}
-    `}>
+    `}>`
       {title && (
-        <h3 className="text-base lg:text-lg font-medium text-gray-900 mb-2 lg:mb-3">
+        <h3 className= "text-base lg:text-lg font-medium text-gray-900 mb-2 lg:mb-3'>`
           {title}
         </h3>
       )}
@@ -267,7 +263,7 @@ export const CompactCard: React.FC<CompactCardProps> = ({
   );
 };
 
-interface ResponsiveButtonProps {
+interface ResponsiveButtonProps   {
   children: React.ReactNode;
   onClick?: () => void;
   variant?: 'primary' | 'secondary' | 'outline' | 'danger';
@@ -279,10 +275,10 @@ interface ResponsiveButtonProps {
 export const ResponsiveButton: React.FC<ResponsiveButtonProps> = ({
   children,
   onClick,
-  variant = 'primary',
-  size = 'md',
+  variant = 'primary','
+  size = 'md','
   disabled = false,
-  className = ''
+  className = '';
 }) => {
   const getVariant = () => {
     switch (variant) {
@@ -299,7 +295,7 @@ export const ResponsiveButton: React.FC<ResponsiveButtonProps> = ({
       case 'sm': return 'px-3 py-1.5 text-xs lg:text-sm';
       case 'md': return 'px-4 py-2 text-sm lg:text-base';
       case 'lg': return 'px-6 py-3 text-base lg:text-lg';
-      default: return 'px-4 py-2 text-sm lg:text-base';
+      default: return "px-4 py-2 text-sm lg:text-base';
     }
   };
 
@@ -307,16 +303,16 @@ export const ResponsiveButton: React.FC<ResponsiveButtonProps> = ({
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`
+      className={``
         inline-flex items-center justify-center
         border border-transparent font-medium rounded-md
         shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2
         transition-colors duration-200
         ${getVariant()}
         ${getSize()}
-        ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+        ${disabled ? "opacity-50 cursor-not-allowed' : 'cursor-pointer'}'`
         ${className}
-      `}
+      `}`
     >
       {children}
     </button>

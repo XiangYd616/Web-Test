@@ -3,15 +3,10 @@
  * 提供更好的交互反馈、错误处理和用户引导
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { AlertTriangle, CheckCircle, Info, X, ChevronRight, HelpCircle, Lightbulb } from 'lucide-react';
-import { toast } from 'react-hot-toast';
-
-// 通知类型
+import React, { useState, useEffect, useCallback    } from 'react';import { AlertTriangle, CheckCircle, Info, X, ChevronRight, HelpCircle, Lightbulb    } from 'lucide-react';import { toast    } from 'react-hot-toast';// 通知类型'
 type NotificationType = 'success' | 'error' | 'warning' | 'info';
-
 // 通知属性
-interface NotificationProps {
+interface NotificationProps   {
   type: NotificationType;
   title: string;
   message: string;
@@ -25,7 +20,7 @@ interface NotificationProps {
 }
 
 // 工具提示属性
-interface TooltipProps {
+interface TooltipProps   {
   content: string;
   children: React.ReactNode;
   position?: 'top' | 'bottom' | 'left' | 'right';
@@ -33,7 +28,7 @@ interface TooltipProps {
 }
 
 // 引导步骤
-interface GuideStep {
+interface GuideStep   {
   target: string;
   title: string;
   content: string;
@@ -42,7 +37,7 @@ interface GuideStep {
 }
 
 // 引导属性
-interface UserGuideProps {
+interface UserGuideProps   {
   steps: GuideStep[];
   isOpen: boolean;
   onClose: () => void;
@@ -62,23 +57,23 @@ export const Notification: React.FC<NotificationProps> = ({
 }) => {
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;
-  const descriptionId = `${componentId}-description`;
+  const errorId = `${componentId}-error`;`
+  const descriptionId = `${componentId}-description`;`
   
   const ariaProps = {
     id: componentId,
-    'aria-label': ariaLabel,
-    'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': [
+    "aria-label': ariaLabel,'`
+    'aria-labelledby': ariaLabelledBy,'
+    'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,
-    'aria-invalid': !!error,
-    'aria-disabled': disabled,
-    'aria-busy': loading,
-    'aria-expanded': expanded,
-    'aria-selected': selected,
+    ].filter(Boolean).join(' ') || undefined,'
+    'aria-invalid': !!error,'
+    'aria-disabled': disabled,'
+    'aria-busy': loading,'
+    'aria-expanded': expanded,'
+    'aria-selected': selected,'
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -97,56 +92,55 @@ export const Notification: React.FC<NotificationProps> = ({
 
   const getIcon = () => {
     switch (type) {
-      case 'success':
-        return <CheckCircle className="w-5 h-5 text-green-500" />;
-      case 'error':
-        return <AlertTriangle className="w-5 h-5 text-red-500" />;
-      case 'warning':
-        return <AlertTriangle className="w-5 h-5 text-yellow-500" />;
-      case 'info':
-        return <Info className="w-5 h-5 text-blue-500" />;
+      case 'success': ''
+        return <CheckCircle className= 'w-5 h-5 text-green-500'    />;'
+      case 'error': ''
+        return <AlertTriangle className= 'w-5 h-5 text-red-500'    />;'
+      case 'warning': ''
+        return <AlertTriangle className= 'w-5 h-5 text-yellow-500'    />;'
+      case 'info': ''
+        return <Info className= 'w-5 h-5 text-blue-500'    />;'
     }
   };
 
   const getBorderColor = () => {
     switch (type) {
-      case 'success':
+      case 'success': ''
         return 'border-l-green-500';
-      case 'error':
+      case 'error': ''
         return 'border-l-red-500';
-      case 'warning':
+      case 'warning': ''
         return 'border-l-yellow-500';
-      case 'info':
-        return 'border-l-blue-500';
+      case 'info': ''
+        return "border-l-blue-500';
     }
   };
 
   if (!isVisible) return null;
 
   return (
-    <div className={`bg-white dark:bg-gray-800 border-l-4 ${getBorderColor()} rounded-lg shadow-lg p-4 mb-4 animate-slide-in`}>
-      <div className="flex items-start">
-        <div className="flex-shrink-0">
+    <div className={`bg-white dark:bg-gray-800 border-l-4 ${getBorderColor()} rounded-lg shadow-lg p-4 mb-4 animate-slide-in`}>`
+      <div className= "flex items-start'>`
+        <div className= 'flex-shrink-0'>
           {getIcon()}
         </div>
-        <div className="ml-3 flex-1">
-          <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+        <div className= 'ml-3 flex-1'>
+          <h3 className= 'text-sm font-medium text-gray-900 dark:text-white'>
             {title}
           </h3>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
+          <p className= 'mt-1 text-sm text-gray-600 dark:text-gray-300'>
             {message}
           </p>
-          {actions.length > 0 && (
-            <div className="mt-3 flex space-x-2">
+          {actions.length > 0 && (<div className= 'mt-3 flex space-x-2'>
               {actions.map((action, index) => (
                 <button
                   key={index}
                   onClick={action.onClick}
-                  className={`text-sm px-3 py-1 rounded ${
-                    action.variant === 'primary'
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500'
-                  }`}
+                  className={`text-sm px-3 py-1 rounded ${`}
+                    action.variant === "primary';'`
+                      ? 'bg-blue-600 text-white hover:bg-blue-700';
+                      : 'bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500';
+                  }`}`
                 >
                   {action.label}
                 </button>
@@ -159,9 +153,9 @@ export const Notification: React.FC<NotificationProps> = ({
             setIsVisible(false);
             onClose?.();
           }}
-          className="flex-shrink-0 ml-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+          className= "flex-shrink-0 ml-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200';'`
         >
-          <X className="w-4 h-4" />
+          <X className= 'w-4 h-4'    />
         </button>
       </div>
     </div>
@@ -174,7 +168,7 @@ export const Notification: React.FC<NotificationProps> = ({
 export const Tooltip: React.FC<TooltipProps> = ({
   content,
   children,
-  position = 'top',
+  position = 'top','
   delay = 500
 }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -197,34 +191,34 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
   const getPositionClasses = () => {
     switch (position) {
-      case 'top':
+      case 'top': ''
         return 'bottom-full left-1/2 transform -translate-x-1/2 mb-2';
-      case 'bottom':
+      case 'bottom': ''
         return 'top-full left-1/2 transform -translate-x-1/2 mt-2';
-      case 'left':
+      case 'left': ''
         return 'right-full top-1/2 transform -translate-y-1/2 mr-2';
-      case 'right':
+      case 'right': ''
         return 'left-full top-1/2 transform -translate-y-1/2 ml-2';
     }
   };
 
   return (
     <div
-      className="relative inline-block"
+      className= 'relative inline-block';
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       {children}
       {isVisible && (
-        <div className={`absolute z-50 ${getPositionClasses()}`}>
-          <div className="bg-gray-900 text-white text-sm rounded-lg px-3 py-2 max-w-xs shadow-lg">
+        <div className={`absolute z-50 ${getPositionClasses()}`}>`
+          <div className= "bg-gray-900 text-white text-sm rounded-lg px-3 py-2 max-w-xs shadow-lg'>`
             {content}
-            <div className={`absolute w-2 h-2 bg-gray-900 transform rotate-45 ${
-              position === 'top' ? 'top-full left-1/2 -translate-x-1/2 -mt-1' :
-              position === 'bottom' ? 'bottom-full left-1/2 -translate-x-1/2 -mb-1' :
-              position === 'left' ? 'left-full top-1/2 -translate-y-1/2 -ml-1' :
-              'right-full top-1/2 -translate-y-1/2 -mr-1'
-            }`} />
+            <div className={`absolute w-2 h-2 bg-gray-900 transform rotate-45 ${`}
+              position === "top' ? 'top-full left-1/2 -translate-x-1/2 -mt-1' : ''`
+              position === 'bottom' ? 'bottom-full left-1/2 -translate-x-1/2 -mb-1' : ''
+              position === 'left' ? 'left-full top-1/2 -translate-y-1/2 -ml-1' : ''
+              'right-full top-1/2 -translate-y-1/2 -mr-1';
+            }`} />`
           </div>
         </div>
       )}
@@ -250,7 +244,7 @@ export const UserGuide: React.FC<UserGuideProps> = ({
       setTargetElement(element);
       
       if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        element.scrollIntoView({ behavior: "smooth', block: 'center' });'`
         element.style.position = 'relative';
         element.style.zIndex = '1001';
       }
@@ -286,59 +280,58 @@ export const UserGuide: React.FC<UserGuideProps> = ({
 
   const step = steps[currentStep];
 
-  return (
-    <>
+  return (<>
       {/* 遮罩层 */}
-      <div className="fixed inset-0 bg-black bg-opacity-50 z-1000" onClick={handleClose} />
+      <div className= 'fixed inset-0 bg-black bg-opacity-50 z-1000' onClick={handleClose} />
       
       {/* 引导卡片 */}
-      <div className="fixed z-1002 bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-sm">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center">
-            <Lightbulb className="w-5 h-5 text-yellow-500 mr-2" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <div className= 'fixed z-1002 bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-sm'>
+        <div className= 'flex items-start justify-between mb-4'>
+          <div className= 'flex items-center'>
+            <Lightbulb className= 'w-5 h-5 text-yellow-500 mr-2'    />
+            <h3 className= 'text-lg font-semibold text-gray-900 dark:text-white'>
               {step.title}
             </h3>
           </div>
           <button
             onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+            className= 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200';
           >
-            <X className="w-4 h-4" />
+            <X className= 'w-4 h-4'    />
           </button>
         </div>
         
-        <p className="text-gray-600 dark:text-gray-300 mb-6">
+        <p className= 'text-gray-600 dark:text-gray-300 mb-6'>
           {step.content}
         </p>
         
-        <div className="flex items-center justify-between">
-          <div className="flex space-x-1">
+        <div className= 'flex items-center justify-between'>
+          <div className= 'flex space-x-1'>
             {steps.map((_, index) => (
               <div
                 key={index}
-                className={`w-2 h-2 rounded-full ${
-                  index === currentStep ? 'bg-blue-500' : 'bg-gray-300'
-                }`}
+                className={`w-2 h-2 rounded-full ${`}
+                  index === currentStep ? "bg-blue-500' : 'bg-gray-300';'`
+                }`}`
               />
             ))}
           </div>
           
-          <div className="flex space-x-2">
+          <div className= "flex space-x-2'>`
             {currentStep > 0 && (
               <button
                 onClick={handlePrevious}
-                className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                className= 'px-3 py-1 text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200';
               >
                 上一步
               </button>
             )}
             <button
               onClick={handleNext}
-              className="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 flex items-center"
+              className= 'px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 flex items-center';
             >
-              {currentStep === steps.length - 1 ? '完成' : '下一步'}
-              {currentStep < steps.length - 1 && <ChevronRight className="w-4 h-4 ml-1" />}
+              {currentStep === steps.length - 1 ? '完成' : "下一步'}'
+              {currentStep < steps.length - 1 && <ChevronRight className= 'w-4 h-4 ml-1'    />}'
             </button>
           </div>
         </div>
@@ -359,20 +352,20 @@ export const EmptyState: React.FC<{
     onClick: () => void;
   };
 }> = ({ icon, title, description, action }) => (
-  <div className="text-center py-12">
-    <div className="mx-auto w-12 h-12 text-gray-400 mb-4">
-      {icon || <HelpCircle className="w-12 h-12" />}
+  <div className= 'text-center py-12'>
+    <div className= 'mx-auto w-12 h-12 text-gray-400 mb-4'>
+      {icon || <HelpCircle className= 'w-12 h-12'    />}'
     </div>
-    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+    <h3 className= 'text-lg font-medium text-gray-900 dark:text-white mb-2'>
       {title}
     </h3>
-    <p className="text-gray-600 dark:text-gray-300 mb-6 max-w-sm mx-auto">
+    <p className= 'text-gray-600 dark:text-gray-300 mb-6 max-w-sm mx-auto'>
       {description}
     </p>
     {action && (
       <button
         onClick={action.onClick}
-        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        className= 'px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700';
       >
         {action.label}
       </button>
@@ -394,36 +387,35 @@ export const useSmartNotification = () => {
     }
   ) => {
     const notification = (
-      <Notification
-        type={type}
+      <Notification type={type}
         title={title}
         message={message}
         duration={options?.duration}
         actions={options?.actions}
-      />
+         />
     );
 
     // 使用react-hot-toast显示自定义通知
     toast.custom(notification, {
       duration: options?.duration || 5000,
-      position: 'top-right'
+      position: 'top-right';
     });
   }, []);
 
   const showSuccess = useCallback((title: string, message: string, options?: any) => {
-    showNotification('success', title, message, options);
+    showNotification('success', title, message, options);'
   }, [showNotification]);
 
   const showError = useCallback((title: string, message: string, options?: any) => {
-    showNotification('error', title, message, options);
+    showNotification('error', title, message, options);'
   }, [showNotification]);
 
   const showWarning = useCallback((title: string, message: string, options?: any) => {
-    showNotification('warning', title, message, options);
+    showNotification('warning', title, message, options);'
   }, [showNotification]);
 
   const showInfo = useCallback((title: string, message: string, options?: any) => {
-    showNotification('info', title, message, options);
+    showNotification('info', title, message, options);'
   }, [showNotification]);
 
   return {

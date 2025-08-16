@@ -1,8 +1,4 @@
-import { useEffect, useState } from 'react';
-import { loadCSS, loadPageCSS, loadComponentCSS, preloadPageCSS } from '../utils/cssLoader';
-
-export const useCSS = (
-  cssPath: string,
+import { useEffect, useState    } from 'react';import { loadCSS, loadPageCSS, loadComponentCSS, preloadPageCSS    } from '../utils/cssLoader';export const useCSS = (cssPath: string,'
   options: {
     immediate?: boolean;
     id?: string;
@@ -51,8 +47,7 @@ export const useCSS = (
   return { loading, loaded, error, load };
 };
 
-export const usePageCSS = (
-  pageName: string,
+export const usePageCSS = (pageName: string,
   options: {
     immediate?: boolean;
     preload?: boolean;
@@ -105,8 +100,7 @@ export const usePageCSS = (
   return { loading, loaded, error, load };
 };
 
-export const useComponentCSS = (
-  componentName: string,
+export const useComponentCSS = (componentName: string,
   options: {
     immediate?: boolean;
   } = {}

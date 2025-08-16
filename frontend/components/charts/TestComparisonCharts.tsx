@@ -1,10 +1,5 @@
 
-import React, { useMemo, useState } from 'react';
-import { BarChart3, Download, GitCompare, Target, TrendingUp } from 'lucide-react';
-
-import { Bar, BarChart, CartesianGrid, ComposedChart, Legend, Line, LineChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-
-interface TestResult {
+import React, { useMemo, useState    } from 'react';import { BarChart3, Download, GitCompare, Target, TrendingUp    } from 'lucide-react';import { Bar, BarChart, CartesianGrid, ComposedChart, Legend, Line, LineChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis    } from 'recharts';interface TestResult   {'
   id: string;
   name: string;
   date: string;
@@ -38,9 +33,9 @@ interface TestResult {
 }
 
 // 基线数据接口
-interface BaselineData {
+interface BaselineData   {
   name: string;
-  metrics: TestResult['metrics'];
+  metrics: TestResult['metrics'];'
   thresholds: {
     responseTime: { warning: number; critical: number };
     throughput: { warning: number; critical: number };
@@ -48,7 +43,7 @@ interface BaselineData {
   };
 }
 
-interface TestComparisonChartsProps {
+interface TestComparisonChartsProps   {
   testResults: TestResult[];
   baseline?: BaselineData;
   currentTest?: TestResult;
@@ -65,31 +60,30 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
 }) => {
   
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState('');
-
+  const [pageTitle, setPageTitle] = useState("');'
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
-      document.title = `${pageTitle} - Test Web`;
+      document.title = `${pageTitle} - Test Web`;`
     }
   }, [pageTitle]);
 
   // 页面可见性检测
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === "visible') {'`
         // 页面变为可见时刷新数据
         fetchData?.();
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);'
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);'
     };
   }, [fetchData]);
-  const [comparisonType, setComparisonType] = useState<'metrics' | 'trends' | 'radar' | 'timeseries'>('metrics');
-  const [selectedMetric, setSelectedMetric] = useState<string>('averageResponseTime');
+  const [comparisonType, setComparisonType] = useState<'metrics' | 'trends' | 'radar' | 'timeseries'>('metrics');'
+  const [selectedMetric, setSelectedMetric] = useState<string>('averageResponseTime');'
   const [showBaseline, setShowBaseline] = useState(!!baseline);
 
   // 处理对比数据
@@ -97,7 +91,7 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
     const allTests = currentTest ? [...testResults, currentTest] : testResults;
 
     return allTests.map((test, index) => ({
-      name: test.name || `测试 ${index + 1}`,
+      name: test.name || `测试 ${index + 1}`,`
       date: new Date(test.date).toLocaleDateString(),
       ...test.metrics,
       isBaseline: false,
@@ -133,31 +127,31 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
 
     return [
       {
-        metric: '响应时间',
+        metric: "响应时间','`
         current: normalizeValue(currentTest.metrics.averageResponseTime, baseline.metrics.averageResponseTime, true),
         baseline: 100,
         threshold: normalizeValue(baseline.thresholds.responseTime.warning, baseline.metrics.averageResponseTime, true)
       },
       {
-        metric: '吞吐量',
+        metric: '吞吐量','
         current: normalizeValue(currentTest.metrics.throughput, baseline.metrics.throughput),
         baseline: 100,
         threshold: normalizeValue(baseline.thresholds.throughput.warning, baseline.metrics.throughput)
       },
       {
-        metric: '错误率',
+        metric: '错误率','
         current: normalizeValue(currentTest.metrics.errorRate, Math.max(baseline.metrics.errorRate, 1), true),
         baseline: 100,
         threshold: normalizeValue(baseline.thresholds.errorRate.warning, Math.max(baseline.metrics.errorRate, 1), true)
       },
       {
-        metric: 'P95响应时间',
+        metric: 'P95响应时间','
         current: normalizeValue(currentTest.metrics.p95ResponseTime, baseline.metrics.p95ResponseTime, true),
         baseline: 100,
         threshold: 100
       },
       {
-        metric: '成功率',
+        metric: '成功率','
         current: normalizeValue(
           (currentTest.metrics.successfulRequests / currentTest.metrics.totalRequests) * 100,
           (baseline.metrics.successfulRequests / baseline.metrics.totalRequests) * 100
@@ -175,14 +169,13 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
     const maxLength = Math.max(...testResults.map(test => test.timeSeriesData?.length || 0));
 
     return Array.from({ length: maxLength }, (_, index) => {
-      const dataPoint: any = { time: index };
-
+      const dataPoint: any  = { time: index };
       testResults.forEach((test, testIndex) => {
         const point = test.timeSeriesData?.[index];
         if (point) {
-          dataPoint[`test${testIndex}_responseTime`] = point.responseTime;
-          dataPoint[`test${testIndex}_throughput`] = point.throughput;
-          dataPoint[`test${testIndex}_errorRate`] = point.errorRate;
+          dataPoint[`test${testIndex}_responseTime`] = point.responseTime;`
+          dataPoint[`test${testIndex}_throughput`] = point.throughput;`
+          dataPoint[`test${testIndex}_errorRate`] = point.errorRate;`
         }
       });
 
@@ -193,33 +186,30 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
   // 渲染指标对比图表
   const renderMetricsComparison = () => (
     <BarChart data={comparisonData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
-      <XAxis dataKey="name" stroke="var(--color-gray-400)" fontSize={12} />
-      <YAxis stroke="var(--color-gray-400)" fontSize={12} />
-      <Tooltip
-        contentStyle={{
-          backgroundColor: 'var(--color-gray-800)',
-          border: '1px solid var(--color-gray-700)',
-          borderRadius: '8px',
-          color: 'var(--color-gray-50)'
+      <CartesianGrid strokeDasharray= "3 3' stroke= 'var(--color-gray-700)'    />`
+      <XAxis dataKey= 'name' stroke= 'var(--color-gray-400)' fontSize={12}    />
+      <YAxis stroke= 'var(--color-gray-400)' fontSize={12}    />
+      <Tooltip contentStyle={{
+          backgroundColor: 'var(--color-gray-800)','
+          border: '1px solid var(--color-gray-700)','
+          borderRadius: '8px','
+          color: 'var(--color-gray-50)';
         }}
-      />
-      <Legend />
+         />
+      <Legend  />
 
-      <Bar
-        dataKey={selectedMetric}
-        fill="var(--color-primary)"
+      <Bar dataKey={selectedMetric}
+        fill= 'var(--color-primary)';
         name={getMetricLabel(selectedMetric)}
-      />
+         />
 
-      {showBaseline && baseline && (
-        <Line
-          type="monotone"
+      {showBaseline && baseline && (<Line
+          type= 'monotone';
           dataKey={() => baseline.metrics[selectedMetric as keyof typeof baseline.metrics]}
-          stroke="var(--color-success)"
+          stroke= 'var(--color-success)';
           strokeWidth={2}
-          strokeDasharray="5 5"
-          name="基线"
+          strokeDasharray= '5 5';
+          name= '基线';
         />
       )}
     </BarChart>
@@ -228,212 +218,200 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
   // 渲染趋势图表
   const renderTrendsChart = () => (
     <ComposedChart data={trendData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
-      <XAxis dataKey="testNumber" stroke="var(--color-gray-400)" fontSize={12} />
-      <YAxis yAxisId="left" stroke="var(--color-gray-400)" fontSize={12} />
-      <YAxis yAxisId="right" orientation="right" stroke="var(--color-gray-400)" fontSize={12} />
-      <Tooltip
-        contentStyle={{
-          backgroundColor: 'var(--color-gray-800)',
-          border: '1px solid var(--color-gray-700)',
-          borderRadius: '8px',
-          color: 'var(--color-gray-50)'
+      <CartesianGrid strokeDasharray= '3 3' stroke= 'var(--color-gray-700)'    />
+      <XAxis dataKey= 'testNumber' stroke= 'var(--color-gray-400)' fontSize={12}    />
+      <YAxis yAxisId= 'left' stroke= 'var(--color-gray-400)' fontSize={12}    />
+      <YAxis yAxisId= 'right' orientation= 'right' stroke= 'var(--color-gray-400)' fontSize={12}    />
+      <Tooltip contentStyle={{
+          backgroundColor: 'var(--color-gray-800)','
+          border: '1px solid var(--color-gray-700)','
+          borderRadius: '8px','
+          color: 'var(--color-gray-50)';
         }}
-      />
-      <Legend />
+         />
+      <Legend  />
 
-      <Line
-        yAxisId="left"
-        type="monotone"
-        dataKey="averageResponseTime"
-        stroke="var(--color-danger)"
+      <Line yAxisId= 'left';
+        type= 'monotone';
+        dataKey= 'averageResponseTime';
+        stroke= 'var(--color-danger)';
         strokeWidth={2}
-        name="平均响应时间"
-      />
+        name= '平均响应时间';
+         />
 
-      <Line
-        yAxisId="right"
-        type="monotone"
-        dataKey="throughput"
-        stroke="var(--color-success)"
+      <Line yAxisId= 'right';
+        type= 'monotone';
+        dataKey= 'throughput';
+        stroke= 'var(--color-success)';
         strokeWidth={2}
-        name="吞吐量"
-      />
+        name= '吞吐量';
+         />
 
-      <Bar
-        yAxisId="right"
-        dataKey="errorRate"
-        fill="var(--color-warning)"
+      <Bar yAxisId= 'right';
+        dataKey= 'errorRate';
+        fill= 'var(--color-warning)';
         opacity={0.7}
-        name="错误率 (%)"
-      />
+        name= '错误率 (%)';
+         />
     </ComposedChart>
   );
 
   // 渲染雷达图
   const renderRadarChart = () => (
     <RadarChart data={radarData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-      <PolarGrid stroke="var(--color-gray-700)" />
-      <PolarAngleAxis dataKey="metric" tick={{ fill: 'var(--color-gray-400)', fontSize: 12 }} />
-      <PolarRadiusAxis
-        angle={90}
+      <PolarGrid stroke= 'var(--color-gray-700)'    />
+      <PolarAngleAxis dataKey= 'metric' tick={{ fill: 'var(--color-gray-400)', fontSize: 12 }}    />
+      <PolarRadiusAxis angle={90}
         domain={[0, 200]}
-        tick={{ fill: 'var(--color-gray-400)', fontSize: 10 }}
-      />
-      <Radar
-        name="当前测试"
-        dataKey="current"
-        stroke="var(--color-primary)"
-        fill="var(--color-primary)"
+        tick={{ fill: 'var(--color-gray-400)', fontSize: 10 }}'
+         />
+      <Radar name= '当前测试';
+        dataKey= 'current';
+        stroke= 'var(--color-primary)';
+        fill= 'var(--color-primary)';
         fillOpacity={0.3}
         strokeWidth={2}
-      />
-      <Radar
-        name="基线"
-        dataKey="baseline"
-        stroke="var(--color-success)"
-        fill="var(--color-success)"
+         />
+      <Radar name= '基线';
+        dataKey= 'baseline';
+        stroke= 'var(--color-success)';
+        fill= 'var(--color-success)';
         fillOpacity={0.1}
         strokeWidth={2}
-        strokeDasharray="5 5"
-      />
-      <Legend />
-      <Tooltip />
+        strokeDasharray= '5 5';
+         />
+      <Legend  />
+      <Tooltip  />
     </RadarChart>
   );
 
   // 渲染时间序列对比
   const renderTimeSeriesComparison = () => (
     <LineChart data={timeSeriesComparisonData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
-      <XAxis dataKey="time" stroke="var(--color-gray-400)" fontSize={12} />
-      <YAxis stroke="var(--color-gray-400)" fontSize={12} />
-      <Tooltip
-        contentStyle={{
-          backgroundColor: 'var(--color-gray-800)',
-          border: '1px solid var(--color-gray-700)',
-          borderRadius: '8px',
-          color: 'var(--color-gray-50)'
+      <CartesianGrid strokeDasharray= '3 3' stroke= 'var(--color-gray-700)'    />
+      <XAxis dataKey= 'time' stroke= 'var(--color-gray-400)' fontSize={12}    />
+      <YAxis stroke= 'var(--color-gray-400)' fontSize={12}    />
+      <Tooltip contentStyle={{
+          backgroundColor: 'var(--color-gray-800)','
+          border: '1px solid var(--color-gray-700)','
+          borderRadius: '8px','
+          color: 'var(--color-gray-50)';
         }}
-      />
-      <Legend />
+         />
+      <Legend  />
 
       {testResults.map((test, index) => (
-        <Line
-          key={test.id}
-          type="monotone"
-          dataKey={`test${index}_${selectedMetric.replace('average', '').toLowerCase()}`}
+        <Line key={test.id}
+          type= 'monotone';
+          dataKey={`test${index}_${selectedMetric.replace('average', "').toLowerCase()}`}'`
           stroke={getTestColor(index)}
           strokeWidth={2}
-          name={test.name || `测试 ${index + 1}`}
-        />
+          name={test.name || `测试 ${index + 1}`}`
+           />
       ))}
     </LineChart>
   );
 
   // 获取指标标签
   const getMetricLabel = (metric: string) => {
-    const labels: Record<string, string> = {
-      averageResponseTime: '平均响应时间 (ms)',
-      throughput: '吞吐量 (req/s)',
-      errorRate: '错误率 (%)',
-      p95ResponseTime: 'P95响应时间 (ms)',
-      totalRequests: '总请求数'
+    const labels: Record<string, string>  = {
+      averageResponseTime: "平均响应时间 (ms)','`
+      throughput: '吞吐量 (req/s)','
+      errorRate: '错误率 (%)','
+      p95ResponseTime: 'P95响应时间 (ms)','
+      totalRequests: '总请求数';
     };
     return labels[metric] || metric;
   };
 
   // 获取测试颜色
   const getTestColor = (index: number) => {
-    const colors = ['var(--color-primary)', 'var(--color-danger)', 'var(--color-success)', 'var(--color-warning)', '#8B5CF6', '#06B6D4'];
+    const colors = ['var(--color-primary)', 'var(--color-danger)', 'var(--color-success)', 'var(--color-warning)', '#8B5CF6', "#06B6D4'];'
     return colors[index % colors.length];
   };
 
-  return (
-    <div className="space-y-4">
+  return (<div className= 'space-y-4'>
       {/* 控制面板 */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-gray-800/50 rounded-lg">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-300">对比类型:</span>
-            <div className="flex gap-1">
+      <div className= 'flex flex-wrap items-center justify-between gap-4 p-4 bg-gray-800/50 rounded-lg'>
+        <div className= 'flex items-center gap-4'>
+          <div className= 'flex items-center gap-2'>
+            <span className= 'text-sm font-medium text-gray-300'>对比类型:</span>
+            <div className= 'flex gap-1'>
               {[
-                { key: 'metrics', label: '指标对比', icon: BarChart3 },
-                { key: 'trends', label: '趋势分析', icon: TrendingUp },
-                { key: 'radar', label: '雷达图', icon: Target },
-                { key: 'timeseries', label: '时序对比', icon: GitCompare }
+                { key: 'metrics', label: '指标对比', icon: BarChart3 },'
+                { key: 'trends', label: '趋势分析', icon: TrendingUp },'
+                { key: 'radar', label: '雷达图', icon: Target },'
+                { key: 'timeseries', label: '时序对比', icon: GitCompare }'
               ].map(({ key, label, icon: Icon }) => (
                 <button
                   key={key}
-                  type="button"
+                  type= 'button';
                   onClick={() => setComparisonType(key as any)}
-                  className={`px-3 py-1 rounded text-sm flex items-center gap-1 transition-colors ${comparisonType === key
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                    }`}
+                  className={`px-3 py-1 rounded text-sm flex items-center gap-1 transition-colors ${comparisonType === key`}
+                    ? "bg-blue-600 text-white';'`
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600';
+                    }`}`
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className= "w-4 h-4'    />`
                   {label}
                 </button>
               ))}
             </div>
           </div>
 
-          {(comparisonType === 'metrics' || comparisonType === 'timeseries') && (
-            <div className="flex items-center gap-2">
-              <label htmlFor="metric-select" className="text-sm text-gray-300">指标:</label>
+          {(comparisonType === 'metrics' || comparisonType === 'timeseries') && (<div className= 'flex items-center gap-2'>
+              <label htmlFor= 'metric-select' className= 'text-sm text-gray-300'>指标:</label>
               <select
-                id="metric-select"
+                id= 'metric-select';
                 value={selectedMetric}
                 onChange={(e) => setSelectedMetric(e.target.value)}
-                className="px-3 py-1 bg-gray-700 text-gray-300 rounded text-sm"
-                aria-label="选择对比指标"
+                className= 'px-3 py-1 bg-gray-700 text-gray-300 rounded text-sm';
+                aria-label= '选择对比指标';
               >
-                <option value="averageResponseTime">平均响应时间</option>
-                <option value="throughput">吞吐量</option>
-                <option value="errorRate">错误率</option>
-                <option value="p95ResponseTime">P95响应时间</option>
-                <option value="totalRequests">总请求数</option>
+                <option value= 'averageResponseTime'>平均响应时间</option>
+                <option value= 'throughput'>吞吐量</option>
+                <option value= 'errorRate'>错误率</option>
+                <option value= 'p95ResponseTime'>P95响应时间</option>
+                <option value= 'totalRequests'>总请求数</option>
               </select>
             </div>
           )}
         </div>
 
-        <div className="flex items-center gap-2">
-          {baseline && (
-            <label className="flex items-center gap-2 text-sm text-gray-300">
+        <div className= 'flex items-center gap-2'>
+          {baseline && (<label className= 'flex items-center gap-2 text-sm text-gray-300'>
               <input
-                type="checkbox"
+                type= 'checkbox';
                 checked={showBaseline}
                 onChange={(e) => setShowBaseline(e.target.checked)}
-                className="rounded"
+                className= 'rounded';
               />
               显示基线
             </label>
           )}
 
           <button
-            type="button"
-            className="px-3 py-1 bg-gray-700 text-gray-300 rounded text-sm hover:bg-gray-600 flex items-center gap-1"
+            type= 'button';
+            className= 'px-3 py-1 bg-gray-700 text-gray-300 rounded text-sm hover:bg-gray-600 flex items-center gap-1';
           >
-            <Download className="w-4 h-4" />
+            <Download className= 'w-4 h-4'    />
             导出
           </button>
         </div>
       </div>
 
       {/* 图表区域 */}
-      <div className="bg-gray-800/50 rounded-lg p-4" style={{ height: `${height}px` }}>
-        <ResponsiveContainer width="100%" height="100%">
+      <div className= 'bg-gray-800/50 rounded-lg p-4' style={{ height: `${height}px` }}>`
+        <ResponsiveContainer width= "100%' height= '100%'>`
           {(() => {
             switch (comparisonType) {
-              case 'metrics':
+              case 'metrics': ''
                 return renderMetricsComparison();
-              case 'trends':
+              case 'trends': ''
                 return renderTrendsChart();
-              case 'radar':
+              case 'radar': ''
                 return renderRadarChart();
-              case 'timeseries':
+              case 'timeseries': ''
                 return renderTimeSeriesComparison();
               default:
                 return renderMetricsComparison();
@@ -443,40 +421,36 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
       </div>
 
       {/* 对比统计 */}
-      {comparisonData.length > 1 && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-gray-800/50 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-gray-300 mb-2">最佳性能</h4>
-            <div className="text-lg font-bold text-green-400">
-              {comparisonData.reduce((best, current) =>
-                current.averageResponseTime < best.averageResponseTime ? current : best
+      {comparisonData.length > 1 && (<div className= 'grid grid-cols-1 md:grid-cols-3 gap-4'>
+          <div className= 'bg-gray-800/50 rounded-lg p-4'>
+            <h4 className= 'text-sm font-medium text-gray-300 mb-2'>最佳性能</h4>
+            <div className= 'text-lg font-bold text-green-400'>
+              {comparisonData.reduce((best, current) => current.averageResponseTime < best.averageResponseTime ? current : best
               ).name}
             </div>
-            <div className="text-sm text-gray-400">
+            <div className= 'text-sm text-gray-400'>
               响应时间: {Math.min(...comparisonData.map(d => d.averageResponseTime))}ms
             </div>
           </div>
 
-          <div className="bg-gray-800/50 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-gray-300 mb-2">最高吞吐量</h4>
-            <div className="text-lg font-bold text-blue-400">
-              {comparisonData.reduce((best, current) =>
-                current.throughput > best.throughput ? current : best
+          <div className= 'bg-gray-800/50 rounded-lg p-4'>
+            <h4 className= 'text-sm font-medium text-gray-300 mb-2'>最高吞吐量</h4>
+            <div className= 'text-lg font-bold text-blue-400'>
+              {comparisonData.reduce((best, current) => current.throughput > best.throughput ? current : best
               ).name}
             </div>
-            <div className="text-sm text-gray-400">
+            <div className= 'text-sm text-gray-400'>
               吞吐量: {Math.max(...comparisonData.map(d => d.throughput))} req/s
             </div>
           </div>
 
-          <div className="bg-gray-800/50 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-gray-300 mb-2">最低错误率</h4>
-            <div className="text-lg font-bold text-purple-400">
-              {comparisonData.reduce((best, current) =>
-                current.errorRate < best.errorRate ? current : best
+          <div className= 'bg-gray-800/50 rounded-lg p-4'>
+            <h4 className= 'text-sm font-medium text-gray-300 mb-2'>最低错误率</h4>
+            <div className= 'text-lg font-bold text-purple-400'>
+              {comparisonData.reduce((best, current) => current.errorRate < best.errorRate ? current : best
               ).name}
             </div>
-            <div className="text-sm text-gray-400">
+            <div className= 'text-sm text-gray-400'>
               错误率: {Math.min(...comparisonData.map(d => d.errorRate))}%
             </div>
           </div>

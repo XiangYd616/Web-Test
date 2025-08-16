@@ -1,6 +1,6 @@
 // 系统管理相关类型定义
 
-export interface SystemStats {
+export interface SystemStats     {
   totalUsers: number;
   activeUsers: number;
   totalTests: number;
@@ -49,7 +49,7 @@ export interface SystemStats {
   };
 }
 
-export interface SystemConfig {
+export interface SystemConfig     {
   general: {
     siteName: string;
     siteDescription: string;
@@ -121,7 +121,7 @@ export interface SystemConfig {
   };
 }
 
-export interface User {
+export interface User     {
   id: string;
   username: string;
   email: string;
@@ -140,7 +140,7 @@ export interface User {
   permissions?: string[];
 }
 
-export interface UserFilter {
+export interface UserFilter     {
   role?: string;
   status?: string;
   search?: string;
@@ -148,7 +148,7 @@ export interface UserFilter {
   department?: string;
 }
 
-export interface SystemLog {
+export interface SystemLog     {
   id: string;
   timestamp: string;
   level: 'debug' | 'info' | 'warning' | 'error' | 'critical';
@@ -160,7 +160,7 @@ export interface SystemLog {
   userAgent?: string;
 }
 
-export interface LogFilter {
+export interface LogFilter     {
   level?: string;
   category?: string;
   startDate?: string;
@@ -169,7 +169,7 @@ export interface LogFilter {
   search?: string;
 }
 
-export interface SystemHealth {
+export interface SystemHealth     {
   status: 'healthy' | 'warning' | 'critical';
   uptime: number; // 秒
   services: {
@@ -192,36 +192,36 @@ export interface SystemHealth {
   };
 }
 
-export interface ServiceStatus {
+export interface ServiceStatus     {
   status: 'healthy' | 'warning' | 'critical';
   responseTime: number; // 毫秒
   lastCheck?: string;
   error?: string;
 }
 
-export interface ResourceUsage {
+export interface ResourceUsage     {
   usage: number; // 百分比
   cores?: number;
 }
 
-export interface MemoryUsage {
+export interface MemoryUsage     {
   usage: number; // 百分比
   total: number; // MB
   available: number; // MB
 }
 
-export interface DiskUsage {
+export interface DiskUsage     {
   usage: number; // 百分比
   total: number; // GB
   available: number; // GB
 }
 
-export interface NetworkUsage {
+export interface NetworkUsage     {
   incoming: number; // KB/s
   outgoing: number; // KB/s
 }
 
-export interface BackupInfo {
+export interface BackupInfo     {
   id: string;
   name: string;
   type: 'full' | 'incremental' | 'config';
@@ -234,7 +234,7 @@ export interface BackupInfo {
   error?: string;
 }
 
-export interface MaintenanceInfo {
+export interface MaintenanceInfo     {
   isMaintenanceMode: boolean;
   lastMaintenance?: string;
   nextScheduledMaintenance?: string;
@@ -244,7 +244,7 @@ export interface MaintenanceInfo {
   maintenanceHistory: MaintenanceRecord[];
 }
 
-export interface SystemUpdate {
+export interface SystemUpdate     {
   version: string;
   type: 'major' | 'minor' | 'patch';
   description: string;
@@ -253,7 +253,7 @@ export interface SystemUpdate {
   critical?: boolean;
 }
 
-export interface MaintenanceRecord {
+export interface MaintenanceRecord     {
   date: string;
   type: 'scheduled' | 'emergency' | 'update';
   description: string;
@@ -262,14 +262,14 @@ export interface MaintenanceRecord {
   notes?: string;
 }
 
-export interface Permission {
+export interface Permission     {
   id: string;
   name: string;
   description: string;
   category: string;
 }
 
-export interface Role {
+export interface Role     {
   id: string;
   name: string;
   description: string;
@@ -277,7 +277,7 @@ export interface Role {
   isSystem: boolean;
 }
 
-export interface AuditLog {
+export interface AuditLog     {
   id: string;
   timestamp: string;
   userId: string;
@@ -292,7 +292,7 @@ export interface AuditLog {
   error?: string;
 }
 
-export interface SystemAlert {
+export interface SystemAlert     {
   id: string;
   type: 'info' | 'warning' | 'error' | 'critical';
   title: string;
@@ -308,7 +308,7 @@ export interface SystemAlert {
   severity: number; // 1-10
 }
 
-export interface DatabaseInfo {
+export interface DatabaseInfo     {
   type: string;
   version: string;
   size: number; // MB
@@ -329,7 +329,7 @@ export interface DatabaseInfo {
 }
 
 // 系统监控指标接口
-export interface SystemMetrics {
+export interface SystemMetrics     {
   system: {
     uptime: number;
     loadAverage: number[];
@@ -390,7 +390,7 @@ export interface SystemMetrics {
   };
 }
 
-export interface SystemMonitor {
+export interface SystemMonitor     {
   id: string;
   timestamp: string;
   metrics: SystemMetrics;

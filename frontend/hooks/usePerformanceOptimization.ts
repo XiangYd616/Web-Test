@@ -2,8 +2,7 @@
  * 性能优化相关的React Hook
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { frontendCache, lazyImageLoader, performanceMonitor, // performanceUtils } from '../utils/performanceUtils'; // 已修复
+import { useCallback, useEffect, useMemo, useRef, useState    } from 'react';import { frontendCache, lazyImageLoader, performanceMonitor, // performanceUtils   } from '../utils/performanceUtils';// 已修复'
 /**
  * 图片懒加载Hook
  */
@@ -19,15 +18,14 @@ export function useLazyImage() {
     const handleLoad = () => setLoaded(true);
     const handleError = () => setError(true);
 
-    img.addEventListener('load', handleLoad);
-    img.addEventListener('error', handleError);
-
+    img.addEventListener('load', handleLoad);'
+    img.addEventListener('error', handleError);'
     // 开始观察图片
     lazyImageLoader.observe(img);
 
     return () => {
-      img.removeEventListener('load', handleLoad);
-      img.removeEventListener('error', handleError);
+      img.removeEventListener('load', handleLoad);'
+      img.removeEventListener('error', handleError);'
       lazyImageLoader.unobserve(img);
     };
   }, []);
@@ -67,7 +65,7 @@ export function usePerformanceMonitor() {
 /**
  * 防抖Hook
  */
-export function useDebounce<T>(value: T, delay: number): T {
+export function useDebounce<T>(value: T, delay: number): T   {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
   useEffect(() => {
@@ -159,38 +157,35 @@ export function useFrontendCache<T>(key: string, fetcher: () => Promise<T>, ttl?
 export function useNetworkStatus() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isSlowNetwork, setIsSlowNetwork] = useState(false);
-  const [networkType, setNetworkType] = useState<string>('unknown');
-
+  const [networkType, setNetworkType] = useState<string>('unknown');'
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
+    window.addEventListener('online', handleOnline);'
+    window.addEventListener('offline', handleOffline);'
     // 检查网络连接类型
-    if ('connection' in navigator) {
+    if ('connection' in navigator) {'
       const connection = (navigator as any).connection;
-      setNetworkType(connection.effectiveType || 'unknown');
+      setNetworkType(connection.effectiveType || 'unknown');'
       setIsSlowNetwork(performanceUtils.isSlowNetwork());
 
       const handleConnectionChange = () => {
-        setNetworkType(connection.effectiveType || 'unknown');
+        setNetworkType(connection.effectiveType || 'unknown');'
         setIsSlowNetwork(performanceUtils.isSlowNetwork());
       };
 
-      connection.addEventListener('change', handleConnectionChange);
-
+      connection.addEventListener('change', handleConnectionChange);'
       return () => {
-        window.removeEventListener('online', handleOnline);
-        window.removeEventListener('offline', handleOffline);
-        connection.removeEventListener('change', handleConnectionChange);
+        window.removeEventListener('online', handleOnline);'
+        window.removeEventListener('offline', handleOffline);'
+        connection.removeEventListener('change', handleConnectionChange);'
       };
     }
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', handleOnline);'
+      window.removeEventListener('offline', handleOffline);'
     };
   }, []);
 
@@ -201,7 +196,7 @@ export function useNetworkStatus() {
  * 设备性能Hook
  */
 export function useDevicePerformance() {
-  const [performanceLevel, setPerformanceLevel] = useState<'high' | 'medium' | 'low'>('medium');
+  const [performanceLevel, setPerformanceLevel] = useState<'high' | 'medium' | 'low'>('medium');'
   const [deviceInfo, setDeviceInfo] = useState({
     cores: navigator.hardwareConcurrency || 4,
     memory: (navigator as any).deviceMemory || 4,
@@ -226,10 +221,9 @@ export function useVisibility() {
       setIsVisible(!document.hidden);
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
+    document.addEventListener('visibilitychange', handleVisibilityChange);'
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);'
     };
   }, []);
 
@@ -248,7 +242,7 @@ export function useMemoryMonitor() {
 
   useEffect(() => {
     const updateMemoryInfo = () => {
-      if ('memory' in performance) {
+      if ('memory' in performance) {'
         const memory = (performance as any).memory;
         setMemoryInfo({
           used: memory.usedJSHeapSize,
@@ -286,13 +280,13 @@ export function useRenderPerformance(componentName: string) {
 
     // 如果渲染时间过长，发出警告
     if (renderTime > 16) { // 超过一帧的时间
-      console.warn(`Component ${componentName} render took ${renderTime.toFixed(2)}ms`);
+      console.warn(`Component ${componentName} render took ${renderTime.toFixed(2)}ms`);`
     }
 
     // 每100次渲染报告一次平均性能
     if (renderCount.current % 100 === 0) {
       const avgRenderTime = totalRenderTime.current / renderCount.current;
-      console.log(`Component ${componentName} average render time: ${avgRenderTime.toFixed(2)}ms over ${renderCount.current} renders`);
+      console.log(`Component ${componentName} average render time: ${avgRenderTime.toFixed(2)}ms over ${renderCount.current} renders`);`
     }
   });
 
@@ -346,7 +340,7 @@ export function useVirtualScroll<T>(
  * 整合所有性能相关功能
  */
 export function usePerformanceOptimization() {
-  const { metrics: performanceMetrics } = usePerformanceMonitor();
+  const { metrics: performanceMetrics }  = usePerformanceMonitor();
   const { performanceLevel } = useDevicePerformance();
   const { isSlowNetwork } = useNetworkStatus();
   const memoryInfo = useMemoryMonitor();
@@ -355,13 +349,13 @@ export function usePerformanceOptimization() {
   const metrics = useMemo(() => ({
     loadTime: performanceMetrics.loadTime || 0,
     renderTime: performanceMetrics.renderTime || 0,
-    memoryUsage: memoryInfo ? memoryInfo.used / (1024 * 1024) : 0, // 转换为MB
+    memoryUsage: memoryInfo ? memoryInfo.used / (1024 * 1024): 0, // 转换为MB
     bundleSize: performanceMetrics.bundleSize || 0,
     ...performanceMetrics
   }), [performanceMetrics, memoryInfo]);
 
   // 渲染时间测量
-  const measureRenderTime = useCallback((componentName: string) => {
+  const measureRenderTime = useCallback((componentName: string)  => {
     let startTime: number;
 
     return {
@@ -371,7 +365,7 @@ export function usePerformanceOptimization() {
       end: () => {
         const endTime = performance.now();
         const renderTime = endTime - startTime;
-        console.log(`${componentName} render time: ${renderTime.toFixed(2)}ms`);
+        console.log(`${componentName} render time: ${renderTime.toFixed(2)}ms`);`
         return renderTime;
       }
     };
@@ -379,30 +373,29 @@ export function usePerformanceOptimization() {
 
   // 获取优化建议
   const getOptimizationSuggestions = useCallback(() => {
-    const suggestions: string[] = [];
-
+    const suggestions: string[]  = [];
     if (metrics.loadTime > 3000) {
-      suggestions.push('页面加载时间过长，建议优化资源加载');
+      suggestions.push("页面加载时间过长，建议优化资源加载');'`
     }
 
     if (metrics.renderTime > 1000) {
-      suggestions.push('组件渲染时间过长，建议使用React.memo或useMemo优化');
+      suggestions.push('组件渲染时间过长，建议使用React.memo或useMemo优化');'
     }
 
     if (metrics.memoryUsage > 50) {
-      suggestions.push('内存使用过高，建议检查内存泄漏');
+      suggestions.push('内存使用过高，建议检查内存泄漏');'
     }
 
     if (metrics.bundleSize > 1000) {
-      suggestions.push('包体积过大，建议启用代码分割');
+      suggestions.push('包体积过大，建议启用代码分割');'
     }
 
     if (isSlowNetwork) {
-      suggestions.push('检测到慢速网络，建议启用资源压缩和缓存');
+      suggestions.push('检测到慢速网络，建议启用资源压缩和缓存');'
     }
 
-    if (performanceLevel === 'low') {
-      suggestions.push('检测到低性能设备，建议降低动画复杂度');
+    if (performanceLevel === 'low') {'
+      suggestions.push('检测到低性能设备，建议降低动画复杂度');'
     }
 
     return suggestions;
@@ -411,15 +404,15 @@ export function usePerformanceOptimization() {
   // 应用优化
   const applyOptimizations = useCallback(() => {
     // 根据设备性能调整设置
-    if (performanceLevel === 'low') {
+    if (performanceLevel === 'low') {'
       // 禁用复杂动画
-      document.documentElement.style.setProperty('--animation-duration', '0s');
+      document.documentElement.style.setProperty('--animation-duration', '0s');'
     }
 
     // 根据网络状况调整
     if (isSlowNetwork) {
       // 启用数据压缩
-      localStorage.setItem('enableCompression', 'true');
+      localStorage.setItem('enableCompression', 'true');'
     }
 
     // 清理缓存
@@ -427,7 +420,7 @@ export function usePerformanceOptimization() {
       frontendCache.clear();
     }
 
-    console.log('Performance optimizations applied');
+    console.log('Performance optimizations applied');'
   }, [performanceLevel, isSlowNetwork, metrics.memoryUsage]);
 
   return {

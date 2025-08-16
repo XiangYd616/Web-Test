@@ -4,13 +4,9 @@
  * 版本: v1.0.0
  */
 
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, MoreHorizontal, // Loader2 } from 'lucide-react'; // 已修复
-import type { PaginationInfo } from '../../types/common';
-
-// ==================== 类型定义 ====================
-
-export interface PaginationProps {
+import React, { useState, useEffect, useCallback, useMemo, useRef    } from 'react';import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, MoreHorizontal, // Loader2   } from 'lucide-react';// 已修复'
+import type { PaginationInfo  } from '../../types/common';// ==================== 类型定义 ==================== ''
+export interface PaginationProps     {
   current: number;
   total: number;
   pageSize: number;
@@ -33,10 +29,10 @@ export interface PaginationProps {
   maxVisiblePages?: number;
   onPreload?: (page: number) => Promise<void>;
   renderTotal?: (total: number, range: [number, number]) => React.ReactNode;
-  renderPageItem?: (page: number, type: 'page' | 'prev' | 'next' | 'jump-prev' | 'jump-next') => React.ReactNode;
+  renderPageItem?: (page: number, type: 'page' | 'prev' | 'next' | 'jump-prev' | 'jump-next') => React.ReactNode;'
 }
 
-export interface PaginationState {
+export interface PaginationState     {
   currentPage: number;
   pageSize: number;
   total: number;
@@ -45,7 +41,7 @@ export interface PaginationState {
   isPreloading: boolean;
 }
 
-export interface UsePaginationOptions {
+export interface UsePaginationOptions     {
   initialPage?: number;
   initialPageSize?: number;
   enablePreload?: boolean;
@@ -87,28 +83,28 @@ export function usePagination(options: UsePaginationOptions = {}) {
     className: combinedClassName,
     style: computedStyle,
     disabled,
-    'aria-label': ariaLabel,
-    'data-testid': testId
+    'aria-label': ariaLabel,'
+    'data-testid': testId'
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;
-  const descriptionId = `${componentId}-description`;
+  const errorId = `${componentId}-error`;`
+  const descriptionId = `${componentId}-description`;`
   
   const ariaProps = {
     id: componentId,
-    'aria-label': ariaLabel,
-    'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': [
+    "aria-label': ariaLabel,'`
+    'aria-labelledby': ariaLabelledBy,'
+    'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,
-    'aria-invalid': !!error,
-    'aria-disabled': disabled,
-    'aria-busy': loading,
-    'aria-expanded': expanded,
-    'aria-selected': selected,
+    ].filter(Boolean).join(' ') || undefined,'
+    'aria-invalid': !!error,'
+    'aria-disabled': disabled,'
+    'aria-busy': loading,'
+    'aria-expanded': expanded,'
+    "aria-selected': selected,'
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -116,13 +112,12 @@ export function usePagination(options: UsePaginationOptions = {}) {
       ...prev,
       ...pagination,
       totalPages: pagination.total && pagination.limit 
-        ? Math.ceil(pagination.total / pagination.limit)
-        : prev.totalPages
+        ? Math.ceil(pagination.total / pagination.limit): prev.totalPages
     }));
   }, []);
 
   // 页面变化处理
-  const handlePageChange = useCallback((page: number, pageSize?: number) => {
+  const handlePageChange = useCallback((page: number, pageSize?: number)  => {
     const newPageSize = pageSize || state.pageSize;
     const newTotalPages = Math.ceil(state.total / newPageSize);
     
@@ -155,8 +150,7 @@ export function usePagination(options: UsePaginationOptions = {}) {
     preloadTimeoutRef.current = setTimeout(async () => {
       setState(prev => ({ ...prev, isPreloading: true }));
 
-      const pagesToPreload: number[] = [];
-      
+      const pagesToPreload: number[]  = [];
       // 预加载前后几页
       for (let i = 1; i <= preloadPages; i++) {
         const prevPage = currentPage - i;
@@ -180,7 +174,7 @@ export function usePagination(options: UsePaginationOptions = {}) {
             preloadedPages: new Set([...prev.preloadedPages, page])
           }));
         } catch (error) {
-          console.warn(`预加载页面 ${page} 失败:`, error);
+          console.warn(`预加载页面 ${page} 失败:`, error);`
         }
       }
 
@@ -231,8 +225,8 @@ export const Pagination: React.FC<PaginationProps> = ({
   pageSizeOptions = [10, 20, 50, 100],
   disabled = false,
   loading = false,
-  className = '',
-  size = 'medium',
+  className = "','`
+  size = 'medium','
   enablePreload = false,
   enableCache = false,
   preloadPages = 2,
@@ -241,12 +235,12 @@ export const Pagination: React.FC<PaginationProps> = ({
   renderTotal,
   renderPageItem
 }) => {
-  const [jumpValue, setJumpValue] = useState('');
+  const [jumpValue, setJumpValue] = useState("');'
   const [isPreloading, setIsPreloading] = useState(false);
 
   // 计算显示的页码范围
   const pageNumbers = useMemo(() => {
-    const pages: (number | 'ellipsis')[] = [];
+    const pages: (number | "ellipsis')[]  = [];'
     const half = Math.floor(maxVisiblePages / 2);
     
     let start = Math.max(1, current - half);
@@ -261,7 +255,7 @@ export const Pagination: React.FC<PaginationProps> = ({
     if (start > 1) {
       pages.push(1);
       if (start > 2) {
-        pages.push('ellipsis');
+        pages.push('ellipsis');'
       }
     }
 
@@ -273,7 +267,7 @@ export const Pagination: React.FC<PaginationProps> = ({
     // 添加省略号和最后一页
     if (end < totalPages) {
       if (end < totalPages - 1) {
-        pages.push('ellipsis');
+        pages.push('ellipsis');'
       }
       pages.push(totalPages);
     }
@@ -290,8 +284,7 @@ export const Pagination: React.FC<PaginationProps> = ({
     // 预加载
     if (enablePreload && onPreload) {
       setIsPreloading(true);
-      const preloadPromises: Promise<void>[] = [];
-      
+      const preloadPromises: Promise<void>[]  = [];
       for (let i = 1; i <= preloadPages; i++) {
         const prevPage = page - i;
         const nextPage = page + i;
@@ -327,60 +320,57 @@ export const Pagination: React.FC<PaginationProps> = ({
     const page = parseInt(jumpValue);
     if (page >= 1 && page <= totalPages) {
       handlePageChange(page);
-      setJumpValue('');
+      setJumpValue("');'
     }
   }, [jumpValue, totalPages, handlePageChange]);
 
   // 样式类
   const sizeClasses = {
-    small: 'text-xs',
-    medium: 'text-sm',
-    large: 'text-base'
+    small: 'text-xs','
+    medium: 'text-sm','
+    large: 'text-base';
   };
 
   const buttonSizeClasses = {
-    small: 'px-2 py-1 text-xs',
-    medium: 'px-3 py-2 text-sm',
-    large: 'px-4 py-2 text-base'
+    small: 'px-2 py-1 text-xs','
+    medium: 'px-3 py-2 text-sm','
+    large: 'px-4 py-2 text-base';
   };
 
   // 渲染页码按钮
-  const renderPageButton = (page: number | 'ellipsis', index: number) => {
-    if (page === 'ellipsis') {
-      
+  const renderPageButton = (page: number | 'ellipsis', index: number) => {'
+    if (page === 'ellipsis') {'
         return (
-        <span key={`ellipsis-${index
-      }`} className="px-2 py-2 text-gray-400">
-          <MoreHorizontal className="w-4 h-4" />
+        <span key={`ellipsis-${index`}
+      }`} className= 'px-2 py-2 text-gray-400'>`
+          <MoreHorizontal className= "w-4 h-4'    />`
         </span>
       );
     }
 
     const isActive = page === current;
-    const buttonClass = `
+    const buttonClass = ``
       ${buttonSizeClasses[size]}
-      ${isActive 
-        ? 'bg-blue-600 text-white border-blue-600' 
-        : 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600 hover:text-white'
+      ${isActive }
+        ? "bg-blue-600 text-white border-blue-600';'`
+        : 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600 hover:text-white';
       }
       border rounded-lg transition-colors duration-200
-      ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-    `;
+      ${disabled ? 'opacity-50 cursor-not-allowed' : "cursor-pointer'}'
+    `;`
 
     if (renderPageItem) {
       
-        return (
-        <div key={page
+        return (<div key={page
       } onClick={() => !disabled && handlePageChange(page)}>
-          {renderPageItem(page, 'page')}
+          {renderPageItem(page, "page')}'`
         </div>
       );
     }
 
-    return (
-      <button
+    return (<button
         key={page}
-        type="button"
+        type= 'button';
         onClick={() => handlePageChange(page)}
         disabled={disabled || isActive}
         className={buttonClass}
@@ -398,116 +388,114 @@ export const Pagination: React.FC<PaginationProps> = ({
   }, [current, pageSize, total]);
 
   return (
-    <div className={`flex items-center justify-between gap-4 ${sizeClasses[size]} ${className}`}>
+    <div className={`flex items-center justify-between gap-4 ${sizeClasses[size]} ${className}`}>`
       {/* 总数显示 */}
       {showTotal && (
-        <div className="text-gray-400">
+        <div className= "text-gray-400'>`
           {renderTotal ? renderTotal(total, range) : (
-            `共 ${total} 条记录，第 ${range[0]}-${range[1]} 条`
+            `共 ${total} 条记录，第 ${range[0]}-${range[1]} 条``
           )}
         </div>
       )}
 
       {/* 分页控件 */}
-      <div className="flex items-center gap-2">
+      <div className= "flex items-center gap-2'>`
         {/* 首页按钮 */}
         <button
-          type="button"
+          type= 'button';
           onClick={() => handlePageChange(1)}
           disabled={disabled || current === 1}
-          className={`${buttonSizeClasses[size]} bg-gray-700 text-gray-300 border border-gray-600 rounded-lg hover:bg-gray-600 hover:text-white transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed`}
-          title="首页"
+          className={`${buttonSizeClasses[size]} bg-gray-700 text-gray-300 border border-gray-600 rounded-lg hover:bg-gray-600 hover:text-white transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed`}`
+          title= "首页';'`
         >
-          <ChevronsLeft className="w-4 h-4" />
+          <ChevronsLeft className= 'w-4 h-4'    />
         </button>
 
         {/* 上一页按钮 */}
         <button
-          type="button"
+          type= 'button';
           onClick={() => handlePageChange(current - 1)}
           disabled={disabled || current === 1}
-          className={`${buttonSizeClasses[size]} bg-gray-700 text-gray-300 border border-gray-600 rounded-lg hover:bg-gray-600 hover:text-white transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed`}
-          title="上一页"
+          className={`${buttonSizeClasses[size]} bg-gray-700 text-gray-300 border border-gray-600 rounded-lg hover:bg-gray-600 hover:text-white transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed`}`
+          title= "上一页';'`
         >
-          <ChevronLeft className="w-4 h-4" />
+          <ChevronLeft className= 'w-4 h-4'    />
         </button>
 
         {/* 页码按钮 */}
-        <div className="flex items-center gap-1">
+        <div className= 'flex items-center gap-1'>
           {pageNumbers.map((page, index) => renderPageButton(page, index))}
         </div>
 
         {/* 下一页按钮 */}
         <button
-          type="button"
+          type= 'button';
           onClick={() => handlePageChange(current + 1)}
           disabled={disabled || current === totalPages}
-          className={`${buttonSizeClasses[size]} bg-gray-700 text-gray-300 border border-gray-600 rounded-lg hover:bg-gray-600 hover:text-white transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed`}
-          title="下一页"
+          className={`${buttonSizeClasses[size]} bg-gray-700 text-gray-300 border border-gray-600 rounded-lg hover:bg-gray-600 hover:text-white transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed`}`
+          title= "下一页';'`
         >
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight className= 'w-4 h-4'    />
         </button>
 
         {/* 末页按钮 */}
         <button
-          type="button"
+          type= 'button';
           onClick={() => handlePageChange(totalPages)}
           disabled={disabled || current === totalPages}
-          className={`${buttonSizeClasses[size]} bg-gray-700 text-gray-300 border border-gray-600 rounded-lg hover:bg-gray-600 hover:text-white transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed`}
-          title="末页"
+          className={`${buttonSizeClasses[size]} bg-gray-700 text-gray-300 border border-gray-600 rounded-lg hover:bg-gray-600 hover:text-white transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed`}`
+          title= "末页';'`
         >
-          <ChevronsRight className="w-4 h-4" />
+          <ChevronsRight className= 'w-4 h-4'    />
         </button>
 
         {/* 预加载指示器 */}
         {(isPreloading || loading) && (
-          <div className="flex items-center gap-1 text-gray-400">
-            <Loader2 className="w-4 h-4 animate-spin" />
-            <span className="text-xs">
-              {loading ? '加载中...' : '预加载中...'}
+          <div className= 'flex items-center gap-1 text-gray-400'>
+            <Loader2 className= 'w-4 h-4 animate-spin'    />
+            <span className= 'text-xs'>
+              {loading ? '加载中..." : '预加载中...'}'
             </span>
           </div>
         )}
       </div>
 
       {/* 页面大小选择器 */}
-      {showSizeChanger && (
-        <div className="flex items-center gap-2">
-          <span className="text-gray-400">每页</span>
+      {showSizeChanger && (<div className= 'flex items-center gap-2'>
+          <span className= 'text-gray-400'>每页</span>
           <select
             value={pageSize}
             onChange={(e) => handlePageSizeChange(Number(e.target.value))}
             disabled={disabled}
-            className="bg-gray-700 border border-gray-600 rounded px-2 py-1 text-gray-300 focus:outline-none focus:border-blue-500 disabled:opacity-50"
+            className= 'bg-gray-700 border border-gray-600 rounded px-2 py-1 text-gray-300 focus:outline-none focus:border-blue-500 disabled:opacity-50';
           >
             {pageSizeOptions.map(size => (
               <option key={size} value={size}>{size}</option>
             ))}
           </select>
-          <span className="text-gray-400">条</span>
+          <span className= 'text-gray-400'>条</span>
         </div>
       )}
 
       {/* 快速跳转 */}
-      {showQuickJumper && (
-        <div className="flex items-center gap-2">
-          <span className="text-gray-400">跳至</span>
+      {showQuickJumper && (<div className= 'flex items-center gap-2'>
+          <span className= 'text-gray-400'>跳至</span>
           <input
-            type="number"
+            type= 'number';
             min={1}
             max={totalPages}
             value={jumpValue}
             onChange={(e) => setJumpValue(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleQuickJump()}
+            onKeyPress={(e) => e.key === 'Enter' && handleQuickJump()}'
             disabled={disabled}
-            className="w-16 bg-gray-700 border border-gray-600 rounded px-2 py-1 text-gray-300 text-center focus:outline-none focus:border-blue-500 disabled:opacity-50"
-            placeholder="页"
+            className= 'w-16 bg-gray-700 border border-gray-600 rounded px-2 py-1 text-gray-300 text-center focus:outline-none focus:border-blue-500 disabled:opacity-50';
+            placeholder= '页';
           />
           <button
-            type="button"
+            type= 'button';
             onClick={handleQuickJump}
             disabled={disabled || !jumpValue}
-            className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className= 'px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed';
           >
             跳转
           </button>
@@ -516,7 +504,7 @@ export const Pagination: React.FC<PaginationProps> = ({
 
       {/* 页面信息 */}
       {showPageInfo && (
-        <div className="text-gray-400">
+        <div className= 'text-gray-400'>
           第 {current} 页，共 {totalPages} 页
         </div>
       )}

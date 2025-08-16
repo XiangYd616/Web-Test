@@ -1,34 +1,24 @@
-import React, { Suspense, lazy } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
-import { AdminGuard, ProtectedRoute } from '../auth/index';
-import { Layout } from '../layout/index';
-import { ErrorBoundary, LoadingSpinner } from '../ui/index';
-
-// 认证页面 - 也使用懒加载以减少初始包大小
-const Login = lazy(() => import('../../pages/core/auth/Login'));
-const Register = lazy(() => import('../../pages/core/auth/Register'));
-
+import React, { Suspense, lazy    } from 'react';import { Navigate, Route, Routes    } from 'react-router-dom';import { AdminGuard, ProtectedRoute    } from '../auth/index';import { Layout    } from '../layout/index';import { ErrorBoundary, LoadingSpinner    } from '../ui/index';// 认证页面 - 也使用懒加载以减少初始包大小'
+const Login = lazy(() => import('../../pages/core/auth/Login'));'
+const Register = lazy(() => import("../../pages/core/auth/Register'));'
 // 懒加载页面组件
-const Dashboard = lazy(() => import('../../pages/core/dashboard/Dashboard'));
-const TestingDashboard = lazy(() => import('../../pages/core/testing/TestingDashboard'));
-const TestPage = lazy(() => import('../../pages/testing/TestPage'));
-const WebsiteTest = lazy(() => import('../../pages/core/testing/WebsiteTest'));
-
+const Dashboard = lazy(() => import('../../pages/core/dashboard/Dashboard'));'
+const TestingDashboard = lazy(() => import('../../pages/core/testing/TestingDashboard'));'
+const TestPage = lazy(() => import('../../pages/testing/TestPage'));'
+const WebsiteTest = lazy(() => import("../../pages/core/testing/WebsiteTest'));'
 // 分析页面（推荐使用）
-const PerformanceAnalysis = lazy(() => import('../../pages/data/reports/PerformanceAnalysis'));
+const PerformanceAnalysis = lazy(() => import('../../pages/data/reports/PerformanceAnalysis'));'
 // APIAnalysis已合并到APITest
 
 // 传统测试页面（保持兼容性）
-const SecurityTest = lazy(() => import('../../pages/core/testing/SecurityTest'));
+const SecurityTest = lazy(() => import('../../pages/core/testing/SecurityTest'));'
 // PerformanceTest已合并到WebsiteTest
-const SEOTest = lazy(() => import('../../pages/core/testing/SEOTest'));
-
-const APITest = lazy(() => import('../../pages/core/testing/APITest'));
-const InfrastructureTest = lazy(() => import('../../pages/core/testing/InfrastructureTest'));
-const StressTest = lazy(() => import('../../pages/core/testing/StressTest'));
-const CompatibilityTest = lazy(() => import('../../pages/core/testing/CompatibilityTest'));
-const UXTest = lazy(() => import('../../pages/core/testing/UXTest'));
-
+const SEOTest = lazy(() => import('../../pages/core/testing/SEOTest'));'
+const APITest = lazy(() => import('../../pages/core/testing/APITest'));'
+const InfrastructureTest = lazy(() => import('../../pages/core/testing/InfrastructureTest'));'
+const StressTest = lazy(() => import('../../pages/core/testing/StressTest'));'
+const CompatibilityTest = lazy(() => import('../../pages/core/testing/CompatibilityTest'));'
+const UXTest = lazy(() => import("../../pages/core/testing/UXTest'));'
 // NetworkTest和DatabaseTest已合并到InfrastructureTest中
 
 // 演示和测试页面
@@ -36,100 +26,88 @@ const UXTest = lazy(() => import('../../pages/core/testing/UXTest'));
 // LocalStressTestDemo 已删除
 
 // 数据管理相关页面
-const DataStorage = lazy(() => import('../../pages/management/admin/DataStorage'));
-const DataManagement = lazy(() => import('../../pages/management/admin/DataManagement'));
-const Statistics = lazy(() => import('../../pages/data/reports/Statistics'));
-const Analytics = lazy(() => import('../../pages/analytics/AnalyticsPage'));
-const MonitoringDashboard = lazy(() => import('../../pages/data/reports/MonitoringDashboard'));
-
+const DataStorage = lazy(() => import('../../pages/management/admin/DataStorage'));'
+const DataManagement = lazy(() => import('../../pages/management/admin/DataManagement'));'
+const Statistics = lazy(() => import('../../pages/data/reports/Statistics'));'
+const Analytics = lazy(() => import('../../pages/analytics/AnalyticsPage'));'
+const MonitoringDashboard = lazy(() => import("../../pages/data/reports/MonitoringDashboard'));'
 // 报告和历史
-const TestHistory = lazy(() => import('../../pages/data/results/TestHistory'));
-
-const Reports = lazy(() => import('../../pages/data/reports/Reports'));
-const TestResultDetail = lazy(() => import('../../pages/data/results/TestResultDetail'));
-const StressTestDetail = lazy(() => import('../../pages/data/results/StressTestDetail'));
-
-const StressTestReport = lazy(() => import('../../pages/data/results/StressTestReport'));
-const SecurityReport = lazy(() => import('../../pages/data/results/SecurityReport'));
-
+const TestHistory = lazy(() => import('../../pages/data/results/TestHistory'));'
+const Reports = lazy(() => import('../../pages/data/reports/Reports'));'
+const TestResultDetail = lazy(() => import('../../pages/data/results/TestResultDetail'));'
+const StressTestDetail = lazy(() => import('../../pages/data/results/StressTestDetail'));'
+const StressTestReport = lazy(() => import('../../pages/data/results/StressTestReport'));'
+const SecurityReport = lazy(() => import("../../pages/data/results/SecurityReport'));'
 // 系统管理 - 只保留Admin页面，其他管理功能都在Admin内部
-const Admin = lazy(() => import('../../pages/management/admin/Admin'));
-
+const Admin = lazy(() => import('../../pages/management/admin/Admin'));'
 // 用户相关
-const UserProfile = lazy(() => import('../../pages/user/profile/UserProfile'));
-const UserBookmarks = lazy(() => import('../../pages/user/profile/UserBookmarks'));
-
+const UserProfile = lazy(() => import('../../pages/user/profile/UserProfile'));'
+const UserBookmarks = lazy(() => import("../../pages/user/profile/UserBookmarks'));'
 // 测试和优化
-const TestOptimizations = lazy(() => import('../../pages/management/scheduling/TestOptimizations'));
-const Notifications = lazy(() => import('../../pages/management/integration/Notifications'));
-
+const TestOptimizations = lazy(() => import('../../pages/management/scheduling/TestOptimizations'));'
+const Notifications = lazy(() => import("../../pages/management/integration/Notifications'));'
 // 集成和配置
-const Integrations = lazy(() => import('../../pages/management/integration/Integrations'));
-const CICDIntegration = lazy(() => import('../../pages/management/integration/CICDIntegration'));
-const Webhooks = lazy(() => import('../../pages/management/integration/Webhooks'));
-const APIKeys = lazy(() => import('../../pages/management/integration/APIKeys'));
-const APIDocs = lazy(() => import('../../pages/user/docs/APIDocs'));
-
+const Integrations = lazy(() => import('../../pages/management/integration/Integrations'));'
+const CICDIntegration = lazy(() => import('../../pages/management/integration/CICDIntegration'));'
+const Webhooks = lazy(() => import('../../pages/management/integration/Webhooks'));'
+const APIKeys = lazy(() => import('../../pages/management/integration/APIKeys'));'
+const APIDocs = lazy(() => import("../../pages/user/docs/APIDocs'));'
 // 调度和任务
-const TestSchedule = lazy(() => import('../../pages/management/scheduling/TestSchedule'));
-const ScheduledTasks = lazy(() => import('../../pages/management/scheduling/ScheduledTasks'));
-
+const TestSchedule = lazy(() => import('../../pages/management/scheduling/TestSchedule'));'
+const ScheduledTasks = lazy(() => import("../../pages/management/scheduling/ScheduledTasks'));'
 // 其他功能
-const Settings = lazy(() => import('../../pages/management/settings/Settings'));
-const Help = lazy(() => import('../../pages/user/docs/Help'));
+const Settings = lazy(() => import('../../pages/management/settings/Settings'));'
+const Help = lazy(() => import("../../pages/user/docs/Help'));'
 // ThemeShowcase 已删除
-const Subscription = lazy(() => import('../../pages/user/misc/Subscription'));
-const DownloadDesktop = lazy(() => import('../../pages/user/misc/DownloadDesktop'));
-
+const Subscription = lazy(() => import('../../pages/user/misc/Subscription'));'
+const DownloadDesktop = lazy(() => import("../../pages/user/misc/DownloadDesktop'));'
 // 演示页面
 
-interface LazyPageWrapperProps {
+interface LazyPageWrapperProps   {
   children: React.ReactNode;
 }
 
-const LazyPageWrapper: React.FC<LazyPageWrapperProps> = ({ children }) => (
+const LazyPageWrapper: React.FC<LazyPageWrapperProps>  = ({ children }) => (
   <ErrorBoundary>
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <LoadingSpinner size="lg" text="加载页面..." />
+      <div className= 'min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900'>
+        <LoadingSpinner size= 'lg' text= '加载页面...'    />
       </div>
     }>
       {children}
     </Suspense>
   </ErrorBoundary>
 );
-
-const AppRoutes: React.FC = () => {
+const AppRoutes: React.FC  = () => {
   
   const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
     if (disabled || loading) return;
     onClick?.(event);
   }, [disabled, loading, onClick]);
   
-  const memoizedHandleChange = useMemo(() => 
-    debounce((value: any) => {
+  const memoizedHandleChange = useMemo(() => debounce((value: any) => {
       onChange?.(value);
     }, 300), [onChange]
   );
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;
-  const descriptionId = `${componentId}-description`;
+  const errorId = `${componentId}-error`;`
+  const descriptionId = `${componentId}-description`;`
   
   const ariaProps = {
     id: componentId,
-    'aria-label': ariaLabel,
-    'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': [
+    "aria-label': ariaLabel,'`
+    'aria-labelledby': ariaLabelledBy,'
+    'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,
-    'aria-invalid': !!error,
-    'aria-disabled': disabled,
-    'aria-busy': loading,
-    'aria-expanded': expanded,
-    'aria-selected': selected,
+    ].filter(Boolean).join(' ') || undefined,'
+    'aria-invalid': !!error,'
+    'aria-disabled': disabled,'
+    'aria-busy': loading,'
+    'aria-expanded': expanded,'
+    'aria-selected': selected,'
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -140,8 +118,8 @@ const AppRoutes: React.FC = () => {
     try {
       onClick?.(event);
     } catch (error) {
-      console.error('Click handler error:', error);
-      setError('操作失败，请重试');
+      console.error('Click handler error: ', error);'
+      setError('操作失败，请重试');'
     }
   }, [disabled, loading, onClick]);
   
@@ -151,8 +129,8 @@ const AppRoutes: React.FC = () => {
     try {
       onChange?.(newValue);
     } catch (error) {
-      console.error('Change handler error:', error);
-      updateState({ error: '值更新失败' });
+      console.error('Change handler error: ', error);'
+      updateState({ error: '值更新失败' });'
     }
   }, [onChange, updateState]);
   
@@ -180,152 +158,152 @@ const AppRoutes: React.FC = () => {
   return (
     <Routes>
       {/* 公开路由 - 使用懒加载包装器 */}
-      <Route path="/login" element={
+      <Route path= '/login' element={'
         <LazyPageWrapper>
-          <Login />
+          <Login  />
         </LazyPageWrapper>
       } />
-      <Route path="/register" element={
+      <Route path= '/register' element={'
         <LazyPageWrapper>
-          <Register />
+          <Register  />
         </LazyPageWrapper>
       } />
       {/* LoginDemo 路由已移除，因为文件不存在 */}
       {/* background-test-demo 路由已移除 */}
 
       {/* 公开路由 - 测试工具页面 */}
-      <Route path="/" element={<Layout />}>
+      <Route path= '/' element={<Layout    />}>
         {/* 测试工具仪表板 */}
-        <Route path="testing" element={
+        <Route path= 'testing' element={'
           <LazyPageWrapper>
-            <TestingDashboard />
+            <TestingDashboard  />
           </LazyPageWrapper>
         } />
 
         {/* 统一测试页面 */}
-        <Route path="testing/:testType" element={
+        <Route path= 'testing/:testType' element={'
           <LazyPageWrapper>
-            <TestPage />
+            <TestPage  />
           </LazyPageWrapper>
         } />
 
         {/* 测试工具 - 公开访问，但功能需要登录 */}
-        <Route path="test" element={<Navigate to="/testing" replace />} />
-        <Route path="website-test" element={
+        <Route path= 'test' element={<Navigate to= '/testing' replace    />} />
+        <Route path= 'website-test' element={'
           <LazyPageWrapper>
-            <WebsiteTest />
+            <WebsiteTest  />
           </LazyPageWrapper>
         } />
-        <Route path="security-test" element={
+        <Route path= 'security-test' element={'
           <LazyPageWrapper>
-            <SecurityTest />
+            <SecurityTest  />
           </LazyPageWrapper>
         } />
         {/* 性能分析（推荐） */}
-        <Route path="performance-analysis" element={
+        <Route path= 'performance-analysis' element={'
           <LazyPageWrapper>
-            <PerformanceAnalysis />
+            <PerformanceAnalysis  />
           </LazyPageWrapper>
         } />
 
         {/* 性能测试重定向到网站测试 */}
-        <Route path="performance-test" element={<Navigate to="/website-test" replace />} />
-        <Route path="performance-test-legacy" element={<Navigate to="/website-test" replace />} />
+        <Route path= 'performance-test' element={<Navigate to= '/website-test' replace    />} />
+        <Route path= 'performance-test-legacy' element={<Navigate to= '/website-test' replace    />} />
 
         {/* SEO测试 */}
-        <Route path="seo-test" element={
+        <Route path= 'seo-test' element={'
           <LazyPageWrapper>
-            <SEOTest />
+            <SEOTest  />
           </LazyPageWrapper>
         } />
 
         {/* API测试 */}
-        <Route path="api-test" element={
+        <Route path= 'api-test' element={'
           <LazyPageWrapper>
-            <APITest />
+            <APITest  />
           </LazyPageWrapper>
         } />
-        <Route path="infrastructure-test" element={
+        <Route path= 'infrastructure-test' element={'
           <LazyPageWrapper>
-            <InfrastructureTest />
+            <InfrastructureTest  />
           </LazyPageWrapper>
         } />
 
         {/* 向后兼容路由 - 重定向到新的合并页面 */}
-        <Route path="network-test" element={<Navigate to="/infrastructure-test" replace />} />
-        <Route path="database-test" element={<Navigate to="/infrastructure-test" replace />} />
-        <Route path="stress-test" element={
+        <Route path= 'network-test' element={<Navigate to= '/infrastructure-test' replace    />} />
+        <Route path= 'database-test' element={<Navigate to= '/infrastructure-test' replace    />} />
+        <Route path= 'stress-test' element={'
           <LazyPageWrapper>
-            <StressTest />
+            <StressTest  />
           </LazyPageWrapper>
         } />
-        <Route path="compatibility-test" element={
+        <Route path= 'compatibility-test' element={'
           <LazyPageWrapper>
-            <CompatibilityTest />
+            <CompatibilityTest  />
           </LazyPageWrapper>
         } />
 
         {/* Chrome 兼容性测试重定向到兼容性测试 */}
-        <Route path="chrome-compatibility-test" element={<Navigate to="/compatibility-test" replace />} />
-        <Route path="ux-test" element={
+        <Route path= 'chrome-compatibility-test' element={<Navigate to= '/compatibility-test' replace    />} />
+        <Route path= 'ux-test' element={'
           <LazyPageWrapper>
-            <UXTest />
+            <UXTest  />
           </LazyPageWrapper>
         } />
 
         {/* 测试优化页面 */}
-        <Route path="test-optimizations" element={
+        <Route path= 'test-optimizations' element={'
           <LazyPageWrapper>
-            <TestOptimizations />
+            <TestOptimizations  />
           </LazyPageWrapper>
         } />
 
         {/* URLInputDemo 已删除 */}
 
         {/* 公开的测试历史查看 */}
-        <Route path="test-history" element={
+        <Route path= 'test-history' element={'
           <LazyPageWrapper>
-            <TestHistory />
+            <TestHistory  />
           </LazyPageWrapper>
         } />
 
-        <Route path="test-result/:id" element={
+        <Route path= 'test-result/:id' element={'
           <LazyPageWrapper>
-            <TestResultDetail />
+            <TestResultDetail  />
           </LazyPageWrapper>
         } />
-        <Route path="stress-test/:testId" element={
+        <Route path= 'stress-test/:testId' element={'
           <LazyPageWrapper>
-            <StressTestDetail />
+            <StressTestDetail  />
           </LazyPageWrapper>
         } />
 
-        <Route path="stress-test-report" element={
+        <Route path= 'stress-test-report' element={'
           <LazyPageWrapper>
-            <StressTestReport />
+            <StressTestReport  />
           </LazyPageWrapper>
         } />
-        <Route path="security-report" element={
+        <Route path= 'security-report' element={'
           <LazyPageWrapper>
-            <SecurityReport />
+            <SecurityReport  />
           </LazyPageWrapper>
         } />
 
         {/* 公开的帮助和文档 */}
-        <Route path="help" element={
+        <Route path= 'help' element={'
           <LazyPageWrapper>
-            <Help />
+            <Help  />
           </LazyPageWrapper>
         } />
-        <Route path="api-docs" element={
+        <Route path= 'api-docs' element={'
           <LazyPageWrapper>
-            <APIDocs />
+            <APIDocs  />
           </LazyPageWrapper>
         } />
         {/* ThemeShowcase 已删除 */}
-        <Route path="download-desktop" element={
+        <Route path= 'download-desktop' element={'
           <LazyPageWrapper>
-            <DownloadDesktop />
+            <DownloadDesktop  />
           </LazyPageWrapper>
         } />
 
@@ -333,147 +311,147 @@ const AppRoutes: React.FC = () => {
       </Route>
 
       {/* 首页重定向到网站测试 */}
-      <Route index element={<Navigate to="/website-test" replace />} />
+      <Route index element={<Navigate to= '/website-test' replace    />} />
 
       {/* 仪表板 - 需要登录 */}
-      <Route path="dashboard" element={
+      <Route path= 'dashboard' element={'
         <ProtectedRoute>
           <LazyPageWrapper>
-            <Dashboard />
+            <Dashboard  />
           </LazyPageWrapper>
         </ProtectedRoute>
       } />
 
       {/* 数据管理 - 需要登录 */}
-      <Route path="data-storage" element={
+      <Route path= 'data-storage' element={'
         <ProtectedRoute>
           <LazyPageWrapper>
-            <DataStorage />
+            <DataStorage  />
           </LazyPageWrapper>
         </ProtectedRoute>
       } />
-      <Route path="data-management" element={
+      <Route path= 'data-management' element={'
         <ProtectedRoute>
           <LazyPageWrapper>
-            <DataManagement />
+            <DataManagement  />
           </LazyPageWrapper>
         </ProtectedRoute>
       } />
 
-      <Route path="statistics" element={
+      <Route path= 'statistics' element={'
         <ProtectedRoute>
           <LazyPageWrapper>
-            <Statistics />
+            <Statistics  />
           </LazyPageWrapper>
         </ProtectedRoute>
       } />
-      <Route path="analytics" element={
+      <Route path= 'analytics' element={'
         <ProtectedRoute>
           <LazyPageWrapper>
-            <Analytics />
+            <Analytics  />
           </LazyPageWrapper>
         </ProtectedRoute>
       } />
-      <Route path="advanced-analytics" element={
+      <Route path= 'advanced-analytics' element={'
         <ProtectedRoute>
           <LazyPageWrapper>
-            <Analytics />
+            <Analytics  />
           </LazyPageWrapper>
         </ProtectedRoute>
       } />
       {/* 暂时注释掉监控面板路由，等待修复 */}
-      {/* <Route path="monitoring" element={
+      {/* <Route path= 'monitoring' element={'
         <ProtectedRoute>
           <LazyPageWrapper>
-            <MonitoringDashboard />
+            <MonitoringDashboard  />
           </LazyPageWrapper>
         </ProtectedRoute>
       } /> */}
 
       {/* 报告管理 - 需要登录 */}
-      <Route path="reports" element={
+      <Route path= 'reports' element={'
         <LazyPageWrapper>
-          <Reports />
+          <Reports  />
         </LazyPageWrapper>
       } />
 
       {/* 用户相关 - 需要登录 */}
-      <Route path="profile" element={
+      <Route path= 'profile' element={'
         <LazyPageWrapper>
-          <UserProfile />
+          <UserProfile  />
         </LazyPageWrapper>
       } />
-      <Route path="bookmarks" element={
+      <Route path= 'bookmarks' element={'
         <LazyPageWrapper>
-          <UserBookmarks />
+          <UserBookmarks  />
         </LazyPageWrapper>
       } />
-      <Route path="notifications" element={
+      <Route path= 'notifications' element={'
         <LazyPageWrapper>
-          <Notifications />
+          <Notifications  />
         </LazyPageWrapper>
       } />
 
       {/* 集成和配置 - 需要登录 */}
-      <Route path="cicd" element={<Navigate to="/cicd-integration" replace />} />
-      <Route path="integrations" element={
+      <Route path= 'cicd' element={<Navigate to= '/cicd-integration' replace    />} />
+      <Route path= 'integrations' element={'
         <LazyPageWrapper>
-          <Integrations />
+          <Integrations  />
         </LazyPageWrapper>
       } />
-      <Route path="cicd-integration" element={
+      <Route path= 'cicd-integration' element={'
         <LazyPageWrapper>
-          <CICDIntegration />
+          <CICDIntegration  />
         </LazyPageWrapper>
       } />
-      <Route path="webhooks" element={
+      <Route path= 'webhooks' element={'
         <LazyPageWrapper>
-          <Webhooks />
+          <Webhooks  />
         </LazyPageWrapper>
       } />
-      <Route path="api-keys" element={
+      <Route path= 'api-keys' element={'
         <LazyPageWrapper>
-          <APIKeys />
+          <APIKeys  />
         </LazyPageWrapper>
       } />
 
       {/* 调度和任务 - 需要登录 */}
-      <Route path="test-schedule" element={
+      <Route path= 'test-schedule' element={'
         <LazyPageWrapper>
-          <TestSchedule />
+          <TestSchedule  />
         </LazyPageWrapper>
       } />
-      <Route path="scheduled-tasks" element={
+      <Route path= 'scheduled-tasks' element={'
         <LazyPageWrapper>
-          <ScheduledTasks />
+          <ScheduledTasks  />
         </LazyPageWrapper>
       } />
 
       {/* 用户设置 - 需要登录 */}
-      <Route path="settings" element={
+      <Route path= 'settings' element={'
         <LazyPageWrapper>
-          <Settings />
+          <Settings  />
         </LazyPageWrapper>
       } />
-      <Route path="subscription" element={
+      <Route path= 'subscription' element={'
         <LazyPageWrapper>
-          <Subscription />
+          <Subscription  />
         </LazyPageWrapper>
       } />
 
       {/* 系统管理 - 只保留Admin页面，所有管理功能都在Admin内部 */}
-      <Route path="admin" element={
+      <Route path= 'admin' element={'
         <AdminGuard>
           <LazyPageWrapper>
-            <Admin />
+            <Admin  />
           </LazyPageWrapper>
         </AdminGuard>
       } />
 
       {/* 重定向旧的管理员页面到Admin页面 */}
-      <Route path="system-status" element={<Navigate to="/admin" replace />} />
-      <Route path="system-logs" element={<Navigate to="/admin" replace />} />
-      <Route path="backup-management" element={<Navigate to="/admin" replace />} />
+      <Route path= 'system-status' element={<Navigate to= '/admin' replace    />} />
+      <Route path= 'system-logs' element={<Navigate to= '/admin' replace    />} />
+      <Route path= 'backup-management' element={<Navigate to= '/admin' replace    />} />
     </Routes>
   );
 };

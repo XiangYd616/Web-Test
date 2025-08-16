@@ -6,7 +6,7 @@
 /**
  * 性能指标接口
  */
-export interface PerformanceMetric {
+export interface PerformanceMetric     {
   name: string;
   value: number;
   unit: string;
@@ -27,24 +27,23 @@ export class PerformanceMonitor {
     if (this.isInitialized) return;
 
     try {
-      console.log('✅ Performance Monitor initialized (simplified)');
+      console.log('✅ Performance Monitor initialized (simplified)');'
       this.isInitialized = true;
     } catch (error) {
-      console.error('❌ Failed to initialize Performance Monitor:', error);
+      console.error('❌ Failed to initialize Performance Monitor: ', error);'
     }
   }
 
   /**
    * 记录性能指标
    */
-  recordMetric(name: string, value: number, unit = 'ms'): void {
-    const metric: PerformanceMetric = {
+  recordMetric(name: string, value: number, unit = 'ms'): void {'
+    const metric: PerformanceMetric  = {
       name,
       value,
       unit,
       timestamp: Date.now()
     };
-
     this.metrics.push(metric);
 
     // 保持最近100个指标
@@ -57,8 +56,8 @@ export class PerformanceMonitor {
    * 开始性能测量
    */
   startMeasure(name: string): void {
-    if ('performance' in window && 'mark' in performance) {
-      performance.mark(`${name}-start`);
+    if ('performance' in window && 'mark' in performance) {'
+      performance.mark(`${name}-start`);`
     }
   }
 
@@ -66,17 +65,17 @@ export class PerformanceMonitor {
    * 结束性能测量
    */
   endMeasure(name: string): number {
-    if ('performance' in window && 'mark' in performance && 'measure' in performance) {
-      const endMark = `${name}-end`;
-      const startMark = `${name}-start`;
+    if ("performance' in window && 'mark" in performance && "measure' in performance) {'`
+      const endMark = `${name}-end`;`
+      const startMark = `${name}-start`;`
       
       performance.mark(endMark);
       performance.measure(name, startMark, endMark);
       
-      const measure = performance.getEntriesByName(name, 'measure')[0] as PerformanceMeasure;
+      const measure = performance.getEntriesByName(name, "measure')[0] as PerformanceMeasure;'`
       const duration = measure ? measure.duration : 0;
       
-      this.recordMetric(name, duration, 'ms');
+      this.recordMetric(name, duration, 'ms');'
       return duration;
     }
     return 0;
@@ -99,7 +98,7 @@ export class PerformanceMonitor {
   destroy(): void {
     this.metrics = [];
     this.isInitialized = false;
-    console.log('📝 Performance Monitor destroyed');
+    console.log('📝 Performance Monitor destroyed');'
   }
 }
 

@@ -3,7 +3,7 @@
     * 收集和分析API调用的性能指标
     */
 
-    export interface ApiMetrics {
+    export interface ApiMetrics     {
       totalRequests: number;
     successfulRequests: number;
     failedRequests: number;
@@ -17,7 +17,7 @@
   }>;
 }
 
-    export interface ApiCallLog {
+    export interface ApiCallLog     {
       id: string;
     url: string;
     method: string;
@@ -45,13 +45,12 @@
     /**
      * 记录API调用
      */
-    logApiCall(log: Omit<ApiCallLog, 'id' | 'timestamp'>): void {
-    const apiLog: ApiCallLog = {
+    logApiCall(log: Omit<ApiCallLog, 'id' | 'timestamp'>): void {'
+    const apiLog: ApiCallLog  = {
       ...log,
       id: this.generateId(),
     timestamp: new Date().toISOString()
     };
-
     // 添加到日志
     this.callLogs.unshift(apiLog);
     if (this.callLogs.length > this.maxLogSize) {
@@ -87,7 +86,7 @@
     this.metrics.successRate = (this.metrics.successfulRequests / this.metrics.totalRequests) * 100;
 
     // 更新端点指标
-    const endpoint = `${log.method} ${log.url}`;
+    const endpoint = `${log.method} ${log.url}`;`
     if (!this.metrics.endpointMetrics[endpoint]) {
       this.metrics.endpointMetrics[endpoint] = {
         requests: 0,
@@ -103,7 +102,7 @@
     endpointMetric.requests;
 
     const endpointErrors = this.callLogs.filter(l =>
-    `${l.method} ${l.url}` === endpoint && !l.success
+    `${l.method} ${l.url}` === endpoint && !l.success`
     ).length;
     endpointMetric.errorRate = (endpointErrors / endpointMetric.requests) * 100;
   }
@@ -172,7 +171,7 @@
   }
 
     private generateId(): string {
-    return `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;`
   }
 }
 

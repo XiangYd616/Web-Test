@@ -3,44 +3,38 @@
  * 整合测试历史、统计分析、数据中心功能
  */
 
-import { BarChart3, Database, FileText, Filter, RefreshCw, // Search } from 'lucide-react'; // 已修复
-import React, { useEffect, useState } from 'react';
-import TestHistory from '../ui/TestHistory.tsx';
-import { unifiedTestHistoryService } from '../../services/testing/testHistoryService';
-import type { TestStatistics, TestType } from '../../types/testHistory';
-
-interface DataManagementProps {
+import { BarChart3, Database, FileText, Filter, RefreshCw, // Search   } from 'lucide-react';// 已修复'
+import React, { useEffect, useState     } from 'react';import TestHistory from '../ui/TestHistory.tsx';import { unifiedTestHistoryService    } from '../../services/testing/testHistoryService';import type { TestStatistics, TestType  } from '../../types/testHistory';interface DataManagementProps   {'
   className?: string;
   defaultTab?: 'history' | 'statistics' | 'export';
 }
 
 export const DataManagement: React.FC<DataManagementProps> = ({
-  className = '',
-  defaultTab = 'history'
+  className = '','
+  defaultTab = 'history';
 }) => {
   
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState('');
-
+  const [pageTitle, setPageTitle] = useState("');'
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
-      document.title = `${pageTitle} - Test Web`;
+      document.title = `${pageTitle} - Test Web`;`
     }
   }, [pageTitle]);
 
   // 页面可见性检测
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === "visible') {'`
         // 页面变为可见时刷新数据
         fetchData?.();
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);'
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener("visibilitychange', handleVisibilityChange);'
     };
   }, [fetchData]);
   
@@ -52,11 +46,11 @@ export const DataManagement: React.FC<DataManagementProps> = ({
   const handleCreate = useCallback(async (newItem) => {
     try {
       setLoading(true);
-      const response = await apiClient.post('/api/items', newItem);
+      const response = await apiClient.post('/api/items', newItem);'
       setData(prev => [...(prev || []), response.data]);
       setIsCreating(false);
     } catch (err) {
-      handleError(err, 'create');
+      handleError(err, "create');'
     } finally {
       setLoading(false);
     }
@@ -65,30 +59,30 @@ export const DataManagement: React.FC<DataManagementProps> = ({
   const handleUpdate = useCallback(async (id, updates) => {
     try {
       setLoading(true);
-      const response = await apiClient.put(`/api/items/${id}`, updates);
+      const response = await apiClient.put(`/api/items/${id}`, updates);`
       setData(prev => prev?.map(item =>
         item.id === id ? response.data : item
       ));
       setIsEditing(false);
       setSelectedItem(null);
     } catch (err) {
-      handleError(err, 'update');
+      handleError(err, "update');'`
     } finally {
       setLoading(false);
     }
   }, [handleError]);
 
   const handleDelete = useCallback(async (id) => {
-    if (!window.confirm('确定要删除这个项目吗？')) {
+    if (!window.confirm('确定要删除这个项目吗？')) {'
       return;
     }
 
     try {
       setLoading(true);
-      await apiClient.delete(`/api/items/${id}`);
+      await apiClient.delete(`/api/items/${id}`);`
       setData(prev => prev?.filter(item => item.id !== id));
     } catch (err) {
-      handleError(err, 'delete');
+      handleError(err, "delete');'`
     } finally {
       setLoading(false);
     }
@@ -99,30 +93,29 @@ export const DataManagement: React.FC<DataManagementProps> = ({
     onClick?.(event);
   }, [disabled, loading, onClick]);
   
-  const memoizedHandleChange = useMemo(() => 
-    debounce((value: any) => {
+  const memoizedHandleChange = useMemo(() => debounce((value: any) => {
       onChange?.(value);
     }, 300), [onChange]
   );
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;
-  const descriptionId = `${componentId}-description`;
+  const errorId = `${componentId}-error`;`
+  const descriptionId = `${componentId}-description`;`
   
   const ariaProps = {
     id: componentId,
-    'aria-label': ariaLabel,
-    'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': [
+    "aria-label': ariaLabel,'`
+    'aria-labelledby': ariaLabelledBy,'
+    'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,
-    'aria-invalid': !!error,
-    'aria-disabled': disabled,
-    'aria-busy': loading,
-    'aria-expanded': expanded,
-    'aria-selected': selected,
+    ].filter(Boolean).join(' ') || undefined,'
+    'aria-invalid': !!error,'
+    'aria-disabled': disabled,'
+    'aria-busy': loading,'
+    'aria-expanded': expanded,'
+    "aria-selected': selected,'
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -130,41 +123,40 @@ export const DataManagement: React.FC<DataManagementProps> = ({
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [statistics, setStatistics] = useState<TestStatistics | null>(null);
   const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("');'
   const [selectedTestTypes, setSelectedTestTypes] = useState<TestType[]>([]);
   const [showFilters, setShowFilters] = useState(false);
 
   // 测试类型选项
-  const testTypeOptions: { value: TestType; label: string; icon: React.ReactNode }[] = [
-    { value: 'stress', label: '压力测试', icon: '⚡' },
-    { value: 'security', label: '安全测试', icon: '🛡️' },
-    { value: 'api', label: 'API测试', icon: '🔌' },
-    { value: 'performance', label: '性能测试', icon: '🚀' },
-    { value: 'compatibility', label: '兼容性测试', icon: '🌐' },
-    { value: 'seo', label: 'SEO测试', icon: '📈' },
-    { value: 'database', label: '数据库测试', icon: '💾' },
-    { value: 'network', label: '网络测试', icon: '🌐' }
+  const testTypeOptions: { value: TestType; label: string; icon: React.ReactNode }[]  = [
+    { value: 'stress', label: '压力测试', icon: '⚡' },'
+    { value: 'security', label: '安全测试', icon: '🛡️' },'
+    { value: 'api', label: 'API测试', icon: '🔌' },'
+    { value: 'performance', label: '性能测试', icon: '🚀' },'
+    { value: 'compatibility', label: '兼容性测试', icon: '🌐' },'
+    { value: 'seo', label: 'SEO测试', icon: '📈' },'
+    { value: 'database', label: '数据库测试', icon: '💾' },'
+    { value: 'network', label: '网络测试', icon: '🌐' }'
   ];
-
   // 标签页配置
   const tabs = [
     {
-      id: 'history',
-      label: '测试历史',
+      id: 'history','
+      label: '测试历史','
       icon: FileText,
-      description: '查看和管理所有测试记录'
+      description: '查看和管理所有测试记录';
     },
     {
-      id: 'statistics',
-      label: '统计分析',
+      id: 'statistics','
+      label: '统计分析','
       icon: BarChart3,
-      description: '测试数据统计和趋势分析'
+      description: '测试数据统计和趋势分析';
     },
     {
-      id: 'export',
-      label: '数据中心',
+      id: 'export','
+      label: '数据中心','
       icon: Database,
-      description: '数据导出、备份和管理'
+      description: '数据导出、备份和管理';
     }
   ];
 
@@ -179,7 +171,7 @@ export const DataManagement: React.FC<DataManagementProps> = ({
       const stats = await unifiedTestHistoryService.getTestStatistics();
       setStatistics(stats);
     } catch (error) {
-      console.error('加载统计数据失败:', error);
+      console.error("加载统计数据失败:', error);'
     } finally {
       setLoading(false);
     }
@@ -205,70 +197,68 @@ export const DataManagement: React.FC<DataManagementProps> = ({
     );
   };
 
-  return (
-    <div className={`unified-data-management ${className}`}>
+  return (<div className={`unified-data-management ${className}`}>`
       {/* 页面头部 */}
-      <div className="data-management-header">
-        <div className="header-content">
-          <div className="title-section">
-            <h1 className="page-title">
-              <Database className="title-icon" />
+      <div className= "data-management-header'>`
+        <div className= 'header-content'>
+          <div className= 'title-section'>
+            <h1 className= 'page-title'>
+              <Database className= 'title-icon'    />
               数据管理
-              <span className="version-badge">v2.0</span>
+              <span className= 'version-badge'>v2.0</span>
             </h1>
-            <p className="page-description">
+            <p className= 'page-description'>
               统一管理测试历史、数据分析和导出功能
             </p>
           </div>
 
-          <div className="header-actions">
+          <div className= 'header-actions'>
             <button
               onClick={handleRefresh}
-              className="action-button refresh-button"
+              className= 'action-button refresh-button';
               disabled={loading}
             >
-              <RefreshCw className={`icon ${loading ? 'spinning' : ''}`} />
+              <RefreshCw className={`icon ${loading ? 'spinning" : ''}`}    />`
               刷新
             </button>
 
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`action-button filter-button ${showFilters ? 'active' : ''}`}
+              className={`action-button filter-button ${showFilters ? "active' : "'}`}'`
             >
-              <Filter className="icon" />
+              <Filter className= "icon'    />`
               筛选
             </button>
           </div>
         </div>
 
         {/* 搜索和过滤栏 */}
-        <div className={`search-filter-bar ${showFilters ? 'expanded' : ''}`}>
-          <div className="search-section">
-            <div className="search-input-wrapper">
-              <Search className="search-icon" />
+        <div className={`search-filter-bar ${showFilters ? 'expanded" : "'}`}>`
+          <div className= "search-section'>`
+            <div className= 'search-input-wrapper'>
+              <Search className= 'search-icon'    />
               <input
-                type="text"
-                placeholder="搜索测试名称、URL或标签..."
+                type= 'text';
+                placeholder= '搜索测试名称、URL或标签...';
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="search-input"
+                className= 'search-input';
               />
             </div>
           </div>
 
-          {showFilters && (
-            <div className="filter-section">
-              <div className="filter-group">
-                <label className="filter-label">测试类型:</label>
-                <div className="test-type-filters">
+          {showFilters && (<div className= 'filter-section'>
+              <div className= 'filter-group'>
+                <label className= 'filter-label'>测试类型:</label>
+                <div className= 'test-type-filters'>
                   {testTypeOptions.map(option => (
                     <button
                       key={option.value}
                       onClick={() => handleTestTypeFilter(option.value)}
-                      className={`test-type-filter ${selectedTestTypes.includes(option.value) ? 'active' : ''
-                        }`}
+                      className={`test-type-filter ${selectedTestTypes.includes(option.value) ? "active' : "';'`}
+                        }`}`
                     >
-                      <span className="filter-icon">{option.icon}</span>
+                      <span className= "filter-icon'>{option.icon}</span>`
                       {option.label}
                     </button>
                   ))}
@@ -280,19 +270,19 @@ export const DataManagement: React.FC<DataManagementProps> = ({
       </div>
 
       {/* 标签页导航 */}
-      <div className="tab-navigation">
+      <div className= 'tab-navigation'>
         {tabs.map(tab => {
           const Icon = tab.icon;
           return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
+              className={`tab-button ${activeTab === tab.id ? 'active" : "'}`}'`
             >
-              <Icon className="tab-icon" />
-              <div className="tab-content">
-                <span className="tab-label">{tab.label}</span>
-                <span className="tab-description">{tab.description}</span>
+              <Icon className= "tab-icon'    />`
+              <div className= 'tab-content'>
+                <span className= 'tab-label'>{tab.label}</span>
+                <span className= 'tab-description'>{tab.description}</span>
               </div>
             </button>
           );
@@ -300,9 +290,9 @@ export const DataManagement: React.FC<DataManagementProps> = ({
       </div>
 
       {/* 标签页内容 */}
-      <div className="tab-content-area">
-        {activeTab === 'history' && (
-          <div className="history-tab">
+      <div className= 'tab-content-area'>
+        {activeTab === 'history' && ('')
+          <div className= 'history-tab'>
             <TestHistory
               showStatistics={true}
               showFilters={true}
@@ -312,14 +302,14 @@ export const DataManagement: React.FC<DataManagementProps> = ({
           </div>
         )}
 
-        {activeTab === 'statistics' && (
-          <div className="statistics-tab">
-            <div className="placeholder-panel">
-              <TrendingUp className="placeholder-icon" />
+        {activeTab === 'statistics' && ('')
+          <div className= 'statistics-tab'>
+            <div className= 'placeholder-panel'>
+              <TrendingUp className= 'placeholder-icon'    />
               <h3>统计分析</h3>
               <p>测试数据统计和趋势分析功能正在开发中...</p>
               {statistics && (
-                <div className="basic-stats">
+                <div className= 'basic-stats'>
                   <p>总测试数: {statistics.totalTests || 0}</p>
                   <p>成功测试: {statistics.completedTests || 0}</p>
                   <p>失败测试: {statistics.failedTests || 0}</p>
@@ -329,10 +319,10 @@ export const DataManagement: React.FC<DataManagementProps> = ({
           </div>
         )}
 
-        {activeTab === 'export' && (
-          <div className="export-tab">
-            <div className="placeholder-panel">
-              <Download className="placeholder-icon" />
+        {activeTab === 'export' && ('')
+          <div className= 'export-tab'>
+            <div className= 'placeholder-panel'>
+              <Download className= 'placeholder-icon'    />
               <h3>数据中心</h3>
               <p>数据导出、备份和管理功能正在开发中...</p>
             </div>
@@ -341,7 +331,7 @@ export const DataManagement: React.FC<DataManagementProps> = ({
       </div>
 
       {/* 样式 */}
-      <style jsx>{`
+      <style jsx>{``
         .unified-data-management {
           min-height: 100vh;
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -657,7 +647,7 @@ export const DataManagement: React.FC<DataManagementProps> = ({
             align-items: flex-start;
           }
         }
-      `}</style>
+      `}</style>`
     </div>
   );
 };

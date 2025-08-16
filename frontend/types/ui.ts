@@ -1,23 +1,16 @@
 // UI组件相关类型定义
-import React from 'react';
-
-// 基础UI属性
-export interface BaseUIProps {
+import React from 'react';// 基础UI属性'
+export interface BaseUIProps     {
   className?: string;
   children?: React.ReactNode;
   id?: string;
-  'data-testid'?: string;
+  'data-testid'?: string;'
 }
 
 // 尺寸类型
-export type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-export type LoadingSize = Size;
-
-// 颜色变体
-export type ColorVariant = 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
-
-// 按钮属性
-export interface ButtonProps extends BaseUIProps {
+export type Size   = 'xs' | 'sm' | 'md' | 'lg' | 'xl';export type LoadingSize   = Size;// 颜色变体'
+export type ColorVariant   = 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';// 按钮属性'
+export interface ButtonProps extends BaseUIProps     {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'link';
   size?: Size;
   disabled?: boolean;
@@ -28,7 +21,7 @@ export interface ButtonProps extends BaseUIProps {
 }
 
 // 输入框属性
-export interface InputProps extends BaseUIProps {
+export interface InputProps extends BaseUIProps     {
   type?: 'text' | 'email' | 'password' | 'number' | 'url' | 'tel' | 'search';
   placeholder?: string;
   value?: string;
@@ -46,7 +39,7 @@ export interface InputProps extends BaseUIProps {
 }
 
 // 选择选项
-export interface SelectOption {
+export interface SelectOption     {
   value: string;
   label: string;
   disabled?: boolean;
@@ -58,7 +51,7 @@ export interface SelectOption {
 export type { SelectOption as SelectOptionType };
 
 // 选择框属性
-export interface SelectProps extends BaseUIProps {
+export interface SelectProps extends BaseUIProps     {
   options: SelectOption[];
   value?: string;
   defaultValue?: string;
@@ -70,11 +63,10 @@ export interface SelectProps extends BaseUIProps {
   multiple?: boolean;
   searchable?: boolean;
   clearable?: boolean;
-  onChange?: (value: string | string[]) => void;
-}
+  onChange?: (value: string | string[]) => void;}
 
 // 模态框属性
-export interface ModalProps extends BaseUIProps {
+export interface ModalProps extends BaseUIProps     {
   open: boolean;
   onClose: () => void;
   title?: string;
@@ -86,7 +78,7 @@ export interface ModalProps extends BaseUIProps {
 }
 
 // 表格列定义
-export interface Column<T = any> {
+export interface Column<T = any>     {
   key: keyof T | string;
   title: string;
   dataIndex?: keyof T;
@@ -105,7 +97,7 @@ export interface Column<T = any> {
 }
 
 // 表格属性
-export interface TableProps<T = any> extends BaseUIProps {
+export interface TableProps<T = any> extends BaseUIProps     {
   columns: Column<T>[];
   dataSource: T[];
   loading?: boolean;
@@ -130,7 +122,7 @@ export interface TableProps<T = any> extends BaseUIProps {
 }
 
 // 分页属性
-export interface PaginationProps extends BaseUIProps {
+export interface PaginationProps extends BaseUIProps     {
   current?: number;
   total: number;
   pageSize?: number;
@@ -146,7 +138,7 @@ export interface PaginationProps extends BaseUIProps {
 }
 
 // 标签属性
-export interface BadgeProps extends BaseUIProps {
+export interface BadgeProps extends BaseUIProps     {
   count?: number;
   text?: string;
   color?: ColorVariant | string;
@@ -158,7 +150,7 @@ export interface BadgeProps extends BaseUIProps {
 }
 
 // 提示框属性
-export interface TooltipProps extends BaseUIProps {
+export interface TooltipProps extends BaseUIProps     {
   title: React.ReactNode;
   placement?: 'top' | 'bottom' | 'left' | 'right' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
   trigger?: 'hover' | 'focus' | 'click' | 'contextMenu';
@@ -172,7 +164,7 @@ export interface TooltipProps extends BaseUIProps {
 }
 
 // 加载状态属性
-export interface LoadingProps extends BaseUIProps {
+export interface LoadingProps extends BaseUIProps     {
   spinning?: boolean;
   size?: LoadingSize;
   tip?: string;
@@ -182,7 +174,7 @@ export interface LoadingProps extends BaseUIProps {
 }
 
 // 警告框属性
-export interface AlertProps extends BaseUIProps {
+export interface AlertProps extends BaseUIProps     {
   type?: 'success' | 'info' | 'warning' | 'error';
   message: React.ReactNode;
   description?: React.ReactNode;
@@ -197,7 +189,7 @@ export interface AlertProps extends BaseUIProps {
 }
 
 // 卡片属性
-export interface CardProps extends BaseUIProps {
+export interface CardProps extends BaseUIProps     {
   title?: React.ReactNode;
   extra?: React.ReactNode;
   cover?: React.ReactNode;
@@ -212,7 +204,7 @@ export interface CardProps extends BaseUIProps {
 }
 
 // 抽屉属性
-export interface DrawerProps extends BaseUIProps {
+export interface DrawerProps extends BaseUIProps     {
   open: boolean;
   onClose: () => void;
   title?: React.ReactNode;
@@ -236,7 +228,7 @@ export interface DrawerProps extends BaseUIProps {
 }
 
 // 步骤条属性
-export interface StepsProps extends BaseUIProps {
+export interface StepsProps extends BaseUIProps     {
   current?: number;
   direction?: 'horizontal' | 'vertical';
   labelPlacement?: 'horizontal' | 'vertical';
@@ -248,7 +240,7 @@ export interface StepsProps extends BaseUIProps {
   items?: StepItem[];
 }
 
-export interface StepItem {
+export interface StepItem     {
   title: React.ReactNode;
   subTitle?: React.ReactNode;
   description?: React.ReactNode;
@@ -258,7 +250,7 @@ export interface StepItem {
 }
 
 // 标签页属性
-export interface TabsProps extends BaseUIProps {
+export interface TabsProps extends BaseUIProps     {
   activeKey?: string;
   defaultActiveKey?: string;
   type?: 'line' | 'card' | 'editable-card';
@@ -270,13 +262,13 @@ export interface TabsProps extends BaseUIProps {
   renderTabBar?: (props: any, DefaultTabBar: React.ComponentType<any>) => React.ReactElement;
   onChange?: (activeKey: string) => void;
   onTabClick?: (key: string, event: React.MouseEvent) => void;
-  onEdit?: (targetKey: React.MouseEvent | React.KeyboardEvent | string, action: 'add' | 'remove') => void;
+  onEdit?: (targetKey: React.MouseEvent | React.KeyboardEvent | string, action: 'add' | 'remove') => void;'
   hideAdd?: boolean;
   centered?: boolean;
   items?: TabItem[];
 }
 
-export interface TabItem {
+export interface TabItem     {
   key: string;
   label: React.ReactNode;
   children: React.ReactNode;
@@ -286,16 +278,9 @@ export interface TabItem {
 }
 
 // 通用事件处理器类型
-export type EventHandler<T = HTMLElement> = (event: React.SyntheticEvent<T>) => void;
-export type ChangeHandler<T = HTMLInputElement> = (event: React.ChangeEvent<T>) => void;
-export type ClickHandler<T = HTMLElement> = (event: React.MouseEvent<T>) => void;
-export type KeyboardHandler<T = HTMLElement> = (event: React.KeyboardEvent<T>) => void;
-
-// 响应式断点
-export type Breakpoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
-
-// 栅格系统
-export interface ColProps extends BaseUIProps {
+export type EventHandler<T   = HTMLElement> = (event: React.SyntheticEvent<T>) => void;export type ChangeHandler<T   = HTMLInputElement> = (event: React.ChangeEvent<T>) => void;export type ClickHandler<T   = HTMLElement> = (event: React.MouseEvent<T>) => void;export type KeyboardHandler<T   = HTMLElement> = (event: React.KeyboardEvent<T>) => void;// 响应式断点
+export type Breakpoint   = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';// 栅格系统'
+export interface ColProps extends BaseUIProps     {
   span?: number;
   offset?: number;
   push?: number;
@@ -309,7 +294,7 @@ export interface ColProps extends BaseUIProps {
   xxl?: number | ColSize;
 }
 
-export interface ColSize {
+export interface ColSize     {
   span?: number;
   offset?: number;
   push?: number;
@@ -317,7 +302,7 @@ export interface ColSize {
   order?: number;
 }
 
-export interface RowProps extends BaseUIProps {
+export interface RowProps extends BaseUIProps     {
   gutter?: number | [number, number] | Partial<Record<Breakpoint, number>>;
   align?: 'top' | 'middle' | 'bottom' | 'stretch';
   justify?: 'start' | 'end' | 'center' | 'space-around' | 'space-between' | 'space-evenly';
@@ -325,7 +310,7 @@ export interface RowProps extends BaseUIProps {
 }
 
 // 主题相关
-export interface ThemeConfig {
+export interface ThemeConfig     {
   primaryColor?: string;
   successColor?: string;
   warningColor?: string;
@@ -340,7 +325,5 @@ export interface ThemeConfig {
 }
 
 // CSS类名工具类型
-export type ClassValue = string | number | boolean | undefined | null | ClassValue[] | { [key: string]: any };
-
-// 组件引用类型
-export type ComponentRef<T = HTMLElement> = React.RefObject<T> | ((instance: T | null) => void) | null;
+export type ClassValue   = string | number | boolean | undefined | null | ClassValue[] | { [key: string]: any };// 组件引用类型
+export type ComponentRef<T   = HTMLElement> = React.RefObject<T> | ((instance: T | null) => void) | null;

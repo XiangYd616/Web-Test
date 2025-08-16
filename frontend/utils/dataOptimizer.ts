@@ -4,11 +4,10 @@
  * 版本: v1.0.0
  */
 
-// // // // // // // // import { defaultMemoryCache } from '../services/cacheStrategy'; // 文件已删除 // 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除 // 文件已删除
-
+// // // // // // // // import { defaultMemoryCache   } from '../services/cacheStrategy';// 文件已删除 // 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除 // 文件已删除'
 // ==================== 类型定义 ====================
 
-export interface DataChunk<T = any> {
+export interface DataChunk<T = any>     {
   id: string;
   data: T[];
   startIndex: number;
@@ -18,7 +17,7 @@ export interface DataChunk<T = any> {
   accessed: number;
 }
 
-export interface ChunkingOptions {
+export interface ChunkingOptions     {
   chunkSize: number;
   maxChunks: number;
   enableCache: boolean;
@@ -26,7 +25,7 @@ export interface ChunkingOptions {
   preloadChunks: number;
 }
 
-export interface LazyLoadOptions<T = any> {
+export interface LazyLoadOptions<T = any>     {
   pageSize: number;
   threshold: number;
   loadMore: (offset: number, limit: number) => Promise<T[]>;
@@ -34,7 +33,7 @@ export interface LazyLoadOptions<T = any> {
   onError?: (error: Error) => void;
 }
 
-export interface MemoryUsage {
+export interface MemoryUsage     {
   used: number;
   total: number;
   percentage: number;
@@ -42,7 +41,7 @@ export interface MemoryUsage {
   items: number;
 }
 
-export interface OptimizationMetrics {
+export interface OptimizationMetrics     {
   totalItems: number;
   chunksCreated: number;
   chunksLoaded: number;
@@ -87,14 +86,14 @@ export class DataChunkManager<T = any> {
    * 创建数据分片
    */
   createChunks(data: T[]): string[] {
-    const chunkIds: string[] = [];
+    const chunkIds: string[]  = [];
     const chunkSize = this.options.chunkSize;
 
     for (let i = 0; i < data.length; i += chunkSize) {
       const chunkData = data.slice(i, i + chunkSize);
       const chunkId = this.generateChunkId(i, i + chunkData.length - 1);
       
-      const chunk: DataChunk<T> = {
+      const chunk: DataChunk<T>  = {
         id: chunkId,
         data: chunkData,
         startIndex: i,
@@ -103,7 +102,6 @@ export class DataChunkManager<T = any> {
         timestamp: Date.now(),
         accessed: 0
       };
-
       this.chunks.set(chunkId, chunk);
       chunkIds.push(chunkId);
       this.metrics.chunksCreated++;
@@ -150,7 +148,7 @@ export class DataChunkManager<T = any> {
    * 获取范围内的数据
    */
   async getRange(startIndex: number, endIndex: number): Promise<T[]> {
-    const result: T[] = [];
+    const result: T[]  = [];
     const chunkSize = this.options.chunkSize;
     
     const startChunk = Math.floor(startIndex / chunkSize);
@@ -184,8 +182,7 @@ export class DataChunkManager<T = any> {
     const currentIndex = Math.floor(currentChunk.startIndex / chunkSize);
     const preloadCount = this.options.preloadChunks;
 
-    const preloadPromises: Promise<void>[] = [];
-
+    const preloadPromises: Promise<void>[]  = [];
     for (let i = 1; i <= preloadCount; i++) {
       // 预加载前面的分片
       const prevIndex = currentIndex - i;
@@ -248,8 +245,7 @@ export class DataChunkManager<T = any> {
    */
   cleanup(): void {
     const now = Date.now();
-    const expiredChunks: string[] = [];
-
+    const expiredChunks: string[]  = [];
     for (const [chunkId, chunk] of this.chunks.entries()) {
       if (now - chunk.timestamp > this.options.cacheTimeout) {
         expiredChunks.push(chunkId);
@@ -292,7 +288,7 @@ export class DataChunkManager<T = any> {
   // ==================== 私有方法 ====================
 
   private generateChunkId(startIndex: number, endIndex: number): string {
-    return `chunk_${startIndex}_${endIndex}`;
+    return `chunk_${startIndex}_${endIndex}`;`
   }
 
   private async loadChunkIfNeeded(chunkId: string): Promise<void> {
@@ -478,14 +474,13 @@ export class PerformanceMonitor {
    */
   takeMemorySnapshot(): MemoryUsage {
     const memory = performance.memory;
-    const snapshot: MemoryUsage = {
+    const snapshot: MemoryUsage  = {
       used: memory?.usedJSHeapSize || 0,
       total: memory?.totalJSHeapSize || 0,
       percentage: memory ? (memory.usedJSHeapSize / memory.totalJSHeapSize) * 100 : 0,
       chunks: 0,
       items: 0
     };
-
     this.memorySnapshots.push(snapshot);
     
     if (this.memorySnapshots.length > this.maxSnapshots) {
@@ -535,14 +530,12 @@ export class PerformanceMonitor {
 /**
  * 数据分批处理
  */
-export function processBatches<T, R>(
-  data: T[],
+export function processBatches<T, R>(data: T[],
   batchSize: number,
   processor: (batch: T[]) => Promise<R[]>
 ): Promise<R[]> {
   return new Promise(async (resolve, reject) => {
-    const results: R[] = [];
-    
+    const results: R[]  = [];
     try {
       for (let i = 0; i < data.length; i += batchSize) {
         const batch = data.slice(i, i + batchSize);
@@ -563,7 +556,7 @@ export function processBatches<T, R>(
 /**
  * 内存使用量估算
  */
-export function estimateMemoryUsage(data: any): number {
+export function estimateMemoryUsage(data: any): number   {
   const json = JSON.stringify(data);
   return new Blob([json]).size;
 }
@@ -571,7 +564,7 @@ export function estimateMemoryUsage(data: any): number {
 /**
  * 数据压缩
  */
-export function compressData<T>(data: T[]): { compressed: string; originalSize: number; compressedSize: number } {
+export function compressData<T>(data: T[]):   { compressed: string; originalSize: number; compressedSize: number } {
   const json = JSON.stringify(data);
   const originalSize = new Blob([json]).size;
   
@@ -589,7 +582,7 @@ export function compressData<T>(data: T[]): { compressed: string; originalSize: 
 /**
  * 数据解压缩
  */
-export function decompressData<T>(compressed: string): T[] {
+export function decompressData<T>(compressed: string): T[]   {
   const json = atob(compressed);
   return JSON.parse(json);
 }

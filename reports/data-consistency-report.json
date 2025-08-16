@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-16T07:25:41.736Z",
+  "timestamp": "2025-08-16T09:33:24.212Z",
   "summary": {
     "totalIssues": 28,
     "categories": {
@@ -1977,7 +1977,7 @@
       "category": "api_consistency",
       "type": "mixed_response_formats",
       "file": "project",
-      "message": "API响应格式不统一: 标准格式26, 直接数据16, 自定义格式8",
+      "message": "API响应格式不统一: 标准格式26, 直接数据17, 自定义格式8",
       "severity": "high"
     },
     {

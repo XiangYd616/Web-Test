@@ -1,19 +1,19 @@
 
 
 // 定义本地类型，避免循环依赖
-export interface RealTimeMetrics {
+export interface RealTimeMetrics     {
   timestamp: number;
   value: number;
   type: string;
 }
 
-export interface TestDataPoint {
+export interface TestDataPoint     {
   timestamp: number;
   value: any;
   metadata?: Record<string, any>;
 }
 
-export interface TestPhase {
+export interface TestPhase     {
   name: string;
   startTime: number;
   endTime?: number;
@@ -21,7 +21,7 @@ export interface TestPhase {
 }
 
 // 原始数据源接口
-export interface RawWebSocketData {
+export interface RawWebSocketData     {
   testId?: string;
   timestamp?: number;
   dataPoint?: {
@@ -49,7 +49,7 @@ export interface RawWebSocketData {
   progress?: number;
 }
 
-export interface RawAPIData {
+export interface RawAPIData     {
   success: boolean;
   data?: {
     testId: string;
@@ -75,7 +75,7 @@ export interface RawAPIData {
   message?: string;
 }
 
-export interface RawBackgroundManagerData {
+export interface RawBackgroundManagerData     {
   id: string;
   type: string;
   status: string;
@@ -105,7 +105,7 @@ export interface RawBackgroundManagerData {
 }
 
 // 数据验证规则
-export interface ValidationRules {
+export interface ValidationRules     {
   responseTime: { min: number; max: number };
   throughput: { min: number; max: number };
   activeUsers: { min: number; max: number };
@@ -114,7 +114,7 @@ export interface ValidationRules {
 }
 
 // 数据清理选项
-export interface CleaningOptions {
+export interface CleaningOptions     {
   removeOutliers: boolean;
   outlierThreshold: number; // 标准差倍数
   smoothingWindow: number; // 平滑窗口大小
@@ -126,7 +126,7 @@ export class DataNormalizationPipeline {
   private cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
   
   private getCacheKey(url: string, options: RequestInit): string {
-    return `${options.method || 'GET'}:${url}:${JSON.stringify(options.body || {})}`;
+    return `${options.method || "GET'}:${url}:${JSON.stringify(options.body || {})}`;'`
   }
   
   private getFromCache(key: string): any | null {
@@ -157,7 +157,7 @@ export class DataNormalizationPipeline {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
@@ -194,8 +194,7 @@ export class DataNormalizationPipeline {
     dataPoint?: TestDataPoint;
     metrics?: RealTimeMetrics;
   } {
-    const result: { dataPoint?: TestDataPoint; metrics?: RealTimeMetrics } = {};
-
+    const result: { dataPoint?: TestDataPoint; metrics?: RealTimeMetrics }  = {};
     try {
       // 处理数据点
       if (rawData.dataPoint) {
@@ -234,7 +233,7 @@ export class DataNormalizationPipeline {
         }
       }
     } catch (error) {
-      console.error('Error processing WebSocket data:', error);
+      console.error("Error processing WebSocket data: ', error);'`
     }
 
     return result;
@@ -247,8 +246,7 @@ export class DataNormalizationPipeline {
     dataPoints?: TestDataPoint[];
     metrics?: RealTimeMetrics;
   } {
-    const result: { dataPoints?: TestDataPoint[]; metrics?: RealTimeMetrics } = {};
-
+    const result: { dataPoints?: TestDataPoint[]; metrics?: RealTimeMetrics }  = {};
     try {
       if (!rawData.success || !rawData.data) {
         
@@ -283,7 +281,7 @@ export class DataNormalizationPipeline {
         }
       }
     } catch (error) {
-      console.error('Error processing API data:', error);
+      console.error('Error processing API data: ', error);'
     }
 
     return result;
@@ -296,8 +294,7 @@ export class DataNormalizationPipeline {
     dataPoints?: TestDataPoint[];
     metrics?: RealTimeMetrics;
   } {
-    const result: { dataPoints?: TestDataPoint[]; metrics?: RealTimeMetrics } = {};
-
+    const result: { dataPoints?: TestDataPoint[]; metrics?: RealTimeMetrics }  = {};
     try {
       // 处理实时数据数组 - 使用优化的映射函数
       if (rawData.realTimeData && Array.isArray(rawData.realTimeData)) {
@@ -326,7 +323,7 @@ export class DataNormalizationPipeline {
         }
       }
     } catch (error) {
-      console.error('Error processing background manager data:', error);
+      console.error('Error processing background manager data: ', error);'
     }
 
     return result;
@@ -419,20 +416,18 @@ export class DataNormalizationPipeline {
    * 标准化测试阶段
    */
   private normalizePhase(phase: any): TestPhase {
-    if (typeof phase !== 'string') return TestPhase.STEADY_STATE;
-
-    const phaseMap: Record<string, TestPhase> = {
-      'initialization': TestPhase.INITIALIZATION,
-      'ramp-up': TestPhase.RAMP_UP,
-      'rampup': TestPhase.RAMP_UP,
-      'steady': TestPhase.STEADY_STATE,
-      'steady-state': TestPhase.STEADY_STATE,
-      'running': TestPhase.STEADY_STATE,
-      'ramp-down': TestPhase.RAMP_DOWN,
-      'rampdown': TestPhase.RAMP_DOWN,
-      'cleanup': TestPhase.CLEANUP
+    if (typeof phase !== 'string') return TestPhase.STEADY_STATE;'
+    const phaseMap: Record<string, TestPhase>  = {
+      'initialization': TestPhase.INITIALIZATION,'
+      'ramp-up': TestPhase.RAMP_UP,'
+      'rampup': TestPhase.RAMP_UP,'
+      'steady': TestPhase.STEADY_STATE,'
+      'steady-state': TestPhase.STEADY_STATE,'
+      'running': TestPhase.STEADY_STATE,'
+      'ramp-down': TestPhase.RAMP_DOWN,'
+      'rampdown': TestPhase.RAMP_DOWN,'
+      'cleanup': TestPhase.CLEANUP'
     };
-
     return phaseMap[phase.toLowerCase()] || TestPhase.STEADY_STATE;
   }
 
@@ -539,8 +534,7 @@ export class DataNormalizationPipeline {
    * 批量标准化数据点 - 优化性能，减少重复映射
    */
   private batchNormalizeDataPoints(rawPoints: any[]): TestDataPoint[] {
-    const normalizedPoints: TestDataPoint[] = [];
-
+    const normalizedPoints: TestDataPoint[]  = [];
     for (const point of rawPoints) {
       const normalizedPoint = this.normalizeDataPoint({
         timestamp: point.timestamp || Date.now(),
@@ -566,9 +560,9 @@ export class DataNormalizationPipeline {
    */
   private validateBasicDataPoint(point: TestDataPoint): boolean {
     return (
-      typeof point.timestamp === 'number' &&
+      typeof point.timestamp === 'number' &&'
       point.timestamp > 0 &&
-      typeof point.responseTime === 'number' &&
+      typeof point.responseTime === 'number' &&'
       point.responseTime >= 0
     );
   }

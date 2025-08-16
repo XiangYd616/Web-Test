@@ -3,9 +3,7 @@
  * 管理数据的CRUD操作流程
  */
 
-import apiClient from '../utils/apiClient';
-
-export interface DataItem {
+import apiClient from '../utils/apiClient';export interface DataItem     {'
   id: number;
   type: string;
   name: string;
@@ -15,7 +13,7 @@ export interface DataItem {
   updatedAt: string;
 }
 
-export interface DataQuery {
+export interface DataQuery     {
   page?: number;
   limit?: number;
   type?: string;
@@ -61,7 +59,7 @@ class DataFlowManager {
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics:', {
+    console.debug('API Metrics: ', {'
       url: info.url,
       method: info.method,
       status: info.status,
@@ -82,7 +80,7 @@ class DataFlowManager {
   private cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
   
   private getCacheKey(url: string, options: RequestInit): string {
-    return `${options.method || 'GET'}:${url}:${JSON.stringify(options.body || {})}`;
+    return `${options.method || 'GET'}:${url}:${JSON.stringify(options.body || {})}`;'`
   }
   
   private getFromCache(key: string): any | null {
@@ -113,7 +111,7 @@ class DataFlowManager {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
@@ -130,15 +128,15 @@ class DataFlowManager {
         }
       });
 
-      const response = await apiClient.get(`/data/list?${params.toString()}`);
+      const response = await apiClient.get(`/data/list?${params.toString()}`);`
       
       if (response.success) {
         return response.data;
       } else {
-        throw new Error(response.error?.message || '查询数据失败');
+        throw new Error(response.error?.message || "查询数据失败');'`
       }
     } catch (error) {
-      console.error('查询数据失败:', error);
+      console.error('查询数据失败:', error);'
       throw error;
     }
   }
@@ -146,17 +144,16 @@ class DataFlowManager {
   /**
    * 创建数据
    */
-  async createData(data: Omit<DataItem, 'id' | 'createdAt' | 'updatedAt'>): Promise<DataItem> {
+  async createData(data: Omit<DataItem, 'id' | 'createdAt' | 'updatedAt'>): Promise<DataItem> {'
     try {
-      const response = await apiClient.post('/data/create', data);
-      
+      const response = await apiClient.post('/data/create', data);'
       if (response.success) {
         return response.data;
       } else {
-        throw new Error(response.error?.message || '创建数据失败');
+        throw new Error(response.error?.message || '创建数据失败');'
       }
     } catch (error) {
-      console.error('创建数据失败:', error);
+      console.error('创建数据失败:', error);'
       throw error;
     }
   }
@@ -166,15 +163,15 @@ class DataFlowManager {
    */
   async updateData(id: number, data: Partial<DataItem>): Promise<DataItem> {
     try {
-      const response = await apiClient.put(`/data/update/${id}`, data);
+      const response = await apiClient.put(`/data/update/${id}`, data);`
       
       if (response.success) {
         return response.data;
       } else {
-        throw new Error(response.error?.message || '更新数据失败');
+        throw new Error(response.error?.message || "更新数据失败');'`
       }
     } catch (error) {
-      console.error('更新数据失败:', error);
+      console.error("更新数据失败:', error);'
       throw error;
     }
   }
@@ -184,13 +181,13 @@ class DataFlowManager {
    */
   async deleteData(id: number): Promise<void> {
     try {
-      const response = await apiClient.delete(`/data/delete/${id}`);
+      const response = await apiClient.delete(`/data/delete/${id}`);`
       
       if (!response.success) {
-        throw new Error(response.error?.message || '删除数据失败');
+        throw new Error(response.error?.message || "删除数据失败');'`
       }
     } catch (error) {
-      console.error('删除数据失败:', error);
+      console.error('删除数据失败:', error);'
       throw error;
     }
   }
@@ -203,7 +200,7 @@ class DataFlowManager {
       const promises = ids.map(id => this.deleteData(id));
       await Promise.all(promises);
     } catch (error) {
-      console.error('批量删除数据失败:', error);
+      console.error('批量删除数据失败:', error);'
       throw error;
     }
   }
@@ -211,7 +208,7 @@ class DataFlowManager {
   /**
    * 导出数据
    */
-  async exportData(query: DataQuery = {}, format: 'csv' | 'json' | 'excel' = 'csv'): Promise<Blob> {
+  async exportData(query: DataQuery = {}, format: 'csv' | 'json' | 'excel' = 'csv'): Promise<Blob> {'
     try {
       const params = new URLSearchParams();
       Object.entries(query).forEach(([key, value]) => {
@@ -219,21 +216,20 @@ class DataFlowManager {
           params.append(key, String(value));
         }
       });
-      params.append('format', format);
-
-      const response = await fetch(`/api/data/export?${params.toString()}`, {
+      params.append('format', format);'
+      const response = await fetch(`/api/data/export?${params.toString()}`, {`
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          "Authorization": `Bearer ${localStorage.getItem("auth_token')}`'`
         }
       });
 
       if (!response.ok) {
-        throw new Error('导出数据失败');
+        throw new Error("导出数据失败');'`
       }
 
       return await response.blob();
     } catch (error) {
-      console.error('导出数据失败:', error);
+      console.error('导出数据失败:', error);'
       throw error;
     }
   }

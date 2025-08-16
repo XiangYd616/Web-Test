@@ -3,24 +3,20 @@
  * 提供在React组件中使用WebSocket的便捷方式
  */
 
-import { useEffect, useState, useCallback, useRef } from 'react';
-import webSocketClient from '../services/realtime/websocketService';
-import type { TestProgressData, TestStatusData, TestCompletedData, TestErrorData } from '../services/realtime/websocketService';
-
-interface UseWebSocketOptions {
+import { useEffect, useState, useCallback, useRef    } from 'react';import webSocketClient from '../services/realtime/websocketService';import type { TestProgressData, TestStatusData, TestCompletedData, TestErrorData  } from '../services/realtime/websocketService';interface UseWebSocketOptions   {'
   autoConnect?: boolean;
   testId?: string;
   room?: string;
 }
 
-interface WebSocketState {
+interface WebSocketState   {
   isConnected: boolean;
   isConnecting: boolean;
   error: string | null;
   clientId: string | null;
 }
 
-interface TestProgress {
+interface TestProgress   {
   testId: string;
   progress: number;
   currentStep: number;
@@ -29,7 +25,7 @@ interface TestProgress {
   timestamp: string;
 }
 
-interface TestStatus {
+interface TestStatus   {
   testId: string;
   status: 'running' | 'completed' | 'failed' | 'cancelled';
   progress: number;
@@ -73,7 +69,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
         ...prev,
         isConnected: false,
         isConnecting: false,
-        error: error instanceof Error ? error.message : '连接失败'
+        error: error instanceof Error ? error.message : '连接失败';
       }));
       return false;
     }
@@ -175,7 +171,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     const handleError = (data: { error: any }) => {
       setState(prev => ({
         ...prev,
-        error: data.error?.message || '连接错误'
+        error: data.error?.message || '连接错误';
       }));
     };
 
@@ -204,9 +200,9 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       setTestResults(data.results);
       setTestStatus(prev => prev ? {
         ...prev,
-        status: 'completed',
+        status: 'completed','
         progress: 100,
-        message: '测试完成'
+        message: '测试完成';
       } : null);
     };
 
@@ -214,29 +210,28 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       setTestError(data.error.message);
       setTestStatus(prev => prev ? {
         ...prev,
-        status: 'failed',
+        status: 'failed','
         message: data.error.message
       } : null);
     };
 
     // 注册事件监听器
-    webSocketClient.on('connected', handleConnected);
-    webSocketClient.on('disconnected', handleDisconnected);
-    webSocketClient.on('error', handleError);
-    webSocketClient.on('testProgress', handleTestProgress);
-    webSocketClient.on('testStatusUpdate', handleTestStatusUpdate);
-    webSocketClient.on('testCompleted', handleTestCompleted);
-    webSocketClient.on('testError', handleTestError);
-
+    webSocketClient.on('connected', handleConnected);'
+    webSocketClient.on('disconnected', handleDisconnected);'
+    webSocketClient.on('error', handleError);'
+    webSocketClient.on('testProgress', handleTestProgress);'
+    webSocketClient.on('testStatusUpdate', handleTestStatusUpdate);'
+    webSocketClient.on('testCompleted', handleTestCompleted);'
+    webSocketClient.on('testError', handleTestError);'
     return () => {
       // 清理事件监听器
-      webSocketClient.off('connected', handleConnected);
-      webSocketClient.off('disconnected', handleDisconnected);
-      webSocketClient.off('error', handleError);
-      webSocketClient.off('testProgress', handleTestProgress);
-      webSocketClient.off('testStatusUpdate', handleTestStatusUpdate);
-      webSocketClient.off('testCompleted', handleTestCompleted);
-      webSocketClient.off('testError', handleTestError);
+      webSocketClient.off('connected', handleConnected);'
+      webSocketClient.off('disconnected', handleDisconnected);'
+      webSocketClient.off('error', handleError);'
+      webSocketClient.off('testProgress', handleTestProgress);'
+      webSocketClient.off('testStatusUpdate', handleTestStatusUpdate);'
+      webSocketClient.off('testCompleted', handleTestCompleted);'
+      webSocketClient.off('testError', handleTestError);'
     };
   }, []);
 
@@ -334,8 +329,8 @@ export function useTestProgress(testId?: string) {
     progress: testProgress?.progress || 0,
     currentStep: testProgress?.currentStep || 0,
     totalSteps: testProgress?.totalSteps || 0,
-    message: testProgress?.message || testStatus?.message || '',
-    status: testStatus?.status || 'idle',
+    message: testProgress?.message || testStatus?.message || '','
+    status: testStatus?.status || 'idle','
     results: testResults,
     error: testError,
     subscribeToTest,

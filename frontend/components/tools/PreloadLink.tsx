@@ -3,11 +3,7 @@
  * 在用户悬停时预加载目标页面
  */
 
-import React, { useRef, useEffect } from 'react';
-import { Link, LinkProps } from 'react-router-dom';
-import { routePreloader, routeImports } from '../../utils/routePreloader';
-
-interface PreloadLinkProps extends LinkProps {
+import React, { useRef, useEffect    } from 'react';import { Link, LinkProps    } from 'react-router-dom';import { routePreloader, routeImports    } from '../../utils/routePreloader';interface PreloadLinkProps extends LinkProps   {'
   /** 预加载策略 */
   preloadStrategy?: 'hover' | 'immediate' | 'idle' | 'none';
   /** 悬停延迟时间（毫秒） */
@@ -20,33 +16,33 @@ interface PreloadLinkProps extends LinkProps {
 
 export const PreloadLink: React.FC<PreloadLinkProps> = ({
   to,
-  preloadStrategy = 'hover',
+  preloadStrategy = 'hover','
   hoverDelay = 100,
   idleDelay = 2000,
   showPreloadState = false,
   children,
-  className = '',
+  className = '','
   ...linkProps
 }) => {
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;
-  const descriptionId = `${componentId}-description`;
+  const errorId = `${componentId}-error`;`
+  const descriptionId = `${componentId}-description`;`
   
   const ariaProps = {
     id: componentId,
-    'aria-label': ariaLabel,
-    'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': [
+    "aria-label': ariaLabel,'`
+    'aria-labelledby': ariaLabelledBy,'
+    'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,
-    'aria-invalid': !!error,
-    'aria-disabled': disabled,
-    'aria-busy': loading,
-    'aria-expanded': expanded,
-    'aria-selected': selected,
+    ].filter(Boolean).join(' ') || undefined,'
+    'aria-invalid': !!error,'
+    'aria-disabled': disabled,'
+    'aria-busy': loading,'
+    'aria-expanded': expanded,'
+    'aria-selected': selected,'
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -57,8 +53,8 @@ export const PreloadLink: React.FC<PreloadLinkProps> = ({
     try {
       onClick?.(event);
     } catch (error) {
-      console.error('Click handler error:', error);
-      setError('操作失败，请重试');
+      console.error('Click handler error: ', error);'
+      setError('操作失败，请重试');'
     }
   }, [disabled, loading, onClick]);
   
@@ -68,8 +64,8 @@ export const PreloadLink: React.FC<PreloadLinkProps> = ({
     try {
       onChange?.(newValue);
     } catch (error) {
-      console.error('Change handler error:', error);
-      updateState({ error: '值更新失败' });
+      console.error('Change handler error: ', error);'
+      updateState({ error: '值更新失败' });'
     }
   }, [onChange, updateState]);
   
@@ -106,15 +102,15 @@ export const PreloadLink: React.FC<PreloadLinkProps> = ({
     const element = linkRef.current;
 
     switch (preloadStrategy) {
-      case 'immediate':
+      case 'immediate': ''
         routePreloader.preloadRoute(routePath, importFn);
         break;
 
-      case 'idle':
+      case 'idle': ''
         routePreloader.preloadOnIdle(routePath, importFn, idleDelay);
         break;
 
-      case 'hover':
+      case 'hover': ''
         cleanupRef.current = routePreloader.preloadOnHover(
           element,
           routePath,
@@ -122,7 +118,7 @@ export const PreloadLink: React.FC<PreloadLinkProps> = ({
         );
         break;
 
-      case 'none':
+      case "none': ''
       default:
         break;
     }
@@ -135,25 +131,24 @@ export const PreloadLink: React.FC<PreloadLinkProps> = ({
   }, [routePath, importFn, preloadStrategy, hoverDelay, idleDelay]);
 
   // 获取预加载状态
-  const preloadState = showPreloadState ? routePreloader.getPreloadState(routePath) : 'idle';
-
+  const preloadState = showPreloadState ? routePreloader.getPreloadState(routePath): 'idle';
   // 状态指示器样式
-  const getStateIndicator = () => {
+  const getStateIndicator = ()  => {
     if (!showPreloadState) return null;
 
     const indicators = {
       idle: null,
       loading: (
-        <span className="inline-block w-2 h-2 bg-yellow-400 rounded-full animate-pulse ml-1" 
-              title="预加载中..." />
+        <span className= 'inline-block w-2 h-2 bg-yellow-400 rounded-full animate-pulse ml-1';
+              title= '预加载中...' />
       ),
       loaded: (
-        <span className="inline-block w-2 h-2 bg-green-400 rounded-full ml-1" 
-              title="已预加载" />
+        <span className= 'inline-block w-2 h-2 bg-green-400 rounded-full ml-1';
+              title= '已预加载' />
       ),
       failed: (
-        <span className="inline-block w-2 h-2 bg-red-400 rounded-full ml-1" 
-              title="预加载失败" />
+        <span className= 'inline-block w-2 h-2 bg-red-400 rounded-full ml-1';
+              title= '预加载失败' />
       )
     };
 
@@ -164,7 +159,7 @@ export const PreloadLink: React.FC<PreloadLinkProps> = ({
     <Link
       ref={linkRef}
       to={to}
-      className={`${className} ${preloadState === 'loaded' ? 'preload-ready' : ''}`}
+      className={`${className} ${preloadState === 'loaded' ? 'preload-ready' : "'}`}'`
       {...linkProps}
     >
       {children}
@@ -176,7 +171,7 @@ export const PreloadLink: React.FC<PreloadLinkProps> = ({
 /**
  * 导航菜单项组件 - 带预加载功能
  */
-interface NavLinkProps extends PreloadLinkProps {
+interface NavLinkProps extends PreloadLinkProps   {
   icon?: React.ReactNode;
   badge?: string | number;
   isActive?: boolean;
@@ -187,28 +182,28 @@ export const NavLink: React.FC<NavLinkProps> = ({
   badge,
   isActive = false,
   children,
-  className = '',
+  className = "','`
   ...preloadLinkProps
 }) => {
-  const baseClasses = `
+  const baseClasses = ``
     flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors
-    ${isActive 
-      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200' 
-      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+    ${isActive }
+      ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200';'`
+      : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800';
     }
-  `;
+  `;`
 
   return (
     <PreloadLink
-      className={`${baseClasses} ${className}`}
-      preloadStrategy="hover"
-      showPreloadState={process.env.NODE_ENV === 'development'}
+      className={`${baseClasses} ${className}`}`
+      preloadStrategy= "hover';'`
+      showPreloadState={process.env.NODE_ENV === 'development'}'
       {...preloadLinkProps}
     >
-      {icon && <span className="mr-3">{icon}</span>}
-      <span className="flex-1">{children}</span>
+      {icon && <span className= 'mr-3'>{icon}</span>}'
+      <span className= 'flex-1'>{children}</span>
       {badge && (
-        <span className="ml-2 px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded-full dark:bg-gray-700 dark:text-gray-300">
+        <span className= 'ml-2 px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded-full dark:bg-gray-700 dark:text-gray-300'>
           {badge}
         </span>
       )}
@@ -219,46 +214,46 @@ export const NavLink: React.FC<NavLinkProps> = ({
 /**
  * 按钮式链接组件 - 带预加载功能
  */
-interface ButtonLinkProps extends PreloadLinkProps {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+interface ButtonLinkProps extends PreloadLinkProps   {
+  variant?: "primary' | 'secondary' | 'outline' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
 }
 
 export const ButtonLink: React.FC<ButtonLinkProps> = ({
-  variant = 'primary',
-  size = 'md',
+  variant = 'primary','
+  size = 'md','
   disabled = false,
   children,
-  className = '',
+  className = '','
   ...preloadLinkProps
 }) => {
   const variantClasses = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
-    secondary: 'bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500',
-    outline: 'border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-blue-500',
-    ghost: 'text-gray-700 hover:bg-gray-100 focus:ring-gray-500'
+    primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500','
+    secondary: 'bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500','
+    outline: 'border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-blue-500','
+    ghost: 'text-gray-700 hover:bg-gray-100 focus:ring-gray-500';
   };
 
   const sizeClasses = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-sm',
-    lg: 'px-6 py-3 text-base'
+    sm: 'px-3 py-1.5 text-sm','
+    md: 'px-4 py-2 text-sm','
+    lg: 'px-6 py-3 text-base';
   };
 
-  const baseClasses = `
+  const baseClasses = ``
     inline-flex items-center justify-center font-medium rounded-lg
     transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2
-    ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+    ${disabled ? "opacity-50 cursor-not-allowed' : 'cursor-pointer'}'`
     ${variantClasses[variant]}
     ${sizeClasses[size]}
-  `;
+  `;`
 
   if (disabled) {
     
         return (
-      <span className={`${baseClasses
-      } ${className}`}>
+      <span className={`${baseClasses`}
+      } ${className}`}>`
         {children}
       </span>
     );
@@ -266,8 +261,8 @@ export const ButtonLink: React.FC<ButtonLinkProps> = ({
 
   return (
     <PreloadLink
-      className={`${baseClasses} ${className}`}
-      preloadStrategy="hover"
+      className={`${baseClasses} ${className}`}`
+      preloadStrategy= "hover';'`
       {...preloadLinkProps}
     >
       {children}

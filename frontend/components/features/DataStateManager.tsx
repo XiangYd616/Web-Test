@@ -4,14 +4,8 @@
  * 版本: v2.0.0
  */
 
-import React from 'react';
-import { ExclamationTriangleIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
-import { cn } from '../../utils/commonUtils';
-import type { LoadingState } from '../../services/dataProcessor.ts';
-
-// ==================== 类型定义 ====================
-
-export interface DataStateManagerProps {
+import React from 'react';import { ExclamationTriangleIcon, ArrowPathIcon    } from '@heroicons/react/24/outline';import { cn    } from '../../utils/commonUtils';import type { LoadingState  } from '../../services/dataProcessor.ts';// ==================== 类型定义 ==================== ''
+export interface DataStateManagerProps     {
   // 状态
   state: LoadingState;
   error?: string | null;
@@ -46,30 +40,29 @@ export interface DataStateManagerProps {
 
 // ==================== 默认渲染组件 ====================
 
-const DefaultLoadingComponent: React.FC<{ text?: string; className?: string }> = ({ 
-  text = '加载中...', 
+const DefaultLoadingComponent: React.FC<{ text?: string; className?: string }>  = ({ 
+  text = '加载中...', '
   className 
 }) => (
-  <div className={cn('flex flex-col items-center justify-center py-12', className)}>
-    <div className="relative">
+  <div className={cn("flex flex-col items-center justify-center py-12', className)}>
+    <div className= 'relative'>
       {/* 主加载动画 */}
-      <div className="w-12 h-12 border-4 border-blue-200 dark:border-blue-800 rounded-full animate-spin">
-        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      <div className= 'w-12 h-12 border-4 border-blue-200 dark:border-blue-800 rounded-full animate-spin'>
+        <div className= 'w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin'></div>
       </div>
       
       {/* 脉冲效果 */}
-      <div className="absolute inset-0 w-12 h-12 border-4 border-blue-400 rounded-full animate-ping opacity-20"></div>
+      <div className= 'absolute inset-0 w-12 h-12 border-4 border-blue-400 rounded-full animate-ping opacity-20'></div>
     </div>
     
-    <p className="mt-4 text-sm text-gray-600 dark:text-gray-400 animate-pulse">
+    <p className= 'mt-4 text-sm text-gray-600 dark:text-gray-400 animate-pulse'>
       {text}
     </p>
   </div>
 );
-
 const DefaultErrorComponent: React.FC<{ 
   error: string; 
-  onRetry?: () => void; 
+  onRetry?: () => void;
   showRetryButton?: boolean;
   className?: string;
 }> = ({ 
@@ -78,62 +71,61 @@ const DefaultErrorComponent: React.FC<{
   showRetryButton = true, 
   className 
 }) => (
-  <div className={cn('flex flex-col items-center justify-center py-12', className)}>
-    <div className="flex items-center justify-center w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full mb-4">
-      <ExclamationTriangleIcon className="w-8 h-8 text-red-600 dark:text-red-400" />
+  <div className={cn("flex flex-col items-center justify-center py-12', className)}>
+    <div className= 'flex items-center justify-center w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full mb-4'>
+      <ExclamationTriangleIcon className= 'w-8 h-8 text-red-600 dark:text-red-400'    />
     </div>
     
-    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+    <h3 className= 'text-lg font-medium text-gray-900 dark:text-gray-100 mb-2'>
       加载失败
     </h3>
     
-    <p className="text-sm text-gray-600 dark:text-gray-400 text-center max-w-md mb-6">
+    <p className= 'text-sm text-gray-600 dark:text-gray-400 text-center max-w-md mb-6'>
       {error}
     </p>
     
     {showRetryButton && onRetry && (
       <button
         onClick={onRetry}
-        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors"
+        className= 'inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors';
       >
-        <ArrowPathIcon className="w-4 h-4" />
+        <ArrowPathIcon className= 'w-4 h-4'    />
         重试
       </button>
     )}
   </div>
 );
 
-const DefaultEmptyComponent: React.FC<{ text?: string; className?: string }> = ({ 
-  text = '暂无数据', 
+const DefaultEmptyComponent: React.FC<{ text?: string; className?: string }>  = ({ 
+  text = '暂无数据', '
   className 
 }) => (
   <div className={cn('flex flex-col items-center justify-center py-12', className)}>
-    <div className="flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full mb-4">
+    <div className= 'flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full mb-4'>
       <svg 
-        className="w-8 h-8 text-gray-400 dark:text-gray-600" 
-        fill="none" 
-        stroke="currentColor" 
-        viewBox="0 0 24 24"
+        className= 'w-8 h-8 text-gray-400 dark:text-gray-600';
+        fill= 'none';
+        stroke= 'currentColor';
+        viewBox= '0 0 24 24';
       >
         <path 
-          strokeLinecap="round" 
-          strokeLinejoin="round" 
+          strokeLinecap= 'round';
+          strokeLinejoin= 'round';
           strokeWidth={1.5} 
-          d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" 
+          d= 'M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4';
         />
       </svg>
     </div>
     
-    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+    <h3 className= 'text-lg font-medium text-gray-900 dark:text-gray-100 mb-2'>
       {text}
     </h3>
     
-    <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+    <p className= 'text-sm text-gray-600 dark:text-gray-400 text-center'>
       当前没有可显示的内容
     </p>
   </div>
 );
-
 // ==================== 主组件 ====================
 
 export const DataStateManager: React.FC<DataStateManagerProps> = ({
@@ -149,8 +141,8 @@ export const DataStateManager: React.FC<DataStateManagerProps> = ({
   onRefresh,
   showRetryButton = true,
   showRefreshButton = false,
-  loadingText = '加载中...',
-  emptyText = '暂无数据',
+  loadingText = '加载中...','
+  emptyText = '暂无数据','
   className,
   loadingClassName,
   errorClassName,
@@ -163,93 +155,92 @@ export const DataStateManager: React.FC<DataStateManagerProps> = ({
     className: combinedClassName,
     style: computedStyle,
     disabled,
-    'aria-label': ariaLabel,
-    'data-testid': testId
+    'aria-label': ariaLabel,'
+    'data-testid': testId'
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;
-  const descriptionId = `${componentId}-description`;
+  const errorId = `${componentId}-error`;`
+  const descriptionId = `${componentId}-description`;`
   
   const ariaProps = {
     id: componentId,
-    'aria-label': ariaLabel,
-    'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': [
+    "aria-label': ariaLabel,'`
+    'aria-labelledby': ariaLabelledBy,'
+    'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,
-    'aria-invalid': !!error,
-    'aria-disabled': disabled,
-    'aria-busy': loading,
-    'aria-expanded': expanded,
-    'aria-selected': selected,
+    ].filter(Boolean).join(' ') || undefined,'
+    'aria-invalid': !!error,'
+    'aria-disabled': disabled,'
+    'aria-busy': loading,'
+    'aria-expanded': expanded,'
+    "aria-selected': selected,'
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
   // 根据状态渲染不同内容
   const renderContent = () => {
     switch (state) {
-      case 'loading':
+      case 'loading': ''
         return renderLoading ? 
           renderLoading() : 
-          <DefaultLoadingComponent text={loadingText} className={loadingClassName} />;
+          <DefaultLoadingComponent text={loadingText} className={loadingClassName}    />;
       
-      case 'error':
+      case 'error': ''
         return renderError ? 
-          renderError(error || '未知错误', onRetry) : 
-          <DefaultErrorComponent 
-            error={error || '未知错误'} 
+          renderError(error || '未知错误', onRetry) : ''
+          <DefaultErrorComponent error={error || "未知错误'} '
             onRetry={onRetry}
             showRetryButton={showRetryButton}
             className={errorClassName}
-          />;
+             />;
       
-      case 'success':
+      case "success': ''
         // 检查是否为空数据
         if (isEmpty || (Array.isArray(data) && data.length === 0) || (!data && data !== 0)) {
           return renderEmpty ? 
             renderEmpty() : 
-            <DefaultEmptyComponent text={emptyText} className={emptyClassName} />;
+            <DefaultEmptyComponent text={emptyText} className={emptyClassName}    />;
         }
         
         // 渲染成功状态
         return renderSuccess ? renderSuccess(data) : children;
       
-      case 'refreshing':
+      case "refreshing': ''
         // 刷新状态下显示原有内容，但可以添加刷新指示器
         return (
-          <div className="relative">
+          <div className= 'relative'>
             {renderSuccess ? renderSuccess(data) : children}
             
             {/* 刷新指示器 */}
-            <div className="absolute top-2 right-2">
-              <div className="flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-xs rounded-full">
-                <ArrowPathIcon className="w-3 h-3 animate-spin" />
+            <div className= 'absolute top-2 right-2'>
+              <div className= 'flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-xs rounded-full'>
+                <ArrowPathIcon className= 'w-3 h-3 animate-spin'    />
                 刷新中
               </div>
             </div>
           </div>
         );
       
-      case 'idle':
+      case 'idle': ''
       default:
         return children;
     }
   };
 
   return (
-    <div className={cn('data-state-manager', className)}>
+    <div className={cn("data-state-manager', className)}>
       {/* 刷新按钮 */}
-      {showRefreshButton && onRefresh && state === 'success' && (
-        <div className="flex justify-end mb-4">
+      {showRefreshButton && onRefresh && state === 'success' && ('')
+        <div className= 'flex justify-end mb-4'>
           <button
             onClick={onRefresh}
-            disabled={state === 'refreshing'}
-            className="inline-flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors disabled:opacity-50"
+            disabled={state === 'refreshing'}'
+            className= 'inline-flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors disabled:opacity-50';
           >
-            <ArrowPathIcon className={cn('w-4 h-4', state === 'refreshing' && 'animate-spin')} />
+            <ArrowPathIcon className={cn('w-4 h-4', state === 'refreshing' && "animate-spin')}    />
             刷新
           </button>
         </div>
@@ -263,7 +254,7 @@ export const DataStateManager: React.FC<DataStateManagerProps> = ({
 
 // ==================== Hook封装 ====================
 
-export interface UseDataStateManagerOptions {
+export interface UseDataStateManagerOptions     {
   loadingText?: string;
   emptyText?: string;
   showRetryButton?: boolean;
@@ -275,8 +266,8 @@ export interface UseDataStateManagerOptions {
 
 export function useDataStateManager(options: UseDataStateManagerOptions = {}) {
   const {
-    loadingText = '加载中...',
-    emptyText = '暂无数据',
+    loadingText = '加载中...','
+    emptyText = '暂无数据','
     showRetryButton = true,
     showRefreshButton = false,
     autoRetry = false,
@@ -338,7 +329,7 @@ export function withDataStateManager<P extends object>(
     
     return (
       <DataStateManager {...defaultProps} {...props}>
-        <WrappedComponent {...(props as P)} ref={ref} />
+        <WrappedComponent {...(props as P)} ref={ref}    />
       </DataStateManager>
     );
   });

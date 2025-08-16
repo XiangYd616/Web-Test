@@ -3,7 +3,7 @@
  * 管理测试执行状态、结果和用户界面状态
  */
 
-export interface TestState {
+export interface TestState     {
   id: string;
   type: 'performance' | 'security' | 'seo' | 'stress' | 'api' | 'compatibility';
   url: string;
@@ -17,7 +17,7 @@ export interface TestState {
   metadata?: Record<string, any>;
 }
 
-export interface GlobalTestState {
+export interface GlobalTestState     {
   activeTests: Map<string, TestState>;
   testHistory: TestState[];
   currentTest?: TestState;
@@ -26,7 +26,7 @@ export interface GlobalTestState {
   queuedTests: TestState[];
 }
 
-export interface StateChangeListener {
+export interface StateChangeListener     {
   (state: GlobalTestState): void;
 }
 
@@ -34,7 +34,6 @@ class TestStateManager {
   private state: GlobalTestState;
   private listeners: Set<StateChangeListener> = new Set();
   private storageKey = 'test-state';
-
   constructor() {
     this.state = {
       activeTests: new Map(),
@@ -60,7 +59,7 @@ class TestStateManager {
   /**
    * 添加状态变化监听器
    */
-  addListener(listener: StateChangeListener): () => void {
+  addListener(listener: StateChangeListener): ()  => void {
     this.listeners.add(listener);
     
     // 返回取消监听函数
@@ -73,19 +72,18 @@ class TestStateManager {
    * 创建新测试
    */
   createTest(
-    type: TestState['type'],
+    type: TestState['type'],'
     url: string,
     metadata?: Record<string, any>
   ): TestState {
-    const test: TestState = {
+    const test: TestState  = {
       id: this.generateTestId(),
       type,
       url,
-      status: 'idle',
+      status: 'idle','
       progress: 0,
       metadata
     };
-
     this.updateState(state => {
       // 如果达到最大并发数，加入队列
       if (state.activeTests.size >= state.maxConcurrentTests) {
@@ -103,8 +101,7 @@ class TestStateManager {
    */
   startTest(testId: string): boolean {
     const test = this.state.activeTests.get(testId);
-    if (!test || test.status !== 'idle') {
-      
+    if (!test || test.status !== 'idle') {'
         return false;
       }
 
@@ -127,8 +124,7 @@ class TestStateManager {
    */
   updateTestProgress(testId: string, progress: number): boolean {
     const test = this.state.activeTests.get(testId);
-    if (!test || test.status !== 'running') {
-      
+    if (!test || test.status !== 'running') {'
         return false;
       }
 
@@ -147,8 +143,7 @@ class TestStateManager {
    */
   completeTest(testId: string, results: any): boolean {
     const test = this.state.activeTests.get(testId);
-    if (!test || test.status !== 'running') {
-      
+    if (!test || test.status !== 'running') {'
         return false;
       }
 
@@ -311,9 +306,8 @@ class TestStateManager {
     failedCount: number;
     totalCount: number;
   } {
-    const completed = this.state.testHistory.filter(t => t.status === 'completed').length;
-    const failed = this.state.testHistory.filter(t => t.status === 'failed').length;
-
+    const completed = this.state.testHistory.filter(t => t.status === 'completed').length;'
+    const failed = this.state.testHistory.filter(t => t.status === 'failed').length;'
     return {
       activeCount: this.state.activeTests.size,
       queuedCount: this.state.queuedTests.length,
@@ -336,8 +330,7 @@ class TestStateManager {
    * 更新全局标志
    */
   private updateGlobalFlags(state: GlobalTestState): void {
-    state.isAnyTestRunning = Array.from(state.activeTests.values()).some(t => t.status === 'running');
-    
+    state.isAnyTestRunning = Array.from(state.activeTests.values()).some(t => t.status === 'running');'
     if (!state.isAnyTestRunning) {
       state.currentTest = undefined;
     }
@@ -362,7 +355,7 @@ class TestStateManager {
       try {
         listener(currentState);
       } catch (error) {
-        console.error('Error in state change listener:', error);
+        console.error('Error in state change listener: ', error);'
       }
     });
   }
@@ -378,7 +371,7 @@ class TestStateManager {
       };
       localStorage.setItem(this.storageKey, JSON.stringify(stateToSave));
     } catch (error) {
-      console.warn('Failed to save test state:', error);
+      console.warn('Failed to save test state: ', error);'
     }
   }
 
@@ -398,7 +391,7 @@ class TestStateManager {
         this.state.maxConcurrentTests = parsed.maxConcurrentTests || 3;
       }
     } catch (error) {
-      console.warn('Failed to load test state:', error);
+      console.warn('Failed to load test state:', error);'
     }
   }
 
@@ -406,7 +399,7 @@ class TestStateManager {
    * 生成测试ID
    */
   private generateTestId(): string {
-    return `test_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    return `test_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;`
   }
 }
 

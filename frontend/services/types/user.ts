@@ -8,19 +8,19 @@
 export type {
   AuthResponse, LoginCredentials,
   // RegisterData, User, UserPreferences, UserProfile, UserRole, UserSession, UserStatus
-} from '../../types/unified/models'; // 已修复
+} from '../../types/unified/models'; // 已修复'
 // 扩展类型定义（服务层特有的类型）
-export interface PasswordResetRequest {
+export interface PasswordResetRequest     {
   email: string;
 }
 
-export interface PasswordReset {
+export interface PasswordReset     {
   token: string;
   newPassword: string;
   confirmPassword: string;
 }
 
-export interface UserUpdateData {
+export interface UserUpdateData     {
   username?: string;
   email?: string;
   firstName?: string;
@@ -32,7 +32,7 @@ export interface UserUpdateData {
   avatar?: string;
 }
 
-export interface PasswordChangeData {
+export interface PasswordChangeData     {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;

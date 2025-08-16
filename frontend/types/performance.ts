@@ -1,7 +1,7 @@
 
 // 扩展 Performance 接口
 declare global {
-  interface Performance {
+  interface Performance   {
     memory?: {
       usedJSHeapSize: number;
       totalJSHeapSize: number;
@@ -9,19 +9,19 @@ declare global {
     };
   }
 
-  interface PerformanceEntry {
+  interface PerformanceEntry   {
     processingStart?: number;
     processingEnd?: number;
     renderStart?: number;
     renderEnd?: number;
   }
 
-  interface PerformanceNavigationTiming {
+  interface PerformanceNavigationTiming   {
     processingStart?: number;
     processingEnd?: number;
   }
 
-  interface PerformanceResourceTiming {
+  interface PerformanceResourceTiming   {
     processingStart?: number;
     processingEnd?: number;
   }
@@ -29,10 +29,9 @@ declare global {
 
 // ==================== 性能配置接口 ====================
 
-export interface PerformanceConfig {
+export interface PerformanceConfig     {
   /** 检测级别 */
   level: 'basic' | 'standard' | 'comprehensive';
-
   /** 页面速度检测 */
   pageSpeed: boolean;
 
@@ -62,7 +61,6 @@ export interface PerformanceConfig {
 
   /** 设备类型 */
   device: 'desktop' | 'mobile' | 'both';
-
   /** 超时时间（秒） */
   timeout: number;
 
@@ -72,7 +70,7 @@ export interface PerformanceConfig {
 
 // ==================== 性能指标接口 ====================
 
-export interface CoreWebVitals {
+export interface CoreWebVitals     {
   /** 最大内容绘制时间 (ms) */
   lcp: number;
 
@@ -95,7 +93,7 @@ export interface CoreWebVitals {
   tti: number;
 }
 
-export interface PageSpeedMetrics {
+export interface PageSpeedMetrics     {
   /** 页面加载时间 (ms) */
   loadTime: number;
 
@@ -118,7 +116,7 @@ export interface PageSpeedMetrics {
   transferSize: number;
 }
 
-export interface ResourceAnalysis {
+export interface ResourceAnalysis     {
   /** 图片资源分析 */
   images: {
     count: number;
@@ -151,10 +149,9 @@ export interface ResourceAnalysis {
   };
 }
 
-export interface CacheAnalysis {
+export interface CacheAnalysis     {
   /** 缓存策略 */
   strategy: 'none' | 'basic' | 'advanced';
-
   /** 缓存命中率 */
   hitRate: number;
 
@@ -179,10 +176,9 @@ export interface CacheAnalysis {
   };
 }
 
-export interface CompressionAnalysis {
+export interface CompressionAnalysis     {
   /** 压缩类型 */
   type: 'none' | 'gzip' | 'brotli' | 'deflate';
-
   /** 压缩率 */
   ratio: number;
 
@@ -207,7 +203,7 @@ export interface CompressionAnalysis {
 
 // ==================== 性能测试结果接口 ====================
 
-export interface PerformanceTestResult {
+export interface PerformanceTestResult     {
   /** 测试ID */
   testId: string;
 
@@ -225,7 +221,6 @@ export interface PerformanceTestResult {
 
   /** 性能等级 */
   grade: 'A+' | 'A' | 'B' | 'C' | 'D' | 'F';
-
   /** Core Web Vitals */
   coreWebVitals?: CoreWebVitals;
 
@@ -261,10 +256,9 @@ export interface PerformanceTestResult {
   error?: string;
 }
 
-export interface PerformanceRecommendation {
+export interface PerformanceRecommendation     {
   /** 建议类型 */
   type: 'critical' | 'important' | 'minor';
-
   /** 建议标题 */
   title: string;
 
@@ -273,21 +267,17 @@ export interface PerformanceRecommendation {
 
   /** 预期收益 */
   impact: 'high' | 'medium' | 'low';
-
   /** 实施难度 */
   difficulty: 'easy' | 'medium' | 'hard';
-
   /** 相关指标 */
   metrics: string[];
 }
 
-export interface PerformanceIssue {
+export interface PerformanceIssue     {
   /** 问题类型 */
   type: 'speed' | 'size' | 'optimization' | 'caching' | 'compression';
-
   /** 严重程度 */
   severity: 'critical' | 'high' | 'medium' | 'low';
-
   /** 问题描述 */
   description: string;
 
@@ -303,10 +293,9 @@ export interface PerformanceIssue {
 
 // ==================== 性能测试进度接口 ====================
 
-export interface PerformanceTestProgress {
+export interface PerformanceTestProgress     {
   /** 当前阶段 */
   phase: 'initializing' | 'analyzing' | 'measuring' | 'optimizing' | 'reporting' | 'completed' | 'failed';
-
   /** 进度百分比 (0-100) */
   progress: number;
 
@@ -334,7 +323,7 @@ export interface PerformanceTestProgress {
 
 export const PERFORMANCE_CONFIG_PRESETS: Record<string, PerformanceConfig> = {
   basic: {
-    level: 'basic',
+    level: 'basic','
     pageSpeed: true,
     coreWebVitals: false,
     resourceOptimization: false,
@@ -344,13 +333,13 @@ export const PERFORMANCE_CONFIG_PRESETS: Record<string, PerformanceConfig> = {
     javascriptOptimization: false,
     cssOptimization: false,
     mobilePerformance: false,
-    device: 'desktop',
+    device: 'desktop','
     timeout: 30,
     retries: 1
   },
 
   standard: {
-    level: 'standard',
+    level: 'standard','
     pageSpeed: true,
     coreWebVitals: true,
     resourceOptimization: true,
@@ -360,13 +349,13 @@ export const PERFORMANCE_CONFIG_PRESETS: Record<string, PerformanceConfig> = {
     javascriptOptimization: false,
     cssOptimization: false,
     mobilePerformance: true,
-    device: 'both',
+    device: 'both','
     timeout: 60,
     retries: 2
   },
 
   comprehensive: {
-    level: 'comprehensive',
+    level: 'comprehensive','
     pageSpeed: true,
     coreWebVitals: true,
     resourceOptimization: true,
@@ -376,7 +365,7 @@ export const PERFORMANCE_CONFIG_PRESETS: Record<string, PerformanceConfig> = {
     javascriptOptimization: true,
     cssOptimization: true,
     mobilePerformance: true,
-    device: 'both',
+    device: 'both','
     timeout: 120,
     retries: 3
   }
@@ -384,9 +373,7 @@ export const PERFORMANCE_CONFIG_PRESETS: Record<string, PerformanceConfig> = {
 
 // ==================== 工具函数类型 ====================
 
-export type PerformanceTestCallback = (progress: PerformanceTestProgress) => void;
-
-export interface PerformanceTestOptions {
+export type PerformanceTestCallback   = (progress: PerformanceTestProgress) => void;export interface PerformanceTestOptions     {
   /** 进度回调 */
   onProgress?: PerformanceTestCallback;
 

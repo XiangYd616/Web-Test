@@ -4,13 +4,8 @@
  * 版本: v1.0.0
  */
 
-import { useCallback, useState } from 'react';
-
-// ==================== 类型定义 ====================
-
-export type MFAMethod = 'totp' | 'sms' | 'email' | 'backup_codes' | 'hardware_key' | 'biometric';
-
-export interface MFAConfig {
+import { useCallback, useState    } from 'react';// ==================== 类型定义 ==================== ''
+export type MFAMethod   = 'totp' | 'sms' | 'email' | 'backup_codes' | 'hardware_key' | 'biometric';export interface MFAConfig     {'
   enabledMethods: MFAMethod[];
   requireMFA: boolean;
   totpIssuer: string;
@@ -24,7 +19,7 @@ export interface MFAConfig {
   lockoutDuration: number; // 锁定时间（秒）
 }
 
-export interface MFASetup {
+export interface MFASetup     {
   userId: string;
   method: MFAMethod;
   isEnabled: boolean;
@@ -37,7 +32,7 @@ export interface MFASetup {
   metadata?: Record<string, any>;
 }
 
-export interface MFAChallenge {
+export interface MFAChallenge     {
   challengeId: string;
   userId: string;
   method: MFAMethod;
@@ -49,7 +44,7 @@ export interface MFAChallenge {
   metadata?: Record<string, any>;
 }
 
-export interface MFAVerificationResult {
+export interface MFAVerificationResult     {
   success: boolean;
   method: MFAMethod;
   challengeId?: string;
@@ -59,7 +54,7 @@ export interface MFAVerificationResult {
   backupCodeUsed?: boolean;
 }
 
-export interface TOTPSetupResult {
+export interface TOTPSetupResult     {
   secret: string;
   qrCodeUrl: string;
   manualEntryKey: string;
@@ -70,7 +65,6 @@ export interface TOTPSetupResult {
 
 class TOTPGenerator {
   private static readonly BASE32_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-
   /**
    * 生成TOTP密钥
    */
@@ -97,14 +91,14 @@ class TOTPGenerator {
 
     const keyBytes = this.base32Decode(secret);
     const key = await crypto.subtle.importKey(
-      'raw',
+      'raw','
       keyBytes,
-      { name: 'HMAC', hash: 'SHA-1' },
+      { name: 'HMAC', hash: 'SHA-1' },'
       false,
-      ['sign']
+      ['sign']'
     );
 
-    const signature = await crypto.subtle.sign('HMAC', key, timeBytes);
+    const signature = await crypto.subtle.sign('HMAC', key, timeBytes);'
     const signatureArray = new Uint8Array(signature);
 
     const offset = signatureArray[19] & 0xf;
@@ -115,7 +109,7 @@ class TOTPGenerator {
       (signatureArray[offset + 3] & 0xff)
     ) % 1000000;
 
-    return code.toString().padStart(6, '0');
+    return code.toString().padStart(6, '0');'
   }
 
   /**
@@ -145,16 +139,16 @@ class TOTPGenerator {
     accountName: string,
     issuer: string
   ): string {
-    const otpauthUrl = `otpauth://totp/${encodeURIComponent(issuer)}:${encodeURIComponent(accountName)}?secret=${secret}&issuer=${encodeURIComponent(issuer)}`;
-    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(otpauthUrl)}`;
+    const otpauthUrl = `otpauth://totp/${encodeURIComponent(issuer)}:${encodeURIComponent(accountName)}?secret=${secret}&issuer=${encodeURIComponent(issuer)}`;`
+    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(otpauthUrl)}`;`
   }
 
   /**
    * Base32解码
    */
   private static base32Decode(encoded: string): Uint8Array {
-    const cleanedInput = encoded.toUpperCase().replace(/[^A-Z2-7]/g, '');
-    const bytes: number[] = [];
+    const cleanedInput = encoded.toUpperCase().replace(/[^A-Z2-7]/g, "');'`
+    const bytes: number[]  = [];
     let buffer = 0;
     let bitsLeft = 0;
 
@@ -184,7 +178,6 @@ class CodeGenerator {
   static generateNumericCode(length: number = 6): string {
     const digits = '0123456789';
     let code = '';
-
     for (let i = 0; i < length; i++) {
       code += digits[Math.floor(Math.random() * digits.length)];
     }
@@ -198,7 +191,6 @@ class CodeGenerator {
   static generateAlphanumericCode(length: number = 8): string {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let code = '';
-
     for (let i = 0; i < length; i++) {
       code += chars[Math.floor(Math.random() * chars.length)];
     }
@@ -210,8 +202,7 @@ class CodeGenerator {
    * 生成备用码
    */
   static generateBackupCodes(count: number = 10): string[] {
-    const codes: string[] = [];
-
+    const codes: string[]  = [];
     for (let i = 0; i < count; i++) {
       const code = this.generateAlphanumericCode(8);
       codes.push(code);
@@ -231,13 +222,13 @@ export class MFAService {
 
   constructor(config: Partial<MFAConfig> = {}) {
     this.config = {
-      enabledMethods: ['totp', 'sms', 'email', 'backup_codes'],
+      enabledMethods: ['totp', 'sms', 'email', 'backup_codes'],'
       requireMFA: false,
-      totpIssuer: 'TestWeb Platform',
+      totpIssuer: 'TestWeb Platform','
       totpDigits: 6,
       totpPeriod: 30,
-      smsProvider: 'mock',
-      emailProvider: 'mock',
+      smsProvider: 'mock','
+      emailProvider: 'mock','
       backupCodesCount: 10,
       codeExpiry: 300, // 5分钟
       maxAttempts: 3,
@@ -262,7 +253,7 @@ export class MFAService {
 
     // 临时存储，等待验证后正式启用
     await defaultMemoryCache.set(
-      `totp_setup_${userId}`,
+      `totp_setup_${userId}`,`
       { secret, backupCodes },
       undefined,
       600000 // 10分钟
@@ -280,7 +271,7 @@ export class MFAService {
    * 验证并启用TOTP
    */
   async enableTOTP(userId: string, token: string): Promise<{ success: boolean; backupCodes?: string[] }> {
-    const setupData = await defaultMemoryCache.get(`totp_setup_${userId}`);
+    const setupData = await defaultMemoryCache.get(`totp_setup_${userId}`);`
     if (!setupData) {
       
         return { success: false
@@ -295,17 +286,16 @@ export class MFAService {
     }
 
     // 保存TOTP设置
-    const setup: MFASetup = {
+    const setup: MFASetup  = {
       userId,
-      method: 'totp',
+      method: "totp','`
       isEnabled: true,
       secret: setupData.secret,
       backupCodes: setupData.backupCodes,
       createdAt: new Date().toISOString()
     };
-
     await this.saveMFASetup(setup);
-    await defaultMemoryCache.delete(`totp_setup_${userId}`);
+    await defaultMemoryCache.delete(`totp_setup_${userId}`);`
 
     return { success: true, backupCodes: setupData.backupCodes };
   }
@@ -319,10 +309,10 @@ export class MFAService {
     const code = CodeGenerator.generateNumericCode(6);
     const challengeId = this.generateChallengeId();
 
-    const challenge: MFAChallenge = {
+    const challenge: MFAChallenge  = {
       challengeId,
       userId,
-      method: 'sms',
+      method: "sms','`
       code,
       expiresAt: new Date(Date.now() + this.config.codeExpiry * 1000).toISOString(),
       attempts: 0,
@@ -330,7 +320,6 @@ export class MFAService {
       createdAt: new Date().toISOString(),
       metadata: { phoneNumber }
     };
-
     this.activeChallenges.set(challengeId, challenge);
 
     // 发送短信
@@ -349,14 +338,13 @@ export class MFAService {
         return false;
       }
 
-    const setup: MFASetup = {
+    const setup: MFASetup  = {
       userId,
-      method: 'sms',
+      method: 'sms','
       isEnabled: true,
       phone: phoneNumber,
       createdAt: new Date().toISOString()
     };
-
     await this.saveMFASetup(setup);
     return true;
   }
@@ -370,10 +358,10 @@ export class MFAService {
     const code = CodeGenerator.generateNumericCode(6);
     const challengeId = this.generateChallengeId();
 
-    const challenge: MFAChallenge = {
+    const challenge: MFAChallenge  = {
       challengeId,
       userId,
-      method: 'email',
+      method: 'email','
       code,
       expiresAt: new Date(Date.now() + this.config.codeExpiry * 1000).toISOString(),
       attempts: 0,
@@ -381,7 +369,6 @@ export class MFAService {
       createdAt: new Date().toISOString(),
       metadata: { email }
     };
-
     this.activeChallenges.set(challengeId, challenge);
 
     // 发送邮件
@@ -400,14 +387,13 @@ export class MFAService {
         return false;
       }
 
-    const setup: MFASetup = {
+    const setup: MFASetup  = {
       userId,
-      method: 'email',
+      method: 'email','
       isEnabled: true,
       email,
       createdAt: new Date().toISOString()
     };
-
     await this.saveMFASetup(setup);
     return true;
   }
@@ -419,40 +405,39 @@ export class MFAService {
    */
   async createChallenge(userId: string, method: MFAMethod): Promise<{ challengeId: string; message?: string }> {
     if (this.isUserLockedOut(userId)) {
-      throw new Error('用户已被锁定，请稍后再试');
+      throw new Error('用户已被锁定，请稍后再试');'
     }
 
     const userSetups = await this.getUserMFASetups(userId);
     const setup = userSetups.find(s => s.method === method && s.isEnabled);
 
     if (!setup) {
-      throw new Error('未找到启用的MFA方法');
+      throw new Error('未找到启用的MFA方法');'
     }
 
     const challengeId = this.generateChallengeId();
 
     switch (method) {
-      case 'totp':
+      case 'totp': ''
         // TOTP不需要发送验证码
-        const totpChallenge: MFAChallenge = {
+        const totpChallenge: MFAChallenge  = {
           challengeId,
           userId,
-          method: 'totp',
+          method: 'totp','
           expiresAt: new Date(Date.now() + this.config.codeExpiry * 1000).toISOString(),
           attempts: 0,
           isUsed: false,
           createdAt: new Date().toISOString()
         };
         this.activeChallenges.set(challengeId, totpChallenge);
-        return { challengeId, message: '请输入身份验证器中的6位数字' };
-
-      case 'sms':
-        if (!setup.phone) throw new Error('未设置手机号');
+        return { challengeId, message: '请输入身份验证器中的6位数字' };'
+      case 'sms': ''
+        if (!setup.phone) throw new Error('未设置手机号');'
         const smsCode = CodeGenerator.generateNumericCode(6);
-        const smsChallenge: MFAChallenge = {
+        const smsChallenge: MFAChallenge  = {
           challengeId,
           userId,
-          method: 'sms',
+          method: 'sms','
           code: smsCode,
           expiresAt: new Date(Date.now() + this.config.codeExpiry * 1000).toISOString(),
           attempts: 0,
@@ -461,15 +446,15 @@ export class MFAService {
         };
         this.activeChallenges.set(challengeId, smsChallenge);
         await this.sendSMS(setup.phone, smsCode);
-        return { challengeId, message: `验证码已发送到 ${this.maskPhone(setup.phone)}` };
+        return { challengeId, message: `验证码已发送到 ${this.maskPhone(setup.phone)}` };`
 
-      case 'email':
-        if (!setup.email) throw new Error('未设置邮箱');
+      case "email': ''`
+        if (!setup.email) throw new Error('未设置邮箱');'
         const emailCode = CodeGenerator.generateNumericCode(6);
-        const emailChallenge: MFAChallenge = {
+        const emailChallenge: MFAChallenge  = {
           challengeId,
           userId,
-          method: 'email',
+          method: 'email','
           code: emailCode,
           expiresAt: new Date(Date.now() + this.config.codeExpiry * 1000).toISOString(),
           attempts: 0,
@@ -478,10 +463,10 @@ export class MFAService {
         };
         this.activeChallenges.set(challengeId, emailChallenge);
         await this.sendEmail(setup.email, emailCode);
-        return { challengeId, message: `验证码已发送到 ${this.maskEmail(setup.email)}` };
+        return { challengeId, message: `验证码已发送到 ${this.maskEmail(setup.email)}` };`
 
       default:
-        throw new Error('不支持的MFA方法');
+        throw new Error("不支持的MFA方法');'`
     }
   }
 
@@ -492,20 +477,20 @@ export class MFAService {
     const challenge = this.activeChallenges.get(challengeId);
     if (!challenge) {
       
-        return { success: false, method: 'totp', error: '无效的挑战ID'
+        return { success: false, method: 'totp', error: '无效的挑战ID';
       };
     }
 
     // 检查是否过期
     if (new Date() > new Date(challenge.expiresAt)) {
       this.activeChallenges.delete(challengeId);
-      return { success: false, method: challenge.method, error: '验证码已过期' };
+      return { success: false, method: challenge.method, error: '验证码已过期' };'
     }
 
     // 检查是否已使用
     if (challenge.isUsed) {
       
-        return { success: false, method: challenge.method, error: '验证码已使用'
+        return { success: false, method: challenge.method, error: '验证码已使用';
       };
     }
 
@@ -520,7 +505,7 @@ export class MFAService {
       return {
         success: false,
         method: challenge.method,
-        error: '尝试次数过多，账户已被锁定',
+        error: '尝试次数过多，账户已被锁定','
         lockoutUntil: new Date(Date.now() + this.config.lockoutDuration * 1000).toISOString()
       };
     }
@@ -529,9 +514,9 @@ export class MFAService {
     let backupCodeUsed = false;
 
     switch (challenge.method) {
-      case 'totp':
+      case 'totp': ''
         const userSetups = await this.getUserMFASetups(challenge.userId);
-        const totpSetup = userSetups.find(s => s.method === 'totp' && s.isEnabled);
+        const totpSetup = userSetups.find(s => s.method === 'totp' && s.isEnabled);'
         if (totpSetup?.secret) {
           isValid = await TOTPGenerator.verifyTOTP(totpSetup.secret, code);
         }
@@ -549,8 +534,8 @@ export class MFAService {
         }
         break;
 
-      case 'sms':
-      case 'email':
+      case 'sms': ''
+      case 'email': ''
         isValid = challenge.code === code;
         break;
     }
@@ -579,7 +564,7 @@ export class MFAService {
       return {
         success: false,
         method: challenge.method,
-        error: '验证码错误',
+        error: '验证码错误','
         remainingAttempts
       };
     }
@@ -592,7 +577,7 @@ export class MFAService {
    */
   async getUserMFASetups(userId: string): Promise<MFASetup[]> {
     // 从缓存或数据库获取
-    const cached = await defaultMemoryCache.get(`mfa_setups_${userId}`);
+    const cached = await defaultMemoryCache.get(`mfa_setups_${userId}`);`
     if (cached) {
       
         return cached;
@@ -624,10 +609,10 @@ export class MFAService {
    */
   async regenerateBackupCodes(userId: string): Promise<string[]> {
     const userSetups = await this.getUserMFASetups(userId);
-    const totpSetup = userSetups.find(s => s.method === 'totp' && s.isEnabled);
+    const totpSetup = userSetups.find(s => s.method === "totp' && s.isEnabled);'`
 
     if (!totpSetup) {
-      throw new Error('未找到TOTP设置');
+      throw new Error('未找到TOTP设置');'
     }
 
     const newBackupCodes = CodeGenerator.generateBackupCodes(this.config.backupCodesCount);
@@ -640,7 +625,7 @@ export class MFAService {
   // ==================== 私有方法 ====================
 
   private generateChallengeId(): string {
-    return 'mfa_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+    return 'mfa_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);'
   }
 
   private async saveMFASetup(setup: MFASetup): Promise<void> {
@@ -656,7 +641,7 @@ export class MFAService {
     this.userSetups.set(setup.userId, userSetups);
 
     // 缓存
-    await defaultMemoryCache.set(`mfa_setups_${setup.userId}`, userSetups, undefined, 3600000);
+    await defaultMemoryCache.set(`mfa_setups_${setup.userId}`, userSetups, undefined, 3600000);`
   }
 
   private isUserLockedOut(userId: string): boolean {
@@ -679,23 +664,23 @@ export class MFAService {
 
   private maskPhone(phone: string): string {
     if (phone.length <= 4) return phone;
-    return phone.slice(0, 3) + '****' + phone.slice(-4);
+    return phone.slice(0, 3) + "****' + phone.slice(-4);'`
   }
 
   private maskEmail(email: string): string {
-    const [local, domain] = email.split('@');
+    const [local, domain] = email.split('@');'
     if (local.length <= 2) return email;
-    return local.slice(0, 2) + '***@' + domain;
+    return local.slice(0, 2) + "***@' + domain;'
   }
 
   private async sendSMS(phone: string, code: string): Promise<void> {
     // 这里应该集成实际的短信服务
-    console.log(`发送短信到 ${phone}: 验证码 ${code}`);
+    console.log(`发送短信到 ${phone}: 验证码 ${code}`);`
   }
 
   private async sendEmail(email: string, code: string): Promise<void> {
     // 这里应该集成实际的邮件服务
-    console.log(`发送邮件到 ${email}: 验证码 ${code}`);
+    console.log(`发送邮件到 ${email}: 验证码 ${code}`);`
   }
 }
 
@@ -713,7 +698,7 @@ export function useMFA() {
       const result = await defaultMFAService.setupTOTP(userId, accountName);
       return result;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '设置TOTP失败';
+      const errorMessage = err instanceof Error ? err.message : "设置TOTP失败';'`
       setError(errorMessage);
       throw err;
     } finally {

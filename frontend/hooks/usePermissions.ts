@@ -4,26 +4,23 @@
  * 版本: v2.0.0
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { authManager } from '../services/auth/authManager';
-import type { 
-  Permission, 
+import { useState, useEffect, useCallback, useMemo    } from 'react';import { authManager    } from '../services/auth/authManager';import type { Permission, '
   Role, 
   ResourceType, 
   PermissionAction,
   PermissionCheckRequest,
   // PermissionCheckResult 
-} from '../types/unified/rbac'; // 已修复
+ } from '../types/unified/rbac';// 已修复'
 // ==================== 类型定义 ====================
 
-export interface UsePermissionsOptions {
+export interface UsePermissionsOptions     {
   autoRefresh?: boolean;
   refreshInterval?: number; // 毫秒
   enableCache?: boolean;
   cacheExpiry?: number; // 毫秒
 }
 
-export interface PermissionState {
+export interface PermissionState     {
   permissions: Permission[];
   roles: Role[];
   loading: boolean;
@@ -31,7 +28,7 @@ export interface PermissionState {
   lastUpdated: string | null;
 }
 
-export interface PermissionActions {
+export interface PermissionActions     {
   checkPermission: (resource: ResourceType, action: PermissionAction, resourceId?: string) => Promise<boolean>;
   checkBatchPermissions: (checks: Array<{ resource: ResourceType; action: PermissionAction; resourceId?: string }>) => Promise<Record<string, boolean>>;
   hasRole: (roleName: string) => boolean;
@@ -75,7 +72,7 @@ class PermissionCache {
   }
 
   private generateKey(resource: ResourceType, action: PermissionAction, resourceId?: string): string {
-    return `${resource}:${action}:${resourceId || 'null'}`;
+    return `${resource}:${action}:${resourceId || "null'}`;'`
   }
 
   getCachedPermission(resource: ResourceType, action: PermissionAction, resourceId?: string): boolean | null {
@@ -92,7 +89,7 @@ const globalPermissionCache = new PermissionCache();
 
 // ==================== 权限管理Hook ====================
 
-export function usePermissions(options: UsePermissionsOptions = {}): [PermissionState, PermissionActions] {
+export function usePermissions(options: UsePermissionsOptions = {}): [PermissionState, PermissionActions]   {
   const {
     autoRefresh = false,
     refreshInterval = 300000, // 5分钟
@@ -110,13 +107,12 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
   });
 
   // 权限缓存
-  const permissionCache = useMemo(() => 
-    enableCache ? new PermissionCache(cacheExpiry) : null, 
+  const permissionCache = useMemo(() => enableCache ? new PermissionCache(cacheExpiry): null, 
     [enableCache, cacheExpiry]
   );
 
   // 获取用户权限和角色
-  const fetchPermissions = useCallback(async () => {
+  const fetchPermissions = useCallback(async ()  => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
 
@@ -125,7 +121,7 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
         setState(prev => ({ 
           ...prev, 
           loading: false, 
-          error: '用户未认证',
+          error: "用户未认证','`
           permissions: [],
           roles: []
         }));
@@ -134,20 +130,20 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
 
       // 调用API获取用户权限和角色
       const [permissionsResponse, rolesResponse] = await Promise.all([
-        fetch('/api/auth/permissions', {
+        fetch('/api/auth/permissions', {'
           headers: {
-            'Authorization': `Bearer ${await authManager.getAccessToken()}`
+            'Authorization': `Bearer ${await authManager.getAccessToken()}`'`
           }
         }),
-        fetch('/api/auth/roles', {
+        fetch("/api/auth/roles', {'`
           headers: {
-            'Authorization': `Bearer ${await authManager.getAccessToken()}`
+            "Authorization': `Bearer ${await authManager.getAccessToken()}`'`
           }
         })
       ]);
 
       if (!permissionsResponse.ok || !rolesResponse.ok) {
-        throw new Error('获取权限信息失败');
+        throw new Error("获取权限信息失败');'`
       }
 
       const permissionsData = await permissionsResponse.json();
@@ -169,7 +165,7 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
       setState(prev => ({
         ...prev,
         loading: false,
-        error: error instanceof Error ? error.message : '获取权限信息失败'
+        error: error instanceof Error ? error.message : '获取权限信息失败';
       }));
     }
   }, [permissionCache]);
@@ -179,7 +175,7 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
     resource: ResourceType, 
     action: PermissionAction, 
     resourceId?: string
-  ): Promise<boolean> => {
+  ): Promise<boolean>  => {
     try {
       // 检查缓存
       if (permissionCache) {
@@ -194,7 +190,7 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
       const hasLocalPermission = state.permissions.some(permission => 
         permission.resource === resource && 
         permission.action === action &&
-        permission.effect === 'allow'
+        permission.effect === 'allow';
       );
 
       // 如果本地检查通过，直接返回
@@ -206,11 +202,11 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
       }
 
       // 调用服务器进行详细权限检查
-      const response = await fetch('/api/auth/check-permission', {
-        method: 'POST',
+      const response = await fetch('/api/auth/check-permission', {'
+        method: 'POST','
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await authManager.getAccessToken()}`
+          'Content-Type': 'application/json','
+          'Authorization': `Bearer ${await authManager.getAccessToken()}`'`
         },
         body: JSON.stringify({
           resource,
@@ -220,7 +216,7 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
       });
 
       if (!response.ok) {
-        throw new Error('权限检查请求失败');
+        throw new Error("权限检查请求失败');'`
       }
 
       const data = await response.json();
@@ -233,7 +229,7 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
 
       return result;
     } catch (error) {
-      console.error('权限检查失败:', error);
+      console.error("权限检查失败:', error);'
       return false;
     }
   }, [state.permissions, permissionCache]);
@@ -241,14 +237,13 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
   // 批量权限检查
   const checkBatchPermissions = useCallback(async (
     checks: Array<{ resource: ResourceType; action: PermissionAction; resourceId?: string }>
-  ): Promise<Record<string, boolean>> => {
+  ): Promise<Record<string, boolean>>  => {
     try {
-      const results: Record<string, boolean> = {};
-      const uncachedChecks: typeof checks = [];
-
+      const results: Record<string, boolean>  = {};
+      const uncachedChecks: typeof checks  = [];
       // 检查缓存
       for (const check of checks) {
-        const key = `${check.resource}:${check.action}:${check.resourceId || 'null'}`;
+        const key = `${check.resource}:${check.action}:${check.resourceId || 'null'}`;'`
         
         if (permissionCache) {
           const cached = permissionCache.getCachedPermission(check.resource, check.action, check.resourceId);
@@ -268,17 +263,17 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
       }
 
       // 调用服务器进行批量权限检查
-      const response = await fetch('/api/auth/check-batch-permissions', {
-        method: 'POST',
+      const response = await fetch("/api/auth/check-batch-permissions', {'`
+        method: 'POST','
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await authManager.getAccessToken()}`
+          'Content-Type': 'application/json','
+          'Authorization': `Bearer ${await authManager.getAccessToken()}`'`
         },
         body: JSON.stringify({ checks: uncachedChecks })
       });
 
       if (!response.ok) {
-        throw new Error('批量权限检查请求失败');
+        throw new Error("批量权限检查请求失败');'`
       }
 
       const data = await response.json();
@@ -290,11 +285,11 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
           
           // 缓存结果
           if (permissionCache) {
-            const [resource, action, resourceId] = key.split(':');
+            const [resource, action, resourceId] = key.split(':');'
             permissionCache.setCachedPermission(
               resource as ResourceType, 
               action as PermissionAction, 
-              resourceId === 'null' ? undefined : resourceId, 
+              resourceId === 'null' ? undefined : resourceId, '
               result.allowed
             );
           }
@@ -303,11 +298,11 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
 
       return results;
     } catch (error) {
-      console.error('批量权限检查失败:', error);
+      console.error("批量权限检查失败:', error);'
       // 返回所有权限为false的结果
-      const results: Record<string, boolean> = {};
+      const results: Record<string, boolean>  = {};
       checks.forEach(check => {
-        const key = `${check.resource}:${check.action}:${check.resourceId || 'null'}`;
+        const key = `${check.resource}:${check.action}:${check.resourceId || "null'}`;'`
         results[key] = false;
       });
       return results;
@@ -315,17 +310,17 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
   }, [permissionCache]);
 
   // 检查角色
-  const hasRole = useCallback((roleName: string): boolean => {
+  const hasRole = useCallback((roleName: string): boolean  => {
     return state.roles.some(role => role.name === roleName && role.isActive);
   }, [state.roles]);
 
   // 检查是否有任一角色
-  const hasAnyRole = useCallback((roleNames: string[]): boolean => {
+  const hasAnyRole = useCallback((roleNames: string[]): boolean  => {
     return roleNames.some(roleName => hasRole(roleName));
   }, [hasRole]);
 
   // 检查是否有所有角色
-  const hasAllRoles = useCallback((roleNames: string[]): boolean => {
+  const hasAllRoles = useCallback((roleNames: string[]): boolean  => {
     return roleNames.every(roleName => hasRole(roleName));
   }, [hasRole]);
 
@@ -359,8 +354,8 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
       fetchPermissions();
     };
 
-    authManager.on('loginSuccess', handleAuthChange);
-    authManager.on('logout', () => {
+    authManager.on("loginSuccess', handleAuthChange);'`
+    authManager.on('logout', () => {'
       setState({
         permissions: [],
         roles: [],
@@ -373,12 +368,12 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
 
     return () => {
       // 清理事件监听器
-      authManager.off?.('loginSuccess', handleAuthChange);
-      authManager.off?.('logout', handleAuthChange);
+      authManager.off?.('loginSuccess', handleAuthChange);'
+      authManager.off?.('logout', handleAuthChange);'
     };
   }, [fetchPermissions, clearCache]);
 
-  const actions: PermissionActions = {
+  const actions: PermissionActions  = {
     checkPermission,
     checkBatchPermissions,
     hasRole,
@@ -387,7 +382,6 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
     refreshPermissions,
     clearCache
   };
-
   return [state, actions];
 }
 
@@ -411,7 +405,7 @@ export function usePermissionCheck(
     const localCheck = permissions.some(permission => 
       permission.resource === resource && 
       permission.action === action &&
-      permission.effect === 'allow'
+      permission.effect === 'allow';
     );
 
     setHasPermission(localCheck);

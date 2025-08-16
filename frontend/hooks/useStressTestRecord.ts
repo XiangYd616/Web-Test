@@ -1,15 +1,10 @@
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { stressTestQueueManager } from '../services/testing/stressTestQueueManager';
-
-import { stressTestRecordService } from '../services/testing/stressTestRecordService';
-
-export interface UseStressTestRecordOptions {
+import { useCallback, useEffect, useRef, useState    } from 'react';import { stressTestQueueManager    } from '../services/testing/stressTestQueueManager';import { stressTestRecordService    } from '../services/testing/stressTestRecordService';export interface UseStressTestRecordOptions     {'
   autoLoad?: boolean;
   defaultQuery?: TestRecordQuery;
 }
 
-export interface UseStressTestRecordReturn {
+export interface UseStressTestRecordReturn     {
   // 状态
   records: StressTestRecord[];
   loading: boolean;
@@ -42,7 +37,7 @@ export interface UseStressTestRecordReturn {
   // 操作方法
   createRecord: (testData: Partial<StressTestRecord>) => Promise<StressTestRecord>;
   updateRecord: (id: string, updates: Partial<StressTestRecord>) => Promise<StressTestRecord>;
-  completeRecord: (id: string, results: StressTestRecord['results'], score?: number) => Promise<StressTestRecord>;
+  completeRecord: (id: string, results: StressTestRecord['results'], score?: number) => Promise<StressTestRecord>;'
   failRecord: (id: string, error: string) => Promise<StressTestRecord>;
   cancelRecord: (id: string, reason?: string) => Promise<StressTestRecord>;
   setWaitingRecord: (id: string, reason?: string) => Promise<StressTestRecord>;
@@ -55,7 +50,7 @@ export interface UseStressTestRecordReturn {
   refreshRecords: () => Promise<void>;
 
   // 队列管理方法
-  enqueueTest: (testData: Partial<StressTestRecord>, priority?: 'high' | 'normal' | 'low') => Promise<string>;
+  enqueueTest: (testData: Partial<StressTestRecord>, priority?: 'high' | 'normal' | 'low') => Promise<string>;'
   cancelQueuedTest: (queueId: string, reason?: string) => Promise<boolean>;
   getQueuePosition: (queueId: string) => number;
   estimateWaitTime: (queueId: string) => number;
@@ -66,7 +61,7 @@ export interface UseStressTestRecordReturn {
   addRealTimeData: (id: string, dataPoint: any) => Promise<void>;
 }
 
-export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): UseStressTestRecordReturn => {
+export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): UseStressTestRecordReturn  => {
   const { autoLoad = true, defaultQuery = {} } = options;
 
   // 状态管理
@@ -113,29 +108,28 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
 
   // 本地状态验证函数
   const isValidStatusTransition = useCallback((
-    fromStatus: StressTestRecord['status'],
-    toStatus: StressTestRecord['status']
-  ): boolean => {
-    const validTransitions: Record<string, string[]> = {
-      'pending': ['running', 'cancelled'],
-      'running': ['completed', 'failed', 'cancelled'],
-      'completed': [], // 完成状态不能转换到其他状态
-      'failed': [], // 失败状态不能转换到其他状态
-      'cancelled': [] // 取消状态不能转换到其他状态
+    fromStatus: StressTestRecord['status'],'
+    toStatus: StressTestRecord['status']'
+  ): boolean  => {
+    const validTransitions: Record<string, string[]>  = {
+      'pending': ['running', 'cancelled'],'
+      'running': ['completed', 'failed', 'cancelled'],'
+      'completed': [], // 完成状态不能转换到其他状态'
+      'failed': [], // 失败状态不能转换到其他状态'
+      'cancelled': [] // 取消状态不能转换到其他状态'
     };
-
     return validTransitions[fromStatus]?.includes(toStatus) || false;
   }, []);
 
   // 创建测试记录 - 增强版本，包含状态管理和错误恢复
-  const createRecord = useCallback(async (testData: Partial<StressTestRecord>): Promise<StressTestRecord> => {
+  const createRecord = useCallback(async (testData: Partial<StressTestRecord>): Promise<StressTestRecord>  => {
     setOperationStates(prev => ({ ...prev, creating: true }));
     try {
       setError(null);
 
       // 状态验证 - 更新为简化状态
-      if (testData.status && !['idle', 'starting', 'running'].includes(testData.status)) {
-        throw new Error(`创建记录时状态无效: ${testData.status}`);
+      if (testData.status && !['idle', 'starting', 'running'].includes(testData.status)) {'
+        throw new Error(`创建记录时状态无效: ${testData.status}`);`
       }
 
       const record = await stressTestRecordService.createTestRecord(testData);
@@ -149,9 +143,9 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
 
       return record;
     } catch (err: any) {
-      const errorMessage = `创建测试记录失败: ${err.message}`;
+      const errorMessage = `创建测试记录失败: ${err.message}`;`
       setError(errorMessage);
-      console.error('创建测试记录失败:', err);
+      console.error("创建测试记录失败:', err);'`
       throw new Error(errorMessage);
     } finally {
       setOperationStates(prev => ({ ...prev, creating: false }));
@@ -159,7 +153,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
   }, []);
 
   // 更新测试记录 - 增强版本，包含状态验证和原子性操作
-  const updateRecord = useCallback(async (id: string, updates: Partial<StressTestRecord>): Promise<StressTestRecord> => {
+  const updateRecord = useCallback(async (id: string, updates: Partial<StressTestRecord>): Promise<StressTestRecord>  => {
     setOperationStates(prev => ({ ...prev, updating: true }));
     try {
       setError(null);
@@ -168,7 +162,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
       if (updates.status) {
         const currentRecord = records.find(r => r.id === id);
         if (currentRecord && !isValidStatusTransition(currentRecord.status, updates.status)) {
-          throw new Error(`无效的状态转换: ${currentRecord.status} -> ${updates.status}`);
+          throw new Error(`无效的状态转换: ${currentRecord.status} -> ${updates.status}`);`
         }
       }
 
@@ -188,9 +182,9 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
 
       return updatedRecord;
     } catch (err: any) {
-      const errorMessage = `更新测试记录失败: ${err.message}`;
+      const errorMessage = `更新测试记录失败: ${err.message}`;`
       setError(errorMessage);
-      console.error('更新测试记录失败:', err);
+      console.error("更新测试记录失败:', err);'`
       throw new Error(errorMessage);
     } finally {
       setOperationStates(prev => ({ ...prev, updating: false }));
@@ -200,9 +194,9 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
   // 完成测试记录
   const completeRecord = useCallback(async (
     id: string,
-    results: StressTestRecord['results'],
+    results: StressTestRecord['results'],'
     score?: number
-  ): Promise<StressTestRecord> => {
+  ): Promise<StressTestRecord>  => {
     try {
       setError(null);
       const completedRecord = await stressTestRecordService.completeTestRecord(id, results, score);
@@ -224,7 +218,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
   }, [currentRecord]);
 
   // 标记测试失败
-  const failRecord = useCallback(async (id: string, errorMsg: string): Promise<StressTestRecord> => {
+  const failRecord = useCallback(async (id: string, errorMsg: string): Promise<StressTestRecord>  => {
     try {
       setError(null);
       const failedRecord = await stressTestRecordService.failTestRecord(id, errorMsg);
@@ -246,7 +240,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
   }, [currentRecord]);
 
   // 取消测试记录
-  const cancelRecord = useCallback(async (id: string, reason?: string): Promise<StressTestRecord> => {
+  const cancelRecord = useCallback(async (id: string, reason?: string): Promise<StressTestRecord>  => {
     try {
       setError(null);
       const cancelledRecord = await stressTestRecordService.cancelTestRecord(id, reason);
@@ -268,7 +262,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
   }, [currentRecord]);
 
   // 设置等待状态
-  const setWaitingRecord = useCallback(async (id: string, reason?: string): Promise<StressTestRecord> => {
+  const setWaitingRecord = useCallback(async (id: string, reason?: string): Promise<StressTestRecord>  => {
     try {
       setError(null);
       const waitingRecord = await stressTestRecordService.setTestPending(id, reason);
@@ -290,7 +284,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
   }, [currentRecord]);
 
   // 从等待状态开始测试
-  const startFromWaitingRecord = useCallback(async (id: string): Promise<StressTestRecord> => {
+  const startFromWaitingRecord = useCallback(async (id: string): Promise<StressTestRecord>  => {
     try {
       setError(null);
       const runningRecord = await stressTestRecordService.startFromPending(id);
@@ -312,11 +306,10 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
   }, [currentRecord]);
 
   // 中断测试记录
-  const interruptTestRecord = useCallback(async (id: string, reason?: string): Promise<StressTestRecord> => {
+  const interruptTestRecord = useCallback(async (id: string, reason?: string): Promise<StressTestRecord>  => {
     try {
       setError(null);
-      const interruptedRecord = await stressTestRecordService.setTestPending(id, reason || '用户中断');
-
+      const interruptedRecord = await stressTestRecordService.setTestPending(id, reason || '用户中断');'
       // 更新本地状态
       setRecords(prev => prev.map(record =>
         record.id === id ? interruptedRecord : record
@@ -334,7 +327,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
   }, [currentRecord]);
 
   // 恢复测试记录
-  const resumeTestRecord = useCallback(async (id: string): Promise<StressTestRecord> => {
+  const resumeTestRecord = useCallback(async (id: string): Promise<StressTestRecord>  => {
     try {
       setError(null);
       const resumedRecord = await stressTestRecordService.startFromPending(id);
@@ -358,8 +351,8 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
   // 队列测试 - 新增方法
   const enqueueTest = useCallback(async (
     testData: Partial<StressTestRecord>,
-    priority: 'high' | 'normal' | 'low' = 'normal'
-  ): Promise<string> => {
+    priority: 'high' | 'normal' | 'low' = 'normal';
+  ): Promise<string>  => {
     setOperationStates(prev => ({ ...prev, queuing: true }));
     try {
       setError(null);
@@ -367,7 +360,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
       // 首先创建测试记录
       const record = await createRecord({
         ...testData,
-        status: 'idle' // 🔧 简化：使用idle作为初始状态
+        status: 'idle' // 🔧 简化：使用idle作为初始状态'
       });
 
       // 然后加入队列
@@ -381,15 +374,15 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
         estimatedDuration: testData.config?.duration || 60,
         maxRetries: 3,
         onProgress: (progress: number, message: string) => {
-          console.log(`队列测试进度: ${progress}% - ${message}`);
+          console.log(`队列测试进度: ${progress}% - ${message}`);`
         },
         onComplete: (result: any) => {
-          console.log('队列测试完成:', result);
+          console.log("队列测试完成:', result);'`
           setCurrentQueueId(null);
           // 记录刷新将通过队列事件监听器处理
         },
         onError: (error: Error) => {
-          console.error('队列测试失败:', error);
+          console.error('队列测试失败:', error);'
           setCurrentQueueId(null);
           // 记录刷新将通过队列事件监听器处理
         }
@@ -408,7 +401,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
   }, [createRecord]);
 
   // 取消队列中的测试
-  const cancelQueuedTest = useCallback(async (queueId: string, reason?: string): Promise<boolean> => {
+  const cancelQueuedTest = useCallback(async (queueId: string, reason?: string): Promise<boolean>  => {
     try {
       setError(null);
       const success = await stressTestQueueManager.cancelQueuedTest(queueId, reason);
@@ -427,17 +420,17 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
   }, [currentQueueId]);
 
   // 获取队列位置
-  const getQueuePosition = useCallback((queueId: string): number => {
+  const getQueuePosition = useCallback((queueId: string): number  => {
     return stressTestQueueManager.getQueuePosition(queueId);
   }, []);
 
   // 估算等待时间
-  const estimateWaitTime = useCallback((queueId: string): number => {
+  const estimateWaitTime = useCallback((queueId: string): number  => {
     return stressTestQueueManager.estimateWaitTime(queueId);
   }, []);
 
   // 删除测试记录
-  const deleteRecord = useCallback(async (id: string): Promise<boolean> => {
+  const deleteRecord = useCallback(async (id: string): Promise<boolean>  => {
     try {
       setError(null);
       const success = await stressTestRecordService.deleteTestRecord(id);
@@ -459,7 +452,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
   }, [currentRecord]);
 
   // 加载测试记录列表
-  const loadRecords = useCallback(async (query: TestRecordQuery = {}): Promise<void> => {
+  const loadRecords = useCallback(async (query: TestRecordQuery = {}): Promise<void>  => {
     try {
       setLoading(true);
       setError(null);
@@ -480,7 +473,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
   }, [currentQuery]);
 
   // 加载单个测试记录
-  const loadRecord = useCallback(async (id: string): Promise<StressTestRecord> => {
+  const loadRecord = useCallback(async (id: string): Promise<StressTestRecord>  => {
     try {
       setError(null);
       const record = await stressTestRecordService.getTestRecord(id);
@@ -493,34 +486,33 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
   }, []);
 
   // 刷新记录列表
-  const refreshRecords = useCallback(async (): Promise<void> => {
+  const refreshRecords = useCallback(async (): Promise<void>  => {
     await loadRecords(currentQuery);
   }, [loadRecords, currentQuery]);
 
   // 开始记录测试
-  const startRecording = useCallback(async (testData: Partial<StressTestRecord>): Promise<string> => {
+  const startRecording = useCallback(async (testData: Partial<StressTestRecord>): Promise<string>  => {
     // 检查是否有认证令牌
-    const authToken = localStorage.getItem('auth_token');
+    const authToken = localStorage.getItem('auth_token');'
     if (!authToken) {
       // 如果没有认证令牌，生成一个本地ID并跳过服务器记录
-      const localId = `local_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-      console.warn('⚠️ 未登录用户，跳过服务器记录创建，使用本地ID:', localId);
+      const localId = `local_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;`
+      console.warn("⚠️ 未登录用户，跳过服务器记录创建，使用本地ID: ', localId);'`
 
       // 创建本地记录
-      const localRecord: StressTestRecord = {
+      const localRecord: StressTestRecord  = {
         id: localId,
-        testName: testData.testName || '未命名测试',
-        url: testData.url || '',
-        status: 'running',
+        testName: testData.testName || '未命名测试','
+        url: testData.url || '','
+        status: 'running','
         startTime: new Date().toISOString(),
         createdAt: new Date().toISOString(),
         config: testData.config || {},
         testId: testData.testId,
-        userId: 'local',
+        userId: 'local','
         tags: testData.tags || [],
-        environment: testData.environment || 'development'
+        environment: testData.environment || 'development';
       };
-
       // 更新本地状态
       setRecords(prev => [localRecord, ...prev]);
       setCurrentRecord(localRecord);
@@ -532,29 +524,27 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
     try {
       const record = await createRecord({
         ...testData,
-        status: 'running',
+        status: 'running','
         startTime: new Date().toISOString()
       });
       return record.id;
     } catch (error: any) {
       // 如果服务器记录创建失败，回退到本地记录
-      console.warn('⚠️ 服务器记录创建失败，回退到本地记录:', error.message);
-
-      const localId = `local_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-      const localRecord: StressTestRecord = {
+      console.warn('⚠️ 服务器记录创建失败，回退到本地记录:', error.message);'
+      const localId = `local_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;`
+      const localRecord: StressTestRecord  = {
         id: localId,
-        testName: testData.testName || '未命名测试',
-        url: testData.url || '',
-        status: 'running',
+        testName: testData.testName || "未命名测试','`
+        url: testData.url || '','
+        status: 'running','
         startTime: new Date().toISOString(),
         createdAt: new Date().toISOString(),
         config: testData.config || {},
         testId: testData.testId,
-        userId: 'local',
+        userId: 'local','
         tags: testData.tags || [],
-        environment: testData.environment || 'development'
+        environment: testData.environment || "development';
       };
-
       // 更新本地状态
       setRecords(prev => [localRecord, ...prev]);
       setCurrentRecord(localRecord);
@@ -564,7 +554,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
   }, [createRecord]);
 
   // 更新测试进度
-  const updateProgress = useCallback(async (id: string, progress: number, phase?: string): Promise<void> => {
+  const updateProgress = useCallback(async (id: string, progress: number, phase?: string): Promise<void>  => {
     await updateRecord(id, {
       progress,
       currentPhase: phase,
@@ -573,7 +563,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
   }, [updateRecord]);
 
   // 添加实时数据 - 优化版本，使用缓存和批量更新
-  const addRealTimeData = useCallback(async (id: string, dataPoint: any): Promise<void> => {
+  const addRealTimeData = useCallback(async (id: string, dataPoint: any): Promise<void>  => {
     try {
       // 获取记录，如果找不到则尝试从服务器获取
       let record = records.find(r => r.id === id) || currentRecord;
@@ -587,7 +577,7 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
             return exists ? prev : [record!, ...prev];
       });
         } catch (err) {
-          console.warn(`无法获取测试记录 ${id}，跳过实时数据更新:`, err);
+          console.warn(`无法获取测试记录 ${id}，跳过实时数据更新:`, err);`
           return;
         }
       }
@@ -621,13 +611,13 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
           // 清空缓存
           realTimeDataCache.current.delete(id);
         } catch (err) {
-          console.error('批量更新实时数据失败:', err);
+          console.error("批量更新实时数据失败:', err);'`
         }
       }, 1000); // 1秒批量更新一次
 
     } catch (err: any) {
-      console.error('添加实时数据失败:', err);
-      setError(`添加实时数据失败: ${err.message}`);
+      console.error('添加实时数据失败:', err);'
+      setError(`添加实时数据失败: ${err.message}`);`
     }
   }, [records, currentRecord, updateRecord]);
 
@@ -646,14 +636,14 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
 
     // 添加队列事件监听
     const removeListener = stressTestQueueManager.addListener((event: string, data: any) => {
-      console.log(`队列事件: ${event}`, data);
+      console.log(`队列事件: ${event}`, data);`
 
       // 更新队列统计
       const newStats = stressTestQueueManager.getQueueStats();
       setQueueStats(newStats);
 
       // 根据事件类型更新本地状态
-      if (event === 'testCompleted' || event === 'testFailed' || event === 'testCancelled') {
+      if (event === "testCompleted' || event === 'testFailed' || event === 'testCancelled') {'`
         // 延迟刷新记录，避免依赖问题
         setTimeout(() => {
           loadRecords(currentQuery);

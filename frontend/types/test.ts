@@ -1,8 +1,6 @@
 
 
-export type TestType = 'api' | 'compatibility' | 'infrastructure' | 'security' | 'seo' | 'stress' | 'ux' | 'website';
-
-export interface TestConfig {
+export type TestType   = 'api' | 'compatibility' | 'infrastructure' | 'security' | 'seo' | 'stress' | 'ux' | 'website';export interface TestConfig     {'
   url: string;
   timeout?: number;
   retries?: number;
@@ -10,7 +8,7 @@ export interface TestConfig {
   headers?: Record<string, string>;
 }
 
-export interface PerformanceTestConfig extends TestConfig {
+export interface PerformanceTestConfig extends TestConfig     {
   users: number;
   duration: number;
   rampUpTime?: number;
@@ -21,7 +19,7 @@ export interface PerformanceTestConfig extends TestConfig {
   };
 }
 
-export interface ContentTestConfig extends TestConfig {
+export interface ContentTestConfig extends TestConfig     {
   checkSEO: boolean;
   // checkAccessibility: boolean; // Removed - functionality moved to compatibility test
   checkPerformance: boolean;
@@ -33,7 +31,7 @@ export interface ContentTestConfig extends TestConfig {
   depth?: number;
 }
 
-export interface SecurityTestConfig extends TestConfig {
+export interface SecurityTestConfig extends TestConfig     {
   checkSSL: boolean;
   checkHeaders: boolean;
   checkCSP: boolean;
@@ -45,7 +43,7 @@ export interface SecurityTestConfig extends TestConfig {
   checkMixedContent: boolean;
 }
 
-export interface APITestConfig extends TestConfig {
+export interface APITestConfig extends TestConfig     {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   body?: string;
   expectedStatus?: number;
@@ -59,7 +57,7 @@ export interface APITestConfig extends TestConfig {
   };
 }
 
-export interface NetworkTestConfig extends TestConfig {
+export interface NetworkTestConfig extends TestConfig     {
   testLatency?: boolean;
   testBandwidth?: boolean;
   testConnectivity?: boolean;
@@ -69,7 +67,7 @@ export interface NetworkTestConfig extends TestConfig {
   packetCount?: number;
 }
 
-export interface TestResult {
+export interface TestResult     {
   id: string;
   testType: TestType;
   url: string;
@@ -90,7 +88,7 @@ export interface TestResult {
   };
 }
 
-export interface TestHistory {
+export interface TestHistory     {
   id: string;
   testName: string;
   testType: TestType;
@@ -114,7 +112,7 @@ export interface TestHistory {
   updatedAt: string;
 }
 
-export interface TestFilter {
+export interface TestFilter     {
   testType?: TestType;
   status?: string;
   dateRange?: {
@@ -126,7 +124,7 @@ export interface TestFilter {
   priority?: string;
 }
 
-export interface TestEngine {
+export interface TestEngine     {
   name: string;
   version: string;
   available: boolean;
@@ -136,7 +134,7 @@ export interface TestEngine {
   error?: string;
 }
 
-export interface TestProgress {
+export interface TestProgress     {
   testId: string;
   stage: string;
   progress: number;
@@ -144,7 +142,7 @@ export interface TestProgress {
   timestamp: string;
 }
 
-export interface TestTemplate {
+export interface TestTemplate     {
   id: string;
   name: string;
   description: string;
@@ -156,7 +154,7 @@ export interface TestTemplate {
   updatedAt: string;
 }
 
-export interface TestSchedule {
+export interface TestSchedule     {
   id: string;
   name: string;
   testType: TestType;
@@ -175,7 +173,7 @@ export interface TestSchedule {
   createdAt: string;
 }
 
-export interface TestReport {
+export interface TestReport     {
   id: string;
   testId: string;
   testType: TestType;
@@ -194,14 +192,14 @@ export interface TestReport {
 }
 
 // 简化的测试配置接口（兼容性）
-export interface SimpleStressTestConfig {
+export interface SimpleStressTestConfig     {
   url: string;
   users: number;
   duration: number;
   rampUpTime?: number;
 }
 
-export interface SimpleContentTestConfig {
+export interface SimpleContentTestConfig     {
   url: string;
   checkSEO: boolean;
   checkAccessibility: boolean;
@@ -209,7 +207,7 @@ export interface SimpleContentTestConfig {
   keywords?: string[];
 }
 
-export interface SimpleSecurityTestConfig {
+export interface SimpleSecurityTestConfig     {
   url: string;
   checkSSL: boolean;
   checkHeaders: boolean;
@@ -217,7 +215,7 @@ export interface SimpleSecurityTestConfig {
   checkSQLInjection: boolean;
 }
 
-export interface TestEngineStatus {
+export interface TestEngineStatus     {
   k6: TestEngine;
   lighthouse: TestEngine;
   playwright: TestEngine;
@@ -226,7 +224,7 @@ export interface TestEngineStatus {
 }
 
 // 批量测试
-export interface BatchTestConfig {
+export interface BatchTestConfig     {
   name: string;
   urls: string[];
   testType: TestType;
@@ -235,7 +233,7 @@ export interface BatchTestConfig {
   maxConcurrency?: number;
 }
 
-export interface BatchTestResult {
+export interface BatchTestResult     {
   id: string;
   name: string;
   status: 'pending' | 'running' | 'completed' | 'failed';

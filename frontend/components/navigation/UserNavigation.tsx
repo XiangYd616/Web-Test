@@ -3,12 +3,7 @@
  * 用户相关的导航和操作菜单
  */
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { NavigationItem } from '../../types/routes';
-
-interface UserNavigationProps {
+import React, { useState, useRef, useEffect    } from 'react';import { Link, useNavigate    } from 'react-router-dom';import { useAuth    } from '../../contexts/AuthContext';import { NavigationItem    } from '../../types/routes';interface UserNavigationProps   {'
   className?: string;
   items?: NavigationItem[];
   showAvatar?: boolean;
@@ -16,10 +11,10 @@ interface UserNavigationProps {
 }
 
 export const UserNavigation: React.FC<UserNavigationProps> = ({
-  className = '',
+  className = '','
   items = [],
   showAvatar = true,
-  avatarSize = 'medium'
+  avatarSize = 'medium';
 }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -27,13 +22,12 @@ export const UserNavigation: React.FC<UserNavigationProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // 默认用户菜单项
-  const defaultItems: NavigationItem[] = [
-    { label: '个人资料', path: '/profile', icon: '👤' },
-    { label: '设置', path: '/settings', icon: '⚙️' },
-    { label: '帮助', path: '/help', icon: '❓' },
-    { label: '退出登录', action: 'logout', icon: '🚪' }
+  const defaultItems: NavigationItem[]  = [
+    { label: '个人资料', path: '/profile', icon: '👤' },'
+    { label: '设置', path: '/settings', icon: '⚙️' },'
+    { label: '帮助', path: '/help', icon: '❓' },'
+    { label: '退出登录', action: 'logout', icon: '🚪' }'
   ];
-
   const menuItems = items.length > 0 ? items : defaultItems;
 
   // 点击外部关闭菜单
@@ -44,16 +38,16 @@ export const UserNavigation: React.FC<UserNavigationProps> = ({
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);'
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);'
     };
   }, []);
 
   const handleItemClick = (item: NavigationItem) => {
-    if (item.action === 'logout') {
+    if (item.action === 'logout') {'
       logout();
-      navigate('/login');
+      navigate('/login');'
     }
     setIsOpen(false);
   };
@@ -72,11 +66,11 @@ export const UserNavigation: React.FC<UserNavigationProps> = ({
 
   if (!user) {
     return (
-      <div className={`user-navigation guest ${className}`}>
-        <Link to="/login" className="login-button">
+      <div className={`user-navigation guest ${className}`}>`
+        <Link to= "/login' className= 'login-button'>`
           登录
         </Link>
-        <Link to="/register" className="register-button">
+        <Link to= '/register' className= 'register-button'>
           注册
         </Link>
       </div>
@@ -84,78 +78,76 @@ export const UserNavigation: React.FC<UserNavigationProps> = ({
   }
 
   return (
-    <div className={`user-navigation ${className}`} ref={dropdownRef}>
+    <div className={`user-navigation ${className}`} ref={dropdownRef}>`
       <button
-        className="user-menu-trigger"
+        className= "user-menu-trigger';'`
         onClick={toggleDropdown}
         aria-expanded={isOpen}
-        aria-haspopup="true"
+        aria-haspopup= 'true';
       >
         {showAvatar && (
-          <div className={`user-avatar ${getAvatarSizeClass()}`}>
+          <div className={`user-avatar ${getAvatarSizeClass()}`}>`
             {user.avatar ? (
               <img
                 src={user.avatar}
-                alt={user.name || '用户头像'}
-                className="avatar-image"
+                alt={user.name || "用户头像'}'`
+                className= 'avatar-image';
               />
             ) : (
-              <div className="avatar-placeholder">
-                {(user.name || user.email || 'U').charAt(0).toUpperCase()}
+              <div className= 'avatar-placeholder'>
+                {(user.name || user.email || "U').charAt(0).toUpperCase()}'
               </div>
             )}
           </div>
         )}
 
-        <div className="user-info">
-          <span className="user-name">{user.name || user.email}</span>
+        <div className= 'user-info'>
+          <span className= 'user-name'>{user.name || user.email}</span>
           {user.role && (
-            <span className="user-role">{user.role}</span>
+            <span className= 'user-role'>{user.role}</span>
           )}
         </div>
 
-        <span className={`dropdown-arrow ${isOpen ? 'open' : ''}`}>
+        <span className={`dropdown-arrow ${isOpen ? 'open' : ''}`}>`
           ▼
         </span>
       </button>
 
       {isOpen && (
-        <div className="user-menu-dropdown">
-          <div className="user-menu-header">
-            <div className="user-details">
-              <div className="user-name">{user.name || user.email}</div>
+        <div className= "user-menu-dropdown'>`
+          <div className= 'user-menu-header'>
+            <div className= 'user-details'>
+              <div className= 'user-name'>{user.name || user.email}</div>
               {user.email && user.name && (
-                <div className="user-email">{user.email}</div>
+                <div className= 'user-email'>{user.email}</div>
               )}
               {user.role && (
-                <div className="user-role-badge">{user.role}</div>
+                <div className= 'user-role-badge'>{user.role}</div>
               )}
             </div>
           </div>
 
-          <div className="user-menu-divider"></div>
+          <div className= 'user-menu-divider'></div>
 
-          <div className="user-menu-items">
+          <div className= 'user-menu-items'>
             {menuItems.map((item, index) => (
-              <div key={index} className="user-menu-item">
-                {item.action ? (
-                  <button
-                    className="user-menu-button"
+              <div key={index} className= 'user-menu-item'>
+                {item.action ? (<button
+                    className= 'user-menu-button';
                     onClick={() => handleItemClick(item)}
                   >
-                    {item.icon && <span className="menu-icon">{item.icon}</span>}
-                    <span className="menu-label">{item.label}</span>
+                    {item.icon && <span className= 'menu-icon'>{item.icon}</span>}'
+                    <span className= 'menu-label'>{item.label}</span>
                   </button>
-                ) : (
-                  <Link
-                    to={item.path || '#'}
-                    className="user-menu-link"
+                ) : (<Link
+                    to={item.path || '#'}'
+                    className= 'user-menu-link';
                     onClick={() => setIsOpen(false)}
                   >
-                    {item.icon && <span className="menu-icon">{item.icon}</span>}
-                    <span className="menu-label">{item.label}</span>
+                    {item.icon && <span className= 'menu-icon'>{item.icon}</span>}'
+                    <span className= 'menu-label'>{item.label}</span>
                     {item.badge && (
-                      <span className={`menu-badge menu-badge--${item.badge.variant}`}>
+                      <span className={`menu-badge menu-badge--${item.badge.variant}`}>`
                         {item.badge.text}
                       </span>
                     )}

@@ -1,10 +1,4 @@
-import React, { useEffect, useRef } from 'react';
-import { X } from 'lucide-react';
-import { createPortal } from 'react-dom';
-import { cn } from '../../utils/cn';
-import { Button, IconButton } from './Button';
-
-interface ModalProps {
+import React, { useEffect, useRef    } from 'react';import { X    } from 'lucide-react';import { createPortal    } from 'react-dom';import { cn    } from '../../utils/cn';import { Button, IconButton    } from './Button';interface ModalProps   {'
   isOpen: boolean;
   onClose: () => void;
   title?: string;
@@ -18,12 +12,12 @@ interface ModalProps {
 }
 
 const modalSizes = {
-  xs: 'max-w-xs',
-  sm: 'max-w-sm',
-  md: 'max-w-md',
-  lg: 'max-w-lg',
-  xl: 'max-w-xl',
-  full: 'max-w-full mx-4'
+  xs: 'max-w-xs','
+  sm: 'max-w-sm','
+  md: 'max-w-md','
+  lg: 'max-w-lg','
+  xl: 'max-w-xl','
+  full: 'max-w-full mx-4';
 };
 
 export const Modal: React.FC<ModalProps> = ({
@@ -31,7 +25,7 @@ export const Modal: React.FC<ModalProps> = ({
   onClose,
   title,
   description,
-  size = 'md',
+  size = 'md','
   closeOnBackdrop = true,
   closeOnEscape = true,
   showCloseButton = true,
@@ -44,8 +38,8 @@ export const Modal: React.FC<ModalProps> = ({
     className: combinedClassName,
     style: computedStyle,
     disabled,
-    'aria-label': ariaLabel,
-    'data-testid': testId
+    'aria-label': ariaLabel,'
+    "data-testid': testId'
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
   
   const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
@@ -53,8 +47,7 @@ export const Modal: React.FC<ModalProps> = ({
     onClick?.(event);
   }, [disabled, loading, onClick]);
   
-  const memoizedHandleChange = useMemo(() => 
-    debounce((value: any) => {
+  const memoizedHandleChange = useMemo(() => debounce((value: any) => {
       onChange?.(value);
     }, 300), [onChange]
   );
@@ -78,13 +71,13 @@ export const Modal: React.FC<ModalProps> = ({
     if (!isOpen || !closeOnEscape) return undefined;
 
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === 'Escape') {'
         onClose();
       }
     };
 
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+    document.addEventListener('keydown', handleEscape);'
+    return () => document.removeEventListener("keydown', handleEscape);'
   }, [isOpen, closeOnEscape, onClose]);
 
   // 焦点管理
@@ -127,9 +120,9 @@ export const Modal: React.FC<ModalProps> = ({
 
   // Focus trap - 简单实现
   const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === 'Tab') {
+    if (event.key === 'Tab') {'
       const focusableElements = modalRef.current?.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex= '-1'])';
       );
 
       if (focusableElements && focusableElements.length > 0) {
@@ -155,14 +148,14 @@ export const Modal: React.FC<ModalProps> = ({
 
   const modalContent = (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className= 'fixed inset-0 z-50 flex items-center justify-center p-4';
       onClick={handleBackdropClick}
     >
       {/* 背景遮罩 */}
       <div
         className={cn(
-          'fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300',
-          isOpen ? 'opacity-100' : 'opacity-0'
+          'fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300','
+          isOpen ? 'opacity-100' : 'opacity-0';
         )}
       />
 
@@ -172,45 +165,44 @@ export const Modal: React.FC<ModalProps> = ({
         tabIndex={-1}
         onKeyDown={handleKeyDown}
         className={cn(
-          'relative w-full bg-gray-800 rounded-lg shadow-xl border border-gray-700',
-          'transform transition-all duration-300 ease-out',
-          'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900',
-          isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0',
+          'relative w-full bg-gray-800 rounded-lg shadow-xl border border-gray-700','
+          'transform transition-all duration-300 ease-out','
+          'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900','
+          isOpen ? 'scale-100 opacity-100' : "scale-95 opacity-0','
           modalSizes[size],
           className
         )}
       >
         {/* 头部 */}
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between p-6 border-b border-gray-700">
+          <div className= 'flex items-center justify-between p-6 border-b border-gray-700'>
             <div>
               {title && (
-                <h2 className="text-lg font-semibold text-white">
+                <h2 className= 'text-lg font-semibold text-white'>
                   {title}
                 </h2>
               )}
               {description && (
-                <p className="mt-1 text-sm text-gray-400">
+                <p className= 'mt-1 text-sm text-gray-400'>
                   {description}
                 </p>
               )}
             </div>
 
             {showCloseButton && (
-              <IconButton
-                icon={<X className="w-4 h-4" />}
-                variant="ghost"
-                size="sm"
+              <IconButton icon={<X className= 'w-4 h-4'    />}'
+                variant= 'ghost';
+                size= 'sm';
                 onClick={onClose}
-                aria-label="关闭模态框"
-                className="text-gray-400 hover:text-white"
+                aria-label= '关闭模态框';
+                className= 'text-gray-400 hover:text-white';
               />
             )}
           </div>
         )}
 
         {/* 内容区域 */}
-        <div className="p-6">
+        <div className= 'p-6'>
           {children}
         </div>
       </div>
@@ -222,43 +214,43 @@ export const Modal: React.FC<ModalProps> = ({
 };
 
 // 模态框头部组件
-interface ModalHeaderProps {
+interface ModalHeaderProps   {
   children: React.ReactNode;
   className?: string;
 }
 
 export const ModalHeader: React.FC<ModalHeaderProps> = ({ children, className }) => (
-  <div className={cn('mb-4', className)}>
+  <div className={cn("mb-4', className)}>
     {children}
   </div>
 );
 
 // 模态框主体组件
-interface ModalBodyProps {
+interface ModalBodyProps   {
   children: React.ReactNode;
   className?: string;
 }
 
 export const ModalBody: React.FC<ModalBodyProps> = ({ children, className }) => (
-  <div className={cn('', className)}>
+  <div className={cn("', className)}>
     {children}
   </div>
 );
 
 // 模态框底部组件
-interface ModalFooterProps {
+interface ModalFooterProps   {
   children: React.ReactNode;
   className?: string;
 }
 
 export const ModalFooter: React.FC<ModalFooterProps> = ({ children, className }) => (
-  <div className={cn('flex items-center justify-end gap-3 mt-6 pt-4 border-t border-gray-700', className)}>
+  <div className={cn("flex items-center justify-end gap-3 mt-6 pt-4 border-t border-gray-700', className)}>
     {children}
   </div>
 );
 
 // 确认对话框组件
-interface ConfirmModalProps {
+interface ConfirmModalProps   {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
@@ -275,9 +267,9 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   onConfirm,
   title,
   message,
-  confirmText = '确认',
-  cancelText = '取消',
-  variant = 'danger'
+  confirmText = '确认','
+  cancelText = '取消','
+  variant = 'danger';
 }) => {
   const handleConfirm = () => {
     onConfirm();
@@ -289,21 +281,21 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title={title}
-      size="sm"
+      size= 'sm';
     >
       <ModalBody>
-        <p className="text-gray-300">{message}</p>
+        <p className= 'text-gray-300'>{message}</p>
       </ModalBody>
 
       <ModalFooter>
         <Button
-          variant="ghost"
+          variant= 'ghost';
           onClick={onClose}
         >
           {cancelText}
         </Button>
         <Button
-          variant={variant === 'warning' || variant === 'info' ? 'primary' : variant}
+          variant={variant === 'warning' || variant === 'info' ? 'primary' : variant}'
           onClick={handleConfirm}
         >
           {confirmText}

@@ -3,10 +3,7 @@
  * 支持WebSocket实时更新和进度可视化
  */
 
-import React, { useState, useEffect } from 'react';
-import { TestProgress, TestStatus, TestType } from '../../types/testConfig';
-
-interface RealTimeTestProgressProps {
+import React, { useState, useEffect    } from 'react';import { TestProgress, TestStatus, TestType    } from '../../types/testConfig';interface RealTimeTestProgressProps   {'
   testId: string;
   testType: TestType;
   initialProgress?: TestProgress;
@@ -27,27 +24,26 @@ export const RealTimeTestProgress: React.FC<RealTimeTestProgressProps> = ({
 }) => {
   
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState('');
-
+  const [pageTitle, setPageTitle] = useState("');'
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
-      document.title = `${pageTitle} - Test Web`;
+      document.title = `${pageTitle} - Test Web`;`
     }
   }, [pageTitle]);
 
   // 页面可见性检测
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
+      if (document.visibilityState === "visible') {'`
         // 页面变为可见时刷新数据
         fetchData?.();
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);'
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener("visibilitychange', handleVisibilityChange);'
     };
   }, [fetchData]);
   
@@ -56,30 +52,29 @@ export const RealTimeTestProgress: React.FC<RealTimeTestProgressProps> = ({
     onClick?.(event);
   }, [disabled, loading, onClick]);
   
-  const memoizedHandleChange = useMemo(() => 
-    debounce((value: any) => {
+  const memoizedHandleChange = useMemo(() => debounce((value: any) => {
       onChange?.(value);
     }, 300), [onChange]
   );
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;
-  const descriptionId = `${componentId}-description`;
+  const errorId = `${componentId}-error`;`
+  const descriptionId = `${componentId}-description`;`
   
   const ariaProps = {
     id: componentId,
-    'aria-label': ariaLabel,
-    'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': [
+    "aria-label': ariaLabel,'`
+    'aria-labelledby': ariaLabelledBy,'
+    'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,
-    'aria-invalid': !!error,
-    'aria-disabled': disabled,
-    'aria-busy': loading,
-    'aria-expanded': expanded,
-    'aria-selected': selected,
+    ].filter(Boolean).join(' ') || undefined,'
+    'aria-invalid': !!error,'
+    'aria-disabled': disabled,'
+    'aria-busy': loading,'
+    'aria-expanded': expanded,'
+    "aria-selected': selected,'
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -111,12 +106,12 @@ export const RealTimeTestProgress: React.FC<RealTimeTestProgressProps> = ({
       if (initialProgress.status === TestStatus.COMPLETED) {
         onComplete?.();
       } else if (initialProgress.status === TestStatus.FAILED) {
-        onError?.('测试执行失败');
+        onError?.('测试执行失败');'
       }
     }
   }, [initialProgress, onProgressUpdate, onComplete, onError]);
 
-  const getStatusColor = (status: TestStatus): string => {
+  const getStatusColor = (status: TestStatus): string  => {
     switch (status) {
       case TestStatus.PENDING:
         return 'text-gray-600';
@@ -133,7 +128,7 @@ export const RealTimeTestProgress: React.FC<RealTimeTestProgressProps> = ({
     }
   };
 
-  const getStatusBgColor = (status: TestStatus): string => {
+  const getStatusBgColor = (status: TestStatus): string  => {
     switch (status) {
       case TestStatus.PENDING:
         return 'bg-gray-100';
@@ -150,7 +145,7 @@ export const RealTimeTestProgress: React.FC<RealTimeTestProgressProps> = ({
     }
   };
 
-  const getStatusIcon = (status: TestStatus): string => {
+  const getStatusIcon = (status: TestStatus): string  => {
     switch (status) {
       case TestStatus.PENDING:
         return '⏳';
@@ -167,7 +162,7 @@ export const RealTimeTestProgress: React.FC<RealTimeTestProgressProps> = ({
     }
   };
 
-  const getStatusText = (status: TestStatus): string => {
+  const getStatusText = (status: TestStatus): string  => {
     switch (status) {
       case TestStatus.PENDING:
         return '等待开始';
@@ -184,59 +179,59 @@ export const RealTimeTestProgress: React.FC<RealTimeTestProgressProps> = ({
     }
   };
 
-  const formatTime = (ms: number): string => {
+  const formatTime = (ms: number): string  => {
     const seconds = Math.floor(ms / 1000);
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     
     if (minutes > 0) {
       
-        return `${minutes
-      }:${remainingSeconds.toString().padStart(2, '0')}`;
+        return `${minutes`}
+      }:${remainingSeconds.toString().padStart(2, '0')}`;'`
     }
-    return `${remainingSeconds}s`;
+    return `${remainingSeconds}s`;`
   };
 
-  const getEstimatedTimeRemaining = (): string => {
+  const getEstimatedTimeRemaining = (): string  => {
     if (progress.progress <= 0 || progress.status !== TestStatus.RUNNING) {
       
-        return '--';
+        return "--';'`
       }
     
     const estimatedTotal = (elapsedTime / progress.progress) * 100;
     const remaining = estimatedTotal - elapsedTime;
     
-    return remaining > 0 ? formatTime(remaining) : '--';
+    return remaining > 0 ? formatTime(remaining): '--';
   };
 
-  const getTestTypeLabel = (testType: TestType): string => {
+  const getTestTypeLabel = (testType: TestType): string  => {
     const labels = {
-      [TestType.API]: 'API测试',
-      [TestType.PERFORMANCE]: '性能测试',
-      [TestType.SECURITY]: '安全测试',
-      [TestType.SEO]: 'SEO测试',
-      [TestType.STRESS]: '压力测试',
-      [TestType.INFRASTRUCTURE]: '基础设施测试',
-      [TestType.UX]: 'UX测试',
-      [TestType.COMPATIBILITY]: '兼容性测试',
-      [TestType.WEBSITE]: '网站综合测试'
+      [TestType.API]: 'API测试','
+      [TestType.PERFORMANCE]: "性能测试','
+      [TestType.SECURITY]: "安全测试','
+      [TestType.SEO]: "SEO测试','
+      [TestType.STRESS]: "压力测试','
+      [TestType.INFRASTRUCTURE]: "基础设施测试','
+      [TestType.UX]: "UX测试','
+      [TestType.COMPATIBILITY]: "兼容性测试','
+      [TestType.WEBSITE]: '网站综合测试';
     };
     return labels[testType];
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border p-6">
+    <div className= 'bg-white rounded-lg shadow-sm border p-6'>
       {/* 头部信息 */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-3">
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getStatusBgColor(progress.status)}`}>
-            <span className="text-lg">{getStatusIcon(progress.status)}</span>
+      <div className= 'flex items-center justify-between mb-6'>
+        <div className= 'flex items-center space-x-3'>
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getStatusBgColor(progress.status)}`}>`
+            <span className= "text-lg'>{getStatusIcon(progress.status)}</span>`
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className= 'text-lg font-semibold text-gray-900'>
               {getTestTypeLabel(testType)}
             </h3>
-            <p className={`text-sm font-medium ${getStatusColor(progress.status)}`}>
+            <p className={`text-sm font-medium ${getStatusColor(progress.status)}`}>`
               {getStatusText(progress.status)}
             </p>
           </div>
@@ -245,7 +240,7 @@ export const RealTimeTestProgress: React.FC<RealTimeTestProgressProps> = ({
         {progress.status === TestStatus.RUNNING && onCancel && (
           <button
             onClick={onCancel}
-            className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500"
+            className= "px-4 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500';'`
           >
             取消测试
           </button>
@@ -253,74 +248,74 @@ export const RealTimeTestProgress: React.FC<RealTimeTestProgressProps> = ({
       </div>
 
       {/* 进度条 */}
-      <div className="mb-6">
-        <div className="flex justify-between text-sm text-gray-600 mb-2">
+      <div className= 'mb-6'>
+        <div className= 'flex justify-between text-sm text-gray-600 mb-2'>
           <span>进度</span>
           <span>{Math.round(progress.progress)}%</span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
+        <div className= 'w-full bg-gray-200 rounded-full h-2'>
           <div
-            className={`h-2 rounded-full transition-all duration-300 ${
+            className={`h-2 rounded-full transition-all duration-300 ${`}
               progress.status === TestStatus.COMPLETED
-                ? 'bg-green-500'
+                ? "bg-green-500';'`
                 : progress.status === TestStatus.FAILED
-                ? 'bg-red-500'
+                ? 'bg-red-500';
                 : progress.status === TestStatus.CANCELLED
-                ? 'bg-yellow-500'
-                : 'bg-blue-500'
-            }`}
-            style={{ width: `${Math.min(progress.progress, 100)}%` }}
+                ? 'bg-yellow-500';
+                : 'bg-blue-500';
+            }`}`
+            style={{ width: `${Math.min(progress.progress, 100)}%` }}`
           />
         </div>
       </div>
 
       {/* 当前状态消息 */}
       {progress.message && (
-        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-          <p className="text-sm text-blue-800">
-            <span className="font-medium">当前步骤:</span> {progress.message}
+        <div className= "mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md'>`
+          <p className= 'text-sm text-blue-800'>
+            <span className= 'font-medium'>当前步骤:</span> {progress.message}'
           </p>
         </div>
       )}
 
       {/* 时间信息 */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-        <div className="text-center p-3 bg-gray-50 rounded-lg">
-          <div className="font-semibold text-gray-900">{formatTime(elapsedTime)}</div>
-          <div className="text-gray-600">已用时间</div>
+      <div className= 'grid grid-cols-2 md:grid-cols-4 gap-4 text-sm'>
+        <div className= 'text-center p-3 bg-gray-50 rounded-lg'>
+          <div className= 'font-semibold text-gray-900'>{formatTime(elapsedTime)}</div>
+          <div className= 'text-gray-600'>已用时间</div>
         </div>
         
-        <div className="text-center p-3 bg-gray-50 rounded-lg">
-          <div className="font-semibold text-gray-900">{getEstimatedTimeRemaining()}</div>
-          <div className="text-gray-600">预计剩余</div>
+        <div className= 'text-center p-3 bg-gray-50 rounded-lg'>
+          <div className= 'font-semibold text-gray-900'>{getEstimatedTimeRemaining()}</div>
+          <div className= 'text-gray-600'>预计剩余</div>
         </div>
 
-        <div className="text-center p-3 bg-gray-50 rounded-lg">
-          <div className="font-semibold text-gray-900 font-mono text-xs">{testId.slice(-8)}</div>
-          <div className="text-gray-600">测试ID</div>
+        <div className= 'text-center p-3 bg-gray-50 rounded-lg'>
+          <div className= 'font-semibold text-gray-900 font-mono text-xs'>{testId.slice(-8)}</div>
+          <div className= 'text-gray-600'>测试ID</div>
         </div>
 
-        <div className="text-center p-3 bg-gray-50 rounded-lg">
-          <div className="font-semibold text-gray-900">{new Date().toLocaleTimeString()}</div>
-          <div className="text-gray-600">当前时间</div>
+        <div className= 'text-center p-3 bg-gray-50 rounded-lg'>
+          <div className= 'font-semibold text-gray-900'>{new Date().toLocaleTimeString()}</div>
+          <div className= 'text-gray-600'>当前时间</div>
         </div>
       </div>
 
       {/* 动画效果 */}
       {progress.status === TestStatus.RUNNING && (
-        <div className="mt-4 flex items-center justify-center space-x-1">
-          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+        <div className= 'mt-4 flex items-center justify-center space-x-1'>
+          <div className= 'w-2 h-2 bg-blue-500 rounded-full animate-bounce' style={{ animationDelay: '0ms' }}></div>
+          <div className= 'w-2 h-2 bg-blue-500 rounded-full animate-bounce' style={{ animationDelay: '150ms' }}></div>
+          <div className= 'w-2 h-2 bg-blue-500 rounded-full animate-bounce' style={{ animationDelay: '300ms' }}></div>
         </div>
       )}
 
       {/* 完成状态的额外信息 */}
       {progress.status === TestStatus.COMPLETED && (
-        <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
-          <div className="flex items-center">
-            <span className="text-green-600 text-lg mr-2">🎉</span>
-            <p className="text-sm text-green-800">
+        <div className= 'mt-4 p-3 bg-green-50 border border-green-200 rounded-md'>
+          <div className= 'flex items-center'>
+            <span className= 'text-green-600 text-lg mr-2'>🎉</span>
+            <p className= 'text-sm text-green-800'>
               测试已成功完成！总耗时 {formatTime(elapsedTime)}
             </p>
           </div>
@@ -329,10 +324,10 @@ export const RealTimeTestProgress: React.FC<RealTimeTestProgressProps> = ({
 
       {/* 失败状态的错误信息 */}
       {progress.status === TestStatus.FAILED && (
-        <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-          <div className="flex items-center">
-            <span className="text-red-600 text-lg mr-2">⚠️</span>
-            <p className="text-sm text-red-800">
+        <div className= 'mt-4 p-3 bg-red-50 border border-red-200 rounded-md'>
+          <div className= 'flex items-center'>
+            <span className= 'text-red-600 text-lg mr-2'>⚠️</span>
+            <p className= 'text-sm text-red-800'>
               测试执行失败，请检查配置或稍后重试。
             </p>
           </div>
@@ -341,10 +336,10 @@ export const RealTimeTestProgress: React.FC<RealTimeTestProgressProps> = ({
 
       {/* 取消状态的信息 */}
       {progress.status === TestStatus.CANCELLED && (
-        <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-          <div className="flex items-center">
-            <span className="text-yellow-600 text-lg mr-2">⏹️</span>
-            <p className="text-sm text-yellow-800">
+        <div className= 'mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md'>
+          <div className= 'flex items-center'>
+            <span className= 'text-yellow-600 text-lg mr-2'>⏹️</span>
+            <p className= 'text-sm text-yellow-800'>
               测试已被取消。
             </p>
           </div>

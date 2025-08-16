@@ -2,9 +2,7 @@
  * useTestRunner Hook
  */
 
-import { useState, useCallback } from 'react';
-
-export interface TestRunnerState {
+import { useState, useCallback    } from 'react';export interface TestRunnerState     {'
   isRunning: boolean;
   progress: number;
   result?: any;

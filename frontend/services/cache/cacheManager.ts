@@ -5,7 +5,7 @@
  */
 
 // 缓存配置接口
-export interface CacheConfig {
+export interface CacheConfig     {
   defaultTTL: number; // 默认过期时间（秒）
   maxMemorySize: number; // 最大内存缓存大小（字节）
   enableLocalStorage: boolean; // 是否启用本地存储
@@ -15,7 +15,7 @@ export interface CacheConfig {
 }
 
 // 缓存项接口
-export interface CacheItem<T = any> {
+export interface CacheItem<T = any>     {
   key: string;
   value: T;
   timestamp: number;
@@ -28,16 +28,16 @@ export interface CacheItem<T = any> {
 
 // 缓存策略枚举
 export enum CacheStrategy {
-  MEMORY_ONLY = 'memory_only',
-  STORAGE_ONLY = 'storage_only',
-  MEMORY_FIRST = 'memory_first',
-  STORAGE_FIRST = 'storage_first',
-  WRITE_THROUGH = 'write_through',
-  WRITE_BACK = 'write_back'
+  MEMORY_ONLY = 'memory_only','
+  STORAGE_ONLY = 'storage_only','
+  MEMORY_FIRST = 'memory_first','
+  STORAGE_FIRST = 'storage_first','
+  WRITE_THROUGH = 'write_through','
+  WRITE_BACK = 'write_back';
 }
 
 // 缓存统计信息
-export interface CacheStats {
+export interface CacheStats     {
   memoryHits: number;
   memoryMisses: number;
   storageHits: number;
@@ -49,7 +49,7 @@ export interface CacheStats {
 }
 
 // 默认配置
-const DEFAULT_CONFIG: CacheConfig = {
+const DEFAULT_CONFIG: CacheConfig  = {
   defaultTTL: 3600, // 1小时
   maxMemorySize: 50 * 1024 * 1024, // 50MB
   enableLocalStorage: true,
@@ -57,7 +57,6 @@ const DEFAULT_CONFIG: CacheConfig = {
   compressionThreshold: 1024, // 1KB
   enableCompression: true
 };
-
 export class CacheManager {
   private config: CacheConfig;
   private memoryCache: Map<string, CacheItem> = new Map();
@@ -102,11 +101,11 @@ export class CacheManager {
         finalValue = await this.compress(serialized);
         compressed = true;
       } catch (error) {
-        console.warn('Compression failed, using uncompressed data:', error);
+        console.warn('Compression failed, using uncompressed data: ', error);'
       }
     }
 
-    const cacheItem: CacheItem<string> = {
+    const cacheItem: CacheItem<string>  = {
       key,
       value: finalValue,
       timestamp,
@@ -116,7 +115,6 @@ export class CacheManager {
       accessCount: 0,
       lastAccessed: timestamp
     };
-
     // 根据策略存储
     switch (strategy) {
       case CacheStrategy.MEMORY_ONLY:
@@ -199,7 +197,7 @@ export class CacheManager {
       try {
         finalValue = await this.decompress(cacheItem.value);
       } catch (error) {
-        console.error('Decompression failed:', error);
+        console.error('Decompression failed: ', error);'
         await this.delete(key);
         return null;
       }
@@ -208,7 +206,7 @@ export class CacheManager {
     try {
       return JSON.parse(finalValue) as T;
     } catch (error) {
-      console.error('JSON parse failed:', error);
+      console.error('JSON parse failed: ', error);'
       await this.delete(key);
       return null;
     }
@@ -230,8 +228,8 @@ export class CacheManager {
    */
   async clear(): Promise<void> {
     this.memoryCache.clear();
-    if (this.config.enableLocalStorage && typeof localStorage !== 'undefined') {
-      const keys = Object.keys(localStorage).filter(key => key.startsWith('cache_'));
+    if (this.config.enableLocalStorage && typeof localStorage !== 'undefined') {'
+      const keys = Object.keys(localStorage).filter(key => key.startsWith('cache_'));'
       keys.forEach(key => localStorage.removeItem(key));
     }
     this.resetStats();
@@ -292,13 +290,12 @@ export class CacheManager {
    * 设置本地存储缓存
    */
   private async setStorageCache(key: string, item: CacheItem<string>): Promise<void> {
-    if (!this.config.enableLocalStorage || typeof localStorage === 'undefined') return;
-
+    if (!this.config.enableLocalStorage || typeof localStorage === 'undefined') return;'
     try {
-      const storageKey = `cache_${key}`;
+      const storageKey = `cache_${key}`;`
       localStorage.setItem(storageKey, JSON.stringify(item));
     } catch (error) {
-      console.warn('Failed to set localStorage cache:', error);
+      console.warn("Failed to set localStorage cache: ', error);'`
     }
   }
 
@@ -306,14 +303,13 @@ export class CacheManager {
    * 获取本地存储缓存
    */
   private async getStorageCache(key: string): Promise<CacheItem<string> | null> {
-    if (!this.config.enableLocalStorage || typeof localStorage === 'undefined') {
-      
+    if (!this.config.enableLocalStorage || typeof localStorage === 'undefined') {'
         this.stats.storageMisses++;
       return null;
       }
 
     try {
-      const storageKey = `cache_${key}`;
+      const storageKey = `cache_${key}`;`
       const stored = localStorage.getItem(storageKey);
       if (stored) {
         
@@ -324,7 +320,7 @@ export class CacheManager {
         return null;
       }
     } catch (error) {
-      console.warn('Failed to get localStorage cache:', error);
+      console.warn("Failed to get localStorage cache: ', error);'`
       this.stats.storageMisses++;
       return null;
     }
@@ -334,15 +330,14 @@ export class CacheManager {
    * 删除本地存储缓存
    */
   private async deleteStorageCache(key: string): Promise<boolean> {
-    if (!this.config.enableLocalStorage || typeof localStorage === 'undefined') return false;
-
+    if (!this.config.enableLocalStorage || typeof localStorage === 'undefined') return false;'
     try {
-      const storageKey = `cache_${key}`;
+      const storageKey = `cache_${key}`;`
       const existed = localStorage.getItem(storageKey) !== null;
       localStorage.removeItem(storageKey);
       return existed;
     } catch (error) {
-      console.warn('Failed to delete localStorage cache:', error);
+      console.warn("Failed to delete localStorage cache: ', error);'`
       return false;
     }
   }
@@ -400,19 +395,19 @@ export class CacheManager {
    */
   private async compress(data: string): Promise<string> {
     // 简单的压缩实现，实际项目中可以使用更高效的压缩算法
-    if (typeof CompressionStream !== 'undefined') {
-      const stream = new CompressionStream('gzip');
+    if (typeof CompressionStream !== 'undefined') {'
+      const stream = new CompressionStream('gzip');'
       const writer = stream.writable.getWriter();
       const reader = stream.readable.getReader();
       
       writer.write(new TextEncoder().encode(data));
       writer.close();
       
-      const chunks: Uint8Array[] = [];
+      const chunks: Uint8Array[]  = [];
       let done = false;
       
       while (!done) {
-        const { value, done: readerDone } = await reader.read();
+        const { value, done: readerDone }  = await reader.read();
         done = readerDone;
         if (value) chunks.push(value);
       }
@@ -436,21 +431,21 @@ export class CacheManager {
    */
   private async decompress(compressedData: string): Promise<string> {
     // 简单的解压缩实现
-    if (typeof DecompressionStream !== 'undefined') {
+    if (typeof DecompressionStream !== 'undefined') {'
       try {
         const compressed = Uint8Array.from(atob(compressedData), c => c.charCodeAt(0));
-        const stream = new DecompressionStream('gzip');
+        const stream = new DecompressionStream('gzip');'
         const writer = stream.writable.getWriter();
         const reader = stream.readable.getReader();
         
         writer.write(compressed);
         writer.close();
         
-        const chunks: Uint8Array[] = [];
+        const chunks: Uint8Array[]  = [];
         let done = false;
         
         while (!done) {
-          const { value, done: readerDone } = await reader.read();
+          const { value, done: readerDone }  = await reader.read();
           done = readerDone;
           if (value) chunks.push(value);
         }
@@ -464,7 +459,7 @@ export class CacheManager {
         
         return new TextDecoder().decode(decompressed);
       } catch (error) {
-        console.warn('Gzip decompression failed, trying base64:', error);
+        console.warn('Gzip decompression failed, trying base64:', error);'
       }
     }
     
@@ -516,8 +511,7 @@ export class CacheManager {
    * 清理过期项
    */
   private async cleanupExpired(): Promise<void> {
-    const expiredKeys: string[] = [];
-    
+    const expiredKeys: string[]  = [];
     this.memoryCache.forEach((item, key) => {
       if (this.isExpired(item)) {
         expiredKeys.push(key);

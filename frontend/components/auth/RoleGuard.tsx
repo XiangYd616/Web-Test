@@ -3,12 +3,7 @@
  * 基于用户角色和权限控制访问
  */
 
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { usePermissions } from '../../hooks/usePermissions';
-
-interface RoleGuardProps {
+import React from 'react';import { Navigate    } from 'react-router-dom';import { useAuth    } from '../../contexts/AuthContext';import { usePermissions    } from '../../hooks/usePermissions';interface RoleGuardProps   {'
   children: React.ReactNode;
   requiredRoles?: string[];
   requiredPermissions?: string[];
@@ -23,7 +18,7 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
   requiredPermissions = [],
   requireAll = false,
   fallback: Fallback,
-  redirectTo = '/unauthorized'
+  redirectTo = '/unauthorized';
 }) => {
   const { user } = useAuth();
   const { hasRole, hasPermission, hasAnyRole, hasAnyPermission } = usePermissions();
@@ -51,10 +46,10 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
 
   if (!hasAccess) {
     if (Fallback) {
-      return <Fallback />;
+      return <Fallback  />;
     }
 
-    return <Navigate to={redirectTo} replace />;
+    return <Navigate to={redirectTo} replace    />;
   }
 
   return <>{children}</>;

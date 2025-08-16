@@ -4,18 +4,14 @@
  */
 
 import '@testing-library/jest-dom';
-import { cleanup } from '@testing-library/react';
-import { afterEach, vi } from 'vitest';
-
-// Jest DOM 匹配器已通过导入自动扩展
-
+import { cleanup    } from '@testing-library/react';import { afterEach, vi    } from 'vitest';// Jest DOM 匹配器已通过导入自动扩展'
 // 每个测试后清理
 afterEach(() => {
     cleanup();
 });
 
 // 模拟环境变量
-Object.defineProperty(window, 'matchMedia', {
+Object.defineProperty(window, 'matchMedia', {'
     writable: true,
     value: vi.fn().mockImplementation(query => ({
         matches: false,
@@ -53,8 +49,7 @@ const localStorageMock = {
     removeItem: vi.fn(),
     clear: vi.fn(),
 };
-vi.stubGlobal('localStorage', localStorageMock);
-
+vi.stubGlobal('localStorage', localStorageMock);'
 // 模拟sessionStorage
 const sessionStorageMock = {
     getItem: vi.fn(),
@@ -62,8 +57,7 @@ const sessionStorageMock = {
     removeItem: vi.fn(),
     clear: vi.fn(),
 };
-vi.stubGlobal('sessionStorage', sessionStorageMock);
-
+vi.stubGlobal('sessionStorage', sessionStorageMock);'
 // 模拟console方法以避免测试输出污染
 global.console = {
     ...console,
@@ -75,7 +69,7 @@ global.console = {
 };
 
 // 模拟URL.createObjectURL
-global.URL.createObjectURL = vi.fn(() => 'mocked-url');
+global.URL.createObjectURL = vi.fn(() => 'mocked-url');'
 global.URL.revokeObjectURL = vi.fn();
 
 // 模拟WebSocket

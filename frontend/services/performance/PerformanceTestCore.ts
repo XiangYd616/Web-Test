@@ -1,7 +1,5 @@
 
-import { CacheAnalysis, CompressionAnalysis, CoreWebVitals, PageSpeedMetrics, PERFORMANCE_CONFIG_PRESETS, PerformanceConfig, PerformanceIssue, PerformanceRecommendation, PerformanceTestCallback, PerformanceTestOptions, PerformanceTestProgress, PerformanceTestResult, ResourceAnalysis } from '../../types/performance';
-
-export class PerformanceTestCore {
+import { CacheAnalysis, CompressionAnalysis, CoreWebVitals, PageSpeedMetrics, PERFORMANCE_CONFIG_PRESETS, PerformanceConfig, PerformanceIssue, PerformanceRecommendation, PerformanceTestCallback, PerformanceTestOptions, PerformanceTestProgress, PerformanceTestResult, ResourceAnalysis    } from '../../types/performance';export class PerformanceTestCore {'
   private async retryRequest(fn: () => Promise<any>, maxRetries: number = 3): Promise<any> {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
@@ -11,14 +9,13 @@ export class PerformanceTestCore {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
   }
   private activeTests = new Map<string, any>();
-  private readonly apiBaseUrl = '/api/test';
-
+  private readonly apiBaseUrl = "/api/test';'`
   /**
    * 运行性能测试
    */
@@ -37,29 +34,28 @@ export class PerformanceTestCore {
     this.validateUrl(url);
 
     // 初始化测试结果
-    const result: PerformanceTestResult = {
+    const result: PerformanceTestResult  = {
       testId,
       url,
       timestamp: Date.now(),
       config: finalConfig,
       overallScore: 0,
-      grade: 'F',
+      grade: 'F','
       recommendations: [],
       issues: [],
       duration: 0
     };
-
     try {
       // 记录测试开始
       this.activeTests.set(testId, { config: finalConfig, startTime: Date.now() });
 
       // 报告进度
       this.reportProgress(options.onProgress, {
-        phase: 'initializing',
+        phase: 'initializing','
         progress: 0,
-        currentStep: '初始化性能测试...',
+        currentStep: '初始化性能测试...','
         completedChecks: [],
-        currentCheck: 'initialization'
+        currentCheck: 'initialization';
       });
 
       const startTime = Date.now();
@@ -78,9 +74,9 @@ export class PerformanceTestCore {
 
       // 报告完成
       this.reportProgress(options.onProgress, {
-        phase: 'completed',
+        phase: 'completed','
         progress: 100,
-        currentStep: '性能测试完成',
+        currentStep: '性能测试完成','
         completedChecks: this.getCompletedChecks(finalConfig),
         realTimeMetrics: {
           responseTime: result.pageSpeed?.responseTime || 0,
@@ -102,9 +98,9 @@ export class PerformanceTestCore {
       result.duration = Date.now() - (this.activeTests.get(testId)?.startTime || Date.now());
 
       this.reportProgress(options.onProgress, {
-        phase: 'failed',
+        phase: 'failed','
         progress: 0,
-        currentStep: `测试失败: ${result.error}`,
+        currentStep: `测试失败: ${result.error}`,`
         completedChecks: []
       });
 
@@ -130,9 +126,9 @@ export class PerformanceTestCore {
     for (const check of checks) {
       try {
         this.reportProgress(onProgress, {
-          phase: 'analyzing',
+          phase: "analyzing','`
           progress: (completedChecks / totalChecks) * 80 + 10, // 10-90%
-          currentStep: `正在执行${check}检测...`,
+          currentStep: `正在执行${check}检测...`,`
           completedChecks: checks.slice(0, completedChecks),
           currentCheck: check
         });
@@ -141,7 +137,7 @@ export class PerformanceTestCore {
         completedChecks++;
 
       } catch (error) {
-        console.warn(`性能检测 ${check} 失败:`, error);
+        console.warn(`性能检测 ${check} 失败:`, error);`
         // 继续执行其他检测
       }
     }
@@ -157,31 +153,31 @@ export class PerformanceTestCore {
     result: PerformanceTestResult
   ): Promise<void> {
     switch (checkType) {
-      case 'pageSpeed':
+      case "pageSpeed': ''`
         result.pageSpeed = await this.checkPageSpeed(url, config);
         break;
-      case 'coreWebVitals':
+      case 'coreWebVitals': ''
         result.coreWebVitals = await this.checkCoreWebVitals(url, config);
         break;
-      case 'resourceOptimization':
+      case 'resourceOptimization': ''
         result.resources = await this.analyzeResources(url, config);
         break;
-      case 'caching':
+      case 'caching': ''
         result.cache = await this.analyzeCaching(url, config);
         break;
-      case 'compression':
+      case 'compression': ''
         result.compression = await this.analyzeCompression(url, config);
         break;
-      case 'mobilePerformance':
+      case 'mobilePerformance': ''
         result.mobilePerformance = await this.checkMobilePerformance(url, config);
         break;
-      case 'modernWebFeatures':
+      case 'modernWebFeatures': ''
         result.modernWebFeatures = await this.checkModernWebFeatures(url, config);
         break;
-      case 'networkOptimization':
+      case 'networkOptimization': ''
         result.networkOptimization = await this.analyzeNetworkOptimization(url, config);
         break;
-      case 'thirdPartyImpact':
+      case "thirdPartyImpact': ''
         result.thirdPartyImpact = await this.analyzeThirdPartyImpact(url, config);
         break;
     }
@@ -192,21 +188,21 @@ export class PerformanceTestCore {
    */
   private async checkPageSpeed(url: string, config: PerformanceConfig): Promise<PageSpeedMetrics> {
     try {
-      const response = await fetch(`${this.apiBaseUrl}/performance/page-speed`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch(`${this.apiBaseUrl}/performance/page-speed`, {`
+        method: "POST','`
+        headers: { 'Content-Type': 'application/json' },'
         body: JSON.stringify({ url, device: config.device, timeout: config.timeout })
       });
 
       if (!response.ok) {
-        throw new Error(`页面速度检测失败: ${response.status}`);
+        throw new Error(`页面速度检测失败: ${response.status}`);`
       }
 
       const data = await response.json();
       return data.success ? data.data : this.getDefaultPageSpeedMetrics();
 
     } catch (error) {
-      console.warn('页面速度检测失败，使用客户端分析:', error);
+      console.warn("页面速度检测失败，使用客户端分析:', error);'`
       return await this.getDefaultPageSpeedMetrics(url);
     }
   }
@@ -218,9 +214,9 @@ export class PerformanceTestCore {
     try {
       // 首先尝试API调用
       try {
-        const response = await fetch(`${this.apiBaseUrl}/performance/core-web-vitals`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        const response = await fetch(`${this.apiBaseUrl}/performance/core-web-vitals`, {`
+          method: "POST','`
+          headers: { 'Content-Type': 'application/json' },'
           body: JSON.stringify({ url, device: config.device })
         });
 
@@ -232,14 +228,14 @@ export class PerformanceTestCore {
       }
         }
       } catch (apiError) {
-        console.warn('API调用失败，使用客户端分析:', apiError);
+        console.warn('API调用失败，使用客户端分析:', apiError);'
       }
 
       // API失败时使用客户端真实分析
       return await this.getDefaultCoreWebVitals(url);
 
     } catch (error) {
-      console.warn('Core Web Vitals检测完全失败:', error);
+      console.warn('Core Web Vitals检测完全失败:', error);'
       // 最后的回退方案
       return {
         lcp: 2500,
@@ -258,21 +254,21 @@ export class PerformanceTestCore {
    */
   private async analyzeResources(url: string, config: PerformanceConfig): Promise<ResourceAnalysis> {
     try {
-      const response = await fetch(`${this.apiBaseUrl}/performance/resources`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch(`${this.apiBaseUrl}/performance/resources`, {`
+        method: "POST','`
+        headers: { 'Content-Type': "application/json' },'
         body: JSON.stringify({ url, includeImages: config.imageOptimization })
       });
 
       if (!response.ok) {
-        throw new Error(`资源分析失败: ${response.status}`);
+        throw new Error(`资源分析失败: ${response.status}`);`
       }
 
       const data = await response.json();
       return data.success ? data.data : this.getDefaultResourceAnalysis();
 
     } catch (error) {
-      console.warn('资源分析失败，使用模拟数据:', error);
+      console.warn("资源分析失败，使用模拟数据:', error);'`
       return this.getDefaultResourceAnalysis();
     }
   }
@@ -319,7 +315,7 @@ export class PerformanceTestCore {
    * 生成测试ID
    */
   private generateTestId(): string {
-    return `perf_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    return `perf_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;`
   }
 
   /**
@@ -329,7 +325,7 @@ export class PerformanceTestCore {
     try {
       new URL(url);
     } catch (error) {
-      throw new Error('无效的URL格式');
+      throw new Error("无效的URL格式');'`
     }
   }
 
@@ -337,13 +333,13 @@ export class PerformanceTestCore {
    * 获取启用的检测项
    */
   private getEnabledChecks(config: PerformanceConfig): string[] {
-    const checks: string[] = [];
-    if (config.pageSpeed) checks.push('pageSpeed');
-    if (config.coreWebVitals) checks.push('coreWebVitals');
-    if (config.resourceOptimization) checks.push('resourceOptimization');
-    if (config.caching) checks.push('caching');
-    if (config.compression) checks.push('compression');
-    if (config.mobilePerformance) checks.push('mobilePerformance');
+    const checks: string[]  = [];
+    if (config.pageSpeed) checks.push('pageSpeed');'
+    if (config.coreWebVitals) checks.push('coreWebVitals');'
+    if (config.resourceOptimization) checks.push('resourceOptimization');'
+    if (config.caching) checks.push('caching');'
+    if (config.compression) checks.push('compression');'
+    if (config.mobilePerformance) checks.push('mobilePerformance');'
     return checks;
   }
 
@@ -404,7 +400,7 @@ export class PerformanceTestCore {
   /**
    * 计算等级
    */
-  private calculateGrade(score: number): 'A+' | 'A' | 'B' | 'C' | 'D' | 'F' {
+  private calculateGrade(score: number): 'A+' | 'A' | 'B' | 'C' | 'D' | 'F' {'
     if (score >= 95) return 'A+';
     if (score >= 85) return 'A';
     if (score >= 75) return 'B';
@@ -487,7 +483,7 @@ export class PerformanceTestCore {
       const pageSize = new Blob([html]).size;
 
       // 分析HTML内容
-      const dom = new DOMParser().parseFromString(html, 'text/html');
+      const dom = new DOMParser().parseFromString(html, 'text/html');'
       const resources = this.countResources(dom);
 
       return {
@@ -500,7 +496,7 @@ export class PerformanceTestCore {
         transferSize: Math.round(pageSize * 0.8) // 估算压缩后大小
       };
     } catch (error) {
-      console.warn('Failed to measure real page speed, using estimated values:', error);
+      console.warn('Failed to measure real page speed, using estimated values: ', error);'
       return {
         loadTime: 2500,
         domContentLoaded: 1800,
@@ -518,8 +514,7 @@ export class PerformanceTestCore {
       // 真实测量Core Web Vitals
       const response = await fetch(url);
       const html = await response.text();
-      const dom = new DOMParser().parseFromString(html, 'text/html');
-
+      const dom = new DOMParser().parseFromString(html, 'text/html');'
       const pageSize = new Blob([html]).size;
       const resources = this.countResources(dom);
 
@@ -539,7 +534,7 @@ export class PerformanceTestCore {
         tti: Math.round(lcp * 1.5)
       };
     } catch (error) {
-      console.warn('Failed to measure real Core Web Vitals, using estimated values:', error);
+      console.warn('Failed to measure real Core Web Vitals, using estimated values: ', error);'
       return {
         lcp: 2400,
         fid: 120,
@@ -582,7 +577,7 @@ export class PerformanceTestCore {
 
   private getDefaultCacheAnalysis(): CacheAnalysis {
     return {
-      strategy: 'basic',
+      strategy: 'basic','
       hitRate: Math.random() * 0.8 + 0.1,
       cacheable: { count: 15, size: 800000 },
       uncached: { count: 5, size: 200000 },
@@ -600,7 +595,7 @@ export class PerformanceTestCore {
     const ratio = Math.random() * 0.6 + 0.3;
 
     return {
-      type: Math.random() > 0.5 ? 'gzip' : 'brotli',
+      type: Math.random() > 0.5 ? 'gzip' : 'brotli','
       ratio,
       originalSize,
       compressedSize: Math.floor(originalSize * (1 - ratio)),
@@ -613,29 +608,28 @@ export class PerformanceTestCore {
    * 生成性能建议
    */
   private generateRecommendations(result: PerformanceTestResult): PerformanceRecommendation[] {
-    const recommendations: PerformanceRecommendation[] = [];
-
+    const recommendations: PerformanceRecommendation[]  = [];
     // 基于页面速度的建议
     if (result.pageSpeed && result.pageSpeed.loadTime > 3000) {
       recommendations.push({
-        type: 'critical',
-        title: '优化页面加载速度',
-        description: '页面加载时间超过3秒，建议优化关键资源加载',
-        impact: 'high',
-        difficulty: 'medium',
-        metrics: ['loadTime', 'fcp']
+        type: 'critical','
+        title: '优化页面加载速度','
+        description: '页面加载时间超过3秒，建议优化关键资源加载','
+        impact: 'high','
+        difficulty: 'medium','
+        metrics: ['loadTime', 'fcp']'
       });
     }
 
     // 基于Core Web Vitals的建议
     if (result.coreWebVitals && result.coreWebVitals.lcp > 2500) {
       recommendations.push({
-        type: 'important',
-        title: '改善最大内容绘制时间',
-        description: 'LCP超过2.5秒，建议优化主要内容的加载',
-        impact: 'high',
-        difficulty: 'medium',
-        metrics: ['lcp']
+        type: 'important','
+        title: '改善最大内容绘制时间','
+        description: 'LCP超过2.5秒，建议优化主要内容的加载','
+        impact: 'high','
+        difficulty: 'medium','
+        metrics: ['lcp']'
       });
     }
 
@@ -646,16 +640,15 @@ export class PerformanceTestCore {
    * 生成性能问题
    */
   private generateIssues(result: PerformanceTestResult): PerformanceIssue[] {
-    const issues: PerformanceIssue[] = [];
-
+    const issues: PerformanceIssue[]  = [];
     // 检查页面大小问题
     if (result.pageSpeed && result.pageSpeed.pageSize > 2000000) {
       issues.push({
-        type: 'size',
-        severity: 'high',
-        description: '页面大小超过2MB，影响加载速度',
-        affectedMetrics: ['loadTime', 'transferSize'],
-        solution: '压缩图片、启用Gzip压缩、移除未使用的资源'
+        type: 'size','
+        severity: 'high','
+        description: '页面大小超过2MB，影响加载速度','
+        affectedMetrics: ['loadTime', 'transferSize'],'
+        solution: '压缩图片、启用Gzip压缩、移除未使用的资源';
       });
     }
 
@@ -667,13 +660,13 @@ export class PerformanceTestCore {
    */
   private async saveTestResult(result: PerformanceTestResult, userId?: string): Promise<void> {
     try {
-      await fetch(`${this.apiBaseUrl}/performance/save`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      await fetch(`${this.apiBaseUrl}/performance/save`, {`
+        method: "POST','`
+        headers: { 'Content-Type': 'application/json' },'
         body: JSON.stringify({ result, userId })
       });
     } catch (error) {
-      console.warn('保存性能测试结果失败:', error);
+      console.warn('保存性能测试结果失败:', error);'
     }
   }
 
@@ -688,48 +681,48 @@ export class PerformanceTestCore {
       const html = await response.text();
 
       const features = {
-        serviceWorker: html.includes('serviceWorker') || html.includes('sw.js'),
-        webp: html.includes('.webp'),
-        http2: response.headers.get('server')?.includes('h2') || false,
-        preload: html.includes('rel="preload"'),
-        prefetch: html.includes('rel="prefetch"'),
-        moduleScripts: html.includes('type="module"'),
-        lazyLoading: html.includes('loading="lazy"'),
-        criticalCSS: html.includes('<style>') && html.includes('critical'),
-        webAssembly: html.includes('.wasm'),
-        pushState: html.includes('pushState') || html.includes('replaceState')
+        serviceWorker: html.includes('serviceWorker') || html.includes('sw.js'),'
+        webp: html.includes('.webp'),'
+        http2: response.headers.get('server')?.includes('h2') || false,'
+        preload: html.includes('rel= 'preload''),'
+        prefetch: html.includes('rel= 'prefetch''),'
+        moduleScripts: html.includes("type= 'module''),'
+        lazyLoading: html.includes('loading= 'lazy''),'
+        criticalCSS: html.includes('<style>') && html.includes('critical'),'
+        webAssembly: html.includes('.wasm'),'
+        pushState: html.includes('pushState') || html.includes('replaceState')'
       };
 
       const score = Object.values(features).filter(Boolean).length * 10;
       const recommendations = [];
 
       if (!features.serviceWorker) {
-        recommendations.push('考虑实现Service Worker以提升缓存和离线体验');
+        recommendations.push('考虑实现Service Worker以提升缓存和离线体验');'
       }
       if (!features.webp) {
-        recommendations.push('使用WebP格式图片以减少文件大小');
+        recommendations.push('使用WebP格式图片以减少文件大小');'
       }
       if (!features.preload) {
-        recommendations.push('使用资源预加载优化关键资源');
+        recommendations.push('使用资源预加载优化关键资源');'
       }
       if (!features.lazyLoading) {
-        recommendations.push('实现图片懒加载以提升初始加载速度');
+        recommendations.push('实现图片懒加载以提升初始加载速度');'
       }
 
       return {
         score: Math.min(100, score),
         features,
         recommendations,
-        modernityLevel: score >= 70 ? 'high' : score >= 40 ? 'medium' : 'low'
+        modernityLevel: score >= 70 ? 'high' : score >= 40 ? 'medium' : 'low';
       };
 
     } catch (error) {
-      console.warn('现代Web功能检查失败:', error);
+      console.warn('现代Web功能检查失败:', error);'
       return {
         score: 0,
         features: {},
-        recommendations: ['无法检查现代Web功能'],
-        modernityLevel: 'unknown'
+        recommendations: ['无法检查现代Web功能'],'
+        modernityLevel: 'unknown';
       };
     }
   }
@@ -744,14 +737,14 @@ export class PerformanceTestCore {
 
       const optimization = {
         compression: {
-          enabled: !!headers.get('content-encoding'),
-          type: headers.get('content-encoding') || 'none',
-          score: headers.get('content-encoding') ? 100 : 0
+          enabled: !!headers.get('content-encoding'),'
+          type: headers.get('content-encoding') || 'none','
+          score: headers.get('content-encoding') ? 100 : 0'
         },
         caching: {
-          cacheControl: headers.get('cache-control') || 'none',
-          etag: !!headers.get('etag'),
-          lastModified: !!headers.get('last-modified'),
+          cacheControl: headers.get('cache-control') || 'none','
+          etag: !!headers.get('etag'),'
+          lastModified: !!headers.get('last-modified'),'
           score: this.calculateCachingScore(headers)
         },
         cdn: {
@@ -760,12 +753,12 @@ export class PerformanceTestCore {
           score: this.detectCDN(headers, url) ? 100 : 0
         },
         http2: {
-          enabled: headers.get('server')?.includes('h2') || false,
-          score: headers.get('server')?.includes('h2') ? 100 : 0
+          enabled: headers.get('server')?.includes('h2') || false,'
+          score: headers.get('server')?.includes('h2') ? 100 : 0'
         },
         security: {
-          hsts: !!headers.get('strict-transport-security'),
-          csp: !!headers.get('content-security-policy'),
+          hsts: !!headers.get('strict-transport-security'),'
+          csp: !!headers.get('content-security-policy'),'
           score: this.calculateSecurityScore(headers)
         }
       };
@@ -780,16 +773,16 @@ export class PerformanceTestCore {
 
       const recommendations = [];
       if (!optimization.compression.enabled) {
-        recommendations.push('启用Gzip或Brotli压缩以减少传输大小');
+        recommendations.push('启用Gzip或Brotli压缩以减少传输大小');'
       }
       if (optimization.caching.score < 70) {
-        recommendations.push('优化缓存策略以提升重复访问性能');
+        recommendations.push('优化缓存策略以提升重复访问性能');'
       }
       if (!optimization.cdn.detected) {
-        recommendations.push('考虑使用CDN加速静态资源分发');
+        recommendations.push('考虑使用CDN加速静态资源分发');'
       }
       if (!optimization.http2.enabled) {
-        recommendations.push('升级到HTTP/2以提升连接效率');
+        recommendations.push('升级到HTTP/2以提升连接效率');'
       }
 
       return {
@@ -800,12 +793,12 @@ export class PerformanceTestCore {
       };
 
     } catch (error) {
-      console.warn('网络优化分析失败:', error);
+      console.warn('网络优化分析失败:', error);'
       return {
         score: 0,
         optimization: {},
-        recommendations: ['无法分析网络优化'],
-        networkGrade: 'F'
+        recommendations: ['无法分析网络优化'],'
+        networkGrade: 'F';
       };
     }
   }
@@ -833,13 +826,13 @@ export class PerformanceTestCore {
 
       const recommendations = [];
       if (totalServices > 10) {
-        recommendations.push('第三方服务过多，考虑减少或延迟加载');
+        recommendations.push('第三方服务过多，考虑减少或延迟加载');'
       }
       if (thirdPartyServices.fonts.length > 3) {
-        recommendations.push('Web字体过多，考虑字体子集化或本地托管');
+        recommendations.push('Web字体过多，考虑字体子集化或本地托管');'
       }
       if (thirdPartyServices.analytics.length > 2) {
-        recommendations.push('分析工具过多，考虑整合或移除不必要的工具');
+        recommendations.push('分析工具过多，考虑整合或移除不必要的工具');'
       }
 
       return {
@@ -847,17 +840,17 @@ export class PerformanceTestCore {
         services: thirdPartyServices,
         totalCount: totalServices,
         recommendations,
-        impactLevel: totalServices > 15 ? 'high' : totalServices > 8 ? 'medium' : 'low'
+        impactLevel: totalServices > 15 ? 'high' : totalServices > 8 ? 'medium' : 'low';
       };
 
     } catch (error) {
-      console.warn('第三方影响分析失败:', error);
+      console.warn('第三方影响分析失败:', error);'
       return {
         score: 0,
         services: {},
         totalCount: 0,
-        recommendations: ['无法分析第三方影响'],
-        impactLevel: 'unknown'
+        recommendations: ['无法分析第三方影响'],'
+        impactLevel: 'unknown';
       };
     }
   }
@@ -866,17 +859,16 @@ export class PerformanceTestCore {
 
   private calculateCachingScore(headers: Headers): number {
     let score = 0;
-    if (headers.get('cache-control')) score += 40;
-    if (headers.get('etag')) score += 30;
-    if (headers.get('last-modified')) score += 20;
-    if (headers.get('expires')) score += 10;
+    if (headers.get('cache-control')) score += 40;'
+    if (headers.get('etag')) score += 30;'
+    if (headers.get('last-modified')) score += 20;'
+    if (headers.get('expires')) score += 10;'
     return score;
   }
 
   private detectCDN(headers: Headers, url: string): boolean {
-    const cdnHeaders = ['cf-ray', 'x-cache', 'x-served-by', 'x-amz-cf-id'];
-    const cdnDomains = ['cloudflare', 'amazonaws', 'fastly', 'maxcdn', 'jsdelivr'];
-
+    const cdnHeaders = ['cf-ray', 'x-cache', 'x-served-by', 'x-amz-cf-id'];'
+    const cdnDomains = ['cloudflare', 'amazonaws', 'fastly', 'maxcdn', 'jsdelivr'];'
     return cdnHeaders.some(header => headers.get(header)) ||
       cdnDomains.some(domain => url.includes(domain));
   }
@@ -891,10 +883,10 @@ export class PerformanceTestCore {
 
   private calculateSecurityScore(headers: Headers): number {
     let score = 0;
-    if (headers.get('strict-transport-security')) score += 50;
-    if (headers.get('content-security-policy')) score += 30;
-    if (headers.get('x-frame-options')) score += 10;
-    if (headers.get('x-content-type-options')) score += 10;
+    if (headers.get('strict-transport-security')) score += 50;'
+    if (headers.get('content-security-policy')) score += 30;'
+    if (headers.get('x-frame-options')) score += 10;'
+    if (headers.get('x-content-type-options')) score += 10;'
     return score;
   }
 
@@ -909,11 +901,11 @@ export class PerformanceTestCore {
 
   private detectAnalytics(html: string): string[] {
     const patterns = [
-      { name: 'Google Analytics', pattern: /google-analytics|gtag|ga/ },
-      { name: 'Adobe Analytics', pattern: /omniture|s_code|adobe/ },
-      { name: 'Mixpanel', pattern: /mixpanel/ },
-      { name: 'Hotjar', pattern: /hotjar/ },
-      { name: 'Segment', pattern: /segment/ }
+      { name: 'Google Analytics', pattern: /google-analytics|gtag|ga/ },'
+      { name: 'Adobe Analytics', pattern: /omniture|s_code|adobe/ },'
+      { name: 'Mixpanel', pattern: /mixpanel/ },'
+      { name: 'Hotjar', pattern: /hotjar/ },'
+      { name: 'Segment', pattern: /segment/ }'
     ];
 
     return patterns.filter(p => p.pattern.test(html)).map(p => p.name);
@@ -921,10 +913,10 @@ export class PerformanceTestCore {
 
   private detectSocialMedia(html: string): string[] {
     const patterns = [
-      { name: 'Facebook Pixel', pattern: /facebook\.net|fbevents/ },
-      { name: 'Twitter', pattern: /twitter\.com\/widgets/ },
-      { name: 'LinkedIn', pattern: /linkedin\.com/ },
-      { name: 'Pinterest', pattern: /pinterest\.com/ }
+      { name: 'Facebook Pixel', pattern: /facebook\.net|fbevents/ },'
+      { name: 'Twitter', pattern: /twitter\.com\/widgets/ },'
+      { name: 'LinkedIn', pattern: /linkedin\.com/ },'
+      { name: 'Pinterest', pattern: /pinterest\.com/ }'
     ];
 
     return patterns.filter(p => p.pattern.test(html)).map(p => p.name);
@@ -932,9 +924,9 @@ export class PerformanceTestCore {
 
   private detectAdvertising(html: string): string[] {
     const patterns = [
-      { name: 'Google Ads', pattern: /googleadservices|googlesyndication/ },
-      { name: 'Amazon Associates', pattern: /amazon-adsystem/ },
-      { name: 'Media.net', pattern: /media\.net/ }
+      { name: 'Google Ads', pattern: /googleadservices|googlesyndication/ },'
+      { name: 'Amazon Associates', pattern: /amazon-adsystem/ },'
+      { name: 'Media.net', pattern: /media\.net/ }'
     ];
 
     return patterns.filter(p => p.pattern.test(html)).map(p => p.name);
@@ -942,9 +934,9 @@ export class PerformanceTestCore {
 
   private detectWebFonts(html: string): string[] {
     const patterns = [
-      { name: 'Google Fonts', pattern: /fonts\.googleapis\.com/ },
-      { name: 'Adobe Fonts', pattern: /typekit\.net|use\.typekit/ },
-      { name: 'Font Awesome', pattern: /fontawesome/ }
+      { name: 'Google Fonts', pattern: /fonts\.googleapis\.com/ },'
+      { name: 'Adobe Fonts', pattern: /typekit\.net|use\.typekit/ },'
+      { name: 'Font Awesome', pattern: /fontawesome/ }'
     ];
 
     return patterns.filter(p => p.pattern.test(html)).map(p => p.name);
@@ -952,9 +944,9 @@ export class PerformanceTestCore {
 
   private detectMaps(html: string): string[] {
     const patterns = [
-      { name: 'Google Maps', pattern: /maps\.googleapis\.com/ },
-      { name: 'Mapbox', pattern: /mapbox/ },
-      { name: 'OpenStreetMap', pattern: /openstreetmap/ }
+      { name: 'Google Maps', pattern: /maps\.googleapis\.com/ },'
+      { name: 'Mapbox', pattern: /mapbox/ },'
+      { name: 'OpenStreetMap', pattern: /openstreetmap/ }'
     ];
 
     return patterns.filter(p => p.pattern.test(html)).map(p => p.name);
@@ -962,9 +954,9 @@ export class PerformanceTestCore {
 
   private detectChatWidgets(html: string): string[] {
     const patterns = [
-      { name: 'Intercom', pattern: /intercom/ },
-      { name: 'Zendesk', pattern: /zendesk/ },
-      { name: 'Drift', pattern: /drift/ }
+      { name: 'Intercom', pattern: /intercom/ },'
+      { name: 'Zendesk', pattern: /zendesk/ },'
+      { name: 'Drift', pattern: /drift/ }'
     ];
 
     return patterns.filter(p => p.pattern.test(html)).map(p => p.name);
@@ -972,9 +964,9 @@ export class PerformanceTestCore {
 
   private detectVideoPlayers(html: string): string[] {
     const patterns = [
-      { name: 'YouTube', pattern: /youtube\.com\/embed/ },
-      { name: 'Vimeo', pattern: /vimeo\.com/ },
-      { name: 'Wistia', pattern: /wistia/ }
+      { name: 'YouTube', pattern: /youtube\.com\/embed/ },'
+      { name: 'Vimeo', pattern: /vimeo\.com/ },'
+      { name: 'Wistia', pattern: /wistia/ }'
     ];
 
     return patterns.filter(p => p.pattern.test(html)).map(p => p.name);
@@ -986,11 +978,10 @@ export class PerformanceTestCore {
    * 统计页面资源
    */
   private countResources(dom: Document) {
-    const images = dom.querySelectorAll('img').length;
-    const scripts = dom.querySelectorAll('script').length;
-    const stylesheets = dom.querySelectorAll('link[rel="stylesheet"]').length;
-    const fonts = dom.querySelectorAll('link[rel="preload"][as="font"]').length;
-
+    const images = dom.querySelectorAll('img').length;'
+    const scripts = dom.querySelectorAll('script').length;'
+    const stylesheets = dom.querySelectorAll('link[rel= 'stylesheet']').length;'
+    const fonts = dom.querySelectorAll('link[rel= 'preload'][as= 'font']').length;'
     return {
       images,
       scripts,
@@ -1021,18 +1012,18 @@ export class PerformanceTestCore {
     baseLCP += resources.images * 80;
 
     // 检查大图片
-    const largeImages = dom.querySelectorAll('img[width], img[height]');
+    const largeImages = dom.querySelectorAll('img[width], img[height]');'
     largeImages.forEach(img => {
-      const width = parseInt(img.getAttribute('width') || '0');
-      const height = parseInt(img.getAttribute('height') || '0');
+      const width = parseInt(img.getAttribute('width') || '0');'
+      const height = parseInt(img.getAttribute('height') || '0');'
       if (width > 800 || height > 600) {
         baseLCP += 400;
       }
     });
 
     // 检查WebP支持
-    const hasWebP = Array.from(dom.querySelectorAll('img')).some(img =>
-      img.getAttribute('src')?.includes('.webp')
+    const hasWebP = Array.from(dom.querySelectorAll('img')).some(img =>'
+      img.getAttribute('src')?.includes('.webp')'
     );
     if (!hasWebP && resources.images > 3) {
       baseLCP += 300;
@@ -1064,15 +1055,15 @@ export class PerformanceTestCore {
     let baseCLS = 0.02;
 
     // 没有尺寸的图片
-    const imagesWithoutDimensions = dom.querySelectorAll('img:not([width]):not([height])').length;
+    const imagesWithoutDimensions = dom.querySelectorAll('img:not([width]):not([height])').length;'
     baseCLS += imagesWithoutDimensions * 0.03;
 
     // 动态内容
-    const dynamicElements = dom.querySelectorAll('[style*="position: absolute"], [style*="position: fixed"]').length;
+    const dynamicElements = dom.querySelectorAll('[style*= 'position: absolute'], [style*= 'position: fixed']').length;'
     baseCLS += dynamicElements * 0.01;
 
     // 广告和嵌入内容
-    const embedElements = dom.querySelectorAll('iframe, embed, object').length;
+    const embedElements = dom.querySelectorAll('iframe, embed, object').length;'
     baseCLS += embedElements * 0.02;
 
     return Math.min(baseCLS, 0.25);

@@ -3,9 +3,7 @@
  * 提供统一的API调用接口和错误处理
  */
 
-import authService from '../services/authService';
-
-export interface ApiResponse<T = any> {
+import authService from '../services/authService';export interface ApiResponse<T = any>     {'
   success: boolean;
   data?: T;
   error?: {
@@ -19,7 +17,7 @@ export interface ApiResponse<T = any> {
 class ApiClient {
   private baseUrl: string;
 
-  constructor(baseUrl: string = '/api') {
+  constructor(baseUrl: string = '/api') {'
     this.baseUrl = baseUrl;
   }
 
@@ -30,29 +28,28 @@ class ApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
-    const url = `${this.baseUrl}${endpoint}`;
+    const url = `${this.baseUrl}${endpoint}`;`
     const token = authService.getToken();
 
-    const config: RequestInit = {
+    const config: RequestInit  = {
       headers: {
-        'Content-Type': 'application/json',
-        ...(token && { 'Authorization': `Bearer ${token}` }),
+        "Content-Type': 'application/json','`
+        ...(token && { "Authorization': `Bearer ${token}` }),'`
         ...options.headers,
       },
       ...options,
     };
-
     try {
       const response = await fetch(url, config);
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error?.message || `HTTP ${response.status}`);
+        throw new Error(result.error?.message || `HTTP ${response.status}`);`
       }
 
       return result;
     } catch (error) {
-      console.error('API请求失败:', error);
+      console.error("API请求失败:', error);'`
       throw error;
     }
   }
@@ -61,7 +58,7 @@ class ApiClient {
    * GET请求
    */
   async get<T>(endpoint: string): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, { method: 'GET' });
+    return this.request<T>(endpoint, { method: 'GET' });'
   }
 
   /**
@@ -69,7 +66,7 @@ class ApiClient {
    */
   async post<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
-      method: 'POST',
+      method: 'POST','
       body: data ? JSON.stringify(data) : undefined,
     });
   }
@@ -79,7 +76,7 @@ class ApiClient {
    */
   async put<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
-      method: 'PUT',
+      method: 'PUT','
       body: data ? JSON.stringify(data) : undefined,
     });
   }
@@ -88,7 +85,7 @@ class ApiClient {
    * DELETE请求
    */
   async delete<T>(endpoint: string): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, { method: 'DELETE' });
+    return this.request<T>(endpoint, { method: 'DELETE' });'
   }
 }
 

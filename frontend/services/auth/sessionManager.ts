@@ -4,11 +4,8 @@
  * 版本: v1.0.0
  */
 
-import type { User, UserSession } from '../../types/user';
-
-// ==================== 类型定义 ====================
-
-export interface SessionConfig {
+import type { User, UserSession  } from '../../types/user';// ==================== 类型定义 ==================== ''
+export interface SessionConfig     {
   maxConcurrentSessions: number;
   sessionTimeout: number; // 会话超时时间（毫秒）
   inactivityTimeout: number; // 非活跃超时时间（毫秒）
@@ -18,7 +15,7 @@ export interface SessionConfig {
   heartbeatInterval: number; // 心跳间隔（毫秒）
 }
 
-export interface SessionData extends UserSession {
+export interface SessionData extends UserSession     {
   // 基础会话信息
   id: string;
   userId: string;
@@ -37,7 +34,7 @@ export interface SessionData extends UserSession {
   activityLog: ActivityRecord[];
 }
 
-export interface DeviceInfo {
+export interface DeviceInfo     {
   deviceId: string;
   userAgent: string;
   platform: string;
@@ -51,7 +48,7 @@ export interface DeviceInfo {
   fingerprint?: string;
 }
 
-export interface LocationInfo {
+export interface LocationInfo     {
   country?: string;
   region?: string;
   city?: string;
@@ -63,7 +60,7 @@ export interface LocationInfo {
   isTor?: boolean;
 }
 
-export interface SecurityFlags {
+export interface SecurityFlags     {
   isSuspicious: boolean;
   isNewDevice: boolean;
   isNewLocation: boolean;
@@ -72,7 +69,7 @@ export interface SecurityFlags {
   lastSecurityCheck: string;
 }
 
-export interface ActivityRecord {
+export interface ActivityRecord     {
   timestamp: string;
   action: string;
   resource: string;
@@ -81,7 +78,7 @@ export interface ActivityRecord {
   userAgent: string;
 }
 
-export interface SessionAlert {
+export interface SessionAlert     {
   id: string;
   sessionId: string;
   userId: string;
@@ -93,7 +90,7 @@ export interface SessionAlert {
   acknowledged: boolean;
 }
 
-export interface ConcurrentSessionPolicy {
+export interface ConcurrentSessionPolicy     {
   maxSessions: number;
   strategy: 'reject_new' | 'terminate_oldest' | 'terminate_all_others' | 'allow_with_warning';
   notifyUser: boolean;
@@ -139,7 +136,7 @@ class DeviceDetector {
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics:', {
+    console.debug('API Metrics: ', {'
       url: info.url,
       method: info.method,
       status: info.status,
@@ -165,7 +162,7 @@ class DeviceDetector {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
@@ -185,7 +182,7 @@ class DeviceDetector {
       browserVersion: this.getBrowserInfo().version,
       os: this.getOSInfo().name,
       osVersion: this.getOSInfo().version,
-      screenResolution: `${screen.width}x${screen.height}`,
+      screenResolution: `${screen.width}x${screen.height}`,`
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       language: navigator.language
     };
@@ -195,10 +192,10 @@ class DeviceDetector {
    * 获取设备ID
    */
   private static getDeviceId(): string {
-    let deviceId = localStorage.getItem('device_id');
+    let deviceId = localStorage.getItem("device_id');'`
     if (!deviceId) {
-      deviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
-      localStorage.setItem('device_id', deviceId);
+      deviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);'
+      localStorage.setItem('device_id', deviceId);'
     }
     return deviceId;
   }
@@ -209,21 +206,21 @@ class DeviceDetector {
   private static getBrowserInfo(): { name: string; version: string } {
     const userAgent = navigator.userAgent;
 
-    if (userAgent.includes('Chrome')) {
+    if (userAgent.includes('Chrome')) {'
       const match = userAgent.match(/Chrome\/(\d+)/);
-      return { name: 'Chrome', version: match ? match[1] : 'Unknown' };
-    } else if (userAgent.includes('Firefox')) {
+      return { name: 'Chrome', version: match ? match[1] : 'Unknown' };'
+    } else if (userAgent.includes('Firefox')) {'
       const match = userAgent.match(/Firefox\/(\d+)/);
-      return { name: 'Firefox', version: match ? match[1] : 'Unknown' };
-    } else if (userAgent.includes('Safari')) {
+      return { name: 'Firefox', version: match ? match[1] : 'Unknown' };'
+    } else if (userAgent.includes('Safari')) {'
       const match = userAgent.match(/Safari\/(\d+)/);
-      return { name: 'Safari', version: match ? match[1] : 'Unknown' };
-    } else if (userAgent.includes('Edge')) {
+      return { name: 'Safari', version: match ? match[1] : 'Unknown' };'
+    } else if (userAgent.includes('Edge')) {'
       const match = userAgent.match(/Edge\/(\d+)/);
-      return { name: 'Edge', version: match ? match[1] : 'Unknown' };
+      return { name: 'Edge', version: match ? match[1] : 'Unknown' };'
     }
 
-    return { name: 'Unknown', version: 'Unknown' };
+    return { name: 'Unknown', version: 'Unknown' };'
   }
 
   /**
@@ -233,21 +230,21 @@ class DeviceDetector {
     const userAgent = navigator.userAgent;
     const platform = navigator.platform;
 
-    if (platform.includes('Win')) {
-      return { name: 'Windows', version: this.getWindowsVersion(userAgent) };
-    } else if (platform.includes('Mac')) {
-      return { name: 'macOS', version: this.getMacVersion(userAgent) };
-    } else if (platform.includes('Linux')) {
-      return { name: 'Linux', version: 'Unknown' };
-    } else if (userAgent.includes('Android')) {
+    if (platform.includes('Win')) {'
+      return { name: 'Windows', version: this.getWindowsVersion(userAgent) };'
+    } else if (platform.includes('Mac')) {'
+      return { name: 'macOS', version: this.getMacVersion(userAgent) };'
+    } else if (platform.includes('Linux')) {'
+      return { name: 'Linux', version: 'Unknown' };'
+    } else if (userAgent.includes('Android')) {'
       const match = userAgent.match(/Android (\d+\.?\d*)/);
-      return { name: 'Android', version: match ? match[1] : 'Unknown' };
-    } else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) {
+      return { name: 'Android', version: match ? match[1] : 'Unknown' };'
+    } else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) {'
       const match = userAgent.match(/OS (\d+_?\d*)/);
-      return { name: 'iOS', version: match ? match[1].replace('_', '.') : 'Unknown' };
+      return { name: 'iOS', version: match ? match[1].replace('_', '.') : 'Unknown' };'
     }
 
-    return { name: 'Unknown', version: 'Unknown' };
+    return { name: 'Unknown', version: 'Unknown' };'
   }
 
   private static getWindowsVersion(userAgent: string): string {
@@ -271,11 +268,10 @@ class LocationDetector {
    * 获取位置信息
    */
   static async getLocationInfo(ipAddress: string): Promise<LocationInfo> {
-    const locationInfo: LocationInfo = { ipAddress };
-
+    const locationInfo: LocationInfo  = { ipAddress };
     try {
       // 尝试从IP地址获取地理位置信息
-      const response = await fetch(`https://ipapi.co/${ipAddress}/json/`);
+      const response = await fetch(`https://ipapi.co/${ipAddress}/json/`);`
       if (response.ok) {
         const data = await response.json();
         locationInfo.country = data.country_name;
@@ -286,7 +282,7 @@ class LocationDetector {
         locationInfo.isp = data.org;
       }
     } catch (error) {
-      console.warn('获取位置信息失败:', error);
+      console.warn("获取位置信息失败:', error);'`
     }
 
     // 检测VPN/Tor（简化实现）
@@ -343,9 +339,9 @@ class SecurityAnalyzer {
     if (sessionData.locationInfo) {
       const knownLocations = userSessions
         .filter(s => s.locationInfo)
-        .map(s => `${s.locationInfo!.country}-${s.locationInfo!.region}`);
+        .map(s => `${s.locationInfo!.country}-${s.locationInfo!.region}`);`
 
-      const currentLocation = `${sessionData.locationInfo.country}-${sessionData.locationInfo.region}`;
+      const currentLocation = `${sessionData.locationInfo.country}-${sessionData.locationInfo.region}`;`
       if (!knownLocations.includes(currentLocation)) {
         isNewLocation = true;
         riskScore += 15;
@@ -431,15 +427,14 @@ export class SessionManager {
     ipAddress: string,
     policy: ConcurrentSessionPolicy = {
       maxSessions: this.config.maxConcurrentSessions,
-      strategy: 'terminate_oldest',
+      strategy: "terminate_oldest','`
       notifyUser: true,
       requireConfirmation: false
     }
   ): Promise<{ sessionId: string; warnings?: string[] }> {
     const sessionId = this.generateSessionId();
     const deviceInfo = DeviceDetector.getDeviceInfo();
-    const warnings: string[] = [];
-
+    const warnings: string[]  = [];
     // 获取位置信息
     let locationInfo: LocationInfo | undefined;
     if (this.config.enableLocationTracking) {
@@ -453,11 +448,11 @@ export class SessionManager {
     }
 
     // 创建会话数据
-    const sessionData: SessionData = {
+    const sessionData: SessionData  = {
       id: sessionId,
       userId: user.id,
-      token: '', // 将由JWT管理器设置
-      refreshToken: '',
+      token: '', // 将由JWT管理器设置'
+      refreshToken: '','
       expiresAt: new Date(Date.now() + this.config.sessionTimeout).toISOString(),
       createdAt: new Date().toISOString(),
       lastActivityAt: new Date().toISOString(),
@@ -476,7 +471,6 @@ export class SessionManager {
       },
       activityLog: []
     };
-
     // 安全分析
     if (this.config.enableSecurityAlerts) {
       sessionData.securityFlags = SecurityAnalyzer.analyzeSession(
@@ -497,7 +491,7 @@ export class SessionManager {
     this.startHeartbeat(sessionId);
 
     // 记录活动
-    this.recordActivity(sessionId, 'session_created', 'auth', {
+    this.recordActivity(sessionId, 'session_created', 'auth', {'
       deviceInfo: deviceInfo,
       locationInfo: locationInfo
     });
@@ -527,7 +521,7 @@ export class SessionManager {
   /**
    * 终止会话
    */
-  async terminateSession(sessionId: string, reason: string = 'user_logout'): Promise<void> {
+  async terminateSession(sessionId: string, reason: string = 'user_logout'): Promise<void> {'
     const session = this.activeSessions.get(sessionId);
     if (!session) return;
 
@@ -539,8 +533,7 @@ export class SessionManager {
     }
 
     // 记录活动
-    this.recordActivity(sessionId, 'session_terminated', 'auth', { reason });
-
+    this.recordActivity(sessionId, 'session_terminated', "auth', { reason });'
     // 标记为非活跃
     session.isActive = false;
     await this.persistSession(session);
@@ -549,7 +542,7 @@ export class SessionManager {
     this.activeSessions.delete(sessionId);
 
     // 清理缓存
-    await defaultMemoryCache.delete(`session_${sessionId}`);
+    await defaultMemoryCache.delete(`session_${sessionId}`);`
   }
 
   /**
@@ -573,16 +566,15 @@ export class SessionManager {
    * 生成安全警报
    */
   private async generateSecurityAlerts(sessionData: SessionData): Promise<void> {
-    const alerts: SessionAlert[] = [];
-
+    const alerts: SessionAlert[]  = [];
     if (sessionData.securityFlags.isNewDevice) {
       alerts.push({
         id: this.generateAlertId(),
         sessionId: sessionData.id,
         userId: sessionData.userId,
-        type: 'new_device',
-        severity: 'medium',
-        message: '检测到新设备登录',
+        type: "new_device','`
+        severity: 'medium','
+        message: '检测到新设备登录','
         details: { deviceInfo: sessionData.deviceInfo },
         timestamp: new Date().toISOString(),
         acknowledged: false
@@ -594,9 +586,9 @@ export class SessionManager {
         id: this.generateAlertId(),
         sessionId: sessionData.id,
         userId: sessionData.userId,
-        type: 'new_location',
-        severity: 'medium',
-        message: '检测到新位置登录',
+        type: 'new_location','
+        severity: 'medium','
+        message: '检测到新位置登录','
         details: { locationInfo: sessionData.locationInfo },
         timestamp: new Date().toISOString(),
         acknowledged: false
@@ -608,9 +600,9 @@ export class SessionManager {
         id: this.generateAlertId(),
         sessionId: sessionData.id,
         userId: sessionData.userId,
-        type: 'suspicious_activity',
-        severity: 'high',
-        message: '检测到可疑活动',
+        type: 'suspicious_activity','
+        severity: 'high','
+        message: '检测到可疑活动','
         details: { riskScore: sessionData.securityFlags.riskScore },
         timestamp: new Date().toISOString(),
         acknowledged: false
@@ -636,27 +628,26 @@ export class SessionManager {
     const userSessions = this.getUserSessions(userId);
 
     switch (policy.strategy) {
-      case 'reject_new':
-        throw new Error('已达到最大并发会话数限制');
-
-      case 'terminate_oldest':
+      case 'reject_new': ''
+        throw new Error('已达到最大并发会话数限制');'
+      case 'terminate_oldest': ''
         const oldestSession = userSessions
           .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())[0];
         if (oldestSession) {
-          await this.terminateSession(oldestSession.id, 'concurrent_limit');
-          warnings.push('已终止最旧的会话');
+          await this.terminateSession(oldestSession.id, 'concurrent_limit');'
+          warnings.push('已终止最旧的会话');'
         }
         break;
 
-      case 'terminate_all_others':
+      case 'terminate_all_others': ''
         for (const session of userSessions) {
-          await this.terminateSession(session.id, 'concurrent_limit');
+          await this.terminateSession(session.id, 'concurrent_limit');'
         }
-        warnings.push('已终止所有其他会话');
+        warnings.push('已终止所有其他会话');'
         break;
 
-      case 'allow_with_warning':
-        warnings.push('已超过建议的并发会话数');
+      case 'allow_with_warning': ''
+        warnings.push('已超过建议的并发会话数');'
         break;
     }
   }
@@ -664,11 +655,11 @@ export class SessionManager {
   // ==================== 私有方法 ====================
 
   private generateSessionId(): string {
-    return 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+    return 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);'
   }
 
   private generateAlertId(): string {
-    return 'alert_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+    return 'alert_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);'
   }
 
   private recordActivity(
@@ -680,7 +671,7 @@ export class SessionManager {
     const session = this.activeSessions.get(sessionId);
     if (!session) return;
 
-    const activity: ActivityRecord = {
+    const activity: ActivityRecord  = {
       timestamp: new Date().toISOString(),
       action,
       resource,
@@ -688,7 +679,6 @@ export class SessionManager {
       ipAddress: session.ipAddress,
       userAgent: session.userAgent
     };
-
     session.activityLog.push(activity);
 
     // 限制活动日志大小
@@ -699,20 +689,18 @@ export class SessionManager {
 
   private getUserActivityHistory(userId: string): ActivityRecord[] {
     const userSessions = this.getUserSessions(userId);
-    const allActivities: ActivityRecord[] = [];
-
+    const allActivities: ActivityRecord[]  = [];
     userSessions.forEach(session => {
       allActivities.push(...session.activityLog);
     });
 
-    return allActivities.sort((a, b) =>
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    return allActivities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
   }
 
   private async persistSession(session: SessionData): Promise<void> {
     // 缓存会话数据
-    await defaultMemoryCache.set(`session_${session.id}`, session, undefined, this.config.sessionTimeout);
+    await defaultMemoryCache.set(`session_${session.id}`, session, undefined, this.config.sessionTimeout);`
   }
 
   private startHeartbeat(sessionId: string): void {
@@ -731,7 +719,7 @@ export class SessionManager {
 
       if (now - lastActivity > this.config.inactivityTimeout) {
         
-        await this.terminateSession(sessionId, 'inactivity_timeout');
+        await this.terminateSession(sessionId, "inactivity_timeout');'`
         return;
       }
 
@@ -751,8 +739,7 @@ export class SessionManager {
 
   private async cleanupExpiredSessions(): Promise<void> {
     const now = Date.now();
-    const expiredSessions: string[] = [];
-
+    const expiredSessions: string[]  = [];
     for (const [sessionId, session] of this.activeSessions.entries()) {
       const expiryTime = new Date(session.expiresAt).getTime();
       if (now > expiryTime) {
@@ -761,14 +748,14 @@ export class SessionManager {
     }
 
     for (const sessionId of expiredSessions) {
-      await this.terminateSession(sessionId, 'session_expired');
+      await this.terminateSession(sessionId, 'session_expired');'
     }
   }
 
   private async sendSecurityNotifications(alerts: SessionAlert[]): Promise<void> {
     // 这里应该实现实际的通知发送逻辑
     // 例如：邮件、短信、推送通知等
-    console.log('安全警报:', alerts);
+    console.log('安全警报:', alerts);'
   }
 }
 

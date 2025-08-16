@@ -3,15 +3,9 @@
  * 基于设计令牌的统一按钮组件
  */
 
-import React, { forwardRef } from 'react';
-import { styled } from 'styled-components';
-
-// 按钮变体类型
-export type ButtonVariant = 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'ghost' | 'link';
-export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-
-// 按钮属性接口
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+import React, { forwardRef    } from 'react';import { styled    } from 'styled-components';// 按钮变体类型'
+export type ButtonVariant   = 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'ghost' | 'link';export type ButtonSize   = 'xs' | 'sm' | 'md' | 'lg' | "xl';// 按钮属性接口'
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>     {
   variant?: ButtonVariant;
   size?: ButtonSize;
   fullWidth?: boolean;
@@ -22,7 +16,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 // 样式化按钮组件
-const StyledButton = styled.button<ButtonProps>`
+const StyledButton = styled.button<ButtonProps>``
   /* 基础样式 */
   display: inline-flex;
   align-items: center;
@@ -46,11 +40,11 @@ const StyledButton = styled.button<ButtonProps>`
   }
 
   /* 加载状态 */
-  ${props => props.loading && `
+  ${props => props.loading && ``}
     pointer-events: none;
 
     &::before {
-      content: '';
+      content: "';'`
       position: absolute;
       top: 50%;
       left: 50%;
@@ -68,54 +62,54 @@ const StyledButton = styled.button<ButtonProps>`
         transform: rotate(360deg);
       }
     }
-  `}
+  `}`
 
   /* 全宽样式 */
-  ${props => props.fullWidth && `
+  ${props => props.fullWidth && ``}
     width: 100%;
-  `}
+  `}`
 
   /* 尺寸变体 */
-  ${props => {
+  ${props => {}
     switch (props.size) {
-      case 'xs':
-        return `
+      case "xs': ''`
+        return ``
           padding: var(--spacing-1) var(--spacing-2);
           font-size: var(--font-size-xs);
           min-height: 24px;
-        `;
-      case 'sm':
-        return `
+        `;`
+      case "sm': ''`
+        return ``
           padding: var(--spacing-2) var(--spacing-3);
           font-size: var(--font-size-sm);
           min-height: 32px;
-        `;
-      case 'lg':
-        return `
+        `;`
+      case "lg': ''`
+        return ``
           padding: var(--spacing-3) var(--spacing-6);
           font-size: var(--font-size-lg);
           min-height: 48px;
-        `;
-      case 'xl':
-        return `
+        `;`
+      case "xl': ''`
+        return ``
           padding: var(--spacing-4) var(--spacing-8);
           font-size: var(--font-size-xl);
           min-height: 56px;
-        `;
+        `;`
       default: // md
-        return `
+        return ``
           padding: var(--spacing-2) var(--spacing-4);
           font-size: var(--font-size-base);
           min-height: 40px;
-        `;
+        `;`
     }
   }}
 
   /* 颜色变体 */
-  ${props => {
+  ${props => {}
     switch (props.variant) {
-      case 'primary':
-        return `
+      case "primary': ''`
+        return ``
           background-color: var(--color-primary-500);
           color: white;
           border-color: var(--color-primary-500);
@@ -129,9 +123,9 @@ const StyledButton = styled.button<ButtonProps>`
             background-color: var(--color-primary-700);
             border-color: var(--color-primary-700);
           }
-        `;
-      case 'secondary':
-        return `
+        `;`
+      case "secondary': ''`
+        return ``
           background-color: var(--color-secondary-500);
           color: white;
           border-color: var(--color-secondary-500);
@@ -140,9 +134,9 @@ const StyledButton = styled.button<ButtonProps>`
             background-color: var(--color-secondary-600);
             border-color: var(--color-secondary-600);
           }
-        `;
-      case 'success':
-        return `
+        `;`
+      case "success': ''`
+        return ``
           background-color: var(--color-success-500);
           color: white;
           border-color: var(--color-success-500);
@@ -151,9 +145,9 @@ const StyledButton = styled.button<ButtonProps>`
             background-color: var(--color-success-600);
             border-color: var(--color-success-600);
           }
-        `;
-      case 'warning':
-        return `
+        `;`
+      case "warning': ''`
+        return ``
           background-color: var(--color-warning-500);
           color: white;
           border-color: var(--color-warning-500);
@@ -162,9 +156,9 @@ const StyledButton = styled.button<ButtonProps>`
             background-color: var(--color-warning-600);
             border-color: var(--color-warning-600);
           }
-        `;
-      case 'error':
-        return `
+        `;`
+      case "error': ''`
+        return ``
           background-color: var(--color-error-500);
           color: white;
           border-color: var(--color-error-500);
@@ -173,9 +167,9 @@ const StyledButton = styled.button<ButtonProps>`
             background-color: var(--color-error-600);
             border-color: var(--color-error-600);
           }
-        `;
-      case 'ghost':
-        return `
+        `;`
+      case "ghost': ''`
+        return ``
           background-color: transparent;
           color: var(--color-primary-500);
           border-color: var(--color-primary-500);
@@ -183,9 +177,9 @@ const StyledButton = styled.button<ButtonProps>`
           &:hover:not(:disabled) {
             background-color: var(--color-primary-50);
           }
-        `;
-      case 'link':
-        return `
+        `;`
+      case "link': ''`
+        return ``
           background-color: transparent;
           color: var(--color-primary-500);
           border-color: transparent;
@@ -195,9 +189,9 @@ const StyledButton = styled.button<ButtonProps>`
           &:hover:not(:disabled) {
             text-decoration: underline;
           }
-        `;
+        `;`
       default:
-        return `
+        return ``
           background-color: var(--color-gray-100);
           color: var(--color-gray-700);
           border-color: var(--color-gray-300);
@@ -206,16 +200,15 @@ const StyledButton = styled.button<ButtonProps>`
             background-color: var(--color-gray-200);
             border-color: var(--color-gray-400);
           }
-        `;
+        `;`
     }
   }}
-`;
+`;`
 
 // 按钮组件
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({
-    variant = 'primary',
-    size = 'md',
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
+    variant = "primary','`
+    size = 'md','
     fullWidth = false,
     loading = false,
     leftIcon,
@@ -234,14 +227,13 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || loading}
         {...props}
       >
-        {!loading && leftIcon && <span className="button-left-icon">{leftIcon}</span>}
-        {!loading && <span className="button-content">{children}</span>}
-        {!loading && rightIcon && <span className="button-right-icon">{rightIcon}</span>}
+        {!loading && leftIcon && <span className= 'button-left-icon'>{leftIcon}</span>}'
+        {!loading && <span className= 'button-content'>{children}</span>}'
+        {!loading && rightIcon && <span className= 'button-right-icon'>{rightIcon}</span>}'
       </StyledButton>
     );
   }
 );
 
 Button.displayName = 'Button';
-
 export default Button;

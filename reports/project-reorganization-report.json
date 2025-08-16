@@ -1,0 +1,971 @@
+{
+  "timestamp": "2025-08-16T10:04:48.803Z",
+  "summary": {
+    "totalActions": 157,
+    "totalErrors": 0,
+    "actionsByType": {
+      "create": 8,
+      "move": 148,
+      "delete": 1
+    },
+    "standardStructureCreated": 11
+  },
+  "actions": [
+    {
+      "type": "create",
+      "path": ".\\reports",
+      "description": "创建目录: 生成的报告文件",
+      "timestamp": "2025-08-16T10:04:48.549Z"
+    },
+    {
+      "type": "create",
+      "path": ".\\scripts\\build",
+      "description": "创建目录: 构建相关脚本",
+      "timestamp": "2025-08-16T10:04:48.550Z"
+    },
+    {
+      "type": "create",
+      "path": ".\\scripts\\deploy",
+      "description": "创建目录: 部署相关脚本",
+      "timestamp": "2025-08-16T10:04:48.550Z"
+    },
+    {
+      "type": "create",
+      "path": ".\\scripts\\maintenance",
+      "description": "创建目录: 维护和修复脚本",
+      "timestamp": "2025-08-16T10:04:48.551Z"
+    },
+    {
+      "type": "create",
+      "path": ".\\scripts\\testing",
+      "description": "创建目录: 测试相关脚本",
+      "timestamp": "2025-08-16T10:04:48.553Z"
+    },
+    {
+      "type": "create",
+      "path": ".\\scripts\\utils",
+      "description": "创建目录: 工具脚本",
+      "timestamp": "2025-08-16T10:04:48.553Z"
+    },
+    {
+      "type": "create",
+      "path": ".\\config\\environments",
+      "description": "创建目录: 环境配置",
+      "timestamp": "2025-08-16T10:04:48.554Z"
+    },
+    {
+      "type": "create",
+      "path": ".\\backup\\archive",
+      "description": "创建目录: 归档备份",
+      "timestamp": "2025-08-16T10:04:48.554Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\advanced-typescript-fix-report.json",
+      "description": "移动到 reports/advanced-typescript-fix-report.json",
+      "timestamp": "2025-08-16T10:04:48.558Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\api-enhancement-report.json",
+      "description": "移动到 reports/api-enhancement-report.json",
+      "timestamp": "2025-08-16T10:04:48.559Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\api-response-fix-report.json",
+      "description": "移动到 reports/api-response-fix-report.json",
+      "timestamp": "2025-08-16T10:04:48.560Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\api-service-enhancement-report.json",
+      "description": "移动到 reports/api-service-enhancement-report.json",
+      "timestamp": "2025-08-16T10:04:48.561Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\async-error-handling-fix-report.json",
+      "description": "移动到 reports/async-error-handling-fix-report.json",
+      "timestamp": "2025-08-16T10:04:48.562Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\basic-test-creation-report.json",
+      "description": "移动到 reports/basic-test-creation-report.json",
+      "timestamp": "2025-08-16T10:04:48.563Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\business-flow-implementation-report.json",
+      "description": "移动到 reports/business-flow-implementation-report.json",
+      "timestamp": "2025-08-16T10:04:48.563Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\component-enhancement-report.json",
+      "description": "移动到 reports/component-enhancement-report.json",
+      "timestamp": "2025-08-16T10:04:48.564Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\comprehensive-consistency-report.json",
+      "description": "移动到 reports/comprehensive-consistency-report.json",
+      "timestamp": "2025-08-16T10:04:48.564Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\config-consistency-report.json",
+      "description": "移动到 reports/config-consistency-report.json",
+      "timestamp": "2025-08-16T10:04:48.582Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\config-standardization-report.json",
+      "description": "移动到 reports/config-standardization-report.json",
+      "timestamp": "2025-08-16T10:04:48.598Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\consistency-check-report.json",
+      "description": "移动到 reports/consistency-check-report.json",
+      "timestamp": "2025-08-16T10:04:48.599Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\critical-functionality-fix-report.json",
+      "description": "移动到 reports/critical-functionality-fix-report.json",
+      "timestamp": "2025-08-16T10:04:48.600Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\data-consistency-report.json",
+      "description": "移动到 reports/data-consistency-report.json",
+      "timestamp": "2025-08-16T10:04:48.601Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\dependency-unification-report.json",
+      "description": "移动到 reports/dependency-unification-report.json",
+      "timestamp": "2025-08-16T10:04:48.601Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\design-system-build-report.json",
+      "description": "移动到 reports/design-system-build-report.json",
+      "timestamp": "2025-08-16T10:04:48.602Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\docs-maintenance-report.json",
+      "description": "移动到 reports/docs-maintenance-report.json",
+      "timestamp": "2025-08-16T10:04:48.602Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\duplicate-resolution-report.json",
+      "description": "移动到 reports/duplicate-resolution-report.json",
+      "timestamp": "2025-08-16T10:04:48.603Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\enhanced-completeness-report.json",
+      "description": "移动到 reports/enhanced-completeness-report.json",
+      "timestamp": "2025-08-16T10:04:48.629Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\frontend-api-integration-report.json",
+      "description": "移动到 reports/frontend-api-integration-report.json",
+      "timestamp": "2025-08-16T10:04:48.631Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\frontend-performance-optimization-report.json",
+      "description": "移动到 reports/frontend-performance-optimization-report.json",
+      "timestamp": "2025-08-16T10:04:48.633Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\functional-completeness-report.json",
+      "description": "移动到 reports/functional-completeness-report.json",
+      "timestamp": "2025-08-16T10:04:48.633Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\functional-consistency-report.json",
+      "description": "移动到 reports/functional-consistency-report.json",
+      "timestamp": "2025-08-16T10:04:48.634Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\hardcoded-replacement-report.json",
+      "description": "移动到 reports/hardcoded-replacement-report.json",
+      "timestamp": "2025-08-16T10:04:48.636Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\naming-normalization-report.json",
+      "description": "移动到 reports/naming-normalization-report.json",
+      "timestamp": "2025-08-16T10:04:48.637Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\naming-standardization-report.json",
+      "description": "移动到 reports/naming-standardization-report.json",
+      "timestamp": "2025-08-16T10:04:48.637Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\page-enhancement-report.json",
+      "description": "移动到 reports/page-enhancement-report.json",
+      "timestamp": "2025-08-16T10:04:48.639Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\performance-optimization-implementation-report.json",
+      "description": "移动到 reports/performance-optimization-implementation-report.json",
+      "timestamp": "2025-08-16T10:04:48.640Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\responsive-optimization-report.json",
+      "description": "移动到 reports/responsive-optimization-report.json",
+      "timestamp": "2025-08-16T10:04:48.642Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\routing-navigation-optimization-report.json",
+      "description": "移动到 reports/routing-navigation-optimization-report.json",
+      "timestamp": "2025-08-16T10:04:48.643Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\simple-quote-fix-report.json",
+      "description": "移动到 reports/simple-quote-fix-report.json",
+      "timestamp": "2025-08-16T10:04:48.643Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\smart-string-fix-report.json",
+      "description": "移动到 reports/smart-string-fix-report.json",
+      "timestamp": "2025-08-16T10:04:48.644Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\specific-error-fix-report.json",
+      "description": "移动到 reports/specific-error-fix-report.json",
+      "timestamp": "2025-08-16T10:04:48.645Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\typescript-fix-report.json",
+      "description": "移动到 reports/typescript-fix-report.json",
+      "timestamp": "2025-08-16T10:04:48.645Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\ui-consistency-report.json",
+      "description": "移动到 reports/ui-consistency-report.json",
+      "timestamp": "2025-08-16T10:04:48.646Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\unterminated-string-fix-report.json",
+      "description": "移动到 reports/unterminated-string-fix-report.json",
+      "timestamp": "2025-08-16T10:04:48.646Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\user-experience-enhancement-report.json",
+      "description": "移动到 reports/user-experience-enhancement-report.json",
+      "timestamp": "2025-08-16T10:04:48.647Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\advanced-typescript-fixer.cjs",
+      "description": "移动到 scripts/maintenance/advanced-typescript-fixer.cjs",
+      "timestamp": "2025-08-16T10:04:48.655Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\api-implementation-enhancer.cjs",
+      "description": "移动到 scripts/maintenance/api-implementation-enhancer.cjs",
+      "timestamp": "2025-08-16T10:04:48.655Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\api-service-enhancer.cjs",
+      "description": "移动到 scripts/maintenance/api-service-enhancer.cjs",
+      "timestamp": "2025-08-16T10:04:48.656Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\async-error-handler-fixer.cjs",
+      "description": "移动到 scripts/maintenance/async-error-handler-fixer.cjs",
+      "timestamp": "2025-08-16T10:04:48.657Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\auto-fix-naming.cjs",
+      "description": "移动到 scripts/maintenance/auto-fix-naming.cjs",
+      "timestamp": "2025-08-16T10:04:48.657Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\basic-test-creator.cjs",
+      "description": "移动到 scripts/testing/basic-test-creator.cjs",
+      "timestamp": "2025-08-16T10:04:48.658Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\batch-template-fix.cjs",
+      "description": "移动到 scripts/maintenance/batch-template-fix.cjs",
+      "timestamp": "2025-08-16T10:04:48.659Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\bump-version.js",
+      "description": "移动到 scripts/utils/bump-version.js",
+      "timestamp": "2025-08-16T10:04:48.659Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\business-flow-implementer.cjs",
+      "description": "移动到 scripts/utils/business-flow-implementer.cjs",
+      "timestamp": "2025-08-16T10:04:48.660Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\check-engine-dependencies.cjs",
+      "description": "移动到 scripts/utils/check-engine-dependencies.cjs",
+      "timestamp": "2025-08-16T10:04:48.661Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\cleanup-engines.cjs",
+      "description": "移动到 scripts/maintenance/cleanup-engines.cjs",
+      "timestamp": "2025-08-16T10:04:48.662Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\complete-implementation-validator.cjs",
+      "description": "移动到 scripts/utils/complete-implementation-validator.cjs",
+      "timestamp": "2025-08-16T10:04:48.663Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\component-enhancement-processor.cjs",
+      "description": "移动到 scripts/maintenance/component-enhancement-processor.cjs",
+      "timestamp": "2025-08-16T10:04:48.664Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\component-functionality-enhancer.cjs",
+      "description": "移动到 scripts/maintenance/component-functionality-enhancer.cjs",
+      "timestamp": "2025-08-16T10:04:48.664Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\componentRefactorExecutor.cjs",
+      "description": "移动到 scripts/utils/componentRefactorExecutor.cjs",
+      "timestamp": "2025-08-16T10:04:48.665Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\componentVersionAnalyzer.cjs",
+      "description": "移动到 scripts/utils/componentVersionAnalyzer.cjs",
+      "timestamp": "2025-08-16T10:04:48.667Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\comprehensive-consistency-checker.cjs",
+      "description": "移动到 scripts/utils/comprehensive-consistency-checker.cjs",
+      "timestamp": "2025-08-16T10:04:48.668Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\comprehensive-duplicate-finder.cjs",
+      "description": "移动到 scripts/utils/comprehensive-duplicate-finder.cjs",
+      "timestamp": "2025-08-16T10:04:48.669Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\comprehensive-naming-checker.cjs",
+      "description": "移动到 scripts/utils/comprehensive-naming-checker.cjs",
+      "timestamp": "2025-08-16T10:04:48.670Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\config-consistency-checker.cjs",
+      "description": "移动到 scripts/utils/config-consistency-checker.cjs",
+      "timestamp": "2025-08-16T10:04:48.670Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\config-optimizer.js",
+      "description": "移动到 scripts/maintenance/config-optimizer.js",
+      "timestamp": "2025-08-16T10:04:48.671Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\config-standardizer.cjs",
+      "description": "移动到 scripts/utils/config-standardizer.cjs",
+      "timestamp": "2025-08-16T10:04:48.672Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\conservative-string-fixer.cjs",
+      "description": "移动到 scripts/maintenance/conservative-string-fixer.cjs",
+      "timestamp": "2025-08-16T10:04:48.672Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\consistency-checker.cjs",
+      "description": "移动到 scripts/utils/consistency-checker.cjs",
+      "timestamp": "2025-08-16T10:04:48.673Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\critical-functionality-fixer.cjs",
+      "description": "移动到 scripts/maintenance/critical-functionality-fixer.cjs",
+      "timestamp": "2025-08-16T10:04:48.675Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\data-consistency-checker.cjs",
+      "description": "移动到 scripts/utils/data-consistency-checker.cjs",
+      "timestamp": "2025-08-16T10:04:48.675Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\dependency-version-unifier.cjs",
+      "description": "移动到 scripts/utils/dependency-version-unifier.cjs",
+      "timestamp": "2025-08-16T10:04:48.676Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\design-system-builder.cjs",
+      "description": "移动到 scripts/build/design-system-builder.cjs",
+      "timestamp": "2025-08-16T10:04:48.677Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\detailed-reality-analyzer.cjs",
+      "description": "移动到 scripts/utils/detailed-reality-analyzer.cjs",
+      "timestamp": "2025-08-16T10:04:48.677Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\docs-maintenance.cjs",
+      "description": "移动到 scripts/utils/docs-maintenance.cjs",
+      "timestamp": "2025-08-16T10:04:48.678Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\duplicate-file-analyzer.cjs",
+      "description": "移动到 scripts/utils/duplicate-file-analyzer.cjs",
+      "timestamp": "2025-08-16T10:04:48.679Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\duplicateScriptsChecker.cjs",
+      "description": "移动到 scripts/utils/duplicateScriptsChecker.cjs",
+      "timestamp": "2025-08-16T10:04:48.684Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\enhance-existing-engines.cjs",
+      "description": "移动到 scripts/maintenance/enhance-existing-engines.cjs",
+      "timestamp": "2025-08-16T10:04:48.685Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\enhanced-completeness-checker.cjs",
+      "description": "移动到 scripts/maintenance/enhanced-completeness-checker.cjs",
+      "timestamp": "2025-08-16T10:04:48.686Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\envConfigChecker.js",
+      "description": "移动到 scripts/utils/envConfigChecker.js",
+      "timestamp": "2025-08-16T10:04:48.687Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\file-naming-checker.cjs",
+      "description": "移动到 scripts/utils/file-naming-checker.cjs",
+      "timestamp": "2025-08-16T10:04:48.688Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\file-naming-normalizer.cjs",
+      "description": "移动到 scripts/utils/file-naming-normalizer.cjs",
+      "timestamp": "2025-08-16T10:04:48.689Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\final-cleanup-validation.cjs",
+      "description": "移动到 scripts/maintenance/final-cleanup-validation.cjs",
+      "timestamp": "2025-08-16T10:04:48.689Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\final-validation.cjs",
+      "description": "移动到 scripts/utils/final-validation.cjs",
+      "timestamp": "2025-08-16T10:04:48.690Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\fix-api-responses.cjs",
+      "description": "移动到 scripts/maintenance/fix-api-responses.cjs",
+      "timestamp": "2025-08-16T10:04:48.691Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\fix-history-api-integration.cjs",
+      "description": "移动到 scripts/maintenance/fix-history-api-integration.cjs",
+      "timestamp": "2025-08-16T10:04:48.691Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\fix-regex-errors.cjs",
+      "description": "移动到 scripts/maintenance/fix-regex-errors.cjs",
+      "timestamp": "2025-08-16T10:04:48.692Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\fix-regex-errors.js",
+      "description": "移动到 scripts/maintenance/fix-regex-errors.js",
+      "timestamp": "2025-08-16T10:04:48.693Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\fix-switch-syntax.cjs",
+      "description": "移动到 scripts/maintenance/fix-switch-syntax.cjs",
+      "timestamp": "2025-08-16T10:04:48.693Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\frontend-api-integrator.cjs",
+      "description": "移动到 scripts/utils/frontend-api-integrator.cjs",
+      "timestamp": "2025-08-16T10:04:48.694Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\frontend-performance-optimizer.cjs",
+      "description": "移动到 scripts/maintenance/frontend-performance-optimizer.cjs",
+      "timestamp": "2025-08-16T10:04:48.694Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\function-analyzer.cjs",
+      "description": "移动到 scripts/utils/function-analyzer.cjs",
+      "timestamp": "2025-08-16T10:04:48.696Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\functional-completeness-checker.cjs",
+      "description": "移动到 scripts/utils/functional-completeness-checker.cjs",
+      "timestamp": "2025-08-16T10:04:48.697Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\functional-consistency-checker.cjs",
+      "description": "移动到 scripts/utils/functional-consistency-checker.cjs",
+      "timestamp": "2025-08-16T10:04:48.698Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\functionality-optimizer.cjs",
+      "description": "移动到 scripts/maintenance/functionality-optimizer.cjs",
+      "timestamp": "2025-08-16T10:04:48.698Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\hardcoded-value-replacer.cjs",
+      "description": "移动到 scripts/utils/hardcoded-value-replacer.cjs",
+      "timestamp": "2025-08-16T10:04:48.699Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\implement-all-test-tools.cjs",
+      "description": "移动到 scripts/testing/implement-all-test-tools.cjs",
+      "timestamp": "2025-08-16T10:04:48.700Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\implement-test-tools-fixes.cjs",
+      "description": "移动到 scripts/maintenance/implement-test-tools-fixes.cjs",
+      "timestamp": "2025-08-16T10:04:48.700Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\import-export-fixer.cjs",
+      "description": "移动到 scripts/maintenance/import-export-fixer.cjs",
+      "timestamp": "2025-08-16T10:04:48.701Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\import-path-normalizer.cjs",
+      "description": "移动到 scripts/utils/import-path-normalizer.cjs",
+      "timestamp": "2025-08-16T10:04:48.702Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\install-dependencies.cjs",
+      "description": "移动到 scripts/utils/install-dependencies.cjs",
+      "timestamp": "2025-08-16T10:04:48.702Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\install-test-dependencies.cjs",
+      "description": "移动到 scripts/testing/install-test-dependencies.cjs",
+      "timestamp": "2025-08-16T10:04:48.703Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\intelligent-path-fixer.cjs",
+      "description": "移动到 scripts/maintenance/intelligent-path-fixer.cjs",
+      "timestamp": "2025-08-16T10:04:48.704Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\migrateToConfigCenter.js",
+      "description": "移动到 scripts/utils/migrateToConfigCenter.js",
+      "timestamp": "2025-08-16T10:04:48.715Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\naming-standardizer.cjs",
+      "description": "移动到 scripts/utils/naming-standardizer.cjs",
+      "timestamp": "2025-08-16T10:04:48.717Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\page-enhancement-processor.cjs",
+      "description": "移动到 scripts/maintenance/page-enhancement-processor.cjs",
+      "timestamp": "2025-08-16T10:04:48.718Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\page-functionality-enhancer.cjs",
+      "description": "移动到 scripts/maintenance/page-functionality-enhancer.cjs",
+      "timestamp": "2025-08-16T10:04:48.718Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\performance-optimization-implementer.cjs",
+      "description": "移动到 scripts/utils/performance-optimization-implementer.cjs",
+      "timestamp": "2025-08-16T10:04:48.719Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\performance-optimizer.cjs",
+      "description": "移动到 scripts/maintenance/performance-optimizer.cjs",
+      "timestamp": "2025-08-16T10:04:48.720Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\precise-naming-checker.cjs",
+      "description": "移动到 scripts/utils/precise-naming-checker.cjs",
+      "timestamp": "2025-08-16T10:04:48.720Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\precise-path-checker.cjs",
+      "description": "移动到 scripts/utils/precise-path-checker.cjs",
+      "timestamp": "2025-08-16T10:04:48.747Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\project-cleaner.cjs",
+      "description": "移动到 scripts/maintenance/project-cleaner.cjs",
+      "timestamp": "2025-08-16T10:04:48.748Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\project-cleanup-analyzer.cjs",
+      "description": "移动到 scripts/maintenance/project-cleanup-analyzer.cjs",
+      "timestamp": "2025-08-16T10:04:48.749Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\project-reorganizer.cjs",
+      "description": "移动到 scripts/utils/project-reorganizer.cjs",
+      "timestamp": "2025-08-16T10:04:48.749Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\quick-engine-test.cjs",
+      "description": "移动到 scripts/testing/quick-engine-test.cjs",
+      "timestamp": "2025-08-16T10:04:48.750Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\quick-validation.cjs",
+      "description": "移动到 scripts/utils/quick-validation.cjs",
+      "timestamp": "2025-08-16T10:04:48.751Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\real-implementation-checker.cjs",
+      "description": "移动到 scripts/utils/real-implementation-checker.cjs",
+      "timestamp": "2025-08-16T10:04:48.752Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\resolve-duplicate-files.cjs",
+      "description": "移动到 scripts/utils/resolve-duplicate-files.cjs",
+      "timestamp": "2025-08-16T10:04:48.752Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\responsive-layout-optimizer.cjs",
+      "description": "移动到 scripts/maintenance/responsive-layout-optimizer.cjs",
+      "timestamp": "2025-08-16T10:04:48.753Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\routeValidator.js",
+      "description": "移动到 scripts/utils/routeValidator.js",
+      "timestamp": "2025-08-16T10:04:48.754Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\routing-navigation-optimizer.cjs",
+      "description": "移动到 scripts/maintenance/routing-navigation-optimizer.cjs",
+      "timestamp": "2025-08-16T10:04:48.754Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\safe-engine-cleanup.cjs",
+      "description": "移动到 scripts/maintenance/safe-engine-cleanup.cjs",
+      "timestamp": "2025-08-16T10:04:48.755Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\service-dependency-analyzer.cjs",
+      "description": "移动到 scripts/utils/service-dependency-analyzer.cjs",
+      "timestamp": "2025-08-16T10:04:48.756Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\service-import-fixer.cjs",
+      "description": "移动到 scripts/maintenance/service-import-fixer.cjs",
+      "timestamp": "2025-08-16T10:04:48.756Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\simple-import-fixer.cjs",
+      "description": "移动到 scripts/maintenance/simple-import-fixer.cjs",
+      "timestamp": "2025-08-16T10:04:48.757Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\simple-quote-fixer.cjs",
+      "description": "移动到 scripts/maintenance/simple-quote-fixer.cjs",
+      "timestamp": "2025-08-16T10:04:48.758Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\smart-import-fixer.cjs",
+      "description": "移动到 scripts/maintenance/smart-import-fixer.cjs",
+      "timestamp": "2025-08-16T10:04:48.758Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\smart-string-fixer.cjs",
+      "description": "移动到 scripts/maintenance/smart-string-fixer.cjs",
+      "timestamp": "2025-08-16T10:04:48.759Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\specific-error-fixer.cjs",
+      "description": "移动到 scripts/maintenance/specific-error-fixer.cjs",
+      "timestamp": "2025-08-16T10:04:48.759Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\standardize-test-tools.cjs",
+      "description": "移动到 scripts/testing/standardize-test-tools.cjs",
+      "timestamp": "2025-08-16T10:04:48.760Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\syntax-check.cjs",
+      "description": "移动到 scripts/utils/syntax-check.cjs",
+      "timestamp": "2025-08-16T10:04:48.761Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\syntax-error-fixer.cjs",
+      "description": "移动到 scripts/maintenance/syntax-error-fixer.cjs",
+      "timestamp": "2025-08-16T10:04:48.761Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\syntax-fixer.cjs",
+      "description": "移动到 scripts/maintenance/syntax-fixer.cjs",
+      "timestamp": "2025-08-16T10:04:48.762Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\template-string-fixer.cjs",
+      "description": "移动到 scripts/maintenance/template-string-fixer.cjs",
+      "timestamp": "2025-08-16T10:04:48.763Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\test-all-engines.cjs",
+      "description": "移动到 scripts/testing/test-all-engines.cjs",
+      "timestamp": "2025-08-16T10:04:48.764Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\test-tools-diagnostics.cjs",
+      "description": "移动到 scripts/testing/test-tools-diagnostics.cjs",
+      "timestamp": "2025-08-16T10:04:48.764Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\test-tools-fixer.cjs",
+      "description": "移动到 scripts/maintenance/test-tools-fixer.cjs",
+      "timestamp": "2025-08-16T10:04:48.765Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\test-tools-validator.cjs",
+      "description": "移动到 scripts/testing/test-tools-validator.cjs",
+      "timestamp": "2025-08-16T10:04:48.765Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\test-websocket.js",
+      "description": "移动到 scripts/testing/test-websocket.js",
+      "timestamp": "2025-08-16T10:04:48.766Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\typescript-error-fixer.cjs",
+      "description": "移动到 scripts/maintenance/typescript-error-fixer.cjs",
+      "timestamp": "2025-08-16T10:04:48.767Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\ui-consistency-checker.cjs",
+      "description": "移动到 scripts/utils/ui-consistency-checker.cjs",
+      "timestamp": "2025-08-16T10:04:48.767Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\unterminated-string-fixer.cjs",
+      "description": "移动到 scripts/maintenance/unterminated-string-fixer.cjs",
+      "timestamp": "2025-08-16T10:04:48.768Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\user-experience-enhancer.cjs",
+      "description": "移动到 scripts/maintenance/user-experience-enhancer.cjs",
+      "timestamp": "2025-08-16T10:04:48.769Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\validate-api-system.cjs",
+      "description": "移动到 scripts/utils/validate-api-system.cjs",
+      "timestamp": "2025-08-16T10:04:48.770Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\validate-complete-implementation.cjs",
+      "description": "移动到 scripts/utils/validate-complete-implementation.cjs",
+      "timestamp": "2025-08-16T10:04:48.770Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\validate-engine-structure.cjs",
+      "description": "移动到 scripts/utils/validate-engine-structure.cjs",
+      "timestamp": "2025-08-16T10:04:48.771Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\validate-platform-management.cjs",
+      "description": "移动到 scripts/utils/validate-platform-management.cjs",
+      "timestamp": "2025-08-16T10:04:48.772Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\validateApiTypes.js",
+      "description": "移动到 scripts/utils/validateApiTypes.js",
+      "timestamp": "2025-08-16T10:04:48.772Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\validateConfigCenter.js",
+      "description": "移动到 scripts/utils/validateConfigCenter.js",
+      "timestamp": "2025-08-16T10:04:48.773Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\validateDataModels.js",
+      "description": "移动到 scripts/utils/validateDataModels.js",
+      "timestamp": "2025-08-16T10:04:48.792Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\scripts\\validateRouteArchitecture.js",
+      "description": "移动到 scripts/utils/validateRouteArchitecture.js",
+      "timestamp": "2025-08-16T10:04:48.794Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\e2e\\api-test.spec.ts",
+      "description": "合并到 tests/e2e/api-test.spec.ts",
+      "timestamp": "2025-08-16T10:04:48.796Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\e2e\\security-test.spec.ts",
+      "description": "合并到 tests/e2e/security-test.spec.ts",
+      "timestamp": "2025-08-16T10:04:48.798Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\e2e\\user-flow.spec.ts",
+      "description": "合并到 tests/e2e/user-flow.spec.ts",
+      "timestamp": "2025-08-16T10:04:48.798Z"
+    },
+    {
+      "type": "delete",
+      "path": ".\\index.html",
+      "description": "删除重复文件",
+      "timestamp": "2025-08-16T10:04:48.800Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\playwright.config.ts",
+      "description": "移动到 config/testing/playwright.config.ts",
+      "timestamp": "2025-08-16T10:04:48.801Z"
+    },
+    {
+      "type": "move",
+      "path": ".\\jest.config.js",
+      "description": "移动到 config/testing/jest.config.js",
+      "timestamp": "2025-08-16T10:04:48.802Z"
+    }
+  ],
+  "errors": [],
+  "newStructure": {
+    "reports": "生成的报告文件",
+    "scripts/build": "构建相关脚本",
+    "scripts/deploy": "部署相关脚本",
+    "scripts/maintenance": "维护和修复脚本",
+    "scripts/testing": "测试相关脚本",
+    "scripts/utils": "工具脚本",
+    "tests/unit": "单元测试",
+    "tests/integration": "集成测试",
+    "tests/e2e": "E2E测试",
+    "config/environments": "环境配置",
+    "backup/archive": "归档备份"
+  }
+}

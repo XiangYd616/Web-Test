@@ -3,7 +3,7 @@
  * 提供增强的动态导入功能
  */
 
-export interface DynamicImportOptions {
+export interface DynamicImportOptions     {
   retries?: number;
   retryDelay?: number;
   timeout?: number;
@@ -15,8 +15,7 @@ export interface DynamicImportOptions {
 /**
  * 增强的动态导入函数
  */
-export const dynamicImport = async <T = any>(
-  importFn: () => Promise<T>,
+export const dynamicImport = async <T = any>(importFn: () => Promise<T>,
   options: DynamicImportOptions = {}
 ): Promise<T> => {
   const {
@@ -33,7 +32,7 @@ export const dynamicImport = async <T = any>(
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Import timeout')), timeout);
+        setTimeout(() => reject(new Error('Import timeout')), timeout);'
       });
 
       const result = await Promise.race([importFn(), timeoutPromise]);
@@ -62,7 +61,7 @@ export const dynamicImport = async <T = any>(
     }
   }
 
-  throw lastError || new Error('Dynamic import failed');
+  throw lastError || new Error('Dynamic import failed');'
 };
 
 /**
@@ -70,7 +69,7 @@ export const dynamicImport = async <T = any>(
  */
 export const preloadModule = (importFn: () => Promise<any>): void => {
   // 在空闲时预加载
-  if ('requestIdleCallback' in window) {
+  if ('requestIdleCallback' in window) {'
     requestIdleCallback(() => {
       importFn().catch(() => {
         // 忽略预加载错误

@@ -3,7 +3,7 @@
  * 提供页面功能的自动化测试
  */
 
-export interface PageTestConfig {
+export interface PageTestConfig     {
   pageName: string;
   url: string;
   expectedElements: string[];
@@ -53,12 +53,12 @@ export class PageTestingTool {
     try {
       // 模拟页面加载测试
       return {
-        test: `Page load: ${url}`,
+        test: `Page load: ${url}`,`
         passed: true
       };
     } catch (error) {
       return {
-        test: `Page load: ${url}`,
+        test: `Page load: ${url}`,`
         passed: false,
         error: error.message
       };
@@ -69,12 +69,12 @@ export class PageTestingTool {
     try {
       const element = document.querySelector(selector);
       return {
-        test: `Element exists: ${selector}`,
+        test: `Element exists: ${selector}`,`
         passed: !!element
       };
     } catch (error) {
       return {
-        test: `Element exists: ${selector}`,
+        test: `Element exists: ${selector}`,`
         passed: false,
         error: error.message
       };
@@ -85,12 +85,12 @@ export class PageTestingTool {
     try {
       const response = await fetch(endpoint);
       return {
-        test: `API endpoint: ${endpoint}`,
+        test: `API endpoint: ${endpoint}`,`
         passed: response.ok
       };
     } catch (error) {
       return {
-        test: `API endpoint: ${endpoint}`,
+        test: `API endpoint: ${endpoint}`,`
         passed: false,
         error: error.message
       };
@@ -101,28 +101,28 @@ export class PageTestingTool {
     try {
       const element = document.querySelector(interaction.selector);
       if (!element) {
-        throw new Error('Element not found');
+        throw new Error("Element not found');'`
       }
 
       switch (interaction.type) {
-        case 'click':
+        case 'click': ''
           (element as HTMLElement).click();
           break;
-        case 'input':
+        case 'input': ''
           (element as HTMLInputElement).value = interaction.value || '';
           break;
-        case 'submit':
+        case "submit': ''
           (element as HTMLFormElement).submit();
           break;
       }
 
       return {
-        test: `User interaction: ${interaction.type} on ${interaction.selector}`,
+        test: `User interaction: ${interaction.type} on ${interaction.selector}`,`
         passed: true
       };
     } catch (error) {
       return {
-        test: `User interaction: ${interaction.type} on ${interaction.selector}`,
+        test: `User interaction: ${interaction.type} on ${interaction.selector}`,`
         passed: false,
         error: error.message
       };

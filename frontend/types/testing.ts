@@ -1,49 +1,47 @@
 // 测试相关类型定义
 
-import { UUID, Timestamp, BaseEntity } from './common';
-
-// 测试状态枚举
+import { UUID, Timestamp, BaseEntity    } from './common';// 测试状态枚举'
 export enum TestStatus {
-  PENDING = 'pending',
-  RUNNING = 'running',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled',
-  PAUSED = 'paused'
+  PENDING = 'pending','
+  RUNNING = 'running','
+  COMPLETED = 'completed','
+  FAILED = 'failed','
+  CANCELLED = 'cancelled','
+  PAUSED = 'paused';
 }
 
 // 测试类型枚举
 export enum TestType {
-  STRESS = 'stress',
-  SECURITY = 'security',
-  SEO = 'seo',
-  API = 'api',
-  COMPATIBILITY = 'compatibility',
-  PERFORMANCE = 'performance',
-  ACCESSIBILITY = 'accessibility',
-  UX = 'ux',
-  LOAD = 'load',
-  SMOKE = 'smoke'
+  STRESS = 'stress','
+  SECURITY = 'security','
+  SEO = 'seo','
+  API = 'api','
+  COMPATIBILITY = 'compatibility','
+  PERFORMANCE = 'performance','
+  ACCESSIBILITY = 'accessibility','
+  UX = 'ux','
+  LOAD = 'load','
+  SMOKE = 'smoke';
 }
 
 // 测试优先级
 export enum TestPriority {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical'
+  LOW = 'low','
+  MEDIUM = 'medium','
+  HIGH = 'high','
+  CRITICAL = 'critical';
 }
 
 // 测试严重程度
 export enum TestSeverity {
-  INFO = 'info',
-  WARNING = 'warning',
-  ERROR = 'error',
-  CRITICAL = 'critical'
+  INFO = 'info','
+  WARNING = 'warning','
+  ERROR = 'error','
+  CRITICAL = 'critical';
 }
 
 // 基础测试配置
-export interface BaseTestConfig {
+export interface BaseTestConfig     {
   url: string;
   timeout?: number;
   retries?: number;
@@ -59,7 +57,7 @@ export interface BaseTestConfig {
 }
 
 // 压力测试配置
-export interface StressTestConfig extends BaseTestConfig {
+export interface StressTestConfig extends BaseTestConfig     {
   duration: number; // 测试持续时间（秒）
   concurrency: number; // 并发用户数
   rampUpTime?: number; // 爬坡时间（秒）
@@ -73,14 +71,14 @@ export interface StressTestConfig extends BaseTestConfig {
 }
 
 // 压力测试场景
-export interface StressTestScenario {
+export interface StressTestScenario     {
   name: string;
   weight: number; // 权重（百分比）
   steps: StressTestStep[];
 }
 
 // 压力测试步骤
-export interface StressTestStep {
+export interface StressTestStep     {
   name: string;
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   url: string;
@@ -91,14 +89,14 @@ export interface StressTestStep {
 }
 
 // 压力测试检查
-export interface StressTestCheck {
+export interface StressTestCheck     {
   name: string;
   condition: string; // 检查条件
   expected: any; // 期望值
 }
 
 // 安全测试配置
-export interface SecurityTestConfig extends BaseTestConfig {
+export interface SecurityTestConfig extends BaseTestConfig     {
   scanDepth?: 'shallow' | 'medium' | 'deep';
   includeTests?: string[]; // 包含的测试类型
   excludeTests?: string[]; // 排除的测试类型
@@ -114,7 +112,7 @@ export interface SecurityTestConfig extends BaseTestConfig {
 }
 
 // SEO测试配置
-export interface SEOTestConfig extends BaseTestConfig {
+export interface SEOTestConfig extends BaseTestConfig     {
   checkMobile?: boolean;
   checkDesktop?: boolean;
   lighthouse?: boolean;
@@ -124,7 +122,7 @@ export interface SEOTestConfig extends BaseTestConfig {
 }
 
 // API测试配置
-export interface APITestConfig extends BaseTestConfig {
+export interface APITestConfig extends BaseTestConfig     {
   baseUrl: string;
   endpoints: APIEndpoint[];
   authentication?: {
@@ -135,7 +133,7 @@ export interface APITestConfig extends BaseTestConfig {
 }
 
 // API端点定义
-export interface APIEndpoint {
+export interface APIEndpoint     {
   name: string;
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   path: string;
@@ -148,7 +146,7 @@ export interface APIEndpoint {
 }
 
 // API测试用例
-export interface APITest {
+export interface APITest     {
   name: string;
   type: 'response_time' | 'status_code' | 'response_body' | 'headers' | 'schema';
   condition: string;
@@ -156,7 +154,7 @@ export interface APITest {
 }
 
 // 兼容性测试配置
-export interface CompatibilityTestConfig extends BaseTestConfig {
+export interface CompatibilityTestConfig extends BaseTestConfig     {
   browsers?: string[]; // 浏览器列表
   devices?: string[]; // 设备列表
   viewports?: Array<{ width: number; height: number; name: string }>;
@@ -164,7 +162,7 @@ export interface CompatibilityTestConfig extends BaseTestConfig {
 }
 
 // 测试实例
-export interface TestInstance extends BaseEntity {
+export interface TestInstance extends BaseEntity     {
   name: string;
   description?: string;
   type: TestType;
@@ -185,7 +183,7 @@ export interface TestInstance extends BaseEntity {
 }
 
 // 测试结果
-export interface TestResult {
+export interface TestResult     {
   id: UUID;
   testId: UUID;
   status: TestStatus;
@@ -200,7 +198,7 @@ export interface TestResult {
 }
 
 // 测试摘要
-export interface TestSummary {
+export interface TestSummary     {
   totalChecks: number;
   passedChecks: number;
   failedChecks: number;
@@ -212,7 +210,7 @@ export interface TestSummary {
 }
 
 // 测试详情
-export interface TestDetails {
+export interface TestDetails     {
   [category: string]: {
     score?: number;
     status: TestStatus;
@@ -222,7 +220,7 @@ export interface TestDetails {
 }
 
 // 测试检查项
-export interface TestCheck {
+export interface TestCheck     {
   id: string;
   name: string;
   description?: string;
@@ -237,7 +235,7 @@ export interface TestCheck {
 }
 
 // 测试指标
-export interface TestMetrics {
+export interface TestMetrics     {
   performance?: {
     responseTime: number;
     throughput: number;
@@ -270,7 +268,7 @@ export interface TestMetrics {
 }
 
 // 测试问题
-export interface TestIssue {
+export interface TestIssue     {
   id: string;
   type: string;
   severity: TestSeverity;
@@ -294,7 +292,7 @@ export interface TestIssue {
 }
 
 // 测试建议
-export interface TestRecommendation {
+export interface TestRecommendation     {
   id: string;
   category: string;
   priority: TestPriority;
@@ -310,7 +308,7 @@ export interface TestRecommendation {
 }
 
 // 测试产物
-export interface TestArtifact {
+export interface TestArtifact     {
   id: string;
   type: 'screenshot' | 'video' | 'report' | 'log' | 'data';
   name: string;
@@ -322,7 +320,7 @@ export interface TestArtifact {
 }
 
 // 测试日志
-export interface TestLog {
+export interface TestLog     {
   id: string;
   timestamp: Timestamp;
   level: 'debug' | 'info' | 'warn' | 'error';
@@ -332,7 +330,7 @@ export interface TestLog {
 }
 
 // 测试模板
-export interface TestTemplate {
+export interface TestTemplate     {
   id: UUID;
   name: string;
   description?: string;
@@ -348,7 +346,7 @@ export interface TestTemplate {
 }
 
 // 测试计划
-export interface TestPlan {
+export interface TestPlan     {
   id: UUID;
   name: string;
   description?: string;
@@ -374,7 +372,7 @@ export interface TestPlan {
 }
 
 // 测试报告
-export interface TestReport {
+export interface TestReport     {
   id: UUID;
   name: string;
   type: 'single' | 'comparison' | 'trend';

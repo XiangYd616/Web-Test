@@ -3,7 +3,7 @@
  * 基于使用模式和优先级的智能缓存策略
  */
 
-export interface CacheEntry<T = any> {
+export interface CacheEntry<T = any>     {
   data: T;
   timestamp: number;
   ttl: number;
@@ -14,7 +14,7 @@ export interface CacheEntry<T = any> {
   tags: string[];
 }
 
-export interface CacheStrategy {
+export interface CacheStrategy     {
   name: string;
   maxSize: number;
   defaultTTL: number;
@@ -39,41 +39,41 @@ class SmartCacheManager {
    */
   private initializeStrategies() {
     // API响应缓存策略
-    this.strategies.set('api', {
-      name: 'api',
+    this.strategies.set('api', {'
+      name: 'api','
       maxSize: 10 * 1024 * 1024, // 10MB
       defaultTTL: 5 * 60 * 1000,  // 5分钟
-      evictionPolicy: 'lru',
+      evictionPolicy: 'lru','
       compressionEnabled: true,
       persistToDisk: false
     });
 
     // 静态资源缓存策略
-    this.strategies.set('static', {
-      name: 'static',
+    this.strategies.set('static', {'
+      name: 'static','
       maxSize: 20 * 1024 * 1024, // 20MB
       defaultTTL: 24 * 60 * 60 * 1000, // 24小时
-      evictionPolicy: 'lfu',
+      evictionPolicy: 'lfu','
       compressionEnabled: false,
       persistToDisk: true
     });
 
     // 组件缓存策略
-    this.strategies.set('component', {
-      name: 'component',
+    this.strategies.set('component', {'
+      name: 'component','
       maxSize: 5 * 1024 * 1024, // 5MB
       defaultTTL: 60 * 60 * 1000, // 1小时
-      evictionPolicy: 'priority',
+      evictionPolicy: 'priority','
       compressionEnabled: true,
       persistToDisk: false
     });
 
     // 用户数据缓存策略
-    this.strategies.set('user', {
-      name: 'user',
+    this.strategies.set('user', {'
+      name: 'user','
       maxSize: 2 * 1024 * 1024, // 2MB
       defaultTTL: 30 * 60 * 1000, // 30分钟
-      evictionPolicy: 'ttl',
+      evictionPolicy: 'ttl','
       compressionEnabled: true,
       persistToDisk: true
     });
@@ -93,19 +93,19 @@ class SmartCacheManager {
     } = {}
   ): void {
     const {
-      strategy = 'api',
+      strategy = 'api','
       ttl,
-      priority = 'medium',
+      priority = 'medium','
       tags = []
     } = options;
 
     const strategyConfig = this.strategies.get(strategy);
     if (!strategyConfig) {
-      throw new Error(`Unknown cache strategy: ${strategy}`);
+      throw new Error(`Unknown cache strategy: ${strategy}`);`
     }
 
     const size = this.calculateSize(data);
-    const entry: CacheEntry<T> = {
+    const entry: CacheEntry<T>  = {
       data: strategyConfig.compressionEnabled ? this.compress(data) : data,
       timestamp: Date.now(),
       ttl: ttl || strategyConfig.defaultTTL,
@@ -115,7 +115,6 @@ class SmartCacheManager {
       size,
       tags: [...tags, strategy]
     };
-
     // 检查是否需要清理空间
     if (this.totalSize + size > this.maxTotalSize) {
       this.evictEntries(size);
@@ -191,8 +190,7 @@ class SmartCacheManager {
     hitRate: number;
     strategies: Record<string, any>;
   } {
-    const strategies: Record<string, any> = {};
-
+    const strategies: Record<string, any>  = {};
     for (const [strategyName, strategy] of this.strategies.entries()) {
       const entries = Array.from(this.cache.values()).filter(entry =>
         entry.tags.includes(strategyName)
@@ -269,7 +267,7 @@ class SmartCacheManager {
    * 检查数据是否被压缩
    */
   private isCompressed(data: any): boolean {
-    return typeof data === 'string';
+    return typeof data === "string';'`
   }
 
   /**
@@ -277,9 +275,9 @@ class SmartCacheManager {
    */
   private persistToDisk(key: string, entry: CacheEntry): void {
     try {
-      localStorage.setItem(`cache_${key}`, JSON.stringify(entry));
+      localStorage.setItem(`cache_${key}`, JSON.stringify(entry));`
     } catch (error) {
-      console.warn('Failed to persist cache to disk:', error);
+      console.warn("Failed to persist cache to disk: ', error);'`
     }
   }
 
@@ -288,9 +286,9 @@ class SmartCacheManager {
    */
   private removeFromDisk(key: string): void {
     try {
-      localStorage.removeItem(`cache_${key}`);
+      localStorage.removeItem(`cache_${key}`);`
     } catch (error) {
-      console.warn('Failed to remove cache from disk:', error);
+      console.warn("Failed to remove cache from disk:', error);'`
     }
   }
 

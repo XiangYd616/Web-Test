@@ -3,10 +3,7 @@
  * 用于高性能渲染大量测试结果
  */
 
-import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
-import ResultCard from './ResultCard';
-
-interface TestResult {
+import React, { memo, useMemo, useCallback, useState, useEffect    } from 'react';import ResultCard from './ResultCard';interface TestResult   {'
   id: string;
   type: string;
   url: string;
@@ -18,7 +15,7 @@ interface TestResult {
   details: any;
 }
 
-interface VirtualizedResultListProps {
+interface VirtualizedResultListProps   {
   results: TestResult[];
   selectedResults: Set<string>;
   showDetails: Record<string, boolean>;
@@ -30,7 +27,7 @@ interface VirtualizedResultListProps {
   height?: number;
 }
 
-interface ListItemProps {
+interface ListItemProps   {
   index: number;
   style: React.CSSProperties;
   data: {
@@ -44,35 +41,34 @@ interface ListItemProps {
   };
 }
 
-const ListItem: React.FC<ListItemProps> = memo(({ index, style, data }) => {
+const ListItem: React.FC<ListItemProps>  = memo(({ index, style, data }) => {
   
   // 性能优化
   const memoizedProps = useMemo(() => ({
     className: combinedClassName,
     style: computedStyle,
     disabled,
-    'aria-label': ariaLabel,
-    'data-testid': testId
+    'aria-label': ariaLabel,'
+    'data-testid': testId'
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
-  
   const componentId = useId();
-  const errorId = `${componentId}-error`;
-  const descriptionId = `${componentId}-description`;
+  const errorId = `${componentId}-error`;`
+  const descriptionId = `${componentId}-description`;`
   
   const ariaProps = {
     id: componentId,
-    'aria-label': ariaLabel,
-    'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': [
+    "aria-label': ariaLabel,'`
+    'aria-labelledby': ariaLabelledBy,'
+    'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,
-    'aria-invalid': !!error,
-    'aria-disabled': disabled,
-    'aria-busy': loading,
-    'aria-expanded': expanded,
-    'aria-selected': selected,
+    ].filter(Boolean).join(' ') || undefined,'
+    'aria-invalid': !!error,'
+    'aria-disabled': disabled,'
+    'aria-busy': loading,'
+    'aria-expanded': expanded,'
+    'aria-selected': selected,'
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -83,8 +79,8 @@ const ListItem: React.FC<ListItemProps> = memo(({ index, style, data }) => {
     try {
       onClick?.(event);
     } catch (error) {
-      console.error('Click handler error:', error);
-      setError('操作失败，请重试');
+      console.error('Click handler error: ', error);'
+      setError('操作失败，请重试');'
     }
   }, [disabled, loading, onClick]);
   
@@ -94,8 +90,8 @@ const ListItem: React.FC<ListItemProps> = memo(({ index, style, data }) => {
     try {
       onChange?.(newValue);
     } catch (error) {
-      console.error('Change handler error:', error);
-      updateState({ error: '值更新失败' });
+      console.error('Change handler error: ', error);'
+      updateState({ error: '值更新失败' });'
     }
   }, [onChange, updateState]);
   
@@ -122,23 +118,21 @@ const ListItem: React.FC<ListItemProps> = memo(({ index, style, data }) => {
   if (!result) return null;
 
   return (
-    <div style={style} className="px-2 py-1">
-      <ResultCard
-        result={result}
+    <div style={style} className= 'px-2 py-1'>
+      <ResultCard result={result}
         isSelected={selectedResults.has(result.id)}
         showDetails={showDetails[result.id] || false}
         onToggleSelection={onToggleSelection}
         onToggleDetails={onToggleDetails}
         onShare={onShare}
         onResultClick={onResultClick}
-      />
+         />
     </div>
   );
 });
 
 ListItem.displayName = 'ListItem';
-
-const VirtualizedResultList: React.FC<VirtualizedResultListProps> = memo(({
+const VirtualizedResultList: React.FC<VirtualizedResultListProps>  = memo(({
   results,
   selectedResults,
   showDetails,
@@ -150,7 +144,6 @@ const VirtualizedResultList: React.FC<VirtualizedResultListProps> = memo(({
   height = 600
 }) => {
   const [containerHeight, setContainerHeight] = useState(height);
-
   // 响应式高度调整
   useEffect(() => {
     const updateHeight = () => {
@@ -160,8 +153,8 @@ const VirtualizedResultList: React.FC<VirtualizedResultListProps> = memo(({
     };
 
     updateHeight();
-    window.addEventListener('resize', updateHeight);
-    return () => window.removeEventListener('resize', updateHeight);
+    window.addEventListener('resize', updateHeight);'
+    return () => window.removeEventListener('resize', updateHeight);'
   }, [height]);
 
   // 计算动态项目高度
@@ -203,11 +196,9 @@ const VirtualizedResultList: React.FC<VirtualizedResultListProps> = memo(({
   // 如果结果数量较少，使用普通渲染
   if (results.length <= 20) {
     
-        return (
-      <div className="space-y-4">
+        return (<div className= 'space-y-4'>
         {results.map((result) => (
-          <ResultCard
-            key={result.id
+          <ResultCard key={result.id
       }
             result={result}
             isSelected={selectedResults.has(result.id)}
@@ -216,7 +207,7 @@ const VirtualizedResultList: React.FC<VirtualizedResultListProps> = memo(({
             onToggleDetails={onToggleDetails}
             onShare={onShare}
             onResultClick={onResultClick}
-          />
+             />
         ))}
       </div>
     );
@@ -224,14 +215,14 @@ const VirtualizedResultList: React.FC<VirtualizedResultListProps> = memo(({
 
   // 大量结果时使用虚拟化列表
   return (
-    <div className="border border-gray-700 rounded-lg overflow-hidden">
+    <div className= 'border border-gray-700 rounded-lg overflow-hidden'>
       <List
         height={containerHeight}
         itemCount={results.length}
         itemSize={getItemSize}
         itemData={itemData}
         overscanCount={5}
-        className="scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800"
+        className= 'scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800';
       >
         {ListItem}
       </List>
@@ -240,5 +231,4 @@ const VirtualizedResultList: React.FC<VirtualizedResultListProps> = memo(({
 });
 
 VirtualizedResultList.displayName = 'VirtualizedResultList';
-
 export default VirtualizedResultList;

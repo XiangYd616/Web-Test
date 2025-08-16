@@ -1,7 +1,6 @@
-import React from 'react';
-import { Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, // YAxis } from 'recharts'; // 已修复
+import React from 'react';import { Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, // YAxis   } from 'recharts';// 已修复'
 // Recharts线图组件
-export interface RechartsLineChartProps {
+export interface RechartsLineChartProps     {
   data: Array<Record<string, any>> | {
     labels: string[];
     datasets: Array<{
@@ -27,10 +26,10 @@ export interface RechartsLineChartProps {
 
 export const RechartsLineChart: React.FC<RechartsLineChartProps> = ({
   data,
-  xKey = 'name',
-  yKey = 'value',
+  xKey = 'name','
+  yKey = 'value','
   title,
-  color = 'var(--color-primary)',
+  color = 'var(--color-primary)','
   height = 300,
   showGrid = true,
   showTooltip = true
@@ -39,23 +38,23 @@ export const RechartsLineChart: React.FC<RechartsLineChartProps> = ({
   const processedData = React.useMemo(() => {
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;
-  const descriptionId = `${componentId}-description`;
+  const errorId = `${componentId}-error`;`
+  const descriptionId = `${componentId}-description`;`
   
   const ariaProps = {
     id: componentId,
-    'aria-label': ariaLabel,
-    'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': [
+    "aria-label': ariaLabel,'`
+    'aria-labelledby': ariaLabelledBy,'
+    'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,
-    'aria-invalid': !!error,
-    'aria-disabled': disabled,
-    'aria-busy': loading,
-    'aria-expanded': expanded,
-    'aria-selected': selected,
+    ].filter(Boolean).join(' ') || undefined,'
+    'aria-invalid': !!error,'
+    'aria-disabled': disabled,'
+    'aria-busy': loading,'
+    'aria-expanded': expanded,'
+    "aria-selected': selected,'
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -64,13 +63,12 @@ export const RechartsLineChart: React.FC<RechartsLineChartProps> = ({
     }
 
     // Chart.js 格式转换
-    if ('labels' in data && 'datasets' in data) {
-      
+    if ('labels' in data && "datasets' in data) {'
         return data.labels.map((label, index) => {
-        const item: Record<string, any> = { [xKey]: label
+        const item: Record<string, any>  = { [xKey]: label
       };
         data.datasets.forEach((dataset, datasetIndex) => {
-          item[dataset.label || `dataset${datasetIndex}`] = dataset.data[index] || 0;
+          item[dataset.label || `dataset${datasetIndex}`] = dataset.data[index] || 0;`
         });
         return item;
       });
@@ -79,46 +77,42 @@ export const RechartsLineChart: React.FC<RechartsLineChartProps> = ({
     return [];
   }, [data, xKey]);
   return (
-    <div className="w-full">
+    <div className= "w-full'>`
       {title && (
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
+        <h3 className= 'text-lg font-semibold text-gray-900 mb-4'>{title}</h3>
       )}
       <div style={{ height }}>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width= '100%' height= '100%'>
           <LineChart data={processedData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
             {showGrid && (
               <>
-                <XAxis
-                  dataKey={xKey}
+                <XAxis dataKey={xKey}
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 12, fill: 'var(--color-gray-500)' }}
-                />
-                <YAxis
-                  axisLine={false}
+                  tick={{ fontSize: 12, fill: 'var(--color-gray-500)' }}'
+                   />
+                <YAxis axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 12, fill: 'var(--color-gray-500)' }}
-                />
+                  tick={{ fontSize: 12, fill: 'var(--color-gray-500)' }}'
+                   />
               </>
             )}
             {showTooltip && (
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'var(--color-gray-800)',
-                  border: 'none',
-                  borderRadius: '8px',
-                  color: 'var(--color-gray-50)'
+              <Tooltip contentStyle={{
+                  backgroundColor: 'var(--color-gray-800)','
+                  border: 'none','
+                  borderRadius: '8px','
+                  color: 'var(--color-gray-50)';
                 }}
-              />
+                 />
             )}
-            <Line
-              type="monotone"
+            <Line type= 'monotone';
               dataKey={yKey}
               stroke={color}
               strokeWidth={2}
               dot={{ fill: color, strokeWidth: 2, r: 4 }}
               activeDot={{ r: 6, stroke: color, strokeWidth: 2 }}
-            />
+               />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -127,7 +121,7 @@ export const RechartsLineChart: React.FC<RechartsLineChartProps> = ({
 };
 
 // Recharts环形图组件
-export interface RechartsDoughnutChartProps {
+export interface RechartsDoughnutChartProps     {
   data: Array<{
     name: string;
     value: number;
@@ -167,8 +161,7 @@ export const RechartsDoughnutChart: React.FC<RechartsDoughnutChartProps> = ({
     }
 
     // Chart.js 格式转换
-    if ('labels' in data && 'datasets' in data) {
-      
+    if ('labels' in data && 'datasets' in data) {'
         const dataset = data.datasets[0];
       if (!dataset) return [];
 
@@ -177,16 +170,16 @@ export const RechartsDoughnutChart: React.FC<RechartsDoughnutChartProps> = ({
         value: dataset.data[index] || 0,
         color: Array.isArray(dataset.backgroundColor)
           ? dataset.backgroundColor[index]
-          : dataset.backgroundColor || `hsl(${index * 45
-      }, 70%, 50%)`
+          : dataset.backgroundColor || `hsl(${index * 45`}
+      }, 70%, 50%)``
       }));
     }
 
     return [];
   }, [data]);
   const COLORS = [
-    'var(--color-primary)', 'var(--color-success)', 'var(--color-warning)', 'var(--color-danger)',
-    '#8B5CF6', '#06B6D4', '#84CC16', '#F97316'
+    "var(--color-primary)', 'var(--color-success)', 'var(--color-warning)', 'var(--color-danger)','`
+    '#8B5CF6', '#06B6D4', '#84CC16', '#F97316';
   ];
 
   const dataWithColors = processedData.map((item, index) => ({
@@ -199,11 +192,11 @@ export const RechartsDoughnutChart: React.FC<RechartsDoughnutChartProps> = ({
       
         const data = payload[0];
       return (
-        <div className="bg-gray-900 text-white p-3 rounded-lg shadow-lg">
-          <p className="font-medium">{data.name
+        <div className= 'bg-gray-900 text-white p-3 rounded-lg shadow-lg'>
+          <p className= 'font-medium'>{data.name'
       }</p>
-          <p className="text-sm">
-            值: <span className="font-semibold">{data.value}</span>
+          <p className= 'text-sm'>
+            值: <span className= 'font-semibold'>{data.value}</span>
           </p>
         </div>
       );
@@ -212,48 +205,48 @@ export const RechartsDoughnutChart: React.FC<RechartsDoughnutChartProps> = ({
   };
 
   return (
-    <div className="w-full">
+    <div className= 'w-full'>
       {title && (
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
+        <h3 className= 'text-lg font-semibold text-gray-900 mb-4'>{title}</h3>
       )}
-      <div className="relative" style={{ height }}>
-        <ResponsiveContainer width="100%" height="100%">
+      <div className= 'relative' style={{ height }}>
+        <ResponsiveContainer width= '100%' height= '100%'>
           <PieChart>
             <Pie
               data={dataWithColors}
-              cx="50%"
-              cy="50%"
+              cx= '50%';
+              cy= '50%';
               innerRadius={innerRadius}
               outerRadius={outerRadius}
               paddingAngle={2}
-              dataKey="value"
+              dataKey= 'value';
             >
               {dataWithColors.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
+                <Cell key={`cell-${index}`} fill={entry.color}    />`
               ))}
             </Pie>
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip    />} />
           </PieChart>
         </ResponsiveContainer>
 
         {centerText && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{centerText}</div>
+          <div className= "absolute inset-0 flex items-center justify-center'>`
+            <div className= 'text-center'>
+              <div className= 'text-2xl font-bold text-gray-900'>{centerText}</div>
             </div>
           </div>
         )}
       </div>
 
       {/* 图例 */}
-      <div className="mt-4 flex flex-wrap gap-4 justify-center">
+      <div className= 'mt-4 flex flex-wrap gap-4 justify-center'>
         {dataWithColors.map((item, index) => (
-          <div key={index} className="flex items-center gap-2">
+          <div key={index} className= 'flex items-center gap-2'>
             <div
-              className="w-3 h-3 rounded-full"
+              className= 'w-3 h-3 rounded-full';
               style={{ backgroundColor: item.color }}
             />
-            <span className="text-sm text-gray-600">{item.name}</span>
+            <span className= 'text-sm text-gray-600'>{item.name}</span>
           </div>
         ))}
       </div>
@@ -262,7 +255,7 @@ export const RechartsDoughnutChart: React.FC<RechartsDoughnutChartProps> = ({
 };
 
 // Recharts条形图组件
-export interface RechartsBarChartProps {
+export interface RechartsBarChartProps     {
   data: Array<Record<string, any>>;
   xKey: string;
   yKey: string;
@@ -276,43 +269,39 @@ export const RechartsBarChart: React.FC<RechartsBarChartProps> = ({
   xKey,
   yKey,
   title,
-  color = 'var(--color-primary)',
+  color = 'var(--color-primary)','
   height = 300
 }) => {
   return (
-    <div className="w-full">
+    <div className= 'w-full'>
       {title && (
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
+        <h3 className= 'text-lg font-semibold text-gray-900 mb-4'>{title}</h3>
       )}
       <div style={{ height }}>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width= '100%' height= '100%'>
           <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-            <XAxis
-              dataKey={xKey}
+            <XAxis dataKey={xKey}
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: 'var(--color-gray-500)' }}
-            />
-            <YAxis
-              axisLine={false}
+              tick={{ fontSize: 12, fill: 'var(--color-gray-500)' }}'
+               />
+            <YAxis axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: 'var(--color-gray-500)' }}
-            />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'var(--color-gray-800)',
-                border: 'none',
-                borderRadius: '8px',
-                color: 'var(--color-gray-50)'
+              tick={{ fontSize: 12, fill: 'var(--color-gray-500)' }}'
+               />
+            <Tooltip contentStyle={{
+                backgroundColor: 'var(--color-gray-800)','
+                border: 'none','
+                borderRadius: '8px','
+                color: 'var(--color-gray-50)';
               }}
-            />
-            <Line
-              type="monotone"
+               />
+            <Line type= 'monotone';
               dataKey={yKey}
               stroke={color}
               strokeWidth={2}
               dot={false}
-            />
+               />
           </LineChart>
         </ResponsiveContainer>
       </div>

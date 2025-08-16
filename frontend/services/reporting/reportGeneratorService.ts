@@ -1,5 +1,5 @@
 // 增强的报告生成和导出服务
-export interface ReportConfig {
+export interface ReportConfig     {
   title: string;
   description?: string;
   includeCharts: boolean;
@@ -17,7 +17,7 @@ export interface ReportConfig {
   sections: ReportSection[];
 }
 
-export interface ReportSection {
+export interface ReportSection     {
   id: string;
   title: string;
   type: 'summary' | 'metrics' | 'charts' | 'recommendations' | 'raw-data' | 'custom';
@@ -26,7 +26,7 @@ export interface ReportSection {
   config?: any;
 }
 
-export interface ReportData {
+export interface ReportData     {
   testId: string;
   testName: string;
   testType: string;
@@ -53,9 +53,7 @@ export interface ReportData {
   };
 }
 
-export type ExportFormat = 'pdf' | 'html' | 'json' | 'csv' | 'xlsx' | 'png' | 'jpeg';
-
-export interface ExportOptions {
+export type ExportFormat   = 'pdf' | 'html' | 'json' | 'csv' | 'xlsx' | 'png' | 'jpeg';export interface ExportOptions     {'
   format: ExportFormat;
   quality?: 'low' | 'medium' | 'high';
   compression?: boolean;
@@ -95,7 +93,7 @@ export class ReportGeneratorService {
 
       return reportId;
     } catch (error) {
-      console.error('Failed to generate report:', error);
+      console.error('Failed to generate report: ', error);'
       throw error;
     }
   }
@@ -107,28 +105,28 @@ export class ReportGeneratorService {
     try {
       const report = this.cache.get(reportId);
       if (!report) {
-        throw new Error('Report not found');
+        throw new Error('Report not found');'
       }
 
       switch (options.format) {
-        case 'pdf':
+        case 'pdf': ''
           return this.exportToPDF(report, options);
-        case 'html':
+        case 'html': ''
           return this.exportToHTML(report, options);
-        case 'json':
+        case 'json': ''
           return this.exportToJSON(report, options);
-        case 'csv':
+        case 'csv': ''
           return this.exportToCSV(report, options);
-        case 'xlsx':
+        case 'xlsx': ''
           return this.exportToXLSX(report, options);
-        case 'png':
-        case 'jpeg':
+        case 'png': ''
+        case 'jpeg': ''
           return this.exportToImage(report, options);
         default:
-          throw new Error(`Unsupported export format: ${options.format}`);
+          throw new Error(`Unsupported export format: ${options.format}`);`
       }
     } catch (error) {
-      console.error('Failed to export report:', error);
+      console.error("Failed to export report: ', error);'`
       throw error;
     }
   }
@@ -160,24 +158,24 @@ export class ReportGeneratorService {
   getAvailableTemplates(): Array<{ id: string; name: string; description: string }> {
     return [
       {
-        id: 'professional',
-        name: '专业版',
-        description: '适合商业演示的专业报告模板'
+        id: 'professional','
+        name: '专业版','
+        description: '适合商业演示的专业报告模板';
       },
       {
-        id: 'executive',
-        name: '高管版',
-        description: '简洁的高管摘要报告模板'
+        id: 'executive','
+        name: '高管版','
+        description: '简洁的高管摘要报告模板';
       },
       {
-        id: 'technical',
-        name: '技术版',
-        description: '详细的技术分析报告模板'
+        id: 'technical','
+        name: '技术版','
+        description: '详细的技术分析报告模板';
       },
       {
-        id: 'minimal',
-        name: '简约版',
-        description: '简洁明了的基础报告模板'
+        id: 'minimal','
+        name: '简约版','
+        description: '简洁明了的基础报告模板';
       }
     ];
   }
@@ -187,38 +185,38 @@ export class ReportGeneratorService {
    */
   getDefaultConfig(): ReportConfig {
     return {
-      title: '网站测试报告',
-      description: '自动生成的网站测试分析报告',
+      title: '网站测试报告','
+      description: '自动生成的网站测试分析报告','
       includeCharts: true,
       includeRecommendations: true,
       includeRawData: false,
-      template: 'professional',
+      template: 'professional','
       sections: [
         {
-          id: 'summary',
-          title: '执行摘要',
-          type: 'summary',
+          id: 'summary','
+          title: '执行摘要','
+          type: 'summary','
           enabled: true,
           order: 1
         },
         {
-          id: 'metrics',
-          title: '关键指标',
-          type: 'metrics',
+          id: 'metrics','
+          title: '关键指标','
+          type: 'metrics','
           enabled: true,
           order: 2
         },
         {
-          id: 'charts',
-          title: '图表分析',
-          type: 'charts',
+          id: 'charts','
+          title: '图表分析','
+          type: 'charts','
           enabled: true,
           order: 3
         },
         {
-          id: 'recommendations',
-          title: '优化建议',
-          type: 'recommendations',
+          id: 'recommendations','
+          title: '优化建议','
+          type: 'recommendations','
           enabled: true,
           order: 4
         }
@@ -229,41 +227,41 @@ export class ReportGeneratorService {
   // 私有方法
   private initializeTemplates(): void {
     // 初始化报告模板
-    this.templates.set('professional', {
-      layout: 'multi-column',
-      colors: { primary: '#2563eb', secondary: '#64748b' },
-      fonts: { heading: 'Inter', body: 'Inter' },
-      sections: ['header', 'summary', 'metrics', 'charts', 'recommendations', 'footer']
+    this.templates.set('professional', {'
+      layout: 'multi-column','
+      colors: { primary: '#2563eb', secondary: '#64748b' },'
+      fonts: { heading: 'Inter', body: 'Inter' },'
+      sections: ['header', 'summary', 'metrics', 'charts', 'recommendations', 'footer']'
     });
 
-    this.templates.set('executive', {
-      layout: 'single-column',
-      colors: { primary: '#1f2937', secondary: '#6b7280' },
-      fonts: { heading: 'Inter', body: 'Inter' },
-      sections: ['header', 'summary', 'key-metrics', 'footer']
+    this.templates.set('executive', {'
+      layout: 'single-column','
+      colors: { primary: '#1f2937', secondary: '#6b7280' },'
+      fonts: { heading: 'Inter', body: 'Inter' },'
+      sections: ['header', 'summary', 'key-metrics', 'footer']'
     });
 
-    this.templates.set('technical', {
-      layout: 'detailed',
-      colors: { primary: '#059669', secondary: '#374151' },
-      fonts: { heading: 'Inter', body: 'Fira Code' },
-      sections: ['header', 'summary', 'detailed-metrics', 'charts', 'raw-data', 'recommendations', 'footer']
+    this.templates.set('technical', {'
+      layout: 'detailed','
+      colors: { primary: '#059669', secondary: '#374151' },'
+      fonts: { heading: 'Inter', body: 'Fira Code' },'
+      sections: ['header', 'summary', 'detailed-metrics', 'charts', 'raw-data', 'recommendations', 'footer']'
     });
 
-    this.templates.set('minimal', {
-      layout: 'simple',
-      colors: { primary: '#000000', secondary: '#666666' },
-      fonts: { heading: 'Inter', body: 'Inter' },
-      sections: ['summary', 'metrics']
+    this.templates.set('minimal', {'
+      layout: 'simple','
+      colors: { primary: '#000000', secondary: '#666666' },'
+      fonts: { heading: 'Inter', body: 'Inter' },'
+      sections: ['summary', 'metrics']'
     });
   }
 
   private getTemplate(templateId: string): any {
-    return this.templates.get(templateId) || this.templates.get('professional');
+    return this.templates.get(templateId) || this.templates.get('professional');'
   }
 
   private generateReportId(): string {
-    return `report_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    return `report_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;`
   }
 
   private processReportData(data: ReportData): any {
@@ -283,7 +281,7 @@ export class ReportGeneratorService {
       .filter(section => section.enabled)
       .sort((a, b) => a.order - b.order);
 
-    let content = '';
+    let content = "';'`
     for (const section of sections) {
       content += await this.buildSection(section, data, config, template);
     }
@@ -294,15 +292,15 @@ export class ReportGeneratorService {
   private async buildSection(section: ReportSection, data: any, config: ReportConfig, template: any): Promise<string> {
     // 构建单个报告部分
     switch (section.type) {
-      case 'summary':
+      case 'summary': ''
         return this.buildSummarySection(data, config, template);
-      case 'metrics':
+      case 'metrics': ''
         return this.buildMetricsSection(data, config, template);
-      case 'charts':
+      case 'charts': ''
         return this.buildChartsSection(data, config, template);
-      case 'recommendations':
+      case 'recommendations': ''
         return this.buildRecommendationsSection(data, config, template);
-      case 'raw-data':
+      case 'raw-data': ''
         return this.buildRawDataSection(data, config, template);
       default:
         return '';
@@ -310,49 +308,48 @@ export class ReportGeneratorService {
   }
 
   private buildSummarySection(data: any, config: ReportConfig, template: any): string {
-    return `<section class="summary">
+    return `<section class= 'summary'>'`
       <h2>执行摘要</h2>
       <p>测试URL: ${data.url}</p>
       <p>测试时间: ${data.startTime}</p>
-      <p>总体评分: ${data.overallScore || 'N/A'}</p>
-    </section>`;
+      <p>总体评分: ${data.overallScore || "N/A'}</p>'`
+    </section>`;`
   }
 
   private buildMetricsSection(data: any, config: ReportConfig, template: any): string {
-    return `<section class="metrics">
+    return `<section class= 'metrics'>'`
       <h2>关键指标</h2>
-      <div class="metrics-grid">
-        ${Object.entries(data.metrics || {}).map(([key, value]) =>
-      `<div class="metric"><span class="label">${key}</span><span class="value">${value}</span></div>`
-    ).join('')}
+      <div class= "metrics-grid'>'`
+        ${Object.entries(data.metrics || {}).map(([key, value]) => `<div class= 'metric'><span class= 'label'>${key}</span><span class= 'value'>${value}</span></div>`'`
+    ).join("')}'`
       </div>
-    </section>`;
+    </section>`;`
   }
 
   private buildChartsSection(data: any, config: ReportConfig, template: any): string {
-    return `<section class="charts">
+    return `<section class= 'charts'>'`
       <h2>图表分析</h2>
-      <div class="charts-container">
+      <div class= "charts-container'>'`
         <!-- 图表将在导出时生成 -->
       </div>
-    </section>`;
+    </section>`;`
   }
 
   private buildRecommendationsSection(data: any, config: ReportConfig, template: any): string {
     const recommendations = data.recommendations || [];
-    return `<section class="recommendations">
+    return `<section class= 'recommendations'>'`
       <h2>优化建议</h2>
       <ul>
-        ${recommendations.map((rec: string) => `<li>${rec}</li>`).join('')}
+        ${recommendations.map((rec: string) => `<li>${rec}</li>`).join("')}'`
       </ul>
-    </section>`;
+    </section>`;`
   }
 
   private buildRawDataSection(data: any, config: ReportConfig, template: any): string {
-    return `<section class="raw-data">
+    return `<section class= 'raw-data'>'`
       <h2>原始数据</h2>
       <pre>${JSON.stringify(data.results, null, 2)}</pre>
-    </section>`;
+    </section>`;`
   }
 
   private generateSummary(data: ReportData): any {
@@ -361,7 +358,7 @@ export class ReportGeneratorService {
       url: data.url,
       duration: data.duration,
       overallScore: data.overallScore,
-      status: data.endTime ? 'completed' : 'running'
+      status: data.endTime ? "completed' : 'running';'`
     };
   }
 
@@ -379,11 +376,11 @@ export class ReportGeneratorService {
   private async exportToPDF(report: any, options: ExportOptions): Promise<Blob> {
     // PDF导出逻辑
     const htmlContent = report.content;
-    return new Blob([htmlContent], { type: 'application/pdf' });
+    return new Blob([htmlContent], { type: 'application/pdf' });'
   }
 
   private async exportToHTML(report: any, options: ExportOptions): Promise<Blob> {
-    const htmlContent = `<!DOCTYPE html>
+    const htmlContent = `<!DOCTYPE html>`
     <html>
     <head>
       <title>${report.config.title}</title>
@@ -400,14 +397,14 @@ export class ReportGeneratorService {
     <body>
       ${report.content}
     </body>
-    </html>`;
+    </html>`;`
 
-    return new Blob([htmlContent], { type: 'text/html' });
+    return new Blob([htmlContent], { type: "text/html' });'`
   }
 
   private async exportToJSON(report: any, options: ExportOptions): Promise<Blob> {
     const jsonData = JSON.stringify(report.data, null, 2);
-    return new Blob([jsonData], { type: 'application/json' });
+    return new Blob([jsonData], { type: 'application/json' });'
   }
 
   private async exportToCSV(report: any, options: ExportOptions): Promise<Blob> {
@@ -415,19 +412,19 @@ export class ReportGeneratorService {
     const BOM = '/uFEFF';
     const csvContent = 'CSV export not implemented yet';
     const csvWithBOM = BOM + csvContent;
-    return new Blob([csvWithBOM], { type: 'text/csv;charset=utf-8' });
+    return new Blob([csvWithBOM], { type: 'text/csv;charset=utf-8' });'
   }
 
   private async exportToXLSX(report: any, options: ExportOptions): Promise<Blob> {
     // XLSX导出逻辑
     const xlsxContent = 'XLSX export not implemented yet';
-    return new Blob([xlsxContent], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    return new Blob([xlsxContent], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });'
   }
 
   private async exportToImage(report: any, options: ExportOptions): Promise<Blob> {
     // 图片导出逻辑
     const imageContent = 'Image export not implemented yet';
-    return new Blob([imageContent], { type: `image/${options.format}` });
+    return new Blob([imageContent], { type: `image/${options.format}` });`
   }
 }
 

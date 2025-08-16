@@ -3,12 +3,7 @@
  * 显示当前页面的导航路径
  */
 
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { BreadcrumbItem } from '../../types/routes';
-import { generateBreadcrumbs } from '../../utils/routeUtils';
-
-interface BreadcrumbProps {
+import React from 'react';import { Link, useLocation    } from 'react-router-dom';import { BreadcrumbItem    } from '../../types/routes';import { generateBreadcrumbs    } from '../../utils/routeUtils';interface BreadcrumbProps   {'
   className?: string;
   separator?: React.ReactNode;
   maxItems?: number;
@@ -19,12 +14,12 @@ interface BreadcrumbProps {
 }
 
 export const Breadcrumb: React.FC<BreadcrumbProps> = ({
-  className = '',
-  separator = '/',
+  className = '','
+  separator = '/','
   maxItems = 5,
   showHome = true,
-  homeLabel = '首页',
-  homePath = '/',
+  homeLabel = '首页','
+  homePath = '/','
   items: customItems
 }) => {
   const location = useLocation();
@@ -41,7 +36,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   const displayItems = allItems.length > maxItems
     ? [
         allItems[0],
-        { label: '...', path: undefined },
+        { label: '...', path: undefined },'
         ...allItems.slice(-maxItems + 2)
       ]
     : allItems;
@@ -50,36 +45,34 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
     return null;
   }
 
-  return (
-    <nav className={`breadcrumb ${className}`} aria-label="面包屑导航">
-      <ol className="breadcrumb-list">
+  return (<nav className={`breadcrumb ${className}`} aria-label= '面包屑导航'>`
+      <ol className= "breadcrumb-list'>`
         {displayItems.map((item, index) => {
           const isLast = index === displayItems.length - 1;
           const isEllipsis = item.label === '...';
-
           return (
             <li
               key={index}
-              className={`breadcrumb-item ${isLast ? 'active' : ''} ${isEllipsis ? 'ellipsis' : ''}`}
+              className={`breadcrumb-item ${isLast ? 'active' : ''} ${isEllipsis ? 'ellipsis' : ''}`}'`
             >
               {!isLast && !isEllipsis && item.path ? (
                 <Link
                   to={item.path}
-                  className="breadcrumb-link"
-                  aria-current={isLast ? 'page' : undefined}
+                  className= "breadcrumb-link';'`
+                  aria-current={isLast ? 'page' : undefined}'
                 >
-                  {item.icon && <span className="breadcrumb-icon">{item.icon}</span>}
-                  <span className="breadcrumb-text">{item.label}</span>
+                  {item.icon && <span className= 'breadcrumb-icon'>{item.icon}</span>}'
+                  <span className= 'breadcrumb-text'>{item.label}</span>
                 </Link>
               ) : (
-                <span className="breadcrumb-text">
-                  {item.icon && <span className="breadcrumb-icon">{item.icon}</span>}
+                <span className= 'breadcrumb-text'>
+                  {item.icon && <span className= 'breadcrumb-icon'>{item.icon}</span>}'
                   {item.label}
                 </span>
               )}
 
               {!isLast && (
-                <span className="breadcrumb-separator" aria-hidden="true">
+                <span className= 'breadcrumb-separator' aria-hidden= 'true'>
                   {separator}
                 </span>
               )}

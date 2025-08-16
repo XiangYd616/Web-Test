@@ -1,11 +1,4 @@
-import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom';
-import { useTheme } from '../../contexts/ThemeContext';
-import Sidebar from './Sidebar';
-import TopNavbar from './TopNavbar';
-
-
-export interface LayoutProps {
+import React, { useState    } from 'react';import { Outlet    } from 'react-router-dom';import { useTheme    } from '../../contexts/ThemeContext';import Sidebar from './Sidebar';import TopNavbar from './TopNavbar';export interface LayoutProps     {'
   // 基础属性
   className?: string;
   style?: React.CSSProperties;
@@ -29,44 +22,42 @@ export interface LayoutProps {
   // 配置属性
   size?: 'small' | 'medium' | 'large';
   variant?: 'primary' | 'secondary' | 'outline';
-  
   // 可访问性
-  'aria-label'?: string;
-  'aria-describedby'?: string;
+  'aria-label'?: string;'
+  'aria-describedby'?: string;'
   role?: string;
   tabIndex?: number;
 }
 
 
-const Layout: React.FC<LayoutProps> = (props) => {
+const Layout: React.FC<LayoutProps>  = (props) => {
   
   // 性能优化
   const memoizedProps = useMemo(() => ({
     className: combinedClassName,
     style: computedStyle,
     disabled,
-    'aria-label': ariaLabel,
-    'data-testid': testId
+    'aria-label': ariaLabel,'
+    'data-testid': testId'
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
-  
   const componentId = useId();
-  const errorId = `${componentId}-error`;
-  const descriptionId = `${componentId}-description`;
+  const errorId = `${componentId}-error`;`
+  const descriptionId = `${componentId}-description`;`
   
   const ariaProps = {
     id: componentId,
-    'aria-label': ariaLabel,
-    'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': [
+    "aria-label': ariaLabel,'`
+    'aria-labelledby': ariaLabelledBy,'
+    'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,
-    'aria-invalid': !!error,
-    'aria-disabled': disabled,
-    'aria-busy': loading,
-    'aria-expanded': expanded,
-    'aria-selected': selected,
+    ].filter(Boolean).join(' ') || undefined,'
+    'aria-invalid': !!error,'
+    'aria-disabled': disabled,'
+    'aria-busy': loading,'
+    'aria-expanded': expanded,'
+    "aria-selected': selected,'
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -78,26 +69,24 @@ const Layout: React.FC<LayoutProps> = (props) => {
   };
 
   return (
-    <div className={`h-screen flex flex-col theme-transition ${actualTheme === 'light' ? 'light-theme-wrapper' : 'dark-theme-wrapper'}`}>
+    <div className={`h-screen flex flex-col theme-transition ${actualTheme === 'light' ? 'light-theme-wrapper' : 'dark-theme-wrapper'}`}>`
       {/* 顶部导航�?*/}
-      <TopNavbar
-        sidebarCollapsed={sidebarCollapsed}
+      <TopNavbar sidebarCollapsed={sidebarCollapsed}
         onToggleSidebar={toggleSidebar}
-      />
+         />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className= "flex flex-1 overflow-hidden'>`
         {/* 侧边�?*/}
-        <Sidebar
-          collapsed={sidebarCollapsed}
+        <Sidebar collapsed={sidebarCollapsed}
           onToggle={toggleSidebar}
-        />
+           />
 
         {/* 主内容区�?*/}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className= 'flex-1 flex flex-col overflow-hidden'>
           {/* 主内�?*/}
-          <main className="flex-1 overflow-y-auto dark-page-scrollbar">
-            <div className="p-0">
-              <Outlet />
+          <main className= 'flex-1 overflow-y-auto dark-page-scrollbar'>
+            <div className= 'p-0'>
+              <Outlet  />
             </div>
           </main>
         </div>

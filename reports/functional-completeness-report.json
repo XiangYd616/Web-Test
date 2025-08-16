@@ -1,23 +1,23 @@
 {
-  "timestamp": "2025-08-16T08:22:29.746Z",
+  "timestamp": "2025-08-16T09:32:39.406Z",
   "summary": {
-    "totalItems": 426,
-    "completeItems": 269,
-    "incompleteItems": 157,
-    "completenessScore": 63,
-    "totalIssues": 131
+    "totalItems": 439,
+    "completeItems": 329,
+    "incompleteItems": 110,
+    "completenessScore": 75,
+    "totalIssues": 135
   },
   "statistics": {
     "frontend": {
       "pages": {
         "total": 109,
-        "complete": 42,
-        "incomplete": 67
+        "complete": 88,
+        "incomplete": 21
       },
       "components": {
-        "total": 126,
-        "complete": 94,
-        "incomplete": 32
+        "total": 136,
+        "complete": 107,
+        "incomplete": 29
       },
       "routes": {
         "total": 0,
@@ -25,9 +25,9 @@
         "incomplete": 0
       },
       "services": {
-        "total": 114,
-        "complete": 60,
-        "incomplete": 54
+        "total": 117,
+        "complete": 61,
+        "incomplete": 56
       }
     },
     "backend": {
@@ -68,10 +68,10 @@
           "file": "frontend\\pages\\core\\auth\\Login.tsx",
           "fileName": "Login.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 75,
+          "functionalityScore": 90,
           "issues": [],
           "isComplete": true
         },
@@ -79,10 +79,10 @@
           "file": "frontend\\pages\\core\\auth\\Register.tsx",
           "fileName": "Register.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 75,
+          "functionalityScore": 100,
           "issues": [],
           "isComplete": true
         },
@@ -90,23 +90,23 @@
           "file": "frontend\\pages\\core\\dashboard\\Dashboard.tsx",
           "fileName": "Dashboard.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 55,
+          "functionalityScore": 70,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\pages\\core\\testing\\APITest.tsx",
           "fileName": "APITest.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 55,
+          "functionalityScore": 70,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\pages\\core\\testing\\CompatibilityTest.tsx",
@@ -183,9 +183,11 @@
           "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 80,
-          "issues": [],
-          "isComplete": true
+          "functionalityScore": 70,
+          "issues": [
+            "页面只是占位符，缺少实际实现"
+          ],
+          "isComplete": false
         },
         {
           "file": "frontend\\pages\\core\\testing\\TestPage.tsx",
@@ -238,9 +240,11 @@
           "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 70,
-          "issues": [],
-          "isComplete": true
+          "functionalityScore": 60,
+          "issues": [
+            "页面只是占位符，缺少实际实现"
+          ],
+          "isComplete": false
         },
         {
           "file": "frontend\\pages\\data\\reports\\PerformanceAnalysis.tsx",
@@ -314,12 +318,12 @@
           "file": "frontend\\pages\\data\\results\\TestHistory.tsx",
           "fileName": "TestHistory.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 55,
+          "functionalityScore": 70,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\pages\\data\\results\\TestResultDetail.tsx",
@@ -369,12 +373,12 @@
           "file": "frontend\\pages\\management\\admin\\SystemMonitor.tsx",
           "fileName": "SystemMonitor.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 55,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\pages\\management\\integration\\APIKeys.tsx",
@@ -394,7 +398,7 @@
           "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 90,
+          "functionalityScore": 100,
           "issues": [],
           "isComplete": true
         },
@@ -413,10 +417,10 @@
           "file": "frontend\\pages\\management\\integration\\Notifications.tsx",
           "fileName": "Notifications.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 75,
+          "functionalityScore": 90,
           "issues": [],
           "isComplete": true
         },
@@ -435,12 +439,12 @@
           "file": "frontend\\pages\\management\\scheduling\\ScheduledTasks.tsx",
           "fileName": "ScheduledTasks.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 55,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\pages\\management\\scheduling\\TestOptimizations.tsx",
@@ -483,12 +487,12 @@
           "file": "frontend\\pages\\TestToolsHub.tsx",
           "fileName": "TestToolsHub.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\pages\\user\\docs\\APIDocs.tsx",
@@ -505,34 +509,34 @@
           "file": "frontend\\pages\\user\\docs\\Help.tsx",
           "fileName": "Help.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\pages\\user\\misc\\DownloadDesktop.tsx",
           "fileName": "DownloadDesktop.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 55,
+          "functionalityScore": 70,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\pages\\user\\misc\\Subscription.tsx",
           "fileName": "Subscription.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\pages\\user\\profile\\UserBookmarks.tsx",
@@ -560,32 +564,32 @@
           "file": "frontend\\components\\charts\\StressTestChart.tsx",
           "fileName": "StressTestChart.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\charts\\StressTestCharts.tsx",
           "fileName": "StressTestCharts.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": false,
-          "functionalityScore": 55,
+          "functionalityScore": 70,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\charts\\StressTestMetrics.tsx",
           "fileName": "StressTestMetrics.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 45,
+          "functionalityScore": 60,
           "issues": [
             "页面只是占位符，缺少实际实现"
           ],
@@ -595,38 +599,16 @@
           "file": "frontend\\components\\charts\\TestComparisonCharts.tsx",
           "fileName": "TestComparisonCharts.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": false,
-          "functionalityScore": 55,
+          "functionalityScore": 70,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\data\\DataManagement.tsx",
           "fileName": "DataManagement.tsx",
-          "hasState": false,
-          "hasApiCalls": false,
-          "hasErrorHandling": true,
-          "hasLoadingState": true,
-          "functionalityScore": 40,
-          "issues": [],
-          "isComplete": false
-        },
-        {
-          "file": "frontend\\components\\features\\DataManagement.tsx",
-          "fileName": "DataManagement.tsx",
-          "hasState": true,
-          "hasApiCalls": false,
-          "hasErrorHandling": true,
-          "hasLoadingState": true,
-          "functionalityScore": 65,
-          "issues": [],
-          "isComplete": false
-        },
-        {
-          "file": "frontend\\components\\features\\MonitorDashboard.tsx",
-          "fileName": "MonitorDashboard.tsx",
           "hasState": true,
           "hasApiCalls": true,
           "hasErrorHandling": true,
@@ -636,59 +618,83 @@
           "isComplete": true
         },
         {
+          "file": "frontend\\components\\features\\DataManagement.tsx",
+          "fileName": "DataManagement.tsx",
+          "hasState": true,
+          "hasApiCalls": true,
+          "hasErrorHandling": true,
+          "hasLoadingState": true,
+          "functionalityScore": 80,
+          "issues": [],
+          "isComplete": true
+        },
+        {
+          "file": "frontend\\components\\features\\MonitorDashboard.tsx",
+          "fileName": "MonitorDashboard.tsx",
+          "hasState": true,
+          "hasApiCalls": true,
+          "hasErrorHandling": true,
+          "hasLoadingState": true,
+          "functionalityScore": 60,
+          "issues": [
+            "页面只是占位符，缺少实际实现"
+          ],
+          "isComplete": false
+        },
+        {
           "file": "frontend\\components\\features\\ReportExporter.tsx",
           "fileName": "ReportExporter.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\features\\ReportManagement.tsx",
           "fileName": "ReportManagement.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\features\\TestRunner.tsx",
           "fileName": "TestRunner.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\layout\\BaseTestLayout.tsx",
           "fileName": "BaseTestLayout.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\results\\TestResults.tsx",
           "fileName": "TestResults.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\security\\SecurityTest.tsx",
@@ -705,10 +711,10 @@
           "file": "frontend\\components\\system\\BackgroundTestNotifications.tsx",
           "fileName": "BackgroundTestNotifications.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 55,
+          "functionalityScore": 70,
           "issues": [
             "页面只是占位符，缺少实际实现"
           ],
@@ -718,34 +724,36 @@
           "file": "frontend\\components\\system\\BackupManagement.tsx",
           "fileName": "BackupManagement.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\system\\MonitoringDashboard.tsx",
           "fileName": "MonitoringDashboard.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
-          "issues": [],
+          "functionalityScore": 60,
+          "issues": [
+            "页面只是占位符，缺少实际实现"
+          ],
           "isComplete": false
         },
         {
           "file": "frontend\\components\\system\\SystemSettings.tsx",
           "fileName": "SystemSettings.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\system\\SystemStatusDashboard.tsx",
@@ -762,23 +770,23 @@
           "file": "frontend\\components\\system\\TestManagement.tsx",
           "fileName": "TestManagement.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\system\\UserManagement.tsx",
           "fileName": "UserManagement.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\testing\\APITestConfig.tsx",
@@ -797,10 +805,10 @@
           "file": "frontend\\components\\testing\\APITestResultAnalysis.tsx",
           "fileName": "APITestResultAnalysis.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 55,
+          "functionalityScore": 70,
           "issues": [
             "页面只是占位符，缺少实际实现"
           ],
@@ -809,22 +817,22 @@
         {
           "file": "frontend\\components\\testing\\BaseTestPage.tsx",
           "fileName": "BaseTestPage.tsx",
-          "hasState": false,
-          "hasApiCalls": false,
+          "hasState": true,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 40,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\testing\\SecurityTestComparison.tsx",
           "fileName": "SecurityTestComparison.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 45,
+          "functionalityScore": 60,
           "issues": [
             "页面只是占位符，缺少实际实现"
           ],
@@ -834,10 +842,10 @@
           "file": "frontend\\components\\testing\\SecurityTestGuide.tsx",
           "fileName": "SecurityTestGuide.tsx",
           "hasState": true,
-          "hasApiCalls": false,
-          "hasErrorHandling": false,
+          "hasApiCalls": true,
+          "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 35,
+          "functionalityScore": 60,
           "issues": [
             "页面只是占位符，缺少实际实现"
           ],
@@ -847,23 +855,23 @@
           "file": "frontend\\components\\testing\\SecurityTestHistory.tsx",
           "fileName": "SecurityTestHistory.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\testing\\SecurityTestPanel.tsx",
           "fileName": "SecurityTestPanel.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\testing\\specialized\\APITestConfig.tsx",
@@ -880,43 +888,43 @@
           "file": "frontend\\components\\testing\\specialized\\SecurityTestConfig.tsx",
           "fileName": "SecurityTestConfig.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\testing\\specialized\\StressTestConfig.tsx",
           "fileName": "StressTestConfig.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\testing\\StressTestConfig.tsx",
           "fileName": "StressTestConfig.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\testing\\StressTestDetailModal.tsx",
           "fileName": "StressTestDetailModal.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 55,
+          "functionalityScore": 70,
           "issues": [
             "页面只是占位符，缺少实际实现"
           ],
@@ -937,65 +945,65 @@
           "file": "frontend\\components\\testing\\StressTestQueueStatus.tsx",
           "fileName": "StressTestQueueStatus.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\testing\\StressTestRecordDetail.tsx",
           "fileName": "StressTestRecordDetail.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\testing\\StressTestResultAnalysis.tsx",
           "fileName": "StressTestResultAnalysis.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\testing\\TestComponents.tsx",
           "fileName": "TestComponents.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\testing\\TestConfig.tsx",
           "fileName": "TestConfig.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\testing\\TestConfigPanel.tsx",
           "fileName": "TestConfigPanel.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 55,
+          "functionalityScore": 70,
           "issues": [
             "页面只是占位符，缺少实际实现"
           ],
@@ -1004,11 +1012,11 @@
         {
           "file": "frontend\\components\\testing\\TestControls.tsx",
           "fileName": "TestControls.tsx",
-          "hasState": false,
-          "hasApiCalls": false,
+          "hasState": true,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 30,
+          "functionalityScore": 60,
           "issues": [
             "页面只是占位符，缺少实际实现"
           ],
@@ -1029,32 +1037,32 @@
           "file": "frontend\\components\\testing\\TestHeader.tsx",
           "fileName": "TestHeader.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\testing\\TestHistoryPanel.tsx",
           "fileName": "TestHistoryPanel.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\testing\\TestingComponents.tsx",
           "fileName": "TestingComponents.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 45,
+          "functionalityScore": 60,
           "issues": [
             "页面只是占位符，缺少实际实现"
           ],
@@ -1064,10 +1072,10 @@
           "file": "frontend\\components\\testing\\TestInterface.tsx",
           "fileName": "TestInterface.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 45,
+          "functionalityScore": 60,
           "issues": [
             "页面只是占位符，缺少实际实现"
           ],
@@ -1077,142 +1085,142 @@
           "file": "frontend\\components\\testing\\TestManager.tsx",
           "fileName": "TestManager.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\testing\\TestPage.tsx",
           "fileName": "TestPage.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\testing\\TestPageWithHistory.tsx",
           "fileName": "TestPageWithHistory.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\testing\\TestProgress.tsx",
           "fileName": "TestProgress.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\testing\\TestProgressPanel.tsx",
           "fileName": "TestProgressPanel.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\testing\\TestResultComparison.tsx",
           "fileName": "TestResultComparison.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\testing\\TestResultDisplay.tsx",
           "fileName": "TestResultDisplay.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\testing\\TestResults.tsx",
           "fileName": "TestResults.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\testing\\TestResultsPanel.tsx",
           "fileName": "TestResultsPanel.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\testing\\TestTemplateManager.tsx",
           "fileName": "TestTemplateManager.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\testing\\TestTemplateSelector.tsx",
           "fileName": "TestTemplateSelector.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\TestResults.tsx",
           "fileName": "TestResults.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 65,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\ui\\CancelTestConfirmDialog.tsx",
           "fileName": "CancelTestConfirmDialog.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 45,
+          "functionalityScore": 60,
           "issues": [
             "页面只是占位符，缺少实际实现"
           ],
@@ -1222,10 +1230,10 @@
           "file": "frontend\\components\\ui\\StopTestConfirmDialog.tsx",
           "fileName": "StopTestConfirmDialog.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 45,
+          "functionalityScore": 60,
           "issues": [
             "页面只是占位符，缺少实际实现"
           ],
@@ -1245,22 +1253,22 @@
         {
           "file": "frontend\\components\\ui\\TestingTools.tsx",
           "fileName": "TestingTools.tsx",
-          "hasState": false,
-          "hasApiCalls": false,
+          "hasState": true,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 50,
+          "functionalityScore": 80,
           "issues": [],
-          "isComplete": false
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\ui\\TestNavigation.tsx",
           "fileName": "TestNavigation.tsx",
           "hasState": true,
-          "hasApiCalls": false,
+          "hasApiCalls": true,
           "hasErrorHandling": true,
           "hasLoadingState": true,
-          "functionalityScore": 75,
+          "functionalityScore": 90,
           "issues": [],
           "isComplete": true
         },
@@ -1410,11 +1418,19 @@
           "hasPropsTypes": true,
           "hasEventHandlers": false,
           "hasStyles": true,
-          "complexity": 19,
-          "issues": [
-            "组件实现过于简单，可能缺少必要功能"
-          ],
-          "isComplete": false
+          "complexity": 22,
+          "issues": [],
+          "isComplete": true
+        },
+        {
+          "file": "frontend\\components\\auth\\RoleGuard.tsx",
+          "fileName": "RoleGuard.tsx",
+          "hasPropsTypes": true,
+          "hasEventHandlers": false,
+          "hasStyles": false,
+          "complexity": 23,
+          "issues": [],
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\auth\\WithAuthCheck.tsx",
@@ -1422,7 +1438,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 63,
+          "complexity": 83,
           "issues": [],
           "isComplete": true
         },
@@ -1472,7 +1488,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 141,
+          "complexity": 166,
           "issues": [],
           "isComplete": true
         },
@@ -1518,7 +1534,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 130,
+          "complexity": 142,
           "issues": [],
           "isComplete": true
         },
@@ -1538,7 +1554,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 61,
+          "complexity": 64,
           "issues": [],
           "isComplete": true
         },
@@ -1588,7 +1604,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 318,
+          "complexity": 321,
           "issues": [],
           "isComplete": true
         },
@@ -1598,7 +1614,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 184,
+          "complexity": 198,
           "issues": [],
           "isComplete": true
         },
@@ -1608,7 +1624,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 102,
+          "complexity": 105,
           "issues": [],
           "isComplete": true
         },
@@ -1618,7 +1634,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 416,
+          "complexity": 419,
           "issues": [],
           "isComplete": true
         },
@@ -1628,7 +1644,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 128,
+          "complexity": 131,
           "issues": [],
           "isComplete": true
         },
@@ -1638,7 +1654,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 50,
+          "complexity": 53,
           "issues": [],
           "isComplete": true
         },
@@ -1648,7 +1664,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 337,
+          "complexity": 340,
           "issues": [],
           "isComplete": true
         },
@@ -1698,7 +1714,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 137,
+          "complexity": 149,
           "issues": [],
           "isComplete": true
         },
@@ -1738,7 +1754,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 47,
+          "complexity": 50,
           "issues": [],
           "isComplete": true
         },
@@ -1748,7 +1764,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 220,
+          "complexity": 223,
           "issues": [],
           "isComplete": true
         },
@@ -1758,7 +1774,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 72,
+          "complexity": 75,
           "issues": [],
           "isComplete": true
         },
@@ -1768,7 +1784,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 226,
+          "complexity": 229,
           "issues": [
             "组件只是占位符，缺少实际实现"
           ],
@@ -1780,7 +1796,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 479,
+          "complexity": 482,
           "issues": [],
           "isComplete": true
         },
@@ -1790,7 +1806,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 240,
+          "complexity": 243,
           "issues": [],
           "isComplete": true
         },
@@ -1800,7 +1816,59 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 107,
+          "complexity": 110,
+          "issues": [],
+          "isComplete": true
+        },
+        {
+          "file": "frontend\\components\\navigation\\Breadcrumb.tsx",
+          "fileName": "Breadcrumb.tsx",
+          "hasPropsTypes": true,
+          "hasEventHandlers": false,
+          "hasStyles": true,
+          "complexity": 34,
+          "issues": [
+            "组件只是占位符，缺少实际实现"
+          ],
+          "isComplete": false
+        },
+        {
+          "file": "frontend\\components\\navigation\\MainNavigation.tsx",
+          "fileName": "MainNavigation.tsx",
+          "hasPropsTypes": true,
+          "hasEventHandlers": true,
+          "hasStyles": true,
+          "complexity": 102,
+          "issues": [],
+          "isComplete": true
+        },
+        {
+          "file": "frontend\\components\\navigation\\SidebarNavigation.tsx",
+          "fileName": "SidebarNavigation.tsx",
+          "hasPropsTypes": true,
+          "hasEventHandlers": true,
+          "hasStyles": true,
+          "complexity": 76,
+          "issues": [],
+          "isComplete": true
+        },
+        {
+          "file": "frontend\\components\\navigation\\UserNavigation.tsx",
+          "fileName": "UserNavigation.tsx",
+          "hasPropsTypes": true,
+          "hasEventHandlers": true,
+          "hasStyles": true,
+          "complexity": 91,
+          "issues": [],
+          "isComplete": true
+        },
+        {
+          "file": "frontend\\components\\optimized\\OptimizedDataTable.tsx",
+          "fileName": "OptimizedDataTable.tsx",
+          "hasPropsTypes": true,
+          "hasEventHandlers": true,
+          "hasStyles": true,
+          "complexity": 77,
           "issues": [],
           "isComplete": true
         },
@@ -1842,7 +1910,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 99,
+          "complexity": 102,
           "issues": [
             "组件只是占位符，缺少实际实现"
           ],
@@ -1855,6 +1923,16 @@
           "hasEventHandlers": true,
           "hasStyles": true,
           "complexity": 57,
+          "issues": [],
+          "isComplete": true
+        },
+        {
+          "file": "frontend\\components\\routing\\RouteManager.tsx",
+          "fileName": "RouteManager.tsx",
+          "hasPropsTypes": true,
+          "hasEventHandlers": false,
+          "hasStyles": true,
+          "complexity": 25,
           "issues": [],
           "isComplete": true
         },
@@ -1938,7 +2016,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 105,
+          "complexity": 117,
           "issues": [],
           "isComplete": true
         },
@@ -1958,7 +2036,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 159,
+          "complexity": 171,
           "issues": [
             "组件只是占位符，缺少实际实现"
           ],
@@ -2062,7 +2140,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 157,
+          "complexity": 169,
           "issues": [],
           "isComplete": true
         },
@@ -2102,7 +2180,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 255,
+          "complexity": 269,
           "issues": [],
           "isComplete": true
         },
@@ -2170,7 +2248,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 131,
+          "complexity": 143,
           "issues": [
             "组件只是占位符，缺少实际实现"
           ],
@@ -2182,7 +2260,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": false,
           "hasStyles": true,
-          "complexity": 53,
+          "complexity": 56,
           "issues": [],
           "isComplete": true
         },
@@ -2212,11 +2290,9 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 11,
-          "issues": [
-            "组件实现过于简单，可能缺少必要功能"
-          ],
-          "isComplete": false
+          "complexity": 26,
+          "issues": [],
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\ui\\ConfirmDialog.tsx",
@@ -2224,7 +2300,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 39,
+          "complexity": 42,
           "issues": [
             "组件只是占位符，缺少实际实现"
           ],
@@ -2236,7 +2312,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 94,
+          "complexity": 97,
           "issues": [],
           "isComplete": true
         },
@@ -2246,7 +2322,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 90,
+          "complexity": 93,
           "issues": [],
           "isComplete": true
         },
@@ -2256,7 +2332,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 55,
+          "complexity": 58,
           "issues": [],
           "isComplete": true
         },
@@ -2266,7 +2342,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 103,
+          "complexity": 106,
           "issues": [
             "组件只是占位符，缺少实际实现"
           ],
@@ -2278,7 +2354,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": false,
           "hasStyles": true,
-          "complexity": 4,
+          "complexity": 7,
           "issues": [
             "组件实现过于简单，可能缺少必要功能"
           ],
@@ -2290,7 +2366,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": false,
           "hasStyles": true,
-          "complexity": 6,
+          "complexity": 9,
           "issues": [
             "组件实现过于简单，可能缺少必要功能"
           ],
@@ -2332,7 +2408,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 98,
+          "complexity": 101,
           "issues": [
             "组件只是占位符，缺少实际实现"
           ],
@@ -2374,7 +2450,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 153,
+          "complexity": 156,
           "issues": [],
           "isComplete": true
         },
@@ -2385,6 +2461,26 @@
           "hasEventHandlers": true,
           "hasStyles": true,
           "complexity": 98,
+          "issues": [],
+          "isComplete": true
+        },
+        {
+          "file": "frontend\\components\\ui\\LazyComponentWrapper.tsx",
+          "fileName": "LazyComponentWrapper.tsx",
+          "hasPropsTypes": true,
+          "hasEventHandlers": true,
+          "hasStyles": true,
+          "complexity": 39,
+          "issues": [],
+          "isComplete": true
+        },
+        {
+          "file": "frontend\\components\\ui\\LazyImage.tsx",
+          "fileName": "LazyImage.tsx",
+          "hasPropsTypes": true,
+          "hasEventHandlers": true,
+          "hasStyles": true,
+          "complexity": 46,
           "issues": [],
           "isComplete": true
         },
@@ -2411,10 +2507,10 @@
         {
           "file": "frontend\\components\\ui\\LoadingStates.tsx",
           "fileName": "LoadingStates.tsx",
-          "hasPropsTypes": false,
+          "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 253,
+          "complexity": 258,
           "issues": [
             "组件只是占位符，缺少实际实现"
           ],
@@ -2426,7 +2522,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 109,
+          "complexity": 112,
           "issues": [
             "组件只是占位符，缺少实际实现"
           ],
@@ -2450,7 +2546,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 189,
+          "complexity": 192,
           "issues": [],
           "isComplete": true
         },
@@ -2490,7 +2586,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 38,
+          "complexity": 41,
           "issues": [],
           "isComplete": true
         },
@@ -2530,7 +2626,7 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 185,
+          "complexity": 188,
           "issues": [
             "组件只是占位符，缺少实际实现"
           ],
@@ -2540,13 +2636,11 @@
           "file": "frontend\\components\\ui\\ThemeProvider.tsx",
           "fileName": "ThemeProvider.tsx",
           "hasPropsTypes": true,
-          "hasEventHandlers": false,
+          "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 6,
-          "issues": [
-            "组件实现过于简单，可能缺少必要功能"
-          ],
-          "isComplete": false
+          "complexity": 21,
+          "issues": [],
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\ui\\ThemeToggle.tsx",
@@ -2561,14 +2655,12 @@
         {
           "file": "frontend\\components\\ui\\Toast.tsx",
           "fileName": "Toast.tsx",
-          "hasPropsTypes": false,
-          "hasEventHandlers": false,
-          "hasStyles": false,
-          "complexity": 8,
-          "issues": [
-            "组件实现过于简单，可能缺少必要功能"
-          ],
-          "isComplete": false
+          "hasPropsTypes": true,
+          "hasEventHandlers": true,
+          "hasStyles": true,
+          "complexity": 20,
+          "issues": [],
+          "isComplete": true
         },
         {
           "file": "frontend\\components\\ui\\URLInput.tsx",
@@ -2608,7 +2700,17 @@
           "hasPropsTypes": true,
           "hasEventHandlers": true,
           "hasStyles": true,
-          "complexity": 74,
+          "complexity": 77,
+          "issues": [],
+          "isComplete": true
+        },
+        {
+          "file": "frontend\\components\\ui\\VirtualTable.tsx",
+          "fileName": "VirtualTable.tsx",
+          "hasPropsTypes": true,
+          "hasEventHandlers": true,
+          "hasStyles": true,
+          "complexity": 48,
           "issues": [],
           "isComplete": true
         }
@@ -2888,6 +2990,17 @@
         {
           "file": "frontend\\services\\cache\\index.ts",
           "fileName": "index.ts",
+          "hasApiCalls": false,
+          "hasErrorHandling": false,
+          "issues": [
+            "API服务文件中没有发现API调用",
+            "API服务缺少错误处理"
+          ],
+          "isComplete": false
+        },
+        {
+          "file": "frontend\\services\\cacheIntegration.ts",
+          "fileName": "cacheIntegration.ts",
           "hasApiCalls": false,
           "hasErrorHandling": false,
           "issues": [
@@ -3199,6 +3312,14 @@
           "isComplete": true
         },
         {
+          "file": "frontend\\services\\performanceMonitoringIntegration.ts",
+          "fileName": "performanceMonitoringIntegration.ts",
+          "hasApiCalls": true,
+          "hasErrorHandling": true,
+          "issues": [],
+          "isComplete": true
+        },
+        {
           "file": "frontend\\services\\preferences\\userPreferencesService.ts",
           "fileName": "userPreferencesService.ts",
           "hasApiCalls": true,
@@ -3307,6 +3428,16 @@
           "hasErrorHandling": true,
           "issues": [],
           "isComplete": true
+        },
+        {
+          "file": "frontend\\services\\smartCacheManager.ts",
+          "fileName": "smartCacheManager.ts",
+          "hasApiCalls": false,
+          "hasErrorHandling": true,
+          "issues": [
+            "API服务文件中没有发现API调用"
+          ],
+          "isComplete": false
         },
         {
           "file": "frontend\\services\\state\\testStateManager.ts",
@@ -4339,800 +4470,814 @@
       "category": "frontend_page",
       "description": "页面只是占位符，缺少实际实现",
       "file": "frontend\\pages\\core\\testing\\StressTest.tsx",
-      "timestamp": "2025-08-16T08:22:29.558Z"
+      "timestamp": "2025-08-16T09:32:39.212Z"
+    },
+    {
+      "category": "frontend_page",
+      "description": "页面只是占位符，缺少实际实现",
+      "file": "frontend\\pages\\core\\testing\\TestingDashboard.tsx",
+      "timestamp": "2025-08-16T09:32:39.213Z"
+    },
+    {
+      "category": "frontend_page",
+      "description": "页面只是占位符，缺少实际实现",
+      "file": "frontend\\pages\\data\\reports\\MonitoringDashboard.tsx",
+      "timestamp": "2025-08-16T09:32:39.216Z"
     },
     {
       "category": "frontend_page",
       "description": "页面只是占位符，缺少实际实现",
       "file": "frontend\\pages\\data\\results\\StressTestDetail.tsx",
-      "timestamp": "2025-08-16T08:22:29.563Z"
+      "timestamp": "2025-08-16T09:32:39.219Z"
     },
     {
       "category": "frontend_page",
       "description": "页面只是占位符，缺少实际实现",
       "file": "frontend\\pages\\management\\scheduling\\TestOptimizations.tsx",
-      "timestamp": "2025-08-16T08:22:29.568Z"
+      "timestamp": "2025-08-16T09:32:39.224Z"
     },
     {
       "category": "frontend_page",
       "description": "页面只是占位符，缺少实际实现",
       "file": "frontend\\pages\\management\\scheduling\\TestSchedule.tsx",
-      "timestamp": "2025-08-16T08:22:29.569Z"
+      "timestamp": "2025-08-16T09:32:39.225Z"
     },
     {
       "category": "frontend_page",
       "description": "页面只是占位符，缺少实际实现",
       "file": "frontend\\components\\charts\\StressTestMetrics.tsx",
-      "timestamp": "2025-08-16T08:22:29.588Z"
+      "timestamp": "2025-08-16T09:32:39.246Z"
+    },
+    {
+      "category": "frontend_page",
+      "description": "页面只是占位符，缺少实际实现",
+      "file": "frontend\\components\\features\\MonitorDashboard.tsx",
+      "timestamp": "2025-08-16T09:32:39.248Z"
     },
     {
       "category": "frontend_page",
       "description": "页面只是占位符，缺少实际实现",
       "file": "frontend\\components\\system\\BackgroundTestNotifications.tsx",
-      "timestamp": "2025-08-16T08:22:29.593Z"
+      "timestamp": "2025-08-16T09:32:39.250Z"
+    },
+    {
+      "category": "frontend_page",
+      "description": "页面只是占位符，缺少实际实现",
+      "file": "frontend\\components\\system\\MonitoringDashboard.tsx",
+      "timestamp": "2025-08-16T09:32:39.251Z"
     },
     {
       "category": "frontend_page",
       "description": "页面只是占位符，缺少实际实现",
       "file": "frontend\\components\\testing\\APITestConfig.tsx",
-      "timestamp": "2025-08-16T08:22:29.595Z"
+      "timestamp": "2025-08-16T09:32:39.253Z"
     },
     {
       "category": "frontend_page",
       "description": "页面只是占位符，缺少实际实现",
       "file": "frontend\\components\\testing\\APITestResultAnalysis.tsx",
-      "timestamp": "2025-08-16T08:22:29.595Z"
+      "timestamp": "2025-08-16T09:32:39.253Z"
     },
     {
       "category": "frontend_page",
       "description": "页面只是占位符，缺少实际实现",
       "file": "frontend\\components\\testing\\SecurityTestComparison.tsx",
-      "timestamp": "2025-08-16T08:22:29.596Z"
+      "timestamp": "2025-08-16T09:32:39.254Z"
     },
     {
       "category": "frontend_page",
       "description": "页面只是占位符，缺少实际实现",
       "file": "frontend\\components\\testing\\SecurityTestGuide.tsx",
-      "timestamp": "2025-08-16T08:22:29.596Z"
+      "timestamp": "2025-08-16T09:32:39.254Z"
     },
     {
       "category": "frontend_page",
       "description": "页面只是占位符，缺少实际实现",
       "file": "frontend\\components\\testing\\StressTestDetailModal.tsx",
-      "timestamp": "2025-08-16T08:22:29.599Z"
+      "timestamp": "2025-08-16T09:32:39.256Z"
     },
     {
       "category": "frontend_page",
       "description": "页面只是占位符，缺少实际实现",
       "file": "frontend\\components\\testing\\TestConfigPanel.tsx",
-      "timestamp": "2025-08-16T08:22:29.601Z"
+      "timestamp": "2025-08-16T09:32:39.259Z"
     },
     {
       "category": "frontend_page",
       "description": "页面只是占位符，缺少实际实现",
       "file": "frontend\\components\\testing\\TestControls.tsx",
-      "timestamp": "2025-08-16T08:22:29.602Z"
+      "timestamp": "2025-08-16T09:32:39.259Z"
     },
     {
       "category": "frontend_page",
       "description": "页面只是占位符，缺少实际实现",
       "file": "frontend\\components\\testing\\TestingComponents.tsx",
-      "timestamp": "2025-08-16T08:22:29.603Z"
+      "timestamp": "2025-08-16T09:32:39.260Z"
     },
     {
       "category": "frontend_page",
       "description": "页面只是占位符，缺少实际实现",
       "file": "frontend\\components\\testing\\TestInterface.tsx",
-      "timestamp": "2025-08-16T08:22:29.603Z"
+      "timestamp": "2025-08-16T09:32:39.260Z"
     },
     {
       "category": "frontend_page",
       "description": "页面只是占位符，缺少实际实现",
       "file": "frontend\\components\\ui\\CancelTestConfirmDialog.tsx",
-      "timestamp": "2025-08-16T08:22:29.606Z"
+      "timestamp": "2025-08-16T09:32:39.264Z"
     },
     {
       "category": "frontend_page",
       "description": "页面只是占位符，缺少实际实现",
       "file": "frontend\\components\\ui\\StopTestConfirmDialog.tsx",
-      "timestamp": "2025-08-16T08:22:29.607Z"
+      "timestamp": "2025-08-16T09:32:39.264Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\auth\\AuthErrorHandler.tsx",
-      "timestamp": "2025-08-16T08:22:29.624Z"
+      "timestamp": "2025-08-16T09:32:39.283Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\auth\\LoginPrompt.tsx",
-      "timestamp": "2025-08-16T08:22:29.625Z"
+      "timestamp": "2025-08-16T09:32:39.284Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\auth\\PasswordStrengthIndicator.tsx",
-      "timestamp": "2025-08-16T08:22:29.625Z"
-    },
-    {
-      "category": "frontend_component",
-      "description": "组件实现过于简单，可能缺少必要功能",
-      "file": "frontend\\components\\auth\\ProtectedRoute.tsx",
-      "timestamp": "2025-08-16T08:22:29.626Z"
+      "timestamp": "2025-08-16T09:32:39.284Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\charts\\PerformanceChart.tsx",
-      "timestamp": "2025-08-16T08:22:29.628Z"
+      "timestamp": "2025-08-16T09:32:39.287Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\charts\\RechartsChart.tsx",
-      "timestamp": "2025-08-16T08:22:29.628Z"
+      "timestamp": "2025-08-16T09:32:39.288Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\charts\\StatCard.tsx",
-      "timestamp": "2025-08-16T08:22:29.628Z"
+      "timestamp": "2025-08-16T09:32:39.288Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\layout\\Sidebar.tsx",
-      "timestamp": "2025-08-16T08:22:29.635Z"
+      "timestamp": "2025-08-16T09:32:39.295Z"
+    },
+    {
+      "category": "frontend_component",
+      "description": "组件只是占位符，缺少实际实现",
+      "file": "frontend\\components\\navigation\\Breadcrumb.tsx",
+      "timestamp": "2025-08-16T09:32:39.296Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\preferences\\UserPreferencesPanel.tsx",
-      "timestamp": "2025-08-16T08:22:29.636Z"
+      "timestamp": "2025-08-16T09:32:39.297Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\results\\VirtualizedResultList.tsx",
-      "timestamp": "2025-08-16T08:22:29.637Z"
+      "timestamp": "2025-08-16T09:32:39.298Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\system\\ErrorHandling.tsx",
-      "timestamp": "2025-08-16T08:22:29.638Z"
+      "timestamp": "2025-08-16T09:32:39.299Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\system\\PerformanceMonitor.tsx",
-      "timestamp": "2025-08-16T08:22:29.638Z"
+      "timestamp": "2025-08-16T09:32:39.299Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\system\\SystemResourceMonitor.tsx",
-      "timestamp": "2025-08-16T08:22:29.639Z"
+      "timestamp": "2025-08-16T09:32:39.300Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\testing\\SecurityResults.tsx",
-      "timestamp": "2025-08-16T08:22:29.641Z"
+      "timestamp": "2025-08-16T09:32:39.302Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\tools\\GlobalSearch.tsx",
-      "timestamp": "2025-08-16T08:22:29.642Z"
+      "timestamp": "2025-08-16T09:32:39.304Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\tools\\InteractiveFeedback.tsx",
-      "timestamp": "2025-08-16T08:22:29.642Z"
+      "timestamp": "2025-08-16T09:32:39.304Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\tools\\PreloadLink.tsx",
-      "timestamp": "2025-08-16T08:22:29.643Z"
+      "timestamp": "2025-08-16T09:32:39.304Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\ui\\Badge.tsx",
-      "timestamp": "2025-08-16T08:22:29.643Z"
+      "timestamp": "2025-08-16T09:32:39.304Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\ui\\CancelProgressFeedback.tsx",
-      "timestamp": "2025-08-16T08:22:29.643Z"
-    },
-    {
-      "category": "frontend_component",
-      "description": "组件实现过于简单，可能缺少必要功能",
-      "file": "frontend\\components\\ui\\CodeEditor.tsx",
-      "timestamp": "2025-08-16T08:22:29.644Z"
+      "timestamp": "2025-08-16T09:32:39.305Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\ui\\ConfirmDialog.tsx",
-      "timestamp": "2025-08-16T08:22:29.644Z"
+      "timestamp": "2025-08-16T09:32:39.306Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\ui\\DeleteConfirmDialog.tsx",
-      "timestamp": "2025-08-16T08:22:29.644Z"
+      "timestamp": "2025-08-16T09:32:39.306Z"
     },
     {
       "category": "frontend_component",
       "description": "组件实现过于简单，可能缺少必要功能",
       "file": "frontend\\components\\ui\\DynamicChartBar.tsx",
-      "timestamp": "2025-08-16T08:22:29.644Z"
+      "timestamp": "2025-08-16T09:32:39.306Z"
     },
     {
       "category": "frontend_component",
       "description": "组件实现过于简单，可能缺少必要功能",
       "file": "frontend\\components\\ui\\DynamicProgressBar.tsx",
-      "timestamp": "2025-08-16T08:22:29.645Z"
+      "timestamp": "2025-08-16T09:32:39.307Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\ui\\ExportModal.tsx",
-      "timestamp": "2025-08-16T08:22:29.645Z"
+      "timestamp": "2025-08-16T09:32:39.307Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\ui\\LoadingStates.tsx",
-      "timestamp": "2025-08-16T08:22:29.647Z"
+      "timestamp": "2025-08-16T09:32:39.309Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\ui\\Modal.tsx",
-      "timestamp": "2025-08-16T08:22:29.647Z"
+      "timestamp": "2025-08-16T09:32:39.309Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\ui\\NotificationSystem.tsx",
-      "timestamp": "2025-08-16T08:22:29.648Z"
+      "timestamp": "2025-08-16T09:32:39.310Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\ui\\Table.tsx",
-      "timestamp": "2025-08-16T08:22:29.649Z"
-    },
-    {
-      "category": "frontend_component",
-      "description": "组件实现过于简单，可能缺少必要功能",
-      "file": "frontend\\components\\ui\\ThemeProvider.tsx",
-      "timestamp": "2025-08-16T08:22:29.650Z"
-    },
-    {
-      "category": "frontend_component",
-      "description": "组件实现过于简单，可能缺少必要功能",
-      "file": "frontend\\components\\ui\\Toast.tsx",
-      "timestamp": "2025-08-16T08:22:29.650Z"
+      "timestamp": "2025-08-16T09:32:39.311Z"
     },
     {
       "category": "frontend_component",
       "description": "组件只是占位符，缺少实际实现",
       "file": "frontend\\components\\ui\\UX.tsx",
-      "timestamp": "2025-08-16T08:22:29.651Z"
+      "timestamp": "2025-08-16T09:32:39.312Z"
     },
     {
       "category": "backend_route",
       "description": "文件中没有发现路由处理器",
       "file": "backend\\routes\\cache.js",
-      "timestamp": "2025-08-16T08:22:29.656Z"
+      "timestamp": "2025-08-16T09:32:39.318Z"
     },
     {
       "category": "backend_route",
       "description": "缺少错误处理机制",
       "file": "backend\\routes\\cache.js",
-      "timestamp": "2025-08-16T08:22:29.656Z"
+      "timestamp": "2025-08-16T09:32:39.318Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\admin\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.685Z"
+      "timestamp": "2025-08-16T09:32:39.346Z"
     },
     {
       "category": "api_integration",
       "description": "API服务缺少错误处理",
       "file": "frontend\\services\\admin\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.685Z"
+      "timestamp": "2025-08-16T09:32:39.346Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\analytics\\analyticsService.ts",
-      "timestamp": "2025-08-16T08:22:29.686Z"
+      "timestamp": "2025-08-16T09:32:39.346Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\analytics\\dataAnalysisService.ts",
-      "timestamp": "2025-08-16T08:22:29.686Z"
+      "timestamp": "2025-08-16T09:32:39.346Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\api\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.687Z"
+      "timestamp": "2025-08-16T09:32:39.347Z"
     },
     {
       "category": "api_integration",
       "description": "API服务缺少错误处理",
       "file": "frontend\\services\\api\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.687Z"
+      "timestamp": "2025-08-16T09:32:39.347Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\apiCacheManager.ts",
-      "timestamp": "2025-08-16T08:22:29.687Z"
+      "timestamp": "2025-08-16T09:32:39.347Z"
     },
     {
       "category": "api_integration",
       "description": "API服务缺少错误处理",
       "file": "frontend\\services\\apiCacheManager.ts",
-      "timestamp": "2025-08-16T08:22:29.687Z"
+      "timestamp": "2025-08-16T09:32:39.347Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\auth\\auditLogService.ts",
-      "timestamp": "2025-08-16T08:22:29.687Z"
+      "timestamp": "2025-08-16T09:32:39.348Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\auth\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.688Z"
+      "timestamp": "2025-08-16T09:32:39.348Z"
     },
     {
       "category": "api_integration",
       "description": "API服务缺少错误处理",
       "file": "frontend\\services\\auth\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.688Z"
+      "timestamp": "2025-08-16T09:32:39.348Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\auth\\mfaService.ts",
-      "timestamp": "2025-08-16T08:22:29.688Z"
+      "timestamp": "2025-08-16T09:32:39.349Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\auth\\passwordPolicyService.ts",
-      "timestamp": "2025-08-16T08:22:29.688Z"
+      "timestamp": "2025-08-16T09:32:39.349Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\auth\\rbacService.ts",
-      "timestamp": "2025-08-16T08:22:29.689Z"
+      "timestamp": "2025-08-16T09:32:39.349Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\cache\\cacheManager.ts",
-      "timestamp": "2025-08-16T08:22:29.689Z"
+      "timestamp": "2025-08-16T09:32:39.350Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\cache\\cacheStrategies.ts",
-      "timestamp": "2025-08-16T08:22:29.689Z"
+      "timestamp": "2025-08-16T09:32:39.350Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\cache\\cacheStrategy.ts",
-      "timestamp": "2025-08-16T08:22:29.690Z"
+      "timestamp": "2025-08-16T09:32:39.350Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\cache\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.690Z"
+      "timestamp": "2025-08-16T09:32:39.350Z"
     },
     {
       "category": "api_integration",
       "description": "API服务缺少错误处理",
       "file": "frontend\\services\\cache\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.690Z"
+      "timestamp": "2025-08-16T09:32:39.350Z"
+    },
+    {
+      "category": "api_integration",
+      "description": "API服务文件中没有发现API调用",
+      "file": "frontend\\services\\cacheIntegration.ts",
+      "timestamp": "2025-08-16T09:32:39.350Z"
+    },
+    {
+      "category": "api_integration",
+      "description": "API服务缺少错误处理",
+      "file": "frontend\\services\\cacheIntegration.ts",
+      "timestamp": "2025-08-16T09:32:39.350Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\collaboration\\collaborationService.ts",
-      "timestamp": "2025-08-16T08:22:29.690Z"
+      "timestamp": "2025-08-16T09:32:39.350Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\config\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.690Z"
+      "timestamp": "2025-08-16T09:32:39.351Z"
     },
     {
       "category": "api_integration",
       "description": "API服务缺少错误处理",
       "file": "frontend\\services\\config\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.690Z"
+      "timestamp": "2025-08-16T09:32:39.351Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\configService.ts",
-      "timestamp": "2025-08-16T08:22:29.690Z"
+      "timestamp": "2025-08-16T09:32:39.351Z"
     },
     {
       "category": "api_integration",
       "description": "API服务缺少错误处理",
       "file": "frontend\\services\\configService.ts",
-      "timestamp": "2025-08-16T08:22:29.690Z"
+      "timestamp": "2025-08-16T09:32:39.351Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\dao\\userDao.ts",
-      "timestamp": "2025-08-16T08:22:29.690Z"
+      "timestamp": "2025-08-16T09:32:39.351Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\data\\dataStateManager.ts",
-      "timestamp": "2025-08-16T08:22:29.691Z"
+      "timestamp": "2025-08-16T09:32:39.352Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\data\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.691Z"
+      "timestamp": "2025-08-16T09:32:39.352Z"
     },
     {
       "category": "api_integration",
       "description": "API服务缺少错误处理",
       "file": "frontend\\services\\data\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.691Z"
+      "timestamp": "2025-08-16T09:32:39.352Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\help\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.692Z"
+      "timestamp": "2025-08-16T09:32:39.352Z"
     },
     {
       "category": "api_integration",
       "description": "API服务缺少错误处理",
       "file": "frontend\\services\\help\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.692Z"
+      "timestamp": "2025-08-16T09:32:39.352Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\history\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.692Z"
+      "timestamp": "2025-08-16T09:32:39.352Z"
     },
     {
       "category": "api_integration",
       "description": "API服务缺少错误处理",
       "file": "frontend\\services\\history\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.692Z"
+      "timestamp": "2025-08-16T09:32:39.352Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.692Z"
+      "timestamp": "2025-08-16T09:32:39.353Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\integration\\configService.ts",
-      "timestamp": "2025-08-16T08:22:29.693Z"
+      "timestamp": "2025-08-16T09:32:39.353Z"
     },
     {
       "category": "api_integration",
       "description": "API服务缺少错误处理",
       "file": "frontend\\services\\integration\\configService.ts",
-      "timestamp": "2025-08-16T08:22:29.693Z"
+      "timestamp": "2025-08-16T09:32:39.353Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\integration\\dataService.ts",
-      "timestamp": "2025-08-16T08:22:29.693Z"
+      "timestamp": "2025-08-16T09:32:39.353Z"
     },
     {
       "category": "api_integration",
       "description": "API服务缺少错误处理",
       "file": "frontend\\services\\integration\\dataService.ts",
-      "timestamp": "2025-08-16T08:22:29.693Z"
+      "timestamp": "2025-08-16T09:32:39.353Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\integration\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.693Z"
+      "timestamp": "2025-08-16T09:32:39.353Z"
     },
     {
       "category": "api_integration",
       "description": "API服务缺少错误处理",
       "file": "frontend\\services\\integration\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.693Z"
+      "timestamp": "2025-08-16T09:32:39.353Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\integration\\notificationService.ts",
-      "timestamp": "2025-08-16T08:22:29.693Z"
+      "timestamp": "2025-08-16T09:32:39.353Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\integration\\versionControlService.ts",
-      "timestamp": "2025-08-16T08:22:29.693Z"
+      "timestamp": "2025-08-16T09:32:39.353Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\monitoring\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.693Z"
+      "timestamp": "2025-08-16T09:32:39.353Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\realtime\\websocketService.ts",
-      "timestamp": "2025-08-16T08:22:29.695Z"
+      "timestamp": "2025-08-16T09:32:39.354Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\reporting\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.695Z"
+      "timestamp": "2025-08-16T09:32:39.355Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\reporting\\reportGeneratorService.ts",
-      "timestamp": "2025-08-16T08:22:29.695Z"
+      "timestamp": "2025-08-16T09:32:39.355Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\search\\globalSearchService.ts",
-      "timestamp": "2025-08-16T08:22:29.696Z"
+      "timestamp": "2025-08-16T09:32:39.355Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\search\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.696Z"
+      "timestamp": "2025-08-16T09:32:39.355Z"
     },
     {
       "category": "api_integration",
       "description": "API服务缺少错误处理",
       "file": "frontend\\services\\search\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.696Z"
+      "timestamp": "2025-08-16T09:32:39.355Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\seo\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.696Z"
+      "timestamp": "2025-08-16T09:32:39.355Z"
     },
     {
       "category": "api_integration",
       "description": "API服务缺少错误处理",
       "file": "frontend\\services\\seo\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.696Z"
+      "timestamp": "2025-08-16T09:32:39.355Z"
+    },
+    {
+      "category": "api_integration",
+      "description": "API服务文件中没有发现API调用",
+      "file": "frontend\\services\\smartCacheManager.ts",
+      "timestamp": "2025-08-16T09:32:39.356Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\state\\testStateManager.ts",
-      "timestamp": "2025-08-16T08:22:29.697Z"
+      "timestamp": "2025-08-16T09:32:39.357Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\system\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.698Z"
+      "timestamp": "2025-08-16T09:32:39.357Z"
     },
     {
       "category": "api_integration",
       "description": "API服务缺少错误处理",
       "file": "frontend\\services\\system\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.698Z"
+      "timestamp": "2025-08-16T09:32:39.357Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\testFlowManager.ts",
-      "timestamp": "2025-08-16T08:22:29.698Z"
+      "timestamp": "2025-08-16T09:32:39.357Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\testing\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.699Z"
+      "timestamp": "2025-08-16T09:32:39.358Z"
     },
     {
       "category": "api_integration",
       "description": "API服务缺少错误处理",
       "file": "frontend\\services\\testing\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.699Z"
+      "timestamp": "2025-08-16T09:32:39.358Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\testing\\securityTestService.ts",
-      "timestamp": "2025-08-16T08:22:29.699Z"
+      "timestamp": "2025-08-16T09:32:39.358Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\testing\\seoTestService.ts",
-      "timestamp": "2025-08-16T08:22:29.699Z"
+      "timestamp": "2025-08-16T09:32:39.358Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\testing\\testHistoryService.ts",
-      "timestamp": "2025-08-16T08:22:29.700Z"
+      "timestamp": "2025-08-16T09:32:39.359Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\testing\\testScheduler.ts",
-      "timestamp": "2025-08-16T08:22:29.700Z"
+      "timestamp": "2025-08-16T09:32:39.359Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\testing\\testService.ts",
-      "timestamp": "2025-08-16T08:22:29.700Z"
+      "timestamp": "2025-08-16T09:32:39.360Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\testing\\testTemplates.ts",
-      "timestamp": "2025-08-16T08:22:29.701Z"
+      "timestamp": "2025-08-16T09:32:39.360Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\testing\\testTemplateService.ts",
-      "timestamp": "2025-08-16T08:22:29.701Z"
+      "timestamp": "2025-08-16T09:32:39.360Z"
     },
     {
       "category": "api_integration",
       "description": "API服务缺少错误处理",
       "file": "frontend\\services\\testing\\testTemplateService.ts",
-      "timestamp": "2025-08-16T08:22:29.701Z"
+      "timestamp": "2025-08-16T09:32:39.360Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\testResultHandler.ts",
-      "timestamp": "2025-08-16T08:22:29.701Z"
+      "timestamp": "2025-08-16T09:32:39.360Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\types\\user.ts",
-      "timestamp": "2025-08-16T08:22:29.701Z"
+      "timestamp": "2025-08-16T09:32:39.360Z"
     },
     {
       "category": "api_integration",
       "description": "API服务缺少错误处理",
       "file": "frontend\\services\\types\\user.ts",
-      "timestamp": "2025-08-16T08:22:29.701Z"
+      "timestamp": "2025-08-16T09:32:39.360Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\types\\versionTypes.ts",
-      "timestamp": "2025-08-16T08:22:29.702Z"
+      "timestamp": "2025-08-16T09:32:39.360Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\user\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.702Z"
+      "timestamp": "2025-08-16T09:32:39.361Z"
     },
     {
       "category": "api_integration",
       "description": "API服务缺少错误处理",
       "file": "frontend\\services\\user\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.702Z"
+      "timestamp": "2025-08-16T09:32:39.361Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\user\\userService.ts",
-      "timestamp": "2025-08-16T08:22:29.702Z"
+      "timestamp": "2025-08-16T09:32:39.361Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\websocket\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.702Z"
+      "timestamp": "2025-08-16T09:32:39.361Z"
     },
     {
       "category": "api_integration",
       "description": "API服务缺少错误处理",
       "file": "frontend\\services\\websocket\\index.ts",
-      "timestamp": "2025-08-16T08:22:29.702Z"
+      "timestamp": "2025-08-16T09:32:39.361Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\websocket\\websocketClient.ts",
-      "timestamp": "2025-08-16T08:22:29.702Z"
+      "timestamp": "2025-08-16T09:32:39.361Z"
     },
     {
       "category": "api_integration",
       "description": "API服务文件中没有发现API调用",
       "file": "frontend\\services\\websocketService.ts",
-      "timestamp": "2025-08-16T08:22:29.703Z"
+      "timestamp": "2025-08-16T09:32:39.361Z"
     },
     {
       "category": "business_flow",
       "description": "缺少组件: Login, Register, AuthService",
       "file": "用户认证流程",
-      "timestamp": "2025-08-16T08:22:29.711Z"
+      "timestamp": "2025-08-16T09:32:39.369Z"
     },
     {
       "category": "business_flow",
       "description": "缺少组件: TestRunner, TestConfig",
       "file": "测试执行流程",
-      "timestamp": "2025-08-16T08:22:29.727Z"
+      "timestamp": "2025-08-16T09:32:39.384Z"
     },
     {
       "category": "business_flow",
       "description": "缺少API端点: /api/tests/run, /api/tests/results, /api/tests/config",
       "file": "测试执行流程",
-      "timestamp": "2025-08-16T08:22:29.727Z"
+      "timestamp": "2025-08-16T09:32:39.384Z"
     },
     {
       "category": "business_flow",
       "description": "缺少组件: DataForm, DataService",
       "file": "数据管理流程",
-      "timestamp": "2025-08-16T08:22:29.746Z"
+      "timestamp": "2025-08-16T09:32:39.405Z"
     },
     {
       "category": "business_flow",
       "description": "缺少API端点: /api/data/list, /api/data/create, /api/data/update, /api/data/delete",
       "file": "数据管理流程",
-      "timestamp": "2025-08-16T08:22:29.746Z"
+      "timestamp": "2025-08-16T09:32:39.405Z"
     }
   ],
   "recommendations": [
-    {
-      "priority": "high",
-      "category": "frontend_pages",
-      "description": "前端页面实现不完整，影响用户体验",
-      "actions": [
-        "优先实现主要功能页面",
-        "添加页面状态管理",
-        "集成API调用和错误处理"
-      ]
-    },
     {
       "priority": "medium",
       "category": "backend_api",

@@ -4,11 +4,8 @@
  * 版本: v1.0.0
  */
 
-import type { ApiResponse } from '../types/api';
-
-// ==================== 缓存配置类型 ====================
-
-export interface CacheConfig {
+import type { ApiResponse  } from '../types/api';// ==================== 缓存配置类型 ==================== ''
+export interface CacheConfig     {
   ttl: number; // 生存时间（毫秒）
   maxSize: number; // 最大缓存条目数
   strategy: CacheStrategy;
@@ -18,14 +15,11 @@ export interface CacheConfig {
   namespace: string;
 }
 
-export type CacheStrategy = 
-  | 'lru' // 最近最少使用
-  | 'lfu' // 最少使用频率
-  | 'fifo' // 先进先出
-  | 'ttl' // 基于时间
-  | 'adaptive'; // 自适应
-
-export interface CacheEntry<T = any> {
+export type CacheStrategy   = | 'lru' // 最近最少使用'
+  | 'lfu' // 最少使用频率'
+  | 'fifo' // 先进先出'
+  | 'ttl' // 基于时间;| 'adaptive'; // 自适应'
+export interface CacheEntry<T = any>     {
   key: string;
   data: T;
   timestamp: number;
@@ -38,7 +32,7 @@ export interface CacheEntry<T = any> {
   metadata?: Record<string, any>;
 }
 
-export interface CacheStats {
+export interface CacheStats     {
   totalEntries: number;
   totalSize: number;
   hitCount: number;
@@ -51,13 +45,13 @@ export interface CacheStats {
 
 // ==================== 缓存键生成器 ====================
 
-export interface CacheKeyGenerator {
+export interface CacheKeyGenerator     {
   generate(namespace: string, identifier: string, params?: Record<string, any>): string;
 }
 
 export class DefaultCacheKeyGenerator implements CacheKeyGenerator {
   generate(namespace: string, identifier: string, params?: Record<string, any>): string {
-    const baseKey = `${namespace}:${identifier}`;
+    const baseKey = `${namespace}:${identifier}`;`
     
     if (!params || Object.keys(params).length === 0) {
       return baseKey;
@@ -66,10 +60,10 @@ export class DefaultCacheKeyGenerator implements CacheKeyGenerator {
     // 对参数进行排序以确保一致性
     const sortedParams = Object.keys(params)
       .sort()
-      .map(key => `${key}=${JSON.stringify(params[key])}`)
-      .join('&');
+      .map(key => `${key}=${JSON.stringify(params[key])}`)`
+      .join("&');'`
 
-    return `${baseKey}:${this.hashString(sortedParams)}`;
+    return `${baseKey}:${this.hashString(sortedParams)}`;`
   }
 
   private hashString(str: string): string {
@@ -85,7 +79,7 @@ export class DefaultCacheKeyGenerator implements CacheKeyGenerator {
 
 // ==================== 缓存存储接口 ====================
 
-export interface CacheStorage<T = any> {
+export interface CacheStorage<T = any>     {
   get(key: string): Promise<CacheEntry<T> | null>;
   set(key: string, entry: CacheEntry<T>): Promise<void>;
   delete(key: string): Promise<boolean>;
@@ -138,7 +132,7 @@ export class MemoryCacheStorage<T = any> implements CacheStorage<T> {
 export class LocalStorageCacheStorage<T = any> implements CacheStorage<T> {
   private prefix: string;
 
-  constructor(prefix: string = 'cache') {
+  constructor(prefix: string = "cache') {'`
     this.prefix = prefix;
   }
 
@@ -147,7 +141,7 @@ export class LocalStorageCacheStorage<T = any> implements CacheStorage<T> {
       const item = localStorage.getItem(this.getStorageKey(key));
       if (!item) return null;
 
-      const entry: CacheEntry<T> = JSON.parse(item);
+      const entry: CacheEntry<T>  = JSON.parse(item);
       entry.lastAccessed = Date.now();
       entry.accessCount++;
       
@@ -187,10 +181,10 @@ export class LocalStorageCacheStorage<T = any> implements CacheStorage<T> {
   }
 
   async keys(): Promise<string[]> {
-    const keys: string[] = [];
+    const keys: string[]  = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && key.startsWith(`${this.prefix}:`)) {
+      if (key && key.startsWith(`${this.prefix}:`)) {`
         keys.push(key.substring(this.prefix.length + 1));
       }
     }
@@ -202,7 +196,7 @@ export class LocalStorageCacheStorage<T = any> implements CacheStorage<T> {
   }
 
   private getStorageKey(key: string): string {
-    return `${this.prefix}:${key}`;
+    return `${this.prefix}:${key}`;`
   }
 
   private async cleanup(): Promise<void> {
@@ -220,7 +214,7 @@ export class LocalStorageCacheStorage<T = any> implements CacheStorage<T> {
 
 // ==================== 缓存驱逐策略 ====================
 
-export interface EvictionStrategy<T = any> {
+export interface EvictionStrategy<T = any>     {
   selectForEviction(entries: Map<string, CacheEntry<T>>, targetCount: number): string[];
 }
 
@@ -295,11 +289,11 @@ export class CacheManager<T = any> {
     this.config = {
       ttl: 300000, // 5分钟
       maxSize: 1000,
-      strategy: 'lru',
+      strategy: "lru','`
       compression: false,
       encryption: false,
       persistToDisk: false,
-      namespace: 'default',
+      namespace: 'default','
       ...config
     };
     this.keyGenerator = keyGenerator;
@@ -359,7 +353,7 @@ export class CacheManager<T = any> {
     const now = Date.now();
     const ttl = customTTL || this.config.ttl;
 
-    const entry: CacheEntry<T> = {
+    const entry: CacheEntry<T>  = {
       key,
       data,
       timestamp: now,
@@ -370,7 +364,6 @@ export class CacheManager<T = any> {
       compressed: this.config.compression,
       encrypted: this.config.encryption
     };
-
     // 检查是否需要驱逐
     await this.ensureCapacity();
 
@@ -422,15 +415,15 @@ export class CacheManager<T = any> {
 
   private createEvictionStrategy(strategy: CacheStrategy): EvictionStrategy<T> {
     switch (strategy) {
-      case 'lru':
+      case 'lru': ''
         return new LRUEvictionStrategy<T>();
-      case 'lfu':
+      case 'lfu': ''
         return new LFUEvictionStrategy<T>();
-      case 'fifo':
+      case 'fifo': ''
         return new FIFOEvictionStrategy<T>();
-      case 'ttl':
+      case 'ttl': ''
         return new TTLEvictionStrategy<T>();
-      case 'adaptive':
+      case "adaptive': ''
         // 自适应策略：根据访问模式动态选择
         return new LRUEvictionStrategy<T>(); // 默认使用LRU
       default:
@@ -553,7 +546,7 @@ export function cached<T extends (...args: any[]) => Promise<ApiResponse<any>>>(
       }
 
       // 生成缓存键
-      const cacheKey = keyGenerator ? keyGenerator(args) : `${propertyKey}_${JSON.stringify(args)}`;
+      const cacheKey = keyGenerator ? keyGenerator(args) : `${propertyKey}_${JSON.stringify(args)}`;`
       
       // 尝试从缓存获取
       const cachedResult = await cacheManager.get(cacheKey);
@@ -582,20 +575,20 @@ export function cached<T extends (...args: any[]) => Promise<ApiResponse<any>>>(
 export const defaultMemoryCache = new CacheManager(
   new MemoryCacheStorage(),
   {
-    namespace: 'memory',
+    namespace: "memory','`
     maxSize: 1000,
     ttl: 300000, // 5分钟
-    strategy: 'lru'
+    strategy: 'lru';
   }
 );
 
 export const defaultLocalStorageCache = new CacheManager(
-  new LocalStorageCacheStorage('app-cache'),
+  new LocalStorageCacheStorage('app-cache'),'
   {
-    namespace: 'localStorage',
+    namespace: 'localStorage','
     maxSize: 500,
     ttl: 3600000, // 1小时
-    strategy: 'ttl',
+    strategy: 'ttl','
     persistToDisk: true
   }
 );
@@ -605,16 +598,16 @@ export const defaultLocalStorageCache = new CacheManager(
 export class CacheFactory {
   static createMemoryCache(config?: Partial<CacheConfig>): CacheManager {
     return new CacheManager(new MemoryCacheStorage(), {
-      namespace: 'memory',
-      strategy: 'lru',
+      namespace: 'memory','
+      strategy: 'lru','
       ...config
     });
   }
 
   static createLocalStorageCache(prefix?: string, config?: Partial<CacheConfig>): CacheManager {
     return new CacheManager(new LocalStorageCacheStorage(prefix), {
-      namespace: 'localStorage',
-      strategy: 'ttl',
+      namespace: 'localStorage','
+      strategy: 'ttl','
       persistToDisk: true,
       ...config
     });
@@ -626,7 +619,7 @@ export class CacheFactory {
   } {
     return {
       memory: this.createMemoryCache({ ttl: 60000, ...config }), // 1分钟
-      localStorage: this.createLocalStorageCache('hybrid', { ttl: 3600000, ...config }) // 1小时
+      localStorage: this.createLocalStorageCache('hybrid', { ttl: 3600000, ...config }) // 1小时'
     };
   }
 }

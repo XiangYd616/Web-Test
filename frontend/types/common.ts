@@ -4,17 +4,9 @@
  */
 
 // 基础类型
-export type ID = string | number;
-export type UUID = string;
-export type Timestamp = string; // 统一使用 ISO 8601 字符串格式
-export type Email = string;
-export type URL = string;
-export type Timezone = string;
-export type LanguageCode = 'zh-CN' | 'en-US' | 'ja-JP' | 'ko-KR';
-export type Status = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
-
-// 基础实体接口
-export interface BaseEntity {
+export type ID   = string | number;export type UUID   = string;export type Timestamp  = string;// 统一使用 ISO 8601 字符串格式
+export type Email   = string;export type URL   = string;export type Timezone   = string;export type LanguageCode   = 'zh-CN' | 'en-US' | 'ja-JP' | 'ko-KR';export type Status   = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';// 基础实体接口'
+export interface BaseEntity     {
   id: UUID;
   created_at: Timestamp;
   updated_at: Timestamp;
@@ -27,7 +19,7 @@ export type {
   RegisterData,
   UserPreferences,
   UserProfile
-} from './user'; // 已修复
+} from './user'; // 已修复'
 // 重新导出枚举类型
 export {
   Language,
@@ -36,11 +28,10 @@ export {
   ThemeMode,
   Timezone,
   UserRole
-} from './enums'; // 已修复
+} from './enums'; // 已修复'
 // API响应类型
-export interface ApiResponse<T = any> {
-  success: boolean;
-  message?: string;
+export interface ApiResponse<T   = any>     {
+  success: boolean;message?: string;
   data?: T;
   error?: {
     code: string;
@@ -56,14 +47,14 @@ export interface ApiResponse<T = any> {
 }
 
 // 分页类型
-export interface PaginationParams {
+export interface PaginationParams     {
   page: number;
   limit: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }
 
-export interface PaginationMeta {
+export interface PaginationMeta     {
   page: number;
   limit: number;
   total: number;
@@ -72,13 +63,13 @@ export interface PaginationMeta {
   hasPrev: boolean;
 }
 
-export interface PaginatedResponse<T> {
+export interface PaginatedResponse<T>     {
   data: T[];
   meta: PaginationMeta;
 }
 
 // 用户类型
-export interface User {
+export interface User     {
   id: ID;
   username: string;
   email: string;
@@ -90,17 +81,14 @@ export interface User {
 }
 
 // 测试相关类型
-export type TestType =
-  | 'api'
-  | 'compatibility'
-  | 'infrastructure'
-  | 'security'
-  | 'seo'
-  | 'stress'
-  | 'ux'
-  | 'website';
-
-export interface TestConfig {
+export type TestType   = | 'api';
+  | 'compatibility';
+  | 'infrastructure';
+  | 'security';
+  | 'seo';
+  | 'stress';
+  | 'ux';
+  | 'website';export interface TestConfig     {'
   url: string;
   type: TestType;
   duration?: number;
@@ -108,7 +96,7 @@ export interface TestConfig {
   options?: Record<string, any>;
 }
 
-export interface TestResult {
+export interface TestResult     {
   id: ID;
   testId: ID;
   userId: ID;
@@ -124,7 +112,7 @@ export interface TestResult {
 }
 
 // 监控类型
-export interface MonitoringTarget {
+export interface MonitoringTarget     {
   id: ID;
   name: string;
   url: string;
@@ -136,46 +124,46 @@ export interface MonitoringTarget {
   updatedAt: Timestamp;
 }
 
-export interface AlertConfig {
+export interface AlertConfig     {
   enabled: boolean;
   conditions: AlertCondition[];
   notifications: NotificationConfig[];
 }
 
-export interface AlertCondition {
+export interface AlertCondition     {
   metric: string;
-  operator: '>' | '<' | '=' | '>=' | '<=';
+  operator: '>' | '<' | '= ' | '>= ' | '<= ';
   threshold: number;
   duration?: number; // 持续时间（秒）
 }
 
-export interface NotificationConfig {
+export interface NotificationConfig     {
   type: 'email' | 'slack' | 'webhook';
   target: string;
   enabled: boolean;
 }
 
 // 组件Props类型
-export interface BaseComponentProps {
+export interface BaseComponentProps     {
   className?: string;
   children?: React.ReactNode;
-  'data-testid'?: string;
+  'data-testid'?: string;'
 }
 
-export interface LoadingProps extends BaseComponentProps {
+export interface LoadingProps extends BaseComponentProps     {
   loading: boolean;
   size?: 'small' | 'medium' | 'large';
   text?: string;
 }
 
-export interface ErrorProps extends BaseComponentProps {
+export interface ErrorProps extends BaseComponentProps     {
   error: Error | string | null;
   onRetry?: () => void;
   showDetails?: boolean;
 }
 
 // 表单类型
-export interface FormField<T = any> {
+export interface FormField<T = any>     {
   name: string;
   label: string;
   type: 'text' | 'email' | 'password' | 'number' | 'select' | 'checkbox' | 'textarea';
@@ -192,7 +180,7 @@ export interface FormField<T = any> {
   };
 }
 
-export interface FormState {
+export interface FormState     {
   fields: Record<string, FormField>;
   errors: Record<string, string>;
   isSubmitting: boolean;
@@ -200,7 +188,7 @@ export interface FormState {
 }
 
 // 主题类型
-export interface Theme {
+export interface Theme     {
   name: string;
   colors: {
     primary: string;
@@ -228,14 +216,11 @@ export interface Theme {
 }
 
 // 工具类型
-export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
-export type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
-};
+export type Optional<T, K extends keyof T>   = Omit<T, K> & Partial<Pick<T, K>>;export type RequiredFields<T, K extends keyof T>   = T & Required<Pick<T, K>>;export type DeepPartial<T>   = {
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];};
 
 // 事件类型
-export interface CustomEvent<T = any> {
+export interface CustomEvent<T = any>     {
   type: string;
   data: T;
   timestamp: Timestamp;
@@ -243,7 +228,7 @@ export interface CustomEvent<T = any> {
 }
 
 // 配置类型
-export interface AppConfig {
+export interface AppConfig     {
   apiUrl: string;
   wsUrl: string;
   version: string;
@@ -261,13 +246,13 @@ export interface AppConfig {
 }
 
 // 帮助系统相关类型
-export interface FAQFeedback {
+export interface FAQFeedback     {
   faqId: string;
   isHelpful: boolean;
   userId?: string;
 }
 
-export interface FeedbackSubmission {
+export interface FeedbackSubmission     {
   type: 'bug' | 'feature' | 'improvement' | 'question';
   title: string;
   description: string;
@@ -276,7 +261,7 @@ export interface FeedbackSubmission {
   userId?: string;
 }
 
-export interface SearchResult {
+export interface SearchResult     {
   id: string;
   type: 'faq' | 'guide' | 'video' | 'download';
   title: string;
@@ -285,13 +270,13 @@ export interface SearchResult {
   url?: string;
 }
 
-export interface DownloadRequest {
+export interface DownloadRequest     {
   resourceId: string;
   userId?: string;
 }
 
 // 验证错误
-export interface ValidationError {
+export interface ValidationError     {
   field: string;
   message: string;
   code?: string;

@@ -1,5 +1,5 @@
 // 高级分析服务
-export interface AnalyticsData {
+export interface AnalyticsData     {
   testId: string;
   url: string;
   timestamp: string;
@@ -12,7 +12,7 @@ export interface AnalyticsData {
   diagnostics: DiagnosticResult[];
 }
 
-export interface DetailedMetrics {
+export interface DetailedMetrics     {
   performance: {
     coreWebVitals: CoreWebVitals;
     loadingMetrics: LoadingMetrics;
@@ -41,15 +41,15 @@ export interface DetailedMetrics {
   };
 }
 
-export interface CoreWebVitals {
-  lcp: { value: number; rating: 'good' | 'needs-improvement' | 'poor'; percentile: number };
-  fid: { value: number; rating: 'good' | 'needs-improvement' | 'poor'; percentile: number };
-  cls: { value: number; rating: 'good' | 'needs-improvement' | 'poor'; percentile: number };
-  fcp: { value: number; rating: 'good' | 'needs-improvement' | 'poor'; percentile: number };
-  ttfb: { value: number; rating: 'good' | 'needs-improvement' | 'poor'; percentile: number };
+export interface CoreWebVitals     {
+  lcp: { value: number; rating: 'good' | 'needs-improvement' | 'poor'; percentile: number };'
+  fid: { value: number; rating: 'good' | 'needs-improvement' | 'poor'; percentile: number };'
+  cls: { value: number; rating: 'good' | 'needs-improvement' | 'poor'; percentile: number };'
+  fcp: { value: number; rating: 'good' | 'needs-improvement' | 'poor'; percentile: number };'
+  ttfb: { value: number; rating: 'good' | 'needs-improvement' | 'poor'; percentile: number };'
 }
 
-export interface LoadingMetrics {
+export interface LoadingMetrics     {
   domContentLoaded: number;
   loadComplete: number;
   firstByte: number;
@@ -60,7 +60,7 @@ export interface LoadingMetrics {
   timeToInteractive: number;
 }
 
-export interface AnalyticsInsight {
+export interface AnalyticsInsight     {
   id: string;
   type: 'performance' | 'security' | 'accessibility' | 'seo' | 'user-experience';
   severity: 'critical' | 'high' | 'medium' | 'low' | 'info';
@@ -72,7 +72,7 @@ export interface AnalyticsInsight {
   confidence: number; // 0-100
 }
 
-export interface TrendAnalysis {
+export interface TrendAnalysis     {
   period: '7d' | '30d' | '90d';
   dataPoints: TrendDataPoint[];
   patterns: TrendPattern[];
@@ -80,7 +80,7 @@ export interface TrendAnalysis {
   anomalies: TrendAnomaly[];
 }
 
-export interface TrendDataPoint {
+export interface TrendDataPoint     {
   timestamp: string;
   metrics: {
     performance: number;
@@ -91,7 +91,7 @@ export interface TrendDataPoint {
   };
 }
 
-export interface Recommendation {
+export interface Recommendation     {
   id: string;
   category: 'performance' | 'security' | 'accessibility' | 'seo' | 'user-experience';
   priority: 'critical' | 'high' | 'medium' | 'low';
@@ -113,7 +113,7 @@ export interface Recommendation {
   tags: string[];
 }
 
-export interface DiagnosticResult {
+export interface DiagnosticResult     {
   id: string;
   name: string;
   category: string;
@@ -129,7 +129,7 @@ export interface DiagnosticResult {
   relatedRecommendations: string[];
 }
 
-export interface ComparisonData {
+export interface ComparisonData     {
   type: 'historical' | 'competitor' | 'industry-average';
   baseline: {
     name: string;
@@ -150,10 +150,9 @@ export interface ComparisonData {
 export class AnalyticsService {
   private static readonly ANALYTICS_STORAGE_KEY = 'advanced_analytics_data';
   private static readonly TRENDS_STORAGE_KEY = 'analytics_trends_data';
-
   // 生成高级分析报告
   static async generateAnalytics(testResult: any): Promise<AnalyticsData> {
-    const analytics: AnalyticsData = {
+    const analytics: AnalyticsData  = {
       testId: testResult.id,
       url: testResult.url,
       timestamp: testResult.timestamp,
@@ -165,7 +164,6 @@ export class AnalyticsService {
       recommendations: await this.generateSmartRecommendations(testResult),
       diagnostics: await this.runDiagnostics(testResult)
     };
-
     // 保存分析数据
     this.saveAnalyticsData(analytics);
 
@@ -206,8 +204,7 @@ export class AnalyticsService {
 
   // 生成智能洞察
   private static async generateInsights(testResult: any): Promise<AnalyticsInsight[]> {
-    const insights: AnalyticsInsight[] = [];
-
+    const insights: AnalyticsInsight[]  = [];
     // 性能洞察
     if (testResult.metrics?.performance) {
       const perfInsights = this.generatePerformanceInsights(testResult.metrics.performance);
@@ -234,21 +231,20 @@ export class AnalyticsService {
 
   // 生成性能洞察
   private static generatePerformanceInsights(performanceData: any): AnalyticsInsight[] {
-    const insights: AnalyticsInsight[] = [];
-
+    const insights: AnalyticsInsight[]  = [];
     // LCP 分析
     if (performanceData.largestContentfulPaint > 2500) {
       insights.push({
-        id: 'lcp-slow',
-        type: 'performance',
-        severity: performanceData.largestContentfulPaint > 4000 ? 'critical' : 'high',
-        title: '最大内容绘制 (LCP) 过慢',
-        description: `当前 LCP 为 ${(performanceData.largestContentfulPaint / 1000).toFixed(2)}s，超过了推荐的 2.5s 阈值`,
-        impact: '用户会感觉页面加载缓慢，可能导致跳出率增加',
+        id: 'lcp-slow','
+        type: 'performance','
+        severity: performanceData.largestContentfulPaint > 4000 ? 'critical' : 'high','
+        title: '最大内容绘制 (LCP) 过慢','
+        description: `当前 LCP 为 ${(performanceData.largestContentfulPaint / 1000).toFixed(2)}s，超过了推荐的 2.5s 阈值`,`
+        impact: "用户会感觉页面加载缓慢，可能导致跳出率增加','`
         evidence: [
-          { metric: 'LCP', value: performanceData.largestContentfulPaint, unit: 'ms' }
+          { metric: 'LCP', value: performanceData.largestContentfulPaint, unit: 'ms' }'
         ],
-        relatedMetrics: ['largestContentfulPaint', 'speedIndex'],
+        relatedMetrics: ['largestContentfulPaint', 'speedIndex'],'
         confidence: 95
       });
     }
@@ -256,16 +252,16 @@ export class AnalyticsService {
     // CLS 分析
     if (performanceData.cumulativeLayoutShift > 0.1) {
       insights.push({
-        id: 'cls-high',
-        type: 'performance',
-        severity: performanceData.cumulativeLayoutShift > 0.25 ? 'high' : 'medium',
-        title: '累积布局偏移 (CLS) 过高',
-        description: `当前 CLS 为 ${performanceData.cumulativeLayoutShift.toFixed(3)}，超过了推荐的 0.1 阈值`,
-        impact: '页面元素意外移动会影响用户体验，可能导致误点击',
+        id: 'cls-high','
+        type: 'performance','
+        severity: performanceData.cumulativeLayoutShift > 0.25 ? 'high' : 'medium','
+        title: '累积布局偏移 (CLS) 过高','
+        description: `当前 CLS 为 ${performanceData.cumulativeLayoutShift.toFixed(3)}，超过了推荐的 0.1 阈值`,`
+        impact: "页面元素意外移动会影响用户体验，可能导致误点击','`
         evidence: [
-          { metric: 'CLS', value: performanceData.cumulativeLayoutShift, unit: '' }
+          { metric: 'CLS', value: performanceData.cumulativeLayoutShift, unit: '' }'
         ],
-        relatedMetrics: ['cumulativeLayoutShift'],
+        relatedMetrics: ['cumulativeLayoutShift'],'
         confidence: 90
       });
     }
@@ -275,8 +271,7 @@ export class AnalyticsService {
 
   // 生成智能建议
   private static async generateSmartRecommendations(testResult: any): Promise<Recommendation[]> {
-    const recommendations: Recommendation[] = [];
-
+    const recommendations: Recommendation[]  = [];
     // 基于性能数据生成建议
     if (testResult.metrics?.performance) {
       const perfRecs = this.generatePerformanceRecommendations(testResult.metrics.performance);
@@ -297,36 +292,35 @@ export class AnalyticsService {
 
   // 生成性能建议
   private static generatePerformanceRecommendations(performanceData: any): Recommendation[] {
-    const recommendations: Recommendation[] = [];
-
+    const recommendations: Recommendation[]  = [];
     if (performanceData.largestContentfulPaint > 2500) {
       recommendations.push({
-        id: 'optimize-lcp',
-        category: 'performance',
-        priority: 'high',
-        title: '优化最大内容绘制 (LCP)',
-        description: '通过优化关键资源加载来改善 LCP 性能',
+        id: 'optimize-lcp','
+        category: 'performance','
+        priority: 'high','
+        title: '优化最大内容绘制 (LCP)','
+        description: '通过优化关键资源加载来改善 LCP 性能','
         solution: {
           steps: [
-            '优化服务器响应时间',
-            '使用 CDN 加速资源加载',
-            '优化图片大小和格式',
-            '预加载关键资源',
-            '移除阻塞渲染的资源'
+            '优化服务器响应时间','
+            '使用 CDN 加速资源加载','
+            '优化图片大小和格式','
+            '预加载关键资源','
+            '移除阻塞渲染的资源';
           ],
           codeExamples: [
             {
-              language: 'html',
-              code: '<link rel="preload" href="hero-image.jpg" as="image">',
-              description: '预加载关键图片资源'
+              language: 'html','
+              code: '<link rel= 'preload' href= 'hero-image.jpg' as= 'image'>','
+              description: '预加载关键图片资源';
             }
           ],
           resources: [
-            { title: 'Optimize LCP - Web.dev', url: 'https://web.dev/optimize-lcp/' },
-            { title: 'LCP optimization guide', url: 'https://web.dev/lcp/' }
+            { title: 'Optimize LCP - Web.dev', url: 'https://web.dev/optimize-lcp/' },'
+            { title: 'LCP optimization guide', url: 'https://web.dev/lcp/' }'
           ],
-          estimatedEffort: 'medium',
-          estimatedImpact: 'high'
+          estimatedEffort: 'medium','
+          estimatedImpact: 'high';
         },
         metrics: {
           currentValue: performanceData.largestContentfulPaint,
@@ -334,7 +328,7 @@ export class AnalyticsService {
           potentialImprovement: Math.max(0, performanceData.largestContentfulPaint - 2500)
         },
         dependencies: [],
-        tags: ['performance', 'lcp', 'loading']
+        tags: ['performance', 'lcp', 'loading']'
       });
     }
 
@@ -343,8 +337,7 @@ export class AnalyticsService {
 
   // 运行诊断
   private static async runDiagnostics(testResult: any): Promise<DiagnosticResult[]> {
-    const diagnostics: DiagnosticResult[] = [];
-
+    const diagnostics: DiagnosticResult[]  = [];
     // 性能诊断
     diagnostics.push(...this.runPerformanceDiagnostics(testResult));
 
@@ -359,26 +352,25 @@ export class AnalyticsService {
 
   // 性能诊断
   private static runPerformanceDiagnostics(testResult: any): DiagnosticResult[] {
-    const diagnostics: DiagnosticResult[] = [];
-
+    const diagnostics: DiagnosticResult[]  = [];
     // 图片优化诊断
     diagnostics.push({
-      id: 'image-optimization',
-      name: '图片优化',
-      category: 'performance',
-      status: 'warning',
+      id: 'image-optimization','
+      name: '图片优化','
+      category: 'performance','
+      status: 'warning','
       score: 75,
       details: {
-        description: '检测图片是否经过适当优化',
-        explanation: '未优化的图片会显著影响页面加载速度',
-        impact: '优化图片可以减少 30-50% 的加载时间',
-        solution: '使用现代图片格式（WebP、AVIF）并压缩图片'
+        description: '检测图片是否经过适当优化','
+        explanation: '未优化的图片会显著影响页面加载速度','
+        impact: '优化图片可以减少 30-50% 的加载时间','
+        solution: '使用现代图片格式（WebP、AVIF）并压缩图片';
       },
       evidence: [
-        { type: 'metric', name: '未优化图片数量', value: 5 },
-        { type: 'metric', name: '潜在节省', value: '1.2MB' }
+        { type: 'metric', name: '未优化图片数量', value: 5 },'
+        { type: 'metric', name: '潜在节省', value: '1.2MB' }'
       ],
-      relatedRecommendations: ['optimize-images']
+      relatedRecommendations: ['optimize-images']'
     });
 
     return diagnostics;
@@ -389,7 +381,7 @@ export class AnalyticsService {
     const historicalData = this.getHistoricalData(url);
 
     return {
-      period: '30d',
+      period: '30d','
       dataPoints: historicalData,
       patterns: this.identifyPatterns(historicalData),
       forecasts: this.generateForecasts(historicalData),
@@ -405,32 +397,32 @@ export class AnalyticsService {
       lcp: {
         value: performance.largestContentfulPaint || 0,
         rating: this.rateMetric(performance.largestContentfulPaint, [2500, 4000]),
-        percentile: this.calculatePercentile(performance.largestContentfulPaint, 'lcp')
+        percentile: this.calculatePercentile(performance.largestContentfulPaint, 'lcp')'
       },
       fid: {
         value: performance.firstInputDelay || 0,
         rating: this.rateMetric(performance.firstInputDelay, [100, 300]),
-        percentile: this.calculatePercentile(performance.firstInputDelay, 'fid')
+        percentile: this.calculatePercentile(performance.firstInputDelay, 'fid')'
       },
       cls: {
         value: performance.cumulativeLayoutShift || 0,
         rating: this.rateMetric(performance.cumulativeLayoutShift, [0.1, 0.25], true),
-        percentile: this.calculatePercentile(performance.cumulativeLayoutShift, 'cls')
+        percentile: this.calculatePercentile(performance.cumulativeLayoutShift, 'cls')'
       },
       fcp: {
         value: performance.firstContentfulPaint || 0,
         rating: this.rateMetric(performance.firstContentfulPaint, [1800, 3000]),
-        percentile: this.calculatePercentile(performance.firstContentfulPaint, 'fcp')
+        percentile: this.calculatePercentile(performance.firstContentfulPaint, 'fcp')'
       },
       ttfb: {
         value: performance.timeToFirstByte || 0,
         rating: this.rateMetric(performance.timeToFirstByte, [800, 1800]),
-        percentile: this.calculatePercentile(performance.timeToFirstByte, 'ttfb')
+        percentile: this.calculatePercentile(performance.timeToFirstByte, 'ttfb')'
       }
     };
   }
 
-  private static rateMetric(value: number, thresholds: [number, number], inverse = false): 'good' | 'needs-improvement' | 'poor' {
+  private static rateMetric(value: number, thresholds: [number, number], inverse = false): 'good' | 'needs-improvement' | 'poor' {'
     if (inverse) {
       
         if (value <= thresholds[0]) return 'good';
@@ -445,14 +437,13 @@ export class AnalyticsService {
 
   private static calculatePercentile(value: number, metric: string): number {
     // 简化的百分位计算，实际应该基于真实的行业数据
-    const benchmarks: Record<string, number[]> = {
+    const benchmarks: Record<string, number[]>  = {
       lcp: [1200, 2500, 4000, 6000],
       fid: [50, 100, 300, 500],
       cls: [0.05, 0.1, 0.25, 0.5],
       fcp: [900, 1800, 3000, 4500],
       ttfb: [200, 800, 1800, 3000]
     };
-
     const benchmark = benchmarks[metric] || [0, 1000, 2000, 3000];
     for (let i = 0; i < benchmark.length; i++) {
       if (value <= benchmark[i]) {
@@ -477,18 +468,18 @@ export class AnalyticsService {
 
       localStorage.setItem(this.ANALYTICS_STORAGE_KEY, JSON.stringify(data));
     } catch (error) {
-      console.error('Failed to save analytics data:', error);
+      console.error('Failed to save analytics data: ', error);'
     }
   }
 
   private static getHistoricalData(url: string): TrendDataPoint[] {
     try {
       const stored = localStorage.getItem(this.ANALYTICS_STORAGE_KEY);
-      const data = stored ? JSON.parse(stored) : [];
+      const data = stored ? JSON.parse(stored): [];
 
       return data
         .filter((item: AnalyticsData) => item.url === url)
-        .map((item: AnalyticsData) => ({
+        .map((item: AnalyticsData)  => ({
           timestamp: item.timestamp,
           metrics: {
             performance: 85, // 简化数据
@@ -508,10 +499,10 @@ export class AnalyticsService {
     // 简化的模式识别
     return [
       {
-        type: 'improvement',
-        description: '性能指标在过去一周持续改善',
+        type: 'improvement','
+        description: '性能指标在过去一周持续改善','
         confidence: 0.85,
-        timeRange: { start: '2025-01-01', end: '2025-01-07' }
+        timeRange: { start: '2025-01-01', end: '2025-01-07' }'
       }
     ];
   }
@@ -520,10 +511,10 @@ export class AnalyticsService {
     // 简化的预测
     return [
       {
-        metric: 'performance',
+        metric: 'performance','
         prediction: 88,
         confidence: 0.75,
-        timeframe: '7d'
+        timeframe: '7d';
       }
     ];
   }
@@ -556,28 +547,28 @@ export class AnalyticsService {
 }
 
 // 类型定义的占位符
-interface TrendPattern { type: string; description: string; confidence: number; timeRange: any; }
-interface TrendForecast { metric: string; prediction: number; confidence: number; timeframe: string; }
-interface TrendAnomaly { }
-interface CodeExample { language: string; code: string; description: string; }
-interface Resource { title: string; url: string; }
-interface DiagnosticEvidence { type: string; name: string; value: any; }
-interface InteractivityMetrics { }
-interface VisualStabilityMetrics { }
-interface NetworkMetrics { }
-interface ResourceMetrics { }
-interface SecurityHeaders { }
-interface CertificateInfo { }
-interface PrivacyCompliance { }
-interface WCAGCompliance { }
-interface AccessibilityBestPractices { }
-interface UserExperienceMetrics { }
-interface OnPageSEO { }
-interface TechnicalSEO { }
-interface ContentQuality { }
-interface StructuredData { }
-interface SecurityVulnerability { }
-interface AccessibilityViolation { }
+interface TrendPattern  { type: string; description: string; confidence: number; timeRange: any; }
+interface TrendForecast  { metric: string; prediction: number; confidence: number; timeframe: string; }
+interface TrendAnomaly  { }
+interface CodeExample  { language: string; code: string; description: string; }
+interface Resource  { title: string; url: string; }
+interface DiagnosticEvidence  { type: string; name: string; value: any; }
+interface InteractivityMetrics  { }
+interface VisualStabilityMetrics  { }
+interface NetworkMetrics  { }
+interface ResourceMetrics  { }
+interface SecurityHeaders  { }
+interface CertificateInfo  { }
+interface PrivacyCompliance  { }
+interface WCAGCompliance  { }
+interface AccessibilityBestPractices  { }
+interface UserExperienceMetrics  { }
+interface OnPageSEO  { }
+interface TechnicalSEO  { }
+interface ContentQuality  { }
+interface StructuredData  { }
+interface SecurityVulnerability  { }
+interface AccessibilityViolation  { }
 
 // 为了兼容旧的Analytics页面，添加简化的方法
 export class LegacyAnalyticsService {
@@ -591,41 +582,41 @@ export class LegacyAnalyticsService {
         totalUsers: Math.floor(Math.random() * 100) + 10
       },
       trends: Array.from({ length: 7 }, (_, i) => ({
-        date: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        date: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0],'
         tests: Math.floor(Math.random() * 50) + 10,
         score: Math.random() * 100
       })),
       testTypes: [
-        { type: 'website', count: 45, averageScore: 85 },
-        { type: 'security', count: 32, averageScore: 78 },
-        { type: 'performance', count: 28, averageScore: 82 },
-        { type: 'seo', count: 25, averageScore: 88 }
+        { type: 'website', count: 45, averageScore: 85 },'
+        { type: 'security', count: 32, averageScore: 78 },'
+        { type: 'performance', count: 28, averageScore: 82 },'
+        { type: 'seo', count: 25, averageScore: 88 }'
       ],
       performance: [
-        { metric: 'Load Time', value: 2.3, trend: 'down' },
-        { metric: 'FCP', value: 1.8, trend: 'up' },
-        { metric: 'LCP', value: 2.1, trend: 'stable' }
+        { metric: 'Load Time', value: 2.3, trend: 'down' },'
+        { metric: 'FCP', value: 1.8, trend: 'up' },'
+        { metric: 'LCP', value: 2.1, trend: 'stable' }'
       ]
     };
   }
 
   static async exportData(format: string, timeRange: string): Promise<Blob> {
     const data = await this.getAnalytics(timeRange);
-    const content = format === 'json'
+    const content = format === 'json';
       ? JSON.stringify(data, null, 2)
       : this.convertToCSV(data);
 
     return new Blob([content], {
-      type: format === 'json' ? 'application/json' : 'text/csv'
+      type: format === 'json' ? 'application/json' : 'text/csv';
     });
   }
 
   private static convertToCSV(data: any): string {
     let csv = 'Type,Value/n';
-    csv += `Total Tests,${data.overview.totalTests}\n`;
-    csv += `Success Rate,${data.overview.successRate}\n`;
-    csv += `Average Score,${data.overview.averageScore}\n`;
-    csv += `Total Users,${data.overview.totalUsers}\n`;
+    csv += `Total Tests,${data.overview.totalTests}\n`;`
+    csv += `Success Rate,${data.overview.successRate}\n`;`
+    csv += `Average Score,${data.overview.averageScore}\n`;`
+    csv += `Total Users,${data.overview.totalUsers}\n`;`
     return csv;
   }
 }
@@ -634,4 +625,4 @@ export class LegacyAnalyticsService {
 export const analyticsService = LegacyAnalyticsService;
 
 // 类型导出
-export type AnalyticsService = typeof LegacyAnalyticsService;
+export type AnalyticsService   = typeof LegacyAnalyticsService;

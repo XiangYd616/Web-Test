@@ -1,29 +1,23 @@
-import { UserRole, UserStatus } from '../../types/enums';
-import { AuthResponse, ChangePasswordData, CreateUserData, LoginCredentials, RegisterData, UpdateUserData, User } from '../../types/user';
-import { browserJwt } from '../../utils/browserJwt';
-import { canUseDatabase } from '../../utils/environment';
-
-// 动态导入数据库模块（避免前端构建时的依赖问题）
+import { UserRole, UserStatus    } from '../../types/enums';import { AuthResponse, ChangePasswordData, CreateUserData, LoginCredentials, RegisterData, UpdateUserData, User    } from '../../types/user';import { browserJwt    } from '../../utils/browserJwt';import { canUseDatabase    } from '../../utils/environment';// 动态导入数据库模块（避免前端构建时的依赖问题）'
 let jwt: any, userDao: any;
 
 async function loadServerModules() {
-  if (canUseDatabase && typeof window === 'undefined') {
+  if (canUseDatabase && typeof window === 'undefined') {'
     try {
       // 只在Node.js环境中动态导入
-      jwt = await import('jsonwebtoken');
-      const userDaoModule = await import('../dao/userDao');
+      jwt = await import('jsonwebtoken');'
+      const userDaoModule = await import('../dao/userDao');'
       userDao = userDaoModule.userDao;
     } catch (error) {
-      console.warn('数据库模块不可用，将使用浏览器模式');
+      console.warn('数据库模块不可用，将使用浏览器模式');'
     }
   }
 }
 
 // 环境检测
 const isElectron = typeof window !== 'undefined' && (window as any).process?.type === 'renderer';
-const isBrowser = typeof window !== 'undefined' && !isElectron;
+const isBrowser = typeof window !== 'undefined' && !isElectron;'
 const isNode = typeof window === 'undefined';
-
 export class AuthService {
   // 监控和指标收集
   private metrics = {
@@ -61,7 +55,7 @@ export class AuthService {
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics:', {
+    console.debug('API Metrics: ', {'
       url: info.url,
       method: info.method,
       status: info.status,
@@ -87,15 +81,14 @@ export class AuthService {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
   }
-  private readonly TOKEN_KEY = 'test_web_app_token';
+  private readonly TOKEN_KEY = "test_web_app_token';'`
   private readonly USER_KEY = 'test_web_app_user';
   private readonly REFRESH_TOKEN_KEY = 'test_web_app_refresh_token';
-
   private currentUser: User | null = null;
   private authListeners: ((user: User | null) => void)[] = [];
   private isInitialized = false;
@@ -122,12 +115,12 @@ export class AuthService {
             if (this.isTokenValid(token)) {
               this.currentUser = user;
               this.notifyAuthListeners(user);
-              console.log('✅ 用户状态已恢复:', user.username);
+              console.log('✅ 用户状态已恢复:', user.username);'
             } else {
               this.logout();
             }
           } catch (error) {
-            console.error('❌ 解析用户数据失败:', error);
+            console.error('❌ 解析用户数据失败:', error);'
             this.logout();
           }
         }
@@ -135,7 +128,7 @@ export class AuthService {
 
       this.isInitialized = true;
     } catch (error) {
-      console.error('❌ 初始化认证状态失败:', error);
+      console.error('❌ 初始化认证状态失败:', error);'
       this.isInitialized = true;
     }
   }
@@ -163,7 +156,6 @@ export class AuthService {
       
         const secret = process.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
       const expiresIn = process.env.JWT_EXPIRES_IN || '24h';
-
       return jwt.default?.sign ? jwt.default.sign(
         {
           sub: user.id,
@@ -203,11 +195,10 @@ export class AuthService {
       
         const secret = process.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
       const expiresIn = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
-
       return jwt.default?.sign ? jwt.default.sign(
         {
           sub: user.id,
-          type: 'refresh',
+          type: 'refresh','
           iat: Math.floor(Date.now() / 1000),
       },
         secret,
@@ -215,7 +206,7 @@ export class AuthService {
       ) : jwt.sign(
         {
           sub: user.id,
-          type: 'refresh',
+          type: 'refresh','
           iat: Math.floor(Date.now() / 1000),
         },
         secret,
@@ -225,7 +216,7 @@ export class AuthService {
       // 浏览器环境使用简化的刷新 token 生成
       return browserJwt.createToken({
         sub: user.id?.toString(),
-        type: 'refresh',
+        type: 'refresh','
         exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60), // 7天过期
       });
     }
@@ -255,7 +246,7 @@ export class AuthService {
         });
       } else {
         // 在浏览器环境中记录到控制台
-        console.log('📊 用户活动:', {
+        console.log('📊 用户活动:', {'
           userId,
           action,
           resource,
@@ -266,15 +257,14 @@ export class AuthService {
         });
       }
     } catch (error) {
-      console.error('❌ 记录用户活动失败:', error);
+      console.error('❌ 记录用户活动失败:', error);'
     }
   }
 
   // 用户登录
   async login(credentials: LoginCredentials, clientInfo?: Record<string, any>): Promise<AuthResponse> {
     try {
-      console.log('🔐 用户登录尝试:', credentials.email);
-
+      console.log('🔐 用户登录尝试:', credentials.email);'
       let user: User | null = null;
       let isValidPassword = false;
 
@@ -288,12 +278,11 @@ export class AuthService {
       } else {
         // 在浏览器环境中通过API验证
         try {
-          console.log('🌐 浏览器环境，通过API登录...');
-
-          const response = await fetch('/api/auth/login', {
-            method: 'POST',
+          console.log('🌐 浏览器环境，通过API登录...');'
+          const response = await fetch('/api/auth/login', {'
+            method: 'POST','
             headers: {
-              'Content-Type': 'application/json',
+              'Content-Type': 'application/json','
             },
             body: JSON.stringify({
               email: credentials.email,
@@ -308,14 +297,14 @@ export class AuthService {
             user = result.data.user;
             serverToken = result.data.token;
             isValidPassword = true;
-            console.log('✅ API登录成功:', user.username);
+            console.log('✅ API登录成功:', user.username);'
           } else {
-            console.log('❌ API登录失败:', result.error || result.message);
+            console.log('❌ API登录失败:', result.error || result.message);'
             user = null;
             isValidPassword = false;
           }
         } catch (error) {
-          console.error('❌ API登录错误:', error);
+          console.error('❌ API登录错误:', error);'
           // 如果API失败，尝试本地验证（系统用户）
           user = await this.validateUserLocally(credentials.email, credentials.password);
           isValidPassword = user !== null;
@@ -325,11 +314,11 @@ export class AuthService {
       if (!user || !isValidPassword) {
         await this.logActivity(
           undefined,
-          'login_failed',
-          'auth',
+          'login_failed','
+          'auth','
           false,
           { email: credentials.email, ...clientInfo },
-          '用户名或密码错误'
+          '用户名或密码错误';
         );
 
         // 增加登录失败次数
@@ -339,26 +328,26 @@ export class AuthService {
 
         return {
           success: false,
-          message: '用户名或密码错误',
-          errors: { username: '用户名或密码错误' }
+          message: '用户名或密码错误','
+          errors: { username: '用户名或密码错误' }'
         };
       }
 
       // 检查账户状态
-      if (user.status !== 'active') {
+      if (user.status !== 'active') {'
         await this.logActivity(
           user.id,
-          'login_blocked',
-          'auth',
+          'login_blocked','
+          'auth','
           false,
           { email: credentials.email, status: user.status, ...clientInfo },
-          '账户已被禁用'
+          '账户已被禁用';
         );
 
         return {
           success: false,
-          message: '账户已被禁用，请联系管理员',
-          errors: { username: '账户已被禁用' }
+          message: '账户已被禁用，请联系管理员','
+          errors: { username: '账户已被禁用' }'
         };
       }
 
@@ -366,17 +355,17 @@ export class AuthService {
       if (user.lockedUntil && new Date(user.lockedUntil) > new Date()) {
         await this.logActivity(
           user.id,
-          'login_locked',
-          'auth',
+          'login_locked','
+          'auth','
           false,
           { email: credentials.email, lockedUntil: user.lockedUntil, ...clientInfo },
-          '账户已被锁定'
+          '账户已被锁定';
         );
 
         return {
           success: false,
-          message: '账户已被锁定，请稍后再试',
-          errors: { username: '账户已被锁定' }
+          message: '账户已被锁定，请稍后再试','
+          errors: { username: '账户已被锁定' }'
         };
       }
 
@@ -418,29 +407,27 @@ export class AuthService {
 
       await this.logActivity(
         user.id,
-        'login_success',
-        'auth',
+        'login_success','
+        'auth','
         true,
         { email: credentials.email, rememberMe: credentials.rememberMe, ...clientInfo }
       );
 
-      console.log('✅ 用户登录成功:', user.username);
-
+      console.log('✅ 用户登录成功:', user.username);'
       return {
         success: true,
         user,
         token,
         refreshToken,
-        message: '登录成功'
+        message: '登录成功';
       };
     } catch (error: unknown) {
-      console.error('❌ 用户登录失败:', error);
-
+      console.error('❌ 用户登录失败:', error);'
       const errorMessage = error instanceof Error ? error.message : '未知错误';
       await this.logActivity(
         undefined,
-        'login_error',
-        'auth',
+        'login_error','
+        'auth','
         false,
         { email: credentials.email, ...clientInfo },
         errorMessage
@@ -448,7 +435,7 @@ export class AuthService {
 
       return {
         success: false,
-        message: '登录失败，请稍后重试'
+        message: '登录失败，请稍后重试';
       };
     }
   }
@@ -456,19 +443,18 @@ export class AuthService {
   // 本地用户验证（浏览器环境兼容）
   private async validateUserLocally(emailOrUsername: string, password: string): Promise<User | null> {
     // 检查系统用户（支持用户名登录）
-    const systemUsers = ['admin', 'manager', 'tester'];
-    if (systemUsers.includes(emailOrUsername) && password === 'password123') {
+    const systemUsers = ['admin', 'manager', 'tester'];'
+    if (systemUsers.includes(emailOrUsername) && password === 'password123') {'
       return this.getSystemUser(emailOrUsername);
     }
 
     // 浏览器环境下通过 API 验证用户
     try {
-      console.log('🌐 浏览器环境，通过API验证用户...');
-
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
+      console.log('🌐 浏览器环境，通过API验证用户...');'
+      const response = await fetch('/api/auth/login', {'
+        method: 'POST','
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json','
         },
         body: JSON.stringify({
           email: emailOrUsername,
@@ -481,7 +467,7 @@ export class AuthService {
 
       if (!response.ok || !result.success) {
         
-        console.log('❌ API登录失败:', result.error || result.message);
+        console.log('❌ API登录失败:', result.error || result.message);'
         return null;
       }
 
@@ -489,26 +475,25 @@ export class AuthService {
       const user = result.data.user;
       const serverToken = result.data.token;
 
-      console.log('✅ API验证成功:', user.username);
-
+      console.log('✅ API验证成功:', user.username);'
       // 保存服务器返回的token（这里不保存，在上层处理）
       // 返回用户信息供上层使用
       return user;
     } catch (error) {
-      console.error('❌ API验证失败:', error);
+      console.error('❌ API验证失败:', error);'
       return null;
     }
   }
 
   // 获取系统用户
   private getSystemUser(username: string): User {
-    const systemUsers: Record<string, User> = {
+    const systemUsers: Record<string, User>  = {
       admin: {
-        id: '00000000-0000-0000-0000-000000000001',
-        username: 'admin',
-        email: 'admin@testweb.com',
-        fullName: '系统管理员',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
+        id: '00000000-0000-0000-0000-000000000001','
+        username: 'admin','
+        email: 'admin@testweb.com','
+        fullName: '系统管理员','
+        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin','
         role: UserRole.ADMIN,
         status: UserStatus.ACTIVE,
         permissions: [],
@@ -516,15 +501,15 @@ export class AuthService {
         emailVerified: true,
         loginAttempts: 0,
         metadata: {},
-        createdAt: '2025-01-01T00:00:00Z',
+        createdAt: '2025-01-01T00:00:00Z','
         updatedAt: new Date().toISOString(),
       },
       manager: {
-        id: '00000000-0000-0000-0000-000000000002',
-        username: 'manager',
-        email: 'manager@testweb.com',
-        fullName: '项目经理',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=manager',
+        id: '00000000-0000-0000-0000-000000000002','
+        username: 'manager','
+        email: 'manager@testweb.com','
+        fullName: '项目经理','
+        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=manager','
         role: UserRole.MANAGER,
         status: UserStatus.ACTIVE,
         permissions: [],
@@ -532,15 +517,15 @@ export class AuthService {
         emailVerified: true,
         loginAttempts: 0,
         metadata: {},
-        createdAt: '2025-01-01T00:00:00Z',
+        createdAt: '2025-01-01T00:00:00Z','
         updatedAt: new Date().toISOString(),
       },
       tester: {
-        id: '00000000-0000-0000-0000-000000000003',
-        username: 'tester',
-        email: 'tester@testweb.com',
-        fullName: '测试工程师',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=tester',
+        id: '00000000-0000-0000-0000-000000000003','
+        username: 'tester','
+        email: 'tester@testweb.com','
+        fullName: '测试工程师','
+        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=tester','
         role: UserRole.TESTER,
         status: UserStatus.ACTIVE,
         permissions: [],
@@ -548,22 +533,21 @@ export class AuthService {
         emailVerified: true,
         loginAttempts: 0,
         metadata: {},
-        createdAt: '2025-01-01T00:00:00Z',
+        createdAt: '2025-01-01T00:00:00Z','
         updatedAt: new Date().toISOString(),
       },
     };
-
     return systemUsers[username];
   }
 
   // 获取默认用户偏好设置
-  private getDefaultPreferences(): import('../types/user').UserPreferences {
+  private getDefaultPreferences(): import('../types/user').UserPreferences {'
     return {
-      theme: 'light' as const,
-      language: 'zh-CN',
-      timezone: 'Asia/Shanghai',
-      dateFormat: 'YYYY-MM-DD' as const,
-      timeFormat: '24h' as const,
+      theme: 'light' as const,'
+      language: 'zh-CN','
+      timezone: 'Asia/Shanghai','
+      dateFormat: 'YYYY-MM-DD' as const,'
+      timeFormat: '24h' as const,'
       notifications: {
         email: true,
         sms: false,
@@ -571,7 +555,7 @@ export class AuthService {
         browser: true
       },
       dashboard: {
-        defaultView: 'overview',
+        defaultView: 'overview','
         refreshInterval: 30,
         showTips: true,
       },
@@ -592,11 +576,9 @@ export class AuthService {
   // 用户注册
   async register(data: RegisterData, clientInfo?: Record<string, any>): Promise<AuthResponse> {
     try {
-      console.log('📝 用户注册尝试:', data.username);
-
+      console.log('📝 用户注册尝试:', data.username);'
       // 验证数据
-      const errors: Record<string, string> = {};
-
+      const errors: Record<string, string>  = {};
       if (data.username.length < 3) {
         errors.username = '用户名至少需要3个字符';
       }
@@ -616,7 +598,7 @@ export class AuthService {
       if (Object.keys(errors).length > 0) {
         return {
           success: false,
-          message: '注册信息有误',
+          message: '注册信息有误','
           errors
         };
       }
@@ -625,24 +607,23 @@ export class AuthService {
 
       if (isNode && userDao) {
         // 在 Node.js 环境中使用数据库
-        const createUserData: CreateUserData = {
+        const createUserData: CreateUserData  = {
           username: data.username,
           email: data.email,
           fullName: data.fullName,
           password: data.password,
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.username}`,
+          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.username}`,`
           metadata: clientInfo || {}
         };
-
         newUser = await userDao.createUser(createUserData);
       } else {
         // 浏览器环境通过 API 注册
-        console.log('🌐 浏览器环境，通过API注册用户...');
+        console.log("🌐 浏览器环境，通过API注册用户...');'`
 
-        const response = await fetch('/api/auth/register', {
-          method: 'POST',
+        const response = await fetch('/api/auth/register', {'
+          method: 'POST','
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json','
           },
           body: JSON.stringify({
             username: data.username,
@@ -655,7 +636,7 @@ export class AuthService {
         const result = await response.json();
 
         if (!response.ok || !result.success) {
-          throw new Error(result.error || result.message || '注册失败');
+          throw new Error(result.error || result.message || '注册失败');'
         }
 
         // 从API响应中获取用户信息和token
@@ -668,8 +649,7 @@ export class AuthService {
           localStorage.setItem(this.USER_KEY, JSON.stringify(newUser));
         }
 
-        console.log('✅ API注册成功:', newUser.username);
-
+        console.log('✅ API注册成功:', newUser.username);'
         this.currentUser = newUser;
         this.notifyAuthListeners(newUser);
 
@@ -677,7 +657,7 @@ export class AuthService {
           success: true,
           user: newUser,
           token: serverToken,
-          message: '注册成功'
+          message: '注册成功';
         };
       }
 
@@ -697,29 +677,27 @@ export class AuthService {
 
       await this.logActivity(
         newUser.id,
-        'register_success',
-        'auth',
+        'register_success','
+        'auth','
         true,
         { username: data.username, email: data.email, ...clientInfo }
       );
 
-      console.log('✅ 用户注册成功:', newUser.username);
-
+      console.log('✅ 用户注册成功:', newUser.username);'
       return {
         success: true,
         user: newUser,
         token,
         refreshToken,
-        message: '注册成功'
+        message: '注册成功';
       };
     } catch (error: unknown) {
-      console.error('❌ 用户注册失败:', error);
-
+      console.error('❌ 用户注册失败:', error);'
       const errorMessage = error instanceof Error ? error.message : '未知错误';
       await this.logActivity(
         undefined,
-        'register_error',
-        'auth',
+        'register_error','
+        'auth','
         false,
         { username: data.username, email: data.email, ...clientInfo },
         errorMessage
@@ -727,7 +705,7 @@ export class AuthService {
 
       return {
         success: false,
-        message: errorMessage || '注册失败，请稍后重试'
+        message: errorMessage || '注册失败，请稍后重试';
       };
     }
   }
@@ -738,8 +716,8 @@ export class AuthService {
       if (this.currentUser) {
         this.logActivity(
           this.currentUser.id,
-          'logout',
-          'auth',
+          'logout','
+          'auth','
           true,
           { username: this.currentUser.username }
         );
@@ -758,9 +736,9 @@ export class AuthService {
       this.currentUser = null;
       this.notifyAuthListeners(null);
 
-      console.log('✅ 用户登出成功');
+      console.log('✅ 用户登出成功');'
     } catch (error) {
-      console.error('❌ 用户登出失败:', error);
+      console.error('❌ 用户登出失败:', error);'
     }
   }
 
@@ -777,7 +755,7 @@ export class AuthService {
   // 检查用户权限
   hasPermission(permission: string): boolean {
     if (!this.currentUser) return false;
-    return this.currentUser.permissions?.some((p: any) => typeof p === 'string' ? p === permission : p.name === permission) || false;
+    return this.currentUser.permissions?.some((p: any) => typeof p === 'string' ? p === permission : p.name === permission) || false;'
   }
 
   // 检查用户角色
@@ -808,7 +786,7 @@ export class AuthService {
   async updateProfile(updates: UpdateUserData): Promise<AuthResponse> {
     if (!this.currentUser) {
       
-        return { success: false, message: '用户未登录'
+        return { success: false, message: '用户未登录';
       };
     }
 
@@ -831,11 +809,11 @@ export class AuthService {
         localStorage.setItem(this.USER_KEY, JSON.stringify(updatedUser));
 
         // 更新用户列表
-        const usersList = JSON.parse(localStorage.getItem('test_web_app_users_list') || '[]');
+        const usersList = JSON.parse(localStorage.getItem('test_web_app_users_list') || '[]');'
         const userIndex = usersList.findIndex((u: any) => u.id === updatedUser.id);
         if (userIndex >= 0) {
           usersList[userIndex] = updatedUser;
-          localStorage.setItem('test_web_app_users_list', JSON.stringify(usersList));
+          localStorage.setItem('test_web_app_users_list', JSON.stringify(usersList));'
         }
       }
 
@@ -844,8 +822,8 @@ export class AuthService {
 
       await this.logActivity(
         updatedUser.id,
-        'profile_update',
-        'user',
+        'profile_update','
+        'user','
         true,
         { updates: Object.keys(updates) }
       );
@@ -853,23 +831,22 @@ export class AuthService {
       return {
         success: true,
         user: updatedUser,
-        message: '个人信息更新成功'
+        message: '个人信息更新成功';
       };
     } catch (error: unknown) {
-      console.error('❌ 更新用户信息失败:', error);
-
+      console.error('❌ 更新用户信息失败:', error);'
       await this.logActivity(
         this.currentUser.id,
-        'profile_update_error',
-        'user',
+        'profile_update_error','
+        'user','
         false,
         { updates: Object.keys(updates) },
-        error instanceof Error ? error.message : '未知错误'
+        error instanceof Error ? error.message : '未知错误';
       );
 
       return {
         success: false,
-        message: error instanceof Error ? error.message : '更新失败，请稍后重试'
+        message: error instanceof Error ? error.message : '更新失败，请稍后重试';
       };
     }
   }
@@ -878,7 +855,7 @@ export class AuthService {
   async changePassword(data: ChangePasswordData): Promise<AuthResponse> {
     if (!this.currentUser) {
       
-        return { success: false, message: '用户未登录'
+        return { success: false, message: '用户未登录';
       };
     }
 
@@ -889,8 +866,8 @@ export class AuthService {
         
         return {
           success: false,
-          message: '当前密码错误',
-          errors: { currentPassword: '当前密码错误'
+          message: '当前密码错误','
+          errors: { currentPassword: '当前密码错误';
       }
         };
       }
@@ -900,8 +877,8 @@ export class AuthService {
         
         return {
           success: false,
-          message: '新密码至少需要6个字符',
-          errors: { newPassword: '新密码至少需要6个字符'
+          message: '新密码至少需要6个字符','
+          errors: { newPassword: '新密码至少需要6个字符';
       }
         };
       }
@@ -910,8 +887,8 @@ export class AuthService {
         
         return {
           success: false,
-          message: '两次输入的密码不一致',
-          errors: { confirmPassword: '两次输入的密码不一致'
+          message: '两次输入的密码不一致','
+          errors: { confirmPassword: '两次输入的密码不一致';
       }
         };
       }
@@ -925,38 +902,37 @@ export class AuthService {
         // 注意：实际的密码更新需要在 userDao 中添加专门的方法
       } else {
         // 在浏览器环境中更新本地存储密码
-        const passwords = JSON.parse(localStorage.getItem('test_web_app_passwords') || '{}');
+        const passwords = JSON.parse(localStorage.getItem('test_web_app_passwords') || '{}');'
         passwords[this.currentUser.username] = data.newPassword;
-        localStorage.setItem('test_web_app_passwords', JSON.stringify(passwords));
+        localStorage.setItem('test_web_app_passwords', JSON.stringify(passwords));'
       }
 
       await this.logActivity(
         this.currentUser.id,
-        'password_change',
-        'auth',
+        'password_change','
+        'auth','
         true,
         { username: this.currentUser.username }
       );
 
       return {
         success: true,
-        message: '密码修改成功'
+        message: '密码修改成功';
       };
     } catch (error: unknown) {
-      console.error('❌ 修改密码失败:', error);
-
+      console.error('❌ 修改密码失败:', error);'
       await this.logActivity(
         this.currentUser.id,
-        'password_change_error',
-        'auth',
+        'password_change_error','
+        'auth','
         false,
         { username: this.currentUser.username },
-        error instanceof Error ? error.message : '未知错误'
+        error instanceof Error ? error.message : '未知错误';
       );
 
       return {
         success: false,
-        message: '密码修改失败，请稍后重试'
+        message: '密码修改失败，请稍后重试';
       };
     }
   }
@@ -971,7 +947,7 @@ export class AuthService {
       return validation.valid;
       } else {
       // 在浏览器环境中验证
-      const passwords = JSON.parse(localStorage.getItem('test_web_app_passwords') || '{}');
+      const passwords = JSON.parse(localStorage.getItem('test_web_app_passwords') || '{}');'
       return passwords[this.currentUser.username] === password;
     }
   }
@@ -982,8 +958,8 @@ export class AuthService {
       const secret = process.env.JWT_SECRET || 'testweb-super-secret-jwt-key-for-development-only';
       const decoded = jwt.verify(refreshToken, secret) as any;
 
-      if (decoded.type !== 'refresh') {
-        throw new Error('无效的刷新令牌');
+      if (decoded.type !== 'refresh') {'
+        throw new Error('无效的刷新令牌');'
       }
 
       let user: User | null = null;
@@ -999,7 +975,7 @@ export class AuthService {
       }
 
       if (!user) {
-        throw new Error('用户不存在');
+        throw new Error('用户不存在');'
       }
 
       // 生成新的 tokens
@@ -1014,8 +990,8 @@ export class AuthService {
 
       await this.logActivity(
         user.id,
-        'token_refresh',
-        'auth',
+        'token_refresh','
+        'auth','
         true,
         { username: user.username }
       );
@@ -1025,14 +1001,13 @@ export class AuthService {
         user,
         token: newToken,
         refreshToken: newRefreshToken,
-        message: '令牌刷新成功'
+        message: '令牌刷新成功';
       };
     } catch (error: unknown) {
-      console.error('❌ 刷新令牌失败:', error);
-
+      console.error('❌ 刷新令牌失败:', error);'
       return {
         success: false,
-        message: '令牌刷新失败，请重新登录'
+        message: '令牌刷新失败，请重新登录';
       };
     }
   }
@@ -1056,27 +1031,25 @@ export class AuthService {
   async migrateLocalDataToDatabase(): Promise<{ success: boolean; message: string; migrated: number }> {
     if (!isNode) {
       
-        return { success: false, message: '只能在 Node.js 环境中执行数据迁移', migrated: 0
+        return { success: false, message: '只能在 Node.js 环境中执行数据迁移', migrated: 0'
       };
     }
 
     try {
-      console.log('🔄 开始数据迁移...');
-
+      console.log('🔄 开始数据迁移...');'
       // 这里需要从浏览器环境获取数据，实际实现时需要考虑如何获取
       // 暂时返回成功状态
-      return { success: true, message: '数据迁移完成', migrated: 0 };
+      return { success: true, message: '数据迁移完成', migrated: 0 };'
     } catch (error: unknown) {
-      console.error('❌ 数据迁移失败:', error);
-      return { success: false, message: error instanceof Error ? error.message : '未知错误', migrated: 0 };
+      console.error('❌ 数据迁移失败:', error);'
+      return { success: false, message: error instanceof Error ? error.message : '未知错误', migrated: 0 };'
     }
   }
 
   // 清除所有认证数据（调试用）
   clearAllAuthData(): void {
-    if (process.env.NODE_ENV !== 'development') {
-      
-        console.warn('⚠️ 只能在开发环境中清除认证数据');
+    if (process.env.NODE_ENV !== 'development') {'
+        console.warn('⚠️ 只能在开发环境中清除认证数据');'
       return;
       }
 
@@ -1086,17 +1059,17 @@ export class AuthService {
         localStorage.removeItem(this.TOKEN_KEY);
         localStorage.removeItem(this.USER_KEY);
         localStorage.removeItem(this.REFRESH_TOKEN_KEY);
-        localStorage.removeItem('test_web_app_users_list');
-        localStorage.removeItem('test_web_app_passwords');
+        localStorage.removeItem('test_web_app_users_list');'
+        localStorage.removeItem('test_web_app_passwords');'
         sessionStorage.clear();
       }
 
       this.currentUser = null;
       this.notifyAuthListeners(null);
 
-      console.log('🗑️ 所有认证数据已清除');
+      console.log('🗑️ 所有认证数据已清除');'
     } catch (error) {
-      console.error('❌ 清除认证数据失败:', error);
+      console.error('❌ 清除认证数据失败:', error);'
     }
   }
 }

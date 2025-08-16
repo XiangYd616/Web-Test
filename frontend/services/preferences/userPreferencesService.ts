@@ -3,9 +3,7 @@
  * 管理用户的个性化配置和偏好设置
  */
 
-import { createApiUrl } from '../../config/api';
-
-export interface UserPreferences {
+import { createApiUrl    } from '../../config/api';export interface UserPreferences     {'
   // 界面设置
   theme: 'light' | 'dark' | 'auto';
   language: 'zh-CN' | 'en-US';
@@ -49,7 +47,7 @@ export interface UserPreferences {
   };
 }
 
-export interface PreferenceCategory {
+export interface PreferenceCategory     {
   key: string;
   label: string;
   icon: string;
@@ -57,7 +55,7 @@ export interface PreferenceCategory {
   settings: PreferenceSetting[];
 }
 
-export interface PreferenceSetting {
+export interface PreferenceSetting     {
   key: string;
   label: string;
   description: string;
@@ -106,7 +104,7 @@ class UserPreferencesService {
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics:', {
+    console.debug('API Metrics: ', {'
       url: info.url,
       method: info.method,
       status: info.status,
@@ -132,41 +130,40 @@ class UserPreferencesService {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
   }
   private preferences: UserPreferences | null = null;
   private listeners: ((preferences: UserPreferences) => void)[] = [];
-  private localStorageKey = 'user-preferences';
-
+  private localStorageKey = "user-preferences';'`
   /**
    * 获取默认偏好设置
    */
   getDefaultPreferences(): UserPreferences {
     return {
       // 界面设置
-      theme: 'dark',
-      language: 'zh-CN',
-      fontSize: 'medium',
+      theme: 'dark','
+      language: 'zh-CN','
+      fontSize: 'medium','
       compactMode: false,
 
       // 测试设置
-      defaultTestTypes: ['performance', 'seo'],
+      defaultTestTypes: ['performance', 'seo'],'
       autoSaveResults: true,
       testTimeout: 300000,
       maxConcurrentTests: 3,
       enableNotifications: true,
 
       // 仪表板设置
-      dashboardLayout: 'grid',
-      defaultChartType: 'line',
+      dashboardLayout: 'grid','
+      defaultChartType: 'line','
       showAdvancedMetrics: false,
       refreshInterval: 30000,
 
       // 报告设置
-      defaultExportFormat: 'json',
+      defaultExportFormat: 'json','
       includeCharts: true,
       includeRawData: false,
       autoEmailReports: false,
@@ -180,10 +177,10 @@ class UserPreferencesService {
 
       // 快捷键设置
       shortcuts: {
-        'new-test': 'Ctrl+N',
-        'save-result': 'Ctrl+S',
-        'export-data': 'Ctrl+E',
-        'toggle-theme': 'Ctrl+T'
+        'new-test': 'Ctrl+N','
+        'save-result': 'Ctrl+S','
+        'export-data': 'Ctrl+E','
+        'toggle-theme': 'Ctrl+T';
       },
 
       // 自定义字段
@@ -197,149 +194,149 @@ class UserPreferencesService {
   getPreferenceCategories(): PreferenceCategory[] {
     return [
       {
-        key: 'interface',
-        label: '界面设置',
-        icon: 'Monitor',
-        description: '自定义界面外观和布局',
+        key: 'interface','
+        label: '界面设置','
+        icon: 'Monitor','
+        description: '自定义界面外观和布局','
         settings: [
           {
-            key: 'theme',
-            label: '主题',
-            description: '选择界面主题',
-            type: 'select',
-            defaultValue: 'dark',
+            key: 'theme','
+            label: '主题','
+            description: '选择界面主题','
+            type: 'select','
+            defaultValue: 'dark','
             options: [
-              { value: 'light', label: '浅色主题' },
-              { value: 'dark', label: '深色主题' },
-              { value: 'auto', label: '跟随系统' }
+              { value: 'light', label: '浅色主题' },'
+              { value: 'dark', label: '深色主题' },'
+              { value: 'auto', label: '跟随系统' }'
             ]
           },
           {
-            key: 'language',
-            label: '语言',
-            description: '选择界面语言',
-            type: 'select',
-            defaultValue: 'zh-CN',
+            key: 'language','
+            label: '语言','
+            description: '选择界面语言','
+            type: 'select','
+            defaultValue: 'zh-CN','
             options: [
-              { value: 'zh-CN', label: '简体中文' },
-              { value: 'en-US', label: 'English' }
+              { value: 'zh-CN', label: '简体中文' },'
+              { value: 'en-US', label: 'English' }'
             ]
           },
           {
-            key: 'fontSize',
-            label: '字体大小',
-            description: '调整界面字体大小',
-            type: 'select',
-            defaultValue: 'medium',
+            key: 'fontSize','
+            label: '字体大小','
+            description: '调整界面字体大小','
+            type: 'select','
+            defaultValue: 'medium','
             options: [
-              { value: 'small', label: '小' },
-              { value: 'medium', label: '中' },
-              { value: 'large', label: '大' }
+              { value: 'small', label: '小' },'
+              { value: 'medium', label: '中' },'
+              { value: 'large', label: '大' }'
             ]
           },
           {
-            key: 'compactMode',
-            label: '紧凑模式',
-            description: '启用紧凑的界面布局',
-            type: 'boolean',
+            key: 'compactMode','
+            label: '紧凑模式','
+            description: '启用紧凑的界面布局','
+            type: 'boolean','
             defaultValue: false
           }
         ]
       },
       {
-        key: 'testing',
-        label: '测试设置',
-        icon: 'TestTube',
-        description: '配置测试相关的默认选项',
+        key: 'testing','
+        label: '测试设置','
+        icon: 'TestTube','
+        description: '配置测试相关的默认选项','
         settings: [
           {
-            key: 'defaultTestTypes',
-            label: '默认测试类型',
-            description: '新建测试时默认选择的测试类型',
-            type: 'multiselect',
-            defaultValue: ['performance', 'seo'],
+            key: 'defaultTestTypes','
+            label: '默认测试类型','
+            description: '新建测试时默认选择的测试类型','
+            type: 'multiselect','
+            defaultValue: ['performance', 'seo'],'
             options: [
-              { value: 'performance', label: '性能测试' },
-              { value: 'seo', label: 'SEO测试' },
-              { value: 'security', label: '安全测试' },
-              { value: 'accessibility', label: '可访问性测试' }
+              { value: 'performance', label: '性能测试' },'
+              { value: 'seo', label: 'SEO测试' },'
+              { value: 'security', label: '安全测试' },'
+              { value: 'accessibility', label: '可访问性测试' }'
             ]
           },
           {
-            key: 'autoSaveResults',
-            label: '自动保存结果',
-            description: '测试完成后自动保存结果',
-            type: 'boolean',
+            key: 'autoSaveResults','
+            label: '自动保存结果','
+            description: '测试完成后自动保存结果','
+            type: 'boolean','
             defaultValue: true
           },
           {
-            key: 'testTimeout',
-            label: '测试超时时间(秒)',
-            description: '单个测试的最大执行时间',
-            type: 'number',
+            key: 'testTimeout','
+            label: '测试超时时间(秒)','
+            description: '单个测试的最大执行时间','
+            type: 'number','
             defaultValue: 300,
             min: 30,
             max: 600
           },
           {
-            key: 'maxConcurrentTests',
-            label: '最大并发测试数',
-            description: '同时运行的最大测试数量',
-            type: 'number',
+            key: 'maxConcurrentTests','
+            label: '最大并发测试数','
+            description: '同时运行的最大测试数量','
+            type: 'number','
             defaultValue: 3,
             min: 1,
             max: 10
           },
           {
-            key: 'enableNotifications',
-            label: '启用通知',
-            description: '测试完成时显示通知',
-            type: 'boolean',
+            key: 'enableNotifications','
+            label: '启用通知','
+            description: '测试完成时显示通知','
+            type: 'boolean','
             defaultValue: true
           }
         ]
       },
       {
-        key: 'dashboard',
-        label: '仪表板',
-        icon: 'BarChart3',
-        description: '自定义仪表板显示和布局',
+        key: 'dashboard','
+        label: '仪表板','
+        icon: 'BarChart3','
+        description: '自定义仪表板显示和布局','
         settings: [
           {
-            key: 'dashboardLayout',
-            label: '布局模式',
-            description: '选择仪表板的布局方式',
-            type: 'select',
-            defaultValue: 'grid',
+            key: 'dashboardLayout','
+            label: '布局模式','
+            description: '选择仪表板的布局方式','
+            type: 'select','
+            defaultValue: 'grid','
             options: [
-              { value: 'grid', label: '网格布局' },
-              { value: 'list', label: '列表布局' }
+              { value: 'grid', label: '网格布局' },'
+              { value: 'list', label: '列表布局' }'
             ]
           },
           {
-            key: 'defaultChartType',
-            label: '默认图表类型',
-            description: '新建图表时的默认类型',
-            type: 'select',
-            defaultValue: 'line',
+            key: 'defaultChartType','
+            label: '默认图表类型','
+            description: '新建图表时的默认类型','
+            type: 'select','
+            defaultValue: 'line','
             options: [
-              { value: 'line', label: '折线图' },
-              { value: 'bar', label: '柱状图' },
-              { value: 'pie', label: '饼图' }
+              { value: 'line', label: '折线图' },'
+              { value: 'bar', label: '柱状图' },'
+              { value: 'pie', label: '饼图' }'
             ]
           },
           {
-            key: 'showAdvancedMetrics',
-            label: '显示高级指标',
-            description: '在仪表板中显示高级性能指标',
-            type: 'boolean',
+            key: 'showAdvancedMetrics','
+            label: '显示高级指标','
+            description: '在仪表板中显示高级性能指标','
+            type: 'boolean','
             defaultValue: false
           },
           {
-            key: 'refreshInterval',
-            label: '刷新间隔(秒)',
-            description: '仪表板数据自动刷新间隔',
-            type: 'number',
+            key: 'refreshInterval','
+            label: '刷新间隔(秒)','
+            description: '仪表板数据自动刷新间隔','
+            type: 'number','
             defaultValue: 30,
             min: 10,
             max: 300
@@ -347,79 +344,79 @@ class UserPreferencesService {
         ]
       },
       {
-        key: 'reports',
-        label: '报告设置',
-        icon: 'FileText',
-        description: '配置报告生成和导出选项',
+        key: 'reports','
+        label: '报告设置','
+        icon: 'FileText','
+        description: '配置报告生成和导出选项','
         settings: [
           {
-            key: 'defaultExportFormat',
-            label: '默认导出格式',
-            description: '导出报告时的默认格式',
-            type: 'select',
-            defaultValue: 'json',
+            key: 'defaultExportFormat','
+            label: '默认导出格式','
+            description: '导出报告时的默认格式','
+            type: 'select','
+            defaultValue: 'json','
             options: [
-              { value: 'json', label: 'JSON' },
-              { value: 'csv', label: 'CSV' },
-              { value: 'excel', label: 'Excel' },
-              { value: 'pdf', label: 'PDF' }
+              { value: 'json', label: 'JSON' },'
+              { value: 'csv', label: 'CSV' },'
+              { value: 'excel', label: 'Excel' },'
+              { value: 'pdf', label: 'PDF' }'
             ]
           },
           {
-            key: 'includeCharts',
-            label: '包含图表',
-            description: '导出报告时包含图表',
-            type: 'boolean',
+            key: 'includeCharts','
+            label: '包含图表','
+            description: '导出报告时包含图表','
+            type: 'boolean','
             defaultValue: true
           },
           {
-            key: 'includeRawData',
-            label: '包含原始数据',
-            description: '导出报告时包含原始测试数据',
-            type: 'boolean',
+            key: 'includeRawData','
+            label: '包含原始数据','
+            description: '导出报告时包含原始测试数据','
+            type: 'boolean','
             defaultValue: false
           },
           {
-            key: 'autoEmailReports',
-            label: '自动邮件报告',
-            description: '定期自动发送报告邮件',
-            type: 'boolean',
+            key: 'autoEmailReports','
+            label: '自动邮件报告','
+            description: '定期自动发送报告邮件','
+            type: 'boolean','
             defaultValue: false
           }
         ]
       },
       {
-        key: 'advanced',
-        label: '高级设置',
-        icon: 'Settings',
-        description: '高级功能和实验性功能设置',
+        key: 'advanced','
+        label: '高级设置','
+        icon: 'Settings','
+        description: '高级功能和实验性功能设置','
         settings: [
           {
-            key: 'enableExperimentalFeatures',
-            label: '启用实验性功能',
-            description: '启用正在开发中的实验性功能',
-            type: 'boolean',
+            key: 'enableExperimentalFeatures','
+            label: '启用实验性功能','
+            description: '启用正在开发中的实验性功能','
+            type: 'boolean','
             defaultValue: false
           },
           {
-            key: 'enableDebugMode',
-            label: '启用调试模式',
-            description: '显示详细的调试信息',
-            type: 'boolean',
+            key: 'enableDebugMode','
+            label: '启用调试模式','
+            description: '显示详细的调试信息','
+            type: 'boolean','
             defaultValue: false
           },
           {
-            key: 'cacheResults',
-            label: '缓存结果',
-            description: '缓存测试结果以提高性能',
-            type: 'boolean',
+            key: 'cacheResults','
+            label: '缓存结果','
+            description: '缓存测试结果以提高性能','
+            type: 'boolean','
             defaultValue: true
           },
           {
-            key: 'maxCacheSize',
-            label: '最大缓存大小',
-            description: '缓存的最大条目数',
-            type: 'number',
+            key: 'maxCacheSize','
+            label: '最大缓存大小','
+            description: '缓存的最大条目数','
+            type: 'number','
             defaultValue: 100,
             min: 10,
             max: 1000
@@ -435,9 +432,9 @@ class UserPreferencesService {
   async loadPreferences(): Promise<UserPreferences> {
     try {
       // 首先尝试从服务器加载
-      const response = await fetch(createApiUrl('/api/user/preferences'), {
+      const response = await fetch(createApiUrl('/api/user/preferences'), {'
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          "Authorization": `Bearer ${localStorage.getItem('token')}`'`
         }
       });
 
@@ -451,7 +448,7 @@ class UserPreferencesService {
         }
       }
     } catch (error) {
-      console.warn('从服务器加载偏好设置失败，使用本地缓存:', error);
+      console.warn("从服务器加载偏好设置失败，使用本地缓存:', error);'`
     }
 
     // 从本地存储加载
@@ -473,11 +470,11 @@ class UserPreferencesService {
       this.saveToLocalStorage();
 
       // 保存到服务器
-      const response = await fetch(createApiUrl('/api/user/preferences'), {
-        method: 'PUT',
+      const response = await fetch(createApiUrl('/api/user/preferences'), {'
+        method: 'PUT','
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Content-Type': 'application/json','
+          "Authorization": `Bearer ${localStorage.getItem('token')}`'`
         },
         body: JSON.stringify(this.preferences)
       });
@@ -496,7 +493,7 @@ class UserPreferencesService {
       return true;
 
     } catch (error) {
-      console.error('保存偏好设置失败:', error);
+      console.error("保存偏好设置失败:', error);'`
       return false;
     }
   }
@@ -565,7 +562,7 @@ class UserPreferencesService {
       };
       }
     } catch (error) {
-      console.warn('从本地存储加载偏好设置失败:', error);
+      console.warn('从本地存储加载偏好设置失败:', error);'
     }
 
     return this.getDefaultPreferences();
@@ -580,7 +577,7 @@ class UserPreferencesService {
         localStorage.setItem(this.localStorageKey, JSON.stringify(this.preferences));
       }
     } catch (error) {
-      console.warn('保存偏好设置到本地存储失败:', error);
+      console.warn('保存偏好设置到本地存储失败:', error);'
     }
   }
 
@@ -609,7 +606,7 @@ class UserPreferencesService {
       const preferences = JSON.parse(data);
       return await this.savePreferences(preferences);
     } catch (error) {
-      console.error('导入偏好设置失败:', error);
+      console.error('导入偏好设置失败:', error);'
       return false;
     }
   }

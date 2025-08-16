@@ -3,13 +3,9 @@
  * 提供统一的通知消息管理功能
  */
 
-import { useCallback, useState } from 'react';
-
-// 通知类型
-export type NotificationType = 'success' | 'error' | 'warning' | 'info';
-
-// 通知项接口
-export interface NotificationItem {
+import { useCallback, useState    } from 'react';// 通知类型'
+export type NotificationType   = 'success' | 'error' | 'warning' | 'info';// 通知项接口'
+export interface NotificationItem     {
     id: string;
     type: NotificationType;
     title?: string;
@@ -20,7 +16,7 @@ export interface NotificationItem {
 }
 
 // 通知配置接口
-export interface NotificationConfig {
+export interface NotificationConfig     {
     type?: NotificationType;
     title?: string;
     duration?: number;
@@ -28,7 +24,7 @@ export interface NotificationConfig {
 }
 
 // 通知上下文接口
-export interface NotificationContextValue {
+export interface NotificationContextValue     {
     notifications: NotificationItem[];
     showNotification: (message: string, type?: NotificationType, config?: NotificationConfig) => string;
     hideNotification: (id: string) => void;
@@ -37,10 +33,9 @@ export interface NotificationContextValue {
 
 // 默认配置
 const DEFAULT_DURATION = 4000;
-const DEFAULT_TYPE: NotificationType = 'info';
-
+const DEFAULT_TYPE: NotificationType  = 'info';
 // 生成唯一ID
-const generateId = () => `notification-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+const generateId = () => `notification-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;`
 
 // 通知Hook
 export const useNotification = () => {
@@ -51,9 +46,9 @@ export const useNotification = () => {
         message: string,
         type: NotificationType = DEFAULT_TYPE,
         config: NotificationConfig = {}
-    ): string => {
+    ): string  => {
         const id = generateId();
-        const notification: NotificationItem = {
+        const notification: NotificationItem  = {
             id,
             type: config.type || type,
             title: config.title,
@@ -62,7 +57,6 @@ export const useNotification = () => {
             closable: config.closable ?? true,
             timestamp: Date.now()
         };
-
         setNotifications(prev => [notification, ...prev]);
 
         // 自动隐藏
@@ -86,23 +80,23 @@ export const useNotification = () => {
     }, []);
 
     // 成功通知的快捷方法
-    const success = useCallback((message: string, config?: Omit<NotificationConfig, 'type'>) => {
-        return showNotification(message, 'success', config);
+    const success = useCallback((message: string, config?: Omit<NotificationConfig, "type'>) => {'`
+        return showNotification(message, 'success', config);'
     }, [showNotification]);
 
     // 错误通知的快捷方法
-    const error = useCallback((message: string, config?: Omit<NotificationConfig, 'type'>) => {
-        return showNotification(message, 'error', { duration: 6000, ...config });
+    const error = useCallback((message: string, config?: Omit<NotificationConfig, 'type'>) => {'
+        return showNotification(message, 'error', { duration: 6000, ...config });'
     }, [showNotification]);
 
     // 警告通知的快捷方法
-    const warning = useCallback((message: string, config?: Omit<NotificationConfig, 'type'>) => {
-        return showNotification(message, 'warning', config);
+    const warning = useCallback((message: string, config?: Omit<NotificationConfig, 'type'>) => {'
+        return showNotification(message, 'warning', config);'
     }, [showNotification]);
 
     // 信息通知的快捷方法
-    const info = useCallback((message: string, config?: Omit<NotificationConfig, 'type'>) => {
-        return showNotification(message, 'info', config);
+    const info = useCallback((message: string, config?: Omit<NotificationConfig, 'type'>) => {'
+        return showNotification(message, 'info', config);'
     }, [showNotification]);
 
     return {

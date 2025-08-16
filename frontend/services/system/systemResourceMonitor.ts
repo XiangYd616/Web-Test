@@ -1,5 +1,5 @@
 
-export interface SystemResources {
+export interface SystemResources     {
   cpu: {
     usage: number; // CPU使用率 (0-100)
     cores: number; // CPU核心数
@@ -25,7 +25,7 @@ export interface SystemResources {
   timestamp: number;
 }
 
-export interface ResourceThresholds {
+export interface ResourceThresholds     {
   cpu: {
     warning: number; // CPU使用率警告阈值
     critical: number; // CPU使用率临界阈值
@@ -40,9 +40,7 @@ export interface ResourceThresholds {
   };
 }
 
-export type ResourceStatus = 'healthy' | 'warning' | 'critical' | 'overloaded';
-
-class SystemResourceMonitor {
+export type ResourceStatus   = 'healthy' | 'warning' | 'critical' | 'overloaded';class SystemResourceMonitor {'
   private async retryRequest(fn: () => Promise<any>, maxRetries: number = 3): Promise<any> {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
@@ -52,7 +50,7 @@ class SystemResourceMonitor {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
@@ -90,7 +88,7 @@ class SystemResourceMonitor {
     if (this.isMonitoring) return;
 
     this.isMonitoring = true;
-    // console.log('🔍 开始系统资源监控...'); // 静默启动
+    // console.log("🔍 开始系统资源监控...'); // 静默启动'`
 
     // 立即获取一次资源信息
     this.updateResources();
@@ -112,7 +110,7 @@ class SystemResourceMonitor {
       clearInterval(this.monitoringInterval);
       this.monitoringInterval = null;
     }
-    // console.log('⏹️ 系统资源监控已停止'); // 静默停止
+    // console.log('⏹️ 系统资源监控已停止'); // 静默停止'
   }
 
   /**
@@ -131,12 +129,12 @@ class SystemResourceMonitor {
         try {
           listener(resources, status);
         } catch (error) {
-          console.error('资源监控监听器错误:', error);
+          console.error('资源监控监听器错误:', error);'
         }
       });
 
     } catch (error) {
-      console.error('更新系统资源信息失败:', error);
+      console.error('更新系统资源信息失败:', error);'
     }
   }
 
@@ -145,14 +143,14 @@ class SystemResourceMonitor {
    */
   private async fetchResourcesFromAPI(): Promise<SystemResources> {
     try {
-      const response = await fetch('/api/system/resources', {
+      const response = await fetch('/api/system/resources', {'
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          "Authorization": `Bearer ${localStorage.getItem('auth_token')}`'`
         }
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status}`);`
       }
 
       const data = await response.json();
@@ -160,7 +158,7 @@ class SystemResourceMonitor {
 
     } catch (error) {
       // 如果API不可用，返回模拟数据
-      // console.warn('无法获取真实资源信息，使用模拟数据:', error); // 静默处理
+      // console.warn("无法获取真实资源信息，使用模拟数据:', error); // 静默处理'`
       return this.getMockResources();
     }
   }
@@ -246,13 +244,12 @@ class SystemResourceMonitor {
   /**
    * 检查是否可以启动新的压力测试
    */
-  canStartNewTest(testType?: 'stress' | 'regular'): boolean {
+  canStartNewTest(testType?: 'stress' | 'regular'): boolean {'
     const status = this.getCurrentStatus();
 
     // 压力测试更宽松的资源检查
-    if (testType === 'stress') {
-      
-        return status !== 'critical'; // 只要不是严重状态就可以启动
+    if (testType === 'stress') {'
+        return status !== 'critical'; // 只要不是严重状态就可以启动'
       }
 
     // 普通测试的原有逻辑
@@ -269,13 +266,13 @@ class SystemResourceMonitor {
     if (!resources) return 3; // 默认值
 
     switch (status) {
-      case 'healthy':
+      case 'healthy': ''
         return Math.min(8, Math.floor(resources.cpu.cores * 1.5));
-      case 'warning':
+      case 'warning': ''
         return Math.min(5, Math.floor(resources.cpu.cores));
-      case 'critical':
+      case 'critical': ''
         return Math.min(2, Math.floor(resources.cpu.cores * 0.5));
-      case 'overloaded':
+      case 'overloaded': ''
         return 1;
       default:
         return 3;
@@ -315,13 +312,12 @@ class SystemResourceMonitor {
   } {
     const resources = this.getCurrentResources();
     const status = this.getCurrentStatus();
-    const recommendations: string[] = [];
-
+    const recommendations: string[]  = [];
     if (!resources) {
       
         return {
-        status: 'healthy',
-        recommendations: ['系统资源监控未启动'],
+        status: 'healthy','
+        recommendations: ['系统资源监控未启动'],'
         metrics: { cpuUsage: 0, memoryUsage: 0, networkLoad: 0, diskUsage: 0
       }
       };
@@ -329,13 +325,13 @@ class SystemResourceMonitor {
 
     // 生成建议
     if (resources.cpu.usage > this.thresholds.cpu.warning) {
-      recommendations.push(`CPU使用率较高 (${resources.cpu.usage.toFixed(1)}%)，建议减少并发测试数量`);
+      recommendations.push(`CPU使用率较高 (${resources.cpu.usage.toFixed(1)}%)，建议减少并发测试数量`);`
     }
     if (resources.memory.usage > this.thresholds.memory.warning) {
-      recommendations.push(`内存使用率较高 (${resources.memory.usage.toFixed(1)}%)，建议清理内存或增加内存`);
+      recommendations.push(`内存使用率较高 (${resources.memory.usage.toFixed(1)}%)，建议清理内存或增加内存`);`
     }
     if (resources.network.activeConnections > this.thresholds.network.maxConnections * 0.8) {
-      recommendations.push(`网络连接数较多 (${resources.network.activeConnections})，建议控制并发连接`);
+      recommendations.push(`网络连接数较多 (${resources.network.activeConnections})，建议控制并发连接`);`
     }
 
     return {
@@ -357,7 +353,7 @@ export const systemResourceMonitor = (() => {
     const instance = new SystemResourceMonitor();
 
     // 静默启动监控，不输出日志
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined') {'`
       setTimeout(() => {
         instance.startMonitoring();
       }, 100);
@@ -365,19 +361,18 @@ export const systemResourceMonitor = (() => {
 
     return instance;
   } catch (error) {
-    console.warn('⚠️ 系统资源监控器初始化失败:', error);
-
+    console.warn('⚠️ 系统资源监控器初始化失败:', error);'
     // 返回一个安全的默认实现
     return {
-      getCurrentStatus: () => 'healthy' as const,
-      canStartNewTest: (testType?: 'stress' | 'regular') => true, // 默认实现总是允许
+      getCurrentStatus: () => 'healthy' as const,'
+      canStartNewTest: (testType?: 'stress' | 'regular') => true, // 默认实现总是允许'
       getRecommendedMaxConcurrentTests: () => 3,
       getCurrentResources: (): any => null,
-      addListener: () => () => { },
+      addListener: () => ()  => { },
       startMonitoring: () => { },
       stopMonitoring: () => { },
       getResourceStats: () => ({
-        status: 'healthy' as const,
+        status: 'healthy' as const,'
         recommendations: [] as any[],
         metrics: { cpuUsage: 0, memoryUsage: 0, networkLoad: 0, diskUsage: 0 }
       })

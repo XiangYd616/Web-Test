@@ -1,9 +1,8 @@
-import { handleAsyncError } from '../utils/errorHandler';
-/**
+import { handleAsyncError    } from '../utils/errorHandler';/**'
  * 安全测试服务
  */
 
-export interface SecurityTestResult {
+export interface SecurityTestResult     {
   score: number;
   vulnerabilities: any[];
   recommendations: any[];
@@ -14,7 +13,7 @@ class SecurityTestService {
     try {
   await new Promise(resolve => setTimeout(resolve, 1000));
 } catch (error) {
-  console.error('Await error:', error);
+  console.error('Await error:', error);'
   throw error;
 }
 

@@ -1,8 +1,6 @@
 // 管理员相关类型定义
 
-import type { User } from './user';
-
-export interface SystemStats {
+import type { User  } from './user';export interface SystemStats     {'
   users: {
     total: number;
     active: number;
@@ -43,7 +41,7 @@ export interface SystemStats {
   };
 }
 
-export interface SystemMonitor {
+export interface SystemMonitor     {
   timestamp: string;
   metrics: {
     system: {
@@ -113,14 +111,14 @@ export interface SystemMonitor {
   }>;
 }
 
-export interface AdminUser extends User {
+export interface AdminUser extends User     {
   testCount: number;
   lastActivity: string;
   ipAddress: string;
   userAgent: string;
 }
 
-export interface UserFilter {
+export interface UserFilter     {
   role?: string;
   status?: string;
   search?: string;
@@ -131,14 +129,14 @@ export interface UserFilter {
   limit?: number;
 }
 
-export interface UserBulkAction {
+export interface UserBulkAction     {
   action: 'activate' | 'deactivate' | 'suspend' | 'changeRole' | 'delete';
   userIds: string[];
   newRole?: string;
   reason?: string;
 }
 
-export interface TestManagement {
+export interface TestManagement     {
   id: string;
   type: string;
   url: string;
@@ -152,7 +150,7 @@ export interface TestManagement {
   error?: string;
 }
 
-export interface TestFilter {
+export interface TestFilter     {
   type?: string;
   status?: string;
   userId?: string;
@@ -164,7 +162,7 @@ export interface TestFilter {
   limit?: number;
 }
 
-export interface SystemConfig {
+export interface SystemConfig     {
   general: {
     siteName: string;
     siteDescription: string;
@@ -242,7 +240,7 @@ export interface SystemConfig {
   };
 }
 
-export interface ActivityLog {
+export interface ActivityLog     {
   id: string;
   userId?: string;
   userName?: string;
@@ -259,7 +257,7 @@ export interface ActivityLog {
   errorMessage?: string;
 }
 
-export interface ActivityFilter {
+export interface ActivityFilter     {
   userId?: string;
   action?: string;
   resource?: string;
@@ -273,7 +271,7 @@ export interface ActivityFilter {
   limit?: number;
 }
 
-export interface BackupInfo {
+export interface BackupInfo     {
   id: string;
   filename: string;
   size: number;
@@ -283,7 +281,7 @@ export interface BackupInfo {
   description?: string;
 }
 
-export interface PermissionGroup {
+export interface PermissionGroup     {
   id: string;
   name: string;
   description: string;
@@ -292,7 +290,7 @@ export interface PermissionGroup {
   isSystem: boolean;
 }
 
-export interface AdminApiResponse<T = any> {
+export interface AdminApiResponse<T = any>     {
   success: boolean;
   data?: T;
   message?: string;

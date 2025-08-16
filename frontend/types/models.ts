@@ -11,15 +11,14 @@
 export type {
   Email, Timestamp,
   // URL, UUID
-} from './common'; // 已修复
-// ==================== 枚举类型导出 ====================
+} from './common'; // 已修复'
+//   = =================== 枚举类型导出 ====================
 
 // 重新导出所有枚举类型（只导出实际存在的枚举）
 export {
   Language, TestGrade,
   TestPriority, TestStatus, TestType, ThemeMode, Timezone, UserPlan, UserRole,
-  // UserStatus
-} from './enums'; // 已修复
+  // UserStatus;} from './enums'; // 已修复'
 // ==================== 用户相关类型导出 ====================
 
 // 重新导出用户相关类型
@@ -27,15 +26,14 @@ export type {
   AuthResponse, ChangePasswordData, CreateUserData, DEFAULT_USER_PREFERENCES, LoginCredentials,
   RegisterData, UpdateUserData, User, UserActivityLog,
   // UserPreferences, UserProfile, UserSession, UserStats
-} from './user'; // 已修复
-// ==================== API响应类型导出 ====================
+} from './user'; // 已修复'
+//   = =================== API响应类型导出 ====================
 
 // 重新导出API响应类型
 export type {
   ApiError, ApiErrorResponse, ApiMeta, ApiResponse, ApiResponseUtils, ApiSuccessResponse, AuthConfig, CreatedResponse, ErrorCode, ErrorResponseMethods, NoContentResponse, PaginatedRequest, PaginatedResponse,
   PaginationInfo, QueryParams,
-  // RequestConfig, ResponseBuilder, ValidationError
-} from './apiResponse'; // 已修复
+  // RequestConfig, ResponseBuilder, ValidationError;} from './apiResponse'; // 已修复'
 // ==================== 测试相关类型导出 ====================
 
 // 测试相关枚举已在上面导出，这里只导出接口类型
@@ -43,11 +41,11 @@ export type {
 // 重新导出测试相关接口类型（从现有的test.ts文件导入）
 export type {
   // APITestConfig, ContentTestConfig, PerformanceTestConfig, SecurityTestConfig
-} from './testEngines'; // 已修复
+} from './testEngines'; // 已修复'
 /**
  * 测试配置接口
  */
-export interface TestConfig {
+export interface TestConfig     {
   // 性能测试配置
   performance?: {
     users?: number;
@@ -102,7 +100,7 @@ export interface TestConfig {
 /**
  * 测试结果接口
  */
-export interface TestResult {
+export interface TestResult     {
   // 基础信息
   id: string;
   testId: string;
@@ -137,7 +135,7 @@ export interface TestResult {
 /**
  * 测试历史接口
  */
-export interface TestHistory {
+export interface TestHistory     {
   id: string;
   userId: string;
   testType: string;
@@ -148,14 +146,13 @@ export interface TestHistory {
   updatedAt: string;
 }
 
-// ==================== 数据库映射接口 ====================
+//   = =================== 数据库映射接口 ====================
 
 /**
  * 测试结果数据库字段映射
  */
-export interface TestResultDatabaseFields {
-  id: string;
-  test_id: string;
+export interface TestResultDatabaseFields     {
+  id: string;test_id: string;
   user_id: string;
   type: string;
   url: string;
@@ -175,7 +172,7 @@ export interface TestResultDatabaseFields {
 /**
  * 测试历史数据库字段映射
  */
-export interface TestHistoryDatabaseFields {
+export interface TestHistoryDatabaseFields     {
   id: string;
   user_id: string;
   test_type: string;
@@ -191,22 +188,22 @@ export interface TestHistoryDatabaseFields {
 /**
  * 将数据库字段转换为TestResult对象
  */
-export function testResultFromDatabase(dbData: TestResultDatabaseFields): TestResult {
+export function testResultFromDatabase(dbData: TestResultDatabaseFields): TestResult   {
   return {
     id: dbData.id,
     testId: dbData.test_id,
     userId: dbData.user_id,
     type: dbData.type,
     url: dbData.url,
-    config: JSON.parse(dbData.config || '{}'),
+    config: JSON.parse(dbData.config || '{}'),'
     status: dbData.status,
     startTime: dbData.start_time,
     endTime: dbData.end_time,
     duration: dbData.duration,
-    results: JSON.parse(dbData.results || 'null'),
-    metrics: JSON.parse(dbData.metrics || '{}'),
-    errors: JSON.parse(dbData.errors || '[]'),
-    metadata: JSON.parse(dbData.metadata || '{}'),
+    results: JSON.parse(dbData.results || 'null'),'
+    metrics: JSON.parse(dbData.metrics || '{}'),'
+    errors: JSON.parse(dbData.errors || '[]'),'
+    metadata: JSON.parse(dbData.metadata || '{}'),'
     createdAt: dbData.created_at,
     updatedAt: dbData.updated_at
   };
@@ -215,7 +212,7 @@ export function testResultFromDatabase(dbData: TestResultDatabaseFields): TestRe
 /**
  * 将TestResult对象转换为数据库字段
  */
-export function testResultToDatabase(testResult: TestResult): TestResultDatabaseFields {
+export function testResultToDatabase(testResult: TestResult): TestResultDatabaseFields   {
   return {
     id: testResult.id,
     test_id: testResult.testId,
@@ -239,7 +236,7 @@ export function testResultToDatabase(testResult: TestResult): TestResultDatabase
 /**
  * 将数据库字段转换为TestHistory对象
  */
-export function testHistoryFromDatabase(dbData: TestHistoryDatabaseFields): TestHistory {
+export function testHistoryFromDatabase(dbData: TestHistoryDatabaseFields): TestHistory   {
   return {
     id: dbData.id,
     userId: dbData.user_id,
@@ -255,7 +252,7 @@ export function testHistoryFromDatabase(dbData: TestHistoryDatabaseFields): Test
 /**
  * 将TestHistory对象转换为数据库字段
  */
-export function testHistoryToDatabase(testHistory: TestHistory): TestHistoryDatabaseFields {
+export function testHistoryToDatabase(testHistory: TestHistory): TestHistoryDatabaseFields   {
   return {
     id: testHistory.id,
     user_id: testHistory.userId,
@@ -273,31 +270,30 @@ export function testHistoryToDatabase(testHistory: TestHistory): TestHistoryData
 /**
  * 验证测试配置
  */
-export function validateTestConfig(type: string, config: any): { isValid: boolean; errors: string[] } {
-  const errors: string[] = [];
-
+export function validateTestConfig(type: string, config: any):   { isValid: boolean; errors: string[] } {
+  const errors: string[]  = [];
   switch (type) {
-    case 'performance':
+    case 'performance': ''
       if (!config.performance?.users || config.performance.users < 1) {
-        errors.push('性能测试需要指定用户数量');
+        errors.push('性能测试需要指定用户数量');'
       }
       if (!config.performance?.duration || config.performance.duration < 1) {
-        errors.push('性能测试需要指定持续时间');
+        errors.push('性能测试需要指定持续时间');'
       }
       break;
 
-    case 'api':
+    case 'api': ''
       if (!config.api?.method) {
-        errors.push('API测试需要指定HTTP方法');
+        errors.push('API测试需要指定HTTP方法');'
       }
       break;
 
-    case 'stress':
+    case 'stress': ''
       if (!config.stress?.maxUsers || config.stress.maxUsers < 1) {
-        errors.push('压力测试需要指定最大用户数');
+        errors.push('压力测试需要指定最大用户数');'
       }
       if (!config.stress?.duration || config.stress.duration < 1) {
-        errors.push('压力测试需要指定持续时间');
+        errors.push('压力测试需要指定持续时间');'
       }
       break;
   }
@@ -311,7 +307,7 @@ export function validateTestConfig(type: string, config: any): { isValid: boolea
 /**
  * 验证URL格式
  */
-export function validateUrl(url: string): boolean {
+export function validateUrl(url: string): boolean   {
   try {
     new URL(url);
     return true;

@@ -1,6 +1,4 @@
-import React, { useEffect, useState } from 'react';
-
-// 延迟导入 Chart.js 以避免初始化问题
+import React, { useEffect, useState    } from 'react';// 延迟导入 Chart.js 以避免初始化问题'
 let ChartJS: any;
 let Bar: any;
 let Doughnut: any;
@@ -14,30 +12,29 @@ const initializeChartJS = async () => {
     onClick?.(event);
   }, [disabled, loading, onClick]);
   
-  const memoizedHandleChange = useMemo(() => 
-    debounce((value: any) => {
+  const memoizedHandleChange = useMemo(() => debounce((value: any) => {
       onChange?.(value);
     }, 300), [onChange]
   );
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;
-  const descriptionId = `${componentId}-description`;
+  const errorId = `${componentId}-error`;`
+  const descriptionId = `${componentId}-description`;`
   
   const ariaProps = {
     id: componentId,
-    'aria-label': ariaLabel,
-    'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': [
+    "aria-label': ariaLabel,'`
+    'aria-labelledby': ariaLabelledBy,'
+    'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,
-    'aria-invalid': !!error,
-    'aria-disabled': disabled,
-    'aria-busy': loading,
-    'aria-expanded': expanded,
-    'aria-selected': selected,
+    ].filter(Boolean).join(' ') || undefined,'
+    'aria-invalid': !!error,'
+    'aria-disabled': disabled,'
+    'aria-busy': loading,'
+    'aria-expanded': expanded,'
+    'aria-selected': selected,'
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -48,8 +45,8 @@ const initializeChartJS = async () => {
     try {
       onClick?.(event);
     } catch (error) {
-      console.error('Click handler error:', error);
-      setError('操作失败，请重试');
+      console.error('Click handler error: ', error);'
+      setError('操作失败，请重试');'
     }
   }, [disabled, loading, onClick]);
   
@@ -59,8 +56,8 @@ const initializeChartJS = async () => {
     try {
       onChange?.(newValue);
     } catch (error) {
-      console.error('Change handler error:', error);
-      updateState({ error: '值更新失败' });
+      console.error('Change handler error: ', error);'
+      updateState({ error: '值更新失败' });'
     }
   }, [onChange, updateState]);
   
@@ -75,9 +72,8 @@ const initializeChartJS = async () => {
   }, [onBlur, updateState]);
   if (ChartJS) return; // 已经初始�?
   try {
-    const chartModule = await import('chart.js');
-    const reactChartModule = await import('react-chartjs-2');
-
+    const chartModule = await import('chart.js');'
+    const reactChartModule = await import("react-chartjs-2');'
     ChartJS = chartModule.Chart;
     Bar = reactChartModule.Bar;
     Doughnut = reactChartModule.Doughnut;
@@ -97,20 +93,20 @@ const initializeChartJS = async () => {
       chartModule.Filler
     );
   } catch (error) {
-    console.error('Failed to initialize Chart.js:', error);
+    console.error("Failed to initialize Chart.js: ', error);'
   }
 };
 
 // 现代化图表配色方案
 export const chartColors = {
-  primary: '#4f46e5',
-  success: 'var(--color-success)',
-  warning: 'var(--color-warning)',
-  error: 'var(--color-danger)',
-  info: 'var(--color-primary)',
-  purple: '#8b5cf6',
-  cyan: '#06b6d4',
-  pink: '#ec4899'
+  primary: '#4f46e5','
+  success: 'var(--color-success)','
+  warning: 'var(--color-warning)','
+  error: 'var(--color-danger)','
+  info: 'var(--color-primary)','
+  purple: '#8b5cf6','
+  cyan: '#06b6d4','
+  pink: '#ec4899';
 };
 
 // 默认图表选项
@@ -120,27 +116,27 @@ const defaultOptions = {
   plugins: {
     legend: {
       labels: {
-        color: '#b4b7c1',
+        color: '#b4b7c1','
         font: {
-          family: 'Inter',
+          family: 'Inter','
           size: 12
         }
       }
     },
     tooltip: {
-      backgroundColor: '#2a2f3e',
-      titleColor: 'var(--color-white)',
-      bodyColor: '#b4b7c1',
-      borderColor: '#3a3f4e',
+      backgroundColor: '#2a2f3e','
+      titleColor: 'var(--color-white)','
+      bodyColor: '#b4b7c1','
+      borderColor: '#3a3f4e','
       borderWidth: 1,
       cornerRadius: 8,
       titleFont: {
-        family: 'Inter',
+        family: 'Inter','
         size: 14,
-        weight: '600'
+        weight: '600';
       },
       bodyFont: {
-        family: 'Inter',
+        family: 'Inter','
         size: 12
       }
     }
@@ -148,26 +144,26 @@ const defaultOptions = {
   scales: {
     x: {
       grid: {
-        color: '#3a3f4e',
-        borderColor: '#3a3f4e'
+        color: '#3a3f4e','
+        borderColor: '#3a3f4e';
       },
       ticks: {
-        color: '#8b8fa3',
+        color: '#8b8fa3','
         font: {
-          family: 'Inter',
+          family: 'Inter','
           size: 11
         }
       }
     },
     y: {
       grid: {
-        color: '#3a3f4e',
-        borderColor: '#3a3f4e'
+        color: '#3a3f4e','
+        borderColor: '#3a3f4e';
       },
       ticks: {
-        color: '#8b8fa3',
+        color: '#8b8fa3','
         font: {
-          family: 'Inter',
+          family: 'Inter','
           size: 11
         }
       }
@@ -175,7 +171,7 @@ const defaultOptions = {
   }
 };
 
-export interface LineChartProps {
+export interface LineChartProps     {
   data: any;
   options?: any;
   height?: number;
@@ -186,7 +182,7 @@ export const LineChart: React.FC<LineChartProps> = ({
   data,
   options = {},
   height = 300,
-  className = ''
+  className = '';
 }) => {
   const [isReady, setIsReady] = useState(false);
 
@@ -202,9 +198,9 @@ export const LineChart: React.FC<LineChartProps> = ({
   if (!isReady || !Line) {
     
         return (
-      <div className={`modern-chart-container ${className
-      }`} style={{ height }}>
-        <div className="flex items-center justify-center h-full text-gray-500">
+      <div className={`modern-chart-container ${className`}
+      }`} style={{ height }}>`
+        <div className= "flex items-center justify-center h-full text-gray-500'>`
           加载图表�?..
         </div>
       </div>
@@ -212,13 +208,13 @@ export const LineChart: React.FC<LineChartProps> = ({
   }
 
   return (
-    <div className={`modern-chart-container ${className}`} style={{ height }}>
-      <Line data={data} options={mergedOptions} />
+    <div className={`modern-chart-container ${className}`} style={{ height }}>`
+      <Line data={data} options={mergedOptions}    />
     </div>
   );
 };
 
-export interface BarChartProps {
+export interface BarChartProps     {
   data: any;
   options?: any;
   height?: number;
@@ -229,7 +225,7 @@ export const BarChart: React.FC<BarChartProps> = ({
   data,
   options = {},
   height = 300,
-  className = ''
+  className = "';'`
 }) => {
   const [isReady, setIsReady] = useState(false);
 
@@ -245,9 +241,9 @@ export const BarChart: React.FC<BarChartProps> = ({
   if (!isReady || !Bar) {
     
         return (
-      <div className={`modern-chart-container ${className
-      }`} style={{ height }}>
-        <div className="flex items-center justify-center h-full text-gray-500">
+      <div className={`modern-chart-container ${className`}
+      }`} style={{ height }}>`
+        <div className= "flex items-center justify-center h-full text-gray-500'>`
           加载图表�?..
         </div>
       </div>
@@ -255,13 +251,13 @@ export const BarChart: React.FC<BarChartProps> = ({
   }
 
   return (
-    <div className={`modern-chart-container ${className}`} style={{ height }}>
-      <Bar data={data} options={mergedOptions} />
+    <div className={`modern-chart-container ${className}`} style={{ height }}>`
+      <Bar data={data} options={mergedOptions}    />
     </div>
   );
 };
 
-export interface DoughnutChartProps {
+export interface DoughnutChartProps     {
   data: any;
   options?: any;
   size?: number;
@@ -272,7 +268,7 @@ export const DoughnutChart: React.FC<DoughnutChartProps> = ({
   data,
   options = {},
   size = 200,
-  className = ''
+  className = "';'`
 }) => {
   const [isReady, setIsReady] = useState(false);
 
@@ -285,46 +281,46 @@ export const DoughnutChart: React.FC<DoughnutChartProps> = ({
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'bottom' as const,
+        position: 'bottom' as const,'
         labels: {
-          color: '#b4b7c1',
+          color: '#b4b7c1','
           font: {
-            family: 'Inter',
+            family: 'Inter','
             size: 12
           },
           padding: 20,
           usePointStyle: true,
-          pointStyle: 'circle'
+          pointStyle: 'circle';
         }
       },
       tooltip: {
-        backgroundColor: '#2a2f3e',
-        titleColor: 'var(--color-white)',
-        bodyColor: '#b4b7c1',
-        borderColor: '#3a3f4e',
+        backgroundColor: '#2a2f3e','
+        titleColor: 'var(--color-white)','
+        bodyColor: '#b4b7c1','
+        borderColor: '#3a3f4e','
         borderWidth: 1,
         cornerRadius: 8,
         titleFont: {
-          family: 'Inter',
+          family: 'Inter','
           size: 14,
-          weight: '600'
+          weight: '600';
         },
         bodyFont: {
-          family: 'Inter',
+          family: 'Inter','
           size: 12
         }
       }
     },
-    cutout: '70%',
+    cutout: '70%','
     ...options
   };
 
   if (!isReady || !Doughnut) {
     
         return (
-      <div className={`modern-chart-container ${className
-      }`} style={{ height: size, width: size }}>
-        <div className="flex items-center justify-center h-full text-gray-500">
+      <div className={`modern-chart-container ${className`}
+      }`} style={{ height: size, width: size }}>`
+        <div className= "flex items-center justify-center h-full text-gray-500'>`
           加载图表�?..
         </div>
       </div>
@@ -332,14 +328,14 @@ export const DoughnutChart: React.FC<DoughnutChartProps> = ({
   }
 
   return (
-    <div className={`modern-chart-container ${className}`} style={{ height: size, width: size }}>
-      <Doughnut data={data} options={doughnutOptions} />
+    <div className={`modern-chart-container ${className}`} style={{ height: size, width: size }}>`
+      <Doughnut data={data} options={doughnutOptions}    />
     </div>
   );
 };
 
 // 进度环图组件
-export interface ProgressRingProps {
+export interface ProgressRingProps     {
   percentage: number;
   size?: number;
   strokeWidth?: number;
@@ -354,9 +350,9 @@ export const ProgressRing: React.FC<ProgressRingProps> = ({
   size = 120,
   strokeWidth = 8,
   color = chartColors.primary,
-  backgroundColor = '#3a3f4e',
+  backgroundColor = "#3a3f4e','`
   showText = true,
-  className = ''
+  className = "';
 }) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
@@ -364,14 +360,14 @@ export const ProgressRing: React.FC<ProgressRingProps> = ({
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   return (
-    <div className={`progress-ring ${className}`} style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="progress-ring-svg">
+    <div className={`progress-ring ${className}`} style={{ width: size, height: size }}>`
+      <svg width={size} height={size} className= "progress-ring-svg'>`
         {/* 背景圆环 */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          fill="transparent"
+          fill= 'transparent';
           stroke={backgroundColor}
           strokeWidth={strokeWidth}
         />
@@ -380,22 +376,22 @@ export const ProgressRing: React.FC<ProgressRingProps> = ({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          fill="transparent"
+          fill= 'transparent';
           stroke={color}
           strokeWidth={strokeWidth}
-          strokeLinecap="round"
+          strokeLinecap= 'round';
           strokeDasharray={strokeDasharray}
           strokeDashoffset={strokeDashoffset}
           style={{
-            transition: 'stroke-dashoffset 0.5s ease-in-out',
-            transform: 'rotate(-90deg)',
-            transformOrigin: '50% 50%'
+            transition: 'stroke-dashoffset 0.5s ease-in-out','
+            transform: 'rotate(-90deg)','
+            transformOrigin: '50% 50%';
           }}
         />
       </svg>
       {showText && (
-        <div className="progress-ring-text">
-          <span className="text-2xl font-bold text-primary">
+        <div className= 'progress-ring-text'>
+          <span className= 'text-2xl font-bold text-primary'>
             {Math.round(percentage)}%
           </span>
         </div>
@@ -405,7 +401,7 @@ export const ProgressRing: React.FC<ProgressRingProps> = ({
 };
 
 // 迷你图表组件
-export interface MiniChartProps {
+export interface MiniChartProps     {
   data: number[];
   color?: string;
   height?: number;
@@ -416,7 +412,7 @@ export const MiniLineChart: React.FC<MiniChartProps> = ({
   data,
   color = chartColors.primary,
   height = 40,
-  className = ''
+  className = '';
 }) => {
   const width = data.length * 8;
   const max = Math.max(...data);
@@ -426,19 +422,19 @@ export const MiniLineChart: React.FC<MiniChartProps> = ({
   const points = data.map((value, index) => {
     const x = index * 8;
     const y = height - ((value - min) / range) * height;
-    return `${x},${y}`;
-  }).join(' ');
+    return `${x},${y}`;`
+  }).join(" ');'`
 
   return (
-    <div className={`mini-chart ${className}`}>
-      <svg width={width} height={height} className="mini-chart-svg">
+    <div className={`mini-chart ${className}`}>`
+      <svg width={width} height={height} className= "mini-chart-svg'>`
         <polyline
           points={points}
-          fill="none"
+          fill= 'none';
           stroke={color}
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          strokeWidth= '2';
+          strokeLinecap= 'round';
+          strokeLinejoin= 'round';
         />
       </svg>
     </div>
@@ -446,7 +442,7 @@ export const MiniLineChart: React.FC<MiniChartProps> = ({
 };
 
 // CSS样式
-const chartStyles = `
+const chartStyles = ``
 .modern-chart-container {
   position: relative;
 }
@@ -471,11 +467,11 @@ const chartStyles = `
 .mini-chart-svg {
   display: block;
 }
-`;
+`;`
 
 // 注入样式
-if (typeof document !== 'undefined') {
-  const styleElement = document.createElement('style');
+if (typeof document !== "undefined') {'`
+  const styleElement = document.createElement('style');'
   styleElement.textContent = chartStyles;
   document.head.appendChild(styleElement);
 }

@@ -3,9 +3,7 @@
  * 处理实时测试进度更新和通信
  */
 
-import { TestProgress, TestResult, TestError } from '../types/testConfig';
-
-export interface WebSocketMessage {
+import { TestProgress, TestResult, TestError    } from '../types/testConfig';export interface WebSocketMessage     {'
   type: 'progress' | 'complete' | 'error' | 'ping' | 'pong';
   payload: any;
   testId?: string;
@@ -38,17 +36,17 @@ export class WebSocketService {
 
       if (this.isConnecting) {
         
-        reject(new Error('WebSocket连接正在进行中'));
+        reject(new Error('WebSocket连接正在进行中'));'
         return;
       }
 
       this.isConnecting = true;
 
       try {
-        this.ws = new WebSocket(`${this.baseUrl}/ws`);
+        this.ws = new WebSocket(`${this.baseUrl}/ws`);`
 
         this.ws.onopen = () => {
-          console.log('WebSocket连接已建立');
+          console.log("WebSocket连接已建立');'`
           this.isConnecting = false;
           this.reconnectAttempts = 0;
           this.startPing();
@@ -57,15 +55,15 @@ export class WebSocketService {
 
         this.ws.onmessage = (event) => {
           try {
-            const message: WebSocketMessage = JSON.parse(event.data);
+            const message: WebSocketMessage  = JSON.parse(event.data);
             this.handleMessage(message);
           } catch (error) {
-            console.error('WebSocket消息解析错误:', error);
+            console.error('WebSocket消息解析错误:', error);'
           }
         };
 
         this.ws.onclose = (event) => {
-          console.log('WebSocket连接已关闭:', event.code, event.reason);
+          console.log('WebSocket连接已关闭:', event.code, event.reason);'
           this.isConnecting = false;
           this.stopPing();
           
@@ -75,9 +73,9 @@ export class WebSocketService {
         };
 
         this.ws.onerror = (error) => {
-          console.error('WebSocket错误:', error);
+          console.error('WebSocket错误:', error);'
           this.isConnecting = false;
-          reject(new Error('WebSocket连接失败'));
+          reject(new Error('WebSocket连接失败'));'
         };
 
       } catch (error) {
@@ -94,7 +92,7 @@ export class WebSocketService {
     this.stopPing();
     
     if (this.ws) {
-      this.ws.close(1000, '客户端主动断开');
+      this.ws.close(1000, '客户端主动断开');'
       this.ws = null;
     }
     
@@ -104,8 +102,7 @@ export class WebSocketService {
   /**
    * 订阅测试进度更新
    */
-  subscribeToTestProgress(
-    testId: string,
+  subscribeToTestProgress(testId: string,
     onProgress: (progress: TestProgress) => void,
     onComplete: (result: TestResult) => void,
     onError: (error: TestError) => void
@@ -114,13 +111,13 @@ export class WebSocketService {
       if (message.testId !== testId) return;
 
       switch (message.type) {
-        case 'progress':
+        case 'progress': ''
           onProgress(message.payload as TestProgress);
           break;
-        case 'complete':
+        case 'complete': ''
           onComplete(message.payload as TestResult);
           break;
-        case 'error':
+        case 'error': ''
           onError(new TestError(message.payload.message, message.payload.code));
           break;
       }
@@ -130,7 +127,7 @@ export class WebSocketService {
 
     // 发送订阅消息
     this.send({
-      type: 'subscribe',
+      type: 'subscribe','
       payload: { testId },
       timestamp: new Date().toISOString()
     });
@@ -139,7 +136,7 @@ export class WebSocketService {
     return () => {
       this.messageHandlers.delete(testId);
       this.send({
-        type: 'unsubscribe',
+        type: 'unsubscribe','
         payload: { testId },
         timestamp: new Date().toISOString()
       });
@@ -156,7 +153,7 @@ export class WebSocketService {
         timestamp: message.timestamp || new Date().toISOString()
       }));
     } else {
-      console.warn('WebSocket未连接，无法发送消息');
+      console.warn('WebSocket未连接，无法发送消息');'
     }
   }
 
@@ -165,10 +162,10 @@ export class WebSocketService {
    */
   private handleMessage(message: WebSocketMessage): void {
     switch (message.type) {
-      case 'ping':
-        this.send({ type: 'pong', payload: {} });
+      case 'ping': ''
+        this.send({ type: 'pong', payload: {} });'
         break;
-      case 'pong':
+      case 'pong': ''
         // 心跳响应，无需处理
         break;
       default:
@@ -186,7 +183,7 @@ export class WebSocketService {
    */
   private startPing(): void {
     this.pingInterval = setInterval(() => {
-      this.send({ type: 'ping', payload: {} });
+      this.send({ type: 'ping', payload: {} });'
     }, 30000); // 每30秒发送一次心跳
   }
 
@@ -207,11 +204,11 @@ export class WebSocketService {
     this.reconnectAttempts++;
     const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
     
-    console.log(`${delay}ms后尝试第${this.reconnectAttempts}次重连...`);
+    console.log(`${delay}ms后尝试第${this.reconnectAttempts}次重连...`);`
     
     setTimeout(() => {
       this.connect().catch(error => {
-        console.error('重连失败:', error);
+        console.error("重连失败:', error);'`
       });
     }, delay);
   }
@@ -220,9 +217,9 @@ export class WebSocketService {
    * 获取WebSocket URL
    */
   private getWebSocketURL(): string {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const protocol = window.location.protocol === 'https: ' ? 'wss: ' : 'ws: ';
     const host = window.location.host;
-    return `${protocol}/${host}`;
+    return `${protocol}/${host}`;`
   }
 
   /**
@@ -236,8 +233,7 @@ export class WebSocketService {
    * 获取连接状态描述
    */
   get connectionState(): string {
-    if (!this.ws) return 'disconnected';
-    
+    if (!this.ws) return "disconnected';'`
     switch (this.ws.readyState) {
       case WebSocket.CONNECTING:
         return 'connecting';
@@ -257,6 +253,6 @@ export class WebSocketService {
 export const websocketService = new WebSocketService();
 
 // 页面卸载时自动断开连接
-window.addEventListener('beforeunload', () => {
+window.addEventListener('beforeunload', () => {'
   websocketService.disconnect();
 });

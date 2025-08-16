@@ -1,113 +1,103 @@
-/**
- * Playwright端到端测试配置
- */
-
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * 从环境变量读取配置
+ * @see https://playwright.dev/docs/test-configuration
  */
-const baseURL = process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:5174';
-
 export default defineConfig({
-    // 测试目录
-    testDir: '../../tools/e2e',
+  testDir: './e2e',
 
-    // 全局测试超时
-    timeout: 30 * 1000,
+  /* Run tests in files in parallel */
+  fullyParallel: true,
 
-    // 期望超时
-    expect: {
-        timeout: 5000,
+  /* Fail the build on CI if you accidentally left test.only in the source code. */
+  forbidOnly: !!process.env.CI,
+
+  /* Retry on CI only */
+  retries: process.env.CI ? 2 : 0,
+
+  /* Opt out of parallel tests on CI. */
+  workers: process.env.CI ? 1 : undefined,
+
+  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
+  reporter: [
+    ['html'],
+    ['json', { outputFile: 'test-results/results.json' }],
+    ['junit', { outputFile: 'test-results/results.xml' }]
+  ],
+
+  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  use: {
+    /* Base URL to use in actions like `await page.goto('/')`. */
+    baseURL: process.env.BASE_URL || 'http://localhost:3000',
+
+    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
+    trace: 'on-first-retry',
+
+    /* Take screenshot on failure */
+    screenshot: 'only-on-failure',
+
+    /* Record video on failure */
+    video: 'retain-on-failure',
+  },
+
+  /* Configure projects for major browsers */
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
     },
 
-    // 并行运行测试
-    fullyParallel: true,
-
-    // 在CI环境中失败时不重试，本地环境重试1次
-    retries: process.env.CI ? 2 : 1,
-
-    // 并行工作进程数
-    workers: process.env.CI ? 1 : undefined,
-
-    // 报告器配置
-    reporter: [
-        ['html'],
-        ['json', { outputFile: 'test-results/results.json' }],
-        ['junit', { outputFile: 'test-results/results.xml' }],
-    ],
-
-    // 全局设置
-    use: {
-        // 基础URL
-        baseURL,
-
-        // 浏览器上下文选项
-        viewport: { width: 1280, height: 720 },
-
-        // 忽略HTTPS错误
-        ignoreHTTPSErrors: true,
-
-        // 截图设置
-        screenshot: 'only-on-failure',
-
-        // 视频录制
-        video: 'retain-on-failure',
-
-        // 跟踪设置
-        trace: 'retain-on-failure',
-
-        // 用户代理
-        userAgent: 'Test Web App E2E Tests',
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
     },
 
-    // 项目配置 - 不同浏览器和设备
-    projects: [
-        {
-            name: 'chromium',
-            use: { ...devices['Desktop Chrome'] },
-        },
-
-        {
-            name: 'firefox',
-            use: { ...devices['Desktop Firefox'] },
-        },
-
-        {
-            name: 'webkit',
-            use: { ...devices['Desktop Safari'] },
-        },
-
-        // 移动端测试
-        {
-            name: 'Mobile Chrome',
-            use: { ...devices['Pixel 5'] },
-        },
-
-        {
-            name: 'Mobile Safari',
-            use: { ...devices['iPhone 12'] },
-        },
-
-        // 平板测试
-        {
-            name: 'Tablet',
-            use: { ...devices['iPad Pro'] },
-        },
-    ],
-
-    // 开发服务器配置
-    webServer: {
-        command: 'npm run preview',
-        port: 5174,
-        reuseExistingServer: !process.env.CI,
-        timeout: 120 * 1000,
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
     },
 
-    // 输出目录
-    outputDir: 'test-results/',
+    /* Test against mobile viewports. */
+    {
+      name: 'Mobile Chrome',
+      use: { ...devices['Pixel 5'] },
+    },
+    {
+      name: 'Mobile Safari',
+      use: { ...devices['iPhone 12'] },
+    },
 
-    // 全局设置和拆卸
-    globalSetup: require.resolve('../../tools/e2e/global-setup.ts'),
-    globalTeardown: require.resolve('../../tools/e2e/global-teardown.ts'),
+    /* Test against branded browsers. */
+    {
+      name: 'Microsoft Edge',
+      use: { ...devices['Desktop Edge'], channel: 'msedge' },
+    },
+    {
+      name: 'Google Chrome',
+      use: { ...devices['Desktop Chrome'], channel: 'chrome' },
+    },
+  ],
+
+  /* Run your local dev server before starting the tests */
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:3000',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120 * 1000,
+  },
+
+  /* Global setup and teardown */
+  globalSetup: require.resolve('./e2e/global-setup.ts'),
+  globalTeardown: require.resolve('./e2e/global-teardown.ts'),
+
+  /* Test timeout */
+  timeout: 30 * 1000,
+
+  /* Expect timeout */
+  expect: {
+    timeout: 5 * 1000,
+  },
+
+  /* Output directory */
+  outputDir: 'test-results/',
 });

@@ -1,11 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
-import { LocalSEOAnalysisEngine, LocalSEOConfig } from '../services/seo/localSEOAnalysisEngine';
-import { SEOAnalysisResult } from '../services/seo/seoAnalysisEngine';
-import { useRealSEOTest } from './useRealSEOTest';
-
-export type SEOTestMode = 'online' | 'local';
-
-interface OnlineSEOConfig {
+import { useCallback, useRef, useState    } from 'react';import { LocalSEOAnalysisEngine, LocalSEOConfig    } from '../services/seo/localSEOAnalysisEngine';import { SEOAnalysisResult    } from '../services/seo/seoAnalysisEngine';import { useRealSEOTest    } from './useRealSEOTest';export type SEOTestMode   = 'online' | 'local';interface OnlineSEOConfig   {'
   url: string;
   keywords?: string;
   checkTechnicalSEO?: boolean;
@@ -19,23 +12,23 @@ interface OnlineSEOConfig {
   depth?: 'basic' | 'standard' | 'comprehensive';
 }
 
-interface SEOTestConfig {
+interface SEOTestConfig   {
   mode: SEOTestMode;
   online?: OnlineSEOConfig;
   local?: LocalSEOConfig;
 }
 
-interface SEOTestProgress {
+interface SEOTestProgress   {
   progress: number;
   currentStep: string;
   isRunning: boolean;
 }
 
 export const useUnifiedSEOTest = () => {
-  const [currentMode, setCurrentMode] = useState<SEOTestMode>('online');
+  const [currentMode, setCurrentMode] = useState<SEOTestMode>('online');'
   const [localProgress, setLocalProgress] = useState<SEOTestProgress>({
     progress: 0,
-    currentStep: '',
+    currentStep: '','
     isRunning: false
   });
   const [localResults, setLocalResults] = useState<SEOAnalysisResult | null>(null);
@@ -50,27 +43,24 @@ export const useUnifiedSEOTest = () => {
     error: onlineError,
     startTest: startOnlineTest,
     stopTest: stopOnlineTest
-  } = useRealSEOTest();
-
+  }  = useRealSEOTest();
   // 统一的状态获取
-  const isRunning = currentMode === 'online' ? onlineIsRunning : localProgress.isRunning;
-  const progress = currentMode === 'online' ? onlineProgress : localProgress;
-  const results = currentMode === 'online' ? onlineResults : localResults;
-  const error = currentMode === 'online' ? onlineError : localError;
-
+  const isRunning = currentMode === 'online' ? onlineIsRunning : localProgress.isRunning;'
+  const progress = currentMode === 'online' ? onlineProgress : localProgress;'
+  const results = currentMode === 'online' ? onlineResults : localResults;'
+  const error = currentMode === 'online' ? onlineError : localError;'
   // 开始统一测试
   const startTest = useCallback(async (config: SEOTestConfig) => {
     setCurrentMode(config.mode);
 
-    if (config.mode === 'online' && config.online) {
+    if (config.mode === 'online' && config.online) {'
       // 清除本地测试状态
       setLocalResults(null);
       setLocalError(null);
-      setLocalProgress({ progress: 0, currentStep: '', isRunning: false });
-
+      setLocalProgress({ progress: 0, currentStep: '', isRunning: false });'
       // 启动在线测试
       return startOnlineTest(config.online);
-    } else if (config.mode === 'local' && config.local) {
+    } else if (config.mode === 'local' && config.local) {'
       // 清除在线测试状态（通过停止在线测试）
       if (onlineIsRunning) {
         await stopOnlineTest();
@@ -79,7 +69,7 @@ export const useUnifiedSEOTest = () => {
       // 启动本地测试
       return startLocalTest(config.local);
     } else {
-      throw new Error('无效的测试配置');
+      throw new Error('无效的测试配置');'
     }
   }, [startOnlineTest, stopOnlineTest, onlineIsRunning]);
 
@@ -88,14 +78,12 @@ export const useUnifiedSEOTest = () => {
     try {
       setLocalError(null);
       setLocalResults(null);
-      setLocalProgress({ progress: 0, currentStep: '正在初始化本地分析...', isRunning: true });
-
+      setLocalProgress({ progress: 0, currentStep: '正在初始化本地分析...', isRunning: true });'
       // 创建本地SEO分析引擎实例
       localEngineRef.current = new LocalSEOAnalysisEngine();
 
       // 开始本地SEO分析
-      const analysisResult = await localEngineRef.current.analyzeLocalFiles(
-        config,
+      const analysisResult = await localEngineRef.current.analyzeLocalFiles(config,
         (progressValue: number, step: string) => {
           setLocalProgress({
             progress: progressValue,
@@ -108,16 +96,16 @@ export const useUnifiedSEOTest = () => {
       setLocalResults(analysisResult);
       setLocalProgress({
         progress: 100,
-        currentStep: '本地分析完成',
+        currentStep: '本地分析完成','
         isRunning: false
       });
 
     } catch (error) {
-      console.error('Local SEO analysis failed:', error);
-      setLocalError(error instanceof Error ? error.message : '本地SEO分析失败');
+      console.error('Local SEO analysis failed: ', error);'
+      setLocalError(error instanceof Error ? error.message : '本地SEO分析失败');'
       setLocalProgress({
         progress: 0,
-        currentStep: '分析失败',
+        currentStep: '分析失败','
         isRunning: false
       });
       throw error;
@@ -126,8 +114,7 @@ export const useUnifiedSEOTest = () => {
 
   // 停止测试
   const stopTest = useCallback(async () => {
-    if (currentMode === 'online') {
-      
+    if (currentMode === 'online') {'
         return stopOnlineTest();
       } else {
       // 停止本地测试
@@ -135,7 +122,7 @@ export const useUnifiedSEOTest = () => {
         localEngineRef.current.stopAnalysis();
         localEngineRef.current = null;
       }
-      setLocalProgress({ progress: 0, currentStep: '', isRunning: false });
+      setLocalProgress({ progress: 0, currentStep: '', isRunning: false });'
     }
   }, [currentMode, stopOnlineTest]);
 
@@ -146,10 +133,10 @@ export const useUnifiedSEOTest = () => {
       await stopTest();
 
       // 清除状态
-      if (mode === 'online') {
+      if (mode === 'online') {'
         setLocalResults(null);
         setLocalError(null);
-        setLocalProgress({ progress: 0, currentStep: '', isRunning: false });
+        setLocalProgress({ progress: 0, currentStep: '', isRunning: false });'
       }
 
       setCurrentMode(mode);
@@ -161,8 +148,8 @@ export const useUnifiedSEOTest = () => {
     await stopTest();
     setLocalResults(null);
     setLocalError(null);
-    setLocalProgress({ progress: 0, currentStep: '', isRunning: false });
-    setCurrentMode('online');
+    setLocalProgress({ progress: 0, currentStep: '', isRunning: false });'
+    setCurrentMode('online');'
   }, [stopTest]);
 
   return {
