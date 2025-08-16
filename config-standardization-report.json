@@ -1,0 +1,276 @@
+{
+  "timestamp": "2025-08-16T07:06:49.239Z",
+  "summary": {
+    "totalFixes": 36,
+    "categories": {
+      "package_json": 14,
+      "typescript": 14,
+      "environment": 8
+    }
+  },
+  "fixes": [
+    {
+      "category": "package_json",
+      "type": "version_updated",
+      "file": "package.json",
+      "message": "更新 axios: ^1.6.0 -> ^1.11.0",
+      "timestamp": "2025-08-16T07:06:49.222Z"
+    },
+    {
+      "category": "package_json",
+      "type": "version_updated",
+      "file": "package.json",
+      "message": "更新 react: ^18.0.0 -> ^18.2.0",
+      "timestamp": "2025-08-16T07:06:49.222Z"
+    },
+    {
+      "category": "package_json",
+      "type": "version_updated",
+      "file": "package.json",
+      "message": "更新 react-dom: ^18.0.0 -> ^18.2.0",
+      "timestamp": "2025-08-16T07:06:49.222Z"
+    },
+    {
+      "category": "package_json",
+      "type": "version_updated",
+      "file": "package.json",
+      "message": "更新 react-router-dom: ^6.8.0 -> ^6.20.1",
+      "timestamp": "2025-08-16T07:06:49.222Z"
+    },
+    {
+      "category": "package_json",
+      "type": "version_updated",
+      "file": "package.json",
+      "message": "更新 recharts: ^2.8.0 -> ^2.15.3",
+      "timestamp": "2025-08-16T07:06:49.222Z"
+    },
+    {
+      "category": "package_json",
+      "type": "version_updated",
+      "file": "package.json",
+      "message": "更新 typescript: ^5.8.3 -> ^5.0.0",
+      "timestamp": "2025-08-16T07:06:49.222Z"
+    },
+    {
+      "category": "package_json",
+      "type": "version_updated",
+      "file": "package.json",
+      "message": "更新 vite: ^4.5.0 -> ^5.0.0",
+      "timestamp": "2025-08-16T07:06:49.223Z"
+    },
+    {
+      "category": "package_json",
+      "type": "version_updated",
+      "file": "package.json",
+      "message": "更新 vitest: ^1.6.0 -> ^1.0.0",
+      "timestamp": "2025-08-16T07:06:49.223Z"
+    },
+    {
+      "category": "package_json",
+      "type": "version_updated",
+      "file": "frontend\\package.json",
+      "message": "更新 typescript: ^5.8.3 -> ^5.0.0",
+      "timestamp": "2025-08-16T07:06:49.224Z"
+    },
+    {
+      "category": "package_json",
+      "type": "version_updated",
+      "file": "frontend\\package.json",
+      "message": "更新 vite: ^4.5.0 -> ^5.0.0",
+      "timestamp": "2025-08-16T07:06:49.224Z"
+    },
+    {
+      "category": "package_json",
+      "type": "version_updated",
+      "file": "frontend\\package.json",
+      "message": "更新 vitest: ^1.6.0 -> ^1.0.0",
+      "timestamp": "2025-08-16T07:06:49.224Z"
+    },
+    {
+      "category": "package_json",
+      "type": "version_updated",
+      "file": "backend\\package.json",
+      "message": "更新 @types/node: ^20.10.4 -> ^20.0.0",
+      "timestamp": "2025-08-16T07:06:49.227Z"
+    },
+    {
+      "category": "typescript",
+      "type": "option_added",
+      "file": "frontend\\tsconfig.json",
+      "message": "添加编译选项: target = \"ES2020\"",
+      "timestamp": "2025-08-16T07:06:49.230Z"
+    },
+    {
+      "category": "typescript",
+      "type": "option_added",
+      "file": "frontend\\tsconfig.json",
+      "message": "添加编译选项: module = \"ESNext\"",
+      "timestamp": "2025-08-16T07:06:49.230Z"
+    },
+    {
+      "category": "typescript",
+      "type": "option_added",
+      "file": "frontend\\tsconfig.json",
+      "message": "添加编译选项: strict = true",
+      "timestamp": "2025-08-16T07:06:49.230Z"
+    },
+    {
+      "category": "typescript",
+      "type": "option_added",
+      "file": "frontend\\tsconfig.json",
+      "message": "添加编译选项: lib = [\"ES2020\",\"DOM\",\"DOM.Iterable\"]",
+      "timestamp": "2025-08-16T07:06:49.230Z"
+    },
+    {
+      "category": "typescript",
+      "type": "option_added",
+      "file": "frontend\\tsconfig.json",
+      "message": "添加编译选项: allowJs = false",
+      "timestamp": "2025-08-16T07:06:49.230Z"
+    },
+    {
+      "category": "typescript",
+      "type": "option_added",
+      "file": "frontend\\tsconfig.json",
+      "message": "添加编译选项: skipLibCheck = true",
+      "timestamp": "2025-08-16T07:06:49.230Z"
+    },
+    {
+      "category": "typescript",
+      "type": "option_added",
+      "file": "frontend\\tsconfig.json",
+      "message": "添加编译选项: esModuleInterop = true",
+      "timestamp": "2025-08-16T07:06:49.230Z"
+    },
+    {
+      "category": "typescript",
+      "type": "option_added",
+      "file": "frontend\\tsconfig.json",
+      "message": "添加编译选项: allowSyntheticDefaultImports = true",
+      "timestamp": "2025-08-16T07:06:49.230Z"
+    },
+    {
+      "category": "typescript",
+      "type": "option_added",
+      "file": "frontend\\tsconfig.json",
+      "message": "添加编译选项: forceConsistentCasingInFileNames = true",
+      "timestamp": "2025-08-16T07:06:49.230Z"
+    },
+    {
+      "category": "typescript",
+      "type": "option_added",
+      "file": "frontend\\tsconfig.json",
+      "message": "添加编译选项: moduleResolution = \"bundler\"",
+      "timestamp": "2025-08-16T07:06:49.230Z"
+    },
+    {
+      "category": "typescript",
+      "type": "option_added",
+      "file": "frontend\\tsconfig.json",
+      "message": "添加编译选项: resolveJsonModule = true",
+      "timestamp": "2025-08-16T07:06:49.230Z"
+    },
+    {
+      "category": "typescript",
+      "type": "option_added",
+      "file": "frontend\\tsconfig.json",
+      "message": "添加编译选项: isolatedModules = true",
+      "timestamp": "2025-08-16T07:06:49.230Z"
+    },
+    {
+      "category": "typescript",
+      "type": "option_added",
+      "file": "frontend\\tsconfig.json",
+      "message": "添加编译选项: noEmit = true",
+      "timestamp": "2025-08-16T07:06:49.230Z"
+    },
+    {
+      "category": "typescript",
+      "type": "option_added",
+      "file": "frontend\\tsconfig.json",
+      "message": "添加编译选项: jsx = \"react-jsx\"",
+      "timestamp": "2025-08-16T07:06:49.230Z"
+    },
+    {
+      "category": "environment",
+      "type": "variable_added",
+      "file": ".env.example",
+      "message": "添加环境变量: NODE_ENV",
+      "timestamp": "2025-08-16T07:06:49.234Z"
+    },
+    {
+      "category": "environment",
+      "type": "variable_added",
+      "file": ".env.example",
+      "message": "添加环境变量: PORT",
+      "timestamp": "2025-08-16T07:06:49.234Z"
+    },
+    {
+      "category": "environment",
+      "type": "variable_added",
+      "file": ".env.example",
+      "message": "添加环境变量: DATABASE_URL",
+      "timestamp": "2025-08-16T07:06:49.234Z"
+    },
+    {
+      "category": "environment",
+      "type": "variable_added",
+      "file": ".env.example",
+      "message": "添加环境变量: JWT_SECRET",
+      "timestamp": "2025-08-16T07:06:49.234Z"
+    },
+    {
+      "category": "environment",
+      "type": "variable_added",
+      "file": ".env.example",
+      "message": "添加环境变量: CORS_ORIGIN",
+      "timestamp": "2025-08-16T07:06:49.234Z"
+    },
+    {
+      "category": "environment",
+      "type": "variable_added",
+      "file": ".env.example",
+      "message": "添加环境变量: LOG_LEVEL",
+      "timestamp": "2025-08-16T07:06:49.234Z"
+    },
+    {
+      "category": "environment",
+      "type": "variable_added",
+      "file": ".env.example",
+      "message": "添加环境变量: UPLOAD_MAX_SIZE",
+      "timestamp": "2025-08-16T07:06:49.234Z"
+    },
+    {
+      "category": "environment",
+      "type": "variable_added",
+      "file": ".env.example",
+      "message": "添加环境变量: SESSION_SECRET",
+      "timestamp": "2025-08-16T07:06:49.234Z"
+    },
+    {
+      "category": "package_json",
+      "type": "script_added",
+      "file": "frontend\\package.json",
+      "message": "添加脚本: start",
+      "timestamp": "2025-08-16T07:06:49.237Z"
+    },
+    {
+      "category": "package_json",
+      "type": "script_added",
+      "file": "backend\\package.json",
+      "message": "添加脚本: build",
+      "timestamp": "2025-08-16T07:06:49.238Z"
+    }
+  ],
+  "standardVersions": {
+    "axios": "^1.11.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.1",
+    "recharts": "^2.15.3",
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "vite": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+}

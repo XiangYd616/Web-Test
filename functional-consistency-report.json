@@ -1,10 +1,10 @@
 {
-  "timestamp": "2025-08-16T06:15:57.858Z",
+  "timestamp": "2025-08-16T07:09:53.711Z",
   "summary": {
-    "totalIssues": 28,
+    "totalIssues": 15,
     "categories": {
       "api_calls": 0,
-      "error_handling": 28,
+      "error_handling": 15,
       "state_management": 0,
       "module_consistency": 0
     }
@@ -125,6 +125,22 @@
         "pattern": "try-catch"
       },
       {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\system\\BackupManagement.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\system\\BackupManagement.tsx",
+        "pattern": "custom-handler"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\system\\CacheManager.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\system\\CacheManager.tsx",
+        "pattern": "custom-handler"
+      },
+      {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\system\\ErrorBoundary.tsx",
         "pattern": "try-catch"
       },
@@ -221,6 +237,14 @@
         "pattern": "custom-handler"
       },
       {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\TestManager.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\TestManager.tsx",
+        "pattern": "custom-handler"
+      },
+      {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\testing\\TestPage.tsx",
         "pattern": "try-catch"
       },
@@ -243,6 +267,14 @@
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\tools\\AppRoutes.tsx",
         "pattern": "error-boundary"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\tools\\CICDDemo.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\components\\tools\\CICDDemo.tsx",
+        "pattern": "custom-handler"
       },
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\components\\tools\\GlobalSearch.tsx",
@@ -315,6 +347,14 @@
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\examples\\SecurityTestWithHistory.tsx",
         "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\hooks\\useAsyncErrorHandler.ts",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\hooks\\useAsyncErrorHandler.ts",
+        "pattern": "custom-handler"
       },
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\hooks\\useAuth.ts",
@@ -473,6 +513,14 @@
         "pattern": "try-catch"
       },
       {
+        "file": "D:\\myproject\\Test-Web\\frontend\\pages\\data\\reports\\MonitoringDashboard.tsx",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\pages\\data\\reports\\MonitoringDashboard.tsx",
+        "pattern": "custom-handler"
+      },
+      {
         "file": "D:\\myproject\\Test-Web\\frontend\\pages\\data\\reports\\PerformanceAnalysis.tsx",
         "pattern": "try-catch"
       },
@@ -549,12 +597,28 @@
         "pattern": "try-catch"
       },
       {
+        "file": "D:\\myproject\\Test-Web\\frontend\\services\\adapters\\testEngineAdapter.ts",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\services\\adapters\\testEngineAdapter.ts",
+        "pattern": "custom-handler"
+      },
+      {
         "file": "D:\\myproject\\Test-Web\\frontend\\services\\adminService.ts",
         "pattern": "try-catch"
       },
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\services\\analytics\\analyticsService.ts",
         "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\services\\analytics\\dataAnalysisService.ts",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\services\\analytics\\dataAnalysisService.ts",
+        "pattern": "custom-handler"
       },
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\services\\api\\apiErrorHandler.ts",
@@ -621,6 +685,14 @@
         "pattern": "try-catch"
       },
       {
+        "file": "D:\\myproject\\Test-Web\\frontend\\services\\auth\\passwordPolicyService.ts",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\services\\auth\\passwordPolicyService.ts",
+        "pattern": "custom-handler"
+      },
+      {
         "file": "D:\\myproject\\Test-Web\\frontend\\services\\auth\\rbacService.ts",
         "pattern": "try-catch"
       },
@@ -641,6 +713,14 @@
         "pattern": "try-catch"
       },
       {
+        "file": "D:\\myproject\\Test-Web\\frontend\\services\\cache\\cacheStrategies.ts",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\services\\cache\\cacheStrategies.ts",
+        "pattern": "custom-handler"
+      },
+      {
         "file": "D:\\myproject\\Test-Web\\frontend\\services\\cache\\cacheStrategy.ts",
         "pattern": "try-catch"
       },
@@ -655,6 +735,14 @@
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\services\\config\\configService.ts",
         "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\services\\dao\\userDao.ts",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\services\\dao\\userDao.ts",
+        "pattern": "custom-handler"
       },
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\services\\data\\dataAnalysisService.ts",
@@ -805,6 +893,22 @@
         "pattern": "try-catch"
       },
       {
+        "file": "D:\\myproject\\Test-Web\\frontend\\services\\testing\\securityTestService.ts",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\services\\testing\\securityTestService.ts",
+        "pattern": "custom-handler"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\services\\testing\\seoTestService.ts",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\services\\testing\\seoTestService.ts",
+        "pattern": "custom-handler"
+      },
+      {
         "file": "D:\\myproject\\Test-Web\\frontend\\services\\testing\\stressTestQueueManager.ts",
         "pattern": "try-catch"
       },
@@ -903,6 +1007,10 @@
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\utils\\errorHandler.ts",
         "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\frontend\\utils\\errorHandler.ts",
+        "pattern": "custom-handler"
       },
       {
         "file": "D:\\myproject\\Test-Web\\frontend\\utils\\exportUtils.ts",
@@ -1087,6 +1195,14 @@
       {
         "file": "D:\\myproject\\Test-Web\\backend\\engines\\performance\\monitors\\PerformanceMonitor.js",
         "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\backend\\engines\\performance\\optimizers\\PerformanceOptimizationEngine.js",
+        "pattern": "try-catch"
+      },
+      {
+        "file": "D:\\myproject\\Test-Web\\backend\\engines\\performance\\optimizers\\PerformanceOptimizationEngine.js",
+        "pattern": "custom-handler"
       },
       {
         "file": "D:\\myproject\\Test-Web\\backend\\engines\\performance\\performanceTestEngine.js",
@@ -1573,6 +1689,10 @@
         "pattern": "custom-handler"
       },
       {
+        "file": "D:\\myproject\\Test-Web\\backend\\utils\\asyncErrorHandler.js",
+        "pattern": "try-catch"
+      },
+      {
         "file": "D:\\myproject\\Test-Web\\backend\\utils\\commonUtils.js",
         "pattern": "try-catch"
       },
@@ -1636,77 +1756,7 @@
     {
       "category": "error_handling",
       "type": "missing_async_error_handling",
-      "file": "frontend\\components\\system\\BackupManagement.tsx",
-      "message": "异步操作缺少错误处理",
-      "severity": "medium"
-    },
-    {
-      "category": "error_handling",
-      "type": "missing_async_error_handling",
-      "file": "frontend\\components\\system\\CacheManager.tsx",
-      "message": "异步操作缺少错误处理",
-      "severity": "medium"
-    },
-    {
-      "category": "error_handling",
-      "type": "missing_async_error_handling",
-      "file": "frontend\\components\\testing\\TestManager.tsx",
-      "message": "异步操作缺少错误处理",
-      "severity": "medium"
-    },
-    {
-      "category": "error_handling",
-      "type": "missing_async_error_handling",
-      "file": "frontend\\components\\tools\\CICDDemo.tsx",
-      "message": "异步操作缺少错误处理",
-      "severity": "medium"
-    },
-    {
-      "category": "error_handling",
-      "type": "missing_async_error_handling",
       "file": "frontend\\components\\ui\\LazyComponent.tsx",
-      "message": "异步操作缺少错误处理",
-      "severity": "medium"
-    },
-    {
-      "category": "error_handling",
-      "type": "missing_async_error_handling",
-      "file": "frontend\\pages\\data\\reports\\MonitoringDashboard.tsx",
-      "message": "异步操作缺少错误处理",
-      "severity": "medium"
-    },
-    {
-      "category": "error_handling",
-      "type": "missing_async_error_handling",
-      "file": "frontend\\services\\adapters\\testEngineAdapter.ts",
-      "message": "异步操作缺少错误处理",
-      "severity": "medium"
-    },
-    {
-      "category": "error_handling",
-      "type": "missing_async_error_handling",
-      "file": "frontend\\services\\analytics\\dataAnalysisService.ts",
-      "message": "异步操作缺少错误处理",
-      "severity": "medium"
-    },
-    {
-      "category": "error_handling",
-      "type": "missing_async_error_handling",
-      "file": "frontend\\services\\auth\\passwordPolicyService.ts",
-      "message": "异步操作缺少错误处理",
-      "severity": "medium"
-    },
-    {
-      "category": "error_handling",
-      "type": "missing_async_error_handling",
-      "file": "frontend\\services\\cache\\cacheStrategies.ts",
-      "message": "异步操作缺少错误处理",
-      "severity": "medium"
-    },
-    {
-      "category": "error_handling",
-      "type": "missing_async_error_handling",
-      "file": "frontend\\services\\dao\\userDao.ts",
       "message": "异步操作缺少错误处理",
       "severity": "medium"
     },
@@ -1728,20 +1778,6 @@
       "category": "error_handling",
       "type": "missing_async_error_handling",
       "file": "frontend\\services\\integration\\notificationService.ts",
-      "message": "异步操作缺少错误处理",
-      "severity": "medium"
-    },
-    {
-      "category": "error_handling",
-      "type": "missing_async_error_handling",
-      "file": "frontend\\services\\testing\\securityTestService.ts",
-      "message": "异步操作缺少错误处理",
-      "severity": "medium"
-    },
-    {
-      "category": "error_handling",
-      "type": "missing_async_error_handling",
-      "file": "frontend\\services\\testing\\seoTestService.ts",
       "message": "异步操作缺少错误处理",
       "severity": "medium"
     },
@@ -1770,13 +1806,6 @@
       "category": "error_handling",
       "type": "missing_async_error_handling",
       "file": "backend\\config\\compatibilityTestConfig.js",
-      "message": "异步操作缺少错误处理",
-      "severity": "medium"
-    },
-    {
-      "category": "error_handling",
-      "type": "missing_async_error_handling",
-      "file": "backend\\engines\\performance\\optimizers\\PerformanceOptimizationEngine.js",
       "message": "异步操作缺少错误处理",
       "severity": "medium"
     },

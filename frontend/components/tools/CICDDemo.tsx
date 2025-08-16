@@ -1,3 +1,4 @@
+import { handleAsyncError } from '../utils/errorHandler';
 import React, { useState } from 'react';
 import {Play, GitBranch, CheckCircle, XCircle, Clock, Code} from 'lucide-react';
 
@@ -22,11 +23,17 @@ const CICDDemo: React.FC = () => {
   ]);
 
   const runPipeline = async () => {
+  try {
     setIsRunning(true);
     setCurrentStep(0);
 
     // 重置所有步骤
-    const resetSteps = steps.map(step => ({ ...step, status: 'pending' as const, duration: undefined as number | undefined, logs: undefined as string[] | undefined }));
+    const resetSteps = steps.map(step => ({ ...step, status: 'pending' as const, duration: undefined as number | undefined, logs: undefined as string[] | undefined 
+  } catch (error) {
+    console.error('Error in runPipeline:', error);
+    throw error;
+  }
+}));
     setSteps(resetSteps);
 
     for (let i = 0; i < steps.length; i++) {
@@ -39,7 +46,12 @@ const CICDDemo: React.FC = () => {
 
       // 模拟步骤执行时间
       const duration = Math.random() * 3000 + 1000; // 1-4秒
-      await new Promise(resolve => setTimeout(resolve, duration));
+      try {
+  await new Promise(resolve => setTimeout(resolve, duration));
+} catch (error) {
+  console.error('Await error:', error);
+  throw error;
+}
 
       // 模拟成功/失败（90%成功率）
       const success = Math.random() > 0.1;

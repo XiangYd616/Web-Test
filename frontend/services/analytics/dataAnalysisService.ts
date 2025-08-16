@@ -1,3 +1,4 @@
+import { handleAsyncError } from '../utils/errorHandler';
 /**
  * 数据分析服务
  */
@@ -10,7 +11,12 @@ export interface AnalysisResult {
 
 class DataAnalysisService {
   async analyzeData(data: any[]): Promise<AnalysisResult> {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+  await new Promise(resolve => setTimeout(resolve, 500));
+} catch (error) {
+  console.error('Await error:', error);
+  throw error;
+}
 
     return {
       summary: { total: data.length },

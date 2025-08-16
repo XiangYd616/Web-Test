@@ -1,3 +1,4 @@
+const { handleAsyncError } = require('../utils/errorHandler');
 /**
  * 性能优化建议引擎
  * 本地化程度：100%
@@ -214,7 +215,18 @@ app.use(compression({
                   title: '动态导入',
                   code: `// 按需加载模块
 async function loadFeature() {
-  const { feature } = await // // // // // // // // import('./feature.js'); // 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除
+  try {
+  const { feature 
+  } catch (error) {
+    console.error('Error in loadFeature:', error);
+    throw error;
+  }
+} = try {
+  await // // // // // // // // import('./feature.js');
+} catch (error) {
+  console.error('Await error:', error);
+  throw error;
+} // 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除
   return feature;
 }
 

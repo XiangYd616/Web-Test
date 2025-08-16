@@ -3,7 +3,7 @@
  * 提供前端错误处理、日志记录、用户通知的统一接口
  */
 
-import {toast} from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 
 // 错误类型枚举
 export enum ErrorType {
@@ -69,7 +69,7 @@ class ErrorService {
    */
   handleError(error: Error | string | any, context?: Record<string, any>): StandardError {
     const standardError = this.standardizeError(error, context);
-    
+
     // 记录错误
     if (this.config.enableLogging) {
       this.logError(standardError);
@@ -100,8 +100,8 @@ class ErrorService {
 
     // 处理不同类型的错误输入
     if (typeof error === 'string') {
-      
-        return {
+
+      return {
         id,
         type: ErrorType.UNKNOWN,
         severity: ErrorSeverity.MEDIUM,
@@ -114,10 +114,10 @@ class ErrorService {
     }
 
     if (error instanceof Error) {
-      
-        const type = this.determineErrorType(error);
+
+      const type = this.determineErrorType(error);
       const severity = this.determineSeverity(error, type);
-      
+
       return {
         id,
         type,
@@ -134,10 +134,10 @@ class ErrorService {
 
     // 处理API错误响应
     if (error?.response || error?.status) {
-      
-        const status = error.status || error.response?.status;
+
+      const status = error.status || error.response?.status;
       const message = error.message || error.response?.data?.message || '请求失败';
-      
+
       return {
         id,
         type: this.getTypeFromStatus(status),
@@ -169,7 +169,7 @@ class ErrorService {
    */
   private determineErrorType(error: Error): ErrorType {
     const message = error.message.toLowerCase();
-    
+
     if (message.includes('network') || message.includes('fetch')) {
       return ErrorType.NETWORK;
     }
@@ -188,7 +188,7 @@ class ErrorService {
     if (message.includes('server') || message.includes('500')) {
       return ErrorType.SERVER;
     }
-    
+
     return ErrorType.CLIENT;
   }
 
@@ -294,7 +294,7 @@ class ErrorService {
       503: '服务暂时不可用',
       504: '网关超时'
     };
-    
+
     return messages[status] || `请求失败 (${status})`;
   }
 
@@ -309,9 +309,9 @@ class ErrorService {
    * 记录错误日志
    */
   private logError(error: StandardError): void {
-    const logMethod = error.severity === ErrorSeverity.CRITICAL ? 'error' : 
-                     error.severity === ErrorSeverity.HIGH ? 'warn' : 'info';
-    
+    const logMethod = error.severity === ErrorSeverity.CRITICAL ? 'error' :
+      error.severity === ErrorSeverity.HIGH ? 'warn' : 'info';
+
     console[logMethod](`[${error.type}] ${error.message}`, {
       id: error.id,
       severity: error.severity,
@@ -326,7 +326,7 @@ class ErrorService {
    */
   private showUserNotification(error: StandardError): void {
     const message = error.userFriendlyMessage || error.message;
-    
+
     switch (error.severity) {
       case ErrorSeverity.CRITICAL:
       case ErrorSeverity.HIGH:
@@ -346,7 +346,7 @@ class ErrorService {
    */
   private addToQueue(error: StandardError): void {
     this.errorQueue.unshift(error);
-    
+
     // 保持队列大小
     if (this.errorQueue.length > this.maxQueueSize) {
       this.errorQueue = this.errorQueue.slice(0, this.maxQueueSize);
@@ -397,13 +397,163 @@ class ErrorService {
   updateConfig(config: Partial<ErrorHandlerConfig>): void {
     this.config = { ...this.config, ...config };
   }
+
+  /**
+   * 处理异步操作错误 - 新增方法
+   * @param error - 错误对象
+   * @param context - 异步操作上下文
+   */
+  handleAsyncError(error: Error | string, context?: {
+    context?: string;
+    retryCount?: number;
+    maxRetries?: number;
+    operation?: string;
+  }): StandardError {
+    const errorObj = typeof error === 'string' ? new Error(error) : error;
+    const errorType = this.determineAsyncErrorType(errorObj);
+    const severity = this.determineAsyncErrorSeverity(errorObj, context);
+
+    const standardError: StandardError = {
+      id: this.generateErrorId(),
+      type: errorType,
+      severity,
+      message: errorObj.message,
+      timestamp: new Date().toISOString(),
+      context: {
+        operation: context?.operation || 'async operation',
+        retryCount: context?.retryCount || 0,
+        maxRetries: context?.maxRetries || 3,
+        ...context
+      },
+      stack: errorObj.stack,
+      userFriendlyMessage: this.generateAsyncErrorMessage(errorObj, context),
+      suggestions: this.generateAsyncSuggestions(errorObj, context),
+      retryable: this.isAsyncRetryable(errorObj, context)
+    };
+
+    return this.handleError(standardError);
+  }
+
+  /**
+   * 确定异步错误类型
+   */
+  private determineAsyncErrorType(error: Error): ErrorType {
+    const message = error.message.toLowerCase();
+
+    if (message.includes('network') || message.includes('fetch')) {
+      return ErrorType.NETWORK;
+    }
+    if (message.includes('timeout')) {
+      return ErrorType.TIMEOUT;
+    }
+    if (message.includes('unauthorized') || message.includes('auth')) {
+      return ErrorType.AUTHENTICATION;
+    }
+    if (message.includes('forbidden') || message.includes('permission')) {
+      return ErrorType.AUTHORIZATION;
+    }
+    if (message.includes('validation') || message.includes('invalid')) {
+      return ErrorType.VALIDATION;
+    }
+
+    return ErrorType.CLIENT;
+  }
+
+  /**
+   * 确定异步错误严重程度
+   */
+  private determineAsyncErrorSeverity(error: Error, context?: any): ErrorSeverity {
+    const message = error.message.toLowerCase();
+
+    if (message.includes('critical') || message.includes('fatal')) {
+      return ErrorSeverity.CRITICAL;
+    }
+
+    if (context?.retryCount >= (context?.maxRetries || 3)) {
+      return ErrorSeverity.HIGH;
+    }
+
+    if (message.includes('network') || message.includes('timeout')) {
+      return ErrorSeverity.MEDIUM;
+    }
+
+    return ErrorSeverity.LOW;
+  }
+
+  /**
+   * 生成异步错误的用户友好消息
+   */
+  private generateAsyncErrorMessage(error: Error, context?: any): string {
+    const message = error.message.toLowerCase();
+
+    if (message.includes('network')) {
+      return '网络连接失败，请检查网络后重试';
+    }
+    if (message.includes('timeout')) {
+      return '操作超时，请稍后重试';
+    }
+    if (context?.retryCount >= (context?.maxRetries || 3)) {
+      return '操作多次失败，请稍后再试或联系技术支持';
+    }
+
+    return '操作失败，请重试';
+  }
+
+  /**
+   * 生成异步错误建议
+   */
+  private generateAsyncSuggestions(error: Error, context?: any): string[] {
+    const message = error.message.toLowerCase();
+    const suggestions: string[] = [];
+
+    if (message.includes('network')) {
+      suggestions.push('检查网络连接', '尝试刷新页面');
+    }
+    if (message.includes('timeout')) {
+      suggestions.push('稍后重试', '检查网络速度');
+    }
+    if (context?.retryCount >= (context?.maxRetries || 3)) {
+      suggestions.push('联系技术支持', '检查系统状态');
+    }
+
+    if (suggestions.length === 0) {
+      suggestions.push('重试操作', '刷新页面');
+    }
+
+    return suggestions;
+  }
+
+  /**
+   * 判断异步错误是否可重试
+   */
+  private isAsyncRetryable(error: Error, context?: any): boolean {
+    const message = error.message.toLowerCase();
+
+    // 如果已经达到最大重试次数，不再重试
+    if (context?.retryCount >= (context?.maxRetries || 3)) {
+      return false;
+    }
+
+    // 网络错误和超时错误通常可以重试
+    if (message.includes('network') || message.includes('timeout') ||
+      message.includes('fetch') || message.includes('connection')) {
+      return true;
+    }
+
+    // 认证和授权错误通常不应该重试
+    if (message.includes('unauthorized') || message.includes('forbidden')) {
+      return false;
+    }
+
+    return true;
+  }
 }
 
 // 创建全局错误服务实例
 export const errorService = new ErrorService();
 
 // 便捷方法
-export const handleError = (error: Error | string | any, context?: Record<string, any>) => 
+export const handleError = (error: Error | string | any, context?: Record<string, any>) =>
   errorService.handleError(error, context);
 
 export default errorService;

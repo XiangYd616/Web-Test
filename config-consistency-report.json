@@ -1,11 +1,11 @@
 {
-  "timestamp": "2025-08-16T06:15:57.967Z",
+  "timestamp": "2025-08-16T07:09:53.807Z",
   "summary": {
-    "totalIssues": 14,
+    "totalIssues": 2,
     "categories": {
-      "package_json": 8,
-      "typescript": 3,
-      "environment": 3,
+      "package_json": 0,
+      "typescript": 2,
+      "environment": 0,
       "build_config": 0
     }
   },
@@ -83,13 +83,13 @@
       },
       "dependencies": {
         "@types/node": "^20.0.0",
-        "axios": "^1.6.0",
+        "axios": "^1.11.0",
         "dotenv": "^16.3.1",
         "pixelmatch": "^7.1.0",
-        "react": "^18.0.0",
-        "react-dom": "^18.0.0",
-        "react-router-dom": "^6.8.0",
-        "recharts": "^2.8.0",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "react-router-dom": "^6.20.1",
+        "recharts": "^2.15.3",
         "sqlite3": "^5.1.7"
       },
       "devDependencies": {
@@ -120,9 +120,9 @@
         "rimraf": "^5.0.5",
         "tailwindcss": "^3.3.6",
         "ts-node": "^10.9.2",
-        "typescript": "^5.8.3",
-        "vite": "^4.5.0",
-        "vitest": "^1.6.0",
+        "typescript": "^5.0.0",
+        "vite": "^5.0.0",
+        "vitest": "^1.0.0",
         "wait-on": "^8.0.3"
       },
       "build": {
@@ -222,7 +222,8 @@
         "type-check": "tsc --noEmit",
         "lint": "eslint . --ext .ts,.tsx",
         "lint:fix": "eslint . --ext .ts,.tsx --fix",
-        "format": "prettier --write \"**/*.{ts,tsx,js,jsx,css,md}\""
+        "format": "prettier --write \"**/*.{ts,tsx,js,jsx,css,md}\"",
+        "start": "vite"
       },
       "dependencies": {
         "axios": "^1.11.0",
@@ -258,9 +259,9 @@
         "postcss": "^8.4.31",
         "prettier": "^3.2.5",
         "tailwindcss": "^3.3.6",
-        "typescript": "^5.8.3",
-        "vite": "^4.5.0",
-        "vitest": "^1.6.0"
+        "typescript": "^5.0.0",
+        "vite": "^5.0.0",
+        "vitest": "^1.0.0"
       },
       "engines": {
         "node": ">=18.0.0",
@@ -300,7 +301,8 @@
         "redis:check": "node ../scripts/backend/check-redis.js",
         "_comment_docker": "🐳 Docker操作",
         "docker:build": "docker build -f ../Dockerfile.api -t testweb-api .",
-        "docker:run": "docker run -p 3001:3001 testweb-api"
+        "docker:run": "docker run -p 3001:3001 testweb-api",
+        "build": "tsc"
       },
       "dependencies": {
         "@socket.io/redis-adapter": "^8.3.0",
@@ -362,7 +364,7 @@
         "xlsx": "^0.18.5"
       },
       "devDependencies": {
-        "@types/node": "^20.10.4",
+        "@types/node": "^20.0.0",
         "cross-env": "^7.0.3",
         "eslint": "^8.57.0",
         "eslint-config-standard": "^17.1.0",
@@ -472,7 +474,25 @@
           "@/contexts/*": [
             "contexts/*"
           ]
-        }
+        },
+        "target": "ES2020",
+        "module": "ESNext",
+        "strict": true,
+        "lib": [
+          "ES2020",
+          "DOM",
+          "DOM.Iterable"
+        ],
+        "allowJs": false,
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "forceConsistentCasingInFileNames": true,
+        "moduleResolution": "bundler",
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noEmit": true,
+        "jsx": "react-jsx"
       },
       "include": [
         "**/*.ts",
@@ -490,101 +510,17 @@
   },
   "issues": [
     {
-      "category": "package_json",
-      "type": "version_mismatch",
-      "file": "multiple_files",
-      "message": "依赖 @types/node 在不同文件中版本不一致: ^20.0.0, ^20.10.4",
-      "severity": "high"
-    },
-    {
-      "category": "package_json",
-      "type": "version_mismatch",
-      "file": "multiple_files",
-      "message": "依赖 axios 在不同文件中版本不一致: ^1.6.0, ^1.11.0",
-      "severity": "high"
-    },
-    {
-      "category": "package_json",
-      "type": "version_mismatch",
-      "file": "multiple_files",
-      "message": "依赖 react 在不同文件中版本不一致: ^18.0.0, ^18.2.0",
-      "severity": "high"
-    },
-    {
-      "category": "package_json",
-      "type": "version_mismatch",
-      "file": "multiple_files",
-      "message": "依赖 react-dom 在不同文件中版本不一致: ^18.0.0, ^18.2.0",
-      "severity": "high"
-    },
-    {
-      "category": "package_json",
-      "type": "version_mismatch",
-      "file": "multiple_files",
-      "message": "依赖 react-router-dom 在不同文件中版本不一致: ^6.8.0, ^6.20.1",
-      "severity": "high"
-    },
-    {
-      "category": "package_json",
-      "type": "version_mismatch",
-      "file": "multiple_files",
-      "message": "依赖 recharts 在不同文件中版本不一致: ^2.8.0, ^2.15.3",
-      "severity": "high"
-    },
-    {
       "category": "typescript",
-      "type": "missing_compiler_option",
+      "type": "invalid_compiler_option",
       "file": "frontend\\tsconfig.json",
-      "message": "缺少编译选项: target",
-      "severity": "medium"
-    },
-    {
-      "category": "typescript",
-      "type": "missing_compiler_option",
-      "file": "frontend\\tsconfig.json",
-      "message": "缺少编译选项: module",
-      "severity": "medium"
-    },
-    {
-      "category": "typescript",
-      "type": "missing_compiler_option",
-      "file": "frontend\\tsconfig.json",
-      "message": "缺少编译选项: strict",
-      "severity": "medium"
-    },
-    {
-      "category": "environment",
-      "type": "missing_example_variable",
-      "file": ".env.example",
-      "message": "示例环境文件缺少必要变量: NODE_ENV",
-      "severity": "medium"
-    },
-    {
-      "category": "environment",
-      "type": "missing_example_variable",
-      "file": ".env.example",
-      "message": "示例环境文件缺少必要变量: PORT",
-      "severity": "medium"
-    },
-    {
-      "category": "environment",
-      "type": "missing_example_variable",
-      "file": ".env.example",
-      "message": "示例环境文件缺少必要变量: DATABASE_URL",
-      "severity": "medium"
-    },
-    {
-      "category": "package_json",
-      "type": "missing_script",
-      "file": "frontend\\package.json",
-      "message": "缺少常见脚本: start",
+      "message": "编译选项值不推荐: target=ES2020",
       "severity": "low"
     },
     {
-      "category": "package_json",
-      "type": "missing_script",
-      "file": "backend\\package.json",
-      "message": "缺少常见脚本: build",
+      "category": "typescript",
+      "type": "invalid_compiler_option",
+      "file": "frontend\\tsconfig.json",
+      "message": "编译选项值不推荐: module=ESNext",
       "severity": "low"
     }
   ]

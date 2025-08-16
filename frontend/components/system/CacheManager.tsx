@@ -1,3 +1,4 @@
+import { handleAsyncError } from '../utils/errorHandler';
 /**
  * 缓存管理组件
  * 提供缓存状态监控和管理界面
@@ -274,7 +275,8 @@ export const CacheManager: React.FC<CacheManagerProps> = ({
     setRefreshTrigger(prev => prev + 1);
     
     // 触发所有缓存的统计更新
-    await Promise.all([
+    try {
+  await Promise.all([
       memoryOps.getStats(),
       localStorageOps.getStats(),
       apiOps.getStats(),
@@ -282,6 +284,10 @@ export const CacheManager: React.FC<CacheManagerProps> = ({
       tempOps.getStats(),
       testResultOps.getStats()
     ]);
+} catch (error) {
+  console.error('Await error:', error);
+  throw error;
+}
   }, [memoryOps, localStorageOps, apiOps, userOps, tempOps, testResultOps]);
 
   // 自动刷新

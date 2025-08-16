@@ -1,3 +1,4 @@
+import { handleAsyncError } from '../utils/errorHandler';
 import React, { useState } from 'react';
 
 import {AlertTriangle, Calendar, Database, Download, HardDrive, RefreshCw, Upload} from 'lucide-react';
@@ -95,13 +96,19 @@ const BackupManagement: React.FC = () => {
   };
 
   const handleCreateBackup = async () => {
+  try {
     setIsCreatingBackup(true);
 
     // 模拟备份创建过程
     setTimeout(() => {
       const newBackup: BackupRecord = {
         id: Date.now().toString(),
-        name: `manual_backup_${new Date().toISOString().split('T')[0].replace(/-/g, '')}`,
+        name: `manual_backup_${new Date().toISOString().split('T')[0].replace(/-/g, '')
+  } catch (error) {
+    console.error('Error in handleCreateBackup:', error);
+    throw error;
+  }
+}`,
         type: 'manual',
         size: Math.floor(Math.random() * 50 * 1024 * 1024), // 随机大小
         createdAt: new Date().toLocaleString('zh-CN'),

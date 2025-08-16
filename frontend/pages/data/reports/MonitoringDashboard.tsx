@@ -1,3 +1,4 @@
+import { handleAsyncError } from '../utils/errorHandler';
 import React, { useEffect, useState } from 'react';
 import {Button} from '../../../components/ui/Button';
 import {Card} from '../../../components/ui/Card.tsx';
@@ -54,6 +55,7 @@ const MonitoringDashboard: React.FC = () => {
   }, []);
 
   const handleAddSite = async () => {
+  try {
     setAddingSite(true);
     // 模拟添加延迟
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -67,7 +69,12 @@ const MonitoringDashboard: React.FC = () => {
       uptime: 99.0 + Math.random(),
       lastCheck: new Date(),
       interval: newSite.interval
-    };
+    
+  } catch (error) {
+    console.error('Error in handleAddSite:', error);
+    throw error;
+  }
+};
 
     setSites(prev => [...prev, site]);
     setNewSite({ name: '', url: '', interval: 5 });

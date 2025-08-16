@@ -1,3 +1,4 @@
+import { handleAsyncError } from '../utils/errorHandler';
 /**
  * 缓存策略配置
  * 为不同类型的数据定义最优的缓存策略
@@ -331,17 +332,32 @@ export function cached(
       const cacheKey = keyGenerator ? keyGenerator(...args) : `${propertyName}:${JSON.stringify(args)}`;
       
       // 尝试从缓存获取
-      const cached = await cacheManager.get(cacheKey, finalConfig.strategy);
+      const cached = try {
+  await cacheManager.get(cacheKey, finalConfig.strategy);
+} catch (error) {
+  console.error('Await error:', error);
+  throw error;
+}
       if (cached !== null) {
         
         return cached;
       }
 
       // 执行原方法
-      const result = await method.apply(this, args);
+      const result = try {
+  await method.apply(this, args);
+} catch (error) {
+  console.error('Await error:', error);
+  throw error;
+}
       
       // 存储到缓存
-      await cacheManager.set(cacheKey, result, finalConfig.ttl, finalConfig.strategy);
+      try {
+  await cacheManager.set(cacheKey, result, finalConfig.ttl, finalConfig.strategy);
+} catch (error) {
+  console.error('Await error:', error);
+  throw error;
+}
       
       return result;
     };
