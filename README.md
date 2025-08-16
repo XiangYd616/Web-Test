@@ -2,11 +2,12 @@
 
 <div align="center">
 
-![Version](https:/img.shields.io/badge/version-1.0.0-blue.svg)
-![Node](https:/img.shields.io/badge/node-%3E%3D18.0.0-green.svg)
-![License](https:/img.shields.io/badge/license-MIT-green.svg)
-![TypeScript](https:/img.shields.io/badge/typescript-5.8+-blue.svg)
-![React](https:/img.shields.io/badge/react-18.2+-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-green.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![TypeScript](https://img.shields.io/badge/typescript-5.8+-blue.svg)
+![React](https://img.shields.io/badge/react-18.2+-blue.svg)
+![Status](https://img.shields.io/badge/status-production%20ready-brightgreen.svg)
 
 **功能完整的企业级网站测试平台**
 
