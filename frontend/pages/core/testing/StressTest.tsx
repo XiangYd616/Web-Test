@@ -1,25 +1,25 @@
 
-import { AlertCircle, AlertTriangle, BarChart3, CheckCircle, Clock, Download, FileText, Globe, Loader, Play, RotateCcw, Settings, Shield, Square, TrendingUp, Users, XCircle, Zap } from 'lucide-react';
+import {AlertCircle, AlertTriangle, BarChart3, CheckCircle, Clock, Download, FileText, Globe, Loader, Play, RotateCcw, Settings, Shield, Square, TrendingUp, Users, XCircle, Zap} from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { useAuthCheck } from '../../../components/auth/WithAuthCheck.tsx';
-import { StressTestCharts as UnifiedStressTestCharts } from '../../../components/charts';
+import {useLocation} from 'react-router-dom';
+import {useAuthCheck} from '../../../components/auth/WithAuthCheck.tsx';
+import {StressTestCharts as StressTestCharts} from '../../../components/charts/index';
 import StressTestHistory from '../../../components/testing/StressTestHistory.tsx';
 import URLInput from '../../../components/testing/URLInput';
 import CancelProgressFeedback from '../../../components/ui/CancelProgressFeedback.tsx';
 import CancelTestConfirmDialog from '../../../components/ui/CancelTestConfirmDialog.tsx';
 import ExportModal from '../../../components/ui/ExportModal.tsx';
-import { useLocalStressTest } from '../../../hooks/useLocalStressTest.ts';
-import { AdvancedStressTestConfig as ImportedAdvancedStressTestConfig } from '../../../hooks/useSimpleTestEngine.ts';
-import { useStressTestRecord } from '../../../hooks/useStressTestRecord.ts';
-import { useUserStats } from '../../../hooks/useUserStats.ts';
+import {useLocalStressTest} from '../../../hooks/useLocalStressTest.ts';
+import {StressTestConfig as ImportedAdvancedStressTestConfig} from '../../../hooks/useSimpleTestEngine.ts';
+import {useStressTestRecord} from '../../../hooks/useStressTestRecord.ts';
+import {useUserStats} from '../../../hooks/useUserStats.ts';
 import backgroundTestManager from '../../../services/testing/backgroundTestManager.ts';
 import ExportUtils from '../../../utils/exportUtils.ts';
 
-import { systemResourceMonitor } from '../../../services/system/systemResourceMonitor.ts';
-import { testEngineManager } from '../../../services/testing/testEngines.ts';
-import { TestPhase, type RealTimeMetrics, type TestDataPoint } from '../../../services/testing/testStateManager';
-// import { getTemplateById } from '../../../services/testTemplates.ts'; // 函数不存在，已注释
+import {systemResourceMonitor} from '../../../services/system/systemResourceMonitor.ts';
+import {testEngineManager} from '../../../services/testing/testEngines.ts';
+import {TestPhase} from '../../../services/testing/testStateManager';
+// import {getTemplateById} from '../../../services/testTemplates.ts'; // 函数不存在，已注释
 import '../../../styles/progress-bar.css';
 import type { TestStatusType } from '../../../types/testHistory.ts';
 
@@ -690,7 +690,7 @@ const StressTest: React.FC = () => {
         }
     }, [processDataPoint, calculateMetricsFromData]);
 
-    // 🔧 修复：转换 TestDataPoint 到 EnhancedRealTimeData 格式
+    // 🔧 修复：转换 TestDataPoint 到 RealTimeData 格式
     const convertToEnhancedRealTimeData = useCallback((dataPoints: TestDataPoint[]) => {
         return dataPoints.map(point => ({
             timestamp: typeof point.timestamp === 'string' ? new Date(point.timestamp).getTime() : point.timestamp,
@@ -5840,7 +5840,7 @@ const StressTest: React.FC = () => {
                                             </button>
                                         </div>
                                     </div>
-                                    <UnifiedStressTestCharts
+                                    <StressTestCharts
                                         realTimeData={(() => {
                                             const convertedData = convertToEnhancedRealTimeData(unifiedTestData.realTimeData);
                                             console.log('🎯 图表数据传递检查:', {
@@ -5894,7 +5894,7 @@ const StressTest: React.FC = () => {
                                                     传统图表模式 (数据点: {stressTestData.length})
                                                     {isRunning && <span className="ml-2 text-green-400">● 运行中</span>}
                                                 </div>
-                                                {/* <AdvancedStressTestChart
+                                                {/* <StressTestChart
                                                     data={stressTestData.map((point: any) => ({
                                                 time: new Date(point.timestamp).toLocaleTimeString(),
                                                 timestamp: point.timestamp,
@@ -5941,7 +5941,7 @@ const StressTest: React.FC = () => {
                                             <div className="bg-white rounded-lg border border-gray-200 h-96">
                                                 <div className="p-4 h-full">
                                                     <h4 className="text-lg font-semibold text-gray-800 mb-4">传统压力测试图表</h4>
-                                                    {/* <AdvancedStressTestChart
+                                                    {/* <StressTestChart
                                                 data={stressTestData.map((point: any) => ({
                                                     time: new Date(point.timestamp).toLocaleTimeString(),
                                                     timestamp: point.timestamp,

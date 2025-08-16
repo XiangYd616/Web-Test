@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNotification } from '../../hooks/useNotification';
-import { useRealTimeData } from '../../hooks/useRealTimeData';
+import { useRealTimeData } from '../../hooks/useWebSocket';
 import {
     Badge,
     Button,
@@ -31,10 +31,10 @@ import {
     Input,
     Modal,
     Select,
-    Table,
-    type SelectOption,
-    type TableColumn
-} from '../ui';
+    Table
+} from '../ui/index';
+
+// SelectOption and TableColumn types will be defined locally
 
 // 监控目标接口
 export interface MonitorTarget {

@@ -7,7 +7,7 @@ const express = require('express');
 const { query, transaction, pool } = require('../config/database');
 const { authMiddleware } = require('../middleware/auth');
 const { asyncHandler } = require('../middleware/errorHandler');
-const DataManagementService = require('../services/dataManagement');
+const DataManagementService = require('../services/dataManagement/index');
 
 const router = express.Router();
 

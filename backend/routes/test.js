@@ -12,23 +12,23 @@ const { authMiddleware, optionalAuth, adminAuth } = require('../middleware/auth'
 const { testRateLimiter, historyRateLimiter } = require('../middleware/rateLimiter');
 const { asyncHandler } = require('../middleware/errorHandler');
 const { validateURLMiddleware, validateAPIURLMiddleware } = require('../middleware/urlValidator');
-const { apiCache, dbCache } = require('../routes/cache.js');
+// const { apiCache, dbCache } = require('./cache.js'); // 已删除
 
 // 导入测试引擎类
-const { RealTestEngine } = require('../engines/api/testEngine.js');
-const { RealStressTestEngine } = require('../engines/stress/realStressTestEngine.js');
+const { RealTestEngine } = require('../engines/api/ApiAnalyzer.js');
+const { RealStressTestEngine } = require('../engines/stress/StressTestEngine.js');
 const RealSecurityTestEngine = require('../engines/security/securityTestEngine.js'); // 直接导出
 const { RealCompatibilityTestEngine } = require('../engines/compatibility/compatibilityTestEngine.js');
-const { RealUXTestEngine } = require('../engines/api/uxTestEngine.js');
+const { RealUXTestEngine } = require('../engines/api/UXAnalyzer.js');
 const { RealAPITestEngine } = require('../engines/api/apiTestEngine.js');
 const securityTestStorage = require('../services/testing/securityTestStorage.js');
 const TestHistoryService = require('../services/testing/TestHistoryService.js');
 const userTestManager = require('../services/testing/UserTestManager.js');
 // 注意：这些服务文件已被删除，需要使用替代方案
-// const databaseService = require('../services/databaseService');
-// const testQueueService = require('../services/testQueueService');
-// const smartCacheService = require('../services/smartCacheService');
-// const enhancedTestHistoryService = require('../services/enhancedTestHistoryService'); // 已移除，功能迁移到 dataManagement
+// const databaseService = require('../services/database/databaseService');
+// const testQueueService = require('../services/queue/queueService');
+// // // // // const smartCacheService = require('../services/smartCacheService'); // 已删除 // 已删除 // 服务已删除 // 服务已删除
+// const enhancedTestHistoryService = require('../services/testing/testHistoryService'); // 已移除，功能迁移到 dataManagement
 
 const multer = require('multer');
 const path = require('path');
@@ -979,7 +979,7 @@ router.post('/run', authMiddleware, testRateLimiter, asyncHandler(async (req, re
     console.log(`🚀 启动${testType}测试: ${url}`);
 
     // 生成测试ID
-    const testId = `${testType}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const testId = `${testType}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
     // 创建测试记录 - 已删除服务，需要使用替代方案
     // await databaseService.createTest({
@@ -2125,7 +2125,7 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
   let testRecordId = recordId; // 使用前端传递的记录ID
 
   // 🔧 修复：如果前端没有提供testId，自动生成一个
-  const testId = providedTestId || `stress_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const testId = providedTestId || `stress_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
   // 🔧 修复：统一配置处理 - 使用直接参数和合理的默认值
   const testConfig = {
@@ -3317,7 +3317,7 @@ router.post('/performance/save', optionalAuth, asyncHandler(async (req, res) => 
   try {
     console.log(`💾 Saving performance test result:`, result.testId);
 
-    const sessionId = result.testId || `perf_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const sessionId = result.testId || `perf_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
     const actualUserId = userId || req.user?.id;
 
     // 准备主表数据

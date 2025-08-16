@@ -1,6 +1,6 @@
 import React from 'react';
-import { cn } from '../../utils/cn';
-import { Table, TableColumn } from '../ui/Table';
+import {cn} from '../../utils/cn';
+import {Table, TableColumn} from './Table';
 
 // 原DataTable的列定义接口
 export interface DataTableColumn<T> {
