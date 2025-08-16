@@ -1,14 +1,14 @@
 {
-  "timestamp": "2025-08-16T06:15:58.134Z",
+  "timestamp": "2025-08-16T06:45:02.253Z",
   "summary": {
-    "totalIssues": 9,
+    "totalIssues": 28,
     "categories": {
-      "api_consistency": 9,
-      "model_consistency": 0
+      "api_consistency": 12,
+      "model_consistency": 16
     },
     "models": {
       "frontend": 22,
-      "backend": 0,
+      "backend": 17,
       "database": 0
     }
   },
@@ -964,7 +964,1012 @@
         }
       ]
     },
-    "backend": {},
+    "backend": {
+      "backend\\types\\models.ts": [
+        {
+          "name": "User",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "uuid",
+              "type": "UUID",
+              "optional": false
+            },
+            {
+              "name": "username",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "email",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "password_hash",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "first_name",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "last_name",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "avatar_url",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "is_active",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "is_admin",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "email_verified",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "email_verification_token",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "password_reset_token",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "password_reset_expires",
+              "type": "DatabaseTimestamp",
+              "optional": true
+            },
+            {
+              "name": "last_login",
+              "type": "DatabaseTimestamp",
+              "optional": true
+            },
+            {
+              "name": "login_attempts",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "locked_until",
+              "type": "DatabaseTimestamp",
+              "optional": true
+            },
+            {
+              "name": "created_at",
+              "type": "DatabaseTimestamp",
+              "optional": false
+            },
+            {
+              "name": "updated_at",
+              "type": "DatabaseTimestamp",
+              "optional": false
+            },
+            {
+              "name": "deleted_at",
+              "type": "DatabaseTimestamp",
+              "optional": true
+            }
+          ]
+        },
+        {
+          "name": "UserProfile",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "user_id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "display_name",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "bio",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "location",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "website",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "timezone",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "language",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "theme",
+              "type": "'light' | 'dark' | 'auto'",
+              "optional": false
+            },
+            {
+              "name": "notifications_enabled",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "created_at",
+              "type": "DatabaseTimestamp",
+              "optional": false
+            },
+            {
+              "name": "updated_at",
+              "type": "DatabaseTimestamp",
+              "optional": false
+            }
+          ]
+        },
+        {
+          "name": "UserSession",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "user_id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "session_token",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "refresh_token",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "expires_at",
+              "type": "DatabaseTimestamp",
+              "optional": false
+            },
+            {
+              "name": "ip_address",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "user_agent",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "is_active",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "created_at",
+              "type": "DatabaseTimestamp",
+              "optional": false
+            },
+            {
+              "name": "updated_at",
+              "type": "DatabaseTimestamp",
+              "optional": false
+            }
+          ]
+        },
+        {
+          "name": "TestConfiguration",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "uuid",
+              "type": "UUID",
+              "optional": false
+            },
+            {
+              "name": "user_id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "name",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "description",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "test_type",
+              "type": "'performance' | 'accessibility' | 'seo' | 'security' | 'compatibility' | 'load' | 'stress'",
+              "optional": false
+            },
+            {
+              "name": "target_url",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "configuration",
+              "type": "JsonObject",
+              "optional": false
+            },
+            {
+              "name": "is_active",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "created_at",
+              "type": "DatabaseTimestamp",
+              "optional": false
+            },
+            {
+              "name": "updated_at",
+              "type": "DatabaseTimestamp",
+              "optional": false
+            },
+            {
+              "name": "deleted_at",
+              "type": "DatabaseTimestamp",
+              "optional": true
+            }
+          ]
+        },
+        {
+          "name": "TestExecution",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "uuid",
+              "type": "UUID",
+              "optional": false
+            },
+            {
+              "name": "test_config_id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "user_id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "status",
+              "type": "'pending' | 'running' | 'completed' | 'failed' | 'cancelled'",
+              "optional": false
+            },
+            {
+              "name": "started_at",
+              "type": "DatabaseTimestamp",
+              "optional": true
+            },
+            {
+              "name": "completed_at",
+              "type": "DatabaseTimestamp",
+              "optional": true
+            },
+            {
+              "name": "duration_ms",
+              "type": "number",
+              "optional": true
+            },
+            {
+              "name": "error_message",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "metadata",
+              "type": "JsonObject",
+              "optional": false
+            },
+            {
+              "name": "created_at",
+              "type": "DatabaseTimestamp",
+              "optional": false
+            },
+            {
+              "name": "updated_at",
+              "type": "DatabaseTimestamp",
+              "optional": false
+            }
+          ]
+        },
+        {
+          "name": "TestResult",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "uuid",
+              "type": "UUID",
+              "optional": false
+            },
+            {
+              "name": "execution_id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "test_type",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "score",
+              "type": "number",
+              "optional": true
+            },
+            {
+              "name": "grade",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "status",
+              "type": "'pass' | 'fail' | 'warning' | 'info'",
+              "optional": false
+            },
+            {
+              "name": "summary",
+              "type": "JsonObject",
+              "optional": false
+            },
+            {
+              "name": "details",
+              "type": "JsonObject",
+              "optional": false
+            },
+            {
+              "name": "recommendations",
+              "type": "JsonObject",
+              "optional": true
+            },
+            {
+              "name": "created_at",
+              "type": "DatabaseTimestamp",
+              "optional": false
+            }
+          ]
+        },
+        {
+          "name": "PerformanceTestResult",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "test_result_id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "metrics",
+              "type": "{",
+              "optional": false
+            },
+            {
+              "name": "first_contentful_paint",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "largest_contentful_paint",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "first_input_delay",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "cumulative_layout_shift",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "speed_index",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "time_to_interactive",
+              "type": "number",
+              "optional": false
+            }
+          ]
+        },
+        {
+          "name": "AccessibilityTestResult",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "test_result_id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "violations",
+              "type": "JsonObject[]",
+              "optional": false
+            },
+            {
+              "name": "passes",
+              "type": "JsonObject[]",
+              "optional": false
+            },
+            {
+              "name": "incomplete",
+              "type": "JsonObject[]",
+              "optional": false
+            },
+            {
+              "name": "inapplicable",
+              "type": "JsonObject[]",
+              "optional": false
+            },
+            {
+              "name": "wcag_level",
+              "type": "'A' | 'AA' | 'AAA'",
+              "optional": false
+            },
+            {
+              "name": "compliance_score",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "created_at",
+              "type": "DatabaseTimestamp",
+              "optional": false
+            }
+          ]
+        },
+        {
+          "name": "SeoTestResult",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "test_result_id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "meta_tags",
+              "type": "JsonObject",
+              "optional": false
+            },
+            {
+              "name": "headings",
+              "type": "JsonObject",
+              "optional": false
+            },
+            {
+              "name": "images",
+              "type": "JsonObject",
+              "optional": false
+            },
+            {
+              "name": "links",
+              "type": "JsonObject",
+              "optional": false
+            },
+            {
+              "name": "structured_data",
+              "type": "JsonObject",
+              "optional": false
+            },
+            {
+              "name": "mobile_friendly",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "page_speed_score",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "created_at",
+              "type": "DatabaseTimestamp",
+              "optional": false
+            }
+          ]
+        },
+        {
+          "name": "SecurityTestResult",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "test_result_id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "vulnerabilities",
+              "type": "JsonObject[]",
+              "optional": false
+            },
+            {
+              "name": "security_headers",
+              "type": "JsonObject",
+              "optional": false
+            },
+            {
+              "name": "ssl_info",
+              "type": "JsonObject",
+              "optional": false
+            },
+            {
+              "name": "content_security_policy",
+              "type": "JsonObject",
+              "optional": false
+            },
+            {
+              "name": "risk_level",
+              "type": "'low' | 'medium' | 'high' | 'critical'",
+              "optional": false
+            },
+            {
+              "name": "created_at",
+              "type": "DatabaseTimestamp",
+              "optional": false
+            }
+          ]
+        },
+        {
+          "name": "CompatibilityTestResult",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "test_result_id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "browser_results",
+              "type": "JsonObject[]",
+              "optional": false
+            },
+            {
+              "name": "device_results",
+              "type": "JsonObject[]",
+              "optional": false
+            },
+            {
+              "name": "compatibility_score",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "issues",
+              "type": "JsonObject[]",
+              "optional": false
+            },
+            {
+              "name": "created_at",
+              "type": "DatabaseTimestamp",
+              "optional": false
+            }
+          ]
+        },
+        {
+          "name": "LoadTestResult",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "test_result_id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "concurrent_users",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "duration_seconds",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "total_requests",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "successful_requests",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "failed_requests",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "average_response_time",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "max_response_time",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "min_response_time",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "requests_per_second",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "error_rate",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "created_at",
+              "type": "DatabaseTimestamp",
+              "optional": false
+            }
+          ]
+        },
+        {
+          "name": "StressTestResult",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "test_result_id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "max_concurrent_users",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "breaking_point",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "recovery_time",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "cpu_usage",
+              "type": "JsonObject",
+              "optional": false
+            },
+            {
+              "name": "memory_usage",
+              "type": "JsonObject",
+              "optional": false
+            },
+            {
+              "name": "network_usage",
+              "type": "JsonObject",
+              "optional": false
+            },
+            {
+              "name": "created_at",
+              "type": "DatabaseTimestamp",
+              "optional": false
+            }
+          ]
+        },
+        {
+          "name": "TestReport",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "uuid",
+              "type": "UUID",
+              "optional": false
+            },
+            {
+              "name": "user_id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "name",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "description",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "report_type",
+              "type": "'single' | 'comparison' | 'trend' | 'summary'",
+              "optional": false
+            },
+            {
+              "name": "test_executions",
+              "type": "DatabaseId[]",
+              "optional": false
+            },
+            {
+              "name": "configuration",
+              "type": "JsonObject",
+              "optional": false
+            },
+            {
+              "name": "generated_at",
+              "type": "DatabaseTimestamp",
+              "optional": false
+            },
+            {
+              "name": "file_path",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "file_size",
+              "type": "number",
+              "optional": true
+            },
+            {
+              "name": "is_public",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "created_at",
+              "type": "DatabaseTimestamp",
+              "optional": false
+            },
+            {
+              "name": "updated_at",
+              "type": "DatabaseTimestamp",
+              "optional": false
+            },
+            {
+              "name": "deleted_at",
+              "type": "DatabaseTimestamp",
+              "optional": true
+            }
+          ]
+        },
+        {
+          "name": "SystemConfiguration",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "key",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "value",
+              "type": "JsonObject",
+              "optional": false
+            },
+            {
+              "name": "description",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "is_public",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "created_at",
+              "type": "DatabaseTimestamp",
+              "optional": false
+            },
+            {
+              "name": "updated_at",
+              "type": "DatabaseTimestamp",
+              "optional": false
+            }
+          ]
+        },
+        {
+          "name": "AuditLog",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "DatabaseId",
+              "optional": false
+            },
+            {
+              "name": "user_id",
+              "type": "DatabaseId",
+              "optional": true
+            },
+            {
+              "name": "action",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "resource_type",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "resource_id",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "old_values",
+              "type": "JsonObject",
+              "optional": true
+            },
+            {
+              "name": "new_values",
+              "type": "JsonObject",
+              "optional": true
+            },
+            {
+              "name": "ip_address",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "user_agent",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "created_at",
+              "type": "DatabaseTimestamp",
+              "optional": false
+            }
+          ]
+        },
+        {
+          "name": "RequestContext",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "user",
+              "type": "User",
+              "optional": true
+            },
+            {
+              "name": "session",
+              "type": "UserSession",
+              "optional": true
+            },
+            {
+              "name": "requestId",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "startTime",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "ip",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "userAgent",
+              "type": "string",
+              "optional": false
+            }
+          ]
+        }
+      ]
+    },
     "database": {}
   },
   "issues": [
@@ -972,8 +1977,113 @@
       "category": "api_consistency",
       "type": "mixed_response_formats",
       "file": "project",
-      "message": "API响应格式不统一: 标准格式27, 直接数据15, 自定义格式8",
+      "message": "API响应格式不统一: 标准格式26, 直接数据16, 自定义格式8",
       "severity": "high"
+    },
+    {
+      "category": "model_consistency",
+      "type": "missing_backend_field",
+      "file": "models",
+      "message": "后端模型 TestResult 缺少字段: testId",
+      "severity": "high"
+    },
+    {
+      "category": "model_consistency",
+      "type": "missing_backend_field",
+      "file": "models",
+      "message": "后端模型 TestResult 缺少字段: userId",
+      "severity": "high"
+    },
+    {
+      "category": "model_consistency",
+      "type": "missing_backend_field",
+      "file": "models",
+      "message": "后端模型 TestResult 缺少字段: type",
+      "severity": "high"
+    },
+    {
+      "category": "model_consistency",
+      "type": "missing_backend_field",
+      "file": "models",
+      "message": "后端模型 TestResult 缺少字段: url",
+      "severity": "high"
+    },
+    {
+      "category": "model_consistency",
+      "type": "missing_backend_field",
+      "file": "models",
+      "message": "后端模型 TestResult 缺少字段: config",
+      "severity": "high"
+    },
+    {
+      "category": "model_consistency",
+      "type": "missing_backend_field",
+      "file": "models",
+      "message": "后端模型 TestResult 缺少字段: startTime",
+      "severity": "high"
+    },
+    {
+      "category": "model_consistency",
+      "type": "missing_backend_field",
+      "file": "models",
+      "message": "后端模型 TestResult 缺少字段: endTime",
+      "severity": "high"
+    },
+    {
+      "category": "model_consistency",
+      "type": "missing_backend_field",
+      "file": "models",
+      "message": "后端模型 TestResult 缺少字段: duration",
+      "severity": "high"
+    },
+    {
+      "category": "model_consistency",
+      "type": "missing_backend_field",
+      "file": "models",
+      "message": "后端模型 TestResult 缺少字段: results",
+      "severity": "high"
+    },
+    {
+      "category": "model_consistency",
+      "type": "missing_backend_field",
+      "file": "models",
+      "message": "后端模型 TestResult 缺少字段: metrics",
+      "severity": "high"
+    },
+    {
+      "category": "model_consistency",
+      "type": "missing_backend_field",
+      "file": "models",
+      "message": "后端模型 TestResult 缺少字段: errors",
+      "severity": "high"
+    },
+    {
+      "category": "model_consistency",
+      "type": "missing_backend_field",
+      "file": "models",
+      "message": "后端模型 TestResult 缺少字段: type",
+      "severity": "high"
+    },
+    {
+      "category": "model_consistency",
+      "type": "missing_backend_field",
+      "file": "models",
+      "message": "后端模型 TestResult 缺少字段: message",
+      "severity": "high"
+    },
+    {
+      "category": "api_consistency",
+      "type": "inconsistent_error_format",
+      "file": "backend\\routes\\admin.js",
+      "message": "API错误响应格式不一致",
+      "severity": "medium"
+    },
+    {
+      "category": "api_consistency",
+      "type": "inconsistent_error_format",
+      "file": "backend\\routes\\analytics.js",
+      "message": "API错误响应格式不一致",
+      "severity": "medium"
     },
     {
       "category": "api_consistency",
@@ -999,7 +2109,21 @@
     {
       "category": "api_consistency",
       "type": "inconsistent_error_format",
+      "file": "backend\\routes\\dataManagement.js",
+      "message": "API错误响应格式不一致",
+      "severity": "medium"
+    },
+    {
+      "category": "api_consistency",
+      "type": "inconsistent_error_format",
       "file": "backend\\routes\\errorManagement.js",
+      "message": "API错误响应格式不一致",
+      "severity": "medium"
+    },
+    {
+      "category": "api_consistency",
+      "type": "inconsistent_error_format",
+      "file": "backend\\routes\\security.js",
       "message": "API错误响应格式不一致",
       "severity": "medium"
     },
@@ -1025,11 +2149,25 @@
       "severity": "medium"
     },
     {
-      "category": "api_consistency",
-      "type": "too_many_status_codes",
-      "file": "backend\\routes\\user.js",
-      "message": "使用了过多的HTTP状态码: 6",
-      "severity": "low"
+      "category": "model_consistency",
+      "type": "type_mismatch",
+      "file": "models",
+      "message": "字段类型不匹配: TestResult.id (前端: string, 后端: DatabaseId)",
+      "severity": "medium"
+    },
+    {
+      "category": "model_consistency",
+      "type": "type_mismatch",
+      "file": "models",
+      "message": "字段类型不匹配: TestResult.status (前端: string, 后端: 'pass' | 'fail' | 'warning' | 'info')",
+      "severity": "medium"
+    },
+    {
+      "category": "model_consistency",
+      "type": "type_mismatch",
+      "file": "models",
+      "message": "字段类型不匹配: TestResult.details (前端: any, 后端: JsonObject)",
+      "severity": "medium"
     }
   ]
 }
