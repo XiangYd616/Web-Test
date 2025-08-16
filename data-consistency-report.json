@@ -1,0 +1,1035 @@
+{
+  "timestamp": "2025-08-16T06:15:58.134Z",
+  "summary": {
+    "totalIssues": 9,
+    "categories": {
+      "api_consistency": 9,
+      "model_consistency": 0
+    },
+    "models": {
+      "frontend": 22,
+      "backend": 0,
+      "database": 0
+    }
+  },
+  "dataModels": {
+    "frontend": {
+      "frontend\\components\\ui\\types.ts": [
+        {
+          "name": "BaseComponentProps",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "className",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "children",
+              "type": "ReactNode",
+              "optional": true
+            },
+            {
+              "name": "id",
+              "type": "string",
+              "optional": true
+            }
+          ]
+        },
+        {
+          "name": "SelectOption",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "value",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "label",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "disabled",
+              "type": "boolean",
+              "optional": true
+            }
+          ]
+        },
+        {
+          "name": "TableColumn",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "key",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "title",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "dataIndex",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "render",
+              "type": "(value: any",
+              "optional": true
+            },
+            {
+              "name": "width",
+              "type": "number | string",
+              "optional": true
+            },
+            {
+              "name": "align",
+              "type": "'left' | 'center' | 'right'",
+              "optional": true
+            },
+            {
+              "name": "sortable",
+              "type": "boolean",
+              "optional": true
+            }
+          ]
+        },
+        {
+          "name": "TablePagination",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "current",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "pageSize",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "total",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "showSizeChanger",
+              "type": "boolean",
+              "optional": true
+            },
+            {
+              "name": "showQuickJumper",
+              "type": "boolean",
+              "optional": true
+            },
+            {
+              "name": "onChange",
+              "type": "(page: number",
+              "optional": true
+            }
+          ]
+        },
+        {
+          "name": "TableRowSelection",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "selectedRowKeys",
+              "type": "string[]",
+              "optional": false
+            },
+            {
+              "name": "onChange",
+              "type": "(selectedRowKeys: string[]",
+              "optional": false
+            },
+            {
+              "name": "type",
+              "type": "'checkbox' | 'radio'",
+              "optional": true
+            }
+          ]
+        }
+      ],
+      "frontend\\types\\electron.d.ts": [
+        {
+          "name": "Window",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "electronAPI",
+              "type": "{",
+              "optional": true
+            },
+            {
+              "name": "getAppVersion",
+              "type": "() => Promise<string>",
+              "optional": false
+            },
+            {
+              "name": "getSystemInfo",
+              "type": "() => Promise<any>",
+              "optional": false
+            },
+            {
+              "name": "showSaveDialog",
+              "type": "(options: any) => Promise<any>",
+              "optional": false
+            },
+            {
+              "name": "showOpenDialog",
+              "type": "(options: any) => Promise<any>",
+              "optional": false
+            },
+            {
+              "name": "showMessageBox",
+              "type": "(options: any) => Promise<any>",
+              "optional": false
+            },
+            {
+              "name": "onMenuAction",
+              "type": "(callback: (event: string",
+              "optional": false
+            },
+            {
+              "name": "isDesktop",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "platform",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "database",
+              "type": "{",
+              "optional": false
+            },
+            {
+              "name": "init",
+              "type": "() => Promise<any>",
+              "optional": false
+            },
+            {
+              "name": "query",
+              "type": "(sql: string",
+              "optional": true
+            },
+            {
+              "name": "backup",
+              "type": "(backupPath: string) => Promise<any>",
+              "optional": false
+            },
+            {
+              "name": "restore",
+              "type": "(backupPath: string) => Promise<any>",
+              "optional": false
+            },
+            {
+              "name": "export",
+              "type": "(format: string",
+              "optional": false
+            },
+            {
+              "name": "getStats",
+              "type": "() => Promise<any>",
+              "optional": false
+            }
+          ]
+        },
+        {
+          "name": "LocalStressTestConfig",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "url",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "users",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "duration",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "testType",
+              "type": "'load' | 'stress' | 'spike' | 'volume'",
+              "optional": false
+            },
+            {
+              "name": "rampUp",
+              "type": "number",
+              "optional": true
+            },
+            {
+              "name": "thinkTime",
+              "type": "number",
+              "optional": true
+            },
+            {
+              "name": "method",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "headers",
+              "type": "Record<string",
+              "optional": true
+            },
+            {
+              "name": "body",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "timeout",
+              "type": "number",
+              "optional": true
+            }
+          ]
+        },
+        {
+          "name": "LocalStressTestResults",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "totalRequests",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "successfulRequests",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "failedRequests",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "averageResponseTime",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "minResponseTime",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "maxResponseTime",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "responseTimes",
+              "type": "number[]",
+              "optional": false
+            },
+            {
+              "name": "errors",
+              "type": "any[]",
+              "optional": false
+            },
+            {
+              "name": "startTime",
+              "type": "number | null",
+              "optional": false
+            },
+            {
+              "name": "endTime",
+              "type": "number | null",
+              "optional": false
+            },
+            {
+              "name": "throughput",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "successRate",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "errorRate",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "duration",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "isRunning",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "systemInfo",
+              "type": "any",
+              "optional": false
+            }
+          ]
+        },
+        {
+          "name": "SystemUsage",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "memory",
+              "type": "{",
+              "optional": false
+            },
+            {
+              "name": "used",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "total",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "external",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "percentage",
+              "type": "number",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "frontend\\types\\models.ts": [
+        {
+          "name": "TestConfig",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "performance",
+              "type": "{",
+              "optional": true
+            },
+            {
+              "name": "users",
+              "type": "number",
+              "optional": true
+            },
+            {
+              "name": "duration",
+              "type": "number",
+              "optional": true
+            },
+            {
+              "name": "rampUpTime",
+              "type": "number",
+              "optional": true
+            },
+            {
+              "name": "scenarios",
+              "type": "string[]",
+              "optional": true
+            }
+          ]
+        },
+        {
+          "name": "TestResult",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "testId",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "userId",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "type",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "url",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "config",
+              "type": "any",
+              "optional": false
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "startTime",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "endTime",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "duration",
+              "type": "number",
+              "optional": true
+            },
+            {
+              "name": "results",
+              "type": "any",
+              "optional": false
+            },
+            {
+              "name": "metrics",
+              "type": "Record<string",
+              "optional": false
+            },
+            {
+              "name": "errors",
+              "type": "Array<{",
+              "optional": false
+            },
+            {
+              "name": "type",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "message",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "details",
+              "type": "any",
+              "optional": true
+            }
+          ]
+        },
+        {
+          "name": "TestHistory",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "userId",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "testType",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "url",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "results",
+              "type": "TestResult",
+              "optional": true
+            },
+            {
+              "name": "createdAt",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "updatedAt",
+              "type": "string",
+              "optional": false
+            }
+          ]
+        },
+        {
+          "name": "TestResultDatabaseFields",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "test_id",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "user_id",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "type",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "url",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "config",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "start_time",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "end_time",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "duration",
+              "type": "number",
+              "optional": true
+            },
+            {
+              "name": "results",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "metrics",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "errors",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "metadata",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "created_at",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "updated_at",
+              "type": "string",
+              "optional": false
+            }
+          ]
+        },
+        {
+          "name": "TestHistoryDatabaseFields",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "id",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "user_id",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "test_type",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "url",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "results",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "created_at",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "updated_at",
+              "type": "string",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "frontend\\types\\modules.d.ts": [
+        {
+          "name": "ImportMetaEnv",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "VITE_API_BASE_URL",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "VITE_APP_TITLE",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "VITE_GOOGLE_PAGESPEED_API_KEY",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "VITE_ENABLE_MOCK",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "VITE_ENABLE_ANALYTICS",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "VITE_SENTRY_DSN",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "MODE",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "BASE_URL",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "PROD",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "DEV",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "SSR",
+              "type": "boolean",
+              "optional": false
+            }
+          ]
+        },
+        {
+          "name": "ImportMeta",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "env",
+              "type": "ImportMetaEnv",
+              "optional": false
+            }
+          ]
+        },
+        {
+          "name": "Window",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "gtag",
+              "type": "(...args: any[]) => void",
+              "optional": true
+            },
+            {
+              "name": "dataLayer",
+              "type": "any[]",
+              "optional": true
+            },
+            {
+              "name": "workbox",
+              "type": "any",
+              "optional": true
+            },
+            {
+              "name": "__PERFORMANCE_OBSERVER__",
+              "type": "PerformanceObserver",
+              "optional": true
+            },
+            {
+              "name": "__ERROR_HANDLER__",
+              "type": "(error: Error) => void",
+              "optional": true
+            },
+            {
+              "name": "__REACT_DEVTOOLS_GLOBAL_HOOK__",
+              "type": "any",
+              "optional": true
+            },
+            {
+              "name": "__REDUX_DEVTOOLS_EXTENSION__",
+              "type": "any",
+              "optional": true
+            }
+          ]
+        },
+        {
+          "name": "CustomEventMap",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "testId",
+              "type": "string",
+              "optional": false
+            }
+          ]
+        },
+        {
+          "name": "Document",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "type",
+              "type": "K",
+              "optional": false
+            },
+            {
+              "name": "listener",
+              "type": "(this: Document",
+              "optional": false
+            },
+            {
+              "name": "type",
+              "type": "K",
+              "optional": false
+            },
+            {
+              "name": "listener",
+              "type": "(this: Document",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "frontend\\types\\unified\\models.ts": [
+        {
+          "name": "Models",
+          "type": "type",
+          "fields": [
+            {
+              "name": "User",
+              "type": "User",
+              "optional": false
+            },
+            {
+              "name": "AuthResponse",
+              "type": "AuthResponse",
+              "optional": false
+            },
+            {
+              "name": "ApiResponse",
+              "type": "ApiResponse",
+              "optional": false
+            },
+            {
+              "name": "TestResult",
+              "type": "TestResult",
+              "optional": false
+            },
+            {
+              "name": "TestConfig",
+              "type": "TestConfig",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "frontend\\vite-env.d.ts": [
+        {
+          "name": "ImportMetaEnv",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "VITE_API_URL",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "VITE_APP_TITLE",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "VITE_ELECTRON_MODE",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "VITE_DEV_PORT",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "VITE_MAX_LOGIN_ATTEMPTS",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "VITE_LOCKOUT_DURATION",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "VITE_SESSION_TIMEOUT",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "VITE_API_RATE_LIMIT",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "VITE_ADMIN_API_RATE_LIMIT",
+              "type": "string",
+              "optional": false
+            }
+          ]
+        },
+        {
+          "name": "ImportMeta",
+          "type": "interface",
+          "fields": [
+            {
+              "name": "env",
+              "type": "ImportMetaEnv",
+              "optional": false
+            }
+          ]
+        }
+      ]
+    },
+    "backend": {},
+    "database": {}
+  },
+  "issues": [
+    {
+      "category": "api_consistency",
+      "type": "mixed_response_formats",
+      "file": "project",
+      "message": "API响应格式不统一: 标准格式27, 直接数据15, 自定义格式8",
+      "severity": "high"
+    },
+    {
+      "category": "api_consistency",
+      "type": "inconsistent_error_format",
+      "file": "backend\\routes\\backup.js",
+      "message": "API错误响应格式不一致",
+      "severity": "medium"
+    },
+    {
+      "category": "api_consistency",
+      "type": "inconsistent_error_format",
+      "file": "backend\\routes\\dataExport.js",
+      "message": "API错误响应格式不一致",
+      "severity": "medium"
+    },
+    {
+      "category": "api_consistency",
+      "type": "inconsistent_error_format",
+      "file": "backend\\routes\\dataImport.js",
+      "message": "API错误响应格式不一致",
+      "severity": "medium"
+    },
+    {
+      "category": "api_consistency",
+      "type": "inconsistent_error_format",
+      "file": "backend\\routes\\errorManagement.js",
+      "message": "API错误响应格式不一致",
+      "severity": "medium"
+    },
+    {
+      "category": "api_consistency",
+      "type": "inconsistent_error_format",
+      "file": "backend\\api\\middleware\\auth.js",
+      "message": "API错误响应格式不一致",
+      "severity": "medium"
+    },
+    {
+      "category": "api_consistency",
+      "type": "inconsistent_error_format",
+      "file": "backend\\api\\middleware\\staticOptimization.js",
+      "message": "API错误响应格式不一致",
+      "severity": "medium"
+    },
+    {
+      "category": "api_consistency",
+      "type": "inconsistent_error_format",
+      "file": "backend\\api\\v1\\routes\\auth.js",
+      "message": "API错误响应格式不一致",
+      "severity": "medium"
+    },
+    {
+      "category": "api_consistency",
+      "type": "too_many_status_codes",
+      "file": "backend\\routes\\user.js",
+      "message": "使用了过多的HTTP状态码: 6",
+      "severity": "low"
+    }
+  ]
+}
