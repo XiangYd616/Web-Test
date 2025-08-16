@@ -3,38 +3,34 @@
  * 提供详细的测试结果分析和可视化
  */
 
-import React, { useState, useMemo } from 'react';
 import {
-  BarChart3,
-  TrendingUp,
-  TrendingDown,
-  Clock,
-  Users,
-  Zap,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
   Activity,
+  AlertTriangle,
+  BarChart3,
+  CheckCircle,
+  Clock,
+  Download,
   Target,
-  Award,
-  Download
+  TrendingUp,
+  Users,
+  XCircle,
+  Zap
 } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
 import {
-  LineChart,
-  Line,
-  AreaChart,
   Area,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
+  AreaChart,
   CartesianGrid,
-  Tooltip,
+  Cell,
   Legend,
-  ResponsiveContainer,
-  PieChart,
+  Line,
+  LineChart,
   Pie,
-  Cell
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
 } from 'recharts';
 
 interface StressTestResult {
@@ -44,7 +40,7 @@ interface StressTestResult {
   startTime: string;
   endTime: string;
   duration: number;
-  
+
   // 核心指标
   metrics: {
     totalRequests: number;
@@ -55,7 +51,7 @@ interface StressTestResult {
     maxResponseTime: number;
     throughput: number;
     errorRate: number;
-    
+
     // 百分位数
     percentiles: {
       p50: number;
@@ -64,7 +60,7 @@ interface StressTestResult {
       p99: number;
     };
   };
-  
+
   // 时间序列数据
   timeSeriesData: Array<{
     timestamp: number;
@@ -73,7 +69,7 @@ interface StressTestResult {
     activeUsers: number;
     errors: number;
   }>;
-  
+
   // 错误分析
   errors: Array<{
     type: string;
@@ -81,7 +77,7 @@ interface StressTestResult {
     count: number;
     percentage: number;
   }>;
-  
+
   // 性能分析
   performance: {
     grade: 'A' | 'B' | 'C' | 'D' | 'F';
@@ -155,7 +151,7 @@ const StressTestResultAnalysis: React.FC<StressTestResultAnalysisProps> = ({
               测试时间: {new Date(result.startTime).toLocaleString()} - {new Date(result.endTime).toLocaleString()}
             </p>
           </div>
-          
+
           {/* 性能等级 */}
           <div className="flex items-center space-x-4">
             <div className={`px-4 py-2 rounded-lg ${getGradeColor(result.performance.grade)}`}>
@@ -164,7 +160,7 @@ const StressTestResultAnalysis: React.FC<StressTestResultAnalysisProps> = ({
                 <div className="text-xs">性能等级</div>
               </div>
             </div>
-            
+
             <div className="text-right">
               <div className="text-2xl font-bold text-gray-900">{result.performance.score}</div>
               <div className="text-xs text-gray-600">综合评分</div>
@@ -184,11 +180,10 @@ const StressTestResultAnalysis: React.FC<StressTestResultAnalysisProps> = ({
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key as any)}
-            className={`flex items-center space-x-2 px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === tab.key
+            className={`flex items-center space-x-2 px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.key
                 ? 'border-blue-500 text-blue-600'
                 : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}
+              }`}
           >
             {tab.icon}
             <span>{tab.label}</span>
@@ -253,10 +248,10 @@ const StressTestResultAnalysis: React.FC<StressTestResultAnalysisProps> = ({
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Line 
-                    type="monotone" 
-                    dataKey="responseTime" 
-                    stroke="#3b82f6" 
+                  <Line
+                    type="monotone"
+                    dataKey="responseTime"
+                    stroke="#3b82f6"
                     strokeWidth={2}
                     name="响应时间 (ms)"
                   />
@@ -328,10 +323,10 @@ const StressTestResultAnalysis: React.FC<StressTestResultAnalysisProps> = ({
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Area 
-                    type="monotone" 
-                    dataKey="throughput" 
-                    stroke="#10b981" 
+                  <Area
+                    type="monotone"
+                    dataKey="throughput"
+                    stroke="#10b981"
                     fill="#10b981"
                     fillOpacity={0.3}
                     name="吞吐量 (req/s)"
@@ -434,10 +429,10 @@ const StressTestResultAnalysis: React.FC<StressTestResultAnalysisProps> = ({
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Area 
-                    type="monotone" 
-                    dataKey="activeUsers" 
-                    stroke="#6366f1" 
+                  <Area
+                    type="monotone"
+                    dataKey="activeUsers"
+                    stroke="#6366f1"
                     fill="#6366f1"
                     fillOpacity={0.3}
                     name="活跃用户数"
@@ -457,27 +452,27 @@ const StressTestResultAnalysis: React.FC<StressTestResultAnalysisProps> = ({
                   <YAxis yAxisId="right" orientation="right" />
                   <Tooltip />
                   <Legend />
-                  <Line 
+                  <Line
                     yAxisId="left"
-                    type="monotone" 
-                    dataKey="responseTime" 
-                    stroke="#3b82f6" 
+                    type="monotone"
+                    dataKey="responseTime"
+                    stroke="#3b82f6"
                     strokeWidth={2}
                     name="响应时间 (ms)"
                   />
-                  <Line 
+                  <Line
                     yAxisId="right"
-                    type="monotone" 
-                    dataKey="throughput" 
-                    stroke="#10b981" 
+                    type="monotone"
+                    dataKey="throughput"
+                    stroke="#10b981"
                     strokeWidth={2}
                     name="吞吐量 (req/s)"
                   />
-                  <Line 
+                  <Line
                     yAxisId="right"
-                    type="monotone" 
-                    dataKey="errors" 
-                    stroke="#ef4444" 
+                    type="monotone"
+                    dataKey="errors"
+                    stroke="#ef4444"
                     strokeWidth={2}
                     name="错误数"
                   />

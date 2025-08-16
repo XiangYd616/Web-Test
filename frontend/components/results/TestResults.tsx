@@ -28,11 +28,13 @@ import {
   PieChart,
   PolarAngleAxis,
   PolarGrid,
-  PolarRadiusAxis, Radar,
+  PolarRadiusAxis,
+  Radar,
   RadarChart,
   ResponsiveContainer,
   Tooltip,
-  XAxis, YAxis
+  XAxis,
+  YAxis
 } from 'recharts';
 
 interface TestResult {
@@ -47,7 +49,7 @@ interface TestResult {
   details: any;
 }
 
-interface EnhancedTestResultsProps {
+interface TestResultsProps {
   results: TestResult[];
   loading?: boolean;
   onResultClick?: (result: TestResult) => void;
@@ -55,7 +57,7 @@ interface EnhancedTestResultsProps {
   onShare?: (result: TestResult) => void;
 }
 
-const EnhancedTestResults: React.FC<EnhancedTestResultsProps> = ({
+const TestResults: React.FC<TestResultsProps> = ({
   results,
   loading = false,
   onResultClick,
@@ -603,4 +605,4 @@ const EnhancedTestResults: React.FC<EnhancedTestResultsProps> = ({
   );
 };
 
-export default EnhancedTestResults;
+export default TestResults;

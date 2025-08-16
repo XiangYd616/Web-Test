@@ -406,8 +406,8 @@ const PerformanceAccessibilityViewer: React.FC<PerformanceAccessibilityViewerPro
                             key={key}
                             onClick={() => setActiveTab(key as any)}
                             className={`py-4 px-2 border-b-2 font-medium text-sm flex items-center space-x-2 ${activeTab === key
-                                    ? 'border-blue-500 text-blue-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                ? 'border-blue-500 text-blue-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
                         >
                             <Icon size={16} />
@@ -570,10 +570,10 @@ const PerformanceAccessibilityViewer: React.FC<PerformanceAccessibilityViewerPro
                                         <p className="text-gray-600 mt-1">{recommendation.description}</p>
                                     </div>
                                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${recommendation.priority === 'high'
-                                            ? 'bg-red-100 text-red-800'
-                                            : recommendation.priority === 'medium'
-                                                ? 'bg-yellow-100 text-yellow-800'
-                                                : 'bg-green-100 text-green-800'
+                                        ? 'bg-red-100 text-red-800'
+                                        : recommendation.priority === 'medium'
+                                            ? 'bg-yellow-100 text-yellow-800'
+                                            : 'bg-green-100 text-green-800'
                                         }`}>
                                         {recommendation.priority === 'high' ? '高优先级' :
                                             recommendation.priority === 'medium' ? '中优先级' : '低优先级'}
