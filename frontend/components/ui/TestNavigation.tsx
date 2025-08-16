@@ -5,7 +5,86 @@ import { Badge, StatusBadge } from './Badge';
 
 import { Layout, Square, Type, Award, Layers, ExternalLink, CheckCircle } from 'lucide-react';
 
-export const TestNavigation: React.FC = () => {
+
+export interface TestNavigationProps {
+  // 基础属性
+  className?: string;
+  style?: React.CSSProperties;
+  children?: React.ReactNode;
+  
+  // 事件处理
+  onClick?: (event: React.MouseEvent<HTMLElement>) => void;
+  onChange?: (value: any) => void;
+  onFocus?: (event: React.FocusEvent<HTMLElement>) => void;
+  onBlur?: (event: React.FocusEvent<HTMLElement>) => void;
+  
+  // 状态属性
+  disabled?: boolean;
+  loading?: boolean;
+  error?: string | boolean;
+  
+  // 数据属性
+  value?: any;
+  defaultValue?: any;
+  
+  // 配置属性
+  size?: 'small' | 'medium' | 'large';
+  variant?: 'primary' | 'secondary' | 'outline';
+  
+  // 可访问性
+  'aria-label'?: string;
+  'aria-describedby'?: string;
+  role?: string;
+  tabIndex?: number;
+}
+
+
+export const TestNavigation: React.FC<TestNavigationProps> = (props) => {
+  
+  const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    if (disabled || loading) return;
+    onClick?.(event);
+  }, [disabled, loading, onClick]);
+  
+  const memoizedHandleChange = useMemo(() => 
+    debounce((value: any) => {
+      onChange?.(value);
+    }, 300), [onChange]
+  );
+  
+  const componentId = useId();
+  const errorId = `${componentId}-error`;
+  const descriptionId = `${componentId}-description`;
+  
+  const ariaProps = {
+    id: componentId,
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledBy,
+    'aria-describedby': [
+      error ? errorId : null,
+      description ? descriptionId : null,
+      ariaDescribedBy
+    ].filter(Boolean).join(' ') || undefined,
+    'aria-invalid': !!error,
+    'aria-disabled': disabled,
+    'aria-busy': loading,
+    'aria-expanded': expanded,
+    'aria-selected': selected,
+    role: role,
+    tabIndex: disabled ? -1 : (tabIndex ?? 0)
+  };
+  
+  const [state, setState] = useState({
+    value: defaultValue,
+    loading: false,
+    error: null,
+    touched: false,
+    focused: false
+  });
+  
+  const updateState = useCallback((updates: Partial<typeof state>) => {
+    setState(prev => ({ ...prev, ...updates }));
+  }, []);
   const testPages = [
     {
       id: 'card',

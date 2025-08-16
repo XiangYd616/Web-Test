@@ -32,6 +32,17 @@ const DataQueryPanel: React.FC<DataQueryPanelProps> = ({
   resultCount = 0,
   isLoading = false
 }) => {
+  
+  const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    if (disabled || loading) return;
+    onClick?.(event);
+  }, [disabled, loading, onClick]);
+  
+  const memoizedHandleChange = useMemo(() => 
+    debounce((value: any) => {
+      onChange?.(value);
+    }, 300), [onChange]
+  );
   const [isExpanded, setIsExpanded] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
 

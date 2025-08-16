@@ -7,6 +7,39 @@ interface TechnicalResultsProps {
 }
 
 const TechnicalResults: React.FC<TechnicalResultsProps> = ({ results }) => {
+  
+  const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    if (disabled || loading) return;
+    onClick?.(event);
+  }, [disabled, loading, onClick]);
+  
+  const memoizedHandleChange = useMemo(() => 
+    debounce((value: any) => {
+      onChange?.(value);
+    }, 300), [onChange]
+  );
+  
+  const componentId = useId();
+  const errorId = `${componentId}-error`;
+  const descriptionId = `${componentId}-description`;
+  
+  const ariaProps = {
+    id: componentId,
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledBy,
+    'aria-describedby': [
+      error ? errorId : null,
+      description ? descriptionId : null,
+      ariaDescribedBy
+    ].filter(Boolean).join(' ') || undefined,
+    'aria-invalid': !!error,
+    'aria-disabled': disabled,
+    'aria-busy': loading,
+    'aria-expanded': expanded,
+    'aria-selected': selected,
+    role: role,
+    tabIndex: disabled ? -1 : (tabIndex ?? 0)
+  };
   const getStatusIcon = (status: boolean | undefined, hasIssues?: boolean) => {
     if (status === undefined) return <Info className="w-5 h-5 text-gray-400" />;
     if (hasIssues) return <AlertTriangle className="w-5 h-5 text-yellow-500" />;

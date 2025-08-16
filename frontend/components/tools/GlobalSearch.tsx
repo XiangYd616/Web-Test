@@ -29,6 +29,17 @@ const iconMap: Record<string, React.ComponentType<any>> = {
 };
 
 const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose, initialQuery = '' }) => {
+  
+  const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    if (disabled || loading) return;
+    onClick?.(event);
+  }, [disabled, loading, onClick]);
+  
+  const memoizedHandleChange = useMemo(() => 
+    debounce((value: any) => {
+      onChange?.(value);
+    }, 300), [onChange]
+  );
   const [query, setQuery] = useState(initialQuery);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);

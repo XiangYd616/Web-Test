@@ -17,6 +17,17 @@ export interface TestEngineStatusProps {
 }
 
 const TestEngineStatus: React.FC<TestEngineStatusProps> = ({ compact = false }) => {
+  
+  const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    if (disabled || loading) return;
+    onClick?.(event);
+  }, [disabled, loading, onClick]);
+  
+  const memoizedHandleChange = useMemo(() => 
+    debounce((value: any) => {
+      onChange?.(value);
+    }, 300), [onChange]
+  );
   const [engines, setEngines] = useState<EngineStatus[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastCheckTime, setLastCheckTime] = useState<number>(0);

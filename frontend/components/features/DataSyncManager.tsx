@@ -37,6 +37,17 @@ interface DataSyncManagerProps {
 }
 
 const DataSyncManager: React.FC<DataSyncManagerProps> = ({ className = '' }) => {
+  
+  const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    if (disabled || loading) return;
+    onClick?.(event);
+  }, [disabled, loading, onClick]);
+  
+  const memoizedHandleChange = useMemo(() => 
+    debounce((value: any) => {
+      onChange?.(value);
+    }, 300), [onChange]
+  );
   const [syncConfig, setSyncConfig] = useState<DataSyncConfig | null>(null);
   const [loading, setLoading] = useState(false);
   const [showAddTargetModal, setShowAddTargetModal] = useState(false);

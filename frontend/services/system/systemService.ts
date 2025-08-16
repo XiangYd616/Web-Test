@@ -12,6 +12,20 @@ import type {
   // UserFilter
 } from '../types/system'; // 已修复
 export class SystemService {
+  private async retryRequest(fn: () => Promise<any>, maxRetries: number = 3): Promise<any> {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await fn();
+      } catch (error) {
+        if (attempt === maxRetries) {
+          throw error;
+        }
+        
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+    await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+  }
+}
+  }
   private static readonly BASE_URL = '/api/system';
   private static cache = new Map<string, any>();
   private static cacheTimeout = 5 * 60 * 1000; // 5分钟缓存

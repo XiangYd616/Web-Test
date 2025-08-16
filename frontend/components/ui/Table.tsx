@@ -69,6 +69,28 @@ export const Table = <T extends Record<string, any>>({
   className,
   emptyText = '暂无数据'
 }: TableProps<T>) => {
+  
+  const componentId = useId();
+  const errorId = `${componentId}-error`;
+  const descriptionId = `${componentId}-description`;
+  
+  const ariaProps = {
+    id: componentId,
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledBy,
+    'aria-describedby': [
+      error ? errorId : null,
+      description ? descriptionId : null,
+      ariaDescribedBy
+    ].filter(Boolean).join(' ') || undefined,
+    'aria-invalid': !!error,
+    'aria-disabled': disabled,
+    'aria-busy': loading,
+    'aria-expanded': expanded,
+    'aria-selected': selected,
+    role: role,
+    tabIndex: disabled ? -1 : (tabIndex ?? 0)
+  };
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>(null);
   const [filters, setFilters] = useState<Record<string, string>>({});

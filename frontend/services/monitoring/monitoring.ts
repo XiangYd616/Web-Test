@@ -85,6 +85,20 @@ export interface MonitoringStats {
 }
 
 export class RealTimeMonitoringService {
+  private async retryRequest(fn: () => Promise<any>, maxRetries: number = 3): Promise<any> {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await fn();
+      } catch (error) {
+        if (attempt === maxRetries) {
+          throw error;
+        }
+        
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+    await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+  }
+}
+  }
   private static instance: RealTimeMonitoringService;
   private targets: Map<string, MonitoringTarget> = new Map();
   private results: Map<string, MonitoringResult[]> = new Map();

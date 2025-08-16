@@ -16,6 +16,40 @@ const StressTestRecordDetail: React.FC<StressTestRecordDetailProps> = ({
   onExport,
   onDelete
 }) => {
+  
+  const componentId = useId();
+  const errorId = `${componentId}-error`;
+  const descriptionId = `${componentId}-description`;
+  
+  const ariaProps = {
+    id: componentId,
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledBy,
+    'aria-describedby': [
+      error ? errorId : null,
+      description ? descriptionId : null,
+      ariaDescribedBy
+    ].filter(Boolean).join(' ') || undefined,
+    'aria-invalid': !!error,
+    'aria-disabled': disabled,
+    'aria-busy': loading,
+    'aria-expanded': expanded,
+    'aria-selected': selected,
+    role: role,
+    tabIndex: disabled ? -1 : (tabIndex ?? 0)
+  };
+  
+  const [state, setState] = useState({
+    value: defaultValue,
+    loading: false,
+    error: null,
+    touched: false,
+    focused: false
+  });
+  
+  const updateState = useCallback((updates: Partial<typeof state>) => {
+    setState(prev => ({ ...prev, ...updates }));
+  }, []);
   // 使用 useMemo 优化数据处理，避免不必要的重新计算
   const processedData = useMemo(() => {
     const config = (record?.config as any) || {};

@@ -2,6 +2,40 @@ import React, { useState, useEffect } from 'react';
 
 import { Check, Copy, Heart, ThumbsUp, Star, Bookmark, BookmarkCheck, Sparkles, Award } from 'lucide-react';
 
+
+export interface InteractiveFeedbackProps {
+  // 基础属性
+  className?: string;
+  style?: React.CSSProperties;
+  children?: React.ReactNode;
+  
+  // 事件处理
+  onClick?: (event: React.MouseEvent<HTMLElement>) => void;
+  onChange?: (value: any) => void;
+  onFocus?: (event: React.FocusEvent<HTMLElement>) => void;
+  onBlur?: (event: React.FocusEvent<HTMLElement>) => void;
+  
+  // 状态属性
+  disabled?: boolean;
+  loading?: boolean;
+  error?: string | boolean;
+  
+  // 数据属性
+  value?: any;
+  defaultValue?: any;
+  
+  // 配置属性
+  size?: 'small' | 'medium' | 'large';
+  variant?: 'primary' | 'secondary' | 'outline';
+  
+  // 可访问性
+  'aria-label'?: string;
+  'aria-describedby'?: string;
+  role?: string;
+  tabIndex?: number;
+}
+
+
 // 按钮状态反馈组件
 export const ButtonFeedback: React.FC<{
   children: React.ReactNode;
@@ -38,6 +72,17 @@ export const ButtonFeedback: React.FC<{
   }, [feedback, feedbackDuration]);
 
   const getVariantClasses = () => {
+  
+  const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    if (disabled || loading) return;
+    onClick?.(event);
+  }, [disabled, loading, onClick]);
+  
+  const memoizedHandleChange = useMemo(() => 
+    debounce((value: any) => {
+      onChange?.(value);
+    }, 300), [onChange]
+  );
     const variants = {
       primary: 'bg-blue-600 hover:bg-blue-700 text-white',
       secondary: 'bg-gray-600 hover:bg-gray-700 text-white',

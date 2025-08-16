@@ -7,6 +7,17 @@ interface DataManagerProps {
 }
 
 const DataManager: React.FC<DataManagerProps> = ({ className = '' }) => {
+  
+  const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    if (disabled || loading) return;
+    onClick?.(event);
+  }, [disabled, loading, onClick]);
+  
+  const memoizedHandleChange = useMemo(() => 
+    debounce((value: any) => {
+      onChange?.(value);
+    }, 300), [onChange]
+  );
   const [activeTab, setActiveTab] = useState<'browse' | 'analytics' | 'backup' | 'sync' | 'settings'>('browse');
   const [records, setRecords] = useState<DataRecord[]>([]);
   const [analytics, setAnalytics] = useState<DataAnalysisResult | null>(null);

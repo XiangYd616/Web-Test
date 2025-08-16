@@ -68,6 +68,17 @@ export const SecurityTestHistory = React.forwardRef<
   }, [history, searchTerm, filterRisk, sortBy, sortOrder]);
 
   const loadHistory = async () => {
+  
+  const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    if (disabled || loading) return;
+    onClick?.(event);
+  }, [disabled, loading, onClick]);
+  
+  const memoizedHandleChange = useMemo(() => 
+    debounce((value: any) => {
+      onChange?.(value);
+    }, 300), [onChange]
+  );
     setIsLoading(true);
     try {
       // 从localStorage加载历史记录

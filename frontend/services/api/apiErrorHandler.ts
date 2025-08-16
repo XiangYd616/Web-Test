@@ -174,6 +174,59 @@ const ERROR_MESSAGES: Record<string, { message: string; userMessage: string; sev
 // ==================== 错误处理器类 ====================
 
 export class ApiErrorHandler {
+  // 监控和指标收集
+  private metrics = {
+    totalRequests: 0,
+    successfulRequests: 0,
+    failedRequests: 0,
+    averageResponseTime: 0,
+    errorsByType: new Map<string, number>()
+  };
+  
+  private logSuccess(info: any): void {
+    this.metrics.totalRequests++;
+    this.metrics.successfulRequests++;
+    
+    // 更新平均响应时间
+    const responseTime = info.responseTime || 0;
+    this.metrics.averageResponseTime = 
+      (this.metrics.averageResponseTime * (this.metrics.successfulRequests - 1) + responseTime) / 
+      this.metrics.successfulRequests;
+  }
+  
+  private logError(error: Error, context: any): void {
+    this.metrics.totalRequests++;
+    this.metrics.failedRequests++;
+    
+    const errorType = error.name || 'UnknownError';
+    this.metrics.errorsByType.set(
+      errorType, 
+      (this.metrics.errorsByType.get(errorType) || 0) + 1
+    );
+    
+    // 发送错误到监控系统
+    this.sendErrorToMonitoring(error, context);
+  }
+  
+  private logMetrics(info: any): void {
+    // 记录请求指标
+    console.debug('API Metrics:', {
+      url: info.url,
+      method: info.method,
+      status: info.status,
+      responseTime: info.responseTime
+    });
+  }
+  
+  getMetrics(): any {
+    return {
+      ...this.metrics,
+      errorsByType: Object.fromEntries(this.metrics.errorsByType),
+      successRate: this.metrics.totalRequests > 0 
+        ? (this.metrics.successfulRequests / this.metrics.totalRequests) * 100 
+        : 0
+    };
+  }
   private config: ErrorHandlerConfig;
   private notificationService?: any; // 可以注入通知服务
   private loggerService?: any; // 可以注入日志服务

@@ -87,6 +87,46 @@ export interface PagePerformanceMetrics {
 }
 
 export class UserFeedbackService {
+  // 缓存机制
+  private cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
+  
+  private getCacheKey(url: string, options: RequestInit): string {
+    return `${options.method || 'GET'}:${url}:${JSON.stringify(options.body || {})}`;
+  }
+  
+  private getFromCache(key: string): any | null {
+    const cached = this.cache.get(key);
+    if (!cached) return null;
+    
+    if (Date.now() - cached.timestamp > cached.ttl) {
+      this.cache.delete(key);
+      return null;
+    }
+    
+    return cached.data;
+  }
+  
+  private setCache(key: string, data: any, ttl: number = 300000): void {
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now(),
+      ttl
+    });
+  }
+  private async retryRequest(fn: () => Promise<any>, maxRetries: number = 3): Promise<any> {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await fn();
+      } catch (error) {
+        if (attempt === maxRetries) {
+          throw error;
+        }
+        
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+    await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+  }
+}
+  }
   private static instance: UserFeedbackService;
   private feedbackQueue: UserFeedback[] = [];
   private usageStatsQueue: UsageStats[] = [];

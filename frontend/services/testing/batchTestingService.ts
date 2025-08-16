@@ -67,6 +67,20 @@ export interface BatchSummary {
 }
 
 class BatchTestingService {
+  private async retryRequest(fn: () => Promise<any>, maxRetries: number = 3): Promise<any> {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await fn();
+      } catch (error) {
+        if (attempt === maxRetries) {
+          throw error;
+        }
+        
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+    await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+  }
+}
+  }
   private baseUrl = '/api/batch-testing';
   private cache = new Map<string, any>();
   private cacheTimeout = 2 * 60 * 1000; // 2分钟缓存

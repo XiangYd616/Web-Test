@@ -157,6 +157,28 @@ export const DataStateManager: React.FC<DataStateManagerProps> = ({
   emptyClassName,
   children
 }) => {
+  
+  const componentId = useId();
+  const errorId = `${componentId}-error`;
+  const descriptionId = `${componentId}-description`;
+  
+  const ariaProps = {
+    id: componentId,
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledBy,
+    'aria-describedby': [
+      error ? errorId : null,
+      description ? descriptionId : null,
+      ariaDescribedBy
+    ].filter(Boolean).join(' ') || undefined,
+    'aria-invalid': !!error,
+    'aria-disabled': disabled,
+    'aria-busy': loading,
+    'aria-expanded': expanded,
+    'aria-selected': selected,
+    role: role,
+    tabIndex: disabled ? -1 : (tabIndex ?? 0)
+  };
   // 根据状态渲染不同内容
   const renderContent = () => {
     switch (state) {

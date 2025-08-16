@@ -16,6 +16,20 @@ export interface LocalSEOConfig {
 }
 
 export class LocalSEOAnalysisEngine {
+  private async retryRequest(fn: () => Promise<any>, maxRetries: number = 3): Promise<any> {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await fn();
+      } catch (error) {
+        if (attempt === maxRetries) {
+          throw error;
+        }
+        
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+    await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+  }
+}
+  }
   private abortController: AbortController | null = null;
 
   /**

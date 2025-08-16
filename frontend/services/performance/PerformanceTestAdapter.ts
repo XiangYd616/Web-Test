@@ -31,6 +31,35 @@ export interface LegacyTestProgressCallback {
 // ==================== 性能测试适配器类 ====================
 
 export class PerformanceTestAdapter {
+  private logApiCall(url: string, method: string, success: boolean, responseTime ?: number): void {
+  const logData = {
+    url,
+    method,
+    success,
+    responseTime,
+    timestamp: new Date().toISOString()
+  };
+
+  if(success) {
+    console.log('API调用成功:', logData);
+  } else {
+    console.error('API调用失败:', logData);
+  }
+}
+  private async retryRequest(fn: () => Promise<any>, maxRetries: number = 3): Promise<any> {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await fn();
+      } catch (error) {
+        if (attempt === maxRetries) {
+          throw error;
+        }
+        
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
+    await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+  }
+}
+  }
   /**
    * 适配旧的性能测试接口
    */

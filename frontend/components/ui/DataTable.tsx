@@ -66,6 +66,29 @@ function DataTable<T extends Record<string, any>>({
   };
 
   const handleSort = (key: keyof T) => {
+  
+  const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    if (disabled || loading) return;
+    onClick?.(event);
+  }, [disabled, loading, onClick]);
+  
+  const memoizedHandleChange = useMemo(() => 
+    debounce((value: any) => {
+      onChange?.(value);
+    }, 300), [onChange]
+  );
+  
+  const [state, setState] = useState({
+    value: defaultValue,
+    loading: false,
+    error: null,
+    touched: false,
+    focused: false
+  });
+  
+  const updateState = useCallback((updates: Partial<typeof state>) => {
+    setState(prev => ({ ...prev, ...updates }));
+  }, []);
     if (!onSort) return;
 
     const newOrder = sortBy === key && sortOrder === 'asc' ? 'desc' : 'asc';

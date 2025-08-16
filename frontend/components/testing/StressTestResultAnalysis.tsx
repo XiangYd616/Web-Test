@@ -71,6 +71,28 @@ const StressTestResultAnalysis: React.FC<StressTestResultAnalysisProps> = ({
   onExport,
   className = ''
 }) => {
+  
+  const componentId = useId();
+  const errorId = `${componentId}-error`;
+  const descriptionId = `${componentId}-description`;
+  
+  const ariaProps = {
+    id: componentId,
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledBy,
+    'aria-describedby': [
+      error ? errorId : null,
+      description ? descriptionId : null,
+      ariaDescribedBy
+    ].filter(Boolean).join(' ') || undefined,
+    'aria-invalid': !!error,
+    'aria-disabled': disabled,
+    'aria-busy': loading,
+    'aria-expanded': expanded,
+    'aria-selected': selected,
+    role: role,
+    tabIndex: disabled ? -1 : (tabIndex ?? 0)
+  };
   const [activeTab, setActiveTab] = useState<'overview' | 'performance' | 'errors' | 'timeline'>('overview');
 
   // 计算性能等级颜色
