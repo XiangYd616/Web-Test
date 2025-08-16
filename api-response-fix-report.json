@@ -1,0 +1,101 @@
+{
+  "timestamp": "2025-08-16T06:37:21.001Z",
+  "summary": {
+    "totalFiles": 23,
+    "totalReplacements": 387
+  },
+  "fixedFiles": [
+    {
+      "file": "backend\\routes\\accessibility.js",
+      "replacements": 8
+    },
+    {
+      "file": "backend\\routes\\admin.js",
+      "replacements": 8
+    },
+    {
+      "file": "backend\\routes\\alerts.js",
+      "replacements": 9
+    },
+    {
+      "file": "backend\\routes\\analytics.js",
+      "replacements": 11
+    },
+    {
+      "file": "backend\\routes\\auth.js",
+      "replacements": 30
+    },
+    {
+      "file": "backend\\routes\\batch.js",
+      "replacements": 18
+    },
+    {
+      "file": "backend\\routes\\data.js",
+      "replacements": 26
+    },
+    {
+      "file": "backend\\routes\\databaseHealth.js",
+      "replacements": 5
+    },
+    {
+      "file": "backend\\routes\\dataManagement.js",
+      "replacements": 8
+    },
+    {
+      "file": "backend\\routes\\engineStatus.js",
+      "replacements": 1
+    },
+    {
+      "file": "backend\\routes\\errors.js",
+      "replacements": 4
+    },
+    {
+      "file": "backend\\routes\\files.js",
+      "replacements": 2
+    },
+    {
+      "file": "backend\\routes\\integrations.js",
+      "replacements": 19
+    },
+    {
+      "file": "backend\\routes\\monitoring.js",
+      "replacements": 12
+    },
+    {
+      "file": "backend\\routes\\performance.js",
+      "replacements": 5
+    },
+    {
+      "file": "backend\\routes\\performanceAccessibility.js",
+      "replacements": 4
+    },
+    {
+      "file": "backend\\routes\\reports.js",
+      "replacements": 31
+    },
+    {
+      "file": "backend\\routes\\security.js",
+      "replacements": 16
+    },
+    {
+      "file": "backend\\routes\\seo.js",
+      "replacements": 1
+    },
+    {
+      "file": "backend\\routes\\storageManagement.js",
+      "replacements": 9
+    },
+    {
+      "file": "backend\\routes\\system.js",
+      "replacements": 3
+    },
+    {
+      "file": "backend\\routes\\test.js",
+      "replacements": 136
+    },
+    {
+      "file": "backend\\routes\\user.js",
+      "replacements": 21
+    }
+  ]
+}

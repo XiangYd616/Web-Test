@@ -1,16 +1,31 @@
 /**
- * API响应格式化中间件
- * 确保所有API返回统一的数据结构
+ * API响应格式化中间件 - 标准版本
+ * 版本: v2.0.0
+ * 确保所有API返回统一的标准数据结构
  */
 
+// 导入标准API响应构建工具
 const {
     createSuccessResponse,
     createErrorResponse,
     createPaginatedResponse,
+    createValidationErrorResponse,
+    createUnauthorizedResponse,
+    createForbiddenResponse,
+    createNotFoundResponse,
+    createConflictResponse,
+    createRateLimitResponse,
+    createInternalErrorResponse,
+    createCreatedResponse,
+    createNoContentResponse,
     generateRequestId,
-    ErrorCodes,
-    getStatusCode
-} = require('../types/apiResponse');
+    getHttpStatusCode,
+    createPaginationMeta
+} = require('../../shared/utils/apiResponseBuilder.js');
+
+const {
+    StandardErrorCode
+} = require('../../shared/types/standardApiResponse.js');
 
 /**
  * 响应格式化中间件
@@ -25,7 +40,7 @@ const responseFormatter = (req, res, next) => {
     req.startTime = Date.now();
 
     /**
-     * 发送成功响应
+     * 发送标准成功响应
      * @param {*} data - 响应数据
      * @param {string} [message] - 响应消息
      * @param {number} [statusCode=200] - HTTP状态码
@@ -39,6 +54,7 @@ const responseFormatter = (req, res, next) => {
             duration,
             path: req.originalUrl,
             method: req.method,
+            version: '2.0.0',
             ...meta
         });
 
@@ -46,7 +62,7 @@ const responseFormatter = (req, res, next) => {
     };
 
     /**
-     * 发送错误响应
+     * 发送标准错误响应
      * @param {string} code - 错误代码
      * @param {string} [message] - 自定义错误消息
      * @param {*} [details] - 错误详情
@@ -55,13 +71,14 @@ const responseFormatter = (req, res, next) => {
      */
     res.error = (code, message = null, details = null, statusCode = null, meta = {}) => {
         const duration = Date.now() - req.startTime;
-        const httpStatusCode = statusCode || getStatusCode(code);
+        const httpStatusCode = statusCode || getHttpStatusCode(code);
 
         const response = createErrorResponse(code, message, details, {
             requestId,
             duration,
             path: req.originalUrl,
             method: req.method,
+            version: '2.0.0',
             ...meta
         });
 
@@ -69,7 +86,7 @@ const responseFormatter = (req, res, next) => {
     };
 
     /**
-     * 发送分页响应
+     * 发送标准分页响应
      * @param {Array} data - 数据数组
      * @param {number} page - 当前页码
      * @param {number} limit - 每页数量
@@ -79,12 +96,14 @@ const responseFormatter = (req, res, next) => {
      */
     res.paginated = (data, page, limit, total, message = null, meta = {}) => {
         const duration = Date.now() - req.startTime;
+        const pagination = createPaginationMeta(page, limit, total);
 
-        const response = createPaginatedResponse(data, page, limit, total, message, {
+        const response = createPaginatedResponse(data, pagination, message, {
             requestId,
             duration,
             path: req.originalUrl,
             method: req.method,
+            version: '2.0.0',
             ...meta
         });
 
@@ -92,77 +111,182 @@ const responseFormatter = (req, res, next) => {
     };
 
     /**
-     * 发送验证错误响应
+     * 发送标准验证错误响应
      * @param {Array|Object} errors - 验证错误数组或对象
      * @param {string} [message] - 自定义错误消息
      */
     res.validationError = (errors, message = null) => {
+        const duration = Date.now() - req.startTime;
         const formattedErrors = Array.isArray(errors) ? errors : [errors];
 
-        return res.error(
-            ErrorCodes.VALIDATION_ERROR,
-            message || '数据验证失败',
-            {
-                fields: formattedErrors,
-                count: formattedErrors.length
-            }
-        );
+        const response = createValidationErrorResponse(formattedErrors, message, {
+            requestId,
+            duration,
+            path: req.originalUrl,
+            method: req.method,
+            version: '2.0.0'
+        });
+
+        return res.status(400).json(response);
     };
 
     /**
-     * 发送未授权响应
-     * @param {string} [message] - 自定义错误消息
+     * 发送创建成功响应 (201)
+     * @param {*} data - 创建的资源数据
+     * @param {string} [message] - 响应消息
+     * @param {Object} [meta] - 额外元数据
      */
-    res.unauthorized = (message = null) => {
-        return res.error(ErrorCodes.UNAUTHORIZED, message);
+    res.created = (data, message = '创建成功', meta = {}) => {
+        const duration = Date.now() - req.startTime;
+
+        const response = createCreatedResponse(data, message, {
+            requestId,
+            duration,
+            path: req.originalUrl,
+            method: req.method,
+            version: '2.0.0',
+            ...meta
+        });
+
+        return res.status(201).json(response);
     };
 
     /**
-     * 发送禁止访问响应
-     * @param {string} [message] - 自定义错误消息
+     * 发送无内容响应 (204)
+     * @param {string} [message] - 响应消息
+     * @param {Object} [meta] - 额外元数据
      */
-    res.forbidden = (message = null) => {
-        return res.error(ErrorCodes.FORBIDDEN, message);
+    res.noContent = (message = '操作成功', meta = {}) => {
+        const duration = Date.now() - req.startTime;
+
+        const response = createNoContentResponse(message, {
+            requestId,
+            duration,
+            path: req.originalUrl,
+            method: req.method,
+            version: '2.0.0',
+            ...meta
+        });
+
+        return res.status(204).json(response);
     };
 
     /**
-     * 发送资源不存在响应
+     * 发送未授权错误响应 (401)
+     * @param {string} [message] - 错误消息
+     */
+    res.unauthorized = (message = '未授权访问') => {
+        const duration = Date.now() - req.startTime;
+
+        const response = createUnauthorizedResponse(message, {
+            requestId,
+            duration,
+            path: req.originalUrl,
+            method: req.method,
+            version: '2.0.0'
+        });
+
+        return res.status(401).json(response);
+    };
+
+    /**
+     * 发送禁止访问错误响应 (403)
+     * @param {string} [message] - 错误消息
+     */
+    res.forbidden = (message = '禁止访问') => {
+        const duration = Date.now() - req.startTime;
+
+        const response = createForbiddenResponse(message, {
+            requestId,
+            duration,
+            path: req.originalUrl,
+            method: req.method,
+            version: '2.0.0'
+        });
+
+        return res.status(403).json(response);
+    };
+
+    /**
+     * 发送资源未找到错误响应 (404)
      * @param {string} [resource] - 资源名称
-     * @param {string} [message] - 自定义错误消息
      */
-    res.notFound = (resource = null, message = null) => {
-        const defaultMessage = resource ? `${resource}不存在` : null;
-        return res.error(ErrorCodes.RESOURCE_NOT_FOUND, message || defaultMessage);
+    res.notFound = (resource = '资源') => {
+        const duration = Date.now() - req.startTime;
+
+        const response = createNotFoundResponse(resource, {
+            requestId,
+            duration,
+            path: req.originalUrl,
+            method: req.method,
+            version: '2.0.0'
+        });
+
+        return res.status(404).json(response);
     };
 
     /**
-     * 发送资源冲突响应
+     * 发送资源冲突错误响应 (409)
      * @param {string} [resource] - 资源名称
-     * @param {string} [message] - 自定义错误消息
+     * @param {string} [message] - 自定义消息
      */
-    res.conflict = (resource = null, message = null) => {
-        const defaultMessage = resource ? `${resource}已存在` : null;
-        return res.error(ErrorCodes.RESOURCE_ALREADY_EXISTS, message || defaultMessage);
+    res.conflict = (resource = '资源', message = null) => {
+        const duration = Date.now() - req.startTime;
+
+        const response = createConflictResponse(resource, message, {
+            requestId,
+            duration,
+            path: req.originalUrl,
+            method: req.method,
+            version: '2.0.0'
+        });
+
+        return res.status(409).json(response);
     };
 
     /**
-     * 发送服务器错误响应
-     * @param {string} [message] - 自定义错误消息
-     * @param {*} [details] - 错误详情
+     * 发送限流错误响应 (429)
+     * @param {string} [message] - 错误消息
+     * @param {number} [retryAfter] - 重试等待时间(秒)
      */
-    res.serverError = (message = null, details = null) => {
-        return res.error(ErrorCodes.INTERNAL_ERROR, message, details);
+    res.rateLimit = (message = '请求过于频繁', retryAfter = null) => {
+        const duration = Date.now() - req.startTime;
+
+        const response = createRateLimitResponse(message, retryAfter, {
+            requestId,
+            duration,
+            path: req.originalUrl,
+            method: req.method,
+            version: '2.0.0'
+        });
+
+        if (retryAfter) {
+            res.set('Retry-After', retryAfter.toString());
+        }
+
+        return res.status(429).json(response);
     };
 
     /**
-     * 发送服务不可用响应
-     * @param {string} [service] - 服务名称
-     * @param {string} [message] - 自定义错误消息
+     * 发送服务器内部错误响应 (500)
+     * @param {string} [message] - 错误消息
+     * @param {Object} [details] - 错误详情
      */
-    res.serviceUnavailable = (service = null, message = null) => {
-        const defaultMessage = service ? `${service}服务暂时不可用` : null;
-        return res.error(ErrorCodes.SERVICE_UNAVAILABLE, message || defaultMessage);
+    res.serverError = (message = '服务器内部错误', details = null) => {
+        const duration = Date.now() - req.startTime;
+
+        const response = createInternalErrorResponse(message, details, {
+            requestId,
+            duration,
+            path: req.originalUrl,
+            method: req.method,
+            version: '2.0.0'
+        });
+
+        return res.status(500).json(response);
     };
+
+
 
     next();
 };
@@ -174,9 +298,9 @@ const responseFormatter = (req, res, next) => {
 const errorResponseFormatter = (err, req, res, next) => {
     // 如果响应已经发送，则跳过
     if (res.headersSent) {
-        
+
         return next(err);
-      }
+    }
 
     console.error('API错误:', {
         requestId: req.requestId,
@@ -187,47 +311,49 @@ const errorResponseFormatter = (err, req, res, next) => {
     });
 
     // 根据错误类型映射到标准错误代码
-    let errorCode = ErrorCodes.INTERNAL_ERROR;
+    let errorCode = StandardErrorCode.INTERNAL_SERVER_ERROR;
     let statusCode = 500;
     let details = null;
 
     // JWT错误
     if (err.name === 'JsonWebTokenError') {
-        errorCode = ErrorCodes.TOKEN_INVALID;
+        errorCode = StandardErrorCode.INVALID_TOKEN;
     } else if (err.name === 'TokenExpiredError') {
-        errorCode = ErrorCodes.TOKEN_EXPIRED;
+        errorCode = StandardErrorCode.TOKEN_EXPIRED;
     }
     // 数据库错误
     else if (err.code === 'ECONNREFUSED') {
-        errorCode = ErrorCodes.DATABASE_CONNECTION_ERROR;
+        errorCode = StandardErrorCode.EXTERNAL_SERVICE_ERROR;
     } else if (err.code === '23505') {
-        errorCode = ErrorCodes.DUPLICATE_ENTRY;
+        errorCode = StandardErrorCode.DUPLICATE_RESOURCE;
     } else if (err.code === '23503') {
-        errorCode = ErrorCodes.FOREIGN_KEY_CONSTRAINT;
+        errorCode = StandardErrorCode.BUSINESS_LOGIC_ERROR;
     } else if (err.code === '23502') {
-        errorCode = ErrorCodes.NOT_NULL_CONSTRAINT;
+        errorCode = StandardErrorCode.MISSING_REQUIRED_FIELD;
     }
     // 文件上传错误
     else if (err.code === 'LIMIT_FILE_SIZE') {
-        errorCode = ErrorCodes.FILE_TOO_LARGE;
+        errorCode = StandardErrorCode.VALIDATION_ERROR;
+        details = { reason: 'file_too_large' };
     } else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
-        errorCode = ErrorCodes.INVALID_FILE_TYPE;
+        errorCode = StandardErrorCode.VALIDATION_ERROR;
+        details = { reason: 'invalid_file_type' };
     }
     // 网络错误
     else if (err.code === 'ENOTFOUND' || err.code === 'ECONNRESET') {
-        errorCode = ErrorCodes.THIRD_PARTY_SERVICE_ERROR;
+        errorCode = StandardErrorCode.EXTERNAL_SERVICE_ERROR;
     } else if (err.code === 'ETIMEDOUT') {
-        errorCode = ErrorCodes.TIMEOUT;
+        errorCode = StandardErrorCode.TIMEOUT_ERROR;
     }
     // 验证错误
     else if (err.name === 'ValidationError') {
-        errorCode = ErrorCodes.VALIDATION_ERROR;
+        errorCode = StandardErrorCode.VALIDATION_ERROR;
         details = err.errors;
     }
     // 自定义应用错误
-    else if (err.code && Object.values(ErrorCodes).includes(err.code)) {
+    else if (err.code && Object.values(StandardErrorCode).includes(err.code)) {
         errorCode = err.code;
-        statusCode = err.statusCode || getStatusCode(errorCode);
+        statusCode = err.statusCode || getHttpStatusCode(errorCode);
         details = err.details;
     }
 
@@ -249,7 +375,7 @@ const errorResponseFormatter = (err, req, res, next) => {
  */
 const notFoundHandler = (req, res, next) => {
     return res.error(
-        ErrorCodes.RESOURCE_NOT_FOUND,
+        StandardErrorCode.NOT_FOUND,
         `接口 ${req.method} ${req.originalUrl} 不存在`,
         {
             method: req.method,
