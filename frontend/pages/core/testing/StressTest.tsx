@@ -3,7 +3,7 @@ import { AlertCircle, AlertTriangle, BarChart3, CheckCircle, Clock, Download, Fi
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuthCheck } from '../../../components/auth/WithAuthCheck.tsx';
-import { StressTestCharts as StressTestCharts } from '../../../components/charts/index';
+import { StressTestCharts } from '../../../components/charts/index';
 import StressTestHistory from '../../../components/testing/StressTestHistory.tsx';
 import URLInput from '../../../components/testing/URLInput';
 import CancelProgressFeedback from '../../../components/ui/CancelProgressFeedback.tsx';
@@ -53,8 +53,58 @@ interface StressTestConfig extends ImportedAdvancedStressTestConfig {
 type LifecycleStressTestConfig = StressTestConfig;
 
 const StressTest: React.FC = () => {
+  
+  const [feedback, setFeedback] = useState({ type: '', message: '' });
+  
+  const showFeedback = (type, message, duration = 3000) => {
+    setFeedback({ type, message });
+    setTimeout(() => {
+      setFeedback({ type: '', message: '' });
+    }, duration);
+  };
+  
+  useEffect(() => {
+    if (state.error) {
+      showFeedback('error', state.error.message);
+    }
+  }, [state.error]);
+  
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null);
+  
+  const handleConfirmAction = (action, message) => {
+    setConfirmAction({ action, message });
+    setShowConfirmDialog(true);
+  };
+  
+  const executeConfirmedAction = async () => {
+    if (confirmAction) {
+      await confirmAction.action();
+      setShowConfirmDialog(false);
+      setConfirmAction(null);
+    }
+  };
+  
+  const [buttonStates, setButtonStates] = useState({});
+  
+  const setButtonLoading = (buttonId, loading) => {
+    setButtonStates(prev => ({
+      ...prev,
+      [buttonId]: { ...prev[buttonId], loading }
+    }));
+  };
+  
+  const setButtonDisabled = (buttonId, disabled) => {
+    setButtonStates(prev => ({
+      ...prev,
+      [buttonId]: { ...prev[buttonId], disabled }
+    }));
+  };
     // 路由状态检查
     const location = useLocation();
+
+    // 错误处理Hook
+    const { executeAsync, state } = useAsyncErrorHandler();
 
     // 登录检查
     const {
@@ -518,8 +568,8 @@ const StressTest: React.FC = () => {
     // 🔧 统一的指标计算函数
     const calculateMetricsFromData = useCallback((data: TestDataPoint[]): RealTimeMetrics => {
         if (!data || data.length === 0) {
-            
-        return {
+
+            return {
                 totalRequests: 0,
                 successfulRequests: 0,
                 failedRequests: 0,
@@ -532,7 +582,7 @@ const StressTest: React.FC = () => {
                 timestamp: Date.now(),
                 p95ResponseTime: 0,
                 p99ResponseTime: 0
-      };
+            };
         }
 
         const totalRequests = data.length;
@@ -633,11 +683,11 @@ const StressTest: React.FC = () => {
                 setMetrics((prevMetrics: RealTimeMetrics | null) => {
                     // 如果已有后端提供的指标数据，保持不变
                     if (prevMetrics && prevMetrics.totalRequests > 0 && typeof prevMetrics.currentTPS === 'number') {
-                        
-        console.log('📊 保持后端提供的指标数据:', prevMetrics);
+
+                        console.log('📊 保持后端提供的指标数据:', prevMetrics);
                         currentMetrics = prevMetrics;
                         return prevMetrics;
-      }
+                    }
 
                     // 否则使用前端计算的指标
                     const newMetrics = calculateMetricsFromData(combined);
@@ -1107,13 +1157,13 @@ const StressTest: React.FC = () => {
                                 }
 
                                 if (serverStatus === 'cancelled' && testStatus !== 'cancelled') {
-                                    
-        console.log('🔄 状态同步：服务器显示已取消，更新状态...');
+
+                                    console.log('🔄 状态同步：服务器显示已取消，更新状态...');
                                     updateTestStatus('cancelled', '测试已取消');
                                     setTestProgress('测试已取消');
                                     setCurrentTestId(null);
                                     return;
-      }
+                                }
 
                                 // 数据检查逻辑（仅在状态为运行中时）
                                 if (stressTestData.length === 0 && isRunning && serverStatus === 'running') {
@@ -2379,19 +2429,19 @@ const StressTest: React.FC = () => {
 
                     // 检查测试是否已被取消 - 如果已取消，忽略后续数据
                     if (testStatus === 'cancelled' || currentStatus === 'CANCELLED') {
-                        
-        console.log('🛑 测试已取消，忽略WebSocket数据');
+
+                        console.log('🛑 测试已取消，忽略WebSocket数据');
                         return;
-      }
+                    }
 
                     // 当接收到第一个实时数据时，更新状态为RUNNING
                     setCurrentStatus((prevStatus: string) => {
                         if (prevStatus === 'WAITING' || prevStatus === 'STARTING') {
-                            
-        console.log('🎯 接收到实时数据，更新状态为RUNNING');
+
+                            console.log('🎯 接收到实时数据，更新状态为RUNNING');
                             setStatusMessage('测试正在运行中...');
                             return 'RUNNING';
-      }
+                        }
                         return prevStatus;
                     });
 
@@ -3038,17 +3088,17 @@ const StressTest: React.FC = () => {
 
         // 如果选择本地测试且可用，使用本地测试引擎
         if (useLocalTest && localStressTest.isAvailable) {
-            
-        return handleStartLocalTest();
-      }
+
+            return handleStartLocalTest();
+        }
 
         // 防止重复启动测试
         if (isRunning || currentStatus === 'STARTING' || currentStatus === 'RUNNING') {
-            
-        console.warn('⚠️ 测试已在运行中，防止重复启动');
+
+            console.warn('⚠️ 测试已在运行中，防止重复启动');
             setError('测试已在运行中，请等待当前测试完成');
             return;
-      }
+        }
 
         // 🔧 使用统一状态管理检查是否可以启动新测试
         if (currentTestId || currentTestIdRef.current) {
@@ -3235,23 +3285,23 @@ const StressTest: React.FC = () => {
 
         // 防止重复取消
         if (isCancelling || cancelInProgress) {
-            
-        console.log('⚠️ 正在取消中，忽略重复请求');
+
+            console.log('⚠️ 正在取消中，忽略重复请求');
             return;
-      }
+        }
 
         // 如果是本地测试，直接停止
         if (useLocalTest && localStressTest.isRunning) {
-            
-        return handleStopLocalTest();
-      }
+
+            return handleStopLocalTest();
+        }
 
         // 检查是否有正在运行的测试
         if (!isRunning && testStatus !== 'running') {
-            
-        console.log('⚠️ 没有正在运行的测试需要取消');
+
+            console.log('⚠️ 没有正在运行的测试需要取消');
             return;
-      }
+        }
 
         // 🔧 修复：不要在这里清理测试ID，保留测试ID用于取消操作
         console.log('🔍 保留测试ID用于取消操作:', {
@@ -3552,8 +3602,8 @@ const StressTest: React.FC = () => {
 
                     // 如果有实时数据，尝试从最新数据点获取时间信息
                     if (stressTestData.length > 0) {
-                        
-        const latestData = stressTestData[stressTestData.length - 1];
+
+                        const latestData = stressTestData[stressTestData.length - 1];
                         const testStartTime = stressTestData[0]?.timestamp;
                         if (testStartTime && latestData.timestamp) {
                             const elapsed = (new Date(latestData.timestamp).getTime() - new Date(testStartTime).getTime()) / 1000;
@@ -3565,7 +3615,7 @@ const StressTest: React.FC = () => {
                                 const secs = Math.floor(seconds % 60);
                                 const ms = Math.floor((seconds % 1) * 10);
                                 return mins > 0 ? `${mins
-      }:${secs.toString().padStart(2, '0')}.${ms}` : `${secs}.${ms}秒`;
+                                    }:${secs.toString().padStart(2, '0')}.${ms}` : `${secs}.${ms}秒`;
                             };
                             timeInfo = `已运行 ${formatTime(elapsed)} (${dataPoints} 数据点)`;
                         } else {
@@ -3603,8 +3653,8 @@ const StressTest: React.FC = () => {
             case 'cancelled':
                 // 🔧 修复：保持实际运行进度，基于真实时间计算，使用精确时间格式
                 if (result?.startTime) {
-                    
-        const startTime = new Date(result.startTime).getTime();
+
+                    const startTime = new Date(result.startTime).getTime();
                     const elapsed = Math.max(0, (now - startTime) / 1000);
                     const totalDuration = testConfig.duration + (testConfig.rampUp || 0) +
                         (testConfig.warmupDuration || 0) + (testConfig.cooldownDuration || 0);
@@ -3616,7 +3666,7 @@ const StressTest: React.FC = () => {
                         const secs = Math.floor(seconds % 60);
                         const ms = Math.floor((seconds % 1) * 10);
                         return mins > 0 ? `${mins
-      }:${secs.toString().padStart(2, '0')}.${ms}` : `${secs}.${ms}秒`;
+                            }:${secs.toString().padStart(2, '0')}.${ms}` : `${secs}.${ms}秒`;
                     };
                     timeInfo = `测试已取消，运行了 ${formatCancelledTime(elapsed)}`;
                 } else {
@@ -3628,8 +3678,8 @@ const StressTest: React.FC = () => {
             case 'failed':
                 // 🔧 修复：保持实际运行进度，基于真实时间计算，使用精确时间格式
                 if (result?.startTime) {
-                    
-        const startTime = new Date(result.startTime).getTime();
+
+                    const startTime = new Date(result.startTime).getTime();
                     const elapsed = Math.max(0, (now - startTime) / 1000);
                     const totalDuration = testConfig.duration + (testConfig.rampUp || 0) +
                         (testConfig.warmupDuration || 0) + (testConfig.cooldownDuration || 0);
@@ -3641,7 +3691,7 @@ const StressTest: React.FC = () => {
                         const secs = Math.floor(seconds % 60);
                         const ms = Math.floor((seconds % 1) * 10);
                         return mins > 0 ? `${mins
-      }:${secs.toString().padStart(2, '0')}.${ms}` : `${secs}.${ms}秒`;
+                            }:${secs.toString().padStart(2, '0')}.${ms}` : `${secs}.${ms}秒`;
                     };
                     timeInfo = `测试失败，运行了 ${formatFailedTime(elapsed)}`;
                 } else {
@@ -3727,10 +3777,10 @@ const StressTest: React.FC = () => {
 
     const handleExportReport = (format: 'json' | 'csv' | 'html' | 'pdf' = 'json') => {
         if (!result) {
-            
-        alert('没有测试结果可导出');
+
+            alert('没有测试结果可导出');
             return;
-      }
+        }
 
         try {
             const report = {
@@ -3884,10 +3934,10 @@ const StressTest: React.FC = () => {
     // 代理分析功能
     const analyzeProxy = async () => {
         if (!testConfig.proxy?.enabled || !testConfig.proxy?.host) {
-            
-        alert('请先配置代理设置');
+
+            alert('请先配置代理设置');
             return;
-      }
+        }
 
         try {
             const response = await fetch('/api/test/proxy-analyze', {
@@ -6064,17 +6114,17 @@ const StressTest: React.FC = () => {
                         duration: (() => {
                             // 🔧 修复：正确计算运行时长
                             if (result?.startTime) {
-                                
-        return Math.floor((Date.now() - new Date(result.startTime).getTime()) / 1000);
-      }
+
+                                return Math.floor((Date.now() - new Date(result.startTime).getTime()) / 1000);
+                            }
                             // 如果没有startTime，使用第一个数据点的时间戳
                             if (stressTestData.length > 0) {
-                                
-        const firstDataTime = typeof stressTestData[0].timestamp === 'string'
+
+                                const firstDataTime = typeof stressTestData[0].timestamp === 'string'
                                     ? new Date(stressTestData[0].timestamp).getTime()
                                     : stressTestData[0].timestamp;
                                 return Math.floor((Date.now() - firstDataTime) / 1000);
-      }
+                            }
                             // 都没有的话，返回0
                             return 0;
                         })(),
@@ -6086,10 +6136,10 @@ const StressTest: React.FC = () => {
 
                             // 如果测试刚开始（前10秒），使用理论估算
                             if (currentDuration < 10 || completedRequests < 20) {
-                                
-        // 理论值：每个用户每秒大约1个请求
+
+                                // 理论值：每个用户每秒大约1个请求
                                 return Math.round(testConfig.users * testConfig.duration);
-      }
+                            }
 
                             // 测试进行中，基于当前实际TPS估算
                             const currentTPS = completedRequests / currentDuration;

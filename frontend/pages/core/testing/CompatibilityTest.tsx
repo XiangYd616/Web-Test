@@ -7,6 +7,53 @@ import { TestType } from '../../../types/testConfig';
 import { TestPage } from '../TestPage';
 
 const CompatibilityTest: React.FC = () => {
+  
+  const [feedback, setFeedback] = useState({ type: '', message: '' });
+  
+  const showFeedback = (type, message, duration = 3000) => {
+    setFeedback({ type, message });
+    setTimeout(() => {
+      setFeedback({ type: '', message: '' });
+    }, duration);
+  };
+  
+  useEffect(() => {
+    if (state.error) {
+      showFeedback('error', state.error.message);
+    }
+  }, [state.error]);
+  
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null);
+  
+  const handleConfirmAction = (action, message) => {
+    setConfirmAction({ action, message });
+    setShowConfirmDialog(true);
+  };
+  
+  const executeConfirmedAction = async () => {
+    if (confirmAction) {
+      await confirmAction.action();
+      setShowConfirmDialog(false);
+      setConfirmAction(null);
+    }
+  };
+  
+  const [buttonStates, setButtonStates] = useState({});
+  
+  const setButtonLoading = (buttonId, loading) => {
+    setButtonStates(prev => ({
+      ...prev,
+      [buttonId]: { ...prev[buttonId], loading }
+    }));
+  };
+  
+  const setButtonDisabled = (buttonId, disabled) => {
+    setButtonStates(prev => ({
+      ...prev,
+      [buttonId]: { ...prev[buttonId], disabled }
+    }));
+  };
   return <TestPage testType={TestType.COMPATIBILITY} />;
 };
 
@@ -853,6 +900,16 @@ const CompatibilityTest: React.FC = () => {
     if (score >= 70) return 'warning';
     return 'danger';
   };
+
+  
+  if (state.isLoading || loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <span className="ml-3 text-gray-600">加载中...</span>
+      </div>
+    );
+  }
 
   return (
     <BaseTestPage
