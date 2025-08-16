@@ -1,4 +1,6 @@
 import { Activity, BarChart3, Clock, Cpu, Database, HardDrive, MemoryStick, Monitor, Network, Server, Settings, Shield, TestTube, TrendingUp, Users } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useAsyncErrorHandler } from '../hooks/useAsyncErrorHandler';
 import React, { useEffect, useState } from 'react';
 import BackupManagement from '../../../components/system/BackupManagement.tsx';
 import SecurityCenter from '../../../components/system/SecurityCenter.tsx';
@@ -10,6 +12,117 @@ import { adminService } from '../../../services/adminService.ts';
 import type { SystemMonitor, SystemStats } from '../../../types/admin.ts';
 
 const Admin: React.FC = () => {
+  
+  const [feedback, setFeedback] = useState({ type: '', message: '' });
+  
+  const showFeedback = (type, message, duration = 3000) => {
+    setFeedback({ type, message });
+    setTimeout(() => {
+      setFeedback({ type: '', message: '' });
+    }, duration);
+  };
+  
+  useEffect(() => {
+    if (state.error) {
+      showFeedback('error', state.error.message);
+    }
+  }, [state.error]);
+  
+  const [formErrors, setFormErrors] = useState({});
+  
+  const validateForm = (data) => {
+    const errors = {};
+    
+    // 基础验证规则
+    if (!data.name || data.name.trim() === '') {
+      errors.name = '名称不能为空';
+    }
+    
+    if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      errors.email = '请输入有效的邮箱地址';
+    }
+    
+    return errors;
+  };
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    const errors = validateForm(formData);
+    setFormErrors(errors);
+    
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+    
+    // 提交表单
+    await submitForm(formData);
+  };
+  
+  
+  const createData = async (newData) => {
+    const result = await executeAsync(
+      () => fetch('/api/data/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newData)
+      }).then(res => res.json()),
+      { context: 'DataManagement.createData' }
+    );
+    
+    if (result && result.success) {
+      // 刷新数据列表
+      fetchData();
+    }
+  };
+  
+  const updateData = async (id, updateData) => {
+    const result = await executeAsync(
+      () => fetch(`/api/data/update/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateData)
+      }).then(res => res.json()),
+      { context: 'DataManagement.updateData' }
+    );
+    
+    if (result && result.success) {
+      fetchData();
+    }
+  };
+  
+  const deleteData = async (id) => {
+    const result = await executeAsync(
+      () => fetch(`/api/data/delete/${id}`, {
+        method: 'DELETE'
+      }).then(res => res.json()),
+      { context: 'DataManagement.deleteData' }
+    );
+    
+    if (result && result.success) {
+      fetchData();
+    }
+  };
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      const result = await executeAsync(
+        () => fetch('/api/data/list').then(res => res.json()),
+        { context: 'DataFetching' }
+      );
+      
+      if (result && result.success) {
+        setData(result.data);
+      }
+      setLoading(false);
+    };
+    
+    fetchData();
+  }, []);
+  const { executeAsync, state } = useAsyncErrorHandler();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [stats, setStats] = useState<SystemStats | null>(null);
   const [monitor, setMonitor] = useState<SystemMonitor | null>(null);
@@ -20,7 +133,47 @@ const Admin: React.FC = () => {
 
     // 每30秒更新一次监控数据
     const interval = setInterval(loadMonitorData, 30000);
-    return () => clearInterval(interval);
+    
+  if (state.isLoading || loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <span className="ml-3 text-gray-600">加载中...</span>
+      </div>
+    );
+  }
+
+  if (state.error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-md p-4">
+        <div className="flex">
+          <div className="flex-shrink-0">
+            <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div className="ml-3">
+            <h3 className="text-sm font-medium text-red-800">
+              操作失败
+            </h3>
+            <div className="mt-2 text-sm text-red-700">
+              <p>{state.error.message}</p>
+            </div>
+            <div className="mt-4">
+              <button
+                onClick={() => window.location.reload()}
+                className="bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200"
+              >
+                重试
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return () => clearInterval(interval);
   }, []);
 
   const loadDashboardData = async () => {

@@ -10,6 +10,52 @@ import IntegrationService, {
 interface IntegrationsProps { }
 
 const Integrations: React.FC<IntegrationsProps> = () => {
+  
+  const [feedback, setFeedback] = useState({ type: '', message: '' });
+  
+  const showFeedback = (type, message, duration = 3000) => {
+    setFeedback({ type, message });
+    setTimeout(() => {
+      setFeedback({ type: '', message: '' });
+    }, duration);
+  };
+  
+  useEffect(() => {
+    if (state.error) {
+      showFeedback('error', state.error.message);
+    }
+  }, [state.error]);
+  
+  const [formErrors, setFormErrors] = useState({});
+  
+  const validateForm = (data) => {
+    const errors = {};
+    
+    // 基础验证规则
+    if (!data.name || data.name.trim() === '') {
+      errors.name = '名称不能为空';
+    }
+    
+    if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      errors.email = '请输入有效的邮箱地址';
+    }
+    
+    return errors;
+  };
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    const errors = validateForm(formData);
+    setFormErrors(errors);
+    
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+    
+    // 提交表单
+    await submitForm(formData);
+  };
   const [activeTab, setActiveTab] = useState<'overview' | 'api-keys' | 'webhooks' | 'third-party'>('overview');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

@@ -35,6 +35,52 @@ interface StatisticsData {
 }
 
 const Statistics: React.FC = () => {
+  
+  const [feedback, setFeedback] = useState({ type: '', message: '' });
+  
+  const showFeedback = (type, message, duration = 3000) => {
+    setFeedback({ type, message });
+    setTimeout(() => {
+      setFeedback({ type: '', message: '' });
+    }, duration);
+  };
+  
+  useEffect(() => {
+    if (state.error) {
+      showFeedback('error', state.error.message);
+    }
+  }, [state.error]);
+  
+  const [formErrors, setFormErrors] = useState({});
+  
+  const validateForm = (data) => {
+    const errors = {};
+    
+    // 基础验证规则
+    if (!data.name || data.name.trim() === '') {
+      errors.name = '名称不能为空';
+    }
+    
+    if (!data.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      errors.email = '请输入有效的邮箱地址';
+    }
+    
+    return errors;
+  };
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    const errors = validateForm(formData);
+    setFormErrors(errors);
+    
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+    
+    // 提交表单
+    await submitForm(formData);
+  };
   const [statistics, setStatistics] = useState<StatisticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState(30);
@@ -66,7 +112,36 @@ const Statistics: React.FC = () => {
   const formatNumber = (num: number) => {
     if (num >= 1000) {
       
-        return (num / 1000).toFixed(1) + 'K';
+        
+  if (state.error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-md p-4">
+        <div className="flex">
+          <div className="flex-shrink-0">
+            <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div className="ml-3">
+            <h3 className="text-sm font-medium text-red-800">操作失败</h3>
+            <div className="mt-2 text-sm text-red-700">
+              <p>{state.error.message}</p>
+            </div>
+            <div className="mt-4">
+              <button
+                onClick={() => window.location.reload()}
+                className="bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200"
+              >
+                重试
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (num / 1000).toFixed(1) + 'K';
       }
     return num.toString();
   };

@@ -4,6 +4,53 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { TestRecord } from '../../../types/testHistory.ts';
 
 const TestResultDetail: React.FC = () => {
+  
+  const [feedback, setFeedback] = useState({ type: '', message: '' });
+  
+  const showFeedback = (type, message, duration = 3000) => {
+    setFeedback({ type, message });
+    setTimeout(() => {
+      setFeedback({ type: '', message: '' });
+    }, duration);
+  };
+  
+  useEffect(() => {
+    if (state.error) {
+      showFeedback('error', state.error.message);
+    }
+  }, [state.error]);
+  
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null);
+  
+  const handleConfirmAction = (action, message) => {
+    setConfirmAction({ action, message });
+    setShowConfirmDialog(true);
+  };
+  
+  const executeConfirmedAction = async () => {
+    if (confirmAction) {
+      await confirmAction.action();
+      setShowConfirmDialog(false);
+      setConfirmAction(null);
+    }
+  };
+  
+  const [buttonStates, setButtonStates] = useState({});
+  
+  const setButtonLoading = (buttonId, loading) => {
+    setButtonStates(prev => ({
+      ...prev,
+      [buttonId]: { ...prev[buttonId], loading }
+    }));
+  };
+  
+  const setButtonDisabled = (buttonId, disabled) => {
+    setButtonStates(prev => ({
+      ...prev,
+      [buttonId]: { ...prev[buttonId], disabled }
+    }));
+  };
   const { testId } = useParams<{ testId: string }>();
   const navigate = useNavigate();
 

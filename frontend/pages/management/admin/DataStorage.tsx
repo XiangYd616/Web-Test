@@ -30,6 +30,22 @@ interface FilterOptions {
 }
 
 const DataStorage: React.FC = () => {
+  
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null);
+  
+  const handleConfirmAction = (action, message) => {
+    setConfirmAction({ action, message });
+    setShowConfirmDialog(true);
+  };
+  
+  const executeConfirmedAction = async () => {
+    if (confirmAction) {
+      await confirmAction.action();
+      setShowConfirmDialog(false);
+      setConfirmAction(null);
+    }
+  };
   const location = useLocation();
   const [activeTab, setActiveTab] = useState<'history' | 'reports' | 'import-export' | 'analytics' | 'performance' | 'monitoring'>('history');
   const [testRecords, setTestRecords] = useState<TestRecord[]>([]);
@@ -358,6 +374,23 @@ const DataStorage: React.FC = () => {
     if (score >= 50) return 'text-orange-400';
     return 'text-red-400';
   };
+
+  
+  if (state.isLoading || loading) {
+    return (
+      <div className="space-y-4">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="animate-pulse flex space-x-4 p-4 border rounded">
+            <div className="rounded-full bg-gray-200 h-10 w-10"></div>
+            <div className="flex-1 space-y-2 py-1">
+              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <main className="data-management-container">

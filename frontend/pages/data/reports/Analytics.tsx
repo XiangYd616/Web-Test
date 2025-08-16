@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { useAsyncErrorHandler } from '../hooks/useAsyncErrorHandler';
 import { BarChart3, TrendingUp, Users, Globe, Clock, AlertCircle } from 'lucide-react';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, // ArcElement,  } from 'chart.js'; // 已修复
@@ -25,6 +27,86 @@ interface AnalyticsData {
 }
 
 const Analytics: React.FC = () => {
+  
+  const [feedback, setFeedback] = useState({ type: '', message: '' });
+  
+  const showFeedback = (type, message, duration = 3000) => {
+    setFeedback({ type, message });
+    setTimeout(() => {
+      setFeedback({ type: '', message: '' });
+    }, duration);
+  };
+  
+  useEffect(() => {
+    if (state.error) {
+      showFeedback('error', state.error.message);
+    }
+  }, [state.error]);
+  
+  
+  const createData = async (newData) => {
+    const result = await executeAsync(
+      () => fetch('/api/data/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newData)
+      }).then(res => res.json()),
+      { context: 'DataManagement.createData' }
+    );
+    
+    if (result && result.success) {
+      // 刷新数据列表
+      fetchData();
+    }
+  };
+  
+  const updateData = async (id, updateData) => {
+    const result = await executeAsync(
+      () => fetch(`/api/data/update/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateData)
+      }).then(res => res.json()),
+      { context: 'DataManagement.updateData' }
+    );
+    
+    if (result && result.success) {
+      fetchData();
+    }
+  };
+  
+  const deleteData = async (id) => {
+    const result = await executeAsync(
+      () => fetch(`/api/data/delete/${id}`, {
+        method: 'DELETE'
+      }).then(res => res.json()),
+      { context: 'DataManagement.deleteData' }
+    );
+    
+    if (result && result.success) {
+      fetchData();
+    }
+  };
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      const result = await executeAsync(
+        () => fetch('/api/data/list').then(res => res.json()),
+        { context: 'DataFetching' }
+      );
+      
+      if (result && result.success) {
+        setData(result.data);
+      }
+      setLoading(false);
+    };
+    
+    fetchData();
+  }, []);
+  const { executeAsync, state } = useAsyncErrorHandler();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState('7d');
@@ -126,7 +208,47 @@ const Analytics: React.FC = () => {
 
   if (loading) {
     
-        return (
+        
+  if (state.isLoading || loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <span className="ml-3 text-gray-600">加载中...</span>
+      </div>
+    );
+  }
+
+  if (state.error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-md p-4">
+        <div className="flex">
+          <div className="flex-shrink-0">
+            <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div className="ml-3">
+            <h3 className="text-sm font-medium text-red-800">
+              操作失败
+            </h3>
+            <div className="mt-2 text-sm text-red-700">
+              <p>{state.error.message}</p>
+            </div>
+            <div className="mt-4">
+              <button
+                onClick={() => window.location.reload()}
+                className="bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200"
+              >
+                重试
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>

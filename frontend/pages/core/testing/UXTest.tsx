@@ -1,5 +1,5 @@
 import { AlertTriangle, BarChart3, CheckCircle, Clock, Download, Eye, Gauge, ImageIcon, MousePointer, Play, Square, Target, TrendingUp, XCircle, Zap } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { useAuthCheck } from '../../../components/auth/WithAuthCheck.tsx';
 import BaseTestPage from '../../../components/testing/BaseTestPage.tsx';
 import { useUserStats } from '../../../hooks/useUserStats.ts';
@@ -58,6 +58,53 @@ interface UXTestResult {
 }
 
 const UXTest: React.FC = () => {
+  
+  const [feedback, setFeedback] = useState({ type: '', message: '' });
+  
+  const showFeedback = (type, message, duration = 3000) => {
+    setFeedback({ type, message });
+    setTimeout(() => {
+      setFeedback({ type: '', message: '' });
+    }, duration);
+  };
+  
+  useEffect(() => {
+    if (state.error) {
+      showFeedback('error', state.error.message);
+    }
+  }, [state.error]);
+  
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null);
+  
+  const handleConfirmAction = (action, message) => {
+    setConfirmAction({ action, message });
+    setShowConfirmDialog(true);
+  };
+  
+  const executeConfirmedAction = async () => {
+    if (confirmAction) {
+      await confirmAction.action();
+      setShowConfirmDialog(false);
+      setConfirmAction(null);
+    }
+  };
+  
+  const [buttonStates, setButtonStates] = useState({});
+  
+  const setButtonLoading = (buttonId, loading) => {
+    setButtonStates(prev => ({
+      ...prev,
+      [buttonId]: { ...prev[buttonId], loading }
+    }));
+  };
+  
+  const setButtonDisabled = (buttonId, disabled) => {
+    setButtonStates(prev => ({
+      ...prev,
+      [buttonId]: { ...prev[buttonId], disabled }
+    }));
+  };
   // 登录检查
   const {
     isAuthenticated,
@@ -213,6 +260,16 @@ const UXTest: React.FC = () => {
     if (value <= threshold.poor) return 'text-yellow-400';
     return 'text-red-400';
   };
+
+  
+  if (state.isLoading || loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <span className="ml-3 text-gray-600">加载中...</span>
+      </div>
+    );
+  }
 
   return (
     <BaseTestPage
