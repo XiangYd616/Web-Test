@@ -282,16 +282,7 @@ router.post('/fetch-sitemap',
  * GET /api/seo/health
  */
 router.get('/health', (req, res) => {
-  res.json({
-    success: true,
-    message: 'SEO API服务运行正常',
-    timestamp: new Date().toISOString(),
-    endpoints: [
-      'POST /api/seo/fetch-page',
-      'POST /api/seo/fetch-robots',
-      'POST /api/seo/fetch-sitemap'
-    ]
-  });
+  res.success(new Date().toISOString(), 'SEO API服务运行正常');
 });
 
 module.exports = router;

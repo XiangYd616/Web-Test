@@ -133,10 +133,7 @@ router.post('/query', authMiddleware, asyncHandler(async (req, res) => {
     // 基本的安全检查
     const allowedTables = ['test_sessions', 'users'];
     if (!allowedTables.includes(targetTable)) {
-      return res.status(400).json({
-        success: false,
-        message: '不允许查询此表'
-      });
+      return res.validationError([], '不允许查询此表');
     }
 
     let whereClause = 'WHERE 1=1';
@@ -199,18 +196,10 @@ router.post('/query', authMiddleware, asyncHandler(async (req, res) => {
 
     const total = parseInt(countResult.rows[0].total);
 
-    res.json({
-      success: true,
-      data: transformedRecords,
-      total: total,
-      hasMore: offset + limit < total
-    });
+    res.success(transformedRecords);
   } catch (error) {
     console.error('数据查询失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '数据查询失败'
-    });
+    res.serverError('数据查询失败');
   }
 }));
 
@@ -266,10 +255,7 @@ router.get('/analytics', authMiddleware, asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error('获取分析数据失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取分析数据失败'
-    });
+    res.serverError('获取分析数据失败');
   }
 }));
 
@@ -292,17 +278,10 @@ router.post('/exports', authMiddleware, asyncHandler(async (req, res) => {
       filters
     };
 
-    res.json({
-      success: true,
-      data: exportTask,
-      message: '导出任务已创建'
-    });
+    res.success(exportTask);
   } catch (error) {
     console.error('创建导出任务失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '创建导出任务失败'
-    });
+    res.serverError('创建导出任务失败');
   }
 }));
 
@@ -325,17 +304,10 @@ router.post('/imports', authMiddleware, asyncHandler(async (req, res) => {
       options
     };
 
-    res.json({
-      success: true,
-      data: importTask,
-      message: '导入任务已创建'
-    });
+    res.success(importTask);
   } catch (error) {
     console.error('创建导入任务失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '创建导入任务失败'
-    });
+    res.serverError('创建导入任务失败');
   }
 }));
 

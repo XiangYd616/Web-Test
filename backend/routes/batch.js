@@ -53,17 +53,11 @@ router.post('/test', asyncHandler(async (req, res) => {
   const { urls, testTypes, options = {} } = req.body;
 
   if (!urls || !Array.isArray(urls) || urls.length === 0) {
-    return res.status(400).json({
-      success: false,
-      message: '需要提供URL列表'
-    });
+    return res.validationError([], '需要提供URL列表');
   }
 
   if (!testTypes || !Array.isArray(testTypes) || testTypes.length === 0) {
-    return res.status(400).json({
-      success: false,
-      message: '需要提供测试类型列表'
-    });
+    return res.validationError([], '需要提供测试类型列表');
   }
 
   const totalItems = urls.length * testTypes.length;
@@ -89,18 +83,12 @@ router.post('/export', asyncHandler(async (req, res) => {
 
   if (!dataType) {
     
-        return res.status(400).json({
-      success: false,
-      message: '需要指定数据类型'
-      });
+        return res.validationError([], '需要指定数据类型');
   }
 
   if (!format) {
     
-        return res.status(400).json({
-      success: false,
-      message: '需要指定导出格式'
-      });
+        return res.validationError([], '需要指定导出格式');
   }
 
   // 估算导出项目数量
@@ -127,17 +115,11 @@ router.post('/delete', asyncHandler(async (req, res) => {
 
   if (!dataType) {
     
-        return res.status(400).json({
-      success: false,
-      message: '需要指定数据类型'
-      });
+        return res.validationError([], '需要指定数据类型');
   }
 
   if (!ids || !Array.isArray(ids) || ids.length === 0) {
-    return res.status(400).json({
-      success: false,
-      message: '需要提供ID列表'
-    });
+    return res.validationError([], '需要提供ID列表');
   }
 
   const operation = createBatchOperation('delete', { dataType, ids, options }, ids.length, req.user.id);
@@ -163,25 +145,16 @@ router.get('/status/:operationId', asyncHandler(async (req, res) => {
 
   if (!operation) {
     
-        return res.status(404).json({
-      success: false,
-      message: '操作不存在'
-      });
+        return res.notFound('资源', '操作不存在');
   }
 
   // 检查权限
   if (operation.userId !== req.user.id && req.user.role !== 'admin') {
     
-        return res.status(403).json({
-      success: false,
-      message: '无权访问此操作'
-      });
+        return res.forbidden('无权访问此操作');
   }
 
-  res.json({
-    success: true,
-    data: operation
-  });
+  res.success(operation);
 }));
 
 /**
@@ -193,36 +166,24 @@ router.post('/cancel/:operationId', asyncHandler(async (req, res) => {
 
   if (!operation) {
     
-        return res.status(404).json({
-      success: false,
-      message: '操作不存在'
-      });
+        return res.notFound('资源', '操作不存在');
   }
 
   // 检查权限
   if (operation.userId !== req.user.id && req.user.role !== 'admin') {
     
-        return res.status(403).json({
-      success: false,
-      message: '无权取消此操作'
-      });
+        return res.forbidden('无权取消此操作');
   }
 
   if (operation.status !== 'running') {
     
-        return res.status(400).json({
-      success: false,
-      message: '只能取消正在运行的操作'
-      });
+        return res.validationError([], '只能取消正在运行的操作');
   }
 
   operation.status = 'cancelled';
   operation.endTime = new Date().toISOString();
 
-  res.json({
-    success: true,
-    message: '操作已取消'
-  });
+  res.success('操作已取消');
 }));
 
 /**
@@ -234,19 +195,13 @@ router.get('/results/:operationId', asyncHandler(async (req, res) => {
 
   if (!operation) {
     
-        return res.status(404).json({
-      success: false,
-      message: '操作不存在'
-      });
+        return res.notFound('资源', '操作不存在');
   }
 
   // 检查权限
   if (operation.userId !== req.user.id && req.user.role !== 'admin') {
     
-        return res.status(403).json({
-      success: false,
-      message: '无权访问此操作结果'
-      });
+        return res.forbidden('无权访问此操作结果');
   }
 
   res.json({
@@ -267,27 +222,18 @@ router.get('/download/:operationId', asyncHandler(async (req, res) => {
 
   if (!operation) {
     
-        return res.status(404).json({
-      success: false,
-      message: '操作不存在'
-      });
+        return res.notFound('资源', '操作不存在');
   }
 
   // 检查权限
   if (operation.userId !== req.user.id && req.user.role !== 'admin') {
     
-        return res.status(403).json({
-      success: false,
-      message: '无权下载此文件'
-      });
+        return res.forbidden('无权下载此文件');
   }
 
   if (operation.type !== 'export' || operation.status !== 'completed') {
     
-        return res.status(400).json({
-      success: false,
-      message: '文件不可下载'
-      });
+        return res.validationError([], '文件不可下载');
   }
 
   // 这里应该返回实际的文件

@@ -70,11 +70,7 @@ router.get('/sites', authMiddleware, asyncHandler(async (req, res) => {
     status
   });
 
-  res.json({
-    success: true,
-    data: result.data,
-    pagination: result.pagination
-  });
+  res.success(result.data);
 }));
 
 /**
@@ -140,10 +136,7 @@ router.get('/sites/:id', authMiddleware, asyncHandler(async (req, res) => {
     });
   }
 
-  res.json({
-    success: true,
-    data: site
-  });
+  res.success(site);
 }));
 
 /**
@@ -179,11 +172,7 @@ router.put('/sites/:id', authMiddleware, validateRequest(updateSiteSchema), asyn
     });
   }
 
-  res.json({
-    success: true,
-    data: updatedSite,
-    message: '监控站点更新成功'
-  });
+  res.success(updatedSite);
 }));
 
 /**
@@ -218,10 +207,7 @@ router.delete('/sites/:id', authMiddleware, asyncHandler(async (req, res) => {
     });
   }
 
-  res.json({
-    success: true,
-    message: '监控站点删除成功'
-  });
+  res.success('监控站点删除成功');
 }));
 
 /**
@@ -245,11 +231,7 @@ router.post('/sites/:id/check', authMiddleware, asyncHandler(async (req, res) =>
 
   const result = await monitoringService.executeImmediateCheck(siteId, userId);
 
-  res.json({
-    success: true,
-    data: result,
-    message: '监控检查已执行'
-  });
+  res.success(result);
 }));
 
 /**
@@ -278,11 +260,7 @@ router.get('/sites/:id/history', authMiddleware, asyncHandler(async (req, res) =
     timeRange
   });
 
-  res.json({
-    success: true,
-    data: history.data,
-    pagination: history.pagination
-  });
+  res.success(history.data);
 }));
 
 /**
@@ -311,11 +289,7 @@ router.get('/alerts', authMiddleware, asyncHandler(async (req, res) => {
     status
   });
 
-  res.json({
-    success: true,
-    data: alerts.data,
-    pagination: alerts.pagination
-  });
+  res.success(alerts.data);
 }));
 
 /**
@@ -350,10 +324,7 @@ router.put('/alerts/:id/read', authMiddleware, asyncHandler(async (req, res) => 
     });
   }
 
-  res.json({
-    success: true,
-    message: '告警已标记为已读'
-  });
+  res.success('告警已标记为已读');
 }));
 
 /**
@@ -446,10 +417,7 @@ router.get('/health', authMiddleware, asyncHandler(async (req, res) => {
 
   const health = await monitoringService.getHealthStatus();
 
-  res.json({
-    success: true,
-    data: health
-  });
+  res.success(health);
 }));
 
 /**
@@ -476,10 +444,7 @@ router.get('/analytics', authMiddleware, asyncHandler(async (req, res) => {
     siteId
   });
 
-  res.json({
-    success: true,
-    data: analytics
-  });
+  res.success(analytics);
 }));
 
 /**
@@ -555,11 +520,7 @@ router.post('/reports', authMiddleware, asyncHandler(async (req, res) => {
     includeDetails
   });
 
-  res.json({
-    success: true,
-    data: report,
-    message: '监控报告生成成功'
-  });
+  res.success(report);
 }));
 
 /**
@@ -586,11 +547,7 @@ router.get('/reports', authMiddleware, asyncHandler(async (req, res) => {
     limit: parseInt(limit)
   });
 
-  res.json({
-    success: true,
-    data: reports.data,
-    pagination: reports.pagination
-  });
+  res.success(reports.data);
 }));
 
 /**

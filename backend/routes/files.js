@@ -271,10 +271,7 @@ router.delete('/:id', authMiddleware, asyncHandler(async (req, res) => {
       logger.warn('删除物理文件失败:', unlinkError);
     }
 
-    res.json({
-      success: true,
-      message: '文件已删除'
-    });
+    res.success('文件已删除');
 
   } catch (error) {
     logger.error('删除文件失败:', error);
@@ -344,10 +341,7 @@ router.put('/:id/metadata', authMiddleware, asyncHandler(async (req, res) => {
       params
     );
 
-    res.json({
-      success: true,
-      message: '文件元数据已更新'
-    });
+    res.success('文件元数据已更新');
 
   } catch (error) {
     logger.error('更新文件元数据失败:', error);

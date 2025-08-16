@@ -11,7 +11,7 @@ const { query, body, validationResult } = require('express-validator');
 
 /**
  * GET /api/storage/status
- * 获取存储系统状�? */
+ * 获取存储系统状�? */
 router.get('/status', optionalAuth, async (req, res) => {
   try {
     const healthStatus = await storageService.getHealthStatus();
@@ -27,10 +27,10 @@ router.get('/status', optionalAuth, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('获取存储状态失�?', error);
+    console.error('获取存储状态失�?', error);
     res.status(500).json({
       success: false,
-      error: '获取存储状态失�?,
+      error: '获取存储状态失�?,
       details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
@@ -44,10 +44,7 @@ router.get('/statistics', optionalAuth, async (req, res) => {
   try {
     const statistics = await storageService.getStorageStatistics();
 
-    res.json({
-      success: true,
-      data: statistics
-    });
+    res.success(statistics);
 
   } catch (error) {
     console.error('获取存储统计失败:', error);
@@ -67,7 +64,7 @@ router.post('/archive',
   authMiddleware,
   [
     body('engineType').optional().isString().withMessage('引擎类型必须是字符串'),
-    body('criteria').optional().isObject().withMessage('归档条件必须是对�?)
+    body('criteria').optional().isObject().withMessage('归档条件必须是对�?)
   ],
   async (req, res) => {
     try {
@@ -84,9 +81,7 @@ router.post('/archive',
 
       const result = await storageService.archiveData(engineType, criteria);
 
-      res.json({
-        success: true,
-        message: `数据归档${engineType ? ` (${engineType})` : ''}已完成`,
+      res.success(`数据归档${engineType ? ` (${engineType)` : ''}已完成`,
         data: result
       });
 
@@ -109,7 +104,7 @@ router.post('/cleanup',
   authMiddleware,
   [
     body('engineType').optional().isString().withMessage('引擎类型必须是字符串'),
-    body('force').optional().isBoolean().withMessage('强制清理标志必须是布尔�?)
+    body('force').optional().isBoolean().withMessage('强制清理标志必须是布尔�?)
   ],
   async (req, res) => {
     try {
@@ -124,7 +119,7 @@ router.post('/cleanup',
 
       const { engineType, force = false } = req.body;
 
-      // 如果是强制清理，需要额外权限验�?      if (force && !req.user.isAdmin) {
+      // 如果是强制清理，需要额外权限验�?      if (force && !req.user.isAdmin) {
 
         return res.status(403).json({
           success: false,
@@ -134,9 +129,7 @@ router.post('/cleanup',
 
       const result = await storageService.cleanupData(engineType);
 
-      res.json({
-        success: true,
-        message: `数据清理${engineType ? ` (${engineType})` : ''}已完成`,
+      res.success(`数据清理${engineType ? ` (${engineType)` : ''}已完成`,
         data: result
       });
 
@@ -158,10 +151,10 @@ router.post('/cleanup',
 router.post('/maintenance',
   authMiddleware,
   [
-    body('operations').optional().isArray().withMessage('操作列表必须是数�?),
-    body('archive').optional().isBoolean().withMessage('归档标志必须是布尔�?),
-    body('cleanup').optional().isBoolean().withMessage('清理标志必须是布尔�?),
-    body('optimize').optional().isBoolean().withMessage('优化标志必须是布尔�?)
+    body('operations').optional().isArray().withMessage('操作列表必须是数�?),
+    body('archive').optional().isBoolean().withMessage('归档标志必须是布尔�?),
+    body('cleanup').optional().isBoolean().withMessage('清理标志必须是布尔�?),
+    body('optimize').optional().isBoolean().withMessage('优化标志必须是布尔�?)
   ],
   async (req, res) => {
     try {
@@ -191,11 +184,7 @@ router.post('/maintenance',
 
       const result = await storageService.performMaintenance(options);
 
-      res.json({
-        success: true,
-        message: '存储维护已完�?,
-        data: result
-      });
+      res.success('存储维护已完�?);
 
     } catch (error) {
       console.error('存储维护失败:', error);
@@ -225,10 +214,7 @@ router.get('/configuration', authMiddleware, async (req, res) => {
 
     const configuration = storageService.getConfiguration();
 
-    res.json({
-      success: true,
-      data: configuration
-    });
+    res.success(configuration);
 
   } catch (error) {
     console.error('获取存储配置失败:', error);
@@ -247,9 +233,9 @@ router.get('/configuration', authMiddleware, async (req, res) => {
 router.put('/configuration',
   authMiddleware,
   [
-    body('storage').optional().isObject().withMessage('存储配置必须是对�?),
-    body('archive').optional().isObject().withMessage('归档配置必须是对�?),
-    body('cleanup').optional().isObject().withMessage('清理配置必须是对�?)
+    body('storage').optional().isObject().withMessage('存储配置必须是对�?),
+    body('archive').optional().isObject().withMessage('归档配置必须是对�?),
+    body('cleanup').optional().isObject().withMessage('清理配置必须是对�?)
   ],
   async (req, res) => {
     try {
@@ -279,11 +265,7 @@ router.put('/configuration',
 
       storageService.updateConfiguration(newConfig);
 
-      res.json({
-        success: true,
-        message: '存储配置已更�?,
-        data: storageService.getConfiguration()
-      });
+      res.success('存储配置已更�?);
 
     } catch (error) {
       console.error('更新存储配置失败:', error);
@@ -298,7 +280,7 @@ router.put('/configuration',
 
 /**
  * GET /api/storage/engines/:engineType/policy
- * 获取特定引擎的存储策�? */
+ * 获取特定引擎的存储策�? */
 router.get('/engines/:engineType/policy', authMiddleware, async (req, res) => {
   try {
     const { engineType } = req.params;
@@ -312,12 +294,12 @@ router.get('/engines/:engineType/policy', authMiddleware, async (req, res) => {
     if (!validEngineTypes.includes(engineType)) {
       return res.status(400).json({
         success: false,
-        error: '无效的引擎类�?,
+        error: '无效的引擎类�?,
         validTypes: validEngineTypes
       });
     }
 
-    // 获取引擎策略（这里需要实现具体的策略获取逻辑�?    const policy = {
+    // 获取引擎策略（这里需要实现具体的策略获取逻辑�?    const policy = {
       engineType,
       storage: {
         compress: true,
@@ -335,10 +317,7 @@ router.get('/engines/:engineType/policy', authMiddleware, async (req, res) => {
       }
     };
 
-    res.json({
-      success: true,
-      data: policy
-    });
+    res.success(policy);
 
   } catch (error) {
     console.error('获取引擎策略失败:', error);
@@ -352,13 +331,13 @@ router.get('/engines/:engineType/policy', authMiddleware, async (req, res) => {
 
 /**
  * PUT /api/storage/engines/:engineType/policy
- * 更新特定引擎的存储策�? */
+ * 更新特定引擎的存储策�? */
 router.put('/engines/:engineType/policy',
   authMiddleware,
   [
-    body('storage').optional().isObject().withMessage('存储策略必须是对�?),
-    body('retention').optional().isObject().withMessage('保留策略必须是对�?),
-    body('archive').optional().isObject().withMessage('归档策略必须是对�?)
+    body('storage').optional().isObject().withMessage('存储策略必须是对�?),
+    body('retention').optional().isObject().withMessage('保留策略必须是对�?),
+    body('archive').optional().isObject().withMessage('归档策略必须是对�?)
   ],
   async (req, res) => {
     try {
@@ -397,10 +376,7 @@ router.put('/engines/:engineType/policy',
         storageService.setArchivePolicy(engineType, archive);
       }
 
-      res.json({
-        success: true,
-        message: `${engineType} 引擎存储策略已更新`
-      });
+      res.success(null, '${engineType} 引擎存储策略已更新');
 
     } catch (error) {
       console.error('更新引擎策略失败:', error);
@@ -439,10 +415,7 @@ router.get('/usage', optionalAuth, async (req, res) => {
       }
     };
 
-    res.json({
-      success: true,
-      data: usage
-    });
+    res.success(usage);
 
   } catch (error) {
     console.error('获取存储使用情况失败:', error);

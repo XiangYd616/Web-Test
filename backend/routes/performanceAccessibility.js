@@ -162,11 +162,7 @@ router.post('/', [
             // 保存测试结果到数据库（如果需要）
             // await saveTestResult(userId, 'performance-accessibility', result.data);
 
-            res.json({
-                success: true,
-                message: '性能和可访问性测试完成',
-                data: result.data
-            });
+            res.success(result.data, '性能和可访问性测试完成');
         } else {
             res.status(500).json({
                 success: false,
@@ -267,11 +263,7 @@ router.post('/export', [
         // 导出报告
         const exportResult = await performanceEngine.exportResults(testResults, format);
 
-        res.json({
-            success: true,
-            message: '报告导出成功',
-            data: exportResult
-        });
+        res.success(exportResult, '报告导出成功');
 
     } catch (error) {
         console.error('报告导出错误:', error);
@@ -324,11 +316,7 @@ router.get('/status', authMiddleware, async (req, res) => {
     try {
         const status = performanceEngine.getEngineStatus();
 
-        res.json({
-            success: true,
-            message: '引擎状态获取成功',
-            data: status
-        });
+        res.success(status, '引擎状态获取成功');
 
     } catch (error) {
         console.error('获取引擎状态错误:', error);
@@ -413,11 +401,7 @@ router.post('/visualizations', [
         // 生成可视化数据
         const visualizations = performanceEngine.generateVisualizationData(testResults);
 
-        res.json({
-            success: true,
-            message: '可视化数据生成成功',
-            data: visualizations
-        });
+        res.success(visualizations, '可视化数据生成成功');
 
     } catch (error) {
         console.error('生成可视化数据错误:', error);

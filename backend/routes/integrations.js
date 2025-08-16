@@ -77,18 +77,10 @@ router.get('/', authMiddleware, asyncHandler(async (req, res) => {
       );
     }
 
-    res.json({
-      success: true,
-      data: filteredIntegrations,
-      total: filteredIntegrations.length,
-      supportedTypes: Object.values(INTEGRATION_TYPES)
-    });
+    res.success(filteredIntegrations);
   } catch (error) {
     Logger.error('获取集成列表失败', error);
-    res.status(500).json({
-      success: false,
-      message: '获取集成列表失败'
-    });
+    res.serverError('获取集成列表失败');
   }
 }));
 
@@ -103,30 +95,19 @@ router.post('/', authMiddleware, asyncHandler(async (req, res) => {
     // 验证必填字段
     if (!name || !type || !config) {
       
-        return res.status(400).json({
-        success: false,
-        message: '名称、类型和配置是必填的'
-      });
+        return res.validationError([], '名称、类型和配置是必填的');
     }
 
     // 验证集成类型
     if (!Object.values(INTEGRATION_TYPES).includes(type)) {
-      return res.status(400).json({
-        success: false,
-        message: '不支持的集成类型',
-        supportedTypes: Object.values(INTEGRATION_TYPES)
-      });
+      return res.validationError([], '不支持的集成类型');
     }
 
     // 验证配置
     const validationResult = validateIntegrationConfig(type, config);
     if (!validationResult.valid) {
       
-        return res.status(400).json({
-        success: false,
-        message: '配置验证失败',
-        errors: validationResult.errors
-      });
+        return res.validationError([], '配置验证失败');
     }
 
     // 创建新集成
@@ -151,10 +132,7 @@ router.post('/', authMiddleware, asyncHandler(async (req, res) => {
     });
   } catch (error) {
     Logger.error('创建集成失败', error);
-    res.status(500).json({
-      success: false,
-      message: '创建集成失败'
-    });
+    res.serverError('创建集成失败');
   }
 }));
 
@@ -219,17 +197,10 @@ router.get('/cicd/platforms', authMiddleware, asyncHandler(async (req, res) => {
   try {
     const platforms = cicdIntegrationService.getSupportedPlatforms();
 
-    res.json({
-      success: true,
-      data: platforms
-    });
+    res.success(platforms);
   } catch (error) {
     Logger.error('获取支持的平台失败', error);
-    res.status(500).json({
-      success: false,
-      message: '获取支持的平台失败',
-      error: error.message
-    });
+    res.serverError('获取支持的平台失败');
   }
 }));
 
@@ -249,10 +220,7 @@ router.post('/cicd', authMiddleware, asyncHandler(async (req, res) => {
 
   if (!name || !platform || !configuration) {
     
-        return res.status(400).json({
-      success: false,
-      message: '缺少必要参数: name, platform, configuration'
-      });
+        return res.validationError([], '缺少必要参数: name, platform, configuration');
   }
 
   try {
@@ -276,11 +244,7 @@ router.post('/cicd', authMiddleware, asyncHandler(async (req, res) => {
     });
   } catch (error) {
     Logger.error('创建CI/CD集成失败', error, { userId: req.user.id });
-    res.status(500).json({
-      success: false,
-      message: '创建CI/CD集成失败',
-      error: error.message
-    });
+    res.serverError('创建CI/CD集成失败');
   }
 }));
 
@@ -300,17 +264,10 @@ router.post('/cicd/:integrationId/trigger', authMiddleware, asyncHandler(async (
 
     Logger.info(`手动触发CI/CD集成: ${integrationId}`, { eventType, userId: req.user.id });
 
-    res.json({
-      success: true,
-      message: 'CI/CD集成触发成功'
-    });
+    res.success('CI/CD集成触发成功');
   } catch (error) {
     Logger.error('触发CI/CD集成失败', error, { integrationId, userId: req.user.id });
-    res.status(500).json({
-      success: false,
-      message: '触发CI/CD集成失败',
-      error: error.message
-    });
+    res.serverError('触发CI/CD集成失败');
   }
 }));
 
@@ -321,17 +278,10 @@ router.get('/cicd', authMiddleware, asyncHandler(async (req, res) => {
   try {
     const integrations = cicdIntegrationService.getIntegrations();
 
-    res.json({
-      success: true,
-      data: integrations
-    });
+    res.success(integrations);
   } catch (error) {
     Logger.error('获取CI/CD集成列表失败', error);
-    res.status(500).json({
-      success: false,
-      message: '获取CI/CD集成列表失败',
-      error: error.message
-    });
+    res.serverError('获取CI/CD集成列表失败');
   }
 }));
 
@@ -349,17 +299,13 @@ router.post('/webhook/:platform', asyncHandler(async (req, res) => {
     Logger.info(`处理${platform} webhook`, { success: result.success });
 
     if (result.success) {
-      res.json({ success: true, message: 'Webhook处理成功' });
+      res.success('Webhook处理成功');
     } else {
       res.status(400).json({ success: false, message: result.error });
     }
   } catch (error) {
     Logger.error('Webhook处理失败', error, { platform });
-    res.status(500).json({
-      success: false,
-      message: 'Webhook处理失败',
-      error: error.message
-    });
+    res.serverError('Webhook处理失败');
   }
 }));
 
@@ -394,24 +340,14 @@ router.get('/cicd/templates/:platform', authMiddleware, asyncHandler(async (req,
     const template = templates[platform];
     if (!template) {
       
-        return res.status(404).json({
-        success: false,
-        message: `不支持的平台: ${platform
-      }`
-      });
+        return res.notFound('资源', '不支持的平台: ${platform
+      }');
     }
 
-    res.json({
-      success: true,
-      data: template
-    });
+    res.success(template);
   } catch (error) {
     Logger.error('获取配置模板失败', error);
-    res.status(500).json({
-      success: false,
-      message: '获取配置模板失败',
-      error: error.message
-    });
+    res.serverError('获取配置模板失败');
   }
 }));
 

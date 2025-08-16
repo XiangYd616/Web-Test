@@ -23,10 +23,7 @@ router.get('/overview', asyncHandler(async (req, res) => {
     uptime: process.uptime()
   };
 
-  res.json({
-    success: true,
-    data: overview
-  });
+  res.success(overview);
 }));
 
 /**
@@ -56,10 +53,7 @@ router.get('/database', asyncHandler(async (req, res) => {
 router.get('/cache', asyncHandler(async (req, res) => {
   const stats = cacheMiddleware.getCacheStats();
 
-  res.json({
-    success: true,
-    data: stats
-  });
+  res.success(stats);
 }));
 
 /**
@@ -68,10 +62,7 @@ router.get('/cache', asyncHandler(async (req, res) => {
 router.get('/api', asyncHandler(async (req, res) => {
   const stats = getApiMetrics();
 
-  res.json({
-    success: true,
-    data: stats
-  });
+  res.success(stats);
 }));
 
 /**
@@ -86,10 +77,7 @@ router.get('/realtime', asyncHandler(async (req, res) => {
     gc: getGCMetrics()
   };
 
-  res.json({
-    success: true,
-    data: metrics
-  });
+  res.success(metrics);
 }));
 
 /**
@@ -322,11 +310,7 @@ function formatBytes(bytes) {
  * 健康检查端点
  */
 router.get('/health', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Performance monitoring service is healthy',
-    timestamp: new Date().toISOString()
-  });
+  res.success(new Date().toISOString(), 'Performance monitoring service is healthy');
 });
 
 module.exports = router;
