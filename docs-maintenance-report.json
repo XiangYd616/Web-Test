@@ -1,0 +1,197 @@
+{
+  "timestamp": "2025-08-16T05:32:00.954Z",
+  "dryRun": true,
+  "summary": {
+    "totalActions": 30,
+    "archives": 0,
+    "warnings": 0,
+    "brokenLinks": 29
+  },
+  "actions": [
+    {
+      "type": "broken_link",
+      "file": "API_DOCUMENTATION.md",
+      "link": "./INSTALLATION.md"
+    },
+    {
+      "type": "broken_link",
+      "file": "API_DOCUMENTATION.md",
+      "link": "./CONFIGURATION.md"
+    },
+    {
+      "type": "broken_link",
+      "file": "API_DOCUMENTATION.md",
+      "link": "./PERFORMANCE.md"
+    },
+    {
+      "type": "broken_link",
+      "file": "API_DOCUMENTATION.md",
+      "link": "./DEVELOPMENT.md"
+    },
+    {
+      "type": "broken_link",
+      "file": "archive\\INTELLIGENT_REPORTS.md",
+      "link": "API_REFERENCE.md#智能报告api"
+    },
+    {
+      "type": "broken_link",
+      "file": "archive\\SERVER_README.md",
+      "link": "../STARTUP_GUIDE.md"
+    },
+    {
+      "type": "broken_link",
+      "file": "archive\\SERVER_README.md",
+      "link": "../LICENSE"
+    },
+    {
+      "type": "broken_link",
+      "file": "ENTERPRISE_INTEGRATIONS.md",
+      "link": "API_REFERENCE.md#企业级集成api"
+    },
+    {
+      "type": "broken_link",
+      "file": "ENV_SETUP_GUIDE.md",
+      "link": "ENV_CONFIGURATION_GUIDE.md"
+    },
+    {
+      "type": "broken_link",
+      "file": "INDEX.md",
+      "link": "../CHANGELOG.md"
+    },
+    {
+      "type": "broken_link",
+      "file": "INDEX.md",
+      "link": "ENV_CONFIGURATION_GUIDE.md"
+    },
+    {
+      "type": "broken_link",
+      "file": "INDEX.md",
+      "link": "INTELLIGENT_REPORTS.md"
+    },
+    {
+      "type": "broken_link",
+      "file": "INDEX.md",
+      "link": "reports/FULL_PROJECT_RESTRUCTURE_COMPLETION_REPORT.md"
+    },
+    {
+      "type": "broken_link",
+      "file": "INDEX.md",
+      "link": "reports/PROJECT_STRUCTURE_ANALYSIS_REPORT.md"
+    },
+    {
+      "type": "broken_link",
+      "file": "INDEX.md",
+      "link": "reports/BACKEND_STRUCTURE_ANALYSIS_REPORT.md"
+    },
+    {
+      "type": "broken_link",
+      "file": "INDEX.md",
+      "link": "reports/NAMING_CONVENTION_FIX_REPORT.md"
+    },
+    {
+      "type": "broken_link",
+      "file": "INDEX.md",
+      "link": "reports/PROJECT_CONFIG_VALIDATION_REPORT.md"
+    },
+    {
+      "type": "broken_link",
+      "file": "INDEX.md",
+      "link": "reports/PROJECT_CLEANUP_REPORT.md"
+    },
+    {
+      "type": "broken_link",
+      "file": "INDEX.md",
+      "link": "reports/MANUAL_TASKS_COMPLETION_REPORT.md"
+    },
+    {
+      "type": "broken_link",
+      "file": "INDEX.md",
+      "link": "reports/DUPLICATE_TEST_ANALYSIS_REPORT.md"
+    },
+    {
+      "type": "broken_link",
+      "file": "INDEX.md",
+      "link": "reports/ROUTE_VALIDATION_REPORT.md"
+    },
+    {
+      "type": "broken_link",
+      "file": "MAINTENANCE.md",
+      "link": "../scripts/system-integration-checker.cjs"
+    },
+    {
+      "type": "broken_link",
+      "file": "MAINTENANCE.md",
+      "link": "../scripts/package-json-analyzer.cjs"
+    },
+    {
+      "type": "broken_link",
+      "file": "MAINTENANCE.md",
+      "link": "../scripts/check-env-config.cjs"
+    },
+    {
+      "type": "broken_link",
+      "file": "NAMING_CONVENTIONS_GUIDE.md",
+      "link": "./NAMING_CHECKLIST.md"
+    },
+    {
+      "type": "broken_link",
+      "file": "NAMING_CONVENTIONS_GUIDE.md",
+      "link": "./NAMING_TOOLS.md"
+    },
+    {
+      "type": "broken_link",
+      "file": "NAMING_CONVENTIONS_GUIDE.md",
+      "link": "./NAMING_STANDARDIZATION_COMPLETE_REPORT.md"
+    },
+    {
+      "type": "broken_link",
+      "file": "README.md",
+      "link": "PROJECT_CLEANUP_REPORT.md"
+    },
+    {
+      "type": "broken_link",
+      "file": "README.md",
+      "link": "reports/"
+    },
+    {
+      "type": "index_update",
+      "count": 34,
+      "files": [
+        "ADVANCED_DATA_MANAGEMENT.md",
+        "API_DOCUMENTATION.md",
+        "API_REFERENCE.md",
+        "CHANGELOG.md",
+        "CHANGELOG_2025-08-15.md",
+        "CODE_REVIEW_CHECKLIST.md",
+        "CODE_STYLE.md",
+        "CONFIG_CENTER_GUIDE.md",
+        "CONTRIBUTING.md",
+        "DATABASE_COMPLETE_GUIDE.md",
+        "DEPLOYMENT_README.md",
+        "DEVELOPMENT_GUIDELINES.md",
+        "ENGINE_MANAGER_CONSOLIDATION.md",
+        "ENTERPRISE_INTEGRATIONS.md",
+        "ENV_SETUP_GUIDE.md",
+        "FILE_NAMING_CONVENTIONS.md",
+        "GEOLITE2_README.md",
+        "LAZY_LOADING_GUIDE.md",
+        "LOCAL_STRESS_TEST.md",
+        "MAINTENANCE.md",
+        "NAMING_CONVENTIONS_GUIDE.md",
+        "NAMING_CONVENTIONS_STANDARDIZATION.md",
+        "NPM_SCRIPTS_GUIDE.md",
+        "PROJECT_ORGANIZATION_RULES.md",
+        "PROJECT_STATUS_2025-08-16.md",
+        "PROJECT_STRUCTURE.md",
+        "PROXY_TESTING.md",
+        "README.md",
+        "REDIS_INTEGRATION.md",
+        "RESPONSIVE_DESIGN_GUIDELINES.md",
+        "TROUBLESHOOTING.md",
+        "UNIFIED_LOGGING.md",
+        "USER_GUIDE.md",
+        "browser-security-guide.md"
+      ]
+    }
+  ]
+}
