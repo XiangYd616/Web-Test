@@ -6,21 +6,8 @@ import { handleAsyncError } from '../utils/errorHandler';
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Database,
-  Trash2,
-  RefreshCw,
-  BarChart3,
-  Settings,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  HardDrive,
-  Zap,
-  TrendingUp,
-  // Activity
-} from 'lucide-react'; // 已修复
-import {useCache, useApiCache, useUserCache, useTempCache, useTestResultCache} from '../../hooks/useCache';
+import { Database, Trash2, RefreshCw, BarChart3, Settings, AlertTriangle, CheckCircle, Clock, HardDrive, Zap, TrendingUp, // Activity } from 'lucide-react'; // 已修复
+import { useCache, useApiCache, useUserCache, useTempCache, useTestResultCache } from '../../hooks/useCache';
 // // import type { CacheStats } from '../../services/cacheStrategy'; // 已删除 // 已删除
 
 // ==================== 类型定义 ====================

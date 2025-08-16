@@ -3,7 +3,7 @@
  * 提供在React组件中使用WebSocket的便捷方式
  */
 
-import {useEffect, useState, useCallback, useRef} from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import webSocketClient from '../services/realtime/websocketService';
 import type { TestProgressData, TestStatusData, TestCompletedData, TestErrorData } from '../services/realtime/websocketService';
 

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-16T07:09:53.711Z",
+  "timestamp": "2025-08-16T07:25:41.469Z",
   "summary": {
     "totalIssues": 15,
     "categories": {
@@ -369,7 +369,7 @@
         "pattern": "try-catch"
       },
       {
-        "file": "D:\\myproject\\Test-Web\\frontend\\hooks\\UseData.ts",
+        "file": "D:\\myproject\\Test-Web\\frontend\\hooks\\useData.ts",
         "pattern": "try-catch"
       },
       {
@@ -1493,7 +1493,7 @@
         "pattern": "try-catch"
       },
       {
-        "file": "D:\\myproject\\Test-Web\\backend\\services\\core\\AlertService.js",
+        "file": "D:\\myproject\\Test-Web\\backend\\services\\core\\alertService.js",
         "pattern": "try-catch"
       },
       {
@@ -1517,7 +1517,7 @@
         "pattern": "try-catch"
       },
       {
-        "file": "D:\\myproject\\Test-Web\\backend\\services\\core\\JwtService.js",
+        "file": "D:\\myproject\\Test-Web\\backend\\services\\core\\jwtService.js",
         "pattern": "try-catch"
       },
       {
@@ -1529,7 +1529,7 @@
         "pattern": "try-catch"
       },
       {
-        "file": "D:\\myproject\\Test-Web\\backend\\services\\core\\PermissionService.js",
+        "file": "D:\\myproject\\Test-Web\\backend\\services\\core\\permissionService.js",
         "pattern": "try-catch"
       },
       {

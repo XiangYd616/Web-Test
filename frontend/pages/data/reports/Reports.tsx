@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {FileText, Download, Filter, Search, BarChart3, PieChart, TrendingUp, Users, Globe, Shield, Zap} from 'lucide-react';
+import { FileText, Download, Filter, Search, BarChart3, PieChart, TrendingUp, Users, Globe, Shield, Zap } from 'lucide-react';
 
 interface ReportData {
   id: string;

@@ -4,12 +4,12 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {useParams, useNavigate} from 'react-router-dom';
-import {TestConfig, TestResult, TestProgress, TestType, TestStatus, TestError} from '../../../types/testConfig';
-import {TestService} from '../../../services/unifiedTestService';
-import {TestConfigPanel} from '../../../components/testing/TestConfigPanel';
-import {RealTimeTestProgress} from '../../../components/testing/TestProgress';
-import {TestResultsPanel} from '../../../components/testing/TestResultsPanel';
+import { useParams, useNavigate } from 'react-router-dom';
+import { TestConfig, TestResult, TestProgress, TestType, TestStatus, TestError } from '../../../types/testConfig';
+import { TestService } from '../../../services/unifiedTestService';
+import { TestConfigPanel } from '../../../components/testing/TestConfigPanel';
+import { RealTimeTestProgress } from '../../../components/testing/TestProgress';
+import { TestResultsPanel } from '../../../components/testing/TestResultsPanel';
 
 interface TestPageProps {
   testType?: TestType;

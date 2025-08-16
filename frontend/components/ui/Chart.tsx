@@ -1,6 +1,6 @@
 import React from 'react';
-import {Activity, BarChart3, PieChart, TrendingUp} from 'lucide-react';
-import {cn} from '../../utils/cn';
+import { Activity, BarChart3, PieChart, TrendingUp } from 'lucide-react';
+import { cn } from '../../utils/cn';
 
 interface ChartContainerProps {
   /** 图表标题 */

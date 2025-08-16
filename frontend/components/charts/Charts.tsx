@@ -1,7 +1,7 @@
-import {format} from 'date-fns';
+import { format } from 'date-fns';
 import React, { useMemo, useState } from 'react';
 
-import {Area, AreaChart, Bar, BarChart, Brush, CartesianGrid, Cell, ComposedChart, Funnel, FunnelChart, LabelList, Legend, Line, LineChart, Pie, PieChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
+import { Area, AreaChart, Bar, BarChart, Brush, CartesianGrid, Cell, ComposedChart, Funnel, FunnelChart, LabelList, Legend, Line, LineChart, Pie, PieChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 // 高级压力测试图表
 interface StressTestChartProps {
@@ -103,10 +103,10 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
 
   const colors = {
     dark: {
-      responseTime: '#3B82F6',
-      throughput: '#10B981',
-      errors: '#EF4444',
-      users: '#F59E0B',
+      responseTime: 'var(--color-primary)',
+      throughput: 'var(--color-success)',
+      errors: 'var(--color-danger)',
+      users: 'var(--color-warning)',
       p95ResponseTime: '#8B5CF6',
       p99ResponseTime: '#EC4899',
       errorRate: '#F97316',
@@ -115,10 +115,10 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
       connectionsActive: '#6366F1'
     },
     light: {
-      responseTime: '#2563EB',
-      throughput: '#059669',
-      errors: '#DC2626',
-      users: '#D97706',
+      responseTime: 'var(--color-primary-hover)',
+      throughput: 'var(--color-success-hover)',
+      errors: 'var(--color-danger-hover)',
+      users: 'var(--color-warning-hover)',
       p95ResponseTime: '#7C3AED',
       p99ResponseTime: '#DB2777',
       errorRate: '#EA580C',
@@ -129,9 +129,9 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
   };
 
   const currentColors = colors[theme];
-  const bgColor = theme === 'dark' ? '#1F2937' : '#FFFFFF';
-  const textColor = theme === 'dark' ? '#F9FAFB' : '#111827';
-  const gridColor = theme === 'dark' ? '#374151' : '#E5E7EB';
+  const bgColor = theme === 'dark' ? 'var(--color-gray-800)' : 'var(--color-white)';
+  const textColor = theme === 'dark' ? 'var(--color-gray-50)' : 'var(--color-gray-900)';
+  const gridColor = theme === 'dark' ? 'var(--color-gray-700)' : 'var(--color-gray-200)';
 
   const renderChart = () => {
     const commonProps = {
@@ -424,9 +424,9 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
   const data = { ...defaultScores, ...scores };
 
   const getScoreColor = (score: number) => {
-    if (score >= 90) return theme === 'dark' ? '#10B981' : '#059669';
-    if (score >= 70) return theme === 'dark' ? '#F59E0B' : '#D97706';
-    return theme === 'dark' ? '#EF4444' : '#DC2626';
+    if (score >= 90) return theme === 'dark' ? 'var(--color-success)' : 'var(--color-success-hover)';
+    if (score >= 70) return theme === 'dark' ? 'var(--color-warning)' : 'var(--color-warning-hover)';
+    return theme === 'dark' ? 'var(--color-danger)' : 'var(--color-danger-hover)';
   };
 
   const overviewData = [
@@ -485,9 +485,9 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
     { metric: '安全性', score: data.security || 0, fullMark: 100 }
   ];
 
-  const bgColor = theme === 'dark' ? '#1F2937' : '#FFFFFF';
-  const textColor = theme === 'dark' ? '#F9FAFB' : '#111827';
-  const gridColor = theme === 'dark' ? '#374151' : '#E5E7EB';
+  const bgColor = theme === 'dark' ? 'var(--color-gray-800)' : 'var(--color-white)';
+  const textColor = theme === 'dark' ? 'var(--color-gray-50)' : 'var(--color-gray-900)';
+  const gridColor = theme === 'dark' ? 'var(--color-gray-700)' : 'var(--color-gray-200)';
 
   const tooltipStyle = {
     backgroundColor: bgColor,
@@ -508,9 +508,9 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
             <YAxis yAxisId="right" orientation="right" stroke={textColor} fontSize={12} />
             <Tooltip contentStyle={tooltipStyle} />
             <Legend />
-            <Bar yAxisId="left" dataKey="score" fill="#3B82F6" name="评分" />
-            <Line yAxisId="right" type="monotone" dataKey="value" stroke="#EF4444" strokeWidth={2} name="实际值" />
-            <ReferenceLine yAxisId="right" y={2.5} stroke="#10B981" strokeDasharray="5 5" label="良好阈值" />
+            <Bar yAxisId="left" dataKey="score" fill="var(--color-primary)" name="评分" />
+            <Line yAxisId="right" type="monotone" dataKey="value" stroke="var(--color-danger)" strokeWidth={2} name="实际值" />
+            <ReferenceLine yAxisId="right" y={2.5} stroke="var(--color-success)" strokeDasharray="5 5" label="良好阈值" />
           </ComposedChart>
         );
 
@@ -528,8 +528,8 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
             <Radar
               name="性能评分"
               dataKey="score"
-              stroke="#3B82F6"
-              fill="#3B82F6"
+              stroke="var(--color-primary)"
+              fill="var(--color-primary)"
               fillOpacity={0.3}
               strokeWidth={2}
             />
@@ -545,10 +545,10 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
             <YAxis domain={[0, 100]} stroke={textColor} fontSize={12} />
             <Tooltip contentStyle={tooltipStyle} />
             <Legend />
-            <Bar dataKey="score" fill="#3B82F6" radius={[4, 4, 0, 0]} name="当前评分" />
+            <Bar dataKey="score" fill="var(--color-primary)" radius={[4, 4, 0, 0]} name="当前评分" />
             <Bar dataKey="target" fill={gridColor} radius={[4, 4, 0, 0]} name="目标评分" opacity={0.3} />
-            <ReferenceLine y={90} stroke="#10B981" strokeDasharray="5 5" label="优秀" />
-            <ReferenceLine y={70} stroke="#F59E0B" strokeDasharray="5 5" label="良好" />
+            <ReferenceLine y={90} stroke="var(--color-success)" strokeDasharray="5 5" label="优秀" />
+            <ReferenceLine y={70} stroke="var(--color-warning)" strokeDasharray="5 5" label="良好" />
           </BarChart>
         );
     }
@@ -705,24 +705,24 @@ export const SecurityChart: React.FC<SecurityChartProps> = ({
   const getSeverityColor = (severity: string) => {
     const colors = {
       dark: {
-        low: '#10B981',
-        medium: '#F59E0B',
+        low: 'var(--color-success)',
+        medium: 'var(--color-warning)',
         high: '#F97316',
-        critical: '#EF4444'
+        critical: 'var(--color-danger)'
       },
       light: {
-        low: '#059669',
-        medium: '#D97706',
+        low: 'var(--color-success-hover)',
+        medium: 'var(--color-warning-hover)',
         high: '#EA580C',
-        critical: '#DC2626'
+        critical: 'var(--color-danger-hover)'
       }
     };
     return colors[theme][severity as keyof typeof colors.dark] || colors[theme].medium;
   };
 
-  const bgColor = theme === 'dark' ? '#1F2937' : '#FFFFFF';
-  const textColor = theme === 'dark' ? '#F9FAFB' : '#111827';
-  const gridColor = theme === 'dark' ? '#374151' : '#E5E7EB';
+  const bgColor = theme === 'dark' ? 'var(--color-gray-800)' : 'var(--color-white)';
+  const textColor = theme === 'dark' ? 'var(--color-gray-50)' : 'var(--color-gray-900)';
+  const gridColor = theme === 'dark' ? 'var(--color-gray-700)' : 'var(--color-gray-200)';
 
   const tooltipStyle = {
     backgroundColor: bgColor,
@@ -747,9 +747,9 @@ export const SecurityChart: React.FC<SecurityChartProps> = ({
   }));
 
   const overallData = [
-    { name: '通过', value: totalPassed, color: '#10B981' },
-    { name: '警告', value: totalWarnings, color: '#F59E0B' },
-    { name: '失败', value: totalFailed, color: '#EF4444' }
+    { name: '通过', value: totalPassed, color: 'var(--color-success)' },
+    { name: '警告', value: totalWarnings, color: 'var(--color-warning)' },
+    { name: '失败', value: totalFailed, color: 'var(--color-danger)' }
   ];
 
   const renderChart = () => {
@@ -762,13 +762,13 @@ export const SecurityChart: React.FC<SecurityChartProps> = ({
             <YAxis stroke={textColor} fontSize={12} />
             <Tooltip contentStyle={tooltipStyle} />
             <Legend />
-            <Bar dataKey="passed" stackId="a" fill="#10B981" name="通过" />
-            <Bar dataKey="warnings" stackId="a" fill="#F59E0B" name="警告" />
-            <Bar dataKey="failed" stackId="a" fill="#EF4444" name="失败" />
+            <Bar dataKey="passed" stackId="a" fill="var(--color-success)" name="通过" />
+            <Bar dataKey="warnings" stackId="a" fill="var(--color-warning)" name="警告" />
+            <Bar dataKey="failed" stackId="a" fill="var(--color-danger)" name="失败" />
             <Line
               type="monotone"
               dataKey={(data: any) => (data.passed / (data.passed + data.failed + (data.warnings || 0))) * 100}
-              stroke="#3B82F6"
+              stroke="var(--color-primary)"
               strokeWidth={2}
               name="通过率 (%)"
             />
@@ -792,9 +792,9 @@ export const SecurityChart: React.FC<SecurityChartProps> = ({
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Bar>
-            <ReferenceLine y={90} stroke="#10B981" strokeDasharray="5 5" label="优秀" />
-            <ReferenceLine y={70} stroke="#F59E0B" strokeDasharray="5 5" label="良好" />
-            <ReferenceLine y={50} stroke="#EF4444" strokeDasharray="5 5" label="需改进" />
+            <ReferenceLine y={90} stroke="var(--color-success)" strokeDasharray="5 5" label="优秀" />
+            <ReferenceLine y={70} stroke="var(--color-warning)" strokeDasharray="5 5" label="良好" />
+            <ReferenceLine y={50} stroke="var(--color-danger)" strokeDasharray="5 5" label="需改进" />
           </BarChart>
         );
 
@@ -827,9 +827,9 @@ export const SecurityChart: React.FC<SecurityChartProps> = ({
                   <XAxis dataKey="category" stroke={textColor} fontSize={10} />
                   <YAxis stroke={textColor} fontSize={10} />
                   <Tooltip contentStyle={tooltipStyle} />
-                  <Bar dataKey="passed" stackId="a" fill="#10B981" name="通过" />
-                  <Bar dataKey="warnings" stackId="a" fill="#F59E0B" name="警告" />
-                  <Bar dataKey="failed" stackId="a" fill="#EF4444" name="失败" />
+                  <Bar dataKey="passed" stackId="a" fill="var(--color-success)" name="通过" />
+                  <Bar dataKey="warnings" stackId="a" fill="var(--color-warning)" name="警告" />
+                  <Bar dataKey="failed" stackId="a" fill="var(--color-danger)" name="失败" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -941,12 +941,12 @@ export const PieChart: React.FC<PieChartProps> = ({
   const [currentChartType, setCurrentChartType] = useState(chartType);
   const [selectedSegment, setSelectedSegment] = useState<string | null>(null);
 
-  const defaultColors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16'];
+  const defaultColors = ['var(--color-primary)', 'var(--color-success)', 'var(--color-warning)', 'var(--color-danger)', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16'];
 
   const defaultData = [
-    { name: '成功', value: 85, color: '#10B981', description: '测试通过', trend: 5 },
-    { name: '警告', value: 10, color: '#F59E0B', description: '需要注意', trend: -2 },
-    { name: '错误', value: 5, color: '#EF4444', description: '测试失败', trend: -1 },
+    { name: '成功', value: 85, color: 'var(--color-success)', description: '测试通过', trend: 5 },
+    { name: '警告', value: 10, color: 'var(--color-warning)', description: '需要注意', trend: -2 },
+    { name: '错误', value: 5, color: 'var(--color-danger)', description: '测试失败', trend: -1 },
   ];
 
   const chartData = (data || defaultData).map((item, index) => ({
@@ -954,9 +954,9 @@ export const PieChart: React.FC<PieChartProps> = ({
     color: item.color || defaultColors[index % defaultColors.length]
   }));
 
-  const bgColor = theme === 'dark' ? '#1F2937' : '#FFFFFF';
-  const textColor = theme === 'dark' ? '#F9FAFB' : '#111827';
-  const gridColor = theme === 'dark' ? '#374151' : '#E5E7EB';
+  const bgColor = theme === 'dark' ? 'var(--color-gray-800)' : 'var(--color-white)';
+  const textColor = theme === 'dark' ? 'var(--color-gray-50)' : 'var(--color-gray-900)';
+  const gridColor = theme === 'dark' ? 'var(--color-gray-700)' : 'var(--color-gray-200)';
 
   const tooltipStyle = {
     backgroundColor: bgColor,
@@ -985,7 +985,7 @@ export const PieChart: React.FC<PieChartProps> = ({
                 <Cell
                   key={`cell-${index}`}
                   fill={entry.color}
-                  stroke={selectedSegment === entry.name ? '#FFFFFF' : 'none'}
+                  stroke={selectedSegment === entry.name ? 'var(--color-white)' : 'none'}
                   strokeWidth={selectedSegment === entry.name ? 2 : 0}
                 />
               ))}
@@ -1028,7 +1028,7 @@ export const PieChart: React.FC<PieChartProps> = ({
                 <Cell
                   key={`cell-${index}`}
                   fill={entry.color}
-                  stroke={selectedSegment === entry.name ? '#FFFFFF' : 'none'}
+                  stroke={selectedSegment === entry.name ? 'var(--color-white)' : 'none'}
                   strokeWidth={selectedSegment === entry.name ? 2 : 0}
                 />
               ))}
@@ -1125,7 +1125,7 @@ interface TrendChartProps {
 export const TrendChart: React.FC<TrendChartProps> = ({
   data,
   title = "趋势分析",
-  color = "#3B82F6",
+  color = "var(--color-primary)",
   theme = 'dark',
   showPrediction = false,
   showTarget = false,
@@ -1164,9 +1164,9 @@ export const TrendChart: React.FC<TrendChartProps> = ({
 
   const chartData = data || generateDefaultData();
 
-  const bgColor = theme === 'dark' ? '#1F2937' : '#FFFFFF';
-  const textColor = theme === 'dark' ? '#F9FAFB' : '#111827';
-  const gridColor = theme === 'dark' ? '#374151' : '#E5E7EB';
+  const bgColor = theme === 'dark' ? 'var(--color-gray-800)' : 'var(--color-white)';
+  const textColor = theme === 'dark' ? 'var(--color-gray-50)' : 'var(--color-gray-900)';
+  const gridColor = theme === 'dark' ? 'var(--color-gray-700)' : 'var(--color-gray-200)';
 
   const tooltipStyle = {
     backgroundColor: bgColor,
@@ -1256,7 +1256,7 @@ export const TrendChart: React.FC<TrendChartProps> = ({
               <Line
                 type="monotone"
                 dataKey="target"
-                stroke="#10B981"
+                stroke="var(--color-success)"
                 strokeWidth={2}
                 strokeDasharray="5 5"
                 dot={false}
@@ -1269,10 +1269,10 @@ export const TrendChart: React.FC<TrendChartProps> = ({
               <Line
                 type="monotone"
                 dataKey="prediction"
-                stroke="#F59E0B"
+                stroke="var(--color-warning)"
                 strokeWidth={2}
                 strokeDasharray="3 3"
-                dot={{ fill: '#F59E0B', strokeWidth: 2, r: 3 }}
+                dot={{ fill: 'var(--color-warning)', strokeWidth: 2, r: 3 }}
                 name="预测值"
               />
             )}
@@ -1283,7 +1283,7 @@ export const TrendChart: React.FC<TrendChartProps> = ({
                 type="monotone"
                 dataKey="confidence"
                 stroke="none"
-                fill="#F59E0B"
+                fill="var(--color-warning)"
                 fillOpacity={0.2}
                 name="置信区间"
               />
@@ -1479,31 +1479,31 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
 
         <ResponsiveContainer width="100%" height={height}>
           <ComposedChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
             <XAxis
               dataKey="time"
-              stroke="#9CA3AF"
+              stroke="var(--color-gray-400)"
               fontSize={12}
             />
             <YAxis
               yAxisId="left"
-              stroke="#9CA3AF"
+              stroke="var(--color-gray-400)"
               fontSize={12}
               label={{ value: '响应时间 (ms)', angle: -90, position: 'insideLeft' }}
             />
             <YAxis
               yAxisId="right"
               orientation="right"
-              stroke="#9CA3AF"
+              stroke="var(--color-gray-400)"
               fontSize={12}
               label={{ value: '用户数/吞吐量', angle: 90, position: 'insideRight' }}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#1F2937',
-                border: '1px solid #374151',
+                backgroundColor: 'var(--color-gray-800)',
+                border: '1px solid var(--color-gray-700)',
                 borderRadius: '8px',
-                color: '#F9FAFB'
+                color: 'var(--color-gray-50)'
               }}
               formatter={(value, name) => {
                 const formatters: Record<string, (v: any) => string[]> = {
@@ -1524,7 +1524,7 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
               yAxisId="left"
               type="monotone"
               dataKey="responseTime"
-              stroke="#3B82F6"
+              stroke="var(--color-primary)"
               strokeWidth={2}
               dot={false}
               name="平均响应时间"
@@ -1545,7 +1545,7 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
             <Bar
               yAxisId="right"
               dataKey="activeUsers"
-              fill="#10B981"
+              fill="var(--color-success)"
               fillOpacity={0.6}
               name="活跃用户"
             />
@@ -1555,7 +1555,7 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
               yAxisId="right"
               type="monotone"
               dataKey="throughput"
-              stroke="#F59E0B"
+              stroke="var(--color-warning)"
               strokeWidth={2}
               dot={false}
               name="吞吐量"
@@ -1566,7 +1566,7 @@ export const RealTimeStressTestChart: React.FC<RealTimeStressTestChartProps> = (
               yAxisId="right"
               type="monotone"
               dataKey="errorRate"
-              stroke="#DC2626"
+              stroke="var(--color-danger-hover)"
               strokeWidth={2}
               dot={false}
               name="错误率"

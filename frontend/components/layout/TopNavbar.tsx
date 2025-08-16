@@ -1,11 +1,11 @@
-import {Activity, AlertTriangle, ArrowRight, BarChart3, Bell, Book, Check, CheckCircle, ChevronDown, Clock, Code, Crown, Download, ExternalLink, FileText, Globe, HelpCircle, Home, Info, Key, Lock, Menu, Monitor, MoreVertical, Package, Play, Search, Settings, Shield, TestTube, Trash2, TrendingUp, Upload, User, X, Zap} from 'lucide-react';
+import { Activity, AlertTriangle, ArrowRight, BarChart3, Bell, Book, Check, CheckCircle, ChevronDown, Clock, Code, Crown, Download, ExternalLink, FileText, Globe, HelpCircle, Home, Info, Key, Lock, Menu, Monitor, MoreVertical, Package, Play, Search, Settings, Shield, TestTube, Trash2, TrendingUp, Upload, User, X, Zap } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
-import {Link, useLocation} from 'react-router-dom';
-import {useAuth} from '../../contexts/AuthContext';
-import {useTheme} from '../../contexts/ThemeContext';
-import {NotificationItem, useNotifications} from '../../hooks/useNotifications';
-import {globalSearchService, SearchResult} from '../../services/search/globalSearchService';
-import {ThemeToggle} from '../ui/index';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
+import { NotificationItem, useNotifications } from '../../hooks/useNotifications';
+import { globalSearchService, SearchResult } from '../../services/search/globalSearchService';
+import { ThemeToggle } from '../ui/index';
 import UserDropdownMenu from './UserDropdownMenu';
 
 interface TopNavbarProps {

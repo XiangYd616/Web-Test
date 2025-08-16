@@ -3,7 +3,7 @@
  * 提供全面的网站安全测试功能
  */
 
-import {Shield} from 'lucide-react';
+import { Shield } from 'lucide-react';
 import React, { useState } from 'react';
 
 interface SecurityTestConfig {

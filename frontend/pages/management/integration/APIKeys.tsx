@@ -1,4 +1,4 @@
-import {Activity, AlertTriangle, CheckCircle, Clock, Copy, Edit, Eye, EyeOff, Filter, Key, Plus, RefreshCw, Search, Shield, Trash2} from 'lucide-react';
+import { Activity, AlertTriangle, CheckCircle, Clock, Copy, Edit, Eye, EyeOff, Filter, Key, Plus, RefreshCw, Search, Shield, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import IntegrationService, { APIKey } from '../../../services/integration/integrationService.ts';
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {Activity, Users, Clock, TrendingUp, AlertCircle} from 'lucide-react';
+import { Activity, Users, Clock, TrendingUp, AlertCircle } from 'lucide-react';
 
 interface StressTestConfigProps {
   config: any;

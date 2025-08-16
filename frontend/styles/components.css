@@ -7,7 +7,7 @@
   border-color: var(--border-color);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
-  border-radius: 0.75rem;
+  border-radius: var(--radius-2xl);
   border: 1px solid;
 }
 
@@ -18,7 +18,7 @@
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border: 1px solid;
-  border-radius: 1rem;
+  border-radius: var(--radius-3xl);
 }
 
 /* ===== 主题切换按钮 ===== */
@@ -27,10 +27,10 @@
   border: 1px solid var(--border-primary);
   color: var(--text-primary);
   position: fixed;
-  top: 1.5rem;
-  right: 1.5rem;
+  top: var(--spacing-6);
+  right: var(--spacing-6);
   z-index: 50;
-  padding: 0.75rem;
+  padding: var(--spacing-3);
   border-radius: 50%;
   transition: all 0.3s ease;
 }
@@ -59,9 +59,9 @@
 /* ===== 进度条 ===== */
 .progress-bar {
   width: 100%;
-  background-color: #374151;
+  background-color: var(--color-gray-700);
   border-radius: 9999px;
-  height: 0.5rem;
+  height: var(--spacing-2);
   overflow: hidden;
 }
 
@@ -72,26 +72,26 @@
 }
 
 .progress-fill-blue {
-  background-color: #3b82f6;
+  background-color: var(--color-primary);
 }
 
 .progress-fill-green {
-  background-color: #10b981;
+  background-color: var(--color-success);
 }
 
 .progress-fill-yellow {
-  background-color: #f59e0b;
+  background-color: var(--color-warning);
 }
 
 .progress-fill-red {
-  background-color: #ef4444;
+  background-color: var(--color-danger);
 }
 
 /* ===== 分数条 ===== */
 .score-bar {
   width: 5rem;
-  height: 0.5rem;
-  background-color: #4b5563;
+  height: var(--spacing-2);
+  background-color: var(--color-gray-600);
   border-radius: 9999px;
   overflow: hidden;
 }
@@ -147,7 +147,7 @@
   }
 }
 
-@media (min-width: 768px) {
+@media (min-width: 641px) and (max-width: 1024px) {
   .md\:grid-cols-auto-1fr {
     grid-template-columns: auto 1fr;
   }
@@ -173,27 +173,27 @@
 
 /* ===== 状态指示器 ===== */
 .status-indicator {
-  width: 0.5rem;
-  height: 0.5rem;
+  width: var(--spacing-2);
+  height: var(--spacing-2);
   border-radius: 50%;
   display: inline-block;
 }
 
 .status-running {
-  background-color: #10b981;
+  background-color: var(--color-success);
   animation: pulse 2s infinite;
 }
 
 .status-completed {
-  background-color: #3b82f6;
+  background-color: var(--color-primary);
 }
 
 .status-failed {
-  background-color: #ef4444;
+  background-color: var(--color-danger);
 }
 
 .status-cancelled {
-  background-color: #f59e0b;
+  background-color: var(--color-warning);
 }
 
 /* ===== 加载动画 ===== */
@@ -238,8 +238,8 @@
 
 /* ===== 动态进度条 ===== */
 .progress-bar-dynamic {
-  background-color: #3b82f6;
-  height: 0.5rem;
+  background-color: var(--color-primary);
+  height: var(--spacing-2);
   border-radius: 9999px;
   transition: width 0.3s ease;
 }

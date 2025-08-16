@@ -1,8 +1,8 @@
 
-import {RotateCcw} from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import {Bar, BarChart, Brush, CartesianGrid, Cell, ComposedChart, Legend, Line, Pie, PieChart, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
+import { Bar, BarChart, Brush, CartesianGrid, Cell, ComposedChart, Legend, Line, Pie, PieChart, ReferenceArea, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 interface TestPhase {
   name: string;
@@ -304,28 +304,28 @@ export const StressTestCharts: React.FC<StressTestChartsProps> = ({
   // 渲染实时监控图表
   const renderRealTimeChart = () => (
     <ComposedChart data={processedData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
       <XAxis
         dataKey="timestamp"
-        stroke="#9CA3AF"
+        stroke="var(--color-gray-400)"
         fontSize={12}
         tickFormatter={formatTimeLabel}
         label={{
           value: timeDisplayMode === 'absolute' ? '实际时间' : '测试时间 (分:秒)',
           position: 'insideBottom',
           offset: -5,
-          style: { textAnchor: 'middle', fill: '#9CA3AF' }
+          style: { textAnchor: 'middle', fill: 'var(--color-gray-400)' }
         }}
       />
-      <YAxis yAxisId="left" stroke="#9CA3AF" fontSize={12} />
-      <YAxis yAxisId="right" orientation="right" stroke="#9CA3AF" fontSize={12} />
+      <YAxis yAxisId="left" stroke="var(--color-gray-400)" fontSize={12} />
+      <YAxis yAxisId="right" orientation="right" stroke="var(--color-gray-400)" fontSize={12} />
 
       <Tooltip
         contentStyle={{
-          backgroundColor: '#1F2937',
-          border: '1px solid #374151',
+          backgroundColor: 'var(--color-gray-800)',
+          border: '1px solid var(--color-gray-700)',
           borderRadius: '8px',
-          color: '#F9FAFB'
+          color: 'var(--color-gray-50)'
         }}
         formatter={(value: any, name: string) => {
           if (name === 'responseTime') return [`${value}ms`, '响应时间'];
@@ -345,7 +345,7 @@ export const StressTestCharts: React.FC<StressTestChartsProps> = ({
         <Brush
           dataKey="timestamp"
           height={30}
-          stroke="#3B82F6"
+          stroke="var(--color-primary)"
           tickFormatter={formatTimeLabel}
         />
       )}
@@ -368,7 +368,7 @@ export const StressTestCharts: React.FC<StressTestChartsProps> = ({
         <Bar
           yAxisId="right"
           dataKey="throughput"
-          fill="#10B981"
+          fill="var(--color-success)"
           name="吞吐量 (req/s)"
           opacity={0.6}
         />
@@ -379,7 +379,7 @@ export const StressTestCharts: React.FC<StressTestChartsProps> = ({
           yAxisId="left"
           type="monotone"
           dataKey="responseTime"
-          stroke="#EF4444"
+          stroke="var(--color-danger)"
           strokeWidth={4}
           dot={false}
           name="响应时间 (ms)"
@@ -393,7 +393,7 @@ export const StressTestCharts: React.FC<StressTestChartsProps> = ({
           yAxisId="right"
           type="monotone"
           dataKey="activeUsers"
-          stroke="#F59E0B"
+          stroke="var(--color-warning)"
           strokeWidth={3}
           dot={false}
           name="活跃用户数"
@@ -407,7 +407,7 @@ export const StressTestCharts: React.FC<StressTestChartsProps> = ({
           yAxisId="right"
           type="monotone"
           dataKey="errorRate"
-          stroke="#DC2626"
+          stroke="var(--color-danger-hover)"
           strokeWidth={2}
           dot={false}
           name="错误率 (%)"
@@ -421,10 +421,10 @@ export const StressTestCharts: React.FC<StressTestChartsProps> = ({
   // 渲染响应时间分布直方图
   const renderDistributionChart = () => (
     <BarChart data={responseTimeDistribution} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
-      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
       <XAxis
         dataKey="range"
-        stroke="#9CA3AF"
+        stroke="var(--color-gray-400)"
         fontSize={11}
         angle={-45}
         textAnchor="end"
@@ -432,16 +432,16 @@ export const StressTestCharts: React.FC<StressTestChartsProps> = ({
         interval={0}
       />
       <YAxis
-        stroke="#9CA3AF"
+        stroke="var(--color-gray-400)"
         fontSize={12}
-        label={{ value: '请求数量', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: '#9CA3AF' } }}
+        label={{ value: '请求数量', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: 'var(--color-gray-400)' } }}
       />
       <Tooltip
         contentStyle={{
-          backgroundColor: '#1F2937',
-          border: '1px solid #374151',
+          backgroundColor: 'var(--color-gray-800)',
+          border: '1px solid var(--color-gray-700)',
           borderRadius: '8px',
-          color: '#F9FAFB'
+          color: 'var(--color-gray-50)'
         }}
         formatter={(value: any, name: string) => {
           if (name === 'count') {
@@ -456,7 +456,7 @@ export const StressTestCharts: React.FC<StressTestChartsProps> = ({
       />
       <Bar
         dataKey="count"
-        fill="#3B82F6"
+        fill="var(--color-primary)"
         name="count"
         radius={[2, 2, 0, 0]}
       />
@@ -465,7 +465,7 @@ export const StressTestCharts: React.FC<StressTestChartsProps> = ({
 
   // 渲染错误类型分布饼图
   const renderErrorBreakdownChart = () => {
-    const COLORS = ['#EF4444', '#F59E0B', '#8B5CF6', '#06B6D4', '#84CC16'];
+    const COLORS = ['var(--color-danger)', 'var(--color-warning)', '#8B5CF6', '#06B6D4', '#84CC16'];
 
     return (
       <PieChart margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>

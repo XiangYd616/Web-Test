@@ -1,4 +1,4 @@
-import {ChevronDown, Download, FileText, Image, Table} from 'lucide-react';
+import { ChevronDown, Download, FileText, Image, Table } from 'lucide-react';
 import React, { useState } from 'react';
 
 // 导出格式配置
@@ -233,12 +233,12 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${title}</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 40px; }
-        .header { border-bottom: 2px solid #e5e7eb; padding-bottom: 20px; margin-bottom: 30px; }
-        .title { font-size: 24px; font-weight: bold; color: #111827; }
-        .timestamp { color: #6b7280; margin-top: 8px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: var(--spacing-10); }
+        .header { border-bottom: var(--spacing-0\.5) solid var(--color-gray-200); padding-bottom: var(--spacing-5); margin-bottom: 30px; }
+        .title { font-size: var(--font-size-2xl); font-weight: bold; color: var(--color-gray-900); }
+        .timestamp { color: var(--color-gray-500); margin-top: var(--spacing-2); }
         .content { line-height: 1.6; }
-        pre { background: #f9fafb; padding: 16px; border-radius: 8px; overflow-x: auto; }
+        pre { background: var(--color-gray-50); padding: var(--spacing-4); border-radius: var(--radius-xl); overflow-x: auto; }
     </style>
 </head>
 <body>

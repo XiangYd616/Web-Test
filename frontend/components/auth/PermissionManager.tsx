@@ -4,21 +4,7 @@
  * 版本: v1.0.0
  */
 
-import {
-  AlertTriangle,
-  Check,
-  ChevronDown,
-  ChevronRight,
-  Edit,
-  Info,
-  Key,
-  Plus,
-  Search,
-  Shield,
-  Trash2,
-  Users,
-  X
-} from 'lucide-react';
+import { AlertTriangle, Check, ChevronDown, ChevronRight, Edit, Info, Key, Plus, Search, Shield, Trash2, Users, X } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import type { Permission, Role, UserPermissions } from '../../services/auth/rbacService';
 import { useRBAC } from '../../services/auth/rbacService';

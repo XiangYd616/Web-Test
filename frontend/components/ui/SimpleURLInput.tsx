@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
-import {Globe} from 'lucide-react';
-import {cn} from '../../utils/cn';
+import { Globe } from 'lucide-react';
+import { cn } from '../../utils/cn';
 
 interface SimpleURLInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> {
   /** 输入值 */

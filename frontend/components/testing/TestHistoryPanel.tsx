@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {History, Search, Filter, Download, Trash2, Eye} from 'lucide-react';
-import {historyService} from '../../services/historyService';
+import { History, Search, Filter, Download, Trash2, Eye } from 'lucide-react';
+import { historyService } from '../../services/historyService';
 
 interface TestHistoryPanelProps {
   testType: string;

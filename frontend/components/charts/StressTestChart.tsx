@@ -1,7 +1,7 @@
 
-import {BarChart3, Download, Settings, TrendingUp} from 'lucide-react';
+import { BarChart3, Download, Settings, TrendingUp } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
-import {TestPhase, TestState} from '../../services/testing/testStateManager';
+import { TestPhase, TestState } from '../../services/testing/testStateManager';
 
 import '../../styles/components.css';
 
@@ -420,7 +420,7 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
                         y1={y}
                         x2="100"
                         y2={y}
-                        stroke="#6B7280"
+                        stroke="var(--color-gray-500)"
                         strokeWidth="0.2"
                         vectorEffect="non-scaling-stroke"
                       />
@@ -434,7 +434,7 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
                           y1="0"
                           x2={x}
                           y2="100"
-                          stroke="#6B7280"
+                          stroke="var(--color-gray-500)"
                           strokeWidth="0.1"
                           vectorEffect="non-scaling-stroke"
                         />
@@ -448,7 +448,7 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
                   <g>
                     <polyline
                       fill="none"
-                      stroke="#3B82F6"
+                      stroke="var(--color-primary)"
                       strokeWidth="0.8"
                       vectorEffect="non-scaling-stroke"
                       points={chartData.points.map((point, index) =>
@@ -463,7 +463,7 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
                         cx={(index / (chartData.points.length - 1)) * 100}
                         cy={(1 - point.responseTimeRatio) * 100}
                         r="0.8"
-                        fill="#3B82F6"
+                        fill="var(--color-primary)"
                         vectorEffect="non-scaling-stroke"
                       />
                     ))}
@@ -475,7 +475,7 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
                   <g>
                     <polyline
                       fill="none"
-                      stroke="#10B981"
+                      stroke="var(--color-success)"
                       strokeWidth="0.8"
                       vectorEffect="non-scaling-stroke"
                       points={chartData.points.map((point, index) =>
@@ -490,7 +490,7 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
                         cx={(index / (chartData.points.length - 1)) * 100}
                         cy={(1 - point.throughputRatio) * 100}
                         r="0.8"
-                        fill="#10B981"
+                        fill="var(--color-success)"
                         vectorEffect="non-scaling-stroke"
                       />
                     ))}
@@ -529,7 +529,7 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
                   <g>
                     <polyline
                       fill="none"
-                      stroke="#EF4444"
+                      stroke="var(--color-danger)"
                       strokeWidth="0.8"
                       vectorEffect="non-scaling-stroke"
                       points={chartData.points.map((point, index) =>
@@ -544,7 +544,7 @@ export const StressTestChart: React.FC<StressTestChartProps> = ({
                         cx={(index / (chartData.points.length - 1)) * 100}
                         cy={(1 - point.errorRateRatio) * 100}
                         r="0.8"
-                        fill="#EF4444"
+                        fill="var(--color-danger)"
                         vectorEffect="non-scaling-stroke"
                       />
                     ))}

@@ -1,0 +1,185 @@
+{
+  "timestamp": "2025-08-16T07:25:00.078Z",
+  "summary": {
+    "totalFixes": 15,
+    "breakpointIssues": 8,
+    "categories": {
+      "breakpoint_unification": 1,
+      "fixed_unit_replacement": 6,
+      "media_query_optimization": 7,
+      "responsive_utilities": 1
+    }
+  },
+  "standardBreakpoints": {
+    "mobile": "640px",
+    "tablet": "1024px",
+    "laptop": "1440px",
+    "desktop": "1920px",
+    "large": "2560px"
+  },
+  "breakpointIssues": [
+    {
+      "breakpoint": "1441px",
+      "files": [
+        "frontend\\styles\\base\\typography.css"
+      ],
+      "suggestion": "1920px"
+    },
+    {
+      "breakpoint": "1921px",
+      "files": [
+        "frontend\\styles\\base\\typography.css"
+      ],
+      "suggestion": "2560px"
+    },
+    {
+      "breakpoint": "2561px",
+      "files": [
+        "frontend\\styles\\base\\typography.css"
+      ],
+      "suggestion": "2560px"
+    },
+    {
+      "breakpoint": "768px",
+      "files": [
+        "frontend\\styles\\components.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\utilities\\helpers.css",
+        "frontend\\styles\\utilities\\layout.css",
+        "frontend\\styles\\utilities\\layout.css"
+      ],
+      "suggestion": "1024px"
+    },
+    {
+      "breakpoint": "641px",
+      "files": [
+        "frontend\\styles\\design-system-unified.css"
+      ],
+      "suggestion": "1024px"
+    },
+    {
+      "breakpoint": "1025px",
+      "files": [
+        "frontend\\styles\\design-system-unified.css"
+      ],
+      "suggestion": "1440px"
+    },
+    {
+      "breakpoint": "480px",
+      "files": [
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\utilities\\helpers.css",
+        "frontend\\styles\\utilities\\layout.css"
+      ],
+      "suggestion": "640px"
+    },
+    {
+      "breakpoint": "360px",
+      "files": [
+        "frontend\\styles\\utilities\\layout.css"
+      ],
+      "suggestion": "640px"
+    }
+  ],
+  "fixes": [
+    {
+      "category": "breakpoint_unification",
+      "file": "frontend\\styles\\breakpoints.css",
+      "description": "创建统一断点定义文件",
+      "timestamp": "2025-08-16T07:25:00.061Z"
+    },
+    {
+      "category": "fixed_unit_replacement",
+      "file": "frontend\\styles\\base\\typography.css",
+      "description": "替换了 2 个固定单位",
+      "timestamp": "2025-08-16T07:25:00.064Z"
+    },
+    {
+      "category": "fixed_unit_replacement",
+      "file": "frontend\\styles\\design-system-unified.css",
+      "description": "替换了 2 个固定单位",
+      "timestamp": "2025-08-16T07:25:00.065Z"
+    },
+    {
+      "category": "fixed_unit_replacement",
+      "file": "frontend\\styles\\design-system.css",
+      "description": "替换了 4 个固定单位",
+      "timestamp": "2025-08-16T07:25:00.066Z"
+    },
+    {
+      "category": "fixed_unit_replacement",
+      "file": "frontend\\styles\\mobile.css",
+      "description": "替换了 2 个固定单位",
+      "timestamp": "2025-08-16T07:25:00.067Z"
+    },
+    {
+      "category": "fixed_unit_replacement",
+      "file": "frontend\\styles\\pagination.css",
+      "description": "替换了 1 个固定单位",
+      "timestamp": "2025-08-16T07:25:00.068Z"
+    },
+    {
+      "category": "fixed_unit_replacement",
+      "file": "frontend\\styles\\theme-config.css",
+      "description": "替换了 1 个固定单位",
+      "timestamp": "2025-08-16T07:25:00.069Z"
+    },
+    {
+      "category": "media_query_optimization",
+      "file": "frontend\\styles\\breakpoints.css",
+      "description": "优化了 1 个媒体查询",
+      "timestamp": "2025-08-16T07:25:00.073Z"
+    },
+    {
+      "category": "media_query_optimization",
+      "file": "frontend\\styles\\components.css",
+      "description": "优化了 1 个媒体查询",
+      "timestamp": "2025-08-16T07:25:00.074Z"
+    },
+    {
+      "category": "media_query_optimization",
+      "file": "frontend\\styles\\design-system-unified.css",
+      "description": "优化了 1 个媒体查询",
+      "timestamp": "2025-08-16T07:25:00.075Z"
+    },
+    {
+      "category": "media_query_optimization",
+      "file": "frontend\\styles\\mobile.css",
+      "description": "优化了 1 个媒体查询",
+      "timestamp": "2025-08-16T07:25:00.076Z"
+    },
+    {
+      "category": "media_query_optimization",
+      "file": "frontend\\styles\\theme-config.css",
+      "description": "优化了 1 个媒体查询",
+      "timestamp": "2025-08-16T07:25:00.076Z"
+    },
+    {
+      "category": "media_query_optimization",
+      "file": "frontend\\styles\\utilities\\helpers.css",
+      "description": "优化了 1 个媒体查询",
+      "timestamp": "2025-08-16T07:25:00.077Z"
+    },
+    {
+      "category": "media_query_optimization",
+      "file": "frontend\\styles\\utilities\\layout.css",
+      "description": "优化了 2 个媒体查询",
+      "timestamp": "2025-08-16T07:25:00.077Z"
+    },
+    {
+      "category": "responsive_utilities",
+      "file": "frontend\\styles\\responsive-utilities.css",
+      "description": "创建响应式工具类文件",
+      "timestamp": "2025-08-16T07:25:00.078Z"
+    }
+  ],
+  "recommendations": [
+    "使用新创建的响应式工具类来简化开发",
+    "定期检查和清理未使用的媒体查询",
+    "优先使用rem单位而不是px单位",
+    "考虑使用CSS Grid和Flexbox进行布局",
+    "测试不同设备和屏幕尺寸的显示效果"
+  ]
+}

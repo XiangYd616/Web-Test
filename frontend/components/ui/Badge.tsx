@@ -1,7 +1,7 @@
 import React from 'react';
-import {CheckCircle, XCircle, AlertTriangle, Clock, Loader, Info} from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle, Clock, Loader, Info } from 'lucide-react';
 
-import {cn} from '../../utils/cn';
+import { cn } from '../../utils/cn';
 
 // Badge组件
 interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {

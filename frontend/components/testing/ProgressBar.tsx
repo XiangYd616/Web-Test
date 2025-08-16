@@ -3,9 +3,9 @@
  * 显示测试的实时进度和状态
  */
 
-import {AlertCircle, CheckCircle, Loader, Wifi, WifiOff, XCircle} from 'lucide-react';
+import { AlertCircle, CheckCircle, Loader, Wifi, WifiOff, XCircle } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import {useTestProgress} from '../../hooks/useWebSocket';
+import { useTestProgress } from '../../hooks/useWebSocket';
 
 interface RealTimeProgressBarProps {
   testId?: string;

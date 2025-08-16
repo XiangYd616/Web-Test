@@ -3,27 +3,10 @@
  * 提供完整的个性化配置界面
  */
 
-import {
-  AlertCircle,
-  BarChart3,
-  Check,
-  Download,
-  FileText,
-  Monitor,
-  RotateCcw,
-  Save,
-  Settings,
-  TestTube,
-  Upload,
-  // X
-} from 'lucide-react'; // 已修复
+import { AlertCircle, BarChart3, Check, Download, FileText, Monitor, RotateCcw, Save, Settings, TestTube, Upload, // X } from 'lucide-react'; // 已修复
 import React, { useEffect, useState } from 'react';
 // 暂时注释掉缺失的导入
-// import {
-//   userPreferencesService,
-//   UserPreferences,
-//   PreferenceCategory,
-//   PreferenceSetting
+// import { //   userPreferencesService, //   UserPreferences, //   PreferenceCategory, //   PreferenceSetting
 // } from '../../services/preferences/userPreferencesService';
 
 interface UserPreferencesPanelProps {

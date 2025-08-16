@@ -4,7 +4,7 @@
  * 版本: v1.0.0
  */
 
-// // // // // // // // import {defaultMemoryCache} from '../services/cacheStrategy'; // 文件已删除 // 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除 // 文件已删除
+// // // // // // // // import { defaultMemoryCache } from '../services/cacheStrategy'; // 文件已删除 // 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除 // 文件已删除
 
 // ==================== 类型定义 ====================
 

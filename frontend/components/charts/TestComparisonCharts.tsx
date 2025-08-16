@@ -1,8 +1,8 @@
 
 import React, { useMemo, useState } from 'react';
-import {BarChart3, Download, GitCompare, Target, TrendingUp} from 'lucide-react';
+import { BarChart3, Download, GitCompare, Target, TrendingUp } from 'lucide-react';
 
-import {Bar, BarChart, CartesianGrid, ComposedChart, Legend, Line, LineChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
+import { Bar, BarChart, CartesianGrid, ComposedChart, Legend, Line, LineChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 interface TestResult {
   id: string;
@@ -168,22 +168,22 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
   // 渲染指标对比图表
   const renderMetricsComparison = () => (
     <BarChart data={comparisonData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-      <XAxis dataKey="name" stroke="#9CA3AF" fontSize={12} />
-      <YAxis stroke="#9CA3AF" fontSize={12} />
+      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
+      <XAxis dataKey="name" stroke="var(--color-gray-400)" fontSize={12} />
+      <YAxis stroke="var(--color-gray-400)" fontSize={12} />
       <Tooltip
         contentStyle={{
-          backgroundColor: '#1F2937',
-          border: '1px solid #374151',
+          backgroundColor: 'var(--color-gray-800)',
+          border: '1px solid var(--color-gray-700)',
           borderRadius: '8px',
-          color: '#F9FAFB'
+          color: 'var(--color-gray-50)'
         }}
       />
       <Legend />
 
       <Bar
         dataKey={selectedMetric}
-        fill="#3B82F6"
+        fill="var(--color-primary)"
         name={getMetricLabel(selectedMetric)}
       />
 
@@ -191,7 +191,7 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
         <Line
           type="monotone"
           dataKey={() => baseline.metrics[selectedMetric as keyof typeof baseline.metrics]}
-          stroke="#10B981"
+          stroke="var(--color-success)"
           strokeWidth={2}
           strokeDasharray="5 5"
           name="基线"
@@ -203,16 +203,16 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
   // 渲染趋势图表
   const renderTrendsChart = () => (
     <ComposedChart data={trendData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-      <XAxis dataKey="testNumber" stroke="#9CA3AF" fontSize={12} />
-      <YAxis yAxisId="left" stroke="#9CA3AF" fontSize={12} />
-      <YAxis yAxisId="right" orientation="right" stroke="#9CA3AF" fontSize={12} />
+      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
+      <XAxis dataKey="testNumber" stroke="var(--color-gray-400)" fontSize={12} />
+      <YAxis yAxisId="left" stroke="var(--color-gray-400)" fontSize={12} />
+      <YAxis yAxisId="right" orientation="right" stroke="var(--color-gray-400)" fontSize={12} />
       <Tooltip
         contentStyle={{
-          backgroundColor: '#1F2937',
-          border: '1px solid #374151',
+          backgroundColor: 'var(--color-gray-800)',
+          border: '1px solid var(--color-gray-700)',
           borderRadius: '8px',
-          color: '#F9FAFB'
+          color: 'var(--color-gray-50)'
         }}
       />
       <Legend />
@@ -221,7 +221,7 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
         yAxisId="left"
         type="monotone"
         dataKey="averageResponseTime"
-        stroke="#EF4444"
+        stroke="var(--color-danger)"
         strokeWidth={2}
         name="平均响应时间"
       />
@@ -230,7 +230,7 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
         yAxisId="right"
         type="monotone"
         dataKey="throughput"
-        stroke="#10B981"
+        stroke="var(--color-success)"
         strokeWidth={2}
         name="吞吐量"
       />
@@ -238,7 +238,7 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
       <Bar
         yAxisId="right"
         dataKey="errorRate"
-        fill="#F59E0B"
+        fill="var(--color-warning)"
         opacity={0.7}
         name="错误率 (%)"
       />
@@ -248,26 +248,26 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
   // 渲染雷达图
   const renderRadarChart = () => (
     <RadarChart data={radarData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-      <PolarGrid stroke="#374151" />
-      <PolarAngleAxis dataKey="metric" tick={{ fill: '#9CA3AF', fontSize: 12 }} />
+      <PolarGrid stroke="var(--color-gray-700)" />
+      <PolarAngleAxis dataKey="metric" tick={{ fill: 'var(--color-gray-400)', fontSize: 12 }} />
       <PolarRadiusAxis
         angle={90}
         domain={[0, 200]}
-        tick={{ fill: '#9CA3AF', fontSize: 10 }}
+        tick={{ fill: 'var(--color-gray-400)', fontSize: 10 }}
       />
       <Radar
         name="当前测试"
         dataKey="current"
-        stroke="#3B82F6"
-        fill="#3B82F6"
+        stroke="var(--color-primary)"
+        fill="var(--color-primary)"
         fillOpacity={0.3}
         strokeWidth={2}
       />
       <Radar
         name="基线"
         dataKey="baseline"
-        stroke="#10B981"
-        fill="#10B981"
+        stroke="var(--color-success)"
+        fill="var(--color-success)"
         fillOpacity={0.1}
         strokeWidth={2}
         strokeDasharray="5 5"
@@ -280,15 +280,15 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
   // 渲染时间序列对比
   const renderTimeSeriesComparison = () => (
     <LineChart data={timeSeriesComparisonData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-      <XAxis dataKey="time" stroke="#9CA3AF" fontSize={12} />
-      <YAxis stroke="#9CA3AF" fontSize={12} />
+      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
+      <XAxis dataKey="time" stroke="var(--color-gray-400)" fontSize={12} />
+      <YAxis stroke="var(--color-gray-400)" fontSize={12} />
       <Tooltip
         contentStyle={{
-          backgroundColor: '#1F2937',
-          border: '1px solid #374151',
+          backgroundColor: 'var(--color-gray-800)',
+          border: '1px solid var(--color-gray-700)',
           borderRadius: '8px',
-          color: '#F9FAFB'
+          color: 'var(--color-gray-50)'
         }}
       />
       <Legend />
@@ -320,7 +320,7 @@ export const TestComparisonCharts: React.FC<TestComparisonChartsProps> = ({
 
   // 获取测试颜色
   const getTestColor = (index: number) => {
-    const colors = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#06B6D4'];
+    const colors = ['var(--color-primary)', 'var(--color-danger)', 'var(--color-success)', 'var(--color-warning)', '#8B5CF6', '#06B6D4'];
     return colors[index % colors.length];
   };
 

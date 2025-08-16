@@ -3,7 +3,7 @@
  * 智能预加载用户可能访问的页面，提升用户体验
  */
 
-import {ComponentType, lazy} from 'react';
+import { ComponentType, lazy } from 'react';
 
 // 预加载状态管理
 interface PreloadState {

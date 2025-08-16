@@ -1,6 +1,6 @@
-import {AlertTriangle, CheckCircle, Download, Info, Share2, XCircle} from 'lucide-react';
+import { AlertTriangle, CheckCircle, Download, Info, Share2, XCircle } from 'lucide-react';
 import React from 'react';
-import {TestResult} from '../../services/testing/testEngineService';
+import { TestResult } from '../../services/testing/testEngineService';
 
 // CSS样式已迁移到组件库，不再需要外部CSS文件
 
@@ -108,7 +108,7 @@ const SEOAnalysis: React.FC<SEOAnalysisProps> = ({
                   cx="60"
                   cy="60"
                   r="50"
-                  stroke="#374151"
+                  stroke="var(--color-gray-700)"
                   strokeWidth="8"
                   fill="none"
                 />
@@ -116,7 +116,7 @@ const SEOAnalysis: React.FC<SEOAnalysisProps> = ({
                   cx="60"
                   cy="60"
                   r="50"
-                  stroke={results.overallScore >= 80 ? "#10B981" : results.overallScore >= 60 ? "#F59E0B" : "#EF4444"}
+                  stroke={results.overallScore >= 80 ? "var(--color-success)" : results.overallScore >= 60 ? "var(--color-warning)" : "var(--color-danger)"}
                   strokeWidth="8"
                   fill="none"
                   strokeDasharray={`${(results.overallScore / 100) * 314} 314`}

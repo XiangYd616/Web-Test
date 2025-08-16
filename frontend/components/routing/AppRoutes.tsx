@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
-import {Routes, Route, Navigate} from 'react-router-dom';
-import {LoadingSpinner} from '../ui/LoadingSpinner';
-import {ProtectedRoute} from '../auth/ProtectedRoute';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
+import { ProtectedRoute } from '../auth/ProtectedRoute';
 
 // Lazy load pages
 const Dashboard = React.lazy(() => import('../../pages/core/dashboard/Dashboard'));

@@ -3,38 +3,9 @@
  * 提供详细的API测试结果分析和可视化
  */
 
-import {
-  Activity,
-  AlertTriangle,
-  BarChart3,
-  CheckCircle,
-  Clock,
-  Code,
-  Download,
-  Eye,
-  FileText,
-  Globe,
-  Shield,
-  TrendingUp,
-  XCircle,
-  // Zap
-} from 'lucide-react'; // 已修复
+import { Activity, AlertTriangle, BarChart3, CheckCircle, Clock, Code, Download, Eye, FileText, Globe, Shield, TrendingUp, XCircle, // Zap } from 'lucide-react'; // 已修复
 import React, { useMemo, useState } from 'react';
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Legend,
-  Line,
-  LineChart,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  // YAxis
-} from 'recharts'; // 已修复
+import { Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, // YAxis } from 'recharts'; // 已修复
 interface APITestEndpointResult {
   id: string;
   name: string;
@@ -159,8 +130,8 @@ const APITestResultAnalysis: React.FC<APITestResultAnalysisProps> = ({
     return Object.entries(distribution).map(([range, count]) => ({
       name: range,
       value: count,
-      color: range === '2xx' ? '#10b981' : range === '3xx' ? '#3b82f6' :
-        range === '4xx' ? '#f59e0b' : range === '5xx' ? '#ef4444' : '#6b7280'
+      color: range === '2xx' ? 'var(--color-success)' : range === '3xx' ? 'var(--color-primary)' :
+        range === '4xx' ? 'var(--color-warning)' : range === '5xx' ? 'var(--color-danger)' : 'var(--color-gray-500)'
     }));
   }, [result.endpoints]);
 
@@ -174,8 +145,8 @@ const APITestResultAnalysis: React.FC<APITestResultAnalysisProps> = ({
     return Object.entries(distribution).map(([method, count]) => ({
       name: method,
       value: count,
-      color: method === 'GET' ? '#10b981' : method === 'POST' ? '#3b82f6' :
-        method === 'PUT' ? '#f59e0b' : method === 'DELETE' ? '#ef4444' : '#6b7280'
+      color: method === 'GET' ? 'var(--color-success)' : method === 'POST' ? 'var(--color-primary)' :
+        method === 'PUT' ? 'var(--color-warning)' : method === 'DELETE' ? 'var(--color-danger)' : 'var(--color-gray-500)'
     }));
   }, [result.endpoints]);
 
@@ -303,7 +274,7 @@ const APITestResultAnalysis: React.FC<APITestResultAnalysisProps> = ({
                   <Legend />
                   <Bar
                     dataKey="responseTime"
-                    fill="#3b82f6"
+                    fill="var(--color-primary)"
                     name="响应时间 (ms)"
                   />
                 </BarChart>
@@ -564,7 +535,7 @@ const APITestResultAnalysis: React.FC<APITestResultAnalysisProps> = ({
                   <Line
                     type="monotone"
                     dataKey="responseTime"
-                    stroke="#3b82f6"
+                    stroke="var(--color-primary)"
                     strokeWidth={2}
                     name="响应时间 (ms)"
                   />

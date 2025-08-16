@@ -1,4 +1,4 @@
-import {AlertTriangle, CheckCircle, Clock, Download, Loader, Play, RotateCcw, Square, XCircle} from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Download, Loader, Play, RotateCcw, Square, XCircle } from 'lucide-react';
 import React from 'react';
 
 // 统一的测试状态类型

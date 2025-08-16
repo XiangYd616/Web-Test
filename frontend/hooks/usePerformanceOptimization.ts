@@ -2,13 +2,8 @@
  * 性能优化相关的React Hook
  */
 
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {
-  frontendCache,
-  lazyImageLoader,
-  performanceMonitor,
-  // performanceUtils
-} from '../utils/performanceUtils'; // 已修复
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { frontendCache, lazyImageLoader, performanceMonitor, // performanceUtils } from '../utils/performanceUtils'; // 已修复
 /**
  * 图片懒加载Hook
  */

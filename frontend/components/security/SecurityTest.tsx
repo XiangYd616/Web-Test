@@ -4,23 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Shield, 
-  AlertTriangle, 
-  CheckCircle, 
-  XCircle,
-  Lock,
-  Unlock,
-  Eye,
-  EyeOff,
-  Bug,
-  Zap,
-  Target,
-  FileText,
-  Download,
-  // RefreshCw
-} from 'lucide-react'; // 已修复
-import {createApiUrl} from '../../config/api';
+import { Shield, AlertTriangle, CheckCircle, XCircle, Lock, Unlock, Eye, EyeOff, Bug, Zap, Target, FileText, Download, // RefreshCw } from 'lucide-react'; // 已修复
+import { createApiUrl } from '../../config/api';
 
 interface SecurityVulnerability {
   type: string;

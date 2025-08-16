@@ -3,7 +3,7 @@
  * 替换模拟数据，实现真实的监控功能
  */
 
-import {io, Socket} from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 
 export interface MonitoringSite {
   id: string;

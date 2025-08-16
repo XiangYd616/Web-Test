@@ -4,9 +4,9 @@
  * 版本: v2.0.0
  */
 
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import type { AuthResponse, User } from '../../types/unified/models';
-import {defaultErrorHandler} from '../unified/apiErrorHandler';
+import { defaultErrorHandler } from '../unified/apiErrorHandler';
 
 // ==================== 类型定义 ====================
 

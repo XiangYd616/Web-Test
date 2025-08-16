@@ -1,5 +1,5 @@
 import React from 'react';
-import {TrendingUp, TrendingDown, Activity, Clock, Target, Users} from 'lucide-react';
+import { TrendingUp, TrendingDown, Activity, Clock, Target, Users } from 'lucide-react';
 
 interface ChartData {
   label: string;
@@ -137,7 +137,7 @@ const DashboardCharts: React.FC<DashboardChartsProps> = ({ className = '' }) => 
             </div>
           </div>
           <div className="relative">
-            {renderMiniChart(performanceData, 'value', '#3B82F6')}
+            {renderMiniChart(performanceData, 'value', 'var(--color-primary)')}
             <div className="flex justify-between mt-2 text-xs text-gray-500">
               {performanceData.map((item, index) => (
                 <span key={index}>{item.time}</span>

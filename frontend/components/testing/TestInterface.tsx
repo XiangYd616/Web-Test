@@ -1,9 +1,9 @@
-import {Clock, Play, Square, Target} from 'lucide-react';
+import { Clock, Play, Square, Target } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
-import {TestResult, TestType} from '../../services/testing/testEngine';
-import {ButtonFeedback} from '../tools/InteractiveFeedback.tsx';
-import {ErrorDisplay, useErrorHandler, useNotifications} from '../system/ErrorHandling';
-import {Loader, useLoadingState} from '../ui/LoadingStates';
+import { TestResult, TestType } from '../../services/testing/testEngine';
+import { ButtonFeedback } from '../tools/InteractiveFeedback.tsx';
+import { ErrorDisplay, useErrorHandler, useNotifications } from '../system/ErrorHandling';
+import { Loader, useLoadingState } from '../ui/LoadingStates';
 
 interface TestInterfaceProps {
   testType: TestType;

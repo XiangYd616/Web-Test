@@ -1,7 +1,7 @@
-import {AlertTriangle, CheckCircle, Clock, Gauge, Minus, TrendingDown, TrendingUp, Zap} from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Gauge, Minus, TrendingDown, TrendingUp, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import {CartesianGrid, Line, LineChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
-import {dataAnalysisService, PerformanceAnalysis} from '../../services/analytics/dataAnalysisService';
+import { CartesianGrid, Line, LineChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { dataAnalysisService, PerformanceAnalysis } from '../../services/analytics/dataAnalysisService';
 
 interface MetricCardProps {
   title: string;
@@ -195,45 +195,45 @@ const PerformanceAnalysisComponent: React.FC = () => {
           <h3 className="text-lg font-semibold text-white mb-4">性能分数趋势</h3>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={performanceData.performanceScores}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
               <XAxis
                 dataKey="date"
-                stroke="#9CA3AF"
+                stroke="var(--color-gray-400)"
                 fontSize={12}
                 tickFormatter={(value) => new Date(value).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}
               />
-              <YAxis stroke="#9CA3AF" fontSize={12} domain={[0, 100]} />
+              <YAxis stroke="var(--color-gray-400)" fontSize={12} domain={[0, 100]} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#1F2937',
-                  border: '1px solid #374151',
+                  backgroundColor: 'var(--color-gray-800)',
+                  border: '1px solid var(--color-gray-700)',
                   borderRadius: '8px',
-                  color: '#F9FAFB'
+                  color: 'var(--color-gray-50)'
                 }}
                 labelFormatter={(value) => new Date(value).toLocaleDateString('zh-CN')}
               />
               <Line
                 type="monotone"
                 dataKey="performance"
-                stroke="#3B82F6"
+                stroke="var(--color-primary)"
                 strokeWidth={2}
-                dot={{ fill: '#3B82F6', strokeWidth: 2, r: 4 }}
+                dot={{ fill: 'var(--color-primary)', strokeWidth: 2, r: 4 }}
                 name="性能"
               />
               <Line
                 type="monotone"
                 dataKey="seo"
-                stroke="#10B981"
+                stroke="var(--color-success)"
                 strokeWidth={2}
-                dot={{ fill: '#10B981', strokeWidth: 2, r: 4 }}
+                dot={{ fill: 'var(--color-success)', strokeWidth: 2, r: 4 }}
                 name="SEO"
               />
               <Line
                 type="monotone"
                 dataKey="accessibility"
-                stroke="#F59E0B"
+                stroke="var(--color-warning)"
                 strokeWidth={2}
-                dot={{ fill: '#F59E0B', strokeWidth: 2, r: 4 }}
+                dot={{ fill: 'var(--color-warning)', strokeWidth: 2, r: 4 }}
                 name="可访问性"
               />
             </LineChart>
@@ -245,28 +245,28 @@ const PerformanceAnalysisComponent: React.FC = () => {
           <h3 className="text-lg font-semibold text-white mb-4">Core Web Vitals 概览</h3>
           <ResponsiveContainer width="100%" height={300}>
             <RadarChart data={radarData}>
-              <PolarGrid stroke="#374151" />
-              <PolarAngleAxis dataKey="metric" tick={{ fill: '#9CA3AF', fontSize: 12 }} />
+              <PolarGrid stroke="var(--color-gray-700)" />
+              <PolarAngleAxis dataKey="metric" tick={{ fill: 'var(--color-gray-400)', fontSize: 12 }} />
               <PolarRadiusAxis
                 angle={90}
                 domain={[0, 100]}
-                tick={{ fill: '#9CA3AF', fontSize: 10 }}
+                tick={{ fill: 'var(--color-gray-400)', fontSize: 10 }}
                 tickCount={5}
               />
               <Radar
                 name="性能指标"
                 dataKey="value"
-                stroke="#3B82F6"
-                fill="#3B82F6"
+                stroke="var(--color-primary)"
+                fill="var(--color-primary)"
                 fillOpacity={0.3}
                 strokeWidth={2}
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#1F2937',
-                  border: '1px solid #374151',
+                  backgroundColor: 'var(--color-gray-800)',
+                  border: '1px solid var(--color-gray-700)',
                   borderRadius: '8px',
-                  color: '#F9FAFB'
+                  color: 'var(--color-gray-50)'
                 }}
               />
             </RadarChart>

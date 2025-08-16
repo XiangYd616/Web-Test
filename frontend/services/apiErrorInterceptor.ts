@@ -4,7 +4,7 @@
  */
 
 import axios, { AxiosError, AxiosResponse } from 'axios';
-import {errorService} from './errorService';
+import { errorService } from './errorService';
 
 // API错误响应接口
 interface ApiErrorResponse {

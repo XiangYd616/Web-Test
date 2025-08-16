@@ -1,0 +1,237 @@
+{
+  "timestamp": "2025-08-16T07:19:17.268Z",
+  "summary": {
+    "totalReplacements": 751,
+    "processedFiles": 36,
+    "replacementTypes": {
+      "colors": 21,
+      "spacing": 22,
+      "fontSizes": 12,
+      "borderRadius": 13
+    }
+  },
+  "processedFiles": [
+    {
+      "file": "frontend\\styles\\base\\scrollbar.css",
+      "replacements": 6
+    },
+    {
+      "file": "frontend\\styles\\base\\typography.css",
+      "replacements": 3
+    },
+    {
+      "file": "frontend\\styles\\components.css",
+      "replacements": 21
+    },
+    {
+      "file": "frontend\\styles\\design-system.css",
+      "replacements": 37
+    },
+    {
+      "file": "frontend\\styles\\design-tokens.css",
+      "replacements": 27
+    },
+    {
+      "file": "frontend\\styles\\mobile.css",
+      "replacements": 66
+    },
+    {
+      "file": "frontend\\styles\\pagination.css",
+      "replacements": 11
+    },
+    {
+      "file": "frontend\\styles\\progress-bar.css",
+      "replacements": 17
+    },
+    {
+      "file": "frontend\\styles\\theme-config.css",
+      "replacements": 29
+    },
+    {
+      "file": "frontend\\styles\\utilities\\helpers.css",
+      "replacements": 8
+    },
+    {
+      "file": "frontend\\styles\\utilities\\layout.css",
+      "replacements": 38
+    },
+    {
+      "file": "frontend\\components\\analytics\\Analytics.tsx",
+      "replacements": 14
+    },
+    {
+      "file": "frontend\\components\\charts\\Chart.tsx",
+      "replacements": 6
+    },
+    {
+      "file": "frontend\\components\\charts\\Charts.tsx",
+      "replacements": 96
+    },
+    {
+      "file": "frontend\\components\\charts\\DashboardCharts.tsx",
+      "replacements": 1
+    },
+    {
+      "file": "frontend\\components\\charts\\PerformanceChart.tsx",
+      "replacements": 9
+    },
+    {
+      "file": "frontend\\components\\charts\\RechartsChart.tsx",
+      "replacements": 14
+    },
+    {
+      "file": "frontend\\components\\charts\\StressTestChart.tsx",
+      "replacements": 8
+    },
+    {
+      "file": "frontend\\components\\charts\\StressTestCharts.tsx",
+      "replacements": 23
+    },
+    {
+      "file": "frontend\\components\\charts\\TestComparisonCharts.tsx",
+      "replacements": 35
+    },
+    {
+      "file": "frontend\\components\\features\\AnalyticsOverview.tsx",
+      "replacements": 32
+    },
+    {
+      "file": "frontend\\components\\features\\DataManagement.tsx",
+      "replacements": 48
+    },
+    {
+      "file": "frontend\\components\\features\\Monitoring.tsx",
+      "replacements": 15
+    },
+    {
+      "file": "frontend\\components\\features\\PerformanceAnalysis.tsx",
+      "replacements": 20
+    },
+    {
+      "file": "frontend\\components\\features\\SEOAnalysis.tsx",
+      "replacements": 4
+    },
+    {
+      "file": "frontend\\components\\results\\TestResults.tsx",
+      "replacements": 22
+    },
+    {
+      "file": "frontend\\components\\system\\ErrorBoundary.tsx",
+      "replacements": 18
+    },
+    {
+      "file": "frontend\\components\\testing\\APITestResultAnalysis.tsx",
+      "replacements": 12
+    },
+    {
+      "file": "frontend\\components\\testing\\StressTestHistory.tsx",
+      "replacements": 4
+    },
+    {
+      "file": "frontend\\components\\testing\\StressTestResultAnalysis.tsx",
+      "replacements": 11
+    },
+    {
+      "file": "frontend\\components\\ui\\ExportButton.tsx",
+      "replacements": 11
+    },
+    {
+      "file": "frontend\\components\\ui\\Image.tsx",
+      "replacements": 1
+    },
+    {
+      "file": "frontend\\components\\ui\\ProgressBar.tsx",
+      "replacements": 2
+    },
+    {
+      "file": "frontend\\components\\ui\\TestPageHistory.tsx",
+      "replacements": 4
+    },
+    {
+      "file": "frontend\\components\\ui\\TestTypeHistory.tsx",
+      "replacements": 76
+    },
+    {
+      "file": "frontend\\components\\ui\\Toast.tsx",
+      "replacements": 2
+    }
+  ],
+  "replacementMappings": {
+    "colors": {
+      "#ffffff": "var(--color-white)",
+      "#000000": "var(--color-black)",
+      "#f9fafb": "var(--color-gray-50)",
+      "#f3f4f6": "var(--color-gray-100)",
+      "#e5e7eb": "var(--color-gray-200)",
+      "#d1d5db": "var(--color-gray-300)",
+      "#9ca3af": "var(--color-gray-400)",
+      "#6b7280": "var(--color-gray-500)",
+      "#4b5563": "var(--color-gray-600)",
+      "#374151": "var(--color-gray-700)",
+      "#1f2937": "var(--color-gray-800)",
+      "#111827": "var(--color-gray-900)",
+      "#3b82f6": "var(--color-primary)",
+      "#2563eb": "var(--color-primary-hover)",
+      "#1d4ed8": "var(--color-primary-active)",
+      "#10b981": "var(--color-success)",
+      "#059669": "var(--color-success-hover)",
+      "#ef4444": "var(--color-danger)",
+      "#dc2626": "var(--color-danger-hover)",
+      "#f59e0b": "var(--color-warning)",
+      "#d97706": "var(--color-warning-hover)"
+    },
+    "spacing": {
+      "0px": "var(--spacing-0)",
+      "2px": "var(--spacing-0\\.5)",
+      "4px": "var(--spacing-1)",
+      "8px": "var(--spacing-2)",
+      "12px": "var(--spacing-3)",
+      "16px": "var(--spacing-4)",
+      "20px": "var(--spacing-5)",
+      "24px": "var(--spacing-6)",
+      "32px": "var(--spacing-8)",
+      "40px": "var(--spacing-10)",
+      "48px": "var(--spacing-12)",
+      "64px": "var(--spacing-16)",
+      "0.25rem": "var(--spacing-1)",
+      "0.5rem": "var(--spacing-2)",
+      "0.75rem": "var(--spacing-3)",
+      "1rem": "var(--spacing-4)",
+      "1.25rem": "var(--spacing-5)",
+      "1.5rem": "var(--spacing-6)",
+      "2rem": "var(--spacing-8)",
+      "2.5rem": "var(--spacing-10)",
+      "3rem": "var(--spacing-12)",
+      "4rem": "var(--spacing-16)"
+    },
+    "fontSizes": {
+      "12px": "var(--font-size-xs)",
+      "14px": "var(--font-size-sm)",
+      "16px": "var(--font-size-base)",
+      "18px": "var(--font-size-lg)",
+      "20px": "var(--font-size-xl)",
+      "24px": "var(--font-size-2xl)",
+      "0.75rem": "var(--font-size-xs)",
+      "0.875rem": "var(--font-size-sm)",
+      "1rem": "var(--font-size-base)",
+      "1.125rem": "var(--font-size-lg)",
+      "1.25rem": "var(--font-size-xl)",
+      "1.5rem": "var(--font-size-2xl)"
+    },
+    "borderRadius": {
+      "0px": "var(--radius-none)",
+      "2px": "var(--radius-sm)",
+      "4px": "var(--radius-md)",
+      "6px": "var(--radius-lg)",
+      "8px": "var(--radius-xl)",
+      "12px": "var(--radius-2xl)",
+      "16px": "var(--radius-3xl)",
+      "0.125rem": "var(--radius-sm)",
+      "0.25rem": "var(--radius-md)",
+      "0.375rem": "var(--radius-lg)",
+      "0.5rem": "var(--radius-xl)",
+      "0.75rem": "var(--radius-2xl)",
+      "1rem": "var(--radius-3xl)"
+    }
+  }
+}

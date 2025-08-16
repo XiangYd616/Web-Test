@@ -3,7 +3,7 @@
  * 提供统一的通知消息管理功能
  */
 
-import {useCallback, useState} from 'react';
+import { useCallback, useState } from 'react';
 
 // 通知类型
 export type NotificationType = 'success' | 'error' | 'warning' | 'info';

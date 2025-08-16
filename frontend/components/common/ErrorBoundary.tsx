@@ -4,7 +4,7 @@
  */
 
 import React, { Component, ReactNode } from 'react';
-import {AlertTriangle, RefreshCw, Home, Bug} from 'lucide-react';
+import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react';
 
 interface ErrorInfo {
   componentStack: string;

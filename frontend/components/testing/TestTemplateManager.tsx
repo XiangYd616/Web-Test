@@ -4,8 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import {TestConfig, TestType} from '../../types/testConfig';
-import {TestService} from '../../services/unifiedTestService';
+import { TestConfig, TestType } from '../../types/testConfig';
+import { TestService } from '../../services/unifiedTestService';
 
 interface TestTemplate {
   name: string;

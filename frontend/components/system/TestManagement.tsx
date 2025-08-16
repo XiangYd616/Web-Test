@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import {adminService} from '../../services/adminService';
+import { adminService } from '../../services/adminService';
 
-import {Clock, Download, Filter, TestTube, TrendingUp, User} from 'lucide-react';
+import { Clock, Download, Filter, TestTube, TrendingUp, User } from 'lucide-react';
 
 interface TestRecord {
   id: string;

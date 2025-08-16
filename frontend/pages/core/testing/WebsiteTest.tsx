@@ -1,13 +1,13 @@
-import {AlertTriangle, CheckCircle, Clock, Code, Download, Eye, Gauge, Globe, Loader, Lock, Play, RotateCcw, Search, Share2, Shield, Square, XCircle} from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Code, Download, Eye, Gauge, Globe, Loader, Lock, Play, RotateCcw, Search, Share2, Shield, Square, XCircle } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import {useSearchParams} from 'react-router-dom';
-import {useAuthCheck} from '../../../components/auth/WithAuthCheck.tsx';
+import { useSearchParams } from 'react-router-dom';
+import { useAuthCheck } from '../../../components/auth/WithAuthCheck.tsx';
 // // import TestCharts - 文件已删除
 // 文件已删除;
 import BaseTestPage from '../../../components/testing/BaseTestPage.tsx';
 import URLInput from '../../../components/testing/URLInput';
-import {ProgressBar} from '../../../components/ui/ProgressBar.tsx';
-import {useUserStats} from '../../../hooks/useUserStats.ts';
+import { ProgressBar } from '../../../components/ui/ProgressBar.tsx';
+import { useUserStats } from '../../../hooks/useUserStats.ts';
 
 // CSS样式已迁移到组件库中
 // 进度条样式已集成到ProgressBar组件

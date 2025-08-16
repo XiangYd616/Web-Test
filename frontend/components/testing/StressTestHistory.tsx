@@ -1,17 +1,12 @@
-import {Activity, BarChart3, Download, ExternalLink, Eye, RefreshCw, Search, Trash2} from 'lucide-react';
+import { Activity, BarChart3, Download, ExternalLink, Eye, RefreshCw, Search, Trash2 } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
-import {useNavigate} from 'react-router-dom';
-import {useAuth} from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import ExportUtils from '../../utils/exportUtils';
-import {
-  calculateTestCompletion,
-  getStatusConfig,
-  getStatusStyleClasses,
-  // getStatusText
-} from '../../utils/testStatusUtils'; // 已修复
-import {DeleteConfirmDialog} from '../ui/DeleteConfirmDialog.tsx';
+import { calculateTestCompletion, getStatusConfig, getStatusStyleClasses, // getStatusText } from '../../utils/testStatusUtils'; // 已修复
+import { DeleteConfirmDialog } from '../ui/DeleteConfirmDialog.tsx';
 import ExportModal from '../ui/ExportModal.tsx';
-import {showToast} from '../ui/Toast.tsx';
+import { showToast } from '../ui/Toast.tsx';
 import StressTestDetailModal from './StressTestDetailModal';
 
 import '../../styles/pagination.css';
@@ -1359,17 +1354,17 @@ const StressTestHistory: React.FC<StressTestHistoryProps> = ({ className = '' })
                         aria-label={`删除测试记录: ${record.testName}`}
                         className="delete-record-button p-2 text-white border border-red-600 hover:border-red-700 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
                         style={{
-                          backgroundColor: '#dc2626 !important',
+                          backgroundColor: 'var(--color-danger-hover) !important',
                           color: 'white !important',
-                          borderColor: '#dc2626 !important'
+                          borderColor: 'var(--color-danger-hover) !important'
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.setProperty('background-color', '#b91c1c', 'important');
                           e.currentTarget.style.setProperty('border-color', '#b91c1c', 'important');
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.setProperty('background-color', '#dc2626', 'important');
-                          e.currentTarget.style.setProperty('border-color', '#dc2626', 'important');
+                          e.currentTarget.style.setProperty('background-color', 'var(--color-danger-hover)', 'important');
+                          e.currentTarget.style.setProperty('border-color', 'var(--color-danger-hover)', 'important');
                         }}
                         title="删除记录"
                       >

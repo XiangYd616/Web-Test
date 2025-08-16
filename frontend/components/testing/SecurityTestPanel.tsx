@@ -1,10 +1,10 @@
 
-import {AlertTriangle, Award, Eye, FileText, Lock, Network, Settings, Shield, Target, Zap} from 'lucide-react';
+import { AlertTriangle, Award, Eye, FileText, Lock, Network, Settings, Shield, Target, Zap } from 'lucide-react';
 import React, { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
-import {SecurityTestConfig, SecurityTestResult, TestProgress, unifiedSecurityEngine} from '../../services/auth/securityEngine';
-// import {createCommonErrors, createError} from '../../utils/errorHandler'; // 函数不存在，已注释
-import {URLValidationResult} from '../../utils/urlValidator';
-import {Error} from './ErrorDisplay';
+import { SecurityTestConfig, SecurityTestResult, TestProgress, unifiedSecurityEngine } from '../../services/auth/securityEngine';
+// import { createCommonErrors, createError } from '../../utils/errorHandler'; // 函数不存在，已注释
+import { URLValidationResult } from '../../utils/urlValidator';
+import { Error } from './ErrorDisplay';
 
 interface SecurityTestPanelProps {
   onTestStart?: () => void;

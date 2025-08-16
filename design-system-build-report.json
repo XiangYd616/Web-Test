@@ -1,0 +1,2718 @@
+{
+  "timestamp": "2025-08-16T07:18:08.616Z",
+  "summary": {
+    "totalHardcodedValues": 251,
+    "colorValues": 177,
+    "spacingValues": 45,
+    "fontSizes": 10,
+    "borderRadius": 9,
+    "shadows": 10,
+    "designTokensGenerated": 5
+  },
+  "hardcodedValues": [
+    {
+      "value": "color:rgba(75, 85, 99, 0.7)",
+      "files": [
+        "frontend\\styles\\base\\scrollbar.css",
+        "frontend\\styles\\base\\scrollbar.css",
+        "frontend\\styles\\base\\scrollbar.css",
+        "frontend\\styles\\base\\scrollbar.css"
+      ]
+    },
+    {
+      "value": "color:rgba(17, 24, 39, 0.4)",
+      "files": [
+        "frontend\\styles\\base\\scrollbar.css",
+        "frontend\\styles\\base\\scrollbar.css",
+        "frontend\\styles\\base\\scrollbar.css",
+        "frontend\\styles\\base\\scrollbar.css",
+        "frontend\\styles\\base\\scrollbar.css",
+        "frontend\\styles\\base\\scrollbar.css"
+      ]
+    },
+    {
+      "value": "color:rgba(107, 114, 128, 0.7)",
+      "files": [
+        "frontend\\styles\\base\\scrollbar.css",
+        "frontend\\styles\\base\\scrollbar.css"
+      ]
+    },
+    {
+      "value": "color:rgba(107, 114, 128, 0.8)",
+      "files": [
+        "frontend\\styles\\base\\scrollbar.css",
+        "frontend\\styles\\base\\scrollbar.css"
+      ]
+    },
+    {
+      "value": "color:rgba(156, 163, 175, 0.8)",
+      "files": [
+        "frontend\\styles\\base\\scrollbar.css",
+        "frontend\\styles\\base\\scrollbar.css"
+      ]
+    },
+    {
+      "value": "color:rgba(31, 41, 55, 0.6)",
+      "files": [
+        "frontend\\styles\\base\\scrollbar.css",
+        "frontend\\styles\\base\\scrollbar.css"
+      ]
+    },
+    {
+      "value": "spacing:12px",
+      "files": [
+        "frontend\\styles\\base\\scrollbar.css",
+        "frontend\\styles\\base\\scrollbar.css",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\system\\ErrorBoundary.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "borderRadius:6px",
+      "files": [
+        "frontend\\styles\\base\\scrollbar.css",
+        "frontend\\styles\\base\\scrollbar.css",
+        "frontend\\styles\\base\\scrollbar.css",
+        "frontend\\styles\\base\\scrollbar.css",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "spacing:1024px",
+      "files": [
+        "frontend\\styles\\base\\typography.css",
+        "frontend\\styles\\design-system-unified.css",
+        "frontend\\styles\\utilities\\layout.css"
+      ]
+    },
+    {
+      "value": "spacing:1440px",
+      "files": [
+        "frontend\\styles\\base\\typography.css"
+      ]
+    },
+    {
+      "value": "spacing:1441px",
+      "files": [
+        "frontend\\styles\\base\\typography.css"
+      ]
+    },
+    {
+      "value": "spacing:1920px",
+      "files": [
+        "frontend\\styles\\base\\typography.css"
+      ]
+    },
+    {
+      "value": "spacing:1921px",
+      "files": [
+        "frontend\\styles\\base\\typography.css"
+      ]
+    },
+    {
+      "value": "spacing:2560px",
+      "files": [
+        "frontend\\styles\\base\\typography.css"
+      ]
+    },
+    {
+      "value": "spacing:2561px",
+      "files": [
+        "frontend\\styles\\base\\typography.css"
+      ]
+    },
+    {
+      "value": "fontSize:14px",
+      "files": [
+        "frontend\\styles\\base\\typography.css",
+        "frontend\\styles\\base\\typography.css",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\system\\ErrorBoundary.tsx",
+        "frontend\\components\\system\\ErrorBoundary.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "fontSize:13px",
+      "files": [
+        "frontend\\styles\\base\\typography.css",
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "fontSize:15px",
+      "files": [
+        "frontend\\styles\\base\\typography.css"
+      ]
+    },
+    {
+      "value": "fontSize:16px",
+      "files": [
+        "frontend\\styles\\base\\typography.css",
+        "frontend\\styles\\utilities\\helpers.css",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "color:rgba(0, 0, 0, 0.25)",
+      "files": [
+        "frontend\\styles\\components.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "color:#667eea",
+      "files": [
+        "frontend\\styles\\components.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "color:#764ba2",
+      "files": [
+        "frontend\\styles\\components.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "color:#f093fb",
+      "files": [
+        "frontend\\styles\\components.css"
+      ]
+    },
+    {
+      "value": "color:#f5576c",
+      "files": [
+        "frontend\\styles\\components.css"
+      ]
+    },
+    {
+      "value": "color:#4facfe",
+      "files": [
+        "frontend\\styles\\components.css"
+      ]
+    },
+    {
+      "value": "color:#00f2fe",
+      "files": [
+        "frontend\\styles\\components.css"
+      ]
+    },
+    {
+      "value": "color:#43e97b",
+      "files": [
+        "frontend\\styles\\components.css"
+      ]
+    },
+    {
+      "value": "color:#38f9d7",
+      "files": [
+        "frontend\\styles\\components.css"
+      ]
+    },
+    {
+      "value": "color:#374151",
+      "files": [
+        "frontend\\styles\\components.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\pagination.css",
+        "frontend\\styles\\pagination.css",
+        "frontend\\styles\\pagination.css",
+        "frontend\\styles\\pagination.css",
+        "frontend\\styles\\pagination.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\analytics\\Analytics.tsx",
+        "frontend\\components\\analytics\\Analytics.tsx",
+        "frontend\\components\\analytics\\Analytics.tsx",
+        "frontend\\components\\analytics\\Analytics.tsx",
+        "frontend\\components\\analytics\\Analytics.tsx",
+        "frontend\\components\\analytics\\Analytics.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\PerformanceChart.tsx",
+        "frontend\\components\\charts\\PerformanceChart.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\Monitoring.tsx",
+        "frontend\\components\\features\\Monitoring.tsx",
+        "frontend\\components\\features\\Monitoring.tsx",
+        "frontend\\components\\features\\Monitoring.tsx",
+        "frontend\\components\\features\\PerformanceAnalysis.tsx",
+        "frontend\\components\\features\\PerformanceAnalysis.tsx",
+        "frontend\\components\\features\\PerformanceAnalysis.tsx",
+        "frontend\\components\\features\\PerformanceAnalysis.tsx",
+        "frontend\\components\\features\\SEOAnalysis.tsx",
+        "frontend\\components\\results\\TestResults.tsx",
+        "frontend\\components\\results\\TestResults.tsx",
+        "frontend\\components\\results\\TestResults.tsx",
+        "frontend\\components\\results\\TestResults.tsx",
+        "frontend\\components\\results\\TestResults.tsx",
+        "frontend\\components\\ui\\ProgressBar.tsx",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "color:#3b82f6",
+      "files": [
+        "frontend\\styles\\components.css",
+        "frontend\\styles\\components.css",
+        "frontend\\styles\\components.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\charts\\Chart.tsx",
+        "frontend\\components\\testing\\APITestResultAnalysis.tsx",
+        "frontend\\components\\testing\\APITestResultAnalysis.tsx",
+        "frontend\\components\\testing\\APITestResultAnalysis.tsx",
+        "frontend\\components\\testing\\APITestResultAnalysis.tsx",
+        "frontend\\components\\testing\\StressTestResultAnalysis.tsx",
+        "frontend\\components\\testing\\StressTestResultAnalysis.tsx",
+        "frontend\\components\\testing\\StressTestResultAnalysis.tsx",
+        "frontend\\components\\ui\\ProgressBar.tsx",
+        "frontend\\components\\ui\\TestPageHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "color:#10b981",
+      "files": [
+        "frontend\\styles\\components.css",
+        "frontend\\styles\\components.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\charts\\Chart.tsx",
+        "frontend\\components\\testing\\APITestResultAnalysis.tsx",
+        "frontend\\components\\testing\\APITestResultAnalysis.tsx",
+        "frontend\\components\\testing\\StressTestResultAnalysis.tsx",
+        "frontend\\components\\testing\\StressTestResultAnalysis.tsx",
+        "frontend\\components\\testing\\StressTestResultAnalysis.tsx",
+        "frontend\\components\\testing\\StressTestResultAnalysis.tsx",
+        "frontend\\components\\ui\\TestPageHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\Toast.tsx"
+      ]
+    },
+    {
+      "value": "color:#f59e0b",
+      "files": [
+        "frontend\\styles\\components.css",
+        "frontend\\styles\\components.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\charts\\Chart.tsx",
+        "frontend\\components\\charts\\PerformanceChart.tsx",
+        "frontend\\components\\charts\\PerformanceChart.tsx",
+        "frontend\\components\\testing\\APITestResultAnalysis.tsx",
+        "frontend\\components\\testing\\APITestResultAnalysis.tsx",
+        "frontend\\components\\testing\\StressTestResultAnalysis.tsx",
+        "frontend\\components\\ui\\TestPageHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "color:#ef4444",
+      "files": [
+        "frontend\\styles\\components.css",
+        "frontend\\styles\\components.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\charts\\Chart.tsx",
+        "frontend\\components\\testing\\APITestResultAnalysis.tsx",
+        "frontend\\components\\testing\\APITestResultAnalysis.tsx",
+        "frontend\\components\\testing\\StressTestResultAnalysis.tsx",
+        "frontend\\components\\testing\\StressTestResultAnalysis.tsx",
+        "frontend\\components\\testing\\StressTestResultAnalysis.tsx",
+        "frontend\\components\\ui\\TestPageHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\Toast.tsx"
+      ]
+    },
+    {
+      "value": "color:#4b5563",
+      "files": [
+        "frontend\\styles\\components.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\pagination.css",
+        "frontend\\styles\\pagination.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "color:rgba(0, 0, 0, 0.1)",
+      "files": [
+        "frontend\\styles\\components.css",
+        "frontend\\styles\\components.css",
+        "frontend\\styles\\components.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\system\\ErrorBoundary.tsx",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "color:rgba(0, 0, 0, 0.06)",
+      "files": [
+        "frontend\\styles\\components.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "color:rgba(0, 0, 0, 0.05)",
+      "files": [
+        "frontend\\styles\\components.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "spacing:5rem",
+      "files": [
+        "frontend\\styles\\components.css"
+      ]
+    },
+    {
+      "value": "spacing:640px",
+      "files": [
+        "frontend\\styles\\components.css",
+        "frontend\\styles\\design-system-unified.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\pagination.css",
+        "frontend\\styles\\utilities\\helpers.css",
+        "frontend\\styles\\utilities\\layout.css"
+      ]
+    },
+    {
+      "value": "spacing:768px",
+      "files": [
+        "frontend\\styles\\components.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\utilities\\helpers.css",
+        "frontend\\styles\\utilities\\layout.css",
+        "frontend\\styles\\utilities\\layout.css",
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "borderRadius:1rem",
+      "files": [
+        "frontend\\styles\\components.css"
+      ]
+    },
+    {
+      "value": "borderRadius:9999px",
+      "files": [
+        "frontend\\styles\\components.css",
+        "frontend\\styles\\components.css",
+        "frontend\\styles\\components.css",
+        "frontend\\styles\\components.css"
+      ]
+    },
+    {
+      "value": "shadow:0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+      "files": [
+        "frontend\\styles\\components.css"
+      ]
+    },
+    {
+      "value": "shadow:0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+      "files": [
+        "frontend\\styles\\components.css"
+      ]
+    },
+    {
+      "value": "spacing:1px",
+      "files": [
+        "frontend\\styles\\design-system-unified.css",
+        "frontend\\styles\\design-system-unified.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "spacing:641px",
+      "files": [
+        "frontend\\styles\\design-system-unified.css"
+      ]
+    },
+    {
+      "value": "spacing:1025px",
+      "files": [
+        "frontend\\styles\\design-system-unified.css"
+      ]
+    },
+    {
+      "value": "color:#2563eb",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "color:#1d4ed8",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "color:#dbeafe",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css"
+      ]
+    },
+    {
+      "value": "color:#1e40af",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\theme-config.css"
+      ]
+    },
+    {
+      "value": "color:#6b7280",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\testing\\APITestResultAnalysis.tsx",
+        "frontend\\components\\testing\\APITestResultAnalysis.tsx",
+        "frontend\\components\\ui\\ExportButton.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "color:#f3f4f6",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\ui\\Image.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "color:#1f2937",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "color:#059669",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx"
+      ]
+    },
+    {
+      "value": "color:#d1fae5",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\theme-config.css"
+      ]
+    },
+    {
+      "value": "color:#047857",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\theme-config.css"
+      ]
+    },
+    {
+      "value": "color:#d97706",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\theme-config.css"
+      ]
+    },
+    {
+      "value": "color:#fef3c7",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\theme-config.css"
+      ]
+    },
+    {
+      "value": "color:#b45309",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\theme-config.css"
+      ]
+    },
+    {
+      "value": "color:#dc2626",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\testing\\StressTestHistory.tsx",
+        "frontend\\components\\testing\\StressTestHistory.tsx",
+        "frontend\\components\\testing\\StressTestHistory.tsx",
+        "frontend\\components\\testing\\StressTestHistory.tsx"
+      ]
+    },
+    {
+      "value": "color:#fee2e2",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\theme-config.css"
+      ]
+    },
+    {
+      "value": "color:#b91c1c",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\testing\\StressTestHistory.tsx",
+        "frontend\\components\\testing\\StressTestHistory.tsx"
+      ]
+    },
+    {
+      "value": "color:#06b6d4",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\components\\charts\\Chart.tsx",
+        "frontend\\components\\testing\\StressTestResultAnalysis.tsx",
+        "frontend\\components\\ui\\TestPageHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "color:#0891b2",
+      "files": [
+        "frontend\\styles\\design-system.css"
+      ]
+    },
+    {
+      "value": "color:#cffafe",
+      "files": [
+        "frontend\\styles\\design-system.css"
+      ]
+    },
+    {
+      "value": "color:#0e7490",
+      "files": [
+        "frontend\\styles\\design-system.css"
+      ]
+    },
+    {
+      "value": "color:#111827",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\ui\\ExportButton.tsx"
+      ]
+    },
+    {
+      "value": "color:#9ca3af",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\pagination.css",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "color:#ffffff",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\charts\\Chart.tsx",
+        "frontend\\components\\charts\\Chart.tsx",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "color:#d1d5db",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "color:#f9fafb",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\components\\ui\\ExportButton.tsx"
+      ]
+    },
+    {
+      "value": "color:rgba(0, 0, 0, 0.5)",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "color:#e5e7eb",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\components\\ui\\ExportButton.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "color:rgba(0, 0, 0, 0.75)",
+      "files": [
+        "frontend\\styles\\design-system.css"
+      ]
+    },
+    {
+      "value": "color:rgba(0, 0, 0, 0.04)",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "color:rgba(59, 130, 246, 0.1)",
+      "files": [
+        "frontend\\styles\\design-system.css"
+      ]
+    },
+    {
+      "value": "color:rgba(239, 68, 68, 0.1)",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\theme-config.css"
+      ]
+    },
+    {
+      "value": "color:rgba(255, 255, 255, 0.1)",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-system.css"
+      ]
+    },
+    {
+      "value": "color:rgba(255, 255, 255, 0.2)",
+      "files": [
+        "frontend\\styles\\design-system.css"
+      ]
+    },
+    {
+      "value": "color:rgba(0, 0, 0, 0.2)",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "spacing:1rem",
+      "files": [
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\design-system.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\pagination.css",
+        "frontend\\styles\\utilities\\helpers.css",
+        "frontend\\styles\\utilities\\helpers.css",
+        "frontend\\styles\\utilities\\layout.css",
+        "frontend\\styles\\utilities\\layout.css",
+        "frontend\\styles\\utilities\\layout.css",
+        "frontend\\styles\\utilities\\layout.css",
+        "frontend\\styles\\utilities\\layout.css"
+      ]
+    },
+    {
+      "value": "shadow:0 0 0 3px rgba(239, 68, 68, 0.1)",
+      "files": [
+        "frontend\\styles\\design-system.css"
+      ]
+    },
+    {
+      "value": "color:#eff6ff",
+      "files": [
+        "frontend\\styles\\design-tokens.css"
+      ]
+    },
+    {
+      "value": "color:#1e3a8a",
+      "files": [
+        "frontend\\styles\\design-tokens.css"
+      ]
+    },
+    {
+      "value": "color:#fef2f2",
+      "files": [
+        "frontend\\styles\\design-tokens.css"
+      ]
+    },
+    {
+      "value": "color:#7f1d1d",
+      "files": [
+        "frontend\\styles\\design-tokens.css"
+      ]
+    },
+    {
+      "value": "color:#f0fdf4",
+      "files": [
+        "frontend\\styles\\design-tokens.css"
+      ]
+    },
+    {
+      "value": "color:#dcfce7",
+      "files": [
+        "frontend\\styles\\design-tokens.css"
+      ]
+    },
+    {
+      "value": "color:#22c55e",
+      "files": [
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css"
+      ]
+    },
+    {
+      "value": "color:#16a34a",
+      "files": [
+        "frontend\\styles\\design-tokens.css"
+      ]
+    },
+    {
+      "value": "color:#15803d",
+      "files": [
+        "frontend\\styles\\design-tokens.css"
+      ]
+    },
+    {
+      "value": "color:#14532d",
+      "files": [
+        "frontend\\styles\\design-tokens.css"
+      ]
+    },
+    {
+      "value": "color:#fffbeb",
+      "files": [
+        "frontend\\styles\\design-tokens.css"
+      ]
+    },
+    {
+      "value": "color:#78350f",
+      "files": [
+        "frontend\\styles\\design-tokens.css"
+      ]
+    },
+    {
+      "value": "color:rgb(0 0 0 / 0.05)",
+      "files": [
+        "frontend\\styles\\design-tokens.css"
+      ]
+    },
+    {
+      "value": "color:rgb(0 0 0 / 0.1)",
+      "files": [
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\design-tokens.css",
+        "frontend\\styles\\design-tokens.css"
+      ]
+    },
+    {
+      "value": "color:rgba(0, 0, 0, 0.3)",
+      "files": [
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "color:#000",
+      "files": [
+        "frontend\\styles\\mobile.css"
+      ]
+    },
+    {
+      "value": "spacing:2rem",
+      "files": [
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\mobile.css"
+      ]
+    },
+    {
+      "value": "spacing:480px",
+      "files": [
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\utilities\\helpers.css",
+        "frontend\\styles\\utilities\\layout.css"
+      ]
+    },
+    {
+      "value": "spacing:44px",
+      "files": [
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\mobile.css"
+      ]
+    },
+    {
+      "value": "spacing:8px",
+      "files": [
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\system\\ErrorBoundary.tsx",
+        "frontend\\components\\ui\\ExportButton.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "spacing:500px",
+      "files": [
+        "frontend\\styles\\mobile.css",
+        "frontend\\components\\system\\ErrorBoundary.tsx"
+      ]
+    },
+    {
+      "value": "fontSize:1rem",
+      "files": [
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\mobile.css",
+        "frontend\\styles\\utilities\\layout.css"
+      ]
+    },
+    {
+      "value": "borderRadius:4px",
+      "files": [
+        "frontend\\styles\\mobile.css",
+        "frontend\\components\\system\\ErrorBoundary.tsx",
+        "frontend\\components\\system\\ErrorBoundary.tsx"
+      ]
+    },
+    {
+      "value": "shadow:inherit",
+      "files": [
+        "frontend\\styles\\mobile.css"
+      ]
+    },
+    {
+      "value": "color:rgba(59, 130, 246, 0.5)",
+      "files": [
+        "frontend\\styles\\pagination.css"
+      ]
+    },
+    {
+      "value": "spacing:80px",
+      "files": [
+        "frontend\\styles\\pagination.css"
+      ]
+    },
+    {
+      "value": "shadow:0 0 0 2px rgba(59, 130, 246, 0.5)",
+      "files": [
+        "frontend\\styles\\pagination.css"
+      ]
+    },
+    {
+      "value": "color:#f97316",
+      "files": [
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\components\\testing\\StressTestResultAnalysis.tsx"
+      ]
+    },
+    {
+      "value": "color:#eab308",
+      "files": [
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\components\\testing\\StressTestResultAnalysis.tsx"
+      ]
+    },
+    {
+      "value": "color:#84cc16",
+      "files": [
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\components\\testing\\StressTestResultAnalysis.tsx"
+      ]
+    },
+    {
+      "value": "color:#6366f1",
+      "files": [
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\components\\testing\\StressTestResultAnalysis.tsx",
+        "frontend\\components\\testing\\StressTestResultAnalysis.tsx",
+        "frontend\\components\\ui\\TestPageHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "color:#8b5cf6",
+      "files": [
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\progress-bar.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\charts\\Chart.tsx",
+        "frontend\\components\\ui\\TestPageHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "color:#f8fafc",
+      "files": [
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "color:#f1f5f9",
+      "files": [
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "color:#e2e8f0",
+      "files": [
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "color:#0f172a",
+      "files": [
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "color:#475569",
+      "files": [
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "color:#64748b",
+      "files": [
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "color:#94a3b8",
+      "files": [
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "color:#cbd5e1",
+      "files": [
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "color:rgba(15, 23, 42, 0.5)",
+      "files": [
+        "frontend\\styles\\theme-config.css"
+      ]
+    },
+    {
+      "value": "color:rgba(15, 23, 42, 0.1)",
+      "files": [
+        "frontend\\styles\\theme-config.css"
+      ]
+    },
+    {
+      "value": "color:rgba(59, 130, 246, 0.2)",
+      "files": [
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css"
+      ]
+    },
+    {
+      "value": "color:rgba(255, 255, 255, 0.95)",
+      "files": [
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "color:rgba(0, 0, 0, 0.15)",
+      "files": [
+        "frontend\\styles\\theme-config.css"
+      ]
+    },
+    {
+      "value": "color:rgba(59, 130, 246, 0.15)",
+      "files": [
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\utilities\\layout.css"
+      ]
+    },
+    {
+      "value": "color:rgba(255, 255, 255, 0.8)",
+      "files": [
+        "frontend\\styles\\theme-config.css"
+      ]
+    },
+    {
+      "value": "color:rgba(239, 68, 68, 0.3)",
+      "files": [
+        "frontend\\styles\\theme-config.css"
+      ]
+    },
+    {
+      "value": "color:#1e293b",
+      "files": [
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "color:#334155",
+      "files": [
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts",
+        "frontend\\components\\ui\\theme\\ThemeSystem.ts"
+      ]
+    },
+    {
+      "value": "color:rgba(0, 0, 0, 0.7)",
+      "files": [
+        "frontend\\styles\\theme-config.css"
+      ]
+    },
+    {
+      "value": "color:rgba(59, 130, 246, 0.3)",
+      "files": [
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css"
+      ]
+    },
+    {
+      "value": "color:rgba(30, 41, 59, 0.95)",
+      "files": [
+        "frontend\\styles\\theme-config.css"
+      ]
+    },
+    {
+      "value": "color:rgba(0, 0, 0, 0.4)",
+      "files": [
+        "frontend\\styles\\theme-config.css"
+      ]
+    },
+    {
+      "value": "color:rgba(51, 65, 85, 0.8)",
+      "files": [
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css"
+      ]
+    },
+    {
+      "value": "color:rgba(59, 130, 246, 0.25)",
+      "files": [
+        "frontend\\styles\\theme-config.css"
+      ]
+    },
+    {
+      "value": "color:rgba(239, 68, 68, 0.15)",
+      "files": [
+        "frontend\\styles\\theme-config.css"
+      ]
+    },
+    {
+      "value": "color:rgba(239, 68, 68, 0.4)",
+      "files": [
+        "frontend\\styles\\theme-config.css"
+      ]
+    },
+    {
+      "value": "color:#fca5a5",
+      "files": [
+        "frontend\\styles\\theme-config.css"
+      ]
+    },
+    {
+      "value": "color:#000000",
+      "files": [
+        "frontend\\styles\\theme-config.css",
+        "frontend\\styles\\theme-config.css"
+      ]
+    },
+    {
+      "value": "spacing:14rem",
+      "files": [
+        "frontend\\styles\\utilities\\layout.css"
+      ]
+    },
+    {
+      "value": "spacing:12rem",
+      "files": [
+        "frontend\\styles\\utilities\\layout.css"
+      ]
+    },
+    {
+      "value": "spacing:360px",
+      "files": [
+        "frontend\\styles\\utilities\\layout.css",
+        "frontend\\styles\\utilities\\layout.css"
+      ]
+    },
+    {
+      "value": "spacing:340px",
+      "files": [
+        "frontend\\styles\\utilities\\layout.css"
+      ]
+    },
+    {
+      "value": "spacing:1023px",
+      "files": [
+        "frontend\\styles\\utilities\\layout.css"
+      ]
+    },
+    {
+      "value": "spacing:350px",
+      "files": [
+        "frontend\\styles\\utilities\\layout.css"
+      ]
+    },
+    {
+      "value": "spacing:320px",
+      "files": [
+        "frontend\\styles\\utilities\\layout.css"
+      ]
+    },
+    {
+      "value": "spacing:300px",
+      "files": [
+        "frontend\\styles\\utilities\\layout.css"
+      ]
+    },
+    {
+      "value": "spacing:280px",
+      "files": [
+        "frontend\\styles\\utilities\\layout.css"
+      ]
+    },
+    {
+      "value": "color:#8884d8",
+      "files": [
+        "frontend\\components\\analytics\\Analytics.tsx",
+        "frontend\\components\\analytics\\Analytics.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\results\\TestResults.tsx",
+        "frontend\\components\\testing\\APITestResultAnalysis.tsx",
+        "frontend\\components\\testing\\APITestResultAnalysis.tsx",
+        "frontend\\components\\testing\\StressTestResultAnalysis.tsx"
+      ]
+    },
+    {
+      "value": "color:#82ca9d",
+      "files": [
+        "frontend\\components\\analytics\\Analytics.tsx",
+        "frontend\\components\\analytics\\Analytics.tsx"
+      ]
+    },
+    {
+      "value": "color:#ffc658",
+      "files": [
+        "frontend\\components\\analytics\\Analytics.tsx"
+      ]
+    },
+    {
+      "value": "color:#ff7300",
+      "files": [
+        "frontend\\components\\analytics\\Analytics.tsx"
+      ]
+    },
+    {
+      "value": "color:#8dd1e1",
+      "files": [
+        "frontend\\components\\analytics\\Analytics.tsx"
+      ]
+    },
+    {
+      "value": "color:#9CA3AF",
+      "files": [
+        "frontend\\components\\analytics\\Analytics.tsx",
+        "frontend\\components\\analytics\\Analytics.tsx",
+        "frontend\\components\\analytics\\Analytics.tsx",
+        "frontend\\components\\analytics\\Analytics.tsx",
+        "frontend\\components\\analytics\\Analytics.tsx",
+        "frontend\\components\\analytics\\Analytics.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\PerformanceChart.tsx",
+        "frontend\\components\\charts\\PerformanceChart.tsx",
+        "frontend\\components\\charts\\PerformanceChart.tsx",
+        "frontend\\components\\charts\\PerformanceChart.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\Monitoring.tsx",
+        "frontend\\components\\features\\Monitoring.tsx",
+        "frontend\\components\\features\\Monitoring.tsx",
+        "frontend\\components\\features\\Monitoring.tsx",
+        "frontend\\components\\features\\PerformanceAnalysis.tsx",
+        "frontend\\components\\features\\PerformanceAnalysis.tsx",
+        "frontend\\components\\features\\PerformanceAnalysis.tsx",
+        "frontend\\components\\features\\PerformanceAnalysis.tsx",
+        "frontend\\components\\results\\TestResults.tsx",
+        "frontend\\components\\results\\TestResults.tsx",
+        "frontend\\components\\results\\TestResults.tsx",
+        "frontend\\components\\results\\TestResults.tsx",
+        "frontend\\components\\results\\TestResults.tsx",
+        "frontend\\components\\results\\TestResults.tsx"
+      ]
+    },
+    {
+      "value": "color:#fff",
+      "files": [
+        "frontend\\components\\analytics\\Analytics.tsx",
+        "frontend\\components\\analytics\\Analytics.tsx",
+        "frontend\\components\\analytics\\Analytics.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\PerformanceChart.tsx",
+        "frontend\\components\\features\\PerformanceAccessibilityViewer.tsx",
+        "frontend\\components\\features\\PerformanceAccessibilityViewer.tsx",
+        "frontend\\components\\ui\\Toast.tsx",
+        "frontend\\components\\ui\\Toast.tsx",
+        "frontend\\components\\ui\\Toast.tsx"
+      ]
+    },
+    {
+      "value": "color:#3B82F6",
+      "files": [
+        "frontend\\components\\analytics\\Analytics.tsx",
+        "frontend\\components\\analytics\\Analytics.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\DashboardCharts.tsx",
+        "frontend\\components\\charts\\RechartsChart.tsx",
+        "frontend\\components\\charts\\RechartsChart.tsx",
+        "frontend\\components\\charts\\RechartsChart.tsx",
+        "frontend\\components\\charts\\StressTestChart.tsx",
+        "frontend\\components\\charts\\StressTestChart.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\Monitoring.tsx",
+        "frontend\\components\\features\\PerformanceAnalysis.tsx",
+        "frontend\\components\\features\\PerformanceAnalysis.tsx",
+        "frontend\\components\\features\\PerformanceAnalysis.tsx",
+        "frontend\\components\\features\\PerformanceAnalysis.tsx",
+        "frontend\\components\\results\\TestResults.tsx",
+        "frontend\\components\\results\\TestResults.tsx",
+        "frontend\\components\\results\\TestResults.tsx",
+        "frontend\\components\\results\\TestResults.tsx",
+        "frontend\\components\\results\\TestResults.tsx"
+      ]
+    },
+    {
+      "value": "color:#4f46e5",
+      "files": [
+        "frontend\\components\\charts\\Chart.tsx"
+      ]
+    },
+    {
+      "value": "color:#ec4899",
+      "files": [
+        "frontend\\components\\charts\\Chart.tsx"
+      ]
+    },
+    {
+      "value": "color:#b4b7c1",
+      "files": [
+        "frontend\\components\\charts\\Chart.tsx",
+        "frontend\\components\\charts\\Chart.tsx",
+        "frontend\\components\\charts\\Chart.tsx",
+        "frontend\\components\\charts\\Chart.tsx"
+      ]
+    },
+    {
+      "value": "color:#2a2f3e",
+      "files": [
+        "frontend\\components\\charts\\Chart.tsx",
+        "frontend\\components\\charts\\Chart.tsx"
+      ]
+    },
+    {
+      "value": "color:#3a3f4e",
+      "files": [
+        "frontend\\components\\charts\\Chart.tsx",
+        "frontend\\components\\charts\\Chart.tsx",
+        "frontend\\components\\charts\\Chart.tsx",
+        "frontend\\components\\charts\\Chart.tsx",
+        "frontend\\components\\charts\\Chart.tsx",
+        "frontend\\components\\charts\\Chart.tsx",
+        "frontend\\components\\charts\\Chart.tsx"
+      ]
+    },
+    {
+      "value": "color:#8b8fa3",
+      "files": [
+        "frontend\\components\\charts\\Chart.tsx",
+        "frontend\\components\\charts\\Chart.tsx"
+      ]
+    },
+    {
+      "value": "color:#10B981",
+      "files": [
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\RechartsChart.tsx",
+        "frontend\\components\\charts\\StressTestChart.tsx",
+        "frontend\\components\\charts\\StressTestChart.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\Monitoring.tsx",
+        "frontend\\components\\features\\Monitoring.tsx",
+        "frontend\\components\\features\\PerformanceAnalysis.tsx",
+        "frontend\\components\\features\\PerformanceAnalysis.tsx",
+        "frontend\\components\\features\\SEOAnalysis.tsx",
+        "frontend\\components\\results\\TestResults.tsx",
+        "frontend\\components\\results\\TestResults.tsx"
+      ]
+    },
+    {
+      "value": "color:#EF4444",
+      "files": [
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\RechartsChart.tsx",
+        "frontend\\components\\charts\\StressTestChart.tsx",
+        "frontend\\components\\charts\\StressTestChart.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\SEOAnalysis.tsx",
+        "frontend\\components\\results\\TestResults.tsx"
+      ]
+    },
+    {
+      "value": "color:#F59E0B",
+      "files": [
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\RechartsChart.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\PerformanceAnalysis.tsx",
+        "frontend\\components\\features\\PerformanceAnalysis.tsx",
+        "frontend\\components\\features\\SEOAnalysis.tsx",
+        "frontend\\components\\results\\TestResults.tsx"
+      ]
+    },
+    {
+      "value": "color:#8B5CF6",
+      "files": [
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\RechartsChart.tsx",
+        "frontend\\components\\charts\\StressTestChart.tsx",
+        "frontend\\components\\charts\\StressTestChart.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\results\\TestResults.tsx"
+      ]
+    },
+    {
+      "value": "color:#EC4899",
+      "files": [
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx"
+      ]
+    },
+    {
+      "value": "color:#F97316",
+      "files": [
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\RechartsChart.tsx"
+      ]
+    },
+    {
+      "value": "color:#06B6D4",
+      "files": [
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\RechartsChart.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx"
+      ]
+    },
+    {
+      "value": "color:#84CC16",
+      "files": [
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\RechartsChart.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx"
+      ]
+    },
+    {
+      "value": "color:#6366F1",
+      "files": [
+        "frontend\\components\\charts\\Charts.tsx"
+      ]
+    },
+    {
+      "value": "color:#2563EB",
+      "files": [
+        "frontend\\components\\charts\\Charts.tsx"
+      ]
+    },
+    {
+      "value": "color:#DC2626",
+      "files": [
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx"
+      ]
+    },
+    {
+      "value": "color:#D97706",
+      "files": [
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx"
+      ]
+    },
+    {
+      "value": "color:#7C3AED",
+      "files": [
+        "frontend\\components\\charts\\Charts.tsx"
+      ]
+    },
+    {
+      "value": "color:#DB2777",
+      "files": [
+        "frontend\\components\\charts\\Charts.tsx"
+      ]
+    },
+    {
+      "value": "color:#EA580C",
+      "files": [
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx"
+      ]
+    },
+    {
+      "value": "color:#0891B2",
+      "files": [
+        "frontend\\components\\charts\\Charts.tsx"
+      ]
+    },
+    {
+      "value": "color:#65A30D",
+      "files": [
+        "frontend\\components\\charts\\Charts.tsx"
+      ]
+    },
+    {
+      "value": "color:#4F46E5",
+      "files": [
+        "frontend\\components\\charts\\Charts.tsx"
+      ]
+    },
+    {
+      "value": "color:#1F2937",
+      "files": [
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\PerformanceChart.tsx",
+        "frontend\\components\\charts\\RechartsChart.tsx",
+        "frontend\\components\\charts\\RechartsChart.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\Monitoring.tsx",
+        "frontend\\components\\features\\Monitoring.tsx",
+        "frontend\\components\\features\\PerformanceAnalysis.tsx",
+        "frontend\\components\\features\\PerformanceAnalysis.tsx",
+        "frontend\\components\\results\\TestResults.tsx",
+        "frontend\\components\\results\\TestResults.tsx"
+      ]
+    },
+    {
+      "value": "color:#FFFFFF",
+      "files": [
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx"
+      ]
+    },
+    {
+      "value": "color:#F9FAFB",
+      "files": [
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\RechartsChart.tsx",
+        "frontend\\components\\charts\\RechartsChart.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx",
+        "frontend\\components\\charts\\StressTestCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\charts\\TestComparisonCharts.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\AnalyticsOverview.tsx",
+        "frontend\\components\\features\\Monitoring.tsx",
+        "frontend\\components\\features\\Monitoring.tsx",
+        "frontend\\components\\features\\PerformanceAnalysis.tsx",
+        "frontend\\components\\features\\PerformanceAnalysis.tsx"
+      ]
+    },
+    {
+      "value": "color:#E5E7EB",
+      "files": [
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx",
+        "frontend\\components\\charts\\Charts.tsx"
+      ]
+    },
+    {
+      "value": "color:#6B7280",
+      "files": [
+        "frontend\\components\\charts\\RechartsChart.tsx",
+        "frontend\\components\\charts\\RechartsChart.tsx",
+        "frontend\\components\\charts\\RechartsChart.tsx",
+        "frontend\\components\\charts\\RechartsChart.tsx",
+        "frontend\\components\\charts\\StressTestChart.tsx",
+        "frontend\\components\\charts\\StressTestChart.tsx"
+      ]
+    },
+    {
+      "value": "color:hsl(${index * 45\n      }, 70%, 50%)",
+      "files": [
+        "frontend\\components\\charts\\RechartsChart.tsx"
+      ]
+    },
+    {
+      "value": "color:#1a202c",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "color:#718096",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "color:#4a5568",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "color:#a0aec0",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "color:rgba(255, 255, 255, 0.9)",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "color:rgba(102, 126, 234, 0.15)",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "color:rgba(102, 126, 234, 0.2)",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "color:#cbd5e0",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "color:#f7fafc",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "spacing:20px",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\system\\ErrorBoundary.tsx",
+        "frontend\\components\\system\\ErrorBoundary.tsx",
+        "frontend\\components\\system\\ErrorBoundary.tsx",
+        "frontend\\components\\system\\ErrorBoundary.tsx",
+        "frontend\\components\\ui\\ExportButton.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "spacing:24px",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "spacing:32px",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "spacing:4px",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "spacing:10px",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\system\\ErrorBoundary.tsx"
+      ]
+    },
+    {
+      "value": "spacing:400px",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "spacing:16px",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\system\\ErrorBoundary.tsx",
+        "frontend\\components\\system\\ErrorBoundary.tsx",
+        "frontend\\components\\system\\ErrorBoundary.tsx",
+        "frontend\\components\\ui\\ExportButton.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "spacing:6px",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "spacing:600px",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "spacing:60px",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "spacing:64px",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "fontSize:28px",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "fontSize:12px",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\system\\ErrorBoundary.tsx",
+        "frontend\\components\\system\\ErrorBoundary.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "fontSize:24px",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\system\\ErrorBoundary.tsx",
+        "frontend\\components\\ui\\ExportButton.tsx"
+      ]
+    },
+    {
+      "value": "borderRadius:16px",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "borderRadius:12px",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "borderRadius:10px",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "borderRadius:20px",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "borderRadius:8px",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\system\\ErrorBoundary.tsx",
+        "frontend\\components\\ui\\ExportButton.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "shadow:0 8px 32px rgba(0, 0, 0, 0.1)",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx",
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "shadow:0 4px 20px rgba(102, 126, 234, 0.15)",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "shadow:0 4px 20px rgba(102, 126, 234, 0.2)",
+      "files": [
+        "frontend\\components\\features\\DataManagement.tsx"
+      ]
+    },
+    {
+      "value": "color:rgba(54, 162, 235, 0.2)",
+      "files": [
+        "frontend\\components\\features\\PerformanceAccessibilityViewer.tsx"
+      ]
+    },
+    {
+      "value": "color:rgba(54, 162, 235, 1)",
+      "files": [
+        "frontend\\components\\features\\PerformanceAccessibilityViewer.tsx",
+        "frontend\\components\\features\\PerformanceAccessibilityViewer.tsx",
+        "frontend\\components\\features\\PerformanceAccessibilityViewer.tsx"
+      ]
+    },
+    {
+      "value": "color:#4CAF50",
+      "files": [
+        "frontend\\components\\features\\PerformanceAccessibilityViewer.tsx",
+        "frontend\\components\\features\\PerformanceAccessibilityViewer.tsx",
+        "frontend\\components\\features\\PerformanceAccessibilityViewer.tsx"
+      ]
+    },
+    {
+      "value": "color:#F44336",
+      "files": [
+        "frontend\\components\\features\\PerformanceAccessibilityViewer.tsx",
+        "frontend\\components\\features\\PerformanceAccessibilityViewer.tsx",
+        "frontend\\components\\features\\PerformanceAccessibilityViewer.tsx"
+      ]
+    },
+    {
+      "value": "color:#FFC107",
+      "files": [
+        "frontend\\components\\features\\PerformanceAccessibilityViewer.tsx",
+        "frontend\\components\\features\\PerformanceAccessibilityViewer.tsx"
+      ]
+    },
+    {
+      "value": "color:#FF9800",
+      "files": [
+        "frontend\\components\\features\\PerformanceAccessibilityViewer.tsx"
+      ]
+    },
+    {
+      "value": "color:#9E9E9E",
+      "files": [
+        "frontend\\components\\features\\PerformanceAccessibilityViewer.tsx"
+      ]
+    },
+    {
+      "value": "color:#f8f9fa",
+      "files": [
+        "frontend\\components\\system\\ErrorBoundary.tsx",
+        "frontend\\components\\system\\ErrorBoundary.tsx"
+      ]
+    },
+    {
+      "value": "color:#dc3545",
+      "files": [
+        "frontend\\components\\system\\ErrorBoundary.tsx"
+      ]
+    },
+    {
+      "value": "color:#333",
+      "files": [
+        "frontend\\components\\system\\ErrorBoundary.tsx"
+      ]
+    },
+    {
+      "value": "color:#666",
+      "files": [
+        "frontend\\components\\system\\ErrorBoundary.tsx",
+        "frontend\\components\\system\\ErrorBoundary.tsx",
+        "frontend\\components\\system\\ErrorBoundary.tsx"
+      ]
+    },
+    {
+      "value": "color:#999",
+      "files": [
+        "frontend\\components\\system\\ErrorBoundary.tsx"
+      ]
+    },
+    {
+      "value": "color:#007bff",
+      "files": [
+        "frontend\\components\\system\\ErrorBoundary.tsx"
+      ]
+    },
+    {
+      "value": "color:#0056b3",
+      "files": [
+        "frontend\\components\\system\\ErrorBoundary.tsx"
+      ]
+    },
+    {
+      "value": "color:#6c757d",
+      "files": [
+        "frontend\\components\\system\\ErrorBoundary.tsx",
+        "frontend\\components\\system\\ErrorBoundary.tsx"
+      ]
+    },
+    {
+      "value": "color:#28a745",
+      "files": [
+        "frontend\\components\\system\\ErrorBoundary.tsx"
+      ]
+    },
+    {
+      "value": "color:#1e7e34",
+      "files": [
+        "frontend\\components\\system\\ErrorBoundary.tsx"
+      ]
+    },
+    {
+      "value": "color:#545b62",
+      "files": [
+        "frontend\\components\\system\\ErrorBoundary.tsx"
+      ]
+    },
+    {
+      "value": "spacing:40px",
+      "files": [
+        "frontend\\components\\system\\ErrorBoundary.tsx",
+        "frontend\\components\\ui\\ExportButton.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "shadow:0 4px 6px rgba(0, 0, 0, 0.1)",
+      "files": [
+        "frontend\\components\\system\\ErrorBoundary.tsx"
+      ]
+    },
+    {
+      "value": "color:#7c3aed",
+      "files": [
+        "frontend\\components\\testing\\StressTestResultAnalysis.tsx"
+      ]
+    },
+    {
+      "value": "spacing:2px",
+      "files": [
+        "frontend\\components\\ui\\ExportButton.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "spacing:30px",
+      "files": [
+        "frontend\\components\\ui\\ExportButton.tsx"
+      ]
+    },
+    {
+      "value": "color:#fafafa",
+      "files": [
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "color:rgba(0,0,0,0.1)",
+      "files": [
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "spacing:14px",
+      "files": [
+        "frontend\\components\\ui\\TestTypeHistory.tsx",
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "fontSize:20px",
+      "files": [
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "fontSize:48px",
+      "files": [
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "shadow:0 2px 8px rgba(0,0,0,0.1)",
+      "files": [
+        "frontend\\components\\ui\\TestTypeHistory.tsx"
+      ]
+    },
+    {
+      "value": "color:#363636",
+      "files": [
+        "frontend\\components\\ui\\Toast.tsx"
+      ]
+    }
+  ],
+  "designTokens": {
+    "colors": {
+      "rgba(75, 85, 99, 0.7)": "--color-custom-1",
+      "rgba(17, 24, 39, 0.4)": "--color-custom-2",
+      "rgba(107, 114, 128, 0.7)": "--color-custom-3",
+      "rgba(107, 114, 128, 0.8)": "--color-custom-4",
+      "rgba(156, 163, 175, 0.8)": "--color-custom-5",
+      "rgba(31, 41, 55, 0.6)": "--color-custom-6",
+      "rgba(0, 0, 0, 0.25)": "--color-custom-7",
+      "#667eea": "--color-custom-8",
+      "#764ba2": "--color-custom-9",
+      "#f093fb": "--color-custom-10",
+      "#f5576c": "--color-custom-11",
+      "#4facfe": "--color-custom-12",
+      "#00f2fe": "--color-custom-13",
+      "#43e97b": "--color-custom-14",
+      "#38f9d7": "--color-custom-15",
+      "#374151": "--color-gray-700",
+      "#3b82f6": "--color-primary",
+      "#10b981": "--color-success",
+      "#f59e0b": "--color-warning",
+      "#ef4444": "--color-danger",
+      "#4b5563": "--color-gray-600",
+      "rgba(0, 0, 0, 0.1)": "--color-custom-22",
+      "rgba(0, 0, 0, 0.06)": "--color-custom-23",
+      "rgba(0, 0, 0, 0.05)": "--color-custom-24",
+      "#2563eb": "--color-primary-hover",
+      "#1d4ed8": "--color-primary-active",
+      "#dbeafe": "--color-custom-27",
+      "#1e40af": "--color-custom-28",
+      "#6b7280": "--color-gray-500",
+      "#f3f4f6": "--color-gray-100",
+      "#1f2937": "--color-gray-800",
+      "#059669": "--color-success-hover",
+      "#d1fae5": "--color-custom-33",
+      "#047857": "--color-custom-34",
+      "#d97706": "--color-warning-hover",
+      "#fef3c7": "--color-custom-36",
+      "#b45309": "--color-custom-37",
+      "#dc2626": "--color-danger-hover",
+      "#fee2e2": "--color-custom-39",
+      "#b91c1c": "--color-custom-40",
+      "#06b6d4": "--color-custom-41",
+      "#0891b2": "--color-custom-42",
+      "#cffafe": "--color-custom-43",
+      "#0e7490": "--color-custom-44",
+      "#111827": "--color-gray-900",
+      "#9ca3af": "--color-gray-400",
+      "#ffffff": "--color-white",
+      "#d1d5db": "--color-gray-300",
+      "#f9fafb": "--color-gray-50",
+      "rgba(0, 0, 0, 0.5)": "--color-custom-50",
+      "#e5e7eb": "--color-gray-200",
+      "rgba(0, 0, 0, 0.75)": "--color-custom-52",
+      "rgba(0, 0, 0, 0.04)": "--color-custom-53",
+      "rgba(59, 130, 246, 0.1)": "--color-custom-54",
+      "rgba(239, 68, 68, 0.1)": "--color-custom-55",
+      "rgba(255, 255, 255, 0.1)": "--color-custom-56",
+      "rgba(255, 255, 255, 0.2)": "--color-custom-57",
+      "rgba(0, 0, 0, 0.2)": "--color-custom-58",
+      "#eff6ff": "--color-custom-59",
+      "#1e3a8a": "--color-custom-60",
+      "#fef2f2": "--color-custom-61",
+      "#7f1d1d": "--color-custom-62",
+      "#f0fdf4": "--color-custom-63",
+      "#dcfce7": "--color-custom-64",
+      "#22c55e": "--color-custom-65",
+      "#16a34a": "--color-custom-66",
+      "#15803d": "--color-custom-67",
+      "#14532d": "--color-custom-68",
+      "#fffbeb": "--color-custom-69",
+      "#78350f": "--color-custom-70",
+      "rgb(0 0 0 / 0.05)": "--color-custom-71",
+      "rgb(0 0 0 / 0.1)": "--color-custom-72",
+      "rgba(0, 0, 0, 0.3)": "--color-custom-73",
+      "#000": "--color-custom-74",
+      "rgba(59, 130, 246, 0.5)": "--color-custom-75",
+      "#f97316": "--color-custom-76",
+      "#eab308": "--color-custom-77",
+      "#84cc16": "--color-custom-78",
+      "#6366f1": "--color-custom-79",
+      "#8b5cf6": "--color-custom-80",
+      "#f8fafc": "--color-custom-81",
+      "#f1f5f9": "--color-custom-82",
+      "#e2e8f0": "--color-custom-83",
+      "#0f172a": "--color-custom-84",
+      "#475569": "--color-custom-85",
+      "#64748b": "--color-custom-86",
+      "#94a3b8": "--color-custom-87",
+      "#cbd5e1": "--color-custom-88",
+      "rgba(15, 23, 42, 0.5)": "--color-custom-89",
+      "rgba(15, 23, 42, 0.1)": "--color-custom-90",
+      "rgba(59, 130, 246, 0.2)": "--color-custom-91",
+      "rgba(255, 255, 255, 0.95)": "--color-custom-92",
+      "rgba(0, 0, 0, 0.15)": "--color-custom-93",
+      "rgba(59, 130, 246, 0.15)": "--color-custom-94",
+      "rgba(255, 255, 255, 0.8)": "--color-custom-95",
+      "rgba(239, 68, 68, 0.3)": "--color-custom-96",
+      "#1e293b": "--color-custom-97",
+      "#334155": "--color-custom-98",
+      "rgba(0, 0, 0, 0.7)": "--color-custom-99",
+      "rgba(59, 130, 246, 0.3)": "--color-custom-100",
+      "rgba(30, 41, 59, 0.95)": "--color-custom-101",
+      "rgba(0, 0, 0, 0.4)": "--color-custom-102",
+      "rgba(51, 65, 85, 0.8)": "--color-custom-103",
+      "rgba(59, 130, 246, 0.25)": "--color-custom-104",
+      "rgba(239, 68, 68, 0.15)": "--color-custom-105",
+      "rgba(239, 68, 68, 0.4)": "--color-custom-106",
+      "#fca5a5": "--color-custom-107",
+      "#000000": "--color-black",
+      "#8884d8": "--color-custom-109",
+      "#82ca9d": "--color-custom-110",
+      "#ffc658": "--color-custom-111",
+      "#ff7300": "--color-custom-112",
+      "#8dd1e1": "--color-custom-113",
+      "#9CA3AF": "--color-gray-400",
+      "#fff": "--color-custom-115",
+      "#3B82F6": "--color-primary",
+      "#4f46e5": "--color-custom-117",
+      "#ec4899": "--color-custom-118",
+      "#b4b7c1": "--color-custom-119",
+      "#2a2f3e": "--color-custom-120",
+      "#3a3f4e": "--color-custom-121",
+      "#8b8fa3": "--color-custom-122",
+      "#10B981": "--color-success",
+      "#EF4444": "--color-danger",
+      "#F59E0B": "--color-warning",
+      "#8B5CF6": "--color-custom-126",
+      "#EC4899": "--color-custom-127",
+      "#F97316": "--color-custom-128",
+      "#06B6D4": "--color-custom-129",
+      "#84CC16": "--color-custom-130",
+      "#6366F1": "--color-custom-131",
+      "#2563EB": "--color-primary-hover",
+      "#DC2626": "--color-danger-hover",
+      "#D97706": "--color-warning-hover",
+      "#7C3AED": "--color-custom-135",
+      "#DB2777": "--color-custom-136",
+      "#EA580C": "--color-custom-137",
+      "#0891B2": "--color-custom-138",
+      "#65A30D": "--color-custom-139",
+      "#4F46E5": "--color-custom-140",
+      "#1F2937": "--color-gray-800",
+      "#FFFFFF": "--color-white",
+      "#F9FAFB": "--color-gray-50",
+      "#E5E7EB": "--color-gray-200",
+      "#6B7280": "--color-gray-500",
+      "hsl(${index * 45\n      }, 70%, 50%)": "--color-custom-146",
+      "#1a202c": "--color-custom-147",
+      "#718096": "--color-custom-148",
+      "#4a5568": "--color-custom-149",
+      "#a0aec0": "--color-custom-150",
+      "rgba(255, 255, 255, 0.9)": "--color-custom-151",
+      "rgba(102, 126, 234, 0.15)": "--color-custom-152",
+      "rgba(102, 126, 234, 0.2)": "--color-custom-153",
+      "#cbd5e0": "--color-custom-154",
+      "#f7fafc": "--color-custom-155",
+      "rgba(54, 162, 235, 0.2)": "--color-custom-156",
+      "rgba(54, 162, 235, 1)": "--color-custom-157",
+      "#4CAF50": "--color-custom-158",
+      "#F44336": "--color-custom-159",
+      "#FFC107": "--color-custom-160",
+      "#FF9800": "--color-custom-161",
+      "#9E9E9E": "--color-custom-162",
+      "#f8f9fa": "--color-custom-163",
+      "#dc3545": "--color-custom-164",
+      "#333": "--color-custom-165",
+      "#666": "--color-custom-166",
+      "#999": "--color-custom-167",
+      "#007bff": "--color-custom-168",
+      "#0056b3": "--color-custom-169",
+      "#6c757d": "--color-custom-170",
+      "#28a745": "--color-custom-171",
+      "#1e7e34": "--color-custom-172",
+      "#545b62": "--color-custom-173",
+      "#7c3aed": "--color-custom-174",
+      "#fafafa": "--color-custom-175",
+      "rgba(0,0,0,0.1)": "--color-custom-176",
+      "#363636": "--color-custom-177"
+    },
+    "spacing": {
+      "12px": "--spacing-3",
+      "1024px": "--spacing-custom-2",
+      "1440px": "--spacing-custom-3",
+      "1441px": "--spacing-custom-4",
+      "1920px": "--spacing-custom-5",
+      "1921px": "--spacing-custom-6",
+      "2560px": "--spacing-custom-7",
+      "2561px": "--spacing-custom-8",
+      "5rem": "--spacing-custom-9",
+      "640px": "--spacing-custom-10",
+      "768px": "--spacing-custom-11",
+      "1px": "--spacing-custom-12",
+      "641px": "--spacing-custom-13",
+      "1025px": "--spacing-custom-14",
+      "1rem": "--spacing-4",
+      "2rem": "--spacing-8",
+      "480px": "--spacing-custom-17",
+      "44px": "--spacing-custom-18",
+      "8px": "--spacing-2",
+      "500px": "--spacing-custom-20",
+      "80px": "--spacing-custom-21",
+      "14rem": "--spacing-custom-22",
+      "12rem": "--spacing-custom-23",
+      "360px": "--spacing-custom-24",
+      "340px": "--spacing-custom-25",
+      "1023px": "--spacing-custom-26",
+      "350px": "--spacing-custom-27",
+      "320px": "--spacing-custom-28",
+      "300px": "--spacing-custom-29",
+      "280px": "--spacing-custom-30",
+      "20px": "--spacing-5",
+      "24px": "--spacing-6",
+      "32px": "--spacing-8",
+      "4px": "--spacing-1",
+      "10px": "--spacing-custom-35",
+      "400px": "--spacing-custom-36",
+      "16px": "--spacing-4",
+      "6px": "--spacing-custom-38",
+      "600px": "--spacing-custom-39",
+      "60px": "--spacing-custom-40",
+      "64px": "--spacing-16",
+      "40px": "--spacing-10",
+      "2px": "--spacing-0.5",
+      "30px": "--spacing-custom-44",
+      "14px": "--spacing-custom-45"
+    },
+    "typography": {
+      "14px": "--font-size-sm",
+      "13px": "--font-size-custom-2",
+      "15px": "--font-size-custom-3",
+      "16px": "--font-size-base",
+      "1rem": "--font-size-base",
+      "28px": "--font-size-custom-6",
+      "12px": "--font-size-xs",
+      "24px": "--font-size-2xl",
+      "20px": "--font-size-xl",
+      "48px": "--font-size-custom-10"
+    },
+    "borderRadius": {
+      "6px": "--radius-lg",
+      "1rem": "--radius-3xl",
+      "9999px": "--radius-custom-3",
+      "4px": "--radius-md",
+      "16px": "--radius-3xl",
+      "12px": "--radius-2xl",
+      "10px": "--radius-custom-7",
+      "20px": "--radius-custom-8",
+      "8px": "--radius-xl"
+    },
+    "shadows": {
+      "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)": "--shadow-lg",
+      "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)": "--shadow-xl",
+      "0 0 0 3px rgba(239, 68, 68, 0.1)": "--shadow-custom-3",
+      "inherit": "--shadow-custom-4",
+      "0 0 0 2px rgba(59, 130, 246, 0.5)": "--shadow-custom-5",
+      "0 8px 32px rgba(0, 0, 0, 0.1)": "--shadow-custom-6",
+      "0 4px 20px rgba(102, 126, 234, 0.15)": "--shadow-custom-7",
+      "0 4px 20px rgba(102, 126, 234, 0.2)": "--shadow-custom-8",
+      "0 4px 6px rgba(0, 0, 0, 0.1)": "--shadow-custom-9",
+      "0 2px 8px rgba(0,0,0,0.1)": "--shadow-custom-10"
+    }
+  },
+  "recommendations": [
+    "建议逐步替换硬编码值为设计令牌",
+    "定期审查设计系统的使用情况",
+    "建立设计系统的维护流程",
+    "考虑使用设计系统的自动化检查工具"
+  ]
+}

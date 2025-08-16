@@ -1,0 +1,1908 @@
+{
+  "timestamp": "2025-08-16T07:21:47.532Z",
+  "summary": {
+    "totalFixes": 277,
+    "totalRenames": 32,
+    "categories": {
+      "file_naming": 32,
+      "code_naming": 1,
+      "import_formatting": 276
+    }
+  },
+  "fixes": [
+    {
+      "category": "code_naming",
+      "file": "backend\\services\\core\\JwtService.js",
+      "description": "修复了代码命名问题",
+      "timestamp": "2025-08-16T07:21:47.232Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\analytics\\Analytics.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.307Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\auth\\AdminGuard.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.307Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\auth\\AuthErrorHandler.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.308Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\auth\\AuthLoadingState.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.309Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\auth\\AuthStatusIndicator.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.309Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\auth\\LoginPrompt.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.310Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\auth\\MFASetup.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.311Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\auth\\PasswordStrengthIndicator.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.312Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\auth\\PermissionManager.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.313Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\auth\\ProtectedFeature.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.313Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\auth\\ProtectedRoute.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.314Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\auth\\WithAuthCheck.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.315Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\batch\\BatchOperationPanel.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.316Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\charts\\Charts.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.317Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\charts\\DashboardCharts.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.317Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\charts\\DataDensityControl.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.318Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\charts\\PerformanceChart.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.319Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\charts\\RechartsChart.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.319Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\charts\\StatCard.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.320Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\charts\\StressTestChart.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.321Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\charts\\StressTestCharts.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.322Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\charts\\StressTestMetrics.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.322Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\charts\\TestComparisonCharts.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.323Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\common\\ErrorBoundary.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.323Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\data\\DataManager.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.324Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\features\\AlertManager.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.325Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\features\\AnalyticsOverview.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.325Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\features\\APIAnalysis.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.326Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\features\\ContentAnalysis.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.326Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\features\\DataExporter.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.327Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\features\\DataFilters.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.328Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\features\\DataManagement.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.329Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\features\\DataManager.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.329Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\features\\DataStateManager.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.330Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\features\\DataSyncManager.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.330Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\features\\ImportExport.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.331Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\features\\MonitorDashboard.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.332Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\features\\Monitoring.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.332Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\features\\PerformanceAccessibilityViewer.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.333Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\features\\PerformanceAnalysis.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.334Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\features\\RealTimeMonitoring.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.334Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\features\\ReportExporter.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.335Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\features\\ReportManagement.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.336Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\features\\ResultViewer.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.336Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\features\\SecurityAnalysis.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.337Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\features\\SEOAnalysis.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.338Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\features\\TestRunner.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.338Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\layout\\BaseTestLayout.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.339Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\layout\\Layout.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.340Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\layout\\Navigation.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.341Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\layout\\Sidebar.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.341Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\layout\\TopNavbar.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.342Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\layout\\UserDropdownMenu.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.343Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\layout\\UserMenu.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.344Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\preferences\\UserPreferencesPanel.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.344Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\results\\ResultCard.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.345Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\results\\ResultsDisplay.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.345Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\results\\TestResults.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.346Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\routing\\AppRoutes.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.347Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\security\\SecurityTest.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.348Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\security\\UrlInput.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.348Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\system\\BackgroundTestNotifications.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.349Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\system\\BackupManagement.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.349Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\system\\CacheManager.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.350Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\system\\EnvironmentPrompt.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.351Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\system\\ErrorBoundary.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.351Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\system\\ErrorHandling.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.352Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\system\\MonitoringDashboard.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.352Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\system\\PerformanceMonitor.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.353Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\system\\SecurityCenter.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.354Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\system\\SystemHealthCheck.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.354Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\system\\SystemMonitor.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.355Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\system\\SystemResourceMonitor.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.355Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\system\\SystemSettings.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.356Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\system\\SystemStatusDashboard.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.357Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\system\\TestManagement.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.357Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\system\\UserManagement.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.358Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\APITestConfig.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.358Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\APITestResultAnalysis.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.359Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\BaseTestPage.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.360Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\ErrorDisplay.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.360Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\FileUploadSEO.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.361Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\LocalAnalysisPrompt.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.362Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\LocalSEOResults.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.362Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\NetworkErrorPrompt.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.363Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\PerformanceResults.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.363Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\ProgressBar.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.364Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\SecurityResults.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.365Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\SecurityTestComparison.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.365Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\SecurityTestGuide.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.366Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\SecurityTestHistory.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.366Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\SecurityTestPanel.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.367Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\SEOResults.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.367Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\specialized\\APITestConfig.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.368Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\specialized\\SecurityTestConfig.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.369Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\specialized\\StressTestConfig.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.370Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\StressTestConfig.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.370Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\StressTestDetailModal.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.371Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\StressTestHistory.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.371Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\StressTestQueueStatus.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.372Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\StressTestRecordDetail.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.373Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\StressTestResultAnalysis.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.373Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\TechnicalResults.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.374Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\TestComponents.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.374Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\TestConfig.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.375Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\TestConfigPanel.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.376Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\TestControls.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.376Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\TestEngineStatus.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.377Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\TestHeader.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.378Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\TestHistoryPanel.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.378Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\TestingComponents.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.379Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\TestInterface.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.379Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\TestManager.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.380Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\TestPage.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.381Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\TestPageWithHistory.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.382Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\TestProgress.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.384Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\TestProgressPanel.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.385Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\TestResultComparison.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.386Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\TestResultDisplay.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.387Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\TestResults.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.388Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\TestResultsPanel.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.388Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\TestTemplateManager.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.389Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\TestTemplateSelector.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.390Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\testing\\URLInput.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.391Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\tools\\CICDDemo.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.392Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\tools\\DataQueryPanel.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.392Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\tools\\GlobalSearch.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.393Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\tools\\InteractiveFeedback.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.394Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\tools\\PreloadLink.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.394Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\Badge.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.395Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\Button.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.395Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\CancelProgressFeedback.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.396Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\CancelTestConfirmDialog.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.397Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\Card.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.397Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\Chart.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.398Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\Checkbox.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.398Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\DataTable.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.399Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\DataTableCompat.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.399Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\DeleteConfirmDialog.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.400Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\ErrorBoundary.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.401Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\ExportButton.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.401Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\ExportModal.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.402Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\FeedbackWidget.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.402Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\Image.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.403Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\Input.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.404Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\Layout.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.404Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\Loading.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.405Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\LoadingSpinner.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.405Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\LoadingStates.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.406Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\Modal.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.407Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\NotificationSystem.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.408Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\Pagination.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.408Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\ProgressBar.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.409Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\SimpleURLInput.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.409Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\StatCard.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.410Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\StatusIndicator.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.410Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\StopTestConfirmDialog.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.411Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\stories\\Button.stories.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.412Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\stories\\Input.stories.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.412Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\Table.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.413Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\TestHistory.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.414Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\TestingTools.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.414Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\TestNavigation.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.415Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\TestPageHistory.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.415Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\TestTypeHistory.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.416Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\ThemeProvider.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.416Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\ThemeToggle.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.417Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\types.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.418Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\UX.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.418Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\components\\ui\\VirtualScrollList.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.419Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\contexts\\AuthContext.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.420Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\hooks\\useAdminAuth.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.421Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\hooks\\useAuth.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.422Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\hooks\\useCache.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.422Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\hooks\\useCSS.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.423Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\hooks\\UseData.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.424Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\hooks\\useDataManagement.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.424Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\hooks\\useDataState.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.425Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\hooks\\useDataStorage.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.425Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\hooks\\useLocalStressTest.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.426Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\hooks\\useMonitoring.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.426Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\hooks\\useNotification.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.427Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\hooks\\useNotifications.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.427Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\hooks\\usePerformanceOptimization.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.428Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\hooks\\usePermissions.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.429Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\hooks\\useRealSEOTest.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.429Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\hooks\\useSEOTest.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.430Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\hooks\\useSimpleTestEngine.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.430Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\hooks\\useStressTestRecord.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.431Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\hooks\\useTest.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.431Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\hooks\\useTestEngine.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.432Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\hooks\\useTestFlow.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.432Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\hooks\\useUserStats.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.433Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\hooks\\useWebSocket.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.434Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\main.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.434Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\analytics\\AnalyticsPage.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.434Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\core\\auth\\Login.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.435Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\core\\dashboard\\Dashboard.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.436Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\core\\testing\\APITest.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.436Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\core\\testing\\CompatibilityTest.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.437Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\core\\testing\\InfrastructureTest.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.437Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\core\\testing\\PerformanceTest.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.438Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\core\\testing\\SecurityTest.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.439Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\core\\testing\\SEOTest.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.440Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\core\\testing\\StressTest.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.442Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\core\\testing\\TestingDashboard.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.443Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\core\\testing\\TestPage.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.444Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\core\\testing\\UXTest.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.444Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\core\\testing\\WebsiteTest.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.445Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\data\\reports\\Analytics.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.445Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\data\\reports\\MonitoringDashboard.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.446Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\data\\reports\\PerformanceAnalysis.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.447Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\data\\reports\\Reports.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.447Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\data\\reports\\Statistics.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.448Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\data\\results\\SecurityReport.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.449Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\data\\results\\StressTestDetail.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.450Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\data\\results\\StressTestReport.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.451Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\data\\results\\TestHistory.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.452Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\data\\results\\TestResultDetail.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.452Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\management\\admin\\Admin.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.453Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\management\\admin\\DataManagement.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.454Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\management\\admin\\DataStorage.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.454Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\management\\admin\\SystemMonitor.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.455Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\management\\integration\\APIKeys.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.456Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\management\\integration\\CICDIntegration.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.456Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\management\\integration\\Integrations.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.457Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\management\\integration\\Notifications.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.457Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\management\\integration\\Webhooks.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.458Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\management\\scheduling\\ScheduledTasks.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.459Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\management\\scheduling\\TestOptimizations.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.460Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\management\\scheduling\\TestSchedule.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.460Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\management\\settings\\Settings.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.461Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\TestToolsHub.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.462Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\user\\docs\\APIDocs.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.462Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\user\\docs\\Help.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.463Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\user\\misc\\DownloadDesktop.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.464Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\user\\misc\\Subscription.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.465Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\user\\profile\\UserBookmarks.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.465Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\pages\\user\\profile\\UserProfile.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.466Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\api\\apiService.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.468Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\api\\errorHandler.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.469Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\apiErrorInterceptor.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.470Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\auth\\authManager.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.470Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\auth\\authService.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.471Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\auth\\jwtManager.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.472Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\batch\\batchOperationService.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.474Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\cache\\cacheStrategies.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.474Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\config\\configService.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.475Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\dao\\userDao.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.476Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\data\\dataAnalysisService.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.476Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\data\\dataProcessor.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.477Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\data\\dataStateManager.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.478Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\integration\\versionControlService.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.480Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\monitoring\\realtimeMonitoringService.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.481Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\performance\\performanceTestAdapter.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.482Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\performance\\PerformanceTestCore.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.482Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\preferences\\userPreferencesService.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.483Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\reporting\\reportService.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.484Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\seo\\localSEOAnalysisEngine.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.485Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\seo\\seoAnalysisEngine.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.486Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\testing\\stressTestQueueManager.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.489Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\testing\\testEngine.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.490Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\testing\\testService.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.491Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\testService.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.492Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\user\\userService.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.494Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\services\\websocketService.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.495Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\types\\dataModels.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.496Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\utils\\dataOptimizer.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.499Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\utils\\LazyLoadManager.tsx",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.501Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\utils\\performanceUtils.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.502Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\utils\\routePreloader.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.503Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\utils\\testStatusUtils.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.504Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\utils\\testUtils.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.505Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "frontend\\__tests__\\setup.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.505Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "backend\\types\\api.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.528Z"
+    },
+    {
+      "category": "import_formatting",
+      "file": "backend\\types\\services.ts",
+      "description": "修复导入语句格式",
+      "timestamp": "2025-08-16T07:21:47.529Z"
+    }
+  ],
+  "renames": [
+    {
+      "file": "frontend\\components\\ui\\DataTableCompat.test.tsx",
+      "oldName": "DataTableCompat.test.tsx",
+      "newName": "DataTableCompat.test.tsx",
+      "reason": "修复components文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.081Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\stories\\Button.stories.tsx",
+      "oldName": "Button.stories.tsx",
+      "newName": "Button.stories.tsx",
+      "reason": "修复components文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.082Z"
+    },
+    {
+      "file": "frontend\\components\\ui\\stories\\Input.stories.tsx",
+      "oldName": "Input.stories.tsx",
+      "newName": "Input.stories.tsx",
+      "reason": "修复components文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.082Z"
+    },
+    {
+      "file": "frontend\\hooks\\index.ts",
+      "oldName": "index.ts",
+      "newName": "useIndex.ts",
+      "reason": "修复hooks文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.082Z"
+    },
+    {
+      "file": "frontend\\hooks\\UseData.ts",
+      "oldName": "UseData.ts",
+      "newName": "useUseData.ts",
+      "reason": "修复hooks文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.082Z"
+    },
+    {
+      "file": "frontend\\services\\performance\\PerformanceTestCore.ts",
+      "oldName": "PerformanceTestCore.ts",
+      "newName": "PerformanceTestCore.ts",
+      "reason": "修复services文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.083Z"
+    },
+    {
+      "file": "backend\\services\\collaboration\\CollaborationService.js",
+      "oldName": "CollaborationService.js",
+      "newName": "CollaborationService.js",
+      "reason": "修复services文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.084Z"
+    },
+    {
+      "file": "backend\\services\\core\\AlertService.js",
+      "oldName": "AlertService.js",
+      "newName": "AlertService.js",
+      "reason": "修复services文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.084Z"
+    },
+    {
+      "file": "backend\\services\\core\\JwtService.js",
+      "oldName": "JwtService.js",
+      "newName": "JwtService.js",
+      "reason": "修复services文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.084Z"
+    },
+    {
+      "file": "backend\\services\\core\\PermissionService.js",
+      "oldName": "PermissionService.js",
+      "newName": "PermissionService.js",
+      "reason": "修复services文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.084Z"
+    },
+    {
+      "file": "backend\\services\\data\\DatabasePerformanceService.js",
+      "oldName": "DatabasePerformanceService.js",
+      "newName": "DatabasePerformanceService.js",
+      "reason": "修复services文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.084Z"
+    },
+    {
+      "file": "backend\\services\\data\\DataManagementService.js",
+      "oldName": "DataManagementService.js",
+      "newName": "DataManagementService.js",
+      "reason": "修复services文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.084Z"
+    },
+    {
+      "file": "backend\\services\\integration\\CICDIntegrationService.js",
+      "oldName": "CICDIntegrationService.js",
+      "newName": "CICDIntegrationService.js",
+      "reason": "修复services文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.084Z"
+    },
+    {
+      "file": "backend\\services\\monitoring\\DatabaseMonitoringService.js",
+      "oldName": "DatabaseMonitoringService.js",
+      "newName": "DatabaseMonitoringService.js",
+      "reason": "修复services文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.084Z"
+    },
+    {
+      "file": "backend\\services\\monitoring\\MonitoringDataCollector.js",
+      "oldName": "MonitoringDataCollector.js",
+      "newName": "MonitoringDataCollector.js",
+      "reason": "修复services文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.084Z"
+    },
+    {
+      "file": "backend\\services\\monitoring\\MonitoringScheduler.js",
+      "oldName": "MonitoringScheduler.js",
+      "newName": "MonitoringScheduler.js",
+      "reason": "修复services文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.084Z"
+    },
+    {
+      "file": "backend\\services\\monitoring\\MonitoringService.js",
+      "oldName": "MonitoringService.js",
+      "newName": "MonitoringService.js",
+      "reason": "修复services文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.084Z"
+    },
+    {
+      "file": "backend\\services\\performance\\PerformanceBenchmarkService.js",
+      "oldName": "PerformanceBenchmarkService.js",
+      "newName": "PerformanceBenchmarkService.js",
+      "reason": "修复services文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.084Z"
+    },
+    {
+      "file": "backend\\services\\realtime\\RealtimeService.js",
+      "oldName": "RealtimeService.js",
+      "newName": "RealtimeService.js",
+      "reason": "修复services文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.084Z"
+    },
+    {
+      "file": "backend\\services\\reporting\\AutomatedReportingService.js",
+      "oldName": "AutomatedReportingService.js",
+      "newName": "AutomatedReportingService.js",
+      "reason": "修复services文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.084Z"
+    },
+    {
+      "file": "backend\\services\\storage\\DataArchiveManager.js",
+      "oldName": "DataArchiveManager.js",
+      "newName": "DataArchiveManager.js",
+      "reason": "修复services文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.084Z"
+    },
+    {
+      "file": "backend\\services\\storage\\DataCleanupManager.js",
+      "oldName": "DataCleanupManager.js",
+      "newName": "DataCleanupManager.js",
+      "reason": "修复services文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.084Z"
+    },
+    {
+      "file": "backend\\services\\storage\\SpecializedStorageManager.js",
+      "oldName": "SpecializedStorageManager.js",
+      "newName": "SpecializedStorageManager.js",
+      "reason": "修复services文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.085Z"
+    },
+    {
+      "file": "backend\\services\\storage\\StorageService.js",
+      "oldName": "StorageService.js",
+      "newName": "StorageService.js",
+      "reason": "修复services文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.085Z"
+    },
+    {
+      "file": "backend\\services\\testing\\TestHistoryService.js",
+      "oldName": "TestHistoryService.js",
+      "newName": "TestHistoryService.js",
+      "reason": "修复services文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.085Z"
+    },
+    {
+      "file": "backend\\services\\testing\\TestValidationService.js",
+      "oldName": "TestValidationService.js",
+      "newName": "TestValidationService.js",
+      "reason": "修复services文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.085Z"
+    },
+    {
+      "file": "backend\\services\\testing\\UserTestManager.js",
+      "oldName": "UserTestManager.js",
+      "newName": "UserTestManager.js",
+      "reason": "修复services文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.085Z"
+    },
+    {
+      "file": "backend\\utils\\download-geodb.js",
+      "oldName": "download-geodb.js",
+      "newName": "download-geodb.js",
+      "reason": "修复utils文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.085Z"
+    },
+    {
+      "file": "backend\\utils\\ErrorLogAggregator.js",
+      "oldName": "ErrorLogAggregator.js",
+      "newName": "ErrorLogAggregator.js",
+      "reason": "修复utils文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.085Z"
+    },
+    {
+      "file": "backend\\utils\\ErrorMonitoringSystem.js",
+      "oldName": "ErrorMonitoringSystem.js",
+      "newName": "ErrorMonitoringSystem.js",
+      "reason": "修复utils文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.085Z"
+    },
+    {
+      "file": "backend\\utils\\monitoring\\PerformanceMonitor.js",
+      "oldName": "PerformanceMonitor.js",
+      "newName": "PerformanceMonitor.js",
+      "reason": "修复utils文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.085Z"
+    },
+    {
+      "file": "backend\\utils\\websocket\\SocketManager.js",
+      "oldName": "SocketManager.js",
+      "newName": "SocketManager.js",
+      "reason": "修复utils文件命名规范",
+      "timestamp": "2025-08-16T07:21:47.085Z"
+    }
+  ],
+  "recommendations": [
+    "建议在IDE中配置自动格式化规则",
+    "考虑添加ESLint规则来强制命名规范",
+    "定期运行命名检查工具",
+    "建立代码审查流程确保命名规范"
+  ]
+}

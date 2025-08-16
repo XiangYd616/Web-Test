@@ -1,6 +1,6 @@
 
 import backgroundTestManager from './backgroundTestManager';
-import {testAPI} from './testApiService';
+import { testAPI } from './testApiService';
 
 // 浏览器兼容的事件发射器
 class BrowserEventEmitter {

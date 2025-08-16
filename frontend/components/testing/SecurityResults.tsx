@@ -1,8 +1,8 @@
 
-import {AlertTriangle, Award, CheckCircle, ChevronDown, ChevronRight, Clock, Download, Eye, EyeOff, FileText, Info, Lock, Network, Shield, Target, TrendingUp, Zap} from 'lucide-react';
+import { AlertTriangle, Award, CheckCircle, ChevronDown, ChevronRight, Clock, Download, Eye, EyeOff, FileText, Info, Lock, Network, Shield, Target, TrendingUp, Zap } from 'lucide-react';
 import React, { useState } from 'react';
 
-import {SecurityTestResult} from '../../services/testing/securityTestService';
+import { SecurityTestResult } from '../../services/testing/securityTestService';
 
 interface SecurityResultsProps {
   result: SecurityTestResult;

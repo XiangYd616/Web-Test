@@ -3,39 +3,39 @@
 /* 基础颜色变量 */
 :root {
   /* 主色调 */
-  --color-primary: #3b82f6;
-  --color-primary-hover: #2563eb;
-  --color-primary-active: #1d4ed8;
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-primary-active: var(--color-primary-active);
   --color-primary-light: #dbeafe;
   --color-primary-dark: #1e40af;
 
   /* 次要色调 */
-  --color-secondary: #6b7280;
-  --color-secondary-hover: #4b5563;
-  --color-secondary-active: #374151;
-  --color-secondary-light: #f3f4f6;
-  --color-secondary-dark: #1f2937;
+  --color-secondary: var(--color-gray-500);
+  --color-secondary-hover: var(--color-gray-600);
+  --color-secondary-active: var(--color-gray-700);
+  --color-secondary-light: var(--color-gray-100);
+  --color-secondary-dark: var(--color-gray-800);
 
   /* 状态颜色 */
-  --color-success: #10b981;
-  --color-success-hover: #059669;
+  --color-success: var(--color-success);
+  --color-success-hover: var(--color-success-hover);
   --color-success-light: #d1fae5;
   --color-success-dark: #047857;
 
-  --color-warning: #f59e0b;
-  --color-warning-hover: #d97706;
+  --color-warning: var(--color-warning);
+  --color-warning-hover: var(--color-warning-hover);
   --color-warning-light: #fef3c7;
   --color-warning-dark: #b45309;
 
-  --color-danger: #ef4444;
-  --color-danger-hover: #dc2626;
+  --color-danger: var(--color-danger);
+  --color-danger-hover: var(--color-danger-hover);
   --color-danger-light: #fee2e2;
   --color-danger-dark: #b91c1c;
 
-  --color-info: #3b82f6;
-  --color-info-hover: #2563eb;
+  --color-info: var(--color-primary);
+  --color-info-hover: var(--color-primary-hover);
   --color-info-light: #dbeafe;
-  --color-info-dark: #1d4ed8;
+  --color-info-dark: var(--color-primary-active);
 
   /* 间距系统 */
   --spacing-xs: 0.25rem;    /* 4px */
@@ -92,7 +92,7 @@
 .light-theme,
 .light {
   /* 背景色 */
-  --bg-primary: #ffffff;
+  --bg-primary: var(--color-white);
   --bg-secondary: #f8fafc;
   --bg-tertiary: #f1f5f9;
   --bg-quaternary: #e2e8f0;
@@ -102,7 +102,7 @@
   --text-secondary: #475569;
   --text-tertiary: #64748b;
   --text-quaternary: #94a3b8;
-  --text-inverse: #ffffff;
+  --text-inverse: var(--color-white);
 
   /* 边框颜色 */
   --border-primary: #e2e8f0;
@@ -110,7 +110,7 @@
   --border-tertiary: #94a3b8;
 
   /* 表面颜色 */
-  --surface-primary: #ffffff;
+  --surface-primary: var(--color-white);
   --surface-secondary: #f8fafc;
   --surface-tertiary: #f1f5f9;
 
@@ -126,16 +126,16 @@
   --card-background: rgba(255, 255, 255, 0.95);
   --card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
   --border-color: #e2e8f0;
-  --input-background: #ffffff;
-  --input-border: #d1d5db;
+  --input-background: var(--color-white);
+  --input-border: var(--color-gray-300);
   --input-focus-ring: rgba(59, 130, 246, 0.15);
-  --accent-primary: #3b82f6;
+  --accent-primary: var(--color-primary);
   --accent-secondary: #8b5cf6;
   --button-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2);
   --secondary-button-background: rgba(255, 255, 255, 0.8);
   --error-background: rgba(239, 68, 68, 0.1);
   --error-border: rgba(239, 68, 68, 0.3);
-  --error-text: #dc2626;
+  --error-text: var(--color-danger-hover);
 }
 
 /* 深色主题 */
@@ -186,7 +186,7 @@
   --input-background: rgba(51, 65, 85, 0.8);
   --input-border: #64748b;
   --input-focus-ring: rgba(59, 130, 246, 0.25);
-  --accent-primary: #3b82f6;
+  --accent-primary: var(--color-primary);
   --accent-secondary: #8b5cf6;
   --button-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
   --secondary-button-background: rgba(51, 65, 85, 0.8);
@@ -317,12 +317,12 @@
 /* 主题感知的侧边栏样式 */
 .themed-sidebar {
   background-color: var(--surface-primary);
-  border-right: 1px solid var(--border-primary);
+  border-right: 0.06rem solid var(--border-primary);
   box-shadow: var(--shadow-lg);
 }
 
 /* 响应式主题调整 */
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   :root {
     --spacing-lg: 1rem;
     --spacing-xl: 1.5rem;
@@ -334,13 +334,13 @@
 /* 高对比度模式支持 */
 @media (prefers-contrast: high) {
   :root {
-    --border-primary: #000000;
-    --border-secondary: #000000;
+    --border-primary: var(--color-black);
+    --border-secondary: var(--color-black);
   }
   
   .dark {
-    --border-primary: #ffffff;
-    --border-secondary: #ffffff;
+    --border-primary: var(--color-white);
+    --border-secondary: var(--color-white);
   }
 }
 

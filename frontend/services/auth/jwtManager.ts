@@ -4,7 +4,7 @@
  * 版本: v1.0.0
  */
 
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import type { User } from '../../types/common';
 
 // ==================== 类型定义 ====================

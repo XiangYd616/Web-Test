@@ -1,8 +1,8 @@
-import {AlertCircle, Calendar, Camera, CheckCircle, Clock, Edit, Github, Globe, Key, Linkedin, Loader, Save, Trash2, Twitter, User, X} from 'lucide-react';
+import { AlertCircle, Calendar, Camera, CheckCircle, Clock, Edit, Github, Globe, Key, Linkedin, Loader, Save, Trash2, Twitter, User, X } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
-import {useAuth} from '../../../contexts/AuthContext.tsx';
-import {useTheme} from '../../../contexts/ThemeContext.tsx';
-import {UpdateProfileData, UserProfile, userService, UserStats} from '../../../services/user/userService.ts';
+import { useAuth } from '../../../contexts/AuthContext.tsx';
+import { useTheme } from '../../../contexts/ThemeContext.tsx';
+import { UpdateProfileData, UserProfile, userService, UserStats } from '../../../services/user/userService.ts';
 
 interface PasswordChangeForm {
   currentPassword: string;

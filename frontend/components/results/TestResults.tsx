@@ -3,39 +3,9 @@
  * 提供更好的用户体验、可视化图表、性能优化和交互增强
  */
 
-import {
-  Activity,
-  AlertTriangle,
-  BarChart3,
-  CheckCircle, Clock,
-  Download,
-  Eye, EyeOff, Maximize2,
-  PieChart as PieChartIcon,
-  Search,
-  Share2,
-  // Zap
-} from 'lucide-react'; // 已修复
+import { Activity, AlertTriangle, BarChart3, CheckCircle, Clock, Download, Eye, EyeOff, Maximize2, PieChart as PieChartIcon, Search, Share2, // Zap } from 'lucide-react'; // 已修复
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Legend,
-  Line,
-  LineChart,
-  Pie,
-  PieChart,
-  PolarAngleAxis,
-  PolarGrid,
-  PolarRadiusAxis,
-  Radar,
-  RadarChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  // YAxis
-} from 'recharts'; // 已修复
+import { Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, Pie, PieChart, PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, // YAxis } from 'recharts'; // 已修复
 interface TestResult {
   id: string;
   type: string;
@@ -440,36 +410,36 @@ const TestResults: React.FC<TestResultsProps> = ({
             <ResponsiveContainer width="100%" height="100%">
               {chartType === 'bar' && (
                 <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <XAxis dataKey="name" stroke="#9CA3AF" />
-                  <YAxis stroke="#9CA3AF" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
+                  <XAxis dataKey="name" stroke="var(--color-gray-400)" />
+                  <YAxis stroke="var(--color-gray-400)" />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: '#1F2937',
-                      border: '1px solid #374151',
+                      backgroundColor: 'var(--color-gray-800)',
+                      border: '1px solid var(--color-gray-700)',
                       borderRadius: '8px'
                     }}
                   />
                   <Legend />
-                  <Bar dataKey="score" fill="#3B82F6" name="分数" />
-                  <Bar dataKey="duration" fill="#10B981" name="耗时(s)" />
+                  <Bar dataKey="score" fill="var(--color-primary)" name="分数" />
+                  <Bar dataKey="duration" fill="var(--color-success)" name="耗时(s)" />
                 </BarChart>
               )}
 
               {chartType === 'line' && (
                 <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <XAxis dataKey="index" stroke="#9CA3AF" />
-                  <YAxis stroke="#9CA3AF" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
+                  <XAxis dataKey="index" stroke="var(--color-gray-400)" />
+                  <YAxis stroke="var(--color-gray-400)" />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: '#1F2937',
-                      border: '1px solid #374151',
+                      backgroundColor: 'var(--color-gray-800)',
+                      border: '1px solid var(--color-gray-700)',
                       borderRadius: '8px'
                     }}
                   />
                   <Legend />
-                  <Line type="monotone" dataKey="score" stroke="#3B82F6" strokeWidth={2} />
+                  <Line type="monotone" dataKey="score" stroke="var(--color-primary)" strokeWidth={2} />
                 </LineChart>
               )}
 
@@ -486,7 +456,7 @@ const TestResults: React.FC<TestResultsProps> = ({
                     dataKey="value"
                   >
                     {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'][index % 5]} />
+                      <Cell key={`cell-${index}`} fill={['var(--color-primary)', 'var(--color-success)', 'var(--color-warning)', 'var(--color-danger)', '#8B5CF6'][index % 5]} />
                     ))}
                   </Pie>
                   <Tooltip />
@@ -495,10 +465,10 @@ const TestResults: React.FC<TestResultsProps> = ({
 
               {chartType === 'radar' && (
                 <RadarChart data={chartData}>
-                  <PolarGrid stroke="#374151" />
-                  <PolarAngleAxis dataKey="metric" stroke="#9CA3AF" />
-                  <PolarRadiusAxis stroke="#9CA3AF" />
-                  <Radar name="指标" dataKey="value" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.6} />
+                  <PolarGrid stroke="var(--color-gray-700)" />
+                  <PolarAngleAxis dataKey="metric" stroke="var(--color-gray-400)" />
+                  <PolarRadiusAxis stroke="var(--color-gray-400)" />
+                  <Radar name="指标" dataKey="value" stroke="var(--color-primary)" fill="var(--color-primary)" fillOpacity={0.6} />
                 </RadarChart>
               )}
             </ResponsiveContainer>

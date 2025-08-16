@@ -1,7 +1,7 @@
 import React from 'react';
-import {useNavigate} from 'react-router-dom';
-import {X, ExternalLink} from 'lucide-react';
-import {useNotifications} from '../../hooks/useNotifications';
+import { useNavigate } from 'react-router-dom';
+import { X, ExternalLink } from 'lucide-react';
+import { useNotifications } from '../../hooks/useNotifications';
 
 const BackgroundTestNotifications: React.FC = () => {
   const navigate = useNavigate();

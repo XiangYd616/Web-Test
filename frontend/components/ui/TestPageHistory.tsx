@@ -3,10 +3,10 @@
  * 基于压力测试历史的设计，适配所有测试类型
  */
 
-import {BarChart3, Calendar, Eye, MoreHorizontal, RefreshCw, Search, Star} from 'lucide-react';
+import { BarChart3, Calendar, Eye, MoreHorizontal, RefreshCw, Search, Star } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
-import {useNavigate} from 'react-router-dom';
-import {useAuth} from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface TestRecord {
   id: string;
@@ -50,12 +50,12 @@ export const TestPageHistory: React.FC<TestPageHistoryProps> = ({
 
   // 测试类型配置
   const testTypeConfig = {
-    stress: { name: '压力测试', icon: '⚡', color: '#ef4444' },
-    security: { name: '安全测试', icon: '🛡️', color: '#f59e0b' },
+    stress: { name: '压力测试', icon: '⚡', color: 'var(--color-danger)' },
+    security: { name: '安全测试', icon: '🛡️', color: 'var(--color-warning)' },
     api: { name: 'API测试', icon: '🔌', color: '#8b5cf6' },
-    performance: { name: '性能测试', icon: '🚀', color: '#3b82f6' },
+    performance: { name: '性能测试', icon: '🚀', color: 'var(--color-primary)' },
     compatibility: { name: '兼容性测试', icon: '🌐', color: '#06b6d4' },
-    seo: { name: 'SEO测试', icon: '📈', color: '#10b981' },
+    seo: { name: 'SEO测试', icon: '📈', color: 'var(--color-success)' },
     accessibility: { name: '可访问性测试', icon: '♿', color: '#6366f1' }
   };
 

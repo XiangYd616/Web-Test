@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
-import {AlertCircle, CheckCircle, Loader, Upload, X} from 'lucide-react';
-import {useTheme} from '../../contexts/ThemeContext';
+import { AlertCircle, CheckCircle, Loader, Upload, X } from 'lucide-react';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface FileUploadSEOProps {
   onAnalysisComplete: (results: any) => void;

@@ -3,35 +3,9 @@
  * 提供详细的测试结果分析和可视化
  */
 
-import {
-  Activity,
-  AlertTriangle,
-  BarChart3,
-  CheckCircle,
-  Clock,
-  Download,
-  Target,
-  TrendingUp,
-  Users,
-  XCircle,
-  // Zap
-} from 'lucide-react'; // 已修复
+import { Activity, AlertTriangle, BarChart3, CheckCircle, Clock, Download, Target, TrendingUp, Users, XCircle, // Zap } from 'lucide-react'; // 已修复
 import React, { useMemo, useState } from 'react';
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  Cell,
-  Legend,
-  Line,
-  LineChart,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  // YAxis
-} from 'recharts'; // 已修复
+import { Area, AreaChart, CartesianGrid, Cell, Legend, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, // YAxis } from 'recharts'; // 已修复
 interface StressTestResult {
   testId: string;
   url: string;
@@ -127,15 +101,15 @@ const StressTestResultAnalysis: React.FC<StressTestResultAnalysisProps> = ({
     name: error.type,
     value: error.count,
     percentage: error.percentage,
-    color: ['#ef4444', '#f97316', '#eab308', '#84cc16', '#06b6d4'][index % 5]
+    color: ['var(--color-danger)', '#f97316', '#eab308', '#84cc16', '#06b6d4'][index % 5]
   }));
 
   // 响应时间分布数据
   const responseTimeDistribution = [
-    { name: '< 100ms', value: 0, color: '#10b981' },
-    { name: '100-500ms', value: 0, color: '#3b82f6' },
-    { name: '500ms-1s', value: 0, color: '#f59e0b' },
-    { name: '1-2s', value: 0, color: '#ef4444' },
+    { name: '< 100ms', value: 0, color: 'var(--color-success)' },
+    { name: '100-500ms', value: 0, color: 'var(--color-primary)' },
+    { name: '500ms-1s', value: 0, color: 'var(--color-warning)' },
+    { name: '1-2s', value: 0, color: 'var(--color-danger)' },
     { name: '> 2s', value: 0, color: '#7c3aed' }
   ];
 
@@ -250,7 +224,7 @@ const StressTestResultAnalysis: React.FC<StressTestResultAnalysisProps> = ({
                   <Line
                     type="monotone"
                     dataKey="responseTime"
-                    stroke="#3b82f6"
+                    stroke="var(--color-primary)"
                     strokeWidth={2}
                     name="响应时间 (ms)"
                   />
@@ -325,8 +299,8 @@ const StressTestResultAnalysis: React.FC<StressTestResultAnalysisProps> = ({
                   <Area
                     type="monotone"
                     dataKey="throughput"
-                    stroke="#10b981"
-                    fill="#10b981"
+                    stroke="var(--color-success)"
+                    fill="var(--color-success)"
                     fillOpacity={0.3}
                     name="吞吐量 (req/s)"
                   />
@@ -455,7 +429,7 @@ const StressTestResultAnalysis: React.FC<StressTestResultAnalysisProps> = ({
                     yAxisId="left"
                     type="monotone"
                     dataKey="responseTime"
-                    stroke="#3b82f6"
+                    stroke="var(--color-primary)"
                     strokeWidth={2}
                     name="响应时间 (ms)"
                   />
@@ -463,7 +437,7 @@ const StressTestResultAnalysis: React.FC<StressTestResultAnalysisProps> = ({
                     yAxisId="right"
                     type="monotone"
                     dataKey="throughput"
-                    stroke="#10b981"
+                    stroke="var(--color-success)"
                     strokeWidth={2}
                     name="吞吐量 (req/s)"
                   />
@@ -471,7 +445,7 @@ const StressTestResultAnalysis: React.FC<StressTestResultAnalysisProps> = ({
                     yAxisId="right"
                     type="monotone"
                     dataKey="errors"
-                    stroke="#ef4444"
+                    stroke="var(--color-danger)"
                     strokeWidth={2}
                     name="错误数"
                   />

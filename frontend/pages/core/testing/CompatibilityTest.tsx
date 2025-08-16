@@ -3,8 +3,8 @@
  */
 
 import React from 'react';
-import {TestType} from '../../../types/testConfig';
-import {TestPage} from '../TestPage';
+import { TestType } from '../../../types/testConfig';
+import { TestPage } from '../TestPage';
 
 const CompatibilityTest: React.FC = () => {
   return <TestPage testType={TestType.COMPATIBILITY} />;

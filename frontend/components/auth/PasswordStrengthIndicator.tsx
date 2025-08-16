@@ -4,16 +4,7 @@
  * 版本: v1.0.0
  */
 
-import {
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Eye,
-  EyeOff,
-  Info,
-  Shield,
-  XCircle
-} from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, Eye, EyeOff, Info, Shield, XCircle } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import type { PasswordValidationResult } from '../../services/auth/passwordPolicyService';
 import { defaultPasswordPolicyService } from '../../services/auth/passwordPolicyService';

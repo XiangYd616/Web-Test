@@ -1,8 +1,8 @@
 
 import React from 'react';
-import {Activity, Server, TrendingUp, Users} from 'lucide-react';
+import { Activity, Server, TrendingUp, Users } from 'lucide-react';
 import SystemResourceMonitor from '../../../components/system/SystemResourceMonitor.tsx';
-import {useStressTestRecord} from '../../../hooks/useStressTestRecord.ts';
+import { useStressTestRecord } from '../../../hooks/useStressTestRecord.ts';
 
 const SystemMonitor: React.FC = () => {
   const { queueStats } = useStressTestRecord({ autoLoad: false });

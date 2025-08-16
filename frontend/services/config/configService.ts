@@ -1,4 +1,4 @@
-import {apiService} from '../api/apiService';
+import { apiService } from '../api/apiService';
 
 export interface TestConfigTemplate {
   id: string;

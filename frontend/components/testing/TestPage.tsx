@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import {TestHistoryPanel} from './TestHistoryPanel';
-import {TestConfigPanel} from './TestConfigPanel';
-import {TestResultsPanel} from './TestResultsPanel';
-import {TestProgressPanel} from './TestProgressPanel';
-import {testService} from '../../services/testService';
-import {configService} from '../../services/configService';
+import { TestHistoryPanel } from './TestHistoryPanel';
+import { TestConfigPanel } from './TestConfigPanel';
+import { TestResultsPanel } from './TestResultsPanel';
+import { TestProgressPanel } from './TestProgressPanel';
+import { testService } from '../../services/testService';
+import { configService } from '../../services/configService';
 
 interface TestPageTemplateProps {
   testType: string;

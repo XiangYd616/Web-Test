@@ -6,18 +6,7 @@
  * 更新时间: 2024-08-08
  */
 
-import {
-  UserRole,
-  UserStatus,
-  UserPlan,
-  TestType,
-  TestStatus,
-  TestGrade,
-  TestPriority,
-  ThemeMode,
-  Language,
-  // Timezone
-} from './enums'; // 已修复
+import { UserRole, UserStatus, UserPlan, TestType, TestStatus, TestGrade, TestPriority, ThemeMode, Language, // Timezone } from './enums'; // 已修复
 // ==================== 基础类型定义 ====================
 
 export type UUID = string;

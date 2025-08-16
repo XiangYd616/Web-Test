@@ -1,4 +1,7 @@
-/* 重构后的主样式文件 */
+/* 重构后的主样式文件 v2.0.0 */
+
+/* 设计系统导入 */
+@import './styles/design-system-unified.css';
 
 /* 主题配置导入 */
 @import './styles/theme-config.css';
@@ -8,6 +11,10 @@
 @import './styles/base/reset.css';
 @import './styles/base/typography.css';
 @import './styles/base/scrollbar.css';
+
+/* 响应式系统导入 */
+@import './styles/breakpoints.css';
+@import './styles/responsive-utilities.css';
 
 /* 工具类导入 */
 @import './styles/utilities/helpers.css';

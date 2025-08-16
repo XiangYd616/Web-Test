@@ -4,7 +4,7 @@
  */
 
 import axios from 'axios';
-import {TestConfig, TestError, TestProgress, TestResult} from '../types/testConfig';
+import { TestConfig, TestError, TestProgress, TestResult } from '../types/testConfig';
 
 export class TestService {
   private baseURL: string;

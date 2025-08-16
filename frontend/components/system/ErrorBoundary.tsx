@@ -4,8 +4,8 @@
  */
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import {enhancedConfigManager} from '../../config/ConfigManager';
-import {performanceMonitor} from '../../utils/performanceMonitor';
+import { enhancedConfigManager } from '../../config/ConfigManager';
+import { performanceMonitor } from '../../utils/performanceMonitor';
 
 /**
  * 错误信息接口
@@ -358,55 +358,55 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             align-items: center;
             justify-content: center;
             min-height: ${level === 'page' ? '100vh' : '200px'};
-            padding: 20px;
+            padding: var(--spacing-5);
             background-color: var(--bg-color, #f8f9fa);
           }
           
           .error-boundary-content {
             text-align: center;
             max-width: 500px;
-            padding: 40px;
+            padding: var(--spacing-10);
             background: white;
-            border-radius: 8px;
+            border-radius: var(--radius-xl);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
           }
           
           .error-icon {
             color: #dc3545;
-            margin-bottom: 20px;
+            margin-bottom: var(--spacing-5);
           }
           
           .error-title {
-            font-size: 24px;
+            font-size: var(--font-size-2xl);
             font-weight: 600;
             color: #333;
-            margin-bottom: 16px;
+            margin-bottom: var(--spacing-4);
           }
           
           .error-description {
             color: #666;
-            margin-bottom: 20px;
+            margin-bottom: var(--spacing-5);
             line-height: 1.5;
           }
           
           .error-id {
             display: block;
-            font-size: 12px;
+            font-size: var(--font-size-xs);
             color: #999;
-            margin-top: 8px;
+            margin-top: var(--spacing-2);
             font-family: monospace;
           }
           
           .error-details {
             text-align: left;
-            margin: 20px 0;
-            padding: 16px;
+            margin: var(--spacing-5) 0;
+            padding: var(--spacing-4);
             background: #f8f9fa;
-            border-radius: 4px;
+            border-radius: var(--radius-md);
           }
           
           .error-stack {
-            font-size: 12px;
+            font-size: var(--font-size-xs);
             color: #666;
             white-space: pre-wrap;
             overflow-x: auto;
@@ -414,7 +414,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           
           .error-actions {
             display: flex;
-            gap: 12px;
+            gap: var(--spacing-3);
             justify-content: center;
             flex-wrap: wrap;
           }
@@ -422,8 +422,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           .retry-button, .refresh-button, .back-button {
             padding: 10px 20px;
             border: none;
-            border-radius: 4px;
-            font-size: 14px;
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-sm);
             cursor: pointer;
             transition: background-color 0.2s;
           }
@@ -461,8 +461,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           }
           
           .retry-info {
-            margin-top: 16px;
-            font-size: 14px;
+            margin-top: var(--spacing-4);
+            font-size: var(--font-size-sm);
             color: #666;
           }
         `}</style>

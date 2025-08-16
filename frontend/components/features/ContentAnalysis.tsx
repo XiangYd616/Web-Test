@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {AlertTriangle, CheckCircle, Info, TrendingDown, TrendingUp, XCircle} from 'lucide-react';
+import { AlertTriangle, CheckCircle, Info, TrendingDown, TrendingUp, XCircle } from 'lucide-react';
 
 interface ContentAnalysisResult {
   seoScore: number;

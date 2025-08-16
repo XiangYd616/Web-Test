@@ -1,7 +1,7 @@
-import {AlertCircle, ArrowLeft, BarChart3, Calendar, CheckCircle, Clock, Copy, Database, Download, FileText, Globe, Info, Settings, Share2, Shield, Star, TrendingUp, XCircle, Zap} from 'lucide-react';
+import { AlertCircle, ArrowLeft, BarChart3, Calendar, CheckCircle, Clock, Copy, Database, Download, FileText, Globe, Info, Settings, Share2, Shield, Star, TrendingUp, XCircle, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import {useNavigate, useParams} from 'react-router-dom';
-import {TestRecord} from '../../../types/testHistory.ts';
+import { useNavigate, useParams } from 'react-router-dom';
+import { TestRecord } from '../../../types/testHistory.ts';
 
 const TestResultDetail: React.FC = () => {
   const { testId } = useParams<{ testId: string }>();

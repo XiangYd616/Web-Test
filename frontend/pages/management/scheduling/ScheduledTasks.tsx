@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import {Clock, Play, Pause, Trash2, Plus, CheckCircle, XCircle, RefreshCw, Settings, Timer, Target, BarChart3, Activity} from 'lucide-react';
+import { Clock, Play, Pause, Trash2, Plus, CheckCircle, XCircle, RefreshCw, Settings, Timer, Target, BarChart3, Activity } from 'lucide-react';
 
 interface ScheduledTask {
   id: string;

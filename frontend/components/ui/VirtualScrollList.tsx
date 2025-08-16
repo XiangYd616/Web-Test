@@ -4,7 +4,7 @@
  */
 
 import React, { useMemo } from 'react';
-import {useVirtualScroll} from '../../hooks/usePerformanceOptimization';
+import { useVirtualScroll } from '../../hooks/usePerformanceOptimization';
 
 interface VirtualScrollListProps<T> {
     items: T[];

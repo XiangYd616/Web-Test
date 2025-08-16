@@ -3,26 +3,11 @@
  * 提供告警查看、管理和配置功能
  */
 
-import {
-    AlertCircle,
-    AlertTriangle,
-    Bell,
-    CheckCircle,
-    Clock,
-    Eye,
-    Filter,
-    Mail,
-    MessageSquare,
-    Search,
-    Settings,
-    Trash2,
-    Webhook,
-    // XCircle
-} from 'lucide-react'; // 已修复
+import { AlertCircle, AlertTriangle, Bell, CheckCircle, Clock, Eye, Filter, Mail, MessageSquare, Search, Settings, Trash2, Webhook, // XCircle } from 'lucide-react'; // 已修复
 import React, { useCallback, useEffect, useState } from 'react';
-import {Button} from '../ui/Button';
-import {Input} from '../ui/Input';
-import {Modal} from '../ui/Modal';
+import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
+import { Modal } from '../ui/Modal';
 
 interface Alert {
     id: string;

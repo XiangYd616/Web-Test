@@ -4,18 +4,7 @@
  * 版本: v1.0.0
  */
 
-import {
-  AlertTriangle,
-  Check,
-  Copy,
-  Download,
-  Key,
-  Loader2,
-  Mail,
-  QrCode,
-  Shield,
-  Smartphone
-} from 'lucide-react';
+import { AlertTriangle, Check, Copy, Download, Key, Loader2, Mail, QrCode, Shield, Smartphone } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import type { MFAMethod, MFASetup, TOTPSetupResult } from '../../services/auth/mfaService';
 import { useMFA } from '../../services/auth/mfaService';

@@ -11,30 +11,30 @@
 
 :root {
   /* 🎨 颜色系统 */
-  --color-primary: #3b82f6;
-  --color-primary-hover: #2563eb;
-  --color-primary-active: #1d4ed8;
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-primary-active: var(--color-primary-active);
   --color-primary-light: #dbeafe;
   --color-primary-dark: #1e40af;
 
-  --color-secondary: #6b7280;
-  --color-secondary-hover: #4b5563;
-  --color-secondary-active: #374151;
-  --color-secondary-light: #f3f4f6;
-  --color-secondary-dark: #1f2937;
+  --color-secondary: var(--color-gray-500);
+  --color-secondary-hover: var(--color-gray-600);
+  --color-secondary-active: var(--color-gray-700);
+  --color-secondary-light: var(--color-gray-100);
+  --color-secondary-dark: var(--color-gray-800);
 
-  --color-success: #10b981;
-  --color-success-hover: #059669;
+  --color-success: var(--color-success);
+  --color-success-hover: var(--color-success-hover);
   --color-success-light: #d1fae5;
   --color-success-dark: #047857;
 
-  --color-warning: #f59e0b;
-  --color-warning-hover: #d97706;
+  --color-warning: var(--color-warning);
+  --color-warning-hover: var(--color-warning-hover);
   --color-warning-light: #fef3c7;
   --color-warning-dark: #b45309;
 
-  --color-danger: #ef4444;
-  --color-danger-hover: #dc2626;
+  --color-danger: var(--color-danger);
+  --color-danger-hover: var(--color-danger-hover);
   --color-danger-light: #fee2e2;
   --color-danger-dark: #b91c1c;
 
@@ -44,35 +44,35 @@
   --color-info-dark: #0e7490;
 
   /* 🌈 语义颜色 */
-  --text-primary: #111827;
-  --text-secondary: #6b7280;
-  --text-tertiary: #9ca3af;
-  --text-inverse: #ffffff;
-  --text-muted: #d1d5db;
+  --text-primary: var(--color-gray-900);
+  --text-secondary: var(--color-gray-500);
+  --text-tertiary: var(--color-gray-400);
+  --text-inverse: var(--color-white);
+  --text-muted: var(--color-gray-300);
 
-  --bg-primary: #ffffff;
-  --bg-secondary: #f9fafb;
-  --bg-tertiary: #f3f4f6;
+  --bg-primary: var(--color-white);
+  --bg-secondary: var(--color-gray-50);
+  --bg-tertiary: var(--color-gray-100);
   --bg-overlay: rgba(0, 0, 0, 0.5);
 
-  --border-primary: #e5e7eb;
-  --border-secondary: #d1d5db;
-  --border-tertiary: #9ca3af;
+  --border-primary: var(--color-gray-200);
+  --border-secondary: var(--color-gray-300);
+  --border-tertiary: var(--color-gray-400);
 
   /* 🌙 深色模式 */
-  --dark-text-primary: #f9fafb;
-  --dark-text-secondary: #d1d5db;
-  --dark-text-tertiary: #9ca3af;
-  --dark-text-inverse: #111827;
+  --dark-text-primary: var(--color-gray-50);
+  --dark-text-secondary: var(--color-gray-300);
+  --dark-text-tertiary: var(--color-gray-400);
+  --dark-text-inverse: var(--color-gray-900);
 
-  --dark-bg-primary: #111827;
-  --dark-bg-secondary: #1f2937;
-  --dark-bg-tertiary: #374151;
+  --dark-bg-primary: var(--color-gray-900);
+  --dark-bg-secondary: var(--color-gray-800);
+  --dark-bg-tertiary: var(--color-gray-700);
   --dark-bg-overlay: rgba(0, 0, 0, 0.75);
 
-  --dark-border-primary: #374151;
-  --dark-border-secondary: #4b5563;
-  --dark-border-tertiary: #6b7280;
+  --dark-border-primary: var(--color-gray-700);
+  --dark-border-secondary: var(--color-gray-600);
+  --dark-border-tertiary: var(--color-gray-500);
 
   /* 📏 间距系统 */
   --spacing-xs: 0.25rem;    /* 4px */
@@ -181,8 +181,8 @@
 /* 工具类 */
 .sr-only {
   position: absolute;
-  width: 1px;
-  height: 1px;
+  width: 0.06rem;
+  height: 0.06rem;
   padding: 0;
   margin: -1px;
   overflow: hidden;
@@ -344,7 +344,7 @@
 
 .ds-card__header {
   padding: var(--spacing-lg);
-  border-bottom: 1px solid var(--border-primary);
+  border-bottom: 0.06rem solid var(--border-primary);
   background-color: var(--bg-secondary);
 }
 
@@ -354,7 +354,7 @@
 
 .ds-card__footer {
   padding: var(--spacing-lg);
-  border-top: 1px solid var(--border-primary);
+  border-top: 0.06rem solid var(--border-primary);
   background-color: var(--bg-secondary);
 }
 
@@ -464,8 +464,8 @@
 /* 🌀 加载状态 */
 .ds-spinner {
   display: inline-block;
-  width: 1rem;
-  height: 1rem;
+  width: var(--spacing-4);
+  height: var(--spacing-4);
   border: 2px solid var(--border-primary);
   border-top-color: var(--color-primary);
   border-radius: var(--radius-full);

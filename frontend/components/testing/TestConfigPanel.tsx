@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import {TestConfig, TestType, APITestConfig, PerformanceTestConfig} from '../../types/testConfig';
+import { TestConfig, TestType, APITestConfig, PerformanceTestConfig } from '../../types/testConfig';
 
 interface TestConfigPanelProps {
   testType: TestType;

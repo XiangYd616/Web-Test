@@ -3,17 +3,10 @@
  * 整合测试历史、统计分析、数据中心功能
  */
 
-import {
-  BarChart3,
-  Database,
-  FileText,
-  Filter,
-  RefreshCw,
-  // Search
-} from 'lucide-react'; // 已修复
+import { BarChart3, Database, FileText, Filter, RefreshCw, // Search } from 'lucide-react'; // 已修复
 import React, { useEffect, useState } from 'react';
 import TestHistory from '../ui/TestHistory.tsx';
-import {unifiedTestHistoryService} from '../../services/testing/testHistoryService';
+import { unifiedTestHistoryService } from '../../services/testing/testHistoryService';
 import type { TestStatistics, TestType } from '../../types/testHistory';
 
 interface DataManagementProps {
@@ -244,15 +237,15 @@ export const DataManagement: React.FC<DataManagementProps> = ({
         .unified-data-management {
           min-height: 100vh;
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          padding: 20px;
+          padding: var(--spacing-5);
         }
 
         .data-management-header {
           background: rgba(255, 255, 255, 0.95);
           backdrop-filter: blur(10px);
-          border-radius: 16px;
-          padding: 24px;
-          margin-bottom: 24px;
+          border-radius: var(--radius-3xl);
+          padding: var(--spacing-6);
+          margin-bottom: var(--spacing-6);
           box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
@@ -260,7 +253,7 @@ export const DataManagement: React.FC<DataManagementProps> = ({
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
-          margin-bottom: 20px;
+          margin-bottom: var(--spacing-5);
         }
 
         .title-section {
@@ -270,7 +263,7 @@ export const DataManagement: React.FC<DataManagementProps> = ({
         .page-title {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: var(--spacing-3);
           font-size: 28px;
           font-weight: 700;
           color: #1a202c;
@@ -278,36 +271,36 @@ export const DataManagement: React.FC<DataManagementProps> = ({
         }
 
         .title-icon {
-          width: 32px;
-          height: 32px;
+          width: var(--spacing-8);
+          height: var(--spacing-8);
           color: #667eea;
         }
 
         .version-badge {
           background: linear-gradient(135deg, #667eea, #764ba2);
           color: white;
-          padding: 4px 12px;
-          border-radius: 12px;
-          font-size: 12px;
+          padding: var(--spacing-1) 12px;
+          border-radius: var(--radius-2xl);
+          font-size: var(--font-size-xs);
           font-weight: 600;
-          margin-left: 12px;
+          margin-left: var(--spacing-3);
         }
 
         .page-description {
           color: #718096;
-          font-size: 16px;
+          font-size: var(--font-size-base);
           margin: 0;
         }
 
         .header-actions {
           display: flex;
-          gap: 12px;
+          gap: var(--spacing-3);
         }
 
         .action-button {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: var(--spacing-2);
           padding: 10px 16px;
           border: 2px solid #e2e8f0;
           border-radius: 10px;
@@ -346,7 +339,7 @@ export const DataManagement: React.FC<DataManagementProps> = ({
 
         .search-filter-bar {
           border-top: 1px solid #e2e8f0;
-          padding-top: 20px;
+          padding-top: var(--spacing-5);
           transition: all 0.3s ease;
         }
 
@@ -357,20 +350,20 @@ export const DataManagement: React.FC<DataManagementProps> = ({
 
         .search-icon {
           position: absolute;
-          left: 12px;
+          left: var(--spacing-3);
           top: 50%;
           transform: translateY(-50%);
-          width: 20px;
-          height: 20px;
+          width: var(--spacing-5);
+          height: var(--spacing-5);
           color: #a0aec0;
         }
 
         .search-input {
           width: 100%;
-          padding: 12px 12px 12px 44px;
+          padding: var(--spacing-3) 12px 12px 44px;
           border: 2px solid #e2e8f0;
           border-radius: 10px;
-          font-size: 14px;
+          font-size: var(--font-size-sm);
           transition: border-color 0.2s;
         }
 
@@ -380,13 +373,13 @@ export const DataManagement: React.FC<DataManagementProps> = ({
         }
 
         .filter-section {
-          margin-top: 16px;
+          margin-top: var(--spacing-4);
         }
 
         .filter-group {
           display: flex;
           align-items: center;
-          gap: 16px;
+          gap: var(--spacing-4);
           flex-wrap: wrap;
         }
 
@@ -398,7 +391,7 @@ export const DataManagement: React.FC<DataManagementProps> = ({
 
         .test-type-filters {
           display: flex;
-          gap: 8px;
+          gap: var(--spacing-2);
           flex-wrap: wrap;
         }
 
@@ -430,18 +423,18 @@ export const DataManagement: React.FC<DataManagementProps> = ({
         .tab-navigation {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-          gap: 16px;
-          margin-bottom: 24px;
+          gap: var(--spacing-4);
+          margin-bottom: var(--spacing-6);
         }
 
         .tab-button {
           display: flex;
           align-items: center;
-          gap: 16px;
-          padding: 20px;
+          gap: var(--spacing-4);
+          padding: var(--spacing-5);
           background: rgba(255, 255, 255, 0.9);
           border: 2px solid transparent;
-          border-radius: 12px;
+          border-radius: var(--radius-2xl);
           cursor: pointer;
           transition: all 0.2s;
           text-align: left;
@@ -461,8 +454,8 @@ export const DataManagement: React.FC<DataManagementProps> = ({
         }
 
         .tab-icon {
-          width: 24px;
-          height: 24px;
+          width: var(--spacing-6);
+          height: var(--spacing-6);
           color: #667eea;
           flex-shrink: 0;
         }
@@ -473,23 +466,23 @@ export const DataManagement: React.FC<DataManagementProps> = ({
 
         .tab-label {
           display: block;
-          font-size: 16px;
+          font-size: var(--font-size-base);
           font-weight: 600;
           color: #1a202c;
-          margin-bottom: 4px;
+          margin-bottom: var(--spacing-1);
         }
 
         .tab-description {
           display: block;
-          font-size: 14px;
+          font-size: var(--font-size-sm);
           color: #718096;
         }
 
         .tab-content-area {
           background: rgba(255, 255, 255, 0.95);
           backdrop-filter: blur(10px);
-          border-radius: 16px;
-          padding: 24px;
+          border-radius: var(--radius-3xl);
+          padding: var(--spacing-6);
           box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
           min-height: 600px;
         }
@@ -505,46 +498,46 @@ export const DataManagement: React.FC<DataManagementProps> = ({
         }
 
         .placeholder-icon {
-          width: 64px;
-          height: 64px;
+          width: var(--spacing-16);
+          height: var(--spacing-16);
           color: #cbd5e0;
-          margin-bottom: 20px;
+          margin-bottom: var(--spacing-5);
         }
 
         .placeholder-panel h3 {
-          font-size: 24px;
+          font-size: var(--font-size-2xl);
           font-weight: 600;
           color: #4a5568;
           margin: 0 0 12px 0;
         }
 
         .placeholder-panel p {
-          font-size: 16px;
+          font-size: var(--font-size-base);
           margin: 0 0 20px 0;
           max-width: 400px;
         }
 
         .basic-stats {
           background: #f7fafc;
-          border-radius: 8px;
-          padding: 16px;
-          margin-top: 20px;
+          border-radius: var(--radius-xl);
+          padding: var(--spacing-4);
+          margin-top: var(--spacing-5);
         }
 
         .basic-stats p {
-          margin: 4px 0;
-          font-size: 14px;
+          margin: var(--spacing-1) 0;
+          font-size: var(--font-size-sm);
           color: #4a5568;
         }
 
         @media (max-width: 768px) {
           .unified-data-management {
-            padding: 12px;
+            padding: var(--spacing-3);
           }
 
           .header-content {
             flex-direction: column;
-            gap: 16px;
+            gap: var(--spacing-4);
           }
 
           .tab-navigation {

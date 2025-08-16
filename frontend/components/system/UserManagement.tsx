@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import {Edit, Search, Shield, ShieldOff, Trash2, UserPlus, Users} from 'lucide-react';
+import { Edit, Search, Shield, ShieldOff, Trash2, UserPlus, Users } from 'lucide-react';
 
 interface User {
   id: string;

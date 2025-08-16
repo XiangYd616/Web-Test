@@ -1,7 +1,7 @@
 
 import React from 'react';
 
-import {AlertTriangle, BarChart3, CheckCircle, Clock, TrendingDown, TrendingUp, Users, Zap} from 'lucide-react';
+import { AlertTriangle, BarChart3, CheckCircle, Clock, TrendingDown, TrendingUp, Users, Zap } from 'lucide-react';
 
 interface StressTestMetricsType {
   totalRequests: number;

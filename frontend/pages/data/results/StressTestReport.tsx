@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import {useParams, useNavigate} from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
-import {ArrowLeft, Download, Share2, BarChart3, Clock, Gauge, TrendingUp, AlertTriangle, CheckCircle, XCircle, Info, Calendar, Users} from 'lucide-react';
+import { ArrowLeft, Download, Share2, BarChart3, Clock, Gauge, TrendingUp, AlertTriangle, CheckCircle, XCircle, Info, Calendar, Users } from 'lucide-react';
 
 interface StressTestMetrics {
   totalRequests: number;

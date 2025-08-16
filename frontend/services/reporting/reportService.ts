@@ -1,6 +1,6 @@
-import {format} from 'date-fns';
-import {dataAnalysisService} from '../analytics/analyticsService';
-import {monitoringService} from '../monitoring/index';
+import { format } from 'date-fns';
+import { dataAnalysisService } from '../analytics/analyticsService';
+import { monitoringService } from '../monitoring/index';
 
 export interface Report {
   id: string;

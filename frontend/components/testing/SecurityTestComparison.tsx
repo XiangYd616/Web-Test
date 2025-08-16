@@ -1,7 +1,7 @@
 
-import {ArrowDown, ArrowUp, Calendar, ChevronDown, ChevronRight, Minus, Shield, TrendingDown, TrendingUp, X} from 'lucide-react';
+import { ArrowDown, ArrowUp, Calendar, ChevronDown, ChevronRight, Minus, Shield, TrendingDown, TrendingUp, X } from 'lucide-react';
 import React, { useState } from 'react';
-import {SecurityTestResult} from '../../services/testing/securityTestService';
+import { SecurityTestResult } from '../../services/testing/securityTestService';
 
 interface SecurityTestComparisonProps {
   results: SecurityTestResult[];

@@ -1,10 +1,10 @@
 import { handleAsyncError } from '../utils/errorHandler';
 import React, { useEffect, useState } from 'react';
-import {Button} from '../../../components/ui/Button';
-import {Card} from '../../../components/ui/Card.tsx';
-import {Input} from '../../../components/ui/Input';
-import {Modal} from '../../../components/ui/Modal.tsx';
-import {StatusIndicator} from '../../../components/ui/StatusIndicator.tsx';
+import { Button } from '../../../components/ui/Button';
+import { Card } from '../../../components/ui/Card.tsx';
+import { Input } from '../../../components/ui/Input';
+import { Modal } from '../../../components/ui/Modal.tsx';
+import { StatusIndicator } from '../../../components/ui/StatusIndicator.tsx';
 
 // 监控站点接口
 interface MonitoringSite {

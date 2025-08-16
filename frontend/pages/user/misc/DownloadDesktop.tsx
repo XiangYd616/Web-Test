@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {Download, Monitor, CheckCircle, Star} from 'lucide-react';
+import { Download, Monitor, CheckCircle, Star } from 'lucide-react';
 
 const DownloadDesktop: React.FC = () => {
   const features = [

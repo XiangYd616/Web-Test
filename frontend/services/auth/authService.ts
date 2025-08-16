@@ -1,7 +1,7 @@
-import {UserRole, UserStatus} from '../../types/enums';
-import {AuthResponse, ChangePasswordData, CreateUserData, LoginCredentials, RegisterData, UpdateUserData, User} from '../../types/user';
-import {browserJwt} from '../../utils/browserJwt';
-import {canUseDatabase} from '../../utils/environment';
+import { UserRole, UserStatus } from '../../types/enums';
+import { AuthResponse, ChangePasswordData, CreateUserData, LoginCredentials, RegisterData, UpdateUserData, User } from '../../types/user';
+import { browserJwt } from '../../utils/browserJwt';
+import { canUseDatabase } from '../../utils/environment';
 
 // 动态导入数据库模块（避免前端构建时的依赖问题）
 let jwt: any, userDao: any;

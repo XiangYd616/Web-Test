@@ -1,6 +1,6 @@
-import {AlertCircle, CheckCircle, Clock, Eye, FileText, Globe, HardDrive, Image, Link, Loader, MapPin, Search, Settings, Share2, Smartphone, Square, XCircle, Zap} from 'lucide-react';
+import { AlertCircle, CheckCircle, Clock, Eye, FileText, Globe, HardDrive, Image, Link, Loader, MapPin, Search, Settings, Share2, Smartphone, Square, XCircle, Zap } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import {useAuthCheck} from '../../../components/auth/WithAuthCheck.tsx';
+import { useAuthCheck } from '../../../components/auth/WithAuthCheck.tsx';
 import BaseTestPage from '../../../components/testing/BaseTestPage.tsx';
 import FileUploadSEO from '../../../components/testing/FileUploadSEO.tsx';
 import LocalSEOResults from '../../../components/testing/LocalSEOResults.tsx';
@@ -8,7 +8,7 @@ import NetworkErrorPrompt from '../../../components/testing/NetworkErrorPrompt.t
 import SEOResults from '../../../components/testing/SEOResults.tsx';
 import URLInput from '../../../components/testing/URLInput';
 import type { SEOTestMode } from '../../../hooks/useSEOTest';
-import {useUnifiedSEOTest} from '../../../hooks/useSEOTest';
+import { useUnifiedSEOTest } from '../../../hooks/useSEOTest';
 
 // CSS样式已迁移到组件库中
 

@@ -1,0 +1,54 @@
+/* 统一设计系统 v2.0.0 */
+/* 此文件整合了所有设计令牌和组件样式 */
+
+@import './design-tokens-unified.css';
+@import './theme-config-unified.css';
+
+/* ===== 全局重置 ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* ===== 基础样式 ===== */
+body {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  padding: 0;
+}
+
+/* ===== 工具类 ===== */
+.sr-only {
+  position: absolute;
+  width: 0.06rem;
+  height: 0.06rem;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ===== 响应式工具 ===== */
+@media (max-width: 640px) {
+  .hidden-mobile { display: none !important; }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .hidden-tablet { display: none !important; }
+}
+
+@media (min-width: 1025px) and (max-width: 1440px) {
+  .hidden-desktop { display: none !important; }
+}

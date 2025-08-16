@@ -3,29 +3,9 @@
  * 支持多种测试类型的结果可视化和分析
  */
 
-import {
-    AlertTriangle,
-    BarChart3,
-    CheckCircle,
-    ChevronDown,
-    ChevronRight,
-    Clock,
-    Download,
-    Eye,
-    Filter,
-    Share2,
-    // TrendingUp
-} from 'lucide-react'; // 已修复
+import { AlertTriangle, BarChart3, CheckCircle, ChevronDown, ChevronRight, Clock, Download, Eye, Filter, Share2, // TrendingUp } from 'lucide-react'; // 已修复
 import React, { useMemo, useState } from 'react';
-import {
-    Badge,
-    Button,
-    Card,
-    Input,
-    Modal,
-    Select,
-    // Table
-} from '../ui/index'; // 已修复
+import { Badge, Button, Card, Input, Modal, Select, // Table } from '../ui/index'; // 已修复
 // SelectOption and TableColumn types will be defined locally
 import { TestResult } from './TestRunner';
 

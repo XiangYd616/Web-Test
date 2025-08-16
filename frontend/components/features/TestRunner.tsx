@@ -3,21 +3,11 @@
  * 支持多种测试类型的统一界面和流程管理
  */
 
-import {Download, History, Play, RefreshCw, Settings, Square} from 'lucide-react';
+import { Download, History, Play, RefreshCw, Settings, Square } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
-import {useNotification} from '../../hooks/useNotification';
-import {useTestEngine} from '../../hooks/useTestEngine';
-import {
-    Badge,
-    Button,
-    Card,
-    Input,
-    Loading,
-    Modal,
-    ProgressBar,
-    Select,
-    // type SelectOption
-} from '../ui/index'; // 已修复
+import { useNotification } from '../../hooks/useNotification';
+import { useTestEngine } from '../../hooks/useTestEngine';
+import { Badge, Button, Card, Input, Loading, Modal, ProgressBar, Select, // type SelectOption } from '../ui/index'; // 已修复
 // 测试类型定义
 export type TestType = 'api' | 'compatibility' | 'infrastructure' | 'security' | 'seo' | 'stress' | 'ux' | 'website';
 

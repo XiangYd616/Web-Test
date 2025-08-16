@@ -3,7 +3,7 @@
  * 提供批量测试、批量导出、批量管理等功能
  */
 
-import {createApiUrl} from '../../config/api';
+import { createApiUrl } from '../../config/api';
 
 export interface BatchTestConfig {
   urls: string[];
