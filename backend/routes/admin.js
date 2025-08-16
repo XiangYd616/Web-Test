@@ -34,10 +34,7 @@ router.get('/stats', asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error('获取系统统计失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取系统统计失败'
-    });
+    res.serverError('获取系统统计失败');
   }
 }));
 
@@ -90,10 +87,7 @@ router.get('/users', asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error('获取用户列表失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取用户列表失败'
-    });
+    res.serverError('获取用户列表失败');
   }
 }));
 
@@ -107,10 +101,7 @@ router.put('/users/:userId/status', asyncHandler(async (req, res) => {
 
   if (typeof isActive !== 'boolean') {
     
-        return res.status(400).json({
-      success: false,
-      message: '状态值必须是布尔类型'
-      });
+        return res.validationError([], '状态值必须是布尔类型');
   }
 
   try {
@@ -121,23 +112,13 @@ router.put('/users/:userId/status', asyncHandler(async (req, res) => {
 
     if (result.rows.length === 0) {
       
-        return res.status(404).json({
-        success: false,
-        message: '用户不存在'
-      });
+        return res.notFound('资源', '用户不存在');
     }
 
-    res.json({
-      success: true,
-      message: '用户状态更新成功',
-      data: result.rows[0]
-    });
+    res.success(result.rows[0], '用户状态更新成功');
   } catch (error) {
     console.error('更新用户状态失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '更新用户状态失败'
-    });
+    res.serverError('更新用户状态失败');
   }
 }));
 
@@ -190,10 +171,7 @@ router.get('/logs', asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error('获取系统日志失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取系统日志失败'
-    });
+    res.serverError('获取系统日志失败');
   }
 }));
 
@@ -285,10 +263,7 @@ router.get('/test-history', asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error('获取测试历史失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取测试历史失败'
-    });
+    res.serverError('获取测试历史失败');
   }
 }));
 

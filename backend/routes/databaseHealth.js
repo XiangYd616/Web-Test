@@ -13,11 +13,7 @@ router.get('/health', async (req, res) => {
     try {
         const healthStatus = await healthCheck();
 
-        res.json({
-            success: true,
-            data: healthStatus,
-            timestamp: new Date().toISOString()
-        });
+        res.success(healthStatus);
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -35,11 +31,7 @@ router.get('/status', async (req, res) => {
         const manager = await getConnectionManager();
         const status = manager.getStatus();
 
-        res.json({
-            success: true,
-            data: status,
-            timestamp: new Date().toISOString()
-        });
+        res.success(status);
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -82,11 +74,7 @@ router.get('/stats', async (req, res) => {
     try {
         const stats = await getStats();
 
-        res.json({
-            success: true,
-            data: stats,
-            timestamp: new Date().toISOString()
-        });
+        res.success(stats);
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -104,12 +92,7 @@ router.post('/test-connection', async (req, res) => {
         const manager = await getConnectionManager();
         const testResult = await manager.testConnection();
 
-        res.json({
-            success: true,
-            message: '数据库连接测试成功',
-            data: testResult,
-            timestamp: new Date().toISOString()
-        });
+        res.success(testResult, '数据库连接测试成功');
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -187,11 +170,7 @@ router.post('/reconnect', async (req, res) => {
         // 尝试重连
         await manager.reconnect();
 
-        res.json({
-            success: true,
-            message: '数据库重连成功',
-            timestamp: new Date().toISOString()
-        });
+        res.success(new Date().toISOString(), '数据库重连成功');
     } catch (error) {
         res.status(500).json({
             success: false,

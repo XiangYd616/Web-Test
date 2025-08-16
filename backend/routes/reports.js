@@ -110,10 +110,7 @@ router.get('/', authMiddleware, asyncHandler(async (req, res) => {
     });
   } catch (error) {
     Logger.error('获取报告列表失败', error);
-    res.status(500).json({
-      success: false,
-      message: '获取报告列表失败'
-    });
+    res.serverError('获取报告列表失败');
   }
 }));
 
@@ -128,28 +125,17 @@ router.post('/generate', authMiddleware, asyncHandler(async (req, res) => {
     // 验证必填字段
     if (!name || !type) {
       
-        return res.status(400).json({
-        success: false,
-        message: '报告名称和类型是必填的'
-      });
+        return res.validationError([], '报告名称和类型是必填的');
     }
 
     // 验证报告类型
     if (!Object.values(REPORT_TYPES).includes(type)) {
-      return res.status(400).json({
-        success: false,
-        message: '不支持的报告类型',
-        supportedTypes: Object.values(REPORT_TYPES)
-      });
+      return res.validationError([], '不支持的报告类型');
     }
 
     // 验证报告格式
     if (!Object.values(REPORT_FORMATS).includes(format)) {
-      return res.status(400).json({
-        success: false,
-        message: '不支持的报告格式',
-        supportedFormats: Object.values(REPORT_FORMATS)
-      });
+      return res.validationError([], '不支持的报告格式');
     }
 
     // 创建新报告
@@ -187,10 +173,7 @@ router.post('/generate', authMiddleware, asyncHandler(async (req, res) => {
     });
   } catch (error) {
     Logger.error('生成报告失败', error);
-    res.status(500).json({
-      success: false,
-      message: '生成报告失败'
-    });
+    res.serverError('生成报告失败');
   }
 }));
 
@@ -205,22 +188,13 @@ router.get('/:id', authMiddleware, asyncHandler(async (req, res) => {
 
     if (!report) {
       
-        return res.status(404).json({
-        success: false,
-        message: '报告不存在'
-      });
+        return res.notFound('资源', '报告不存在');
     }
 
-    res.json({
-      success: true,
-      data: report
-    });
+    res.success(report);
   } catch (error) {
     Logger.error('获取报告详情失败', error);
-    res.status(500).json({
-      success: false,
-      message: '获取报告详情失败'
-    });
+    res.serverError('获取报告详情失败');
   }
 }));
 
@@ -235,18 +209,12 @@ router.get('/:id/download', authMiddleware, asyncHandler(async (req, res) => {
 
     if (!report) {
       
-        return res.status(404).json({
-        success: false,
-        message: '报告不存在'
-      });
+        return res.notFound('资源', '报告不存在');
     }
 
     if (report.status !== 'completed') {
       
-        return res.status(400).json({
-        success: false,
-        message: '报告尚未生成完成'
-      });
+        return res.validationError([], '报告尚未生成完成');
     }
 
     // 增加下载次数
@@ -265,10 +233,7 @@ router.get('/:id/download', authMiddleware, asyncHandler(async (req, res) => {
     Logger.info('报告下载', { reportId: id, fileName });
   } catch (error) {
     Logger.error('下载报告失败', error);
-    res.status(500).json({
-      success: false,
-      message: '下载报告失败'
-    });
+    res.serverError('下载报告失败');
   }
 }));
 
@@ -283,26 +248,17 @@ router.delete('/:id', authMiddleware, asyncHandler(async (req, res) => {
 
     if (reportIndex === -1) {
       
-        return res.status(404).json({
-        success: false,
-        message: '报告不存在'
-      });
+        return res.notFound('资源', '报告不存在');
     }
 
     const deletedReport = reports.splice(reportIndex, 1)[0];
 
     Logger.info('删除报告', { reportId: id, name: deletedReport.name });
 
-    res.json({
-      success: true,
-      message: '报告删除成功'
-    });
+    res.success('报告删除成功');
   } catch (error) {
     Logger.error('删除报告失败', error);
-    res.status(500).json({
-      success: false,
-      message: '删除报告失败'
-    });
+    res.serverError('删除报告失败');
   }
 }));
 
@@ -379,17 +335,10 @@ router.get('/scheduled', authMiddleware, asyncHandler(async (req, res) => {
   try {
     const reports = automatedReportingService.getScheduledReports();
 
-    res.json({
-      success: true,
-      data: reports
-    });
+    res.success(reports);
   } catch (error) {
     Logger.error('获取定时报告列表失败', error);
-    res.status(500).json({
-      success: false,
-      message: '获取定时报告列表失败',
-      error: error.message
-    });
+    res.serverError('获取定时报告列表失败');
   }
 }));
 
@@ -412,10 +361,7 @@ router.post('/scheduled', authMiddleware, asyncHandler(async (req, res) => {
 
   if (!name || !schedule || !reportType) {
     
-        return res.status(400).json({
-      success: false,
-      message: '缺少必要参数: name, schedule, reportType'
-      });
+        return res.validationError([], '缺少必要参数: name, schedule, reportType');
   }
 
   try {
@@ -442,11 +388,7 @@ router.post('/scheduled', authMiddleware, asyncHandler(async (req, res) => {
     });
   } catch (error) {
     Logger.error('创建定时报告失败', error, { userId: req.user.id });
-    res.status(500).json({
-      success: false,
-      message: '创建定时报告失败',
-      error: error.message
-    });
+    res.serverError('创建定时报告失败');
   }
 }));
 
@@ -461,17 +403,10 @@ router.post('/scheduled/:reportId/execute', authMiddleware, asyncHandler(async (
 
     Logger.info(`立即执行报告: ${reportId}`, { userId: req.user.id });
 
-    res.json({
-      success: true,
-      message: '报告执行已启动'
-    });
+    res.success('报告执行已启动');
   } catch (error) {
     Logger.error('执行报告失败', error, { reportId, userId: req.user.id });
-    res.status(500).json({
-      success: false,
-      message: '执行报告失败',
-      error: error.message
-    });
+    res.serverError('执行报告失败');
   }
 }));
 
@@ -501,17 +436,10 @@ router.get('/templates', authMiddleware, asyncHandler(async (req, res) => {
       }
     ];
 
-    res.json({
-      success: true,
-      data: templates
-    });
+    res.success(templates);
   } catch (error) {
     Logger.error('获取报告模板失败', error);
-    res.status(500).json({
-      success: false,
-      message: '获取报告模板失败',
-      error: error.message
-    });
+    res.serverError('获取报告模板失败');
   }
 }));
 
@@ -534,10 +462,7 @@ router.post('/performance/benchmarks', authMiddleware, asyncHandler(async (req, 
 
   if (!name || !type || !metrics) {
     
-        return res.status(400).json({
-      success: false,
-      message: '缺少必要参数: name, type, metrics'
-      });
+        return res.validationError([], '缺少必要参数: name, type, metrics');
   }
 
   try {
@@ -562,11 +487,7 @@ router.post('/performance/benchmarks', authMiddleware, asyncHandler(async (req, 
     });
   } catch (error) {
     Logger.error('创建性能基准测试失败', error, { userId: req.user.id });
-    res.status(500).json({
-      success: false,
-      message: '创建性能基准测试失败',
-      error: error.message
-    });
+    res.serverError('创建性能基准测试失败');
   }
 }));
 
@@ -585,18 +506,10 @@ router.post('/performance/benchmarks/:benchmarkId/run', authMiddleware, asyncHan
 
     Logger.info(`执行性能基准测试: ${benchmarkId}`, { testId: testResult.id, userId: req.user.id });
 
-    res.json({
-      success: true,
-      data: testResult,
-      message: '性能基准测试执行成功'
-    });
+    res.success(testResult);
   } catch (error) {
     Logger.error('执行性能基准测试失败', error, { benchmarkId, userId: req.user.id });
-    res.status(500).json({
-      success: false,
-      message: '执行性能基准测试失败',
-      error: error.message
-    });
+    res.serverError('执行性能基准测试失败');
   }
 }));
 
@@ -608,10 +521,7 @@ router.post('/performance/baselines', authMiddleware, asyncHandler(async (req, r
 
   if (!benchmarkId || !testResultId) {
     
-        return res.status(400).json({
-      success: false,
-      message: '缺少必要参数: benchmarkId, testResultId'
-      });
+        return res.validationError([], '缺少必要参数: benchmarkId, testResultId');
   }
 
   try {
@@ -619,18 +529,10 @@ router.post('/performance/baselines', authMiddleware, asyncHandler(async (req, r
 
     Logger.info(`设置性能基线: ${benchmarkId}`, { testResultId, userId: req.user.id });
 
-    res.json({
-      success: true,
-      data: baseline,
-      message: '性能基线设置成功'
-    });
+    res.success(baseline);
   } catch (error) {
     Logger.error('设置性能基线失败', error, { benchmarkId, testResultId, userId: req.user.id });
-    res.status(500).json({
-      success: false,
-      message: '设置性能基线失败',
-      error: error.message
-    });
+    res.serverError('设置性能基线失败');
   }
 }));
 
@@ -655,18 +557,10 @@ router.post('/performance/report', authMiddleware, asyncHandler(async (req, res)
 
     Logger.info('生成性能报告', { timeRange, userId: req.user.id });
 
-    res.json({
-      success: true,
-      data: report,
-      message: '性能报告生成成功'
-    });
+    res.success(report);
   } catch (error) {
     Logger.error('生成性能报告失败', error, { userId: req.user.id });
-    res.status(500).json({
-      success: false,
-      message: '生成性能报告失败',
-      error: error.message
-    });
+    res.serverError('生成性能报告失败');
   }
 }));
 

@@ -38,10 +38,7 @@ router.post('/:type', asyncHandler(async (req, res) => {
 
   if (!data) {
     
-        return res.status(400).json({
-      success: false,
-      message: '缺少数据内容'
-      });
+        return res.validationError([], '缺少数据内容');
   }
 
   try {
@@ -57,11 +54,7 @@ router.post('/:type', asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error('创建数据失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '创建数据失败',
-      error: error.message
-    });
+    res.serverError('创建数据失败');
   }
 }));
 
@@ -80,10 +73,7 @@ router.get('/:type/:id', asyncHandler(async (req, res) => {
 
     const record = await dataManagementService.readData(type, id, options);
 
-    res.json({
-      success: true,
-      data: record
-    });
+    res.success(record);
   } catch (error) {
     console.error('读取数据失败:', error);
     const statusCode = error.message.includes('不存在') ? 404 : 500;
@@ -104,10 +94,7 @@ router.put('/:type/:id', asyncHandler(async (req, res) => {
 
   if (!updates) {
     
-        return res.status(400).json({
-      success: false,
-      message: '缺少更新数据'
-      });
+        return res.validationError([], '缺少更新数据');
   }
 
   try {
@@ -116,11 +103,7 @@ router.put('/:type/:id', asyncHandler(async (req, res) => {
       userId: req.user.id
     });
 
-    res.json({
-      success: true,
-      data: record,
-      message: '数据更新成功'
-    });
+    res.success(record);
   } catch (error) {
     console.error('更新数据失败:', error);
     const statusCode = error.message.includes('不存在') ? 404 : 500;
@@ -145,11 +128,7 @@ router.delete('/:type/:id', asyncHandler(async (req, res) => {
       userId: req.user.id
     });
 
-    res.json({
-      success: true,
-      data: result,
-      message: '数据删除成功'
-    });
+    res.success(result);
   } catch (error) {
     console.error('删除数据失败:', error);
     const statusCode = error.message.includes('不存在') ? 404 : 500;
@@ -189,17 +168,10 @@ router.get('/:type', asyncHandler(async (req, res) => {
 
     const result = await dataManagementService.queryData(type, query, options);
 
-    res.json({
-      success: true,
-      data: result
-    });
+    res.success(result);
   } catch (error) {
     console.error('查询数据失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '查询数据失败',
-      error: error.message
-    });
+    res.serverError('查询数据失败');
   }
 }));
 
@@ -210,10 +182,7 @@ router.post('/batch', asyncHandler(async (req, res) => {
   const { operations } = req.body;
 
   if (!operations || !Array.isArray(operations)) {
-    return res.status(400).json({
-      success: false,
-      message: '缺少有效的操作列表'
-    });
+    return res.validationError([], '缺少有效的操作列表');
   }
 
   try {
@@ -232,11 +201,7 @@ router.post('/batch', asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error('批量操作失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '批量操作失败',
-      error: error.message
-    });
+    res.serverError('批量操作失败');
   }
 }));
 
@@ -253,18 +218,10 @@ router.post('/:type/export', asyncHandler(async (req, res) => {
       filename
     });
 
-    res.json({
-      success: true,
-      data: result,
-      message: '数据导出成功'
-    });
+    res.success(result);
   } catch (error) {
     console.error('数据导出失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '数据导出失败',
-      error: error.message
-    });
+    res.serverError('数据导出失败');
   }
 }));
 
@@ -277,10 +234,7 @@ router.post('/:type/import', upload.single('file'), asyncHandler(async (req, res
 
   if (!req.file) {
     
-        return res.status(400).json({
-      success: false,
-      message: '缺少上传文件'
-      });
+        return res.validationError([], '缺少上传文件');
   }
 
   try {
@@ -295,11 +249,7 @@ router.post('/:type/import', upload.single('file'), asyncHandler(async (req, res
     });
   } catch (error) {
     console.error('数据导入失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '数据导入失败',
-      error: error.message
-    });
+    res.serverError('数据导入失败');
   }
 }));
 
@@ -316,26 +266,16 @@ router.get('/:type/statistics', asyncHandler(async (req, res) => {
       try {
         options.customStats = JSON.parse(customStats);
       } catch (e) {
-        return res.status(400).json({
-          success: false,
-          message: '自定义统计参数格式错误'
-        });
+        return res.validationError([], '自定义统计参数格式错误');
       }
     }
 
     const statistics = await dataManagementService.getStatistics(type, options);
 
-    res.json({
-      success: true,
-      data: statistics
-    });
+    res.success(statistics);
   } catch (error) {
     console.error('获取统计信息失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取统计信息失败',
-      error: error.message
-    });
+    res.serverError('获取统计信息失败');
   }
 }));
 
@@ -351,18 +291,10 @@ router.post('/backup', asyncHandler(async (req, res) => {
       createdBy: req.user.id
     });
 
-    res.json({
-      success: true,
-      data: backupInfo,
-      message: '数据备份创建成功'
-    });
+    res.success(backupInfo);
   } catch (error) {
     console.error('创建备份失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '创建备份失败',
-      error: error.message
-    });
+    res.serverError('创建备份失败');
   }
 }));
 
@@ -378,17 +310,10 @@ router.get('/types', asyncHandler(async (req, res) => {
       description: getTypeDescription(value)
     }));
 
-    res.json({
-      success: true,
-      data: typeInfo
-    });
+    res.success(typeInfo);
   } catch (error) {
     console.error('获取数据类型失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取数据类型失败',
-      error: error.message
-    });
+    res.serverError('获取数据类型失败');
   }
 }));
 
@@ -403,17 +328,10 @@ router.get('/export-formats', asyncHandler(async (req, res) => {
       mimeType: getFormatMimeType(format)
     }));
 
-    res.json({
-      success: true,
-      data: formats
-    });
+    res.success(formats);
   } catch (error) {
     console.error('获取导出格式失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取导出格式失败',
-      error: error.message
-    });
+    res.serverError('获取导出格式失败');
   }
 }));
 
@@ -426,25 +344,15 @@ router.post('/:type/validate', asyncHandler(async (req, res) => {
 
   if (!data) {
     
-        return res.status(400).json({
-      success: false,
-      message: '缺少验证数据'
-      });
+        return res.validationError([], '缺少验证数据');
   }
 
   try {
     dataManagementService.validateData(type, data);
     
-    res.json({
-      success: true,
-      message: '数据验证通过'
-    });
+    res.success('数据验证通过');
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: '数据验证失败',
-      error: error.message
-    });
+    res.validationError([], '数据验证失败');
   }
 }));
 

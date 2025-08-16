@@ -86,18 +86,11 @@ router.get('/resources', systemResourceRateLimit, async (req, res) => {
     //   diskUsage: `${diskInfo.usage.toFixed(1)}%`
     // }); // 注释掉成功日志
 
-    res.json({
-      success: true,
-      resources: resources
-    });
+    res.success(resources);
 
   } catch (error) {
     console.error('❌ 获取系统资源信息失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取系统资源信息失败',
-      error: error.message
-    });
+    res.serverError('获取系统资源信息失败');
   }
 });
 
@@ -319,11 +312,7 @@ router.get('/health', systemResourceRateLimit, async (req, res) => {
 
   } catch (error) {
     console.error('❌ 获取系统健康状态失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取系统健康状态失败',
-      error: error.message
-    });
+    res.serverError('获取系统健康状态失败');
   }
 });
 

@@ -19,10 +19,7 @@ router.post('/check', async (req, res) => {
     const result = await accessibilityService.performAccessibilityCheck(req.body);
 
     if (result.success) {
-      res.json({
-        success: true,
-        data: result.data
-      });
+      res.success(result.data);
     } else {
       res.status(400).json({
         success: false,
@@ -80,10 +77,7 @@ router.get('/wcag/:level', async (req, res) => {
       ]
     };
 
-    res.json({
-      success: true,
-      data: guidelines
-    });
+    res.success(guidelines);
   } catch (error) {
     Logger.error('获取WCAG指南失败:', error);
     res.status(500).json({
@@ -128,10 +122,7 @@ router.get('/recommendations', async (req, res) => {
       }
     ];
 
-    res.json({
-      success: true,
-      data: recommendations
-    });
+    res.success(recommendations);
   } catch (error) {
     Logger.error('获取无障碍建议失败:', error);
     res.status(500).json({
@@ -177,10 +168,7 @@ router.get('/history', async (req, res) => {
       }
     };
 
-    res.json({
-      success: true,
-      data: history
-    });
+    res.success(history);
   } catch (error) {
     Logger.error('获取无障碍历史失败:', error);
     res.status(500).json({
@@ -273,10 +261,7 @@ router.get('/stats', async (req, res) => {
       ]
     };
 
-    res.json({
-      success: true,
-      data: stats
-    });
+    res.success(stats);
   } catch (error) {
     Logger.error('获取无障碍统计失败:', error);
     res.status(500).json({
@@ -317,10 +302,7 @@ router.get('/keyboard', async (req, res) => {
       checkedElements: 45
     };
 
-    res.json({
-      success: true,
-      data: result
-    });
+    res.success(result);
   } catch (error) {
     Logger.error('键盘导航检查失败:', error);
     res.status(500).json({
@@ -362,10 +344,7 @@ router.get('/screen-reader', async (req, res) => {
       landmarkCount: 5
     };
 
-    res.json({
-      success: true,
-      data: result
-    });
+    res.success(result);
   } catch (error) {
     Logger.error('屏幕阅读器检查失败:', error);
     res.status(500).json({
@@ -411,10 +390,7 @@ router.get('/contrast', async (req, res) => {
       level
     };
 
-    res.json({
-      success: true,
-      data: result
-    });
+    res.success(result);
   } catch (error) {
     Logger.error('颜色对比度检查失败:', error);
     res.status(500).json({

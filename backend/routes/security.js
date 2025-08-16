@@ -23,20 +23,14 @@ router.post('/advanced-test', asyncHandler(async (req, res) => {
 
   if (!url) {
     
-        return res.status(400).json({
-      success: false,
-      message: '需要提供测试URL'
-      });
+        return res.validationError([], '需要提供测试URL');
   }
 
   // 验证URL格式
   try {
     new URL(url);
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: 'URL格式无效'
-    });
+    return res.validationError([], 'URL格式无效');
   }
 
   try {
@@ -55,18 +49,11 @@ router.post('/advanced-test', asyncHandler(async (req, res) => {
     // 记录测试结果到数据库（这里应该实际保存到数据库）
     console.log(`✅ 高级安全测试完成: ${url}, 评分: ${result.summary.securityScore}`);
 
-    res.json({
-      success: true,
-      data: result
-    });
+    res.success(result);
 
   } catch (error) {
     console.error('高级安全测试失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '安全测试失败',
-      error: error.message
-    });
+    res.serverError('安全测试失败');
   }
 }));
 
@@ -78,10 +65,7 @@ router.post('/quick-check', asyncHandler(async (req, res) => {
 
   if (!url) {
     
-        return res.status(400).json({
-      success: false,
-      message: '需要提供测试URL'
-      });
+        return res.validationError([], '需要提供测试URL');
   }
 
   try {
@@ -109,11 +93,7 @@ router.post('/quick-check', asyncHandler(async (req, res) => {
 
   } catch (error) {
     console.error('快速安全检查失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '快速安全检查失败',
-      error: error.message
-    });
+    res.serverError('快速安全检查失败');
   }
 }));
 
@@ -152,11 +132,7 @@ router.get('/test-history', asyncHandler(async (req, res) => {
 
   } catch (error) {
     console.error('获取安全测试历史失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取测试历史失败',
-      error: error.message
-    });
+    res.serverError('获取测试历史失败');
   }
 }));
 
@@ -231,18 +207,11 @@ router.get('/test/:testId', asyncHandler(async (req, res) => {
       ]
     };
 
-    res.json({
-      success: true,
-      data: mockTestDetail
-    });
+    res.success(mockTestDetail);
 
   } catch (error) {
     console.error('获取安全测试详情失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取测试详情失败',
-      error: error.message
-    });
+    res.serverError('获取测试详情失败');
   }
 }));
 
@@ -282,18 +251,11 @@ router.get('/statistics', asyncHandler(async (req, res) => {
       }
     };
 
-    res.json({
-      success: true,
-      data: mockStatistics
-    });
+    res.success(mockStatistics);
 
   } catch (error) {
     console.error('获取安全统计信息失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取统计信息失败',
-      error: error.message
-    });
+    res.serverError('获取统计信息失败');
   }
 }));
 
@@ -306,10 +268,7 @@ router.post('/export-report', asyncHandler(async (req, res) => {
 
   if (!testId) {
     
-        return res.status(400).json({
-      success: false,
-      message: '需要提供测试ID'
-      });
+        return res.validationError([], '需要提供测试ID');
   }
 
   try {
@@ -340,19 +299,12 @@ router.post('/export-report', asyncHandler(async (req, res) => {
         break;
 
       default:
-        res.status(400).json({
-          success: false,
-          message: '不支持的导出格式'
-        });
+        res.validationError([], '不支持的导出格式');
     }
 
   } catch (error) {
     console.error('导出安全报告失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '导出报告失败',
-      error: error.message
-    });
+    res.serverError('导出报告失败');
   }
 }));
 
@@ -400,18 +352,11 @@ router.get('/recommendations', asyncHandler(async (req, res) => {
       ? Object.values(recommendations).flat()
       : recommendations[category] || [];
 
-    res.json({
-      success: true,
-      data: result
-    });
+    res.success(result);
 
   } catch (error) {
     console.error('获取安全建议失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取安全建议失败',
-      error: error.message
-    });
+    res.serverError('获取安全建议失败');
   }
 }));
 

@@ -18,26 +18,16 @@ router.post('/trend', asyncHandler(async (req, res) => {
   const { dataPoints, options = {} } = req.body;
 
   if (!dataPoints || !Array.isArray(dataPoints) || dataPoints.length < 2) {
-    return res.status(400).json({
-      success: false,
-      message: '需要至少2个数据点进行趋势分析'
-    });
+    return res.validationError([], '需要至少2个数据点进行趋势分析');
   }
 
   try {
     const result = await performTrendAnalysis(dataPoints, options);
     
-    res.json({
-      success: true,
-      data: result
-    });
+    res.success(result);
   } catch (error) {
     console.error('趋势分析失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '趋势分析失败',
-      error: error.message
-    });
+    res.serverError('趋势分析失败');
   }
 }));
 
@@ -48,26 +38,16 @@ router.post('/compare', asyncHandler(async (req, res) => {
   const { baseline, comparison, options = {} } = req.body;
 
   if (!baseline || !comparison || !Array.isArray(baseline) || !Array.isArray(comparison)) {
-    return res.status(400).json({
-      success: false,
-      message: '需要提供基准数据和对比数据'
-    });
+    return res.validationError([], '需要提供基准数据和对比数据');
   }
 
   try {
     const result = await performComparisonAnalysis(baseline, comparison, options);
     
-    res.json({
-      success: true,
-      data: result
-    });
+    res.success(result);
   } catch (error) {
     console.error('对比分析失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '对比分析失败',
-      error: error.message
-    });
+    res.serverError('对比分析失败');
   }
 }));
 
@@ -80,17 +60,10 @@ router.post('/performance', asyncHandler(async (req, res) => {
   try {
     const result = await analyzePerformanceMetrics(filter, req.user.id);
     
-    res.json({
-      success: true,
-      data: result
-    });
+    res.success(result);
   } catch (error) {
     console.error('性能分析失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '性能分析失败',
-      error: error.message
-    });
+    res.serverError('性能分析失败');
   }
 }));
 
@@ -102,26 +75,16 @@ router.post('/insights', asyncHandler(async (req, res) => {
 
   if (!dataType) {
     
-        return res.status(400).json({
-      success: false,
-      message: '需要指定数据类型'
-      });
+        return res.validationError([], '需要指定数据类型');
   }
 
   try {
     const result = await generateInsights(dataType, timeRange, req.user.id);
     
-    res.json({
-      success: true,
-      data: result
-    });
+    res.success(result);
   } catch (error) {
     console.error('洞察分析失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '洞察分析失败',
-      error: error.message
-    });
+    res.serverError('洞察分析失败');
   }
 }));
 

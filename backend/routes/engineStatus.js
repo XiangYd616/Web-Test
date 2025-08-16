@@ -174,10 +174,7 @@ router.get('/capabilities', optionalAuth, (req, res) => {
       website: getEngineCapabilities('website')
     };
 
-    res.json({
-      success: true,
-      data: capabilities
-    });
+    res.success(capabilities);
 
   } catch (error) {
     console.error('获取引擎能力失败:', error);

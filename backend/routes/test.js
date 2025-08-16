@@ -373,17 +373,10 @@ router.get('/k6/status', asyncHandler(async (req, res) => {
       engineStatus.error = 'K6 not found in PATH';
     }
 
-    res.json({
-      success: true,
-      data: engineStatus
-    });
+    res.success(engineStatus);
   } catch (error) {
     console.error('K6 status check failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'K6状态检查失败',
-      error: error.message
-    });
+    res.serverError('K6状态检查失败');
   }
 }));
 
@@ -396,18 +389,10 @@ router.post('/k6/install', authMiddleware, adminAuth, asyncHandler(async (req, r
     // 模拟安装过程
     console.log('Installing K6...');
 
-    res.json({
-      success: true,
-      message: 'K6安装请求已提交，请手动安装K6',
-      installUrl: 'https://k6.io/docs/getting-started/installation/'
-    });
+    res.success('https://k6.io/docs/getting-started/installation/', 'K6安装请求已提交，请手动安装K6');
   } catch (error) {
     console.error('K6 installation failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'K6安装失败',
-      error: error.message
-    });
+    res.serverError('K6安装失败');
   }
 }));
 
@@ -435,17 +420,10 @@ router.get('/lighthouse/status', asyncHandler(async (req, res) => {
       engineStatus.error = 'Lighthouse not installed';
     }
 
-    res.json({
-      success: true,
-      data: engineStatus
-    });
+    res.success(engineStatus);
   } catch (error) {
     console.error('Lighthouse status check failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Lighthouse状态检查失败',
-      error: error.message
-    });
+    res.serverError('Lighthouse状态检查失败');
   }
 }));
 
@@ -457,18 +435,10 @@ router.post('/lighthouse/install', authMiddleware, adminAuth, asyncHandler(async
   try {
     console.log('Installing Lighthouse...');
 
-    res.json({
-      success: true,
-      message: 'Lighthouse已包含在项目依赖中',
-      version: require('lighthouse/package.json').version
-    });
+    res.success(require('lighthouse/package.json').version, 'Lighthouse已包含在项目依赖中');
   } catch (error) {
     console.error('Lighthouse installation check failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Lighthouse安装检查失败',
-      error: error.message
-    });
+    res.serverError('Lighthouse安装检查失败');
   }
 }));
 
@@ -496,18 +466,10 @@ router.post('/lighthouse/run', authMiddleware, asyncHandler(async (req, res) => 
       }
     };
 
-    res.json({
-      success: true,
-      data: mockResult,
-      message: 'Lighthouse测试完成'
-    });
+    res.success(mockResult);
   } catch (error) {
     console.error('Lighthouse run failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Lighthouse运行失败',
-      error: error.message
-    });
+    res.serverError('Lighthouse运行失败');
   }
 }));
 
@@ -535,17 +497,10 @@ router.get('/playwright/status', asyncHandler(async (req, res) => {
       engineStatus.error = 'Playwright not installed';
     }
 
-    res.json({
-      success: true,
-      data: engineStatus
-    });
+    res.success(engineStatus);
   } catch (error) {
     console.error('Playwright status check failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Playwright状态检查失败',
-      error: error.message
-    });
+    res.serverError('Playwright状态检查失败');
   }
 }));
 
@@ -557,18 +512,10 @@ router.post('/playwright/install', authMiddleware, adminAuth, asyncHandler(async
   try {
     console.log('Installing Playwright...');
 
-    res.json({
-      success: true,
-      message: 'Playwright已包含在项目依赖中',
-      version: require('playwright/package.json').version
-    });
+    res.success(require('playwright/package.json').version, 'Playwright已包含在项目依赖中');
   } catch (error) {
     console.error('Playwright installation check failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Playwright安装检查失败',
-      error: error.message
-    });
+    res.serverError('Playwright安装检查失败');
   }
 }));
 
@@ -599,18 +546,10 @@ router.post('/playwright/run', authMiddleware, asyncHandler(async (req, res) => 
       }
     };
 
-    res.json({
-      success: true,
-      data: mockResult,
-      message: 'Playwright测试完成'
-    });
+    res.success(mockResult);
   } catch (error) {
     console.error('Playwright run failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Playwright运行失败',
-      error: error.message
-    });
+    res.serverError('Playwright运行失败');
   }
 }));
 
@@ -695,10 +634,7 @@ router.get('/status', asyncHandler(async (req, res) => {
     }
   }
 
-  res.json({
-    success: true,
-    data: engineStatuses
-  });
+  res.success(engineStatuses);
 }));
 
 /**
@@ -747,11 +683,7 @@ router.get('/history', optionalAuth, historyRateLimiter, asyncHandler(async (req
       endDate
     });
 
-    res.json({
-      success: true,
-      data: result.data,
-      pagination: result.pagination
-    });
+    res.success(result.data);
 
   } catch (error) {
     console.error('获取测试历史失败:', error);
@@ -841,10 +773,7 @@ router.get('/statistics', optionalAuth, asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error('获取测试统计信息失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取统计信息失败'
-    });
+    res.serverError('获取统计信息失败');
   }
 }));
 
@@ -955,10 +884,7 @@ async function handleTestHistory(req, res) {
     });
   } catch (error) {
     console.error('获取测试历史失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取测试历史失败'
-    });
+    res.serverError('获取测试历史失败');
   }
 }
 
@@ -1051,10 +977,7 @@ router.get('/queue/status', optionalAuth, asyncHandler(async (req, res) => {
       failedTests: 0
     };
 
-    res.json({
-      success: true,
-      data: queueStatus
-    });
+    res.success(queueStatus);
   } catch (error) {
     console.error('获取队列状态失败:', error);
     res.status(500).json({
@@ -1076,10 +999,7 @@ router.post('/:testId/cancel', authMiddleware, asyncHandler(async (req, res) => 
     // 临时返回成功响应
     console.log(`测试取消请求: ${testId} (服务已删除)`);
 
-    res.json({
-      success: true,
-      message: '测试已取消'
-    });
+    res.success('测试已取消');
   } catch (error) {
     console.error('取消测试失败:', error);
     res.status(500).json({
@@ -1104,10 +1024,7 @@ router.get('/cache/stats', optionalAuth, asyncHandler(async (req, res) => {
   try {
     const stats = smartCacheService.getStats();
 
-    res.json({
-      success: true,
-      data: stats
-    });
+    res.success(stats);
   } catch (error) {
     console.error('获取缓存统计失败:', error);
     res.status(500).json({
@@ -1125,10 +1042,7 @@ router.post('/cache/flush', authMiddleware, asyncHandler(async (req, res) => {
   try {
     await smartCacheService.flush();
 
-    res.json({
-      success: true,
-      message: '缓存已清空'
-    });
+    res.success('缓存已清空');
   } catch (error) {
     console.error('清空缓存失败:', error);
     res.status(500).json({
@@ -1156,11 +1070,7 @@ router.post('/cache/invalidate', authMiddleware, asyncHandler(async (req, res) =
   try {
     const invalidatedCount = await smartCacheService.invalidate(event, data);
 
-    res.json({
-      success: true,
-      message: `已失效 ${invalidatedCount} 条缓存记录`,
-      invalidatedCount
-    });
+    res.success(null, '已失效 ${invalidatedCount} 条缓存记录');
   } catch (error) {
     console.error('缓存失效失败:', error);
     res.status(500).json({
@@ -1181,10 +1091,7 @@ router.get('/:testId/status', optionalAuth, asyncHandler(async (req, res) => {
     // 从数据库获取测试状态
     const testStatus = await databaseService.getTestStatus(testId);
 
-    res.json({
-      success: true,
-      data: testStatus
-    });
+    res.success(testStatus);
 
   } catch (error) {
     console.error('获取测试状态失败:', error);
@@ -1215,10 +1122,7 @@ router.get('/:testId/result', optionalAuth, asyncHandler(async (req, res) => {
       });
     }
 
-    res.json({
-      success: true,
-      data: testResult
-    });
+    res.success(testResult);
 
   } catch (error) {
     console.error('获取测试结果失败:', error);
@@ -1241,10 +1145,7 @@ router.post('/:testId/stop', authMiddleware, asyncHandler(async (req, res) => {
     // 更新测试状态为已停止
     await databaseService.updateTestStatus(testId, 'stopped', null, '测试已被用户停止');
 
-    res.json({
-      success: true,
-      message: '测试已停止'
-    });
+    res.success('测试已停止');
 
   } catch (error) {
     console.error('停止测试失败:', error);
@@ -1267,10 +1168,7 @@ router.get('/config/templates', optionalAuth, asyncHandler(async (req, res) => {
     // 从数据库获取配置模板
     const templates = await databaseService.getConfigTemplates(testType);
 
-    res.json({
-      success: true,
-      data: templates
-    });
+    res.success(templates);
 
   } catch (error) {
     console.error('获取配置模板失败:', error);
@@ -1306,10 +1204,7 @@ router.post('/config/templates', authMiddleware, asyncHandler(async (req, res) =
       userId: req.user?.id
     });
 
-    res.json({
-      success: true,
-      data: template
-    });
+    res.success(template);
 
   } catch (error) {
     console.error('保存配置模板失败:', error);
@@ -1336,11 +1231,7 @@ router.post('/history', authMiddleware, asyncHandler(async (req, res) => {
     res.json(result);
   } catch (error) {
     console.error('创建测试记录失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '创建测试记录失败',
-      error: error.message
-    });
+    res.serverError('创建测试记录失败');
   }
 }));
 
@@ -1360,10 +1251,7 @@ router.put('/history/:recordId', authMiddleware, asyncHandler(async (req, res) =
 
     if (existingRecord.rows.length === 0) {
       
-        return res.status(404).json({
-        success: false,
-        message: '记录不存在或无权限访问'
-      });
+        return res.notFound('资源', '记录不存在或无权限访问');
     }
 
     const result = await testHistoryService.updateTestRecord(recordId, req.body);
@@ -1371,11 +1259,7 @@ router.put('/history/:recordId', authMiddleware, asyncHandler(async (req, res) =
     res.json(result);
   } catch (error) {
     console.error('更新测试记录失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '更新测试记录失败',
-      error: error.message
-    });
+    res.serverError('更新测试记录失败');
   }
 }));
 
@@ -1406,23 +1290,13 @@ router.get('/history/:recordId', optionalAuth, asyncHandler(async (req, res) => 
 
     if (result.rows.length === 0) {
       
-        return res.status(404).json({
-        success: false,
-        message: '记录不存在或无权限访问'
-      });
+        return res.notFound('资源', '记录不存在或无权限访问');
     }
 
-    res.json({
-      success: true,
-      data: testHistoryService.formatTestRecord(result.rows[0])
-    });
+    res.success(testHistoryService.formatTestRecord(result.rows[0]));
   } catch (error) {
     console.error('获取测试记录失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取测试记录失败',
-      error: error.message
-    });
+    res.serverError('获取测试记录失败');
   }
 }));
 
@@ -1438,11 +1312,7 @@ router.post('/history/:recordId/start', authMiddleware, asyncHandler(async (req,
     res.json(result);
   } catch (error) {
     console.error('开始测试失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '开始测试失败',
-      error: error.message
-    });
+    res.serverError('开始测试失败');
   }
 }));
 
@@ -1458,11 +1328,7 @@ router.post('/history/:recordId/progress', authMiddleware, asyncHandler(async (r
     res.json(result);
   } catch (error) {
     console.error('更新测试进度失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '更新测试进度失败',
-      error: error.message
-    });
+    res.serverError('更新测试进度失败');
   }
 }));
 
@@ -1478,11 +1344,7 @@ router.post('/history/:recordId/complete', authMiddleware, asyncHandler(async (r
     res.json(result);
   } catch (error) {
     console.error('完成测试失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '完成测试失败',
-      error: error.message
-    });
+    res.serverError('完成测试失败');
   }
 }));
 
@@ -1499,11 +1361,7 @@ router.post('/history/:recordId/fail', authMiddleware, asyncHandler(async (req, 
     res.json(result);
   } catch (error) {
     console.error('标记测试失败失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '标记测试失败失败',
-      error: error.message
-    });
+    res.serverError('标记测试失败失败');
   }
 }));
 
@@ -1520,11 +1378,7 @@ router.post('/history/:recordId/cancel', authMiddleware, asyncHandler(async (req
     res.json(result);
   } catch (error) {
     console.error('取消测试失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '取消测试失败',
-      error: error.message
-    });
+    res.serverError('取消测试失败');
   }
 }));
 
@@ -1540,11 +1394,7 @@ router.get('/history/:recordId/progress', authMiddleware, asyncHandler(async (re
     res.json(result);
   } catch (error) {
     console.error('获取测试进度失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取测试进度失败',
-      error: error.message
-    });
+    res.serverError('获取测试进度失败');
   }
 }));
 
@@ -1563,22 +1413,13 @@ router.delete('/history/:recordId', authMiddleware, asyncHandler(async (req, res
 
     if (result.rowCount === 0) {
       
-        return res.status(404).json({
-        success: false,
-        message: '测试记录不存在'
-      });
+        return res.notFound('资源', '测试记录不存在');
     }
 
-    res.json({
-      success: true,
-      message: '测试记录已删除'
-    });
+    res.success('测试记录已删除');
   } catch (error) {
     console.error('删除测试记录失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '删除测试记录失败'
-    });
+    res.serverError('删除测试记录失败');
   }
 }));
 
@@ -1643,10 +1484,7 @@ router.get('/analytics', authMiddleware, asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error('获取测试分析数据失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取测试分析数据失败'
-    });
+    res.serverError('获取测试分析数据失败');
   }
 }));
 
@@ -1707,10 +1545,7 @@ router.get('/stats', authMiddleware, asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error('获取测试统计失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取测试统计失败'
-    });
+    res.serverError('获取测试统计失败');
   }
 }));
 
@@ -1733,16 +1568,10 @@ router.get('/:testId', authMiddleware, asyncHandler(async (req, res) => {
       });
     }
 
-    res.json({
-      success: true,
-      data: result.data
-    });
+    res.success(result.data);
   } catch (error) {
     console.error('获取测试结果失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取测试结果失败'
-    });
+    res.serverError('获取测试结果失败');
   }
 }));
 
@@ -1755,20 +1584,14 @@ router.post('/website', optionalAuth, testRateLimiter, asyncHandler(async (req, 
 
   if (!url) {
     
-        return res.status(400).json({
-      success: false,
-      message: 'URL是必填的'
-      });
+        return res.validationError([], 'URL是必填的');
   }
 
   try {
     // 验证URL格式
     new URL(url);
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: '无效的URL格式'
-    });
+    return res.validationError([], '无效的URL格式');
   }
 
   try {
@@ -1783,24 +1606,14 @@ router.post('/website', optionalAuth, testRateLimiter, asyncHandler(async (req, 
 
     if (testResult.success && testResult.data) {
       console.log('📤 Sending nested data structure');
-      res.json({
-        success: true,
-        data: testResult.data
-      });
+      res.success(testResult.data);
     } else {
       console.log('📤 Sending direct data structure');
-      res.json({
-        success: true,
-        data: testResult
-      });
+      res.success(testResult);
     }
   } catch (error) {
     console.error('网站测试失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '网站测试失败',
-      error: error.message
-    });
+    res.serverError('网站测试失败');
   }
 }));
 
@@ -1870,11 +1683,7 @@ router.get('/stress/status/:testId', optionalAuth, asyncHandler(async (req, res)
       }
 
       // 如果没有找到历史记录，返回404而不是默认完成状态
-      return res.status(404).json({
-        success: false,
-        message: '测试不存在',
-        data: null
-      });
+      return res.notFound('资源', '测试不存在');
     }
 
     res.json({
@@ -1892,11 +1701,7 @@ router.get('/stress/status/:testId', optionalAuth, asyncHandler(async (req, res)
     });
   } catch (error) {
     console.error('获取压力测试状态失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取测试状态失败',
-      error: error.message
-    });
+    res.serverError('获取测试状态失败');
   }
 }));
 
@@ -1942,11 +1747,7 @@ router.post('/stress/cancel/:testId', authMiddleware, asyncHandler(async (req, r
     }
   } catch (error) {
     console.error('取消压力测试失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '取消测试失败',
-      error: error.message
-    });
+    res.serverError('取消测试失败');
   }
 }));
 
@@ -1965,11 +1766,7 @@ router.post('/stress/stop/:testId', authMiddleware, asyncHandler(async (req, res
     const result = { success: true, message: '测试已停止' };
 
     if (result.success) {
-      res.json({
-        success: true,
-        message: result.message,
-        data: result.data
-      });
+      res.success(result.message);
     } else {
       res.status(400).json({
         success: false,
@@ -1978,11 +1775,7 @@ router.post('/stress/stop/:testId', authMiddleware, asyncHandler(async (req, res
     }
   } catch (error) {
     console.error('停止压力测试失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '停止测试失败',
-      error: error.message
-    });
+    res.serverError('停止测试失败');
   }
 }));
 
@@ -2011,11 +1804,7 @@ router.get('/stress/running', optionalAuth, asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error('获取运行中测试失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取运行中测试失败',
-      error: error.message
-    });
+    res.serverError('获取运行中测试失败');
   }
 }));
 
@@ -2044,11 +1833,7 @@ router.post('/stress/cleanup-all', adminAuth, asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error('强制清理测试失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '强制清理失败',
-      error: error.message
-    });
+    res.serverError('强制清理失败');
   }
 }));
 
@@ -2472,11 +2257,7 @@ router.post('/stress', authMiddleware, testRateLimiter, validateURLMiddleware(),
     });
   } catch (error) {
     console.error('❌ 压力测试API处理失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '压力测试启动失败',
-      error: error.message
-    });
+    res.serverError('压力测试启动失败');
   }
 }));
 
@@ -2552,19 +2333,10 @@ router.post('/security',
         // 不影响主要响应，只记录错误
       }
 
-      res.json({
-        success: true,
-        data: testResult,
-        testType: 'security',
-        module: module || 'full'
-      });
+      res.success(testResult);
     } catch (error) {
       console.error('安全测试失败:', error);
-      res.status(500).json({
-        success: false,
-        message: '安全测试失败',
-        error: error.message
-      });
+      res.serverError('安全测试失败');
     }
   }));
 
@@ -2602,11 +2374,7 @@ router.get('/security/history',
       res.json(result);
     } catch (error) {
       console.error('获取安全测试历史失败:', error);
-      res.status(500).json({
-        success: false,
-        message: '获取安全测试历史失败',
-        error: error.message
-      });
+      res.serverError('获取安全测试历史失败');
     }
   }));
 
@@ -2622,11 +2390,7 @@ router.get('/security/statistics', optionalAuth, asyncHandler(async (req, res) =
     res.json(result);
   } catch (error) {
     console.error('获取安全测试统计失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取安全测试统计失败',
-      error: error.message
-    });
+    res.serverError('获取安全测试统计失败');
   }
 }));
 
@@ -2647,11 +2411,7 @@ router.get('/security/:testId', optionalAuth, asyncHandler(async (req, res) => {
     res.json(result);
   } catch (error) {
     console.error('获取安全测试结果失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取安全测试结果失败',
-      error: error.message
-    });
+    res.serverError('获取安全测试结果失败');
   }
 }));
 
@@ -2672,11 +2432,7 @@ router.delete('/security/:testId', optionalAuth, asyncHandler(async (req, res) =
     res.json(result);
   } catch (error) {
     console.error('删除安全测试结果失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '删除安全测试结果失败',
-      error: error.message
-    });
+    res.serverError('删除安全测试结果失败');
   }
 }));
 
@@ -2759,21 +2515,11 @@ router.post('/performance',
 
       console.log(`✅ Performance test completed for ${validatedURL} with score:`, testResult.score);
 
-      res.json({
-        success: true,
-        data: testResult,
-        testType: 'performance',
-        timestamp: new Date().toISOString()
-      });
+      res.success(testResult);
 
     } catch (error) {
       console.error('❌ Performance test failed:', error);
-      res.status(500).json({
-        success: false,
-        message: '性能测试失败',
-        error: error.message,
-        timestamp: new Date().toISOString()
-      });
+      res.serverError('性能测试失败');
     }
   }));
 
@@ -2816,19 +2562,11 @@ router.post('/performance/page-speed',
         transferSize: testResult.performance?.transferSize || Math.floor(Math.random() * 1500000) + 300000
       };
 
-      res.json({
-        success: true,
-        data: pageSpeedMetrics,
-        timestamp: new Date().toISOString()
-      });
+      res.success(pageSpeedMetrics);
 
     } catch (error) {
       console.error('❌ Page speed test failed:', error);
-      res.status(500).json({
-        success: false,
-        message: '页面速度检测失败',
-        error: error.message
-      });
+      res.serverError('页面速度检测失败');
     }
   }));
 
@@ -2865,19 +2603,11 @@ router.post('/performance/core-web-vitals', optionalAuth, testRateLimiter, valid
       tti: testResult.performance?.tti || Math.floor(Math.random() * 5000) + 2000
     };
 
-    res.json({
-      success: true,
-      data: coreWebVitals,
-      timestamp: new Date().toISOString()
-    });
+    res.success(coreWebVitals);
 
   } catch (error) {
     console.error('❌ Core Web Vitals test failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Core Web Vitals检测失败',
-      error: error.message
-    });
+    res.serverError('Core Web Vitals检测失败');
   }
 }));
 
@@ -2926,18 +2656,10 @@ router.post('/compatibility', optionalAuth, testRateLimiter, validateURLMiddlewa
       console.log(`✅ Enhanced compatibility test completed with detailed report`);
     }
 
-    res.json({
-      success: true,
-      data: testResult.data || testResult,
-      message: '兼容性测试完成'
-    });
+    res.success(testResult.data || testResult);
   } catch (error) {
     console.error('兼容性测试失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '兼容性测试失败',
-      error: error.message
-    });
+    res.serverError('兼容性测试失败');
   }
 }));
 
@@ -2958,18 +2680,10 @@ router.post('/caniuse', optionalAuth, testRateLimiter, asyncHandler(async (req, 
 
     console.log(`✅ Can I Use test completed with score: ${realResult.overallScore}`);
 
-    res.json({
-      success: true,
-      data: realResult,
-      message: 'Can I Use兼容性测试完成'
-    });
+    res.success(realResult);
   } catch (error) {
     console.error('Can I Use测试失败:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Can I Use测试失败',
-      error: error.message
-    });
+    res.serverError('Can I Use测试失败');
   }
 }));
 
@@ -3004,18 +2718,10 @@ router.post('/browserstack', optionalAuth, testRateLimiter, asyncHandler(async (
 
     console.log(`✅ BrowserStack test completed with score: ${mockResult.score}`);
 
-    res.json({
-      success: true,
-      data: mockResult,
-      message: 'BrowserStack兼容性测试完成'
-    });
+    res.success(mockResult);
   } catch (error) {
     console.error('BrowserStack测试失败:', error);
-    res.status(500).json({
-      success: false,
-      message: 'BrowserStack测试失败',
-      error: error.message
-    });
+    res.serverError('BrowserStack测试失败');
   }
 }));
 
@@ -3143,18 +2849,10 @@ router.post('/feature-detection', optionalAuth, testRateLimiter, asyncHandler(as
 
     console.log(`✅ Feature detection test completed with score: ${mockResult.score}`);
 
-    res.json({
-      success: true,
-      data: mockResult,
-      message: '特性检测兼容性测试完成'
-    });
+    res.success(mockResult);
   } catch (error) {
     console.error('特性检测测试失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '特性检测测试失败',
-      error: error.message
-    });
+    res.serverError('特性检测测试失败');
   }
 }));
 
@@ -3188,18 +2886,10 @@ router.post('/feature-detection', optionalAuth, testRateLimiter, asyncHandler(as
 
     console.log(`✅ Feature detection test completed with score: ${mockResult.score}`);
 
-    res.json({
-      success: true,
-      data: mockResult,
-      message: '特性检测测试完成'
-    });
+    res.success(mockResult);
   } catch (error) {
     console.error('特性检测测试失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '特性检测测试失败',
-      error: error.message
-    });
+    res.serverError('特性检测测试失败');
   }
 }));
 
@@ -3233,18 +2923,10 @@ router.post('/local-compatibility', optionalAuth, testRateLimiter, asyncHandler(
 
     console.log(`✅ Local compatibility test completed with score: ${mockResult.score}`);
 
-    res.json({
-      success: true,
-      data: mockResult,
-      message: '本地兼容性测试完成'
-    });
+    res.success(mockResult);
   } catch (error) {
     console.error('本地兼容性测试失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '本地兼容性测试失败',
-      error: error.message
-    });
+    res.serverError('本地兼容性测试失败');
   }
 }));
 
@@ -3297,19 +2979,11 @@ router.post('/performance/resources', optionalAuth, testRateLimiter, validateURL
       }
     };
 
-    res.json({
-      success: true,
-      data: resourceAnalysis,
-      timestamp: new Date().toISOString()
-    });
+    res.success(resourceAnalysis);
 
   } catch (error) {
     console.error('❌ Resource analysis failed:', error);
-    res.status(500).json({
-      success: false,
-      message: '资源分析失败',
-      error: error.message
-    });
+    res.serverError('资源分析失败');
   }
 }));
 
@@ -3322,10 +2996,7 @@ router.post('/performance/save', optionalAuth, asyncHandler(async (req, res) => 
 
   if (!result) {
     
-        return res.status(400).json({
-      success: false,
-      message: '测试结果数据是必填的'
-      });
+        return res.validationError([], '测试结果数据是必填的');
   }
 
   try {
@@ -3441,19 +3112,11 @@ router.post('/performance/save', optionalAuth, asyncHandler(async (req, res) => 
 
     console.log(`✅ Performance test result saved:`, sessionId);
 
-    res.json({
-      success: true,
-      message: '性能测试结果已保存',
-      testId: sessionId
-    });
+    res.success(sessionId, '性能测试结果已保存');
 
   } catch (error) {
     console.error('❌ Failed to save performance test result:', error);
-    res.status(500).json({
-      success: false,
-      message: '保存性能测试结果失败',
-      error: error.message
-    });
+    res.serverError('保存性能测试结果失败');
   }
 }));
 
@@ -3499,18 +3162,10 @@ router.post('/pagespeed', optionalAuth, testRateLimiter, validateURLMiddleware()
 
     console.log(`✅ PageSpeed test completed with score: ${mockResult.desktop.performanceScore}`);
 
-    res.json({
-      success: true,
-      data: mockResult,
-      message: 'Google PageSpeed测试完成'
-    });
+    res.success(mockResult);
   } catch (error) {
     console.error('PageSpeed测试失败:', error);
-    res.status(500).json({
-      success: false,
-      message: 'PageSpeed测试失败',
-      error: error.message
-    });
+    res.serverError('PageSpeed测试失败');
   }
 }));
 
@@ -3561,18 +3216,10 @@ router.post('/gtmetrix', optionalAuth, testRateLimiter, asyncHandler(async (req,
 
     console.log(`✅ GTmetrix test completed with performance score: ${mockResult.scores.performance}`);
 
-    res.json({
-      success: true,
-      data: mockResult,
-      message: 'GTmetrix测试完成'
-    });
+    res.success(mockResult);
   } catch (error) {
     console.error('GTmetrix测试失败:', error);
-    res.status(500).json({
-      success: false,
-      message: 'GTmetrix测试失败',
-      error: error.message
-    });
+    res.serverError('GTmetrix测试失败');
   }
 }));
 
@@ -3612,18 +3259,10 @@ router.post('/webpagetest', optionalAuth, testRateLimiter, asyncHandler(async (r
 
     console.log(`✅ WebPageTest completed with score: ${mockResult.score}`);
 
-    res.json({
-      success: true,
-      data: mockResult,
-      message: 'WebPageTest测试完成'
-    });
+    res.success(mockResult);
   } catch (error) {
     console.error('WebPageTest测试失败:', error);
-    res.status(500).json({
-      success: false,
-      message: 'WebPageTest测试失败',
-      error: error.message
-    });
+    res.serverError('WebPageTest测试失败');
   }
 }));
 
@@ -3688,18 +3327,10 @@ router.post('/lighthouse', optionalAuth, testRateLimiter, asyncHandler(async (re
 
     console.log(`✅ Lighthouse test completed with score: ${mockResult.lhr.categories.performance.score}`);
 
-    res.json({
-      success: true,
-      data: mockResult,
-      message: 'Lighthouse测试完成'
-    });
+    res.success(mockResult);
   } catch (error) {
     console.error('Lighthouse测试失败:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Lighthouse测试失败',
-      error: error.message
-    });
+    res.serverError('Lighthouse测试失败');
   }
 }));
 
@@ -3738,18 +3369,10 @@ router.post('/local-performance', optionalAuth, testRateLimiter, asyncHandler(as
 
     console.log(`✅ Local performance test completed with score: ${mockResult.score}`);
 
-    res.json({
-      success: true,
-      data: mockResult,
-      message: '本地性能测试完成'
-    });
+    res.success(mockResult);
   } catch (error) {
     console.error('本地性能测试失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '本地性能测试失败',
-      error: error.message
-    });
+    res.serverError('本地性能测试失败');
   }
 }));
 
@@ -3762,19 +3385,13 @@ router.post('/ux', optionalAuth, testRateLimiter, asyncHandler(async (req, res) 
 
   if (!url) {
     
-        return res.status(400).json({
-      success: false,
-      message: 'URL是必填的'
-      });
+        return res.validationError([], 'URL是必填的');
   }
 
   try {
     new URL(url);
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: '无效的URL格式'
-    });
+    return res.validationError([], '无效的URL格式');
   }
 
   try {
@@ -3783,17 +3400,10 @@ router.post('/ux', optionalAuth, testRateLimiter, asyncHandler(async (req, res) 
       userId: req.user?.id
     });
 
-    res.json({
-      success: true,
-      data: testResult
-    });
+    res.success(testResult);
   } catch (error) {
     console.error('用户体验测试失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '用户体验测试失败',
-      error: error.message
-    });
+    res.serverError('用户体验测试失败');
   }
 }));
 
@@ -3878,21 +3488,11 @@ router.post('/seo', optionalAuth, testRateLimiter, validateURLMiddleware(), asyn
 
     const seoResult = await seoResponse.json();
 
-    res.json({
-      success: true,
-      data: seoResult,
-      testType: 'seo',
-      timestamp: new Date().toISOString(),
-      note: 'This endpoint redirects to /api/seo/analyze for compatibility'
-    });
+    res.success(seoResult);
 
   } catch (error) {
     console.error('❌ SEO test failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'SEO测试失败',
-      error: error.message
-    });
+    res.serverError('SEO测试失败');
   }
 }));
 
@@ -3919,13 +3519,7 @@ router.post('/accessibility', optionalAuth, testRateLimiter, validateURLMiddlewa
 
     const accessibilityResult = await accessibilityResponse.json();
 
-    res.json({
-      success: true,
-      data: accessibilityResult.data,
-      testType: 'accessibility',
-      timestamp: new Date().toISOString(),
-      note: 'This endpoint redirects to /api/accessibility/check for compatibility'
-    });
+    res.success(accessibilityResult.data);
 
   } catch (error) {
     console.error('❌ Accessibility test failed:', error);
@@ -3952,28 +3546,19 @@ router.post('/api-test', optionalAuth, testRateLimiter, asyncHandler(async (req,
   // 验证必填参数
   if (!baseUrl) {
     
-        return res.status(400).json({
-      success: false,
-      message: 'API基础URL是必填的'
-      });
+        return res.validationError([], 'API基础URL是必填的');
   }
 
   if (!endpoints || endpoints.length === 0) {
     
-        return res.status(400).json({
-      success: false,
-      message: '至少需要一个API端点'
-      });
+        return res.validationError([], '至少需要一个API端点');
   }
 
   try {
     // 验证baseUrl格式
     new URL(baseUrl);
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: 'API基础URL格式无效'
-    });
+    return res.validationError([], 'API基础URL格式无效');
   }
 
   try {
@@ -4003,18 +3588,10 @@ router.post('/api-test', optionalAuth, testRateLimiter, asyncHandler(async (req,
 
     const testResult = await realAPITestEngine.runAPITest(testConfig);
 
-    res.json({
-      success: true,
-      data: testResult,
-      message: 'API测试完成'
-    });
+    res.success(testResult);
   } catch (error) {
     console.error('API测试失败:', error);
-    res.status(500).json({
-      success: false,
-      message: 'API测试失败',
-      error: error.message
-    });
+    res.serverError('API测试失败');
   }
 }));
 
@@ -4034,22 +3611,13 @@ router.delete('/:testId', authMiddleware, asyncHandler(async (req, res) => {
 
     if (result.rowCount === 0) {
       
-        return res.status(404).json({
-        success: false,
-        message: '测试结果不存在'
-      });
+        return res.notFound('资源', '测试结果不存在');
     }
 
-    res.json({
-      success: true,
-      message: '测试结果已删除'
-    });
+    res.success('测试结果已删除');
   } catch (error) {
     console.error('删除测试结果失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '删除测试结果失败'
-    });
+    res.serverError('删除测试结果失败');
   }
 }));
 
@@ -4086,17 +3654,10 @@ router.get('/k6/status', asyncHandler(async (req, res) => {
       engineStatus.error = 'K6 not found in PATH';
     }
 
-    res.json({
-      success: true,
-      data: engineStatus
-    });
+    res.success(engineStatus);
   } catch (error) {
     console.error('K6 status check failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'K6状态检查失败',
-      error: error.message
-    });
+    res.serverError('K6状态检查失败');
   }
 }));
 
@@ -4124,17 +3685,10 @@ router.get('/lighthouse/status', asyncHandler(async (req, res) => {
       engineStatus.error = 'Lighthouse not installed';
     }
 
-    res.json({
-      success: true,
-      data: engineStatus
-    });
+    res.success(engineStatus);
   } catch (error) {
     console.error('Lighthouse status check failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Lighthouse状态检查失败',
-      error: error.message
-    });
+    res.serverError('Lighthouse状态检查失败');
   }
 }));
 
@@ -4162,17 +3716,10 @@ router.get('/playwright/status', asyncHandler(async (req, res) => {
       engineStatus.error = 'Playwright not installed';
     }
 
-    res.json({
-      success: true,
-      data: engineStatus
-    });
+    res.success(engineStatus);
   } catch (error) {
     console.error('Playwright status check failed:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Playwright状态检查失败',
-      error: error.message
-    });
+    res.serverError('Playwright状态检查失败');
   }
 }));
 
@@ -4243,24 +3790,14 @@ router.get('/:engine/status', asyncHandler(async (req, res) => {
         break;
 
       default:
-        return res.status(404).json({
-          success: false,
-          message: `未知的测试引擎: ${engine}`
-        });
+        return res.notFound('资源', '未知的测试引擎: ${engine}');
     }
 
-    res.json({
-      success: true,
-      data: engineStatus
-    });
+    res.success(engineStatus);
 
   } catch (error) {
     console.error(`获取${engine}引擎状态失败:`, error);
-    res.status(500).json({
-      success: false,
-      message: `获取${engine}引擎状态失败`,
-      error: error.message
-    });
+    res.serverError('获取${engine}引擎状态失败');
   }
 }));
 
@@ -4340,18 +3877,12 @@ router.post('/proxy-latency', optionalAuth, testRateLimiter, asyncHandler(async 
   // 验证代理配置
   if (!proxy || !proxy.enabled) {
     
-        return res.status(400).json({
-      success: false,
-      message: '代理配置无效或未启用'
-      });
+        return res.validationError([], '代理配置无效或未启用');
   }
 
   if (!proxy.host) {
     
-        return res.status(400).json({
-      success: false,
-      message: '代理地址不能为空'
-      });
+        return res.validationError([], '代理地址不能为空');
   }
 
   const startTime = Date.now();
@@ -4534,18 +4065,12 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
   // 验证代理配置
   if (!proxy || !proxy.enabled) {
     
-        return res.status(400).json({
-      success: false,
-      message: '代理配置无效或未启用'
-      });
+        return res.validationError([], '代理配置无效或未启用');
   }
 
   if (!proxy.host) {
     
-        return res.status(400).json({
-      success: false,
-      message: '代理地址不能为空'
-      });
+        return res.validationError([], '代理地址不能为空');
   }
 
   try {
@@ -4731,21 +4256,7 @@ router.get('/geo-status', optionalAuth, asyncHandler(async (req, res) => {
   const geoStatus = geoLocationService.getStatus();
   const updateStatus = geoUpdateService.getStatus();
 
-  res.json({
-    success: true,
-    geoService: geoStatus,
-    autoUpdate: updateStatus,
-    message: geoStatus.useLocalDB ?
-      'MaxMind 本地数据库已启用' :
-      'API 查询模式（建议下载本地数据库）',
-    recommendations: geoStatus.useLocalDB ?
-      (updateStatus.enabled ? [] : ['启用自动更新以保持数据库最新']) :
-      [
-        '设置 MAXMIND_LICENSE_KEY 环境变量',
-        '手动触发数据库下载',
-        '启用自动更新'
-      ]
-  });
+  res.success(geoStatus);
 }));
 
 /**
@@ -4764,11 +4275,7 @@ router.post('/geo-update', optionalAuth, asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error('手动更新失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '更新过程中发生错误',
-      error: error.message
-    });
+    res.serverError('更新过程中发生错误');
   }
 }));
 
@@ -4790,18 +4297,10 @@ router.put('/geo-config', optionalAuth, asyncHandler(async (req, res) => {
 
     const status = geoUpdateService.getStatus();
 
-    res.json({
-      success: true,
-      message: '配置更新成功',
-      status: status
-    });
+    res.success(status, '配置更新成功');
   } catch (error) {
     console.error('配置更新失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '配置更新失败',
-      error: error.message
-    });
+    res.serverError('配置更新失败');
   }
 }));
 
@@ -4815,10 +4314,7 @@ router.post('/proxy-analyze', optionalAuth, asyncHandler(async (req, res) => {
 
     if (!proxy || !proxy.host) {
       
-        return res.status(400).json({
-        success: false,
-        message: '缺少代理配置信息'
-      });
+        return res.validationError([], '缺少代理配置信息');
     }
 
     console.log('🔍 开始分析代理配置:', `${proxy.host}:${proxy.port}`);
@@ -4826,19 +4322,11 @@ router.post('/proxy-analyze', optionalAuth, asyncHandler(async (req, res) => {
     const validator = new ProxyValidator();
     const analysis = await validator.analyzeProxy(proxy);
 
-    res.json({
-      success: true,
-      message: '代理分析完成',
-      analysis: analysis
-    });
+    res.success(analysis, '代理分析完成');
 
   } catch (error) {
     console.error('代理分析失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '代理分析失败',
-      error: error.message
-    });
+    res.serverError('代理分析失败');
   }
 }));
 

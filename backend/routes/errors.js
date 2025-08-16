@@ -33,10 +33,7 @@ router.post('/report', asyncHandler(async (req, res) => {
   // 验证必要字段
   if (!id || !type || !message) {
     
-        return res.status(400).json({
-      success: false,
-      message: '缺少必要的错误信息字段'
-      });
+        return res.validationError([], '缺少必要的错误信息字段');
   }
 
   // 记录前端错误
@@ -87,11 +84,7 @@ router.post('/report', asyncHandler(async (req, res) => {
   // 可以在这里添加错误统计、告警等逻辑
   await processErrorReport(errorReport);
 
-  res.json({
-    success: true,
-    message: '错误报告已记录',
-    reportId: id
-  });
+  res.success(id, '错误报告已记录');
 }));
 
 /**
@@ -114,10 +107,7 @@ router.get('/stats', asyncHandler(async (req, res) => {
     }
   };
 
-  res.json({
-    success: true,
-    data: stats
-  });
+  res.success(stats);
 }));
 
 /**
@@ -245,11 +235,7 @@ async function updateErrorStats(errorReport) {
  * 健康检查端点
  */
 router.get('/health', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Error reporting service is healthy',
-    timestamp: new Date().toISOString()
-  });
+  res.success(new Date().toISOString(), 'Error reporting service is healthy');
 });
 
 module.exports = router;

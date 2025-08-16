@@ -25,10 +25,7 @@ router.get('/profile', authMiddleware, asyncHandler(async (req, res) => {
 
     if (result.rows.length === 0) {
       
-        return res.status(404).json({
-        success: false,
-        message: '用户不存在'
-      });
+        return res.notFound('资源', '用户不存在');
     }
 
     const user = result.rows[0];
@@ -51,10 +48,7 @@ router.get('/profile', authMiddleware, asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error('获取用户资料失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取用户资料失败'
-    });
+    res.serverError('获取用户资料失败');
   }
 }));
 
@@ -68,17 +62,11 @@ router.put('/profile', authMiddleware, asyncHandler(async (req, res) => {
   // 验证输入
   if (username && username.length < 3) {
     
-        return res.status(400).json({
-      success: false,
-      message: '用户名长度至少3位'
-      });
+        return res.validationError([], '用户名长度至少3位');
   }
 
   if (website && !isValidUrl(website)) {
-    return res.status(400).json({
-      success: false,
-      message: '网站URL格式无效'
-    });
+    return res.validationError([], '网站URL格式无效');
   }
 
   try {
@@ -91,10 +79,7 @@ router.put('/profile', authMiddleware, asyncHandler(async (req, res) => {
       );
 
       if (existingUser.rows.length > 0) {
-        return res.status(409).json({
-          success: false,
-          message: '用户名已被使用'
-      });
+        return res.conflict('资源', '用户名已被使用');
       }
     }
 
@@ -128,10 +113,7 @@ router.put('/profile', authMiddleware, asyncHandler(async (req, res) => {
     }
 
     if (Object.keys(updates).length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: '没有提供要更新的字段'
-      });
+      return res.validationError([], '没有提供要更新的字段');
     }
 
     const setClause = Object.values(updates).join(', ');
@@ -145,17 +127,10 @@ router.put('/profile', authMiddleware, asyncHandler(async (req, res) => {
 
     const user = result.rows[0];
 
-    res.json({
-      success: true,
-      message: '资料更新成功',
-      data: user
-    });
+    res.success(user, '资料更新成功');
   } catch (error) {
     console.error('更新用户资料失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '更新用户资料失败'
-    });
+    res.serverError('更新用户资料失败');
   }
 }));
 
@@ -178,16 +153,10 @@ router.get('/preferences', authMiddleware, asyncHandler(async (req, res) => {
       auto_save: true
     };
 
-    res.json({
-      success: true,
-      data: preferences
-    });
+    res.success(preferences);
   } catch (error) {
     console.error('获取用户偏好失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取用户偏好失败'
-    });
+    res.serverError('获取用户偏好失败');
   }
 }));
 
@@ -237,17 +206,10 @@ router.put('/preferences', authMiddleware, asyncHandler(async (req, res) => {
       );
     }
 
-    res.json({
-      success: true,
-      message: '偏好设置更新成功',
-      data: result.rows[0]
-    });
+    res.success(result.rows[0], '偏好设置更新成功');
   } catch (error) {
     console.error('更新用户偏好失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '更新用户偏好失败'
-    });
+    res.serverError('更新用户偏好失败');
   }
 }));
 
@@ -290,10 +252,7 @@ router.get('/activity', authMiddleware, asyncHandler(async (req, res) => {
     });
   } catch (error) {
     console.error('获取用户活动日志失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '获取用户活动日志失败'
-    });
+    res.serverError('获取用户活动日志失败');
   }
 }));
 
@@ -306,10 +265,7 @@ router.delete('/account', authMiddleware, asyncHandler(async (req, res) => {
 
   if (!password) {
     
-        return res.status(400).json({
-      success: false,
-      message: '需要提供密码确认'
-      });
+        return res.validationError([], '需要提供密码确认');
   }
 
   try {
@@ -321,10 +277,7 @@ router.delete('/account', authMiddleware, asyncHandler(async (req, res) => {
 
     if (userResult.rows.length === 0) {
       
-        return res.status(404).json({
-        success: false,
-        message: '用户不存在'
-      });
+        return res.notFound('资源', '用户不存在');
     }
 
     const bcrypt = require('bcryptjs');
@@ -332,10 +285,7 @@ router.delete('/account', authMiddleware, asyncHandler(async (req, res) => {
 
     if (!isPasswordValid) {
       
-        return res.status(401).json({
-        success: false,
-        message: '密码错误'
-      });
+        return res.unauthorized('密码错误');
     }
 
     // 软删除用户（标记为非活跃）
@@ -344,16 +294,10 @@ router.delete('/account', authMiddleware, asyncHandler(async (req, res) => {
       [req.user.id]
     );
 
-    res.json({
-      success: true,
-      message: '账户已删除'
-    });
+    res.success('账户已删除');
   } catch (error) {
     console.error('删除用户账户失败:', error);
-    res.status(500).json({
-      success: false,
-      message: '删除用户账户失败'
-    });
+    res.serverError('删除用户账户失败');
   }
 }));
 
@@ -400,18 +344,12 @@ router.get('/notifications', authMiddleware, asyncHandler(async (req, res) => {
       data: row.data
     }));
 
-    res.json({
-      success: true,
-      data: notifications
-    });
+    res.success(notifications);
 
   } catch (error) {
     console.error('获取用户通知失败:', error);
     // 如果数据库表不存在，返回空数组
-    res.json({
-      success: true,
-      data: []
-    });
+    res.success([]);
   }
 }));
 
@@ -477,25 +415,8 @@ router.get('/stats/:userId', authMiddleware, asyncHandler(async (req, res) => {
       testsByTypeObj[row.test_type] = parseInt(row.count);
     });
 
-    res.json({
-      success: true,
-      data: {
-        total_tests: parseInt(stats.total_tests) || 0,
-        tests_today: parseInt(stats.tests_today) || 0,
-        tests_this_week: parseInt(stats.tests_this_week) || 0,
-        tests_this_month: parseInt(stats.tests_this_month) || 0,
-        successful_tests: parseInt(stats.successful_tests) || 0,
-        failed_tests: parseInt(stats.failed_tests) || 0,
-        average_score: parseFloat(stats.average_score) || 0,
-        total_test_time: parseInt(stats.total_test_time) || 0,
-        most_used_test_type: mostUsedType,
-        tests_by_type: testsByTypeObj,
-        recent_activity: recentActivity.rows.map(row => ({
-          test_type: row.test_type,
-          status: row.status,
-          score: row.score,
-          created_at: row.created_at
-        }))
+    res.success({
+        total_tests: parseInt(stats.total_tests) || 0))
       }
     });
 

@@ -79,11 +79,7 @@ router.get('/', authMiddleware, validateQuery(alertQuerySchema), asyncHandler(as
         status
     });
 
-    res.json({
-        success: true,
-        data: alerts.data,
-        pagination: alerts.pagination
-    });
+    res.success(alerts.data);
 }));
 
 /**
@@ -107,10 +103,7 @@ router.get('/stats', authMiddleware, asyncHandler(async (req, res) => {
 
     const stats = await alertService.getAlertStats(userId, timeRange);
 
-    res.json({
-        success: true,
-        data: stats
-    });
+    res.success(stats);
 }));
 
 /**
@@ -145,10 +138,7 @@ router.put('/:id/acknowledge', authMiddleware, asyncHandler(async (req, res) => 
         });
     }
 
-    res.json({
-        success: true,
-        message: '告警已确认'
-    });
+    res.success('告警已确认');
 }));
 
 /**
@@ -183,10 +173,7 @@ router.put('/:id/resolve', authMiddleware, asyncHandler(async (req, res) => {
         });
     }
 
-    res.json({
-        success: true,
-        message: '告警已解决'
-    });
+    res.success('告警已解决');
 }));
 
 /**
@@ -268,10 +255,7 @@ router.get('/:id', authMiddleware, asyncHandler(async (req, res) => {
         });
     }
 
-    res.json({
-        success: true,
-        data: alert
-    });
+    res.success(alert);
 }));
 
 /**
@@ -306,10 +290,7 @@ router.delete('/:id', authMiddleware, asyncHandler(async (req, res) => {
         });
     }
 
-    res.json({
-        success: true,
-        message: '告警已删除'
-    });
+    res.success('告警已删除');
 }));
 
 /**
@@ -359,10 +340,7 @@ router.get('/rules', authMiddleware, asyncHandler(async (req, res) => {
 
     const rules = await alertService.getAlertRules(userId);
 
-    res.json({
-        success: true,
-        data: rules
-    });
+    res.success(rules);
 }));
 
 /**
@@ -386,11 +364,7 @@ router.put('/rules', authMiddleware, asyncHandler(async (req, res) => {
 
     const updated = await alertService.updateAlertRules(userId, rules);
 
-    res.json({
-        success: true,
-        data: updated,
-        message: '告警规则更新成功'
-    });
+    res.success(updated);
 }));
 
 /**
@@ -414,10 +388,7 @@ router.get('/history/stats', authMiddleware, asyncHandler(async (req, res) => {
 
     const stats = await alertService.getAlertHistoryStats(userId, timeRange);
 
-    res.json({
-        success: true,
-        data: stats
-    });
+    res.success(stats);
 }));
 
 module.exports = router;
