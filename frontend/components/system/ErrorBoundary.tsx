@@ -131,6 +131,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     try {
       const authData = localStorage.getItem('auth-data');
       if (authData) {
+        
         const parsed = JSON.parse(authData);
         return parsed.user?.id;
       }
@@ -215,9 +216,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     const { maxRetries = 3 } = this.props;
 
     if (this.state.retryCount >= maxRetries) {
-      console.warn('Maximum retry attempts reached');
+      
+        console.warn('Maximum retry attempts reached');
       return;
-    }
+      }
 
     // 清除之前的超时
     this.retryTimeouts.forEach(timeout => clearTimeout(timeout));
@@ -276,8 +278,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
     // 使用自定义错误UI
     if (fallback && error && errorId) {
-      return fallback(error, errorId, this.handleRetry);
-    }
+      
+        return fallback(error, errorId, this.handleRetry);
+      }
 
     // 默认错误UI
     return (
@@ -469,8 +472,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   render(): ReactNode {
     if (this.state.hasError) {
-      return this.renderErrorUI();
-    }
+      
+        return this.renderErrorUI();
+      }
 
     return this.props.children;
   }

@@ -17,12 +17,13 @@ function requirePermission(resource, action, options = {}) {
     try {
       // 检查用户是否已认证
       if (!req.user || !req.user.id) {
+        
         return res.status(401).json({
           success: false,
           error: {
             code: 'UNAUTHORIZED',
             message: '用户未认证'
-          }
+      }
         });
       }
 
@@ -113,8 +114,9 @@ function requirePermission(resource, action, options = {}) {
 
         // 调用自定义拒绝处理函数
         if (options.onDenied) {
-          return options.onDenied(req, res, permissionResult.reason);
-        }
+          
+        return options.onDenied(req, res, permissionResult.reason);
+      }
 
         Logger.warn('Permission check failed', { 
           userId, 
@@ -135,6 +137,7 @@ function requirePermission(resource, action, options = {}) {
 
       // 如果是可选权限检查，允许继续
       if (options.optional) {
+        
         return next();
       }
 
@@ -156,12 +159,13 @@ function requireBatchPermissions(permissions, options = {}) {
   return async (req, res, next) => {
     try {
       if (!req.user || !req.user.id) {
+        
         return res.status(401).json({
           success: false,
           error: {
             code: 'UNAUTHORIZED',
             message: '用户未认证'
-          }
+      }
         });
       }
 
@@ -194,13 +198,14 @@ function requireBatchPermissions(permissions, options = {}) {
       const allAllowed = Object.values(batchResult.results).every(result => result.allowed);
 
       if (allAllowed || options.requireAny) {
+        
         // 如果所有权限都通过，或者只需要任一权限通过
         const hasAnyPermission = Object.values(batchResult.results).some(result => result.allowed);
         
         if (allAllowed || (options.requireAny && hasAnyPermission)) {
           req.batchPermissionResults = batchResult;
           return next();
-        }
+      }
       }
 
       // 权限检查失败
@@ -251,12 +256,13 @@ function requireRole(roleNames, options = {}) {
   return async (req, res, next) => {
     try {
       if (!req.user || !req.user.id) {
+        
         return res.status(401).json({
           success: false,
           error: {
             code: 'UNAUTHORIZED',
             message: '用户未认证'
-          }
+      }
         });
       }
 
@@ -272,6 +278,7 @@ function requireRole(roleNames, options = {}) {
         : roles.some(role => userRoleNames.includes(role));
 
       if (hasRequiredRole) {
+        
         req.userRoles = userRoles;
         return next();
       }
@@ -474,7 +481,9 @@ function Role(roleNames, options = {}) {
  */
 async function checkPermission(req, resource, action, resourceId = null) {
   if (!req.user || !req.user.id) {
-    return { allowed: false, reason: 'User not authenticated' };
+    
+        return { allowed: false, reason: 'User not authenticated'
+      };
   }
 
   const context = {
@@ -509,8 +518,9 @@ async function checkPermission(req, resource, action, resourceId = null) {
  */
 async function hasRole(req, roleName) {
   if (!req.user || !req.user.id) {
-    return false;
-  }
+    
+        return false;
+      }
 
   try {
     const userRoles = await rbacService.getUserRoles(req.user.id);
@@ -526,8 +536,9 @@ async function hasRole(req, roleName) {
  */
 async function hasAnyRole(req, roleNames) {
   if (!req.user || !req.user.id) {
-    return false;
-  }
+    
+        return false;
+      }
 
   try {
     const userRoles = await rbacService.getUserRoles(req.user.id);

@@ -315,9 +315,13 @@ const TestHistory: React.FC<TestHistoryProps> = ({ className = '' }) => {
     if (!duration) return '-';
 
     if (duration < 1000) {
-      return `${duration}ms`;
+      
+        return `${duration
+      }ms`;
     } else if (duration < 60000) {
-      return `${(duration / 1000).toFixed(1)}s`;
+      
+        return `${(duration / 1000).toFixed(1)
+      }s`;
     } else {
       return `${(duration / 60000).toFixed(1)}m`;
     }
@@ -343,8 +347,10 @@ const TestHistory: React.FC<TestHistoryProps> = ({ className = '' }) => {
 
   // 未登录状态显示
   if (!isAuthenticated) {
-    return (
-      <section className={`enhanced-test-history ${className}`}>
+    
+        return (
+      <section className={`enhanced-test-history ${className
+      }`}>
         <div className="p-12 text-center">
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-8 max-w-md mx-auto">
             <Shield className="w-16 h-16 mx-auto mb-6 text-gray-500" />

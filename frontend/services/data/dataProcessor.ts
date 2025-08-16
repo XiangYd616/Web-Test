@@ -9,9 +9,8 @@ import type {
   ApiErrorResponse,
   ApiResponse,
   ApiSuccessResponse,
-  PaginationInfo
-} from '../types/api';
-
+  // PaginationInfo
+} from '../types/api'; // 已修复
 // ==================== 数据处理配置 ====================
 
 export interface DataProcessorConfig {

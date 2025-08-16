@@ -1,8 +1,8 @@
+import { AlertCircle, CheckCircle, Eye, EyeOff, Lock, Mail, Moon, Sun, User } from 'lucide-react';
 import React, { useState } from 'react';
-import {AlertCircle, CheckCircle, Eye, EyeOff, Lock, Mail, Moon, Sun, User} from 'lucide-react';
-import {Link, useNavigate} from 'react-router-dom';
-import {useAuth} from '../../../contexts/AuthContext.tsx';
-import {useTheme} from '../../../contexts/ThemeContext.tsx';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../contexts/AuthContext.tsx';
+import { useTheme } from '../../../contexts/ThemeContext.tsx';
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -39,16 +39,18 @@ const Register: React.FC = () => {
 
     // 验证密码
     if (formData.password !== formData.confirmPassword) {
-      setError('两次输入的密码不一致');
+      
+        setError('两次输入的密码不一致');
       setIsLoading(false);
       return;
-    }
+      }
 
     if (passwordStrength < 3) {
-      setError('密码强度不够，请设置更复杂的密码');
+      
+        setError('密码强度不够，请设置更复杂的密码');
       setIsLoading(false);
       return;
-    }
+      }
 
     try {
       await register(formData);

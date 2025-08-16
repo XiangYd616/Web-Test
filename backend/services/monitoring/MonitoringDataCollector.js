@@ -32,9 +32,10 @@ class MonitoringDataCollector extends EventEmitter {
      */
     start() {
         if (this.isRunning) {
-            logger.warn('监控数据收集器已在运行中');
+            
+        logger.warn('监控数据收集器已在运行中');
             return;
-        }
+      }
 
         logger.info('启动监控数据收集器...');
 
@@ -50,8 +51,9 @@ class MonitoringDataCollector extends EventEmitter {
      */
     async stop() {
         if (!this.isRunning) {
-            return;
-        }
+            
+        return;
+      }
 
         logger.info('停止监控数据收集器...');
 
@@ -75,9 +77,10 @@ class MonitoringDataCollector extends EventEmitter {
     async collectData(dataType, data) {
         try {
             if (!this.isRunning) {
-                logger.warn('数据收集器未运行，忽略数据收集');
+                
+        logger.warn('数据收集器未运行，忽略数据收集');
                 return;
-            }
+      }
 
             const timestamp = new Date().toISOString();
             const dataPoint = {
@@ -214,8 +217,9 @@ class MonitoringDataCollector extends EventEmitter {
      */
     async flushBuffer() {
         if (this.dataBuffer.size === 0) {
-            return;
-        }
+            
+        return;
+      }
 
         const startTime = Date.now();
         const dataPoints = Array.from(this.dataBuffer.values());

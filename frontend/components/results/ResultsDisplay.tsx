@@ -6,8 +6,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   Play, Pause, RotateCcw, Wifi, WifiOff, Bell, BellOff,
-  TrendingUp, Activity, Clock, AlertCircle
-} from 'lucide-react';
+  // TrendingUp, Activity, Clock, AlertCircle
+} from 'lucide-react'; // 已修复
 import TestResults from './TestResults';
 import {createApiUrl} from '../../config/api';
 
@@ -62,14 +62,15 @@ const RealTimeResultsDisplay: React.FC<RealTimeResultsDisplayProps> = ({
   // 建立WebSocket连接
   const connectWebSocket = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
-      return;
-    }
+      
+        return;
+      }
 
     setConnectionStatus('connecting');
     
     try {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//${window.location.host}/ws/test-results`;
+      const wsUrl = `${protocol}/${window.location.host}/ws/test-results`;
       
       wsRef.current = new WebSocket(wsUrl);
       

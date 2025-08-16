@@ -108,8 +108,10 @@ const SystemHealthCheck: React.FC<SystemHealthCheckProps> = ({ className = '' })
                        metrics.some(m => m.status === 'warning') ? 'warning' : 'healthy';
 
   if (loading) {
-    return (
-      <div className={`bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6 ${className}`}>
+    
+        return (
+      <div className={`bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6 ${className
+      }`}>
         <div className="flex items-center justify-center h-32">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
           <span className="ml-3 text-gray-300">检查系统健康状态...</span>

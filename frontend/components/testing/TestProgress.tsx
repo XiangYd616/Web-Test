@@ -132,15 +132,18 @@ export const RealTimeTestProgress: React.FC<RealTimeTestProgressProps> = ({
     const remainingSeconds = seconds % 60;
     
     if (minutes > 0) {
-      return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+      
+        return `${minutes
+      }:${remainingSeconds.toString().padStart(2, '0')}`;
     }
     return `${remainingSeconds}s`;
   };
 
   const getEstimatedTimeRemaining = (): string => {
     if (progress.progress <= 0 || progress.status !== TestStatus.RUNNING) {
-      return '--';
-    }
+      
+        return '--';
+      }
     
     const estimatedTotal = (elapsedTime / progress.progress) * 100;
     const remaining = estimatedTotal - elapsedTime;

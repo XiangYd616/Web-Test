@@ -274,6 +274,7 @@ class ComparisonService {
       const response = await fetch(`${this.baseUrl}/${comparisonId}/export?${params}`);
 
       if (format === 'json') {
+        
         const data = await response.json();
         return data.success ? data.downloadUrl : '';
       } else {

@@ -401,7 +401,9 @@ class LoadGenerator {
    */
   calculatePercentiles(sortedTimes) {
     if (sortedTimes.length === 0) {
-      return { p50: 0, p90: 0, p95: 0, p99: 0 };
+      
+        return { p50: 0, p90: 0, p95: 0, p99: 0
+      };
     }
     
     const getPercentile = (p) => {

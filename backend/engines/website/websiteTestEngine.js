@@ -197,8 +197,9 @@ class WebsiteTestEngine {
 
             // 只处理同域名链接（除非允许外部链接）
             if (!config.followExternalLinks && linkUrl.hostname !== baseUrl.hostname) {
-              return;
-            }
+              
+        return;
+      }
 
             // 过滤掉锚点、邮件、电话等链接
             if (linkUrl.protocol === 'http:' || linkUrl.protocol === 'https:') {
@@ -402,13 +403,15 @@ class WebsiteTestEngine {
     const totalPages = pageResults.length;
 
     if (totalPages === 0) {
-      return {
+      
+        return {
         totalPages: 0,
         healthyPages: 0,
         warningPages: 0,
         errorPages: 0,
         overallScore: 0,
-        categories: {}
+        categories: {
+      }
       };
     }
 
@@ -537,10 +540,11 @@ class WebsiteTestEngine {
   async stopTest(testId) {
     const test = this.activeTests.get(testId);
     if (test && test.status === 'running') {
-      test.status = 'cancelled';
+      
+        test.status = 'cancelled';
       this.activeTests.set(testId, test);
       return true;
-    }
+      }
     return false;
   }
 }

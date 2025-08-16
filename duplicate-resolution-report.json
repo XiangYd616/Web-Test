@@ -1,0 +1,67 @@
+{
+  "timestamp": "2025-08-16T05:02:00.879Z",
+  "dryRun": false,
+  "summary": {
+    "totalActions": 10,
+    "deletions": 4,
+    "renames": 6
+  },
+  "actions": [
+    {
+      "type": "delete",
+      "file": "frontend/components/testing/TestConfigPanel.tsx",
+      "reason": "删除重复文件: UnifiedTestConfigPanel支持所有9种测试类型，功能更完整"
+    },
+    {
+      "type": "rename",
+      "from": "frontend/components/testing/UnifiedTestConfigPanel.tsx",
+      "to": "frontend/components/testing/TestConfigPanel.tsx",
+      "reason": "UnifiedTestConfigPanel支持所有9种测试类型，功能更完整"
+    },
+    {
+      "type": "delete",
+      "file": "frontend/components/testing/TestResultsPanel.tsx",
+      "reason": "删除重复文件: UnifiedTestResultsPanel支持所有测试类型，功能更完整"
+    },
+    {
+      "type": "rename",
+      "from": "frontend/components/testing/UnifiedTestResultsPanel.tsx",
+      "to": "frontend/components/testing/TestResultsPanel.tsx",
+      "reason": "UnifiedTestResultsPanel支持所有测试类型，功能更完整"
+    },
+    {
+      "type": "rename",
+      "from": "frontend/components/testing/UnifiedTestManager.tsx",
+      "to": "frontend/components/testing/TestManager.tsx",
+      "reason": "保留UnifiedTestManager，重命名为TestManager"
+    },
+    {
+      "type": "delete",
+      "file": "frontend/pages/core/testing/SecurityTestRefactored.tsx",
+      "reason": "删除重复文件: 删除Refactored版本，保留原版本"
+    },
+    {
+      "type": "delete",
+      "file": "frontend/pages/core/testing/TestPage.tsx",
+      "reason": "删除重复文件: UnifiedTestPage功能更完整"
+    },
+    {
+      "type": "rename",
+      "from": "frontend/pages/core/testing/UnifiedTestPage.tsx",
+      "to": "frontend/pages/core/testing/TestPage.tsx",
+      "reason": "UnifiedTestPage功能更完整"
+    },
+    {
+      "type": "rename",
+      "from": "frontend/hooks/useUnifiedTestFlow.ts",
+      "to": "frontend/hooks/useTestFlow.ts",
+      "reason": "重命名为useTestFlow"
+    },
+    {
+      "type": "rename",
+      "from": "frontend/components/testing/RealTimeTestProgress.tsx",
+      "to": "frontend/components/testing/TestProgress.tsx",
+      "reason": "重命名为TestProgress"
+    }
+  ]
+}

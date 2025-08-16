@@ -242,8 +242,9 @@ function queryCacheMiddleware(cacheManager) {
             } = options;
 
             if (skipCache) {
-                return req.optimizedQuery(sql, params);
-            }
+                
+        return req.optimizedQuery(sql, params);
+      }
 
             // 生成缓存键
             const key = cacheKey || generateQueryCacheKey(sql, params);
@@ -252,12 +253,13 @@ function queryCacheMiddleware(cacheManager) {
                 // 尝试从缓存获取
                 const cached = await cacheManager.get('db_queries', key);
                 if (cached) {
-                    return {
+                    
+        return {
                         rows: cached.rows,
                         rowCount: cached.rowCount,
                         cached: true,
                         queryTime: 0
-                    };
+      };
                 }
 
                 // 缓存未命中，执行查询
@@ -357,14 +359,15 @@ function queryStatsMiddleware() {
 function dbHealthCheckMiddleware() {
     return async (req, res, next) => {
         if (req.path === '/api/db/health' && req.method === 'GET') {
-            try {
+            
+        try {
                 const optimizer = await initializeOptimizer();
                 const health = await optimizer.healthCheck();
 
                 return res.json({
                     success: true,
                     data: health
-                });
+      });
             } catch (error) {
                 return res.status(500).json({
                     success: false,
@@ -383,14 +386,15 @@ function dbHealthCheckMiddleware() {
 function performanceReportMiddleware() {
     return async (req, res, next) => {
         if (req.path === '/api/db/performance' && req.method === 'GET') {
-            try {
+            
+        try {
                 const optimizer = await initializeOptimizer();
                 const report = optimizer.getPerformanceReport();
 
                 return res.json({
                     success: true,
                     data: report
-                });
+      });
             } catch (error) {
                 return res.status(500).json({
                     success: false,
@@ -400,11 +404,13 @@ function performanceReportMiddleware() {
         }
 
         if (req.path === '/api/db/optimize' && req.method === 'POST') {
-            try {
+            
+        try {
                 if (!req.user || req.user.role !== 'admin') {
                     return res.status(403).json({
                         success: false,
-                        error: { code: 'FORBIDDEN', message: '权限不足' }
+                        error: { code: 'FORBIDDEN', message: '权限不足'
+      }
                     });
                 }
 
@@ -468,8 +474,9 @@ function createQueryOptimizationMiddleware(cacheManager, options = {}) {
 
         function runNext() {
             if (index >= middlewares.length) {
-                return next();
-            }
+                
+        return next();
+      }
 
             const middleware = middlewares[index++];
             middleware(req, res, runNext);

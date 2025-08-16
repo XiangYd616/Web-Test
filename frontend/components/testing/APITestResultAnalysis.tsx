@@ -17,8 +17,8 @@ import {
   Shield,
   TrendingUp,
   XCircle,
-  Zap
-} from 'lucide-react';
+  // Zap
+} from 'lucide-react'; // 已修复
 import React, { useMemo, useState } from 'react';
 import {
   Bar,
@@ -33,9 +33,8 @@ import {
   ResponsiveContainer,
   Tooltip,
   XAxis,
-  YAxis
-} from 'recharts';
-
+  // YAxis
+} from 'recharts'; // 已修复
 interface APITestEndpointResult {
   id: string;
   name: string;

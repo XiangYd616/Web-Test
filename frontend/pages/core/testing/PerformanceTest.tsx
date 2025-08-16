@@ -123,9 +123,10 @@ const PerformanceTest: React.FC = () => {
 
   const handleStartTest = async () => {
     if (!config.url) {
-      alert('请输入测试URL');
+      
+        alert('请输入测试URL');
       return;
-    }
+      }
 
     try {
       await startTest(config);
@@ -288,12 +289,14 @@ const PerformanceTest: React.FC = () => {
 
   const renderResults = () => {
     if (isRunning) {
-      return (
+      
+        return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
           <div className="text-center">
             <LoadingStates
               type="progress"
-              progress={progress}
+              progress={progress
+      }
               message="正在执行性能测试，请稍候..."
             />
             <div className="mt-4">
@@ -307,11 +310,13 @@ const PerformanceTest: React.FC = () => {
     }
 
     if (error) {
-      return (
+      
+        return (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
           <div className="text-center text-red-600 dark:text-red-400">
             <h3 className="text-lg font-semibold mb-2">测试失败</h3>
-            <p className="mb-4">{error}</p>
+            <p className="mb-4">{error
+      }</p>
             <Button variant="primary" onClick={handleRetryTest}>
               重新测试
             </Button>
@@ -321,7 +326,8 @@ const PerformanceTest: React.FC = () => {
     }
 
     if (result) {
-      return (
+      
+        return (
         <TestResults
           result={{
             id: result.testId,
@@ -337,7 +343,7 @@ const PerformanceTest: React.FC = () => {
               passed: result.accessibility?.passes?.length || 0,
               failed: result.accessibility?.violations?.length || 0,
               warnings: result.performance?.opportunities?.length || 0
-            },
+      },
             details: [
               ...(result.performance?.opportunities?.map(opp => ({
                 category: '性能优化',

@@ -76,8 +76,9 @@ export const Table = <T extends Record<string, any>>({
   // 获取行键值
   const getRowKey = (record: T, index: number): string => {
     if (typeof rowKey === 'function') {
-      return rowKey(record);
-    }
+      
+        return rowKey(record);
+      }
     return record[rowKey] || index.toString();
   };
 
@@ -119,16 +120,18 @@ export const Table = <T extends Record<string, any>>({
     // 应用筛选
     Object.entries(filters).forEach(([field, value]) => {
       if (value) {
+        
         result = result.filter(record => {
           const fieldValue = record[field];
           return String(fieldValue).toLowerCase().includes(value.toLowerCase());
-        });
+      });
       }
     });
 
     // 应用排序
     if (sortField && sortOrder) {
-      result.sort((a, b) => {
+      
+        result.sort((a, b) => {
         const aValue = a[sortField];
         const bValue = b[sortField];
 
@@ -251,11 +254,13 @@ export const Table = <T extends Record<string, any>>({
   // 渲染表体
   const renderBody = () => {
     if (loading) {
-      return (
+      
+        return (
         <tbody>
           <tr>
             <td
-              colSpan={columns.length + (rowSelection ? 1 : 0)}
+              colSpan={columns.length + (rowSelection ? 1 : 0)
+      }
               className={cn(
                 'text-center text-gray-500 dark:text-gray-400',
                 cellPadding[size]
@@ -272,11 +277,13 @@ export const Table = <T extends Record<string, any>>({
     }
 
     if (paginatedData.length === 0) {
-      return (
+      
+        return (
         <tbody>
           <tr>
             <td
-              colSpan={columns.length + (rowSelection ? 1 : 0)}
+              colSpan={columns.length + (rowSelection ? 1 : 0)
+      }
               className={cn(
                 'text-center text-gray-500 dark:text-gray-400',
                 cellPadding[size]

@@ -358,8 +358,9 @@ class SecurityRiskAssessment {
    */
   calculateOverallRiskScore(vulnerabilityAnalysis) {
     if (vulnerabilityAnalysis.totalCount === 0) {
-      return 0;
-    }
+      
+        return 0;
+      }
 
     let totalScore = 0;
     let weightSum = 0;

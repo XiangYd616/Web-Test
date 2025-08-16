@@ -109,29 +109,32 @@ export const parseErrorMessage = (errorMessage: string | null, status: string): 
 
   // 取消状态的处理
   if (status === 'cancelled') {
-    return {
+    
+        return {
       type: 'cancel',
       message: errorMessage,
       reason: errorMessage.includes('用户') ? '用户主动取消' : errorMessage
-    };
+      };
   }
 
   // 超时状态的处理
   if (status === 'timeout') {
-    return {
+    
+        return {
       type: 'timeout',
       message: errorMessage,
       details: '测试执行时间超过预设限制'
-    };
+      };
   }
 
   // 失败状态的处理
   if (status === 'failed') {
-    return {
+    
+        return {
       type: 'error',
       message: errorMessage,
       details: errorMessage
-    };
+      };
   }
 
   return {
@@ -149,7 +152,8 @@ export const calculateTestCompletion = (record: any): number => {
 
   // 如果测试失败或取消，根据实际数据计算完成度
   if (record.status === 'failed' || record.status === 'cancelled') {
-    const totalRequests = record.totalRequests || record.results?.metrics?.totalRequests || 0;
+    
+        const totalRequests = record.totalRequests || record.results?.metrics?.totalRequests || 0;
     const expectedDuration = record.config?.duration || 60; // 默认60秒
     const actualDuration = record.duration || 0;
 
@@ -163,7 +167,7 @@ export const calculateTestCompletion = (record: any): number => {
 
       // 取两者的平均值
       return Math.round((timeCompletion + requestCompletion) / 2);
-    }
+      }
 
     return Math.round(timeCompletion);
   }
@@ -177,14 +181,18 @@ export const formatDuration = (seconds: number | null | undefined): string => {
   if (!seconds || seconds <= 0) return '-';
 
   if (seconds < 60) {
-    return `${seconds}秒`;
+    
+        return `${seconds
+      }秒`;
   }
 
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
 
   if (minutes < 60) {
-    return remainingSeconds > 0 ? `${minutes}分${remainingSeconds}秒` : `${minutes}分钟`;
+    
+        return remainingSeconds > 0 ? `${minutes
+      }分${remainingSeconds}秒` : `${minutes}分钟`;
   }
 
   const hours = Math.floor(minutes / 60);
@@ -216,9 +224,11 @@ export const getStatusDescription = (status: string, errorInfo?: ParsedErrorInfo
   const config = getStatusConfig(status);
 
   if (errorInfo) {
-    switch (errorInfo.type) {
+    
+        switch (errorInfo.type) {
       case 'cancel':
-        return `测试被取消：${errorInfo.reason || errorInfo.message}`;
+        return `测试被取消：${errorInfo.reason || errorInfo.message
+      }`;
       case 'timeout':
         return `测试超时：${errorInfo.details || errorInfo.message}`;
       case 'error':

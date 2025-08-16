@@ -104,8 +104,9 @@ class TestStateManager {
   startTest(testId: string): boolean {
     const test = this.state.activeTests.get(testId);
     if (!test || test.status !== 'idle') {
-      return false;
-    }
+      
+        return false;
+      }
 
     this.updateState(state => {
       const testToUpdate = state.activeTests.get(testId);
@@ -127,8 +128,9 @@ class TestStateManager {
   updateTestProgress(testId: string, progress: number): boolean {
     const test = this.state.activeTests.get(testId);
     if (!test || test.status !== 'running') {
-      return false;
-    }
+      
+        return false;
+      }
 
     this.updateState(state => {
       const testToUpdate = state.activeTests.get(testId);
@@ -146,8 +148,9 @@ class TestStateManager {
   completeTest(testId: string, results: any): boolean {
     const test = this.state.activeTests.get(testId);
     if (!test || test.status !== 'running') {
-      return false;
-    }
+      
+        return false;
+      }
 
     this.updateState(state => {
       const testToUpdate = state.activeTests.get(testId);
@@ -179,8 +182,9 @@ class TestStateManager {
   failTest(testId: string, error: string): boolean {
     const test = this.state.activeTests.get(testId);
     if (!test) {
-      return false;
-    }
+      
+        return false;
+      }
 
     this.updateState(state => {
       const testToUpdate = state.activeTests.get(testId);
@@ -213,8 +217,9 @@ class TestStateManager {
                  this.state.queuedTests.find(t => t.id === testId);
     
     if (!test) {
-      return false;
-    }
+      
+        return false;
+      }
 
     this.updateState(state => {
       // 从活跃测试中移除
@@ -401,7 +406,7 @@ class TestStateManager {
    * 生成测试ID
    */
   private generateTestId(): string {
-    return `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `test_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 }
 

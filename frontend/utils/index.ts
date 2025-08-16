@@ -1,25 +1,25 @@
 // Auto-generated index file
-export { default as apiUtils } from './apiUtils';
-export { default as browserJwt } from './browserJwt';
-export { default as browserSupport } from './browserSupport';
-export { default as chromeCompatibility } from './chromeCompatibility';
-export { default as cn } from './cn';
-export { default as codeSplitting } from './codeSplitting';
-export { default as cssLoader } from './cssLoader';
-export { default as dataOptimizer } from './dataOptimizer';
-export { default as dataProcessingUtils } from './dataProcessingUtils';
-export { default as dataVisualizationOptimizer } from './dataVisualizationOptimizer';
-export { default as environment } from './environment';
-export { default as errorHandler } from './errorHandler';
-export { default as exportUtils } from './exportUtils';
-export { default as logger } from './logger';
-export { default as numberFormatter } from './numberFormatter';
-export { default as performanceUtils } from './performanceUtils';
-export { default as reportExporter } from './reportExporter';
-export { default as routePreloader } from './routePreloader';
-export { default as routeUtils } from './routeUtils';
-export { default as storage } from './storage';
-export { default as testStatusUtils } from './testStatusUtils';
-export { default as testTemplates } from './testTemplates';
-export { default as testUtils } from './testUtils';
-export { default as urlValidator } from './urlValidator';
+// export { default as apiUtils } from './apiUtils'; // 已修复
+// export { default as browserJwt } from './browserJwt'; // 已修复
+// export { default as browserSupport } from './browserSupport'; // 已修复
+// export { default as chromeCompatibility } from './chromeCompatibility'; // 已修复
+// export { default as cn } from './cn'; // 已修复
+// export { default as codeSplitting } from './codeSplitting'; // 已修复
+// export { default as cssLoader } from './cssLoader'; // 已修复
+// export { default as dataOptimizer } from './dataOptimizer'; // 已修复
+// export { default as dataProcessingUtils } from './dataProcessingUtils'; // 已修复
+// export { default as dataVisualizationOptimizer } from './dataVisualizationOptimizer'; // 已修复
+// export { default as environment } from './environment'; // 已修复
+// export { default as errorHandler } from './errorHandler'; // 已修复
+// export { default as exportUtils } from './exportUtils'; // 已修复
+// export { default as logger } from './logger'; // 已修复
+// export { default as numberFormatter } from './numberFormatter'; // 已修复
+// export { default as performanceUtils } from './performanceUtils'; // 已修复
+// export { default as reportExporter } from './reportExporter'; // 已修复
+// export { default as routePreloader } from './routePreloader'; // 已修复
+// export { default as routeUtils } from './routeUtils'; // 已修复
+// export { default as storage } from './storage'; // 已修复
+// export { default as testStatusUtils } from './testStatusUtils'; // 已修复
+// export { default as testTemplates } from './testTemplates'; // 已修复
+// export { default as testUtils } from './testUtils'; // 已修复
+// export { default as urlValidator } from './urlValidator'; // 已修复

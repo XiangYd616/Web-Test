@@ -29,8 +29,10 @@ const AuthStatusIndicator: React.FC<AuthStatusIndicatorProps> = ({
 
   // 侧边栏显示模式
   if (showInSidebar) {
-    return (
-      <div className={`${className}`}>
+    
+        return (
+      <div className={`${className
+      }`}>
         {isAuthenticated ? (
           <div className="space-y-2">
             {/* 用户信息 */}
@@ -81,8 +83,10 @@ const AuthStatusIndicator: React.FC<AuthStatusIndicatorProps> = ({
 
   // 紧凑模式
   if (compact) {
-    return (
-      <div className={`flex items-center space-x-2 ${className}`}>
+    
+        return (
+      <div className={`flex items-center space-x-2 ${className
+      }`}>
         {isAuthenticated ? (
           <>
             <div className="w-6 h-6 bg-green-500/20 rounded-full flex items-center justify-center">

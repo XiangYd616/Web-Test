@@ -116,9 +116,10 @@ const UXTest: React.FC = () => {
     }
 
     if (!config.url) {
-      setError('请输入要测试的网站URL');
+      
+        setError('请输入要测试的网站URL');
       return;
-    }
+      }
 
     setIsRunning(true);
     setProgress(0);

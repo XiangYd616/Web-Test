@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 import {Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
 
-// // import '../../../components/stress/StatusLabel.css'; // 文件已删除 // CSS文件不存在，已注释
+// // // import '../../../components/stress/StatusLabel.css'; // 文件已删除 // 文件已删除 // CSS文件不存在，已注释
 import {DataProcessingUtils} from '../../../utils/dataProcessingUtils.ts';
 
 // 智能数据采样函数 - 移到组件外部避免 hooks 顺序问题
@@ -114,19 +114,22 @@ const StressTestDetail: React.FC = () => {
 
     // 优先使用已计算的错误率
     if (record.errorRate !== undefined && record.errorRate !== null) {
-      return record.errorRate;
-    }
+      
+        return record.errorRate;
+      }
     if (metrics.errorRate !== undefined && metrics.errorRate !== null) {
-      return metrics.errorRate;
-    }
+      
+        return metrics.errorRate;
+      }
 
     // 从失败请求数和总请求数计算
     const failed = record.failedRequests || metrics.failedRequests || 0;
     const total = record.totalRequests || metrics.totalRequests || 0;
 
     if (total > 0) {
-      return (failed / total) * 100;
-    }
+      
+        return (failed / total) * 100;
+      }
 
     return 0;
   };
@@ -231,15 +234,19 @@ const StressTestDetail: React.FC = () => {
     const roundedSeconds = Math.round(seconds * 10) / 10;
 
     if (roundedSeconds < 60) {
-      // 小于60秒时，显示小数位（如果不为0）
-      return roundedSeconds % 1 === 0 ? `${roundedSeconds}秒` : `${roundedSeconds}秒`;
+      
+        // 小于60秒时，显示小数位（如果不为0）
+      return roundedSeconds % 1 === 0 ? `${roundedSeconds
+      }秒` : `${roundedSeconds}秒`;
     }
 
     const minutes = Math.floor(roundedSeconds / 60);
     const remainingSeconds = Math.round((roundedSeconds % 60) * 10) / 10;
 
     if (remainingSeconds === 0) {
-      return `${minutes}分`;
+      
+        return `${minutes
+      }分`;
     }
 
     // 显示小数位（如果不为0）
@@ -253,10 +260,11 @@ const StressTestDetail: React.FC = () => {
     if (record.results?.actualDuration) return record.results.actualDuration;
     if (record.duration) return record.duration;
     if (record.startTime && record.endTime) {
-      const start = new Date(record.startTime).getTime();
+      
+        const start = new Date(record.startTime).getTime();
       const end = new Date(record.endTime).getTime();
       return Math.floor((end - start) / 1000);
-    }
+      }
     return 0;
   };
 
@@ -264,17 +272,20 @@ const StressTestDetail: React.FC = () => {
   const getOverallScore = () => {
     // 优先使用 overallScore，然后尝试从 results 中获取
     if (record.overallScore !== undefined && record.overallScore !== null) {
-      return Math.round(record.overallScore * 10) / 10; // 保留一位小数
-    }
+      
+        return Math.round(record.overallScore * 10) / 10; // 保留一位小数
+      }
     if (record.results?.overallScore !== undefined && record.results?.overallScore !== null) {
-      return Math.round(record.results.overallScore * 10) / 10;
-    }
+      
+        return Math.round(record.results.overallScore * 10) / 10;
+      }
     // 如果有平均响应时间，可以基于此计算一个简单的评分
     if (record.averageResponseTime || record.results?.metrics?.averageResponseTime) {
-      const avgTime = record.averageResponseTime || record.results?.metrics?.averageResponseTime;
+      
+        const avgTime = record.averageResponseTime || record.results?.metrics?.averageResponseTime;
       const score = Math.max(0, 100 - Math.min(100, avgTime / 10));
       return Math.round(score * 10) / 10;
-    }
+      }
     return null;
   };
 
@@ -413,9 +424,10 @@ const StressTestDetail: React.FC = () => {
   // 重新测试
   const retestWithSameConfig = () => {
     if (!record) {
-      alert('无法获取测试记录信息');
+      
+        alert('无法获取测试记录信息');
       return;
-    }
+      }
 
     setShowRetestDialog(true);
   };
@@ -619,7 +631,8 @@ const StressTestDetail: React.FC = () => {
   };
 
   if (loading) {
-    return (
+    
+        return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
@@ -627,15 +640,17 @@ const StressTestDetail: React.FC = () => {
         </div>
       </div>
     );
-  }
+      }
 
   if (error || !record) {
-    return (
+    
+        return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <XCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-white mb-2">加载失败</h2>
-          <p className="text-gray-400 mb-4">{error}</p>
+          <p className="text-gray-400 mb-4">{error
+      }</p>
           <button
             type="button"
             onClick={() => navigate('/stress-test', { state: { activeTab: 'history' } })}
@@ -1320,7 +1335,8 @@ const StressTestDetail: React.FC = () => {
                             tickFormatter={(value) => {
                               // 🔧 改进：计算相对于测试开始的时间，提高到0.01秒精度
                               if (finalChartData.length > 0) {
-                                const startTime = new Date(finalChartData[0].timestamp).getTime();
+                                
+        const startTime = new Date(finalChartData[0].timestamp).getTime();
                                 const currentTime = new Date(value).getTime();
                                 const elapsedSeconds = (currentTime - startTime) / 1000; // 保留小数
 
@@ -1328,7 +1344,8 @@ const StressTestDetail: React.FC = () => {
                                 const seconds = Math.floor(elapsedSeconds % 60);
                                 const ms = Math.floor((elapsedSeconds % 1) * 100); // 0.01秒精度
 
-                                return minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}` : `${seconds}.${ms.toString().padStart(2, '0')}`;
+                                return minutes > 0 ? `${minutes
+      }:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}` : `${seconds}.${ms.toString().padStart(2, '0')}`;
                               }
 
                               // 备用方案：显示绝对时间
@@ -1437,7 +1454,8 @@ const StressTestDetail: React.FC = () => {
                             tickFormatter={(value) => {
                               // 🔧 改进：计算相对于测试开始的时间，提高到0.01秒精度
                               if (finalChartData.length > 0) {
-                                const startTime = new Date(finalChartData[0].timestamp).getTime();
+                                
+        const startTime = new Date(finalChartData[0].timestamp).getTime();
                                 const currentTime = new Date(value).getTime();
                                 const elapsedSeconds = (currentTime - startTime) / 1000; // 保留小数
 
@@ -1445,7 +1463,8 @@ const StressTestDetail: React.FC = () => {
                                 const seconds = Math.floor(elapsedSeconds % 60);
                                 const ms = Math.floor((elapsedSeconds % 1) * 100); // 0.01秒精度
 
-                                return minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}` : `${seconds}.${ms.toString().padStart(2, '0')}`;
+                                return minutes > 0 ? `${minutes
+      }:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}` : `${seconds}.${ms.toString().padStart(2, '0')}`;
                               }
 
                               // 备用方案：显示绝对时间

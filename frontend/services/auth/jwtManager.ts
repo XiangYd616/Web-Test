@@ -114,12 +114,13 @@ class DeviceFingerprinter {
    */
   private static async hashString(str: string): Promise<string> {
     if (crypto.subtle) {
-      const encoder = new TextEncoder();
+      
+        const encoder = new TextEncoder();
       const data = encoder.encode(str);
       const hashBuffer = await crypto.subtle.digest('SHA-256', data);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    } else {
+      } else {
       // 降级到简单哈希
       let hash = 0;
       for (let i = 0; i < str.length; i++) {
@@ -453,7 +454,8 @@ export class JwtManager {
   async refreshTokens(): Promise<RefreshResult> {
     const refreshToken = this.getRefreshToken();
     if (!refreshToken) {
-      return {
+      
+        return {
         success: false,
         error: '没有刷新token',
         requiresReauth: true

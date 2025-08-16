@@ -69,9 +69,10 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
 
   const handleExport = async () => {
     if (!testResults.length) {
-      alert('没有可导出的测试数据');
+      
+        alert('没有可导出的测试数据');
       return;
-    }
+      }
 
     setIsGenerating(true);
 
@@ -140,10 +141,12 @@ const ReportExporter: React.FC<ReportExporterProps> = ({
   };
 
   if (!isOpen) {
-    return (
+    
+        return (
       <button
         type="button"
-        onClick={() => setIsOpen(true)}
+        onClick={() => setIsOpen(true)
+      }
         className={`flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors ${className}`}
       >
         <Download className="w-4 h-4" />

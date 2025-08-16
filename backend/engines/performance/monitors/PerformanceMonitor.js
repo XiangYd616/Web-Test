@@ -481,8 +481,9 @@ class RealTimePerformanceMonitor extends EventEmitter {
   getPerformanceTrends(monitorId, timeRange = '24h') {
     const task = this.monitoringTasks.get(monitorId);
     if (!task || !task.performanceHistory.length) {
-      return null;
-    }
+      
+        return null;
+      }
 
     const now = new Date();
     const timeRangeMs = this.parseTimeRange(timeRange);
@@ -494,7 +495,9 @@ class RealTimePerformanceMonitor extends EventEmitter {
     );
 
     if (recentHistory.length < 2) {
-      return { error: '数据不足，无法分析趋势' };
+      
+        return { error: '数据不足，无法分析趋势'
+      };
     }
 
     const trends = this.analyzeTrends(recentHistory);
@@ -663,7 +666,9 @@ class RealTimePerformanceMonitor extends EventEmitter {
   getMonitoringStatus(monitorId) {
     const task = this.monitoringTasks.get(monitorId);
     if (!task) {
-      return { error: '监控任务不存在' };
+      
+        return { error: '监控任务不存在'
+      };
     }
 
     const baseline = this.performanceBaselines.get(monitorId);

@@ -31,12 +31,14 @@ export class ProxyService {
       // 首先尝试使用后端API
       const backendResponse = await this.fetchViaBackend(cleanUrl, signal);
       if (backendResponse) {
+        
         return backendResponse;
       }
 
       // 如果后端失败，尝试使用代理API
       const proxyResponse = await this.fetchViaProxy(cleanUrl, signal);
       if (proxyResponse) {
+        
         return proxyResponse;
       }
 
@@ -224,7 +226,8 @@ export class ProxyService {
           clearTimeout(timeoutId);
 
           if (response.ok) {
-            const loadTime = Date.now() - startTime;
+            
+        const loadTime = Date.now() - startTime;
 
             // 处理不同代理服务的响应格式
             if (proxyUrl.includes('allorigins')) {
@@ -233,7 +236,8 @@ export class ProxyService {
                 if (data.contents) {
                   return {
                     html: data.contents,
-                    headers: data.headers || {},
+                    headers: data.headers || {
+      },
                     status: data.status || 200,
                     url: url,
                     loadTime
@@ -248,17 +252,21 @@ export class ProxyService {
               try {
                 const data = await response.json();
                 if (data && typeof data === 'string') {
-                  return {
+                  
+        return {
                     html: data,
-                    headers: {},
+                    headers: {
+      },
                     status: 200,
                     url: url,
                     loadTime
                   };
                 } else if (data && data.contents) {
-                  return {
+                  
+        return {
                     html: data.contents,
-                    headers: data.headers || {},
+                    headers: data.headers || {
+      },
                     status: data.status || 200,
                     url: url,
                     loadTime
@@ -267,10 +275,12 @@ export class ProxyService {
               } catch (jsonError) {
                 // 如果不是JSON，尝试作为文本处理
                 const html = await response.text();
-                if (html && html.length > 100) { // 确保有实际内容
+                if (html && html.length > 100) { 
+        // 确保有实际内容
                   return {
                     html,
-                    headers: {},
+                    headers: {
+      },
                     status: 200,
                     url: url,
                     loadTime
@@ -414,10 +424,11 @@ export class ProxyService {
       });
 
       if (response.ok) {
+        
         const result = await response.json();
         if (result.success && result.data) {
           return result.data;
-        }
+      }
       }
 
       // 后端失败，回退到原方法
@@ -462,10 +473,11 @@ export class ProxyService {
       });
 
       if (response.ok) {
+        
         const result = await response.json();
         if (result.success && result.data) {
           return result.data;
-        }
+      }
       }
 
       // 后端失败，回退到原方法

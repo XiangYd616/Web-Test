@@ -105,6 +105,7 @@ export function useDataState<T = any>(
       const response = await operation();
       
       if (response.success && response.data !== undefined) {
+        
         const responseData = response.data;
         setData(responseData);
         setState('success');
@@ -146,9 +147,10 @@ export function useDataState<T = any>(
   // 重试操作
   const retry = useCallback(async (): Promise<T | null> => {
     if (lastOperationRef.current) {
-      setRetryCount(prev => prev + 1);
+      
+        setRetryCount(prev => prev + 1);
       return execute(lastOperationRef.current);
-    }
+      }
     return null;
   }, [execute]);
 
@@ -261,8 +263,9 @@ export function useBatchDataState(
   const execute = useCallback(async (key: string, operation: AsyncOperation) => {
     const stateHook = stateHooks[key];
     if (stateHook) {
-      return stateHook[1].execute(operation);
-    }
+      
+        return stateHook[1].execute(operation);
+      }
     return null;
   }, [stateHooks]);
 
@@ -284,8 +287,9 @@ export function useBatchDataState(
   const retry = useCallback(async (key: string) => {
     const stateHook = stateHooks[key];
     if (stateHook) {
-      return stateHook[1].retry();
-    }
+      
+        return stateHook[1].retry();
+      }
     return null;
   }, [stateHooks]);
 
@@ -410,8 +414,9 @@ export function usePaginatedDataState<T = any>(
   // 加载更多数据
   const loadMore = useCallback(async (operation: AsyncOperation<T[]>): Promise<T[] | null> => {
     if (!hasNext || isLoadingMore) {
-      return null;
-    }
+      
+        return null;
+      }
 
     setIsLoadingMore(true);
     
@@ -434,8 +439,9 @@ export function usePaginatedDataState<T = any>(
   // 刷新当前页
   const refresh = useCallback(async (): Promise<T[] | null> => {
     if (lastOperationRef.current) {
-      return loadPage(lastOperationRef.current, page, limit);
-    }
+      
+        return loadPage(lastOperationRef.current, page, limit);
+      }
     return null;
   }, [loadPage, page, limit]);
 

@@ -211,6 +211,7 @@ export class DataNormalizationPipeline {
 
     try {
       if (!rawData.success || !rawData.data) {
+        
         return result;
       }
 
@@ -367,8 +368,9 @@ export class DataNormalizationPipeline {
 
     // 如果时间戳太旧，使用当前时间
     if (now - ts > this.validationRules.timestamp.maxAge) {
-      return now;
-    }
+      
+        return now;
+      }
 
     return ts;
   }

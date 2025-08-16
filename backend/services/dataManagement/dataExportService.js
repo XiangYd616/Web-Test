@@ -548,9 +548,11 @@ class DataExportService extends EventEmitter {
       const filePath = path.join(this.exportDir, `${filename}.csv`);
 
       if (data.length === 0) {
+        
         await fs.writeFile(filePath, '', 'utf8');
         const stats = await fs.stat(filePath);
-        return { filePath, fileSize: stats.size };
+        return { filePath, fileSize: stats.size
+      };
       }
 
       // 获取所有字段
@@ -1049,14 +1051,16 @@ class DataExportService extends EventEmitter {
       // 先从内存中查找
       const memoryTask = this.exportQueue.get(taskId) || this.activeExports.get(taskId);
       if (memoryTask && memoryTask.userId === userId) {
+        
         return {
           success: true,
           data: memoryTask
-        };
+      };
       }
 
       // 从数据库查找
       if (this.dbPool) {
+        
         const result = await this.dbPool.query(
           'SELECT * FROM export_tasks WHERE id = $1 AND user_id = $2',
           [taskId, userId]
@@ -1081,7 +1085,7 @@ class DataExportService extends EventEmitter {
               startedAt: task.started_at,
               completedAt: task.completed_at,
               expiresAt: task.expires_at
-            }
+      }
           };
         }
       }
@@ -1105,17 +1109,19 @@ class DataExportService extends EventEmitter {
       const task = this.exportQueue.get(taskId) || this.activeExports.get(taskId);
 
       if (!task || task.userId !== userId) {
+        
         return {
           success: false,
           error: '任务不存在或无权限访问'
-        };
+      };
       }
 
       if (task.status === 'completed' || task.status === 'failed') {
+        
         return {
           success: false,
           error: '任务已完成，无法取消'
-        };
+      };
       }
 
       // 更新任务状态
@@ -1148,10 +1154,12 @@ class DataExportService extends EventEmitter {
       const offset = (page - 1) * limit;
 
       if (!this.dbPool) {
+        
         return {
           success: true,
           data: [],
-          pagination: { page, limit, total: 0, totalPages: 0 }
+          pagination: { page, limit, total: 0, totalPages: 0
+      }
         };
       }
 

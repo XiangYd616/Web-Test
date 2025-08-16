@@ -88,17 +88,19 @@ router.post('/export', asyncHandler(async (req, res) => {
   const { dataType, filters = {}, format, options = {} } = req.body;
 
   if (!dataType) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '需要指定数据类型'
-    });
+      });
   }
 
   if (!format) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '需要指定导出格式'
-    });
+      });
   }
 
   // 估算导出项目数量
@@ -124,10 +126,11 @@ router.post('/delete', asyncHandler(async (req, res) => {
   const { dataType, ids, options = {} } = req.body;
 
   if (!dataType) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '需要指定数据类型'
-    });
+      });
   }
 
   if (!ids || !Array.isArray(ids) || ids.length === 0) {
@@ -159,18 +162,20 @@ router.get('/status/:operationId', asyncHandler(async (req, res) => {
   const operation = batchOperations.get(operationId);
 
   if (!operation) {
-    return res.status(404).json({
+    
+        return res.status(404).json({
       success: false,
       message: '操作不存在'
-    });
+      });
   }
 
   // 检查权限
   if (operation.userId !== req.user.id && req.user.role !== 'admin') {
-    return res.status(403).json({
+    
+        return res.status(403).json({
       success: false,
       message: '无权访问此操作'
-    });
+      });
   }
 
   res.json({
@@ -187,25 +192,28 @@ router.post('/cancel/:operationId', asyncHandler(async (req, res) => {
   const operation = batchOperations.get(operationId);
 
   if (!operation) {
-    return res.status(404).json({
+    
+        return res.status(404).json({
       success: false,
       message: '操作不存在'
-    });
+      });
   }
 
   // 检查权限
   if (operation.userId !== req.user.id && req.user.role !== 'admin') {
-    return res.status(403).json({
+    
+        return res.status(403).json({
       success: false,
       message: '无权取消此操作'
-    });
+      });
   }
 
   if (operation.status !== 'running') {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '只能取消正在运行的操作'
-    });
+      });
   }
 
   operation.status = 'cancelled';
@@ -225,18 +233,20 @@ router.get('/results/:operationId', asyncHandler(async (req, res) => {
   const operation = batchOperations.get(operationId);
 
   if (!operation) {
-    return res.status(404).json({
+    
+        return res.status(404).json({
       success: false,
       message: '操作不存在'
-    });
+      });
   }
 
   // 检查权限
   if (operation.userId !== req.user.id && req.user.role !== 'admin') {
-    return res.status(403).json({
+    
+        return res.status(403).json({
       success: false,
       message: '无权访问此操作结果'
-    });
+      });
   }
 
   res.json({
@@ -256,25 +266,28 @@ router.get('/download/:operationId', asyncHandler(async (req, res) => {
   const operation = batchOperations.get(operationId);
 
   if (!operation) {
-    return res.status(404).json({
+    
+        return res.status(404).json({
       success: false,
       message: '操作不存在'
-    });
+      });
   }
 
   // 检查权限
   if (operation.userId !== req.user.id && req.user.role !== 'admin') {
-    return res.status(403).json({
+    
+        return res.status(403).json({
       success: false,
       message: '无权下载此文件'
-    });
+      });
   }
 
   if (operation.type !== 'export' || operation.status !== 'completed') {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '文件不可下载'
-    });
+      });
   }
 
   // 这里应该返回实际的文件

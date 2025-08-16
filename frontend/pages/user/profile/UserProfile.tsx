@@ -116,10 +116,11 @@ const UserProfilePage: React.FC = () => {
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) { // 5MB
+    if (file.size > 5 * 1024 * 1024) { 
+        // 5MB
       setError('图片大小不能超过5MB');
       return;
-    }
+      }
 
     try {
       setUploadingAvatar(true);
@@ -161,14 +162,16 @@ const UserProfilePage: React.FC = () => {
 
   const handlePasswordChange = async () => {
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setError('新密码和确认密码不匹配');
+      
+        setError('新密码和确认密码不匹配');
       return;
-    }
+      }
 
     if (passwordForm.newPassword.length < 6) {
-      setError('新密码长度至少6位');
+      
+        setError('新密码长度至少6位');
       return;
-    }
+      }
 
     try {
       setSaving(true);
@@ -192,9 +195,10 @@ const UserProfilePage: React.FC = () => {
   };
 
   if (loading) {
-    return (
+    
+        return (
       <div className={`min-h-screen flex items-center justify-center ${actualTheme === 'light' ? 'bg-gray-50' : 'bg-gray-900'
-        }`}>
+      }`}>
         <div className="text-center">
           <Loader className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-500" />
           <p className={actualTheme === 'light' ? 'text-gray-600' : 'text-gray-400'}>
@@ -206,9 +210,10 @@ const UserProfilePage: React.FC = () => {
   }
 
   if (!profile || !stats) {
-    return (
+    
+        return (
       <div className={`min-h-screen flex items-center justify-center ${actualTheme === 'light' ? 'bg-gray-50' : 'bg-gray-900'
-        }`}>
+      }`}>
         <div className="text-center">
           <AlertCircle className="w-8 h-8 mx-auto mb-4 text-red-500" />
           <p className={actualTheme === 'light' ? 'text-gray-600' : 'text-gray-400'}>

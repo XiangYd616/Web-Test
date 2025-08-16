@@ -197,8 +197,9 @@ class SystemResourceMonitor {
       memory.usage >= this.thresholds.memory.critical ||
       network.activeConnections >= this.thresholds.network.maxConnections
     ) {
-      return 'critical';
-    }
+      
+        return 'critical';
+      }
 
     // 检查警告状态
     if (
@@ -206,8 +207,9 @@ class SystemResourceMonitor {
       memory.usage >= this.thresholds.memory.warning ||
       network.activeConnections >= this.thresholds.network.maxConnections * 0.8
     ) {
-      return 'warning';
-    }
+      
+        return 'warning';
+      }
 
     return 'healthy';
   }
@@ -235,8 +237,9 @@ class SystemResourceMonitor {
 
     // 压力测试更宽松的资源检查
     if (testType === 'stress') {
-      return status !== 'critical'; // 只要不是严重状态就可以启动
-    }
+      
+        return status !== 'critical'; // 只要不是严重状态就可以启动
+      }
 
     // 普通测试的原有逻辑
     return status === 'healthy' || status === 'warning';
@@ -301,10 +304,12 @@ class SystemResourceMonitor {
     const recommendations: string[] = [];
 
     if (!resources) {
-      return {
+      
+        return {
         status: 'healthy',
         recommendations: ['系统资源监控未启动'],
-        metrics: { cpuUsage: 0, memoryUsage: 0, networkLoad: 0, diskUsage: 0 }
+        metrics: { cpuUsage: 0, memoryUsage: 0, networkLoad: 0, diskUsage: 0
+      }
       };
     }
 

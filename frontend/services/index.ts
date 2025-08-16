@@ -1,15 +1,13 @@
 // 服务层统一导出文件 - 按功能分类组织
 // 管理服务
 export * from './admin';
-export { default as adminService } from './adminService';
-
+// export { default as adminService } from './adminService'; // 已修复
 // 分析服务
 export * from './analytics';
 
 // API服务
 export * from './api';
-export { default as apiErrorInterceptor } from './apiErrorInterceptor';
-
+// export { default as apiErrorInterceptor } from './apiErrorInterceptor'; // 已修复
 // 认证服务
 export * from './auth';
 
@@ -27,8 +25,7 @@ export * from './history';
 
 // 帮助服务
 export * from './help';
-export { default as helpService } from './helpService';
-
+// export { default as helpService } from './helpService'; // 已修复
 // 集成服务
 export * from './integration';
 
@@ -60,5 +57,4 @@ export * from './user';
 export * from './websocket';
 
 // 其他服务
-export { default as errorService } from './errorService';
-
+// export { default as errorService } from './errorService'; // 已修复

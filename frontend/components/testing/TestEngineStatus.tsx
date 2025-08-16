@@ -25,9 +25,10 @@ const TestEngineStatus: React.FC<TestEngineStatusProps> = ({ compact = false }) 
     // 缓存机制：如果距离上次检查不到2分钟，跳过检查
     const now = Date.now();
     if (now - lastCheckTime < 2 * 60 * 1000 && engines.length > 0) {
-      console.log('⏰ 跳过引擎状态检查（缓存有效）');
+      
+        console.log('⏰ 跳过引擎状态检查（缓存有效）');
       return;
-    }
+      }
 
     setIsRefreshing(true);
     setLastCheckTime(now);
@@ -43,8 +44,9 @@ const TestEngineStatus: React.FC<TestEngineStatusProps> = ({ compact = false }) 
 
       const results = engineChecks.map((result, index) => {
         if (result.status === 'fulfilled') {
-          return result.value;
-        } else {
+          
+        return result.value;
+      } else {
           const engineNames = ['k6', 'playwright', 'api', 'security'];
           return {
             name: engineNames[index],
@@ -69,6 +71,7 @@ const TestEngineStatus: React.FC<TestEngineStatusProps> = ({ compact = false }) 
     try {
       const response = await fetch('/api/test/stress/engines');
       if (response.ok) {
+        
         const data = await response.json();
         return {
           name: 'k6 压力测试',
@@ -78,7 +81,7 @@ const TestEngineStatus: React.FC<TestEngineStatusProps> = ({ compact = false }) 
           lastCheck: new Date().toLocaleTimeString(),
           capabilities: ['负载测试', '性能测试', '压力测试', '并发测试'],
           errorMessage: data.data.k6?.error
-        };
+      };
       } else {
         return {
           name: 'k6 压力测试',
@@ -105,6 +108,7 @@ const TestEngineStatus: React.FC<TestEngineStatusProps> = ({ compact = false }) 
     try {
       const response = await fetch('/api/test/compatibility/engines');
       if (response.ok) {
+        
         const data = await response.json();
         return {
           name: 'Playwright 兼容性测试',
@@ -114,7 +118,7 @@ const TestEngineStatus: React.FC<TestEngineStatusProps> = ({ compact = false }) 
           lastCheck: new Date().toLocaleTimeString(),
           capabilities: ['浏览器兼容性', 'UI测试', '端到端测试', '截图对比'],
           errorMessage: data.data.playwright?.error
-        };
+      };
       } else {
         return {
           name: 'Playwright 兼容性测试',
@@ -141,6 +145,7 @@ const TestEngineStatus: React.FC<TestEngineStatusProps> = ({ compact = false }) 
     try {
       const response = await fetch('/api/test/api/engines');
       if (response.ok) {
+        
         const data = await response.json();
         return {
           name: 'API 测试引擎',
@@ -149,7 +154,7 @@ const TestEngineStatus: React.FC<TestEngineStatusProps> = ({ compact = false }) 
           lastCheck: new Date().toLocaleTimeString(),
           capabilities: ['REST API测试', 'GraphQL测试', '接口性能测试', '数据验证'],
           errorMessage: data.error
-        };
+      };
       } else {
         return {
           name: 'API 测试引擎',
@@ -176,6 +181,7 @@ const TestEngineStatus: React.FC<TestEngineStatusProps> = ({ compact = false }) 
     try {
       const response = await fetch('/api/test/security/engines');
       if (response.ok) {
+        
         const data = await response.json();
         return {
           name: '安全扫描引擎',
@@ -184,7 +190,7 @@ const TestEngineStatus: React.FC<TestEngineStatusProps> = ({ compact = false }) 
           lastCheck: new Date().toLocaleTimeString(),
           capabilities: ['漏洞扫描', 'SQL注入检测', 'XSS检测', '安全配置检查'],
           errorMessage: data.error
-        };
+      };
       } else {
         return {
           name: '安全扫描引擎',
@@ -255,10 +261,12 @@ const TestEngineStatus: React.FC<TestEngineStatusProps> = ({ compact = false }) 
   }, []);
 
   if (compact) {
-    return (
+    
+        return (
       <div className="flex items-center space-x-4">
         {engines.map((engine) => (
-          <div key={engine.type} className="flex items-center space-x-1">
+          <div key={engine.type
+      } className="flex items-center space-x-1">
             {getEngineIcon(engine.type)}
             {getStatusIcon(engine.status)}
           </div>

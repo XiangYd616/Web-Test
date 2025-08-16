@@ -60,8 +60,10 @@ const StatCard: React.FC<StatCardProps> = ({
   };
 
   if (loading) {
-    return (
-      <article className={`stat-card stat-card-${variant} ${className}`} aria-busy="true" aria-label="加载统计数据">
+    
+        return (
+      <article className={`stat-card stat-card-${variant
+      } ${className}`} aria-busy="true" aria-label="加载统计数据">
         <header className="stat-card-header">
           <div className="loading-shimmer w-12 h-12 rounded-lg" aria-hidden="true"></div>
           <div className="loading-shimmer w-16 h-4 rounded" aria-hidden="true"></div>

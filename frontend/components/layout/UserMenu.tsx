@@ -27,7 +27,8 @@ const UserMenu: React.FC = () => {
   };
 
   if (!user) {
-    return (
+    
+        return (
       <div className="flex items-center space-x-2">
         <Link
           to="/login"
@@ -43,7 +44,7 @@ const UserMenu: React.FC = () => {
         </Link>
       </div>
     );
-  }
+      }
 
   return (
     <div className="relative" ref={menuRef}>

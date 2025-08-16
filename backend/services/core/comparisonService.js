@@ -101,12 +101,13 @@ class ComparisonService {
       const testData = await this.getTestDataByTimeRange(testType, url, timeRange);
 
       if (testData.length === 0) {
+        
         return {
           success: true,
           data: {
             trends: [],
             analysis: '暂无数据进行趋势分析'
-          }
+      }
         };
       }
 
@@ -303,10 +304,12 @@ class ComparisonService {
     const isNegativeMetric = ['responseTime', 'errorRate', 'cpuUsage', 'memoryUsage'].includes(metric);
 
     if (isPositiveMetric) {
-      return change > 0 ? 'improvement' : change < 0 ? 'regression' : 'unchanged';
-    } else if (isNegativeMetric) {
-      return change < 0 ? 'improvement' : change > 0 ? 'regression' : 'unchanged';
-    }
+      
+        return change > 0 ? 'improvement' : change < 0 ? 'regression' : 'unchanged';
+      } else if (isNegativeMetric) {
+      
+        return change < 0 ? 'improvement' : change > 0 ? 'regression' : 'unchanged';
+      }
 
     return 'unchanged';
   }
@@ -390,7 +393,9 @@ class ComparisonService {
     const severity = this.getTrendSeverity(trend);
 
     if (direction === 'stable') {
-      return `${metric}保持稳定`;
+      
+        return `${metric
+      }保持稳定`;
     }
 
     const change = direction === 'increasing' ? '上升' : '下降';

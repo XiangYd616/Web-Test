@@ -678,7 +678,9 @@ class ContentQualityAnalyzer {
   // 可读性分析方法
   calculateFleschKincaid(sentences, words) {
     if (sentences.length === 0 || words.length === 0) {
-      return { score: 0, gradeLevel: 0 };
+      
+        return { score: 0, gradeLevel: 0
+      };
     }
 
     const avgSentenceLength = words.length / sentences.length;
@@ -695,7 +697,9 @@ class ContentQualityAnalyzer {
 
   calculateGunningFog(sentences, words) {
     if (sentences.length === 0 || words.length === 0) {
-      return { score: 0, gradeLevel: 0 };
+      
+        return { score: 0, gradeLevel: 0
+      };
     }
 
     const avgSentenceLength = words.length / sentences.length;
@@ -713,7 +717,9 @@ class ContentQualityAnalyzer {
 
   calculateSMOGIndex(sentences, words) {
     if (sentences.length < 30) {
-      return { score: 0, gradeLevel: 0, note: 'Insufficient text for SMOG calculation' };
+      
+        return { score: 0, gradeLevel: 0, note: 'Insufficient text for SMOG calculation'
+      };
     }
 
     const complexWords = words.filter(word => this.countSyllables(word) >= 3).length;

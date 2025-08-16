@@ -48,9 +48,10 @@ class AlertService extends EventEmitter {
     async start() {
         try {
             if (this.isRunning) {
-                logger.warn('告警服务已在运行中');
+                
+        logger.warn('告警服务已在运行中');
                 return;
-            }
+      }
 
             logger.info('启动告警服务...');
 
@@ -75,8 +76,9 @@ class AlertService extends EventEmitter {
     async stop() {
         try {
             if (!this.isRunning) {
-                return;
-            }
+                
+        return;
+      }
 
             logger.info('停止告警服务...');
 
@@ -102,9 +104,10 @@ class AlertService extends EventEmitter {
     async initializeEmailTransporter() {
         try {
             if (!this.config.emailHost || !this.config.emailUser || !this.config.emailPassword) {
-                logger.warn('邮件配置不完整，跳过邮件传输器初始化');
+                
+        logger.warn('邮件配置不完整，跳过邮件传输器初始化');
                 return;
-            }
+      }
 
             this.emailTransporter = nodemailer.createTransporter({
                 host: this.config.emailHost,
@@ -192,12 +195,15 @@ class AlertService extends EventEmitter {
      */
     determineSeverity(consecutiveFailures) {
         if (consecutiveFailures >= this.config.criticalThreshold) {
-            return 'critical';
-        } else if (consecutiveFailures >= this.config.highThreshold) {
-            return 'high';
-        } else if (consecutiveFailures >= this.config.mediumThreshold) {
-            return 'medium';
-        } else {
+            
+        return 'critical';
+      } else if (consecutiveFailures >= this.config.highThreshold) {
+            
+        return 'high';
+      } else if (consecutiveFailures >= this.config.mediumThreshold) {
+            
+        return 'medium';
+      } else {
             return 'low';
         }
     }
@@ -208,8 +214,9 @@ class AlertService extends EventEmitter {
     isInCooldown(targetId) {
         const lastAlert = this.alertHistory.get(targetId);
         if (!lastAlert) {
-            return false;
-        }
+            
+        return false;
+      }
 
         const timeSinceLastAlert = Date.now() - lastAlert.timestamp;
         return timeSinceLastAlert < this.config.alertCooldown;
@@ -716,10 +723,11 @@ class AlertService extends EventEmitter {
             }
 
             if (notifications.length === 0) {
-                return {
+                
+        return {
                     success: false,
                     message: '没有启用的通知方式'
-                };
+      };
             }
 
             // 等待所有通知发送完成
@@ -730,13 +738,14 @@ class AlertService extends EventEmitter {
             const failed = results.filter(r => r.status === 'rejected').length;
 
             if (failed > 0) {
-                const errors = results
+                
+        const errors = results
                     .filter(r => r.status === 'rejected')
                     .map(r => r.reason.message);
                 return {
                     success: false,
                     message: errors[0] || '通知发送失败'
-                };
+      };
             }
 
             return {
@@ -986,8 +995,9 @@ class AlertService extends EventEmitter {
             const result = await this.dbPool.query(query, [userId]);
 
             if (result.rows.length === 0) {
-                return this.getDefaultAlertRules();
-            }
+                
+        return this.getDefaultAlertRules();
+      }
 
             const preferences = result.rows[0].preferences || {};
             return preferences.alertRules || this.getDefaultAlertRules();

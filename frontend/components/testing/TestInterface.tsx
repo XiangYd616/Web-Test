@@ -34,9 +34,10 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
 
   const handleStartTest = useCallback(async () => {
     if (!config.url) {
-      notifyError('输入错误', '请输入有效的URL');
+      
+        notifyError('输入错误', '请输入有效的URL');
       return;
-    }
+      }
 
     clearError();
     setResult(null);

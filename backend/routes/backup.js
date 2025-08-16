@@ -129,16 +129,19 @@ router.post('/restore/:backupId',
             const backup = backupList.data.find(b => b.id === backupId);
 
             if (!backup) {
-                return res.status(404).json(formatResponse(false, null, '备份不存在'));
-            }
+                
+        return res.status(404).json(formatResponse(false, null, '备份不存在'));
+      }
 
             if (backup.status !== 'completed') {
-                return res.status(400).json(formatResponse(false, null, '备份未完成，无法恢复'));
-            }
+                
+        return res.status(400).json(formatResponse(false, null, '备份未完成，无法恢复'));
+      }
 
             if (!backup.backupPath) {
-                return res.status(404).json(formatResponse(false, null, '备份文件不存在'));
-            }
+                
+        return res.status(404).json(formatResponse(false, null, '备份文件不存在'));
+      }
 
             const result = await req.backupService.restoreDatabase(backup.backupPath, options);
 
@@ -170,12 +173,14 @@ router.get('/download/:backupId',
             const backup = backupList.data.find(b => b.id === backupId);
 
             if (!backup) {
-                return res.status(404).json(formatResponse(false, null, '备份不存在'));
-            }
+                
+        return res.status(404).json(formatResponse(false, null, '备份不存在'));
+      }
 
             if (!backup.backupPath) {
-                return res.status(404).json(formatResponse(false, null, '备份文件不存在'));
-            }
+                
+        return res.status(404).json(formatResponse(false, null, '备份文件不存在'));
+      }
 
             // 检查文件是否存在
             const fs = require('fs').promises;
@@ -342,12 +347,14 @@ router.post('/verify/:backupId',
             const backup = backupList.data.find(b => b.id === backupId);
 
             if (!backup) {
-                return res.status(404).json(formatResponse(false, null, '备份不存在'));
-            }
+                
+        return res.status(404).json(formatResponse(false, null, '备份不存在'));
+      }
 
             if (!backup.backupPath) {
-                return res.status(404).json(formatResponse(false, null, '备份文件不存在'));
-            }
+                
+        return res.status(404).json(formatResponse(false, null, '备份文件不存在'));
+      }
 
             // 验证文件完整性
             const fs = require('fs').promises;

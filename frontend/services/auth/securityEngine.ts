@@ -546,10 +546,11 @@ class SecurityEngine {
   cancelTest(testId: string): boolean {
     const controller = this.activeTests.get(testId);
     if (controller) {
-      controller.abort();
+      
+        controller.abort();
       this.activeTests.delete(testId);
       return true;
-    }
+      }
     return false;
   }
 
@@ -1057,7 +1058,9 @@ class SecurityEngine {
 
   private getHeaderRecommendation(headerName: string, value: string): string | undefined {
     if (!value) {
-      return `添加 ${headerName} 安全头`;
+      
+        return `添加 ${headerName
+      } 安全头`;
     }
 
     if (!this.isHeaderSecure(headerName, value)) {
@@ -1071,9 +1074,10 @@ class SecurityEngine {
     const recommendations: string[] = [];
 
     if (!data.securityHeaders) {
-      recommendations.push('配置基本的HTTP安全头');
+      
+        recommendations.push('配置基本的HTTP安全头');
       return recommendations;
-    }
+      }
 
     const headers = data.securityHeaders;
 
@@ -1369,8 +1373,9 @@ class SecurityEngine {
    */
   private enhanceError(error: any, config: SecurityTestConfig, testId: string): SecurityTestError {
     if (error instanceof SecurityTestError) {
-      return error;
-    }
+      
+        return error;
+      }
 
     // 根据错误类型提供具体的错误信息和建议
     let errorType = 'UNKNOWN_ERROR';

@@ -200,6 +200,7 @@ class RealTimeMonitoringService {
 
     const pollInterval = setInterval(async () => {
       if (this.isConnected) {
+        
         clearInterval(pollInterval);
         return;
       }
@@ -336,6 +337,7 @@ class RealTimeMonitoringService {
       });
 
       if (response.ok) {
+        
         const result = await response.json();
         if (result.success) {
           const newSite = result.data;
@@ -343,7 +345,7 @@ class RealTimeMonitoringService {
           this.saveToStorage();
           this.emit('siteAdded', newSite);
           return newSite;
-        }
+      }
       }
 
       throw new Error('添加监控站点失败');

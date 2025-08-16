@@ -141,10 +141,11 @@ class TestService {
 
         // 检查测试是否完成
         if (result.status === 'completed' || result.status === 'failed' || result.status === 'cancelled') {
-          this.runningTests.delete(testId);
+          
+        this.runningTests.delete(testId);
           this.notifyResult(testId, result);
           return;
-        }
+      }
 
         // 继续轮询
         setTimeout(poll, 2000);

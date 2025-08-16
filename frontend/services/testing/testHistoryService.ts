@@ -82,8 +82,9 @@ class TestHistoryService {
   updateRecord(id: string, updates: Partial<TestHistoryRecord>): TestHistoryRecord | null {
     const index = this.history.findIndex(record => record.id === id);
     if (index === -1) {
-      return null;
-    }
+      
+        return null;
+      }
 
     this.history[index] = { ...this.history[index], ...updates };
     this.saveHistory();
@@ -111,58 +112,66 @@ class TestHistoryService {
     return this.history.filter(record => {
       // 测试类型过滤
       if (filter.testType && filter.testType.length > 0) {
+        
         if (!filter.testType.includes(record.testType)) {
           return false;
-        }
+      }
       }
 
       // 状态过滤
       if (filter.status && filter.status.length > 0) {
+        
         if (!filter.status.includes(record.status)) {
           return false;
-        }
+      }
       }
 
       // 日期范围过滤
       if (filter.dateRange) {
+        
         const recordDate = new Date(record.startTime);
         if (recordDate < filter.dateRange.start || recordDate > filter.dateRange.end) {
           return false;
-        }
+      }
       }
 
       // URL过滤
       if (filter.url) {
+        
         if (!record.url.toLowerCase().includes(filter.url.toLowerCase())) {
           return false;
-        }
+      }
       }
 
       // 标签过滤
       if (filter.tags && filter.tags.length > 0) {
+        
         if (!record.tags || !filter.tags.some(tag => record.tags!.includes(tag))) {
           return false;
-        }
+      }
       }
 
       // 用户过滤
       if (filter.userId) {
+        
         if (record.userId !== filter.userId) {
           return false;
-        }
+      }
       }
 
       // 分数范围过滤
       if (filter.minScore !== undefined && record.score !== undefined) {
+        
         if (record.score < filter.minScore) {
           return false;
-        }
+      }
       }
 
       if (filter.maxScore !== undefined && record.score !== undefined) {
+        
         if (record.score > filter.maxScore) {
           return false;
-        }
+      }
       }
 
       return true;
@@ -252,8 +261,9 @@ class TestHistoryService {
   deleteRecord(id: string): boolean {
     const index = this.history.findIndex(record => record.id === id);
     if (index === -1) {
-      return false;
-    }
+      
+        return false;
+      }
 
     this.history.splice(index, 1);
     this.saveHistory();
@@ -273,8 +283,9 @@ class TestHistoryService {
    */
   exportHistory(format: 'json' | 'csv' = 'json'): string {
     if (format === 'json') {
-      return JSON.stringify(this.history, null, 2);
-    } else {
+      
+        return JSON.stringify(this.history, null, 2);
+      } else {
       // CSV格式
       const headers = ['ID', 'Type', 'URL', 'Status', 'Score', 'Start Time', 'Duration'];
       const rows = this.history.map(record => [
@@ -403,7 +414,7 @@ class TestHistoryService {
    * 生成ID
    */
   private generateId(): string {
-    return `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `test_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 }
 

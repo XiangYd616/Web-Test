@@ -131,8 +131,9 @@ class GeoLocationService {
     }
 
     if (!result) {
-      return null;
-    }
+      
+        return null;
+      }
 
     return {
       country: result.country?.names?.en || result.country?.names?.zh_CN,
@@ -196,11 +197,12 @@ class GeoLocationService {
         clearTimeout(timeoutId);
 
         if (response.ok) {
-          const data = await response.json();
+          
+        const data = await response.json();
           const location = api.parser(data);
           if (location) {
             return location;
-          }
+      }
         }
       } catch (error) {
         console.warn(`API ${api.url} 查询失败:`, error.message);

@@ -69,7 +69,8 @@ class FileUploadService {
     // 验证文件
     const validation = this.validateFile(file, finalConfig);
     if (!validation.valid) {
-      return {
+      
+        return {
         success: false,
         fileId: '',
         fileName: file.name,
@@ -215,6 +216,7 @@ class FileUploadService {
 
       const result = await response.json();
       if (result.success) {
+        
         return result.data;
       } else {
         throw new Error(result.error || 'Failed to fetch files');
@@ -302,9 +304,11 @@ class FileUploadService {
   private validateFile(file: File, config: UploadConfig): { valid: boolean; error?: string } {
     // 检查文件大小
     if (config.maxSize && file.size > config.maxSize) {
-      return {
+      
+        return {
         valid: false,
-        error: `文件大小超过限制 (${this.formatFileSize(config.maxSize)})`
+        error: `文件大小超过限制 (${this.formatFileSize(config.maxSize)
+      })`
       };
     }
 

@@ -72,8 +72,9 @@ class AutomatedReportingService extends EventEmitter {
    */
   async initialize() {
     if (this.isInitialized) {
-      return;
-    }
+      
+        return;
+      }
 
     try {
       // 创建报告输出目录
@@ -193,8 +194,9 @@ class AutomatedReportingService extends EventEmitter {
     const reportConfig = this.scheduledReports.get(reportId);
 
     if (!reportConfig || !reportConfig.enabled) {
-      return;
-    }
+      
+        return;
+      }
 
     console.log(`🔄 执行定时报告: ${reportConfig.name}`);
 

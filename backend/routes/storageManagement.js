@@ -5,18 +5,17 @@
 
 const express = require('express');
 const router = express.Router();
-const { unifiedStorageService } = require('../services/storage/UnifiedStorageService');
+const { storageService } = require('../services/storage/StorageService');
 const { authMiddleware, optionalAuth } = require('../middleware/auth');
 const { query, body, validationResult } = require('express-validator');
 
 /**
  * GET /api/storage/status
- * 获取存储系统状态
- */
+ * 获取存储系统状�? */
 router.get('/status', optionalAuth, async (req, res) => {
   try {
-    const healthStatus = await unifiedStorageService.getHealthStatus();
-    const statistics = await unifiedStorageService.getStorageStatistics();
+    const healthStatus = await storageService.getHealthStatus();
+    const statistics = await storageService.getStorageStatistics();
 
     res.json({
       success: true,
@@ -28,10 +27,10 @@ router.get('/status', optionalAuth, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('获取存储状态失败:', error);
+    console.error('获取存储状态失�?', error);
     res.status(500).json({
       success: false,
-      error: '获取存储状态失败',
+      error: '获取存储状态失�?,
       details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
@@ -43,7 +42,7 @@ router.get('/status', optionalAuth, async (req, res) => {
  */
 router.get('/statistics', optionalAuth, async (req, res) => {
   try {
-    const statistics = await unifiedStorageService.getStorageStatistics();
+    const statistics = await storageService.getStorageStatistics();
 
     res.json({
       success: true,
@@ -68,7 +67,7 @@ router.post('/archive',
   authMiddleware,
   [
     body('engineType').optional().isString().withMessage('引擎类型必须是字符串'),
-    body('criteria').optional().isObject().withMessage('归档条件必须是对象')
+    body('criteria').optional().isObject().withMessage('归档条件必须是对�?)
   ],
   async (req, res) => {
     try {
@@ -83,7 +82,7 @@ router.post('/archive',
 
       const { engineType, criteria = {} } = req.body;
 
-      const result = await unifiedStorageService.archiveData(engineType, criteria);
+      const result = await storageService.archiveData(engineType, criteria);
 
       res.json({
         success: true,
@@ -110,7 +109,7 @@ router.post('/cleanup',
   authMiddleware,
   [
     body('engineType').optional().isString().withMessage('引擎类型必须是字符串'),
-    body('force').optional().isBoolean().withMessage('强制清理标志必须是布尔值')
+    body('force').optional().isBoolean().withMessage('强制清理标志必须是布尔�?)
   ],
   async (req, res) => {
     try {
@@ -125,15 +124,15 @@ router.post('/cleanup',
 
       const { engineType, force = false } = req.body;
 
-      // 如果是强制清理，需要额外权限验证
-      if (force && !req.user.isAdmin) {
+      // 如果是强制清理，需要额外权限验�?      if (force && !req.user.isAdmin) {
+
         return res.status(403).json({
           success: false,
           error: '强制清理需要管理员权限'
         });
       }
 
-      const result = await unifiedStorageService.cleanupData(engineType);
+      const result = await storageService.cleanupData(engineType);
 
       res.json({
         success: true,
@@ -159,10 +158,10 @@ router.post('/cleanup',
 router.post('/maintenance',
   authMiddleware,
   [
-    body('operations').optional().isArray().withMessage('操作列表必须是数组'),
-    body('archive').optional().isBoolean().withMessage('归档标志必须是布尔值'),
-    body('cleanup').optional().isBoolean().withMessage('清理标志必须是布尔值'),
-    body('optimize').optional().isBoolean().withMessage('优化标志必须是布尔值')
+    body('operations').optional().isArray().withMessage('操作列表必须是数�?),
+    body('archive').optional().isBoolean().withMessage('归档标志必须是布尔�?),
+    body('cleanup').optional().isBoolean().withMessage('清理标志必须是布尔�?),
+    body('optimize').optional().isBoolean().withMessage('优化标志必须是布尔�?)
   ],
   async (req, res) => {
     try {
@@ -177,6 +176,7 @@ router.post('/maintenance',
 
       // 维护操作需要管理员权限
       if (!req.user.isAdmin) {
+
         return res.status(403).json({
           success: false,
           error: '存储维护需要管理员权限'
@@ -189,11 +189,11 @@ router.post('/maintenance',
         optimize: req.body.optimize
       };
 
-      const result = await unifiedStorageService.performMaintenance(options);
+      const result = await storageService.performMaintenance(options);
 
       res.json({
         success: true,
-        message: '存储维护已完成',
+        message: '存储维护已完�?,
         data: result
       });
 
@@ -216,13 +216,14 @@ router.get('/configuration', authMiddleware, async (req, res) => {
   try {
     // 配置查看需要管理员权限
     if (!req.user.isAdmin) {
+
       return res.status(403).json({
         success: false,
         error: '查看存储配置需要管理员权限'
       });
     }
 
-    const configuration = unifiedStorageService.getConfiguration();
+    const configuration = storageService.getConfiguration();
 
     res.json({
       success: true,
@@ -246,9 +247,9 @@ router.get('/configuration', authMiddleware, async (req, res) => {
 router.put('/configuration',
   authMiddleware,
   [
-    body('storage').optional().isObject().withMessage('存储配置必须是对象'),
-    body('archive').optional().isObject().withMessage('归档配置必须是对象'),
-    body('cleanup').optional().isObject().withMessage('清理配置必须是对象')
+    body('storage').optional().isObject().withMessage('存储配置必须是对�?),
+    body('archive').optional().isObject().withMessage('归档配置必须是对�?),
+    body('cleanup').optional().isObject().withMessage('清理配置必须是对�?)
   ],
   async (req, res) => {
     try {
@@ -263,6 +264,7 @@ router.put('/configuration',
 
       // 配置更新需要管理员权限
       if (!req.user.isAdmin) {
+
         return res.status(403).json({
           success: false,
           error: '更新存储配置需要管理员权限'
@@ -275,12 +277,12 @@ router.put('/configuration',
         cleanup: req.body.cleanup
       };
 
-      unifiedStorageService.updateConfiguration(newConfig);
+      storageService.updateConfiguration(newConfig);
 
       res.json({
         success: true,
-        message: '存储配置已更新',
-        data: unifiedStorageService.getConfiguration()
+        message: '存储配置已更�?,
+        data: storageService.getConfiguration()
       });
 
     } catch (error) {
@@ -296,8 +298,7 @@ router.put('/configuration',
 
 /**
  * GET /api/storage/engines/:engineType/policy
- * 获取特定引擎的存储策略
- */
+ * 获取特定引擎的存储策�? */
 router.get('/engines/:engineType/policy', authMiddleware, async (req, res) => {
   try {
     const { engineType } = req.params;
@@ -311,13 +312,12 @@ router.get('/engines/:engineType/policy', authMiddleware, async (req, res) => {
     if (!validEngineTypes.includes(engineType)) {
       return res.status(400).json({
         success: false,
-        error: '无效的引擎类型',
+        error: '无效的引擎类�?,
         validTypes: validEngineTypes
       });
     }
 
-    // 获取引擎策略（这里需要实现具体的策略获取逻辑）
-    const policy = {
+    // 获取引擎策略（这里需要实现具体的策略获取逻辑�?    const policy = {
       engineType,
       storage: {
         compress: true,
@@ -352,14 +352,13 @@ router.get('/engines/:engineType/policy', authMiddleware, async (req, res) => {
 
 /**
  * PUT /api/storage/engines/:engineType/policy
- * 更新特定引擎的存储策略
- */
+ * 更新特定引擎的存储策�? */
 router.put('/engines/:engineType/policy',
   authMiddleware,
   [
-    body('storage').optional().isObject().withMessage('存储策略必须是对象'),
-    body('retention').optional().isObject().withMessage('保留策略必须是对象'),
-    body('archive').optional().isObject().withMessage('归档策略必须是对象')
+    body('storage').optional().isObject().withMessage('存储策略必须是对�?),
+    body('retention').optional().isObject().withMessage('保留策略必须是对�?),
+    body('archive').optional().isObject().withMessage('归档策略必须是对�?)
   ],
   async (req, res) => {
     try {
@@ -376,6 +375,7 @@ router.put('/engines/:engineType/policy',
 
       // 策略更新需要管理员权限
       if (!req.user.isAdmin) {
+
         return res.status(403).json({
           success: false,
           error: '更新存储策略需要管理员权限'
@@ -386,15 +386,15 @@ router.put('/engines/:engineType/policy',
 
       // 更新各种策略
       if (storage) {
-        unifiedStorageService.setStorageStrategy(engineType, storage);
+        storageService.setStorageStrategy(engineType, storage);
       }
 
       if (retention) {
-        unifiedStorageService.setCleanupPolicy(engineType, retention);
+        storageService.setCleanupPolicy(engineType, retention);
       }
 
       if (archive) {
-        unifiedStorageService.setArchivePolicy(engineType, archive);
+        storageService.setArchivePolicy(engineType, archive);
       }
 
       res.json({

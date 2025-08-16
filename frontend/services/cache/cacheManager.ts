@@ -179,8 +179,9 @@ export class CacheManager {
     }
 
     if (!cacheItem) {
-      return null;
-    }
+      
+        return null;
+      }
 
     // 检查是否过期
     if (this.isExpired(cacheItem)) {
@@ -271,15 +272,17 @@ export class CacheManager {
    */
   private async getMemoryCache(key: string): Promise<CacheItem<string> | null> {
     if (!this.config.enableMemoryCache) {
-      this.stats.memoryMisses++;
+      
+        this.stats.memoryMisses++;
       return null;
-    }
+      }
 
     const item = this.memoryCache.get(key);
     if (item) {
-      this.stats.memoryHits++;
+      
+        this.stats.memoryHits++;
       return item;
-    } else {
+      } else {
       this.stats.memoryMisses++;
       return null;
     }
@@ -304,14 +307,16 @@ export class CacheManager {
    */
   private async getStorageCache(key: string): Promise<CacheItem<string> | null> {
     if (!this.config.enableLocalStorage || typeof localStorage === 'undefined') {
-      this.stats.storageMisses++;
+      
+        this.stats.storageMisses++;
       return null;
-    }
+      }
 
     try {
       const storageKey = `cache_${key}`;
       const stored = localStorage.getItem(storageKey);
       if (stored) {
+        
         this.stats.storageHits++;
         return JSON.parse(stored) as CacheItem<string>;
       } else {

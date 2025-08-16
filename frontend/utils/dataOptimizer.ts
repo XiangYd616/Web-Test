@@ -4,7 +4,7 @@
  * 版本: v1.0.0
  */
 
-// // // // // import {defaultMemoryCache} from '../services/cacheStrategy'; // 已删除 // 已删除 // 服务已删除 // 服务已删除 // 文件已删除
+// // // // // // // // import {defaultMemoryCache} from '../services/cacheStrategy'; // 文件已删除 // 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除 // 文件已删除
 
 // ==================== 类型定义 ====================
 
@@ -132,7 +132,8 @@ export class DataChunkManager<T = any> {
 
     // 检查缓存
     if (this.options.enableCache) {
-      const cached = await defaultMemoryCache.get(chunkId);
+      
+        const cached = await defaultMemoryCache.get(chunkId);
       if (cached) {
         this.chunks.set(chunkId, cached);
         this.metrics.cacheHits++;
@@ -213,8 +214,9 @@ export class DataChunkManager<T = any> {
    */
   optimizeMemory(): void {
     if (this.chunks.size <= this.options.maxChunks) {
-      return;
-    }
+      
+        return;
+      }
 
     // 按访问频率和时间排序
     const sortedChunks = Array.from(this.chunks.entries())
@@ -356,8 +358,9 @@ export class LazyLoadManager<T = any> {
    */
   async loadMore(): Promise<T[]> {
     if (this.loading || !this.hasMore) {
-      return [];
-    }
+      
+        return [];
+      }
 
     this.loading = true;
 
@@ -384,8 +387,9 @@ export class LazyLoadManager<T = any> {
    */
   shouldLoadMore(scrollPosition: number, containerHeight: number, contentHeight: number): boolean {
     if (this.loading || !this.hasMore) {
-      return false;
-    }
+      
+        return false;
+      }
 
     const scrollPercentage = (scrollPosition + containerHeight) / contentHeight;
     return scrollPercentage >= (1 - this.options.threshold / 100);
@@ -451,8 +455,9 @@ export class PerformanceMonitor {
   getMetricStats(name: string) {
     const values = this.metrics.get(name) || [];
     if (values.length === 0) {
-      return null;
-    }
+      
+        return null;
+      }
 
     const sorted = [...values].sort((a, b) => a - b);
     const sum = values.reduce((a, b) => a + b, 0);
@@ -502,8 +507,9 @@ export class PerformanceMonitor {
    */
   detectMemoryLeak(): boolean {
     if (this.memorySnapshots.length < 10) {
-      return false;
-    }
+      
+        return false;
+      }
 
     const recent = this.memorySnapshots.slice(-10);
     const trend = recent.reduce((sum, snapshot, index) => {

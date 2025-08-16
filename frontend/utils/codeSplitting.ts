@@ -8,32 +8,32 @@ import React, { ComponentType, lazy } from 'react';
 // 大型组件的动态导入映射
 export const largeComponentImports = {
   // SEO 相关组件 - 按功能分割
-  // 'SEOResults': () => import('../components/seo/SEOResults'), // 已删除
-  // 'LocalSEOResults': () => import('../components/seo/LocalSEOResults'), // 已删除
-  // 'FileUploadSEO': () => import('../components/seo/FileUploadSEO'), // 已删除
-  // 'NetworkErrorPrompt': () => import('../components/seo/NetworkErrorPrompt'), // 已删除
+  // 'SEOResults': () => // import('../components/seo/SEOResults'), // 已删除
+  // LocalSEOResults: () => import('../components/seo/LocalSEOResults'), // 已删除
+  // FileUploadSEO: () => import('../components/seo/FileUploadSEO'), // 已删除
+  // NetworkErrorPrompt: () => import('../components/seo/NetworkErrorPrompt'), // 已删除
 
   // 测试相关组件 - 按测试类型分割
-  // 'TestInterface': () => import('../components/testing/TestInterface'), // 已删除
-  // 'TestResultDisplay': () => import('../components/testing/TestResultDisplay'), // 已删除
-  // 'TestEngineStatus': () => import('../components/testing/TestEngineStatus'), // 已删除
+  // TestInterface: () => import('../components/testing/TestInterface'), // 已删除
+  // TestResultDisplay: () => import('../components/testing/TestResultDisplay'), // 已删除
+  // TestEngineStatus: () => import('../components/testing/TestEngineStatus'), // 已删除
 
   // 数据管理组件 - 按功能分割
-  // 'DataList': () => import('../components/data/DataList'), // 已删除
-  'DataManager': () => import('../components/data/DataManager'),
-  // 'DataManagement': () => import('../components/data/DataManagement'), // 已删除
-  // 'DataStats': () => import('../components/data/DataStats'), // 已删除
+  // DataList: () => import('../components/data/DataList'), // 已删除
+  DataManager: () => import('../components/data/DataManager'),
+  // DataManagement: () => import('../components/data/DataManagement'), // 已删除
+  // DataStats: () => import('../components/data/DataStats'), // 已删除
 
   // 图表组件 - 按图表类型分割
-  // 'Charts': () => import('../components/charts/Charts'), // 已删除
-  // 'PerformanceChart': () => import('../components/charts/PerformanceChart'), // 已删除
-  // 'StressTestChart': () => import('../components/charts/StressTestChart'), // 已删除
+  // Charts: () => import('../components/charts/Charts'), // 已删除
+  // PerformanceChart: () => import('../components/charts/PerformanceChart'), // 已删除
+  // StressTestChart: () => import('../components/charts/StressTestChart'), // 已删除
 
   // 现代化组件 - 按复杂度分割
-  // 'Layout': () => import('../components/modern/Layout'), // 已删除
-  // 'Chart': () => import('../components/modern/Chart'), // 已删除
-  // 'StatCard': () => import('../components/modern/StatCard'), // 已删除
-  // 'Card': () => import('../components/ui/Card'), // 已删除
+  // Layout: () => import('../components/modern/Layout'), // 已删除
+  // Chart: () => import('../components/modern/Chart'), // 已删除
+  // StatCard: () => import('../components/modern/StatCard'), // 已删除
+  // Card: () => import('../components/ui/Card'), // 已删除
 };
 
 // 创建带分析的懒加载组件
@@ -41,7 +41,7 @@ export function createAnalyzedLazyComponent<T extends ComponentType<any>>(
   componentName: string,
   importFn: () => Promise<{ default: T }>,
   options: {
-    priority?: 'high' | 'medium' | 'low'; // 已删除
+    priority?: 'high' | 'medium' | 'low'; // 已删除 // 已删除
     preload?: boolean;
     chunkName?: string;
   } = {}
@@ -192,13 +192,13 @@ export const createPageChunks = (pageName: string) => {
   const chunkStrategies = {
     // 大型测试页面 - 使用实际存在的页面
     'StressTest': {
-      main: () => import('../pages/StressTest'),
+      main: () => import('../pages/testing/StressTest'),
       detail: () => import('../pages/StressTestDetail'),
       report: () => import('../pages/StressTestReport'),
     },
 
     'SEOTest': {
-      main: () => import('../pages/SEOTest'),
+      main: () => import('../pages/testing/SEOTest'),
     },
 
     'DatabaseTest': {
@@ -206,9 +206,9 @@ export const createPageChunks = (pageName: string) => {
     },
 
     'Admin': {
-      main: () => import('../pages/Admin'),
+      main: () => import('../pages/admin/Admin'),
       dataStorage: () => import('../pages/admin/DataStorage'),
-      settings: () => import('../pages/Settings'),
+      settings: () => import('../pages/settings/Settings'),
       systemMonitor: () => import('../pages/admin/SystemMonitor'),
     }
   };

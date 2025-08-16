@@ -36,7 +36,8 @@ const validatePagination = (req, res, next) => {
 
   // 验证页码
   if (page !== undefined) {
-    const pageNum = parseInt(page);
+    
+        const pageNum = parseInt(page);
     if (isNaN(pageNum) || pageNum < 1) {
       return res.status(400).json({
         success: false,
@@ -48,7 +49,8 @@ const validatePagination = (req, res, next) => {
 
   // 验证每页数量
   if (limit !== undefined) {
-    const limitNum = parseInt(limit);
+    
+        const limitNum = parseInt(limit);
     if (isNaN(limitNum) || limitNum < 1 || limitNum > 100) {
       return res.status(400).json({
         success: false,
@@ -122,7 +124,8 @@ const validateDateRange = (req, res, next) => {
   const { dateFrom, dateTo } = req.query;
 
   if (dateFrom) {
-    const fromDate = new Date(dateFrom);
+    
+        const fromDate = new Date(dateFrom);
     if (isNaN(fromDate.getTime())) {
       return res.status(400).json({
         success: false,
@@ -133,7 +136,8 @@ const validateDateRange = (req, res, next) => {
   }
 
   if (dateTo) {
-    const toDate = new Date(dateTo);
+    
+        const toDate = new Date(dateTo);
     if (isNaN(toDate.getTime())) {
       return res.status(400).json({
         success: false,
@@ -161,7 +165,8 @@ const validateSearch = (req, res, next) => {
   const { search } = req.query;
 
   if (search !== undefined) {
-    // 清理搜索字符串
+    
+        // 清理搜索字符串
     const cleanSearch = search.trim();
 
     if (cleanSearch.length > 100) {
@@ -201,7 +206,8 @@ const validateTimeRange = (req, res, next) => {
   const { timeRange } = req.query;
 
   if (timeRange !== undefined) {
-    const timeRangeNum = parseInt(timeRange);
+    
+        const timeRangeNum = parseInt(timeRange);
     if (isNaN(timeRangeNum) || timeRangeNum < 1 || timeRangeNum > 365) {
       return res.status(400).json({
         success: false,

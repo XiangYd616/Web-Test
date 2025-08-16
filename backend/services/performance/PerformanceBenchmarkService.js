@@ -57,8 +57,9 @@ class PerformanceBenchmarkService extends EventEmitter {
    */
   async initialize() {
     if (this.isInitialized) {
-      return;
-    }
+      
+        return;
+      }
 
     try {
       // 创建必要的目录
@@ -354,7 +355,9 @@ class PerformanceBenchmarkService extends EventEmitter {
   calculateStatistics(results) {
     const validResults = results.filter(r => !r.error);
     if (validResults.length === 0) {
-      return { error: '所有测试运行都失败了' };
+      
+        return { error: '所有测试运行都失败了'
+      };
     }
     
     const statistics = {};
@@ -396,7 +399,9 @@ class PerformanceBenchmarkService extends EventEmitter {
   compareWithBaseline(benchmarkId, statistics) {
     const baseline = this.baselines.get(benchmarkId);
     if (!baseline) {
-      return { hasBaseline: false };
+      
+        return { hasBaseline: false
+      };
     }
     
     const comparison = { hasBaseline: true, improvements: {}, regressions: {} };

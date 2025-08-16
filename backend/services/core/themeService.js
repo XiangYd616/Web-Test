@@ -174,10 +174,11 @@ class ThemeService {
       const theme = this.themes.get(themeId);
       
       if (!theme || !theme.isActive) {
+        
         return {
           success: false,
           error: '主题不存在'
-        };
+      };
       }
 
       return {
@@ -240,24 +241,27 @@ class ThemeService {
       const theme = this.themes.get(themeId);
       
       if (!theme) {
+        
         return {
           success: false,
           error: '主题不存在'
-        };
+      };
       }
 
       if (theme.type === 'built-in') {
+        
         return {
           success: false,
           error: '内置主题不能修改'
-        };
+      };
       }
 
       if (theme.createdBy !== userId) {
+        
         return {
           success: false,
           error: '只能修改自己创建的主题'
-        };
+      };
       }
 
       const updatedTheme = {
@@ -296,24 +300,27 @@ class ThemeService {
       const theme = this.themes.get(themeId);
       
       if (!theme) {
+        
         return {
           success: false,
           error: '主题不存在'
-        };
+      };
       }
 
       if (theme.type === 'built-in') {
+        
         return {
           success: false,
           error: '内置主题不能删除'
-        };
+      };
       }
 
       if (theme.createdBy !== userId) {
+        
         return {
           success: false,
           error: '只能删除自己创建的主题'
-        };
+      };
       }
 
       // 软删除
@@ -491,10 +498,11 @@ class ThemeService {
       const theme = this.themes.get(themeId);
       
       if (!theme) {
+        
         return {
           success: false,
           error: '主题不存在'
-        };
+      };
       }
 
       const css = this.buildCSSFromTheme(theme);

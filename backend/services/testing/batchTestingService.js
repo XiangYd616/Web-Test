@@ -248,7 +248,8 @@ class BatchTestingService {
     const batch = this.activeBatches.get(batchId) || this.batchHistory.get(batchId);
     
     if (!batch) {
-      return {
+      
+        return {
         success: false,
         error: '批量测试任务不存在'
       };
@@ -277,7 +278,8 @@ class BatchTestingService {
     const batch = this.activeBatches.get(batchId) || this.batchHistory.get(batchId);
     
     if (!batch) {
-      return {
+      
+        return {
         success: false,
         error: '批量测试任务不存在'
       };
@@ -305,14 +307,16 @@ class BatchTestingService {
     const batch = this.activeBatches.get(batchId);
     
     if (!batch) {
-      return {
+      
+        return {
         success: false,
         error: '批量测试任务不存在'
       };
     }
 
     if (batch.status !== 'running') {
-      return {
+      
+        return {
         success: false,
         error: '只能取消正在运行的批量测试'
       };

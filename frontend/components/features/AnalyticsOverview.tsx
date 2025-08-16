@@ -146,23 +146,25 @@ const AnalyticsOverview: React.FC = () => {
   };
 
   if (loading) {
-    return (
+    
+        return (
       <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
         <span className="ml-3 text-gray-400">加载分析数据...</span>
       </div>
     );
-  }
+      }
 
   if (!analyticsData) {
-    return (
+    
+        return (
       <div className="text-center py-12">
         <BarChart3 className="w-16 h-16 text-gray-600 mx-auto mb-4" />
         <h3 className="text-xl font-semibold text-white mb-2">暂无数据</h3>
         <p className="text-gray-400">请先运行一些测试以查看分析数据</p>
       </div>
     );
-  }
+      }
 
   const testTypeData = Object.entries(analyticsData.testsByType).map(([type, count]) => ({
     name: type,

@@ -578,13 +578,14 @@ export const useStressTestRecord = (options: UseStressTestRecordOptions = {}): U
       // 获取记录，如果找不到则尝试从服务器获取
       let record = records.find(r => r.id === id) || currentRecord;
       if (!record) {
+        
         try {
           record = await stressTestRecordService.getTestRecord(id);
           // 更新本地记录列表
           setRecords(prev => {
             const exists = prev.some(r => r.id === id);
             return exists ? prev : [record!, ...prev];
-          });
+      });
         } catch (err) {
           console.warn(`无法获取测试记录 ${id}，跳过实时数据更新:`, err);
           return;

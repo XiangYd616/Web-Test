@@ -86,7 +86,8 @@ router.get('/status/:engineType', optionalAuth, async (req, res) => {
     const engineStat = engineStats[engineType];
 
     if (!engineHealth) {
-      return res.status(404).json({
+      
+        return res.status(404).json({
         success: false,
         error: '引擎未找到或未初始化'
       });
@@ -134,7 +135,7 @@ router.post('/restart/:engineType', optionalAuth, async (req, res) => {
       });
     }
 
-    // 重启引擎（这里需要在UnifiedTestEngineManager中实现重启方法）
+    // 重启引擎（这里需要在TestEngineManager中实现重启方法）
     // 暂时返回成功状态
     res.json({
       success: true,

@@ -430,7 +430,8 @@ class ScreenshotComparator {
   inferDifferenceType(colorAnalysis, structureAnalysis, bounds) {
     // 如果有显著的结构变化
     if (structureAnalysis.structuralChange) {
-      // 根据位置和大小判断
+      
+        // 根据位置和大小判断
       if (bounds.width > 200 || bounds.height > 200) {
         return this.differenceTypes.LAYOUT;
       } else {
@@ -440,7 +441,8 @@ class ScreenshotComparator {
     
     // 如果主要是颜色差异
     if (colorAnalysis.significant) {
-      if (colorAnalysis.averageDifference > 50) {
+      
+        if (colorAnalysis.averageDifference > 50) {
         return this.differenceTypes.COLOR;
       } else {
         return this.differenceTypes.FONT;

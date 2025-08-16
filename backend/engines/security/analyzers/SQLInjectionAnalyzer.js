@@ -272,6 +272,7 @@ class SQLInjectionAnalyzer {
       const vulnerabilities = [];
 
       if (params.size === 0) {
+        
         return vulnerabilities;
       }
 
@@ -412,7 +413,8 @@ class SQLInjectionAnalyzer {
     // 检查SQL错误特征
     const errorMatch = this.checkSQLErrors(content);
     if (errorMatch) {
-      return {
+      
+        return {
         type: 'sql_injection',
         severity: 'high',
         confidence: 'high',
@@ -423,7 +425,7 @@ class SQLInjectionAnalyzer {
           errorText: errorMatch.text,
           responseTime,
           statusCode: status
-        },
+      },
         description: `检测到SQL错误信息，可能存在SQL注入漏洞`,
         recommendation: '验证和过滤用户输入，使用参数化查询'
       };
@@ -431,7 +433,8 @@ class SQLInjectionAnalyzer {
 
     // 检查时间盲注
     if (context.injectionType === 'timeBased' && responseTime > this.timeThreshold) {
-      return {
+      
+        return {
         type: 'sql_injection',
         severity: 'medium',
         confidence: 'medium',
@@ -441,7 +444,7 @@ class SQLInjectionAnalyzer {
           responseTime,
           threshold: this.timeThreshold,
           statusCode: status
-        },
+      },
         description: `响应时间异常延长，可能存在时间盲注漏洞`,
         recommendation: '验证和过滤用户输入，使用参数化查询'
       };
@@ -449,7 +452,8 @@ class SQLInjectionAnalyzer {
 
     // 检查布尔盲注（需要对比正常响应）
     if (context.injectionType === 'booleanBased') {
-      const suspiciousPatterns = [
+      
+        const suspiciousPatterns = [
         /login\s*successful/i,
         /welcome/i,
         /dashboard/i,
@@ -468,7 +472,7 @@ class SQLInjectionAnalyzer {
             suspiciousContent: true,
             responseTime,
             statusCode: status
-          },
+      },
           description: `可能存在布尔盲注漏洞`,
           recommendation: '验证和过滤用户输入，使用参数化查询'
         };
@@ -485,10 +489,11 @@ class SQLInjectionAnalyzer {
     for (const pattern of this.errorSignatures) {
       const match = content.match(pattern);
       if (match) {
+        
         return {
           pattern: pattern.toString(),
           text: match[0]
-        };
+      };
       }
     }
     return null;

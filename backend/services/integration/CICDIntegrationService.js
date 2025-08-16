@@ -59,8 +59,9 @@ class CICDIntegrationService extends EventEmitter {
    */
   async initialize() {
     if (this.isInitialized) {
-      return;
-    }
+      
+        return;
+      }
 
     try {
       // 加载已保存的集成配置
@@ -139,8 +140,9 @@ class CICDIntegrationService extends EventEmitter {
     const integration = this.integrations.get(integrationId);
     
     if (!integration || !integration.enabled) {
-      return;
-    }
+      
+        return;
+      }
 
     if (!integration.triggerEvents.includes(eventType)) {
       return;

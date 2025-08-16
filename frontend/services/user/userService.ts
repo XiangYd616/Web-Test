@@ -107,6 +107,7 @@ class UserService {
     try {
       const response = await unifiedApiService.get('/api/user/profile');
       if (response.success) {
+        
         return response.data.user;
       }
       throw new Error(response.message || '获取用户资料失败');
@@ -121,6 +122,7 @@ class UserService {
     try {
       const response = await unifiedApiService.put('/api/user/profile', data);
       if (response.success) {
+        
         return response.data.user;
       }
       throw new Error(response.message || '更新用户资料失败');
@@ -135,6 +137,7 @@ class UserService {
     try {
       const response = await unifiedApiService.get('/api/user/stats');
       if (response.success) {
+        
         return response.data;
       }
       throw new Error(response.message || '获取用户统计失败');
@@ -149,6 +152,7 @@ class UserService {
     try {
       const response = await unifiedApiService.get('/api/user/settings');
       if (response.success) {
+        
         return response.data.settings;
       }
       throw new Error(response.message || '获取用户设置失败');
@@ -163,6 +167,7 @@ class UserService {
     try {
       const response = await unifiedApiService.put('/api/user/settings', { settings });
       if (response.success) {
+        
         return response.data.settings;
       }
       throw new Error(response.message || '更新用户设置失败');
@@ -185,6 +190,7 @@ class UserService {
       });
 
       if (response.success) {
+        
         return response.data.avatarUrl;
       }
       throw new Error(response.message || '上传头像失败');
@@ -225,6 +231,7 @@ class UserService {
     try {
       const response = await unifiedApiService.get('/api/user/bookmarks');
       if (response.success) {
+        
         return response.data.bookmarks;
       }
       throw new Error(response.message || '获取收藏夹失败');
@@ -239,6 +246,7 @@ class UserService {
     try {
       const response = await unifiedApiService.post('/api/user/bookmarks', bookmark);
       if (response.success) {
+        
         return response.data.bookmark;
       }
       throw new Error(response.message || '添加收藏失败');
@@ -253,6 +261,7 @@ class UserService {
     try {
       const response = await unifiedApiService.put(`/api/user/bookmarks/${id}`, updates);
       if (response.success) {
+        
         return response.data.bookmark;
       }
       throw new Error(response.message || '更新收藏失败');
@@ -280,6 +289,7 @@ class UserService {
     try {
       const response = await unifiedApiService.get(`/api/user/tests?page=${page}&limit=${limit}`);
       if (response.success) {
+        
         return response.data;
       }
       throw new Error(response.message || '获取测试历史失败');
@@ -307,6 +317,7 @@ class UserService {
     try {
       const response = await unifiedApiService.get(`/api/user/notifications?page=${page}&limit=${limit}`);
       if (response.success) {
+        
         return response.data;
       }
       throw new Error(response.message || '获取通知失败');

@@ -23,8 +23,9 @@ class CollaborationService extends EventEmitter {
    */
   async initialize(server) {
     if (this.isInitialized) {
-      return;
-    }
+      
+        return;
+      }
 
     try {
       // 创建WebSocket服务器

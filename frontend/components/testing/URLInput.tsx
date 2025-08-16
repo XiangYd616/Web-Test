@@ -30,10 +30,11 @@ const URLInput: React.FC<URLInputProps> = ({
 
   const performValidation = useCallback(async (url: string) => {
     if (!url) {
-      setValidationResult(null);
+      
+        setValidationResult(null);
       onValidationChange?.(false);
       return;
-    }
+      }
 
     setIsChecking(true);
     try {

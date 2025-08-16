@@ -5,8 +5,8 @@
  */
 
 import type {
-  Version
-} from '../types/versionTypes';
+  // Version
+} from '../types/versionTypes'; // 已修复
 import {
   ApiVersionNegotiator,
   AutoMigrationSystem,
@@ -16,9 +16,8 @@ import {
   TypeVersionRegistry,
   VERSION_INFO,
   VersionChecker,
-  VersionedDataWrapper
-} from '../types/versionTypes';
-
+  // VersionedDataWrapper
+} from '../types/versionTypes'; // 已修复
 // 定义本地类型，避免重复导入
 export interface VersionedData {
   version: Version;
@@ -37,7 +36,7 @@ export interface ApiVersionNegotiation {
   serverVersion: Version;
   negotiatedVersion: Version;
 }
-// // // // import {defaultMemoryCache} from './cacheStrategy'; // 已删除 // 已删除 // 服务已删除 // 服务已删除
+// // // // // // import {defaultMemoryCache} from './cacheStrategy'; // 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除
 
 // ==================== 版本控制配置 ====================
 
@@ -112,7 +111,8 @@ export class VersionControlService {
     const cacheKey = `compatibility_${clientVersion}_${serverVersion}`;
 
     if (this.config.enableVersionCache) {
-      const cached = await defaultMemoryCache.get(cacheKey);
+      
+        const cached = await defaultMemoryCache.get(cacheKey);
       if (cached) {
         return cached;
       }
@@ -180,11 +180,12 @@ export class VersionControlService {
       const versionedData = this.ensureVersionedData(data);
 
       if (versionedData.version === targetVersion) {
+        
         return {
           success: true,
           data: versionedData as VersionedData<T>,
           duration: Date.now() - startTime
-        };
+      };
       }
 
       // 执行迁移
@@ -281,8 +282,9 @@ export class VersionControlService {
    */
   getTypeVersions(typeName?: string): any {
     if (typeName) {
-      return TypeVersionRegistry.getVersions(typeName);
-    }
+      
+        return TypeVersionRegistry.getVersions(typeName);
+      }
     return TypeVersionRegistry.getAll();
   }
 
@@ -317,9 +319,10 @@ export class VersionControlService {
    */
   getMigrationHistory(migrationId?: string): MigrationResult[] | MigrationResult | null {
     if (migrationId) {
-      const history = this.migrationHistory.get(migrationId);
+      
+        const history = this.migrationHistory.get(migrationId);
       return history ? history[0] : null;
-    }
+      }
 
     const allHistory: MigrationResult[] = [];
     for (const history of this.migrationHistory.values()) {
@@ -376,8 +379,9 @@ export class VersionControlService {
 
   private ensureVersionedData(data: VersionedData<any> | any): VersionedData<any> {
     if (data && typeof data === 'object' && 'version' in data && 'data' in data) {
-      return data as VersionedData<any>;
-    }
+      
+        return data as VersionedData<any>;
+      }
 
     return {
       version: '1.0.0', // 默认版本

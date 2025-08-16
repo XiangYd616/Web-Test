@@ -90,16 +90,18 @@ export const UrlInput: React.FC<UrlInputProps> = ({
   // 获取状态图标
   const getStatusIcon = useMemo(() => {
     if (isValidating) {
-      return <RefreshCw className="h-4 w-4 text-blue-400 animate-spin" />;
-    }
+      
+        return <RefreshCw className="h-4 w-4 text-blue-400 animate-spin" />;
+      }
 
     if (!value.trim()) {
       return <Globe className="h-4 w-4 text-gray-400" />;
     }
 
     if (validationResult?.isValid) {
-      return <CheckCircle className="h-4 w-4 text-green-500" />;
-    }
+      
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      }
 
     return <AlertTriangle className="h-4 w-4 text-red-400" />;
   }, [isValidating, value, validationResult]);
@@ -111,12 +113,14 @@ export const UrlInput: React.FC<UrlInputProps> = ({
     }
 
     if (validationResult?.isValid) {
-      return 'border-green-500/50 focus:border-green-500';
-    }
+      
+        return 'border-green-500/50 focus:border-green-500';
+      }
 
     if (validationResult?.errors.length) {
-      return 'border-red-500/50 focus:border-red-500';
-    }
+      
+        return 'border-red-500/50 focus:border-red-500';
+      }
 
     return 'border-gray-600 focus:border-blue-500';
   }, [value, validationResult]);

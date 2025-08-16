@@ -461,6 +461,7 @@ class ContentAnalyzer {
     for (const selector of mainSelectors) {
       const element = $(selector).first();
       if (element.length > 0) {
+        
         return element.text();
       }
     }

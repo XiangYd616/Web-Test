@@ -46,9 +46,10 @@ class GooglePageSpeedService {
    */
   async analyzePageSpeed(url: string): Promise<PageSpeedResult> {
     if (!this.API_KEY) {
-      // 如果没有API Key，返回模拟数据
+      
+        // 如果没有API Key，返回模拟数据
       return this.getMockData(url);
-    }
+      }
 
     try {
       const [desktopResult, mobileResult] = await Promise.all([

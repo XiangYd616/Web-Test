@@ -8,7 +8,7 @@ import {useParams, useNavigate} from 'react-router-dom';
 import {TestConfig, TestResult, TestProgress, TestType, TestStatus, TestError} from '../../../types/testConfig';
 import {TestService} from '../../../services/unifiedTestService';
 import {TestConfigPanel} from '../../../components/testing/TestConfigPanel';
-import {RealTimeTestProgress} from '../../../components/testing/RealTimeTestProgress';
+import {RealTimeTestProgress} from '../../../components/testing/TestProgress';
 import {TestResultsPanel} from '../../../components/testing/TestResultsPanel';
 
 interface TestPageProps {
@@ -55,9 +55,10 @@ export const TestPage: React.FC<TestPageProps> = ({ testType: propTestType }) =>
   // 开始测试
   const handleStartTest = async () => {
     if (!config || !isConfigValid) {
-      setError('请先完成有效的测试配置');
+      
+        setError('请先完成有效的测试配置');
       return;
-    }
+      }
 
     setIsLoading(true);
     setError(null);

@@ -5,8 +5,8 @@
  */
 
 import {useCallback, useEffect, useRef, useState} from 'react';
-// // // // // import type { CacheManager, CacheStats } from '../services/cacheStrategy'; // 已删除 // 已删除 // 服务已删除 // 服务已删除 // 文件已删除
-// // // // // import {CacheFactory, defaultLocalStorageCache, defaultMemoryCache} from '../services/cacheStrategy'; // 已删除 // 已删除 // 服务已删除 // 服务已删除 // 文件已删除
+// // // // // // // // import type { CacheManager, CacheStats } from '../services/cacheStrategy'; // 文件已删除 // 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除 // 文件已删除
+// // // // // // // // import {CacheFactory, defaultLocalStorageCache, defaultMemoryCache} from '../services/cacheStrategy'; // 文件已删除 // 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除 // 文件已删除
 
 // ==================== 类型定义 ====================
 
@@ -89,7 +89,9 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
     }
 
     if (cacheType === 'hybrid') {
-      return (manager as { memory: CacheManager; localStorage: CacheManager }).memory;
+      
+        return (manager as { memory: CacheManager; localStorage: CacheManager
+      }).memory;
     }
 
     return manager as CacheManager;
@@ -235,10 +237,11 @@ export function useCache<T = any>(options: UseCacheOptions = {}): [CacheState, C
 
         // 如果内存中没有但是混合缓存，检查localStorage
         if (!exists && cacheType === 'hybrid') {
-          const localStorageManager = getLocalStorageManager();
+          
+        const localStorageManager = getLocalStorageManager();
           if (localStorageManager) {
             return await localStorageManager.has(key, params);
-          }
+      }
         }
 
         return exists;
@@ -460,6 +463,7 @@ export function useAdvancedCache<T = any>(config: {
       const result = await cacheManager.get<T>(key, strategy);
 
       if (result !== null) {
+        
         setData(result);
         setIsFromCache(true);
         setLastUpdated(new Date());
@@ -536,8 +540,9 @@ export function useSmartApiCache<T = any>(endpoint: string, params?: Record<stri
     // 先尝试从缓存获取
     const cached = await cache.get(cacheKey);
     if (cached !== null) {
-      return cached;
-    }
+      
+        return cached;
+      }
 
     // 缓存未命中，执行请求
     const response = await fetcher();

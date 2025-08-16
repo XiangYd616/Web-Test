@@ -202,7 +202,8 @@ export class CacheStrategyManager {
     const { size, accessFrequency, updateFrequency, importance, durability } = characteristics;
 
     // 大文件优先存储
-    if (size > 1024 * 1024) { // > 1MB
+    if (size > 1024 * 1024) { 
+        // > 1MB
       return {
         strategy: CacheStrategy.STORAGE_ONLY,
         ttl: durability === 'temporary' ? 300 : 3600,
@@ -215,7 +216,8 @@ export class CacheStrategyManager {
 
     // 高频访问数据优先内存
     if (accessFrequency === 'high') {
-      return {
+      
+        return {
         strategy: updateFrequency === 'high' ? CacheStrategy.WRITE_THROUGH : CacheStrategy.MEMORY_FIRST,
         ttl: durability === 'temporary' ? 300 : 1800,
         priority: importance,
@@ -226,7 +228,8 @@ export class CacheStrategyManager {
 
     // 关键数据双重保障
     if (importance === 'critical') {
-      return {
+      
+        return {
         strategy: CacheStrategy.WRITE_THROUGH,
         ttl: durability === 'persistent' ? 43200 : 3600,
         priority: 'critical',
@@ -237,7 +240,8 @@ export class CacheStrategyManager {
 
     // 临时数据仅内存
     if (durability === 'temporary') {
-      return {
+      
+        return {
         strategy: CacheStrategy.MEMORY_ONLY,
         ttl: 300,
         priority: 'low',
@@ -329,6 +333,7 @@ export function cached(
       // 尝试从缓存获取
       const cached = await cacheManager.get(cacheKey, finalConfig.strategy);
       if (cached !== null) {
+        
         return cached;
       }
 

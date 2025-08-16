@@ -240,10 +240,11 @@ class PerformanceTestEngine {
   async stopTest(testId) {
     const test = this.activeTests.get(testId);
     if (test && test.status === 'running') {
-      test.status = 'cancelled';
+      
+        test.status = 'cancelled';
       this.activeTests.set(testId, test);
       return true;
-    }
+      }
     return false;
   }
 }

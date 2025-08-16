@@ -9,9 +9,8 @@ import type {
   TestHistoryResponse,
   TestSession,
   TestStatistics,
-  TestType
-} from '../types/testHistory';
-
+  // TestType
+} from '../types/testHistory'; // 已修复
 export interface TestHistoryFilters {
   testType?: TestType | TestType[];
   status?: string;

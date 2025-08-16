@@ -127,7 +127,8 @@ router.post('/generate', authMiddleware, asyncHandler(async (req, res) => {
 
     // 验证必填字段
     if (!name || !type) {
-      return res.status(400).json({
+      
+        return res.status(400).json({
         success: false,
         message: '报告名称和类型是必填的'
       });
@@ -203,7 +204,8 @@ router.get('/:id', authMiddleware, asyncHandler(async (req, res) => {
     const report = reports.find(r => r.id === id);
 
     if (!report) {
-      return res.status(404).json({
+      
+        return res.status(404).json({
         success: false,
         message: '报告不存在'
       });
@@ -232,14 +234,16 @@ router.get('/:id/download', authMiddleware, asyncHandler(async (req, res) => {
     const report = reports.find(r => r.id === id);
 
     if (!report) {
-      return res.status(404).json({
+      
+        return res.status(404).json({
         success: false,
         message: '报告不存在'
       });
     }
 
     if (report.status !== 'completed') {
-      return res.status(400).json({
+      
+        return res.status(400).json({
         success: false,
         message: '报告尚未生成完成'
       });
@@ -278,7 +282,8 @@ router.delete('/:id', authMiddleware, asyncHandler(async (req, res) => {
     const reportIndex = reports.findIndex(r => r.id === id);
 
     if (reportIndex === -1) {
-      return res.status(404).json({
+      
+        return res.status(404).json({
         success: false,
         message: '报告不存在'
       });
@@ -406,10 +411,11 @@ router.post('/scheduled', authMiddleware, asyncHandler(async (req, res) => {
   } = req.body;
 
   if (!name || !schedule || !reportType) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '缺少必要参数: name, schedule, reportType'
-    });
+      });
   }
 
   try {
@@ -527,10 +533,11 @@ router.post('/performance/benchmarks', authMiddleware, asyncHandler(async (req, 
   } = req.body;
 
   if (!name || !type || !metrics) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '缺少必要参数: name, type, metrics'
-    });
+      });
   }
 
   try {
@@ -600,10 +607,11 @@ router.post('/performance/baselines', authMiddleware, asyncHandler(async (req, r
   const { benchmarkId, testResultId } = req.body;
 
   if (!benchmarkId || !testResultId) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '缺少必要参数: benchmarkId, testResultId'
-    });
+      });
   }
 
   try {

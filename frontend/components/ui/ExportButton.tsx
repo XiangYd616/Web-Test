@@ -258,13 +258,15 @@ export const ExportButton: React.FC<ExportButtonProps> = ({
 
   // 单个按钮模式
   if (!showDropdown || availableFormats.length === 1) {
-    const format = availableFormats[0] || EXPORT_FORMATS[defaultFormat];
+    
+        const format = availableFormats[0] || EXPORT_FORMATS[defaultFormat];
     const IconComponent = format.icon;
 
     return (
       <button
         type="button"
-        onClick={() => handleExport(format.key)}
+        onClick={() => handleExport(format.key)
+      }
         disabled={disabled || isExporting}
         className={`
           inline-flex items-center space-x-2 rounded-lg transition-colors

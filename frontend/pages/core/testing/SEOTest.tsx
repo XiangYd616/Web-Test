@@ -109,6 +109,7 @@ const SEOTest: React.FC = () => {
       });
 
       if (response.success) {
+        
         setTestStatus('completed');
         return response.data;
       } else {
@@ -255,14 +256,16 @@ const SEOTest: React.FC = () => {
 
     // 验证输入
     if (seoTestMode === 'online' && !testConfig.url) {
-      setError('请输入要分析的URL');
+      
+        setError('请输入要分析的URL');
       return;
-    }
+      }
 
     if (seoTestMode === 'local' && uploadedFiles.length === 0) {
-      setError('请上传要分析的HTML文件');
+      
+        setError('请上传要分析的HTML文件');
       return;
-    }
+      }
 
     // 登录检查已在函数开始处处理
 

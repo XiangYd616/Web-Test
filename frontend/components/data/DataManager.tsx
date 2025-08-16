@@ -16,8 +16,8 @@ import {
   Square,
   Trash2,
   Upload,
-  X
-} from 'lucide-react';
+  // X
+} from 'lucide-react'; // 已修复
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {useDataManagement} from '../../hooks/useDataManagement';
 import {realtimeManager} from '../services/realtime/websocketService';

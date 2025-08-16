@@ -63,9 +63,10 @@ class DataArchiveManager {
    */
   async runScheduledArchive() {
     if (this.isRunning) {
-      console.log('⚠️ 归档任务正在运行中，跳过本次执行');
+      
+        console.log('⚠️ 归档任务正在运行中，跳过本次执行');
       return;
-    }
+      }
 
     try {
       this.isRunning = true;

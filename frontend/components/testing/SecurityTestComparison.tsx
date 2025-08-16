@@ -79,8 +79,9 @@ const SecurityTestComparison: React.FC<SecurityTestComparisonProps> = ({
   // 获取变化趋势
   const getTrend = (values: (number | string)[], index: number) => {
     if (index === 0 || typeof values[index] !== 'number' || typeof values[index - 1] !== 'number') {
-      return null;
-    }
+      
+        return null;
+      }
 
     const current = values[index] as number;
     const previous = values[index - 1] as number;
@@ -140,14 +141,16 @@ const SecurityTestComparison: React.FC<SecurityTestComparisonProps> = ({
   };
 
   if (results.length < 2) {
-    return (
+    
+        return (
       <div className="bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6">
         <div className="text-center">
           <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-white mb-2">需要至少2个测试结果</h3>
           <p className="text-gray-400">请选择至少2个测试结果进行对比分析</p>
           <button
-            onClick={onClose}
+            onClick={onClose
+      }
             className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
           >
             返回

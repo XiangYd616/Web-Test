@@ -85,6 +85,7 @@ class MonitoringService {
       const data = await response.json();
 
       if (data.success) {
+        
         this.sites = data.data;
         return this.sites;
       } else {
@@ -122,6 +123,7 @@ class MonitoringService {
 
       const data = await response.json();
       if (data.success) {
+        
         this.sites.push(data.data);
         return data.data;
       }
@@ -151,6 +153,7 @@ class MonitoringService {
       });
 
       if (response.ok) {
+        
         this.sites = this.sites.filter(site => site.id !== siteId);
         return;
       }
@@ -429,6 +432,7 @@ class MonitoringService {
     try {
       const stored = localStorage.getItem('monitoring_sites');
       if (stored) {
+        
         this.sites = JSON.parse(stored);
         return this.sites;
       }

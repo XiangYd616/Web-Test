@@ -168,8 +168,9 @@ export const NumberBadge: React.FC<NumberBadgeProps> = ({
   ...props
 }) => {
   if (count === 0 && !showZero) {
-    return null;
-  }
+    
+        return null;
+      }
 
   const displayCount = count > max ? `${max}+` : count.toString();
 

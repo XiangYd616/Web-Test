@@ -822,7 +822,7 @@ export class RealSEOAnalysisEngine {
    */
   private async analyzeTechnicalSEO(url: string, dom: Document): Promise<TechnicalSEOResult> {
     const urlObj = new URL(url);
-    const baseUrl = `${urlObj.protocol}/\${urlObj.host}`;
+    const baseUrl = `${urlObj.protocol}/${urlObj.host}`;
 
     // 检查robots.txt
     const robotsTxt = await this.checkRobotsTxt(baseUrl);
@@ -1007,7 +1007,8 @@ export class RealSEOAnalysisEngine {
     const issues: string[] = [];
 
     if (canonicalLinks.length === 0) {
-      return {
+      
+        return {
         present: false,
         correct: false,
         issues: ['缺少canonical标签']
@@ -1020,8 +1021,10 @@ export class RealSEOAnalysisEngine {
 
     const canonicalUrl = canonicalLinks[0].getAttribute('href');
     if (!canonicalUrl) {
-      issues.push('canonical标签缺少href属性');
-      return { present: true, correct: false, issues };
+      
+        issues.push('canonical标签缺少href属性');
+      return { present: true, correct: false, issues
+      };
     }
 
     // 检查canonical URL是否有效
@@ -1055,7 +1058,8 @@ export class RealSEOAnalysisEngine {
     const issues: string[] = [];
 
     if (!metaRobots) {
-      return {
+      
+        return {
         present: false,
         content: '',
         issues: ['缺少meta robots标签']
@@ -1094,7 +1098,8 @@ export class RealSEOAnalysisEngine {
     const issues: string[] = [];
 
     if (hreflangLinks.length === 0) {
-      return {
+      
+        return {
         present: false,
         correct: false,
         issues: ['没有hreflang标签（如果是多语言网站建议添加）']
@@ -1273,7 +1278,8 @@ export class RealSEOAnalysisEngine {
     const issues: string[] = [];
 
     if (!title) {
-      return {
+      
+        return {
         present: false,
         length: 0,
         optimal: false,
@@ -1321,7 +1327,8 @@ export class RealSEOAnalysisEngine {
     const issues: string[] = [];
 
     if (!metaDesc) {
-      return {
+      
+        return {
         present: false,
         length: 0,
         optimal: false,
@@ -1445,8 +1452,9 @@ export class RealSEOAnalysisEngine {
     const keywordDensity: { [keyword: string]: number } = {};
 
     if (!keywords) {
-      return keywordDensity;
-    }
+      
+        return keywordDensity;
+      }
 
     const keywordList = keywords.split(',').map(k => k.trim().toLowerCase()).filter(k => k);
     keywordList.forEach(keyword => {
@@ -2097,8 +2105,9 @@ export class RealSEOAnalysisEngine {
   }): number {
     // 如果没有真实的PageSpeed数据，返回较低分数并提示使用本地分析
     if (!params.hasPageSpeedData) {
-      return 30; // 低分数表示数据不完整
-    }
+      
+        return 30; // 低分数表示数据不完整
+      }
 
     // 基于基础指标的简单评分
     let score = 100;
@@ -2297,7 +2306,9 @@ export class RealSEOAnalysisEngine {
     const viewportMeta = dom.querySelector('meta[name="viewport"]');
 
     if (!viewportMeta) {
-      return { present: false, correct: false, content: '' };
+      
+        return { present: false, correct: false, content: ''
+      };
     }
 
     const content = viewportMeta.getAttribute('content') || '';
@@ -2747,7 +2758,9 @@ export class RealSEOAnalysisEngine {
     const issues: string[] = [];
 
     if (!isHttps) {
-      return { present: false, issues };
+      
+        return { present: false, issues
+      };
     }
 
     // 检查HTTP资源

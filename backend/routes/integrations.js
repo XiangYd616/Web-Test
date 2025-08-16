@@ -102,7 +102,8 @@ router.post('/', authMiddleware, asyncHandler(async (req, res) => {
 
     // 验证必填字段
     if (!name || !type || !config) {
-      return res.status(400).json({
+      
+        return res.status(400).json({
         success: false,
         message: '名称、类型和配置是必填的'
       });
@@ -120,7 +121,8 @@ router.post('/', authMiddleware, asyncHandler(async (req, res) => {
     // 验证配置
     const validationResult = validateIntegrationConfig(type, config);
     if (!validationResult.valid) {
-      return res.status(400).json({
+      
+        return res.status(400).json({
         success: false,
         message: '配置验证失败',
         errors: validationResult.errors
@@ -246,10 +248,11 @@ router.post('/cicd', authMiddleware, asyncHandler(async (req, res) => {
   } = req.body;
 
   if (!name || !platform || !configuration) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '缺少必要参数: name, platform, configuration'
-    });
+      });
   }
 
   try {
@@ -390,9 +393,11 @@ router.get('/cicd/templates/:platform', authMiddleware, asyncHandler(async (req,
 
     const template = templates[platform];
     if (!template) {
-      return res.status(404).json({
+      
+        return res.status(404).json({
         success: false,
-        message: `不支持的平台: ${platform}`
+        message: `不支持的平台: ${platform
+      }`
       });
     }
 

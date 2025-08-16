@@ -5,8 +5,9 @@ export class ConfigService {
   async getConfig(key?: string): Promise<any> {
     
     if (key) {
-      return this.config[key];
-    }
+      
+        return this.config[key];
+      }
     return this.config;
   }
 

@@ -10,10 +10,11 @@ export const useUserStats = () => {
   // 加载用户统计数据
   const loadStats = useCallback(() => {
     if (!user?.id) {
-      setStats(null);
+      
+        setStats(null);
       setLoading(false);
       return;
-    }
+      }
 
     try {
       const userStats = userStatsService.getUserStats(user.id);

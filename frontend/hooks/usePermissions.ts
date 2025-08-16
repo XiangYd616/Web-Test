@@ -12,9 +12,8 @@ import type {
   ResourceType, 
   PermissionAction,
   PermissionCheckRequest,
-  PermissionCheckResult 
-} from '../types/unified/rbac';
-
+  // PermissionCheckResult 
+} from '../types/unified/rbac'; // 已修复
 // ==================== 类型定义 ====================
 
 export interface UsePermissionsOptions {
@@ -184,10 +183,11 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
     try {
       // 检查缓存
       if (permissionCache) {
+        
         const cached = permissionCache.getCachedPermission(resource, action, resourceId);
         if (cached !== null) {
           return cached;
-        }
+      }
       }
 
       // 本地权限检查（基于已获取的权限列表）
@@ -263,6 +263,7 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
 
       // 如果所有权限都已缓存，直接返回
       if (uncachedChecks.length === 0) {
+        
         return results;
       }
 
@@ -346,9 +347,10 @@ export function usePermissions(options: UsePermissionsOptions = {}): [Permission
     fetchPermissions();
 
     if (autoRefresh && refreshInterval > 0) {
-      const interval = setInterval(fetchPermissions, refreshInterval);
+      
+        const interval = setInterval(fetchPermissions, refreshInterval);
       return () => clearInterval(interval);
-    }
+      }
   }, [fetchPermissions, autoRefresh, refreshInterval]);
 
   // 监听认证状态变化

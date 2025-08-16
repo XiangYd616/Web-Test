@@ -18,8 +18,8 @@ import {
   Target,
   FileText,
   Download,
-  RefreshCw
-} from 'lucide-react';
+  // RefreshCw
+} from 'lucide-react'; // 已修复
 import {createApiUrl} from '../../config/api';
 
 interface SecurityVulnerability {

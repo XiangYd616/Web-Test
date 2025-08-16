@@ -39,8 +39,9 @@ function DataTable<T extends Record<string, any>>({
 }: DataTableProps<T>) {
   const getRowKey = (record: T, index: number): string => {
     if (typeof rowKey === 'function') {
-      return rowKey(record);
-    }
+      
+        return rowKey(record);
+      }
     return record[rowKey] || index.toString();
   };
 
@@ -48,7 +49,9 @@ function DataTable<T extends Record<string, any>>({
   const getGridClassName = (): string => {
     const columnCount = columns.length;
     if (columnCount <= 12) {
-      return `grid-cols-${columnCount}`;
+      
+        return `grid-cols-${columnCount
+      }`;
     }
     return 'grid-fixed-md'; // 超过12列时使用固定宽度
   };
@@ -56,8 +59,9 @@ function DataTable<T extends Record<string, any>>({
   // 生成ARIA sort属性值
   const getAriaSortValue = (columnKey: keyof T): "ascending" | "descending" | "none" | undefined => {
     if (sortBy === columnKey) {
-      return sortOrder === 'asc' ? 'ascending' : 'descending';
-    }
+      
+        return sortOrder === 'asc' ? 'ascending' : 'descending';
+      }
     return columns.find(col => col.key === columnKey)?.sortable ? 'none' : undefined;
   };
 
@@ -70,16 +74,19 @@ function DataTable<T extends Record<string, any>>({
 
   const getSortIcon = (key: keyof T) => {
     if (sortBy !== key) {
-      return <SortAsc className="w-4 h-4 text-gray-500" />;
-    }
+      
+        return <SortAsc className="w-4 h-4 text-gray-500" />;
+      }
     return sortOrder === 'asc' ?
       <ChevronUp className="w-4 h-4 text-blue-400" /> :
       <ChevronDown className="w-4 h-4 text-blue-400" />;
   };
 
   if (loading) {
-    return (
-      <section className={`bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 overflow-hidden ${className}`} aria-busy="true" aria-label="加载数据表格">
+    
+        return (
+      <section className={`bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 overflow-hidden ${className
+      }`} aria-busy="true" aria-label="加载数据表格">
         <div className="animate-pulse">
           {/* 表头骨架 */}
           <header className="bg-gray-700/30 px-6 py-4">

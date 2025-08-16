@@ -166,8 +166,8 @@ const Analytics: React.FC<AnalyticsProps> = ({
             key={tab.key}
             onClick={() => setActiveTab(tab.key as any)}
             className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md transition-colors ${activeTab === tab.key
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-300 hover:bg-gray-600'
+              ? 'bg-blue-600 text-white'
+              : 'text-gray-300 hover:bg-gray-600'
               }`}
           >
             <tab.icon className="w-4 h-4" />

@@ -29,12 +29,14 @@ export class DataProcessingUtils {
     if (!timestamp) return new Date().toISOString();
 
     if (typeof timestamp === 'string') {
-      return new Date(timestamp).toISOString();
-    }
+      
+        return new Date(timestamp).toISOString();
+      }
 
     if (typeof timestamp === 'number') {
-      return new Date(timestamp).toISOString();
-    }
+      
+        return new Date(timestamp).toISOString();
+      }
 
     return new Date().toISOString();
   }
@@ -81,8 +83,10 @@ export class DataProcessingUtils {
     const validData = data.filter(item => item.responseTime > 0);
 
     if (validData.length === 0) {
-      return [
-        { range: '0-50ms', count: 0, percentage: 0, color: 'bg-green-400' },
+      
+        return [
+        { range: '0-50ms', count: 0, percentage: 0, color: 'bg-green-400'
+      },
         { range: '50-100ms', count: 0, percentage: 0, color: 'bg-green-300' },
         { range: '100-200ms', count: 0, percentage: 0, color: 'bg-yellow-400' },
         { range: '200-500ms', count: 0, percentage: 0, color: 'bg-orange-400' },
@@ -155,7 +159,8 @@ export class DataProcessingUtils {
     const validData = this.filterValidData(data);
 
     if (validData.length === 0) {
-      return {
+      
+        return {
         totalRequests: 0,
         successfulRequests: 0,
         failedRequests: 0,

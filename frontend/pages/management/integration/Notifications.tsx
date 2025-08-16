@@ -92,14 +92,15 @@ const Notifications: React.FC = () => {
   };
 
   if (loading) {
-    return (
+    
+        return (
       <div className="space-y-6 dark-page-scrollbar">
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
         </div>
       </div>
     );
-  }
+      }
 
   return (
     <div className="space-y-6 dark-page-scrollbar">

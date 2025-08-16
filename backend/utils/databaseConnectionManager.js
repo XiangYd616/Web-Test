@@ -369,7 +369,9 @@ class DatabaseConnectionManager extends EventEmitter {
      */
     async batchInsert(tableName, columns, values, options = {}) {
         if (!values || values.length === 0) {
-            return { rowCount: 0 };
+            
+        return { rowCount: 0
+      };
         }
 
         const { batchSize = 1000 } = options;
@@ -456,8 +458,9 @@ class DatabaseConnectionManager extends EventEmitter {
             Logger.error(`数据库重连失败 (尝试 ${this.reconnectAttempts})`, error);
 
             if (this.reconnectAttempts < this.config.retryAttempts) {
-                return this.reconnect();
-            } else {
+                
+        return this.reconnect();
+      } else {
                 this.emit('reconnectFailed', { attempts: this.reconnectAttempts, error });
                 throw error;
             }

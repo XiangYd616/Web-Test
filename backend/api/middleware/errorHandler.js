@@ -73,9 +73,10 @@ const getErrorDetails = (error) => {
 const getUserFriendlyMessage = (error) => {
   // 数据库错误
   if (error.code === '23505') {
-    if (error.constraint && error.constraint.includes('email')) {
+    
+        if (error.constraint && error.constraint.includes('email')) {
       return '该邮箱地址已被使用';
-    }
+      }
     if (error.constraint && error.constraint.includes('username')) {
       return '该用户名已被使用';
     }
@@ -83,30 +84,36 @@ const getUserFriendlyMessage = (error) => {
   }
   
   if (error.code === '23503') {
-    return '关联的数据不存在';
-  }
+    
+        return '关联的数据不存在';
+      }
   
   if (error.code === '23502') {
-    return '必填字段不能为空';
-  }
+    
+        return '必填字段不能为空';
+      }
   
   // JWT错误
   if (error.name === 'TokenExpiredError') {
-    return '登录已过期，请重新登录';
-  }
+    
+        return '登录已过期，请重新登录';
+      }
   
   if (error.name === 'JsonWebTokenError') {
-    return '无效的认证信息';
-  }
+    
+        return '无效的认证信息';
+      }
   
   // 网络错误
   if (error.code === 'ECONNREFUSED') {
-    return '服务暂时不可用，请稍后重试';
-  }
+    
+        return '服务暂时不可用，请稍后重试';
+      }
   
   if (error.code === 'ETIMEDOUT') {
-    return '请求超时，请稍后重试';
-  }
+    
+        return '请求超时，请稍后重试';
+      }
   
   // 默认消息
   return error.message || '服务器内部错误';
@@ -118,12 +125,14 @@ const getUserFriendlyMessage = (error) => {
 const getStatusCode = (error) => {
   // 已设置状态码的错误
   if (error.statusCode) {
-    return error.statusCode;
-  }
+    
+        return error.statusCode;
+      }
   
   if (error.status) {
-    return error.status;
-  }
+    
+        return error.status;
+      }
   
   // 根据错误类型确定状态码
   switch (error.name) {
@@ -166,17 +175,20 @@ const getStatusCode = (error) => {
 const getErrorCode = (error) => {
   // 自定义错误代码
   if (error.errorCode) {
-    return error.errorCode;
-  }
+    
+        return error.errorCode;
+      }
   
   // 根据错误类型映射
   if (ERROR_TYPE_MAP[error.name]) {
-    return ERROR_TYPE_MAP[error.name];
-  }
+    
+        return ERROR_TYPE_MAP[error.name];
+      }
   
   if (ERROR_TYPE_MAP[error.code]) {
-    return ERROR_TYPE_MAP[error.code];
-  }
+    
+        return ERROR_TYPE_MAP[error.code];
+      }
   
   // 默认错误代码
   return ERROR_CODES.INTERNAL_ERROR;
@@ -226,8 +238,9 @@ const logError = (error, req) => {
 const errorHandler = (error, req, res, next) => {
   // 如果响应已经发送，则交给默认错误处理器
   if (res.headersSent) {
-    return next(error);
-  }
+    
+        return next(error);
+      }
   
   // 记录错误日志
   logError(error, req);

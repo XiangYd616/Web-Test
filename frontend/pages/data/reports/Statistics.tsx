@@ -65,8 +65,9 @@ const Statistics: React.FC = () => {
   // 格式化数字
   const formatNumber = (num: number) => {
     if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'K';
-    }
+      
+        return (num / 1000).toFixed(1) + 'K';
+      }
     return num.toString();
   };
 
@@ -109,7 +110,8 @@ const Statistics: React.FC = () => {
   }, [timeRange]);
 
   if (loading) {
-    return (
+    
+        return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
         <div className="text-center">
           <Activity className="w-8 h-8 text-blue-400 animate-spin mx-auto mb-4" />
@@ -117,10 +119,11 @@ const Statistics: React.FC = () => {
         </div>
       </div>
     );
-  }
+      }
 
   if (!statistics) {
-    return (
+    
+        return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
         <div className="text-center">
           <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -128,7 +131,7 @@ const Statistics: React.FC = () => {
         </div>
       </div>
     );
-  }
+      }
 
   return (
     <div className="data-management-container">

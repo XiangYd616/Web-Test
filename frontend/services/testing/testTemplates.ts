@@ -355,9 +355,10 @@ export class TestTemplateService {
     const filteredTemplates = customTemplates.filter(t => t.id !== templateId);
 
     if (filteredTemplates.length !== customTemplates.length) {
-      localStorage.setItem(this.CUSTOM_TEMPLATES_KEY, JSON.stringify(filteredTemplates));
+      
+        localStorage.setItem(this.CUSTOM_TEMPLATES_KEY, JSON.stringify(filteredTemplates));
       return true;
-    }
+      }
 
     return false;
   }
@@ -405,8 +406,9 @@ export class TestTemplateService {
     const allTemplates = this.getAllTemplates();
 
     if (userHistory.length === 0) {
-      return this.getPopularTemplates(5);
-    }
+      
+        return this.getPopularTemplates(5);
+      }
 
     // 简单的推荐算法：基于标签相似度
     const userTags = new Set<string>();

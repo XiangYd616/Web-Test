@@ -236,6 +236,7 @@ class BatchOperationService {
       const result = await response.json();
 
       if (result.success) {
+        
         const operation = result.data;
         this.operations.set(operationId, operation);
         this.notifyListeners(operationId, operation);
@@ -302,6 +303,7 @@ class BatchOperationService {
       const result = await response.json();
 
       if (result.success) {
+        
         return result.data;
       } else {
         throw new Error(result.message || '获取操作结果失败');

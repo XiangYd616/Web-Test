@@ -25,13 +25,15 @@ const createCacheMiddleware = (cacheManager, options = {}) => {
   return (req, res, next) => {
     // 检查是否跳过缓存
     if (config.skipCache || req.headers[config.skipCacheHeader]) {
-      return next();
-    }
+      
+        return next();
+      }
     
     // 只缓存GET请求
     if (req.method !== 'GET') {
-      return next();
-    }
+      
+        return next();
+      }
     
     // 生成缓存键
     const cacheKey = config.cacheKeyGenerator 
@@ -186,8 +188,9 @@ async function cacheResponse(req, res, cacheManager, cacheKey, config, data, sta
     
     // 只缓存成功的响应
     if (statusCode < 200 || statusCode >= 300) {
-      return;
-    }
+      
+        return;
+      }
     
     // 准备缓存数据
     const cacheData = {

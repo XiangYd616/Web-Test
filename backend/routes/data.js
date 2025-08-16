@@ -37,10 +37,11 @@ router.post('/:type', asyncHandler(async (req, res) => {
   const { data, options = {} } = req.body;
 
   if (!data) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '缺少数据内容'
-    });
+      });
   }
 
   try {
@@ -102,10 +103,11 @@ router.put('/:type/:id', asyncHandler(async (req, res) => {
   const { updates, options = {} } = req.body;
 
   if (!updates) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '缺少更新数据'
-    });
+      });
   }
 
   try {
@@ -274,10 +276,11 @@ router.post('/:type/import', upload.single('file'), asyncHandler(async (req, res
   const { format = 'json' } = req.body;
 
   if (!req.file) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '缺少上传文件'
-    });
+      });
   }
 
   try {
@@ -422,10 +425,11 @@ router.post('/:type/validate', asyncHandler(async (req, res) => {
   const { data } = req.body;
 
   if (!data) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '缺少验证数据'
-    });
+      });
   }
 
   try {

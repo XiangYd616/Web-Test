@@ -16,9 +16,8 @@ import {
   AlertTriangle,
   Info,
   ChevronDown,
-  ChevronUp
-} from 'lucide-react';
-
+  // ChevronUp
+} from 'lucide-react'; // 已修复
 interface StressTestConfig {
   // 基础配置
   url: string;

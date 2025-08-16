@@ -198,9 +198,11 @@ export class ApiErrorHandler {
   private normalizeError(error: any, context: ErrorContext): ApiError {
     // 如果已经是标准化的API错误
     if (error.code && error.message) {
-      return {
+      
+        return {
         ...error,
-        context: { ...error.context, ...context }
+        context: { ...error.context, ...context
+      }
       } as ApiError;
     }
 
@@ -235,8 +237,9 @@ export class ApiErrorHandler {
 
     // HTTP响应错误
     if (error.response) {
-      return this.normalizeHttpError(error, context);
-    }
+      
+        return this.normalizeHttpError(error, context);
+      }
 
     // 默认未知错误
     return {
@@ -261,7 +264,8 @@ export class ApiErrorHandler {
 
     // 如果响应包含标准化的错误格式
     if (data && data.error && data.error.code) {
-      return {
+      
+        return {
         ...data.error,
         context,
         retryable: this.isRetryableHttpStatus(status)
@@ -356,8 +360,9 @@ export class ApiErrorHandler {
     // 检查重试次数
     const currentRetries = this.retryCount.get(requestId) || 0;
     if (currentRetries >= this.config.maxRetries) {
-      return false;
-    }
+      
+        return false;
+      }
 
     // 增加重试计数
     this.retryCount.set(requestId, currentRetries + 1);
@@ -594,8 +599,9 @@ export const ErrorHandlerUtils = {
     const data = response.data;
 
     if (data && data.error) {
-      return data.error;
-    }
+      
+        return data.error;
+      }
 
     return ErrorHandlerUtils.createError(
       status >= 500 ? ErrorCode.SERVER_ERROR : ErrorCode.UNKNOWN_ERROR,

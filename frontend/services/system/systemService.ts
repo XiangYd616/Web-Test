@@ -9,9 +9,8 @@ import type {
   SystemLog,
   SystemStats,
   User,
-  UserFilter
-} from '../types/system';
-
+  // UserFilter
+} from '../types/system'; // 已修复
 export class SystemService {
   private static readonly BASE_URL = '/api/system';
   private static cache = new Map<string, any>();

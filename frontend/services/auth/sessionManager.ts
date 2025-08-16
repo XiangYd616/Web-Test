@@ -652,6 +652,7 @@ export class SessionManager {
     const timer = setInterval(async () => {
       const session = this.activeSessions.get(sessionId);
       if (!session) {
+        
         clearInterval(timer);
         this.heartbeatTimers.delete(sessionId);
         return;
@@ -662,6 +663,7 @@ export class SessionManager {
       const now = Date.now();
 
       if (now - lastActivity > this.config.inactivityTimeout) {
+        
         await this.terminateSession(sessionId, 'inactivity_timeout');
         return;
       }

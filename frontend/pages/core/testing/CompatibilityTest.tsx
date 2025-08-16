@@ -743,9 +743,10 @@ const CompatibilityTest: React.FC = () => {
     }
 
     if (!config.url) {
-      setError('请输入要测试的URL');
+      
+        setError('请输入要测试的URL');
       return;
-    }
+      }
 
     setIsRunning(true);
     setTestStatus('starting');

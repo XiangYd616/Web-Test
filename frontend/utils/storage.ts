@@ -93,8 +93,9 @@ export class StorageManager {
             }
 
             if (!itemStr) {
-                return defaultValue;
-            }
+                
+        return defaultValue;
+      }
 
             const item: CacheItem<T> = JSON.parse(itemStr);
 
@@ -164,11 +165,12 @@ export class StorageManager {
         try {
             const storage = this.getStorage();
             if (storage) {
-                const keys = Object.keys(storage);
+                
+        const keys = Object.keys(storage);
                 return keys
                     .filter(key => key.startsWith(this.prefix))
                     .map(key => key.substring(this.prefix.length));
-            } else {
+      } else {
                 const keys = Array.from(memoryCache.keys());
                 return keys
                     .filter(key => key.startsWith(this.prefix))
@@ -251,8 +253,9 @@ export class CacheManager {
     ): Promise<T> {
         const cached = this.get<T>(key);
         if (cached !== undefined) {
-            return cached;
-        }
+            
+        return cached;
+      }
 
         const value = await factory();
         this.set(key, value, expiry);

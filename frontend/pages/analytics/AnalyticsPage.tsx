@@ -11,8 +11,8 @@ import {
   Settings,
   Share2,
   Target,
-  TrendingUp
-} from 'lucide-react';
+  // TrendingUp
+} from 'lucide-react'; // 已修复
 import React, { useState } from 'react';
 import Analytics from '../../components/analytics/Analytics';
 import {useAuthCheck} from '../../components/auth/WithAuthCheck';

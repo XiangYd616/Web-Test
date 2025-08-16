@@ -36,8 +36,9 @@ class DataManagementService extends EventEmitter {
    */
   async initialize() {
     if (this.isInitialized) {
-      return;
-    }
+      
+        return;
+      }
 
     try {
       // 创建必要的目录
@@ -120,6 +121,7 @@ class DataManagementService extends EventEmitter {
       
       // 应用过滤器
       if (options.fields) {
+        
         return this.filterFields(record, options.fields);
       }
       
@@ -175,8 +177,10 @@ class DataManagementService extends EventEmitter {
       const record = await this.readData(type, id);
       
       if (options.softDelete) {
+        
         // 软删除：标记为已删除
-        return await this.updateData(type, id, {}, {
+        return await this.updateData(type, id, {
+      }, {
           ...options,
           metadata: { deletedAt: new Date().toISOString(), deletedBy: options.userId }
         });
@@ -530,8 +534,9 @@ class DataManagementService extends EventEmitter {
     return records.filter(record => {
       for (const [key, value] of Object.entries(filters)) {
         if (record.data[key] !== value) {
-          return false;
-        }
+          
+        return false;
+      }
       }
       return true;
     });
@@ -551,6 +556,7 @@ class DataManagementService extends EventEmitter {
       const bValue = b.data[sortConfig.field] || b.metadata[sortConfig.field];
       
       if (sortConfig.direction === 'desc') {
+        
         return bValue > aValue ? 1 : -1;
       } else {
         return aValue > bValue ? 1 : -1;

@@ -132,8 +132,9 @@ export class VersionChecker {
   static getMigrationPath(typeName: string, fromVersion: string, toVersion: string): string[] {
     const typeInfo = TYPE_VERSIONS[typeName];
     if (!typeInfo || !typeInfo.migrationPath) {
-      return [];
-    }
+      
+        return [];
+      }
 
     const path: string[] = [];
     let currentVersion = fromVersion;
@@ -325,12 +326,14 @@ export class TypeVersionRegistry {
   static validate(name: string, version: string, data: any): boolean {
     const info = this.get(name, version);
     if (!info) {
-      return false;
-    }
+      
+        return false;
+      }
 
     if (info.validator) {
-      return info.validator(data);
-    }
+      
+        return info.validator(data);
+      }
 
     return true;
   }
@@ -381,8 +384,9 @@ export class AutoMigrationSystem {
     targetVersion: string = DATA_MODEL_VERSION
   ): Promise<VersionedData<T>> {
     if (data.version === targetVersion) {
-      return data as VersionedData<T>;
-    }
+      
+        return data as VersionedData<T>;
+      }
 
     const migrationPath = VersionChecker.getMigrationPath(typeName, data.version, targetVersion);
     let currentData = data;

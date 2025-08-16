@@ -39,9 +39,10 @@ class LazyImageLoader {
 
     public observe(img: HTMLImageElement) {
         if (!this.observer) {
-            this.loadImage(img);
+            
+        this.loadImage(img);
             return;
-        }
+      }
 
         this.images.add(img);
         this.observer.observe(img);
@@ -98,9 +99,10 @@ class ResourcePreloader {
     public async preloadCriticalResources() {
         // 在开发环境中跳过资源预加载，避免404错误
         if (process.env.NODE_ENV === 'development') {
-            console.log('Development mode: Skipping critical resource preloading');
+            
+        console.log('Development mode: Skipping critical resource preloading');
             return;
-        }
+      }
 
         // 生产环境中预加载关键资源
         const criticalResources = [
@@ -561,8 +563,9 @@ class FrontendCacheManager {
         const cached = this.cache.get(key);
 
         if (!cached) {
-            return null;
-        }
+            
+        return null;
+      }
 
         // 检查是否过期
         if (Date.now() - cached.timestamp > cached.ttl) {
@@ -665,11 +668,12 @@ export const performanceUtils = {
      */
     isSlowNetwork(): boolean {
         if ('connection' in navigator) {
-            const connection = (navigator as any).connection;
+            
+        const connection = (navigator as any).connection;
             return connection.effectiveType === 'slow-2g' ||
                 connection.effectiveType === '2g' ||
                 connection.saveData;
-        }
+      }
         return false;
     },
 

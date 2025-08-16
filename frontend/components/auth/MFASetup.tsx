@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import type { MFAMethod, MFASetup, TOTPSetupResult } from '../../services/auth/mfaService';
-import {useMFA} from '../../services/auth/mfaService';
+import { useMFA } from '../../services/auth/mfaService';
 
 // ==================== 类型定义 ====================
 
@@ -91,6 +91,7 @@ const TOTPSetupStep: React.FC<TOTPSetupStepProps> = ({
   };
 
   if (!setupData) {
+
     return (
       <div className="flex items-center justify-center p-8">
         <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
@@ -372,10 +373,12 @@ export const MFASetup: React.FC<MFASetupProps> = ({
   };
 
   if (showBackupCodes) {
+
     return (
       <div className="max-w-md mx-auto">
         <BackupCodesDisplay
-          codes={backupCodes}
+          codes={backupCodes
+          }
           onDownload={() => { }}
           onContinue={handleSetupComplete}
         />
@@ -384,10 +387,12 @@ export const MFASetup: React.FC<MFASetupProps> = ({
   }
 
   if (selectedMethod === 'totp') {
+
     return (
       <div className="max-w-md mx-auto">
         <TOTPSetupStep
-          userId={userId}
+          userId={userId
+          }
           accountName={userEmail}
           onComplete={handleTOTPComplete}
           onCancel={() => setSelectedMethod(null)}
@@ -413,8 +418,8 @@ export const MFASetup: React.FC<MFASetupProps> = ({
         <div
           onClick={() => !isMethodEnabled('totp') && handleMethodSelect('totp')}
           className={`p-4 rounded-lg border cursor-pointer transition-colors ${isMethodEnabled('totp')
-              ? 'bg-green-900/30 border-green-700'
-              : 'bg-gray-800 border-gray-600 hover:border-gray-500'
+            ? 'bg-green-900/30 border-green-700'
+            : 'bg-gray-800 border-gray-600 hover:border-gray-500'
             }`}
         >
           <div className="flex items-center space-x-3">

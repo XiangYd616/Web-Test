@@ -76,11 +76,13 @@ const SystemResourceMonitor: React.FC<SystemResourceMonitorProps> = ({
   // 评估系统状态
   const evaluateStatus = (res: SystemResources): 'healthy' | 'warning' | 'critical' => {
     if (res.cpu.usage > 85 || res.memory.usage > 90 || res.disk.usage > 95) {
-      return 'critical';
-    }
+      
+        return 'critical';
+      }
     if (res.cpu.usage > 70 || res.memory.usage > 75 || res.disk.usage > 85) {
-      return 'warning';
-    }
+      
+        return 'warning';
+      }
     return 'healthy';
   };
 
@@ -119,7 +121,9 @@ const SystemResourceMonitor: React.FC<SystemResourceMonitorProps> = ({
   // 格式化大小
   const formatSize = (bytes: number, unit: string = 'MB') => {
     if (unit === 'GB') {
-      return `${(bytes / 1024).toFixed(1)}GB`;
+      
+        return `${(bytes / 1024).toFixed(1)
+      }GB`;
     }
     return `${bytes.toFixed(0)}${unit}`;
   };
@@ -134,8 +138,10 @@ const SystemResourceMonitor: React.FC<SystemResourceMonitorProps> = ({
   }, []);
 
   if (loading) {
-    return (
-      <div className={`animate-pulse bg-gray-800/50 rounded-lg p-4 ${className}`}>
+    
+        return (
+      <div className={`animate-pulse bg-gray-800/50 rounded-lg p-4 ${className
+      }`}>
         <div className="h-4 bg-gray-700 rounded w-1/3 mb-2"></div>
         <div className="h-3 bg-gray-700 rounded w-1/2"></div>
       </div>
@@ -143,8 +149,10 @@ const SystemResourceMonitor: React.FC<SystemResourceMonitorProps> = ({
   }
 
   if (error) {
-    return (
-      <div className={`bg-red-500/10 border border-red-500/30 rounded-lg p-4 ${className}`}>
+    
+        return (
+      <div className={`bg-red-500/10 border border-red-500/30 rounded-lg p-4 ${className
+      }`}>
         <div className="flex items-center text-red-400">
           <AlertTriangle className="w-4 h-4 mr-2" />
           <span className="text-sm">资源监控不可用</span>
@@ -155,12 +163,15 @@ const SystemResourceMonitor: React.FC<SystemResourceMonitorProps> = ({
   }
 
   if (!resources) {
-    return null;
-  }
+    
+        return null;
+      }
 
   if (compact) {
-    return (
-      <div className={`${getStatusColor(status)} rounded-lg border p-3 ${className}`}>
+    
+        return (
+      <div className={`${getStatusColor(status)
+      } rounded-lg border p-3 ${className}`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             {getStatusIcon(status)}

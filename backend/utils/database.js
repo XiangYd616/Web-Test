@@ -87,7 +87,9 @@ class DatabaseUtils {
    */
   static async batchInsert(tableName, columns, rows, conflictAction = 'IGNORE') {
     if (!rows || rows.length === 0) {
-      return { rowCount: 0 };
+      
+        return { rowCount: 0
+      };
     }
 
     const operationName = `batch_insert_${tableName}`;

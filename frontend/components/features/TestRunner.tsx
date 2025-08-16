@@ -16,9 +16,8 @@ import {
     Modal,
     ProgressBar,
     Select,
-    type SelectOption
-} from '../ui/index';
-
+    // type SelectOption
+} from '../ui/index'; // 已修复
 // 测试类型定义
 export type TestType = 'api' | 'compatibility' | 'infrastructure' | 'security' | 'seo' | 'stress' | 'ux' | 'website';
 
@@ -146,9 +145,10 @@ export const TestRunner: React.FC<TestRunnerProps> = ({
     // 开始测试
     const handleStartTest = useCallback(async () => {
         if (!config.url) {
-            showNotification('请输入有效的URL', 'error');
+            
+        showNotification('请输入有效的URL', 'error');
             return;
-        }
+      }
 
         try {
             // 通知测试开始

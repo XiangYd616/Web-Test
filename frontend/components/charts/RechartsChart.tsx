@@ -8,9 +8,8 @@ import {
   ResponsiveContainer,
   Tooltip,
   XAxis,
-  YAxis
-} from 'recharts';
-
+  // YAxis
+} from 'recharts'; // 已修复
 // Recharts线图组件
 export interface RechartsLineChartProps {
   data: Array<Record<string, any>> | {
@@ -54,8 +53,10 @@ export const RechartsLineChart: React.FC<RechartsLineChartProps> = ({
 
     // Chart.js 格式转换
     if ('labels' in data && 'datasets' in data) {
-      return data.labels.map((label, index) => {
-        const item: Record<string, any> = { [xKey]: label };
+      
+        return data.labels.map((label, index) => {
+        const item: Record<string, any> = { [xKey]: label
+      };
         data.datasets.forEach((dataset, datasetIndex) => {
           item[dataset.label || `dataset${datasetIndex}`] = dataset.data[index] || 0;
         });
@@ -155,7 +156,8 @@ export const RechartsDoughnutChart: React.FC<RechartsDoughnutChartProps> = ({
 
     // Chart.js 格式转换
     if ('labels' in data && 'datasets' in data) {
-      const dataset = data.datasets[0];
+      
+        const dataset = data.datasets[0];
       if (!dataset) return [];
 
       return data.labels.map((label, index) => ({
@@ -163,7 +165,8 @@ export const RechartsDoughnutChart: React.FC<RechartsDoughnutChartProps> = ({
         value: dataset.data[index] || 0,
         color: Array.isArray(dataset.backgroundColor)
           ? dataset.backgroundColor[index]
-          : dataset.backgroundColor || `hsl(${index * 45}, 70%, 50%)`
+          : dataset.backgroundColor || `hsl(${index * 45
+      }, 70%, 50%)`
       }));
     }
 
@@ -181,10 +184,12 @@ export const RechartsDoughnutChart: React.FC<RechartsDoughnutChartProps> = ({
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
-      const data = payload[0];
+      
+        const data = payload[0];
       return (
         <div className="bg-gray-900 text-white p-3 rounded-lg shadow-lg">
-          <p className="font-medium">{data.name}</p>
+          <p className="font-medium">{data.name
+      }</p>
           <p className="text-sm">
             值: <span className="font-semibold">{data.value}</span>
           </p>

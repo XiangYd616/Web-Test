@@ -1,410 +1,366 @@
 /**
- * 测试历史API路由
- * 支持测试页面历史标签页的所有功能
+ * 统一测试历史API路由
+ * 提供标准化的测试历史记录接口
  */
 
 const express = require('express');
 const router = express.Router();
-const TestHistoryService = require('../services/testing/TestHistoryService.js');
-const { authMiddleware } = require('../middleware/auth');
-// const { validateTestType, validatePagination, validateSorting, validateSearch, validateStatus, validateUUID } = require('../middleware/validation');
+const { authMiddleware, optionalAuth } = require('../middleware/auth');
+const TestHistoryService = require('../services/testing/TestHistoryService');
+const { TestDataTransformer } = require('../utils/testDataTransformer');
+const { query, validationResult } = require('express-validator');
 
-// 延迟初始化服务，使用数据库配置模块的query方法
-let testHistoryService = null;
-
-const getTestHistoryService = () => {
-  if (!testHistoryService) {
-    // 使用数据库配置模块的query方法，而不是连接池对象
-    testHistoryService = new TestHistoryService(require('../config/database'));
-  }
-  return testHistoryService;
-};
+// 初始化服务
+let testHistoryService;
+try {
+  const dbModule = require('../config/database.js');
+  testHistoryService = new TestHistoryService(dbModule);
+} catch (error) {
+  console.error('初始化TestHistoryService失败:', error);
+}
 
 /**
  * GET /api/test/history
- * 获取测试历史列表（用于测试页面历史标签页）
+ * 获取测试历史列表
  */
-router.get('/', authMiddleware, async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const {
-      type: testType,  // 前端传递的是 type 参数
-      page = 1,
-      limit = 20,
-      search = '',
-      status = '',
-      sortBy = 'created_at',
-      sortOrder = 'DESC'
-    } = req.query;
-
-    // 验证测试类型
-    const validTestTypes = ['stress', 'security', 'api', 'performance', 'compatibility', 'seo', 'accessibility'];
-    if (testType && !validTestTypes.includes(testType)) {
-      return res.status(400).json({
-        success: false,
-        error: `无效的测试类型。支持的类型: ${validTestTypes.join(', ')}`
-      });
-    }
-
-    // 临时返回空数据，避免数据库错误
-    const result = {
-      success: true,
-      data: {
-        tests: [],
-        pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
-          total: 0,
-          totalPages: 0,
-          hasNext: false,
-          hasPrev: false
-        }
+router.get('/', 
+  optionalAuth,
+  [
+    query('type').optional().isString().withMessage('测试类型必须是字符串'),
+    query('status').optional().isString().withMessage('状态必须是字符串'),
+    query('page').optional().isInt({ min: 1 }).withMessage('页码必须是正整数'),
+    query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('限制数量必须在1-100之间'),
+    query('search').optional().isString().withMessage('搜索词必须是字符串'),
+    query('sortBy').optional().isString().withMessage('排序字段必须是字符串'),
+    query('sortOrder').optional().isIn(['ASC', 'DESC']).withMessage('排序方向必须是ASC或DESC')
+  ],
+  async (req, res) => {
+    try {
+      // 验证请求参数
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          error: '请求参数无效',
+          details: errors.array()
+        });
       }
-    };
 
-    console.log('📋 [TestHistory] 返回空测试历史数据 (临时解决方案):', {
-      testType,
-      userId,
-      page,
-      limit
-    });
+      const {
+        type: testType,
+        status,
+        page = 1,
+        limit = 20,
+        search = '',
+        sortBy = 'created_at',
+        sortOrder = 'DESC',
+        startDate,
+        endDate
+      } = req.query;
 
-    res.json(result);
-  } catch (error) {
-    console.error('获取测试历史失败:', error);
-    res.status(500).json({
-      success: false,
-      error: '服务器内部错误'
-    });
-  }
-});
+      const userId = req.user?.id;
 
-/**
- * GET /api/test/history/detailed
- * 获取详细测试历史（包含测试类型特定指标）
- */
-router.get('/detailed', authMiddleware, async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const { testType, page = 1, limit = 20 } = req.query;
+      // 构建查询参数
+      const queryParams = {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        testType,
+        status,
+        userId,
+        search,
+        sortBy,
+        sortOrder,
+        startDate,
+        endDate
+      };
 
-    // 验证测试类型
-    const validTestTypes = ['stress', 'security', 'api', 'performance', 'compatibility', 'seo', 'accessibility'];
-    if (testType && !validTestTypes.includes(testType)) {
-      return res.status(400).json({
-        success: false,
-        error: `无效的测试类型。支持的类型: ${validTestTypes.join(', ')}`
-      });
-    }
-
-    // 临时返回空数据，避免数据库错误
-    const result = {
-      success: true,
-      data: {
-        tests: [],
-        pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
-          total: 0,
-          totalPages: 0,
-          hasNext: false,
-          hasPrev: false
-        }
+      // 获取历史记录
+      let result;
+      if (testHistoryService) {
+        // 使用新的历史服务
+        result = await testHistoryService.getTestHistory(queryParams);
+      } else {
+        // 降级处理：返回空数据
+        result = {
+          success: true,
+          data: {
+            tests: [],
+            pagination: {
+              page: parseInt(page),
+              limit: parseInt(limit),
+              total: 0,
+              totalPages: 0,
+              hasNext: false,
+              hasPrev: false
+            }
+          }
+        };
       }
-    };
 
-    console.log('📋 [TestHistory] 返回空详细测试历史数据 (临时解决方案):', {
-      testType,
-      userId,
-      page,
-      limit
-    });
+      // 转换数据格式
+      if (result.success && result.data.tests) {
+        result.data.tests = result.data.tests.map(test => 
+          TestDataTransformer.transformToHistoryItem(test)
+        );
+      }
 
-    res.json(result);
-  } catch (error) {
-    console.error('获取详细测试历史失败:', error);
-    res.status(500).json({
-      success: false,
-      error: '服务器内部错误'
-    });
-  }
-});
-
-/**
- * GET /api/test/history/:sessionId
- * 获取单个测试的完整详情
- */
-router.get('/:sessionId', authMiddleware, async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const { sessionId } = req.params;
-
-    // 验证UUID格式
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(sessionId)) {
-      return res.status(400).json({
-        success: false,
-        error: '无效的会话ID格式'
-      });
-    }
-
-    const result = await getTestHistoryService().getTestDetails(sessionId, userId);
-    res.json(result);
-  } catch (error) {
-    console.error('获取测试详情失败:', error);
-    res.status(500).json({
-      success: false,
-      error: '服务器内部错误'
-    });
-  }
-});
-
-/**
- * POST /api/test/history/stress
- * 创建压力测试记录
- */
-router.post('/stress', authMiddleware, async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const { testName, url, config, stressData } = req.body;
-
-    // 基础验证
-    if (!testName || !url || !stressData) {
-      return res.status(400).json({
-        success: false,
-        error: '缺少必要的测试数据'
-      });
-    }
-
-    const result = await getTestHistoryService().createStressTestResult(userId, {
-      testName,
-      url,
-      config: config || {},
-      stressData
-    });
-
-    if (result.success) {
-      res.status(201).json(result);
-    } else {
-      res.status(400).json(result);
-    }
-  } catch (error) {
-    console.error('创建压力测试记录失败:', error);
-    res.status(500).json({
-      success: false,
-      error: '服务器内部错误'
-    });
-  }
-});
-
-/**
- * POST /api/test/history/security
- * 创建安全测试记录
- */
-router.post('/security', authMiddleware, async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const { testName, url, config, securityData } = req.body;
-
-    // 基础验证
-    if (!testName || !url || !securityData) {
-      return res.status(400).json({
-        success: false,
-        error: '缺少必要的测试数据'
-      });
-    }
-
-    const result = await getTestHistoryService().createSecurityTestResult(userId, {
-      testName,
-      url,
-      config: config || {},
-      securityData
-    });
-
-    if (result.success) {
-      res.status(201).json(result);
-    } else {
-      res.status(400).json(result);
-    }
-  } catch (error) {
-    console.error('创建安全测试记录失败:', error);
-    res.status(500).json({
-      success: false,
-      error: '服务器内部错误'
-    });
-  }
-});
-
-/**
- * DELETE /api/test/history/:sessionId
- * 删除单个测试记录（软删除）
- */
-router.delete('/:sessionId', authMiddleware, async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const { sessionId } = req.params;
-
-    // 验证UUID格式
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(sessionId)) {
-      return res.status(400).json({
-        success: false,
-        error: '无效的会话ID格式'
-      });
-    }
-
-    const result = await getTestHistoryService().deleteTestSession(sessionId, userId);
-
-    if (result.success) {
       res.json(result);
-    } else {
-      res.status(404).json(result);
+
+    } catch (error) {
+      console.error('获取测试历史失败:', error);
+      res.status(500).json({
+        success: false,
+        error: '获取测试历史失败',
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      });
     }
-  } catch (error) {
-    console.error('删除测试记录失败:', error);
-    res.status(500).json({
-      success: false,
-      error: '服务器内部错误'
-    });
   }
-});
+);
 
 /**
- * DELETE /api/test/history/batch
- * 批量删除测试记录（软删除）
+ * GET /api/test/history/:testId
+ * 获取单个测试记录详情
  */
-router.delete('/batch', authMiddleware, async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const { sessionIds } = req.body;
+router.get('/:testId', 
+  optionalAuth,
+  async (req, res) => {
+    try {
+      const { testId } = req.params;
+      const userId = req.user?.id;
 
-    // 验证输入
-    if (!Array.isArray(sessionIds) || sessionIds.length === 0) {
-      return res.status(400).json({
+      // 验证UUID格式
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(testId)) {
+        return res.status(400).json({
+          success: false,
+          error: '无效的测试ID格式'
+        });
+      }
+
+      let result;
+      if (testHistoryService) {
+        result = await testHistoryService.getTestDetails(testId, userId);
+      } else {
+        result = {
+          success: false,
+          error: '历史服务不可用'
+        };
+      }
+
+      // 转换数据格式
+      if (result.success && result.data) {
+        result.data = TestDataTransformer.transformBackendToFrontend(result.data);
+      }
+
+      res.json(result);
+
+    } catch (error) {
+      console.error('获取测试详情失败:', error);
+      res.status(500).json({
         success: false,
-        error: '请提供要删除的测试记录ID列表'
+        error: '获取测试详情失败',
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }
-
-    // 验证UUID格式
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    const invalidIds = sessionIds.filter(id => !uuidRegex.test(id));
-    if (invalidIds.length > 0) {
-      return res.status(400).json({
-        success: false,
-        error: '包含无效的会话ID格式'
-      });
-    }
-
-    const result = await getTestHistoryService().batchDeleteTestSessions(sessionIds, userId);
-    res.json(result);
-  } catch (error) {
-    console.error('批量删除测试记录失败:', error);
-    res.status(500).json({
-      success: false,
-      error: '服务器内部错误'
-    });
   }
-});
+);
 
 /**
- * GET /api/test/history/statistics
- * 获取测试统计信息
+ * DELETE /api/test/history/:testId
+ * 删除测试记录
  */
-router.get('/statistics', authMiddleware, async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const { timeRange = 30 } = req.query;
+router.delete('/:testId', 
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const { testId } = req.params;
+      const userId = req.user.id;
 
-    // 验证时间范围
-    const timeRangeNum = parseInt(timeRange);
-    if (isNaN(timeRangeNum) || timeRangeNum < 1 || timeRangeNum > 365) {
-      return res.status(400).json({
+      // 验证UUID格式
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(testId)) {
+        return res.status(400).json({
+          success: false,
+          error: '无效的测试ID格式'
+        });
+      }
+
+      let result;
+      if (testHistoryService) {
+        result = await testHistoryService.deleteTestRecord(testId, userId);
+      } else {
+        result = {
+          success: false,
+          error: '历史服务不可用'
+        };
+      }
+
+      res.json(result);
+
+    } catch (error) {
+      console.error('删除测试记录失败:', error);
+      res.status(500).json({
         success: false,
-        error: '无效的时间范围（1-365天）'
+        error: '删除测试记录失败',
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }
-
-    const result = await getTestHistoryService().getTestStatistics(userId, timeRangeNum);
-    res.json(result);
-  } catch (error) {
-    console.error('获取测试统计失败:', error);
-    res.status(500).json({
-      success: false,
-      error: '服务器内部错误'
-    });
   }
-});
+);
+
+/**
+ * POST /api/test/history/batch-delete
+ * 批量删除测试记录
+ */
+router.post('/batch-delete', 
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const { testIds } = req.body;
+      const userId = req.user.id;
+
+      if (!Array.isArray(testIds) || testIds.length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: '测试ID列表不能为空'
+        });
+      }
+
+      // 验证所有UUID格式
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      const invalidIds = testIds.filter(id => !uuidRegex.test(id));
+      if (invalidIds.length > 0) {
+        
+        return res.status(400).json({
+          success: false,
+          error: '包含无效的测试ID格式',
+          details: invalidIds
+      });
+      }
+
+      let result;
+      if (testHistoryService) {
+        result = await testHistoryService.batchDeleteTestRecords(testIds, userId);
+      } else {
+        result = {
+          success: false,
+          error: '历史服务不可用'
+        };
+      }
+
+      res.json(result);
+
+    } catch (error) {
+      console.error('批量删除测试记录失败:', error);
+      res.status(500).json({
+        success: false,
+        error: '批量删除测试记录失败',
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      });
+    }
+  }
+);
 
 /**
  * GET /api/test/history/export
- * 导出测试历史数据
+ * 导出测试历史
  */
-router.get('/export', authMiddleware, async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const { testType, format = 'json', startDate, endDate } = req.query;
+router.get('/export', 
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const {
+        type: testType,
+        status,
+        format = 'json',
+        startDate,
+        endDate
+      } = req.query;
 
-    // 验证测试类型
-    if (!testType || !['stress', 'security', 'api', 'performance', 'compatibility', 'seo', 'accessibility'].includes(testType)) {
-      return res.status(400).json({
-        success: false,
-        error: '无效的测试类型'
-      });
-    }
+      const userId = req.user.id;
 
-    // 验证导出格式
-    if (!['json', 'csv'].includes(format)) {
-      return res.status(400).json({
-        success: false,
-        error: '不支持的导出格式'
-      });
-    }
-
-    // 获取数据（不分页，获取所有数据）
-    const result = await getTestHistoryService().getDetailedTestHistory(userId, testType, {
-      page: 1,
-      limit: 10000 // 设置一个较大的限制
-    });
-
-    if (!result.success) {
-      return res.status(400).json(result);
-    }
-
-    // 设置响应头
-    const timestamp = new Date().toISOString().split('T')[0];
-    const filename = `${testType}_test_history_${timestamp}.${format}`;
-
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-
-    if (format === 'json') {
-      res.setHeader('Content-Type', 'application/json');
-      res.json(result.data.tests);
-    } else if (format === 'csv') {
-      res.setHeader('Content-Type', 'text/csv');
-
-      // 简单的CSV转换（实际项目中可能需要更复杂的CSV库）
-      const tests = result.data.tests;
-      if (tests.length === 0) {
-        return res.send('');
+      // 验证导出格式
+      if (!['json', 'csv', 'excel'].includes(format)) {
+        return res.status(400).json({
+          success: false,
+          error: '不支持的导出格式'
+        });
       }
 
-      const headers = Object.keys(tests[0]).join(',');
-      const rows = tests.map(test =>
-        Object.values(test).map(value =>
-          typeof value === 'string' ? `"${value.replace(/"/g, '""')}"` : value
-        ).join(',')
-      );
+      // 获取要导出的数据
+      const queryParams = {
+        page: 1,
+        limit: 1000, // 导出时获取更多数据
+        testType,
+        status,
+        userId,
+        startDate,
+        endDate
+      };
 
-      res.send([headers, ...rows].join('/n'));
+      let result;
+      if (testHistoryService) {
+        result = await testHistoryService.getTestHistory(queryParams);
+      } else {
+        return res.status(503).json({
+          success: false,
+          error: '导出服务不可用'
+        });
+      }
+
+      if (!result.success) {
+        
+        return res.status(500).json(result);
+      }
+
+      const data = result.data.tests || [];
+
+      // 根据格式返回数据
+      switch (format) {
+        case 'json':
+          res.setHeader('Content-Type', 'application/json');
+          res.setHeader('Content-Disposition', `attachment; filename="test-history-${Date.now()}.json"`);
+          res.json(data);
+          break;
+
+        case 'csv':
+          // 简单的CSV导出实现
+          const csvHeaders = ['ID', '测试名称', '测试类型', 'URL', '状态', '评分', '创建时间'];
+          const csvRows = data.map(item => [
+            item.id,
+            item.test_name || '',
+            item.test_type || '',
+            item.url || '',
+            item.status || '',
+            item.overall_score || '',
+            item.created_at || ''
+          ]);
+
+          const csvContent = [csvHeaders, ...csvRows]
+            .map(row => row.map(field => `"${field}"`).join(','))
+            .join('\n');
+
+          res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+          res.setHeader('Content-Disposition', `attachment; filename="test-history-${Date.now()}.csv"`);
+          res.send('\ufeff' + csvContent); // 添加BOM以支持中文
+          break;
+
+        default:
+          res.status(400).json({
+            success: false,
+            error: '不支持的导出格式'
+          });
+      }
+
+    } catch (error) {
+      console.error('导出测试历史失败:', error);
+      res.status(500).json({
+        success: false,
+        error: '导出测试历史失败',
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      });
     }
-  } catch (error) {
-    console.error('导出测试历史失败:', error);
-    res.status(500).json({
-      success: false,
-      error: '服务器内部错误'
-    });
   }
-});
+);
 
 module.exports = router;

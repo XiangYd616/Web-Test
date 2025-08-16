@@ -159,6 +159,7 @@ class SecurityTestEngine {
       const parsedUrl = new URL(targetUrl);
 
       if (parsedUrl.protocol !== 'https:') {
+        
         return {
           status: 'failed',
           message: '网站未使用HTTPS',
@@ -166,7 +167,7 @@ class SecurityTestEngine {
           details: {
             protocol: parsedUrl.protocol,
             secure: false
-          }
+      }
         };
       }
 
@@ -336,10 +337,11 @@ class SecurityTestEngine {
   async stopTest(testId) {
     const test = this.activeTests.get(testId);
     if (test && test.status === 'running') {
-      test.status = 'cancelled';
+      
+        test.status = 'cancelled';
       this.activeTests.set(testId, test);
       return true;
-    }
+      }
     return false;
   }
 }

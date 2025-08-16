@@ -136,8 +136,10 @@ class ConfigService {
     const errors: string[] = [];
 
     if (!config || typeof config !== 'object') {
-      errors.push('配置不能为空');
-      return { valid: false, errors };
+      
+        errors.push('配置不能为空');
+      return { valid: false, errors
+      };
     }
 
     switch (testType) {
@@ -183,6 +185,7 @@ class ConfigService {
       const configs = stored ? JSON.parse(stored) : [];
 
       if (testType) {
+        
         return configs.filter((config: TestConfigTemplate) => config.testType === testType);
       }
 

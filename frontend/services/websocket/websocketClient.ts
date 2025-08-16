@@ -73,6 +73,7 @@ class WebSocketClient {
       // 获取token
       const authToken = token || this.getAuthToken();
       if (!authToken) {
+        
         console.warn('⚠️ 无法连接WebSocket: 缺少认证token');
         this.isConnecting = false;
         return false;
@@ -81,7 +82,7 @@ class WebSocketClient {
       // 构建WebSocket URL
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const host = window.location.host;
-      const wsUrl = `${protocol}/\${host}/ws?token=${encodeURIComponent(authToken)}`;
+      const wsUrl = `${protocol}/${host}/ws?token=${encodeURIComponent(authToken)}`;
 
       console.log('🔌 正在连接WebSocket服务器...');
       
@@ -89,9 +90,10 @@ class WebSocketClient {
       
       return new Promise((resolve, reject) => {
         if (!this.ws) {
-          reject(new Error('WebSocket创建失败'));
+          
+        reject(new Error('WebSocket创建失败'));
           return;
-        }
+      }
 
         const timeout = setTimeout(() => {
           reject(new Error('WebSocket连接超时'));
@@ -158,9 +160,10 @@ class WebSocketClient {
    */
   send(message: WebSocketMessage): boolean {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      console.warn('⚠️ WebSocket未连接，无法发送消息');
+      
+        console.warn('⚠️ WebSocket未连接，无法发送消息');
       return false;
-    }
+      }
 
     try {
       this.ws.send(JSON.stringify(message));

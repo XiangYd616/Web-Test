@@ -328,6 +328,7 @@ class HistoryManagementService {
       const response = await fetch(`${this.baseUrl}/export?${params}`);
       
       if (format === 'json') {
+        
         const data = await response.json();
         return data.success ? data.downloadUrl : '';
       } else {
@@ -357,6 +358,7 @@ class HistoryManagementService {
       const data = await response.json();
 
       if (!data.success) {
+        
         return [];
       }
 

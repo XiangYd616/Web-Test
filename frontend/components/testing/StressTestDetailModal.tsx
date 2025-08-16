@@ -5,7 +5,7 @@ import {useNavigate} from 'react-router-dom';
 import ExportUtils from '../../utils/exportUtils';
 import ExportModal from '../ui/ExportModal.tsx';
 
-// // import './StressTestDetailModal.css'; // 文件已删除 // CSS文件不存在，已注释
+// // // import './StressTestDetailModal.css'; // 文件已删除 // 文件已删除 // CSS文件不存在，已注释
 
 interface StressTestDetailModalProps {
   record: any;
@@ -28,19 +28,22 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = React.memo((
 
     // 优先使用已计算的错误率
     if (record.errorRate !== undefined && record.errorRate !== null) {
-      return record.errorRate;
-    }
+      
+        return record.errorRate;
+      }
     if (metrics.errorRate !== undefined && metrics.errorRate !== null) {
-      return metrics.errorRate;
-    }
+      
+        return metrics.errorRate;
+      }
 
     // 从失败请求数和总请求数计算
     const failed = record.failedRequests || metrics.failedRequests || 0;
     const total = record.totalRequests || metrics.totalRequests || 0;
 
     if (total > 0) {
-      return (failed / total) * 100;
-    }
+      
+        return (failed / total) * 100;
+      }
 
     return 0;
   };
@@ -61,10 +64,11 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = React.memo((
   const calculateTestCompletion = (record: any) => {
     if (!record || record.status === 'completed') return 100;
     if (record.status === 'failed' || record.status === 'cancelled') {
-      const actualDuration = record.duration || 0;
+      
+        const actualDuration = record.duration || 0;
       const expectedDuration = record.config?.duration || 60;
       return Math.min(Math.round((actualDuration / expectedDuration) * 100), 100);
-    }
+      }
     return 0;
   };
 
@@ -146,8 +150,9 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = React.memo((
   const formatDuration = (record: any) => {
     // 对于运行中的测试，不显示时长
     if (record.status === 'running' || record.status === 'pending') {
-      return '-';
-    }
+      
+        return '-';
+      }
 
     // 优先使用 duration
     let seconds = record.duration;
@@ -184,7 +189,9 @@ const StressTestDetailModal: React.FC<StressTestDetailModalProps> = React.memo((
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     if (minutes > 0) {
-      return `${minutes}分${remainingSeconds}秒`;
+      
+        return `${minutes
+      }分${remainingSeconds}秒`;
     } else {
       return `${remainingSeconds}秒`;
     }

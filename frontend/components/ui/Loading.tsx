@@ -271,9 +271,11 @@ export const Loading: React.FC<LoadingProps> = ({
 
   // 如果是覆盖模式
   if (overlay) {
-    return (
+    
+        return (
       <div className="relative">
-        {children}
+        {children
+      }
         <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm flex items-center justify-center z-50">
           {loadingContent}
         </div>

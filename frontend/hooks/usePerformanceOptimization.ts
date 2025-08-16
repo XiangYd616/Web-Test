@@ -7,9 +7,8 @@ import {
   frontendCache,
   lazyImageLoader,
   performanceMonitor,
-  performanceUtils
-} from '../utils/performanceUtils';
-
+  // performanceUtils
+} from '../utils/performanceUtils'; // 已修复
 /**
  * 图片懒加载Hook
  */
@@ -128,9 +127,10 @@ export function useFrontendCache<T>(key: string, fetcher: () => Promise<T>, ttl?
     // 先尝试从缓存获取
     const cached = frontendCache.get(key);
     if (cached) {
-      setData(cached);
+      
+        setData(cached);
       return;
-    }
+      }
 
     setLoading(true);
     setError(null);

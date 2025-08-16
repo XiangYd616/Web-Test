@@ -212,13 +212,15 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     } = this.props;
 
     if (hasError) {
-      // 如果提供了自定义fallback，使用它
+      
+        // 如果提供了自定义fallback，使用它
       if (fallback) {
         return fallback;
       }
 
       // 根据级别显示不同的错误UI
       if (level === 'page') {
+        
         return (
           <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
             <div className="max-w-md w-full bg-gray-800 rounded-lg p-6 text-center">
@@ -231,7 +233,8 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
               <div className="space-y-3">
                 {enableRetry && retryCount < maxRetries && (
                   <button
-                    onClick={this.handleRetry}
+                    onClick={this.handleRetry
+      }
                     className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2"
                   >
                     <RefreshCw className="w-4 h-4" />

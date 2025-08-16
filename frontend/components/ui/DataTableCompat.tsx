@@ -79,8 +79,9 @@ function DataTableCompat<T extends Record<string, any>>({
   // 转换行键值函数
   const getRowKey = (record: T): string => {
     if (typeof rowKey === 'function') {
-      return rowKey(record);
-    }
+      
+        return rowKey(record);
+      }
     return record[rowKey] || record.id?.toString() || Math.random().toString();
   };
 

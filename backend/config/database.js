@@ -310,7 +310,9 @@ const transaction = async (callback) => {
  */
 const batchInsert = async (tableName, columns, values) => {
   if (!values || values.length === 0) {
-    return { rowCount: 0 };
+    
+        return { rowCount: 0
+      };
   }
 
   const dbPool = getPool();

@@ -93,8 +93,10 @@ const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({ page, className = '' })
   };
 
   if (isSubmitted) {
-    return (
-      <div className={`fixed bottom-4 right-4 z-50 ${className}`}>
+    
+        return (
+      <div className={`fixed bottom-4 right-4 z-50 ${className
+      }`}>
         <div className="bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2">
           <ThumbsUp className="w-5 h-5" />
           <span>感谢您的反馈！</span>

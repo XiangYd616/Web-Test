@@ -618,6 +618,7 @@ export class APITestEngine {
 
       // 检查字段类型
       if (schema.properties) {
+        
         for (const [field, fieldSchema] of Object.entries(schema.properties as any)) {
           if (field in data) {
             const expectedType = (fieldSchema as any).type;
@@ -625,7 +626,7 @@ export class APITestEngine {
 
             if (expectedType && expectedType !== actualType) {
               return false;
-            }
+      }
           }
         }
       }

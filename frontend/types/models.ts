@@ -10,45 +10,40 @@
 // 重新导出基础类型
 export type {
   Email, Timestamp,
-  URL, UUID
-} from './common';
-
+  // URL, UUID
+} from './common'; // 已修复
 // ==================== 枚举类型导出 ====================
 
 // 重新导出所有枚举类型（只导出实际存在的枚举）
 export {
   Language, TestGrade,
   TestPriority, TestStatus, TestType, ThemeMode, Timezone, UserPlan, UserRole,
-  UserStatus
-} from './enums';
-
+  // UserStatus
+} from './enums'; // 已修复
 // ==================== 用户相关类型导出 ====================
 
 // 重新导出用户相关类型
 export type {
   AuthResponse, ChangePasswordData, CreateUserData, DEFAULT_USER_PREFERENCES, LoginCredentials,
   RegisterData, UpdateUserData, User, UserActivityLog,
-  UserPreferences, UserProfile, UserSession, UserStats
-} from './user';
-
+  // UserPreferences, UserProfile, UserSession, UserStats
+} from './user'; // 已修复
 // ==================== API响应类型导出 ====================
 
 // 重新导出API响应类型
 export type {
   ApiError, ApiErrorResponse, ApiMeta, ApiResponse, ApiResponseUtils, ApiSuccessResponse, AuthConfig, CreatedResponse, ErrorCode, ErrorResponseMethods, NoContentResponse, PaginatedRequest, PaginatedResponse,
   PaginationInfo, QueryParams,
-  RequestConfig, ResponseBuilder, ValidationError
-} from './apiResponse';
-
+  // RequestConfig, ResponseBuilder, ValidationError
+} from './apiResponse'; // 已修复
 // ==================== 测试相关类型导出 ====================
 
 // 测试相关枚举已在上面导出，这里只导出接口类型
 
 // 重新导出测试相关接口类型（从现有的test.ts文件导入）
 export type {
-  APITestConfig, ContentTestConfig, PerformanceTestConfig, SecurityTestConfig
-} from './testEngines';
-
+  // APITestConfig, ContentTestConfig, PerformanceTestConfig, SecurityTestConfig
+} from './testEngines'; // 已修复
 /**
  * 测试配置接口
  */

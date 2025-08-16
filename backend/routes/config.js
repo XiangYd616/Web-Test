@@ -38,8 +38,9 @@ router.get('/:key', async (req, res) => {
     const value = configCenter.get(key);
     
     if (value === undefined) {
-      return res.error('配置项不存在', 404);
-    }
+      
+        return res.error('配置项不存在', 404);
+      }
     
     const schema = configCenter.getSchema()[key];
     
@@ -64,19 +65,22 @@ router.put('/:key', async (req, res) => {
     const { value } = req.body;
     
     if (value === undefined) {
-      return res.error('配置值不能为空', 400);
-    }
+      
+        return res.error('配置值不能为空', 400);
+      }
     
     // 检查配置项是否存在
     const schema = configCenter.getSchema()[key];
     if (!schema) {
-      return res.error('配置项不存在', 404);
-    }
+      
+        return res.error('配置项不存在', 404);
+      }
     
     // 检查是否支持热更新
     if (!schema.hotReload) {
-      return res.error('此配置项不支持热更新，需要重启应用', 400);
-    }
+      
+        return res.error('此配置项不支持热更新，需要重启应用', 400);
+      }
     
     const oldValue = configCenter.get(key);
     configCenter.set(key, value, 'api');
@@ -103,8 +107,9 @@ router.put('/', async (req, res) => {
     const { configs } = req.body;
     
     if (!configs || typeof configs !== 'object') {
-      return res.error('配置数据格式错误', 400);
-    }
+      
+        return res.error('配置数据格式错误', 400);
+      }
     
     const results = [];
     const errors = [];
@@ -189,11 +194,12 @@ router.get('/meta/history', async (req, res) => {
     const filteredHistory = history.map(change => {
       const schema = configCenter.getSchema()[change.key];
       if (schema && schema.sensitive) {
+        
         return {
           ...change,
           oldValue: change.oldValue ? '***' : change.oldValue,
           newValue: change.newValue ? '***' : change.newValue
-        };
+      };
       }
       return change;
     });
@@ -218,8 +224,9 @@ router.post('/meta/rollback', async (req, res) => {
     const { changeId } = req.body;
     
     if (!changeId) {
-      return res.error('变更ID不能为空', 400);
-    }
+      
+        return res.error('变更ID不能为空', 400);
+      }
     
     const rollbackInfo = configCenter.rollback(changeId);
     const schema = configCenter.getSchema()[rollbackInfo.key];
@@ -245,13 +252,15 @@ router.post('/meta/reset', async (req, res) => {
     const { key } = req.body;
     
     if (key) {
-      // 重置单个配置
+      
+        // 重置单个配置
       const schema = configCenter.getSchema()[key];
       if (!schema) {
         return res.error('配置项不存在', 404);
       }
       
       if (!schema.hotReload) {
+        
         return res.error('此配置项不支持热更新，需要重启应用', 400);
       }
       
@@ -324,8 +333,9 @@ router.post('/meta/validate', async (req, res) => {
     const { configs } = req.body;
     
     if (!configs || typeof configs !== 'object') {
-      return res.error('配置数据格式错误', 400);
-    }
+      
+        return res.error('配置数据格式错误', 400);
+      }
     
     const validationResults = [];
     
@@ -406,8 +416,9 @@ router.post('/meta/import', async (req, res) => {
     const { configs, overwrite = false } = req.body;
     
     if (!configs || typeof configs !== 'object') {
-      return res.error('配置数据格式错误', 400);
-    }
+      
+        return res.error('配置数据格式错误', 400);
+      }
     
     const importResults = [];
     const errors = [];

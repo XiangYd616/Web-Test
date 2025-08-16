@@ -1,28 +1,30 @@
 # 路由验证报告
 
-**验证时间**: 2025-08-15T06:25:16.737Z
+**验证时间**: 2025-08-16T04:08:36.432Z
 
 ## 📋 验证概述
 
 本次验证检查了项目中的路由配置、页面文件和路由定义的一致性。
 
-## 📄 未使用的页面文件 (44)
+## 📄 未使用的页面文件 (47)
 
 以下页面文件存在但未在路由中使用：
 
-- **AdvancedAnalyticsPage**: `analytics\AdvancedAnalyticsPage.tsx`
+- **AnalyticsPage**: `analytics\AnalyticsPage.tsx`
 - **Login**: `core\auth\Login.tsx`
 - **Register**: `core\auth\Register.tsx`
-- **ModernDashboard**: `core\dashboard\ModernDashboard.tsx`
+- **Dashboard**: `core\dashboard\Dashboard.tsx`
 - **APITest**: `core\testing\APITest.tsx`
-- **APITestRefactored**: `core\testing\APITestRefactored.tsx`
 - **CompatibilityTest**: `core\testing\CompatibilityTest.tsx`
 - **InfrastructureTest**: `core\testing\InfrastructureTest.tsx`
+- **PerformanceTest**: `core\testing\PerformanceTest.tsx`
 - **SecurityTest**: `core\testing\SecurityTest.tsx`
 - **SecurityTestRefactored**: `core\testing\SecurityTestRefactored.tsx`
 - **SEOTest**: `core\testing\SEOTest.tsx`
 - **StressTest**: `core\testing\StressTest.tsx`
-- **StressTestRefactored**: `core\testing\StressTestRefactored.tsx`
+- **TestingDashboard**: `core\testing\TestingDashboard.tsx`
+- **TestPage**: `core\testing\TestPage.tsx`
+- **UnifiedTestPage**: `core\testing\UnifiedTestPage.tsx`
 - **UXTest**: `core\testing\UXTest.tsx`
 - **WebsiteTest**: `core\testing\WebsiteTest.tsx`
 - **Analytics**: `data\reports\Analytics.tsx`
@@ -48,6 +50,7 @@
 - **TestOptimizations**: `management\scheduling\TestOptimizations.tsx`
 - **TestSchedule**: `management\scheduling\TestSchedule.tsx`
 - **Settings**: `management\settings\Settings.tsx`
+- **TestToolsHub**: `TestToolsHub.tsx`
 - **APIDocs**: `user\docs\APIDocs.tsx`
 - **Help**: `user\docs\Help.tsx`
 - **DownloadDesktop**: `user\misc\DownloadDesktop.tsx`
@@ -55,17 +58,13 @@
 - **UserBookmarks**: `user\profile\UserBookmarks.tsx`
 - **UserProfile**: `user\profile\UserProfile.tsx`
 
-## 🔄 重复路由定义 (1)
-
-以下路由被定义了多次：
-
-- **performance-test**: 定义了 2 次
-
-## ⚠️ 路由配置不匹配 (8)
+## ⚠️ 路由配置不匹配 (10)
 
 路由定义与routeUtils.ts配置不一致：
 
 - **/theme-showcase**: 在配置中存在但未定义路由
+- **/testing**: 已定义路由但未在配置中声明
+- **/performance-analysis**: 已定义路由但未在配置中声明
 - **/performance-test-legacy**: 已定义路由但未在配置中声明
 - **/infrastructure-test**: 已定义路由但未在配置中声明
 - **/test-optimizations**: 已定义路由但未在配置中声明
@@ -77,12 +76,12 @@
 ## 📊 验证统计
 
 - 缺失页面文件: 0
-- 未使用页面文件: 44
-- 重复路由定义: 1
-- 路由配置不匹配: 8
+- 未使用页面文件: 47
+- 重复路由定义: 0
+- 路由配置不匹配: 10
 - 验证错误: 0
 
-**总问题数**: 53
+**总问题数**: 57
 
 ## 📚 建议
 
@@ -94,5 +93,5 @@
 
 ---
 
-**生成时间**: 2025-08-15T06:25:16.737Z
+**生成时间**: 2025-08-16T04:08:36.432Z
 **脚本版本**: v1.0.0

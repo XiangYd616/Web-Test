@@ -12,7 +12,7 @@ const { authMiddleware, optionalAuth, adminAuth } = require('../middleware/auth'
 const { testRateLimiter, historyRateLimiter } = require('../middleware/rateLimiter');
 const { asyncHandler } = require('../middleware/errorHandler');
 const { validateURLMiddleware, validateAPIURLMiddleware } = require('../middleware/urlValidator');
-// const { apiCache, dbCache } = require('./cache.js'); // 已删除
+// // const { apiCache, dbCache } = require('./cache.js'); // 已删除 // 已删除
 
 // 导入测试引擎类
 const { RealTestEngine } = require('../engines/api/ApiAnalyzer.js');
@@ -27,7 +27,7 @@ const userTestManager = require('../services/testing/UserTestManager.js');
 // 注意：这些服务文件已被删除，需要使用替代方案
 // const databaseService = require('../services/database/databaseService');
 // const testQueueService = require('../services/queue/queueService');
-// // // // // const smartCacheService = require('../services/smartCacheService'); // 已删除 // 已删除 // 服务已删除 // 服务已删除
+// // // // // // // const smartCacheService = require('../services/smartCacheService'); // 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除
 // const enhancedTestHistoryService = require('../services/testing/testHistoryService'); // 已移除，功能迁移到 dataManagement
 
 const multer = require('multer');
@@ -940,8 +940,9 @@ async function handleTestHistory(req, res) {
     });
 
     if (!result.success) {
-      return res.status(400).json(result);
-    }
+      
+        return res.status(400).json(result);
+      }
 
     const { tests, pagination } = result.data;
 
@@ -969,10 +970,11 @@ router.post('/run', authMiddleware, testRateLimiter, asyncHandler(async (req, re
   const { testType, url, config = {}, testName } = req.body;
 
   if (!testType || !url) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       error: '缺少必需参数: testType 和 url'
-    });
+      });
   }
 
   try {
@@ -1144,10 +1146,11 @@ router.post('/cache/invalidate', authMiddleware, asyncHandler(async (req, res) =
   const { event, data } = req.body;
 
   if (!event) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       error: '缺少必需参数: event'
-    });
+      });
   }
 
   try {
@@ -1205,7 +1208,8 @@ router.get('/:testId/result', optionalAuth, asyncHandler(async (req, res) => {
     const testResult = await databaseService.getTestResult(testId);
 
     if (!testResult) {
-      return res.status(404).json({
+      
+        return res.status(404).json({
         success: false,
         error: '测试结果不存在或已过期'
       });
@@ -1285,10 +1289,11 @@ router.post('/config/templates', authMiddleware, asyncHandler(async (req, res) =
   const { name, testType, config, description } = req.body;
 
   if (!name || !testType || !config) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       error: '缺少必需参数: name, testType, config'
-    });
+      });
   }
 
   try {
@@ -1354,7 +1359,8 @@ router.put('/history/:recordId', authMiddleware, asyncHandler(async (req, res) =
     );
 
     if (existingRecord.rows.length === 0) {
-      return res.status(404).json({
+      
+        return res.status(404).json({
         success: false,
         message: '记录不存在或无权限访问'
       });
@@ -1399,7 +1405,8 @@ router.get('/history/:recordId', optionalAuth, asyncHandler(async (req, res) => 
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({
+      
+        return res.status(404).json({
         success: false,
         message: '记录不存在或无权限访问'
       });
@@ -1555,7 +1562,8 @@ router.delete('/history/:recordId', authMiddleware, asyncHandler(async (req, res
     );
 
     if (result.rowCount === 0) {
-      return res.status(404).json({
+      
+        return res.status(404).json({
         success: false,
         message: '测试记录不存在'
       });
@@ -1718,7 +1726,8 @@ router.get('/:testId', authMiddleware, asyncHandler(async (req, res) => {
     const result = await testHistoryService.getTestDetails(testId, req.user.id);
 
     if (!result.success) {
-      return res.status(404).json({
+      
+        return res.status(404).json({
         success: false,
         message: result.error || '测试结果不存在'
       });
@@ -1745,10 +1754,11 @@ router.post('/website', optionalAuth, testRateLimiter, asyncHandler(async (req, 
   const { url, options = {} } = req.body;
 
   if (!url) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: 'URL是必填的'
-    });
+      });
   }
 
   try {
@@ -1818,7 +1828,8 @@ router.get('/stress/status/:testId', optionalAuth, asyncHandler(async (req, res)
         const historyResult = await query(historyQuery, [`%${testId}%`]);
 
         if (historyResult.rows.length > 0) {
-          const testRecord = historyResult.rows[0];
+          
+        const testRecord = historyResult.rows[0];
           console.log('📊 从测试历史获取结果:', testRecord.id, testRecord.status);
 
           // 如果测试已完成，返回真实的测试结果
@@ -1842,7 +1853,7 @@ router.get('/stress/status/:testId', optionalAuth, asyncHandler(async (req, res)
                   peakTPS: testRecord.peak_tps || 0,
                   errorRate: testRecord.error_rate || 0,
                   activeUsers: 0
-                },
+      },
                 realTimeData: realTimeData,
                 results: testRecord.results ?
                   (typeof testRecord.results === 'string' ?
@@ -2629,8 +2640,9 @@ router.get('/security/:testId', optionalAuth, asyncHandler(async (req, res) => {
     const result = await securityTestStorage.getSecurityTestResult(testId, req.user?.id);
 
     if (!result.success) {
-      return res.status(404).json(result);
-    }
+      
+        return res.status(404).json(result);
+      }
 
     res.json(result);
   } catch (error) {
@@ -2653,8 +2665,9 @@ router.delete('/security/:testId', optionalAuth, asyncHandler(async (req, res) =
     const result = await securityTestStorage.deleteSecurityTestResult(testId, req.user?.id);
 
     if (!result.success) {
-      return res.status(404).json(result);
-    }
+      
+        return res.status(404).json(result);
+      }
 
     res.json(result);
   } catch (error) {
@@ -3308,10 +3321,11 @@ router.post('/performance/save', optionalAuth, asyncHandler(async (req, res) => 
   const { result, userId } = req.body;
 
   if (!result) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '测试结果数据是必填的'
-    });
+      });
   }
 
   try {
@@ -3747,10 +3761,11 @@ router.post('/ux', optionalAuth, testRateLimiter, asyncHandler(async (req, res) 
   const { url, options = {} } = req.body;
 
   if (!url) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: 'URL是必填的'
-    });
+      });
   }
 
   try {
@@ -3936,17 +3951,19 @@ router.post('/api-test', optionalAuth, testRateLimiter, asyncHandler(async (req,
 
   // 验证必填参数
   if (!baseUrl) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: 'API基础URL是必填的'
-    });
+      });
   }
 
   if (!endpoints || endpoints.length === 0) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '至少需要一个API端点'
-    });
+      });
   }
 
   try {
@@ -4016,7 +4033,8 @@ router.delete('/:testId', authMiddleware, asyncHandler(async (req, res) => {
     );
 
     if (result.rowCount === 0) {
-      return res.status(404).json({
+      
+        return res.status(404).json({
         success: false,
         message: '测试结果不存在'
       });
@@ -4321,17 +4339,19 @@ router.post('/proxy-latency', optionalAuth, testRateLimiter, asyncHandler(async 
 
   // 验证代理配置
   if (!proxy || !proxy.enabled) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '代理配置无效或未启用'
-    });
+      });
   }
 
   if (!proxy.host) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '代理地址不能为空'
-    });
+      });
   }
 
   const startTime = Date.now();
@@ -4513,17 +4533,19 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
 
   // 验证代理配置
   if (!proxy || !proxy.enabled) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '代理配置无效或未启用'
-    });
+      });
   }
 
   if (!proxy.host) {
-    return res.status(400).json({
+    
+        return res.status(400).json({
       success: false,
       message: '代理地址不能为空'
-    });
+      });
   }
 
   try {
@@ -4792,7 +4814,8 @@ router.post('/proxy-analyze', optionalAuth, asyncHandler(async (req, res) => {
     const { proxy } = req.body;
 
     if (!proxy || !proxy.host) {
-      return res.status(400).json({
+      
+        return res.status(400).json({
         success: false,
         message: '缺少代理配置信息'
       });

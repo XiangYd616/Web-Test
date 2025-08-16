@@ -301,8 +301,9 @@ export class TestStateManager {
    */
   cancelTest(): void {
     if (this.state === TestState.COMPLETED || this.state === TestState.FAILED) {
-      return; // 已完成的测试无法取消
-    }
+      
+        return; // 已完成的测试无法取消
+      }
 
     const previousState = this.state;
     this.state = TestState.CANCELLED;

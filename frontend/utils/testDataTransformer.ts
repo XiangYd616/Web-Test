@@ -153,7 +153,8 @@ export class TestDataTransformer {
    */
   private static parseResults(results: string | object): any {
     if (typeof results === 'string') {
-      try {
+      
+        try {
         return JSON.parse(results);
       } catch (error) {
         console.warn('Failed to parse results JSON:', error);
@@ -168,7 +169,8 @@ export class TestDataTransformer {
    */
   private static parseConfig(config: string | object): any {
     if (typeof config === 'string') {
-      try {
+      
+        try {
         return JSON.parse(config);
       } catch (error) {
         console.warn('Failed to parse config JSON:', error);

@@ -82,7 +82,8 @@ const Admin: React.FC = () => {
   ];
 
   if (loading) {
-    return (
+    
+        return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
@@ -90,7 +91,7 @@ const Admin: React.FC = () => {
         </div>
       </div>
     );
-  }
+      }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">

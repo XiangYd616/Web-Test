@@ -614,7 +614,7 @@ class ReportGenerator {
 <script>
 // 懒加载模块
 const loadModule = async () => {
-  const { default: module } = await // // // // import('./heavy-module.js'); // 已删除 // 已删除 // 服务已删除 // 服务已删除
+  const { default: module } = await // // // // // // import('./heavy-module.js'); // 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除
   return module;
 };
 
@@ -716,8 +716,9 @@ document.addEventListener('click', async () => {
 
   generateOptimizedDescription(currentDescription, analysisResults) {
     if (!currentDescription) {
-      return '这是一个优化后的meta描述，包含主要关键词，长度在120-160字符之间，并包含明确的行动号召。立即了解更多信息！';
-    }
+      
+        return '这是一个优化后的meta描述，包含主要关键词，长度在120-160字符之间，并包含明确的行动号召。立即了解更多信息！';
+      }
 
     // 简化的描述优化逻辑
     let optimized = currentDescription;

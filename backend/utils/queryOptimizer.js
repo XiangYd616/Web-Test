@@ -92,10 +92,12 @@ class QueryOptimizer {
     } = options;
 
     if (enableTransaction && !enableParallel) {
-      return this.executeBatchInTransaction(queries);
-    } else if (enableParallel) {
-      return this.executeBatchInParallel(queries, maxConcurrency);
-    } else {
+      
+        return this.executeBatchInTransaction(queries);
+      } else if (enableParallel) {
+      
+        return this.executeBatchInParallel(queries, maxConcurrency);
+      } else {
       return this.executeBatchSequential(queries);
     }
   }

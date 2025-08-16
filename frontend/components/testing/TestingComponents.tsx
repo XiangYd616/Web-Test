@@ -140,8 +140,9 @@ export const TestProgressDisplay: React.FC<TestProgressProps> = ({
   };
 
   if (!isRunning && status === 'idle') {
-    return null;
-  }
+    
+        return null;
+      }
 
   return (
     <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6 mb-6">

@@ -204,8 +204,9 @@ class EnginePool extends EventEmitter {
       .filter(engine => engine && engine.isAvailable && engine.status === 'idle');
 
     if (availableEngines.length === 0) {
-      return null;
-    }
+      
+        return null;
+      }
 
     // 根据负载均衡策略选择引擎
     switch (this.options.loadBalanceStrategy) {
@@ -570,7 +571,9 @@ class TestEngineManager extends EventEmitter {
   async stopTest(testId) {
     const testInfo = this.runningTests.get(testId);
     if (!testInfo) {
-      return { success: false, message: 'Test not found' };
+      
+        return { success: false, message: 'Test not found'
+      };
     }
 
     try {
@@ -625,17 +628,20 @@ class EngineAdapter extends TestEngineInterface {
     try {
       // 尝试调用原引擎的健康检查方法
       if (typeof this.originalEngine.healthCheck === 'function') {
+        
         const result = await this.originalEngine.healthCheck();
-        return result.status ? result : { status: 'healthy', timestamp: new Date().toISOString() };
+        return result.status ? result : { status: 'healthy', timestamp: new Date().toISOString()
+      };
       }
 
       // 如果没有健康检查方法，尝试检查可用性
       if (typeof this.originalEngine.checkAvailability === 'function') {
+        
         const isAvailable = await this.originalEngine.checkAvailability();
         return {
           status: isAvailable ? 'healthy' : 'unhealthy',
           timestamp: new Date().toISOString()
-        };
+      };
       }
 
       // 默认认为健康
@@ -656,7 +662,8 @@ class EngineAdapter extends TestEngineInterface {
 
       for (const method of methods) {
         if (typeof this.originalEngine[method] === 'function') {
-          const result = await this.originalEngine[method](config, options);
+          
+        const result = await this.originalEngine[method](config, options);
 
           // 标准化返回结果
           return {
@@ -665,7 +672,7 @@ class EngineAdapter extends TestEngineInterface {
             timestamp: new Date().toISOString(),
             engine: this.name,
             type: this.engineType
-          };
+      };
         }
       }
 
@@ -682,10 +689,12 @@ class EngineAdapter extends TestEngineInterface {
   async stopTest(testId) {
     try {
       if (typeof this.originalEngine.stopTest === 'function') {
+        
         return await this.originalEngine.stopTest(testId);
       }
 
       if (typeof this.originalEngine.cancel === 'function') {
+        
         return await this.originalEngine.cancel(testId);
       }
 
@@ -697,12 +706,14 @@ class EngineAdapter extends TestEngineInterface {
 
   getCapabilities() {
     if (typeof this.originalEngine.getCapabilities === 'function') {
-      return this.originalEngine.getCapabilities();
-    }
+      
+        return this.originalEngine.getCapabilities();
+      }
 
     if (this.originalEngine.capabilities) {
-      return this.originalEngine.capabilities;
-    }
+      
+        return this.originalEngine.capabilities;
+      }
 
     // 根据引擎类型返回默认能力
     const defaultCapabilities = {

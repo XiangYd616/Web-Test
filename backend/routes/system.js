@@ -185,9 +185,10 @@ async function getDiskInfo() {
     // 这里提供一个跨平台的简化实现
 
     if (process.platform === 'win32') {
-      // Windows系统
+      
+        // Windows系统
       return await getWindowsDiskInfo();
-    } else {
+      } else {
       // Unix-like系统
       return await getUnixDiskInfo();
     }
@@ -252,7 +253,8 @@ async function getUnixDiskInfo() {
     const lines = stdout.trim().split('/n');
 
     if (lines.length >= 2) {
-      const parts = lines[1].split(/\s+/);
+      
+        const parts = lines[1].split(/\s+/);
       if (parts.length >= 5) {
         const usagePercent = parseInt(parts[4].replace('%', '')) || 50;
         const available = parseFloat(parts[3].replace(/[^/d.]/g, '')) || 100;
@@ -260,7 +262,7 @@ async function getUnixDiskInfo() {
         return {
           usage: usagePercent,
           available: available
-        };
+      };
       }
     }
 

@@ -202,8 +202,10 @@ const DataSyncManager: React.FC<DataSyncManagerProps> = ({ className = '' }) => 
   };
 
   if (loading) {
-    return (
-      <div className={`bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 ${className}`}>
+    
+        return (
+      <div className={`bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 ${className
+      }`}>
         <div className="p-6 text-center">
           <RefreshCw className="w-8 h-8 text-blue-400 animate-spin mx-auto mb-4" />
           <p className="text-gray-400">加载同步配置...</p>
@@ -213,8 +215,10 @@ const DataSyncManager: React.FC<DataSyncManagerProps> = ({ className = '' }) => 
   }
 
   if (!syncConfig) {
-    return (
-      <div className={`bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 ${className}`}>
+    
+        return (
+      <div className={`bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 ${className
+      }`}>
         <div className="p-6 text-center">
           <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-4" />
           <p className="text-gray-400">加载同步配置失败</p>

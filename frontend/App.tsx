@@ -4,30 +4,31 @@
  */
 
 // React相关导入
-import {useEffect} from 'react';
+import { useEffect } from 'react';
 
 // 路由和组件导入
+import ErrorBoundary from './components/common/ErrorBoundary';
 import BackgroundTestNotifications from './components/system/BackgroundTestNotifications';
 import AppRoutes from './components/tools/AppRoutes.tsx';
 
 // 增强的系统组件导入
 
 // 上下文提供者导入
-import {AppProvider} from './contexts/AppContext';
-import {AuthProvider} from './contexts/AuthContext';
-import {ThemeProvider} from './contexts/ThemeContext';
+import { AppProvider } from './contexts/AppContext';
+import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 // 服务和错误处理导入
 import './services/apiErrorInterceptor';
 import './services/errorService';
 
 // 增强的系统服务导入
-import {enhancedConfigManager} from './config/ConfigManager';
-import {lazyLoadManager} from './utils/LazyLoadManager';
-import {performanceMonitor} from './utils/performanceMonitor';
+import { enhancedConfigManager } from './config/ConfigManager';
+import { lazyLoadManager } from './utils/LazyLoadManager';
+import { performanceMonitor } from './utils/performanceMonitor';
 
 // 性能优化工具导入
-import {initializePreloading} from './utils/routePreloader';
+import { initializePreloading } from './utils/routePreloader';
 
 /**
  * 应用程序根组件

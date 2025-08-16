@@ -17,10 +17,10 @@ import {
   HardDrive,
   Zap,
   TrendingUp,
-  Activity
-} from 'lucide-react';
+  // Activity
+} from 'lucide-react'; // 已修复
 import {useCache, useApiCache, useUserCache, useTempCache, useTestResultCache} from '../../hooks/useCache';
-// import type { CacheStats } from '../../services/cacheStrategy'; // 已删除
+// // import type { CacheStats } from '../../services/cacheStrategy'; // 已删除 // 已删除
 
 // ==================== 类型定义 ====================
 

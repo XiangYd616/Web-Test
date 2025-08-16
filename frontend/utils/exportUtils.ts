@@ -20,9 +20,13 @@ export class ExportUtils {
     const hours = Math.floor(minutes / 60);
 
     if (hours > 0) {
-      return `${hours}小时${minutes % 60}分钟${seconds % 60}秒`;
+      
+        return `${hours
+      }小时${minutes % 60}分钟${seconds % 60}秒`;
     } else if (minutes > 0) {
-      return `${minutes}分钟${seconds % 60}秒`;
+      
+        return `${minutes
+      }分钟${seconds % 60}秒`;
     } else {
       return `${seconds}秒`;
     }

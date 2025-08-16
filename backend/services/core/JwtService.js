@@ -341,8 +341,9 @@ class JwtService {
 
         const match = expiry.match(/^(\d+)([smhdw])$/);
         if (!match) {
-            return 900; // 默认15分钟
-        }
+            
+        return 900; // 默认15分钟
+      }
 
         const [, value, unit] = match;
         return parseInt(value) * (units[unit] || 1);
@@ -371,8 +372,9 @@ class JwtService {
         try {
             const decoded = this.decodeToken(token);
             if (!decoded || !decoded.exp) {
-                return true;
-            }
+                
+        return true;
+      }
 
             const expirationTime = decoded.exp * 1000;
             const thresholdTime = Date.now() + (thresholdMinutes * 60 * 1000);
@@ -392,8 +394,9 @@ class JwtService {
         try {
             const decoded = this.decodeToken(token);
             if (!decoded || !decoded.exp) {
-                return 0;
-            }
+                
+        return 0;
+      }
 
             const remainingTime = decoded.exp - Math.floor(Date.now() / 1000);
             return Math.max(0, remainingTime);

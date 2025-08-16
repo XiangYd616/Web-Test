@@ -1,6 +1,6 @@
 /**
  * 统一路由管理器 - 修复API路由架构问题
- * 整合RouteManager和EnhancedRouteManager的功能，提供统一的路由管理
+ * 整合RouteManager和RouteManager的功能，提供统一的路由管理
  */
 
 const express = require('express');
@@ -10,7 +10,7 @@ const path = require('path');
 let ServiceError, ErrorTypes, ApiResponse;
 
 try {
-  const errorHandler = require('../utils/ErrorHandler');
+  const errorHandler = require('../utils/errorHandler');
   ServiceError = errorHandler.ServiceError;
   ErrorTypes = errorHandler.ErrorTypes;
 } catch (error) {
@@ -41,7 +41,7 @@ try {
 /**
  * 统一路由管理器
  */
-class UnifiedRouteManager {
+class RouteManager {
   constructor(app) {
     this.app = app;
     this.routes = new Map();
@@ -263,7 +263,7 @@ class UnifiedRouteManager {
       // 具体测试路由 - 必须在通用测试路由之前
       {
         path: '/api/test/history',
-        module: '../routes/unifiedTestHistory.js',
+        module: '../routes/testHistory.js',
         description: '统一测试历史API',
         group: 'testSpecific'
       },
@@ -656,4 +656,4 @@ class UnifiedRouteManager {
   }
 }
 
-module.exports = UnifiedRouteManager;
+module.exports = RouteManager;

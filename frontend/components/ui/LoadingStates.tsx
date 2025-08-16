@@ -352,9 +352,11 @@ export const Loader: React.FC<{
   className?: string;
 }> = ({ type, testType, progress, stage, className = '' }) => {
   if (type === 'test' && testType && progress !== undefined && stage) {
-    switch (testType) {
+    
+        switch (testType) {
       case 'stress':
-        return <TestLoadingStates.StressTest progress={progress} stage={stage} />;
+        return <TestLoadingStates.StressTest progress={progress
+      } stage={stage} />;
       case 'content':
         return <TestLoadingStates.ContentTest progress={progress} stage={stage} />;
       case 'security':
@@ -365,15 +367,21 @@ export const Loader: React.FC<{
   }
 
   if (type === 'data') {
-    return <SkeletonLoader type="list" className={className} />;
+    
+        return <SkeletonLoader type="list" className={className
+      } />;
   }
 
   if (type === 'chart') {
-    return <SkeletonLoader type="chart" className={className} />;
+    
+        return <SkeletonLoader type="chart" className={className
+      } />;
   }
 
   if (type === 'report') {
-    return <LoadingWithText text="生成报告中..." subtext="请稍候，正在处理数据..." className={className} />;
+    
+        return <LoadingWithText text="生成报告中..." subtext="请稍候，正在处理数据..." className={className
+      } />;
   }
 
   return <BasicLoader className={className} />;

@@ -76,10 +76,8 @@ export interface MonitoringIncident {
 }
 
 // 统一服务导出
-export { default as monitoring } from './monitoring';
-
+// export { default as monitoring } from './monitoring'; // 已修复
 // 兼容性导出（逐步迁移）
-export { monitoringService } from './monitoringService';
-
+// export { monitoringService } from './monitoringService'; // 已修复
 // 类型已在上面定义并自动导出，无需重复导出
 

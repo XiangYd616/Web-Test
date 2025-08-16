@@ -5,9 +5,8 @@
 
 import React, { memo, useCallback } from 'react';
 import { 
-  AlertTriangle, CheckCircle, Clock, Share2, Eye, EyeOff, Maximize2
-} from 'lucide-react';
-
+  // AlertTriangle, CheckCircle, Clock, Share2, Eye, EyeOff, Maximize2
+} from 'lucide-react'; // 已修复
 interface TestResult {
   id: string;
   type: string;

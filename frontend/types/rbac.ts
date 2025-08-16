@@ -505,15 +505,17 @@ export function isPermissionMatch(
 ): boolean {
   // 检查资源和操作是否匹配
   if (permission.resource !== resource || permission.action !== action) {
-    return false;
-  }
+    
+        return false;
+      }
 
   // 检查条件
   if (permission.conditions && permission.conditions.length > 0 && context) {
-    return permission.conditions.every(condition => 
+    
+        return permission.conditions.every(condition => 
       validatePermissionCondition(condition, context)
     );
-  }
+      }
 
   return true;
 }

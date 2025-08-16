@@ -82,9 +82,10 @@ const UserBookmarks: React.FC = () => {
   // 添加收藏
   const handleAddBookmark = async () => {
     if (!newBookmarkForm.title || !newBookmarkForm.url) {
-      setError('请填写标题和URL');
+      
+        setError('请填写标题和URL');
       return;
-    }
+      }
 
     try {
       setSaving(true);
@@ -221,9 +222,10 @@ const UserBookmarks: React.FC = () => {
   const allTags = Array.from(new Set(bookmarks.flatMap(bookmark => bookmark.tags)));
 
   if (loading) {
-    return (
+    
+        return (
       <div className={`min-h-screen flex items-center justify-center ${actualTheme === 'light' ? 'bg-gray-50' : 'bg-gray-900'
-        }`}>
+      }`}>
         <div className="text-center">
           <Loader className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-500" />
           <p className={actualTheme === 'light' ? 'text-gray-600' : 'text-gray-400'}>

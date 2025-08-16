@@ -129,6 +129,7 @@ class TOTPGenerator {
       const expectedToken = await this.generateTOTP(secret, timeStep);
 
       if (expectedToken === token) {
+        
         return true;
       }
     }
@@ -281,12 +282,16 @@ export class MFAService {
   async enableTOTP(userId: string, token: string): Promise<{ success: boolean; backupCodes?: string[] }> {
     const setupData = await defaultMemoryCache.get(`totp_setup_${userId}`);
     if (!setupData) {
-      return { success: false };
+      
+        return { success: false
+      };
     }
 
     const isValid = await TOTPGenerator.verifyTOTP(setupData.secret, token);
     if (!isValid) {
-      return { success: false };
+      
+        return { success: false
+      };
     }
 
     // 保存TOTP设置
@@ -340,8 +345,9 @@ export class MFAService {
   async enableSMS(userId: string, challengeId: string, code: string, phoneNumber: string): Promise<boolean> {
     const isValid = await this.verifyChallenge(challengeId, code);
     if (!isValid.success) {
-      return false;
-    }
+      
+        return false;
+      }
 
     const setup: MFASetup = {
       userId,
@@ -390,8 +396,9 @@ export class MFAService {
   async enableEmail(userId: string, challengeId: string, code: string, email: string): Promise<boolean> {
     const isValid = await this.verifyChallenge(challengeId, code);
     if (!isValid.success) {
-      return false;
-    }
+      
+        return false;
+      }
 
     const setup: MFASetup = {
       userId,
@@ -484,7 +491,9 @@ export class MFAService {
   async verifyChallenge(challengeId: string, code: string): Promise<MFAVerificationResult> {
     const challenge = this.activeChallenges.get(challengeId);
     if (!challenge) {
-      return { success: false, method: 'totp', error: '无效的挑战ID' };
+      
+        return { success: false, method: 'totp', error: '无效的挑战ID'
+      };
     }
 
     // 检查是否过期
@@ -495,7 +504,9 @@ export class MFAService {
 
     // 检查是否已使用
     if (challenge.isUsed) {
-      return { success: false, method: challenge.method, error: '验证码已使用' };
+      
+        return { success: false, method: challenge.method, error: '验证码已使用'
+      };
     }
 
     // 增加尝试次数
@@ -503,7 +514,8 @@ export class MFAService {
 
     // 检查尝试次数
     if (challenge.attempts > this.config.maxAttempts) {
-      this.activeChallenges.delete(challengeId);
+      
+        this.activeChallenges.delete(challengeId);
       this.lockoutUser(challenge.userId);
       return {
         success: false,
@@ -582,8 +594,9 @@ export class MFAService {
     // 从缓存或数据库获取
     const cached = await defaultMemoryCache.get(`mfa_setups_${userId}`);
     if (cached) {
-      return cached;
-    }
+      
+        return cached;
+      }
 
     // 这里应该从数据库获取，目前返回内存中的数据
     return this.userSetups.get(userId) || [];
@@ -597,10 +610,11 @@ export class MFAService {
     const setup = userSetups.find(s => s.method === method);
 
     if (setup) {
-      setup.isEnabled = false;
+      
+        setup.isEnabled = false;
       await this.saveMFASetup(setup);
       return true;
-    }
+      }
 
     return false;
   }

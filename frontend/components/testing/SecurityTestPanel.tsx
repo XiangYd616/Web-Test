@@ -170,16 +170,18 @@ export const SecurityTestPanel = forwardRef<SecurityTestPanelRef, SecurityTestPa
   // 运行测试
   const runTest = useCallback(async () => {
     if (!config.url) {
-      const urlError = createCommonErrors.invalidUrl();
+      
+        const urlError = createCommonErrors.invalidUrl();
       setEnhancedError(urlError);
       return;
-    }
+      }
 
     if (!isUrlValid) {
-      const urlError = createCommonErrors.invalidUrl(config.url);
+      
+        const urlError = createCommonErrors.invalidUrl(config.url);
       setEnhancedError(urlError);
       return;
-    }
+      }
 
     setIsRunning(true);
     setError(null);

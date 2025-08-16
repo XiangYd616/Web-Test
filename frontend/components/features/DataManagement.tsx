@@ -9,8 +9,8 @@ import {
   FileText,
   Filter,
   RefreshCw,
-  Search
-} from 'lucide-react';
+  // Search
+} from 'lucide-react'; // 已修复
 import React, { useEffect, useState } from 'react';
 import TestHistory from '../ui/TestHistory.tsx';
 import {unifiedTestHistoryService} from '../../services/testing/testHistoryService';

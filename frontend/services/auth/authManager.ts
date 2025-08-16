@@ -197,12 +197,13 @@ export class AuthManager {
 
     // 生成哈希
     if (crypto.subtle) {
-      const encoder = new TextEncoder();
+      
+        const encoder = new TextEncoder();
       const data = encoder.encode(fingerprint);
       const hashBuffer = await crypto.subtle.digest('SHA-256', data);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    } else {
+      } else {
       // 降级到简单哈希
       return btoa(fingerprint).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32);
     }
@@ -231,6 +232,7 @@ export class AuthManager {
       }
 
       if (data.success) {
+        
         // 检查是否需要MFA
         if (data.requireMFA) {
           this.emit('mfaRequired', data.mfaChallenge);
@@ -239,7 +241,7 @@ export class AuthManager {
             requireMFA: true,
             mfaChallenge: data.mfaChallenge,
             message: '需要多因素认证'
-          };
+      };
         }
 
         // 存储tokens
@@ -294,6 +296,7 @@ export class AuthManager {
       }
 
       if (data.success) {
+        
         await this.storeTokens(data.token, data.refreshToken);
         this.emit('tokenRefreshed', data.token);
         return true;
@@ -362,6 +365,7 @@ export class AuthManager {
       }
 
       if (data.success) {
+        
         await this.storeTokens(data.token, data.refreshToken);
         this.startAutoRefresh();
         this.emit('mfaSuccess', data.user);
@@ -371,7 +375,7 @@ export class AuthManager {
           user: data.user,
           token: data.token,
           message: 'MFA验证成功'
-        };
+      };
       } else {
         throw new Error(data.message || 'MFA验证失败');
       }
@@ -584,18 +588,20 @@ export class AuthManager {
 
   private async getAccessToken(): Promise<string | null> {
     if (this.config.enableSecureStorage) {
-      const encrypted = localStorage.getItem('auth_access_token_enc');
+      
+        const encrypted = localStorage.getItem('auth_access_token_enc');
       return encrypted ? await this.decryptData(encrypted) : null;
-    } else {
+      } else {
       return localStorage.getItem('auth_access_token');
     }
   }
 
   private async getRefreshToken(): Promise<string | null> {
     if (this.config.enableSecureStorage) {
-      const encrypted = localStorage.getItem('auth_refresh_token_enc');
+      
+        const encrypted = localStorage.getItem('auth_refresh_token_enc');
       return encrypted ? await this.decryptData(encrypted) : null;
-    } else {
+      } else {
       return localStorage.getItem('auth_refresh_token');
     }
   }

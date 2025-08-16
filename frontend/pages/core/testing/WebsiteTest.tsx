@@ -369,8 +369,9 @@ const WebsiteTest: React.FC = () => {
       .map(([type, _]) => type);
 
     if (selectedTests.length === 0) {
-      return;
-    }
+      
+        return;
+      }
 
     clearError();
     clearResults();

@@ -149,9 +149,10 @@ export const StressTestCharts: React.FC<StressTestChartsProps> = ({
     }
 
     if (!sourceData || sourceData.length === 0) {
-      console.log('❌ StressTestCharts: 返回空数据');
+      
+        console.log('❌ StressTestCharts: 返回空数据');
       return [];
-    }
+      }
 
     // 根据密度控制设置采样步长
     const step = densityControl === 'low' ? 5 : densityControl === 'medium' ? 2 : 1;
@@ -273,7 +274,8 @@ export const StressTestCharts: React.FC<StressTestChartsProps> = ({
   // 🔧 新增：时间格式化函数
   const formatTimeLabel = useCallback((value: any) => {
     if (timeDisplayMode === 'absolute') {
-      // 显示实际时间 (HH:MM:SS)
+      
+        // 显示实际时间 (HH:MM:SS)
       return new Date(value).toLocaleTimeString('zh-CN', {
         hour12: false,
         hour: '2-digit',
@@ -283,6 +285,7 @@ export const StressTestCharts: React.FC<StressTestChartsProps> = ({
     } else {
       // 🔧 改进：显示相对时间，提高到0.01秒精度 (M:SS.CC)
       if (processedData.length > 0) {
+        
         const startTime = new Date(processedData[0].timestamp).getTime();
         const currentTime = new Date(value).getTime();
         const elapsedSeconds = (currentTime - startTime) / 1000; // 保留小数
@@ -291,7 +294,8 @@ export const StressTestCharts: React.FC<StressTestChartsProps> = ({
         const seconds = Math.floor(elapsedSeconds % 60);
         const ms = Math.floor((elapsedSeconds % 1) * 100); // 0.01秒精度
 
-        return minutes > 0 ? `${minutes}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}` : `${seconds}.${ms.toString().padStart(2, '0')}`;
+        return minutes > 0 ? `${minutes
+      }:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}` : `${seconds}.${ms.toString().padStart(2, '0')}`;
       }
       return new Date(value).toLocaleTimeString();
     }
@@ -441,8 +445,10 @@ export const StressTestCharts: React.FC<StressTestChartsProps> = ({
         }}
         formatter={(value: any, name: string) => {
           if (name === 'count') {
-            const percentage = responseTimeDistribution.find(item => item.count === value)?.percentage || 0;
-            return [`${value} 个请求 (${percentage.toFixed(1)}%)`, '请求数量'];
+            
+        const percentage = responseTimeDistribution.find(item => item.count === value)?.percentage || 0;
+            return [`${value
+      } 个请求 (${percentage.toFixed(1)}%)`, '请求数量'];
           }
           return [value, name];
         }}

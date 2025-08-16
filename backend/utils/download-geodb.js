@@ -38,10 +38,11 @@ class GeoDBDownloader {
    */
   async downloadDatabase(edition, filename) {
     if (!this.licenseKey) {
-      console.error('❌ 请设置 MAXMIND_LICENSE_KEY 环境变量');
+      
+        console.error('❌ 请设置 MAXMIND_LICENSE_KEY 环境变量');
       console.log('💡 获取许可证密钥：https://www.maxmind.com/en/accounts/current/license-key');
       return false;
-    }
+      }
 
     const url = `${this.baseUrl}?edition_id=${edition}&license_key=${this.licenseKey}&suffix=tar.gz`;
     const outputPath = path.join(this.dataDir, filename);
@@ -102,11 +103,12 @@ class GeoDBDownloader {
 
       const request = client.get(url, (response) => {
         if (response.statusCode === 302 || response.statusCode === 301) {
-          // 处理重定向
+          
+        // 处理重定向
           return this.downloadFileOnce(response.headers.location, outputPath)
             .then(resolve)
             .catch(reject);
-        }
+      }
 
         if (response.statusCode !== 200) {
           reject(new Error(`HTTP ${response.statusCode}: ${response.statusMessage}`));

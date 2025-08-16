@@ -37,14 +37,16 @@ class GeoUpdateService {
     const licenseKey = process.env.MAXMIND_LICENSE_KEY;
 
     if (!licenseKey) {
-      console.log('⚠️  未设置 MAXMIND_LICENSE_KEY，地理位置自动更新已禁用');
+      
+        console.log('⚠️  未设置 MAXMIND_LICENSE_KEY，地理位置自动更新已禁用');
       return;
-    }
+      }
 
     if (!this.config.enabled) {
-      console.log('⏸️  自动更新已禁用');
+      
+        console.log('⏸️  自动更新已禁用');
       return;
-    }
+      }
 
     // 启动时检查数据库
     if (this.config.checkOnStartup) {
@@ -85,9 +87,10 @@ class GeoUpdateService {
    */
   async checkAndUpdate() {
     if (this.isUpdating) {
-      console.log('🔄 更新正在进行中，跳过检查');
+      
+        console.log('🔄 更新正在进行中，跳过检查');
       return false;
-    }
+      }
 
     this.lastUpdateCheck = new Date();
 
@@ -96,6 +99,7 @@ class GeoUpdateService {
       const needsUpdate = await this.needsUpdate();
 
       if (needsUpdate) {
+        
         console.log('📥 检测到需要更新数据库');
         return await this.performUpdate();
       } else {
@@ -132,8 +136,9 @@ class GeoUpdateService {
 
     // 检查许可证密钥是否可用
     if (!process.env.MAXMIND_LICENSE_KEY) {
-      return false;
-    }
+      
+        return false;
+      }
 
     return false;
   }
@@ -143,9 +148,10 @@ class GeoUpdateService {
    */
   async performUpdate() {
     if (this.isUpdating) {
-      console.log('🔄 更新已在进行中');
+      
+        console.log('🔄 更新已在进行中');
       return false;
-    }
+      }
 
     this.isUpdating = true;
     let retries = 0;
@@ -157,7 +163,8 @@ class GeoUpdateService {
         const success = await this.downloader.downloadAll();
 
         if (success) {
-          this.lastUpdateTime = new Date();
+          
+        this.lastUpdateTime = new Date();
           console.log('✅ GeoLite2 数据库更新成功');
 
           // 通知地理位置服务重新加载
@@ -165,7 +172,7 @@ class GeoUpdateService {
 
           this.isUpdating = false;
           return true;
-        } else {
+      } else {
           throw new Error('数据库下载失败');
         }
       } catch (error) {

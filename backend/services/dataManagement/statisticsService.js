@@ -323,7 +323,8 @@ class StatisticsService {
    */
   formatOverviewStats(stats) {
     if (!stats) {
-      return {
+      
+        return {
         totalTests: 0,
         completedTests: 0,
         failedTests: 0,

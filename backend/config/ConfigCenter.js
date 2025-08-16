@@ -536,8 +536,9 @@ class ConfigCenter extends EventEmitter {
     
     const schema = this.schema[key];
     if (schema && schema.default !== undefined) {
-      return schema.default;
-    }
+      
+        return schema.default;
+      }
     
     return defaultValue;
   }

@@ -119,17 +119,19 @@ export class IntegrationService {
       });
 
       if (!response.ok) {
+        
         if (response.status === 401) {
           console.warn('Authentication failed, returning mock API keys');
           const mockData = this.generateMockAPIKeys();
           this.setCache(cacheKey, mockData);
           return mockData;
-        }
+      }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
       if (data.success) {
+        
         this.setCache(cacheKey, data.data);
         return data.data;
       } else {
@@ -161,6 +163,7 @@ export class IntegrationService {
 
       const data = await response.json();
       if (data.success) {
+        
         // 清除缓存
         this.clearCache('api-keys');
         return data.data;
@@ -214,17 +217,19 @@ export class IntegrationService {
       });
 
       if (!response.ok) {
+        
         if (response.status === 401) {
           console.warn('Authentication failed, returning mock webhooks');
           const mockData = this.generateMockWebhooks();
           this.setCache(cacheKey, mockData);
           return mockData;
-        }
+      }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
       if (data.success) {
+        
         this.setCache(cacheKey, data.data);
         return data.data;
       } else {
@@ -302,17 +307,19 @@ export class IntegrationService {
       });
 
       if (!response.ok) {
+        
         if (response.status === 401) {
           console.warn('Authentication failed, returning mock third-party integrations');
           const mockData = this.generateMockThirdPartyIntegrations();
           this.setCache(cacheKey, mockData);
           return mockData;
-        }
+      }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
       if (data.success) {
+        
         this.setCache(cacheKey, data.data);
         return data.data;
       } else {
@@ -347,17 +354,19 @@ export class IntegrationService {
       });
 
       if (!response.ok) {
+        
         if (response.status === 401) {
           console.warn('Authentication failed, returning mock integration stats');
           const mockData = this.generateMockStats();
           this.setCache(cacheKey, mockData);
           return mockData;
-        }
+      }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
       if (data.success) {
+        
         this.setCache(cacheKey, data.data);
         return data.data;
       } else {

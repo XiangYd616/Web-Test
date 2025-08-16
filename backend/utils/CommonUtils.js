@@ -80,16 +80,19 @@ class CommonUtils {
    */
   static deepClone(obj) {
     if (obj === null || typeof obj !== 'object') {
-      return obj;
-    }
+      
+        return obj;
+      }
 
     if (obj instanceof Date) {
-      return new Date(obj.getTime());
-    }
+      
+        return new Date(obj.getTime());
+      }
 
     if (obj instanceof Array) {
-      return obj.map(item => this.deepClone(item));
-    }
+      
+        return obj.map(item => this.deepClone(item));
+      }
 
     if (typeof obj === 'object') {
       const cloned = {};
@@ -237,11 +240,17 @@ class CommonUtils {
     const days = Math.floor(hours / 24);
 
     if (days > 0) {
-      return `${days}天 ${hours % 24}小时 ${minutes % 60}分钟`;
+      
+        return `${days
+      }天 ${hours % 24}小时 ${minutes % 60}分钟`;
     } else if (hours > 0) {
-      return `${hours}小时 ${minutes % 60}分钟 ${seconds % 60}秒`;
+      
+        return `${hours
+      }小时 ${minutes % 60}分钟 ${seconds % 60}秒`;
     } else if (minutes > 0) {
-      return `${minutes}分钟 ${seconds % 60}秒`;
+      
+        return `${minutes
+      }分钟 ${seconds % 60}秒`;
     } else {
       return `${seconds}秒`;
     }
@@ -287,12 +296,13 @@ class CommonUtils {
    */
   static unique(array, key = null) {
     if (key) {
-      const seen = new Set();
+      
+        const seen = new Set();
       return array.filter(item => {
         const value = item[key];
         if (seen.has(value)) {
           return false;
-        }
+      }
         seen.add(value);
         return true;
       });
@@ -358,6 +368,7 @@ class CommonUtils {
     
     for (const key of keys) {
       if (current == null || typeof current !== 'object') {
+        
         return defaultValue;
       }
       current = current[key];
