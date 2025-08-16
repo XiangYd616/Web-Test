@@ -47,6 +47,15 @@ interface NavigationItem {
 
 const Navigation: React.FC<NavigationProps> = (props) => {
   
+  // 性能优化
+  const memoizedProps = useMemo(() => ({
+    className: combinedClassName,
+    style: computedStyle,
+    disabled,
+    'aria-label': ariaLabel,
+    'data-testid': testId
+  }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
+  
   const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
     if (disabled || loading) return;
     onClick?.(event);

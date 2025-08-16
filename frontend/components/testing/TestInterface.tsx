@@ -26,6 +26,31 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
   onCancelTest,
   className = ''
 }) => {
+  
+  // 页面级功能
+  const [pageTitle, setPageTitle] = useState('');
+
+  // 设置页面标题
+  useEffect(() => {
+    if (pageTitle) {
+      document.title = `${pageTitle} - Test Web`;
+    }
+  }, [pageTitle]);
+
+  // 页面可见性检测
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // 页面变为可见时刷新数据
+        fetchData?.();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [fetchData]);
   const [config, setConfig] = useState(defaultConfig);
   const [result, setResult] = useState<TestResult | null>(null);
   const { isLoading, progress, stage, error, startLoading, updateProgress, finishLoading, setLoadingError } = useLoadingState();

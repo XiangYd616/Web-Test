@@ -2,11 +2,37 @@ import React from 'react';
 
 import { Activity, CheckCircle, Clock, Loader, Target, Zap } from 'lucide-react';
 
+
+
+interface LoadingStatesProps {
+  className?: string;
+  children?: React.ReactNode;
+  style?: React.CSSProperties;
+  disabled?: boolean;
+  loading?: boolean;
+  variant?: 'primary' | 'secondary' | 'outline';
+  size?: 'small' | 'medium' | 'large';
+  onClick?: (event: React.MouseEvent<HTMLElement>) => void;
+  onChange?: (value: any) => void;
+  onFocus?: (event: React.FocusEvent<HTMLElement>) => void;
+  onBlur?: (event: React.FocusEvent<HTMLElement>) => void;
+  'data-testid'?: string;
+  'aria-label'?: string;
+  'aria-describedby'?: string;
+  role?: string;
+  tabIndex?: number;
+}
 // 基础加载组件
-export const BasicLoader: React.FC<{ size?: 'sm' | 'md' | 'lg'; className?: string }> = ({
-  size = 'md',
-  className = ''
-}) => {
+export const BasicLoader: React.FC<LoadingStatesProps> = (props) => {
+  
+  // 性能优化
+  const memoizedProps = useMemo(() => ({
+    className: combinedClassName,
+    style: computedStyle,
+    disabled,
+    'aria-label': ariaLabel,
+    'data-testid': testId
+  }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
   
   const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
     if (disabled || loading) return;

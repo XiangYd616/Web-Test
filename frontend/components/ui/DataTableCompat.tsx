@@ -71,6 +71,15 @@ function DataTableCompat<T extends Record<string, any>>({
   // 处理排序变化
   const handleSortChange = (field: string | null, order: 'ascend' | 'descend' | null) => {
   
+  // 性能优化
+  const memoizedProps = useMemo(() => ({
+    className: combinedClassName,
+    style: computedStyle,
+    disabled,
+    'aria-label': ariaLabel,
+    'data-testid': testId
+  }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
+  
   const handleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
     if (disabled || loading) return;
     

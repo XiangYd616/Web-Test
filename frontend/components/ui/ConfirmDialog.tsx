@@ -27,6 +27,15 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   type = 'info'
 }) => {
   
+  // 性能优化
+  const memoizedProps = useMemo(() => ({
+    className: combinedClassName,
+    style: computedStyle,
+    disabled,
+    'aria-label': ariaLabel,
+    'data-testid': testId
+  }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
+  
   const componentId = useId();
   const errorId = `${componentId}-error`;
   const descriptionId = `${componentId}-description`;
@@ -100,4 +109,4 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   );
 };
 
-export default ConfirmDialog;
+export default React.memo(ConfirmDialog);

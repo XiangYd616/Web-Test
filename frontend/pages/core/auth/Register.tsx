@@ -9,6 +9,71 @@ import { useTheme } from '../../../contexts/ThemeContext.tsx';
 
 const Register: React.FC = () => {
   
+  // 页面级功能
+  const [pageTitle, setPageTitle] = useState('');
+
+  // 设置页面标题
+  useEffect(() => {
+    if (pageTitle) {
+      document.title = `${pageTitle} - Test Web`;
+    }
+  }, [pageTitle]);
+
+  // 页面可见性检测
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // 页面变为可见时刷新数据
+        fetchData?.();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [fetchData]);
+  
+  // 表单验证
+  const [formData, setFormData] = useState({});
+  const [formErrors, setFormErrors] = useState({});
+
+  const validateForm = useCallback((data) => {
+    const errors = {};
+    
+    // 添加验证规则
+    if (!data.name?.trim()) {
+      errors.name = '名称不能为空';
+    }
+    
+    if (!data.email?.trim()) {
+      errors.email = '邮箱不能为空';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      errors.email = '邮箱格式不正确';
+    }
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  }, []);
+
+  const handleSubmit = useCallback(async (e) => {
+    e.preventDefault();
+    
+    if (!validateForm(formData)) {
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      await apiClient.post('/api/submit', formData);
+      // 处理成功提交
+    } catch (err) {
+      setError(err.message || '提交失败');
+    } finally {
+      setLoading(false);
+    }
+  }, [formData, validateForm]);
+  
   const [feedback, setFeedback] = useState({ type: '', message: '' });
   
   const showFeedback = (type, message, duration = 3000) => {

@@ -13,6 +13,31 @@ import type { SystemMonitor, SystemStats } from '../../../types/admin.ts';
 
 const Admin: React.FC = () => {
   
+  // 页面级功能
+  const [pageTitle, setPageTitle] = useState('');
+
+  // 设置页面标题
+  useEffect(() => {
+    if (pageTitle) {
+      document.title = `${pageTitle} - Test Web`;
+    }
+  }, [pageTitle]);
+
+  // 页面可见性检测
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // 页面变为可见时刷新数据
+        fetchData?.();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [fetchData]);
+  
   const [feedback, setFeedback] = useState({ type: '', message: '' });
   
   const showFeedback = (type, message, duration = 3000) => {

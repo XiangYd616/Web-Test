@@ -1,6 +1,26 @@
 import React from 'react';
 import toast, { Toaster, ToastOptions } from 'react-hot-toast';
 
+
+
+interface ToastProps {
+  className?: string;
+  children?: React.ReactNode;
+  style?: React.CSSProperties;
+  disabled?: boolean;
+  loading?: boolean;
+  variant?: 'primary' | 'secondary' | 'outline';
+  size?: 'small' | 'medium' | 'large';
+  onClick?: (event: React.MouseEvent<HTMLElement>) => void;
+  onChange?: (value: any) => void;
+  onFocus?: (event: React.FocusEvent<HTMLElement>) => void;
+  onBlur?: (event: React.FocusEvent<HTMLElement>) => void;
+  'data-testid'?: string;
+  'aria-label'?: string;
+  'aria-describedby'?: string;
+  role?: string;
+  tabIndex?: number;
+}
 // Toast 配置
 const toastConfig: ToastOptions = {
   duration: 4000,
@@ -32,7 +52,65 @@ const errorConfig = {
 };
 
 // Toast 提供者组件
-export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ToastProvider: React.FC<ToastProps> = (props) => {
+  
+  // 性能优化
+  const memoizedProps = useMemo(() => ({
+    className: combinedClassName,
+    style: computedStyle,
+    disabled,
+    'aria-label': ariaLabel,
+    'data-testid': testId
+  }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
+  
+  // 样式和主题支持
+  const {
+    className = '',
+    style,
+    variant = 'primary',
+    size = 'medium'
+  } = props;
+
+  const baseClasses = 'component-base';
+  const variantClasses = `component--${variant}`;
+  const sizeClasses = `component--${size}`;
+  const stateClasses = [
+    disabled && 'component--disabled',
+    loading && 'component--loading'
+  ].filter(Boolean).join(' ');
+
+  const combinedClassName = [
+    baseClasses,
+    variantClasses,
+    sizeClasses,
+    stateClasses,
+    className
+  ].filter(Boolean).join(' ');
+  
+  // 可访问性支持
+  const {
+    'aria-label': ariaLabel,
+    'aria-describedby': ariaDescribedBy,
+    role,
+    tabIndex = 0,
+    'data-testid': testId
+  } = props;
+
+  const accessibilityProps = {
+    'aria-label': ariaLabel,
+    'aria-describedby': ariaDescribedBy,
+    role,
+    tabIndex: disabled ? -1 : tabIndex,
+    'data-testid': testId
+  };
+
+  // 键盘导航支持
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onClick?.(event as any);
+    }
+  }, [onClick]);
   return (
     <>
       {children}

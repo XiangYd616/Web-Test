@@ -11,6 +11,15 @@ interface DataStatsProps {
 
 const DataStats: React.FC<DataStatsProps> = ({ records, pagination, loading }) => {
   
+  // 性能优化
+  const memoizedProps = useMemo(() => ({
+    className: combinedClassName,
+    style: computedStyle,
+    disabled,
+    'aria-label': ariaLabel,
+    'data-testid': testId
+  }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
+  
   const handleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
     if (disabled || loading) return;
     

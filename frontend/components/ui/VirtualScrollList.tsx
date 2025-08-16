@@ -41,6 +41,15 @@ function VirtualScrollList<T>({
 
     const handleScrollEvent = (e: React.UIEvent<HTMLDivElement>) => {
   
+  // 性能优化
+  const memoizedProps = useMemo(() => ({
+    className: combinedClassName,
+    style: computedStyle,
+    disabled,
+    'aria-label': ariaLabel,
+    'data-testid': testId
+  }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
+  
   const componentId = useId();
   const errorId = `${componentId}-error`;
   const descriptionId = `${componentId}-description`;
@@ -190,4 +199,4 @@ function VirtualScrollList<T>({
     );
 }
 
-export default VirtualScrollList;
+export default React.memo(VirtualScrollList);

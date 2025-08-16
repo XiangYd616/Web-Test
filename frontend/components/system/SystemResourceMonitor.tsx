@@ -40,6 +40,63 @@ const SystemResourceMonitor: React.FC<SystemResourceMonitorProps> = ({
   showDetails = true
 }) => {
   
+  // 性能优化
+  const memoizedProps = useMemo(() => ({
+    className: combinedClassName,
+    style: computedStyle,
+    disabled,
+    'aria-label': ariaLabel,
+    'data-testid': testId
+  }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
+  
+  // 变体和主题支持
+  const variantStyles = useMemo(() => {
+    const styles = {
+      primary: {
+        backgroundColor: '#007bff',
+        color: '#ffffff',
+        border: '1px solid #007bff'
+      },
+      secondary: {
+        backgroundColor: '#6c757d',
+        color: '#ffffff',
+        border: '1px solid #6c757d'
+      },
+      outline: {
+        backgroundColor: 'transparent',
+        color: '#007bff',
+        border: '1px solid #007bff'
+      }
+    };
+
+    return styles[variant] || styles.primary;
+  }, [variant]);
+
+  const sizeStyles = useMemo(() => {
+    const styles = {
+      small: {
+        padding: '0.25rem 0.5rem',
+        fontSize: '0.875rem'
+      },
+      medium: {
+        padding: '0.5rem 1rem',
+        fontSize: '1rem'
+      },
+      large: {
+        padding: '0.75rem 1.5rem',
+        fontSize: '1.125rem'
+      }
+    };
+
+    return styles[size] || styles.medium;
+  }, [size]);
+
+  const computedStyle = useMemo(() => ({
+    ...variantStyles,
+    ...sizeStyles,
+    ...style
+  }), [variantStyles, sizeStyles, style]);
+  
   const memoizedHandleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
     if (disabled || loading) return;
     onClick?.(event);
