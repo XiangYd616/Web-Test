@@ -1,0 +1,591 @@
+{
+  "timestamp": "2025-08-16T06:15:57.967Z",
+  "summary": {
+    "totalIssues": 14,
+    "categories": {
+      "package_json": 8,
+      "typescript": 3,
+      "environment": 3,
+      "build_config": 0
+    }
+  },
+  "configs": {
+    "package.json": {
+      "name": "test-web-app",
+      "version": "1.0.0",
+      "type": "module",
+      "private": true,
+      "workspaces": [
+        "frontend",
+        "backend"
+      ],
+      "description": "集成压力测试、内容检测、兼容性测试的跨平台桌面应用",
+      "author": {
+        "name": "Test Web App Team",
+        "email": "1823170057@qq.com"
+      },
+      "main": "electron/main.js",
+      "homepage": "./",
+      "scripts": {
+        "_comment_main": "🚀 主要启动命令",
+        "start": "concurrently \"npm run backend\" \"npm run frontend\"",
+        "dev": "concurrently \"npm run backend:dev\" \"npm run frontend\"",
+        "_comment_services": "🔧 服务依赖分析",
+        "frontend": "cd frontend && npm run dev",
+        "backend": "cd backend && npm start",
+        "backend:dev": "cd backend && npm run dev",
+        "_comment_build": "📦 构建相关",
+        "build": "cd frontend && npm run build",
+        "build:check": "cd frontend && npm run build:check",
+        "preview": "cd frontend && npm run preview",
+        "type-check": "cd frontend && npm run type-check",
+        "_comment_database": "🗄️ 数据库管理",
+        "db:init": "cd backend && npm run db:init",
+        "db:migrate": "cd backend && npm run db:migrate",
+        "db:check": "cd backend && npm run db:check",
+        "db:backup": "cd backend && npm run db:backup",
+        "_comment_test": "🧪 测试相关",
+        "test": "cd frontend && npm run test",
+        "test:run": "cd frontend && npm run test:run",
+        "test:coverage": "cd frontend && npm run test:coverage",
+        "test:e2e": "playwright test",
+        "_comment_electron": "⚡ Electron应用",
+        "electron:dev": "concurrently \"npm run frontend\" \"wait-on http://localhost:5174 && cross-env ELECTRON_IS_DEV=1 electron .\"",
+        "electron:build": "npm run build && electron-builder",
+        "_comment_maintenance": "🔧 项目维护",
+        "lint": "cd frontend && npm run lint && cd ../backend && npm run lint",
+        "lint:fix": "cd frontend && npm run lint:fix && cd ../backend && npm run lint:fix",
+        "format": "cd frontend && npm run format",
+        "ci:check": "npm run type-check && npm run lint && npm run build",
+        "_comment_naming": "🏷️ 命名规范",
+        "lint:naming": "node scripts/precise-naming-checker.cjs",
+        "lint:naming:full": "node scripts/comprehensive-naming-checker.cjs",
+        "fix:naming": "node scripts/auto-fix-naming.cjs --fix",
+        "check:naming": "node scripts/precise-naming-checker.cjs",
+        "_comment_imports": "📦 导入导出修复",
+        "fix:imports": "node scripts/simple-import-fixer.cjs",
+        "check:imports": "node scripts/import-export-fixer.cjs",
+        "check:imports:precise": "node scripts/precise-path-checker.cjs",
+        "fix:imports:smart": "node scripts/smart-import-fixer.cjs --fix",
+        "analyze:services": "node scripts/service-dependency-analyzer.cjs",
+        "fix:services": "node scripts/service-import-fixer.cjs --fix",
+        "_comment_cleanup": "🧹 清理操作",
+        "analyze:cleanup": "node scripts/project-cleanup-analyzer.cjs",
+        "clean:project": "node scripts/project-cleaner.cjs --clean",
+        "_comment_intelligent": "🧠 智能路径修复",
+        "fix:paths:intelligent": "node scripts/intelligent-path-fixer.cjs --fix",
+        "fix:imports:normalize": "node scripts/import-path-normalizer.cjs --fix",
+        "clean": "rimraf dist dist-electron node_modules/.cache",
+        "clean:all": "rimraf dist dist-electron node_modules",
+        "_comment_utils": "🔧 实用工具",
+        "deps:update": "npm update",
+        "security:audit": "npm audit && cd backend && npm audit"
+      },
+      "dependencies": {
+        "@types/node": "^20.0.0",
+        "axios": "^1.6.0",
+        "dotenv": "^16.3.1",
+        "pixelmatch": "^7.1.0",
+        "react": "^18.0.0",
+        "react-dom": "^18.0.0",
+        "react-router-dom": "^6.8.0",
+        "recharts": "^2.8.0",
+        "sqlite3": "^5.1.7"
+      },
+      "devDependencies": {
+        "@testing-library/jest-dom": "^6.6.4",
+        "@testing-library/react": "^16.3.0",
+        "@testing-library/user-event": "^14.6.1",
+        "@types/bcrypt": "^5.0.2",
+        "@types/jsonwebtoken": "^9.0.10",
+        "@types/lodash": "^4.17.20",
+        "@types/pg": "^8.10.9",
+        "@types/react": "^18.2.37",
+        "@types/react-dom": "^18.2.15",
+        "@typescript-eslint/eslint-plugin": "^6.21.0",
+        "@typescript-eslint/parser": "^6.21.0",
+        "@vitejs/plugin-react": "^4.1.1",
+        "autoprefixer": "^10.4.16",
+        "concurrently": "^9.2.0",
+        "connect-history-api-fallback": "^2.0.0",
+        "cross-env": "^7.0.3",
+        "electron": "^32.2.6",
+        "electron-builder": "^25.1.8",
+        "eslint": "^8.57.0",
+        "eslint-plugin-react-hooks": "^4.6.0",
+        "eslint-plugin-react-refresh": "^0.4.5",
+        "jsdom": "^26.1.0",
+        "postcss": "^8.4.31",
+        "prettier": "^3.2.5",
+        "rimraf": "^5.0.5",
+        "tailwindcss": "^3.3.6",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.8.3",
+        "vite": "^4.5.0",
+        "vitest": "^1.6.0",
+        "wait-on": "^8.0.3"
+      },
+      "build": {
+        "appId": "com.testweb.app",
+        "productName": "Test Web App",
+        "directories": {
+          "output": "dist-electron",
+          "buildResources": "build"
+        },
+        "files": [
+          "dist/**/*",
+          "electron/**/*",
+          "node_modules/**/*",
+          "!node_modules/.cache",
+          "!node_modules/.vite"
+        ],
+        "includeSubNodeModules": true,
+        "buildDependenciesFromSource": false,
+        "mac": {
+          "target": [
+            {
+              "target": "dmg",
+              "arch": [
+                "x64",
+                "arm64"
+              ]
+            }
+          ],
+          "category": "public.app-category.developer-tools"
+        },
+        "win": {
+          "target": [
+            {
+              "target": "nsis",
+              "arch": [
+                "x64"
+              ]
+            },
+            {
+              "target": "portable",
+              "arch": [
+                "x64"
+              ]
+            }
+          ]
+        },
+        "linux": {
+          "target": [
+            {
+              "target": "AppImage",
+              "arch": [
+                "x64"
+              ]
+            },
+            {
+              "target": "deb",
+              "arch": [
+                "x64"
+              ]
+            }
+          ],
+          "category": "Development"
+        },
+        "nsis": {
+          "oneClick": false,
+          "allowToChangeInstallationDirectory": true,
+          "createDesktopShortcut": true,
+          "createStartMenuShortcut": true
+        },
+        "publish": {
+          "provider": "github",
+          "owner": "your-username",
+          "repo": "test-web-app"
+        }
+      },
+      "optionalDependencies": {
+        "@esbuild/win32-x64": "^0.25.5"
+      }
+    },
+    "frontend\\package.json": {
+      "name": "testweb-frontend",
+      "version": "1.0.0",
+      "description": "Test Web App Frontend",
+      "type": "module",
+      "private": true,
+      "scripts": {
+        "_comment_dev": "🚀 开发相关",
+        "dev": "cross-env VITE_DEV_PORT=5174 vite --host --config ../config/build/vite.config.ts",
+        "build": "cross-env NODE_ENV=production vite build --config ../config/build/vite.config.ts",
+        "build:check": "tsc --noEmit && vite build --config ../config/build/vite.config.ts",
+        "preview": "vite preview --config ../config/build/vite.config.ts",
+        "_comment_test": "🧪 测试相关",
+        "test": "vitest",
+        "test:run": "vitest run",
+        "test:coverage": "vitest run --coverage",
+        "_comment_maintenance": "🔧 代码维护",
+        "type-check": "tsc --noEmit",
+        "lint": "eslint . --ext .ts,.tsx",
+        "lint:fix": "eslint . --ext .ts,.tsx --fix",
+        "format": "prettier --write \"**/*.{ts,tsx,js,jsx,css,md}\""
+      },
+      "dependencies": {
+        "axios": "^1.11.0",
+        "chart.js": "^4.4.0",
+        "clsx": "^2.1.1",
+        "date-fns": "^4.1.0",
+        "jwt-decode": "^4.0.0",
+        "lucide-react": "^0.294.0",
+        "react": "^18.2.0",
+        "react-chartjs-2": "^5.2.0",
+        "react-dom": "^18.2.0",
+        "react-hot-toast": "^2.5.2",
+        "react-router-dom": "^6.20.1",
+        "recharts": "^2.15.3",
+        "socket.io-client": "^4.8.1",
+        "tailwind-merge": "^3.3.1"
+      },
+      "devDependencies": {
+        "@testing-library/jest-dom": "^6.6.4",
+        "@testing-library/react": "^16.3.0",
+        "@testing-library/user-event": "^14.6.1",
+        "@types/react": "^18.2.37",
+        "@types/react-dom": "^18.2.15",
+        "@typescript-eslint/eslint-plugin": "^6.21.0",
+        "@typescript-eslint/parser": "^6.21.0",
+        "@vitejs/plugin-react": "^4.1.1",
+        "autoprefixer": "^10.4.16",
+        "cross-env": "^7.0.3",
+        "eslint": "^8.57.0",
+        "eslint-plugin-react-hooks": "^4.6.0",
+        "eslint-plugin-react-refresh": "^0.4.5",
+        "jsdom": "^26.1.0",
+        "postcss": "^8.4.31",
+        "prettier": "^3.2.5",
+        "tailwindcss": "^3.3.6",
+        "typescript": "^5.8.3",
+        "vite": "^4.5.0",
+        "vitest": "^1.6.0"
+      },
+      "engines": {
+        "node": ">=18.0.0",
+        "npm": ">=9.0.0"
+      }
+    },
+    "backend\\package.json": {
+      "name": "testweb-api-server",
+      "version": "1.0.0",
+      "description": "Test Web App API Server",
+      "main": "app.js",
+      "scripts": {
+        "_comment_main": "🚀 主要启动命令",
+        "start": "cross-env NODE_ENV=production node src/app.js",
+        "dev": "cross-env NODE_ENV=development nodemon src/app.js",
+        "_comment_test": "🧪 测试相关",
+        "test": "jest",
+        "test:watch": "jest --watch",
+        "test:coverage": "jest --coverage",
+        "_comment_maintenance": "🔧 代码维护",
+        "lint": "eslint . --ext .js",
+        "lint:fix": "eslint . --ext .js --fix",
+        "_comment_database": "🗄️ 数据库操作",
+        "db:init": "node scripts/initDatabase.js",
+        "db:migrate": "node scripts/migrate.js migrate",
+        "db:check": "node scripts/migrate.js check",
+        "db:backup": "node scripts/migrate.js backup",
+        "_comment_security": "🔒 安全相关",
+        "security:audit": "npm audit",
+        "security:fix": "npm audit fix",
+        "_comment_health": "🏥 健康检查",
+        "health:check": "curl http:/localhost:3001/health",
+        "_comment_cache": "💾 缓存管理",
+        "cache:stats": "curl http:/localhost:3001/api/test/cache/stats",
+        "cache:flush": "curl -X POST http:/localhost:3001/api/test/cache/flush",
+        "_comment_redis": "🔴 Redis操作",
+        "redis:check": "node ../scripts/backend/check-redis.js",
+        "_comment_docker": "🐳 Docker操作",
+        "docker:build": "docker build -f ../Dockerfile.api -t testweb-api .",
+        "docker:run": "docker run -p 3001:3001 testweb-api"
+      },
+      "dependencies": {
+        "@socket.io/redis-adapter": "^8.3.0",
+        "abort-controller": "^3.0.0",
+        "archiver": "^7.0.1",
+        "axios": "^1.11.0",
+        "bcrypt": "^5.1.1",
+        "bcryptjs": "^2.4.3",
+        "bull": "^4.12.2",
+        "cheerio": "^1.1.0",
+        "compression": "^1.7.4",
+        "cors": "^2.8.5",
+        "cron": "^3.1.6",
+        "crypto": "^1.0.1",
+        "csv-parser": "^3.2.0",
+        "csv-writer": "^1.6.0",
+        "date-fns": "^4.1.0",
+        "dotenv": "^16.3.1",
+        "exceljs": "^4.4.0",
+        "express": "^4.21.2",
+        "express-openapi-validator": "^5.3.7",
+        "express-rate-limit": "^7.4.1",
+        "express-validator": "^7.2.0",
+        "fast-csv": "^5.0.2",
+        "helmet": "^8.0.0",
+        "http-proxy-agent": "^7.0.2",
+        "https-proxy-agent": "^7.0.5",
+        "ioredis": "^5.4.1",
+        "joi": "^17.13.3",
+        "jsonwebtoken": "^9.0.2",
+        "lighthouse": "^12.2.1",
+        "lodash": "^4.17.21",
+        "maxmind": "^4.3.8",
+        "mongodb": "^6.17.0",
+        "morgan": "^1.10.0",
+        "multer": "^1.4.5-lts.1",
+        "mysql2": "^3.14.1",
+        "node-cron": "^3.0.3",
+        "node-fetch": "^2.7.0",
+        "nodemailer": "^6.9.15",
+        "pdf-lib": "^1.17.1",
+        "pdfkit": "^0.17.1",
+        "pg": "^8.16.2",
+        "pg-hstore": "^2.3.4",
+        "playwright": "^1.53.1",
+        "prom-client": "^13.2.0",
+        "puppeteer": "^24.10.2",
+        "redis": "^5.5.6",
+        "sequelize": "^6.37.5",
+        "sharp": "^0.33.5",
+        "socket.io": "^4.8.1",
+        "swagger-jsdoc": "^6.2.8",
+        "swagger-ui-express": "^5.0.1",
+        "tar": "^7.4.3",
+        "uuid": "^9.0.1",
+        "winston": "^3.17.0",
+        "winston-daily-rotate-file": "^5.0.0",
+        "ws": "^8.18.0",
+        "xlsx": "^0.18.5"
+      },
+      "devDependencies": {
+        "@types/node": "^20.10.4",
+        "cross-env": "^7.0.3",
+        "eslint": "^8.57.0",
+        "eslint-config-standard": "^17.1.0",
+        "eslint-plugin-import": "^2.29.0",
+        "eslint-plugin-node": "^11.1.0",
+        "eslint-plugin-promise": "^6.1.1",
+        "jest": "^29.7.0",
+        "nodemon": "^3.0.2",
+        "sequelize-cli": "^6.6.2",
+        "supertest": "^6.3.3"
+      },
+      "engines": {
+        "node": ">=18.0.0",
+        "npm": ">=9.0.0"
+      },
+      "keywords": [
+        "test",
+        "web",
+        "api",
+        "performance",
+        "security",
+        "seo",
+        "monitoring",
+        "postgresql",
+        "express",
+        "javascript"
+      ],
+      "author": "Test Web App Team",
+      "license": "MIT",
+      "repository": {
+        "type": "git",
+        "url": "https:/github.com/your-org/test-web-app.git"
+      },
+      "bugs": {
+        "url": "https:/github.com/your-org/test-web-app/issues"
+      },
+      "homepage": "https:/github.com/your-org/test-web-app#readme",
+      "jest": {
+        "testEnvironment": "node",
+        "collectCoverageFrom": [
+          "**/*.js",
+          "!**/node_modules/**",
+          "!**/coverage/**",
+          "!**/dist/**"
+        ],
+        "coverageThreshold": {
+          "global": {
+            "branches": 80,
+            "functions": 80,
+            "lines": 80,
+            "statements": 80
+          }
+        }
+      },
+      "eslintConfig": {
+        "extends": [
+          "standard"
+        ],
+        "env": {
+          "node": true,
+          "jest": true
+        },
+        "rules": {
+          "no-console": "warn",
+          "no-unused-vars": "error"
+        }
+      },
+      "nodemonConfig": {
+        "watch": [
+          "."
+        ],
+        "ext": "js,json",
+        "ignore": [
+          "node_modules/",
+          "dist/",
+          "coverage/",
+          "logs/"
+        ]
+      }
+    },
+    "frontend\\tsconfig.json": {
+      "extends": "../config/build/tsconfig.json",
+      "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+          "@/*": [
+            "*"
+          ],
+          "@/components/*": [
+            "components/*"
+          ],
+          "@/services/*": [
+            "services/*"
+          ],
+          "@/utils/*": [
+            "utils/*"
+          ],
+          "@/types/*": [
+            "types/*"
+          ],
+          "@/hooks/*": [
+            "hooks/*"
+          ],
+          "@/pages/*": [
+            "pages/*"
+          ],
+          "@/contexts/*": [
+            "contexts/*"
+          ]
+        }
+      },
+      "include": [
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.d.ts"
+      ],
+      "exclude": [
+        "node_modules",
+        "dist",
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "__tests__"
+      ]
+    }
+  },
+  "issues": [
+    {
+      "category": "package_json",
+      "type": "version_mismatch",
+      "file": "multiple_files",
+      "message": "依赖 @types/node 在不同文件中版本不一致: ^20.0.0, ^20.10.4",
+      "severity": "high"
+    },
+    {
+      "category": "package_json",
+      "type": "version_mismatch",
+      "file": "multiple_files",
+      "message": "依赖 axios 在不同文件中版本不一致: ^1.6.0, ^1.11.0",
+      "severity": "high"
+    },
+    {
+      "category": "package_json",
+      "type": "version_mismatch",
+      "file": "multiple_files",
+      "message": "依赖 react 在不同文件中版本不一致: ^18.0.0, ^18.2.0",
+      "severity": "high"
+    },
+    {
+      "category": "package_json",
+      "type": "version_mismatch",
+      "file": "multiple_files",
+      "message": "依赖 react-dom 在不同文件中版本不一致: ^18.0.0, ^18.2.0",
+      "severity": "high"
+    },
+    {
+      "category": "package_json",
+      "type": "version_mismatch",
+      "file": "multiple_files",
+      "message": "依赖 react-router-dom 在不同文件中版本不一致: ^6.8.0, ^6.20.1",
+      "severity": "high"
+    },
+    {
+      "category": "package_json",
+      "type": "version_mismatch",
+      "file": "multiple_files",
+      "message": "依赖 recharts 在不同文件中版本不一致: ^2.8.0, ^2.15.3",
+      "severity": "high"
+    },
+    {
+      "category": "typescript",
+      "type": "missing_compiler_option",
+      "file": "frontend\\tsconfig.json",
+      "message": "缺少编译选项: target",
+      "severity": "medium"
+    },
+    {
+      "category": "typescript",
+      "type": "missing_compiler_option",
+      "file": "frontend\\tsconfig.json",
+      "message": "缺少编译选项: module",
+      "severity": "medium"
+    },
+    {
+      "category": "typescript",
+      "type": "missing_compiler_option",
+      "file": "frontend\\tsconfig.json",
+      "message": "缺少编译选项: strict",
+      "severity": "medium"
+    },
+    {
+      "category": "environment",
+      "type": "missing_example_variable",
+      "file": ".env.example",
+      "message": "示例环境文件缺少必要变量: NODE_ENV",
+      "severity": "medium"
+    },
+    {
+      "category": "environment",
+      "type": "missing_example_variable",
+      "file": ".env.example",
+      "message": "示例环境文件缺少必要变量: PORT",
+      "severity": "medium"
+    },
+    {
+      "category": "environment",
+      "type": "missing_example_variable",
+      "file": ".env.example",
+      "message": "示例环境文件缺少必要变量: DATABASE_URL",
+      "severity": "medium"
+    },
+    {
+      "category": "package_json",
+      "type": "missing_script",
+      "file": "frontend\\package.json",
+      "message": "缺少常见脚本: start",
+      "severity": "low"
+    },
+    {
+      "category": "package_json",
+      "type": "missing_script",
+      "file": "backend\\package.json",
+      "message": "缺少常见脚本: build",
+      "severity": "low"
+    }
+  ]
+}
