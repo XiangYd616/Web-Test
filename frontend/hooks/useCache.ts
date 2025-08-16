@@ -4,9 +4,9 @@
  * 版本: v2.0.0 - 整合新的缓存管理系统
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import type { CacheManager, CacheStats } from '../services/cacheStrategy';
-import { CacheFactory, defaultLocalStorageCache, defaultMemoryCache } from '../services/cacheStrategy';
+import {useCallback, useEffect, useRef, useState} from 'react';
+// // // // // import type { CacheManager, CacheStats } from '../services/cacheStrategy'; // 已删除 // 已删除 // 服务已删除 // 服务已删除 // 文件已删除
+// // // // // import {CacheFactory, defaultLocalStorageCache, defaultMemoryCache} from '../services/cacheStrategy'; // 已删除 // 已删除 // 服务已删除 // 服务已删除 // 文件已删除
 
 // ==================== 类型定义 ====================
 
