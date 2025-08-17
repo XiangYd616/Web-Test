@@ -50,7 +50,7 @@ export interface TestHistoryStats     {
 class TestHistoryService {
   private history: TestHistoryRecord[] = [];
   private maxHistorySize = 1000;
-  private storageKey = 'test-history';
+  private storageKey = 'test-history',
   constructor() {
     this.loadHistory();
   }
@@ -58,7 +58,7 @@ class TestHistoryService {
   /**
    * 添加测试记录
    */
-  addRecord(record: Omit<TestHistoryRecord, 'id'>): TestHistoryRecord {'
+  addRecord(record: Omit<TestHistoryRecord, 'id'>): TestHistoryRecord {
     const fullRecord: TestHistoryRecord  = {
       ...record,
       id: this.generateId()
@@ -211,8 +211,8 @@ class TestHistoryService {
    */
   getStats(filter: TestHistoryFilter = {}): TestHistoryStats {
     const records = this.getFilteredRecords(filter);
-    const completedRecords = records.filter(r => r.status === 'completed');'
-    const failedRecords = records.filter(r => r.status === 'failed');'
+    const completedRecords = records.filter(r => r.status === 'completed);
+    const failedRecords = records.filter(r => r.status === 'failed);
     // 按类型统计
     const testsByType: Record<string, number>  = {};
     records.forEach(record => {
@@ -278,41 +278,40 @@ class TestHistoryService {
   /**
    * 导出历史记录
    */
-  exportHistory(format: 'json' | 'csv' = 'json'): string {'
-    if (format === 'json') {'
+  exportHistory(format: 'json' | 'csv' = 'json'): string {
+    if (format === 'json') {
         return JSON.stringify(this.history, null, 2);
       } else {
       // CSV格式
-      const headers = ['ID', 'Type', 'URL', 'Status', 'Score', 'Start Time', 'Duration'];'
-      const rows = this.history.map(record => [
-        record.id,
+      const headers = ['ID', 'Type', 'URL', 'Status', 'Score', 'Start Time', Duration];
+      const rows = this.history.map(record => [record.id,
         record.testType,
         record.url,
         record.status,
-        record.score || '','
+        record.score || ,
         record.startTime.toISOString(),
-        record.duration || '';
+        record.duration || ;
       ]);
 
-      return [headers, ...rows].map(row => row.join(',')).join('\n');'
+      return [headers, ...rows].map(row => row.join(',')').join('\n);
     }
   }
 
   /**
    * 导入历史记录
    */
-  importHistory(data: string, format: 'json' | 'csv' = 'json'): number {'
+  importHistory(data: string, format: 'json' | 'csv' = 'json'): number {
     try {
       let importedRecords: TestHistoryRecord[] = [];
 
-      if (format === 'json') {'
+      if (format === 'json') {
         importedRecords = JSON.parse(data);
       } else {
         // 简化的CSV解析
-        const lines = data.split('\n');'
-        const headers = lines[0].split(',');'
+        const lines = data.split('\n);
+        const headers = lines[0].split(',);
         importedRecords = lines.slice(1).map(line => {
-          const values = line.split(',');'
+          const values = line.split(',);
           return {
             id: values[0],
             testType: values[1] as any,
@@ -339,7 +338,7 @@ class TestHistoryService {
       this.saveHistory();
       return newRecords.length;
     } catch (error) {
-      console.error('Failed to import history: ', error);'
+      console.error('Failed to import history: , error);
       return 0;
     }
   }
@@ -347,10 +346,10 @@ class TestHistoryService {
   /**
    * 生成趋势数据
    */
-  private generateTrendsData(records: TestHistoryRecord[]): TestHistoryStats['trendsData'] {'
+  private generateTrendsData(records: TestHistoryRecord[]): TestHistoryStats['trendsData] {
     const dailyData: Record<string, { count: number; totalScore: number; scoreCount: number }>  = {};
     records.forEach(record => {
-      const date = new Date(record.startTime).toISOString().split('T')[0];'
+      const date = new Date(record.startTime).toISOString().split('T)[0];
       if (!dailyData[date]) {
         dailyData[date] = { count: 0, totalScore: 0, scoreCount: 0 };
       }
@@ -387,7 +386,7 @@ class TestHistoryService {
         }));
       }
     } catch (error) {
-      console.warn('Failed to load test history: ', error);'
+      console.warn('Failed to load test history: , error);
       this.history = [];
     }
   }
@@ -399,7 +398,7 @@ class TestHistoryService {
     try {
       localStorage.setItem(this.storageKey, JSON.stringify(this.history));
     } catch (error) {
-      console.warn('Failed to save test history:', error);'
+      console.warn('Failed to save test history:, error);
     }
   }
 
@@ -407,7 +406,7 @@ class TestHistoryService {
    * 生成ID
    */
   private generateId(): string {
-    return `test_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;`
+    return `test_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 }
 
@@ -416,3 +415,4 @@ const testHistoryService = new TestHistoryService();
 
 export default testHistoryService;
 export { TestHistoryService };
+`

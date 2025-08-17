@@ -1,4 +1,4 @@
-import { handleAsyncError    } from '../utils/errorHandler';/**'
+import { handleAsyncError    } from '../utils/errorHandler';/**
  * SEO测试服务
  */
 
@@ -13,7 +13,7 @@ class SEOTestService {
     try {
   await new Promise(resolve => setTimeout(resolve, 1000));
 } catch (error) {
-  console.error('Await error:', error);'
+  console.error('Await error:, error);
   throw error;
 }
 

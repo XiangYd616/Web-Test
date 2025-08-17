@@ -1,26 +1,26 @@
 
 // 取消原因枚举
 export enum CancelReason {
-  USER_CANCELLED = 'user_cancelled','
-  TIMEOUT = 'timeout','
-  SYSTEM_ERROR = 'system_error','
-  RESOURCE_LIMIT = 'resource_limit','
-  NETWORK_ERROR = 'network_error','
-  INVALID_CONFIG = 'invalid_config','
-  EXTERNAL_INTERRUPT = 'external_interrupt';
+  USER_CANCELLED = 'user_cancelled',
+  TIMEOUT = 'timeout',
+  SYSTEM_ERROR = 'system_error',
+  RESOURCE_LIMIT = 'resource_limit',
+  NETWORK_ERROR = 'network_error',
+  INVALID_CONFIG = 'invalid_config',
+  EXTERNAL_INTERRUPT = 'external_interrupt',
 }
 
 // 失败原因枚举
 export enum FailureReason {
-  NETWORK_ERROR = 'network_error','
-  TIMEOUT = 'timeout','
-  SERVER_ERROR = 'server_error','
-  INVALID_RESPONSE = 'invalid_response','
-  RESOURCE_EXHAUSTED = 'resource_exhausted','
-  CONFIGURATION_ERROR = 'configuration_error','
-  AUTHENTICATION_ERROR = 'authentication_error','
-  RATE_LIMIT_EXCEEDED = 'rate_limit_exceeded','
-  UNKNOWN_ERROR = 'unknown_error';
+  NETWORK_ERROR = 'network_error',
+  TIMEOUT = 'timeout',
+  SERVER_ERROR = 'server_error',
+  INVALID_RESPONSE = 'invalid_response',
+  RESOURCE_EXHAUSTED = 'resource_exhausted',
+  CONFIGURATION_ERROR = 'configuration_error',
+  AUTHENTICATION_ERROR = 'authentication_error',
+  RATE_LIMIT_EXCEEDED = 'rate_limit_exceeded',
+  UNKNOWN_ERROR = 'unknown_error',
 }
 
 export interface StressTestRecord     {
@@ -174,7 +174,7 @@ export interface TestRecordResponse     {
 }
 
 class StressTestRecordService {
-  private baseUrl = '/api/test';
+  private baseUrl = '/api/test',
   private maxRetries = 3;
   private retryDelay = 1000; // 1秒
 
@@ -190,9 +190,9 @@ class StressTestRecordService {
         ...options,
         signal: controller.signal,
         headers: {
-          'Content-Type': 'application/json','
-          ...(localStorage.getItem('auth_token') ? {'
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`'`
+          'Content-Type': 'application/json',
+          ...(localStorage.getItem('auth_token') ? {
+            'Authorization': `Bearer ${localStorage.getItem(auth_token)}
           } : {}),
           ...options.headers
         }
@@ -200,14 +200,14 @@ class StressTestRecordService {
 
       clearTimeout(timeoutId);
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);`
+      if (!response.ok) {`
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
       return response;
     } catch (error: any) {
-      if (retries > 0 && (error.name === "AbortError' || error.message.includes('fetch'))) {'`
-        console.warn(`请求失败，${this.retryDelay}ms后重试... (剩余重试次数: ${retries})`);`
+      if (retries > 0 && (error.name === 'AbortError' || error.message.includes('fetch)')) {'`
+        console.warn(`请求失败，${this.retryDelay}ms后重试... (剩余重试次数: ${retries})`);
         await new Promise(resolve => setTimeout(resolve, this.retryDelay));
         return this.fetchWithRetry(url, options, retries - 1);
       }
@@ -221,33 +221,33 @@ class StressTestRecordService {
   async createTestRecord(testData: Partial<StressTestRecord>): Promise<StressTestRecord> {
     try {
       // 准备后端API期望的数据格式
-      const apiData = {
-        testName: testData.testName || `压力测试 - ${this.getHostnameFromUrl(testData.url!) || "未知'}`,'`
-        testType: "stress','`
+      const apiData = {`
+        testName: testData.testName || `压力测试 - ${this.getHostnameFromUrl(testData.url!) || "未知"}`,`
+        testType: "stress",
         url: testData.url!,
-        status: testData.status || 'pending','
+        status: testData.status || 'pending',
         config: testData.config || {},
-        environment: testData.environment || 'production','
-        tags: testData.tags || [],
-        description: `压力测试 - ${this.getHostnameFromUrl(testData.url!) || '未知'}`'`
+        environment: testData.environment || 'production,
+        tags: testData.tags || [],`
+        description: `压力测试 - ${this.getHostnameFromUrl(testData.url!) || 未知}
       };
 
-      // 保存到后端
-      const response = await fetch(`${this.baseUrl}/history`, {`
-        method: "POST','`
+      // 保存到后端`
+      const response = await fetch(`${this.baseUrl}/history`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json','
-          ...(localStorage.getItem('auth_token') ? {'
-            "Authorization": `Bearer ${localStorage.getItem('auth_token')}`'`
+          'Content-Type': 'application/json',
+          ...(localStorage.getItem('auth_token') ? {`
+            "Authorization": `Bearer ${localStorage.getItem("auth_token")"}
           } : {})
         },
         body: JSON.stringify(apiData)
       });
 
       const data = await response.json();
-      if (!data.success) {
-        throw new Error(data.message || "创建测试记录失败');'`
-      }
+      if (!data.success) {'
+        throw new Error(data.message || "创建测试记录失败");
+      "}
 
       // 将后端返回的数据转换为前端期望的格式
       const backendRecord = data.data;
@@ -266,7 +266,7 @@ class StressTestRecordService {
       };
       return record;
     } catch (error) {
-      console.error('创建测试记录失败:', error);'
+      console.error('创建测试记录失败:, error);
       throw error;
     }
   }
@@ -277,8 +277,8 @@ class StressTestRecordService {
   async updateTestRecord(id: string, updates: Partial<StressTestRecord>): Promise<StressTestRecord> {
     try {
       // 数据验证
-      if (!id || typeof id !== 'string') {'
-        throw new Error('无效的测试记录ID');'
+      if (!id || typeof id !== 'string') {
+        throw new Error('无效的测试记录ID');
       }
 
       const updateData = {
@@ -286,31 +286,31 @@ class StressTestRecordService {
         updatedAt: new Date().toISOString()
       };
 
-      // 使用带重试机制的fetch
-      const response = await this.fetchWithRetry(`${this.baseUrl}/history/${id}`, {`
-        method: "PUT','`
+      // 使用带重试机制的fetch`
+      const response = await this.fetchWithRetry(`${this.baseUrl}/history/${id}`, {
+        method: "PUT",
         body: JSON.stringify(updateData)
-      });
+      "});
 
       const data = await response.json();
       if (!data.success) {
-        throw new Error(data.message || '更新测试记录失败');'
+        throw new Error(data.message || '更新测试记录失败');
       }
 
       return data.data;
     } catch (error: any) {
-      console.error("更新测试记录失败:', error);'
-      throw new Error(`更新测试记录失败: ${error.message}`);`
+      console.error("更新测试记录失败:", error");`
+      throw new Error(`更新测试记录失败: ${error.message"}`);
     }
   }
 
   /**
    * 完成测试记录
    */
-  async completeTestRecord(id: string, results: StressTestRecord["results'], overallScore?: number): Promise<StressTestRecord> {'`
+  async completeTestRecord(id: string, results: StressTestRecord["results"], overallScore?: number): Promise<StressTestRecord> {
     try {
       const updates: Partial<StressTestRecord>  = {
-        status: 'completed','
+        status: 'completed',
         endTime: new Date().toISOString(),
         completedAt: new Date().toISOString(),
         results,
@@ -319,7 +319,7 @@ class StressTestRecordService {
       };
       return await this.updateTestRecord(id, updates);
     } catch (error) {
-      console.error('完成测试记录失败:', error);'
+      console.error('完成测试记录失败:, error);
       throw error;
     }
   }
@@ -341,12 +341,12 @@ class StressTestRecordService {
         try {
           currentRecord = await this.getTestRecord(id);
         } catch (err) {
-          console.warn('获取当前记录失败，继续失败操作:', err);'
+          console.warn('获取当前记录失败，继续失败操作:', err);
         }
       }
 
       const updates: Partial<StressTestRecord>  = {
-        status: 'failed','
+        status: 'failed',
         endTime: new Date().toISOString(),
         error,
         failureReason,
@@ -359,13 +359,13 @@ class StressTestRecordService {
         updates.actualDuration = Math.round((endTime - startTime) / 1000);
       }
 
-      // 调用后端失败API
-      const response = await fetch(`${this.baseUrl}/history/${id}/fail`, {`
-        method: "POST','`
+      // 调用后端失败API`
+      const response = await fetch(`${this.baseUrl}/history/${id}/fail`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json','
-          ...(localStorage.getItem('auth_token') ? {'
-            "Authorization": `Bearer ${localStorage.getItem('auth_token')}`'`
+          'Content-Type': 'application/json',
+          ...(localStorage.getItem('auth_token') ? {`
+            "Authorization": `Bearer ${localStorage.getItem("auth_token")"}
           } : {})
         },
         body: JSON.stringify({
@@ -384,10 +384,10 @@ class StressTestRecordService {
       }
 
       return data.data;
-    } catch (error) {
-      console.error("标记测试失败失败:', error);'`
+    } catch (error) {'
+      console.error("标记测试失败失败:", error");
       throw error;
-    }
+    "}
   }
 
   /**
@@ -406,12 +406,12 @@ class StressTestRecordService {
         try {
           currentRecord = await this.getTestRecord(id);
         } catch (error) {
-          console.warn('获取当前记录失败，继续取消操作:', error);'
+          console.warn('获取当前记录失败，继续取消操作:, error);
         }
       }
 
       const updates: Partial<StressTestRecord>  = {
-        status: 'cancelled','
+        status: 'cancelled',
         endTime: new Date().toISOString(),
         error: reason || this.getCancelReasonMessage(cancelReason),
         cancelReason,
@@ -425,9 +425,9 @@ class StressTestRecordService {
       }
 
       // 如果是本地记录，直接更新本地存储
-      if (id.startsWith('local_')) {'
+      if (id.startsWith('local_')') {
         if (!currentRecord) {
-          throw new Error('本地记录不存在');'
+          throw new Error('本地记录不存在');
         }
 
         const updatedRecord: StressTestRecord  = {
@@ -445,13 +445,13 @@ class StressTestRecordService {
         return updatedRecord;
       }
 
-      // 服务器记录，调用后端取消API
-      const response = await fetch(`${this.baseUrl}/history/${id}/cancel`, {`
-        method: "POST','`
+      // 服务器记录，调用后端取消API`
+      const response = await fetch(`${this.baseUrl}/history/${id}/cancel`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json','
-          ...(localStorage.getItem('auth_token') ? {'
-            "Authorization": `Bearer ${localStorage.getItem('auth_token')}`'`
+          'Content-Type': 'application/json',
+          ...(localStorage.getItem('auth_token') ? {`
+            "Authorization": `Bearer ${localStorage.getItem("auth_token")"}
           } : {})
         },
         body: JSON.stringify({
@@ -462,13 +462,13 @@ class StressTestRecordService {
       });
 
       const data = await response.json();
-      if (!data.success) {
-        throw new Error(data.message || "取消测试记录失败');'`
-      }
+      if (!data.success) {'
+        throw new Error(data.message || "取消测试记录失败");
+      "}
 
       return data.data;
     } catch (error) {
-      console.error('取消测试记录失败:', error);'
+      console.error('取消测试记录失败:, error);
       throw error;
     }
   }
@@ -479,13 +479,13 @@ class StressTestRecordService {
   async setTestPending(id: string, reason?: string): Promise<StressTestRecord> {
     try {
       const updates: Partial<StressTestRecord>  = {
-        status: 'idle', // 🔧 简化：使用idle作为等待状态'
+        status: 'idle', // 🔧 简化：使用idle作为等待状态
         updatedAt: new Date().toISOString(),
         waitingReason: reason
       };
       return await this.updateTestRecord(id, updates);
     } catch (error) {
-      console.error('设置测试准备状态失败:', error);'
+      console.error('设置测试准备状态失败:, error);
       throw error;
     }
   }
@@ -496,14 +496,14 @@ class StressTestRecordService {
   async startFromPending(id: string): Promise<StressTestRecord> {
     try {
       const updates: Partial<StressTestRecord>  = {
-        status: 'running','
+        status: 'running',
         startTime: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         waitingReason: undefined // 清除等待原因
       };
       return await this.updateTestRecord(id, updates);
     } catch (error) {
-      console.error('从准备状态开始测试失败:', error);'
+      console.error('从准备状态开始测试失败:, error);
       throw error;
     }
   }
@@ -513,7 +513,7 @@ class StressTestRecordService {
    */
   async timeoutTestRecord(
     id: string,
-    timeoutReason: string = '测试执行超时','
+    timeoutReason: string = '测试执行超时',
     preserveData: boolean = true
   ): Promise<StressTestRecord> {
     try {
@@ -523,14 +523,14 @@ class StressTestRecordService {
         try {
           currentRecord = await this.getTestRecord(id);
         } catch (err) {
-          console.warn('获取当前记录失败，继续超时操作:', err);'
+          console.warn('获取当前记录失败，继续超时操作:', err);
         }
       }
 
       const updates: Partial<StressTestRecord>  = {
-        status: 'failed','
-        endTime: new Date().toISOString(),
-        error: `测试超时失败: ${timeoutReason}`,`
+        status: 'failed',
+        endTime: new Date().toISOString(),`
+        error: `测试超时失败: ${timeoutReason}`,
         failureReason: FailureReason.TIMEOUT,
         updatedAt: new Date().toISOString()
       };
@@ -543,9 +543,9 @@ class StressTestRecordService {
 
       return await this.updateTestRecord(id, updates);
     } catch (error) {
-      console.error("标记测试超时失败:', error);'`
+      console.error("标记测试超时失败:", error");
       throw error;
-    }
+    "}
   }
 
   /**
@@ -558,17 +558,17 @@ class StressTestRecordService {
   ): Promise<StressTestRecord> {
     try {
       const updates: Partial<StressTestRecord>  = {
-        status: 'idle', // 🔧 简化：使用idle作为中断状态'
+        status: 'idle', // 🔧 简化：使用idle作为中断状态
         interruptedAt: new Date().toISOString(),
-        interruptReason,
-        waitingReason: `测试已中断: ${interruptReason}`,`
+        interruptReason,`
+        waitingReason: `测试已中断: ${interruptReason}`,
         updatedAt: new Date().toISOString()
       };
       return await this.updateTestRecord(id, updates);
     } catch (error) {
-      console.error("中断测试记录失败:', error);'`
+      console.error("中断测试记录失败:", error");
       throw error;
-    }
+    "}
   }
 
   /**
@@ -577,14 +577,14 @@ class StressTestRecordService {
   async resumeTestRecord(id: string): Promise<StressTestRecord> {
     try {
       const updates: Partial<StressTestRecord>  = {
-        status: 'running','
+        status: 'running',
         resumedAt: new Date().toISOString(),
         waitingReason: undefined,
         updatedAt: new Date().toISOString()
       };
       return await this.updateTestRecord(id, updates);
     } catch (error) {
-      console.error('恢复测试记录失败:', error);'
+      console.error('恢复测试记录失败:, error);
       throw error;
     }
   }
@@ -601,23 +601,23 @@ class StressTestRecordService {
           params.append(key, value.toString());
         }
       });
-
-      const response = await fetch(`${this.baseUrl}/history?type=stress&${params.toString()}`, {`
+`
+      const response = await fetch(`${this.baseUrl}/history?type=stress&${params.toString()}`, {
         headers: {
-          ...(localStorage.getItem("auth_token') ? {'`
-            "Authorization": `Bearer ${localStorage.getItem('auth_token')}`'`
+          ...(localStorage.getItem("auth_token") ? {`
+            "Authorization": `Bearer ${localStorage.getItem("auth_token")"}
           } : {})
         }
       });
 
       const data = await response.json();
-      if (!data.success) {
-        throw new Error(data.message || "查询测试记录失败');'`
-      }
+      if (!data.success) {'
+        throw new Error(data.message || "查询测试记录失败");
+      "}
 
       return data;
     } catch (error) {
-      console.error('查询测试记录失败:', error);'
+      console.error('查询测试记录失败:, error);
       throw error;
     }
   }
@@ -628,32 +628,32 @@ class StressTestRecordService {
   async getTestRecord(id: string): Promise<StressTestRecord> {
     try {
       // 如果是本地记录，从本地存储获取
-      if (id.startsWith('local_')) {'
+      if (id.startsWith('local_')') {
         const localRecords = this.getLocalRecords();
         const record = localRecords.find(r => r.id === id);
         if (!record) {
-          throw new Error('本地记录不存在');'
+          throw new Error('本地记录不存在');
         }
         return record;
       }
 
-      // 服务器记录，调用API
-      const response = await fetch(`${this.baseUrl}/history/${id}`, {`
+      // 服务器记录，调用API`
+      const response = await fetch(`${this.baseUrl}/history/${id}`, {
         headers: {
-          ...(localStorage.getItem("auth_token') ? {'`
-            "Authorization": `Bearer ${localStorage.getItem('auth_token')}`'`
+          ...(localStorage.getItem("auth_token") ? {`
+            "Authorization": `Bearer ${localStorage.getItem("auth_token")"}
           } : {})
         }
       });
 
       const data = await response.json();
-      if (!data.success) {
-        throw new Error(data.message || "获取测试记录失败');'`
-      }
+      if (!data.success) {'
+        throw new Error(data.message || "获取测试记录失败");
+      "}
 
       return data.data;
     } catch (error) {
-      console.error('获取测试记录失败:', error);'
+      console.error('获取测试记录失败:, error);
       throw error;
     }
   }
@@ -662,38 +662,38 @@ class StressTestRecordService {
    * 删除测试记录
    */
   async deleteTestRecord(id: string): Promise<boolean> {
-    try {
-      const response = await fetch(`${this.baseUrl}/history/${id}`, {`
-        method: "DELETE','`
+    try {`
+      const response = await fetch(`${this.baseUrl}/history/${id}`, {
+        method: "DELETE",
         headers: {
-          ...(localStorage.getItem('auth_token') ? {'
-            "Authorization": `Bearer ${localStorage.getItem('auth_token')}`'`
+          ...(localStorage.getItem('auth_token') ? {`
+            "Authorization": `Bearer ${localStorage.getItem("auth_token")"}
           } : {})
         }
       });
 
       const data = await response.json();
       return data.success;
-    } catch (error) {
-      console.error("删除测试记录失败:', error);'`
+    } catch (error) {'
+      console.error("删除测试记录失败:", error");
       return false;
-    }
+    "}
   }
 
   /**
    * 生成唯一ID
    */
-  private generateId(): string {
-    return `stress_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;`
+  private generateId(): string {`
+    return `stress_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   /**
    * 安全地从URL获取主机名
    */
   private getHostnameFromUrl(url: string): string {
-    if (!url || url.trim() === "') {'`
-      return '';
-    }
+    if (!url || url.trim() === ") {'
+      return ;
+    "}
     try {
       return new URL(url).hostname;
     } catch {
@@ -704,13 +704,13 @@ class StressTestRecordService {
   /**
    * 计算性能等级
    */
-  private calculateGrade(score?: number): 'A' | 'B' | 'C' | 'D' | 'F' {'
-    if (!score) return 'F';
-    if (score >= 90) return 'A';
-    if (score >= 80) return 'B';
-    if (score >= 70) return 'C';
-    if (score >= 60) return 'D';
-    return 'F';
+  private calculateGrade(score?: number): 'A' | 'B' | 'C' | 'D' | 'F' {
+    if (!score) return 'F;
+    if (score >= 90) return 'A;
+    if (score >= 80) return 'B;
+    if (score >= 70) return 'C;
+    if (score >= 60) return 'D;
+    return 'F;
   }
 
   /**
@@ -718,15 +718,15 @@ class StressTestRecordService {
    */
   private getCancelReasonMessage(reason: CancelReason): string {
     const messages = {
-      [CancelReason.USER_CANCELLED]: '用户手动取消测试','
-      [CancelReason.TIMEOUT]: '测试执行超时','
-      [CancelReason.SYSTEM_ERROR]: '系统错误导致测试取消','
-      [CancelReason.RESOURCE_LIMIT]: '资源限制导致测试取消','
-      [CancelReason.NETWORK_ERROR]: '网络错误导致测试取消','
-      [CancelReason.INVALID_CONFIG]: '配置无效导致测试取消','
-      [CancelReason.EXTERNAL_INTERRUPT]: '外部中断导致测试取消';
+      [CancelReason.USER_CANCELLED]: '用户手动取消测试',
+      [CancelReason.TIMEOUT]: '测试执行超时',
+      [CancelReason.SYSTEM_ERROR]: '系统错误导致测试取消',
+      [CancelReason.RESOURCE_LIMIT]: '资源限制导致测试取消',
+      [CancelReason.NETWORK_ERROR]: '网络错误导致测试取消',
+      [CancelReason.INVALID_CONFIG]: '配置无效导致测试取消',
+      [CancelReason.EXTERNAL_INTERRUPT]: '外部中断导致测试取消;
     };
-    return messages[reason] || '测试已取消';
+    return messages[reason] || '测试已取消;
   }
 
   /**
@@ -734,33 +734,33 @@ class StressTestRecordService {
    */
   private getFailureReasonMessage(reason: FailureReason): string {
     const messages = {
-      [FailureReason.NETWORK_ERROR]: '网络连接错误','
-      [FailureReason.TIMEOUT]: '请求超时','
-      [FailureReason.SERVER_ERROR]: '服务器错误','
-      [FailureReason.INVALID_RESPONSE]: '无效响应','
-      [FailureReason.RESOURCE_EXHAUSTED]: '资源耗尽','
-      [FailureReason.CONFIGURATION_ERROR]: '配置错误','
-      [FailureReason.AUTHENTICATION_ERROR]: '认证错误','
-      [FailureReason.RATE_LIMIT_EXCEEDED]: '请求频率超限','
-      [FailureReason.UNKNOWN_ERROR]: '未知错误';
+      [FailureReason.NETWORK_ERROR]: '网络连接错误',
+      [FailureReason.TIMEOUT]: '请求超时',
+      [FailureReason.SERVER_ERROR]: '服务器错误',
+      [FailureReason.INVALID_RESPONSE]: '无效响应',
+      [FailureReason.RESOURCE_EXHAUSTED]: '资源耗尽',
+      [FailureReason.CONFIGURATION_ERROR]: '配置错误',
+      [FailureReason.AUTHENTICATION_ERROR]: '认证错误',
+      [FailureReason.RATE_LIMIT_EXCEEDED]: '请求频率超限',
+      [FailureReason.UNKNOWN_ERROR]: '未知错误;
     };
-    return messages[reason] || '测试失败';
+    return messages[reason] || '测试失败;
   }
 
   /**
    * 验证状态转换是否有效 - 公共方法
    */
   public isValidStatusTransition(
-    fromStatus: StressTestRecord['status'],'
-    toStatus: StressTestRecord['status']'
+    fromStatus: StressTestRecord['status],
+    toStatus: StressTestRecord['status]
   ): boolean {
     const validTransitions: Record<string, string[]>  = {
-      'pending': ['running', 'cancelled'],'
-      'running': ['completed', 'failed', 'cancelled'],'
-      'completed': [], // 完成状态不能转换'
+      'pending': ['running', 'cancelled],
+      'running': ['completed', 'failed', 'cancelled],
+      'completed': [], // 完成状态不能转换
       'failed': [], // 失败状态不能转换'
-      "cancelled': [] // 取消状态不能转换'
-    };
+      "cancelled": [] // 取消状态不能转换
+    "};
     return validTransitions[fromStatus]?.includes(toStatus) || false;
   }
 
@@ -776,17 +776,17 @@ class StressTestRecordService {
       if (updates.status) {
         const currentRecord = await this.getTestRecord(id);
         if (!this.isValidStatusTransition(currentRecord.status, updates.status)) {
-          throw new Error(
-            `无效的状态转换: ${currentRecord.status} -> ${updates.status}``
+          throw new Error(`
+            `无效的状态转换: ${currentRecord.status} -> ${updates.status}
           );
         }
       }
 
       return await this.updateTestRecord(id, updates);
-    } catch (error) {
-      console.error("更新测试记录失败:', error);'`
+    } catch (error) {'
+      console.error("更新测试记录失败:", error");
       throw error;
-    }
+    "}
   }
 
   /**
@@ -794,7 +794,7 @@ class StressTestRecordService {
    */
   async batchCancelTestRecords(
     ids: string[],
-    reason: string = '批量取消','
+    reason: string = '批量取消',
     cancelReason: CancelReason = CancelReason.USER_CANCELLED
   ): Promise<{ success: string[], failed: string[] }> {
     const results: { success: string[], failed: string[] }  = { success: [], failed: [] };
@@ -802,8 +802,8 @@ class StressTestRecordService {
       try {
         await this.cancelTestRecord(id, reason, cancelReason);
         results.success.push(id);
-      } catch (error) {
-        console.error(`取消测试记录 ${id} 失败:`, error);`
+      } catch (error) {`
+        console.error(`取消测试记录 ${id} 失败:`, error);
         results.failed.push(id);
       }
     }
@@ -815,26 +815,26 @@ class StressTestRecordService {
    * 清理过期的等待状态记录
    */
   async cleanupExpiredWaitingRecords(maxWaitingMinutes: number = 30): Promise<number> {
-    try {
-      const response = await fetch(`${this.baseUrl}/history/cleanup/waiting`, {`
-        method: "POST','`
+    try {`
+      const response = await fetch(`${this.baseUrl}/history/cleanup/waiting`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json','
-          ...(localStorage.getItem('auth_token') ? {'
-            "Authorization": `Bearer ${localStorage.getItem('auth_token')}`'`
+          'Content-Type': 'application/json',
+          ...(localStorage.getItem('auth_token') ? {`
+            "Authorization": `Bearer ${localStorage.getItem("auth_token")"}
           } : {})
         },
         body: JSON.stringify({ maxWaitingMinutes })
       });
 
       const data = await response.json();
-      if (!data.success) {
-        throw new Error(data.message || "清理过期记录失败');'`
-      }
+      if (!data.success) {'
+        throw new Error(data.message || "清理过期记录失败");
+      "}
 
       return data.data.cleanedCount || 0;
     } catch (error) {
-      console.error('清理过期等待记录失败:', error);'
+      console.error('清理过期等待记录失败:, error);
       throw error;
     }
   }
@@ -855,24 +855,24 @@ class StressTestRecordService {
   }> {
     try {
       const params = new URLSearchParams();
-      if (dateFrom) params.append('dateFrom', dateFrom);'
-      if (dateTo) params.append('dateTo', dateTo);'
-      const response = await fetch(`${this.baseUrl}/history/statistics?${params.toString()}`, {`
+      if (dateFrom) params.append('dateFrom', dateFrom');
+      if (dateTo) params.append('dateTo', dateTo');`
+      const response = await fetch(`${this.baseUrl}/history/statistics?${params.toString()}`, {
         headers: {
-          ...(localStorage.getItem("auth_token') ? {'`
-            "Authorization": `Bearer ${localStorage.getItem('auth_token')}`'`
+          ...(localStorage.getItem("auth_token") ? {`
+            "Authorization": `Bearer ${localStorage.getItem("auth_token")"}
           } : {})
         }
       });
 
       const data = await response.json();
-      if (!data.success) {
-        throw new Error(data.message || "获取统计信息失败');'`
-      }
+      if (!data.success) {'
+        throw new Error(data.message || "获取统计信息失败");
+      "}
 
       return data.data;
     } catch (error) {
-      console.error('获取测试记录统计失败:', error);'
+      console.error('获取测试记录统计失败:, error);
       throw error;
     }
   }
@@ -891,22 +891,22 @@ class StressTestRecordService {
           params.append(key, value.toString());
         }
       });
-      params.append('format', format);'
-      const response = await fetch(`${this.baseUrl}/history/export?${params.toString()}`, {`
+      params.append('format', format');`
+      const response = await fetch(`${this.baseUrl}/history/export?${params.toString()}`, {
         headers: {
-          ...(localStorage.getItem("auth_token') ? {'`
-            "Authorization": `Bearer ${localStorage.getItem("auth_token')}`'`
+          ...(localStorage.getItem("auth_token") ? {`
+            "Authorization": `Bearer ${localStorage.getItem("auth_token")"}
           } : {})
         }
       });
 
-      if (!response.ok) {
-        throw new Error("导出失败');'`
-      }
+      if (!response.ok) {'
+        throw new Error("导出失败");
+      "}
 
       return await response.blob();
     } catch (error) {
-      console.error('导出测试记录失败:', error);'
+      console.error('导出测试记录失败:, error);
       throw error;
     }
   }
@@ -914,3 +914,4 @@ class StressTestRecordService {
 
 export const stressTestRecordService = new StressTestRecordService();
 export default stressTestRecordService;
+`

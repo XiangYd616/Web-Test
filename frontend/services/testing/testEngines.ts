@@ -36,7 +36,7 @@ export class K6Engine implements TestEngine {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError';
+    const errorType = error.name || 'UnknownError;
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -48,7 +48,7 @@ export class K6Engine implements TestEngine {
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics: ', {'
+    console.debug('API Metrics: ', {
       url: info.url,
       method: info.method,
       status: info.status,
@@ -74,13 +74,13 @@ export class K6Engine implements TestEngine {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
   }
-  name = "k6';'`
-  version = '';
+  name = 'k6',
+  version = ';
   isAvailable = false;
   private lastCheckTime = 0;
   private cacheTimeout = 30000; // 30秒缓存
@@ -95,7 +95,7 @@ export class K6Engine implements TestEngine {
 
     try {
       // 通过API检查后端k6引擎状态
-      const response = await fetch('/api/test/k6/status');'
+      const response = await fetch('/api/test/k6/status);
       if (response.ok) {
         
         const result = await response.json();
@@ -109,7 +109,7 @@ export class K6Engine implements TestEngine {
       this.lastCheckTime = now;
       return false;
     } catch (error) {
-      console.error('K6 availability check failed: ', error);'
+      console.error('K6 availability check failed: , error);
       this.isAvailable = false;
       this.lastCheckTime = now;
       return false;
@@ -118,13 +118,13 @@ export class K6Engine implements TestEngine {
 
   async install(): Promise<boolean> {
     try {
-      console.log('Installing k6...');'
+      console.log('Installing k6...);
       // 通过API请求后端安装k6
-      const response = await fetch('/api/test/k6/install', {'
-        method: 'POST','
+      const response = await fetch('/api/test/k6/install', {
+        method: 'POST',
         headers: {
-          'Content-Type': 'application/json','
-          "Authorization": `Bearer ${localStorage.getItem('token')}`'`
+          'Content-Type': 'application/json',`
+          "Authorization": `Bearer ${localStorage.getItem("token")"}
         }
       });
 
@@ -133,10 +133,10 @@ export class K6Engine implements TestEngine {
         return await this.checkAvailability();
       }
       return false;
-    } catch (error) {
-      console.error("Failed to install k6: ', error);'`
+    } catch (error) {'
+      console.error("Failed to install k6: ", error");
       return false;
-    }
+    "}
   }
 
   async run(config: {
@@ -147,33 +147,33 @@ export class K6Engine implements TestEngine {
   }): Promise<any> {
     try {
       // 通过API调用后端k6测试
-      const response = await fetch('/api/test/performance', {'
-        method: 'POST','
+      const response = await fetch('/api/test/performance', {
+        method: 'POST',
         headers: {
-          'Content-Type': 'application/json','
-          'Authorization": `Bearer ${localStorage.getItem("token')}`'`
+          'Content-Type': 'application/json','`
+          Authorization": `Bearer ${localStorage.getItem("token")"}
         },
         body: JSON.stringify(config)
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `K6 test failed: ${response.status}`);`
+        const errorData = await response.json();`
+        throw new Error(errorData.message || `K6 test failed: ${response.status}`);
       }
 
       const results = await response.json();
       return results.data || results;
     } catch (error) {
-      console.error("K6 test failed: ', error);'`
+      console.error("K6 test failed: ", error");
       throw error;
-    }
+    "}
   }
 }
 
 // Lighthouse 性能测试引擎 - 浏览器兼容版本
 export class LighthouseEngine implements TestEngine {
-  name = 'lighthouse';
-  version = '';
+  name = 'lighthouse',
+  version = ';
   isAvailable = false;
   private lastCheckTime = 0;
   private cacheTimeout = 30000; // 30秒缓存
@@ -187,7 +187,7 @@ export class LighthouseEngine implements TestEngine {
       }
 
     try {
-      const response = await fetch('/api/test/lighthouse/status');'
+      const response = await fetch('/api/test/lighthouse/status);
       if (response.ok) {
         
         const result = await response.json();
@@ -201,7 +201,7 @@ export class LighthouseEngine implements TestEngine {
       this.lastCheckTime = now;
       return false;
     } catch (error) {
-      console.error('Lighthouse availability check failed: ', error);'
+      console.error('Lighthouse availability check failed: , error);
       this.isAvailable = false;
       this.lastCheckTime = now;
       return false;
@@ -210,12 +210,12 @@ export class LighthouseEngine implements TestEngine {
 
   async install(): Promise<boolean> {
     try {
-      console.log('Installing Lighthouse...');'
-      const response = await fetch('/api/test/lighthouse/install', {'
-        method: 'POST','
+      console.log('Installing Lighthouse...);
+      const response = await fetch('/api/test/lighthouse/install', {
+        method: 'POST',
         headers: {
-          'Content-Type': 'application/json','
-          'Authorization": `Bearer ${localStorage.getItem('token')}`'`
+          'Content-Type': 'application/json','`
+          'Authorization': `Bearer ${localStorage.getItem(token)}
         }
       });
 
@@ -224,10 +224,10 @@ export class LighthouseEngine implements TestEngine {
         return await this.checkAvailability();
       }
       return false;
-    } catch (error) {
-      console.error("Failed to install Lighthouse: ', error);'`
+    } catch (error) {'
+      console.error("Failed to install Lighthouse: ", error");
       return false;
-    }
+    "}
   }
 
   async run(config: {
@@ -236,32 +236,32 @@ export class LighthouseEngine implements TestEngine {
     categories: string[];
   }): Promise<any> {
     try {
-      const response = await fetch('/api/test/lighthouse/run', {'
-        method: 'POST','
+      const response = await fetch('/api/test/lighthouse/run', {
+        method: 'POST',
         headers: {
-          'Content-Type': 'application/json','
-          "Authorization": `Bearer ${localStorage.getItem('token')}`'`
+          'Content-Type': 'application/json',`
+          "Authorization": `Bearer ${localStorage.getItem("token")"}
         },
         body: JSON.stringify(config)
       });
 
-      if (!response.ok) {
-        throw new Error(`Lighthouse test failed: ${response.status}`);`
+      if (!response.ok) {`
+        throw new Error(`Lighthouse test failed: ${response.status}`);
       }
 
       const results = await response.json();
       return results;
     } catch (error) {
-      console.error("Lighthouse test failed: ', error);'`
+      console.error("Lighthouse test failed: ", error");
       throw error;
-    }
+    "}
   }
 }
 
 // Playwright 浏览器测试引擎 - 浏览器兼容版本
 export class PlaywrightEngine implements TestEngine {
-  name = 'playwright';
-  version = '';
+  name = 'playwright',
+  version = ';
   isAvailable = false;
   private lastCheckTime = 0;
   private cacheTimeout = 30000; // 30秒缓存
@@ -275,7 +275,7 @@ export class PlaywrightEngine implements TestEngine {
       }
 
     try {
-      const response = await fetch('/api/test/playwright/status');'
+      const response = await fetch('/api/test/playwright/status);
       if (response.ok) {
         
         const result = await response.json();
@@ -289,7 +289,7 @@ export class PlaywrightEngine implements TestEngine {
       this.lastCheckTime = now;
       return false;
     } catch (error) {
-      console.error('Playwright availability check failed: ', error);'
+      console.error('Playwright availability check failed: , error);
       this.isAvailable = false;
       this.lastCheckTime = now;
       return false;
@@ -298,12 +298,12 @@ export class PlaywrightEngine implements TestEngine {
 
   async install(): Promise<boolean> {
     try {
-      console.log('Installing Playwright...');'
-      const response = await fetch('/api/test/playwright/install', {'
-        method: 'POST','
+      console.log('Installing Playwright...);
+      const response = await fetch('/api/test/playwright/install', {
+        method: 'POST',
         headers: {
-          'Content-Type': 'application/json','
-          "Authorization": `Bearer ${localStorage.getItem('token')}`'`
+          'Content-Type': 'application/json',`
+          "Authorization": `Bearer ${localStorage.getItem("token")"}
         }
       });
 
@@ -312,10 +312,10 @@ export class PlaywrightEngine implements TestEngine {
         return await this.checkAvailability();
       }
       return false;
-    } catch (error) {
-      console.error("Failed to install Playwright: ', error);'`
+    } catch (error) {'
+      console.error("Failed to install Playwright: ", error");
       return false;
-    }
+    "}
   }
 
   async run(config: {
@@ -325,25 +325,25 @@ export class PlaywrightEngine implements TestEngine {
     viewport?: { width: number; height: number };
   }): Promise<any> {
     try {
-      const response = await fetch('/api/test/playwright/run', {'
-        method: 'POST','
+      const response = await fetch('/api/test/playwright/run', {
+        method: 'POST',
         headers: {
-          'Content-Type': 'application/json','
-          'Authorization": `Bearer ${localStorage.getItem("token')}`'`
+          'Content-Type': 'application/json','`
+          Authorization": `Bearer ${localStorage.getItem("token")"}
         },
         body: JSON.stringify(config)
       });
 
-      if (!response.ok) {
-        throw new Error(`Playwright test failed: ${response.status}`);`
+      if (!response.ok) {`
+        throw new Error(`Playwright test failed: ${response.status}`);
       }
 
       const results = await response.json();
       return results;
     } catch (error) {
-      console.error("Playwright test failed: ', error);'`
+      console.error("Playwright test failed: ", error");
       throw error;
-    }
+    "}
   }
 }
 
@@ -356,9 +356,9 @@ export class TestEngineManager {
   private initializationPromise: Promise<void> | null = null;
 
   constructor() {
-    this.engines.set('k6', new K6Engine());'
-    this.engines.set('lighthouse', new LighthouseEngine());'
-    this.engines.set('playwright', new PlaywrightEngine());'
+    this.engines.set('k6', new K6Engine('));
+    this.engines.set('lighthouse', new LighthouseEngine('));
+    this.engines.set('playwright', new PlaywrightEngine('));
   }
 
   // 初始化所有引擎
@@ -366,14 +366,14 @@ export class TestEngineManager {
     // 如果已经初始化过，直接返回
     if (this.isInitialized) {
       
-        console.log('🔄 Test engines already initialized');'
+        console.log('🔄 Test engines already initialized);
       return;
       }
 
     // 如果正在初始化，等待初始化完成
     if (this.initializationPromise) {
       
-        console.log('⏳ Waiting for ongoing initialization...');'
+        console.log('⏳ Waiting for ongoing initialization...);
       return this.initializationPromise;
       }
 
@@ -385,13 +385,13 @@ export class TestEngineManager {
   }
 
   private async doInitialization(): Promise<void> {
-    console.log('Initializing test engines...');'
+    console.log('Initializing test engines...);
     for (const [name, engine] of this.engines) {
       try {
-        await engine.checkAvailability();
-        console.log(`✅ ${name} engine initialized`);`
-      } catch (error) {
-        console.warn(`⚠️ ${name} engine initialization failed:`, error);`
+        await engine.checkAvailability();`
+        console.log(`✅ ${name} engine initialized`);
+      } catch (error) {`
+        console.warn(`⚠️ ${name} engine initialization failed:`, error);
       }
     }
   }
@@ -405,17 +405,17 @@ export class TestEngineManager {
     // 如果缓存还有效，直接返回缓存结果
     const now = Date.now();
     if (now - this.lastCheckAllTime < this.checkAllCacheTimeout && Object.keys(this.cachedResults).length > 0) {
-      console.log("🔄 Using cached engine status results');'`
-      return { ...this.cachedResults };
+      console.log("🔄 Using cached engine status results");
+      return { ...this.cachedResults "};
     }
 
-    console.log('🔍 Checking all engines status...');'
+    console.log('🔍 Checking all engines status...);
     const results: Record<string, boolean>  = {};
     for (const [name, engine] of this.engines) {
       try {
         results[name] = await engine.checkAvailability();
-      } catch (error) {
-        console.error(`Failed to check ${name} engine:`, error);`
+      } catch (error) {`
+        console.error(`Failed to check ${name} engine:`, error);
         results[name] = false;
       }
     }
@@ -429,28 +429,28 @@ export class TestEngineManager {
 
   async installEngine(name: string): Promise<boolean> {
     const engine = this.engines.get(name);
-    if (!engine) {
-      throw new Error(`Unknown engine: ${name}`);`
+    if (!engine) {`
+      throw new Error(`Unknown engine: ${name}`);
     }
 
     try {
       return await engine.install();
-    } catch (error) {
-      console.error(`Failed to install ${name} engine:`, error);`
+    } catch (error) {`
+      console.error(`Failed to install ${name} engine:`, error);
       return false;
     }
   }
 
   async runTest(engineName: string, config: any): Promise<any> {
     const engine = this.engines.get(engineName);
-    if (!engine) {
-      throw new Error(`Unknown engine: ${engineName}`);`
+    if (!engine) {`
+      throw new Error(`Unknown engine: ${engineName}`);
     }
 
     // 检查引擎可用性
     const isAvailable = await engine.checkAvailability();
-    if (!isAvailable) {
-      throw new Error(`Engine ${engineName} is not available. Please install it first.`);`
+    if (!isAvailable) {`
+      throw new Error(`Engine ${engineName} is not available. Please install it first.`);
     }
 
     return await engine.run(config);
@@ -477,9 +477,9 @@ export class TestEngineManager {
       } catch (error) {
         status[name] = {
           name: engine.name,
-          version: "unknown','`
+          version: "unknown",
           isAvailable: false
-        };
+        "};
       }
     }
 
@@ -489,21 +489,22 @@ export class TestEngineManager {
   // 获取推荐的测试引擎
   getRecommendedEngine(testType: string): string {
     switch (testType) {
-      case 'performance': ''
-      case 'stress': ''
-        return 'k6';
-      case 'seo': ''
-      case 'accessibility': ''
-      case 'ux': ''
-        return 'lighthouse';
-      case 'compatibility': ''
-      case 'security': ''
-        return 'playwright';
+      case 'performance': '
+      case 'stress': '
+        return 'k6;
+      case 'seo': '
+      case 'accessibility': '
+      case 'ux': '
+        return 'lighthouse;
+      case 'compatibility': '
+      case 'security': '
+        return 'playwright;
       default:
-        return 'lighthouse';
+        return 'lighthouse;
     }
   }
 }
 
 // 导出单例实例
 export const testEngineManager = new TestEngineManager();
+`

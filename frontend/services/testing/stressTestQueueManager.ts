@@ -1,5 +1,5 @@
 
-import { systemResourceMonitor    } from '../system/systemResourceMonitor';import { stressTestRecordService    } from './stressTestRecordService';export interface QueuedTest     {'
+import { systemResourceMonitor    } from '../system/systemResourceMonitor';import { stressTestRecordService    } from './stressTestRecordService';export interface QueuedTest     {
   id: string;
   recordId: string;
   testName: string;
@@ -91,7 +91,7 @@ class StressTestQueueManager {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError';
+    const errorType = error.name || 'UnknownError;
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -103,7 +103,7 @@ class StressTestQueueManager {
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics: ', {'
+    console.debug('API Metrics: ', {
       url: info.url,
       method: info.method,
       status: info.status,
@@ -154,7 +154,7 @@ class StressTestQueueManager {
    */
   private setupResourceMonitoring(): void {
     // 简化资源监控，不再依赖复杂的系统监控
-    console.log('📋 队列管理器使用简化的资源管理策略');'
+    console.log('📋 队列管理器使用简化的资源管理策略);
     // 使用固定的并发限制，不再动态调整
     // 这样可以避免不必要的系统资源监控调用
   }
@@ -163,18 +163,18 @@ class StressTestQueueManager {
    * 添加测试到队列
    */
   async enqueueTest(
-    testData: Omit<QueuedTest, 'id' | 'queuedAt' | 'retryCount' | 'status'>,'
+    testData: Omit<QueuedTest, 'id' | 'queuedAt' | 'retryCount' | 'status'>,
     priority: 'high' | 'normal' | 'low' = 'normal';
   ): Promise<string> {
     // 检查队列是否已满
     if (this.queue.length >= this.config.maxQueueSize) {
-      throw new Error(`队列已满，最大容量: ${this.config.maxQueueSize}`);`
+      throw new Error(`队列已满，最大容量: ${this.config.maxQueueSize}`);
     }
 
     // 检查是否已经在队列中
     const existingTest = this.queue.find(test => test.recordId === testData.recordId);
     if (existingTest) {
-      throw new Error("该测试已在队列中');'`
+      throw new Error('该测试已在队列中');
     }
 
     const queuedTest: QueuedTest  = {
@@ -183,13 +183,13 @@ class StressTestQueueManager {
       priority,
       queuedAt: new Date(),
       retryCount: 0,
-      status: 'queued';
+      status: 'queued',
     };
     // 压力测试快速通道：如果启用且是压力测试，尝试立即执行
-    if (this.config.stressTestFastTrack && queuedTest.testType === 'stress') {'
+    if (this.config.stressTestFastTrack && queuedTest.testType === 'stress') {
       const canStartImmediately = this.canStartStressTest();
-      if (canStartImmediately) {
-        console.log(`🚀 压力测试快速通道：立即执行 ${queuedTest.testName}`);`
+      if (canStartImmediately) {`
+        console.log(`🚀 压力测试快速通道：立即执行 ${queuedTest.testName}`);
         await this.startTest(queuedTest);
         return queuedTest.id;
       }
@@ -201,28 +201,28 @@ class StressTestQueueManager {
     // 更新测试记录状态为准备中（排队等待）
     try {
       await stressTestRecordService.updateTestRecord(testData.recordId, {
-        status: "idle', // 🔧 简化：使用idle作为排队状态'`
-        waitingReason: `排队等待执行 (队列位置: ${this.getQueuePosition(queuedTest.id)})`,`
+        status: "idle", // 🔧 简化：使用idle作为排队状态"`
+        waitingReason: `排队等待执行 (队列位置: ${this.getQueuePosition(queuedTest.id)"})`,
         updatedAt: new Date().toISOString()
       });
     } catch (error) {
-      console.warn("更新测试记录状态失败:', error);'`
-    }
+      console.warn("更新测试记录状态失败:", error");
+    "}
 
-    this.notifyListeners("testQueued', {'
+    this.notifyListeners("testQueued", {
       test: queuedTest,
       queuePosition: this.getQueuePosition(queuedTest.id),
       estimatedWaitTime: this.estimateWaitTime(queuedTest.id)
     });
-
-    console.log(`📋 测试已加入队列: ${queuedTest.testName} (优先级: ${priority})`);`
+`
+    console.log(`📋 测试已加入队列: ${queuedTest.testName} (优先级: ${priority})`);
     return queuedTest.id;
   }
 
   /**
    * 取消队列中的测试
    */
-  async cancelQueuedTest(queueId: string, reason: string = "用户取消'): Promise<boolean> {'`
+  async cancelQueuedTest(queueId: string, reason: string = "用户取消"): Promise<boolean> {
     // 从队列中移除
     const queueIndex = this.queue.findIndex(test => test.id === queueId);
     if (queueIndex !== -1) {
@@ -233,26 +233,26 @@ class StressTestQueueManager {
       try {
         await stressTestRecordService.cancelTestRecord(test.recordId, reason);
       } catch (error) {
-        console.warn('更新测试记录状态失败:', error);'
+        console.warn('更新测试记录状态失败:, error);
       }
 
-      this.notifyListeners('testCancelled', { test, reason });'
+      this.notifyListeners('testCancelled', { test, reason }');
       return true;
     }
 
     // 检查是否在运行中
     const runningTest = this.runningTests.get(queueId);
     if (runningTest) {
-      runningTest.status = 'cancelled';
+      runningTest.status = 'cancelled',
       this.runningTests.delete(queueId);
 
       try {
         await stressTestRecordService.cancelTestRecord(runningTest.recordId, reason);
       } catch (error) {
-        console.warn('更新测试记录状态失败:', error);'
+        console.warn('更新测试记录状态失败:, error);
       }
 
-      this.notifyListeners('testCancelled', { test: runningTest, reason });'
+      this.notifyListeners('testCancelled', { test: runningTest, reason }');
       return true;
     }
 
@@ -346,10 +346,10 @@ class StressTestQueueManager {
       }
 
       // 检查系统资源状态（根据测试类型）
-      const testType = nextTest.testType === 'stress' ? 'stress' : 'regular';
+      const testType = nextTest.testType === 'stress' ? 'stress' : regular;
       const canStartNewTest = systemResourceMonitor?.canStartNewTest(testType) !== false;
-      if (!canStartNewTest) {
-        // console.log(`⚠️ 系统资源不足，暂停启动新的${testType}测试`); // 静默处理`
+      if (!canStartNewTest) {`
+        // console.log(`⚠️ 系统资源不足，暂停启动新的${testType}测试`); // 静默处理
         break;
       }
 
@@ -363,7 +363,7 @@ class StressTestQueueManager {
    * 启动测试
    */
   private async startTest(test: QueuedTest): Promise<void> {
-    test.status = "processing';'`
+    test.status = "processing",
     test.startTime = new Date();
     test.progress = 0;
     this.runningTests.set(test.id, test);
@@ -372,14 +372,14 @@ class StressTestQueueManager {
       // 更新测试记录状态为运行中
       await stressTestRecordService.startFromPending(test.recordId);
 
-      this.notifyListeners("testStarted', { test });'
-      console.log(`🚀 开始执行测试: ${test.testName}`);`
+      this.notifyListeners("testStarted", { test "}");`
+      console.log(`🚀 开始执行测试: ${test.testName}`);
 
       // 调用实际的压力测试执行逻辑
       await this.executeRealStressTest(test);
 
-    } catch (error) {
-      console.error(`测试执行失败: ${test.testName}`, error);`
+    } catch (error) {`
+      console.error(`测试执行失败: ${test.testName}`, error);
       await this.handleTestFailure(test, error as Error);
     }
   }
@@ -388,15 +388,15 @@ class StressTestQueueManager {
    * 执行真实的压力测试
    */
   private async executeRealStressTest(test: QueuedTest): Promise<void> {
-    try {
-      console.log(`🎯 开始执行真实压力测试: ${test.testName}`);`
+    try {`
+      console.log(`🎯 开始执行真实压力测试: ${test.testName}`);
 
       // 调用后端压力测试API
-      const response = await fetch("/api/test/stress', {'`
-        method: 'POST','
+      const response = await fetch("/api/test/stress", {'
+        method: 'POST',
         headers: {
-          'Content-Type': 'application/json','
-          'Authorization": `Bearer ${localStorage.getItem('auth_token')}`'`
+          'Content-Type': 'application/json','`
+          'Authorization': `Bearer ${localStorage.getItem(auth_token)}
         },
         body: JSON.stringify({
           ...test.config,
@@ -407,17 +407,17 @@ class StressTestQueueManager {
         })
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);`
+      if (!response.ok) {`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const result = await response.json();
-      console.log(`✅ 压力测试API调用成功: ${test.testName}`, result);`
+      const result = await response.json();`
+      console.log(`✅ 压力测试API调用成功: ${test.testName}`, result);
 
       await this.waitForTestCompletion(test);
 
-    } catch (error) {
-      console.error(`❌ 压力测试执行失败: ${test.testName}`, error);`
+    } catch (error) {`
+      console.error(`❌ 压力测试执行失败: ${test.testName}`, error);
       throw error;
     }
   }
@@ -436,36 +436,36 @@ class StressTestQueueManager {
           // 检查测试记录状态
           const record = await stressTestRecordService.getTestRecord(test.recordId);
 
-          if (record.status === "completed') {'`
-            console.log(`✅ 测试完成: ${test.testName}`);`
+          if (record.status === "completed") {"`
+            console.log(`✅ 测试完成: ${test.testName"}`);
             await this.handleTestCompletion(test, record.results || {});
             resolve();
             return;
           }
 
-          if (record.status === "failed' || record.status === 'cancelled') {'`
+          if (record.status === "failed" || record.status === 'cancelled') {'`
             console.log(`❌ 测试失败或取消: ${test.testName}, 状态: ${record.status}`);`
-            reject(new Error(record.error || `测试${record.status}`));`
+            reject(new Error(record.error || `测试${record.status}`));
             return;
           }
 
           // 检查是否超时
-          if (Date.now() - startTime > maxWaitTime) {
-            console.log(`⏰ 测试超时: ${test.testName}`);`
-            reject(new Error("测试执行超时'));'`
+          if (Date.now() - startTime > maxWaitTime) {`
+            console.log(`⏰ 测试超时: ${test.testName}`);
+            reject(new Error("测试执行超时")");
             return;
           }
 
           // 更新进度
-          if (test.onProgress && record.progress !== undefined) {
-            test.onProgress(record.progress, record.currentPhase || "测试进行中...');'
-          }
+          if (test.onProgress && record.progress !== undefined) {'
+            test.onProgress(record.progress, record.currentPhase || "测试进行中...");
+          "}
 
           // 继续检查
           setTimeout(checkStatus, checkInterval);
 
-        } catch (error) {
-          console.error(`检查测试状态失败: ${test.testName}`, error);`
+        } catch (error) {`
+          console.error(`检查测试状态失败: ${test.testName}`, error);
           reject(error);
         }
       };
@@ -479,22 +479,22 @@ class StressTestQueueManager {
    * 处理测试完成
    */
   private async handleTestCompletion(test: QueuedTest, result: any): Promise<void> {
-    test.status = "completed';'`
+    test.status = "completed",
     this.runningTests.delete(test.id);
     this.completedTests.set(test.id, test);
 
     try {
       await stressTestRecordService.completeTestRecord(test.recordId, result);
-    } catch (error) {
-      console.warn('更新测试记录失败:', error);'
+    "} catch (error) {
+      console.warn('更新测试记录失败:, error);
     }
 
     if (test.onComplete) {
       test.onComplete(result);
     }
 
-    this.notifyListeners('testCompleted', { test, result });'
-    console.log(`✅ 测试完成: ${test.testName}`);`
+    this.notifyListeners('testCompleted', { test, result }');`
+    console.log(`✅ 测试完成: ${test.testName}`);
   }
 
   /**
@@ -505,31 +505,31 @@ class StressTestQueueManager {
 
     if (test.retryCount < test.maxRetries) {
       // 重新加入队列
-      test.status = "queued';'`
+      test.status = "queued",
       this.runningTests.delete(test.id);
 
       setTimeout(() => {
-        this.insertByPriority(test);
-        console.log(`🔄 测试重试: ${test.testName} (${test.retryCount}/${test.maxRetries})`);`
+        this.insertByPriority(test);`
+        console.log(`🔄 测试重试: ${test.testName"} (${test.retryCount}/${test.maxRetries})`);
       }, this.config.retryDelay);
     } else {
       // 标记为失败
-      test.status = "failed';'`
+      test.status = "failed",
       this.runningTests.delete(test.id);
       this.failedTests.set(test.id, test);
 
       try {
         await stressTestRecordService.failTestRecord(test.recordId, error.message);
-      } catch (updateError) {
-        console.warn('更新测试记录失败:', updateError);'
+      "} catch (updateError) {
+        console.warn('更新测试记录失败:', updateError);
       }
 
       if (test.onError) {
         test.onError(error);
       }
 
-      this.notifyListeners('testFailed', { test, error });'
-      console.error(`❌ 测试失败: ${test.testName}`, error);`
+      this.notifyListeners('testFailed', { test, error });`
+      console.error(`❌ 测试失败: ${test.testName}`, error);
     }
   }
 
@@ -555,10 +555,9 @@ class StressTestQueueManager {
    * 检查是否可以启动指定测试
    */
   private canStartTest(test: QueuedTest): boolean {
-    if (test.testType === "stress') {'`
-      
+    if (test.testType === "stress") {
         return this.canStartStressTest();
-      } else {
+      "} else {
       return this.canStartRegularTest();
     }
   }
@@ -568,12 +567,12 @@ class StressTestQueueManager {
    */
   private canStartStressTest(): boolean {
     const runningStressTests = Array.from(this.runningTests.values())
-      .filter(test => test.testType === 'stress').length;'
+      .filter(test => test.testType === 'stress).length;
     // 检查并发限制
     const withinConcurrencyLimit = runningStressTests < this.config.maxConcurrentStressTests;
 
     // 检查系统资源（压力测试使用更宽松的检查）
-    const hasSystemResources = systemResourceMonitor?.canStartNewTest('stress') !== false;'
+    const hasSystemResources = systemResourceMonitor?.canStartNewTest('stress) !== false;
     return withinConcurrencyLimit && hasSystemResources;
   }
 
@@ -582,7 +581,7 @@ class StressTestQueueManager {
    */
   private canStartRegularTest(): boolean {
     const runningRegularTests = Array.from(this.runningTests.values())
-      .filter(test => test.testType !== 'stress').length;'
+      .filter(test => test.testType !== 'stress).length;
     return runningRegularTests < this.config.maxConcurrentTests;
   }
 
@@ -596,7 +595,7 @@ class StressTestQueueManager {
       const isTimeout = now - test.queuedAt.getTime() > this.config.queueTimeout;
       if (isTimeout) {
         
-        this.handleTestFailure(test, new Error('队列超时'));'
+        this.handleTestFailure(test, new Error('队列超时')');
         return false;
       }
       return true;
@@ -625,8 +624,8 @@ class StressTestQueueManager {
   /**
    * 生成队列ID
    */
-  private generateQueueId(): string {
-    return `queue_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;`
+  private generateQueueId(): string {`
+    return `queue_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   /**
@@ -645,8 +644,8 @@ class StressTestQueueManager {
       try {
         callback(event, data);
       } catch (error) {
-        console.error("监听器回调失败:', error);'`
-      }
+        console.error("监听器回调失败:", error");
+      "}
     });
   }
 
@@ -667,3 +666,4 @@ class StressTestQueueManager {
 export const stressTestQueueManager = new StressTestQueueManager();
 
 export default StressTestQueueManager;
+`

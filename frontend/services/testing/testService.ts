@@ -1,4 +1,4 @@
-import { apiService    } from '../api/apiService';export interface TestConfig     {'
+import { apiService    } from '../api/apiService';export interface TestConfig     {
   [key: string]: any;
 }
 
@@ -25,7 +25,7 @@ export interface TestResult     {
   completedAt?: string;
 }
 
-export type TestStatus   = 'idle' | 'running' | 'completed' | 'failed' | 'cancelled';class TestService {'
+export type TestStatus   = 'idle' | 'running' | 'completed' | 'failed' | 'cancelled';class TestService {
   private runningTests = new Map<string, TestResult>();
   private progressCallbacks = new Map<string, (progress: TestProgress) => void>();
   private resultCallbacks = new Map<string, (result: TestResult) => void>();
@@ -35,11 +35,11 @@ export type TestStatus   = 'idle' | 'running' | 'completed' | 'failed' | 'cancel
    */
   async startTest(testType: string, url: string, config: TestConfig = {}, testName?: string): Promise<string> {
     try {
-      const response = await apiService.post('/api/test/run', {'
+      const response = await apiService.post('/api/test/run, {
         testType,
         url,
         config,
-        testName: testName || `${testType.toUpperCase()}测试 - ${new Date().toLocaleString()}``
+        testName: testName || `${testType.toUpperCase()}测试 - ${new Date().toLocaleString()}
       });
 
       const testId = response.data.testId;
@@ -49,14 +49,14 @@ export type TestStatus   = 'idle' | 'running' | 'completed' | 'failed' | 'cancel
         id: testId,
         testType,
         url,
-        status: "running','`
+        status: 'running',
         createdAt: new Date().toISOString(),
         progress: {
           current: 0,
           total: 100,
           percentage: 0,
-          stage: '初始化测试...','
-          message: '正在准备测试环境','
+          stage: '初始化测试...',
+          message: '正在准备测试环境',
           startTime: new Date().toISOString()
         }
       });
@@ -66,8 +66,8 @@ export type TestStatus   = 'idle' | 'running' | 'completed' | 'failed' | 'cancel
 
       return testId;
     } catch (error) {
-      console.error('启动测试失败:', error);'
-      throw new Error(`启动测试失败: ${error.message}`);`
+      console.error('启动测试失败:, error);`
+      throw new Error(`启动测试失败: ${error.message}`);
     }
   }
 
@@ -75,18 +75,18 @@ export type TestStatus   = 'idle' | 'running' | 'completed' | 'failed' | 'cancel
    * 停止测试
    */
   async stopTest(testId: string): Promise<void> {
-    try {
-      await apiService.post(`/api/test/${testId}/stop`);`
+    try {`
+      await apiService.post(`/api/test/${testId}/stop`);
 
       const test = this.runningTests.get(testId);
       if (test) {
-        test.status = "cancelled';'`
+        test.status = "cancelled",
         this.runningTests.set(testId, test);
         this.notifyResult(testId, test);
-      }
+      "}
     } catch (error) {
-      console.error('停止测试失败:', error);'
-      throw new Error('停止测试失败');'
+      console.error('停止测试失败:, error);
+      throw new Error('停止测试失败');
     }
   }
 
@@ -94,8 +94,8 @@ export type TestStatus   = 'idle' | 'running' | 'completed' | 'failed' | 'cancel
    * 获取测试状态
    */
   async getTestStatus(testId: string): Promise<TestResult | null> {
-    try {
-      const response = await apiService.get(`/api/test/${testId}/status`);`
+    try {`
+      const response = await apiService.get(`/api/test/${testId}/status`);
       const result = response.data;
 
       // 更新本地状态
@@ -103,22 +103,22 @@ export type TestStatus   = 'idle' | 'running' | 'completed' | 'failed' | 'cancel
 
       return result;
     } catch (error) {
-      console.error("获取测试状态失败:', error);'`
+      console.error("获取测试状态失败:", error");
       return this.runningTests.get(testId) || null;
-    }
+    "}
   }
 
   /**
    * 获取测试结果
    */
   async getTestResult(testId: string): Promise<TestResult | null> {
-    try {
-      const response = await apiService.get(`/api/test/${testId}/result`);`
+    try {`
+      const response = await apiService.get(`/api/test/${testId}/result`);
       return response.data;
     } catch (error) {
-      console.error("获取测试结果失败:', error);'`
-      throw new Error('获取测试结果失败');'
-    }
+      console.error("获取测试结果失败:", error");
+      throw new Error('获取测试结果失败');
+    "}
   }
 
   /**
@@ -136,7 +136,7 @@ export type TestStatus   = 'idle' | 'running' | 'completed' | 'failed' | 'cancel
         }
 
         // 检查测试是否完成
-        if (result.status === 'completed' || result.status === 'failed' || result.status === 'cancelled') {'
+        if (result.status === 'completed' || result.status === 'failed' || result.status === 'cancelled') {
         this.runningTests.delete(testId);
           this.notifyResult(testId, result);
           return;
@@ -145,11 +145,11 @@ export type TestStatus   = 'idle' | 'running' | 'completed' | 'failed' | 'cancel
         // 继续轮询
         setTimeout(poll, 2000);
       } catch (error) {
-        console.error('轮询测试状态失败:', error);'
+        console.error('轮询测试状态失败:, error);
         // 标记测试失败
         const test = this.runningTests.get(testId);
         if (test) {
-          test.status = 'failed';
+          test.status = 'failed',
           test.error = error.message;
           this.runningTests.delete(testId);
           this.notifyResult(testId, test);
@@ -218,21 +218,21 @@ export type TestStatus   = 'idle' | 'running' | 'completed' | 'failed' | 'cancel
   validateConfig(testType: string, config: TestConfig): { valid: boolean; errors: string[] } {
     const errors: string[]  = [];
     switch (testType) {
-      case 'api': ''
+      case 'api': 
         if (config.timeout && (config.timeout < 1000 || config.timeout > 300000)) {
-          errors.push('超时时间必须在1秒到5分钟之间');'
+          errors.push('超时时间必须在1秒到5分钟之间');
         }
         if (config.retries && (config.retries < 0 || config.retries > 10)) {
-          errors.push('重试次数必须在0到10之间');'
+          errors.push('重试次数必须在0到10之间');
         }
         break;
 
-      case 'stress': ''
+      case 'stress': 
         if (config.duration && (config.duration < 10 || config.duration > 3600)) {
-          errors.push('测试时长必须在10秒到1小时之间');'
+          errors.push('测试时长必须在10秒到1小时之间');
         }
         if (config.concurrency && (config.concurrency < 1 || config.concurrency > 1000)) {
-          errors.push('并发用户数必须在1到1000之间');'
+          errors.push('并发用户数必须在1到1000之间');
         }
         break;
     }
@@ -246,3 +246,4 @@ export type TestStatus   = 'idle' | 'running' | 'completed' | 'failed' | 'cancel
 
 export const testService = new TestService();
 export default testService;
+`

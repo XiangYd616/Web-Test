@@ -79,11 +79,11 @@ export class TestScheduler {
   private static timers: Map<string, NodeJS.Timeout> = new Map();
 
   // 创建定时测试
-  static createSchedule(schedule: Omit<ScheduledTest, 'id' | 'createdAt' | 'updatedAt' | 'runCount' | 'status'>): ScheduledTest {'
+  static createSchedule(schedule: Omit<ScheduledTest, 'id' | 'createdAt' | 'updatedAt' | 'runCount' | 'status'>): ScheduledTest {
     const newSchedule: ScheduledTest  = {
       ...schedule,
-      id: `schedule-${Date.now()}`,`
-      status: "active','`
+      id: `schedule-${Date.now()}`,
+      status: 'active',
       runCount: 0,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -109,7 +109,7 @@ export class TestScheduler {
 
     // 重新调度
     this.cancelSchedule(id);
-    if (updatedSchedule.status === 'active') {'
+    if (updatedSchedule.status === 'active') {
       this.scheduleNextRun(updatedSchedule);
     }
 
@@ -132,7 +132,7 @@ export class TestScheduler {
     const schedule = this.schedules.get(id);
     if (!schedule) return false;
 
-    schedule.status = 'paused';
+    schedule.status = 'paused',
     schedule.updatedAt = new Date().toISOString();
     this.cancelSchedule(id);
 
@@ -142,8 +142,8 @@ export class TestScheduler {
   // 恢复调度
   static resumeSchedule(id: string): boolean {
     const schedule = this.schedules.get(id);
-    if (!schedule || schedule.status !== 'paused') return false;'
-    schedule.status = 'active';
+    if (!schedule || schedule.status !== 'paused') return false;
+    schedule.status = 'active',
     schedule.updatedAt = new Date().toISOString();
     this.scheduleNextRun(schedule);
 
@@ -154,24 +154,24 @@ export class TestScheduler {
   static async executeTest(scheduleId: string): Promise<TestExecution> {
     const schedule = this.schedules.get(scheduleId);
     if (!schedule) {
-      throw new Error('Schedule not found');'
+      throw new Error('Schedule not found');
     }
 
-    const execution: TestExecution  = {
-      id: `exec-${Date.now()}`,`
-      scheduleId,
-      testId: `test-${Date.now()}`,`
-      status: "pending','`
+    const execution: TestExecution  = {`
+      id: `exec-${Date.now()}`,
+      scheduleId,`
+      testId: `test-${Date.now()}`,
+      status: "pending",
       startTime: new Date().toISOString(),
       retryCount: 0,
-      triggeredBy: 'manual';
+      triggeredBy: 'manual',
     };
     this.executions.set(execution.id, execution);
 
     try {
       await this.runTest(execution, schedule);
     } catch (error) {
-      execution.status = 'failed';
+      execution.status = 'failed',
       execution.error = error instanceof Error ? error.message : 'Unknown error';
       execution.endTime = new Date().toISOString();
     }
@@ -182,35 +182,35 @@ export class TestScheduler {
   // 批量测试
   static async executeBatchTests(config: BatchTestConfig): Promise<TestExecution[]> {
     const executions: TestExecution[]  = [];
-    if (config.execution.mode === 'sequential') {'
+    if (config.execution.mode === 'sequential') {
       // 顺序执行
       for (const test of config.tests.sort((a, b) => a.priority - b.priority)) {
         const execution = await this.executeSingleTest(test);
         executions.push(execution);
 
-        if (execution.status === 'failed' && !config.execution.continueOnFailure) {'
+        if (execution.status === 'failed' && !config.execution.continueOnFailure) {
           break;
         }
       }
-    } else if (config.execution.mode === 'parallel') {'
+    } else if (config.execution.mode === 'parallel') {
       // 并行执行
       const promises = config.tests.map(test => this.executeSingleTest(test));
       const results = await Promise.allSettled(promises);
 
       results.forEach((result, index) => {
-        if (result.status === 'fulfilled') {'
+        if (result.status === 'fulfilled') {
           executions.push(result.value);
         } else {
-          executions.push({
-            id: `exec-${Date.now()}-${index}`,`
-            scheduleId: "batch','`
-            testId: `test-${Date.now()}-${index}`,`
-            status: "failed','`
+          executions.push({`
+            id: `exec-${Date.now()}-${index}`,
+            scheduleId: "batch",`
+            testId: `test-${Date.now()}-${index}`,
+            status: "failed",
             startTime: new Date().toISOString(),
             endTime: new Date().toISOString(),
             error: result.reason,
             retryCount: 0,
-            triggeredBy: 'manual';
+            triggeredBy: 'manual',
           });
         }
       });
@@ -253,14 +253,14 @@ export class TestScheduler {
 
     const stats = {
       total: executions.length,
-      completed: executions.filter(e => e.status === 'completed').length,'
-      failed: executions.filter(e => e.status === 'failed').length,'
-      running: executions.filter(e => e.status === 'running').length,'
+      completed: executions.filter(e => e.status === 'completed').length,
+      failed: executions.filter(e => e.status === 'failed').length,
+      running: executions.filter(e => e.status === 'running).length,
       averageDuration: 0,
       successRate: 0
     };
 
-    const completedExecutions = executions.filter(e => e.status === 'completed' && e.duration);'
+    const completedExecutions = executions.filter(e => e.status === 'completed && e.duration);
     if (completedExecutions.length > 0) {
       stats.averageDuration = completedExecutions.reduce((sum, e) => sum + (e.duration || 0), 0) / completedExecutions.length;
     }
@@ -294,7 +294,7 @@ export class TestScheduler {
     const now = new Date();
     const startTime = new Date(schedule.schedule.startTime);
 
-    if (schedule.schedule.type === 'once') {'
+    if (schedule.schedule.type === 'once') {
         return startTime > now ? startTime : null;
       }
 
@@ -302,22 +302,22 @@ export class TestScheduler {
     let nextRun = new Date(startTime);
 
     switch (schedule.schedule.interval) {
-      case 'hourly': ''
+      case 'hourly': 
         while (nextRun <= now) {
           nextRun.setHours(nextRun.getHours() + 1);
         }
         break;
-      case 'daily': ''
+      case 'daily': 
         while (nextRun <= now) {
           nextRun.setDate(nextRun.getDate() + 1);
         }
         break;
-      case 'weekly': ''
+      case 'weekly': 
         while (nextRun <= now) {
           nextRun.setDate(nextRun.getDate() + 7);
         }
         break;
-      case 'monthly': ''
+      case 'monthly': 
         while (nextRun <= now) {
           nextRun.setMonth(nextRun.getMonth() + 1);
         }
@@ -340,14 +340,14 @@ export class TestScheduler {
 
   // 私有方法：执行调度的测试
   private static async executeScheduledTest(schedule: ScheduledTest): Promise<void> {
-    const execution: TestExecution  = {
-      id: `exec-${Date.now()}`,`
-      scheduleId: schedule.id,
-      testId: `test-${Date.now()}`,`
-      status: "pending','`
+    const execution: TestExecution  = {`
+      id: `exec-${Date.now()}`,
+      scheduleId: schedule.id,`
+      testId: `test-${Date.now()}`,
+      status: "pending",
       startTime: new Date().toISOString(),
       retryCount: 0,
-      triggeredBy: 'schedule';
+      triggeredBy: 'schedule',
     };
     this.executions.set(execution.id, execution);
 
@@ -363,7 +363,7 @@ export class TestScheduler {
       this.scheduleNextRun(schedule);
 
     } catch (error) {
-      execution.status = 'failed';
+      execution.status = 'failed',
       execution.error = error instanceof Error ? error.message : 'Unknown error';
       execution.endTime = new Date().toISOString();
 
@@ -378,17 +378,17 @@ export class TestScheduler {
 
   // 私有方法：运行测试
   private static async runTest(execution: TestExecution, schedule: ScheduledTest): Promise<void> {
-    execution.status = 'running';
+    execution.status = 'running',
     // 这里集成实际的测试引擎
     // 根据 schedule.testType 调用相应的测试服务
 
     // 模拟测试执行
     await new Promise(resolve => setTimeout(resolve, 5000));
 
-    execution.status = 'completed';
+    execution.status = 'completed',
     execution.endTime = new Date().toISOString();
     execution.duration = new Date(execution.endTime).getTime() - new Date(execution.startTime).getTime();
-    execution.results = { score: 85, message: 'Test completed successfully' };'
+    execution.results = { score: 85, message: 'Test completed successfully' };
     // 发送通知
     if (schedule.notifications.onSuccess) {
       await this.sendNotification(schedule, execution);
@@ -398,16 +398,16 @@ export class TestScheduler {
   // 私有方法：重试测试
   private static async retryTest(execution: TestExecution, schedule: ScheduledTest): Promise<void> {
     execution.retryCount++;
-    execution.status = 'pending';
+    execution.status = 'pending',
     try {
       await this.runTest(execution, schedule);
     } catch (error) {
-      execution.status = 'failed';
-      execution.error = error instanceof Error ? error.message : "Unknown error';
+      execution.status = 'failed',
+      execution.error = error instanceof Error ? error.message : "Unknown error";
       if (execution.retryCount < schedule.retryPolicy.maxRetries) {
         setTimeout(() => {
           this.retryTest(execution, schedule);
-        }, schedule.retryPolicy.retryDelay * Math.pow(schedule.retryPolicy.backoffMultiplier, execution.retryCount));
+        "}, schedule.retryPolicy.retryDelay * Math.pow(schedule.retryPolicy.backoffMultiplier, execution.retryCount));
       } else {
         // 最终失败，发送通知
         if (schedule.notifications.onFailure) {
@@ -428,20 +428,20 @@ export class TestScheduler {
 
   // 私有方法：执行单个测试
   private static async executeSingleTest(test: any): Promise<TestExecution> {
-    const execution: TestExecution  = {
-      id: `exec-${Date.now()}`,`
-      scheduleId: "batch','`
-      testId: `test-${Date.now()}`,`
-      status: "pending','`
+    const execution: TestExecution  = {`
+      id: `exec-${Date.now()}`,
+      scheduleId: "batch",`
+      testId: `test-${Date.now()}`,
+      status: "pending",
       startTime: new Date().toISOString(),
       retryCount: 0,
-      triggeredBy: 'manual';
+      triggeredBy: 'manual',
     };
     // 模拟测试执行
-    execution.status = 'running';
+    execution.status = 'running',
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    execution.status = 'completed';
+    execution.status = 'completed;
     execution.endTime = new Date().toISOString();
     execution.duration = new Date(execution.endTime).getTime() - new Date(execution.startTime).getTime();
     execution.results = { score: Math.floor(Math.random() * 40) + 60 };
@@ -451,14 +451,14 @@ export class TestScheduler {
 
   // 私有方法：发送通知
   private static async sendNotification(schedule: ScheduledTest, execution: TestExecution): Promise<void> {
-    // 实现邮件和Webhook通知
-    console.log(`Sending notification for schedule ${schedule.id}, execution ${execution.id}`);`
+    // 实现邮件和Webhook通知`
+    console.log(`Sending notification for schedule ${schedule.id}, execution ${execution.id}`);
   }
 
   // 私有方法：发送批量测试通知
   private static async sendBatchNotification(config: BatchTestConfig, executions: TestExecution[]): Promise<void> {
-    // 实现批量测试完成通知
-    console.log(`Batch test completed: ${executions.length} tests executed`);`
+    // 实现批量测试完成通知`
+    console.log(`Batch test completed: ${executions.length} tests executed`);
   }
 }
 
@@ -467,3 +467,4 @@ export const testScheduler = TestScheduler;
 
 // 默认导出
 export default TestScheduler;
+`
