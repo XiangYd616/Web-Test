@@ -1,5 +1,5 @@
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api;
 interface TestConfig   {
   url: string;
   [key: string]: any;
@@ -54,7 +54,7 @@ class TestApiService {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError';
+    const errorType = error.name || 'UnknownError;
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -66,7 +66,7 @@ class TestApiService {
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics: ', {'
+    console.debug('API Metrics: ', {
       url: info.url,
       method: info.method,
       status: info.status,
@@ -92,7 +92,7 @@ class TestApiService {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
@@ -102,25 +102,25 @@ class TestApiService {
 
   // 获取认证token
   private getAuthToken(): string | null {
-    return localStorage.getItem("auth_token') || localStorage.getItem('token');'`
+    return localStorage.getItem('auth_token') || localStorage.getItem('token);
   }
 
   // 通用请求方法
   private async request(endpoint: string, options: RequestInit = {}): Promise<any> {
     const token = this.getAuthToken();
-
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {`
+`
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       headers: {
-        "Content-Type': 'application/json','`
-        ...(token && { 'Authorization': `Bearer ${token}` }),'`
+        "Content-Type": 'application/json','`
+        ...(token && { Authorization": `Bearer ${token"}` }),
         ...options.headers,
       },
       ...options,
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);`
+      const errorData = await response.json().catch(() => ({}));`
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
     }
 
     return response.json();
@@ -130,17 +130,17 @@ class TestApiService {
   async runWebsiteTest(config: TestConfig): Promise<string> {
     try {
       const sessionId = this.generateSessionId();
-      this.createSession(sessionId, "website-test');'`
+      this.createSession(sessionId, "website-test");
 
-      const result = await this.request('/tests/website', {'
-        method: 'POST','
+      const result = await this.request('/tests/website', {
+        method: 'POST,
         body: JSON.stringify(config),
-      });
+      "});
 
       this.updateSessionResult(sessionId, result);
       return sessionId;
     } catch (error) {
-      console.error('Website test failed: ', error);'
+      console.error('Website test failed: , error);
       throw error;
     }
   }
@@ -149,16 +149,16 @@ class TestApiService {
   async runPerformanceTest(config: TestConfig): Promise<string> {
     try {
       const sessionId = this.generateSessionId();
-      this.createSession(sessionId, 'performance-test');'
-      const result = await this.request('/tests/performance', {'
-        method: 'POST','
+      this.createSession(sessionId, 'performance-test');
+      const result = await this.request('/tests/performance', {
+        method: 'POST,
         body: JSON.stringify(config),
       });
 
       this.updateSessionResult(sessionId, result);
       return sessionId;
     } catch (error) {
-      console.error('Performance test failed: ', error);'
+      console.error('Performance test failed: , error);
       throw error;
     }
   }
@@ -167,16 +167,16 @@ class TestApiService {
   async runSecurityTest(config: TestConfig): Promise<string> {
     try {
       const sessionId = this.generateSessionId();
-      this.createSession(sessionId, 'security-test');'
-      const result = await this.request('/tests/security', {'
-        method: 'POST','
+      this.createSession(sessionId, 'security-test');
+      const result = await this.request('/tests/security', {
+        method: 'POST,
         body: JSON.stringify(config),
       });
 
       this.updateSessionResult(sessionId, result);
       return sessionId;
     } catch (error) {
-      console.error('Security test failed: ', error);'
+      console.error('Security test failed: , error);
       throw error;
     }
   }
@@ -185,16 +185,16 @@ class TestApiService {
   async runSEOTest(config: TestConfig): Promise<string> {
     try {
       const sessionId = this.generateSessionId();
-      this.createSession(sessionId, 'seo-test');'
-      const result = await this.request('/tests/seo', {'
-        method: 'POST','
+      this.createSession(sessionId, 'seo-test');
+      const result = await this.request('/tests/seo', {
+        method: 'POST,
         body: JSON.stringify(config),
       });
 
       this.updateSessionResult(sessionId, result);
       return sessionId;
     } catch (error) {
-      console.error('SEO test failed: ', error);'
+      console.error('SEO test failed: , error);
       throw error;
     }
   }
@@ -203,16 +203,16 @@ class TestApiService {
   async runAPITest(config: TestConfig): Promise<string> {
     try {
       const sessionId = this.generateSessionId();
-      this.createSession(sessionId, 'api-test');'
-      const result = await this.request('/tests/api', {'
-        method: 'POST','
+      this.createSession(sessionId, 'api-test');
+      const result = await this.request('/tests/api', {
+        method: 'POST,
         body: JSON.stringify(config),
       });
 
       this.updateSessionResult(sessionId, result);
       return sessionId;
     } catch (error) {
-      console.error('API test failed: ', error);'
+      console.error('API test failed: , error);
       throw error;
     }
   }
@@ -221,16 +221,16 @@ class TestApiService {
   async runStressTest(config: TestConfig): Promise<string> {
     try {
       const sessionId = this.generateSessionId();
-      this.createSession(sessionId, 'stress-test');'
-      const result = await this.request('/tests/stress', {'
-        method: 'POST','
+      this.createSession(sessionId, 'stress-test');
+      const result = await this.request('/tests/stress', {
+        method: 'POST,
         body: JSON.stringify(config),
       });
 
       this.updateSessionResult(sessionId, result);
       return sessionId;
     } catch (error) {
-      console.error('Stress test failed: ', error);'
+      console.error('Stress test failed: , error);
       throw error;
     }
   }
@@ -239,31 +239,31 @@ class TestApiService {
   async runCompatibilityTest(config: TestConfig): Promise<string> {
     try {
       const sessionId = this.generateSessionId();
-      this.createSession(sessionId, 'compatibility-test');'
-      const result = await this.request('/tests/compatibility', {'
-        method: 'POST','
+      this.createSession(sessionId, 'compatibility-test');
+      const result = await this.request('/tests/compatibility', {
+        method: 'POST,
         body: JSON.stringify(config),
       });
 
       this.updateSessionResult(sessionId, result);
       return sessionId;
     } catch (error) {
-      console.error("Compatibility test failed: ', error);'
+      console.error("Compatibility test failed: ", error");
       throw error;
-    }
+    "}
   }
 
   // 获取测试结果
   async getTestResult(sessionId: string): Promise<TestResult | null> {
     const session = this.sessions.get(sessionId);
     if (!session) {
-      try {
-        const result = await this.request(`/tests/results/${sessionId}`);`
+      try {`
+        const result = await this.request(`/tests/results/${sessionId}`);
         return result;
       } catch (error) {
-        console.error("Failed to get test result: ', error);'`
+        console.error("Failed to get test result: ", error");
         return null;
-      }
+      "}
     }
     return session.result || null;
   }
@@ -275,58 +275,58 @@ class TestApiService {
 
   // 取消测试
   async cancelTest(sessionId: string): Promise<boolean> {
-    try {
-      await this.request(`/tests/cancel/${sessionId}`, {`
-        method: "POST','`
-      });
+    try {`
+      await this.request(`/tests/cancel/${sessionId}`, {
+        method: "POST",
+      "});
 
       const session = this.sessions.get(sessionId);
       if (session) {
-        session.status = 'failed';
-        session.error = 'Test cancelled by user';
+        session.status = 'failed',
+        session.error = 'Test cancelled by user',
         session.endTime = Date.now();
       }
 
       return true;
     } catch (error) {
-      console.error("Failed to cancel test: ', error);'
+      console.error("Failed to cancel test: ", error");
       return false;
-    }
+    "}
   }
 
   // 获取测试历史
   async getTestHistory(limit = 50): Promise<any[]> {
-    try {
-      const result = await this.request(`/tests/history?limit=${limit}`);`
+    try {`
+      const result = await this.request(`/tests/history?limit=${limit}`);
       return result.data || [];
     } catch (error) {
-      console.error("Failed to get test history: ', error);'`
+      console.error("Failed to get test history: ", error");
       return [];
-    }
+    "}
   }
 
   // 导出测试结果
-  async exportTestResults(testId: string, format: 'json' | 'csv' | 'pdf' | 'html'): Promise<any> {'
-    try {
-      const result = await this.request(`/tests/export/${testId}?format=${format}`, {`
-        method: "GET','`
-      });
+  async exportTestResults(testId: string, format: 'json' | 'csv' | 'pdf' | 'html'): Promise<any> {
+    try {`
+      const result = await this.request(`/tests/export/${testId}?format=${format}`, {
+        method: "GET",
+      "});
       return result;
     } catch (error) {
-      console.error("Failed to export test results: ', error);'
+      console.error("Failed to export test results: ", error");
       throw error;
-    }
+    "}
   }
 
   // 删除测试结果
   async deleteTestResult(resultId: string): Promise<boolean> {
-    try {
-      await this.request(`/tests/results/${resultId}`, {`
-        method: "DELETE','`
-      });
+    try {`
+      await this.request(`/tests/results/${resultId}`, {
+        method: "DELETE",
+      "});
       return true;
     } catch (error) {
-      console.error('Failed to delete test result: ', error);'
+      console.error('Failed to delete test result: , error);
       return false;
     }
   }
@@ -334,40 +334,40 @@ class TestApiService {
   // 检查测试引擎状态
   async checkEngineStatus(): Promise<TestResult> {
     try {
-      const result = await this.request('/test-engines/status');'
+      const result = await this.request('/test-engines/status);
       return {
         success: true,
         data: result.data || result,
-        message: result.message || 'Engine status retrieved successfully';
+        message: result.message || 'Engine status retrieved successfully;
       };
     } catch (error) {
-      console.error('Failed to check engine status: ', error);'
+      console.error('Failed to check engine status: , error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to check engine status','
+        error: error instanceof Error ? error.message : 'Failed to check engine status',
         data: {
-          lighthouse: { available: false, version: 'unknown' },'
-          playwright: { available: false, version: 'unknown' },'
-          k6: { available: false, version: 'unknown' },'
-          puppeteer: { available: false, version: 'unknown' }'
+          lighthouse: { available: false, version: 'unknown' }',
+          playwright: { available: false, version: 'unknown' }',
+          k6: { available: false, version: 'unknown' }',
+          puppeteer: { available: false, version: 'unknown }
         }
       };
     }
   }
 
   // 会话管理方法
-  private generateSessionId(): string {
-    return `test_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;`
+  private generateSessionId(): string {`
+    return `test_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   private createSession(sessionId: string, type: string): void {
     const session: TestSession  = {
       id: sessionId,
-      status: "pending','`
+      status: "pending",
       progress: [{
-        stage: 'initializing','
-        progress: 0,
-        message: `Starting ${type}...`,`
+        stage: 'initializing",
+        progress: 0,`
+        message: `Starting ${type"}...`,
         timestamp: Date.now()
       }],
       startTime: Date.now()
@@ -378,15 +378,15 @@ class TestApiService {
   private updateSessionResult(sessionId: string, result: any): void {
     const session = this.sessions.get(sessionId);
     if (session) {
-      session.status = "completed';'`
+      session.status = "completed",
       session.result = result;
       session.endTime = Date.now();
       session.progress.push({
-        stage: 'completed','
+        stage: 'completed',
         progress: 100,
-        message: 'Test completed successfully','
+        message: 'Test completed successfully",
         timestamp: Date.now()
-      });
+      "});
     }
   }
 
@@ -414,25 +414,25 @@ class TestApiService {
 
   // 获取测试模板
   async getTestTemplates(testType: string): Promise<any[]> {
-    try {
-      const result = await this.request(`/tests/templates?type=${testType}`);`
+    try {`
+      const result = await this.request(`/tests/templates?type=${testType}`);
       return result.data || [];
     } catch (error) {
-      console.error("Failed to get test templates: ', error);'`
+      console.error("Failed to get test templates: ", error");
       return [];
-    }
+    "}
   }
 
   // 保存测试模板
   async saveTestTemplate(template: { testType: string; name: string; description: string; config: any }): Promise<any> {
     try {
-      const result = await this.request('/tests/templates', {'
-        method: 'POST','
+      const result = await this.request('/tests/templates', {
+        method: 'POST,
         body: JSON.stringify(template)
       });
       return result;
     } catch (error) {
-      console.error('Failed to save test template:', error);'
+      console.error('Failed to save test template:, error);
       throw error;
     }
   }
@@ -446,3 +446,4 @@ export const testAPI = testApiService; // 兼容性导出
 export type { TestConfig, TestProgress, TestResult, TestSession };
 
 export default testApiService;
+`

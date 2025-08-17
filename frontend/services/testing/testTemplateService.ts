@@ -11,9 +11,8 @@ export interface TestTemplate     {
 
 class TestTemplateService {
   getTemplates(): TestTemplate[] {
-    return [
-      { id: '1', name: 'Basic Performance', type: 'performance', config: {} },'
-      { id: '2', name: 'Security Scan', type: 'security', config: {} }'
+    return [{ id: '1', name: 'Basic Performance', type: 'performance', config: {} }',
+      { id: '2', name: 'Security Scan', type: security, config: {} }
     ];
   }
 }
