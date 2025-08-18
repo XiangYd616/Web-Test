@@ -1,31 +1,31 @@
-import { handleAsyncError    } from '../utils/errorHandler';/**'
+import { handleAsyncError    } from '../utils/errorHandler';/**
  * 用户数据访问对象
  * 提供用户相关的数据库操作
  */
 
-import { CreateUserData, UpdateUserData, User    } from '../../types/user';// 模拟用户数据存储'
+import { CreateUserData, UpdateUserData, User    } from '../../types/user';// 模拟用户数据存储
 const users: User[]  = [
   {
-    id: '1','
-    username: 'admin','
-    email: 'admin@example.com','
-    password: '$2b$10$rOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQ', // 'admin123';
-    role: 'admin' as any, // 临时修复，稍后会正确导入枚举'
+    id: '1',
+    username: 'admin',
+    email: 'admin@example.com',
+    password: '$2b$10$rOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQ', // 'admin123'
+    role: 'admin' as any, // 临时修复，稍后会正确导入枚举
     isActive: true,
-    createdAt: new Date('2024-01-01').toISOString(),'
-    updatedAt: new Date('2024-01-01').toISOString(),'
+    createdAt: new Date('2024-01-01').toISOString(),
+    updatedAt: new Date('2024-01-01').toISOString(),
     lastLoginAt: null,
     profile: {
-      firstName: 'Admin','
-      lastName: 'User','
+      firstName: 'Admin',
+      lastName: 'User',
       avatar: null,
-      bio: 'System Administrator','
+      bio: 'System Administrator',
       phone: null,
       address: null,
       preferences: {
-        theme: 'light','
-        language: 'zh-CN','
-        timezone: 'Asia/Shanghai','
+        theme: 'light',
+        language: 'zh-CN',
+        timezone: 'Asia/Shanghai',
         notifications: {
           email: true,
           push: true,
@@ -36,26 +36,26 @@ const users: User[]  = [
     }
   },
   {
-    id: '2','
-    username: 'testuser','
-    email: 'test@example.com','
-    password: '$2b$10$rOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQ', // 'test123';
-    role: 'user' as any, // 临时修复，稍后会正确导入枚举'
+    id: '2',
+    username: 'testuser',
+    email: 'test@example.com',
+    password: '$2b$10$rOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQjQjQjQjOzJqQjQjQjQjQ', // 'test123'
+    role: 'user' as any, // 临时修复，稍后会正确导入枚举
     isActive: true,
-    createdAt: new Date('2024-01-02').toISOString(),'
-    updatedAt: new Date('2024-01-02').toISOString(),'
+    createdAt: new Date('2024-01-02').toISOString(),
+    updatedAt: new Date('2024-01-02').toISOString(),
     lastLoginAt: null,
     profile: {
-      firstName: 'Test','
-      lastName: 'User','
+      firstName: 'Test',
+      lastName: 'User',
       avatar: null,
-      bio: 'Test User Account','
+      bio: 'Test User Account',
       phone: null,
       address: null,
       preferences: {
-        theme: 'light','
-        language: 'zh-CN','
-        timezone: 'Asia/Shanghai','
+        theme: 'light',
+        language: 'zh-CN',
+        timezone: 'Asia/Shanghai',
         notifications: {
           email: true,
           push: false,
@@ -103,22 +103,22 @@ export const userDao = {
       username: userData.username,
       email: userData.email,
       password: userData.password,
-      role: userData.role || 'user' as any,'
+      role: userData.role || 'user' as any,
       isActive: true,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       lastLoginAt: null,
       profile: {
-        firstName: userData.firstName || '','
-        lastName: userData.lastName || '','
+        firstName: userData.firstName || '',
+        lastName: userData.lastName || '',
         avatar: null,
-        bio: '','
+        bio: '',
         phone: null,
         address: null,
         preferences: {
-          theme: 'light','
-          language: 'zh-CN','
-          timezone: 'Asia/Shanghai','
+          theme: 'light',
+          language: 'zh-CN',
+          timezone: 'Asia/Shanghai',
           notifications: {
             email: true,
             push: true,
@@ -195,7 +195,7 @@ export const userDao = {
     const user = try {
   await this.findByUsername(username) || await this.findByEmail(username);
 } catch (error) {
-  console.error('Await error: ', error);'
+  console.error('Await error: ', error);
   throw error;
 }
     if (!user || !user.isActive) {
@@ -220,7 +220,7 @@ export const userDao = {
     const user = try {
   await this.findByUsername(username);
 } catch (error) {
-  console.error('Await error: ', error);'
+  console.error('Await error: ', error);
   throw error;
 }
     return user !== null;
@@ -233,7 +233,7 @@ export const userDao = {
     const user = try {
   await this.findByEmail(email);
 } catch (error) {
-  console.error('Await error:', error);'
+  console.error('Await error:', error);
   throw error;
 }
     return user !== null;

@@ -1,25 +1,25 @@
 /**
- * 虚拟化结果列表组件
- * 用于高性能渲染大量测试结果
+ * 虚拟化结果列表组件;
+ * 用于高性能渲染大量测试结果;
  */
 
-import React, { memo, useMemo, useCallback, useState, useEffect    } from 'react';import ResultCard from './ResultCard';interface TestResult   {'
-  id: string;
+import React, { memo, useMemo, useCallback, useState, useEffect    } from 'react';import ResultCard from './ResultCard';interface TestResult   {
+  id: string;,
   type: string;
-  url: string;
+  url: string;,
   score: number;
-  status: 'success' | 'warning' | 'error';
+  status: 'success' | 'warning' | 'error';,
   timestamp: string;
-  duration: number;
+  duration: number;,
   metrics: Record<string, any>;
   details: any;
 }
 
 interface VirtualizedResultListProps   {
-  results: TestResult[];
+  results: TestResult[];,
   selectedResults: Set<string>;
   showDetails: Record<string, boolean>;
-  onToggleSelection: (id: string) => void;
+  onToggleSelection: (id: string) => void;,
   onToggleDetails: (id: string) => void;
   onShare?: (result: TestResult) => void;
   onResultClick?: (result: TestResult) => void;
@@ -28,14 +28,14 @@ interface VirtualizedResultListProps   {
 }
 
 interface ListItemProps   {
-  index: number;
+  index: number;,
   style: React.CSSProperties;
-  data: {
-    results: TestResult[];
-    selectedResults: Set<string>;
-    showDetails: Record<string, boolean>;
-    onToggleSelection: (id: string) => void;
-    onToggleDetails: (id: string) => void;
+  data: {,
+  results: TestResult[];
+    selectedResults: Set<string>;,
+  showDetails: Record<string, boolean>;
+    onToggleSelection: (id: string) => void;,
+  onToggleDetails: (id: string) => void;
     onShare?: (result: TestResult) => void;
     onResultClick?: (result: TestResult) => void;
   };
@@ -45,32 +45,32 @@ const ListItem: React.FC<ListItemProps>  = memo(({ index, style, data }) => {
   
   // 性能优化
   const memoizedProps = useMemo(() => ({
-    className: combinedClassName,
-    style: computedStyle,
-    disabled,
-    'aria-label': ariaLabel,'
-    'data-testid': testId'
+    className: combinedClassName,;
+    style: computedStyle,;
+    disabled,;
+    'aria-label': ariaLabel,;
+    'data-testid': testId;
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
   const componentId = useId();
-  const errorId = `${componentId}-error`;`
-  const descriptionId = `${componentId}-description`;`
+  const errorId = `${componentId}-error`;
+  const descriptionId = `${componentId}-description`;
   
   const ariaProps = {
-    id: componentId,
-    "aria-label': ariaLabel,'`
-    'aria-labelledby': ariaLabelledBy,'
-    'aria-describedby': ['']
-      error ? errorId : null,
-      description ? descriptionId : null,
-      ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,'
-    'aria-invalid': !!error,'
-    'aria-disabled': disabled,'
-    'aria-busy': loading,'
-    'aria-expanded': expanded,'
-    'aria-selected': selected,'
-    role: role,
-    tabIndex: disabled ? -1 : (tabIndex ?? 0)
+    id: componentId,;
+    "aria-label': ariaLabel,'`;"`
+    'aria-labelledby': ariaLabelledBy,;
+    'aria-describedby': [''];
+      error ? errorId : null,;
+      description ? descriptionId : null,;
+      ariaDescribedBy;
+    ].filter(Boolean).join(' ') || undefined,;
+    'aria-invalid': !!error,;
+    'aria-disabled': disabled,;
+    'aria-busy': loading,;
+    'aria-expanded': expanded,;
+    'aria-selected': selected,;
+    role: role,;
+    tabIndex: disabled ? -1 : (tabIndex ?? 0);
   };
   
   const handleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
@@ -79,8 +79,8 @@ const ListItem: React.FC<ListItemProps>  = memo(({ index, style, data }) => {
     try {
       onClick?.(event);
     } catch (error) {
-      console.error('Click handler error: ', error);'
-      setError('操作失败，请重试');'
+      console.error('Click handler error: ', error);
+      setError('操作失败，请重试");
     }
   }, [disabled, loading, onClick]);
   
@@ -90,34 +90,32 @@ const ListItem: React.FC<ListItemProps>  = memo(({ index, style, data }) => {
     try {
       onChange?.(newValue);
     } catch (error) {
-      console.error('Change handler error: ', error);'
-      updateState({ error: '值更新失败' });'
+      console.error('Change handler error: ', error);
+      updateState({ error: '值更新失败' });
     }
   }, [onChange, updateState]);
   
-  const handleFocus = useCallback((event: React.FocusEvent<HTMLElement>) => {
-    updateState({ focused: true });
+  const handleFocus = useCallback((event: React.FocusEvent<HTMLElement>) => { updateState({ focused: true  });
     onFocus?.(event);
   }, [onFocus, updateState]);
   
-  const handleBlur = useCallback((event: React.FocusEvent<HTMLElement>) => {
-    updateState({ focused: false });
+  const handleBlur = useCallback((event: React.FocusEvent<HTMLElement>) => { updateState({ focused: false  });
     onBlur?.(event);
   }, [onBlur, updateState]);
   const {
-    results,
-    selectedResults,
-    showDetails,
-    onToggleSelection,
-    onToggleDetails,
-    onShare,
-    onResultClick
+    results,;
+    selectedResults,;
+    showDetails,;
+    onToggleSelection,;
+    onToggleDetails,;
+    onShare,;
+    onResultClick;
   } = data;
 
   const result = results[index];
   if (!result) return null;
 
-  return (
+  return (;
     <div style={style} className= 'px-2 py-1'>
       <ResultCard result={result}
         isSelected={selectedResults.has(result.id)}
@@ -131,17 +129,17 @@ const ListItem: React.FC<ListItemProps>  = memo(({ index, style, data }) => {
   );
 });
 
-ListItem.displayName = 'ListItem';
+ListItem.displayName = 'ListItem'
 const VirtualizedResultList: React.FC<VirtualizedResultListProps>  = memo(({
-  results,
-  selectedResults,
-  showDetails,
-  onToggleSelection,
-  onToggleDetails,
-  onShare,
-  onResultClick,
-  itemHeight = 200,
-  height = 600
+  results,;
+  selectedResults,;
+  showDetails,;
+  onToggleSelection,;
+  onToggleDetails,;
+  onShare,;
+  onResultClick,;
+  itemHeight = 200,;
+  height = 600;)
 }) => {
   const [containerHeight, setContainerHeight] = useState(height);
   // 响应式高度调整
@@ -153,8 +151,8 @@ const VirtualizedResultList: React.FC<VirtualizedResultListProps>  = memo(({
     };
 
     updateHeight();
-    window.addEventListener('resize', updateHeight);'
-    return () => window.removeEventListener('resize', updateHeight);'
+    window.addEventListener('resize', updateHeight);
+    return () => window.removeEventListener('resize', updateHeight);
   }, [height]);
 
   // 计算动态项目高度
@@ -176,27 +174,27 @@ const VirtualizedResultList: React.FC<VirtualizedResultListProps>  = memo(({
 
   // 准备传递给列表项的数据
   const itemData = useMemo(() => ({
-    results,
-    selectedResults,
-    showDetails,
-    onToggleSelection,
-    onToggleDetails,
-    onShare,
-    onResultClick
+    results,;
+    selectedResults,;
+    showDetails,;
+    onToggleSelection,;
+    onToggleDetails,;
+    onShare,;
+    onResultClick;
   }), [
-    results,
-    selectedResults,
-    showDetails,
-    onToggleSelection,
-    onToggleDetails,
-    onShare,
-    onResultClick
+    results,;
+    selectedResults,;
+    showDetails,;
+    onToggleSelection,;
+    onToggleDetails,;
+    onShare,;
+    onResultClick;
   ]);
 
   // 如果结果数量较少，使用普通渲染
   if (results.length <= 20) {
     
-        return (<div className= 'space-y-4'>
+        return (<div className= 'space-y-4'>;
         {results.map((result) => (
           <ResultCard key={result.id
       }
@@ -214,21 +212,21 @@ const VirtualizedResultList: React.FC<VirtualizedResultListProps>  = memo(({
   }
 
   // 大量结果时使用虚拟化列表
-  return (
-    <div className= 'border border-gray-700 rounded-lg overflow-hidden'>
-      <List
+  return (;
+    <div className= 'border border-gray-700 rounded-lg overflow-hidden'>;
+      <List;
         height={containerHeight}
         itemCount={results.length}
         itemSize={getItemSize}
         itemData={itemData}
         overscanCount={5}
-        className= 'scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800';
-      >
+        className= 'scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800'
+      >;
         {ListItem}
       </List>
     </div>
   );
 });
 
-VirtualizedResultList.displayName = 'VirtualizedResultList';
+VirtualizedResultList.displayName = 'VirtualizedResultList'
 export default VirtualizedResultList;

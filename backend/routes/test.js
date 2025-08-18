@@ -12,15 +12,15 @@ const { authMiddleware, optionalAuth, adminAuth } = require('../middleware/auth'
 const { testRateLimiter, historyRateLimiter } = require('../middleware/rateLimiter');
 const { asyncHandler } = require('../middleware/errorHandler');
 const { validateURLMiddleware, validateAPIURLMiddleware } = require('../middleware/urlValidator');
-// // const { apiCache, dbCache } = require('./cache.js'); // 已删除 // 已删除
+const { apiCache, dbCache } = require('../middleware/cache.js');
 
 // 导入测试引擎类
-const { RealTestEngine } = require('../engines/api/ApiAnalyzer.js');
+const APIAnalyzer = require('../engines/api/ApiAnalyzer.js');
 const { RealStressTestEngine } = require('../engines/stress/StressTestEngine.js');
 const RealSecurityTestEngine = require('../engines/security/securityTestEngine.js'); // 直接导出
-const { RealCompatibilityTestEngine } = require('../engines/compatibility/compatibilityTestEngine.js');
-const { RealUXTestEngine } = require('../engines/api/UXAnalyzer.js');
-const { RealAPITestEngine } = require('../engines/api/apiTestEngine.js');
+const CompatibilityTestEngine = require('../engines/compatibility/compatibilityTestEngine.js');
+const UXAnalyzer = require('../engines/api/UXAnalyzer.js');
+const ApiTestEngine = require('../engines/api/apiTestEngine.js');
 const securityTestStorage = require('../services/testing/securityTestStorage.js');
 const TestHistoryService = require('../services/testing/TestHistoryService.js');
 const userTestManager = require('../services/testing/UserTestManager.js');
@@ -34,13 +34,13 @@ const multer = require('multer');
 const path = require('path');
 
 // 创建测试引擎实例（简化架构）
-const realTestEngine = new RealTestEngine();
+const realTestEngine = new APIAnalyzer();
 // 🔧 重构：移除全局实例，压力测试现在通过UserTestManager管理
 // const realStressTestEngine = createGlobalInstance(); // 已移除
 const realSecurityTestEngine = new RealSecurityTestEngine();
-const realCompatibilityTestEngine = new RealCompatibilityTestEngine();
-const realUXTestEngine = new RealUXTestEngine();
-const realAPITestEngine = new RealAPITestEngine();
+const realCompatibilityTestEngine = new CompatibilityTestEngine();
+const realUXTestEngine = new UXAnalyzer();
+const realAPITestEngine = new ApiTestEngine();
 
 // 🔧 统一使用本地TestHistoryService实例
 const testHistoryService = new TestHistoryService(require('../config/database'));
@@ -869,9 +869,9 @@ async function handleTestHistory(req, res) {
     });
 
     if (!result.success) {
-      
-        return res.status(400).json(result);
-      }
+
+      return res.status(400).json(result);
+    }
 
     const { tests, pagination } = result.data;
 
@@ -896,11 +896,11 @@ router.post('/run', authMiddleware, testRateLimiter, asyncHandler(async (req, re
   const { testType, url, config = {}, testName } = req.body;
 
   if (!testType || !url) {
-    
-        return res.status(400).json({
+
+    return res.status(400).json({
       success: false,
       error: '缺少必需参数: testType 和 url'
-      });
+    });
   }
 
   try {
@@ -1060,11 +1060,11 @@ router.post('/cache/invalidate', authMiddleware, asyncHandler(async (req, res) =
   const { event, data } = req.body;
 
   if (!event) {
-    
-        return res.status(400).json({
+
+    return res.status(400).json({
       success: false,
       error: '缺少必需参数: event'
-      });
+    });
   }
 
   try {
@@ -1115,8 +1115,8 @@ router.get('/:testId/result', optionalAuth, asyncHandler(async (req, res) => {
     const testResult = await databaseService.getTestResult(testId);
 
     if (!testResult) {
-      
-        return res.status(404).json({
+
+      return res.status(404).json({
         success: false,
         error: '测试结果不存在或已过期'
       });
@@ -1187,11 +1187,11 @@ router.post('/config/templates', authMiddleware, asyncHandler(async (req, res) =
   const { name, testType, config, description } = req.body;
 
   if (!name || !testType || !config) {
-    
-        return res.status(400).json({
+
+    return res.status(400).json({
       success: false,
       error: '缺少必需参数: name, testType, config'
-      });
+    });
   }
 
   try {
@@ -1250,8 +1250,8 @@ router.put('/history/:recordId', authMiddleware, asyncHandler(async (req, res) =
     );
 
     if (existingRecord.rows.length === 0) {
-      
-        return res.notFound('资源', '记录不存在或无权限访问');
+
+      return res.notFound('资源', '记录不存在或无权限访问');
     }
 
     const result = await testHistoryService.updateTestRecord(recordId, req.body);
@@ -1289,8 +1289,8 @@ router.get('/history/:recordId', optionalAuth, asyncHandler(async (req, res) => 
     );
 
     if (result.rows.length === 0) {
-      
-        return res.notFound('资源', '记录不存在或无权限访问');
+
+      return res.notFound('资源', '记录不存在或无权限访问');
     }
 
     res.success(testHistoryService.formatTestRecord(result.rows[0]));
@@ -1412,8 +1412,8 @@ router.delete('/history/:recordId', authMiddleware, asyncHandler(async (req, res
     );
 
     if (result.rowCount === 0) {
-      
-        return res.notFound('资源', '测试记录不存在');
+
+      return res.notFound('资源', '测试记录不存在');
     }
 
     res.success('测试记录已删除');
@@ -1561,8 +1561,8 @@ router.get('/:testId', authMiddleware, asyncHandler(async (req, res) => {
     const result = await testHistoryService.getTestDetails(testId, req.user.id);
 
     if (!result.success) {
-      
-        return res.status(404).json({
+
+      return res.status(404).json({
         success: false,
         message: result.error || '测试结果不存在'
       });
@@ -1583,8 +1583,8 @@ router.post('/website', optionalAuth, testRateLimiter, asyncHandler(async (req, 
   const { url, options = {} } = req.body;
 
   if (!url) {
-    
-        return res.validationError([], 'URL是必填的');
+
+    return res.validationError([], 'URL是必填的');
   }
 
   try {
@@ -1641,8 +1641,8 @@ router.get('/stress/status/:testId', optionalAuth, asyncHandler(async (req, res)
         const historyResult = await query(historyQuery, [`%${testId}%`]);
 
         if (historyResult.rows.length > 0) {
-          
-        const testRecord = historyResult.rows[0];
+
+          const testRecord = historyResult.rows[0];
           console.log('📊 从测试历史获取结果:', testRecord.id, testRecord.status);
 
           // 如果测试已完成，返回真实的测试结果
@@ -1666,7 +1666,7 @@ router.get('/stress/status/:testId', optionalAuth, asyncHandler(async (req, res)
                   peakTPS: testRecord.peak_tps || 0,
                   errorRate: testRecord.error_rate || 0,
                   activeUsers: 0
-      },
+                },
                 realTimeData: realTimeData,
                 results: testRecord.results ?
                   (typeof testRecord.results === 'string' ?
@@ -2404,9 +2404,9 @@ router.get('/security/:testId', optionalAuth, asyncHandler(async (req, res) => {
     const result = await securityTestStorage.getSecurityTestResult(testId, req.user?.id);
 
     if (!result.success) {
-      
-        return res.status(404).json(result);
-      }
+
+      return res.status(404).json(result);
+    }
 
     res.json(result);
   } catch (error) {
@@ -2425,9 +2425,9 @@ router.delete('/security/:testId', optionalAuth, asyncHandler(async (req, res) =
     const result = await securityTestStorage.deleteSecurityTestResult(testId, req.user?.id);
 
     if (!result.success) {
-      
-        return res.status(404).json(result);
-      }
+
+      return res.status(404).json(result);
+    }
 
     res.json(result);
   } catch (error) {
@@ -2995,8 +2995,8 @@ router.post('/performance/save', optionalAuth, asyncHandler(async (req, res) => 
   const { result, userId } = req.body;
 
   if (!result) {
-    
-        return res.validationError([], '测试结果数据是必填的');
+
+    return res.validationError([], '测试结果数据是必填的');
   }
 
   try {
@@ -3384,8 +3384,8 @@ router.post('/ux', optionalAuth, testRateLimiter, asyncHandler(async (req, res) 
   const { url, options = {} } = req.body;
 
   if (!url) {
-    
-        return res.validationError([], 'URL是必填的');
+
+    return res.validationError([], 'URL是必填的');
   }
 
   try {
@@ -3545,13 +3545,13 @@ router.post('/api-test', optionalAuth, testRateLimiter, asyncHandler(async (req,
 
   // 验证必填参数
   if (!baseUrl) {
-    
-        return res.validationError([], 'API基础URL是必填的');
+
+    return res.validationError([], 'API基础URL是必填的');
   }
 
   if (!endpoints || endpoints.length === 0) {
-    
-        return res.validationError([], '至少需要一个API端点');
+
+    return res.validationError([], '至少需要一个API端点');
   }
 
   try {
@@ -3610,8 +3610,8 @@ router.delete('/:testId', authMiddleware, asyncHandler(async (req, res) => {
     );
 
     if (result.rowCount === 0) {
-      
-        return res.notFound('资源', '测试结果不存在');
+
+      return res.notFound('资源', '测试结果不存在');
     }
 
     res.success('测试结果已删除');
@@ -3876,13 +3876,13 @@ router.post('/proxy-latency', optionalAuth, testRateLimiter, asyncHandler(async 
 
   // 验证代理配置
   if (!proxy || !proxy.enabled) {
-    
-        return res.validationError([], '代理配置无效或未启用');
+
+    return res.validationError([], '代理配置无效或未启用');
   }
 
   if (!proxy.host) {
-    
-        return res.validationError([], '代理地址不能为空');
+
+    return res.validationError([], '代理地址不能为空');
   }
 
   const startTime = Date.now();
@@ -4064,13 +4064,13 @@ router.post('/proxy-test', optionalAuth, testRateLimiter, asyncHandler(async (re
 
   // 验证代理配置
   if (!proxy || !proxy.enabled) {
-    
-        return res.validationError([], '代理配置无效或未启用');
+
+    return res.validationError([], '代理配置无效或未启用');
   }
 
   if (!proxy.host) {
-    
-        return res.validationError([], '代理地址不能为空');
+
+    return res.validationError([], '代理地址不能为空');
   }
 
   try {
@@ -4313,8 +4313,8 @@ router.post('/proxy-analyze', optionalAuth, asyncHandler(async (req, res) => {
     const { proxy } = req.body;
 
     if (!proxy || !proxy.host) {
-      
-        return res.validationError([], '缺少代理配置信息');
+
+      return res.validationError([], '缺少代理配置信息');
     }
 
     console.log('🔍 开始分析代理配置:', `${proxy.host}:${proxy.port}`);

@@ -1,29 +1,29 @@
 /**
- * 增强版错误边界组件
- * 提供完整的错误捕获、错误报告和错误恢复功能
+ * 增强版错误边界组件;
+ * 提供完整的错误捕获、错误报告和错误恢复功能;
  */
 
-import React, { Component, ReactNode, ErrorInfo } from 'react';
+import React, { Component, ReactNode, ErrorInfo  } from 'react
 
 // 错误信息接口
-export interface ErrorDetails {
+export interface ErrorDetails  {
   message: string;
   stack?: string;
   componentStack?: string;
   errorBoundary?: string;
   errorInfo?: ErrorInfo;
-  timestamp: Date;
-  userAgent: string;
+  timestamp: Date;,
+  userAgent: string;,
   url: string;
   userId?: string;
 }
 
 // 错误边界状态
 interface ErrorBoundaryState {
-  hasError: boolean;
-  error: Error | null;
-  errorInfo: ErrorInfo | null;
-  errorId: string | null;
+  hasError: boolean;,
+  error: Error | null;,
+  errorInfo: ErrorInfo | null;,
+  errorId: string | null;,
   retryCount: number;
 }
 
@@ -37,7 +37,7 @@ interface EnhancedErrorBoundaryProps {
   resetOnPropsChange?: boolean;
   resetKeys?: Array<string | number>;
   isolate?: boolean;
-  level?: 'page' | 'section' | 'component';
+  level?: 'page' | 'section' | 'component'
 }
 
 class EnhancedErrorBoundary extends Component<EnhancedErrorBoundaryProps, ErrorBoundaryState> {
@@ -47,33 +47,33 @@ class EnhancedErrorBoundary extends Component<EnhancedErrorBoundaryProps, ErrorB
     super(props);
     
     this.state = {
-      hasError: false,
-      error: null,
-      errorInfo: null,
-      errorId: null,
-      retryCount: 0
+      hasError: false,;
+      error: null,;
+      errorInfo: null,;
+      errorId: null,;
+      retryCount: 0;
     };
   }
 
   static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
     return {
-      hasError: true,
-      error,
+      hasError: true,;
+      error,;
       errorId: `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
     };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    const errorDetails: ErrorDetails = {
-      message: error.message,
-      stack: error.stack,
-      componentStack: errorInfo.componentStack,
-      errorBoundary: this.constructor.name,
-      errorInfo,
-      timestamp: new Date(),
-      userAgent: navigator.userAgent,
-      url: window.location.href,
-      userId: this.getUserId()
+    const errorDetails: ErrorDetails = {,
+  message: error.message,;
+      stack: error.stack,;
+      componentStack: errorInfo.componentStack,;
+      errorBoundary: this.constructor.name,;
+      errorInfo,;
+      timestamp: new Date(),;
+      userAgent: navigator.userAgent,;
+      url: window.location.href,;
+      userId: this.getUserId();
     };
 
     // 更新状态
@@ -97,8 +97,8 @@ class EnhancedErrorBoundary extends Component<EnhancedErrorBoundaryProps, ErrorB
 
     if (hasError && resetOnPropsChange) {
       if (resetKeys) {
-        const hasResetKeyChanged = resetKeys.some(
-          (key, index) => prevProps.resetKeys?.[index] !== key
+        const hasResetKeyChanged = resetKeys.some(;)
+          (key, index) => prevProps.resetKeys?.[index] !== key;
         );
         if (hasResetKeyChanged) {
           this.resetErrorBoundary();
@@ -149,11 +149,11 @@ class EnhancedErrorBoundary extends Component<EnhancedErrorBoundaryProps, ErrorB
   private async reportError(errorDetails: ErrorDetails) {
     try {
       await fetch('/api/errors/report', {
-        method: 'POST',
+        method: 'POST',;
         headers: {
           'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(errorDetails)
+        },)
+        body: JSON.stringify(errorDetails);
       });
     } catch (reportError) {
       console.error('Failed to report error:', reportError);
@@ -166,11 +166,11 @@ class EnhancedErrorBoundary extends Component<EnhancedErrorBoundaryProps, ErrorB
     }
 
     this.setState({
-      hasError: false,
-      error: null,
-      errorInfo: null,
-      errorId: null,
-      retryCount: 0
+      hasError: false,;
+      error: null,;
+      errorInfo: null,;
+      errorId: null,;
+      retryCount: 0;)
     });
   };
 
@@ -183,7 +183,7 @@ class EnhancedErrorBoundary extends Component<EnhancedErrorBoundaryProps, ErrorB
       return;
     }
 
-    this.setState({ retryCount: retryCount + 1 });
+    this.setState({ retryCount: retryCount + 1  });
 
     // 延迟重试，避免立即重试可能导致的问题
     this.retryTimeoutId = window.setTimeout(() => {
@@ -207,85 +207,85 @@ class EnhancedErrorBoundary extends Component<EnhancedErrorBoundaryProps, ErrorB
     // 默认错误界面
     const canRetry = enableRetry && retryCount < maxRetries;
     const levelConfig = {
-      page: {
-        title: '页面加载失败',
-        description: '抱歉，页面遇到了问题。请尝试刷新页面或联系技术支持。',
+      page: {','
+  title: '页面加载失败',;
+        description: '抱歉，页面遇到了问题。请尝试刷新页面或联系技术支持。',;
         icon: '🚫'
       },
-      section: {
-        title: '模块加载失败',
-        description: '这个模块暂时无法显示。您可以尝试重新加载或继续使用其他功能。',
+      section: {','
+  title: '模块加载失败',;
+        description: '这个模块暂时无法显示。您可以尝试重新加载或继续使用其他功能。',;
         icon: '⚠️'
       },
-      component: {
-        title: '组件错误',
-        description: '这个组件遇到了问题，但不会影响页面的其他功能。',
+      component: {','
+  title: '组件错误',;
+        description: '这个组件遇到了问题，但不会影响页面的其他功能。',;
         icon: '🔧'
       }
     };
 
     const config = levelConfig[level];
 
-    return (
-      <div className="error-boundary-fallback p-6 bg-red-50 border border-red-200 rounded-lg">
-        <div className="flex items-start space-x-4">
+    return (;
+      <div className="error-boundary-fallback p-6 bg-red-50 border border-red-200 rounded-lg">";"
+        <div className="flex items-start space-x-4">";"
           <div className="text-2xl">{config.icon}</div>
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-red-800 mb-2">
+          <div className="flex-1">";"
+            <h3 className="text-lg font-semibold text-red-800 mb-2">;
               {config.title}
             </h3>
-            <p className="text-red-700 mb-4">
+            <p className="text-red-700 mb-4">;
               {config.description}
             </p>
-            
-            {process.env.NODE_ENV === 'development' && (
-              <details className="mb-4">
-                <summary className="cursor-pointer text-sm text-red-600 hover:text-red-800">
-                  查看错误详情
+            ;
+            { process.env.NODE_ENV === 'development' && (
+              <details className="mb-4">";"
+                <summary className="cursor-pointer text-sm text-red-600 hover:text-red-800">;
+                  查看错误详情;
                 </summary>
-                <div className="mt-2 p-3 bg-red-100 rounded text-xs font-mono text-red-800 overflow-auto">
-                  <div className="mb-2">
-                    <strong>错误信息:</strong> {error.message}
+                <div className="mt-2 p-3 bg-red-100 rounded text-xs font-mono text-red-800 overflow-auto">";"
+                  <div className="mb-2">;
+                    <strong>错误信息:</strong> {error.message }
                   </div>
-                  {error.stack && (
-                    <div className="mb-2">
+                  { error.stack && (
+                    <div className="mb-2">;
                       <strong>错误堆栈:</strong>
-                      <pre className="whitespace-pre-wrap">{error.stack}</pre>
+                      <pre className="whitespace-pre-wrap">{error.stack }</pre>
                     </div>
                   )}
-                  {errorInfo.componentStack && (
-                    <div>
+                  { errorInfo.componentStack && (
+                    <div>;
                       <strong>组件堆栈:</strong>
-                      <pre className="whitespace-pre-wrap">{errorInfo.componentStack}</pre>
+                      <pre className="whitespace-pre-wrap">{errorInfo.componentStack }</pre>
                     </div>
                   )}
                 </div>
               </details>
             )}
 
-            <div className="flex space-x-3">
+            <div className="flex space-x-3">;
               {canRetry && (
-                <button
+                <button;
                   onClick={this.retry}
-                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-                >
+                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors";
+                >;
                   重试 {retryCount > 0 && `(${retryCount}/${maxRetries})`}
                 </button>
               )}
               
-              <button
+              <button;
                 onClick={() => window.location.reload()}
-                className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
-              >
-                刷新页面
+                className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors";
+              >;
+                刷新页面;
               </button>
-              
+              ;
               {level === 'page' && (
-                <button
+                <button;
                   onClick={() => window.history.back()}
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                >
-                  返回上页
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors";
+                >;
+                  返回上页;
                 </button>
               )}
             </div>
@@ -315,12 +315,11 @@ class EnhancedErrorBoundary extends Component<EnhancedErrorBoundaryProps, ErrorB
 }
 
 // 高阶组件包装器
-export function withErrorBoundary<P extends object>(
-  Component: React.ComponentType<P>,
-  errorBoundaryProps?: Omit<EnhancedErrorBoundaryProps, 'children'>
-) {
-  const WrappedComponent = (props: P) => (
-    <EnhancedErrorBoundary {...errorBoundaryProps}>
+export function withErrorBoundary<P extends object>(;
+  Component: React.ComponentType<P>,;
+  errorBoundaryProps?: Omit<EnhancedErrorBoundaryProps, 'children'>;
+) { const WrappedComponent = (props: P) => (;
+    <EnhancedErrorBoundary {...errorBoundaryProps }>
       <Component {...props} />
     </EnhancedErrorBoundary>
   );
@@ -333,12 +332,12 @@ export function withErrorBoundary<P extends object>(
 // Hook for error reporting
 export function useErrorHandler() {
   const reportError = (error: Error, context?: string) => {
-    const errorDetails: ErrorDetails = {
-      message: error.message,
-      stack: error.stack,
-      timestamp: new Date(),
-      userAgent: navigator.userAgent,
-      url: window.location.href,
+    const errorDetails: ErrorDetails = {,
+  message: error.message,;
+      stack: error.stack,;
+      timestamp: new Date(),;
+      userAgent: navigator.userAgent,;
+      url: window.location.href,;
       userId: undefined // 可以从认证上下文获取
     };
 
@@ -350,10 +349,10 @@ export function useErrorHandler() {
     
     // 发送错误报告
     fetch('/api/errors/report', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(errorDetails)
-    }).catch(reportError => {
+      method: 'POST',;
+      headers: { 'Content-Type': 'application/json' },)
+      body: JSON.stringify(errorDetails);
+    }).catch(reportError => {')'
       console.error('Failed to report error:', reportError);
     });
   };
@@ -362,3 +361,4 @@ export function useErrorHandler() {
 }
 
 export default EnhancedErrorBoundary;
+'";

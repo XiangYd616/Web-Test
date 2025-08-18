@@ -17,7 +17,8 @@
   "scripts": {
     "_comment_main": "🚀 主要启动命令",
     "start": "concurrently \"npm run backend\" \"npm run frontend\"",
-    "dev": "concurrently \"npm run backend:dev\" \"npm run frontend\"",
+    "dev": "node scripts/start-dev.js",
+    "dev:manual": "concurrently \"npm run backend:dev\" \"npm run frontend\"",
     "_comment_services": "🔧 服务依赖分析",
     "frontend": "cd frontend && npm run dev",
     "backend": "cd backend && npm start",

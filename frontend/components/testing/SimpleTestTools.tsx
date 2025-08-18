@@ -3,14 +3,14 @@
  * 提供基本的网站测试功能
  */
 
-import React, { useState } from 'react';
-import { SimpleBarChart, StatCard, ProgressRing } from '../charts/SimpleCharts';
+import React, { useState } from 'react
+import { SimpleBarChart, StatCard, ProgressRing } from '../charts/SimpleCharts
 
 // 测试结果类型
 interface TestResult {
   id: string;
   name: string;
-  status: 'running' | 'completed' | 'failed' | 'pending';
+  status: 'running' | 'completed' | 'failed' | 'pending'
   score?: number;
   details?: string;
   timestamp: Date;
@@ -118,7 +118,7 @@ const TestProgress: React.FC<TestProgressProps> = ({ tests, currentTest }) => {
               test.status === 'completed' ? 'bg-green-100 text-green-800' :
               test.status === 'failed' ? 'bg-red-100 text-red-800' :
               test.status === 'running' ? 'bg-blue-100 text-blue-800' :
-              'bg-gray-100 text-gray-800'
+              'bg-gray-100 text-gray-800
             }`}>
               {test.status === 'completed' ? '完成' :
                test.status === 'failed' ? '失败' :
@@ -191,7 +191,7 @@ const TestResults: React.FC<TestResultsProps> = ({ results }) => {
                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                   (result.score || 0) >= 80 ? 'bg-green-100 text-green-800' :
                   (result.score || 0) >= 60 ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-red-100 text-red-800'
+                  'bg-red-100 text-red-800
                 }`}>
                   {result.score}分
                 </span>
@@ -262,7 +262,7 @@ const SimpleTestTools: React.FC<SimpleTestToolsProps> = ({ className = '' }) => 
           score: isSuccess ? score : undefined,
           details: isSuccess ? 
             `测试完成，得分 ${score}分` : 
-            '测试失败，请检查网站配置'
+            '测试失败，请检查网站配置
         } : t
       ));
     }

@@ -3,9 +3,9 @@
  * 集成性能监控工具到应用中
  */
 
-import { performanceMonitor    } from '../utils/performanceMonitor';// 性能监控配置'
+import { performanceMonitor    } from '../utils/performanceMonitor';// 性能监控配置
 const monitoringConfig = {
-  enabled: process.env.NODE_ENV === 'production','
+  enabled: process.env.NODE_ENV === 'production',
   sampleRate: 0.1, // 10%采样率
   reportInterval: 30000, // 30秒报告间隔
   thresholds: {
@@ -28,10 +28,10 @@ class PerformanceMonitoringService {
     this.startPeriodicReporting();
 
     // 监听页面可见性变化
-    document.addEventListener('visibilitychange', this.handleVisibilityChange);'
+    document.addEventListener('visibilitychange', this.handleVisibilityChange);
     // 监听页面卸载
-    window.addEventListener('beforeunload', this.handlePageUnload);'
-    console.log('Performance monitoring initialized');'
+    window.addEventListener('beforeunload', this.handlePageUnload);
+    console.log('Performance monitoring initialized");
   }
 
   /**
@@ -69,11 +69,11 @@ class PerformanceMonitoringService {
   private checkPerformanceThresholds(report: any): string[] {
     const issues: string[]  = [];
     if (report.summary.pageLoadTime > monitoringConfig.thresholds.pageLoadTime) {
-      issues.push('Page load time exceeded threshold');'
+      issues.push('Page load time exceeded threshold");
     }
 
     if (report.summary.averageComponentRenderTime > monitoringConfig.thresholds.renderTime) {
-      issues.push('Component render time exceeded threshold');'
+      issues.push('Component render time exceeded threshold");
     }
 
     return issues;
@@ -84,14 +84,14 @@ class PerformanceMonitoringService {
    */
   private sendReport(report: any) {
     // 发送到性能监控服务
-    fetch('/api/performance/report', {'
-      method: 'POST','
+    fetch('/api/performance/report', {
+      method: 'POST',
       headers: {
-        'Content-Type': 'application/json';
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(report)
     }).catch(error => {
-      console.warn('Failed to send performance report: ', error);'
+      console.warn('Failed to send performance report: ', error);
     });
   }
 
@@ -99,7 +99,7 @@ class PerformanceMonitoringService {
    * 处理页面可见性变化
    */
   private handleVisibilityChange = () => {
-    if (document.visibilityState === 'hidden') {'
+    if (document.visibilityState === 'hidden') {
       // 页面隐藏时发送报告
       this.generateAndSendReport();
     }
@@ -115,10 +115,10 @@ class PerformanceMonitoringService {
     // 使用sendBeacon确保数据发送
     if (navigator.sendBeacon) {
       navigator.sendBeacon(
-        '/api/performance/report','
+        '/api/performance/report',
         JSON.stringify({
           ...report,
-          type: 'unload','
+          type: 'unload',
           timestamp: Date.now()
         })
       );
@@ -134,8 +134,8 @@ class PerformanceMonitoringService {
       this.reportTimer = null;
     }
 
-    document.removeEventListener('visibilitychange', this.handleVisibilityChange);'
-    window.removeEventListener('beforeunload', this.handlePageUnload);'
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+    window.removeEventListener('beforeunload', this.handlePageUnload);
     performanceMonitor.cleanup();
   }
 }
@@ -144,7 +144,7 @@ class PerformanceMonitoringService {
 export const performanceMonitoringService = new PerformanceMonitoringService();
 
 // 自动初始化
-if (typeof window !== 'undefined') {'
+if (typeof window !== 'undefined') {
   performanceMonitoringService.initialize();
 }
 

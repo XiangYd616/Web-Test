@@ -3,14 +3,14 @@
  * 高性能的大数据表格渲染
  */
 
-import React, { useMemo    } from 'react';import VirtualScroll from './VirtualScroll';export interface Column<T>     {'
+import React, { useMemo    } from 'react';import VirtualScroll from './VirtualScroll';export interface Column<T>     {
   key: string;
   title: string;
   dataIndex: keyof T;
   width?: number;
   render?: (value: any, record: T, index: number) => React.ReactNode;
   sorter?: boolean;
-  fixed?: 'left' | 'right';
+  fixed?: 'left' | 'right'
 }
 
 export interface VirtualTableProps<T>     {
@@ -30,8 +30,8 @@ export const VirtualTable = <T extends Record<string, any>>({
   rowHeight = 50,
   containerHeight,
   onRowClick,
-  rowKey = 'id','
-  className = '','
+  rowKey = 'id',
+  className = '',
   loading = false
 }: VirtualTableProps<T>) => {
   
@@ -40,7 +40,7 @@ export const VirtualTable = <T extends Record<string, any>>({
     className: combinedClassName,
     style: computedStyle,
     disabled,
-    'aria-label': ariaLabel,'
+    'aria-label': ariaLabel,
     "data-testid': testId'
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
   
@@ -48,11 +48,11 @@ export const VirtualTable = <T extends Record<string, any>>({
   const [error, setError] = useState<string | null>(null);
 
   const handleError = useCallback((err: Error | string) => {
-    const errorMessage = typeof err === 'string' ? err : err.message;'
+    const errorMessage = typeof err === 'string' ? err : err.message;
     setError(errorMessage);
 
     // 可选：发送错误报告
-    if (process.env.NODE_ENV === 'production') {'
+    if (process.env.NODE_ENV === 'production') {
       console.error("Component error: ', errorMessage);'
     }
   }, []);
@@ -84,13 +84,13 @@ export const VirtualTable = <T extends Record<string, any>>({
   // 渲染表头
   const renderHeader = () => (
     <div
-      className= 'virtual-table-header';
+      className= 'virtual-table-header'
       style={{
-        display: 'flex','
+        display: 'flex',
         height: rowHeight,
-        backgroundColor: '#f5f5f5','
-        borderBottom: '1px solid #e0e0e0','
-        fontWeight: 'bold';
+        backgroundColor: '#f5f5f5',
+        borderBottom: '1px solid #e0e0e0',
+        fontWeight: 'bold'
       }}
     >
       {columnWidths.map((col) => (
@@ -99,9 +99,9 @@ export const VirtualTable = <T extends Record<string, any>>({
           style={{
             width: `${col.percentage}%`,`
             padding: "0 8px','`
-            display: 'flex','
-            alignItems: 'center','
-            borderRight: '1px solid #e0e0e0';
+            display: 'flex',
+            alignItems: 'center',
+            borderRight: '1px solid #e0e0e0'
           }}
         >
           {col.title}
@@ -112,15 +112,15 @@ export const VirtualTable = <T extends Record<string, any>>({
 
   // 渲染行
   const renderRow = (record: T, index: number, style: React.CSSProperties) => {
-    const key = typeof rowKey === 'function' ? rowKey(record) : record[rowKey];'
+    const key = typeof rowKey === 'function' ? rowKey(record) : record[rowKey];
     return (<div
         key={key}
         style={{
           ...style,
-          display: 'flex','
-          borderBottom: '1px solid #f0f0f0','
-          cursor: onRowClick ? 'pointer' : 'default','
-          backgroundColor: index % 2 === 0 ? '#fff' : '#fafafa';
+          display: 'flex',
+          borderBottom: '1px solid #f0f0f0',
+          cursor: onRowClick ? 'pointer' : 'default',
+          backgroundColor: index % 2 === 0 ? '#fff' : '#fafafa'
         }}
         onClick={() => onRowClick?.(record, index)}
       >
@@ -130,12 +130,12 @@ export const VirtualTable = <T extends Record<string, any>>({
             style={{
               width: `${col.percentage}%`,`
               padding: "0 8px','`
-              display: 'flex','
-              alignItems: 'center','
-              borderRight: '1px solid #f0f0f0','
-              overflow: 'hidden','
-              textOverflow: 'ellipsis','
-              whiteSpace: 'nowrap';
+              display: 'flex',
+              alignItems: 'center',
+              borderRight: '1px solid #f0f0f0',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
             }}
           >
             {col.render
@@ -155,8 +155,8 @@ export const VirtualTable = <T extends Record<string, any>>({
         style={{
           height: containerHeight,
           display: "flex','`
-          alignItems: 'center','
-          justifyContent: 'center';
+          alignItems: 'center',
+          justifyContent: 'center'
         }}
       >
         <div>加载中...</div>

@@ -4,11 +4,11 @@
  * 版本: v2.0.0
  */
 
-import { useCallback, useEffect, useRef, useState    } from 'react';import type { ApiErrorResponse,'
+import { useCallback, useEffect, useRef, useState    } from 'react';import type { ApiErrorResponse,
   ApiResponse,
   ApiSuccessResponse,
   // PaginationInfo
- } from '../types/api';// 已修复'
+ } from '../types/api';// 已修复
 // ==================== 数据处理配置 ====================
 
 export interface DataProcessorConfig     {
@@ -17,7 +17,7 @@ export interface DataProcessorConfig     {
     enabled: boolean;
     ttl: number; // 毫秒
     maxSize: number;
-    strategy: 'lru' | 'ttl' | 'fifo';
+    strategy: 'lru' | 'ttl' | 'fifo'
   };
 
   // 重试配置
@@ -25,7 +25,7 @@ export interface DataProcessorConfig     {
     enabled: boolean;
     maxAttempts: number;
     delay: number; // 毫秒
-    backoff: 'linear' | 'exponential';
+    backoff: 'linear' | 'exponential'
   };
 
   // 分页配置
@@ -50,13 +50,13 @@ const DEFAULT_CONFIG: DataProcessorConfig  = {
     enabled: true,
     ttl: 300000, // 5分钟
     maxSize: 100,
-    strategy: 'lru';
+    strategy: 'lru'
   },
   retry: {
     enabled: true,
     maxAttempts: 3,
     delay: 1000,
-    backoff: 'exponential';
+    backoff: 'exponential'
   },
   pagination: {
     defaultPageSize: 20,
@@ -72,7 +72,7 @@ const DEFAULT_CONFIG: DataProcessorConfig  = {
 };
 // ==================== 数据状态类型 ====================
 
-export type LoadingState   = 'idle' | 'loading' | 'success' | 'error' | 'refreshing';export interface DataState<T = any>     {'
+export type LoadingState   = 'idle' | 'loading' | 'success' | 'error' | 'refreshing';export interface DataState<T = any>     {
   // 数据状态
   state: LoadingState;
   data: T | null;
@@ -141,7 +141,7 @@ class DataCache {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError';
+    const errorType = error.name || 'UnknownError'
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -153,7 +153,7 @@ class DataCache {
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics: ', {'
+    console.debug('API Metrics: ', {
       url: info.url,
       method: info.method,
       status: info.status,
@@ -172,10 +172,10 @@ class DataCache {
   }
   private cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
   private maxSize: number;
-  private strategy: 'lru' | 'ttl' | 'fifo';
+  private strategy: 'lru' | 'ttl' | 'fifo'
   private accessOrder = new Map<string, number>();
 
-  constructor(maxSize = 100, strategy: 'lru' | 'ttl' | 'fifo' = 'lru') {'
+  constructor(maxSize = 100, strategy: 'lru' | 'ttl' | 'fifo' = 'lru') {
     this.maxSize = maxSize;
     this.strategy = strategy;
   }
@@ -192,7 +192,7 @@ class DataCache {
       ttl
     });
 
-    if (this.strategy === 'lru') {'
+    if (this.strategy === 'lru') {
       this.accessOrder.set(key, Date.now());
     }
   }
@@ -209,7 +209,7 @@ class DataCache {
     }
 
     // 更新访问时间（LRU）
-    if (this.strategy === 'lru') {'
+    if (this.strategy === 'lru') {
       this.accessOrder.set(key, Date.now());
     }
 
@@ -271,7 +271,7 @@ export function useDataProcessor<T = any>(
 
   // 状态管理
   const [state, setState] = useState<DataState<T>>({
-    state: 'idle','
+    state: 'idle',
     data: null,
     error: null,
     loading: false,
@@ -290,9 +290,9 @@ export function useDataProcessor<T = any>(
 
   // 生成缓存键
   const generateCacheKey = useCallback((params?: any): string  => {
-    const baseKey = 'data-processor';
+    const baseKey = 'data-processor'
     if (!params) return baseKey;
-    return `${baseKey}-${JSON.stringify(params)}`;`
+    return `${baseKey}-${JSON.stringify(params)}`;
   }, []);
 
   // 更新状态
@@ -301,9 +301,9 @@ export function useDataProcessor<T = any>(
       ...prev,
       ...updates,
       loading: updates.state === "loading','`
-      success: updates.state === 'success','
-      hasError: updates.state === 'error','
-      refreshing: updates.state === 'refreshing';
+      success: updates.state === 'success',
+      hasError: updates.state === 'error',
+      refreshing: updates.state === 'refreshing'
     }));
   }, []);
 
@@ -319,27 +319,27 @@ export function useDataProcessor<T = any>(
 
       // 更新状态
       updateState({
-        state: 'success','
+        state: 'success',
         data: successResponse.data,
         error: null,
         lastUpdated: new Date().toISOString(),
         retryCount: 0,
-        pagination: 'pagination' in successResponse.meta ? successResponse.meta.pagination : undefined'
+        pagination: 'pagination' in successResponse.meta ? successResponse.meta.pagination : undefined
       });
 
       return successResponse.data;
     } else {
       const errorResponse = response as ApiErrorResponse;
-      const errorMessage = errorResponse.error.message || '请求失败';
+      const errorMessage = errorResponse.error.message || '请求失败'
       updateState({
-        state: 'error','
+        state: 'error',
         error: errorMessage,
         data: finalConfig.errorHandling?.fallbackData || null
       });
 
       // 显示错误通知
       if (finalConfig.errorHandling?.showNotification) {
-        console.error('API Error: ', errorMessage);'
+        console.error('API Error: ', errorMessage);
         // 这里可以集成通知系统
       }
 
@@ -366,7 +366,7 @@ export function useDataProcessor<T = any>(
       const cachedData = globalCache.get(cacheKey);
       if (cachedData) {
         updateState({
-          state: 'success','
+          state: 'success',
           data: cachedData,
           error: null,
           cacheHit: true,
@@ -378,7 +378,7 @@ export function useDataProcessor<T = any>(
 
     // 设置加载状态
     updateState({
-      state: state.data ? 'refreshing' : 'loading','
+      state: state.data ? 'refreshing' : 'loading',
       error: null,
       cacheHit: false,
       retryCount: isRetry ? state.retryCount + 1 : 0
@@ -396,9 +396,9 @@ export function useDataProcessor<T = any>(
 
       return processResponse(response, cacheKey);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : '网络请求失败';
+      const errorMessage = error instanceof Error ? error.message : '网络请求失败'
       updateState({
-        state: 'error','
+        state: 'error',
         error: errorMessage,
         data: finalConfig.errorHandling?.fallbackData || state.data
       });
@@ -408,7 +408,7 @@ export function useDataProcessor<T = any>(
         finalConfig.errorHandling?.autoRetry &&
         state.retryCount < (finalConfig.retry.maxAttempts - 1)) {
 
-        const delay = finalConfig.retry.backoff === 'exponential';
+        const delay = finalConfig.retry.backoff === 'exponential'
           ? finalConfig.retry.delay * Math.pow(2, state.retryCount): finalConfig.retry.delay;
 
         retryTimeoutRef.current = setTimeout(()  => {
@@ -436,28 +436,28 @@ export function useDataProcessor<T = any>(
   const actions: DataActions<T>  = {
     load: (params) => {
       if (!lastRequestRef.current) {
-        throw new Error('No request function provided');'
+        throw new Error('No request function provided");
       }
       return executeRequest(lastRequestRef.current, params);
     },
 
     refresh: () => {
       if (!lastRequestRef.current) {
-        throw new Error('No request function provided');'
+        throw new Error('No request function provided");
       }
       return executeRequest(lastRequestRef.current, undefined, { useCache: false });
     },
 
     retry: () => {
       if (!lastRequestRef.current) {
-        throw new Error('No request function provided');'
+        throw new Error('No request function provided");
       }
       return executeRequest(lastRequestRef.current, undefined, { useCache: false, isRetry: true });
     },
 
     reset: () => {
       updateState({
-        state: 'idle','
+        state: 'idle',
         data: null,
         error: null,
         lastUpdated: null,
@@ -492,7 +492,7 @@ export function useDataProcessor<T = any>(
 
     setData: (data: T) => {
       updateState({
-        state: 'success','
+        state: 'success',
         data,
         error: null,
         lastUpdated: new Date().toISOString()
@@ -501,7 +501,7 @@ export function useDataProcessor<T = any>(
 
     setError: (error: string) => {
       updateState({
-        state: 'error','
+        state: 'error',
         error,
         data: finalConfig.errorHandling?.fallbackData || state.data
       });
@@ -509,7 +509,7 @@ export function useDataProcessor<T = any>(
 
     setLoading: (loading: boolean) => {
       updateState({
-        state: loading ? 'loading' : 'idle';
+        state: loading ? 'loading' : 'idle'
       });
     }
   };

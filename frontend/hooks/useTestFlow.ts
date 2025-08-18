@@ -2,7 +2,7 @@
  * 统一的测试数据流管理Hook
  */
 
-import { useState, useCallback, useRef    } from 'react';import { testService    } from '../services/unifiedTestService';import { TestConfig, TestResult, TestProgress, TestError    } from '../types/index';export interface UseUnifiedTestFlowReturn<T extends TestResult = TestResult>     {'
+import { useState, useCallback, useRef    } from 'react';import { testService    } from '../services/unifiedTestService';import { TestConfig, TestResult, TestProgress, TestError    } from '../types/index';export interface UseUnifiedTestFlowReturn<T extends TestResult = TestResult>     {
   // 状态
   isRunning: boolean;
   progress: number;
@@ -64,7 +64,7 @@ export function useUnifiedTestFlow<T extends TestResult = TestResult>(
             }
           }
         } catch (err) {
-          console.error('获取测试进度失败:', err);'
+          console.error('获取测试进度失败:', err);
         }
       }, 1000);
 
@@ -79,7 +79,7 @@ export function useUnifiedTestFlow<T extends TestResult = TestResult>(
       try {
         await testService.cancelTest(testType, currentTestId.current);
       } catch (err) {
-        console.error('取消测试失败:', err);'
+        console.error('取消测试失败:', err);
       }
     }
     
@@ -108,7 +108,7 @@ export function useUnifiedTestFlow<T extends TestResult = TestResult>(
       const historyData = await testService.getTestHistory(testType);
       setHistory(historyData as T[]);
     } catch (err) {
-      console.error('加载测试历史失败:', err);'
+      console.error('加载测试历史失败:', err);
     } finally {
       setHistoryLoading(false);
     }
@@ -119,7 +119,7 @@ export function useUnifiedTestFlow<T extends TestResult = TestResult>(
       await testService.deleteHistoryItem(testType, testId);
       setHistory(prev => prev.filter(item => item.testId !== testId));
     } catch (err) {
-      console.error('删除历史记录失败:', err);'
+      console.error('删除历史记录失败:', err);
     }
   }, [testType]);
 

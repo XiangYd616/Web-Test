@@ -1,10 +1,10 @@
-import { ChevronDown, ChevronUp, Filter    } from 'lucide-react';import React, { useMemo, useState    } from 'react';import { cn    } from '../../utils/cn';// 表格列定义接口'
+import { ChevronDown, ChevronUp, Filter    } from 'lucide-react';import React, { useMemo, useState    } from 'react';import { cn    } from '../../utils/cn';// 表格列定义接口
 export interface TableColumn<T = any>     {
   key: string;
   title: string;
   dataIndex?: string;
   width?: string | number;
-  align?: 'left' | 'center' | 'right';
+  align?: 'left' | 'center' | 'right'
   sortable?: boolean;
   filterable?: boolean;
   render?: (value: any, record: T, index: number) => React.ReactNode;
@@ -39,7 +39,7 @@ export interface TableProps<T = any>     {
     x?: number | string;
     y?: number | string;
   };
-  size?: 'small' | 'middle' | 'large';
+  size?: 'small' | 'middle' | 'large'
   bordered?: boolean;
   showHeader?: boolean;
   className?: string;
@@ -47,22 +47,22 @@ export interface TableProps<T = any>     {
 }
 
 // 排序状态类型
-type SortOrder = 'ascend' | "descend' | null;'
+type SortOrder = 'ascend' | "descend' | null;"
 // 表格组件
 export const Table = <T extends Record<string, any>>({
   columns,
   data,
   loading = false,
   pagination,
-  rowKey = 'id','
+  rowKey = 'id',
   rowSelection,
   onRow,
   scroll,
-  size = 'middle','
+  size = 'middle',
   bordered = false,
   showHeader = true,
   className,
-  emptyText = '暂无数据';
+  emptyText = '暂无数据'
 }: TableProps<T>) => {
   
   // 性能优化
@@ -70,28 +70,28 @@ export const Table = <T extends Record<string, any>>({
     className: combinedClassName,
     style: computedStyle,
     disabled,
-    'aria-label': ariaLabel,'
-    'data-testid': testId'
+    'aria-label': ariaLabel,
+    'data-testid': testId
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;`
-  const descriptionId = `${componentId}-description`;`
+  const errorId = `${componentId}-error`;
+  const descriptionId = `${componentId}-description`;
   
   const ariaProps = {
     id: componentId,
-    "aria-label': ariaLabel,'`
-    'aria-labelledby': ariaLabelledBy,'
+    "aria-label': ariaLabel,'`"`
+    'aria-labelledby': ariaLabelledBy,
     'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,'
-    'aria-invalid': !!error,'
-    'aria-disabled': disabled,'
-    'aria-busy': loading,'
-    'aria-expanded': expanded,'
-    "aria-selected': selected,'
+    ].filter(Boolean).join(' ') || undefined,
+    'aria-invalid': !!error,
+    'aria-disabled': disabled,
+    'aria-busy': loading,
+    'aria-expanded': expanded,
+    "aria-selected': selected,"
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -101,7 +101,7 @@ export const Table = <T extends Record<string, any>>({
 
   // 获取行键值
   const getRowKey = (record: T, index: number): string  => {
-    if (typeof rowKey === 'function') {'
+    if (typeof rowKey === 'function') {
         return rowKey(record);
       }
     return record[rowKey] || index.toString();
@@ -115,17 +115,17 @@ export const Table = <T extends Record<string, any>>({
 
     if (sortField === field) {
       // 切换排序顺序：升序 -> 降序 -> 无排序
-      if (sortOrder === 'ascend') {'
-        setSortOrder('descend');'
-      } else if (sortOrder === 'descend') {'
+      if (sortOrder === 'ascend') {
+        setSortOrder('descend");"
+      } else if (sortOrder === 'descend') {
         setSortOrder(null);
         setSortField(null);
       } else {
-        setSortOrder('ascend');'
+        setSortOrder('ascend");"
       }
     } else {
       setSortField(field);
-      setSortOrder("ascend');'
+      setSortOrder("ascend");
     }
   };
 
@@ -163,7 +163,7 @@ export const Table = <T extends Record<string, any>>({
         if (aValue === bValue) return 0;
 
         const comparison = aValue > bValue ? 1 : -1;
-        return sortOrder === 'ascend' ? comparison : -comparison;'
+        return sortOrder === 'ascend' ? comparison : -comparison;
       });
     }
 
@@ -183,16 +183,16 @@ export const Table = <T extends Record<string, any>>({
 
   // 表格尺寸样式
   const sizeClasses = {
-    small: 'text-xs','
-    middle: 'text-sm','
-    large: 'text-base';
+    small: 'text-xs',
+    middle: 'text-sm',
+    large: 'text-base'
   };
 
   // 单元格内边距
   const cellPadding = {
-    small: 'px-2 py-1','
-    middle: 'px-3 py-2','
-    large: 'px-4 py-3';
+    small: 'px-2 py-1',
+    middle: 'px-3 py-2',
+    large: 'px-4 py-3'
   };
 
   // 渲染表头
@@ -203,14 +203,14 @@ export const Table = <T extends Record<string, any>>({
       <thead className= 'bg-gray-50 dark:bg-gray-800'>
         <tr>
           {rowSelection && (
-            <th className={cn(
-              'border-b border-gray-200 dark:border-gray-700','
+            <th className={cn(>
+              'border-b border-gray-200 dark:border-gray-700',
               cellPadding[size],
-              bordered && 'border-r';
+              bordered && 'border-r'
             )}>
-              <input
-                type= 'checkbox';
-                className= 'rounded border-gray-300 text-blue-600 focus:ring-blue-500';
+              <input>
+                type= 'checkbox'
+                className= 'rounded border-gray-300 text-blue-600 focus:ring-blue-500'
                 onChange={(e) => {
                   const allKeys = paginatedData.map((record, index) => getRowKey(record, index));
                   if (e.target.checked) {
@@ -228,15 +228,15 @@ export const Table = <T extends Record<string, any>>({
             </th>
           )}
           {columns.map((column) => (
-            <th
+            <th>
               key={column.key}
               className={cn(
-                'border-b border-gray-200 dark:border-gray-700 text-left font-medium text-gray-900 dark:text-gray-100','
+                'border-b border-gray-200 dark:border-gray-700 text-left font-medium text-gray-900 dark:text-gray-100',
                 cellPadding[size],
-                bordered && 'border-r border-gray-200 dark:border-gray-700','
-                column.align === 'center' && 'text-center','
-                column.align === 'right' && 'text-right','
-                column.sortable && 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700','
+                bordered && 'border-r border-gray-200 dark:border-gray-700',
+                column.align === 'center' && 'text-center',
+                column.align === 'right' && 'text-right',
+                column.sortable && 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700',
                 column.className
               )}
               style={{ width: column.width }}
@@ -246,18 +246,18 @@ export const Table = <T extends Record<string, any>>({
                 <span>{column.title}</span>
                 {column.sortable && (
                   <div className= 'flex flex-col'>
-                    <ChevronUp className={cn(
-                        'w-3 h-3','
-                        sortField === (column.dataIndex || column.key) && sortOrder === 'ascend';
-                          ? 'text-blue-600';
-                          : 'text-gray-400';
+                    <ChevronUp className={cn(>
+                        'w-3 h-3',
+                        sortField === (column.dataIndex || column.key) && sortOrder === 'ascend'
+                          ? 'text-blue-600'
+                          : 'text-gray-400'
                       )}
                        />
-                    <ChevronDown className={cn(
-                        'w-3 h-3 -mt-1','
-                        sortField === (column.dataIndex || column.key) && sortOrder === 'descend';
-                          ? 'text-blue-600';
-                          : 'text-gray-400';
+                    <ChevronDown className={cn(>
+                        'w-3 h-3 -mt-1',
+                        sortField === (column.dataIndex || column.key) && sortOrder === 'descend'
+                          ? 'text-blue-600'
+                          : 'text-gray-400'
                       )}
                        />
                   </div>
@@ -280,11 +280,11 @@ export const Table = <T extends Record<string, any>>({
         return (
         <tbody>
           <tr>
-            <td
+            <td>
               colSpan={columns.length + (rowSelection ? 1 : 0)
       }
               className={cn(
-                "text-center text-gray-500 dark:text-gray-400','
+                "text-center text-gray-500 dark:text-gray-400',"
                 cellPadding[size]
               )}
             >
@@ -303,11 +303,11 @@ export const Table = <T extends Record<string, any>>({
         return (
         <tbody>
           <tr>
-            <td
+            <td>
               colSpan={columns.length + (rowSelection ? 1 : 0)
       }
               className={cn(
-                'text-center text-gray-500 dark:text-gray-400','
+                'text-center text-gray-500 dark:text-gray-400',
                 cellPadding[size]
               )}
             >
@@ -324,24 +324,24 @@ export const Table = <T extends Record<string, any>>({
           const rowProps = onRow?.(record, index) || {};
 
           return (
-            <tr
+            <tr>
               key={key}
               className={cn(
-                'hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors','
+                'hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors',
                 rowProps.className
               )}
               onClick={rowProps.onClick}
               onDoubleClick={rowProps.onDoubleClick}
             >
               {rowSelection && (
-                <td className={cn(
-                  'border-gray-200 dark:border-gray-700','
+                <td className={cn(>
+                  'border-gray-200 dark:border-gray-700',
                   cellPadding[size],
-                  bordered && 'border-r';
+                  bordered && 'border-r'
                 )}>
-                  <input
-                    type= 'checkbox';
-                    className= 'rounded border-gray-300 text-blue-600 focus:ring-blue-500';
+                  <input>
+                    type= 'checkbox'
+                    className= 'rounded border-gray-300 text-blue-600 focus:ring-blue-500'
                     checked={rowSelection.selectedRowKeys?.includes(key) || false}
                     disabled={rowSelection.getCheckboxProps?.(record)?.disabled}
                     onChange={(e) => {
@@ -371,14 +371,14 @@ export const Table = <T extends Record<string, any>>({
                 const value = record[dataIndex];
 
                 return (
-                  <td
+                  <td>
                     key={column.key}
                     className={cn(
-                      'text-gray-900 dark:text-gray-100','
+                      'text-gray-900 dark:text-gray-100',
                       cellPadding[size],
-                      bordered && 'border-r border-gray-200 dark:border-gray-700','
-                      column.align === 'center' && 'text-center','
-                      column.align === 'right' && 'text-right','
+                      bordered && 'border-r border-gray-200 dark:border-gray-700',
+                      column.align === 'center' && 'text-center',
+                      column.align === 'right' && 'text-right',
                       column.className
                     )}
                   >
@@ -395,15 +395,15 @@ export const Table = <T extends Record<string, any>>({
 
   return (
     <div className={cn('w-full', className)}>
-      <div className={cn(
-        'overflow-auto','
-        scroll?.x && 'overflow-x-auto','
-        scroll?.y && 'overflow-y-auto';
+      <div className={cn(>
+        'overflow-auto',
+        scroll?.x && 'overflow-x-auto',
+        scroll?.y && 'overflow-y-auto'
       )} style={{ maxHeight: scroll?.y }}>
-        <table className={cn(
-          'min-w-full divide-y divide-gray-200 dark:divide-gray-700','
+        <table className={cn(>
+          'min-w-full divide-y divide-gray-200 dark:divide-gray-700',
           sizeClasses[size],
-          bordered && 'border border-gray-200 dark:border-gray-700';
+          bordered && 'border border-gray-200 dark:border-gray-700'
         )}>
           {renderHeader()}
           {renderBody()}
@@ -411,7 +411,7 @@ export const Table = <T extends Record<string, any>>({
       </div>
 
       {pagination && (
-        <TablePagination current={pagination.current}
+        <TablePagination current={pagination.current}>
           pageSize={pagination.pageSize}
           total={pagination.total}
           showSizeChanger={pagination.showSizeChanger}
@@ -465,10 +465,10 @@ const TablePagination: React.FC<TablePaginationProps>  = ({
         {showSizeChanger && (
           <div className= 'flex items-center gap-2 text-sm'>
             <span className= 'text-gray-700 dark:text-gray-300'>每页显示:</span>
-            <select
+            <select>
               value={pageSize}
               onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-              className= 'px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[70px]';
+              className= 'px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[70px]'
             >
               <option value={10} className= 'dark:bg-gray-700 dark:text-white'>10 条</option>
               <option value={20} className= 'dark:bg-gray-700 dark:text-white'>20 条</option>
@@ -479,10 +479,10 @@ const TablePagination: React.FC<TablePaginationProps>  = ({
         )}
 
         <div className= 'flex items-center gap-1'>
-          <button
+          <button>
             onClick={() => handlePageChange(current - 1)}
-            disabled={current <= 1}
-            className= 'px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-800';
+            disabled={current <= 1}>
+            className= 'px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-800'
           >
             上一页
           </button>
@@ -491,10 +491,10 @@ const TablePagination: React.FC<TablePaginationProps>  = ({
             {current} / {totalPages}
           </span>
 
-          <button
+          <button>
             onClick={() => handlePageChange(current + 1)}
             disabled={current >= totalPages}
-            className= 'px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-800';
+            className= 'px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-800'
           >
             下一页
           </button>
@@ -502,13 +502,13 @@ const TablePagination: React.FC<TablePaginationProps>  = ({
 
         {showQuickJumper && (<div className= 'flex items-center gap-2 text-sm'>
             <span className= 'text-gray-700 dark:text-gray-300'>跳至</span>
-            <input
-              type= 'number';
+            <input>
+              type= 'number'
               min={1}
               max={totalPages}
-              className= 'w-12 px-1 py-1 text-center border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100';
+              className= 'w-12 px-1 py-1 text-center border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
               onKeyPress={(e) => {
-                if (e.key === 'Enter') {'
+                if (e.key === 'Enter') {
                   const page = parseInt((e.target as HTMLInputElement).value);
                   handlePageChange(page);
                 }

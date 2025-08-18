@@ -3,7 +3,7 @@ export interface MonitoringSite     {
   id: string;
   url: string;
   name: string;
-  status: 'online' | 'offline' | 'warning' | 'maintenance';
+  status: 'online' | 'offline' | 'warning' | 'maintenance'
   responseTime: number;
   uptime: number;
   lastCheck: string;
@@ -37,11 +37,11 @@ export interface AlertRule     {
   id: string;
   name: string;
   siteId: string;
-  condition: 'response_time' | 'status_code' | 'uptime' | 'ssl_expiry';
-  operator: '>' | '<' | '= ' | '!= ';
+  condition: 'response_time' | 'status_code' | 'uptime' | 'ssl_expiry'
+  operator: '>' | '<' | '= ' | '!= '
   threshold: number;
   enabled: boolean;
-  notifications: ('email' | 'webhook' | 'sms')[];'
+  notifications: ('email' | 'webhook' | 'sms')[];
   createdAt: string;
 }
 
@@ -71,7 +71,7 @@ class MonitoringService {
   }
 }
   }
-  private baseUrl = "http://localhost:3001/api';'`
+  private baseUrl = "http://localhost:3001/api";`
   private monitoringInterval: NodeJS.Timeout | null = null;
   private sites: MonitoringSite[] = [];
   private alertRules: AlertRule[] = [];
@@ -81,9 +81,9 @@ class MonitoringService {
    * 获取认证头
    */
   private getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem('auth_token');'
+    const token = localStorage.getItem('auth_token");
     return {
-      'Content-Type': 'application/json','
+      'Content-Type': 'application/json',
       ...(token && { "Authorization': `Bearer ${token}` })'`
     };
   }
@@ -115,10 +115,10 @@ class MonitoringService {
   /**
    * 添加监控站点
    */
-  async addSite(siteData: Omit<MonitoringSite, 'id' | 'status' | 'responseTime' | 'uptime' | 'lastCheck' | 'alerts' | 'createdAt'>): Promise<MonitoringSite> {'
+  async addSite(siteData: Omit<MonitoringSite, 'id' | 'status' | 'responseTime' | 'uptime' | 'lastCheck' | 'alerts' | 'createdAt'>): Promise<MonitoringSite> {
     const newSite: MonitoringSite  = {
       id: Date.now().toString(),
-      status: 'online','
+      status: 'online',
       responseTime: 0,
       uptime: 100,
       lastCheck: new Date().toISOString(),
@@ -130,7 +130,7 @@ class MonitoringService {
     try {
       const response = await fetch(`${this.baseUrl}/monitoring/sites`, {`
         method: "POST','`
-        headers: { 'Content-Type': 'application/json' },'
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newSite)
       });
 
@@ -162,7 +162,7 @@ class MonitoringService {
   async removeSite(siteId: string): Promise<void> {
     try {
       const response = await fetch(`${this.baseUrl}/monitoring/sites/${siteId}`, {`
-        method: "DELETE';'`
+        method: "DELETE";`
       });
 
       if (response.ok) {
@@ -171,7 +171,7 @@ class MonitoringService {
         return;
       }
     } catch (error) {
-      console.warn('Backend not available, using local storage: ', error);'
+      console.warn('Backend not available, using local storage: ', error);
     }
 
     // 本地删除
@@ -191,9 +191,9 @@ class MonitoringService {
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒超时
 
       const response = await fetch(site.url, {
-        method: 'HEAD','
+        method: 'HEAD',
         signal: controller.signal,
-        mode: 'no-cors' // 避免CORS问题'
+        mode: 'no-cors' // 避免CORS问题
       });
 
       clearTimeout(timeoutId);
@@ -214,7 +214,7 @@ class MonitoringService {
       };
       // 更新站点状态
       this.updateSiteStatus(site.id, {
-        status: status >= 200 && status < 400 ? 'online' : 'offline','
+        status: status >= 200 && status < 400 ? 'online' : 'offline',
         responseTime,
         lastCheck: monitoringData.timestamp,
         httpStatus: status
@@ -240,11 +240,11 @@ class MonitoringService {
         connectTime: 0,
         downloadTime: 0,
         responseSize: 0,
-        error: error instanceof Error ? error.message : 'Unknown error';
+        error: error instanceof Error ? error.message : 'Unknown error'
       };
       // 更新站点状态为离线
       this.updateSiteStatus(site.id, {
-        status: 'offline','
+        status: 'offline',
         responseTime,
         lastCheck: monitoringData.timestamp,
         alerts: (this.sites.find(s => s.id === site.id)?.alerts || 0) + 1
@@ -411,10 +411,10 @@ class MonitoringService {
    */
   private evaluateCondition(value: number, operator: string, threshold: number): boolean {
     switch (operator) {
-      case '>': return value > threshold;'
-      case '<': return value < threshold;'
-      case '= ': return value === threshold;'
-      case '!= ': return value !== threshold;'
+      case '>': return value > threshold;
+      case '<': return value < threshold;
+      case '= ': return value === threshold;
+      case '!= ': return value !== threshold;
       default: return false;
     }
   }
@@ -441,29 +441,29 @@ class MonitoringService {
    */
   private getLocalSites(): MonitoringSite[] {
     try {
-      const stored = localStorage.getItem("monitoring_sites');'`
+      const stored = localStorage.getItem("monitoring_sites");`
       if (stored) {
         
         this.sites = JSON.parse(stored);
         return this.sites;
       }
     } catch (error) {
-      console.error('Error loading local sites: ', error);'
+      console.error('Error loading local sites: ', error);
     }
 
     // 默认示例站点
     this.sites = [
       {
-        id: '1','
-        url: 'https://www.google.com','
-        name: 'Google','
-        status: 'online','
+        id: '1',
+        url: 'https://www.google.com',
+        name: 'Google',
+        status: 'online',
         responseTime: 120,
         uptime: 99.9,
         lastCheck: new Date().toISOString(),
         alerts: 0,
-        region: '全球','
-        sslExpiry: '2024-12-31','
+        region: '全球',
+        sslExpiry: '2024-12-31',
         certificateValid: true,
         httpStatus: 200,
         responseSize: 1024,
@@ -484,9 +484,9 @@ class MonitoringService {
    */
   private saveLocalSites(): void {
     try {
-      localStorage.setItem('monitoring_sites', JSON.stringify(this.sites));'
+      localStorage.setItem('monitoring_sites', JSON.stringify(this.sites));
     } catch (error) {
-      console.error('Error saving local sites:', error);'
+      console.error('Error saving local sites:', error);
     }
   }
 }

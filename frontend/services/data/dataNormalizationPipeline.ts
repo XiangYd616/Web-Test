@@ -17,7 +17,7 @@ export interface TestPhase     {
   name: string;
   startTime: number;
   endTime?: number;
-  status: 'pending' | 'running' | 'completed' | 'failed';
+  status: 'pending' | 'running' | 'completed' | 'failed'
 }
 
 // 原始数据源接口
@@ -281,7 +281,7 @@ export class DataNormalizationPipeline {
         }
       }
     } catch (error) {
-      console.error('Error processing API data: ', error);'
+      console.error('Error processing API data: ', error);
     }
 
     return result;
@@ -323,7 +323,7 @@ export class DataNormalizationPipeline {
         }
       }
     } catch (error) {
-      console.error('Error processing background manager data: ', error);'
+      console.error('Error processing background manager data: ', error);
     }
 
     return result;
@@ -416,17 +416,17 @@ export class DataNormalizationPipeline {
    * 标准化测试阶段
    */
   private normalizePhase(phase: any): TestPhase {
-    if (typeof phase !== 'string') return TestPhase.STEADY_STATE;'
+    if (typeof phase !== 'string') return TestPhase.STEADY_STATE;
     const phaseMap: Record<string, TestPhase>  = {
-      'initialization': TestPhase.INITIALIZATION,'
-      'ramp-up': TestPhase.RAMP_UP,'
-      'rampup': TestPhase.RAMP_UP,'
-      'steady': TestPhase.STEADY_STATE,'
-      'steady-state': TestPhase.STEADY_STATE,'
-      'running': TestPhase.STEADY_STATE,'
-      'ramp-down': TestPhase.RAMP_DOWN,'
-      'rampdown': TestPhase.RAMP_DOWN,'
-      'cleanup': TestPhase.CLEANUP'
+      'initialization': TestPhase.INITIALIZATION,
+      'ramp-up': TestPhase.RAMP_UP,
+      'rampup': TestPhase.RAMP_UP,
+      'steady': TestPhase.STEADY_STATE,
+      'steady-state': TestPhase.STEADY_STATE,
+      'running': TestPhase.STEADY_STATE,
+      'ramp-down': TestPhase.RAMP_DOWN,
+      'rampdown': TestPhase.RAMP_DOWN,
+      'cleanup': TestPhase.CLEANUP
     };
     return phaseMap[phase.toLowerCase()] || TestPhase.STEADY_STATE;
   }
@@ -560,9 +560,9 @@ export class DataNormalizationPipeline {
    */
   private validateBasicDataPoint(point: TestDataPoint): boolean {
     return (
-      typeof point.timestamp === 'number' &&'
+      typeof point.timestamp === 'number' &&
       point.timestamp > 0 &&
-      typeof point.responseTime === 'number' &&'
+      typeof point.responseTime === 'number' &&
       point.responseTime >= 0
     );
   }

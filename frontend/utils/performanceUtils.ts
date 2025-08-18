@@ -13,7 +13,7 @@ class LazyImageLoader {
     }
 
     private initObserver() {
-        if (!('IntersectionObserver' in window)) {'
+        if (!('IntersectionObserver' in window)) {
             // 降级处理：直接加载所有图片
             this.loadAllImages();
             return;
@@ -30,7 +30,7 @@ class LazyImageLoader {
                 });
             },
             {
-                rootMargin: '50px 0px', // 提前50px开始加载'
+                rootMargin: '50px 0px', // 提前50px开始加载
                 threshold: 0.1
             }
         );
@@ -60,16 +60,16 @@ class LazyImageLoader {
 
         if (src) {
             img.src = src;
-            img.removeAttribute('data-src');'
+            img.removeAttribute('data-src");
         }
 
         if (srcset) {
             img.srcset = srcset;
-            img.removeAttribute('data-srcset');'
+            img.removeAttribute('data-srcset");
         }
 
-        img.classList.remove('lazy-loading');'
-        img.classList.add('lazy-loaded');'
+        img.classList.remove('lazy-loading");
+        img.classList.add('lazy-loaded");
     }
 
     private loadAllImages() {
@@ -97,17 +97,17 @@ class ResourcePreloader {
      */
     public async preloadCriticalResources() {
         // 在开发环境中跳过资源预加载，避免404错误
-        if (process.env.NODE_ENV === 'development') {'
-        console.log('Development mode: Skipping critical resource preloading');'
+        if (process.env.NODE_ENV === 'development') {
+        console.log('Development mode: Skipping critical resource preloading");
             return;
       }
 
         // 生产环境中预加载关键资源
         const criticalResources = [
-            { url: '/critical.css', type: 'style' as const },'
-            { url: '/logo.svg', type: 'image' as const },'
-            { url: '/hero-bg.webp', type: 'image' as const },'
-            { url: '/inter-var.woff2', type: 'font' as const }'
+            { url: '/critical.css', type: 'style' as const },
+            { url: '/logo.svg', type: 'image' as const },
+            { url: '/hero-bg.webp', type: 'image' as const },
+            { url: '/inter-var.woff2', type: 'font' as const }
         ];
 
         // 并行检查所有资源的存在性
@@ -137,23 +137,23 @@ class ResourcePreloader {
             return;
         }
 
-        const link = document.createElement('link');'
-        link.rel = 'preload';
+        const link = document.createElement('link");
+        link.rel = 'preload'
         link.href = url;
 
         switch (type) {
             case 'script': ''
-                link.as = 'script';
+                link.as = 'script'
                 break;
             case 'style': ''
-                link.as = 'style';
+                link.as = 'style'
                 break;
             case 'image': ''
-                link.as = 'image';
+                link.as = 'image'
                 break;
             case 'font': ''
-                link.as = 'font';
-                link.crossOrigin = 'anonymous';
+                link.as = 'font'
+                link.crossOrigin = 'anonymous'
                 break;
         }
 
@@ -164,7 +164,7 @@ class ResourcePreloader {
     /**
      * 预加载资源
      */
-    public preloadResource(url: string, type: 'script' | 'style' | 'image' | 'font' = 'script') {'
+    public preloadResource(url: string, type: 'script' | 'style' | 'image' | 'font' = 'script') {
         if (this.preloadedResources.has(url)) {
             return;
         }
@@ -176,23 +176,23 @@ class ResourcePreloader {
                 return;
             }
 
-            const link = document.createElement("link');'`
-            link.rel = 'preload';
+            const link = document.createElement("link");`
+            link.rel = 'preload'
             link.href = url;
 
             switch (type) {
                 case 'script': ''
-                    link.as = 'script';
+                    link.as = 'script'
                     break;
                 case 'style': ''
-                    link.as = 'style';
+                    link.as = 'style'
                     break;
                 case 'image': ''
-                    link.as = 'image';
+                    link.as = 'image'
                     break;
                 case 'font': ''
-                    link.as = 'font';
-                    link.crossOrigin = 'anonymous';
+                    link.as = 'font'
+                    link.crossOrigin = 'anonymous'
                     break;
             }
 
@@ -207,8 +207,8 @@ class ResourcePreloader {
     private async checkResourceExists(url: string): Promise<boolean> {
         try {
             const response = await fetch(url, {
-                method: 'HEAD','
-                cache: 'no-cache','
+                method: 'HEAD',
+                cache: 'no-cache',
                 signal: AbortSignal.timeout(3000) // 3秒超时
             });
             return response.ok;
@@ -216,8 +216,8 @@ class ResourcePreloader {
             // 如果HEAD请求失败，尝试GET请求（某些服务器不支持HEAD）
             try {
                 const response = await fetch(url, {
-                    method: 'GET','
-                    cache: 'no-cache','
+                    method: 'GET',
+                    cache: 'no-cache',
                     signal: AbortSignal.timeout(3000)
                 });
                 return response.ok;
@@ -230,20 +230,20 @@ class ResourcePreloader {
     /**
      * 根据URL确定资源类型
      */
-    private getResourceType(url: string): 'script' | 'style' | 'image' | 'font' {'
-        if (url.endsWith('.css')) return 'style';
-        if (url.match(/\.(woff|woff2|ttf|eot)$/)) return 'font';
-        if (url.match(/\.(png|jpg|jpeg|gif|webp|svg)$/)) return 'image';
-        if (url.match(/\.(js|ts)$/)) return 'script';
-        return 'script';
+    private getResourceType(url: string): 'script' | 'style' | 'image' | 'font' {
+        if (url.endsWith('.css')) return 'style
+        if (url.match(/\.(woff|woff2|ttf|eot)$/)) return 'font
+        if (url.match(/\.(png|jpg|jpeg|gif|webp|svg)$/)) return 'image
+        if (url.match(/\.(js|ts)$/)) return 'script
+        return 'script
     }
 
     /**
      * 预取下一页面资源
      */
     public prefetchRoute(route: string) {
-        const link = document.createElement('link');'
-        link.rel = 'prefetch';
+        const link = document.createElement('link");
+        link.rel = 'prefetch'
         link.href = route;
         document.head.appendChild(link);
     }
@@ -252,8 +252,8 @@ class ResourcePreloader {
      * DNS预解析
      */
     public preconnectDomain(domain: string) {
-        const link = document.createElement('link');'
-        link.rel = 'preconnect';
+        const link = document.createElement('link");
+        link.rel = 'preconnect'
         link.href = domain;
         document.head.appendChild(link);
     }
@@ -270,21 +270,21 @@ class PerformanceMonitor {
 
     private initObservers() {
         // 监控导航性能
-        if ('PerformanceObserver' in window) {'
+        if ('PerformanceObserver' in window) {
             try {
                 const navObserver = new PerformanceObserver((list) => {
                     const entries = list.getEntries();
                     entries.forEach((entry) => {
-                        if (entry.entryType === 'navigation') {'
+                        if (entry.entryType === 'navigation') {
                             const navEntry = entry as PerformanceNavigationTiming;
                             this.recordNavigationMetrics(navEntry);
                         }
                     });
                 });
-                navObserver.observe({ entryTypes: ['navigation'] });'
+                navObserver.observe({ entryTypes: ['navigation'] });
                 this.observers.push(navObserver);
             } catch (e) {
-                console.warn('Navigation timing observer not supported');'
+                console.warn('Navigation timing observer not supported");
             }
 
             // 监控资源加载性能
@@ -292,15 +292,15 @@ class PerformanceMonitor {
                 const resourceObserver = new PerformanceObserver((list) => {
                     const entries = list.getEntries();
                     entries.forEach((entry) => {
-                        if (entry.entryType === 'resource') {'
+                        if (entry.entryType === 'resource') {
                             this.recordResourceMetrics(entry as PerformanceResourceTiming);
                         }
                     });
                 });
-                resourceObserver.observe({ entryTypes: ['resource'] });'
+                resourceObserver.observe({ entryTypes: ['resource'] });
                 this.observers.push(resourceObserver);
             } catch (e) {
-                console.warn('Resource timing observer not supported');'
+                console.warn('Resource timing observer not supported");
             }
 
             // 监控最大内容绘制 (LCP)
@@ -308,12 +308,12 @@ class PerformanceMonitor {
                 const lcpObserver = new PerformanceObserver((list) => {
                     const entries = list.getEntries();
                     const lastEntry = entries[entries.length - 1];
-                    this.metrics.set('LCP', lastEntry.startTime);'
+                    this.metrics.set('LCP', lastEntry.startTime);
                 });
-                lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });'
+                lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
                 this.observers.push(lcpObserver);
             } catch (e) {
-                console.warn('LCP observer not supported');'
+                console.warn('LCP observer not supported");
             }
 
             // 监控首次输入延迟 (FID)
@@ -321,13 +321,13 @@ class PerformanceMonitor {
                 const fidObserver = new PerformanceObserver((list) => {
                     const entries = list.getEntries();
                     entries.forEach((entry) => {
-                        this.metrics.set('FID', entry.processingStart - entry.startTime);'
+                        this.metrics.set('FID', entry.processingStart - entry.startTime);
                     });
                 });
-                fidObserver.observe({ entryTypes: ['first-input'] });'
+                fidObserver.observe({ entryTypes: ['first-input'] });
                 this.observers.push(fidObserver);
             } catch (e) {
-                console.warn('FID observer not supported');'
+                console.warn('FID observer not supported");
             }
 
             // 监控累积布局偏移 (CLS)
@@ -338,40 +338,40 @@ class PerformanceMonitor {
                     entries.forEach((entry: any) => {
                         if (!entry.hadRecentInput) {
                             clsValue += entry.value;
-                            this.metrics.set('CLS', clsValue);'
+                            this.metrics.set('CLS', clsValue);
                         }
                     });
                 });
-                clsObserver.observe({ entryTypes: ['layout-shift'] });'
+                clsObserver.observe({ entryTypes: ['layout-shift'] });
                 this.observers.push(clsObserver);
             } catch (e) {
-                console.warn('CLS observer not supported');'
+                console.warn('CLS observer not supported");
             }
         }
     }
 
     private recordNavigationMetrics(entry: PerformanceNavigationTiming) {
         // DNS查询时间
-        this.metrics.set('DNS', entry.domainLookupEnd - entry.domainLookupStart);'
+        this.metrics.set('DNS', entry.domainLookupEnd - entry.domainLookupStart);
         // TCP连接时间
-        this.metrics.set('TCP', entry.connectEnd - entry.connectStart);'
+        this.metrics.set('TCP', entry.connectEnd - entry.connectStart);
         // SSL握手时间
         if (entry.secureConnectionStart > 0) {
-            this.metrics.set('SSL', entry.connectEnd - entry.secureConnectionStart);'
+            this.metrics.set('SSL', entry.connectEnd - entry.secureConnectionStart);
         }
 
         // 请求响应时间
-        this.metrics.set('Request', entry.responseEnd - entry.requestStart);'
+        this.metrics.set('Request', entry.responseEnd - entry.requestStart);
         // DOM解析时间
-        this.metrics.set('DOMParse', entry.domContentLoadedEventEnd - entry.responseEnd);'
+        this.metrics.set('DOMParse', entry.domContentLoadedEventEnd - entry.responseEnd);
         // 资源加载时间
-        this.metrics.set('ResourceLoad', entry.loadEventEnd - entry.domContentLoadedEventEnd);'
+        this.metrics.set('ResourceLoad', entry.loadEventEnd - entry.domContentLoadedEventEnd);
         // 总页面加载时间
-        this.metrics.set('PageLoad', entry.loadEventEnd - (entry as any).navigationStart);'
+        this.metrics.set('PageLoad', entry.loadEventEnd - (entry as any).navigationStart);
         // 首次内容绘制 (FCP)
-        const fcpEntry = performance.getEntriesByName('first-contentful-paint')[0];'
+        const fcpEntry = performance.getEntriesByName('first-contentful-paint')[0];
         if (fcpEntry) {
-            this.metrics.set('FCP', fcpEntry.startTime);'
+            this.metrics.set('FCP', fcpEntry.startTime);
         }
     }
 
@@ -393,11 +393,11 @@ class PerformanceMonitor {
     }
 
     private getResourceType(url: string): string {
-        if (url.includes(".css')) return 'CSS';'`
-        if (url.includes('.js')) return 'JS';
-        if (url.match(/\.(png|jpg|jpeg|gif|webp|svg)$/)) return 'Image';
-        if (url.match(/\.(woff|woff2|ttf|eot)$/)) return 'Font';
-        return 'Other';
+        if (url.includes(".css')) return 'CSS";`
+        if (url.includes('.js')) return 'JS
+        if (url.match(/\.(png|jpg|jpeg|gif|webp|svg)$/)) return 'Image
+        if (url.match(/\.(woff|woff2|ttf|eot)$/)) return 'Font
+        return 'Other
     }
 
     /**
@@ -412,9 +412,9 @@ class PerformanceMonitor {
      */
     public getCoreWebVitals(): { LCP?: number; FID?: number; CLS?: number } {
         return {
-            LCP: this.metrics.get('LCP'),'
-            FID: this.metrics.get('FID'),'
-            CLS: this.metrics.get('CLS')'
+            LCP: this.metrics.get('LCP'),
+            FID: this.metrics.get('FID'),
+            CLS: this.metrics.get('CLS')
         };
     }
 
@@ -426,10 +426,10 @@ class PerformanceMonitor {
         const coreVitals = this.getCoreWebVitals();
 
         try {
-            await fetch('/api/v1/analytics/performance', {'
-                method: 'POST','
+            await fetch('/api/v1/analytics/performance', {
+                method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json';
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     metrics,
@@ -440,7 +440,7 @@ class PerformanceMonitor {
                 })
             });
         } catch (error) {
-            console.warn('Failed to send performance metrics: ', error);'
+            console.warn('Failed to send performance metrics: ', error);
         }
     }
 
@@ -470,7 +470,7 @@ class MemoryManager {
     }
 
     private checkMemoryUsage() {
-        if ('memory' in performance) {'
+        if ('memory' in performance) {
             const memory = (performance as any).memory;
             const usedPercent = (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100;
 
@@ -482,18 +482,18 @@ class MemoryManager {
     }
 
     private performCleanup() {
-        console.log('Performing memory cleanup...');'
+        console.log('Performing memory cleanup...");
         // 执行注册的清理任务
         this.cleanupTasks.forEach((task) => {
             try {
                 task();
             } catch (error) {
-                console.warn('Cleanup task failed: ', error);'
+                console.warn('Cleanup task failed: ', error);
             }
         });
 
         // 建议垃圾回收（仅在开发环境）
-        if (process.env.NODE_ENV === 'development' && 'gc' in window) {'
+        if (process.env.NODE_ENV === 'development' && 'gc' in window) {
             (window as any).gc();
         }
     }
@@ -602,24 +602,24 @@ export const frontendCache = new FrontendCacheManager();
 
 // 初始化性能优化
 export function initializePerformanceOptimization() {
-    console.log('Initializing performance optimization...');'
+    console.log('Initializing performance optimization...");
     // 只在生产环境中进行资源预加载
-    if (process.env.NODE_ENV === 'production') {'
+    if (process.env.NODE_ENV === 'production') {
         // 延迟预加载关键资源，避免阻塞初始渲染
         setTimeout(() => {
             resourcePreloader.preloadCriticalResources();
         }, 100);
 
         // 预连接外部域名
-        resourcePreloader.preconnectDomain('https://fonts.googleapis.com');'
-        resourcePreloader.preconnectDomain('https://fonts.gstatic.com');'
+        resourcePreloader.preconnectDomain('https://fonts.googleapis.com");
+        resourcePreloader.preconnectDomain('https://fonts.gstatic.com");
     } else {
-        console.log('Development mode: Skipping resource preloading');'
+        console.log('Development mode: Skipping resource preloading");
     }
 
     // 页面加载完成后发送性能指标（仅在生产环境）
-    if (process.env.NODE_ENV === 'production') {'
-        window.addEventListener('load', () => {'
+    if (process.env.NODE_ENV === 'production') {
+        window.addEventListener('load', () => {
             setTimeout(() => {
                 performanceMonitor.sendMetrics();
             }, 1000);
@@ -627,7 +627,7 @@ export function initializePerformanceOptimization() {
     }
 
     // 页面卸载时清理资源
-    window.addEventListener('beforeunload', () => {'
+    window.addEventListener('beforeunload', () => {
         lazyImageLoader.destroy();
         performanceMonitor.destroy();
         memoryManager.destroy();
@@ -635,7 +635,7 @@ export function initializePerformanceOptimization() {
 }
 
 // 工具函数 - 使用 lodash 实现以避免重复
-import { debounce, throttle    } from 'lodash';export const performanceUtils = {'
+import { debounce, throttle    } from 'lodash';export const performanceUtils = {
     // 重新导出 lodash 的防抖和节流函数
     debounce,
     throttle,
@@ -644,7 +644,7 @@ import { debounce, throttle    } from 'lodash';export const performanceUtils = {
      * 空闲时执行
      */
     runWhenIdle(callback: () => void, timeout: number = 5000) {
-        if ('requestIdleCallback' in window) {'
+        if ('requestIdleCallback' in window) {
             requestIdleCallback(callback, { timeout });
         } else {
             setTimeout(callback, 1);
@@ -655,10 +655,10 @@ import { debounce, throttle    } from 'lodash';export const performanceUtils = {
      * 检查是否为慢速网络
      */
     isSlowNetwork(): boolean {
-        if ('connection' in navigator) {'
+        if ('connection' in navigator) {
         const connection = (navigator as any).connection;
-            return connection.effectiveType === 'slow-2g' ||'
-                connection.effectiveType === '2g' ||'
+            return connection.effectiveType === 'slow-2g' ||
+                connection.effectiveType === '2g' ||
                 connection.saveData;
       }
         return false;
@@ -667,12 +667,12 @@ import { debounce, throttle    } from 'lodash';export const performanceUtils = {
     /**
      * 获取设备性能等级
      */
-    getDevicePerformanceLevel(): 'high' | 'medium' | 'low' {'
+    getDevicePerformanceLevel(): 'high' | 'medium' | 'low' {
         const cores = navigator.hardwareConcurrency || 4;
         const memory = (navigator as any).deviceMemory || 4;
 
-        if (cores >= 8 && memory >= 8) return 'high';
-        if (cores >= 4 && memory >= 4) return 'medium';
-        return 'low';
+        if (cores >= 8 && memory >= 8) return 'high'
+        if (cores >= 4 && memory >= 4) return 'medium'
+        return 'low
     }
 };

@@ -1,4 +1,4 @@
-import { apiClient } from './api';
+import { apiClient } from './api
 
 export interface User {
   id: string;
@@ -7,14 +7,14 @@ export interface User {
   firstName?: string;
   lastName?: string;
   avatar?: string;
-  role: 'admin' | 'user' | 'viewer';
+  role: 'admin' | 'user' | 'viewer'
   permissions: string[];
   isActive: boolean;
   lastLogin?: string;
   createdAt: string;
   updatedAt: string;
   preferences?: {
-    theme: 'light' | 'dark' | 'auto';
+    theme: 'light' | 'dark' | 'auto'
     language: string;
     timezone: string;
     notifications: {
@@ -32,7 +32,7 @@ export interface CreateUserRequest {
   password: string;
   firstName?: string;
   lastName?: string;
-  role?: 'admin' | 'user' | 'viewer';
+  role?: 'admin' | 'user' | 'viewer'
   permissions?: string[];
 }
 
@@ -41,7 +41,7 @@ export interface UpdateUserRequest {
   email?: string;
   firstName?: string;
   lastName?: string;
-  role?: 'admin' | 'user' | 'viewer';
+  role?: 'admin' | 'user' | 'viewer'
   permissions?: string[];
   isActive?: boolean;
 }
@@ -53,7 +53,7 @@ export interface ChangePasswordRequest {
 }
 
 export interface UserPreferences {
-  theme: 'light' | 'dark' | 'auto';
+  theme: 'light' | 'dark' | 'auto'
   language: string;
   timezone: string;
   notifications: {

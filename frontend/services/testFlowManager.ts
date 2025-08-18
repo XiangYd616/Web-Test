@@ -3,8 +3,8 @@
  * 管理完整的测试执行流程
  */
 
-import apiClient from '../utils/apiClient';export interface TestConfig     {'
-  testType: 'performance' | 'stress' | 'api' | 'seo' | 'security';
+import apiClient from '../utils/apiClient';export interface TestConfig     {
+  testType: 'performance' | 'stress' | 'api' | 'seo' | 'security'
   url: string;
   duration: number;
   concurrency?: number;
@@ -13,7 +13,7 @@ import apiClient from '../utils/apiClient';export interface TestConfig     {'
 
 export interface TestExecution     {
   id: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled'
   progress: number;
   startTime: string;
   endTime?: string;
@@ -30,7 +30,7 @@ class TestFlowManager {
    */
   async startTest(config: TestConfig): Promise<string> {
     try {
-      const response = await apiClient.post('/tests/run', {'
+      const response = await apiClient.post('/tests/run', {
         testType: config.testType,
         config
       });
@@ -38,7 +38,7 @@ class TestFlowManager {
       if (response.success) {
         const execution: TestExecution  = {
           id: response.data.executionId,
-          status: 'running','
+          status: 'running',
           progress: 0,
           startTime: response.data.startTime,
           config
@@ -51,10 +51,10 @@ class TestFlowManager {
 
         return execution.id;
       } else {
-        throw new Error(response.error?.message || '启动测试失败');'
+        throw new Error(response.error?.message || '启动测试失败");
       }
     } catch (error) {
-      console.error('启动测试失败:', error);'
+      console.error('启动测试失败:', error);
       throw error;
     }
   }
@@ -69,7 +69,7 @@ class TestFlowManager {
       if (response.success) {
         return response.data;
       } else {
-        throw new Error(response.error?.message || "获取测试结果失败');'`
+        throw new Error(response.error?.message || "获取测试结果失败");`
       }
     } catch (error) {
       console.error("获取测试结果失败:', error);'
@@ -87,15 +87,15 @@ class TestFlowManager {
       if (response.success) {
         const execution = this.executions.get(executionId);
         if (execution) {
-          execution.status = "cancelled';'`
+          execution.status = "cancelled";`
           this.executions.set(executionId, execution);
           this.notifyListeners(execution);
         }
       } else {
-        throw new Error(response.error?.message || '取消测试失败');'
+        throw new Error(response.error?.message || '取消测试失败");
       }
     } catch (error) {
-      console.error('取消测试失败:', error);'
+      console.error('取消测试失败:', error);
       throw error;
     }
   }
@@ -118,7 +118,7 @@ class TestFlowManager {
             if (response.data.status === "completed') {'`
               execution.endTime = response.data.completedAt;
               clearInterval(interval);
-            } else if (response.data.status === 'failed' || response.data.status === 'cancelled') {'
+            } else if (response.data.status === 'failed' || response.data.status === 'cancelled') {
               clearInterval(interval);
             }
             
@@ -127,7 +127,7 @@ class TestFlowManager {
           }
         }
       } catch (error) {
-        console.error('轮询测试状态失败:', error);'
+        console.error('轮询测试状态失败:', error);
         clearInterval(interval);
       }
     }, 2000);

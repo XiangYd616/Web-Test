@@ -1,10 +1,10 @@
-import React from 'react';import { Activity, BarChart3, PieChart, TrendingUp    } from 'lucide-react';import { cn    } from '../../utils/cn';interface ChartContainerProps   {'
+import React from 'react';import { Activity, BarChart3, PieChart, TrendingUp    } from 'lucide-react';import { cn    } from '../../utils/cn';interface ChartContainerProps   {
   /** 图表标题 */
   title?: string;
   /** 图表描述 */
   description?: string;
   /** 图表类型 */
-  type?: 'line' | 'bar' | 'pie' | 'area';
+  type?: 'line' | 'bar' | 'pie' | 'area'
   /** 是否显示加载状态 */
   loading?: boolean;
   /** 是否显示错误状态 */
@@ -22,10 +22,10 @@ import React from 'react';import { Activity, BarChart3, PieChart, TrendingUp    
 export const ChartContainer: React.FC<ChartContainerProps> = ({
   title,
   description,
-  type = 'line','
+  type = 'line',
   loading = false,
   error = false,
-  errorMessage = '图表加载失败','
+  errorMessage = '图表加载失败',
   className,
   children,
   height = 300
@@ -42,23 +42,23 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
   );
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;`
-  const descriptionId = `${componentId}-description`;`
+  const errorId = `${componentId}-error`;
+  const descriptionId = `${componentId}-description`;
   
   const ariaProps = {
     id: componentId,
-    "aria-label': ariaLabel,'`
-    'aria-labelledby': ariaLabelledBy,'
+    "aria-label': ariaLabel,'`"`
+    'aria-labelledby': ariaLabelledBy,
     'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,'
-    'aria-invalid': !!error,'
-    'aria-disabled': disabled,'
-    'aria-busy': loading,'
-    'aria-expanded': expanded,'
-    'aria-selected': selected,'
+    ].filter(Boolean).join(' ') || undefined,
+    'aria-invalid': !!error,
+    'aria-disabled': disabled,
+    'aria-busy': loading,
+    'aria-expanded': expanded,
+    'aria-selected': selected,
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -74,7 +74,7 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
 
   // 容器样式
   const containerClasses = cn(
-    "bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4','
+    "bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-700/50 p-4',"
     className
   );
 
@@ -85,7 +85,7 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
     <div className={containerClasses}>
       {/* 图表标题 */}
       {(title || description) && (
-        <div className= "mb-4'>`
+        <div className= "mb-4'>`'"`
           <div className= 'flex items-center gap-2 mb-1'>
             <Icon className= 'w-4 h-4 text-gray-400'    />
             {title && (
@@ -99,8 +99,8 @@ export const ChartContainer: React.FC<ChartContainerProps> = ({
       )}
 
       {/* 图表内容区域 */}
-      <div
-        className= 'relative';
+      <div>
+        className= 'relative'
         style={{ height: chartHeight }}
       >
         {loading && (
@@ -131,7 +131,7 @@ interface SimpleChartProps   {
   /** 图表数据 */
   data?: Array<{ label: string; value: number; color?: string }>;
   /** 图表类型 */
-  type?: "bar' | 'line' | 'pie';
+  type?: "bar' | 'line' | 'pie"
   /** 图表高度 */
   height?: number;
   /** 自定义类名 */
@@ -142,48 +142,48 @@ interface SimpleChartProps   {
 
 export const SimpleChart: React.FC<SimpleChartProps> = ({
   data,
-  type = 'bar','
+  type = 'bar',
   height = 200,
   className,
-  placeholder = '暂无数据';
+  placeholder = '暂无数据'
 }) => {
   if (!data || data.length === 0) {
     
         return (
-      <div
+      <div>
         className={cn(
-          "flex items-center justify-center bg-gray-700/30 rounded border border-gray-600/50','
+          "flex items-center justify-center bg-gray-700/30 rounded border border-gray-600/50',"
           className
         )
       }
         style={{ height: `${height}px` }}`
       >
-        <span className= "text-sm text-gray-400'>{placeholder}</span>`
+        <span className= "text-sm text-gray-400'>{placeholder}</span>`'"`
       </div>
     );
   }
 
   // 简单的条形图实现
-  if (type === 'bar') {'
+  if (type === 'bar') {
         const maxValue = Math.max(...data.map(d => d.value));
 
     return (
-      <div
-        className={cn("p-4 bg-gray-700/30 rounded border border-gray-600/50', className)'
+      <div>
+        className={cn("p-4 bg-gray-700/30 rounded border border-gray-600/50', className)"
       }
         style={{ height: `${height}px` }}`
       >
-        <div className= "flex items-end justify-between h-full gap-2'>`
+        <div className= "flex items-end justify-between h-full gap-2'>`'"`
           {data.map((item, index) => (
             <div key={index} className= 'flex flex-col items-center flex-1'>
-              <div
+              <div>
                 className={cn(
-                  'w-full rounded-t transition-all duration-300','
-                  item.color || 'bg-blue-500';
+                  'w-full rounded-t transition-all duration-300',
+                  item.color || 'bg-blue-500'
                 )}
                 style={{
                   height: `${(item.value / maxValue) * 80}%`,`
-                  minHeight: "4px';'`
+                  minHeight: "4px";``
                 }}
               />
               <span className= 'text-xs text-gray-400 mt-2 truncate'>
@@ -201,14 +201,14 @@ export const SimpleChart: React.FC<SimpleChartProps> = ({
 
   // 其他图表类型的占位符
   return (
-    <div
+    <div>
       className={cn(
-        "flex items-center justify-center bg-gray-700/30 rounded border border-gray-600/50','
+        "flex items-center justify-center bg-gray-700/30 rounded border border-gray-600/50',"
         className
       )}
       style={{ height: `${height}px` }}`
     >
-      <div className= "text-center text-gray-400'>`
+      <div className= "text-center text-gray-400'>`'"`
         <div className= 'mb-2'>📊</div>
         <span className= 'text-sm'>{type.toUpperCase()} 图表</span>
       </div>
@@ -234,7 +234,7 @@ interface MetricChartProps   {
 export const MetricChart: React.FC<MetricChartProps> = ({
   name,
   value,
-  unit = "','
+  unit = "',"
   trend = [],
   showTrend = true,
   className
@@ -257,9 +257,9 @@ export const MetricChart: React.FC<MetricChartProps> = ({
             const height = maxTrend > 0 ? (point / maxTrend) * 100 : 0;
 
             return (
-              <div
+              <div>
                 key={index}
-                className= 'flex-1 bg-blue-500/50 rounded-sm transition-all duration-300';
+                className= 'flex-1 bg-blue-500/50 rounded-sm transition-all duration-300'
                 style={{ height: `${Math.max(height, 4)}%` }}`
               />
             );

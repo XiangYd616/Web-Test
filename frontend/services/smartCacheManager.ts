@@ -9,7 +9,7 @@ export interface CacheEntry<T = any>     {
   ttl: number;
   accessCount: number;
   lastAccessed: number;
-  priority: 'high' | 'medium' | 'low';
+  priority: 'high' | 'medium' | 'low'
   size: number;
   tags: string[];
 }
@@ -18,7 +18,7 @@ export interface CacheStrategy     {
   name: string;
   maxSize: number;
   defaultTTL: number;
-  evictionPolicy: 'lru' | 'lfu' | 'ttl' | 'priority';
+  evictionPolicy: 'lru' | 'lfu' | 'ttl' | 'priority'
   compressionEnabled: boolean;
   persistToDisk: boolean;
 }
@@ -39,41 +39,41 @@ class SmartCacheManager {
    */
   private initializeStrategies() {
     // API响应缓存策略
-    this.strategies.set('api', {'
-      name: 'api','
+    this.strategies.set('api', {
+      name: 'api',
       maxSize: 10 * 1024 * 1024, // 10MB
       defaultTTL: 5 * 60 * 1000,  // 5分钟
-      evictionPolicy: 'lru','
+      evictionPolicy: 'lru',
       compressionEnabled: true,
       persistToDisk: false
     });
 
     // 静态资源缓存策略
-    this.strategies.set('static', {'
-      name: 'static','
+    this.strategies.set('static', {
+      name: 'static',
       maxSize: 20 * 1024 * 1024, // 20MB
       defaultTTL: 24 * 60 * 60 * 1000, // 24小时
-      evictionPolicy: 'lfu','
+      evictionPolicy: 'lfu',
       compressionEnabled: false,
       persistToDisk: true
     });
 
     // 组件缓存策略
-    this.strategies.set('component', {'
-      name: 'component','
+    this.strategies.set('component', {
+      name: 'component',
       maxSize: 5 * 1024 * 1024, // 5MB
       defaultTTL: 60 * 60 * 1000, // 1小时
-      evictionPolicy: 'priority','
+      evictionPolicy: 'priority',
       compressionEnabled: true,
       persistToDisk: false
     });
 
     // 用户数据缓存策略
-    this.strategies.set('user', {'
-      name: 'user','
+    this.strategies.set('user', {
+      name: 'user',
       maxSize: 2 * 1024 * 1024, // 2MB
       defaultTTL: 30 * 60 * 1000, // 30分钟
-      evictionPolicy: 'ttl','
+      evictionPolicy: 'ttl',
       compressionEnabled: true,
       persistToDisk: true
     });
@@ -88,14 +88,14 @@ class SmartCacheManager {
     options: {
       strategy?: string;
       ttl?: number;
-      priority?: 'high' | 'medium' | 'low';
+      priority?: 'high' | 'medium' | 'low'
       tags?: string[];
     } = {}
   ): void {
     const {
-      strategy = 'api','
+      strategy = 'api',
       ttl,
-      priority = 'medium','
+      priority = 'medium',
       tags = []
     } = options;
 
@@ -267,7 +267,7 @@ class SmartCacheManager {
    * 检查数据是否被压缩
    */
   private isCompressed(data: any): boolean {
-    return typeof data === "string';'`
+    return typeof data === "string";`
   }
 
   /**

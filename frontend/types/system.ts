@@ -77,7 +77,7 @@ export interface SystemConfig     {
     };
     defaultLocations: string[];
     maxFileUploadSize: number; // MB
-    screenshotQuality: 'low' | 'medium' | 'high';
+    screenshotQuality: 'low' | 'medium' | 'high'
     videoRecording: boolean;
     harGeneration: boolean;
   };
@@ -115,9 +115,9 @@ export interface SystemConfig     {
   };
   backup: {
     enabled: boolean;
-    frequency: 'hourly' | 'daily' | 'weekly' | 'monthly';
+    frequency: 'hourly' | 'daily' | 'weekly' | 'monthly'
     retentionDays: number;
-    location: 'local' | 'cloud' | 's3';
+    location: 'local' | 'cloud' | 's3'
   };
 }
 
@@ -125,8 +125,8 @@ export interface User     {
   id: string;
   username: string;
   email: string;
-  role: 'admin' | 'user' | 'viewer';
-  status: 'active' | 'inactive' | 'suspended';
+  role: 'admin' | 'user' | 'viewer'
+  status: 'active' | 'inactive' | 'suspended'
   createdAt: string;
   lastLogin?: string;
   testCount: number;
@@ -151,8 +151,8 @@ export interface UserFilter     {
 export interface SystemLog     {
   id: string;
   timestamp: string;
-  level: 'debug' | 'info' | 'warning' | 'error' | 'critical';
-  category: 'auth' | 'test' | 'system' | 'admin' | 'api' | 'security';
+  level: 'debug' | 'info' | 'warning' | 'error' | 'critical'
+  category: 'auth' | 'test' | 'system' | 'admin' | 'api' | 'security'
   message: string;
   details?: Record<string, any>;
   userId?: string;
@@ -170,7 +170,7 @@ export interface LogFilter     {
 }
 
 export interface SystemHealth     {
-  status: 'healthy' | 'warning' | 'critical';
+  status: 'healthy' | 'warning' | 'critical'
   uptime: number; // 秒
   services: {
     database: ServiceStatus;
@@ -193,7 +193,7 @@ export interface SystemHealth     {
 }
 
 export interface ServiceStatus     {
-  status: 'healthy' | 'warning' | 'critical';
+  status: 'healthy' | 'warning' | 'critical'
   responseTime: number; // 毫秒
   lastCheck?: string;
   error?: string;
@@ -224,8 +224,8 @@ export interface NetworkUsage     {
 export interface BackupInfo     {
   id: string;
   name: string;
-  type: 'full' | 'incremental' | 'config';
-  status: 'pending' | 'running' | 'completed' | 'failed';
+  type: 'full' | 'incremental' | 'config'
+  status: 'pending' | 'running' | 'completed' | 'failed'
   createdAt: string;
   completedAt?: string;
   size: number; // 字节
@@ -246,7 +246,7 @@ export interface MaintenanceInfo     {
 
 export interface SystemUpdate     {
   version: string;
-  type: 'major' | 'minor' | 'patch';
+  type: 'major' | 'minor' | 'patch'
   description: string;
   releaseDate: string;
   size: number; // 字节
@@ -255,7 +255,7 @@ export interface SystemUpdate     {
 
 export interface MaintenanceRecord     {
   date: string;
-  type: 'scheduled' | 'emergency' | 'update';
+  type: 'scheduled' | 'emergency' | 'update'
   description: string;
   duration: number; // 秒
   success: boolean;
@@ -294,7 +294,7 @@ export interface AuditLog     {
 
 export interface SystemAlert     {
   id: string;
-  type: 'info' | 'warning' | 'error' | 'critical';
+  type: 'info' | 'warning' | 'error' | 'critical'
   title: string;
   message: string;
   timestamp: string;
@@ -395,5 +395,5 @@ export interface SystemMonitor     {
   timestamp: string;
   metrics: SystemMetrics;
   alerts: SystemAlert[];
-  status: 'healthy' | 'warning' | 'critical';
+  status: 'healthy' | 'warning' | 'critical'
 }

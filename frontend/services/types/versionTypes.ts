@@ -28,7 +28,7 @@ export interface VersionHistory     {
 export interface VersionComparison     {
   current: Version;
   target: Version;
-  result: 'newer' | 'older' | 'same';
+  result: 'newer' | 'older' | 'same'
   difference: {
     major: number;
     minor: number;
@@ -40,7 +40,7 @@ export interface VersionUpdate     {
   available: boolean;
   currentVersion: string;
   latestVersion: string;
-  updateType: 'major' | 'minor' | 'patch';
+  updateType: 'major' | 'minor' | 'patch'
   changelog?: string[];
   downloadUrl?: string;
   releaseNotes?: string;
@@ -50,7 +50,7 @@ export interface VersionConfig     {
   checkInterval: number; // 检查更新间隔（毫秒）
   autoCheck: boolean;
   includePrerelease: boolean;
-  updateChannel: 'stable' | 'beta' | 'alpha';
+  updateChannel: 'stable' | 'beta' | 'alpha'
 }
 
 export interface VersionMetadata     {
@@ -58,7 +58,7 @@ export interface VersionMetadata     {
   buildDate: Date;
   commitHash: string;
   branch: string;
-  environment: 'development' | 'staging' | 'production';
+  environment: 'development' | 'staging' | 'production'
   features: string[];
   dependencies: Record<string, string>;
 }
@@ -83,7 +83,7 @@ export interface VersionMigrationStep     {
   id: string;
   title: string;
   description: string;
-  type: 'data' | 'config' | 'schema' | 'cleanup';
+  type: 'data' | 'config' | 'schema' | 'cleanup'
   isReversible: boolean;
   execute: () => Promise<void>;
   rollback?: () => Promise<void>;
@@ -101,7 +101,7 @@ export interface VersionRelease     {
   releaseDate: Date;
   title: string;
   description: string;
-  type: 'major' | 'minor' | 'patch' | 'hotfix';
+  type: 'major' | 'minor' | 'patch' | 'hotfix'
   features: VersionFeature[];
   bugFixes: VersionBugFix[];
   breakingChanges: VersionBreakingChange[];
@@ -114,7 +114,7 @@ export interface VersionFeature     {
   title: string;
   description: string;
   category: string;
-  impact: 'low' | 'medium' | 'high';
+  impact: 'low' | 'medium' | 'high'
   documentation?: string;
 }
 
@@ -122,7 +122,7 @@ export interface VersionBugFix     {
   id: string;
   title: string;
   description: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: 'low' | 'medium' | 'high' | 'critical'
   affectedVersions: Version[];
   issueUrl?: string;
 }
@@ -149,18 +149,18 @@ export interface VersionSecurityFix     {
   id: string;
   title: string;
   description: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: 'low' | 'medium' | 'high' | 'critical'
   cveId?: string;
   affectedVersions: Version[];
 }
 
 export interface VersionNotification     {
   id: string;
-  type: 'update' | 'security' | 'deprecation' | 'migration';
+  type: 'update' | 'security' | 'deprecation' | 'migration'
   title: string;
   message: string;
   version: Version;
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  priority: 'low' | 'medium' | 'high' | 'critical'
   actionRequired: boolean;
   actionUrl?: string;
   dismissible: boolean;
@@ -185,7 +185,7 @@ export interface VersionAnalytics     {
 
 export interface VersionPreferences     {
   autoUpdate: boolean;
-  updateChannel: 'stable' | 'beta' | 'alpha';
+  updateChannel: 'stable' | 'beta' | 'alpha'
   notificationSettings: {
     updates: boolean;
     security: boolean;
@@ -210,36 +210,36 @@ export const VERSION_PATTERNS = {
 } as const;
 
 export const VERSION_CHANNELS = {
-  STABLE: 'stable','
-  BETA: 'beta','
-  ALPHA: 'alpha','
-  NIGHTLY: 'nightly';
+  STABLE: 'stable',
+  BETA: 'beta',
+  ALPHA: 'alpha',
+  NIGHTLY: 'nightly'
 } as const;
 
 export const UPDATE_TYPES = {
-  MAJOR: 'major','
-  MINOR: 'minor','
-  PATCH: 'patch','
-  PRERELEASE: 'prerelease';
+  MAJOR: 'major',
+  MINOR: 'minor',
+  PATCH: 'patch',
+  PRERELEASE: 'prerelease'
 } as const;
 
 export const MIGRATION_TYPES = {
-  DATA: 'data','
-  CONFIG: 'config','
-  SCHEMA: 'schema','
-  CLEANUP: 'cleanup';
+  DATA: 'data',
+  CONFIG: 'config',
+  SCHEMA: 'schema',
+  CLEANUP: 'cleanup'
 } as const;
 
 export const NOTIFICATION_TYPES = {
-  UPDATE: 'update','
-  SECURITY: 'security','
-  DEPRECATION: 'deprecation','
-  MIGRATION: 'migration';
+  UPDATE: 'update',
+  SECURITY: 'security',
+  DEPRECATION: 'deprecation',
+  MIGRATION: 'migration'
 } as const;
 
 export const PRIORITY_LEVELS = {
-  LOW: 'low','
-  MEDIUM: 'medium','
-  HIGH: 'high','
-  CRITICAL: 'critical';
+  LOW: 'low',
+  MEDIUM: 'medium',
+  HIGH: 'high',
+  CRITICAL: 'critical'
 } as const;

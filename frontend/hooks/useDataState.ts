@@ -4,13 +4,13 @@
  * 版本: v2.0.0
  */
 
-import { useState, useCallback, useRef, useEffect    } from 'react';import { apiErrorHandler    } from '../services/api/errorHandler';import type { ApiError  } from '../types/unified/apiResponse';// 数据状态枚举'
+import { useState, useCallback, useRef, useEffect    } from 'react';import { apiErrorHandler    } from '../services/api/errorHandler';import type { ApiError  } from '../types/unified/apiResponse';// 数据状态枚举
 export enum DataStatus {
-  IDLE = 'idle','
-  LOADING = 'loading','
-  SUCCESS = 'success','
-  ERROR = 'error','
-  EMPTY = 'empty';
+  IDLE = 'idle',
+  LOADING = 'loading',
+  SUCCESS = 'success',
+  ERROR = 'error',
+  EMPTY = 'empty'
 }
 
 // 数据状态接口
@@ -60,7 +60,7 @@ const DEFAULT_CONFIG: Required<DataOperationConfig>  = {
   maxRetries: 3,
   retryDelay: 1000,
   enableCache: false,
-  cacheKey: '','
+  cacheKey: '',
   cacheTTL: 300,
   onSuccess: () => {},
   onError: () => {},
@@ -141,7 +141,7 @@ export function useDataState<T = any>(config: DataOperationConfig = {}): [
         fetcher,
         {
           requestId: finalConfig.cacheKey || `data_${Date.now()}`,`
-          operation: "data_fetch';'`
+          operation: "data_fetch";`
         },
         {
           maxRetries: finalConfig.maxRetries,
@@ -152,7 +152,7 @@ export function useDataState<T = any>(config: DataOperationConfig = {}): [
       
       // 验证数据
       if (!finalConfig.validateData(result)) {
-        throw new Error('Data validation failed');'
+        throw new Error('Data validation failed");
       }
       
       // 转换数据
@@ -161,7 +161,7 @@ export function useDataState<T = any>(config: DataOperationConfig = {}): [
       // 检查是否为空
       const isEmpty = transformedData == null || 
                      (Array.isArray(transformedData) && transformedData.length === 0) ||
-                     (typeof transformedData === 'object' && Object.keys(transformedData).length === 0);'
+                     (typeof transformedData === 'object' && Object.keys(transformedData).length === 0);
       // 更新状态
       updateState({
         data: transformedData,
@@ -178,7 +178,7 @@ export function useDataState<T = any>(config: DataOperationConfig = {}): [
       // 处理错误
       const { error: apiError }  = await apiErrorHandler.handleError(error, {
         requestId: finalConfig.cacheKey || `data_${Date.now()}`,`
-        operation: "data_fetch';'`
+        operation: "data_fetch";`
       });
       updateState({
         status: DataStatus.ERROR,
@@ -197,13 +197,13 @@ export function useDataState<T = any>(config: DataOperationConfig = {}): [
   const retry = useCallback(async (): Promise<T | null>  => {
     if (!lastFetcherRef.current) {
       
-        console.warn('No fetcher available for retry');'
+        console.warn('No fetcher available for retry");
       return null;
       }
     
     if (state.retryCount >= finalConfig.maxRetries) {
       
-        console.warn('Maximum retry attempts reached');'
+        console.warn('Maximum retry attempts reached");
       return null;
       }
     
@@ -235,7 +235,7 @@ export function useDataState<T = any>(config: DataOperationConfig = {}): [
   const setData = useCallback((data: T | null) => {
     const isEmpty = data == null || 
                    (Array.isArray(data) && data.length === 0) ||
-                   (typeof data === 'object' && Object.keys(data).length === 0);'
+                   (typeof data === 'object' && Object.keys(data).length === 0);
     updateState({
       data,
       status: isEmpty ? DataStatus.EMPTY : DataStatus.SUCCESS,
@@ -359,7 +359,7 @@ export function usePaginatedDataState<T = any>(config: DataOperationConfig = {})
       
       return newData;
     } catch (error) {
-      console.error('Load more failed:', error);'
+      console.error('Load more failed:', error);
       return null;
     } finally {
       setLoadingMore(false);

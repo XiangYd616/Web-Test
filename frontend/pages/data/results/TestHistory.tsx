@@ -3,13 +3,13 @@
  * 使用统一的测试历史组件和布局
  */
 
-import { FileText    } from 'lucide-react';import React, { useState, useEffect    } from 'react';import { PageLayout    } from '../../../components/layout/PageLayout.tsx';import TestHistoryComponent from './TestHistory.tsx';const TestHistory: React.FC  = () => {'
+import { FileText    } from 'lucide-react';import React, { useState, useEffect    } from 'react';import { PageLayout    } from '../../../components/layout/PageLayout.tsx';import TestHistoryComponent from './TestHistory.tsx';const TestHistory: React.FC  = () => {
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState("');'
+  const [pageTitle, setPageTitle] = useState("");
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
-      document.title = `${pageTitle} - Test Web`;`
+      document.title = `${pageTitle} - Test Web`;
     }
   }, [pageTitle]);
 
@@ -22,23 +22,23 @@ import { FileText    } from 'lucide-react';import React, { useState, useEffect  
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);'
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);'
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [fetchData]);
   
-  const [feedback, setFeedback] = useState({ type: '', message: '' });'
+  const [feedback, setFeedback] = useState({ type: '', message: '' });
   const showFeedback = (type, message, duration = 3000) => {
     setFeedback({ type, message });
     setTimeout(() => {
-      setFeedback({ type: '', message: '' });'
+      setFeedback({ type: '', message: '' });
     }, duration);
   };
   
   useEffect(() => {
     if (state.error) {
-      showFeedback('error', state.error.message);'
+      showFeedback('error', state.error.message);
     }
   }, [state.error]);
   
@@ -92,7 +92,7 @@ import { FileText    } from 'lucide-react';import React, { useState, useEffect  
             <div className= 'mt-4'>
               <button
                 onClick={() => window.location.reload()}
-                className= 'bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200';
+                className= 'bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200'
               >
                 重试
               </button>
@@ -113,11 +113,11 @@ import { FileText    } from 'lucide-react';import React, { useState, useEffect  
 
   return (
     <PageLayout
-      title= '测试历史';
-      description= '查看和管理您的所有测试记录，包括性能、安全、SEO等各类测试结果';
+      title= '测试历史'
+      description= '查看和管理您的所有测试记录，包括性能、安全、SEO等各类测试结果'
       icon={FileText}
-      background= 'dark';
-      maxWidth= 'xl';
+      background= 'dark'
+      maxWidth= 'xl'
     >
       <TestHistoryComponent testType= 'all'    />
     </PageLayout>

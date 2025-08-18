@@ -3,33 +3,33 @@
  * 整合配置、进度、结果展示的完整测试流程
  */
 
-import React, { useState, useEffect, useCallback    } from 'react';import { useState, useEffect    } from 'react';import { useAsyncErrorHandler    } from '../hooks/useAsyncErrorHandler';import TestResults from '../components/TestResults';import { useParams, useNavigate    } from 'react-router-dom';import { TestConfig, TestResult, TestProgress, TestType, TestStatus, TestError    } from '../../../types/testConfig';import { TestService    } from '../../../services/unifiedTestService';import { TestConfigPanel    } from '../../../components/testing/TestConfigPanel';import { RealTimeTestProgress    } from '../../../components/testing/TestProgress';import { TestResultsPanel    } from '../../../components/testing/TestResultsPanel';interface TestPageProps   {'
+import React, { useState, useEffect, useCallback    } from 'react';import { useState, useEffect    } from 'react';import { useAsyncErrorHandler    } from '../hooks/useAsyncErrorHandler';import TestResults from '../components/TestResults';import { useParams, useNavigate    } from 'react-router-dom';import { TestConfig, TestResult, TestProgress, TestType, TestStatus, TestError    } from '../../../types/testConfig';import { TestService    } from '../../../services/unifiedTestService';import { TestConfigPanel    } from '../../../components/testing/TestConfigPanel';import { RealTimeTestProgress    } from '../../../components/testing/TestProgress';import { TestResultsPanel    } from '../../../components/testing/TestResultsPanel';interface TestPageProps   {
   testType?: TestType;
 }
 
 export const TestPage: React.FC<TestPageProps> = ({ testType: propTestType }) => {
   
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState("');'
+  const [pageTitle, setPageTitle] = useState("");
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
-      document.title = `${pageTitle} - Test Web`;`
+      document.title = `${pageTitle} - Test Web`;
     }
   }, [pageTitle]);
 
   // 页面可见性检测
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible') {'`
+      if (document.visibilityState === "visible') {'`"`
         // 页面变为可见时刷新数据
         fetchData?.();
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);'
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
-      document.removeEventListener("visibilitychange', handleVisibilityChange);'
+      document.removeEventListener("visibilitychange', handleVisibilityChange);"
     };
   }, [fetchData]);
   const { testType: paramTestType }  = useParams<{ testType: string }>();
@@ -48,7 +48,7 @@ export const TestPage: React.FC<TestPageProps> = ({ testType: propTestType }) =>
   const [testService] = useState(() => new TestService());
 
   // 页面状态
-  const [currentStep, setCurrentStep] = useState<'config' | 'running' | 'results'>("config');'
+  const [currentStep, setCurrentStep] = useState<'config' | 'running' | 'results'>("config");
   // 清理资源
   useEffect(() => {
     
@@ -77,9 +77,9 @@ export const TestPage: React.FC<TestPageProps> = ({ testType: propTestType }) =>
               <p>{state.error.message}</p>
             </div>
             <div className= 'mt-4'>
-              <button
+              <button>
                 onClick={() => window.location.reload()}
-                className= 'bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200';
+                className= 'bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200'
               >
                 重试
               </button>
@@ -109,17 +109,17 @@ export const TestPage: React.FC<TestPageProps> = ({ testType: propTestType }) =>
   // 开始测试
   const handleStartTest = async () => {
   
-  const [feedback, setFeedback] = useState({ type: '', message: '' });'
+  const [feedback, setFeedback] = useState({ type: '', message: '' });
   const showFeedback = (type, message, duration = 3000) => {
     setFeedback({ type, message });
     setTimeout(() => {
-      setFeedback({ type: '', message: '' });'
+      setFeedback({ type: '', message: '' });
     }, duration);
   };
   
   useEffect(() => {
     if (state.error) {
-      showFeedback('error', state.error.message);'
+      showFeedback('error', state.error.message);
     }
   }, [state.error]);
   
@@ -157,12 +157,12 @@ export const TestPage: React.FC<TestPageProps> = ({ testType: propTestType }) =>
   
   const runTest = async (config) => {
     setIsRunning(true);
-    const result = await executeAsync(() => fetch('/api/tests/run', {'
-        method: 'POST','
-        headers: { 'Content-Type': 'application/json' },'
-        body: JSON.stringify({ testType: 'performance', config })'
+    const result = await executeAsync(() => fetch('/api/tests/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ testType: 'performance', config })
       }).then(res => res.json()),
-      { context: 'TestExecution.runTest' }'
+      { context: 'TestExecution.runTest' }
     );
     
     if (result && result.success) {
@@ -177,10 +177,10 @@ export const TestPage: React.FC<TestPageProps> = ({ testType: propTestType }) =>
     const interval = setInterval(async () => {
       const result = await executeAsync(
         () => fetch(`/api/tests/results/${executionId}`).then(res => res.json()),`
-        { context: "TestExecution.pollResult' }'`
+        { context: "TestExecution.pollResult' }'`"`
       );
       
-      if (result && result.success && result.data.status === 'completed') {'
+      if (result && result.success && result.data.status === 'completed') {
         setTestResult(result.data);
         clearInterval(interval);
       }
@@ -192,14 +192,14 @@ export const TestPage: React.FC<TestPageProps> = ({ testType: propTestType }) =>
   const [isRunning, setIsRunning] = useState(false);
     if (!config || !isConfigValid) {
       
-        setError('请先完成有效的测试配置');'
+        setError('请先完成有效的测试配置");"
       return;
       }
 
     setIsLoading(true);
     setError(null);
     setTestResult(null);
-    setCurrentStep('running');'
+    setCurrentStep('running");"
     try {
       const { testId } = await testService.startTestWithRealTimeUpdates(
         testType,
@@ -214,7 +214,7 @@ export const TestPage: React.FC<TestPageProps> = ({ testType: propTestType }) =>
         testId,
         status: TestStatus.RUNNING,
         progress: 0,
-        message: '正在初始化测试...';
+        message: '正在初始化测试...'
       });
     } catch (error) {
       handleTestError(error as TestError);
@@ -231,14 +231,14 @@ export const TestPage: React.FC<TestPageProps> = ({ testType: propTestType }) =>
   // 处理测试完成
   const handleTestComplete = useCallback((result: TestResult) => {
     setTestResult(result);
-    setCurrentStep("results');'
+    setCurrentStep("results");
     setTestProgress(prev => prev ? { ...prev, status: TestStatus.COMPLETED, progress: 100 } : null);
   }, []);
 
   // 处理测试错误
   const handleTestError = useCallback((error: TestError) => {
     setError(error.message);
-    setCurrentStep('config');'
+    setCurrentStep('config");"
     setTestProgress(prev => prev ? { ...prev, status: TestStatus.FAILED } : null);
     setIsLoading(false);
   }, []);
@@ -248,18 +248,18 @@ export const TestPage: React.FC<TestPageProps> = ({ testType: propTestType }) =>
     if (currentTestId) {
       try {
         await testService.stopTest(testType, currentTestId);
-        setCurrentStep('config');'
+        setCurrentStep('config");"
         setTestProgress(null);
         setCurrentTestId(null);
       } catch (error) {
-        console.error('取消测试失败:', error);'
+        console.error('取消测试失败:', error);
       }
     }
   };
 
   // 重新测试
   const handleRetryTest = () => {
-    setCurrentStep("config');'
+    setCurrentStep("config");
     setTestResult(null);
     setTestProgress(null);
     setCurrentTestId(null);
@@ -267,22 +267,22 @@ export const TestPage: React.FC<TestPageProps> = ({ testType: propTestType }) =>
   };
 
   // 导出报告
-  const handleExportReport = async (format: 'pdf' | 'html' | 'json') => {'
+  const handleExportReport = async (format: 'pdf' | 'html' | 'json') => {
     if (!testResult) return;
 
     try {
       const blob = await testService.exportReport(testResult.testId, format);
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');'
+      const a = document.createElement('a");"
       a.href = url;
-      a.download = `test-report-${testResult.testId}.${format}`;`
+      a.download = `test-report-${testResult.testId}.${format}`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("导出报告失败:', error);'`
-      setError('导出报告失败，请稍后重试');'
+      console.error("导出报告失败:', error);'`"`
+      setError('导出报告失败，请稍后重试");"
     }
   };
 
@@ -295,30 +295,30 @@ export const TestPage: React.FC<TestPageProps> = ({ testType: propTestType }) =>
   const handleSaveTemplate = async () => {
     if (!config || !testResult) return;
 
-    const templateName = prompt("请输入模板名称:');'`
+    const templateName = prompt("请输入模板名称:");``
     if (!templateName) return;
 
-    const description = prompt("请输入模板描述:') || '';
+    const description = prompt("请输入模板描述:') || "
     try {
       await testService.saveTestTemplate(testType, templateName, config, description);
-      alert('模板保存成功！');'
+      alert('模板保存成功！");"
     } catch (error) {
-      console.error("保存模板失败:', error);'
-      setError('保存模板失败，请稍后重试');'
+      console.error("保存模板失败:', error);"
+      setError('保存模板失败，请稍后重试");"
     }
   };
 
   const getTestTypeLabel = (testType: TestType): string  => {
     const labels = {
-      [TestType.API]: "API测试','
-      [TestType.PERFORMANCE]: "性能测试','
-      [TestType.SECURITY]: "安全测试','
-      [TestType.SEO]: "SEO测试','
-      [TestType.STRESS]: "压力测试','
-      [TestType.INFRASTRUCTURE]: "基础设施测试','
-      [TestType.UX]: "UX测试','
-      [TestType.COMPATIBILITY]: "兼容性测试','
-      [TestType.WEBSITE]: '网站综合测试';
+      [TestType.API]: "API测试',"
+      [TestType.PERFORMANCE]: "性能测试',"
+      [TestType.SECURITY]: "安全测试',"
+      [TestType.SEO]: "SEO测试',"
+      [TestType.STRESS]: "压力测试',"
+      [TestType.INFRASTRUCTURE]: "基础设施测试',"
+      [TestType.UX]: "UX测试',"
+      [TestType.COMPATIBILITY]: "兼容性测试',"
+      [TestType.WEBSITE]: '网站综合测试'
     };
     return labels[testType];
   };
@@ -327,26 +327,26 @@ export const TestPage: React.FC<TestPageProps> = ({ testType: propTestType }) =>
     <div className= 'flex items-center justify-center mb-8'>
       <div className= 'flex items-center space-x-4'>
         {[
-          { key: 'config', label: '配置测试', icon: '⚙️' },'
-          { key: 'running', label: '执行测试', icon: '🔄' },'
-          { key: 'results', label: '查看结果', icon: '📊' }'
+          { key: 'config', label: '配置测试', icon: '⚙️' },
+          { key: 'running', label: '执行测试', icon: '🔄' },
+          { key: 'results', label: '查看结果', icon: '📊' }
         ].map((step, index) => (
           <React.Fragment key={step.key}>
-            <div className={`flex items-center space-x-2 ${`}
-              currentStep === step.key ? "text-blue-600' : ''`
-              ['config', 'running', 'results'].indexOf(currentStep) > index ? 'text-green-600' : 'text-gray-400';
+            <div className={`flex items-center space-x-2 ${`}>
+              currentStep === step.key ? "text-blue-600' : ''`"`
+              ['config', 'running', 'results'].indexOf(currentStep) > index ? 'text-green-600' : 'text-gray-400'
             }`}>`
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${`}
-                currentStep === step.key ? "border-blue-600 bg-blue-50' : ''`
-                ['config', 'running', 'results'].indexOf(currentStep) > index ? 'border-green-600 bg-green-50' : "border-gray-300';
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${`}>
+                currentStep === step.key ? "border-blue-600 bg-blue-50' : ''`"`
+                ['config', 'running', 'results'].indexOf(currentStep) > index ? 'border-green-600 bg-green-50' : "border-gray-300"
               }`}>`
-                <span className= "text-sm'>{step.icon}</span>`
+                <span className= "text-sm'>{step.icon}</span>`'"`
               </div>
               <span className= 'text-sm font-medium'>{step.label}</span>
             </div>
-            {index < 2 && (
-              <div className={`w-8 h-0.5 ${`}
-                ["config', 'running', 'results'].indexOf(currentStep) > index ? 'bg-green-600' : "bg-gray-300';'`
+            {index < 2 && (>
+              <div className={`w-8 h-0.5 ${`}>
+                ["config', 'running', 'results'].indexOf(currentStep) > index ? 'bg-green-600' : "bg-gray-300";``
               }`} />`
             )}
           </React.Fragment>
@@ -356,7 +356,7 @@ export const TestPage: React.FC<TestPageProps> = ({ testType: propTestType }) =>
   );
 
   return (
-    <div className= "min-h-screen bg-gray-50 py-8'>`
+    <div className= "min-h-screen bg-gray-50 py-8'>`'"`
       <div className= 'max-w-6xl mx-auto px-4 sm:px-6 lg:px-8'>
         {/* 页面头部 */}
         <div className= 'text-center mb-8'>
@@ -390,25 +390,25 @@ export const TestPage: React.FC<TestPageProps> = ({ testType: propTestType }) =>
         <div className= 'space-y-6'>
           {/* 配置阶段 */}
           {currentStep === 'config' && (<div className= 'space-y-6'>
-              <TestConfigPanel testType={testType}
+              <TestConfigPanel testType={testType}>
                 initialConfig={config || undefined}
                 onConfigChange={handleConfigChange}
                 onValidationChange={handleValidationChange}
                  />
 
               <div className= 'flex justify-center space-x-4'>
-                <button
-                  onClick={() => navigate("/testing')}'
-                  className= 'px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50';
+                <button>
+                  onClick={() => navigate("/testing')}"
+                  className= 'px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50'
                 >
                   返回
                 </button>
-                <button
+                <button>
                   onClick={handleStartTest}
                   disabled={!isConfigValid || isLoading}
-                  className= 'px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed';
+                  className= 'px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
                 >
-                  {isLoading ? '启动中..." : '开始测试'}'
+                  {isLoading ? '启动中..." : '开始测试'}"
                 </button>
               </div>
             </div>
@@ -416,7 +416,7 @@ export const TestPage: React.FC<TestPageProps> = ({ testType: propTestType }) =>
 
           {/* 执行阶段 */}
           {currentStep === 'running' && testProgress && ('')
-            <RealTimeTestProgress testId={testProgress.testId}
+            <RealTimeTestProgress testId={testProgress.testId}>
               testType={testType}
               initialProgress={testProgress}
               onProgressUpdate={handleProgressUpdate}
@@ -428,7 +428,7 @@ export const TestPage: React.FC<TestPageProps> = ({ testType: propTestType }) =>
 
           {/* 结果阶段 */}
           {currentStep === 'results' && testResult && (<div className= 'space-y-6'>
-              <TestResultsPanel testType={testType}
+              <TestResultsPanel testType={testType}>
                 result={testResult}
                 onExport={handleExportReport}
                 onCompare={handleCompareResults}
@@ -436,15 +436,15 @@ export const TestPage: React.FC<TestPageProps> = ({ testType: propTestType }) =>
                  />
 
               <div className= 'flex justify-center space-x-4'>
-                <button
+                <button>
                   onClick={handleRetryTest}
-                  className= 'px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50';
+                  className= 'px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50'
                 >
                   重新测试
                 </button>
-                <button
-                  onClick={() => navigate('/testing')}'
-                  className= 'px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700';
+                <button>
+                  onClick={() => navigate('/testing')}
+                  className= 'px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700'
                 >
                   返回首页
                 </button>

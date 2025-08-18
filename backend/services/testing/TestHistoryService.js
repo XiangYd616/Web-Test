@@ -86,9 +86,9 @@ class TestHistoryService {
 
     try {
       console.log('🔍 [TestHistoryService] 执行查询:', {
-        query: query.replace(//s+/g, ' ').trim(),
+        query: query.replace(/\s+/g, ' ').trim(),
         params,
-        countQuery: countQuery.replace(//s+/g, ' ').trim(),
+        countQuery: countQuery.replace(/\s+/g, ' ').trim(),
         countParams: countParams
       });
 
@@ -120,7 +120,7 @@ class TestHistoryService {
         stack: error.stack,
         code: error.code,
         detail: error.detail,
-        query: query?.replace(//s+/g, ' ').trim(),
+        query: query?.replace(/\s+/g, ' ').trim(),
         params
       });
       return {
@@ -152,8 +152,8 @@ class TestHistoryService {
 
     const viewName = viewMap[testType];
     if (!viewName) {
-      
-        return {
+
+      return {
         success: false,
         error: '不支持的测试类型'
       };
@@ -204,11 +204,11 @@ class TestHistoryService {
       const sessionResult = await this.db.query(sessionQuery, [sessionId, userId]);
 
       if (sessionResult.rows.length === 0) {
-        
+
         return {
           success: false,
           error: '测试记录不存在'
-      };
+        };
       }
 
       const session = sessionResult.rows[0];
@@ -227,11 +227,12 @@ class TestHistoryService {
 
       const detailsTable = detailsMap[testType];
       if (!detailsTable) {
-        
+
         return {
           success: true,
-          data: { session, details: null
-      }
+          data: {
+            session, details: null
+          }
         };
       }
 
@@ -510,11 +511,11 @@ class TestHistoryService {
       const checkResult = await this.db.query(checkQuery, [sessionId, userId]);
 
       if (checkResult.rows.length === 0) {
-        
+
         return {
           success: false,
           error: '测试记录不存在或无权限删除'
-      };
+        };
       }
 
       const result = await this.db.query(
@@ -550,11 +551,11 @@ class TestHistoryService {
       const validIds = checkResult.rows.map(row => row.id);
 
       if (validIds.length === 0) {
-        
+
         return {
           success: false,
           error: '没有可删除的测试记录'
-      };
+        };
       }
 
       const result = await this.db.query(

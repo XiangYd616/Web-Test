@@ -3,15 +3,15 @@
  * 统一的测试工具入口和管理界面
  */
 
-import React, { useState, useEffect    } from 'react';import { Link    } from 'react-router-dom';import { Zap, Monitor, Server, Gauge, Shield, // Search, Activity, User, Globe   } from 'lucide-react';// 已修复'
+import React, { useState, useEffect    } from 'react';import { Link    } from 'react-router-dom';import { Zap, Monitor, Server, Gauge, Shield, // Search, Activity, User, Globe   } from 'lucide-react';// 已修复
 const TestToolsHub: React.FC  = () => {
   
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState("');'
+  const [pageTitle, setPageTitle] = useState("");
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
-      document.title = `${pageTitle} - Test Web`;`
+      document.title = `${pageTitle} - Test Web`;
     }
   }, [pageTitle]);
 
@@ -24,23 +24,23 @@ const TestToolsHub: React.FC  = () => {
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);'
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);'
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [fetchData]);
   
-  const [feedback, setFeedback] = useState({ type: '', message: '' });'
+  const [feedback, setFeedback] = useState({ type: '', message: '' });
   const showFeedback = (type, message, duration = 3000) => {
     setFeedback({ type, message });
     setTimeout(() => {
-      setFeedback({ type: '', message: '' });'
+      setFeedback({ type: '', message: '' });
     }, duration);
   };
   
   useEffect(() => {
     if (state.error) {
-      showFeedback('error', state.error.message);'
+      showFeedback('error', state.error.message);
     }
   }, [state.error]);
   
@@ -76,15 +76,15 @@ const TestToolsHub: React.FC  = () => {
     }));
   };
   const testTools = [
-    { id: 'api', name: 'API测试', icon: Zap, path: '/testing/api', color: 'blue' },'
-    { id: 'compatibility', name: '兼容性测试', icon: Monitor, path: '/testing/compatibility', color: 'green' },'
-    { id: 'infrastructure', name: '基础设施测试', icon: Server, path: '/testing/infrastructure', color: 'purple' },'
-    { id: 'performance', name: '性能测试', icon: Gauge, path: '/testing/performance', color: 'orange' },'
-    { id: 'security', name: '安全测试', icon: Shield, path: '/testing/security', color: 'red' },'
-    { id: 'seo', name: 'SEO测试', icon: Search, path: '/testing/seo', color: 'indigo' },'
-    { id: 'stress', name: '压力测试', icon: Activity, path: '/testing/stress', color: 'pink' },'
-    { id: 'ux', name: 'UX测试', icon: User, path: '/testing/ux', color: 'teal' },'
-    { id: 'website', name: '网站测试', icon: Globe, path: '/testing/website', color: 'cyan' }'
+    { id: 'api', name: 'API测试', icon: Zap, path: '/testing/api', color: 'blue' },
+    { id: 'compatibility', name: '兼容性测试', icon: Monitor, path: '/testing/compatibility', color: 'green' },
+    { id: 'infrastructure', name: '基础设施测试', icon: Server, path: '/testing/infrastructure', color: 'purple' },
+    { id: 'performance', name: '性能测试', icon: Gauge, path: '/testing/performance', color: 'orange' },
+    { id: 'security', name: '安全测试', icon: Shield, path: '/testing/security', color: 'red' },
+    { id: 'seo', name: 'SEO测试', icon: Search, path: '/testing/seo', color: 'indigo' },
+    { id: 'stress', name: '压力测试', icon: Activity, path: '/testing/stress', color: 'pink' },
+    { id: 'ux', name: 'UX测试', icon: User, path: '/testing/ux', color: 'teal' },
+    { id: 'website', name: '网站测试', icon: Globe, path: '/testing/website', color: 'cyan' }
   ];
 
   
@@ -106,7 +106,7 @@ const TestToolsHub: React.FC  = () => {
             <div className= 'mt-4'>
               <button
                 onClick={() => window.location.reload()}
-                className= 'bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200';
+                className= 'bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200'
               >
                 重试
               </button>
@@ -143,7 +143,7 @@ const TestToolsHub: React.FC  = () => {
             <Link
               key={tool.id}
               to={tool.path}
-              className= 'block p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-shadow';
+              className= 'block p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition-shadow'
             >
               <div className= 'flex items-center space-x-4'>
                 <div className={`p-3 rounded-lg bg-${tool.color}-100 dark:bg-${tool.color}-900`}>`

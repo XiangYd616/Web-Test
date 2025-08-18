@@ -5,7 +5,7 @@
  */
 
 // 导入基础类型
-import type { UserRole, UserStatus  } from './enums';// 定义用户相关类型'
+import type { UserRole, UserStatus  } from './enums';// 定义用户相关类型
 export type UUID   = string;export type Timestamp   = string;export interface User     {
   id: UUID;
   username: string;
@@ -30,7 +30,7 @@ export type UUID   = string;export type Timestamp   = string;export interface Us
 }
 
 export interface UserPreferences     {
-  theme: 'light' | 'dark' | 'auto';
+  theme: 'light' | 'dark' | 'auto'
   language: string;
   timezone: string;
   notifications: {
@@ -138,9 +138,9 @@ export interface UserStats     {
 }
 
 export const DEFAULT_USER_PREFERENCES: UserPreferences = {
-  theme: 'auto','
-  language: 'zh-CN','
-  timezone: 'Asia/Shanghai','
+  theme: 'auto',
+  language: 'zh-CN',
+  timezone: 'Asia/Shanghai',
   notifications: {
     email: true,
     push: true,

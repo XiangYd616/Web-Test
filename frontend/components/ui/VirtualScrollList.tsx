@@ -3,7 +3,7 @@
  * 用于高效渲染大量数据列表
  */
 
-import React, { useMemo    } from 'react';import { useVirtualScroll    } from '../../hooks/usePerformanceOptimization';interface VirtualScrollListProps<T>   {'
+import React, { useMemo    } from 'react';import { useVirtualScroll    } from '../../hooks/usePerformanceOptimization';interface VirtualScrollListProps<T>   {
     items: T[];
     itemHeight: number;
     height: number;
@@ -21,7 +21,7 @@ function VirtualScrollList<T>({
     itemHeight,
     height,
     renderItem,
-    className = '','
+    className ='',
     overscan = 5,
     onScroll,
     loading = false,
@@ -43,28 +43,28 @@ function VirtualScrollList<T>({
     className: combinedClassName,
     style: computedStyle,
     disabled,
-    'aria-label': ariaLabel,'
-    'data-testid': testId'
+    'aria-label': ariaLabel,
+    'data-testid': testId
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;`
-  const descriptionId = `${componentId}-description`;`
+  const errorId = `${componentId}-error`;
+  const descriptionId = `${componentId}-description`;
   
   const ariaProps = {
     id: componentId,
     "aria-label': ariaLabel,'`
-    'aria-labelledby': ariaLabelledBy,'
+    'aria-labelledby': ariaLabelledBy,
     'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,'
-    'aria-invalid': !!error,'
-    'aria-disabled': disabled,'
-    'aria-busy': loading,'
-    'aria-expanded': expanded,'
-    'aria-selected': selected,'
+    ].filter(Boolean).join(' ') || undefined,
+    'aria-invalid': !!error,
+    'aria-disabled': disabled,
+    'aria-busy': loading,
+    'aria-expanded': expanded,
+    'aria-selected': selected,
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -75,8 +75,8 @@ function VirtualScrollList<T>({
     try {
       onClick?.(event);
     } catch (error) {
-      console.error('Click handler error: ', error);'
-      setError('操作失败，请重试');'
+      console.error('Click handler error: ', error);
+      setError('操作失败，请重试");
     }
   }, [disabled, loading, onClick]);
   
@@ -86,8 +86,8 @@ function VirtualScrollList<T>({
     try {
       onChange?.(newValue);
     } catch (error) {
-      console.error('Change handler error: ', error);'
-      updateState({ error: '值更新失败' });'
+      console.error('Change handler error: ', error);
+      updateState({ error: '值更新失败' });
     }
   }, [onChange, updateState]);
   
@@ -125,7 +125,7 @@ function VirtualScrollList<T>({
                     key={actualIndex}
                     style={{
                         height: itemHeight,
-                        position: 'absolute','
+                        position: 'absolute',
                         top: index * itemHeight,
                         left: 0,
                         right: 0
@@ -144,9 +144,9 @@ function VirtualScrollList<T>({
             <div className={`flex items-center justify-center ${className`}
       }`} style={{ height }}>`
                 {loadingComponent || (
-                    <div className= "flex items-center space-x-2'>`
-                        <div className= 'w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin' />
-                        <span className= 'text-gray-600'>加载中...</span>
+                    <div className="flex items-center space-x-2'>`
+                        <div className='w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin' />
+                        <span className='text-gray-600'>加载中...</span>
                     </div>
                 )}
             </div>
@@ -160,9 +160,9 @@ function VirtualScrollList<T>({
             <div className={`flex items-center justify-center ${className`}
       }`} style={{ height }}>`
                 {emptyComponent || (
-                    <div className= "text-center text-gray-500'>`
-                        <svg className= 'w-12 h-12 mx-auto mb-4' fill= 'none' stroke= 'currentColor' viewBox= '0 0 24 24'>
-                            <path strokeLinecap= 'round' strokeLinejoin= 'round' strokeWidth={2} d= 'M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4' />
+                    <div className="text-center text-gray-500'>`
+                        <svg className='w-12 h-12 mx-auto mb-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                            <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4' />
                         </svg>
                         <p>暂无数据</p>
                     </div>
@@ -180,13 +180,13 @@ function VirtualScrollList<T>({
             <div
                 style={{
                     height: totalHeight,
-                    position: "relative';'`
+                    position: "relative";`
                 }}
             >
                 <div
                     style={{
                         transform: `translateY(${offsetY}px)`,`
-                        position: "relative';'`
+                        position: "relative";`
                     }}
                 >
                     {renderedItems}

@@ -37,9 +37,10 @@ const integrationRoutes = require('../routes/integrations.js');
 const errorRoutes = require('../routes/errors.js');
 const performanceRoutes = require('../routes/performance.js');
 const filesRoutes = require('../routes/files.js');
+const unifiedTestRoutes = require('../routes/unifiedTest.js');
 
 // 导入中间件
-const { errorHandler } = require('../middleware/errorHandler.js');
+const { ErrorHandler } = require('../middleware/errorHandler.js');
 const { requestLogger } = require('../middleware/logger.js');
 const { rateLimiter } = require('../middleware/rateLimiter.js');
 // const { securityMiddleware } = require('../../frontend/config/security.ts'); // 暂时注释掉，因为TS模块导入问题
@@ -475,7 +476,7 @@ app.use('*', notFoundHandler);
 
 // 错误处理中间件 - 使用统一格式
 app.use(errorResponseFormatter);
-app.use(errorHandler);
+app.use(ErrorHandler.globalErrorHandler);
 
 // 启动服务器
 const startServer = async () => {

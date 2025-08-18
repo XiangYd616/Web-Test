@@ -1,9 +1,9 @@
-import { handleAsyncError    } from '../utils/errorHandler';import React, { useEffect, useState    } from 'react';import { Button    } from '../../../components/ui/Button';import { Card    } from '../../../components/ui/Card.tsx';import { Input    } from '../../../components/ui/Input';import { Modal    } from '../../../components/ui/Modal.tsx';import { StatusIndicator    } from '../../../components/ui/StatusIndicator.tsx';// 监控站点接口'
+import { handleAsyncError    } from '../utils/errorHandler';import React, { useEffect, useState    } from 'react';import { Button    } from '../../../components/ui/Button';import { Card    } from '../../../components/ui/Card.tsx';import { Input    } from '../../../components/ui/Input';import { Modal    } from '../../../components/ui/Modal.tsx';import { StatusIndicator    } from '../../../components/ui/StatusIndicator.tsx';// 监控站点接口
 interface MonitoringSite   {
   id: string;
   name: string;
   url: string;
-  status: 'online' | 'offline' | 'warning';
+  status: 'online' | 'offline' | 'warning'
   responseTime: number;
   uptime: number;
   lastCheck: Date;
@@ -13,32 +13,32 @@ interface MonitoringSite   {
 const MonitoringDashboard: React.FC  = () => {
   
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState('');'
+  const [pageTitle, setPageTitle] = useState('");"
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
-      document.title = `${pageTitle} - Test Web`;`
+      document.title = `${pageTitle} - Test Web`;
     }
   }, [pageTitle]);
 
   // 页面可见性检测
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible') {'`
+      if (document.visibilityState === "visible') {'`"`
         // 页面变为可见时刷新数据
         fetchData?.();
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);'
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
-      document.removeEventListener("visibilitychange', handleVisibilityChange);'
+      document.removeEventListener("visibilitychange', handleVisibilityChange);"
     };
   }, [fetchData]);
   
   // 图表和数据可视化
   const [chartData, setChartData] = useState(null);
-  const [chartType, setChartType] = useState('line');'
+  const [chartType, setChartType] = useState('line");"
   const processChartData = useCallback((rawData) => {
     if (!rawData) return null;
 
@@ -46,10 +46,10 @@ const MonitoringDashboard: React.FC  = () => {
     return {
       labels: rawData.map(item => item.label),
       datasets: [{
-        label: '数据','
+        label: '数据',
         data: rawData.map(item => item.value),
-        borderColor: 'rgb(75, 192, 192)','
-        backgroundColor: 'rgba(75, 192, 192, 0.2)','
+        borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
       }]
     };
   }, []);
@@ -61,25 +61,25 @@ const MonitoringDashboard: React.FC  = () => {
     }
   }, [data, processChartData]);
   
-  const [feedback, setFeedback] = useState({ type: '', message: '' });'
+  const [feedback, setFeedback] = useState({ type: '', message: '' });
   const showFeedback = (type, message, duration = 3000) => {
     setFeedback({ type, message });
     setTimeout(() => {
-      setFeedback({ type: '', message: '' });'
+      setFeedback({ type: '', message: '' });
     }, duration);
   };
   
   useEffect(() => {
     if (state.error) {
-      showFeedback('error', state.error.message);'
+      showFeedback('error', state.error.message);
     }
   }, [state.error]);
   const [sites, setSites] = useState<MonitoringSite[]>([]);
   const [showAddSiteModal, setShowAddSiteModal] = useState(false);
   const [addingSite, setAddingSite] = useState(false);
   const [newSite, setNewSite] = useState({
-    name: '','
-    url: "','
+    name: '',
+    url: "',"
     interval: 5
   });
 
@@ -87,20 +87,20 @@ const MonitoringDashboard: React.FC  = () => {
   useEffect(() => {
     setSites([
       {
-        id: '1','
-        name: '主站点','
-        url: 'https://example.com','
-        status: 'online','
+        id: '1',
+        name: '主站点',
+        url: 'https://example.com',
+        status: 'online',
         responseTime: 245,
         uptime: 99.9,
         lastCheck: new Date(),
         interval: 5
       },
       {
-        id: '2','
-        name: 'API服务','
-        url: 'https://api.example.com','
-        status: 'offline','
+        id: '2',
+        name: 'API服务',
+        url: 'https://api.example.com',
+        status: 'offline',
         responseTime: 0,
         uptime: 98.5,
         lastCheck: new Date(),
@@ -119,20 +119,20 @@ const MonitoringDashboard: React.FC  = () => {
       id: Date.now().toString(),
       name: newSite.name,
       url: newSite.url,
-      status: 'online','
+      status: 'online',
       responseTime: Math.floor(Math.random() * 500) + 100,
       uptime: 99.0 + Math.random(),
       lastCheck: new Date(),
       interval: newSite.interval
     
   } catch (error) {
-    console.error('Error in handleAddSite: ', error);'
+    console.error('Error in handleAddSite: ', error);
     throw error;
   }
 };
 
     setSites(prev => [...prev, site]);
-    setNewSite({ name: '', url: "', interval: 5 });'
+    setNewSite({ name: '', url: "', interval: 5 });"
     setShowAddSiteModal(false);
     setAddingSite(false);
   };
@@ -178,9 +178,9 @@ const MonitoringDashboard: React.FC  = () => {
           <Card className= 'bg-gray-800/50 border-gray-700'>
             <h2 className= 'text-lg font-semibold text-white mb-4'>快速操作</h2>
             <div className= 'flex gap-4'>
-              <Button
+              <Button>
                 onClick={() => setShowAddSiteModal(true)}
-                className= 'bg-blue-600 hover:bg-blue-700';
+                className= 'bg-blue-600 hover:bg-blue-700'
               >
                 添加新监控
               </Button>
@@ -197,8 +197,8 @@ const MonitoringDashboard: React.FC  = () => {
             <Card key={site.id} className= 'bg-gray-800/50 border-gray-700'>
               <div className= 'flex items-center justify-between mb-4'>
                 <h3 className= 'text-lg font-semibold text-white'>{site.name}</h3>
-                <StatusIndicator status={site.status === 'online' ? 'success' : 'error'}'
-                  size= 'sm';
+                <StatusIndicator status={site.status === 'online' ? 'success' : 'error'}>
+                  size= 'sm'
                    />
               </div>
               <div className= 'space-y-2 text-sm'>
@@ -226,44 +226,44 @@ const MonitoringDashboard: React.FC  = () => {
         </div>
 
         {/* 添加站点模态框 */}
-        <Modal
+        <Modal>
           isOpen={showAddSiteModal}
           onClose={() => setShowAddSiteModal(false)}
-          title= '添加监控站点';
+          title= '添加监控站点'
         >
           <div className= 'space-y-4'>
-            <Input
-              label= '站点名称';
+            <Input>
+              label= '站点名称'
               value={newSite.name}
               onChange={(e) => setNewSite(prev => ({ ...prev, name: e.target.value }))}
-              placeholder= '输入站点名称';
+              placeholder= '输入站点名称'
             />
-            <Input
-              label= 'URL地址';
+            <Input>
+              label= 'URL地址'
               value={newSite.url}
               onChange={(e) => setNewSite(prev => ({ ...prev, url: e.target.value }))}
-              placeholder= 'https://example.com';
+              placeholder= 'https://example.com'
             />
-            <Input
-              label= '检查间隔(分钟)';
-              type= 'number';
+            <Input>
+              label= '检查间隔(分钟)'
+              type= 'number'
               value={newSite.interval.toString()}
               onChange={(e) => setNewSite(prev => ({ ...prev, interval: parseInt(e.target.value) || 5 }))}
-              min= '1';
-              max= '60';
+              min= '1'
+              max= '60'
             />
             <div className= 'flex gap-3 pt-4'>
-              <Button
+              <Button>
                 onClick={handleAddSite}
                 disabled={!newSite.name || !newSite.url || addingSite}
-                className= 'bg-blue-600 hover:bg-blue-700';
+                className= 'bg-blue-600 hover:bg-blue-700'
               >
-                {addingSite ? '添加中..." : "添加监控'}'
+                {addingSite ? '添加中..." : "添加监控'}
               </Button>
-              <Button
-                variant= 'outline';
+              <Button>
+                variant= 'outline'
                 onClick={() => setShowAddSiteModal(false)}
-                className= 'border-gray-600 text-gray-300';
+                className= 'border-gray-600 text-gray-300'
               >
                 取消
               </Button>

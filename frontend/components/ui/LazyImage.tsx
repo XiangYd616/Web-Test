@@ -3,7 +3,7 @@
  * 支持渐进式加载和占位符
  */
 
-import React, { useState, useRef, useEffect    } from 'react';export interface LazyImageProps     {'
+import React, { useState, useRef, useEffect    } from 'react';export interface LazyImageProps     {
   src: string;
   alt: string;
   placeholder?: string;
@@ -22,12 +22,12 @@ export const LazyImage: React.FC<LazyImageProps> = ({
   src,
   alt,
   placeholder,
-  className = '','
+  className = '',
   style,
   onLoad,
   onError,
   threshold = 0.1,
-  rootMargin = '50px','
+  rootMargin = '50px',
   blurDataURL,
   quality = 75,
   priority = false
@@ -38,21 +38,21 @@ export const LazyImage: React.FC<LazyImageProps> = ({
     className: combinedClassName,
     style: computedStyle,
     disabled,
-    'aria-label': ariaLabel,'
+    'aria-label': ariaLabel,
     "data-testid': testId'
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
   
   // 可访问性支持
   const {
-    'aria-label': ariaLabel,'
-    'aria-describedby': ariaDescribedBy,'
+    'aria-label': ariaLabel,
+    'aria-describedby': ariaDescribedBy,
     role,
     tabIndex  = 0,
-    'data-testid': testId'
+    'data-testid': testId
   } = props;
   const accessibilityProps = {
-    'aria-label': ariaLabel,'
-    'aria-describedby': ariaDescribedBy,'
+    'aria-label': ariaLabel,
+    'aria-describedby': ariaDescribedBy,
     role,
     tabIndex: disabled ? -1 : tabIndex,
     "data-testid': testId'
@@ -60,7 +60,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
 
   // 键盘导航支持
   const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' || event.key === ' ') {'
+    if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       onClick?.(event as any);
     }
@@ -111,7 +111,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
   // 生成优化的图片URL
   const getOptimizedSrc = (originalSrc: string, quality: number) => {
     // 这里可以集成图片CDN或优化服务
-    // 例如：return `${originalSrc}?q=${quality}&auto=format`;`
+    // 例如：return `${originalSrc}?q=${quality}&auto=format`;
     return originalSrc;
   };
 
@@ -123,27 +123,27 @@ export const LazyImage: React.FC<LazyImageProps> = ({
       className={`lazy-image-container ${className}`}`
       style={{
         position: "relative','`
-        overflow: 'hidden','
+        overflow: 'hidden',
         ...style
       }}
     >
       {/* 占位符 */}
       {!isLoaded && !hasError && (
         <div
-          className= 'lazy-image-placeholder';
+          className= 'lazy-image-placeholder'
           style={{
-            position: 'absolute','
+            position: 'absolute',
             top: 0,
             left: 0,
-            width: '100%','
-            height: '100%','
-            backgroundColor: '#f0f0f0','
-            display: 'flex','
-            alignItems: 'center','
-            justifyContent: 'center','
+            width: '100%',
+            height: '100%',
+            backgroundColor: '#f0f0f0',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             backgroundImage: blurDataURL ? `url(${blurDataURL})` : undefined,`
             backgroundSize: "cover','`
-            backgroundPosition: 'center','
+            backgroundPosition: 'center',
             filter: blurDataURL ? "blur(10px)' : undefined'
           }}
         >
@@ -161,10 +161,10 @@ export const LazyImage: React.FC<LazyImageProps> = ({
           onLoad={handleLoad}
           onError={handleError}
           style={{
-            width: '100%','
-            height: '100%','
-            objectFit: 'cover','
-            transition: 'opacity 0.3s ease-in-out','
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            transition: 'opacity 0.3s ease-in-out',
             opacity: isLoaded ? 1 : 0
           }}
         />
@@ -173,18 +173,18 @@ export const LazyImage: React.FC<LazyImageProps> = ({
       {/* 错误状态 */}
       {hasError && (
         <div
-          className= 'lazy-image-error';
+          className= 'lazy-image-error'
           style={{
-            position: 'absolute','
+            position: 'absolute',
             top: 0,
             left: 0,
-            width: '100%','
-            height: '100%','
-            backgroundColor: '#f5f5f5','
-            display: 'flex','
-            alignItems: 'center','
-            justifyContent: 'center','
-            color: '#999';
+            width: '100%',
+            height: '100%',
+            backgroundColor: '#f5f5f5',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#999'
           }}
         >
           <span>图片加载失败</span>

@@ -124,8 +124,8 @@ router.post('/generate', authMiddleware, asyncHandler(async (req, res) => {
 
     // 验证必填字段
     if (!name || !type) {
-      
-        return res.validationError([], '报告名称和类型是必填的');
+
+      return res.validationError([], '报告名称和类型是必填的');
     }
 
     // 验证报告类型
@@ -187,8 +187,8 @@ router.get('/:id', authMiddleware, asyncHandler(async (req, res) => {
     const report = reports.find(r => r.id === id);
 
     if (!report) {
-      
-        return res.notFound('资源', '报告不存在');
+
+      return res.notFound('资源', '报告不存在');
     }
 
     res.success(report);
@@ -208,20 +208,20 @@ router.get('/:id/download', authMiddleware, asyncHandler(async (req, res) => {
     const report = reports.find(r => r.id === id);
 
     if (!report) {
-      
-        return res.notFound('资源', '报告不存在');
+
+      return res.notFound('资源', '报告不存在');
     }
 
     if (report.status !== 'completed') {
-      
-        return res.validationError([], '报告尚未生成完成');
+
+      return res.validationError([], '报告尚未生成完成');
     }
 
     // 增加下载次数
     report.downloadCount++;
 
     // 模拟文件下载
-    const fileName = `${report.name.replace(/[^a-zA-Z0-9/u4e00-/u9fa5]/g, '_')}.${report.format}`;
+    const fileName = `${report.name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_')}.${report.format}`;
 
     res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(fileName)}"`);
     res.setHeader('Content-Type', getContentType(report.format));
@@ -247,8 +247,8 @@ router.delete('/:id', authMiddleware, asyncHandler(async (req, res) => {
     const reportIndex = reports.findIndex(r => r.id === id);
 
     if (reportIndex === -1) {
-      
-        return res.notFound('资源', '报告不存在');
+
+      return res.notFound('资源', '报告不存在');
     }
 
     const deletedReport = reports.splice(reportIndex, 1)[0];
@@ -360,8 +360,8 @@ router.post('/scheduled', authMiddleware, asyncHandler(async (req, res) => {
   } = req.body;
 
   if (!name || !schedule || !reportType) {
-    
-        return res.validationError([], '缺少必要参数: name, schedule, reportType');
+
+    return res.validationError([], '缺少必要参数: name, schedule, reportType');
   }
 
   try {
@@ -461,8 +461,8 @@ router.post('/performance/benchmarks', authMiddleware, asyncHandler(async (req, 
   } = req.body;
 
   if (!name || !type || !metrics) {
-    
-        return res.validationError([], '缺少必要参数: name, type, metrics');
+
+    return res.validationError([], '缺少必要参数: name, type, metrics');
   }
 
   try {
@@ -520,8 +520,8 @@ router.post('/performance/baselines', authMiddleware, asyncHandler(async (req, r
   const { benchmarkId, testResultId } = req.body;
 
   if (!benchmarkId || !testResultId) {
-    
-        return res.validationError([], '缺少必要参数: benchmarkId, testResultId');
+
+    return res.validationError([], '缺少必要参数: benchmarkId, testResultId');
   }
 
   try {

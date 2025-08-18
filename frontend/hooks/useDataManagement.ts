@@ -1,18 +1,18 @@
-import { useCallback, useEffect, useState    } from 'react';import { DataBackup, DataQuery, DataRecord, advancedDataManager    } from '../services/data/dataService';const extendedDataManager = {'
+import { useCallback, useEffect, useState    } from 'react';import { DataBackup, DataQuery, DataRecord, advancedDataManager    } from '../services/data/dataService';const extendedDataManager = {
   ...advancedDataManager,
   getSyncConfig: async (): Promise<DataSyncConfig>  => {
 
     return {
-      id: 'default','
-      name: 'Default Sync','
+      id: 'default',
+      name: 'Default Sync',
       enabled: false,
       interval: 60,
       schedule: {
-        type: 'interval','
-        value: '60','
-        frequency: 'hourly';
+        type: 'interval',
+        value: '60',
+        frequency: 'hourly'
       },
-      conflictResolution: 'local','
+      conflictResolution: 'local',
       retryAttempts: 3,
       targets: []
     };
@@ -23,7 +23,7 @@ import { useCallback, useEffect, useState    } from 'react';import { DataBackup,
   },
   createRecord: async (type: string, data: any, metadata?: any): Promise<DataRecord>  => {
 
-    const validType = ['test', 'user', 'report', 'log', 'config'].includes(type) ? type as any : 'test';
+    const validType = ['test', 'user', 'report', 'log', 'config'].includes(type) ? type as any : 'test'
     return {
       id: Date.now().toString(),
       type: validType,
@@ -33,7 +33,7 @@ import { useCallback, useEffect, useState    } from 'react';import { DataBackup,
         updatedAt: new Date().toISOString(),
         version: 1,
         tags: [],
-        source: 'manual','
+        source: 'manual',
         ...metadata
       }
     };
@@ -42,14 +42,14 @@ import { useCallback, useEffect, useState    } from 'react';import { DataBackup,
 
     return {
       id,
-      type: 'test','
+      type: 'test',
       data,
       metadata: {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         version: 1,
         tags: [],
-        source: 'manual','
+        source: 'manual',
         ...metadata
       }
     };
@@ -64,7 +64,7 @@ import { useCallback, useEffect, useState    } from 'react';import { DataBackup,
   },
   importData: async (file: File, config: any): Promise<{ taskId: string }> => {
 
-    return { taskId: 'temp-' + Date.now() };'
+    return { taskId: 'temp-' + Date.now() };
   },
   validateData: async (query: any): Promise<{ isValid: boolean, errors: any[] }> => {
 
@@ -94,17 +94,17 @@ interface DataSyncConfig   {
   enabled: boolean;
   interval: number;
   schedule: {
-    type: 'interval' | 'cron';
+    type: 'interval' | 'cron'
     value: string;
-    frequency: 'manual' | 'hourly' | 'daily' | 'weekly';
+    frequency: 'manual' | 'hourly' | 'daily' | 'weekly'
     time?: string;
   };
-  conflictResolution: 'local' | 'remote' | 'merge';
+  conflictResolution: 'local' | 'remote' | 'merge'
   retryAttempts: number;
   targets: Array<{
     id: string;
     name: string;
-    type: 'database' | 'api' | 'file';
+    type: 'database' | 'api' | 'file'
     config: any;
   }>;
 }
@@ -152,7 +152,7 @@ export interface UseDataManagementReturn     {
   triggerSync: (targetId?: string) => Promise<{ taskId: string }>;
 
   // 导入导出
-  exportData: (format: 'json' | 'csv' | 'xlsx', selectedIds?: string[]) => Promise<void>;'
+  exportData: (format: 'json' | 'csv' | 'xlsx', selectedIds?: string[]) => Promise<void>;
   importData: (file: File, config: any) => Promise<{ taskId: string }>;
 
   // 数据验证和清理
@@ -182,8 +182,8 @@ export const useDataManagement = (): UseDataManagementReturn  => {
       limit: 50
     },
     sort: {
-      field: 'created_at','
-      order: 'desc';
+      field: 'created_at',
+      order: 'desc'
     }
   });
 
@@ -197,9 +197,9 @@ export const useDataManagement = (): UseDataManagementReturn  => {
       setRecords(result.data);
       setTotalRecords(result.total);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '加载数据失败';
+      const errorMessage = err instanceof Error ? err.message : '加载数据失败'
       setError(errorMessage);
-      console.error('Failed to load data: ', err);'
+      console.error('Failed to load data: ', err);
     } finally {
       setLoading(false);
     }
@@ -212,7 +212,7 @@ export const useDataManagement = (): UseDataManagementReturn  => {
       const analyticsData = await advancedDataManager.getAnalytics();
       setAnalytics(analyticsData);
     } catch (err) {
-      console.error('Failed to load analytics: ', err);'
+      console.error('Failed to load analytics: ', err);
     } finally {
       setAnalyticsLoading(false);
     }
@@ -225,7 +225,7 @@ export const useDataManagement = (): UseDataManagementReturn  => {
       const backupList = await advancedDataManager.getBackups();
       setBackups(backupList);
     } catch (err) {
-      console.error('Failed to load backups: ', err);'
+      console.error('Failed to load backups: ', err);
     } finally {
       setBackupsLoading(false);
     }
@@ -238,19 +238,19 @@ export const useDataManagement = (): UseDataManagementReturn  => {
       const config = await extendedDataManager.getSyncConfig();
       setSyncConfig(config);
     } catch (err) {
-      console.error('Failed to load sync config: ', err);'
+      console.error('Failed to load sync config: ', err);
       // 设置默认配置
       setSyncConfig({
-        id: 'default','
-        name: 'Default Sync','
+        id: 'default',
+        name: 'Default Sync',
         enabled: false,
         interval: 60,
         schedule: {
-          type: 'interval','
-          value: '60','
-          frequency: 'hourly';
+          type: 'interval',
+          value: '60',
+          frequency: 'hourly'
         },
-        conflictResolution: 'local','
+        conflictResolution: 'local',
         retryAttempts: 3,
         targets: []
       });
@@ -266,7 +266,7 @@ export const useDataManagement = (): UseDataManagementReturn  => {
       await loadData(); // 重新加载数据
       return record;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '创建记录失败';
+      const errorMessage = err instanceof Error ? err.message : '创建记录失败'
       setError(errorMessage);
       throw err;
     }
@@ -278,7 +278,7 @@ export const useDataManagement = (): UseDataManagementReturn  => {
       await loadData(); // 重新加载数据
       return record;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '更新记录失败';
+      const errorMessage = err instanceof Error ? err.message : '更新记录失败'
       setError(errorMessage);
       throw err;
     }
@@ -292,7 +292,7 @@ export const useDataManagement = (): UseDataManagementReturn  => {
       }
       return success;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '删除记录失败';
+      const errorMessage = err instanceof Error ? err.message : '删除记录失败'
       setError(errorMessage);
       throw err;
     }
@@ -301,14 +301,14 @@ export const useDataManagement = (): UseDataManagementReturn  => {
   const batchDelete = useCallback(async (ids: string[]): Promise<void>  => {
     try {
       const operations = ids.map(id => ({
-        type: 'delete' as const,'
+        type: 'delete' as const,
         id
       }));
 
       await advancedDataManager.batchOperation(operations);
       await loadData(); // 重新加载数据
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '批量删除失败';
+      const errorMessage = err instanceof Error ? err.message : '批量删除失败'
       setError(errorMessage);
       throw err;
     }
@@ -321,7 +321,7 @@ export const useDataManagement = (): UseDataManagementReturn  => {
       await loadBackups(); // 重新加载备份列表
       return backup;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '创建备份失败';
+      const errorMessage = err instanceof Error ? err.message : '创建备份失败'
       setError(errorMessage);
       throw err;
     }
@@ -332,7 +332,7 @@ export const useDataManagement = (): UseDataManagementReturn  => {
       const result = await advancedDataManager.restoreBackup(backupId, options);
       return result;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '恢复备份失败';
+      const errorMessage = err instanceof Error ? err.message : '恢复备份失败'
       setError(errorMessage);
       throw err;
     }
@@ -342,12 +342,12 @@ export const useDataManagement = (): UseDataManagementReturn  => {
   const updateSyncConfig = useCallback(async (config: Partial<DataSyncConfig>): Promise<DataSyncConfig>  => {
     try {
       const fullConfig: DataSyncConfig  = {
-        id: config.id || 'default','
-        name: config.name || 'Default Sync','
+        id: config.id || 'default',
+        name: config.name || 'Default Sync',
         enabled: config.enabled || false,
         interval: config.interval || 60,
-        schedule: config.schedule || { type: 'interval', value: '60', frequency: 'hourly' },'
-        conflictResolution: config.conflictResolution || 'local','
+        schedule: config.schedule || { type: 'interval', value: '60', frequency: 'hourly' },
+        conflictResolution: config.conflictResolution || 'local',
         retryAttempts: config.retryAttempts || 3,
         targets: config.targets || []
       };
@@ -355,7 +355,7 @@ export const useDataManagement = (): UseDataManagementReturn  => {
       setSyncConfig(updatedConfig);
       return updatedConfig;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '更新同步配置失败';
+      const errorMessage = err instanceof Error ? err.message : '更新同步配置失败'
       setError(errorMessage);
       throw err;
     }
@@ -366,14 +366,14 @@ export const useDataManagement = (): UseDataManagementReturn  => {
       const result = await advancedDataManager.triggerSync(targetId);
       return result;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '触发同步失败';
+      const errorMessage = err instanceof Error ? err.message : '触发同步失败'
       setError(errorMessage);
       throw err;
     }
   }, []);
 
   // 导入导出函数
-  const exportData = useCallback(async (format: 'json' | 'csv' | 'xlsx', selectedIds?: string[]): Promise<void>  => {'
+  const exportData = useCallback(async (format: 'json' | 'csv' | 'xlsx', selectedIds?: string[]): Promise<void>  => {
     try {
       const exportQuery = selectedIds && selectedIds.length > 0
         ? { ...query, ids: selectedIds }
@@ -387,13 +387,13 @@ export const useDataManagement = (): UseDataManagementReturn  => {
 
       if ((result as any).downloadUrl) {
         // 直接下载
-        window.open((result as any).downloadUrl, '_blank');'
+        window.open((result as any).downloadUrl, '_blank");
       } else {
         // 异步任务，显示任务ID
         alert(`导出任务已创建，任务ID: ${(result as any).taskId}`);`
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "导出数据失败';'`
+      const errorMessage = err instanceof Error ? err.message : "导出数据失败";`
       setError(errorMessage);
       throw err;
     }
@@ -401,11 +401,11 @@ export const useDataManagement = (): UseDataManagementReturn  => {
 
   const importData = useCallback(async (file: File, config: any): Promise<{ taskId: string }> => {
     try {
-      const result = await extendedDataManager.importData?.(file, config) || { taskId: 'temp-' + Date.now() };'
+      const result = await extendedDataManager.importData?.(file, config) || { taskId: 'temp-' + Date.now() };
       await loadData(); // 重新加载数据
       return result;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '导入数据失败';
+      const errorMessage = err instanceof Error ? err.message : '导入数据失败'
       setError(errorMessage);
       throw err;
     }
@@ -417,7 +417,7 @@ export const useDataManagement = (): UseDataManagementReturn  => {
       const result = await extendedDataManager.validateData?.(validateQuery) || { isValid: true, errors: [] };
       return result;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '数据验证失败';
+      const errorMessage = err instanceof Error ? err.message : '数据验证失败'
       setError(errorMessage);
       throw err;
     }
@@ -428,7 +428,7 @@ export const useDataManagement = (): UseDataManagementReturn  => {
       const result = await advancedDataManager.cleanupData(config);
       return result;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '数据清理失败';
+      const errorMessage = err instanceof Error ? err.message : '数据清理失败'
       setError(errorMessage);
       throw err;
     }

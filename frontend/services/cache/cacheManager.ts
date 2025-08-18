@@ -28,12 +28,12 @@ export interface CacheItem<T = any>     {
 
 // 缓存策略枚举
 export enum CacheStrategy {
-  MEMORY_ONLY = 'memory_only','
-  STORAGE_ONLY = 'storage_only','
-  MEMORY_FIRST = 'memory_first','
-  STORAGE_FIRST = 'storage_first','
-  WRITE_THROUGH = 'write_through','
-  WRITE_BACK = 'write_back';
+  MEMORY_ONLY = 'memory_only',
+  STORAGE_ONLY = 'storage_only',
+  MEMORY_FIRST = 'memory_first',
+  STORAGE_FIRST = 'storage_first',
+  WRITE_THROUGH = 'write_through',
+  WRITE_BACK = 'write_back'
 }
 
 // 缓存统计信息
@@ -101,7 +101,7 @@ export class CacheManager {
         finalValue = await this.compress(serialized);
         compressed = true;
       } catch (error) {
-        console.warn('Compression failed, using uncompressed data: ', error);'
+        console.warn('Compression failed, using uncompressed data: ', error);
       }
     }
 
@@ -197,7 +197,7 @@ export class CacheManager {
       try {
         finalValue = await this.decompress(cacheItem.value);
       } catch (error) {
-        console.error('Decompression failed: ', error);'
+        console.error('Decompression failed: ', error);
         await this.delete(key);
         return null;
       }
@@ -206,7 +206,7 @@ export class CacheManager {
     try {
       return JSON.parse(finalValue) as T;
     } catch (error) {
-      console.error('JSON parse failed: ', error);'
+      console.error('JSON parse failed: ', error);
       await this.delete(key);
       return null;
     }
@@ -228,8 +228,8 @@ export class CacheManager {
    */
   async clear(): Promise<void> {
     this.memoryCache.clear();
-    if (this.config.enableLocalStorage && typeof localStorage !== 'undefined') {'
-      const keys = Object.keys(localStorage).filter(key => key.startsWith('cache_'));'
+    if (this.config.enableLocalStorage && typeof localStorage !== 'undefined') {
+      const keys = Object.keys(localStorage).filter(key => key.startsWith('cache_'));
       keys.forEach(key => localStorage.removeItem(key));
     }
     this.resetStats();
@@ -290,9 +290,9 @@ export class CacheManager {
    * 设置本地存储缓存
    */
   private async setStorageCache(key: string, item: CacheItem<string>): Promise<void> {
-    if (!this.config.enableLocalStorage || typeof localStorage === 'undefined') return;'
+    if (!this.config.enableLocalStorage || typeof localStorage === 'undefined') return;
     try {
-      const storageKey = `cache_${key}`;`
+      const storageKey = `cache_${key}`;
       localStorage.setItem(storageKey, JSON.stringify(item));
     } catch (error) {
       console.warn("Failed to set localStorage cache: ', error);'`
@@ -303,13 +303,13 @@ export class CacheManager {
    * 获取本地存储缓存
    */
   private async getStorageCache(key: string): Promise<CacheItem<string> | null> {
-    if (!this.config.enableLocalStorage || typeof localStorage === 'undefined') {'
+    if (!this.config.enableLocalStorage || typeof localStorage === 'undefined') {
         this.stats.storageMisses++;
       return null;
       }
 
     try {
-      const storageKey = `cache_${key}`;`
+      const storageKey = `cache_${key}`;
       const stored = localStorage.getItem(storageKey);
       if (stored) {
         
@@ -330,9 +330,9 @@ export class CacheManager {
    * 删除本地存储缓存
    */
   private async deleteStorageCache(key: string): Promise<boolean> {
-    if (!this.config.enableLocalStorage || typeof localStorage === 'undefined') return false;'
+    if (!this.config.enableLocalStorage || typeof localStorage === 'undefined') return false;
     try {
-      const storageKey = `cache_${key}`;`
+      const storageKey = `cache_${key}`;
       const existed = localStorage.getItem(storageKey) !== null;
       localStorage.removeItem(storageKey);
       return existed;
@@ -374,7 +374,7 @@ export class CacheManager {
   private async evictLRU(): Promise<void> {
     if (this.memoryCache.size === 0) return;
 
-    let oldestKey = '';
+    let oldestKey = ''
     let oldestTime = Date.now();
 
     this.memoryCache.forEach((item, key) => {
@@ -395,8 +395,8 @@ export class CacheManager {
    */
   private async compress(data: string): Promise<string> {
     // 简单的压缩实现，实际项目中可以使用更高效的压缩算法
-    if (typeof CompressionStream !== 'undefined') {'
-      const stream = new CompressionStream('gzip');'
+    if (typeof CompressionStream !== 'undefined') {
+      const stream = new CompressionStream('gzip");
       const writer = stream.writable.getWriter();
       const reader = stream.readable.getReader();
       
@@ -431,10 +431,10 @@ export class CacheManager {
    */
   private async decompress(compressedData: string): Promise<string> {
     // 简单的解压缩实现
-    if (typeof DecompressionStream !== 'undefined') {'
+    if (typeof DecompressionStream !== 'undefined') {
       try {
         const compressed = Uint8Array.from(atob(compressedData), c => c.charCodeAt(0));
-        const stream = new DecompressionStream('gzip');'
+        const stream = new DecompressionStream('gzip");
         const writer = stream.writable.getWriter();
         const reader = stream.readable.getReader();
         
@@ -459,7 +459,7 @@ export class CacheManager {
         
         return new TextDecoder().decode(decompressed);
       } catch (error) {
-        console.warn('Gzip decompression failed, trying base64:', error);'
+        console.warn('Gzip decompression failed, trying base64:', error);
       }
     }
     

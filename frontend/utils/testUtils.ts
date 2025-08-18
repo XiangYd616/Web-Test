@@ -3,7 +3,7 @@
  * 提供前端测试、性能测试、用户体验测试等工具
  */
 
-import { errorService    } from '../services/errorService';// 测试结果接口'
+import { errorService    } from '../services/errorService';// 测试结果接口
 interface TestResult   {
   name: string;
   passed: boolean;
@@ -89,9 +89,9 @@ export class TestSuite {
       total,
       passed,
       failed,
-      passRate: total > 0 ? (passed / total * 100).toFixed(2) : '0','
+      passRate: total > 0 ? (passed / total * 100).toFixed(2) : '0',
       totalDuration: totalDuration.toFixed(2),
-      avgDuration: total > 0 ? (totalDuration / total).toFixed(2) : '0';
+      avgDuration: total > 0 ? (totalDuration / total).toFixed(2) : '0'
     };
   }
 }
@@ -114,25 +114,25 @@ export class PerformanceTester {
   async testPageLoad(): Promise<PerformanceTestResult[]> {
     const results: PerformanceTestResult[]  = [];
     // 测试导航时间
-    if ('performance' in window && 'getEntriesByType' in performance) {'
-      const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];'
+    if ('performance' in window && 'getEntriesByType' in performance) {
+      const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
       if (navEntries.length > 0) {
         const nav = navEntries[0];
         const loadTime = nav.loadEventEnd - (nav as any).navigationStart;
 
         results.push({
-          metric: 'Page Load Time','
+          metric: 'Page Load Time',
           value: loadTime,
-          unit: 'ms','
+          unit: 'ms',
           threshold: this.thresholds.loadTime,
           passed: loadTime <= this.thresholds.loadTime
         });
 
         const renderTime = nav.domContentLoadedEventEnd - (nav as any).navigationStart;
         results.push({
-          metric: 'DOM Content Loaded','
+          metric: 'DOM Content Loaded',
           value: renderTime,
-          unit: 'ms','
+          unit: 'ms',
           threshold: this.thresholds.renderTime,
           passed: renderTime <= this.thresholds.renderTime
         });
@@ -140,13 +140,13 @@ export class PerformanceTester {
     }
 
     // 测试首次内容绘制
-    const paintEntries = performance.getEntriesByType('paint');'
-    const fcp = paintEntries.find(entry => entry.name === 'first-contentful-paint');'
+    const paintEntries = performance.getEntriesByType('paint");
+    const fcp = paintEntries.find(entry => entry.name === 'first-contentful-paint");
     if (fcp) {
       results.push({
-        metric: 'First Contentful Paint','
+        metric: 'First Contentful Paint',
         value: fcp.startTime,
-        unit: 'ms','
+        unit: 'ms',
         threshold: this.thresholds.renderTime,
         passed: fcp.startTime <= this.thresholds.renderTime
       });
@@ -159,14 +159,14 @@ export class PerformanceTester {
    * 测试内存使用
    */
   testMemoryUsage(): PerformanceTestResult | null {
-    if ('memory' in performance) {'
+    if ('memory' in performance) {
         const memory = (performance as any).memory;
       const usedMB = memory.usedJSHeapSize / 1024 / 1024;
 
       return {
-        metric: 'Memory Usage','
+        metric: 'Memory Usage',
         value: usedMB,
-        unit: 'MB','
+        unit: 'MB',
         threshold: this.thresholds.memoryUsage,
         passed: usedMB <= this.thresholds.memoryUsage
       };
@@ -178,9 +178,9 @@ export class PerformanceTester {
    * 测试组件渲染性能
    */
   async testComponentRender(componentName: string, renderFn: () => void): Promise<PerformanceTestResult> {
-    const startMark = `${componentName}-start`;`
-    const endMark = `${componentName}-end`;`
-    const measureName = `${componentName}-render`;`
+    const startMark = `${componentName}-start`;
+    const endMark = `${componentName}-end`;
+    const measureName = `${componentName}-render`;
 
     performance.mark(startMark);
     renderFn();
@@ -212,8 +212,8 @@ export class UXTester {
       const button = document.querySelector(buttonSelector) as HTMLButtonElement;
       if (!button) {
         resolve({
-          component: 'Button','
-          interaction: 'Click','
+          component: 'Button',
+          interaction: 'Click',
           responseTime: -1,
           passed: false
         });
@@ -224,16 +224,16 @@ export class UXTester {
 
       const handleClick = () => {
         const responseTime = performance.now() - startTime;
-        button.removeEventListener('click', handleClick);'
+        button.removeEventListener('click', handleClick);
         resolve({
-          component: 'Button','
-          interaction: 'Click','
+          component: 'Button',
+          interaction: 'Click',
           responseTime,
           passed: responseTime <= 100 // 100ms threshold
         });
       };
 
-      button.addEventListener('click', handleClick);'
+      button.addEventListener('click', handleClick);
       button.click();
     });
   }
@@ -246,8 +246,8 @@ export class UXTester {
     if (!form) {
       
         return {
-        component: 'Form','
-        interaction: 'Validation','
+        component: 'Form',
+        interaction: 'Validation',
         responseTime: -1,
         passed: false
       };
@@ -256,10 +256,10 @@ export class UXTester {
     const startTime = performance.now();
 
     // 触发表单验证
-    const inputs = form.querySelectorAll('input[required]');'
+    const inputs = form.querySelectorAll('input[required]");
     if (inputs.length > 0) {
       const firstInput = inputs[0] as HTMLInputElement;
-      firstInput.value = '';
+      firstInput.value = ''
       firstInput.blur();
     }
 
@@ -269,8 +269,8 @@ export class UXTester {
     const responseTime = performance.now() - startTime;
 
     return {
-      component: 'Form','
-      interaction: 'Validation','
+      component: 'Form',
+      interaction: 'Validation',
       responseTime,
       passed: responseTime <= 200 // 200ms threshold for validation
     };
@@ -297,8 +297,8 @@ export class UXTester {
           const fps = 1000 / avgFrameTime;
 
           resolve({
-            component: 'Page','
-            interaction: 'Scroll','
+            component: 'Page',
+            interaction: 'Scroll',
             responseTime: avgFrameTime,
             passed: fps >= 30 // 至少30fps
           });
@@ -362,8 +362,8 @@ export class APITester {
     try {
       // 故意发送错误请求
       const response = await fetch(url + "/nonexistent', {'`
-        method: 'POST','
-        body: 'invalid data';
+        method: 'POST',
+        body: 'invalid data'
       });
 
       const duration = performance.now() - startTime;
@@ -413,11 +413,11 @@ export class TestRunner {
     api: TestResult[];
     summary: any;
   }> {
-    console.log("🧪 开始运行完整测试套件...');'`
+    console.log("🧪 开始运行完整测试套件...");`
 
     try {
       // 性能测试
-      console.log('📊 运行性能测试...');'
+      console.log('📊 运行性能测试...");
       const performanceResults = await this.performanceTester.testPageLoad();
       const memoryResult = this.performanceTester.testMemoryUsage();
       if (memoryResult) {
@@ -425,17 +425,17 @@ export class TestRunner {
       }
 
       // 用户体验测试
-      console.log('👤 运行用户体验测试...');'
+      console.log('👤 运行用户体验测试...");
       const uxResults: UXTestResult[]  = [];
       // API测试
-      console.log('🌐 运行API测试...');'
+      console.log('🌐 运行API测试...");
       const apiResults: TestResult[]  = [];
       // 测试健康检查端点
-      const healthTest = await this.apiTester.testAPIResponse('/api/health');'
+      const healthTest = await this.apiTester.testAPIResponse('/api/health");
       apiResults.push(healthTest);
 
       // 测试错误处理
-      const errorTest = await this.apiTester.testErrorHandling('/api');'
+      const errorTest = await this.apiTester.testErrorHandling('/api");
       apiResults.push(errorTest);
 
       const summary = {
@@ -453,7 +453,7 @@ export class TestRunner {
         }
       };
 
-      console.log('✅ 测试套件运行完成');'
+      console.log('✅ 测试套件运行完成");
       return {
         performance: performanceResults,
         ux: uxResults,
@@ -462,8 +462,8 @@ export class TestRunner {
       };
 
     } catch (error) {
-      console.error('❌ 测试套件运行失败:', error);'
-      errorService.handleError(error, { context: 'test_suite' });'
+      console.error('❌ 测试套件运行失败:', error);
+      errorService.handleError(error, { context: 'test_suite' });
       throw error;
     }
   }

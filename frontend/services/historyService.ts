@@ -3,7 +3,7 @@
  * 提供测试历史记录的获取、管理和操作功能
  */
 
-import axios from 'axios';export interface TestHistoryQuery     {'
+import axios from 'axios';export interface TestHistoryQuery     {
   testType?: string;
   status?: string;
   dateRange?: string;
@@ -11,7 +11,7 @@ import axios from 'axios';export interface TestHistoryQuery     {'
   page?: number;
   limit?: number;
   sortBy?: string;
-  sortOrder?: 'ASC' | 'DESC';
+  sortOrder?: 'ASC' | 'DESC'
 }
 
 export interface TestHistoryResponse     {
@@ -31,7 +31,7 @@ export interface TestHistoryItem     {
   testName: string;
   testType: string;
   url: string;
-  status: 'completed' | 'failed' | 'running' | 'cancelled';
+  status: 'completed' | 'failed' | 'running' | 'cancelled'
   score?: number;
   duration: number;
   createdAt: string;
@@ -71,7 +71,7 @@ class HistoryService {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError';
+    const errorType = error.name || 'UnknownError'
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -83,7 +83,7 @@ class HistoryService {
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics: ', {'
+    console.debug('API Metrics: ', {
       url: info.url,
       method: info.method,
       status: info.status,
@@ -101,7 +101,7 @@ class HistoryService {
     };
   }
   private async retryRequest(fn: () => Promise<any>, maxRetries: number = 3): Promise<any> {
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {>
       try {
         return await fn();
       } catch (error) {
@@ -119,7 +119,7 @@ class HistoryService {
   private cacheTimeout = 5 * 60 * 1000; // 5分钟缓存
 
   constructor() {
-    this.baseUrl = process.env.REACT_APP_API_URL || "http://localhost:3001/api';'`
+    this.baseUrl = process.env.REACT_APP_API_URL || "http://localhost:3001/api";``
   }
 
   /**
@@ -130,13 +130,13 @@ class HistoryService {
       const params = new URLSearchParams();
 
       // 构建查询参数
-      if (query.testType) params.append('type', query.testType);'
-      if (query.status && query.status !== 'all') params.append('status', query.status);'
-      if (query.search) params.append('search', query.search);'
-      if (query.page) params.append('page', query.page.toString());'
-      if (query.limit) params.append('limit', query.limit.toString());'
-      if (query.sortBy) params.append('sortBy', query.sortBy);'
-      if (query.sortOrder) params.append('sortOrder', query.sortOrder);'
+      if (query.testType) params.append('type', query.testType);
+      if (query.status && query.status !== 'all') params.append('status', query.status);
+      if (query.search) params.append('search', query.search);
+      if (query.page) params.append('page', query.page.toString());
+      if (query.limit) params.append('limit', query.limit.toString());
+      if (query.sortBy) params.append('sortBy', query.sortBy);
+      if (query.sortOrder) params.append('sortOrder', query.sortOrder);
       // 处理日期范围
       if (query.dateRange) {
         const now = new Date();
@@ -159,8 +159,8 @@ class HistoryService {
             startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         }
 
-        params.append('startDate', startDate.toISOString());'
-        params.append("endDate', now.toISOString());'
+        params.append('startDate', startDate.toISOString());
+        params.append("endDate', now.toISOString());"
       }
 
       const response = await axios.get(`${this.baseUrl}/test/history?${params.toString()}`);`
@@ -170,8 +170,8 @@ class HistoryService {
       return {
         data: this.transformHistoryItems(data.data?.tests || data.data || []),
         pagination: data.data?.pagination || {
-          page: parseInt(query.page?.toString() || "1'),'`
-          limit: parseInt(query.limit?.toString() || '20'),'
+          page: parseInt(query.page?.toString() || "1'),'`"`
+          limit: parseInt(query.limit?.toString() || '20'),
           total: 0,
           totalPages: 0,
           hasNext: false,
@@ -180,7 +180,7 @@ class HistoryService {
       };
 
     } catch (error) {
-      console.error('获取测试历史失败:', error);'
+      console.error('获取测试历史失败:', error);
       // 返回空数据而不是抛出错误，避免页面崩溃
       return {
         data: [],
@@ -204,7 +204,7 @@ class HistoryService {
       const response = await axios.get(`${this.baseUrl}/test/history/${testId}`);`
       return this.transformHistoryItem(response.data.data);
     } catch (error) {
-      console.error("获取测试详情失败:', error);'`
+      console.error("获取测试详情失败:', error);'`"`
       return null;
     }
   }
@@ -217,8 +217,8 @@ class HistoryService {
       await axios.delete(`${this.baseUrl}/test/history/${testId}`);`
       this.clearCache();
     } catch (error) {
-      console.error("删除测试记录失败:', error);'`
-      throw new Error('删除测试记录失败');'
+      console.error("删除测试记录失败:', error);'`"`
+      throw new Error('删除测试记录失败");"
     }
   }
 
@@ -230,30 +230,30 @@ class HistoryService {
       await axios.post(`${this.baseUrl}/test/history/batch-delete`, { testIds });`
       this.clearCache();
     } catch (error) {
-      console.error("批量删除测试记录失败:', error);'`
-      throw new Error('批量删除测试记录失败');'
+      console.error("批量删除测试记录失败:', error);'`"`
+      throw new Error('批量删除测试记录失败");"
     }
   }
 
   /**
    * 导出测试历史
    */
-  async exportHistory(query: TestHistoryQuery = {}, format: 'json' | 'csv' | 'excel' = 'json'): Promise<Blob> {'
+  async exportHistory(query: TestHistoryQuery = {}, format: 'json' | 'csv' | 'excel' = 'json'): Promise<Blob> {
     try {
       const params = new URLSearchParams();
       
-      if (query.testType) params.append('type', query.testType);'
-      if (query.status && query.status !== 'all') params.append('status', query.status);'
-      if (query.search) params.append('search', query.search);'
-      params.append("format', format);'
+      if (query.testType) params.append('type', query.testType);
+      if (query.status && query.status !== 'all') params.append('status', query.status);
+      if (query.search) params.append('search', query.search);
+      params.append("format', format);"
       const response = await axios.get(`${this.baseUrl}/test/history/export?${params.toString()}`, {`
-        responseType: "blob';'`
+        responseType: "blob";``
       });
 
       return response.data;
     } catch (error) {
-      console.error('导出测试历史失败:', error);'
-      throw new Error('导出测试历史失败');'
+      console.error('导出测试历史失败:', error);
+      throw new Error('导出测试历史失败");"
     }
   }
 
@@ -265,8 +265,8 @@ class HistoryService {
       const response = await axios.post(`${this.baseUrl}/test/history/${testId}/rerun`);`
       return response.data;
     } catch (error) {
-      console.error("重新运行测试失败:', error);'`
-      throw new Error('重新运行测试失败');'
+      console.error("重新运行测试失败:', error);'`"`
+      throw new Error('重新运行测试失败");"
     }
   }
 
@@ -276,12 +276,12 @@ class HistoryService {
   async getTestStats(testType?: string, timeRange: number = 30): Promise<any> {
     try {
       const params = new URLSearchParams();
-      if (testType) params.append('type', testType);'
-      params.append("timeRange', timeRange.toString());'
+      if (testType) params.append('type', testType);
+      params.append("timeRange', timeRange.toString());"
       const response = await axios.get(`${this.baseUrl}/test/history/stats?${params.toString()}`);`
       return response.data;
     } catch (error) {
-      console.error("获取测试统计失败:', error);'`
+      console.error("获取测试统计失败:', error);'`"`
       return null;
     }
   }
@@ -299,7 +299,7 @@ class HistoryService {
   private transformHistoryItem(item: any): TestHistoryItem {
     return {
       id: item.id || item.session_id,
-      testName: item.test_name || item.testName || '未命名测试','
+      testName: item.test_name || item.testName || '未命名测试',
       testType: item.test_type || item.testType,
       url: item.url || item.target_url,
       status: item.status,
@@ -307,8 +307,8 @@ class HistoryService {
       duration: item.duration || 0,
       createdAt: item.created_at || item.createdAt,
       updatedAt: item.updated_at || item.updatedAt,
-      config: typeof item.config === 'string' ? JSON.parse(item.config) : item.config,'
-      results: typeof item.results === 'string' ? JSON.parse(item.results) : item.results,'
+      config: typeof item.config === 'string' ? JSON.parse(item.config) : item.config,
+      results: typeof item.results === 'string' ? JSON.parse(item.results) : item.results,
       summary: {
         totalChecks: item.total_issues || item.totalChecks,
         passed: item.passed || 0,
@@ -330,7 +330,7 @@ class HistoryService {
    */
   private getCache(key: string): any {
     const cached = this.cache.get(key);
-    if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
+    if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {>
       return cached.data;
     }
     return null;

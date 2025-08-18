@@ -3,7 +3,7 @@
  * 统一处理所有API请求的错误响应
  */
 
-import axios, { AxiosError, AxiosResponse  } from 'axios';import { errorService    } from './errorService';// API错误响应接口'
+import axios, { AxiosError, AxiosResponse  } from 'axios';import { errorService    } from './errorService';// API错误响应接口
 interface ApiErrorResponse   {
   success: boolean;
   message: string;
@@ -44,7 +44,7 @@ class ApiErrorInterceptor {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError';
+    const errorType = error.name || 'UnknownError'
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -56,7 +56,7 @@ class ApiErrorInterceptor {
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics: ', {'
+    console.debug('API Metrics: ', {
       url: info.url,
       method: info.method,
       status: info.status,
@@ -126,7 +126,7 @@ class ApiErrorInterceptor {
    */
   private handleRequestError(error: any): any {
     const standardError = errorService.handleError(error, {
-      phase: 'request','
+      phase: 'request',
       url: error.config?.url,
       method: error.config?.method
     });
@@ -156,7 +156,7 @@ class ApiErrorInterceptor {
     
     // 创建标准化错误
     const standardError = errorService.handleError(error, {
-      phase: 'response','
+      phase: 'response',
       url,
       method,
       status: error.response?.status,
@@ -189,12 +189,12 @@ class ApiErrorInterceptor {
     const data = error.response.data;
     
     // 标准API错误格式
-    if (data && typeof data === 'object' && 'success' in data) {'
+    if (data && typeof data === 'object' && 'success' in data) {
         return data as ApiErrorResponse;
       }
 
     // 简单字符串错误
-    if (typeof data === 'string') {'
+    if (typeof data === 'string') {
         return {
         success: false,
         message: data
@@ -202,7 +202,7 @@ class ApiErrorInterceptor {
     }
 
     // HTML错误页面
-    if (typeof data === 'string' && data.includes('<html>')) {'
+    if (typeof data === 'string' && data.includes('<html>')) {
       return {
         success: false,
         message: `服务器返回了HTML页面 (${error.response.status})``
@@ -212,7 +212,7 @@ class ApiErrorInterceptor {
     // 其他格式
     return {
       success: false,
-      message: error.message || "未知错误';'`
+      message: error.message || "未知错误";`
     };
   }
 
@@ -289,15 +289,15 @@ class ApiErrorInterceptor {
    */
   private async handleUnauthorized(error: AxiosError): Promise<void> {
     // 清除本地认证信息
-    localStorage.removeItem('auth_token');'
-    localStorage.removeItem('refresh_token');'
+    localStorage.removeItem('auth_token");
+    localStorage.removeItem('refresh_token");
     // 如果不是登录页面，重定向到登录
-    if (!window.location.pathname.includes('/login')) {'
+    if (!window.location.pathname.includes('/login')) {
       // 保存当前页面用于登录后跳转
-      localStorage.setItem('redirect_after_login', window.location.pathname);'
+      localStorage.setItem('redirect_after_login', window.location.pathname);
       // 延迟跳转，让用户看到错误消息
       setTimeout(() => {
-        window.location.href = '/login';
+        window.location.href = '/login'
       }, 2000);
     }
   }
@@ -307,7 +307,7 @@ class ApiErrorInterceptor {
    */
   private handleForbidden(error: AxiosError): void {
     // 记录权限问题，可能需要联系管理员
-    console.warn('Access forbidden: ', {'
+    console.warn('Access forbidden: ', {
       url: error.config?.url,
       user: this.getCurrentUser(),
       timestamp: new Date().toISOString()
@@ -319,7 +319,7 @@ class ApiErrorInterceptor {
    */
   private handleRateLimit(error: AxiosError): void {
     // 从响应头获取重试时间
-    const retryAfter = error.response?.headers['retry-after'];'
+    const retryAfter = error.response?.headers['retry-after"];
     const waitTime = retryAfter ? parseInt(retryAfter) * 1000 : 60000;
 
     // 实施退避策略
@@ -352,7 +352,7 @@ class ApiErrorInterceptor {
    * 生成请求ID
    */
   private generateRequestId(): string {
-    return `req_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;`
+    return `req_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   /**
@@ -360,7 +360,7 @@ class ApiErrorInterceptor {
    */
   private getCurrentUser(): any {
     try {
-      const userStr = localStorage.getItem("current_user');'`
+      const userStr = localStorage.getItem("current_user");`
       return userStr ? JSON.parse(userStr) : null;
     } catch {
       return null;
@@ -399,7 +399,7 @@ export const apiErrorInterceptor = new ApiErrorInterceptor();
 export const handleApiError = (error: AxiosError, context?: Record<string, any>) => {
   return errorService.handleError(error, {
     ...context,
-    phase: 'manual','
+    phase: 'manual',
     url: error.config?.url,
     method: error.config?.method,
     status: error.response?.status

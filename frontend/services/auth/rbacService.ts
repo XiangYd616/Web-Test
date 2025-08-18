@@ -9,9 +9,9 @@ export interface Permission     {
   id: string;
   name: string;
   description: string;
-  resource: string; // 资源类型，如 'user', 'test', 'system';
-  action: string; // 操作类型，如 'read', 'write', 'delete', 'execute';
-  scope?: string; // 作用域，如 'own', 'team', 'all';
+  resource: string; // 资源类型，如 'user', 'test', 'system'
+  action: string; // 操作类型，如 'read', 'write', 'delete', 'execute'
+  scope?: string; // 作用域，如 'own', 'team', 'all'
   conditions?: PermissionCondition[]; // 权限条件
   isSystem: boolean; // 是否为系统权限
   category: string; // 权限分类
@@ -20,8 +20,8 @@ export interface Permission     {
 }
 
 export interface PermissionCondition     {
-  type: 'time' | 'location' | 'device' | 'custom';
-  operator: 'equals' | 'not_equals' | 'in' | 'not_in' | 'greater_than' | 'less_than';
+  type: 'time' | 'location' | 'device' | 'custom'
+  operator: 'equals' | 'not_equals' | 'in' | 'not_in' | 'greater_than' | 'less_than'
   value: any;
   description: string;
 }
@@ -188,10 +188,10 @@ export class RBACService {
   /**
    * 创建权限
    */
-  async createPermission(permission: Omit<Permission, 'id' | 'createdAt' | 'updatedAt'>): Promise<Permission> {'
+  async createPermission(permission: Omit<Permission, 'id' | 'createdAt' | 'updatedAt'>): Promise<Permission> {
     const newPermission: Permission  = {
       ...permission,
-      id: this.generateId('perm'),'
+      id: this.generateId('perm'),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -248,7 +248,7 @@ export class RBACService {
   async createRole(role: Omit<Role, "id' | 'createdAt' | 'updatedAt'>): Promise<Role> {'`
     const newRole: Role  = {
       ...role,
-      id: this.generateId('role'),'
+      id: this.generateId('role'),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -484,7 +484,7 @@ export class RBACService {
         if (!check.context || !PermissionCalculator.checkConditions(permission.conditions, check.context)) {
             return {
               granted: false,
-              reason: '不满足权限条件','
+              reason: '不满足权限条件',
               matchedPermissions: [permission],
               conditions: permission.conditions
       };
@@ -499,14 +499,14 @@ export class RBACService {
       
         return {
         granted: true,
-        reason: '权限检查通过','
+        reason: '权限检查通过',
         matchedPermissions
       };
     }
 
     return {
       granted: false,
-      reason: '没有匹配的权限','
+      reason: '没有匹配的权限',
       matchedPermissions: []
     };
   }
@@ -610,23 +610,23 @@ export class RBACService {
   private initializeDefaultPermissions(): void {
     const defaultPermissions: Omit<Permission, "id' | 'createdAt' | 'updatedAt'>[]  = ['']`
       // 用户管理权限
-      { name: '查看用户', description: '查看用户信息', resource: 'user', action: 'read', scope: 'all', isSystem: true, category: 'user_management' },'
-      { name: '创建用户', description: '创建新用户', resource: 'user', action: 'create', scope: 'all', isSystem: true, category: 'user_management' },'
-      { name: '编辑用户', description: '编辑用户信息', resource: 'user', action: 'update', scope: 'all', isSystem: true, category: 'user_management' },'
-      { name: '删除用户', description: '删除用户', resource: 'user', action: 'delete', scope: 'all', isSystem: true, category: 'user_management' },'
+      { name: '查看用户', description: '查看用户信息', resource: 'user', action: 'read', scope: 'all', isSystem: true, category: 'user_management' },
+      { name: '创建用户', description: '创建新用户', resource: 'user', action: 'create', scope: 'all', isSystem: true, category: 'user_management' },
+      { name: '编辑用户', description: '编辑用户信息', resource: 'user', action: 'update', scope: 'all', isSystem: true, category: 'user_management' },
+      { name: '删除用户', description: '删除用户', resource: 'user', action: 'delete', scope: 'all', isSystem: true, category: 'user_management' },
       // 测试管理权限
-      { name: '运行测试', description: '运行各种测试', resource: 'test', action: 'execute', scope: 'own', isSystem: true, category: 'testing' },'
-      { name: '查看测试结果', description: '查看测试结果', resource: 'test', action: 'read', scope: 'own', isSystem: true, category: 'testing' },'
-      { name: '管理测试', description: '管理所有测试', resource: 'test', action: 'manage', scope: 'all', isSystem: true, category: 'testing' },'
+      { name: '运行测试', description: '运行各种测试', resource: 'test', action: 'execute', scope: 'own', isSystem: true, category: 'testing' },
+      { name: '查看测试结果', description: '查看测试结果', resource: 'test', action: 'read', scope: 'own', isSystem: true, category: 'testing' },
+      { name: '管理测试', description: '管理所有测试', resource: 'test', action: 'manage', scope: 'all', isSystem: true, category: 'testing' },
       // 系统管理权限
-      { name: '系统配置', description: '修改系统配置', resource: 'system', action: 'configure', scope: 'all', isSystem: true, category: 'system' },'
-      { name: '查看日志', description: '查看系统日志', resource: 'system', action: 'read_logs', scope: 'all', isSystem: true, category: 'system' },'
-      { name: '系统监控', description: '监控系统状态', resource: 'system', action: 'monitor', scope: 'all', isSystem: true, category: 'system' }'
+      { name: '系统配置', description: '修改系统配置', resource: 'system', action: 'configure', scope: 'all', isSystem: true, category: 'system' },
+      { name: '查看日志', description: '查看系统日志', resource: 'system', action: 'read_logs', scope: 'all', isSystem: true, category: 'system' },
+      { name: '系统监控', description: '监控系统状态', resource: 'system', action: 'monitor', scope: 'all', isSystem: true, category: 'system' }
     ];
     defaultPermissions.forEach(perm => {
       const permission: Permission  = {
         ...perm,
-        id: this.generateId('perm'),'
+        id: this.generateId('perm'),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
@@ -642,54 +642,54 @@ export class RBACService {
 
     const defaultRoles: Omit<Role, 'id' | 'createdAt' | 'updatedAt'>[]  = ['']
       {
-        name: 'admin','
-        description: '系统管理员','
+        name: 'admin',
+        description: '系统管理员',
         permissions: allPermissions,
         isSystem: true,
         isActive: true,
         priority: 100
       },
       {
-        name: 'manager','
-        description: '管理员','
+        name: 'manager',
+        description: '管理员',
         permissions: allPermissions.filter(id => {
           const perm = this.permissions.get(id);
-          return perm && perm.category !== 'system';
+          return perm && perm.category !== 'system'
         }),
         isSystem: true,
         isActive: true,
         priority: 80
       },
       {
-        name: 'user','
-        description: '普通用户','
+        name: 'user',
+        description: '普通用户',
         permissions: allPermissions.filter(id => {
           const perm = this.permissions.get(id);
-          return perm && (perm.action === 'read' || perm.action === 'execute') && perm.scope === 'own';
+          return perm && (perm.action === 'read' || perm.action === 'execute') && perm.scope === 'own'
         }),
         isSystem: true,
         isActive: true,
         priority: 50
       },
       {
-        name: 'viewer','
-        description: '只读用户','
+        name: 'viewer',
+        description: '只读用户',
         permissions: allPermissions.filter(id => {
           const perm = this.permissions.get(id);
-          return perm && perm.action === 'read';
+          return perm && perm.action === 'read'
         }),
         isSystem: true,
         isActive: true,
         priority: 30
       },
       {
-        name: 'tester','
-        description: '测试员','
+        name: 'tester',
+        description: '测试员',
         permissions: allPermissions.filter(id => {
           const perm = this.permissions.get(id);
-          return perm && perm.category === 'testing';
+          return perm && perm.category === 'testing'
         }),
-        inheritFrom: ['user'],'
+        inheritFrom: ['user'],
         isSystem: true,
         isActive: true,
         priority: 60
@@ -699,7 +699,7 @@ export class RBACService {
     defaultRoles.forEach(role => {
       const newRole: Role  = {
         ...role,
-        id: this.generateId('role'),'
+        id: this.generateId('role'),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
@@ -711,7 +711,7 @@ export class RBACService {
   // ==================== 工具方法 ====================
 
   private generateId(prefix: string): string {
-    return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;`
+    return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
 
   private async cachePermission(permission: Permission): Promise<void> {
@@ -742,7 +742,7 @@ export function useRBAC() {
       const result = await rbacService.checkPermission(userId, check);
       return result;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "权限检查失败';'`
+      const errorMessage = err instanceof Error ? err.message : "权限检查失败";`
       setError(errorMessage);
       throw err;
     } finally {
@@ -754,7 +754,7 @@ export function useRBAC() {
     try {
       return await rbacService.hasRole(userId, roleId);
     } catch (err) {
-      console.error('角色检查失败:', err);'
+      console.error('角色检查失败:', err);
       return false;
     }
   }, [rbacService]);
@@ -767,7 +767,7 @@ export function useRBAC() {
       const result = await rbacService.getUserPermissions(userId);
       return result;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '获取用户权限失败';
+      const errorMessage = err instanceof Error ? err.message : '获取用户权限失败'
       setError(errorMessage);
       throw err;
     } finally {

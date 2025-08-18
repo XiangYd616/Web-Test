@@ -40,7 +40,7 @@ export interface ResourceThresholds     {
   };
 }
 
-export type ResourceStatus   = 'healthy' | 'warning' | 'critical' | 'overloaded';class SystemResourceMonitor {'
+export type ResourceStatus   = 'healthy' | 'warning' | 'critical' | 'overloaded';class SystemResourceMonitor {
   private async retryRequest(fn: () => Promise<any>, maxRetries: number = 3): Promise<any> {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
@@ -110,7 +110,7 @@ export type ResourceStatus   = 'healthy' | 'warning' | 'critical' | 'overloaded'
       clearInterval(this.monitoringInterval);
       this.monitoringInterval = null;
     }
-    // console.log('⏹️ 系统资源监控已停止'); // 静默停止'
+    // console.log('⏹️ 系统资源监控已停止'); // 静默停止
   }
 
   /**
@@ -129,12 +129,12 @@ export type ResourceStatus   = 'healthy' | 'warning' | 'critical' | 'overloaded'
         try {
           listener(resources, status);
         } catch (error) {
-          console.error('资源监控监听器错误:', error);'
+          console.error('资源监控监听器错误:', error);
         }
       });
 
     } catch (error) {
-      console.error('更新系统资源信息失败:', error);'
+      console.error('更新系统资源信息失败:', error);
     }
   }
 
@@ -143,7 +143,7 @@ export type ResourceStatus   = 'healthy' | 'warning' | 'critical' | 'overloaded'
    */
   private async fetchResourcesFromAPI(): Promise<SystemResources> {
     try {
-      const response = await fetch('/api/system/resources', {'
+      const response = await fetch('/api/system/resources', {
         headers: {
           "Authorization": `Bearer ${localStorage.getItem('auth_token')}`'`
         }
@@ -210,7 +210,7 @@ export type ResourceStatus   = 'healthy' | 'warning' | 'critical' | 'overloaded'
       network.activeConnections >= this.thresholds.network.maxConnections
     ) {
       
-        return 'critical';
+        return 'critical
       }
 
     // 检查警告状态
@@ -220,10 +220,10 @@ export type ResourceStatus   = 'healthy' | 'warning' | 'critical' | 'overloaded'
       network.activeConnections >= this.thresholds.network.maxConnections * 0.8
     ) {
       
-        return 'warning';
+        return 'warning
       }
 
-    return 'healthy';
+    return 'healthy
   }
 
   /**
@@ -237,23 +237,23 @@ export type ResourceStatus   = 'healthy' | 'warning' | 'critical' | 'overloaded'
    * 获取资源状态
    */
   getCurrentStatus(): ResourceStatus {
-    if (!this.resources) return 'healthy';
+    if (!this.resources) return 'healthy
     return this.evaluateResourceStatus(this.resources);
   }
 
   /**
    * 检查是否可以启动新的压力测试
    */
-  canStartNewTest(testType?: 'stress' | 'regular'): boolean {'
+  canStartNewTest(testType?: 'stress' | 'regular'): boolean {
     const status = this.getCurrentStatus();
 
     // 压力测试更宽松的资源检查
-    if (testType === 'stress') {'
-        return status !== 'critical'; // 只要不是严重状态就可以启动'
+    if (testType === 'stress') {
+        return status !== 'critical'; // 只要不是严重状态就可以启动
       }
 
     // 普通测试的原有逻辑
-    return status === 'healthy' || status === 'warning';
+    return status === 'healthy' || status === 'warning'
   }
 
   /**
@@ -316,8 +316,8 @@ export type ResourceStatus   = 'healthy' | 'warning' | 'critical' | 'overloaded'
     if (!resources) {
       
         return {
-        status: 'healthy','
-        recommendations: ['系统资源监控未启动'],'
+        status: 'healthy',
+        recommendations: ['系统资源监控未启动'],
         metrics: { cpuUsage: 0, memoryUsage: 0, networkLoad: 0, diskUsage: 0
       }
       };
@@ -361,18 +361,18 @@ export const systemResourceMonitor = (() => {
 
     return instance;
   } catch (error) {
-    console.warn('⚠️ 系统资源监控器初始化失败:', error);'
+    console.warn('⚠️ 系统资源监控器初始化失败:', error);
     // 返回一个安全的默认实现
     return {
-      getCurrentStatus: () => 'healthy' as const,'
-      canStartNewTest: (testType?: 'stress' | 'regular') => true, // 默认实现总是允许'
+      getCurrentStatus: () => 'healthy' as const,
+      canStartNewTest: (testType?: 'stress' | 'regular') => true, // 默认实现总是允许
       getRecommendedMaxConcurrentTests: () => 3,
       getCurrentResources: (): any => null,
       addListener: () => ()  => { },
       startMonitoring: () => { },
       stopMonitoring: () => { },
       getResourceStats: () => ({
-        status: 'healthy' as const,'
+        status: 'healthy' as const,
         recommendations: [] as any[],
         metrics: { cpuUsage: 0, memoryUsage: 0, networkLoad: 0, diskUsage: 0 }
       })

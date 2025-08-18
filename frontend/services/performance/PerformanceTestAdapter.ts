@@ -3,7 +3,7 @@ import { PERFORMANCE_CONFIG_PRESETS, PerformanceTestProgress, PerformanceTestRes
 // 兼容旧的性能测试配置接口
 export interface LegacyPerformanceTestConfig     {
   url: string;
-  mode: 'basic' | 'standard' | 'comprehensive' | 'lighthouse';
+  mode: 'basic' | 'standard' | 'comprehensive' | 'lighthouse'
   checkPageSpeed: boolean;
   checkCoreWebVitals: boolean;
   checkResourceOptimization: boolean;
@@ -14,7 +14,7 @@ export interface LegacyPerformanceTestConfig     {
   checkCSSOptimization: boolean;
   checkMobilePerformance: boolean;
   checkAccessibility: boolean;
-  device: 'desktop' | 'mobile' | 'both';
+  device: 'desktop' | 'mobile' | 'both'
 }
 
 // 兼容旧的测试进度接口
@@ -37,9 +37,9 @@ export class PerformanceTestAdapter {
   };
 
   if(success) {
-    console.log('API调用成功:', logData);'
+    console.log('API调用成功:', logData);
   } else {
-    console.error('API调用失败:', logData);'
+    console.error('API调用失败:', logData);
   }
 }
   private async retryRequest(fn: () => Promise<any>, maxRetries: number = 3): Promise<any> {
@@ -105,21 +105,21 @@ export class PerformanceTestAdapter {
   static async runWebsitePerformanceTest(
     url: string,
     options: {
-      device?: "desktop' | 'mobile' | 'both';'`
-      level?: 'basic' | 'standard' | 'comprehensive';
+      device?: "desktop' | 'mobile' | 'both";`
+      level?: 'basic' | 'standard' | 'comprehensive'
       includeAccessibility?: boolean;
     } = {}
   ): Promise<any> {
     const config: Partial<PerformanceConfig>  = {
-      level: options.level || 'standard','
-      device: options.device || 'desktop','
+      level: options.level || 'standard',
+      device: options.device || 'desktop',
       pageSpeed: true,
       coreWebVitals: true,
       resourceOptimization: true,
       caching: true,
       compression: true,
       imageOptimization: true,
-      mobilePerformance: options.device !== 'desktop';
+      mobilePerformance: options.device !== 'desktop'
     };
     const result = await performanceTestCore.runPerformanceTest(url, config);
 
@@ -155,13 +155,13 @@ export class PerformanceTestAdapter {
   static async runSEOPerformanceTest(
     url: string,
     options: {
-      device?: 'desktop' | 'mobile' | 'both';
+      device?: 'desktop' | 'mobile' | 'both'
       checkMobile?: boolean;
     } = {}
   ): Promise<any> {
     const config: Partial<PerformanceConfig>  = {
-      level: 'basic', // SEO测试使用基础性能检测'
-      device: options.device || 'desktop','
+      level: 'basic', // SEO测试使用基础性能检测
+      device: options.device || 'desktop',
       pageSpeed: true,
       coreWebVitals: true,
       resourceOptimization: false, // SEO测试不需要详细的资源分析
@@ -184,9 +184,9 @@ export class PerformanceTestAdapter {
         mobileScore: result.mobilePerformance?.score || null
       },
       issues: result.issues.filter(issue =>
-        issue.type === 'speed' || issue.type === 'size';
+        issue.type === 'speed' || issue.type === 'size'
       ).map(issue => ({
-        type: 'performance','
+        type: 'performance',
         severity: issue.severity,
         description: issue.description,
         recommendation: issue.solution
@@ -205,8 +205,8 @@ export class PerformanceTestAdapter {
     } = {}
   ): Promise<any> {
     const config: Partial<PerformanceConfig>  = {
-      level: 'basic','
-      device: 'desktop','
+      level: 'basic',
+      device: 'desktop',
       pageSpeed: true,
       coreWebVitals: false, // API测试不需要Core Web Vitals
       resourceOptimization: false,
@@ -226,9 +226,9 @@ export class PerformanceTestAdapter {
       ttfb: result.pageSpeed?.ttfb || 0,
       score: result.overallScore,
       issues: result.issues.filter(issue =>
-        issue.type === 'speed';
+        issue.type === 'speed'
       ).map(issue => ({
-        type: 'slow_response','
+        type: 'slow_response',
         severity: issue.severity,
         description: issue.description
       }))
@@ -242,7 +242,7 @@ export class PerformanceTestAdapter {
    */
   private static convertLegacyConfig(legacy: LegacyPerformanceTestConfig): Partial<PerformanceConfig> {
     return {
-      level: legacy.mode === 'lighthouse' ? 'comprehensive' : legacy.mode,'
+      level: legacy.mode === 'lighthouse' ? 'comprehensive' : legacy.mode,
       pageSpeed: legacy.checkPageSpeed,
       coreWebVitals: legacy.checkCoreWebVitals,
       resourceOptimization: legacy.checkResourceOptimization,
@@ -303,7 +303,7 @@ export class PerformanceTestAdapter {
 
 export async function quickPerformanceTest(
   url: string,
-  level: 'basic' | 'standard' | 'comprehensive' = 'standard';
+  level: 'basic' | 'standard' | 'comprehensive' = 'standard'
 ): Promise<any> {
   const config = PERFORMANCE_CONFIG_PRESETS[level];
   const result = await performanceTestCore.runPerformanceTest(url, config);
@@ -315,7 +315,7 @@ export async function getPerformanceMetrics(
   options: {
     includeVitals?: boolean;
     includeMobile?: boolean;
-    device?: 'desktop' | 'mobile' | 'both';
+    device?: 'desktop' | 'mobile' | 'both'
   } = {}
 ): Promise<{
   loadTime: number;
@@ -326,11 +326,11 @@ export async function getPerformanceMetrics(
   mobile?: any;
 }> {
   const config: Partial<PerformanceConfig>  = {
-    level: 'basic','
+    level: 'basic',
     pageSpeed: true,
     coreWebVitals: options.includeVitals || false,
     mobilePerformance: options.includeMobile || false,
-    device: options.device || 'desktop','
+    device: options.device || 'desktop',
     resourceOptimization: false,
     caching: false,
     compression: false,

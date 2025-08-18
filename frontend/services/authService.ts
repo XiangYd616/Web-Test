@@ -3,7 +3,7 @@
  * 处理用户登录、注册、登出等认证相关功能
  */
 
-import { createSuccessResponse, createErrorResponse    } from '../../shared/utils/apiResponseBuilder';export interface LoginCredentials     {'
+import { createSuccessResponse, createErrorResponse    } from '../../shared/utils/apiResponseBuilder';export interface LoginCredentials     {
   username: string;
   password: string;
 }
@@ -51,7 +51,7 @@ class AuthService {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError';
+    const errorType = error.name || 'UnknownError'
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -63,7 +63,7 @@ class AuthService {
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics: ', {'
+    console.debug('API Metrics: ', {
       url: info.url,
       method: info.method,
       status: info.status,
@@ -81,7 +81,7 @@ class AuthService {
     };
   }
   private async retryRequest(fn: () => Promise<any>, maxRetries: number = 3): Promise<any> {
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {>
       try {
         return await fn();
       } catch (error) {
@@ -94,7 +94,7 @@ class AuthService {
   }
 }
   }
-  private baseUrl = "/api/auth';'`
+  private baseUrl = "/api/auth";``
   private token: string | null = null;
 
   /**
@@ -103,9 +103,9 @@ class AuthService {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
       const response = await fetch(`${this.baseUrl}/login`, {`
-        method: "POST','`
+        method: "POST','`"`
         headers: {
-          'Content-Type': 'application/json','
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(credentials),
       });
@@ -113,16 +113,16 @@ class AuthService {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error?.message || '登录失败');'
+        throw new Error(result.error?.message || '登录失败");"
       }
 
       // 保存token
       this.token = result.data.token;
-      localStorage.setItem('auth_token', this.token);'
-      localStorage.setItem('user', JSON.stringify(result.data.user));'
+      localStorage.setItem('auth_token', this.token);
+      localStorage.setItem('user', JSON.stringify(result.data.user));
       return result.data;
     } catch (error) {
-      console.error('登录错误:', error);'
+      console.error('登录错误:', error);
       throw error;
     }
   }
@@ -133,9 +133,9 @@ class AuthService {
   async register(userData: RegisterData): Promise<{ user: User; message: string }> {
     try {
       const response = await fetch(`${this.baseUrl}/register`, {`
-        method: "POST','`
+        method: "POST','`"`
         headers: {
-          'Content-Type': 'application/json','
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(userData),
       });
@@ -143,12 +143,12 @@ class AuthService {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error?.message || '注册失败');'
+        throw new Error(result.error?.message || '注册失败");"
       }
 
       return result.data;
     } catch (error) {
-      console.error("注册错误:', error);'
+      console.error("注册错误:', error);"
       throw error;
     }
   }
@@ -159,18 +159,18 @@ class AuthService {
   async logout(): Promise<void> {
     try {
       await fetch(`${this.baseUrl}/logout`, {`
-        method: "POST','`
+        method: "POST','`"`
         headers: {
           'Authorization': `Bearer ${this.token}`,'`
         },
       });
     } catch (error) {
-      console.error("登出错误:', error);'`
+      console.error("登出错误:', error);'`"`
     } finally {
       // 清除本地存储
       this.token = null;
-      localStorage.removeItem('auth_token');'
-      localStorage.removeItem('user');'
+      localStorage.removeItem('auth_token");"
+      localStorage.removeItem('user");"
     }
   }
 
@@ -181,18 +181,18 @@ class AuthService {
     try {
       const response = await fetch(`${this.baseUrl}/me`, {`
         headers: {
-          "Authorization': `Bearer ${this.token}`,'`
+          "Authorization': `Bearer ${this.token}`,'`"
         },
       });
 
       if (!response.ok) {
-        throw new Error("获取用户信息失败');'`
+        throw new Error("获取用户信息失败");``
       }
 
       const result = await response.json();
       return result.data.user;
     } catch (error) {
-      console.error('获取用户信息错误:', error);'
+      console.error('获取用户信息错误:', error);
       return null;
     }
   }
@@ -209,7 +209,7 @@ class AuthService {
    */
   getToken(): string | null {
     if (!this.token) {
-      this.token = localStorage.getItem('auth_token');'
+      this.token = localStorage.getItem('auth_token");"
     }
     return this.token;
   }
@@ -219,7 +219,7 @@ class AuthService {
    */
   getUser(): User | null {
     try {
-      const userStr = localStorage.getItem('user');'
+      const userStr = localStorage.getItem('user");"
       return userStr ? JSON.parse(userStr) : null;
     } catch {
       return null;

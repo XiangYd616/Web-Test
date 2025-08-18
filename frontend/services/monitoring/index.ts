@@ -5,7 +5,7 @@ export interface MonitoringSite     {
     name: string;
     url: string;
     region: string;
-    status: 'online' | 'offline' | 'warning' | 'unknown';
+    status: 'online' | 'offline' | 'warning' | 'unknown'
     lastCheck: string;
     responseTime: number;
     uptime: number;
@@ -18,7 +18,7 @@ export interface MonitoringSite     {
 export interface MonitoringData     {
     timestamp: string;
     siteId: string;
-    status: 'online' | 'offline' | 'warning';
+    status: 'online' | 'offline' | 'warning'
     responseTime: number;
     statusCode: number;
     errorMessage?: string;
@@ -46,8 +46,8 @@ export interface MonitoringStats     {
 export interface AlertConfig     {
     id: string;
     siteId: string;
-    type: 'uptime' | 'response_time' | 'status_code' | 'ssl_expiry';
-    condition: 'greater_than' | 'less_than' | 'equals' | 'not_equals';
+    type: 'uptime' | 'response_time' | 'status_code' | 'ssl_expiry'
+    condition: 'greater_than' | 'less_than' | 'equals' | 'not_equals'
     threshold: number;
     enabled: boolean;
     notifications: {
@@ -62,22 +62,22 @@ export interface AlertConfig     {
 export interface MonitoringIncident     {
     id: string;
     siteId: string;
-    type: 'downtime' | 'slow_response' | 'error' | 'ssl_issue';
-    severity: 'critical' | 'high' | 'medium' | 'low';
+    type: 'downtime' | 'slow_response' | 'error' | 'ssl_issue'
+    severity: 'critical' | 'high' | 'medium' | 'low'
     title: string;
     description: string;
     startTime: string;
     endTime?: string;
     duration?: number;
-    status: 'open' | 'investigating' | 'resolved';
+    status: 'open' | 'investigating' | 'resolved'
     affectedChecks: number;
     rootCause?: string;
     resolution?: string;
 }
 
 // 统一服务导出
-// export { default as monitoring } from './monitoring'; // 已修复'
+// export { default as monitoring } from './monitoring'; // 已修复
 // 兼容性导出（逐步迁移）
-// export { monitoringService } from './monitoringService'; // 已修复'
+// export { monitoringService } from './monitoringService'; // 已修复
 // 类型已在上面定义并自动导出，无需重复导出
 

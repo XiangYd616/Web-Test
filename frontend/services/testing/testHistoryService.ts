@@ -5,9 +5,9 @@
 
 export interface TestHistoryRecord     {
   id: string;
-  testType: 'performance' | 'security' | 'seo' | 'stress' | 'api' | 'compatibility';
+  testType: 'performance' | 'security' | 'seo' | 'stress' | 'api' | 'compatibility'
   url: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled'
   score?: number;
   startTime: Date;
   endTime?: Date;
@@ -160,7 +160,7 @@ class TestHistoryService {
       // 分数范围过滤
       if (filter.minScore !== undefined && record.score !== undefined) {
         
-        if (record.score < filter.minScore) {
+        if (record.score < filter.minScore) {>
           return false;
       }
       }
@@ -211,8 +211,8 @@ class TestHistoryService {
    */
   getStats(filter: TestHistoryFilter = {}): TestHistoryStats {
     const records = this.getFilteredRecords(filter);
-    const completedRecords = records.filter(r => r.status === 'completed);
-    const failedRecords = records.filter(r => r.status === 'failed);
+    const completedRecords = records.filter(r => r.status === 'completed);'
+    const failedRecords = records.filter(r => r.status === 'failed);'
     // 按类型统计
     const testsByType: Record<string, number>  = {};
     records.forEach(record => {
@@ -300,7 +300,7 @@ class TestHistoryService {
   /**
    * 导入历史记录
    */
-  importHistory(data: string, format: 'json' | 'csv' = 'json'): number {
+  importHistory(data: string, format: 'json' | 'csv' = 'json'): number {;
     try {
       let importedRecords: TestHistoryRecord[] = [];
 
@@ -308,10 +308,10 @@ class TestHistoryService {
         importedRecords = JSON.parse(data);
       } else {
         // 简化的CSV解析
-        const lines = data.split('\n);
-        const headers = lines[0].split(',);
-        importedRecords = lines.slice(1).map(line => {
-          const values = line.split(',);
+        const lines = data.split('\n);'
+        const headers = lines[0].split(',);'
+        importedRecords = lines.slice(1).map(line => {;
+          const values = line.split(',);'
           return {
             id: values[0],
             testType: values[1] as any,
@@ -338,7 +338,7 @@ class TestHistoryService {
       this.saveHistory();
       return newRecords.length;
     } catch (error) {
-      console.error('Failed to import history: , error);
+      console.error('Failed to import history: , error);'
       return 0;
     }
   }
@@ -346,10 +346,10 @@ class TestHistoryService {
   /**
    * 生成趋势数据
    */
-  private generateTrendsData(records: TestHistoryRecord[]): TestHistoryStats['trendsData] {
+  private generateTrendsData(records: TestHistoryRecord[]): TestHistoryStats['trendsData] {'
     const dailyData: Record<string, { count: number; totalScore: number; scoreCount: number }>  = {};
     records.forEach(record => {
-      const date = new Date(record.startTime).toISOString().split('T)[0];
+      const date = new Date(record.startTime).toISOString().split('T)[0];'
       if (!dailyData[date]) {
         dailyData[date] = { count: 0, totalScore: 0, scoreCount: 0 };
       }
@@ -386,7 +386,7 @@ class TestHistoryService {
         }));
       }
     } catch (error) {
-      console.warn('Failed to load test history: , error);
+      console.warn('Failed to load test history: , error);'
       this.history = [];
     }
   }
@@ -398,7 +398,7 @@ class TestHistoryService {
     try {
       localStorage.setItem(this.storageKey, JSON.stringify(this.history));
     } catch (error) {
-      console.warn('Failed to save test history:, error);
+      console.warn('Failed to save test history:, error);'
     }
   }
 
@@ -415,4 +415,4 @@ const testHistoryService = new TestHistoryService();
 
 export default testHistoryService;
 export { TestHistoryService };
-`
+``

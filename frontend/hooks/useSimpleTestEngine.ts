@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useRef, useState    } from 'react';import backgroundTestManager from '../services/testing/backgroundTestManager.ts';import { testAPI    } from '../services/testing/testService';export interface StressTestConfig     {'
+import { useCallback, useEffect, useRef, useState    } from 'react';import backgroundTestManager from '../services/testing/backgroundTestManager.ts';import { testAPI    } from '../services/testing/testService';export interface StressTestConfig     {
   url: string;
   users: number;
   duration: number;
   rampUp: number;
-  testType: 'gradual' | 'spike' | 'constant' | 'stress' | 'load' | 'volume';
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  testType: 'gradual' | 'spike' | 'constant' | 'stress' | 'load' | 'volume'
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
   timeout: number;
   thinkTime: number;
   warmupDuration: number;
@@ -12,12 +12,12 @@ import { useCallback, useEffect, useRef, useState    } from 'react';import backg
   headers?: Record<string, string>;
   body?: string;
   authentication?: {
-    type: 'basic' | 'bearer' | 'api-key';
+    type: 'basic' | 'bearer' | 'api-key'
     credentials: Record<string, string>;
   };
   proxy?: {
     enabled: boolean;
-    type?: 'http' | 'https' | 'socks5';
+    type?: 'http' | 'https' | 'socks5'
     host?: string;
     port?: number;
     username?: string;
@@ -26,7 +26,7 @@ import { useCallback, useEffect, useRef, useState    } from 'react';import backg
   scenarios?: TestScenario[];
   thresholds?: TestThresholds;
   regions?: string[];
-  protocols?: ('http1' | 'http2' | 'http3')[];'
+  protocols?: ('http1' | 'http2' | 'http3')[];
 }
 
 export interface TestScenario     {
@@ -67,7 +67,7 @@ export interface DetailedTestProgress     {
   throughput: number;
   timeoutCount: number;
   progress: number;
-  currentPhase: 'warmup' | 'rampup' | 'steady' | 'cooldown' | 'completed';
+  currentPhase: 'warmup' | 'rampup' | 'steady' | 'cooldown' | 'completed'
   phaseProgress: number;
   bytesReceived: number;
   bytesSent: number;
@@ -130,28 +130,28 @@ export const useAdvancedTestEngine = () => {
 
   // 检测增强的浏览器能力
   const browserCapabilities: BrowserCapabilities  = {
-    fetch: typeof fetch !== 'undefined','
-    webWorkers: typeof Worker !== 'undefined','
-    serviceWorker: 'serviceWorker' in navigator,'
-    webAssembly: typeof WebAssembly !== 'undefined','
-    webRTC: 'RTCPeerConnection' in window,'
+    fetch: typeof fetch !== 'undefined',
+    webWorkers: typeof Worker !== 'undefined',
+    serviceWorker: 'serviceWorker' in navigator,
+    webAssembly: typeof WebAssembly !== 'undefined',
+    webRTC: 'RTCPeerConnection' in window,
     webGL: (() => {
       try {
-        const canvas = document.createElement('canvas');'
-        return !!(canvas.getContext('webgl') || canvas.getContext('experimental-webgl'));'
+        const canvas = document.createElement('canvas");
+        return !!(canvas.getContext('webgl') || canvas.getContext('experimental-webgl'));
       } catch (e) {
         return false;
       }
     })(),
-    indexedDB: 'indexedDB' in window,'
-    localStorage: 'localStorage' in window,'
-    sessionStorage: 'sessionStorage' in window,'
-    geolocation: 'geolocation' in navigator,'
-    notifications: 'Notification' in window,'
-    camera: 'mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices,'
-    microphone: 'mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices,'
-    bluetooth: 'bluetooth' in navigator,'
-    nfc: 'nfc' in navigator'
+    indexedDB: 'indexedDB' in window,
+    localStorage: 'localStorage' in window,
+    sessionStorage: 'sessionStorage' in window,
+    geolocation: 'geolocation' in navigator,
+    notifications: 'Notification' in window,
+    camera: 'mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices,
+    microphone: 'mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices,
+    bluetooth: 'bluetooth' in navigator,
+    nfc: 'nfc' in navigator
   };
 
   // 初始化引擎状态检查
@@ -161,7 +161,7 @@ export const useAdvancedTestEngine = () => {
         const response = await testAPI.checkEngineStatus();
         setEngineStatus(response.data);
       } catch (error) {
-        console.error('Failed to check engine status: ', error);'
+        console.error('Failed to check engine status: ', error);
         setEngineStatus({
           k6: false,
           lighthouse: false,
@@ -207,7 +207,7 @@ export const useAdvancedTestEngine = () => {
             throughput: metrics.throughput || 0,
             timeoutCount: metrics.timeoutCount || 0,
             progress: metrics.progress || 0,
-            currentPhase: metrics.currentPhase || 'steady','
+            currentPhase: metrics.currentPhase || 'steady',
             phaseProgress: metrics.phaseProgress || 0,
             bytesReceived: metrics.bytesReceived || 0,
             bytesSent: metrics.bytesSent || 0,
@@ -229,7 +229,7 @@ export const useAdvancedTestEngine = () => {
           }
         }
       } catch (error) {
-        console.error('Failed to fetch real-time metrics: ', error);'
+        console.error('Failed to fetch real-time metrics: ', error);
       }
     }, 2000); // 每2秒更新一次
   }, []);
@@ -250,11 +250,11 @@ export const useAdvancedTestEngine = () => {
     try {
       // 验证配置
       if (!config.url) {
-        throw new Error('测试URL不能为空');'
+        throw new Error('测试URL不能为空");
       }
 
       // 启动后台测试
-      const testId = backgroundTestManager.startTest('stress','
+      const testId = backgroundTestManager.startTest('stress',
         config,
         // onProgress 回调
         (progress: number, step: string, metrics?: any) => {
@@ -273,7 +273,7 @@ export const useAdvancedTestEngine = () => {
               throughput: metrics.throughput || 0,
               timeoutCount: metrics.timeoutCount || 0,
               progress: progress,
-              currentPhase: metrics.currentPhase || 'steady','
+              currentPhase: metrics.currentPhase || 'steady',
               phaseProgress: metrics.phaseProgress || 0,
               bytesReceived: metrics.bytesReceived || 0,
               bytesSent: metrics.bytesSent || 0,
@@ -299,7 +299,7 @@ export const useAdvancedTestEngine = () => {
         },
         // onError 回调
         (error: any) => {
-          console.error('Advanced stress test failed: ', error);'
+          console.error('Advanced stress test failed: ', error);
           setIsRunning(false);
           stopRealTimeMetrics();
           currentTestId.current = null;
@@ -310,7 +310,7 @@ export const useAdvancedTestEngine = () => {
       startRealTimeMetrics(testId);
 
     } catch (error) {
-      console.error('Failed to start advanced stress test: ', error);'
+      console.error('Failed to start advanced stress test: ', error);
       setIsRunning(false);
     }
   }, [startRealTimeMetrics, stopRealTimeMetrics]);
@@ -337,37 +337,37 @@ export const useAdvancedTestEngine = () => {
       setTestHistory(data);
       return data;
     } catch (error) {
-      console.error('Failed to fetch test history: ', error);'
+      console.error('Failed to fetch test history: ', error);
       return [];
     }
   }, []);
 
-  const exportTestResults = useCallback(async (testId: string, format: 'json' | 'csv' | 'pdf' | 'html') => {'
+  const exportTestResults = useCallback(async (testId: string, format: 'json' | 'csv' | 'pdf' | 'html') => {
     try {
       const response = await testAPI.exportTestResults(testId, format);
       return response.data;
     } catch (error) {
-      console.error('Failed to export test results: ', error);'
+      console.error('Failed to export test results: ', error);
       throw error;
     }
   }, []);
 
   const scheduleTest = useCallback(async (config: StressTestConfig, schedule: any) => {
     try {
-      const response = await (testAPI as any).scheduleTest('stress', config, schedule);'
+      const response = await (testAPI as any).scheduleTest('stress', config, schedule);
       return response.data;
     } catch (error) {
-      console.error('Failed to schedule test: ', error);'
+      console.error('Failed to schedule test: ', error);
       throw error;
     }
   }, []);
 
   const getTestTemplates = useCallback(async () => {
     try {
-      const response = await testAPI.getTestTemplates('stress');'
+      const response = await testAPI.getTestTemplates('stress");
       return Array.isArray(response) ? response : (response as any)?.data || [];
     } catch (error) {
-      console.error('Failed to fetch test templates: ', error);'
+      console.error('Failed to fetch test templates: ', error);
       return [];
     }
   }, []);

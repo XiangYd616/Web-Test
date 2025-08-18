@@ -22,7 +22,7 @@ export interface TestEngineResult     {
 export interface TestIssue     {
   id: string;
   type: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: 'low' | 'medium' | 'high' | 'critical'
   title: string;
   description: string;
   element?: string;
@@ -34,14 +34,14 @@ export interface TestRecommendation     {
   category: string;
   title: string;
   description: string;
-  impact: 'low' | 'medium' | 'high';
-  effort: 'low' | 'medium' | 'high';
+  impact: 'low' | 'medium' | 'high'
+  effort: 'low' | 'medium' | 'high'
   priority: number;
 }
 
 export interface TestEngineOptions     {
   url: string;
-  testType: 'performance' | 'security' | 'seo' | 'stress' | 'api' | 'compatibility';
+  testType: 'performance' | 'security' | 'seo' | 'stress' | 'api' | 'compatibility'
   customSettings?: Record<string, any>;
   timeout?: number;
   retryOnFailure?: boolean;

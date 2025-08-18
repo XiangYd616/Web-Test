@@ -3,7 +3,7 @@
  * 与后端配置中心集成，支持动态配置更新
  */
 
-import { EventEmitter    } from 'events';/**'
+import { EventEmitter    } from 'events';/**
  * 前端配置接口
  */
 export interface FrontendConfig     {
@@ -22,7 +22,7 @@ export interface FrontendConfig     {
     lazyLoading: boolean;
   };
   ui: {
-    theme: 'dark' | 'light' | 'auto';
+    theme: 'dark' | 'light' | 'auto'
     language: string;
     pageSize: number;
     animationsEnabled: boolean;
@@ -43,7 +43,7 @@ export interface FrontendConfig     {
   };
   cache: {
     enableServiceWorker: boolean;
-    cacheStrategy: 'cache-first' | 'network-first' | 'stale-while-revalidate';
+    cacheStrategy: 'cache-first' | 'network-first' | 'stale-while-revalidate'
     maxAge: number;
   };
 }
@@ -55,7 +55,7 @@ export interface ConfigChangeEvent     {
   key: string;
   oldValue: any;
   newValue: any;
-  source: 'local' | 'remote' | 'user';
+  source: 'local' | 'remote' | 'user'
 }
 
 /**
@@ -66,8 +66,8 @@ export class ConfigManager extends EventEmitter {
   private remoteConfig: Partial<FrontendConfig> = {};
   private isInitialized = false;
   private syncInterval: number | null = null;
-  private readonly storageKey = 'enhanced-app-config';
-  private readonly remoteConfigUrl = '/api/config/frontend';
+  private readonly storageKey = 'enhanced-app-config'
+  private readonly remoteConfigUrl = '/api/config/frontend'
   constructor() {
     super();
     this.config = this.getDefaultConfig();
@@ -79,7 +79,7 @@ export class ConfigManager extends EventEmitter {
   private getDefaultConfig(): FrontendConfig {
     return {
       api: {
-        baseUrl: process.env.REACT_APP_API_URL || 'http://localhost:3001','
+        baseUrl: process.env.REACT_APP_API_URL || 'http://localhost:3001',
         timeout: 30000,
         retries: 3,
         retryDelay: 1000
@@ -93,8 +93,8 @@ export class ConfigManager extends EventEmitter {
         lazyLoading: true
       },
       ui: {
-        theme: 'auto','
-        language: 'zh-CN','
+        theme: 'auto',
+        language: 'zh-CN',
         pageSize: 20,
         animationsEnabled: true,
         compactMode: false
@@ -114,7 +114,7 @@ export class ConfigManager extends EventEmitter {
       },
       cache: {
         enableServiceWorker: true,
-        cacheStrategy: 'stale-while-revalidate','
+        cacheStrategy: 'stale-while-revalidate',
         maxAge: 86400000 // 24小时
       }
     }; // 已删除
@@ -143,10 +143,10 @@ export class ConfigManager extends EventEmitter {
       this.setupEnvironmentListeners();
 
       this.isInitialized = true;
-      this.emit('initialized', this.config);'
-      console.log('✅ Enhanced Config Manager initialized');'
+      this.emit('initialized', this.config);
+      console.log('✅ Enhanced Config Manager initialized");"
     } catch (error) {
-      console.error('❌ Failed to initialize Enhanced Config Manager: ', error);'
+      console.error('❌ Failed to initialize Enhanced Config Manager: ', error);
       // 使用默认配置继续运行
       this.isInitialized = true;
     }
@@ -163,7 +163,7 @@ export class ConfigManager extends EventEmitter {
         this.config = this.deepMerge(this.config, localConfig);
       }
     } catch (error) {
-      console.warn('Failed to load local config: ', error);'
+      console.warn('Failed to load local config: ', error);
     }
   }
 
@@ -173,9 +173,9 @@ export class ConfigManager extends EventEmitter {
   private async fetchRemoteConfig(): Promise<void> {
     try {
       const response = await fetch(this.remoteConfigUrl, {
-        method: 'GET','
+        method: 'GET',
         headers: {
-          'Content-Type': 'application/json';
+          'Content-Type': 'application/json'
         }
       });
 
@@ -186,7 +186,7 @@ export class ConfigManager extends EventEmitter {
         }
       }
     } catch (error) {
-      console.warn('Failed to fetch remote config: ', error);'
+      console.warn('Failed to fetch remote config: ', error);
     }
   }
 
@@ -214,11 +214,11 @@ export class ConfigManager extends EventEmitter {
         timeout: parseInt(import.meta.env.VITE_API_TIMEOUT) || this.config.api.timeout
       },
       features: {
-        realTimeUpdates: import.meta.env.VITE_ENABLE_REAL_TIME === 'true','
-        performanceMonitoring: import.meta.env.VITE_ENABLE_PERFORMANCE_MONITORING !== 'false';
+        realTimeUpdates: import.meta.env.VITE_ENABLE_REAL_TIME === 'true',
+        performanceMonitoring: import.meta.env.VITE_ENABLE_PERFORMANCE_MONITORING !== 'false'
       },
       monitoring: {
-        enableErrorTracking: import.meta.env.VITE_ENABLE_ERROR_TRACKING !== 'false','
+        enableErrorTracking: import.meta.env.VITE_ENABLE_ERROR_TRACKING !== 'false',
         sampleRate: parseFloat(import.meta.env.VITE_MONITORING_SAMPLE_RATE) || this.config.monitoring.sampleRate
       }
     };
@@ -248,10 +248,10 @@ export class ConfigManager extends EventEmitter {
         this.mergeConfigs();
 
         // 触发变更事件
-        this.emitConfigChanges(oldConfig, this.config, 'remote');'
+        this.emitConfigChanges(oldConfig, this.config, 'remote");"
       }
     } catch (error) {
-      console.warn('Failed to sync with remote config: ', error);'
+      console.warn('Failed to sync with remote config: ', error);
     }
   }
 
@@ -261,22 +261,22 @@ export class ConfigManager extends EventEmitter {
   private setupEnvironmentListeners(): void {
     // 监听主题变化
     if (window.matchMedia) {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');'
-      mediaQuery.addEventListener('change', (e) => {'
-        if (this.config.ui.theme === 'auto') {'
-          this.emit('themeChanged', e.matches ? 'dark' : 'light');'
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)");"
+      mediaQuery.addEventListener('change', (e) => {
+        if (this.config.ui.theme === 'auto') {
+          this.emit('themeChanged', e.matches ? 'dark' : 'light");"
         }
       });
     }
 
     // 监听网络状态变化
-    window.addEventListener('online', () => {'
-      this.emit('networkStatusChanged', true);'
+    window.addEventListener('online', () => {
+      this.emit('networkStatusChanged', true);
       this.syncWithRemote();
     });
 
-    window.addEventListener('offline', () => {'
-      this.emit('networkStatusChanged', false);'
+    window.addEventListener('offline', () => {
+      this.emit('networkStatusChanged', false);
     });
   }
 
@@ -292,7 +292,7 @@ export class ConfigManager extends EventEmitter {
   /**
    * 设置配置值
    */
-  set(key: string, value: any, source: 'local' | 'user' = 'user'): void {'
+  set(key: string, value: any, source: 'local' | 'user' = 'user'): void {
     const oldValue = this.getNestedValue(this.config, key);
     this.setNestedValue(this.config, key, value);
 
@@ -300,7 +300,7 @@ export class ConfigManager extends EventEmitter {
     this.saveLocalConfig();
 
     // 触发变更事件
-    this.emit('configChanged', {'
+    this.emit('configChanged', {
       key,
       oldValue,
       newValue: value,
@@ -318,7 +318,7 @@ export class ConfigManager extends EventEmitter {
   /**
    * 批量更新配置
    */
-  updateBatch(updates: Partial<FrontendConfig>, source: 'local' | 'user' = 'user'): void {'
+  updateBatch(updates: Partial<FrontendConfig>, source: 'local' | 'user' = 'user'): void {
     const oldConfig = { ...this.config };
     this.config = this.deepMerge(this.config, updates);
 
@@ -340,7 +340,7 @@ export class ConfigManager extends EventEmitter {
     localStorage.removeItem(this.storageKey);
 
     // 触发变更事件
-    this.emitConfigChanges(oldConfig, this.config, 'user');'
+    this.emitConfigChanges(oldConfig, this.config, 'user");"
   }
 
   /**
@@ -350,7 +350,7 @@ export class ConfigManager extends EventEmitter {
     try {
       localStorage.setItem(this.storageKey, JSON.stringify(this.config));
     } catch (error) {
-      console.error('Failed to save local config: ', error);'
+      console.error('Failed to save local config: ', error);
     }
   }
 
@@ -361,10 +361,10 @@ export class ConfigManager extends EventEmitter {
     const result = {};
 
     for (const obj of objects) {
-      if (obj && typeof obj === 'object') {'
+      if (obj && typeof obj === 'object') {
         for (const key in obj) {
           if (obj.hasOwnProperty(key)) {
-            if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {'
+            if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
               result[key] = this.deepMerge(result[key] || {}, obj[key]);
             } else {
               result[key] = obj[key];
@@ -381,14 +381,14 @@ export class ConfigManager extends EventEmitter {
    * 获取嵌套值
    */
   private getNestedValue(obj: any, path: string): any {
-    return path.split('.').reduce((current, key) => current?.[key], obj);'
+    return path.split('.').reduce((current, key) => current?.[key], obj);
   }
 
   /**
    * 设置嵌套值
    */
   private setNestedValue(obj: any, path: string, value: any): void {
-    const keys = path.split('.');'
+    const keys = path.split('.");"
     const lastKey = keys.pop()!;
     const target = keys.reduce((current, key) => {
       if (!(key in current)) {
@@ -406,18 +406,18 @@ export class ConfigManager extends EventEmitter {
     const changes = this.getConfigDifferences(oldConfig, newConfig);
 
     for (const change of changes) {
-      this.emit('configChanged', { ...change, source } as ConfigChangeEvent);'
+      this.emit('configChanged', { ...change, source } as ConfigChangeEvent);
     }
 
     if (changes.length > 0) {
-      this.emit('configUpdated', { oldConfig, newConfig, changes, source });'
+      this.emit('configUpdated', { oldConfig, newConfig, changes, source });
     }
   }
 
   /**
    * 获取配置差异
    */
-  private getConfigDifferences(oldConfig: any, newConfig: any, prefix = ''): Array<{ key: string, oldValue: any, newValue: any }> {'
+  private getConfigDifferences(oldConfig: any, newConfig: any, prefix = ''): Array<{ key: string, oldValue: any, newValue: any }> {
     const differences: Array<{ key: string, oldValue: any, newValue: any }>  = [];
     const allKeys = new Set([...Object.keys(oldConfig || {}), ...Object.keys(newConfig || {})]);
 
@@ -426,7 +426,7 @@ export class ConfigManager extends EventEmitter {
       const oldValue = oldConfig?.[key];
       const newValue = newConfig?.[key];
 
-      if (typeof oldValue === "object' && typeof newValue === 'object' &&'`
+      if (typeof oldValue === "object' && typeof newValue === 'object' &&'`"`
         oldValue !== null && newValue !== null &&
         !Array.isArray(oldValue) && !Array.isArray(newValue)) {
         differences.push(...this.getConfigDifferences(oldValue, newValue, fullKey));

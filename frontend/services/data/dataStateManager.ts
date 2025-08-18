@@ -5,7 +5,7 @@
  */
 
 import { useState, useCallback, useRef, useEffect    } from 'react';import type { ApiResponse, ApiError  } from '../types/api';// ==================== 状态类型定义 ==================== ''
-export type DataState   = 'idle' | 'loading' | 'success' | 'error';export interface DataStateInfo<T = any>     {'
+export type DataState   = 'idle' | 'loading' | 'success' | 'error';export interface DataStateInfo<T = any>     {
   state: DataState;
   data: T | null;
   error: ApiError | null;
@@ -54,7 +54,7 @@ export function useDataState<T = any>(
     onStateChange
   } = options;
 
-  const [state, setState] = useState<DataState>('idle');'
+  const [state, setState] = useState<DataState>('idle");"
   const [data, setData] = useState<T | null>(initialData);
   const [error, setError] = useState<ApiError | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
@@ -68,9 +68,9 @@ export function useDataState<T = any>(
     state,
     data,
     error,
-    loading: state === 'loading','
-    success: state === 'success','
-    hasError: state === 'error','
+    loading: state === 'loading',
+    success: state === 'success',
+    hasError: state === 'error',
     lastUpdated,
     retryCount
   };
@@ -91,7 +91,7 @@ export function useDataState<T = any>(
   // 执行异步操作
   const execute = useCallback(async (operation: AsyncOperation<T>): Promise<T | null>  => {
     lastOperationRef.current = operation;
-    setState('loading');'
+    setState('loading");"
     setError(null);
 
     try {
@@ -101,31 +101,31 @@ export function useDataState<T = any>(
         
         const responseData = response.data;
         setData(responseData);
-        setState('success');'
+        setState('success");"
         setLastUpdated(new Date().toISOString());
         setRetryCount(0);
         onSuccess?.(responseData);
         return responseData;
       } else {
         const apiError: ApiError  = response.error || {
-          code: 'UNKNOWN_ERROR','
-          message: 'Unknown error occurred','
+          code: 'UNKNOWN_ERROR',
+          message: 'Unknown error occurred',
           timestamp: new Date().toISOString()
         };
         throw apiError;
       }
     } catch (err) {
       const apiError: ApiError  = err instanceof Error ? {
-        code: 'EXECUTION_ERROR','
+        code: 'EXECUTION_ERROR',
         message: err.message,
         timestamp: new Date().toISOString()
       } : err as ApiError;
       setError(apiError);
-      setState('error');'
+      setState('error");"
       onError?.(apiError);
 
       // 自动重试逻辑
-      if (autoRetry && retryCount < retryLimit && apiError.retryable !== false) {
+      if (autoRetry && retryCount < retryLimit && apiError.retryable !== false) {>
         setRetryCount(prev => prev + 1);
         retryTimeoutRef.current = setTimeout(() => {
           execute(operation);
@@ -148,7 +148,7 @@ export function useDataState<T = any>(
 
   // 重置状态
   const reset = useCallback(() => {
-    setState('idle');'
+    setState('idle");"
     setData(initialData);
     setError(null);
     setLastUpdated(null);
@@ -164,7 +164,7 @@ export function useDataState<T = any>(
   // 手动设置数据
   const setDataManually = useCallback((newData: T) => {
     setData(newData);
-    setState('success');'
+    setState('success");"
     setLastUpdated(new Date().toISOString());
     setError(null);
   }, []);
@@ -172,7 +172,7 @@ export function useDataState<T = any>(
   // 手动设置错误
   const setErrorManually = useCallback((newError: ApiError) => {
     setError(newError);
-    setState('error');'
+    setState('error");"
     setData(null);
   }, []);
 
@@ -224,7 +224,7 @@ export function useBatchDataState(
     states: Object.fromEntries(
       Object.entries(stateHooks).map(([key, [stateInfo]]) => [key, stateInfo])
     ),
-    globalState: 'idle','
+    globalState: 'idle',
     allLoading: false,
     allSuccess: false,
     hasAnyError: false,
@@ -241,13 +241,13 @@ export function useBatchDataState(
   batchInfo.progress = batchInfo.completedCount / batchInfo.totalCount;
 
   if (batchInfo.allLoading) {
-    batchInfo.globalState = 'loading';
+    batchInfo.globalState = 'loading'
   } else if (batchInfo.allSuccess) {
-    batchInfo.globalState = 'success';
+    batchInfo.globalState = 'success'
   } else if (batchInfo.hasAnyError) {
-    batchInfo.globalState = 'error';
+    batchInfo.globalState = 'error'
   } else {
-    batchInfo.globalState = 'idle';
+    batchInfo.globalState = 'idle'
   }
 
   // 执行单个操作
@@ -362,7 +362,7 @@ export function usePaginatedDataState<T = any>(
 
   // 计算分页信息
   const totalPages = Math.ceil(total / limit);
-  const hasNext = page < totalPages;
+  const hasNext = page < totalPages;>
   const hasPrev = page > 1;
 
   const paginatedState: PaginatedDataState<T>  = {

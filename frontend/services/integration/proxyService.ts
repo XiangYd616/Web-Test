@@ -32,7 +32,7 @@ export class ProxyService {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError';
+    const errorType = error.name || 'UnknownError'
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -44,7 +44,7 @@ export class ProxyService {
   
   private logMetrics(info: any): void {
     // 记录请求指标
-    console.debug('API Metrics: ', {'
+    console.debug('API Metrics: ', {
       url: info.url,
       method: info.method,
       status: info.status,
@@ -62,7 +62,7 @@ export class ProxyService {
     };
   }
   private async retryRequest(fn: () => Promise<any>, maxRetries: number = 3): Promise<any> {
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {>
       try {
         return await fn();
       } catch (error) {
@@ -125,29 +125,29 @@ export class ProxyService {
 建议解决方案：
 1. 检查网址是否正确
 2. 稍后重试
-3. 切换到"本地分析'模式，上传HTML文件进行分析'`
+3. 切换到"本地分析'模式，上传HTML文件进行分析'`"`
 
 本地分析模式可以提供完整的SEO检测功能，不受网络限制。`);`
       }
 
     } catch (error) {
-      console.warn("Fetch page failed: ', error);'`
+      console.warn("Fetch page failed: ', error);'`"`
 
       // 提供更详细的错误信息
       if (error instanceof Error) {
         // 如果是我们自定义的详细错误信息，直接抛出
-        if (error.message.includes('建议解决方案')) {'
+        if (error.message.includes('建议解决方案')) {
           throw error;
         }
 
-        if (error.message.includes('CORS')) {'
+        if (error.message.includes('CORS')) {
           throw new Error(`跨域访问被阻止：${cleanUrl}`
 
 该网站不允许跨域访问。建议：
-• 切换到"本地分析'模式'`
+• 切换到"本地分析'模式'`"`
 • 上传网页HTML文件进行分析
 • 本地分析功能完整，不受网络限制`);`
-        } else if (error.message.includes("Failed to fetch') || error.message.includes("NetworkError')) {'`
+        } else if (error.message.includes("Failed to fetch') || error.message.includes("NetworkError')) {'``
           throw new Error(`网络连接失败：${cleanUrl}`
 
 请检查：
@@ -156,14 +156,14 @@ export class ProxyService {
 • 网站是否可访问
 
 建议切换到'本地分析'模式进行离线分析。`);'`
-        } else if (error.message.includes("404')) {'`
+        } else if (error.message.includes("404')) {'`"`
           throw new Error(`页面不存在：${cleanUrl}`
 
 该页面返回404错误，请：
 • 检查网址拼写是否正确
 • 确认页面是否存在
 • 尝试访问网站首页`);`
-        } else if (error.message.includes("timeout') || error.message.includes('aborted')) {'`
+        } else if (error.message.includes("timeout') || error.message.includes('aborted')) {'`"`
           throw new Error(`请求超时：${cleanUrl}`
 
 网站响应时间过长，建议：
@@ -173,7 +173,7 @@ export class ProxyService {
         } else {
           throw new Error(`访问失败：${error.message}`
 
-建议切换到"本地分析'模式，上传HTML文件进行完整的SEO分析。`);'`
+建议切换到"本地分析'模式，上传HTML文件进行完整的SEO分析。`);'`"
         }
       } else {
         throw new Error(`访问网站时发生未知错误。`
@@ -192,11 +192,11 @@ export class ProxyService {
       let cleanUrl = url.trim();
 
       // 修复常见的URL错误
-      cleanUrl = cleanUrl.replace(/,/g, ".'); // 修复逗号错误'`
-      cleanUrl = cleanUrl.replace(/\s+/g, ''); // 移除空格'
+      cleanUrl = cleanUrl.replace(/,/g, ".'); // 修复逗号错误'`"`
+      cleanUrl = cleanUrl.replace(/\s+/g, ''); // 移除空格
       // 确保有协议
-      if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {'
-        cleanUrl = 'https://' + cleanUrl;'
+      if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+        cleanUrl = 'https://' + cleanUrl;
       }
 
       // 验证URL格式
@@ -216,15 +216,15 @@ export class ProxyService {
       const startTime = Date.now();
 
       // 后端API地址
-      const backendUrl = process.env.REACT_APP_API_URL || "http://localhost:3001';'`
-      const apiEndpoint = `${backendUrl}/api/seo/fetch-page`;`
+      const backendUrl = process.env.REACT_APP_API_URL || "http://localhost:3001";``
+      const apiEndpoint = `${backendUrl}/api/seo/fetch-page`;
 
       console.log(`🔄 尝试后端API: ${apiEndpoint}`);`
 
       const response = await fetch(apiEndpoint, {
-        method: "POST','`
+        method: "POST','`"`
         headers: {
-          'Content-Type': 'application/json','
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ url }),
         signal
@@ -248,7 +248,7 @@ export class ProxyService {
           loadTime: result.data.loadTime || loadTime
         };
       } else {
-        throw new Error(result.error || "后端API返回错误');'`
+        throw new Error(result.error || "后端API返回错误");``
       }
 
     } catch (error) {
@@ -282,10 +282,10 @@ export class ProxyService {
           const response = await fetch(proxyUrl, {
             signal: signal || controller.signal,
             headers: {
-              "User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36','`
-              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8','
-              'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8','
-              'Cache-Control': 'no-cache';
+              "User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36','`"`
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+              'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+              'Cache-Control': 'no-cache'
             }
           });
 
@@ -296,7 +296,7 @@ export class ProxyService {
         const loadTime = Date.now() - startTime;
 
             // 处理不同代理服务的响应格式
-            if (proxyUrl.includes('allorigins')) {'
+            if (proxyUrl.includes('allorigins')) {
               try {
                 const data = await response.json();
                 if (data.contents) {
@@ -310,14 +310,14 @@ export class ProxyService {
                   };
                 }
               } catch (jsonError) {
-                console.warn('Failed to parse allorigins response: ', jsonError);'
+                console.warn('Failed to parse allorigins response: ', jsonError);
                 continue;
               }
-            } else if (proxyUrl.includes('codetabs')) {'
+            } else if (proxyUrl.includes('codetabs')) {
               // 处理codetabs响应
               try {
                 const data = await response.json();
-                if (data && typeof data === 'string') {'
+                if (data && typeof data === 'string') {
         return {
                     html: data,
                     headers: {
@@ -358,7 +358,7 @@ export class ProxyService {
               const html = await response.text();
 
               // 验证响应内容
-              if (html && html.length > 100 && !html.includes('Error') && !html.includes('error')) {'
+              if (html && html.length > 100 && !html.includes('Error') && !html.includes('error')) {
                 const headers: { [key: string]: string }  = {};
                 response.headers.forEach((value, key) => {
                   headers[key] = value;
@@ -376,7 +376,7 @@ export class ProxyService {
           }
         } catch (error) {
           // 只在开发模式下显示代理错误详情，减少控制台噪音
-          if (process.env.NODE_ENV === 'development') {'
+          if (process.env.NODE_ENV === 'development') {
             console.warn(`代理服务失败 ${proxyUrl}:`, error instanceof Error ? error.message : error);`
           }
           continue;
@@ -384,12 +384,12 @@ export class ProxyService {
       }
 
       // 所有代理都失败了
-      console.warn("All proxy services failed for URL: ', url);'`
+      console.warn("All proxy services failed for URL: ', url);'`"`
 
       // 返回null，让调用者决定如何处理
       return null;
     } catch (error) {
-      console.warn('Proxy service error: ', error);'
+      console.warn('Proxy service error: ', error);
       // 返回null，让调用者决定如何处理
       return null;
     }
@@ -405,10 +405,10 @@ export class ProxyService {
       // 尝试直接访问
       const response = await fetch(url, {
         signal,
-        mode: 'cors','
+        mode: 'cors',
         headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; SEO-Analyzer/1.0)','
-          'Accept': "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
+          'User-Agent': 'Mozilla/5.0 (compatible; SEO-Analyzer/1.0)',
+          'Accept': "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
         }
       });
 
@@ -440,16 +440,16 @@ export class ProxyService {
   /**
    * 检查URL是否可访问
    */
-  async checkUrl(url: string, signal?: AbortSignal): Promise<{
+  async checkUrl(url: string, signal?: AbortSignal): Promise<{>
     accessible: boolean;
     status: number;
     error?: string;
   }> {
     try {
       const response = await fetch(url, {
-        method: "HEAD','`
+        method: "HEAD','`"`
         signal,
-        mode: 'cors';
+        mode: 'cors'
       });
 
       return {
@@ -460,7 +460,7 @@ export class ProxyService {
       return {
         accessible: false,
         status: 0,
-        error: error instanceof Error ? error.message : '未知错误';
+        error: error instanceof Error ? error.message : '未知错误'
       };
     }
   }
@@ -468,20 +468,20 @@ export class ProxyService {
   /**
    * 获取robots.txt内容
    */
-  async fetchRobotsTxt(baseUrl: string, signal?: AbortSignal): Promise<{
+  async fetchRobotsTxt(baseUrl: string, signal?: AbortSignal): Promise<{>
     exists: boolean;
     content: string;
     accessible: boolean;
   }> {
     try {
       // 首先尝试后端API
-      const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
-      const apiEndpoint = `${backendUrl}/api/seo/fetch-robots`;`
+      const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001'
+      const apiEndpoint = `${backendUrl}/api/seo/fetch-robots`;
 
       const response = await fetch(apiEndpoint, {
-        method: "POST','`
+        method: "POST','`"`
         headers: {
-          'Content-Type': "application/json','
+          'Content-Type': "application/json',"
         },
         body: JSON.stringify({ baseUrl }),
         signal
@@ -496,7 +496,7 @@ export class ProxyService {
       }
 
       // 后端失败，回退到原方法
-      const robotsUrl = `${baseUrl}/robots.txt`;`
+      const robotsUrl = `${baseUrl}/robots.txt`;
       const pageResponse = await this.fetchPage(robotsUrl, signal);
 
       return {
@@ -507,7 +507,7 @@ export class ProxyService {
     } catch (error) {
       return {
         exists: false,
-        content: "','`
+        content: "','`"`
         accessible: false
       };
     }
@@ -516,7 +516,7 @@ export class ProxyService {
   /**
    * 获取sitemap内容
    */
-  async fetchSitemap(sitemapUrl: string, signal?: AbortSignal): Promise<{
+  async fetchSitemap(sitemapUrl: string, signal?: AbortSignal): Promise<{>
     exists: boolean;
     content: string;
     accessible: boolean;
@@ -524,13 +524,13 @@ export class ProxyService {
   }> {
     try {
       // 首先尝试后端API
-      const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
-      const apiEndpoint = `${backendUrl}/api/seo/fetch-sitemap`;`
+      const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001'
+      const apiEndpoint = `${backendUrl}/api/seo/fetch-sitemap`;
 
       const response = await fetch(apiEndpoint, {
-        method: "POST','`
+        method: "POST','`"`
         headers: {
-          'Content-Type': 'application/json','
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ sitemapUrl }),
         signal
@@ -558,7 +558,7 @@ export class ProxyService {
       };
     } catch (error) {
       // 404错误是正常的，不需要记录错误
-      if (error instanceof Error && error.message.includes('404')) {'
+      if (error instanceof Error && error.message.includes('404')) {
         // 静默处理404错误
       } else {
         console.warn(`Failed to fetch sitemap ${sitemapUrl}:`, error);`
@@ -566,7 +566,7 @@ export class ProxyService {
 
       return {
         exists: false,
-        content: "','`
+        content: "','`"`
         accessible: false,
         urls: []
       };
@@ -583,14 +583,14 @@ export class ProxyService {
       const urlMatches = sitemapContent.match(/<loc>(.*?)<\/loc>/g);
       if (urlMatches) {
         urlMatches.forEach(match => {
-          const url = match.replace(/<\/?loc>/g, '').trim();'
+          const url = match.replace(/<\/?loc>/g, '').trim();
           if (url) {
             urls.push(url);
           }
         });
       }
     } catch (error) {
-      console.warn('Failed to parse sitemap URLs: ', error);'
+      console.warn('Failed to parse sitemap URLs: ', error);
     }
 
     return urls;
@@ -599,7 +599,7 @@ export class ProxyService {
   /**
    * 批量检查URL状态
    */
-  async checkMultipleUrls(urls: string[], signal?: AbortSignal): Promise<{
+  async checkMultipleUrls(urls: string[], signal?: AbortSignal): Promise<{>
     [url: string]: {
       accessible: boolean;
       status: number;
@@ -620,7 +620,7 @@ export class ProxyService {
       const chunkResults = await Promise.allSettled(promises);
 
       chunkResults.forEach((promiseResult) => {
-        if (promiseResult.status === 'fulfilled') {'
+        if (promiseResult.status === 'fulfilled') {
           const { url, result } = promiseResult.value;
           results[url] = result;
         }
@@ -638,7 +638,7 @@ export class ProxyService {
    */
   private chunkArray<T>(array: T[], size: number): T[][] {
     const chunks: T[][]  = [];
-    for (let i = 0; i < array.length; i += size) {
+    for (let i = 0; i < array.length; i += size) {>
       chunks.push(array.slice(i, i + size));
     }
     return chunks;
@@ -647,7 +647,7 @@ export class ProxyService {
   /**
    * 模拟页面性能测试
    */
-  async measurePagePerformance(url: string, signal?: AbortSignal): Promise<{
+  async measurePagePerformance(url: string, signal?: AbortSignal): Promise<{>
     loadTime: number;
     pageSize: number;
     requests: number;

@@ -3,7 +3,7 @@
  * 动态设置和管理页面标题
  */
 
-import { useEffect, useRef    } from 'react';import { useLocation    } from 'react-router-dom';interface PageTitleOptions   {'
+import { useEffect, useRef    } from 'react';import { useLocation    } from 'react-router-dom';interface PageTitleOptions   {
   suffix?: string;
   separator?: string;
   template?: string;
@@ -13,11 +13,11 @@ export const usePageTitle = (title?: string,
   options: PageTitleOptions = {}
 ) => {
   const location = useLocation();
-  const previousTitle = useRef<string>('');'
+  const previousTitle = useRef<string>('");
   const {
-    suffix = 'Test Web','
-    separator = ' - ','
-    template = '{title}{separator}{suffix}';
+    suffix = 'Test Web',
+    separator = ' - ',
+    template = '{title}{separator}{suffix}'
   } = options;
 
   useEffect(() => {
@@ -27,9 +27,9 @@ export const usePageTitle = (title?: string,
 
       // 设置新标题
       const newTitle = template
-        .replace('{title}', title)'
-        .replace('{separator}', separator)'
-        .replace('{suffix}', suffix);'
+        .replace('{title}', title)
+        .replace('{separator}', separator)
+        .replace('{suffix}', suffix);
       document.title = newTitle;
     }
 
@@ -44,9 +44,9 @@ export const usePageTitle = (title?: string,
   // 动态设置标题的函数
   const setTitle = (newTitle: string) => {
     const formattedTitle = template
-      .replace('{title}', newTitle)'
-      .replace('{separator}', separator)'
-      .replace('{suffix}', suffix);'
+      .replace('{title}', newTitle)
+      .replace('{separator}', separator)
+      .replace('{suffix}', suffix);
     document.title = formattedTitle;
   };
 
@@ -70,7 +70,7 @@ export const usePageMeta = () => {
     let metaTag = document.querySelector(`meta[name= '${name}']`) as HTMLMetaElement;'`
 
     if (!metaTag) {
-      metaTag = document.createElement("meta');'`
+      metaTag = document.createElement("meta");`
       metaTag.name = name;
       document.head.appendChild(metaTag);
     }
@@ -79,23 +79,23 @@ export const usePageMeta = () => {
   };
 
   const setDescription = (description: string) => {
-    setMetaTag('description', description);'
+    setMetaTag('description', description);
   };
 
   const setKeywords = (keywords: string[]) => {
-    setMetaTag('keywords', keywords.join(', '));'
+    setMetaTag('keywords', keywords.join(', '));
   };
 
   const setOGTitle = (title: string) => {
-    setMetaTag('og:title', title);'
+    setMetaTag('og:title', title);
   };
 
   const setOGDescription = (description: string) => {
-    setMetaTag('og:description', description);'
+    setMetaTag('og:description', description);
   };
 
   const setOGImage = (imageUrl: string) => {
-    setMetaTag('og:image', imageUrl);'
+    setMetaTag('og:image', imageUrl);
   };
 
   return {

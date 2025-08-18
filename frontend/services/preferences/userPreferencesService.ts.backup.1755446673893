@@ -1,0 +1,618 @@
+/**
+ * 用户偏好设置服务
+ * 管理用户的个性化配置和偏好设置
+ */
+
+import { createApiUrl    } from '../../config/api';export interface UserPreferences     {'
+  // 界面设置
+  theme: 'light' | 'dark' | 'auto';
+  language: 'zh-CN' | 'en-US';
+  fontSize: 'small' | 'medium' | 'large';
+  compactMode: boolean;
+
+  // 测试设置
+  defaultTestTypes: string[];
+  autoSaveResults: boolean;
+  testTimeout: number;
+  maxConcurrentTests: number;
+  enableNotifications: boolean;
+
+  // 仪表板设置
+  dashboardLayout: 'grid' | 'list';
+  defaultChartType: 'line' | 'bar' | 'pie';
+  showAdvancedMetrics: boolean;
+  refreshInterval: number;
+
+  // 报告设置
+  defaultExportFormat: 'json' | 'csv' | 'excel' | 'pdf';
+  includeCharts: boolean;
+  includeRawData: boolean;
+  autoEmailReports: boolean;
+  emailRecipients: string[];
+
+  // 高级设置
+  enableExperimentalFeatures: boolean;
+  enableDebugMode: boolean;
+  cacheResults: boolean;
+  maxCacheSize: number;
+
+  // 快捷键设置
+  shortcuts: {
+    [key: string]: string;
+  };
+
+  // 自定义字段
+  customFields: {
+    [key: string]: any;
+  };
+}
+
+export interface PreferenceCategory     {
+  key: string;
+  label: string;
+  icon: string;
+  description: string;
+  settings: PreferenceSetting[];
+}
+
+export interface PreferenceSetting     {
+  key: string;
+  label: string;
+  description: string;
+  type: 'boolean' | 'string' | 'number' | 'select' | 'multiselect' | 'color' | 'shortcut';
+  defaultValue: any;
+  options?: { value: any; label: string }[];
+  min?: number;
+  max?: number;
+  validation?: (value: any) => boolean | string;
+}
+
+class UserPreferencesService {
+  // 监控和指标收集
+  private metrics = {
+    totalRequests: 0,
+    successfulRequests: 0,
+    failedRequests: 0,
+    averageResponseTime: 0,
+    errorsByType: new Map<string, number>()
+  };
+  
+  private logSuccess(info: any): void {
+    this.metrics.totalRequests++;
+    this.metrics.successfulRequests++;
+    
+    // 更新平均响应时间
+    const responseTime = info.responseTime || 0;
+    this.metrics.averageResponseTime = 
+      (this.metrics.averageResponseTime * (this.metrics.successfulRequests - 1) + responseTime) / 
+      this.metrics.successfulRequests;
+  }
+  
+  private logError(error: Error, context: any): void {
+    this.metrics.totalRequests++;
+    this.metrics.failedRequests++;
+    
+    const errorType = error.name || 'UnknownError';
+    this.metrics.errorsByType.set(
+      errorType, 
+      (this.metrics.errorsByType.get(errorType) || 0) + 1
+    );
+    
+    // 发送错误到监控系统
+    this.sendErrorToMonitoring(error, context);
+  }
+  
+  private logMetrics(info: any): void {
+    // 记录请求指标
+    console.debug('API Metrics: ', {'
+      url: info.url,
+      method: info.method,
+      status: info.status,
+      responseTime: info.responseTime
+    });
+  }
+  
+  getMetrics(): any {
+    return {
+      ...this.metrics,
+      errorsByType: Object.fromEntries(this.metrics.errorsByType),
+      successRate: this.metrics.totalRequests > 0 
+        ? (this.metrics.successfulRequests / this.metrics.totalRequests) * 100 
+        : 0
+    };
+  }
+  private async retryRequest(fn: () => Promise<any>, maxRetries: number = 3): Promise<any> {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await fn();
+      } catch (error) {
+        if (attempt === maxRetries) {
+          throw error;
+        }
+        
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
+    await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+  }
+}
+  }
+  private preferences: UserPreferences | null = null;
+  private listeners: ((preferences: UserPreferences) => void)[] = [];
+  private localStorageKey = "user-preferences";`
+  /**
+   * 获取默认偏好设置
+   */
+  getDefaultPreferences(): UserPreferences {
+    return {
+      // 界面设置
+      theme: 'dark','
+      language: 'zh-CN','
+      fontSize: 'medium','
+      compactMode: false,
+
+      // 测试设置
+      defaultTestTypes: ['performance', 'seo'],'
+      autoSaveResults: true,
+      testTimeout: 300000,
+      maxConcurrentTests: 3,
+      enableNotifications: true,
+
+      // 仪表板设置
+      dashboardLayout: 'grid','
+      defaultChartType: 'line','
+      showAdvancedMetrics: false,
+      refreshInterval: 30000,
+
+      // 报告设置
+      defaultExportFormat: 'json','
+      includeCharts: true,
+      includeRawData: false,
+      autoEmailReports: false,
+      emailRecipients: [],
+
+      // 高级设置
+      enableExperimentalFeatures: false,
+      enableDebugMode: false,
+      cacheResults: true,
+      maxCacheSize: 100,
+
+      // 快捷键设置
+      shortcuts: {
+        'new-test': 'Ctrl+N','
+        'save-result': 'Ctrl+S','
+        'export-data': 'Ctrl+E','
+        'toggle-theme': 'Ctrl+T';
+      },
+
+      // 自定义字段
+      customFields: {}
+    };
+  }
+
+  /**
+   * 获取偏好设置分类
+   */
+  getPreferenceCategories(): PreferenceCategory[] {
+    return [
+      {
+        key: 'interface','
+        label: '界面设置','
+        icon: 'Monitor','
+        description: '自定义界面外观和布局','
+        settings: [
+          {
+            key: 'theme','
+            label: '主题','
+            description: '选择界面主题','
+            type: 'select','
+            defaultValue: 'dark','
+            options: [
+              { value: 'light', label: '浅色主题' },'
+              { value: 'dark', label: '深色主题' },'
+              { value: 'auto', label: '跟随系统' }'
+            ]
+          },
+          {
+            key: 'language','
+            label: '语言','
+            description: '选择界面语言','
+            type: 'select','
+            defaultValue: 'zh-CN','
+            options: [
+              { value: 'zh-CN', label: '简体中文' },'
+              { value: 'en-US', label: 'English' }'
+            ]
+          },
+          {
+            key: 'fontSize','
+            label: '字体大小','
+            description: '调整界面字体大小','
+            type: 'select','
+            defaultValue: 'medium','
+            options: [
+              { value: 'small', label: '小' },'
+              { value: 'medium', label: '中' },'
+              { value: 'large', label: '大' }'
+            ]
+          },
+          {
+            key: 'compactMode','
+            label: '紧凑模式','
+            description: '启用紧凑的界面布局','
+            type: 'boolean','
+            defaultValue: false
+          }
+        ]
+      },
+      {
+        key: 'testing','
+        label: '测试设置','
+        icon: 'TestTube','
+        description: '配置测试相关的默认选项','
+        settings: [
+          {
+            key: 'defaultTestTypes','
+            label: '默认测试类型','
+            description: '新建测试时默认选择的测试类型','
+            type: 'multiselect','
+            defaultValue: ['performance', 'seo'],'
+            options: [
+              { value: 'performance', label: '性能测试' },'
+              { value: 'seo', label: 'SEO测试' },'
+              { value: 'security', label: '安全测试' },'
+              { value: 'accessibility', label: '可访问性测试' }'
+            ]
+          },
+          {
+            key: 'autoSaveResults','
+            label: '自动保存结果','
+            description: '测试完成后自动保存结果','
+            type: 'boolean','
+            defaultValue: true
+          },
+          {
+            key: 'testTimeout','
+            label: '测试超时时间(秒)','
+            description: '单个测试的最大执行时间','
+            type: 'number','
+            defaultValue: 300,
+            min: 30,
+            max: 600
+          },
+          {
+            key: 'maxConcurrentTests','
+            label: '最大并发测试数','
+            description: '同时运行的最大测试数量','
+            type: 'number','
+            defaultValue: 3,
+            min: 1,
+            max: 10
+          },
+          {
+            key: 'enableNotifications','
+            label: '启用通知','
+            description: '测试完成时显示通知','
+            type: 'boolean','
+            defaultValue: true
+          }
+        ]
+      },
+      {
+        key: 'dashboard','
+        label: '仪表板','
+        icon: 'BarChart3','
+        description: '自定义仪表板显示和布局','
+        settings: [
+          {
+            key: 'dashboardLayout','
+            label: '布局模式','
+            description: '选择仪表板的布局方式','
+            type: 'select','
+            defaultValue: 'grid','
+            options: [
+              { value: 'grid', label: '网格布局' },'
+              { value: 'list', label: '列表布局' }'
+            ]
+          },
+          {
+            key: 'defaultChartType','
+            label: '默认图表类型','
+            description: '新建图表时的默认类型','
+            type: 'select','
+            defaultValue: 'line','
+            options: [
+              { value: 'line', label: '折线图' },'
+              { value: 'bar', label: '柱状图' },'
+              { value: 'pie', label: '饼图' }'
+            ]
+          },
+          {
+            key: 'showAdvancedMetrics','
+            label: '显示高级指标','
+            description: '在仪表板中显示高级性能指标','
+            type: 'boolean','
+            defaultValue: false
+          },
+          {
+            key: 'refreshInterval','
+            label: '刷新间隔(秒)','
+            description: '仪表板数据自动刷新间隔','
+            type: 'number','
+            defaultValue: 30,
+            min: 10,
+            max: 300
+          }
+        ]
+      },
+      {
+        key: 'reports','
+        label: '报告设置','
+        icon: 'FileText','
+        description: '配置报告生成和导出选项','
+        settings: [
+          {
+            key: 'defaultExportFormat','
+            label: '默认导出格式','
+            description: '导出报告时的默认格式','
+            type: 'select','
+            defaultValue: 'json','
+            options: [
+              { value: 'json', label: 'JSON' },'
+              { value: 'csv', label: 'CSV' },'
+              { value: 'excel', label: 'Excel' },'
+              { value: 'pdf', label: 'PDF' }'
+            ]
+          },
+          {
+            key: 'includeCharts','
+            label: '包含图表','
+            description: '导出报告时包含图表','
+            type: 'boolean','
+            defaultValue: true
+          },
+          {
+            key: 'includeRawData','
+            label: '包含原始数据','
+            description: '导出报告时包含原始测试数据','
+            type: 'boolean','
+            defaultValue: false
+          },
+          {
+            key: 'autoEmailReports','
+            label: '自动邮件报告','
+            description: '定期自动发送报告邮件','
+            type: 'boolean','
+            defaultValue: false
+          }
+        ]
+      },
+      {
+        key: 'advanced','
+        label: '高级设置','
+        icon: 'Settings','
+        description: '高级功能和实验性功能设置','
+        settings: [
+          {
+            key: 'enableExperimentalFeatures','
+            label: '启用实验性功能','
+            description: '启用正在开发中的实验性功能','
+            type: 'boolean','
+            defaultValue: false
+          },
+          {
+            key: 'enableDebugMode','
+            label: '启用调试模式','
+            description: '显示详细的调试信息','
+            type: 'boolean','
+            defaultValue: false
+          },
+          {
+            key: 'cacheResults','
+            label: '缓存结果','
+            description: '缓存测试结果以提高性能','
+            type: 'boolean','
+            defaultValue: true
+          },
+          {
+            key: 'maxCacheSize','
+            label: '最大缓存大小','
+            description: '缓存的最大条目数','
+            type: 'number','
+            defaultValue: 100,
+            min: 10,
+            max: 1000
+          }
+        ]
+      }
+    ];
+  }
+
+  /**
+   * 加载用户偏好设置
+   */
+  async loadPreferences(): Promise<UserPreferences> {
+    try {
+      // 首先尝试从服务器加载
+      const response = await fetch(createApiUrl('/api/user/preferences'), {'
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem('token')}`'`
+        }
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          this.preferences = { ...this.getDefaultPreferences(), ...result.data };
+          this.saveToLocalStorage();
+          this.notifyListeners();
+          return this.preferences;
+        }
+      }
+    } catch (error) {
+      console.warn("从服务器加载偏好设置失败，使用本地缓存:', error);'`
+    }
+
+    // 从本地存储加载
+    const localPreferences = this.loadFromLocalStorage();
+    this.preferences = localPreferences;
+    this.notifyListeners();
+    return this.preferences;
+  }
+
+  /**
+   * 保存用户偏好设置
+   */
+  async savePreferences(preferences: Partial<UserPreferences>): Promise<boolean> {
+    try {
+      // 合并偏好设置
+      this.preferences = { ...this.preferences, ...preferences };
+
+      // 保存到本地存储
+      this.saveToLocalStorage();
+
+      // 保存到服务器
+      const response = await fetch(createApiUrl('/api/user/preferences'), {'
+        method: 'PUT','
+        headers: {
+          'Content-Type': 'application/json','
+          "Authorization": `Bearer ${localStorage.getItem('token')}`'`
+        },
+        body: JSON.stringify(this.preferences)
+      });
+
+      if (response.ok) {
+        
+        const result = await response.json();
+        if (result.success) {
+          this.notifyListeners();
+          return true;
+      }
+      }
+
+      // 即使服务器保存失败，本地保存成功也算成功
+      this.notifyListeners();
+      return true;
+
+    } catch (error) {
+      console.error("保存偏好设置失败:', error);'`
+      return false;
+    }
+  }
+
+  /**
+   * 重置偏好设置
+   */
+  async resetPreferences(): Promise<boolean> {
+    const defaultPreferences = this.getDefaultPreferences();
+    return await this.savePreferences(defaultPreferences);
+  }
+
+  /**
+   * 获取当前偏好设置
+   */
+  getPreferences(): UserPreferences {
+    if (!this.preferences) {
+      this.preferences = this.loadFromLocalStorage();
+    }
+    return this.preferences;
+  }
+
+  /**
+   * 获取特定偏好设置值
+   */
+  getPreference<K extends keyof UserPreferences>(key: K): UserPreferences[K] {
+    const preferences = this.getPreferences();
+    return preferences[key];
+  }
+
+  /**
+   * 设置特定偏好设置值
+   */
+  async setPreference<K extends keyof UserPreferences>(
+    key: K,
+    value: UserPreferences[K]
+  ): Promise<boolean> {
+    return await this.savePreferences({ [key]: value } as Partial<UserPreferences>);
+  }
+
+  /**
+   * 监听偏好设置变化
+   */
+  onPreferencesChange(callback: (preferences: UserPreferences) => void): () => void {
+    this.listeners.push(callback);
+
+    // 返回取消监听的函数
+    return () => {
+      const index = this.listeners.indexOf(callback);
+      if (index > -1) {
+        this.listeners.splice(index, 1);
+      }
+    };
+  }
+
+  /**
+   * 从本地存储加载
+   */
+  private loadFromLocalStorage(): UserPreferences {
+    try {
+      const stored = localStorage.getItem(this.localStorageKey);
+      if (stored) {
+        
+        const parsed = JSON.parse(stored);
+        return { ...this.getDefaultPreferences(), ...parsed
+      };
+      }
+    } catch (error) {
+      console.warn('从本地存储加载偏好设置失败:', error);'
+    }
+
+    return this.getDefaultPreferences();
+  }
+
+  /**
+   * 保存到本地存储
+   */
+  private saveToLocalStorage(): void {
+    try {
+      if (this.preferences) {
+        localStorage.setItem(this.localStorageKey, JSON.stringify(this.preferences));
+      }
+    } catch (error) {
+      console.warn('保存偏好设置到本地存储失败:', error);'
+    }
+  }
+
+  /**
+   * 通知监听器
+   */
+  private notifyListeners(): void {
+    if (this.preferences) {
+      this.listeners.forEach(callback => callback(this.preferences!));
+    }
+  }
+
+  /**
+   * 导出偏好设置
+   */
+  exportPreferences(): string {
+    const preferences = this.getPreferences();
+    return JSON.stringify(preferences, null, 2);
+  }
+
+  /**
+   * 导入偏好设置
+   */
+  async importPreferences(data: string): Promise<boolean> {
+    try {
+      const preferences = JSON.parse(data);
+      return await this.savePreferences(preferences);
+    } catch (error) {
+      console.error('导入偏好设置失败:', error);'
+      return false;
+    }
+  }
+}
+
+export const userPreferencesService = new UserPreferencesService();
+
+// 自动加载偏好设置
+userPreferencesService.loadPreferences().catch(console.error);

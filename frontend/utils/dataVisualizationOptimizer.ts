@@ -15,7 +15,7 @@ export interface DataPoint     {
 
 export interface OptimizationConfig     {
   maxDataPoints: number;
-  samplingStrategy: 'uniform' | 'adaptive' | 'importance';
+  samplingStrategy: 'uniform' | 'adaptive' | 'importance'
   preserveKeyPoints: boolean;
   enableCaching: boolean;
   performanceThreshold: number; // ms
@@ -50,7 +50,7 @@ class DataVisualizationOptimizer {
 
     const finalConfig: OptimizationConfig  = {
       maxDataPoints: 1000,
-      samplingStrategy: 'adaptive','
+      samplingStrategy: 'adaptive',
       preserveKeyPoints: true,
       enableCaching: true,
       performanceThreshold: 50,
@@ -327,7 +327,7 @@ class DataVisualizationOptimizer {
     }));
 
     const configHash = this.simpleHash(JSON.stringify(config));
-    return `${dataHash}_${configHash}`;`
+    return `${dataHash}_${configHash}`;
   }
 
   /**

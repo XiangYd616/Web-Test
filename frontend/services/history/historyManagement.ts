@@ -9,7 +9,7 @@ export interface HistoryRecord     {
   userId: string;
   testType: string;
   url: string;
-  status: 'completed' | 'failed' | 'cancelled';
+  status: 'completed' | 'failed' | 'cancelled'
   startTime: string;
   endTime: string;
   duration: number;
@@ -40,12 +40,12 @@ export interface HistoryAnalytics     {
   averageDuration: number;
   testsByType: Record<string, number>;
   testsByStatus: Record<string, number>;
-  trendsData: Array<{
+  trendsData: Array<{>
     date: string;
     count: number;
     successRate: number;
   }>;
-  topUrls: Array<{
+  topUrls: Array<{>
     url: string;
     count: number;
     successRate: number;
@@ -54,7 +54,7 @@ export interface HistoryAnalytics     {
 
 class HistoryManagementService {
   private async retryRequest(fn: () => Promise<any>, maxRetries: number = 3): Promise<any> {
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {>
       try {
         return await fn();
       } catch (error) {
@@ -67,7 +67,7 @@ class HistoryManagementService {
   }
 }
   }
-  private baseUrl = "/api/test/history';'`
+  private baseUrl = "/api/test/history";``
   private cache = new Map<string, any>();
   private cacheTimeout = 5 * 60 * 1000; // 5分钟缓存
 
@@ -77,7 +77,7 @@ class HistoryManagementService {
   async getHistory(
     filter: HistoryFilter = {},
     pagination: { page: number; limit: number } = { page: 1, limit: 20 }
-  ): Promise<{
+  ): Promise<{>
     records: HistoryRecord[];
     total: number;
     pagination: any;
@@ -85,17 +85,17 @@ class HistoryManagementService {
     try {
       const params = new URLSearchParams();
       
-      if (filter.testType) params.append('type', filter.testType);'
-      if (filter.status) params.append('status', filter.status);'
-      if (filter.search) params.append('search', filter.search);'
-      if (filter.archived !== undefined) params.append('archived', filter.archived.toString());'
-      params.append('page', pagination.page.toString());'
-      params.append("limit', pagination.limit.toString());'
+      if (filter.testType) params.append('type', filter.testType);
+      if (filter.status) params.append('status', filter.status);
+      if (filter.search) params.append('search', filter.search);
+      if (filter.archived !== undefined) params.append('archived', filter.archived.toString());
+      params.append('page', pagination.page.toString());
+      params.append("limit', pagination.limit.toString());"
       const response = await fetch(`${this.baseUrl}?${params}`);`
       const data = await response.json();
 
       if (!data.success) {
-        throw new Error(data.message || "获取历史记录失败');'`
+        throw new Error(data.message || "获取历史记录失败");``
       }
 
       return {
@@ -104,7 +104,7 @@ class HistoryManagementService {
         pagination: data.data.pagination
       };
     } catch (error) {
-      console.error('获取历史记录失败:', error);'
+      console.error('获取历史记录失败:', error);
       throw error;
     }
   }
@@ -118,12 +118,12 @@ class HistoryManagementService {
       const data = await response.json();
 
       if (!data.success) {
-        throw new Error(data.message || "获取历史记录详情失败');'`
+        throw new Error(data.message || "获取历史记录详情失败");``
       }
 
       return data.data;
     } catch (error) {
-      console.error("获取历史记录详情失败:', error);'
+      console.error("获取历史记录详情失败:', error);"
       throw error;
     }
   }
@@ -134,19 +134,19 @@ class HistoryManagementService {
   async deleteHistory(id: string): Promise<void> {
     try {
       const response = await fetch(`${this.baseUrl}/${id}`, {`
-        method: "DELETE';'`
+        method: "DELETE";``
       });
 
       const data = await response.json();
 
       if (!data.success) {
-        throw new Error(data.message || '删除历史记录失败');'
+        throw new Error(data.message || '删除历史记录失败");"
       }
 
       // 清除相关缓存
       this.clearCache();
     } catch (error) {
-      console.error('删除历史记录失败:', error);'
+      console.error('删除历史记录失败:', error);
       throw error;
     }
   }
@@ -157,9 +157,9 @@ class HistoryManagementService {
   async batchDeleteHistory(ids: string[]): Promise<void> {
     try {
       const response = await fetch(`${this.baseUrl}/batch`, {`
-        method: "DELETE','`
+        method: "DELETE','`"`
         headers: {
-          'Content-Type': 'application/json';
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ ids })
       });
@@ -167,13 +167,13 @@ class HistoryManagementService {
       const data = await response.json();
 
       if (!data.success) {
-        throw new Error(data.message || '批量删除历史记录失败');'
+        throw new Error(data.message || '批量删除历史记录失败");"
       }
 
       // 清除相关缓存
       this.clearCache();
     } catch (error) {
-      console.error('批量删除历史记录失败:', error);'
+      console.error('批量删除历史记录失败:', error);
       throw error;
     }
   }
@@ -184,19 +184,19 @@ class HistoryManagementService {
   async archiveHistory(id: string): Promise<void> {
     try {
       const response = await fetch(`${this.baseUrl}/${id}/archive`, {`
-        method: "POST';'`
+        method: "POST";``
       });
 
       const data = await response.json();
 
       if (!data.success) {
-        throw new Error(data.message || '归档历史记录失败');'
+        throw new Error(data.message || '归档历史记录失败");"
       }
 
       // 清除相关缓存
       this.clearCache();
     } catch (error) {
-      console.error('归档历史记录失败:', error);'
+      console.error('归档历史记录失败:', error);
       throw error;
     }
   }
@@ -207,9 +207,9 @@ class HistoryManagementService {
   async updateNotes(id: string, notes: string): Promise<void> {
     try {
       const response = await fetch(`${this.baseUrl}/${id}/notes`, {`
-        method: "PUT','`
+        method: "PUT','`"`
         headers: {
-          'Content-Type': 'application/json';
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ notes })
       });
@@ -217,13 +217,13 @@ class HistoryManagementService {
       const data = await response.json();
 
       if (!data.success) {
-        throw new Error(data.message || '更新备注失败');'
+        throw new Error(data.message || '更新备注失败");"
       }
 
       // 清除相关缓存
       this.clearCache();
     } catch (error) {
-      console.error("更新备注失败:', error);'
+      console.error("更新备注失败:', error);"
       throw error;
     }
   }
@@ -234,9 +234,9 @@ class HistoryManagementService {
   async addTag(id: string, tag: string): Promise<void> {
     try {
       const response = await fetch(`${this.baseUrl}/${id}/tags`, {`
-        method: "POST','`
+        method: "POST','`"`
         headers: {
-          'Content-Type': 'application/json';
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ tag })
       });
@@ -244,13 +244,13 @@ class HistoryManagementService {
       const data = await response.json();
 
       if (!data.success) {
-        throw new Error(data.message || '添加标签失败');'
+        throw new Error(data.message || '添加标签失败");"
       }
 
       // 清除相关缓存
       this.clearCache();
     } catch (error) {
-      console.error('添加标签失败:', error);'
+      console.error('添加标签失败:', error);
       throw error;
     }
   }
@@ -261,19 +261,19 @@ class HistoryManagementService {
   async removeTag(id: string, tag: string): Promise<void> {
     try {
       const response = await fetch(`${this.baseUrl}/${id}/tags/${encodeURIComponent(tag)}`, {`
-        method: "DELETE';'`
+        method: "DELETE";``
       });
 
       const data = await response.json();
 
       if (!data.success) {
-        throw new Error(data.message || '移除标签失败');'
+        throw new Error(data.message || '移除标签失败");"
       }
 
       // 清除相关缓存
       this.clearCache();
     } catch (error) {
-      console.error("移除标签失败:', error);'
+      console.error("移除标签失败:', error);"
       throw error;
     }
   }
@@ -285,26 +285,26 @@ class HistoryManagementService {
     filter: HistoryFilter = {},
     timeRange: number = 30
   ): Promise<HistoryAnalytics> {
-    const cacheKey = `analytics-${JSON.stringify(filter)}-${timeRange}`;`
+    const cacheKey = `analytics-${JSON.stringify(filter)}-${timeRange}`;
     
     // 检查缓存
     if (this.cache.has(cacheKey)) {
       const cached = this.cache.get(cacheKey);
-      if (Date.now() - cached.timestamp < this.cacheTimeout) {
+      if (Date.now() - cached.timestamp < this.cacheTimeout) {>
         return cached.data;
       }
     }
 
     try {
       const params = new URLSearchParams();
-      params.append("timeRange', timeRange.toString());'`
+      params.append("timeRange', timeRange.toString());'`"`
       
-      if (filter.testType) params.append('testType', filter.testType);'
+      if (filter.testType) params.append('testType', filter.testType);
       const response = await fetch(`${this.baseUrl}/analytics?${params}`);`
       const data = await response.json();
 
       if (!data.success) {
-        throw new Error(data.message || "获取分析数据失败');'`
+        throw new Error(data.message || "获取分析数据失败");``
       }
 
       const analytics = data.data;
@@ -317,7 +317,7 @@ class HistoryManagementService {
 
       return analytics;
     } catch (error) {
-      console.error('获取分析数据失败:', error);'
+      console.error('获取分析数据失败:', error);
       throw error;
     }
   }
@@ -327,26 +327,26 @@ class HistoryManagementService {
    */
   async exportHistory(
     filter: HistoryFilter = {},
-    format: 'json' | 'csv' | 'excel' = 'json';
+    format: 'json' | 'csv' | 'excel' = 'json'
   ): Promise<string> {
     try {
       const params = new URLSearchParams();
-      params.append('format', format);'
-      if (filter.testType) params.append('testType', filter.testType);'
-      if (filter.status) params.append("status', filter.status);'
+      params.append('format', format);
+      if (filter.testType) params.append('testType', filter.testType);
+      if (filter.status) params.append("status', filter.status);"
       const response = await fetch(`${this.baseUrl}/export?${params}`);`
       
-      if (format === "json') {'`
+      if (format === "json') {'`"`
         
         const data = await response.json();
-        return data.success ? data.downloadUrl : '';
+        return data.success ? data.downloadUrl : ''
       } else {
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
         return url;
       }
     } catch (error) {
-      console.error('导出历史记录失败:', error);'
+      console.error('导出历史记录失败:', error);
       throw error;
     }
   }
@@ -373,7 +373,7 @@ class HistoryManagementService {
 
       return data.data || [];
     } catch (error) {
-      console.error("获取常用标签失败:', error);'`
+      console.error("获取常用标签失败:', error);'`"`
       return [];
     }
   }

@@ -5,7 +5,7 @@ import type { ApiError,
   ApiResponse,
   PaginatedResponse,
   PaginationInfo
- } from '../api';import type { ValidationError  } from '../common';// 重新导出所有 API 响应类型'
+ } from '../api';import type { ValidationError  } from '../common';// 重新导出所有 API 响应类型
 export type {
   ApiError,
   ApiResponse,
@@ -18,35 +18,35 @@ export type {
 export {
   extractData,
   extractError
-} from '../apiResponse'; // 已修复'
+} from '../apiResponse'; // 已修复
 // 错误代码枚举
 export enum ErrorCode {
   // 通用错误
-  UNKNOWN_ERROR   = 'UNKNOWN_ERROR','
-  VALIDATION_ERROR = 'VALIDATION_ERROR','
-  NETWORK_ERROR = 'NETWORK_ERROR','
-  TIMEOUT_ERROR = 'TIMEOUT_ERROR','
+  UNKNOWN_ERROR   = 'UNKNOWN_ERROR',
+  VALIDATION_ERROR = 'VALIDATION_ERROR',
+  NETWORK_ERROR = 'NETWORK_ERROR',
+  TIMEOUT_ERROR = 'TIMEOUT_ERROR',
   // 认证错误
-  UNAUTHORIZED = 'UNAUTHORIZED','
-  FORBIDDEN = 'FORBIDDEN','
-  TOKEN_EXPIRED = 'TOKEN_EXPIRED','
-  INVALID_CREDENTIALS = 'INVALID_CREDENTIALS','
+  UNAUTHORIZED = 'UNAUTHORIZED',
+  FORBIDDEN = 'FORBIDDEN',
+  TOKEN_EXPIRED = 'TOKEN_EXPIRED',
+  INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
   // 业务错误
-  RESOURCE_NOT_FOUND = 'RESOURCE_NOT_FOUND','
-  RESOURCE_CONFLICT = 'RESOURCE_CONFLICT','
-  RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED','
+  RESOURCE_NOT_FOUND = 'RESOURCE_NOT_FOUND',
+  RESOURCE_CONFLICT = 'RESOURCE_CONFLICT',
+  RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
   // 服务器错误
-  INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR','
-  SERVICE_UNAVAILABLE = 'SERVICE_UNAVAILABLE','
-  BAD_GATEWAY = 'BAD_GATEWAY';
+  INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR',
+  SERVICE_UNAVAILABLE = 'SERVICE_UNAVAILABLE',
+  BAD_GATEWAY = 'BAD_GATEWAY'
 }
 
 // 错误严重程度
 export enum ErrorSeverity {
-  LOW = 'low','
-  MEDIUM = 'medium','
-  HIGH = 'high','
-  CRITICAL = 'critical';
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical'
 }
 
 // 扩展的 API 错误接口
@@ -129,61 +129,61 @@ export const createApiError = {
   validation: (message: string, details?: Record<string, any>) => new ApiErrorBuilder(ErrorCode.VALIDATION_ERROR, message)
       .withDetails(details || {})
       .withSeverity(ErrorSeverity.MEDIUM)
-      .withCategory('validation')'
+      .withCategory('validation')
       .build(),
 
-  unauthorized: (message: string = '未授权访问') => new ApiErrorBuilder(ErrorCode.UNAUTHORIZED, message)'
+  unauthorized: (message: string = '未授权访问') => new ApiErrorBuilder(ErrorCode.UNAUTHORIZED, message)
       .withSeverity(ErrorSeverity.HIGH)
-      .withCategory('auth')'
+      .withCategory('auth')
       .withStatusCode(401)
       .build(),
 
-  forbidden: (message: string = '访问被禁止') => new ApiErrorBuilder(ErrorCode.FORBIDDEN, message)'
+  forbidden: (message: string = '访问被禁止') => new ApiErrorBuilder(ErrorCode.FORBIDDEN, message)
       .withSeverity(ErrorSeverity.HIGH)
-      .withCategory('auth')'
+      .withCategory('auth')
       .withStatusCode(403)
       .build(),
 
-  notFound: (message: string = '资源不存在') => new ApiErrorBuilder(ErrorCode.RESOURCE_NOT_FOUND, message)'
+  notFound: (message: string = '资源不存在') => new ApiErrorBuilder(ErrorCode.RESOURCE_NOT_FOUND, message)
       .withSeverity(ErrorSeverity.MEDIUM)
-      .withCategory('resource')'
+      .withCategory('resource')
       .withStatusCode(404)
       .build(),
 
-  conflict: (message: string = '资源冲突') => new ApiErrorBuilder(ErrorCode.RESOURCE_CONFLICT, message)'
+  conflict: (message: string = '资源冲突') => new ApiErrorBuilder(ErrorCode.RESOURCE_CONFLICT, message)
       .withSeverity(ErrorSeverity.MEDIUM)
-      .withCategory('resource')'
+      .withCategory('resource')
       .withStatusCode(409)
       .build(),
 
-  rateLimit: (message: string = '请求过于频繁') => new ApiErrorBuilder(ErrorCode.RATE_LIMIT_EXCEEDED, message)'
+  rateLimit: (message: string = '请求过于频繁') => new ApiErrorBuilder(ErrorCode.RATE_LIMIT_EXCEEDED, message)
       .withSeverity(ErrorSeverity.HIGH)
-      .withCategory('rate_limit')'
+      .withCategory('rate_limit')
       .withStatusCode(429)
       .retryable(true)
       .build(),
 
-  network: (message: string = '网络连接失败') => new ApiErrorBuilder(ErrorCode.NETWORK_ERROR, message)'
+  network: (message: string = '网络连接失败') => new ApiErrorBuilder(ErrorCode.NETWORK_ERROR, message)
       .withSeverity(ErrorSeverity.HIGH)
-      .withCategory('network')'
+      .withCategory('network')
       .retryable(true)
       .build(),
 
-  timeout: (message: string = '请求超时') => new ApiErrorBuilder(ErrorCode.TIMEOUT_ERROR, message)'
+  timeout: (message: string = '请求超时') => new ApiErrorBuilder(ErrorCode.TIMEOUT_ERROR, message)
       .withSeverity(ErrorSeverity.MEDIUM)
-      .withCategory('timeout')'
+      .withCategory('timeout')
       .retryable(true)
       .build(),
 
-  internal: (message: string = '服务器内部错误') => new ApiErrorBuilder(ErrorCode.INTERNAL_SERVER_ERROR, message)'
+  internal: (message: string = '服务器内部错误') => new ApiErrorBuilder(ErrorCode.INTERNAL_SERVER_ERROR, message)
       .withSeverity(ErrorSeverity.CRITICAL)
-      .withCategory('server')'
+      .withCategory('server')
       .withStatusCode(500)
       .build(),
 
-  serviceUnavailable: (message: string = '服务暂不可用') => new ApiErrorBuilder(ErrorCode.SERVICE_UNAVAILABLE, message)'
+  serviceUnavailable: (message: string = '服务暂不可用') => new ApiErrorBuilder(ErrorCode.SERVICE_UNAVAILABLE, message)
       .withSeverity(ErrorSeverity.HIGH)
-      .withCategory('server')'
+      .withCategory('server')
       .withStatusCode(503)
       .retryable(true)
       .build()

@@ -8,9 +8,25 @@
  */
 
 // 导入共享类型和后端模型
-import { StandardApiResponse, StandardApiSuccessResponse, StandardApiErrorResponse, StandardPaginatedResponse, PaginationMeta } from '../../shared/types/standardApiResponse';
+import {
+  PaginationMeta,
+  StandardApiErrorResponse,
+  StandardApiResponse,
+  StandardApiSuccessResponse,
+  StandardPaginatedResponse
+} from '../../shared/types/standardApiResponse';
 
-import { User, UserProfile, TestConfiguration, TestExecution, TestResult, TestReport, CreateUserData, UpdateUserData, CreateTestConfigData, UpdateTestConfigData, CreateTestExecutionData, UpdateTestExecutionData } from './models';
+import {
+  CreateTestConfigData,
+  TestConfiguration,
+  TestExecution,
+  TestReport,
+  TestResult,
+  UpdateTestConfigData,
+  UpdateUserData,
+  User,
+  UserProfile
+} from './models';
 
 // ==================== 基础API类型 ====================
 
@@ -78,7 +94,7 @@ export interface GetUserResponse {
   profile?: UserProfile;
 }
 
-export interface UpdateUserRequest extends UpdateUserData {}
+export interface UpdateUserRequest extends UpdateUserData { }
 
 export interface UpdateUserResponse {
   user: Omit<User, 'password_hash'>;
@@ -101,13 +117,13 @@ export interface GetUsersResponse {
 
 // ==================== 测试配置相关API类型 ====================
 
-export interface CreateTestConfigRequest extends CreateTestConfigData {}
+export interface CreateTestConfigRequest extends CreateTestConfigData { }
 
 export interface CreateTestConfigResponse {
   test_config: TestConfiguration;
 }
 
-export interface UpdateTestConfigRequest extends UpdateTestConfigData {}
+export interface UpdateTestConfigRequest extends UpdateTestConfigData { }
 
 export interface UpdateTestConfigResponse {
   test_config: TestConfiguration;
@@ -324,74 +340,43 @@ export interface BusinessLogicError {
 // ==================== 导出所有API类型 ====================
 
 export type {
+  ApiErrorResponse,
   // 基础API类型
   ApiResponse,
-  ApiSuccessResponse,
-  ApiErrorResponse,
-  PaginatedResponse,
-  
-  // 认证相关
-  LoginRequest,
-  LoginResponse,
-  RegisterRequest,
-  RegisterResponse,
-  RefreshTokenRequest,
-  RefreshTokenResponse,
-  ChangePasswordRequest,
-  ResetPasswordRequest,
-  ResetPasswordConfirmRequest,
-  
-  // 用户相关
-  GetUserResponse,
-  UpdateUserRequest,
-  UpdateUserResponse,
-  GetUsersQuery,
-  GetUsersResponse,
-  
-  // 测试配置相关
-  CreateTestConfigRequest,
-  CreateTestConfigResponse,
-  UpdateTestConfigRequest,
-  UpdateTestConfigResponse,
-  GetTestConfigsQuery,
-  GetTestConfigsResponse,
-  
-  // 测试执行相关
-  StartTestRequest,
-  StartTestResponse,
-  GetTestExecutionsQuery,
-  GetTestExecutionsResponse,
-  GetTestExecutionResponse,
-  CancelTestRequest,
-  
-  // 测试结果相关
-  GetTestResultsQuery,
-  GetTestResultsResponse,
-  GetTestResultResponse,
-  
+  ApiSuccessResponse, BusinessLogicError, CancelTestRequest, ChangePasswordRequest,
   // 报告相关
   CreateReportRequest,
   CreateReportResponse,
-  GetReportsQuery,
-  GetReportsResponse,
-  GenerateReportRequest,
-  GenerateReportResponse,
-  
+  // 测试配置相关
+  CreateTestConfigRequest,
+  CreateTestConfigResponse, DeleteFileRequest, GenerateReportRequest,
+  GenerateReportResponse, GetReportsQuery,
+  GetReportsResponse, GetSystemConfigResponse,
   // 系统相关
-  GetSystemStatsResponse,
-  GetSystemConfigResponse,
-  UpdateSystemConfigRequest,
-  
+  GetSystemStatsResponse, GetTestConfigsQuery,
+  GetTestConfigsResponse, GetTestExecutionResponse, GetTestExecutionsQuery,
+  GetTestExecutionsResponse, GetTestResultResponse,
+  // 测试结果相关
+  GetTestResultsQuery,
+  GetTestResultsResponse,
+  // 用户相关
+  GetUserResponse, GetUsersQuery,
+  GetUsersResponse,
+  // 认证相关
+  LoginRequest,
+  LoginResponse, PaginatedResponse, RefreshTokenRequest,
+  RefreshTokenResponse, RegisterRequest,
+  RegisterResponse, ResetPasswordConfirmRequest, ResetPasswordRequest,
+  // 测试执行相关
+  StartTestRequest,
+  StartTestResponse, SystemNotificationMessage, TestProgressMessage, UpdateSystemConfigRequest, UpdateTestConfigRequest,
+  UpdateTestConfigResponse, UpdateUserRequest,
+  UpdateUserResponse,
   // 文件上传相关
   UploadFileResponse,
-  DeleteFileRequest,
-  
-  // WebSocket相关
-  WebSocketMessage,
-  TestProgressMessage,
-  SystemNotificationMessage,
-  
   // 错误处理
   ValidationErrorDetail,
-  BusinessLogicError
+  // WebSocket相关
+  WebSocketMessage
 };
+

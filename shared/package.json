@@ -1,0 +1,8 @@
+{
+  "name": "test-web-shared",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "description": "Shared utilities and types for Test Web App",
+  "main": "index.js",
+  "private": true
+}

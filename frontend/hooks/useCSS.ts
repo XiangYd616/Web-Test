@@ -1,4 +1,4 @@
-import { useEffect, useState    } from 'react';import { loadCSS, loadPageCSS, loadComponentCSS, preloadPageCSS    } from '../utils/cssLoader';export const useCSS = (cssPath: string,'
+import { useEffect, useState    } from 'react';import { loadCSS, loadPageCSS, loadComponentCSS, preloadPageCSS    } from '../utils/cssLoader';export const useCSS = (cssPath: string,
   options: {
     immediate?: boolean;
     id?: string;

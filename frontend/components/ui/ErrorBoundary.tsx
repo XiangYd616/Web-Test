@@ -1,4 +1,4 @@
-import { AlertTriangle, Bug, Home, RefreshCw    } from 'lucide-react';import { Component, ErrorInfo, ReactNode    } from 'react';interface Props   {'
+import { AlertTriangle, Bug, Home, RefreshCw    } from 'lucide-react';import { Component, ErrorInfo, ReactNode    } from 'react';interface Props   {
   children: ReactNode;
   fallback?: ReactNode;
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
@@ -18,7 +18,7 @@ class ErrorBoundary extends Component<Props, State> {
       hasError: false,
       error: null,
       errorInfo: null,
-      errorId: '';
+      errorId: ''
     };
   }
 
@@ -52,12 +52,12 @@ class ErrorBoundary extends Component<Props, State> {
       hasError: false,
       error: null,
       errorInfo: null,
-      errorId: '';
+      errorId: ''
     });
   };
 
   handleGoHome = () => {
-    window.location.href = '/';
+    window.location.href = '/'
   };
 
   handleReportBug = () => {
@@ -75,11 +75,11 @@ class ErrorBoundary extends Component<Props, State> {
     // 复制错误信息到剪贴板
     navigator.clipboard.writeText(JSON.stringify(errorReport, null, 2))
       .then(() => {
-        alert('错误信息已复制到剪贴板，请联系技术支持');'
+        alert('错误信息已复制到剪贴板，请联系技术支持");
       })
       .catch(() => {
         console.log("错误报告:', errorReport);'
-        alert('请将控制台中的错误信息发送给技术支持');'
+        alert('请将控制台中的错误信息发送给技术支持");
       });
   };
 
@@ -120,7 +120,7 @@ class ErrorBoundary extends Component<Props, State> {
               <div className= 'space-y-3'>
                 <button
                   onClick={this.handleRetry}
-                  className= 'w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500';
+                  className= 'w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
                   type= 'button'>
                   <RefreshCw className= 'w-4 h-4 mr-2'    />
                   重试
@@ -128,7 +128,7 @@ class ErrorBoundary extends Component<Props, State> {
 
                 <button
                   onClick={this.handleGoHome}
-                  className= 'w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500';
+                  className= 'w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
                   type= 'button'>
                   <Home className= 'w-4 h-4 mr-2'    />
                   返回首页
@@ -136,7 +136,7 @@ class ErrorBoundary extends Component<Props, State> {
 
                 <button
                   onClick={this.handleReportBug}
-                  className= 'w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-500 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500';
+                  className= 'w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-500 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
                   type= 'button'>
                   <Bug className= 'w-4 h-4 mr-2'    />
                   报告问题

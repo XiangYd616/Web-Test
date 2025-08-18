@@ -3,7 +3,7 @@
  * 提供统一的懒加载组件加载体验
  */
 
-import React, { Suspense, ComponentType, LazyExoticComponent    } from 'react';import LoadingFallback from './LoadingFallback';import ErrorBoundary from './ErrorBoundary';interface LazyComponentWrapperProps   {'
+import React, { Suspense, ComponentType, LazyExoticComponent    } from 'react';import LoadingFallback from './LoadingFallback';import ErrorBoundary from './ErrorBoundary';interface LazyComponentWrapperProps   {
   component: LazyExoticComponent<ComponentType<any>>;
   fallback?: React.ComponentType;
   errorFallback?: React.ComponentType<{ error: Error; retry: () => void }>;
@@ -26,21 +26,21 @@ export const LazyComponentWrapper: React.FC<LazyComponentWrapperProps> = ({
     className: combinedClassName,
     style: computedStyle,
     disabled,
-    'aria-label': ariaLabel,'
+    'aria-label': ariaLabel,
     "data-testid': testId'
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
   
   // 可访问性支持
   const {
-    'aria-label': ariaLabel,'
-    'aria-describedby': ariaDescribedBy,'
+    'aria-label': ariaLabel,
+    'aria-describedby': ariaDescribedBy,
     role,
     tabIndex  = 0,
-    'data-testid': testId'
+    'data-testid': testId
   } = props;
   const accessibilityProps = {
-    'aria-label': ariaLabel,'
-    'aria-describedby': ariaDescribedBy,'
+    'aria-label': ariaLabel,
+    'aria-describedby': ariaDescribedBy,
     role,
     tabIndex: disabled ? -1 : tabIndex,
     "data-testid': testId'
@@ -48,7 +48,7 @@ export const LazyComponentWrapper: React.FC<LazyComponentWrapperProps> = ({
 
   // 键盘导航支持
   const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' || event.key === ' ') {'
+    if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       onClick?.(event as any);
     }
@@ -115,7 +115,7 @@ export const useLazyComponent = (componentLoader: () => Promise<{ default: Compo
       setComponent(() => LoadedComponent);
       return LoadedComponent;
     } catch (err) {
-      const error = err instanceof Error ? err : new Error("组件加载失败');'
+      const error = err instanceof Error ? err : new Error("组件加载失败");
       setError(error);
       throw error;
     } finally {

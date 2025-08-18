@@ -3,7 +3,7 @@
  * 管理测试配置模板的保存、加载和删除
  */
 
-import React, { useState, useEffect    } from 'react';import { TestConfig, TestType    } from '../../types/testConfig';import { TestService    } from '../../services/unifiedTestService';interface TestTemplate   {'
+import React, { useState, useEffect    } from 'react';import { TestConfig, TestType    } from '../../types/testConfig';import { TestService    } from '../../services/unifiedTestService';interface TestTemplate   {
   name: string;
   config: TestConfig;
   description: string;
@@ -23,26 +23,26 @@ export const TestTemplateManager: React.FC<TestTemplateManagerProps> = ({
 }) => {
   
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState("');'
+  const [pageTitle, setPageTitle] = useState("");
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
-      document.title = `${pageTitle} - Test Web`;`
+      document.title = `${pageTitle} - Test Web`;
     }
   }, [pageTitle]);
 
   // 页面可见性检测
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible') {'`
+      if (document.visibilityState === "visible') {'`"`
         // 页面变为可见时刷新数据
         fetchData?.();
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);'
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
-      document.removeEventListener("visibilitychange', handleVisibilityChange);'
+      document.removeEventListener("visibilitychange', handleVisibilityChange);"
     };
   }, [fetchData]);
   
@@ -57,23 +57,23 @@ export const TestTemplateManager: React.FC<TestTemplateManagerProps> = ({
   );
   
   const componentId = useId();
-  const errorId = `${componentId}-error`;`
-  const descriptionId = `${componentId}-description`;`
+  const errorId = `${componentId}-error`;
+  const descriptionId = `${componentId}-description`;
   
   const ariaProps = {
     id: componentId,
-    "aria-label': ariaLabel,'`
-    'aria-labelledby': ariaLabelledBy,'
+    "aria-label': ariaLabel,'`"`
+    'aria-labelledby': ariaLabelledBy,
     'aria-describedby': ['']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
-    ].filter(Boolean).join(' ') || undefined,'
-    'aria-invalid': !!error,'
-    'aria-disabled': disabled,'
-    'aria-busy': loading,'
-    'aria-expanded': expanded,'
-    'aria-selected': selected,'
+    ].filter(Boolean).join(' ') || undefined,
+    'aria-invalid': !!error,
+    'aria-disabled': disabled,
+    'aria-busy': loading,
+    'aria-expanded': expanded,
+    'aria-selected': selected,
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -94,8 +94,8 @@ export const TestTemplateManager: React.FC<TestTemplateManagerProps> = ({
       const templateData = await testService.getTestTemplates(testType);
       setTemplates(templateData);
     } catch (error) {
-      setError('加载模板失败');'
-      console.error("Failed to load templates: ', error);'
+      setError('加载模板失败");"
+      console.error("Failed to load templates: ', error);"
     } finally {
       setIsLoading(false);
     }
@@ -122,22 +122,22 @@ export const TestTemplateManager: React.FC<TestTemplateManagerProps> = ({
           setSelectedTemplate(null);
         }
       } catch (error) {
-        setError("删除模板失败');'`
+        setError("删除模板失败");``
       }
     }
   };
 
   const getTestTypeLabel = (testType: TestType): string  => {
     const labels = {
-      [TestType.API]: "API测试','
-      [TestType.PERFORMANCE]: "性能测试','
-      [TestType.SECURITY]: "安全测试','
-      [TestType.SEO]: "SEO测试','
-      [TestType.STRESS]: "压力测试','
-      [TestType.INFRASTRUCTURE]: "基础设施测试','
-      [TestType.UX]: "UX测试','
-      [TestType.COMPATIBILITY]: "兼容性测试','
-      [TestType.WEBSITE]: '网站综合测试';
+      [TestType.API]: "API测试',"
+      [TestType.PERFORMANCE]: "性能测试',"
+      [TestType.SECURITY]: "安全测试',"
+      [TestType.SEO]: "SEO测试',"
+      [TestType.STRESS]: "压力测试',"
+      [TestType.INFRASTRUCTURE]: "基础设施测试',"
+      [TestType.UX]: "UX测试',"
+      [TestType.COMPATIBILITY]: "兼容性测试',"
+      [TestType.WEBSITE]: '网站综合测试'
     };
     return labels[testType];
   };
@@ -165,9 +165,9 @@ export const TestTemplateManager: React.FC<TestTemplateManagerProps> = ({
             <h2 className= 'text-xl font-semibold text-gray-900'>
               {getTestTypeLabel(testType)} 模板管理
             </h2>
-            <button
+            <button>
               onClick={onClose}
-              className= 'text-gray-400 hover:text-gray-600';
+              className= 'text-gray-400 hover:text-gray-600'
             >
               ✕
             </button>
@@ -193,16 +193,16 @@ export const TestTemplateManager: React.FC<TestTemplateManagerProps> = ({
                 </div>
               ) : (<div className= 'space-y-2'>
                   {templates.map((template) => (
-                    <div
+                    <div>
                       key={template.name}
                       className={`p-3 border rounded-lg cursor-pointer transition-colors ${`}
                         selectedTemplate?.name === template.name
-                          ? "border-blue-500 bg-blue-50';'`
-                          : 'border-gray-200 hover:bg-gray-50';
+                          ? "border-blue-500 bg-blue-50";``
+                          : 'border-gray-200 hover:bg-gray-50'
                       }`}`
                       onClick={() => handleTemplateSelect(template)}
                     >
-                      <div className= "flex items-center justify-between'>`
+                      <div className= "flex items-center justify-between'>`'"`
                         <div className= 'flex-1'>
                           <h4 className= 'font-medium text-gray-900'>{template.name}</h4>
                           <p className= 'text-sm text-gray-600 mt-1'>{template.description}</p>
@@ -212,13 +212,13 @@ export const TestTemplateManager: React.FC<TestTemplateManagerProps> = ({
                             </p>
                           )}
                         </div>
-                        <button
+                        <button>
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteTemplate(template.name);
                           }}
-                          className= 'text-red-500 hover:text-red-700 p-1';
-                          title= '删除模板';
+                          className= 'text-red-500 hover:text-red-700 p-1'
+                          title= '删除模板'
                         >
                           🗑️
                         </button>
@@ -268,16 +268,16 @@ export const TestTemplateManager: React.FC<TestTemplateManagerProps> = ({
         {/* 底部操作 */}
         <div className= 'border-t border-gray-200 p-6'>
           <div className= 'flex justify-end space-x-3'>
-            <button
+            <button>
               onClick={onClose}
-              className= 'px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50';
+              className= 'px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50'
             >
               取消
             </button>
-            <button
+            <button>
               onClick={handleUseTemplate}
               disabled={!selectedTemplate}
-              className= 'px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed';
+              className= 'px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
             >
               使用模板
             </button>

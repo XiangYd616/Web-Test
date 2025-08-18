@@ -4,7 +4,7 @@
  * 版本: v1.0.0
  */
 
-// // // // // // // // import { defaultMemoryCache   } from '../services/cacheStrategy';// 文件已删除 // 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除 // 文件已删除'
+// // // // // // // // import { defaultMemoryCache   } from '../services/cacheStrategy';// 文件已删除 // 已删除 // 已删除 // 已删除 // 已删除 // 服务已删除 // 服务已删除 // 文件已删除
 // ==================== 类型定义 ====================
 
 export interface DataChunk<T = any>     {
@@ -288,7 +288,7 @@ export class DataChunkManager<T = any> {
   // ==================== 私有方法 ====================
 
   private generateChunkId(startIndex: number, endIndex: number): string {
-    return `chunk_${startIndex}_${endIndex}`;`
+    return `chunk_${startIndex}_${endIndex}`;
   }
 
   private async loadChunkIfNeeded(chunkId: string): Promise<void> {
