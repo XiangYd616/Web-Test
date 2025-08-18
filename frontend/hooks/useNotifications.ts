@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState    } from 'react';export interface NotificationItem     {
   id: string;
-  type: 'success' | 'warning' | 'error' | 'info'
+  type: 'success' | 'warning' | 'error' | 'info
   title: string;
   message: string;
   time: string;
   read: boolean;
-  category?: 'system' | 'test' | 'security' | 'performance' | 'general'
-  priority?: 'low' | 'medium' | 'high' | 'urgent'
+  category?: 'system' | 'test' | 'security' | 'performance' | 'general
+  priority?: 'low' | 'medium' | 'high' | 'urgent
   actionUrl?: string;
   actionText?: string;
   createdAt: Date;
@@ -30,7 +30,7 @@ export interface NotificationStats     {
   };
 }
 
-const STORAGE_KEY = 'testweb_notifications'
+const STORAGE_KEY = 'testweb_notifications
 // 模拟通知数据
 const generateMockNotifications = (): NotificationItem[]  => {
   const now = new Date();
@@ -171,13 +171,13 @@ export const useNotifications = () => {
 
     const response = await fetch('/api/user/notifications', {
       headers: {
-        'Authorization': `Bearer ${token}`,'`
-        "Content-Type': 'application/json";`
+        'Authorization': `Bearer ${token}`,
+        "Content-Type': 'application/json";
       }
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);`
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
     const result = await response.json();
@@ -190,7 +190,7 @@ export const useNotifications = () => {
       // 同步到本地存储
       localStorage.setItem(STORAGE_KEY, JSON.stringify(apiNotifications));
     } else {
-      throw new Error("Invalid API response");`
+      throw new Error("Invalid API response");
     }
   };
 

@@ -9,5 +9,5 @@ const withAuthCheck: React.FC<withAuthCheckProps> = (props) => {
       <p>组件内容</p>
     </div>
   );
-};'"
-export default withAuthCheck;'"
+};
+export default withAuthCheck;'

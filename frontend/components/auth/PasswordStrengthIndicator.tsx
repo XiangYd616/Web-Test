@@ -10,4 +10,4 @@ const PasswordStrengthIndicator: React.FC<PasswordStrengthIndicatorProps> = (pro
     </div>
   );
 };
-export default PasswordStrengthIndicator;'"
+export default PasswordStrengthIndicator;

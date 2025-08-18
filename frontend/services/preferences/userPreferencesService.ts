@@ -1,6 +1,6 @@
 // UserPreferencesService - 用户偏好设置服务
 export interface UserPreferences {
-  theme: 'light' | 'dark' | 'auto'
+  theme: 'light' | 'dark' | 'auto
   language: string;
   notifications: {
     email: boolean;
@@ -14,7 +14,7 @@ export interface UserPreferences {
 }
 
 export class UserPreferencesService {
-  private storageKey = 'userPreferences'
+  private storageKey = 'userPreferences
   private defaultPreferences: UserPreferences = {
     theme: 'light',
     language: 'zh-CN',

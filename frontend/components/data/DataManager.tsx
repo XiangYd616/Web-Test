@@ -10,4 +10,4 @@ const DataManager: React.FC<DataManagerProps> = (props) => {
     </div>
   );
 };
-export default DataManager;'"
+export default DataManager;

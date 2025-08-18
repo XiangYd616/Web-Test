@@ -4,7 +4,7 @@
  * 版本: v1.0.0
  */
 
-import { useState, useCallback, useRef, useEffect    } from 'react';import type { ApiResponse, ApiError  } from '../types/api';// ==================== 状态类型定义 ==================== ''
+import { useState, useCallback, useRef, useEffect    } from 'react';import type { ApiResponse, ApiError  } from '../types/api';// ==================== 状态类型定义 ==================== 
 export type DataState   = 'idle' | 'loading' | 'success' | 'error';export interface DataStateInfo<T = any>     {
   state: DataState;
   data: T | null;
@@ -54,7 +54,7 @@ export function useDataState<T = any>(
     onStateChange
   } = options;
 
-  const [state, setState] = useState<DataState>('idle");"
+  const [state, setState] = useState<DataState>('idle");
   const [data, setData] = useState<T | null>(initialData);
   const [error, setError] = useState<ApiError | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
@@ -91,7 +91,7 @@ export function useDataState<T = any>(
   // 执行异步操作
   const execute = useCallback(async (operation: AsyncOperation<T>): Promise<T | null>  => {
     lastOperationRef.current = operation;
-    setState('loading");"
+    setState('loading");
     setError(null);
 
     try {
@@ -101,7 +101,7 @@ export function useDataState<T = any>(
         
         const responseData = response.data;
         setData(responseData);
-        setState('success");"
+        setState('success");
         setLastUpdated(new Date().toISOString());
         setRetryCount(0);
         onSuccess?.(responseData);
@@ -121,7 +121,7 @@ export function useDataState<T = any>(
         timestamp: new Date().toISOString()
       } : err as ApiError;
       setError(apiError);
-      setState('error");"
+      setState('error");
       onError?.(apiError);
 
       // 自动重试逻辑
@@ -148,7 +148,7 @@ export function useDataState<T = any>(
 
   // 重置状态
   const reset = useCallback(() => {
-    setState('idle");"
+    setState('idle");
     setData(initialData);
     setError(null);
     setLastUpdated(null);
@@ -164,7 +164,7 @@ export function useDataState<T = any>(
   // 手动设置数据
   const setDataManually = useCallback((newData: T) => {
     setData(newData);
-    setState('success");"
+    setState('success");
     setLastUpdated(new Date().toISOString());
     setError(null);
   }, []);
@@ -172,7 +172,7 @@ export function useDataState<T = any>(
   // 手动设置错误
   const setErrorManually = useCallback((newError: ApiError) => {
     setError(newError);
-    setState('error");"
+    setState('error");
     setData(null);
   }, []);
 
@@ -241,13 +241,13 @@ export function useBatchDataState(
   batchInfo.progress = batchInfo.completedCount / batchInfo.totalCount;
 
   if (batchInfo.allLoading) {
-    batchInfo.globalState = 'loading'
+    batchInfo.globalState = 'loading
   } else if (batchInfo.allSuccess) {
-    batchInfo.globalState = 'success'
+    batchInfo.globalState = 'success
   } else if (batchInfo.hasAnyError) {
-    batchInfo.globalState = 'error'
+    batchInfo.globalState = 'error
   } else {
-    batchInfo.globalState = 'idle'
+    batchInfo.globalState = 'idle
   }
 
   // 执行单个操作

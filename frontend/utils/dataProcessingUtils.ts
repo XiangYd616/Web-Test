@@ -60,7 +60,7 @@ export class DataProcessingUtils {
       errorRate: this.normalizeNumber(rawPoint.errorRate, 0, 100),
       status: rawPoint.status || (rawPoint.success ? 200 : 500),
       success: Boolean(rawPoint.success),
-      phase: rawPoint.phase || 'steady'
+      phase: rawPoint.phase || 'steady
     };
   }
 
@@ -83,7 +83,7 @@ export class DataProcessingUtils {
     if (validData.length === 0) {
       
         return [
-        { range: '0-50ms', count: 0, percentage: 0, color: 'bg-green-400'
+        { range: '0-50ms', count: 0, percentage: 0, color: 'bg-green-400
       },
         { range: '50-100ms', count: 0, percentage: 0, color: 'bg-green-300' },
         { range: '100-200ms', count: 0, percentage: 0, color: 'bg-yellow-400' },
@@ -121,31 +121,31 @@ export class DataProcessingUtils {
         range: '0-50ms',
         count: distribution['0-50'],
         percentage: totalCount > 0 ? (distribution['0-50'] / totalCount) * 100 : 0,
-        color: 'bg-green-400'
+        color: 'bg-green-400
       },
       {
         range: '50-100ms',
         count: distribution['50-100'],
         percentage: totalCount > 0 ? (distribution['50-100'] / totalCount) * 100 : 0,
-        color: 'bg-green-300'
+        color: 'bg-green-300
       },
       {
         range: '100-200ms',
         count: distribution['100-200'],
         percentage: totalCount > 0 ? (distribution['100-200'] / totalCount) * 100 : 0,
-        color: 'bg-yellow-400'
+        color: 'bg-yellow-400
       },
       {
         range: '200-500ms',
         count: distribution['200-500'],
         percentage: totalCount > 0 ? (distribution['200-500'] / totalCount) * 100 : 0,
-        color: 'bg-orange-400'
+        color: 'bg-orange-400
       },
       {
         range: '500ms+',
         count: distribution['500+'],
         percentage: totalCount > 0 ? (distribution['500+'] / totalCount) * 100 : 0,
-        color: 'bg-red-400'
+        color: 'bg-red-400
       }
     ];
   }

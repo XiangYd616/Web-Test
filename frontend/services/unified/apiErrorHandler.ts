@@ -38,18 +38,18 @@ export const defaultErrorHandler = {
     return error && 
            typeof error === 'object' && 
            typeof error.code === 'string' && 
-           typeof error.message === 'string'
+           typeof error.message === 'string
   },
 
   /**
    * 格式化错误消息
    */
   formatErrorMessage(error: ApiError): string {
-    const baseMessage = error.message || '未知错误'
+    const baseMessage = error.message || '未知错误
     if (error.details && typeof error.details === 'object') {
       const details = Object.entries(error.details)
-        .map(([key, value]) => `${key}: ${value}`)`
-        .join(", ");`
+        .map(([key, value]) => `${key}: ${value}`)
+        .join(", ");
       
       return `${baseMessage} (${details})`;
     }
@@ -62,8 +62,8 @@ export const defaultErrorHandler = {
    */
   logError(error: ApiError, context?: string): void {
     const timestamp = new Date().toISOString();
-    const contextStr = context ? ` [${context}]` : '";`
-    console.error(`${timestamp}${contextStr} API Error:`, {`
+    const contextStr = context ? ` [${context}]` : ';
+    console.error(`${timestamp}${contextStr} API Error:`, {
       code: error.code,
       message: error.message,
       details: error.details,
@@ -82,7 +82,7 @@ export const defaultErrorHandler = {
       meta: {
         timestamp: new Date().toISOString(),
         requestId: this.generateRequestId(),
-        version: "1.0";`
+        version: "1.0";
       }
     };
   },
@@ -98,8 +98,7 @@ export const defaultErrorHandler = {
    * 网络错误处理
    */
   handleNetworkError(error: any): ApiError {
-    if (error.name === "NetworkError' || error.code === 'NETWORK_ERROR') {'`
-      
+    if (error.name === "NetworkError' || error.code === 'NETWORK_ERROR') {
         return {
         code: 'NETWORK_ERROR',
         message: '网络连接失败，请检查网络设置',
@@ -116,7 +115,7 @@ export const defaultErrorHandler = {
         message: '请求超时，请稍后重试',
         timestamp: new Date().toISOString(),
         details: {
-          timeout: error.timeout || 'unknown'
+          timeout: error.timeout || 'unknown
       }
       };
     }
@@ -143,7 +142,7 @@ export const defaultErrorHandler = {
     };
     const errorInfo = errorMap[status] || {
       code: 'HTTP_ERROR',
-      message: `HTTP错误: ${status} ${statusText}``
+      message: `HTTP错误: ${status} ${statusText}
     };
 
     return {
@@ -173,7 +172,7 @@ export default defaultErrorHandler;
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
@@ -203,7 +202,7 @@ export default defaultErrorHandler;
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || "UnknownError";`
+    const errorType = error.name || "UnknownError";
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1

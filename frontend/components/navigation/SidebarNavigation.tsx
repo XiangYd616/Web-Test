@@ -11,7 +11,7 @@ import React, { useState    } from 'react';import { Link, useLocation    } from 
  }
 
 export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
-  className = '',;
+  className = ',;
   items,;
   collapsed = false,;
   onToggle;
@@ -52,17 +52,17 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
     const isExpanded = expandedItems.has(item.label);
 
     if (hasChildren) {
-      return (<div key={item.label} className={`sidebar-item sidebar-group level-${level}`}>`
+      return (<div key={item.label} className={`sidebar-item sidebar-group level-${level}`}>
           <button;
-            className={ `sidebar-group-toggle ${isActive ? 'active' : "' }`}'`"`
+            className={ `sidebar-group-toggle ${isActive ? 'active' : " }`}'
             onClick={() => toggleExpanded(item.label)}
             aria-expanded={isExpanded}
           >;
-            {item.icon && <span className= "sidebar-icon'>{item.icon}</span>}'`"`
+            {item.icon && <span className="sidebar-icon'>{item.icon}</span>}'
             {!collapsed && (
               <>;
-                <span className= 'sidebar-label'>{item.label}</span>
-                <span className={ `sidebar-arrow ${isExpanded ? 'expanded' : "' }`}>`'"`
+                <span className='sidebar-label'>{item.label}</span>
+                <span className={ `sidebar-arrow ${isExpanded ? 'expanded' : " }`}>`
                   ▼;
                 </span>
               </>
@@ -70,7 +70,7 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
           </button>
 
           {isExpanded && !collapsed && (
-            <div className= "sidebar-submenu'>`;'"`
+            <div className="sidebar-submenu'>`;
               {item.children?.map(child => renderNavigationItem(child, level + 1))}
             </div>
           )}
@@ -82,15 +82,15 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
       <Link;
         key={item.label}
         to={item.path || '#'}
-        className={`sidebar-item sidebar-link level-${level} ${ isActive ? 'active' : "' }`}'`"`
+        className={`sidebar-item sidebar-link level-${level} ${ isActive ? 'active' : " }`}'
         title={ collapsed ? item.label : undefined }
       >;
-        {item.icon && <span className= "sidebar-icon'>{item.icon}</span>}'`"`
+        {item.icon && <span className="sidebar-icon'>{item.icon}</span>}'
         {!collapsed && (
           <>;
-            <span className= 'sidebar-label'>{item.label}</span>
+            <span className='sidebar-label'>{item.label}</span>
             {item.badge && (
-              <span className={`sidebar-badge sidebar-badge--${item.badge.variant}`}>`
+              <span className={`sidebar-badge sidebar-badge--${item.badge.variant}`}>
                 {item.badge.text}
               </span>
             )}
@@ -101,10 +101,10 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
   };
 
   return (;
-    <aside className={ `sidebar-navigation ${collapsed ? 'collapsed' : "' } ${className}`}>`'"`
-      <div className= "sidebar-header'>`;'"`
+    <aside className={ `sidebar-navigation ${collapsed ? 'collapsed' : " } ${className}`}>`
+      <div className="sidebar-header'>`;
         <button;
-          className= 'sidebar-toggle'
+          className= 'sidebar-toggle
           onClick={onToggle}
           aria-label={ collapsed ? '展开侧边栏" : "收起侧边栏' }
         >;
@@ -112,7 +112,7 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
         </button>
       </div>
 
-      <nav className= 'sidebar-menu'>;
+      <nav className='sidebar-menu'>;
         {accessibleItems.map(item => renderNavigationItem(item))}
       </nav>
     </aside>

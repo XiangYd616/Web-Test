@@ -1,7 +1,7 @@
 import React from 'react';import { CheckCircle, XCircle, AlertTriangle, Clock, Loader, Info    } from 'lucide-react';import { cn    } from '../../utils/cn';// Badge组件
 interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement>   {
-  variant?: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info'
-  size?: 'xs' | 'sm' | 'md' | 'lg'
+  variant?: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info
+  size?: 'xs' | 'sm' | 'md' | 'lg
   outline?: boolean;
   children: React.ReactNode;
 }
@@ -9,31 +9,31 @@ interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement>   {
 const badgeVariants = {
   default: {
     solid: 'bg-gray-600 text-white border-gray-600',
-    outline: 'bg-transparent text-gray-300 border-gray-600'
+    outline: 'bg-transparent text-gray-300 border-gray-600
   },
   primary: {
     solid: 'bg-blue-600 text-white border-blue-600',
-    outline: 'bg-blue-600/10 text-blue-400 border-blue-600/30'
+    outline: 'bg-blue-600/10 text-blue-400 border-blue-600/30
   },
   secondary: {
     solid: 'bg-gray-500 text-white border-gray-500',
-    outline: 'bg-gray-500/10 text-gray-400 border-gray-500/30'
+    outline: 'bg-gray-500/10 text-gray-400 border-gray-500/30
   },
   success: {
     solid: 'bg-green-600 text-white border-green-600',
-    outline: 'bg-green-600/10 text-green-400 border-green-600/30'
+    outline: 'bg-green-600/10 text-green-400 border-green-600/30
   },
   warning: {
     solid: 'bg-yellow-600 text-white border-yellow-600',
-    outline: 'bg-yellow-600/10 text-yellow-400 border-yellow-600/30'
+    outline: 'bg-yellow-600/10 text-yellow-400 border-yellow-600/30
   },
   danger: {
     solid: 'bg-red-600 text-white border-red-600',
-    outline: 'bg-red-600/10 text-red-400 border-red-600/30'
+    outline: 'bg-red-600/10 text-red-400 border-red-600/30
   },
   info: {
     solid: 'bg-cyan-600 text-white border-cyan-600',
-    outline: 'bg-cyan-600/10 text-cyan-400 border-cyan-600/30'
+    outline: 'bg-cyan-600/10 text-cyan-400 border-cyan-600/30
   }
 };
 
@@ -41,7 +41,7 @@ const badgeSizes = {
   xs: 'px-1.5 py-0.5 text-xs',
   sm: 'px-2 py-1 text-xs',
   md: 'px-2.5 py-1 text-sm',
-  lg: 'px-3 py-1.5 text-sm'
+  lg: 'px-3 py-1.5 text-sm
 };
 
 export const Badge: React.FC<BadgeProps> = ({
@@ -69,9 +69,9 @@ export const Badge: React.FC<BadgeProps> = ({
   
   const ariaProps = {
     id: componentId,
-    "aria-label': ariaLabel,'`
+    "aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': ['']
+    'aria-describedby': [']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
@@ -85,7 +85,7 @@ export const Badge: React.FC<BadgeProps> = ({
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
   const variantStyles = badgeVariants[variant];
-  const styleType = outline ? 'outline' : 'solid'
+  const styleType = outline ? 'outline' : 'solid
   return (
     <span
       className={cn(
@@ -106,7 +106,7 @@ export const Badge: React.FC<BadgeProps> = ({
 
 // 状态徽章组件
 interface StatusBadgeProps extends Omit<BadgeProps, 'variant' | 'children'>   {
-  status: 'success' | 'error' | 'warning' | 'pending' | 'info' | 'loading'
+  status: 'success' | 'error' | 'warning' | 'pending' | 'info' | 'loading
   text?: string;
   showIcon?: boolean;
 }
@@ -115,32 +115,32 @@ const statusConfig = {
   success: {
     variant: 'success' as const,
     icon: CheckCircle,
-    defaultText: '成功'
+    defaultText: '成功
   },
   error: {
     variant: 'danger' as const,
     icon: XCircle,
-    defaultText: '失败'
+    defaultText: '失败
   },
   warning: {
     variant: 'warning' as const,
     icon: AlertTriangle,
-    defaultText: '警告'
+    defaultText: '警告
   },
   pending: {
     variant: 'secondary' as const,
     icon: Clock,
-    defaultText: '待处理'
+    defaultText: '待处理
   },
   info: {
     variant: 'info' as const,
     icon: Info,
-    defaultText: '信息'
+    defaultText: '信息
   },
   loading: {
     variant: 'primary' as const,
     icon: Loader,
-    defaultText: '加载中'
+    defaultText: '加载中
   }
 };
 
@@ -168,7 +168,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
             size === 'sm' && 'w-3 h-3',
             size === 'md' && 'w-3.5 h-3.5',
             size === 'lg' && 'w-4 h-4',
-            status === 'loading' && 'animate-spin'
+            status === 'loading' && 'animate-spin
           )}
            />
       )}
@@ -197,13 +197,13 @@ export const NumberBadge: React.FC<NumberBadgeProps> = ({
         return null;
       }
 
-  const displayCount = count > max ? `${max}+` : count.toString();`
+  const displayCount = count > max ? `${max}+` : count.toString();
 
   return (
     <Badge
       variant={variant}
       size={size}
-      className= "min-w-[1.25rem] h-5 rounded-full flex items-center justify-center p-0 text-xs font-bold";`
+      className= "min-w-[1.25rem] h-5 rounded-full flex items-center justify-center p-0 text-xs font-bold";
       {...props}
     >
       {displayCount}
@@ -213,8 +213,8 @@ export const NumberBadge: React.FC<NumberBadgeProps> = ({
 
 // 点状态指示器
 interface DotBadgeProps extends React.HTMLAttributes<HTMLSpanElement>   {
-  status: 'success' | 'error' | 'warning' | 'pending' | 'info'
-  size?: 'sm' | 'md' | 'lg'
+  status: 'success' | 'error' | 'warning' | 'pending' | 'info
+  size?: 'sm' | 'md' | 'lg
   pulse?: boolean;
 }
 
@@ -223,13 +223,13 @@ const dotColors = {
   error: 'bg-red-500',
   warning: 'bg-yellow-500',
   pending: 'bg-gray-500',
-  info: 'bg-blue-500'
+  info: 'bg-blue-500
 };
 
 const dotSizes = {
   sm: 'w-2 h-2',
   md: 'w-3 h-3',
-  lg: 'w-4 h-4'
+  lg: 'w-4 h-4
 };
 
 export const DotBadge: React.FC<DotBadgeProps> = ({
@@ -275,16 +275,16 @@ export const ProgressBadge: React.FC<ProgressBadgeProps> = ({
   // 根据进度自动选择颜色
   const getVariant = () => {
     if (variant !== 'primary') return variant;
-    if (percentage >= 80) return 'success'
-    if (percentage >= 60) return 'warning'
-    if (percentage >= 40) return 'info'
+    if (percentage >= 80) return 'success
+    if (percentage >= 60) return 'warning
+    if (percentage >= 40) return 'info
     return "danger
   };
 
   const displayText = showPercentage
-    ? `${percentage}%``
+    ? `${percentage}%
     : showValue
-      ? `${value}/${max}``
+      ? `${value}/${max}
       : percentage.toString();
 
   return (
@@ -299,7 +299,7 @@ export const ProgressBadge: React.FC<ProgressBadgeProps> = ({
 };
 
 // 标签徽章组件（用于分类标签）
-interface TagBadgeProps extends Omit<BadgeProps, "variant'>   {'`
+interface TagBadgeProps extends Omit<BadgeProps, "variant'>   {
   color?: string;
   removable?: boolean;
   onRemove?: () => void;
@@ -315,14 +315,14 @@ export const TagBadge: React.FC<TagBadgeProps> = ({
   ...props
 }) => {
   const customStyle = color ? {
-    backgroundColor: `${color}20`,`
-    borderColor: `${color}40`,`
+    backgroundColor: `${color}20`,
+    borderColor: `${color}40`,
     color: color
   } : {};
 
   return (
     <Badge
-      variant={color ? undefined : "secondary'}'`
+      variant={color ? undefined : "secondary'}
       size={size}
       outline
       className={cn(
@@ -336,11 +336,11 @@ export const TagBadge: React.FC<TagBadgeProps> = ({
       {children}
       {removable && (
         <button
-          type= 'button'
+          type= 'button
           onClick={onRemove}
-          className= 'ml-1 hover:bg-current hover:bg-opacity-20 rounded-full p-0.5 transition-colors'
+          className= 'ml-1 hover:bg-current hover:bg-opacity-20 rounded-full p-0.5 transition-colors
         >
-          <XCircle className= 'w-3 h-3'    />
+          <XCircle className='w-3 h-3' />
         </button>
       )}
     </Badge>

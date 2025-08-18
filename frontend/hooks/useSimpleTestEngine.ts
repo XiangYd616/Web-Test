@@ -3,8 +3,8 @@ import { useCallback, useEffect, useRef, useState    } from 'react';import backg
   users: number;
   duration: number;
   rampUp: number;
-  testType: 'gradual' | 'spike' | 'constant' | 'stress' | 'load' | 'volume'
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
+  testType: 'gradual' | 'spike' | 'constant' | 'stress' | 'load' | 'volume
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH
   timeout: number;
   thinkTime: number;
   warmupDuration: number;
@@ -12,12 +12,12 @@ import { useCallback, useEffect, useRef, useState    } from 'react';import backg
   headers?: Record<string, string>;
   body?: string;
   authentication?: {
-    type: 'basic' | 'bearer' | 'api-key'
+    type: 'basic' | 'bearer' | 'api-key
     credentials: Record<string, string>;
   };
   proxy?: {
     enabled: boolean;
-    type?: 'http' | 'https' | 'socks5'
+    type?: 'http' | 'https' | 'socks5
     host?: string;
     port?: number;
     username?: string;
@@ -67,7 +67,7 @@ export interface DetailedTestProgress     {
   throughput: number;
   timeoutCount: number;
   progress: number;
-  currentPhase: 'warmup' | 'rampup' | 'steady' | 'cooldown' | 'completed'
+  currentPhase: 'warmup' | 'rampup' | 'steady' | 'cooldown' | 'completed
   phaseProgress: number;
   bytesReceived: number;
   bytesSent: number;
@@ -374,10 +374,10 @@ export const useAdvancedTestEngine = () => {
 
   const saveTestTemplate = useCallback(async (name: string, config: StressTestConfig) => {
     try {
-      const response = await testAPI.saveTestTemplate({ testType: 'stress', name, description: `${name} 压力测试模板`, config });'`
+      const response = await testAPI.saveTestTemplate({ testType: 'stress', name, description: `${name} 压力测试模板`, config });
       return response.data;
     } catch (error) {
-      console.error("Failed to save test template:', error);'`
+      console.error("Failed to save test template:', error);
       throw error;
     }
   }, []);

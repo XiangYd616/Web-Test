@@ -10,7 +10,7 @@ import React, { useMemo    } from 'react';import VirtualScroll from './VirtualSc
   width?: number;
   render?: (value: any, record: T, index: number) => React.ReactNode;
   sorter?: boolean;
-  fixed?: 'left' | 'right'
+  fixed?: 'left' | 'right
 }
 
 export interface VirtualTableProps<T>     {
@@ -31,7 +31,7 @@ export const VirtualTable = <T extends Record<string, any>>({
   containerHeight,
   onRowClick,
   rowKey = 'id',
-  className = '',
+  className = ',
   loading = false
 }: VirtualTableProps<T>) => {
   
@@ -41,7 +41,7 @@ export const VirtualTable = <T extends Record<string, any>>({
     style: computedStyle,
     disabled,
     'aria-label': ariaLabel,
-    "data-testid': testId'
+    "data-testid': testId
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
   
   // 错误处理
@@ -53,7 +53,7 @@ export const VirtualTable = <T extends Record<string, any>>({
 
     // 可选：发送错误报告
     if (process.env.NODE_ENV === 'production') {
-      console.error("Component error: ', errorMessage);'
+      console.error("Component error: ', errorMessage);
     }
   }, []);
 
@@ -84,24 +84,24 @@ export const VirtualTable = <T extends Record<string, any>>({
   // 渲染表头
   const renderHeader = () => (
     <div
-      className= 'virtual-table-header'
+      className= 'virtual-table-header
       style={{
         display: 'flex',
         height: rowHeight,
         backgroundColor: '#f5f5f5',
         borderBottom: '1px solid #e0e0e0',
-        fontWeight: 'bold'
+        fontWeight: 'bold
       }}
     >
       {columnWidths.map((col) => (
         <div
           key={col.key}
           style={{
-            width: `${col.percentage}%`,`
-            padding: "0 8px','`
+            width: `${col.percentage}%`,
+            padding: "0 8px',
             display: 'flex',
             alignItems: 'center',
-            borderRight: '1px solid #e0e0e0'
+            borderRight: '1px solid #e0e0e0
           }}
         >
           {col.title}
@@ -120,7 +120,7 @@ export const VirtualTable = <T extends Record<string, any>>({
           display: 'flex',
           borderBottom: '1px solid #f0f0f0',
           cursor: onRowClick ? 'pointer' : 'default',
-          backgroundColor: index % 2 === 0 ? '#fff' : '#fafafa'
+          backgroundColor: index % 2 === 0 ? '#fff' : '#fafafa
         }}
         onClick={() => onRowClick?.(record, index)}
       >
@@ -128,14 +128,14 @@ export const VirtualTable = <T extends Record<string, any>>({
           <div
             key={col.key}
             style={{
-              width: `${col.percentage}%`,`
-              padding: "0 8px','`
+              width: `${col.percentage}%`,
+              padding: "0 8px',
               display: 'flex',
               alignItems: 'center',
               borderRight: '1px solid #f0f0f0',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap
             }}
           >
             {col.render
@@ -151,12 +151,12 @@ export const VirtualTable = <T extends Record<string, any>>({
   if (loading) {
     return (
       <div
-        className={`virtual-table-loading ${className}`}`
+        className={`virtual-table-loading ${className}`}
         style={{
           height: containerHeight,
-          display: "flex','`
+          display: "flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center
         }}
       >
         <div>加载中...</div>
@@ -165,14 +165,14 @@ export const VirtualTable = <T extends Record<string, any>>({
   }
 
   return (
-    <div className={`virtual-table ${className}`}>`
+    <div className={`virtual-table ${className}`}>
       {renderHeader()}
       <VirtualScroll
         items={dataSource}
         itemHeight={rowHeight}
         containerHeight={containerHeight - rowHeight}
         renderItem={renderRow}
-        getItemKey={(record, index) => typeof rowKey === "function' ? rowKey(record) : record[rowKey] || index'`
+        getItemKey={(record, index) => typeof rowKey === "function' ? rowKey(record) : record[rowKey] || index
         }
       />
     </div>

@@ -10,4 +10,4 @@ const ProtectedFeature: React.FC<ProtectedFeatureProps> = (props) => {
     </div>
   );
 };
-export default ProtectedFeature;'"
+export default ProtectedFeature;

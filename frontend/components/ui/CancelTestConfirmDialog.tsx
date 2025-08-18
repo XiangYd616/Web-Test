@@ -22,7 +22,7 @@ const CancelTestConfirmDialog: React.FC<CancelTestConfirmDialogProps>  = ({
 }) => {
   
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState("");
+  const [pageTitle, setPageTitle] = useState(");
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
@@ -33,7 +33,7 @@ const CancelTestConfirmDialog: React.FC<CancelTestConfirmDialogProps>  = ({
   // 页面可见性检测
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState ==="visible') {'`
+      if (document.visibilityState ==="visible') {
         // 页面变为可见时刷新数据
         fetchData?.();
       }
@@ -56,7 +56,7 @@ const CancelTestConfirmDialog: React.FC<CancelTestConfirmDialogProps>  = ({
   );
   const [selectedReason, setSelectedReason] = useState('user_cancelled");
   const [preserveData, setPreserveData] = useState(true);
-  const [customReason, setCustomReason] = useState('");
+  const [customReason, setCustomReason] = useState(');
   const cancelReasons = [
     { value: 'user_cancelled', label: '用户主动取消' },
     { value: 'test_error', label: '测试出现错误' },
@@ -67,7 +67,7 @@ const CancelTestConfirmDialog: React.FC<CancelTestConfirmDialogProps>  = ({
   ];
 
   const handleConfirm = () => {
-    const reason = selectedReason ==='other' ? customReason : ''
+    const reason = selectedReason ==='other' ? customReason : 
       cancelReasons.find(r => r.value === selectedReason)?.label || "用户取消
     onConfirm(reason, preserveData);
   };
@@ -87,7 +87,7 @@ const CancelTestConfirmDialog: React.FC<CancelTestConfirmDialogProps>  = ({
     // 🔧 修复：直接使用实际配置，如果没有配置说明测试有问题
     if (!testProgress.totalDuration || testProgress.totalDuration <= 0) {
       
-        console.error("测试配置错误：无法获取总测试时长");`
+        console.error("测试配置错误：无法获取总测试时长");
       return 0; // 配置错误时返回0%
       }
 
@@ -114,12 +114,12 @@ const CancelTestConfirmDialog: React.FC<CancelTestConfirmDialogProps>  = ({
             </div>
           </div>
           <button
-            type='button'
+            type='button
             onClick={onCancel}
-            className='p-1 hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0'
+            className='p-1 hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0
             disabled={isLoading}
-            title='关闭弹窗'
-            aria-label='关闭弹窗'
+            title='关闭弹窗
+            aria-label='关闭弹窗
           >
             <X className='w-4 h-4 sm:w-5 sm:h-5 text-gray-400'    />
           </button>
@@ -162,14 +162,14 @@ const CancelTestConfirmDialog: React.FC<CancelTestConfirmDialogProps>  = ({
                     {!testProgress.totalDuration || testProgress.totalDuration <= 0 ? (
                       <span className='text-red-400'>配置错误</span>
                     ) : (
-                      `${calculateProgress()}% (${formatDuration(testProgress.duration)} / ${formatDuration(testProgress.totalDuration)})``
+                      `${calculateProgress()}% (${formatDuration(testProgress.duration)} / ${formatDuration(testProgress.totalDuration)})
                     )}
                   </span>
                 </div>
-                <div className="w-full bg-gray-700 rounded-full h-2'>`
+                <div className="w-full bg-gray-700 rounded-full h-2'>
                   <div
-                    className='bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300'
-                    style={{ width: `${calculateProgress()}%` }}`
+                    className='bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300
+                    style={{ width: `${calculateProgress()}%` }}
                   />
                 </div>
               </div>
@@ -177,18 +177,18 @@ const CancelTestConfirmDialog: React.FC<CancelTestConfirmDialogProps>  = ({
           )}
 
           {/* 取消原因选择 */}
-          <div className="p-4 sm:p-6 border-b border-gray-700'>`
+          <div className="p-4 sm:p-6 border-b border-gray-700'>
             <h4 className='text-sm font-medium text-gray-300 mb-3'>取消原因</h4>
             <div className='space-y-2'>
               {cancelReasons.map((reason) => (
                 <label key={reason.value} className='flex items-center space-x-3 cursor-pointer'>
                   <input
-                    type='radio'
-                    name='cancelReason'
+                    type='radio
+                    name='cancelReason
                     value={reason.value}
                     checked={selectedReason === reason.value}
                     onChange={(e) => setSelectedReason(e.target.value)}
-                    className='w-4 h-4 text-blue-500 bg-gray-700 border-gray-600 focus:ring-blue-500'
+                    className='w-4 h-4 text-blue-500 bg-gray-700 border-gray-600 focus:ring-blue-500
                     disabled={isLoading}
                   />
                   <span className='text-sm text-gray-300'>{reason.label}</span>
@@ -199,11 +199,11 @@ const CancelTestConfirmDialog: React.FC<CancelTestConfirmDialogProps>  = ({
             {/* 自定义原因输入 */}
             {selectedReason ==='other' && (<div className='mt-3'>
                 <input
-                  type='text'
-                  placeholder='请输入取消原因...'
+                  type='text
+                  placeholder='请输入取消原因...
                   value={customReason}
                   onChange={(e) => setCustomReason(e.target.value)}
-                  className='w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                  className='w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500
                   disabled={isLoading}
                 />
               </div>
@@ -214,10 +214,10 @@ const CancelTestConfirmDialog: React.FC<CancelTestConfirmDialogProps>  = ({
           <div className='p-4 sm:p-6 border-b border-gray-700'>
             <label className='flex items-start space-x-3 cursor-pointer'>
               <input
-                type='checkbox'
+                type='checkbox
                 checked={preserveData}
                 onChange={(e) => setPreserveData(e.target.checked)}
-                className='w-4 h-4 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 mt-0.5 flex-shrink-0'
+                className='w-4 h-4 text-blue-500 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 mt-0.5 flex-shrink-0
                 disabled={isLoading}
               />
               <div className='min-w-0'>
@@ -248,18 +248,18 @@ const CancelTestConfirmDialog: React.FC<CancelTestConfirmDialogProps>  = ({
         {/* 按钮 - 固定在底部 */}
         <div className='flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 p-4 sm:p-6 border-t border-gray-700 bg-gray-800 flex-shrink-0'>
           <button
-            type='button'
+            type='button
             onClick={onCancel}
-            className='px-4 py-2 text-gray-300 border border-gray-600 rounded-lg hover:bg-gray-700/50 transition-colors disabled:opacity-50 order-2 sm:order-1'
+            className='px-4 py-2 text-gray-300 border border-gray-600 rounded-lg hover:bg-gray-700/50 transition-colors disabled:opacity-50 order-2 sm:order-1
             disabled={isLoading}
           >
             继续测试
           </button>
           <button
-            type='button'
+            type='button
             onClick={handleConfirm}
             disabled={isLoading || (selectedReason ==='other' && !customReason.trim())}
-            className='px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-2'
+            className='px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-2
           >
             {isLoading ? (
               <>

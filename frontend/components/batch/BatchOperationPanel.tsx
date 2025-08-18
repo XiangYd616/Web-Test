@@ -10,4 +10,4 @@ const BatchOperationPanel: React.FC<BatchOperationPanelProps> = (props) => {
     </div>
   );
 };
-export default BatchOperationPanel;'"
+export default BatchOperationPanel;

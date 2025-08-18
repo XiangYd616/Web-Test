@@ -50,7 +50,7 @@ export type ResourceStatus   = 'healthy' | 'warning' | 'critical' | 'overloaded'
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
@@ -88,8 +88,7 @@ export type ResourceStatus   = 'healthy' | 'warning' | 'critical' | 'overloaded'
     if (this.isMonitoring) return;
 
     this.isMonitoring = true;
-    // console.log("🔍 开始系统资源监控...'); // 静默启动'`
-
+    // console.log("🔍 开始系统资源监控...'); // 静默启动
     // 立即获取一次资源信息
     this.updateResources();
 
@@ -145,12 +144,12 @@ export type ResourceStatus   = 'healthy' | 'warning' | 'critical' | 'overloaded'
     try {
       const response = await fetch('/api/system/resources', {
         headers: {
-          "Authorization": `Bearer ${localStorage.getItem('auth_token')}`'`
+          "Authorization": `Bearer ${localStorage.getItem('auth_token')}
         }
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
@@ -158,7 +157,7 @@ export type ResourceStatus   = 'healthy' | 'warning' | 'critical' | 'overloaded'
 
     } catch (error) {
       // 如果API不可用，返回模拟数据
-      // console.warn("无法获取真实资源信息，使用模拟数据:', error); // 静默处理'`
+      // console.warn("无法获取真实资源信息，使用模拟数据:', error); // 静默处理
       return this.getMockResources();
     }
   }
@@ -253,7 +252,7 @@ export type ResourceStatus   = 'healthy' | 'warning' | 'critical' | 'overloaded'
       }
 
     // 普通测试的原有逻辑
-    return status === 'healthy' || status === 'warning'
+    return status === 'healthy' || status === 'warning
   }
 
   /**
@@ -266,15 +265,15 @@ export type ResourceStatus   = 'healthy' | 'warning' | 'critical' | 'overloaded'
     if (!resources) return 3; // 默认值
 
     switch (status) {
-      case 'healthy': ''
+      case 'healthy': 
         return Math.min(8, Math.floor(resources.cpu.cores * 1.5));
-      case 'warning': ''
+      case 'warning': 
         return Math.min(5, Math.floor(resources.cpu.cores));
-      case 'critical': ''
+      case 'critical': 
         return Math.min(2, Math.floor(resources.cpu.cores * 0.5));
-      case 'overloaded': ''
+      case 'overloaded': 
         return 1;
-      default:
+      default: undefined, // 已修复
         return 3;
     }
   }
@@ -325,13 +324,13 @@ export type ResourceStatus   = 'healthy' | 'warning' | 'critical' | 'overloaded'
 
     // 生成建议
     if (resources.cpu.usage > this.thresholds.cpu.warning) {
-      recommendations.push(`CPU使用率较高 (${resources.cpu.usage.toFixed(1)}%)，建议减少并发测试数量`);`
+      recommendations.push(`CPU使用率较高 (${resources.cpu.usage.toFixed(1)}%)，建议减少并发测试数量`);
     }
     if (resources.memory.usage > this.thresholds.memory.warning) {
-      recommendations.push(`内存使用率较高 (${resources.memory.usage.toFixed(1)}%)，建议清理内存或增加内存`);`
+      recommendations.push(`内存使用率较高 (${resources.memory.usage.toFixed(1)}%)，建议清理内存或增加内存`);
     }
     if (resources.network.activeConnections > this.thresholds.network.maxConnections * 0.8) {
-      recommendations.push(`网络连接数较多 (${resources.network.activeConnections})，建议控制并发连接`);`
+      recommendations.push(`网络连接数较多 (${resources.network.activeConnections})，建议控制并发连接`);
     }
 
     return {
@@ -353,7 +352,7 @@ export const systemResourceMonitor = (() => {
     const instance = new SystemResourceMonitor();
 
     // 静默启动监控，不输出日志
-    if (typeof window !== "undefined') {'`
+    if (typeof window !== "undefined') {
       setTimeout(() => {
         instance.startMonitoring();
       }, 100);

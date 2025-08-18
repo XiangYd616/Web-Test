@@ -15,14 +15,14 @@ export enum DataType {
   TEMPORARY_DATA = 'temporary_data',
   LARGE_DATASETS = 'large_datasets',
   REAL_TIME_DATA = 'real_time_data',
-  AUTHENTICATION = 'authentication'
+  AUTHENTICATION = 'authentication
 }
 
 // 缓存策略配置接口
 export interface CacheStrategyConfig     {
   strategy: CacheStrategy;
   ttl: number; // 过期时间（秒）
-  priority: 'low' | 'medium' | 'high' | 'critical'
+  priority: 'low' | 'medium' | 'high' | 'critical
   enableCompression: boolean;
   maxSize?: number; // 最大大小（字节）
   description: string;
@@ -35,7 +35,7 @@ export const CACHE_STRATEGIES: Record<DataType, CacheStrategyConfig> = {
     ttl: 3600, // 1小时
     priority: 'high',
     enableCompression: false,
-    description: '用户资料信息，需要高可用性和一致性'
+    description: '用户资料信息，需要高可用性和一致性
   },
 
   [DataType.USER_PREFERENCES]: {
@@ -43,7 +43,7 @@ export const CACHE_STRATEGIES: Record<DataType, CacheStrategyConfig> = {
     ttl: 7200, // 2小时
     priority: 'high',
     enableCompression: false,
-    description: '用户偏好设置，频繁访问且需要持久化'
+    description: '用户偏好设置，频繁访问且需要持久化
   },
 
   [DataType.TEST_RESULTS]: {
@@ -52,7 +52,7 @@ export const CACHE_STRATEGIES: Record<DataType, CacheStrategyConfig> = {
     priority: 'medium',
     enableCompression: true,
     maxSize: 1024 * 1024, // 1MB
-    description: '测试结果数据，大容量且需要长期保存'
+    description: '测试结果数据，大容量且需要长期保存
   },
 
   [DataType.TEST_HISTORY]: {
@@ -60,7 +60,7 @@ export const CACHE_STRATEGIES: Record<DataType, CacheStrategyConfig> = {
     ttl: 1800, // 30分钟
     priority: 'medium',
     enableCompression: true,
-    description: '测试历史记录，频繁访问但可以重新获取'
+    description: '测试历史记录，频繁访问但可以重新获取
   },
 
   [DataType.API_RESPONSES]: {
@@ -68,7 +68,7 @@ export const CACHE_STRATEGIES: Record<DataType, CacheStrategyConfig> = {
     ttl: 300, // 5分钟
     priority: 'low',
     enableCompression: false,
-    description: '一般API响应，短期缓存减少网络请求'
+    description: '一般API响应，短期缓存减少网络请求
   },
 
   [DataType.STATIC_CONFIG]: {
@@ -76,7 +76,7 @@ export const CACHE_STRATEGIES: Record<DataType, CacheStrategyConfig> = {
     ttl: 43200, // 12小时
     priority: 'critical',
     enableCompression: false,
-    description: '静态配置数据，关键且变化较少'
+    description: '静态配置数据，关键且变化较少
   },
 
   [DataType.TEMPORARY_DATA]: {
@@ -84,7 +84,7 @@ export const CACHE_STRATEGIES: Record<DataType, CacheStrategyConfig> = {
     ttl: 60, // 1分钟
     priority: 'low',
     enableCompression: false,
-    description: '临时数据，短期使用后即可丢弃'
+    description: '临时数据，短期使用后即可丢弃
   },
 
   [DataType.LARGE_DATASETS]: {
@@ -93,7 +93,7 @@ export const CACHE_STRATEGIES: Record<DataType, CacheStrategyConfig> = {
     priority: 'low',
     enableCompression: true,
     maxSize: 10 * 1024 * 1024, // 10MB
-    description: '大型数据集，只存储在本地存储中'
+    description: '大型数据集，只存储在本地存储中
   },
 
   [DataType.REAL_TIME_DATA]: {
@@ -101,7 +101,7 @@ export const CACHE_STRATEGIES: Record<DataType, CacheStrategyConfig> = {
     ttl: 30, // 30秒
     priority: 'medium',
     enableCompression: false,
-    description: '实时数据，快速访问但很快过期'
+    description: '实时数据，快速访问但很快过期
   },
 
   [DataType.AUTHENTICATION]: {
@@ -109,7 +109,7 @@ export const CACHE_STRATEGIES: Record<DataType, CacheStrategyConfig> = {
     ttl: 1800, // 30分钟
     priority: 'critical',
     enableCompression: false,
-    description: '认证信息，需要快速访问和安全性'
+    description: '认证信息，需要快速访问和安全性
   }
 };
 
@@ -125,7 +125,7 @@ export class CacheKeyGenerator {
   /**
    * 生成测试相关的缓存键
    */
-  static test(testId: string, type: "result' | 'config' | 'history'): string {'`"`
+  static test(testId: string, type: "result' | 'config' | 'history'): string {'
     return `test:${testId}:${type}`;
   }
 
@@ -133,7 +133,7 @@ export class CacheKeyGenerator {
    * 生成API响应缓存键
    */
   static api(endpoint: string, params?: Record<string, any>): string {
-    const paramString = params ? JSON.stringify(params) : "";``
+    const paramString = params ? JSON.stringify(params) : ";
     const hash = this.simpleHash(paramString);
     return `api:${endpoint}:${hash}`;
   }
@@ -142,7 +142,7 @@ export class CacheKeyGenerator {
    * 生成配置缓存键
    */
   static config(configType: string, version?: string): string {
-    return `config:${configType}${version ? `:${version}` : "'}`;'`"
+    return `config:${configType}${version ? `:${version}` : "}`;
   }
 
   /**
@@ -156,7 +156,7 @@ export class CacheKeyGenerator {
    * 生成分页数据缓存键
    */
   static paginated(resource: string, page: number, limit: number, filters?: Record<string, any>): string {
-    const filterString = filters ? JSON.stringify(filters) : "";``
+    const filterString = filters ? JSON.stringify(filters) : ";
     const hash = this.simpleHash(filterString);
     return `paginated:${resource}:${page}:${limit}:${hash}`;
   }
@@ -192,10 +192,10 @@ export class CacheStrategyManager {
    */
   static recommendStrategy(characteristics: {
     size: number;
-    accessFrequency: "low' | 'medium' | 'high";``
-    updateFrequency: 'low' | 'medium' | 'high'
+    accessFrequency: "low' | 'medium' | 'high";
+    updateFrequency: 'low' | 'medium' | 'high
     importance: 'low' | 'medium' | 'high' | 'critical';
-    durability: 'temporary' | 'session' | 'persistent'
+    durability: 'temporary' | 'session' | 'persistent
   }): CacheStrategyConfig {
     const { size, accessFrequency, updateFrequency, importance, durability } = characteristics;
 
@@ -208,7 +208,7 @@ export class CacheStrategyManager {
         priority: importance,
         enableCompression: true,
         maxSize: size,
-        description: '大文件，存储优先策略'
+        description: '大文件，存储优先策略
       };
     }
 
@@ -219,7 +219,7 @@ export class CacheStrategyManager {
         ttl: durability === 'temporary' ? 300 : 1800,
         priority: importance,
         enableCompression: size > 10240, // > 10KB
-        description: '高频访问数据，内存优先策略'
+        description: '高频访问数据，内存优先策略
       };
     }
 
@@ -230,7 +230,7 @@ export class CacheStrategyManager {
         ttl: durability === 'persistent' ? 43200 : 3600,
         priority: 'critical',
         enableCompression: false,
-        description: '关键数据，双重保障策略'
+        description: '关键数据，双重保障策略
       };
     }
 
@@ -241,7 +241,7 @@ export class CacheStrategyManager {
         ttl: 300,
         priority: 'low',
         enableCompression: false,
-        description: '临时数据，仅内存策略'
+        description: '临时数据，仅内存策略
       };
     }
 
@@ -251,7 +251,7 @@ export class CacheStrategyManager {
       ttl: 1800,
       priority: 'medium',
       enableCompression: size > 1024,
-      description: '默认策略，内存优先'
+      description: '默认策略，内存优先
     };
   }
 
@@ -261,19 +261,19 @@ export class CacheStrategyManager {
   static validateStrategy(config: CacheStrategyConfig): { valid: boolean; errors: string[] } {
     const errors: string[]  = [];
     if (config.ttl <= 0) {>
-      errors.push('TTL必须大于0");"
+      errors.push('TTL必须大于0");
     }
 
     if (config.ttl > 86400 * 7) { // 7天
-      errors.push('TTL不应超过7天");"
+      errors.push('TTL不应超过7天");
     }
 
     if (config.maxSize && config.maxSize <= 0) {>
-      errors.push('maxSize必须大于0");"
+      errors.push('maxSize必须大于0");
     }
 
     if (config.maxSize && config.maxSize > 100 * 1024 * 1024) { // 100MB
-      errors.push('maxSize不应超过100MB");"
+      errors.push('maxSize不应超过100MB");
     }
 
     return {
@@ -326,7 +326,7 @@ export function cached(dataType: DataType,
       const cached = try {
   await cacheManager.get(cacheKey, finalConfig.strategy);
 } catch (error) {
-  console.error("Await error: ', error);'`"`
+  console.error("Await error: ', error);
   throw error;
 }
       if (cached !== null) {

@@ -20,8 +20,8 @@ import React, { useEffect, useState    } from 'react';import { adminService    }
   defaultValue?: any;
   
   // 配置属性
-  size?: 'small' | 'medium' | 'large'
-  variant?: 'primary' | 'secondary' | 'outline'
+  size?: 'small' | 'medium' | 'large
+  variant?: 'primary' | 'secondary' | 'outline
   // 可访问性
   'aria-label'?: string;
   'aria-describedby'?: string;
@@ -32,10 +32,10 @@ import React, { useEffect, useState    } from 'react';import { adminService    }
 
 interface TestRecord   {
   id: string;
-  type: 'stress' | 'content' | 'compatibility' | 'api'
+  type: 'stress' | 'content' | 'compatibility' | 'api
   url: string;
   user: string;
-  status: 'completed' | 'running' | 'failed'
+  status: 'completed' | 'running' | 'failed
   createdAt: string;
   duration: number;
   score?: number;
@@ -46,7 +46,7 @@ interface TestRecord   {
 const TestManagement: React.FC<TestManagementProps>  = (props) => {
   
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState("");
+  const [pageTitle, setPageTitle] = useState(");
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
@@ -57,7 +57,7 @@ const TestManagement: React.FC<TestManagementProps>  = (props) => {
   // 页面可见性检测
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState ==="visible') {'`"`
+      if (document.visibilityState ==="visible') {'
         // 页面变为可见时刷新数据
         fetchData?.();
       }
@@ -80,8 +80,8 @@ const TestManagement: React.FC<TestManagementProps>  = (props) => {
   );
   const [tests, setTests] = useState<TestRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedType, setSelectedType] = useState<'all' | 'stress' | 'content' | 'compatibility' | 'api'>('all");"
-  const [selectedStatus, setSelectedStatus] = useState<'all' | 'completed' | 'running' | 'failed'>('all");"
+  const [selectedType, setSelectedType] = useState<'all' | 'stress' | 'content' | 'compatibility' | 'api'>('all");
+  const [selectedStatus, setSelectedStatus] = useState<'all' | 'completed' | 'running' | 'failed'>('all");
   const [dateRange, setDateRange] = useState("today");
   // 加载测试数据
   useEffect(() => {
@@ -108,39 +108,39 @@ const TestManagement: React.FC<TestManagementProps>  = (props) => {
 
   const getTypeLabel = (type: string) => {
     switch (type) {
-      case 'stress': return '压力测试'
-      case 'content': return '内容检测'
-      case 'compatibility': return '兼容性测试'
-      case 'api': return 'API测试'
+      case 'stress': return '压力测试
+      case 'content': return '内容检测
+      case 'compatibility': return '兼容性测试
+      case 'api': return 'API测试
       default: return type;
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800'
-      case 'running': return 'bg-blue-100 text-blue-800'
-      case 'failed': return 'bg-red-100 text-red-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'completed': return 'bg-green-100 text-green-800
+      case 'running': return 'bg-blue-100 text-blue-800
+      case 'failed': return 'bg-red-100 text-red-800
+      default: return 'bg-gray-100 text-gray-800
     }
   };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'completed': return '已完成'
-      case 'running': return '运行中'
-      case 'failed': return '失败'
+      case 'completed': return '已完成
+      case 'running': return '运行中
+      case 'failed': return '失败
       default: return status;
     }
   };
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'stress': return 'bg-orange-100 text-orange-800'
-      case 'content': return 'bg-blue-100 text-blue-800'
-      case 'compatibility': return 'bg-purple-100 text-purple-800'
-      case 'api': return 'bg-green-100 text-green-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'stress': return 'bg-orange-100 text-orange-800
+      case 'content': return 'bg-blue-100 text-blue-800
+      case 'compatibility': return 'bg-purple-100 text-purple-800
+      case 'api': return 'bg-green-100 text-green-800
+      default: return 'bg-gray-100 text-gray-800
     }
   };
 
@@ -223,11 +223,11 @@ const TestManagement: React.FC<TestManagementProps>  = (props) => {
           <div>
             <label htmlFor='test-type-select' className='block text-sm font-medium text-gray-700 mb-2'>测试类型</label>
             <select>
-              id='test-type-select'
+              id='test-type-select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value as any)}
-              className='input'
-              aria-label='选择测试类型'
+              className='input
+              aria-label='选择测试类型
             >
               <option value='all'>所有类型</option>
               <option value='stress'>压力测试</option>
@@ -240,11 +240,11 @@ const TestManagement: React.FC<TestManagementProps>  = (props) => {
           <div>
             <label htmlFor='test-status-select' className='block text-sm font-medium text-gray-700 mb-2'>状态</label>
             <select>
-              id='test-status-select'
+              id='test-status-select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value as any)}
-              className='input'
-              aria-label='选择测试状态'
+              className='input
+              aria-label='选择测试状态
             >
               <option value='all'>所有状态</option>
               <option value='completed'>已完成</option>
@@ -256,11 +256,11 @@ const TestManagement: React.FC<TestManagementProps>  = (props) => {
           <div>
             <label htmlFor='date-range-select' className='block text-sm font-medium text-gray-700 mb-2'>时间范围</label>
             <select>
-              id='date-range-select'
+              id='date-range-select
               value={dateRange}
               onChange={(e) => setDateRange(e.target.value)}
-              className='input'
-              aria-label='选择时间范围'
+              className='input
+              aria-label='选择时间范围
             >
               <option value='today'>今天</option>
               <option value='week'>本周</option>
@@ -313,42 +313,42 @@ const TestManagement: React.FC<TestManagementProps>  = (props) => {
                     <div>
                       <div className='text-sm font-medium text-gray-900'>{test.url}</div>
                       <div className='text-sm text-gray-500'>
-                        {test.requests > 0 && `${test.requests} 请求`}`
-                        {test.errors > 0 && ` • ${test.errors} 错误`}`
+                        {test.requests > 0 && `${test.requests} 请求`}
+                        {test.errors > 0 && ` • ${test.errors} 错误`}
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap'>`'"`
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(test.type)}`}>`
+                  <td className="px-6 py-4 whitespace-nowrap'>`
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTypeColor(test.type)}`}>
                       {getTypeLabel(test.type)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap'>`'"`
+                  <td className="px-6 py-4 whitespace-nowrap'>`
                     <div className='flex items-center'>
                       <User className='w-4 h-4 text-gray-400 mr-2'    />
                       <span className='text-sm text-gray-900'>{test.user}</span>
                     </div>
                   </td>
                   <td className='px-6 py-4 whitespace-nowrap'>
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(test.status)}`}>`
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(test.status)}`}>
                       {getStatusLabel(test.status)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900'>`'"`
-                    {test.score ? `${test.score}分` : "-'}'`"
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900'>`
+                    {test.score ? `${test.score}分` : "-'}'
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap'>`'"`
+                  <td className="px-6 py-4 whitespace-nowrap'>`
                     <div className='text-sm text-gray-900'>{test.createdAt}</div>
                     <div className='text-sm text-gray-500'>
-                      {test.duration > 0 ? `${test.duration}秒` : "-'}'`"
+                      {test.duration > 0 ? `${test.duration}秒` : "-'}'
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium'>`'"`
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium'>`
                     <div className='flex items-center space-x-2'>
                       <button type='button' className='text-blue-600 hover:text-blue-900'>
                         查看详情
                       </button>
-                      {test.status ==='running' 
+                      {test.status ==='running
                         <button type='button' className='text-red-600 hover:text-red-900'>
                           停止
                         </button>

@@ -1,5 +1,5 @@
 import { Database, Network, Server    } from 'lucide-react';import { useState, useEffect    } from 'react';import { useAsyncErrorHandler    } from '../hooks/useAsyncErrorHandler';import TestResults from '../components/TestResults';import React, { useState    } from 'react';import { useAuthCheck    } from '../../../components/auth/WithAuthCheck.tsx';import BaseTestPage from '../../../components/testing/BaseTestPage.tsx';import { useUserStats    } from '../../../hooks/useUserStats.ts';// 基础设施测试类型
-type InfrastructureTestType = 'database' | 'network' | 'server' | 'all'
+type InfrastructureTestType = 'database' | 'network' | 'server' | 'all
 // 数据库连接配置
 interface DatabaseConfig   {
   host: string;
@@ -7,7 +7,7 @@ interface DatabaseConfig   {
   database: string;
   username: string;
   password: string;
-  type: 'postgresql' | 'mysql' | 'mongodb' | 'redis' | 'sqlite'
+  type: 'postgresql' | 'mysql' | 'mongodb' | 'redis' | 'sqlite
   ssl: boolean;
   timeout: number;
   maxConnections: number;
@@ -16,7 +16,7 @@ interface DatabaseConfig   {
 // 网络测试配置
 interface NetworkConfig   {
   target: string;
-  testType: 'ping' | 'traceroute' | 'bandwidth' | 'dns' | 'all'
+  testType: 'ping' | 'traceroute' | 'bandwidth' | 'dns' | 'all
   timeout: number;
   packetCount: number;
   packetSize: number;
@@ -67,7 +67,7 @@ interface InfrastructureTestResult   {
 const InfrastructureTest: React.FC  = () => {
   
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState('");"
+  const [pageTitle, setPageTitle] = useState(');
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
@@ -78,7 +78,7 @@ const InfrastructureTest: React.FC  = () => {
   // 页面可见性检测
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible') {'`"`
+      if (document.visibilityState === "visible') {'
         // 页面变为可见时刷新数据
         fetchData?.();
       }
@@ -90,11 +90,11 @@ const InfrastructureTest: React.FC  = () => {
     };
   }, [fetchData]);
   
-  const [feedback, setFeedback] = useState({ type: '', message: '' });
+  const [feedback, setFeedback] = useState({ type: ', message: ' });
   const showFeedback = (type, message, duration = 3000) => {
     setFeedback({ type, message });
     setTimeout(() => {
-      setFeedback({ type: '', message: '' });
+      setFeedback({ type: ', message: ' });
     }, duration);
   };
   
@@ -157,8 +157,8 @@ const InfrastructureTest: React.FC  = () => {
   const pollTestResult = async (executionId) => {
     const interval = setInterval(async () => {
       const result = await executeAsync(
-        () => fetch(`/api/tests/results/${executionId}`).then(res => res.json()),`
-        { context: "TestExecution.pollResult' }'`"`
+        () => fetch(`/api/tests/results/${executionId}`).then(res => res.json()),
+        { context: "TestExecution.pollResult' }'
       );
       
       if (result && result.success && result.data.status === 'completed') {
@@ -178,7 +178,7 @@ const InfrastructureTest: React.FC  = () => {
     LoginPromptComponent
   } = useAuthCheck({
     feature: '基础设施测试',
-    description: '使用基础设施测试功能'
+    description: '使用基础设施测试功能
   });
 
   // 用户统计
@@ -192,8 +192,8 @@ const InfrastructureTest: React.FC  = () => {
         host: 'localhost',
         port: 5432,
         database: 'testdb',
-        username: '',
-        password: '',
+        username: ',
+        password: ',
         type: 'postgresql',
         ssl: false,
         timeout: 30000,
@@ -236,7 +236,7 @@ const InfrastructureTest: React.FC  = () => {
       return;
       }
 
-    setTestStatus('running");"
+    setTestStatus('running");
     setError(null);
 
     try {
@@ -259,10 +259,10 @@ const InfrastructureTest: React.FC  = () => {
         } : undefined,
       };
       setResults(mockResult);
-      setTestStatus('completed");"
+      setTestStatus('completed");
       recordTestCompletion('infrastructure', true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '测试失败");"
+      setError(err instanceof Error ? err.message : '测试失败");
       setTestStatus("failed");
     }
   };
@@ -279,32 +279,32 @@ const InfrastructureTest: React.FC  = () => {
   
   if (state.isLoading || loading) {
     return (
-      <div className= 'flex justify-center items-center h-64'>
-        <div className= 'animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500'></div>
-        <span className= 'ml-3 text-gray-600'>加载中...</span>
+      <div className='flex justify-center items-center h-64'>
+        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500'></div>
+        <span className='ml-3 text-gray-600'>加载中...</span>
       </div>
     );
   }
 
   if (state.error) {
-    return (<div className= 'bg-red-50 border border-red-200 rounded-md p-4'>
-        <div className= 'flex'>
-          <div className= 'flex-shrink-0'>
-            <svg className= 'h-5 w-5 text-red-400' viewBox= '0 0 20 20' fill= 'currentColor'>
-              <path fillRule= 'evenodd' d= 'M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z' clipRule= 'evenodd' />
+    return (<div className='bg-red-50 border border-red-200 rounded-md p-4'>
+        <div className='flex'>
+          <div className='flex-shrink-0'>
+            <svg className= 'h-5 w-5 text-red-400' viewBox= '0 0 20 20' fill='currentColor'>
+              <path fillRule= 'evenodd' d= 'M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z' clipRule='evenodd' />
             </svg>
           </div>
-          <div className= 'ml-3'>
-            <h3 className= 'text-sm font-medium text-red-800'>
+          <div className='ml-3'>
+            <h3 className='text-sm font-medium text-red-800'>
               操作失败
             </h3>
-            <div className= 'mt-2 text-sm text-red-700'>
+            <div className='mt-2 text-sm text-red-700'>
               <p>{state.error.message}</p>
             </div>
-            <div className= 'mt-4'>
+            <div className='mt-4'>
               <button>
                 onClick={() => window.location.reload()}
-                className= 'bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200'
+                className= 'bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200
               >
                 重试
               </button>
@@ -316,52 +316,52 @@ const InfrastructureTest: React.FC  = () => {
   }
 
   return (<BaseTestPage>
-      testType= 'performance'
-      title= '基础设施测试'
-      description= '全面测试数据库性能、网络连接质量和服务器基础设施'
+      testType= 'performance
+      title= '基础设施测试
+      description= '全面测试数据库性能、网络连接质量和服务器基础设施
       icon={Server}
       isTestDisabled={!config.database.enabled && !config.network.enabled}
       onStartTest={handleStartTest}
       onTestSelect={handleTestSelect}
       onTestRerun={handleTestRerun}
       testContent={
-        <div className= 'space-y-6'>
+        <div className='space-y-6'>
           {/* 测试类型选择 */}
-          <div className= 'bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6'>
-            <h3 className= 'text-xl font-semibold text-white mb-4'>选择测试类型</h3>
-            <div className= 'grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <div className='bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6'>
+            <h3 className='text-xl font-semibold text-white mb-4'>选择测试类型</h3>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               {/* 数据库测试 */}
               <div className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${config.database.enabled`}>
-                ? "border-blue-500 bg-blue-500/10";``
-                : 'border-gray-600 bg-gray-800/50'
-                }`}`
+                ? "border-blue-500 bg-blue-500/10";
+                : 'border-gray-600 bg-gray-800/50
+                }`}
                 onClick={() => setConfig(prev => ({
                   ...prev,
                   database: { ...prev.database, enabled: !prev.database.enabled }
                 }))}>
-                <div className= "flex items-center space-x-3'>`'"`
-                  <Database className= 'w-6 h-6 text-blue-400'    />
+                <div className="flex items-center space-x-3'>`
+                  <Database className='w-6 h-6 text-blue-400' />
                   <div>
-                    <h4 className= 'font-semibold text-white'>数据库测试</h4>
-                    <p className= 'text-sm text-gray-300'>测试数据库连接、性能和安全性</p>
+                    <h4 className='font-semibold text-white'>数据库测试</h4>
+                    <p className='text-sm text-gray-300'>测试数据库连接、性能和安全性</p>
                   </div>
                 </div>
               </div>
 
               {/* 网络测试 */}
               <div className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${config.network.enabled`}>
-                ? "border-green-500 bg-green-500/10";``
-                : 'border-gray-600 bg-gray-800/50'
-                }`}`
+                ? "border-green-500 bg-green-500/10";
+                : 'border-gray-600 bg-gray-800/50
+                }`}
                 onClick={() => setConfig(prev => ({
                   ...prev,
                   network: { ...prev.network, enabled: !prev.network.enabled }
                 }))}>
-                <div className= "flex items-center space-x-3'>`'"`
-                  <Network className= 'w-6 h-6 text-green-400'    />
+                <div className="flex items-center space-x-3'>`
+                  <Network className='w-6 h-6 text-green-400' />
                   <div>
-                    <h4 className= 'font-semibold text-white'>网络测试</h4>
-                    <p className= 'text-sm text-gray-300'>测试网络延迟、带宽和连接质量</p>
+                    <h4 className='font-semibold text-white'>网络测试</h4>
+                    <p className='text-sm text-gray-300'>测试网络延迟、带宽和连接质量</p>
                   </div>
                 </div>
               </div>
@@ -370,38 +370,38 @@ const InfrastructureTest: React.FC  = () => {
 
           {/* 测试结果 */}
           {results && (
-            <div className= 'bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6'>
-              <h3 className= 'text-xl font-semibold text-white mb-4'>测试结果</h3>
-              <div className= 'grid grid-cols-1 md:grid-cols-2 gap-6'>
+            <div className='bg-gray-800/80 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6'>
+              <h3 className='text-xl font-semibold text-white mb-4'>测试结果</h3>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                 {results.database && (
-                  <div className= 'space-y-4'>
-                    <h4 className= 'font-semibold text-blue-400'>数据库测试</h4>
-                    <div className= 'space-y-2'>
-                      <div className= 'flex justify-between'>
-                        <span className= 'text-gray-300'>连接测试:</span>
+                  <div className='space-y-4'>
+                    <h4 className='font-semibold text-blue-400'>数据库测试</h4>
+                    <div className='space-y-2'>
+                      <div className='flex justify-between'>
+                        <span className='text-gray-300'>连接测试:</span>
                         <span className={results.database.connectionTest.success ? 'text-green-400' : 'text-red-400'}>
                           {results.database.connectionTest.success ? '成功" : "失败'}
                         </span>
                       </div>
-                      <div className= 'flex justify-between'>
-                        <span className= 'text-gray-300'>响应时间:</span>
-                        <span className= 'text-white'>{results.database.connectionTest.responseTime.toFixed(2)}ms</span>
+                      <div className='flex justify-between'>
+                        <span className='text-gray-300'>响应时间:</span>
+                        <span className='text-white'>{results.database.connectionTest.responseTime.toFixed(2)}ms</span>
                       </div>
                     </div>
                   </div>
                 )}
 
                 {results.network && (
-                  <div className= 'space-y-4'>
-                    <h4 className= 'font-semibold text-green-400'>网络测试</h4>
-                    <div className= 'space-y-2'>
-                      <div className= 'flex justify-between'>
-                        <span className= 'text-gray-300'>平均延迟:</span>
-                        <span className= 'text-white'>{results.network.latency.avg}ms</span>
+                  <div className='space-y-4'>
+                    <h4 className='font-semibold text-green-400'>网络测试</h4>
+                    <div className='space-y-2'>
+                      <div className='flex justify-between'>
+                        <span className='text-gray-300'>平均延迟:</span>
+                        <span className='text-white'>{results.network.latency.avg}ms</span>
                       </div>
-                      <div className= 'flex justify-between'>
-                        <span className= 'text-gray-300'>下载速度:</span>
-                        <span className= 'text-white'>{results.network.bandwidth.download.toFixed(2)} Mbps</span>
+                      <div className='flex justify-between'>
+                        <span className='text-gray-300'>下载速度:</span>
+                        <span className='text-white'>{results.network.bandwidth.download.toFixed(2)} Mbps</span>
                       </div>
                     </div>
                   </div>
@@ -412,8 +412,8 @@ const InfrastructureTest: React.FC  = () => {
 
           {/* 错误显示 */}
           {error && (
-            <div className= 'bg-red-500/10 border border-red-500/30 rounded-lg p-4'>
-              <p className= 'text-red-400'>{error}</p>
+            <div className='bg-red-500/10 border border-red-500/30 rounded-lg p-4'>
+              <p className='text-red-400'>{error}</p>
             </div>
           )}
         </div>

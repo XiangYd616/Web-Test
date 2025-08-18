@@ -37,7 +37,7 @@ export enum UserRole {
 export enum UserStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
-  SUSPENDED = 'suspended'
+  SUSPENDED = 'suspended
 }
 
 /**
@@ -47,7 +47,7 @@ export enum UserStatus {
 export enum UserPlan {
   FREE = 'free',
   PRO = 'pro',
-  ENTERPRISE = 'enterprise'
+  ENTERPRISE = 'enterprise
 }
 
 // ==================== 测试相关枚举 ====================
@@ -73,7 +73,7 @@ export enum TestType {
   SEO = 'seo',
   STRESS = 'stress',
   UX = 'ux',
-  WEBSITE = 'website'
+  WEBSITE = 'website
 }
 
 /**
@@ -89,7 +89,7 @@ export enum TestStatus {
   RUNNING = 'running',
   COMPLETED = 'completed',
   FAILED = 'failed',
-  CANCELLED = 'cancelled'
+  CANCELLED = 'cancelled
 }
 
 /**
@@ -113,7 +113,7 @@ export enum TestPriority {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical
 }
 
 // ==================== 系统相关枚举 ====================
@@ -124,7 +124,7 @@ export enum TestPriority {
 export enum ThemeMode {
   LIGHT = 'light',
   DARK = 'dark',
-  AUTO = 'auto'
+  AUTO = 'auto
 }
 
 /**
@@ -134,7 +134,7 @@ export enum Language {
   ZH_CN = 'zh-CN',
   EN_US = 'en-US',
   JA_JP = 'ja-JP',
-  KO_KR = 'ko-KR'
+  KO_KR = 'ko-KR
 }
 
 /**
@@ -145,7 +145,7 @@ export enum Timezone {
   UTC = 'UTC',
   AMERICA_NEW_YORK = 'America/New_York',
   EUROPE_LONDON = 'Europe/London',
-  ASIA_TOKYO = 'Asia/Tokyo'
+  ASIA_TOKYO = 'Asia/Tokyo
 }
 
 // ==================== 枚举验证函数 ====================
@@ -224,7 +224,7 @@ export function getUserRoleDisplayName(role: UserRole): string   {
     [UserRole.ADMIN]: '管理员',
     [UserRole.MODERATOR]: '版主',
     [UserRole.TESTER]: '测试员',
-    [UserRole.MANAGER]: '经理'
+    [UserRole.MANAGER]: '经理
   };
   return roleNames[role] || role;
 }
@@ -240,7 +240,7 @@ export function getTestTypeDisplayName(type: TestType): string   {
     [TestType.API]: 'API测试',
     [TestType.COMPATIBILITY]: '兼容性测试',
     [TestType.ACCESSIBILITY]: '可访问性测试',
-    [TestType.STRESS]: '压力测试'
+    [TestType.STRESS]: '压力测试
   };
   return typeNames[type] || type;
 }
@@ -254,7 +254,7 @@ export function getTestStatusDisplayName(status: TestStatus): string   {
     [TestStatus.RUNNING]: '运行中',
     [TestStatus.COMPLETED]: '已完成',
     [TestStatus.FAILED]: '失败',
-    [TestStatus.CANCELLED]: '已取消'
+    [TestStatus.CANCELLED]: '已取消
   };
   return statusNames[status] || status;
 }
@@ -299,5 +299,5 @@ export enum ErrorCode {
   INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR',
   SERVER_ERROR = 'SERVER_ERROR',
   SERVICE_UNAVAILABLE = 'SERVICE_UNAVAILABLE',
-  BAD_GATEWAY = 'BAD_GATEWAY'
+  BAD_GATEWAY = 'BAD_GATEWAY
 }

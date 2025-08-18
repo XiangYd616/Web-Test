@@ -2,9 +2,9 @@ import React, { useState, useEffect    } from 'react';import { Clock, Play, Paus
   id: string;
   name: string;
   description: string;
-  type: 'backup' | 'cleanup' | 'report' | 'monitor' | 'test'
+  type: 'backup' | 'cleanup' | 'report' | 'monitor' | 'test
   schedule: string;
-  status: 'active' | 'paused' | 'error'
+  status: 'active' | 'paused' | 'error
   lastRun: string;
   nextRun: string;
   runCount: number;
@@ -15,7 +15,7 @@ import React, { useState, useEffect    } from 'react';import { Clock, Play, Paus
 const ScheduledTasks: React.FC  = () => {
   
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState("");
+  const [pageTitle, setPageTitle] = useState(");
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
@@ -26,7 +26,7 @@ const ScheduledTasks: React.FC  = () => {
   // 页面可见性检测
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState ==="visible') {'`
+      if (document.visibilityState ==="visible') {
         // 页面变为可见时刷新数据
         fetchData?.();
       }
@@ -59,14 +59,14 @@ const ScheduledTasks: React.FC  = () => {
   const handleUpdate = useCallback(async (id, updates) => {
     try {
       setLoading(true);
-      const response = await apiClient.put(`/api/items/${id}`, updates);`
+      const response = await apiClient.put(`/api/items/${id}`, updates);
       setData(prev => prev?.map(item =>
         item.id === id ? response.data : item
       ));
       setIsEditing(false);
       setSelectedItem(null);
     } catch (err) {
-      handleError(err, "update");`
+      handleError(err, "update");
     } finally {
       setLoading(false);
     }
@@ -79,10 +79,10 @@ const ScheduledTasks: React.FC  = () => {
 
     try {
       setLoading(true);
-      await apiClient.delete(`/api/items/${id}`);`
+      await apiClient.delete(`/api/items/${id}`);
       setData(prev => prev?.filter(item => item.id !== id));
     } catch (err) {
-      handleError(err, "delete");`
+      handleError(err, "delete");
     } finally {
       setLoading(false);
     }
@@ -162,20 +162,20 @@ const ScheduledTasks: React.FC  = () => {
 
   const getTaskTypeIcon = (type: string) => {
     switch (type) {
-      case 'backup": return <Target className='w-4 h-4' />'
-      case 'cleanup": return <Trash2 className='w-4 h-4' />'
-      case 'report": return <BarChart3 className='w-4 h-4' />'
-      case 'monitor": return <Activity className='w-4 h-4' />'
-      case 'test": return <Timer className='w-4 h-4' />'
+      case 'backup": return <Target className='w-4 h-4' />
+      case 'cleanup": return <Trash2 className='w-4 h-4' />
+      case 'report": return <BarChart3 className='w-4 h-4' />
+      case 'monitor": return <Activity className='w-4 h-4' />
+      case 'test": return <Timer className='w-4 h-4' />
       default: return <Settings className='w-4 h-4'    />
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'active": return <CheckCircle className='w-4 h-4 text-green-400' />'
-      case 'paused": return <Pause className='w-4 h-4 text-yellow-400' />'
-      case 'error": return <XCircle className='w-4 h-4 text-red-400' />'
+      case 'active": return <CheckCircle className='w-4 h-4 text-green-400' />
+      case 'paused": return <Pause className='w-4 h-4 text-yellow-400' />
+      case 'error": return <XCircle className='w-4 h-4 text-red-400' />
       default: return <XCircle className='w-4 h-4 text-gray-400'    />
     }
   };
@@ -216,7 +216,7 @@ const ScheduledTasks: React.FC  = () => {
             <div className='mt-4'>
               <button
                 onClick={() => window.location.reload()}
-                className='bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200'
+                className='bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200
               >
                 重试
               </button>
@@ -254,16 +254,16 @@ const ScheduledTasks: React.FC  = () => {
             </div>
             <div className='flex items-center gap-3'>
               <button
-                type='button'
-                className='flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-blue-500/25'
+                type='button
+                className='flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-blue-500/25
               >
                 <Plus className='w-4 h-4'    />
                 创建任务
               </button>
               <button
-                type='button'
+                type='button
                 onClick={loadTasks}
-                className='flex items-center gap-2 px-4 py-2.5 bg-gray-700/50 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-600/50 hover:text-white transition-all duration-200 shadow-lg'
+                className='flex items-center gap-2 px-4 py-2.5 bg-gray-700/50 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-600/50 hover:text-white transition-all duration-200 shadow-lg
               >
                 <RefreshCw className='w-4 h-4'    />
                 刷新
@@ -380,11 +380,11 @@ const ScheduledTasks: React.FC  = () => {
                       <div className='flex items-center gap-2'>
                         {getStatusIcon(task.status)}
                         <span className={`text-sm font-semibold px-2.5 py-1 rounded-full text-xs ${`}
-                          task.status ==="active' ? 'bg-green-500/20 text-green-400 border border-green-500/30' : ''`
-                          task.status ==='paused' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' : ''
+                          task.status ==="active' ? 'bg-green-500/20 text-green-400 border border-green-500/30' : '
+                          task.status ==='paused' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' : 
                           'bg-red-500/20 text-red-400 border border-red-500/30
-                        }`}>`
-                          {task.status ==="active' ? '活跃' : ''`
+                        }`}>
+                          {task.status ==="active' ? '活跃' : '
                            task.status ==='paused' ? '暂停" : "错误'}
                         </span>
                       </div>
@@ -400,16 +400,16 @@ const ScheduledTasks: React.FC  = () => {
                     <td className='px-6 py-5'>
                       <div className='flex items-center gap-2'>
                         <button
-                          type='button'
-                          className='p-2 rounded-lg hover:bg-blue-500/20 text-blue-400 hover:text-blue-300 transition-colors duration-150 border border-transparent hover:border-blue-500/30'
-                          title='立即运行'
+                          type='button
+                          className='p-2 rounded-lg hover:bg-blue-500/20 text-blue-400 hover:text-blue-300 transition-colors duration-150 border border-transparent hover:border-blue-500/30
+                          title='立即运行
                         >
                           <Play className='w-4 h-4'    />
                         </button>
                         <button
-                          type='button'
-                          className='p-2 rounded-lg hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-colors duration-150 border border-transparent hover:border-red-500/30'
-                          title='删除任务'
+                          type='button
+                          className='p-2 rounded-lg hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-colors duration-150 border border-transparent hover:border-red-500/30
+                          title='删除任务
                         >
                           <Trash2 className='w-4 h-4'    />
                         </button>

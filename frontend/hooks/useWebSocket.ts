@@ -27,7 +27,7 @@ interface TestProgress   {
 
 interface TestStatus   {
   testId: string;
-  status: 'running' | 'completed' | 'failed' | 'cancelled'
+  status: 'running' | 'completed' | 'failed' | 'cancelled
   progress: number;
   message: string;
   timestamp: string;
@@ -69,7 +69,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
         ...prev,
         isConnected: false,
         isConnecting: false,
-        error: error instanceof Error ? error.message : '连接失败'
+        error: error instanceof Error ? error.message : '连接失败
       }));
       return false;
     }
@@ -171,7 +171,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     const handleError = (data: { error: any }) => {
       setState(prev => ({
         ...prev,
-        error: data.error?.message || '连接错误'
+        error: data.error?.message || '连接错误
       }));
     };
 
@@ -202,7 +202,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
         ...prev,
         status: 'completed',
         progress: 100,
-        message: '测试完成'
+        message: '测试完成
       } : null);
     };
 
@@ -329,7 +329,7 @@ export function useTestProgress(testId?: string) {
     progress: testProgress?.progress || 0,
     currentStep: testProgress?.currentStep || 0,
     totalSteps: testProgress?.totalSteps || 0,
-    message: testProgress?.message || testStatus?.message || '',
+    message: testProgress?.message || testStatus?.message || ',
     status: testStatus?.status || 'idle',
     results: testResults,
     error: testError,

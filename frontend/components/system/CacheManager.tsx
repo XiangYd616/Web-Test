@@ -10,4 +10,4 @@ const CacheManager: React.FC<CacheManagerProps> = (props) => {
     </div>
   );
 };
-export default CacheManager;'"
+export default CacheManager;

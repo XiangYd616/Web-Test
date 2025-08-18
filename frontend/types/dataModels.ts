@@ -46,8 +46,8 @@ export interface NotificationSettings        {
  * 仪表板设置接口
  */
 export interface DashboardSettings        {
-  defaultView: 'overview' | 'tests' | 'reports' | 'analytics'
-  layout: 'grid' | 'list' | 'cards'
+  defaultView: 'overview' | 'tests' | 'reports' | 'analytics
+  layout: 'grid' | 'list' | 'cards
   widgets: string[];
   refreshInterval: number; // 秒
   showTips: boolean;
@@ -81,7 +81,7 @@ export interface UserPreferences        {
   language: Language;
   timezone: Timezone;
   dateFormat: string;
-  timeFormat: '12h' | '24h'
+  timeFormat: '12h' | '24h
   notifications: NotificationSettings;
   dashboard: DashboardSettings;
   testing: TestingSettings;
@@ -188,7 +188,7 @@ export interface TestConfig        {
   
   // API测试配置
   api?: {
-    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH
     headers?: Record<string, string>;
     body?: any;
     expectedStatus?: number[];
@@ -237,7 +237,7 @@ export interface TestError        {
   type: string;
   message: string;
   details?: any;
-  severity: 'low' | 'medium' | 'high' | 'critical'
+  severity: 'low' | 'medium' | 'high' | 'critical
   line?: number;
   column?: number;
   file?: string;
@@ -261,13 +261,13 @@ export interface TestRecommendation        {
   title: string;
   description: string;
   priority: TestPriority;
-  impact: 'low' | 'medium' | 'high'
-  effort: 'low' | 'medium' | 'high'
+  impact: 'low' | 'medium' | 'high
+  effort: 'low' | 'medium' | 'high
   category: string;
   resources?: Array<{
     title: string;
     url: string;
-    type: 'documentation' | 'tutorial' | 'tool' | 'article'
+    type: 'documentation' | 'tutorial' | 'tool' | 'article
   }>;
 }
 
@@ -275,7 +275,7 @@ export interface TestRecommendation        {
  * 测试产物接口
  */
 export interface TestArtifact        {
-  type: 'screenshot' | 'video' | 'report' | 'log' | 'trace'
+  type: 'screenshot' | 'video' | 'report' | 'log' | 'trace
   name: string;
   url: string;
   size?: number;                   // 字节

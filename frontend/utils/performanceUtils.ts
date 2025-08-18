@@ -117,10 +117,10 @@ class ResourcePreloader {
                 if (exists) {
                     this.preloadResourceDirect(url, type);
                 } else {
-                    console.warn(`Critical resource not found: ${url}`);`
+                    console.warn(`Critical resource not found: ${url}`);
                 }
             } catch (error) {
-                console.warn(`Failed to check resource: ${url}`, error);`
+                console.warn(`Failed to check resource: ${url}`, error);
             }
         });
 
@@ -132,28 +132,28 @@ class ResourcePreloader {
     /**
      * 直接预加载资源（不进行存在性检查）
      */
-    private preloadResourceDirect(url: string, type: "script' | 'style' | 'image' | 'font') {'`
+    private preloadResourceDirect(url: string, type: "script' | 'style' | 'image' | 'font') {
         if (this.preloadedResources.has(url)) {
             return;
         }
 
         const link = document.createElement('link");
-        link.rel = 'preload'
+        link.rel = 'preload
         link.href = url;
 
         switch (type) {
-            case 'script': ''
-                link.as = 'script'
+            case 'script': 
+                link.as = 'script
                 break;
-            case 'style': ''
-                link.as = 'style'
+            case 'style': 
+                link.as = 'style
                 break;
-            case 'image': ''
-                link.as = 'image'
+            case 'image': 
+                link.as = 'image
                 break;
-            case 'font': ''
-                link.as = 'font'
-                link.crossOrigin = 'anonymous'
+            case 'font': 
+                link.as = 'font
+                link.crossOrigin = 'anonymous
                 break;
         }
 
@@ -172,27 +172,27 @@ class ResourcePreloader {
         // 检查资源是否存在
         this.checkResourceExists(url).then((exists) => {
             if (!exists) {
-                console.warn(`Resource not found, skipping preload: ${url}`);`
+                console.warn(`Resource not found, skipping preload: ${url}`);
                 return;
             }
 
-            const link = document.createElement("link");`
-            link.rel = 'preload'
+            const link = document.createElement("link");
+            link.rel = 'preload
             link.href = url;
 
             switch (type) {
-                case 'script': ''
-                    link.as = 'script'
+                case 'script': 
+                    link.as = 'script
                     break;
-                case 'style': ''
-                    link.as = 'style'
+                case 'style': 
+                    link.as = 'style
                     break;
-                case 'image': ''
-                    link.as = 'image'
+                case 'image': 
+                    link.as = 'image
                     break;
-                case 'font': ''
-                    link.as = 'font'
-                    link.crossOrigin = 'anonymous'
+                case 'font': 
+                    link.as = 'font
+                    link.crossOrigin = 'anonymous
                     break;
             }
 
@@ -243,7 +243,7 @@ class ResourcePreloader {
      */
     public prefetchRoute(route: string) {
         const link = document.createElement('link");
-        link.rel = 'prefetch'
+        link.rel = 'prefetch
         link.href = route;
         document.head.appendChild(link);
     }
@@ -253,7 +253,7 @@ class ResourcePreloader {
      */
     public preconnectDomain(domain: string) {
         const link = document.createElement('link");
-        link.rel = 'preconnect'
+        link.rel = 'preconnect
         link.href = domain;
         document.head.appendChild(link);
     }
@@ -380,20 +380,20 @@ class PerformanceMonitor {
         const loadTime = entry.responseEnd - entry.startTime;
 
         // 记录不同类型资源的加载时间
-        const currentMax = this.metrics.get(`${resourceType}Max`) || 0;`
+        const currentMax = this.metrics.get(`${resourceType}Max`) || 0;
         if (loadTime > currentMax) {
-            this.metrics.set(`${resourceType}Max`, loadTime);`
+            this.metrics.set(`${resourceType}Max`, loadTime);
         }
 
         // 记录资源大小
         if (entry.transferSize) {
-            const currentSize = this.metrics.get(`${resourceType}Size`) || 0;`
-            this.metrics.set(`${resourceType}Size`, currentSize + entry.transferSize);`
+            const currentSize = this.metrics.get(`${resourceType}Size`) || 0;
+            this.metrics.set(`${resourceType}Size`, currentSize + entry.transferSize);
         }
     }
 
     private getResourceType(url: string): string {
-        if (url.includes(".css')) return 'CSS";`
+        if (url.includes(".css')) return 'CSS";
         if (url.includes('.js')) return 'JS
         if (url.match(/\.(png|jpg|jpeg|gif|webp|svg)$/)) return 'Image
         if (url.match(/\.(woff|woff2|ttf|eot)$/)) return 'Font
@@ -429,7 +429,7 @@ class PerformanceMonitor {
             await fetch('/api/v1/analytics/performance', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json
                 },
                 body: JSON.stringify({
                     metrics,
@@ -671,8 +671,8 @@ import { debounce, throttle    } from 'lodash';export const performanceUtils = {
         const cores = navigator.hardwareConcurrency || 4;
         const memory = (navigator as any).deviceMemory || 4;
 
-        if (cores >= 8 && memory >= 8) return 'high'
-        if (cores >= 4 && memory >= 4) return 'medium'
+        if (cores >= 8 && memory >= 8) return 'high
+        if (cores >= 4 && memory >= 4) return 'medium
         return 'low
     }
 };

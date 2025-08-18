@@ -1,7 +1,7 @@
 import { apiClient } from './api
 
 export interface DataExportOptions {
-  format: 'json' | 'csv' | 'xlsx'
+  format: 'json' | 'csv' | 'xlsx
   dateRange?: {
     start: string;
     end: string;
@@ -11,7 +11,7 @@ export interface DataExportOptions {
 
 export interface DataImportOptions {
   file: File;
-  format: 'json' | 'csv' | 'xlsx'
+  format: 'json' | 'csv' | 'xlsx
   mapping?: Record<string, string>;
 }
 
@@ -25,8 +25,8 @@ export interface DataBackupOptions {
 export interface DataSyncOptions {
   endpoint: string;
   apiKey?: string;
-  syncDirection: 'upload' | 'download' | 'bidirectional'
-  conflictResolution: 'local' | 'remote' | 'merge'
+  syncDirection: 'upload' | 'download' | 'bidirectional
+  conflictResolution: 'local' | 'remote' | 'merge
 }
 
 class DataService {
@@ -34,7 +34,7 @@ class DataService {
   async exportData(options: DataExportOptions): Promise<Blob> {
     try {
       const response = await apiClient.post('/data/export', options, {
-        responseType: 'blob'
+        responseType: 'blob
       });
       return response.data;
     } catch (error) {
@@ -59,7 +59,7 @@ class DataService {
 
       const response = await apiClient.post('/data/import', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data
         }
       });
       return response.data;

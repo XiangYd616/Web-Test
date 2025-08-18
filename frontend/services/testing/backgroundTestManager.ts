@@ -1,10 +1,10 @@
 
 export interface TestInfo     {
   id: string;
-  type: 'database' | 'api' | 'performance' | 'security' | 'compatibility' | 'content' | 'stress' | 'seo' | 'website'
+  type: 'database' | 'api' | 'performance' | 'security' | 'compatibility' | 'content' | 'stress' | 'seo' | 'website
   // 'accessibility' type removed - functionality moved to compatibility test
   config: any;
-  status: 'running' | 'completed' | 'failed' | 'cancelled'
+  status: 'running' | 'completed' | 'failed' | 'cancelled
   progress: number;
   startTime: Date;
   endTime?: Date;
@@ -35,7 +35,7 @@ export type TestEvent   = 'testStarted' | 'testProgress' | 'testCompleted' | 'te
   private completedTests = new Map<string, TestInfo>();
   private listeners = new Set<TestListener>();
   private testCounter = 0;
-  private apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
+  private apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api
   constructor() {
     // 从localStorage恢复状态
     this.loadFromStorage();
@@ -45,7 +45,7 @@ export type TestEvent   = 'testStarted' | 'testProgress' | 'testCompleted' | 'te
   }
 
   // 生成唯一测试ID
-  generateTestId(): string {``
+  generateTestId(): string {
     return `test_${Date.now()}_${++this.testCounter}`;
   }
 
@@ -122,7 +122,7 @@ export type TestEvent   = 'testStarted' | 'testProgress' | 'testCompleted' | 'te
         case 'stress': 
           await this.executeStressTest(testInfo);
           break;
-        default:``
+        default:
           throw new Error(`不支持的测试类型: ${testInfo.type}`);
       }
     } catch (error) {
@@ -136,17 +136,17 @@ export type TestEvent   = 'testStarted' | 'testProgress' | 'testCompleted' | 'te
 
     this.updateTestProgress(testInfo.id, 10, "🌐 正在准备网站测试...");
 
-    try {``
+    try {
       const response = await fetch(`${this.apiBaseUrl}/test/website`, {
         method: "POST",
         headers: {
-          'Content-Type': 'application/json','``
-          'Authorization: `Bearer ${localStorage.getItem("auth_token")"}'`
+          'Content-Type': 'application/json','
+          'Authorization: `Bearer ${localStorage.getItem("auth_token")"}
         },
         body: JSON.stringify(config)
       });
 
-      if (!response.ok) {``
+      if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -157,7 +157,7 @@ export type TestEvent   = 'testStarted' | 'testProgress' | 'testCompleted' | 'te
         '🔍 正在分析SEO优化...',
         '🔒 正在检查安全配置...',
         '🌍 正在测试兼容性...',
-        '📊 正在生成综合报告...;'
+        '📊 正在生成综合报告...;
       ]);
 
       const data = await response.json();
@@ -178,17 +178,17 @@ export type TestEvent   = 'testStarted' | 'testProgress' | 'testCompleted' | 'te
     const { config } = testInfo;
 
     this.updateTestProgress(testInfo.id, 10, "⚡ 正在准备性能测试...");
-    try {``
+    try {
       const response = await fetch(`${this.apiBaseUrl}/test/performance`, {
         method: "POST",
         headers: {
-          'Content-Type': 'application/json','``
-          'Authorization: `Bearer ${localStorage.getItem("auth_token")"}'`
+          'Content-Type': 'application/json','
+          'Authorization: `Bearer ${localStorage.getItem("auth_token")"}
         },
         body: JSON.stringify(config)
       });
 
-      if (!response.ok) {``
+      if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -199,7 +199,7 @@ export type TestEvent   = 'testStarted' | 'testProgress' | 'testCompleted' | 'te
         '📱 正在检查移动端性能...',
         '🖼️ 正在优化图片资源...',
         '⚡ 正在分析Core Web Vitals...',
-        '📈 正在生成性能报告...;'
+        '📈 正在生成性能报告...;
       ]);
 
       const data = await response.json();
@@ -219,17 +219,17 @@ export type TestEvent   = 'testStarted' | 'testProgress' | 'testCompleted' | 'te
     const { config } = testInfo;
 
     this.updateTestProgress(testInfo.id, 10, "🔒 正在准备安全测试...");
-    try {``
+    try {
       const response = await fetch(`${this.apiBaseUrl}/test/security`, {
         method: "POST",
         headers: {
-          'Content-Type': 'application/json','``
-          'Authorization: `Bearer ${localStorage.getItem("auth_token")"}'`
+          'Content-Type': 'application/json','
+          'Authorization: `Bearer ${localStorage.getItem("auth_token")"}
         },
         body: JSON.stringify(config)
       });
 
-      if (!response.ok) {``
+      if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -240,7 +240,7 @@ export type TestEvent   = 'testStarted' | 'testProgress' | 'testCompleted' | 'te
         '🛡️ 正在扫描安全漏洞...',
         '🔐 正在验证HTTPS配置...',
         '🚨 正在检查恶意软件...',
-        '📋 正在生成安全报告...;'
+        '📋 正在生成安全报告...;
       ]);
 
       const data = await response.json();
@@ -266,17 +266,17 @@ export type TestEvent   = 'testStarted' | 'testProgress' | 'testCompleted' | 'te
     const { config } = testInfo;
 
     this.updateTestProgress(testInfo.id, 10, "🔌 正在准备API测试...");
-    try {``
+    try {
       const response = await fetch(`${this.apiBaseUrl}/test/api`, {
         method: "POST",
         headers: {
-          'Content-Type': 'application/json','``
-          'Authorization: `Bearer ${localStorage.getItem("auth_token")"}'`
+          'Content-Type': 'application/json','
+          'Authorization: `Bearer ${localStorage.getItem("auth_token")"}
         },
         body: JSON.stringify(config)
       });
 
-      if (!response.ok) {``
+      if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -287,7 +287,7 @@ export type TestEvent   = 'testStarted' | 'testProgress' | 'testCompleted' | 'te
         '📊 正在验证响应数据...',
         '⚡ 正在测试响应时间...',
         '🔒 正在检查API安全性...',
-        '📈 正在生成测试报告...;'
+        '📈 正在生成测试报告...;
       ]);
 
       const data = await response.json();
@@ -311,13 +311,13 @@ export type TestEvent   = 'testStarted' | 'testProgress' | 'testCompleted' | 'te
       const response = await fetch('/api/test/database', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',``
-          "Authorization": `Bearer ${localStorage.getItem("token")"}`
+          'Content-Type': 'application/json',
+          "Authorization": `Bearer ${localStorage.getItem("token")"}
         },
         body: JSON.stringify(config)
       });
 
-      if (!response.ok) {``
+      if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -341,17 +341,17 @@ export type TestEvent   = 'testStarted' | 'testProgress' | 'testCompleted' | 'te
     const { config } = testInfo;
 
     this.updateTestProgress(testInfo.id, 10, "💪 正在准备压力测试...");
-    try {``
+    try {
       const response = await fetch(`${this.apiBaseUrl}/test/stress`, {
         method: "POST",
         headers: {
-          'Content-Type': 'application/json','``
-          'Authorization: `Bearer ${localStorage.getItem("auth_token")"}'`
+          'Content-Type': 'application/json','
+          'Authorization: `Bearer ${localStorage.getItem("auth_token")"}
         },
         body: JSON.stringify(config)
       });
 
-      if (!response.ok) {``
+      if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -362,7 +362,7 @@ export type TestEvent   = 'testStarted' | 'testProgress' | 'testCompleted' | 'te
         '📊 正在收集性能指标...',
         '⚡ 正在分析响应时间...',
         '🔍 正在检测瓶颈...',
-        '📈 正在生成压力测试报告...;'
+        '📈 正在生成压力测试报告...;
       ]);
 
       const data = await response.json();
@@ -494,7 +494,7 @@ export type TestEvent   = 'testStarted' | 'testProgress' | 'testCompleted' | 'te
       try {
         listener(event, data);
       } catch (error) {
-        console.error('Error in test listener: , error);'
+        console.error('Error in test listener: , error);
       }
     });
   }
@@ -508,21 +508,21 @@ export type TestEvent   = 'testStarted' | 'testProgress' | 'testCompleted' | 'te
       };
       localStorage.setItem('backgroundTestManager', JSON.stringify(data'));
     } catch (error) {
-      console.error('Failed to save test manager state: , error);'
+      console.error('Failed to save test manager state: , error);
     }
   }
 
   // 从本地存储加载
   private loadFromStorage(): void {
     try {
-      const data = localStorage.getItem('backgroundTestManager);'
+      const data = localStorage.getItem('backgroundTestManager);
       if (data) {
         const parsed = JSON.parse(data);
         this.completedTests = new Map(parsed.completedTests || []);
         this.testCounter = parsed.testCounter || 0;
       }
     } catch (error) {
-      console.error('Failed to load test manager state:, error);'
+      console.error('Failed to load test manager state:, error);
     }
   }
 
@@ -538,4 +538,3 @@ export type TestEvent   = 'testStarted' | 'testProgress' | 'testCompleted' | 'te
 const backgroundTestManager = new BackgroundTestManager();
 
 export default backgroundTestManager;
-``

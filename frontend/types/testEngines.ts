@@ -16,7 +16,7 @@ export interface BaseTestResult     {
 export interface TestError     {
   code: string;
   message: string;
-  severity: 'low' | 'medium' | 'high' | 'critical'
+  severity: 'low' | 'medium' | 'high' | 'critical
   line?: number;
   column?: number;
 }
@@ -24,7 +24,7 @@ export interface TestError     {
 export interface TestWarning     {
   code: string;
   message: string;
-  severity: 'info' | 'warning'
+  severity: 'info' | 'warning
   suggestion?: string;
 }
 
@@ -33,8 +33,8 @@ export interface TestRecommendation     {
   title: string;
   description: string;
   priority: TestPriority;
-  impact: 'low' | 'medium' | 'high'
-  effort: 'low' | 'medium' | 'high'
+  impact: 'low' | 'medium' | 'high
+  effort: 'low' | 'medium' | 'high
   category: string;
 }
 
@@ -51,7 +51,7 @@ export interface SEOTestConfig extends BaseTestConfig     {
 }
 
 export interface SEOTestResult extends BaseTestResult     {
-  testType: 'seo'
+  testType: 'seo
   seoScore: number;
   metaTags: MetaTagsAnalysis;
   headings: HeadingAnalysis;
@@ -102,7 +102,7 @@ export interface ContentAnalysis     {
   readabilityScore: number;
   keywordDensity: Record<string, number>;
   duplicateContent: boolean;
-  contentQuality: 'poor' | 'fair' | 'good' | 'excellent'
+  contentQuality: 'poor' | 'fair' | 'good' | 'excellent
 }
 
 export interface StructuredDataAnalysis     {
@@ -130,8 +130,8 @@ export interface MobileOptimizationAnalysis     {
 // ==================== 性能测试类型 ====================
 
 export interface PerformanceTestConfig extends BaseTestConfig     {
-  device?: 'desktop' | 'mobile' | 'tablet'
-  connection?: 'fast' | 'slow' | '3g' | '4g'
+  device?: 'desktop' | 'mobile' | 'tablet
+  connection?: 'fast' | 'slow' | '3g' | '4g
   location?: string;
   runs?: number;
   includeScreenshot?: boolean;
@@ -140,7 +140,7 @@ export interface PerformanceTestConfig extends BaseTestConfig     {
 }
 
 export interface PerformanceTestResult extends BaseTestResult     {
-  testType: 'performance'
+  testType: 'performance
   performanceScore: number;
   coreWebVitals: CoreWebVitals;
   lighthouse: LighthouseMetrics;
@@ -185,15 +185,15 @@ export interface PerformanceOpportunity     {
   title: string;
   description: string;
   savings: number;
-  impact: 'low' | 'medium' | 'high'
-  effort: 'low' | 'medium' | 'high'
+  impact: 'low' | 'medium' | 'high
+  effort: 'low' | 'medium' | 'high
 }
 
 export interface PerformanceDiagnostic     {
   id: string;
   title: string;
   description: string;
-  severity: 'info' | 'warning' | 'error'
+  severity: 'info' | 'warning' | 'error
   details?: Record<string, any>;
 }
 
@@ -205,14 +205,14 @@ export interface SecurityTestConfig extends BaseTestConfig     {
   checkSSL?: boolean;
   checkHeaders?: boolean;
   checkCookies?: boolean;
-  scanType?: 'basic' | 'comprehensive'
+  scanType?: 'basic' | 'comprehensive
   customChecks?: string[];
 }
 
 export interface SecurityTestResult extends BaseTestResult     {
-  testType: 'security'
+  testType: 'security
   securityScore: number;
-  riskLevel: 'low' | 'medium' | 'high' | 'critical'
+  riskLevel: 'low' | 'medium' | 'high' | 'critical
   vulnerabilities: SecurityVulnerability[];
   securityHeaders: SecurityHeaders;
   sslInfo: SSLInfo;
@@ -223,7 +223,7 @@ export interface SecurityTestResult extends BaseTestResult     {
 export interface SecurityVulnerability     {
   id: string;
   type: string;
-  severity: 'low' | 'medium' | 'high' | 'critical'
+  severity: 'low' | 'medium' | 'high' | 'critical
   title: string;
   description: string;
   impact: string;
@@ -282,7 +282,7 @@ export interface CSPAnalysis     {
 // ==================== API 测试类型 ====================
 
 export interface APITestConfig extends BaseTestConfig     {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS'
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS
   headers?: Record<string, string>;
   body?: any;
   authentication?: APIAuthentication;
@@ -293,12 +293,12 @@ export interface APITestConfig extends BaseTestConfig     {
 }
 
 export interface APIAuthentication     {
-  type: 'none' | 'basic' | 'bearer' | 'apikey' | 'oauth2'
+  type: 'none' | 'basic' | 'bearer' | 'apikey' | 'oauth2
   credentials?: Record<string, string>;
 }
 
 export interface APITestResult extends BaseTestResult     {
-  testType: 'api'
+  testType: 'api
   method: string;
   statusCode: number;
   responseTime: number;
@@ -344,7 +344,7 @@ export interface BrowserConfig     {
 
 export interface DeviceConfig     {
   name: string;
-  type: 'desktop' | 'tablet' | 'mobile'
+  type: 'desktop' | 'tablet' | 'mobile
   userAgent: string;
   viewport: { width: number; height: number; };
 }
@@ -357,7 +357,7 @@ export interface ViewportConfig     {
 }
 
 export interface CompatibilityTestResult extends BaseTestResult     {
-  testType: 'compatibility'
+  testType: 'compatibility
   overallScore: number;
   browserResults: BrowserTestResult[];
   deviceResults: DeviceTestResult[];
@@ -401,34 +401,34 @@ export interface FeatureSupportResult     {
   supported: boolean;
   browserSupport: Record<string, boolean>;
   fallbackAvailable: boolean;
-  impact: 'low' | 'medium' | 'high'
+  impact: 'low' | 'medium' | 'high
 }
 
 export interface LayoutIssue     {
   type: string;
   element: string;
   description: string;
-  severity: 'low' | 'medium' | 'high'
+  severity: 'low' | 'medium' | 'high
 }
 
 export interface TouchIssue     {
   type: string;
   element: string;
   description: string;
-  severity: 'low' | 'medium' | 'high'
+  severity: 'low' | 'medium' | 'high
 }
 
 export interface ResponsiveIssue     {
   type: string;
   description: string;
-  severity: 'low' | 'medium' | 'high'
+  severity: 'low' | 'medium' | 'high
   affectedElements: string[];
 }
 
 // ==================== 无障碍测试类型 ====================
 
 export interface AccessibilityTestConfig extends BaseTestConfig     {
-  level?: 'A' | 'AA' | 'AAA'
+  level?: 'A' | 'AA' | 'AAA
   categories?: string[];
   includeScreenshots?: boolean;
   checkKeyboard?: boolean;
@@ -436,9 +436,9 @@ export interface AccessibilityTestConfig extends BaseTestConfig     {
 }
 
 export interface AccessibilityTestResult extends BaseTestResult     {
-  testType: 'accessibility'
+  testType: 'accessibility
   level: string;
-  complianceLevel: 'poor' | 'fair' | 'good' | 'excellent'
+  complianceLevel: 'poor' | 'fair' | 'good' | 'excellent
   violations: AccessibilityViolation[];
   passes: AccessibilityPass[];
   summary: AccessibilitySummary;
@@ -446,7 +446,7 @@ export interface AccessibilityTestResult extends BaseTestResult     {
 
 export interface AccessibilityViolation     {
   id: string;
-  impact: 'minor' | 'moderate' | 'serious' | 'critical'
+  impact: 'minor' | 'moderate' | 'serious' | 'critical
   description: string;
   help: string;
   helpUrl: string;
@@ -497,7 +497,7 @@ export interface StressTestConfig extends BaseTestConfig     {
   concurrency: number;
   rampUp?: number;
   requestsPerSecond?: number;
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE
   headers?: Record<string, string>;
   body?: any;
   scenarios?: StressTestScenario[];
@@ -520,13 +520,13 @@ export interface StressTestStep     {
 }
 
 export interface StressTestAssertion     {
-  type: 'status' | 'response_time' | 'body_contains' | 'header_exists'
+  type: 'status' | 'response_time' | 'body_contains' | 'header_exists
   value: any;
-  operator?: 'equals' | 'less_than' | 'greater_than' | 'contains'
+  operator?: 'equals' | 'less_than' | 'greater_than' | 'contains
 }
 
 export interface StressTestResult extends BaseTestResult     {
-  testType: 'stress'
+  testType: 'stress
   metrics: StressTestMetrics;
   errors: StressTestError[];
   summary: StressTestSummary;
@@ -560,7 +560,7 @@ export interface StressTestError     {
 
 export interface StressTestSummary     {
   passed: boolean;
-  performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F'
+  performanceGrade: 'A' | 'B' | 'C' | 'D' | 'F
   bottlenecks: string[];
 }
 

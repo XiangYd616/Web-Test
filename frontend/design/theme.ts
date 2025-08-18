@@ -12,7 +12,7 @@ export interface Theme     {
   shadows: typeof shadows;
   borderRadius: typeof borderRadius;
   transitions: typeof transitions;
-  mode: 'light' | 'dark'
+  mode: 'light' | 'dark
 }
 
 // 浅色主题
@@ -24,16 +24,16 @@ export const lightTheme: Theme = {
     background: {
       primary: '#ffffff',
       secondary: '#f8f9fa',
-      tertiary: '#e9ecef'
+      tertiary: '#e9ecef
     },
     text: {
       primary: '#212529',
       secondary: '#6c757d',
-      disabled: '#adb5bd'
+      disabled: '#adb5bd
     },
     border: {
       primary: '#dee2e6',
-      secondary: '#e9ecef'
+      secondary: '#e9ecef
     }
   },
   typography,
@@ -52,16 +52,16 @@ export const darkTheme: Theme = {
     background: {
       primary: '#121212',
       secondary: '#1e1e1e',
-      tertiary: '#2d2d2d'
+      tertiary: '#2d2d2d
     },
     text: {
       primary: '#ffffff',
       secondary: '#b3b3b3',
-      disabled: '#666666'
+      disabled: '#666666
     },
     border: {
       primary: '#404040',
-      secondary: '#333333'
+      secondary: '#333333
     }
   },
   typography,
@@ -123,35 +123,35 @@ export class ThemeManager {
     Object.entries(theme.colors).forEach(([key, value]) => {
       if (typeof value === 'object') {
         Object.entries(value).forEach(([subKey, subValue]) => {
-          root.style.setProperty(`--color-${key}-${subKey}`, subValue);`
+          root.style.setProperty(`--color-${key}-${subKey}`, subValue);
         });
       } else {
-        root.style.setProperty(`--color-${key}`, value);`
+        root.style.setProperty(`--color-${key}`, value);
       }
     });
 
     // 应用字体变量
     Object.entries(theme.typography.fontSize).forEach(([key, value]) => {
-      root.style.setProperty(`--font-size-${key}`, value);`
+      root.style.setProperty(`--font-size-${key}`, value);
     });
 
     // 应用间距变量
     Object.entries(theme.spacing).forEach(([key, value]) => {
-      root.style.setProperty(`--spacing-${key}`, value);`
+      root.style.setProperty(`--spacing-${key}`, value);
     });
 
     // 应用阴影变量
     Object.entries(theme.shadows).forEach(([key, value]) => {
-      root.style.setProperty(`--shadow-${key}`, value);`
+      root.style.setProperty(`--shadow-${key}`, value);
     });
 
     // 设置主题类名
-    root.className = root.className.replace(/theme-\w+/g, "");`
-    root.classList.add(`theme-${theme.name}`);`
+    root.className = root.className.replace(/theme-\w+/g, ");
+    root.classList.add(`theme-${theme.name}`);
   }
 
   private handleSystemThemeChange(e: MediaQueryListEvent): void {
-    if (!localStorage.getItem("theme')) {'`
+    if (!localStorage.getItem("theme')) {
       const newTheme = e.matches ? darkTheme : lightTheme;
       this.setTheme(newTheme);
     }

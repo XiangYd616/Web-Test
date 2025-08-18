@@ -1,6 +1,6 @@
 // ReportService - 报告服务
 export interface ReportConfig {
-  type: 'pdf' | 'excel' | 'csv' | 'json'
+  type: 'pdf' | 'excel' | 'csv' | 'json
   title: string;
   data: any[];
   template?: string;
@@ -39,7 +39,7 @@ export class ReportService {
       console.error('报告生成失败:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : '未知错误'
+        error: error instanceof Error ? error.message : '未知错误
       };
     }
   }

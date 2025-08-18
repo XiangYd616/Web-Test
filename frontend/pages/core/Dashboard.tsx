@@ -6,9 +6,8 @@ import {
   CheckCircleOutlined, 
   ClockCircleOutlined,
   WarningOutlined,
-  ReloadOutlined
-} from '@ant-design/icons';
-
+  // ReloadOutlined
+} from '@ant-design/icons'; // 已修复
 const { Title, Text } = Typography;
 
 interface DashboardStats {
@@ -39,7 +38,7 @@ const Dashboard: React.FC = () => {
   const [systemStatus, setSystemStatus] = useState<SystemStatus>({
     status: 'healthy',
     message: '系统运行正常',
-    uptime: '99.9%'
+    uptime: '99.9%
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -124,7 +123,7 @@ const Dashboard: React.FC = () => {
         <Col xs={24} sm={12} md={6}>
           <Card>
             <Statistic
-              title="总测试数"
+              title="总测试数
               value={stats.totalTests}
               prefix={<DashboardOutlined />}
               valueStyle={{ color: '#1890ff' }}
@@ -135,7 +134,7 @@ const Dashboard: React.FC = () => {
         <Col xs={24} sm={12} md={6}>
           <Card>
             <Statistic
-              title="通过测试"
+              title="通过测试
               value={stats.passedTests}
               prefix={<CheckCircleOutlined />}
               valueStyle={{ color: '#52c41a' }}
@@ -146,7 +145,7 @@ const Dashboard: React.FC = () => {
         <Col xs={24} sm={12} md={6}>
           <Card>
             <Statistic
-              title="失败测试"
+              title="失败测试
               value={stats.failedTests}
               prefix={<BugOutlined />}
               valueStyle={{ color: '#ff4d4f' }}
@@ -157,7 +156,7 @@ const Dashboard: React.FC = () => {
         <Col xs={24} sm={12} md={6}>
           <Card>
             <Statistic
-              title="待处理"
+              title="待处理
               value={stats.pendingTests}
               prefix={<ClockCircleOutlined />}
               valueStyle={{ color: '#faad14' }}
@@ -173,7 +172,7 @@ const Dashboard: React.FC = () => {
           <Card title="测试成功率" loading={isLoading}>
             <div style={{ textAlign: 'center' }}>
               <Progress
-                type="circle"
+                type="circle
                 percent={stats.successRate}
                 format={(percent) => `${percent}%`}
                 strokeColor={stats.successRate >= 90 ? '#52c41a' : stats.successRate >= 70 ? '#faad14' : '#ff4d4f'}

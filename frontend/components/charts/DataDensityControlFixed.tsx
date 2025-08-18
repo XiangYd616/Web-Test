@@ -10,4 +10,4 @@ const DataDensityControlFixed: React.FC<DataDensityControlFixedProps> = (props) 
     </div>
   );
 };
-export default DataDensityControlFixed;'"
+export default DataDensityControlFixed;

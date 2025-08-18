@@ -45,7 +45,7 @@ const URL_PATTERNS = {
     'http//': 'http://',
     'https//': 'https://',
     'www.': 'https://www.',
-    'ftp://': 'https://'
+    'ftp://': 'https://
   }
 };
 
@@ -59,7 +59,7 @@ const SECURITY_CHECKS = {
     '80': 'HTTP (建议使用HTTPS)',
     '8080': '开发服务器端口',
     '3000': 'Node.js开发端口',
-    '8000': 'Python开发端口'
+    '8000': 'Python开发端口
   } as { [key: string]: string }
 };
 
@@ -68,7 +68,7 @@ export function autoFixUrl(url: string):   { fixed: string; fixes: string[] } {
   const fixes: string[]  = [];
   // 移除多余空格
   if (URL_PATTERNS.hasSpaces.test(fixed)) {
-    fixed = fixed.replace(/\s+/g, '");
+    fixed = fixed.replace(/\s+/g, ');
     fixes.push('移除了多余的空格");
   }
 
@@ -76,14 +76,14 @@ export function autoFixUrl(url: string):   { fixed: string; fixes: string[] } {
   for (const [typo, correct] of Object.entries(URL_PATTERNS.commonTypos)) {
     if (fixed.toLowerCase().startsWith(typo)) {
       fixed = correct + fixed.slice(typo.length);
-      fixes.push(`修复了拼写错误: ${typo} → ${correct}`);`
+      fixes.push(`修复了拼写错误: ${typo} → ${correct}`);
       break;
     }
   }
 
   // 自动添加协议
   if (URL_PATTERNS.missingProtocol.test(fixed)) {
-    fixed = "https://' + fixed;'`
+    fixed = "https://' + fixed;
     fixes.push('自动添加了HTTPS协议");
   }
 
@@ -103,7 +103,7 @@ export function validateUrlFormat(url: string):   { isValid: boolean; error?: st
   } catch (error) {
     return {
       isValid: false,
-      error: error instanceof Error ? error.message : 'URL格式无效'
+      error: error instanceof Error ? error.message : 'URL格式无效
     };
   }
 }
@@ -117,22 +117,22 @@ export function performSecurityChecks(urlObj: URL): string[]   {
 
   // 检查危险协议
   if (SECURITY_CHECKS.dangerousProtocols.includes(urlObj.protocol)) {
-    notes.push(`🚨 检测到潜在危险协议: ${urlObj.protocol}`);`
+    notes.push(`🚨 检测到潜在危险协议: ${urlObj.protocol}`);
   }
 
   // 检查可疑域名
   if (SECURITY_CHECKS.suspiciousDomains.includes(urlObj.hostname)) {
-    notes.push(`⚠️ 检测到特殊域名: ${urlObj.hostname}`);`
+    notes.push(`⚠️ 检测到特殊域名: ${urlObj.hostname}`);
   }
 
   // 检查端口
   if (urlObj.port && SECURITY_CHECKS.commonPorts[urlObj.port]) {
-    notes.push(`ℹ️ 端口 ${urlObj.port}: ${SECURITY_CHECKS.commonPorts[urlObj.port]}`);`
+    notes.push(`ℹ️ 端口 ${urlObj.port}: ${SECURITY_CHECKS.commonPorts[urlObj.port]}`);
   }
 
   // 检查IP地址
   if (/^\d+\.\d+\.\d+\.\d+$/.test(urlObj.hostname)) {
-    notes.push("ℹ️ 使用IP地址访问，请确认这是预期的");`
+    notes.push("ℹ️ 使用IP地址访问，请确认这是预期的");
   }
 
   return notes;

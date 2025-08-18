@@ -25,15 +25,15 @@ export const useAuthFlow = () => {
   const validateLoginForm = useCallback((data: LoginFormData) => {
     const errors: Record<string, string>  = {};
     if (!data.email || !data.email.trim()) {
-      errors.email = '邮箱不能为空'
+      errors.email = '邮箱不能为空
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-      errors.email = '请输入有效的邮箱地址'
+      errors.email = '请输入有效的邮箱地址
     }
 
     if (!data.password || !data.password.trim()) {
-      errors.password = '密码不能为空'
+      errors.password = '密码不能为空
     } else if (data.password.length < 6) {
-      errors.password = '密码长度至少6位'
+      errors.password = '密码长度至少6位
     }
 
     return errors;
@@ -43,25 +43,25 @@ export const useAuthFlow = () => {
   const validateRegisterForm = useCallback((data: RegisterFormData) => {
     const errors: Record<string, string>  = {};
     if (!data.username || !data.username.trim()) {
-      errors.username = '用户名不能为空'
+      errors.username = '用户名不能为空
     } else if (data.username.length < 3) {
-      errors.username = '用户名长度至少3位'
+      errors.username = '用户名长度至少3位
     }
 
     if (!data.email || !data.email.trim()) {
-      errors.email = '邮箱不能为空'
+      errors.email = '邮箱不能为空
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-      errors.email = '请输入有效的邮箱地址'
+      errors.email = '请输入有效的邮箱地址
     }
 
     if (!data.password || !data.password.trim()) {
-      errors.password = '密码不能为空'
+      errors.password = '密码不能为空
     } else if (data.password.length < 6) {
-      errors.password = '密码长度至少6位'
+      errors.password = '密码长度至少6位
     }
 
     if (data.password !== data.confirmPassword) {
-      errors.confirmPassword = '两次输入的密码不一致'
+      errors.confirmPassword = '两次输入的密码不一致
     }
 
     return errors;

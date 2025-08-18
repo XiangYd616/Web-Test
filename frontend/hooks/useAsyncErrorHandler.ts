@@ -100,7 +100,7 @@ export function useAsyncErrorHandler(
         const errorObj = error instanceof Error ? error : new Error(String(error));
         
         if (logError) {
-          console.error(`[${context}] Error (attempt ${currentRetry + 1}):`, errorObj);`
+          console.error(`[${context}] Error (attempt ${currentRetry + 1}):`, errorObj);
         }
 
         // 处理错误
@@ -141,7 +141,7 @@ export function useAsyncErrorHandler(
 
         if (showNotification) {
           // 这里可以集成通知系统
-          console.warn(`操作失败: ${errorObj.message}`);`
+          console.warn(`操作失败: ${errorObj.message}`);
         }
 
         return null;
@@ -198,8 +198,7 @@ export function useAsyncErrorHandler(
  * 判断错误是否可重试
  */
 function isRetryableError(error: Error): boolean {
-  const retryablePatterns = [
-    "network','`
+  const retryablePatterns = ["network',
     'timeout',
     'connection',
     'fetch',
@@ -239,7 +238,7 @@ export function useApiErrorHandler() {
     retryDelay: 1000,
     showNotification: true,
     logError: true,
-    context: 'API call'
+    context: 'API call
   });
 }
 
@@ -252,7 +251,7 @@ export function useFileErrorHandler() {
     retryDelay: 500,
     showNotification: true,
     logError: true,
-    context: 'File operation'
+    context: 'File operation
   });
 }
 
@@ -265,6 +264,6 @@ export function useDatabaseErrorHandler() {
     retryDelay: 2000,
     showNotification: false,
     logError: true,
-    context: 'Database operation'
+    context: 'Database operation
   });
 }

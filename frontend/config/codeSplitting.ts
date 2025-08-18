@@ -7,7 +7,7 @@ export interface ChunkConfig     {
   name: string;
   test: RegExp | string;
   priority: number;
-  chunks: 'all' | 'async' | 'initial'
+  chunks: 'all' | 'async' | 'initial
   minSize?: number;
   maxSize?: number;
   cacheGroups?: Record<string, any>;

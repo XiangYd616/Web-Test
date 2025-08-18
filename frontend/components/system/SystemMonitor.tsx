@@ -20,8 +20,8 @@ import { Activity, AlertTriangle, CheckCircle, Cpu, Database, Eye, HardDrive, Me
   defaultValue?: any;
   
   // 配置属性
-  size?: 'small' | 'medium' | 'large'
-  variant?: 'primary' | 'secondary' | 'outline'
+  size?: 'small' | 'medium' | 'large
+  variant?: 'primary' | 'secondary' | 'outline
   // 可访问性
   'aria-label'?: string;
   'aria-describedby'?: string;
@@ -49,7 +49,7 @@ interface ActiveTest   {
   currentUsers: number;
   errorRate: number;
   averageResponseTime: number;
-  status: 'running' | 'warning' | 'critical'
+  status: 'running' | 'warning' | 'critical
   warnings: string[];
 }
 
@@ -104,7 +104,7 @@ const SystemMonitor: React.FC<SystemMonitorProps>  = (props) => {
       errorRate: 65.2,
       averageResponseTime: 12000,
       status: 'critical' as const,
-      warnings: ["错误率过高", "响应时间超时']'
+      warnings: ["错误率过高", "响应时间超时']
     }
   ]);
 
@@ -129,7 +129,7 @@ const SystemMonitor: React.FC<SystemMonitorProps>  = (props) => {
       // 检查自动保护规则
       checkAutoProtection(data);
     } catch (error) {
-      console.error("加载监控数据失败', error);"
+      console.error("加载监控数据失败', error);
     } finally {
       setLoading(false);
     }
@@ -142,22 +142,22 @@ const SystemMonitor: React.FC<SystemMonitorProps>  = (props) => {
     const newAlerts: string[]  = [];
     // 检查CPU使用率
     if (monitorData.metrics.system.cpuUsage.percentage > autoProtection.systemCpuThreshold) {
-      newAlerts.push(`CPU使用率过高: ${monitorData.metrics.system.cpuUsage.percentage.toFixed(1)}%`);`
+      newAlerts.push(`CPU使用率过高: ${monitorData.metrics.system.cpuUsage.percentage.toFixed(1)}%`);
     }
 
     // 检查内存使用率
     const memoryUsage = monitorData.metrics.system.memoryUsage.percentage;
     if (memoryUsage > autoProtection.systemMemoryThreshold) {
-      newAlerts.push(`内存使用率过高: ${memoryUsage.toFixed(1)}%`);`
+      newAlerts.push(`内存使用率过高: ${memoryUsage.toFixed(1)}%`);
     }
 
     // 检查活跃测试
     activeTests.forEach(test => {
       if (test.errorRate > autoProtection.errorRateThreshold) {
-        newAlerts.push(`测试 ${test.id} 错误率过高: ${test.errorRate.toFixed(1)}%`);`
+        newAlerts.push(`测试 ${test.id} 错误率过高: ${test.errorRate.toFixed(1)}%`);
       }
       if (test.averageResponseTime > autoProtection.responseTimeThreshold) {
-        newAlerts.push(`测试 ${test.id} 响应时间过长: ${test.averageResponseTime}ms`);`
+        newAlerts.push(`测试 ${test.id} 响应时间过长: ${test.averageResponseTime}ms`);
       }
     });
 
@@ -165,22 +165,22 @@ const SystemMonitor: React.FC<SystemMonitorProps>  = (props) => {
 
     // 自动停止危险测试
     if (autoProtection.autoStopEnabled && newAlerts.length > 0) {
-      console.warn("🚨 自动保护触发，检测到以下问题:', newAlerts);'`"`
+      console.warn("🚨 自动保护触发，检测到以下问题:', newAlerts);
       // 这里可以调用API停止危险测试
     }
   };
 
   // 强制停止测试
   const forceStopTest = async (testId: string) => {
-    console.log("🛑 管理员强制停止测试:', testId);"
+    console.log("🛑 管理员强制停止测试:', testId);
     setActiveTests(prev => prev.filter(test => test.id !== testId));
     setAlerts(prev => prev.filter(alert => !alert.includes(testId)));
   };
 
   const formatBytes = (bytes: number): string  => {
-    if (bytes === 0) return '0 B'
+    if (bytes === 0) return '0 B
     const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB"];"
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
@@ -188,13 +188,13 @@ const SystemMonitor: React.FC<SystemMonitorProps>  = (props) => {
   const getUsageColor = (usage: number): string  => {
     if (usage < 50) return 'text-green-600'>
     if (usage < 80) return 'text-yellow-600'>
-    return 'text-red-600'
+    return 'text-red-600
   };
 
   const getUsageBarColor = (usage: number): string  => {
     if (usage < 50) return 'bg-green-500'>
     if (usage < 80) return 'bg-yellow-500'>
-    return 'bg-red-500'
+    return 'bg-red-500
   };
 
   const ProgressBar: React.FC<{ value: number; max: number; label: string }>  = ({ value, max, label }) => {
@@ -209,11 +209,11 @@ const SystemMonitor: React.FC<SystemMonitorProps>  = (props) => {
         </div>
         <div className='w-full bg-gray-200 rounded-full h-2'>
           <div>
-            className={`h-2 rounded-full transition-all duration-300 ${getUsageBarColor(percentage)}`}`
-            style={{ width: `${Math.min(percentage, 100)}%` }}`
+            className={`h-2 rounded-full transition-all duration-300 ${getUsageBarColor(percentage)}`}
+            style={{ width: `${Math.min(percentage, 100)}%` }}
           />
         </div>
-        <div className="flex justify-between text-xs text-gray-500'>`'"`
+        <div className="flex justify-between text-xs text-gray-500'>`
           <span>{formatBytes(value)}</span>
           <span>{formatBytes(max)}</span>
         </div>
@@ -244,20 +244,20 @@ const SystemMonitor: React.FC<SystemMonitorProps>  = (props) => {
           <div className='flex items-center space-x-2'>
             <label htmlFor='auto-refresh-checkbox' className='text-sm font-medium text-gray-700'>自动刷新</label>
             <input>
-              id='auto-refresh-checkbox'
-              type='checkbox'
+              id='auto-refresh-checkbox
+              type='checkbox
               checked={autoRefresh}
               onChange={(e) => setAutoRefresh(e.target.checked)}
-              className='rounded border-gray-300 text-primary-600 focus:ring-primary-500'
-              aria-label='启用或禁用自动刷新'
+              className='rounded border-gray-300 text-primary-600 focus:ring-primary-500
+              aria-label='启用或禁用自动刷新
             />
           </div>
           <select>
             value={refreshInterval}
             onChange={(e) => setRefreshInterval(Number(e.target.value))}
-            className='input text-sm'
+            className='input text-sm
             disabled={!autoRefresh}
-            aria-label='刷新间隔'
+            aria-label='刷新间隔
           >
             <option value={10}>10秒</option>
             <option value={30}>30秒</option>
@@ -265,9 +265,9 @@ const SystemMonitor: React.FC<SystemMonitorProps>  = (props) => {
             <option value={300}>5分钟</option>
           </select>
           <button>
-            type='button'
+            type='button
             onClick={loadMonitorData}
-            className='btn btn-outline btn-sm flex items-center space-x-2'
+            className='btn btn-outline btn-sm flex items-center space-x-2
           >
             <RefreshCw className='w-4 h-4'    />
             <span>刷新</span>
@@ -301,15 +301,15 @@ const SystemMonitor: React.FC<SystemMonitorProps>  = (props) => {
           </div>
           <div className='flex items-center space-x-2'>
             <span className={`px-2 py-1 rounded-full text-xs font-medium ${autoProtection.enabled`}>
-              ? "bg-green-100 text-green-800";``
-              : 'bg-gray-100 text-gray-800'
-              }`}>`
-              {autoProtection.enabled ? "已启用" : "已禁用'}'``
+              ? "bg-green-100 text-green-800";
+              : 'bg-gray-100 text-gray-800
+              }`}>
+              {autoProtection.enabled ? "已启用" : "已禁用'}'
             </span>
             <button>
-              type='button'
+              type='button
               onClick={() => setAutoProtection(prev => ({ ...prev, enabled: !prev.enabled }))}
-              className='px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors'
+              className='px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors
             >
               {autoProtection.enabled ? '禁用" : "启用'}
             </button>
@@ -329,10 +329,10 @@ const SystemMonitor: React.FC<SystemMonitorProps>  = (props) => {
           <div className='flex items-center justify-between'>
             <div>
               <p className='text-sm font-medium text-gray-500'>CPU 使用率</p>
-              <p className={`text-2xl font-bold ${getUsageColor(monitor?.metrics.cpu.usage || 0)}`}>`
+              <p className={`text-2xl font-bold ${getUsageColor(monitor?.metrics.cpu.usage || 0)}`}>
                 {monitor?.metrics.cpu.usage.toFixed(1)}%
               </p>
-              <p className="text-sm text-gray-600'>{monitor?.metrics.cpu.cores} 核心</p>`'"`
+              <p className="text-sm text-gray-600'>{monitor?.metrics.cpu.cores} 核心</p>`
             </div>
             <Cpu className='w-8 h-8 text-blue-600'    />
           </div>
@@ -342,10 +342,10 @@ const SystemMonitor: React.FC<SystemMonitorProps>  = (props) => {
           <div className='flex items-center justify-between'>
             <div>
               <p className='text-sm font-medium text-gray-500'>内存使用率</p>
-              <p className={`text-2xl font-bold ${getUsageColor(monitor?.metrics.memory.usage || 0)}`}>`
+              <p className={`text-2xl font-bold ${getUsageColor(monitor?.metrics.memory.usage || 0)}`}>
                 {monitor?.metrics.memory.usage.toFixed(1)}%
               </p>
-              <p className="text-sm text-gray-600'>`'"`
+              <p className="text-sm text-gray-600'>`
                 {formatBytes(monitor?.metrics.memory.used || 0)} / {formatBytes(monitor?.metrics.memory.total || 0)}
               </p>
             </div>
@@ -357,10 +357,10 @@ const SystemMonitor: React.FC<SystemMonitorProps>  = (props) => {
           <div className='flex items-center justify-between'>
             <div>
               <p className='text-sm font-medium text-gray-500'>磁盘使用率</p>
-              <p className={`text-2xl font-bold ${getUsageColor(monitor?.metrics.disk.usage || 0)}`}>`
+              <p className={`text-2xl font-bold ${getUsageColor(monitor?.metrics.disk.usage || 0)}`}>
                 {monitor?.metrics.disk.usage.toFixed(1)}%
               </p>
-              <p className="text-sm text-gray-600'>`'"`
+              <p className="text-sm text-gray-600'>`
                 {formatBytes(monitor?.metrics.disk.used || 0)} / {formatBytes(monitor?.metrics.disk.total || 0)}
               </p>
             </div>
@@ -394,12 +394,12 @@ const SystemMonitor: React.FC<SystemMonitorProps>  = (props) => {
           <div className='space-y-6'>
             <ProgressBar value={monitor?.metrics.memory.used || 0}>
               max={monitor?.metrics.memory.total || 1}
-              label='内存使用'
+              label='内存使用
                />
 
             <ProgressBar value={monitor?.metrics.disk.used || 0}>
               max={monitor?.metrics.disk.total || 1}
-              label='磁盘使用'
+              label='磁盘使用
                />
 
             <div className='space-y-2'>
@@ -515,8 +515,8 @@ const SystemMonitor: React.FC<SystemMonitorProps>  = (props) => {
 
             <div className='flex items-center justify-between'>
               <span className='text-sm font-medium'>错误率</span>
-              <span className={`text-sm font-medium ${(monitor?.metrics.application.errorRate || 0) < 5 ? 'text-green-600' : 'text-red-600";`}">
-                }`}>`
+              <span className={`text-sm font-medium ${(monitor?.metrics.application.errorRate || 0) < 5 ? 'text-green-600' : 'text-red-600";}">
+                }`}>
                 {monitor?.metrics.application.errorRate.toFixed(2)}%
               </span>
             </div>
@@ -525,7 +525,7 @@ const SystemMonitor: React.FC<SystemMonitorProps>  = (props) => {
       </div>
 
       {/* 系统健康状态 */}
-      <div className="bg-white rounded-lg shadow p-6'>`'"`
+      <div className="bg-white rounded-lg shadow p-6'>`
         <h3 className='text-lg font-medium text-gray-900 mb-4'>系统健康状态</h3>
         <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
           <div className='flex items-center space-x-3 p-3 bg-green-50 rounded-lg'>
@@ -573,18 +573,18 @@ const SystemMonitor: React.FC<SystemMonitorProps>  = (props) => {
           </div>
         ) : (<div className='space-y-4'>
             {activeTests.map((test) => (
-              <div key={test.id} className={`p-4 rounded-lg border ${test.status ==='critical' ? 'bg-red-50 border-red-200' : ''`}>
-                test.status ==="warning' ? 'bg-yellow-50 border-yellow-200' : ''`"`
-                  'bg-green-50 border-green-200'
-                }`}>`
-                <div className="flex items-center justify-between mb-3'>`'"`
+              <div key={test.id} className={`p-4 rounded-lg border ${test.status ==='critical' ? 'bg-red-50 border-red-200' : '}>
+                test.status ==="warning' ? 'bg-yellow-50 border-yellow-200' : '
+                  'bg-green-50 border-green-200
+                }`}>
+                <div className="flex items-center justify-between mb-3'>`
                   <div className='flex items-center space-x-3'>
-                    <div className={`w-3 h-3 rounded-full ${test.status ==='critical' ? 'bg-red-500 animate-pulse' : ''`}>
-                      test.status ==="warning' ? 'bg-yellow-500 animate-pulse' : ''`"`
-                        'bg-green-500'
-                      }`}></div>`
+                    <div className={`w-3 h-3 rounded-full ${test.status ==='critical' ? 'bg-red-500 animate-pulse' : '}>
+                      test.status ==="warning' ? 'bg-yellow-500 animate-pulse' : '
+                        'bg-green-500
+                      }`}></div>
                     <div>
-                      <div className="font-medium text-gray-900'>{test.id}</div>`'"`
+                      <div className="font-medium text-gray-900'>{test.id}</div>`
                       <div className='text-sm text-gray-600'>{test.url}</div>
                     </div>
                   </div>
@@ -598,10 +598,10 @@ const SystemMonitor: React.FC<SystemMonitorProps>  = (props) => {
                       </div>
                     </div>
                     <button>
-                      type='button'
+                      type='button
                       onClick={() => forceStopTest(test.id)}
-                      className='p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors'
-                      title='强制停止测试'
+                      className='p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors
+                      title='强制停止测试
                     >
                       <StopCircle className='w-4 h-4'    />
                     </button>
@@ -610,20 +610,20 @@ const SystemMonitor: React.FC<SystemMonitorProps>  = (props) => {
 
                 <div className='grid grid-cols-2 gap-4 mb-3'>
                   <div className='text-center'>
-                    <div className={`text-lg font-bold ${test.errorRate > 50 ? 'text-red-600' : ''`}
-                      test.errorRate > 20 ? "text-yellow-600' : 'text-green-600";``
-                      }`}>`
+                    <div className={`text-lg font-bold ${test.errorRate > 50 ? 'text-red-600' : '}
+                      test.errorRate > 20 ? "text-yellow-600' : 'text-green-600";
+                      }`}>
                       {test.errorRate.toFixed(1)}%
                     </div>
-                    <div className="text-xs text-gray-500'>错误率</div>`'"`
+                    <div className="text-xs text-gray-500'>错误率</div>`
                   </div>
                   <div className='text-center'>
-                    <div className={`text-lg font-bold ${test.averageResponseTime > 10000 ? 'text-red-600' : ''`}
-                      test.averageResponseTime > 5000 ? "text-yellow-600' : 'text-green-600";``
-                      }`}>`
+                    <div className={`text-lg font-bold ${test.averageResponseTime > 10000 ? 'text-red-600' : '}
+                      test.averageResponseTime > 5000 ? "text-yellow-600' : 'text-green-600";
+                      }`}>
                       {test.averageResponseTime}ms
                     </div>
-                    <div className="text-xs text-gray-500'>响应时间</div>`'"`
+                    <div className="text-xs text-gray-500'>响应时间</div>`
                   </div>
                 </div>
 

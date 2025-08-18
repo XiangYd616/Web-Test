@@ -69,13 +69,13 @@ export interface ApplicationMetrics {
 
 export interface Alert {
   id: string;
-  type: 'system' | 'application' | 'security' | 'performance'
-  severity: 'low' | 'medium' | 'high' | 'critical'
+  type: 'system' | 'application' | 'security' | 'performance
+  severity: 'low' | 'medium' | 'high' | 'critical
   title: string;
   message: string;
   source: string;
   timestamp: string;
-  status: 'active' | 'acknowledged' | 'resolved'
+  status: 'active' | 'acknowledged' | 'resolved
   acknowledgedBy?: string;
   acknowledgedAt?: string;
   resolvedAt?: string;
@@ -86,14 +86,14 @@ export interface MonitoringRule {
   id: string;
   name: string;
   description: string;
-  type: 'threshold' | 'anomaly' | 'pattern'
+  type: 'threshold' | 'anomaly' | 'pattern
   metric: string;
   condition: {
-    operator: '>' | '<' | '>=' | '<=' | '==' | '!='
+    operator: '>' | '<' | '>=' | '<=' | '==' | '!=
     value: number;
     duration?: number;
   };
-  severity: 'low' | 'medium' | 'high' | 'critical'
+  severity: 'low' | 'medium' | 'high' | 'critical
   isActive: boolean;
   notifications: {
     email: boolean;
@@ -107,7 +107,7 @@ export interface MonitoringRule {
 
 export interface HealthCheck {
   service: string;
-  status: 'healthy' | 'degraded' | 'unhealthy'
+  status: 'healthy' | 'degraded' | 'unhealthy
   responseTime: number;
   lastCheck: string;
   uptime: number;
@@ -115,7 +115,7 @@ export interface HealthCheck {
     version?: string;
     dependencies?: Array<{
       name: string;
-      status: 'healthy' | 'unhealthy'
+      status: 'healthy' | 'unhealthy
       responseTime?: number;
     }>;
     metrics?: Record<string, any>;
@@ -150,7 +150,7 @@ class MonitoringService {
 
   // 健康检查
   async getHealthStatus(): Promise<{
-    overall: 'healthy' | 'degraded' | 'unhealthy'
+    overall: 'healthy' | 'degraded' | 'unhealthy
     services: HealthCheck[];
     lastUpdate: string;
   }> {
@@ -312,7 +312,7 @@ class MonitoringService {
   // 容量规划
   async getCapacityForecast(params: {
     metric: string;
-    timeRange: '30d' | '90d' | '180d'
+    timeRange: '30d' | '90d' | '180d
     forecastDays: number;
   }): Promise<{
     current: number;

@@ -36,20 +36,20 @@ export interface WebhookConfig     {
 export interface ThirdPartyIntegration     {
   id: string;
   name: string;
-  type: 'slack' | 'discord' | 'teams' | 'email' | 'jira' | 'github' | 'gitlab' | 'jenkins' | 'docker' | 'aws' | 'gcp' | 'azure'
+  type: 'slack' | 'discord' | 'teams' | 'email' | 'jira' | 'github' | 'gitlab' | 'jenkins' | 'docker' | 'aws' | 'gcp' | 'azure
   isEnabled: boolean;
   config: Record<string, any>;
-  status: 'connected' | 'disconnected' | 'error' | 'pending'
+  status: 'connected' | 'disconnected' | 'error' | 'pending
   lastSync?: string;
   description: string;
   icon: string;
-  category: 'notification' | 'cicd' | 'cloud' | 'monitoring' | 'collaboration'
+  category: 'notification' | 'cicd' | 'cloud' | 'monitoring' | 'collaboration
 }
 
 export interface CICDIntegration     {
   id: string;
   name: string;
-  type: 'github' | 'gitlab' | 'jenkins' | 'azure-devops' | 'circleci' | 'travis'
+  type: 'github' | 'gitlab' | 'jenkins' | 'azure-devops' | 'circleci' | 'travis
   repository: string;
   branch: string;
   triggerEvents: string[];
@@ -62,12 +62,12 @@ export interface CICDIntegration     {
     environment?: Record<string, string>;
   };
   lastRun?: string;
-  status: 'success' | 'failure' | 'pending' | 'disabled'
+  status: 'success' | 'failure' | 'pending' | 'disabled
 }
 
 export interface NotificationConfig     {
   id: string;
-  type: 'email' | 'slack' | 'discord' | 'teams' | 'webhook'
+  type: 'email' | 'slack' | 'discord' | 'teams' | 'webhook
   name: string;
   isEnabled: boolean;
   triggers: {
@@ -95,38 +95,38 @@ export interface IntegrationStats     {
 }
 
 export class IntegrationService {
-  private static readonly BASE_URL = '/api/integrations'
+  private static readonly BASE_URL = '/api/integrations
   private static cache = new Map<string, any>();
   private static cacheTimeout = 5 * 60 * 1000; // 5分钟缓存
 
   // API密钥管理
   static async getAPIKeys(): Promise<APIKey[]> {
-    const cacheKey = 'api-keys'
+    const cacheKey = 'api-keys
     const cached = this.getFromCache(cacheKey);
     if (cached) return cached;
 
     // 如果用户未认证，直接返回模拟数据
     if (!this.isAuthenticated()) {
-      console.warn('User not authenticated, returning mock API keys");"
+      console.warn('User not authenticated, returning mock API keys");
       const mockData = this.generateMockAPIKeys();
       this.setCache(cacheKey, mockData);
       return mockData;
     }
 
     try {
-      const response = await fetch(`${this.BASE_URL}/api-keys`, {`
+      const response = await fetch(`${this.BASE_URL}/api-keys`, {
         headers: this.getAuthHeaders()
       });
 
       if (!response.ok) {
         
         if (response.status === 401) {
-          console.warn("Authentication failed, returning mock API keys");``
+          console.warn("Authentication failed, returning mock API keys");
           const mockData = this.generateMockAPIKeys();
           this.setCache(cacheKey, mockData);
           return mockData;
       }
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
@@ -135,7 +135,7 @@ export class IntegrationService {
         this.setCache(cacheKey, data.data);
         return data.data;
       } else {
-        throw new Error(data.message || "Failed to fetch API keys");``
+        throw new Error(data.message || "Failed to fetch API keys");
       }
 
     } catch (error) {
@@ -148,27 +148,27 @@ export class IntegrationService {
 
   static async createAPIKey(keyData: Partial<APIKey>): Promise<APIKey> {
     try {
-      const response = await fetch(`${this.BASE_URL}/api-keys`, {`
-        method: "POST','`"`
+      const response = await fetch(`${this.BASE_URL}/api-keys`, {
+        method: "POST',"
         headers: {
           ...this.getAuthHeaders(),
-          'Content-Type': "application/json"
+          'Content-Type': "application/json
         },
         body: JSON.stringify(keyData)
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
       if (data.success) {
         
         // 清除缓存
-        this.clearCache("api-keys");``
+        this.clearCache("api-keys");
         return data.data;
       } else {
-        throw new Error(data.message || 'Failed to create API key");"
+        throw new Error(data.message || 'Failed to create API key");
       }
 
     } catch (error) {
@@ -179,17 +179,17 @@ export class IntegrationService {
 
   static async deleteAPIKey(keyId: string): Promise<void> {
     try {
-      const response = await fetch(`${this.BASE_URL}/api-keys/${keyId}`, {`
-        method: "DELETE','`"`
+      const response = await fetch(`${this.BASE_URL}/api-keys/${keyId}`, {
+        method: "DELETE',"
         headers: this.getAuthHeaders()
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       // 清除缓存
-      this.clearCache("api-keys");``
+      this.clearCache("api-keys");
 
     } catch (error) {
       console.error('Failed to delete API key: ', error);
@@ -199,32 +199,32 @@ export class IntegrationService {
 
   // Webhook管理
   static async getWebhooks(): Promise<WebhookConfig[]> {
-    const cacheKey = 'webhooks'
+    const cacheKey = 'webhooks
     const cached = this.getFromCache(cacheKey);
     if (cached) return cached;
 
     // 如果用户未认证，直接返回模拟数据
     if (!this.isAuthenticated()) {
-      console.warn('User not authenticated, returning mock webhooks");"
+      console.warn('User not authenticated, returning mock webhooks");
       const mockData = this.generateMockWebhooks();
       this.setCache(cacheKey, mockData);
       return mockData;
     }
 
     try {
-      const response = await fetch(`${this.BASE_URL}/webhooks`, {`
+      const response = await fetch(`${this.BASE_URL}/webhooks`, {
         headers: this.getAuthHeaders()
       });
 
       if (!response.ok) {
         
         if (response.status === 401) {
-          console.warn("Authentication failed, returning mock webhooks");``
+          console.warn("Authentication failed, returning mock webhooks");
           const mockData = this.generateMockWebhooks();
           this.setCache(cacheKey, mockData);
           return mockData;
       }
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
@@ -233,7 +233,7 @@ export class IntegrationService {
         this.setCache(cacheKey, data.data);
         return data.data;
       } else {
-        throw new Error(data.message || "Failed to fetch webhooks");``
+        throw new Error(data.message || "Failed to fetch webhooks");
       }
 
     } catch (error) {
@@ -246,23 +246,23 @@ export class IntegrationService {
 
   static async createWebhook(webhookData: Partial<WebhookConfig>): Promise<WebhookConfig> {
     try {
-      const response = await fetch(`${this.BASE_URL}/webhooks`, {`
-        method: "POST','`"`
+      const response = await fetch(`${this.BASE_URL}/webhooks`, {
+        method: "POST',"
         headers: {
           ...this.getAuthHeaders(),
-          'Content-Type': "application/json"
+          'Content-Type': "application/json
         },
         body: JSON.stringify(webhookData)
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const newWebhook: WebhookConfig  = {
         id: Date.now().toString(),
-        name: webhookData.name || "New Webhook','`"`
-        url: webhookData.url || '',
+        name: webhookData.name || "New Webhook','
+        url: webhookData.url || ',
         events: webhookData.events || ['test.completed'],
         isActive: true,
         headers: webhookData.headers || {},
@@ -277,7 +277,7 @@ export class IntegrationService {
         timeout: 30000
       };
       // 清除缓存
-      this.clearCache('webhooks");"
+      this.clearCache('webhooks");
       return newWebhook;
 
     } catch (error) {
@@ -288,32 +288,32 @@ export class IntegrationService {
 
   // 第三方集成
   static async getThirdPartyIntegrations(): Promise<ThirdPartyIntegration[]> {
-    const cacheKey = 'third-party-integrations'
+    const cacheKey = 'third-party-integrations
     const cached = this.getFromCache(cacheKey);
     if (cached) return cached;
 
     // 如果用户未认证，直接返回模拟数据
     if (!this.isAuthenticated()) {
-      console.warn('User not authenticated, returning mock third-party integrations");"
+      console.warn('User not authenticated, returning mock third-party integrations");
       const mockData = this.generateMockThirdPartyIntegrations();
       this.setCache(cacheKey, mockData);
       return mockData;
     }
 
     try {
-      const response = await fetch(`${this.BASE_URL}/third-party`, {`
+      const response = await fetch(`${this.BASE_URL}/third-party`, {
         headers: this.getAuthHeaders()
       });
 
       if (!response.ok) {
         
         if (response.status === 401) {
-          console.warn("Authentication failed, returning mock third-party integrations");``
+          console.warn("Authentication failed, returning mock third-party integrations");
           const mockData = this.generateMockThirdPartyIntegrations();
           this.setCache(cacheKey, mockData);
           return mockData;
       }
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
@@ -322,7 +322,7 @@ export class IntegrationService {
         this.setCache(cacheKey, data.data);
         return data.data;
       } else {
-        throw new Error(data.message || "Failed to fetch third-party integrations");``
+        throw new Error(data.message || "Failed to fetch third-party integrations");
       }
 
     } catch (error) {
@@ -335,32 +335,32 @@ export class IntegrationService {
 
   // 集成统计
   static async getIntegrationStats(): Promise<IntegrationStats> {
-    const cacheKey = 'integration-stats'
+    const cacheKey = 'integration-stats
     const cached = this.getFromCache(cacheKey);
     if (cached) return cached;
 
     // 如果用户未认证，直接返回模拟数据
     if (!this.isAuthenticated()) {
-      console.warn('User not authenticated, returning mock integration stats");"
+      console.warn('User not authenticated, returning mock integration stats");
       const mockData = this.generateMockStats();
       this.setCache(cacheKey, mockData);
       return mockData;
     }
 
     try {
-      const response = await fetch(`${this.BASE_URL}/stats`, {`
+      const response = await fetch(`${this.BASE_URL}/stats`, {
         headers: this.getAuthHeaders()
       });
 
       if (!response.ok) {
         
         if (response.status === 401) {
-          console.warn("Authentication failed, returning mock integration stats");``
+          console.warn("Authentication failed, returning mock integration stats");
           const mockData = this.generateMockStats();
           this.setCache(cacheKey, mockData);
           return mockData;
       }
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
@@ -369,7 +369,7 @@ export class IntegrationService {
         this.setCache(cacheKey, data.data);
         return data.data;
       } else {
-        throw new Error(data.message || "Failed to fetch integration stats");``
+        throw new Error(data.message || "Failed to fetch integration stats");
       }
 
     } catch (error) {
@@ -382,12 +382,12 @@ export class IntegrationService {
 
   // 私有辅助方法
   private static getAuthHeaders(): Record<string, string> {
-    const token = localStorage.getItem('token') || localStorage.getItem('authToken");"
+    const token = localStorage.getItem('token') || localStorage.getItem('authToken");
     const headers: Record<string, string>  = {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json
     };
     if (token) {
-      headers['Authorization'] = `Bearer ${token}`;'`
+      headers['Authorization'] = `Bearer ${token}`;
     }
 
     return headers;
@@ -395,7 +395,7 @@ export class IntegrationService {
 
   // 检查用户是否已登录
   private static isAuthenticated(): boolean {
-    const token = localStorage.getItem("token') || localStorage.getItem('authToken");``
+    const token = localStorage.getItem("token') || localStorage.getItem('authToken");
     return !!token;
   }
 
@@ -419,8 +419,8 @@ export class IntegrationService {
   }
 
   private static generateAPIKey(): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-    let result = 'twapp_'
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789
+    let result = 'twapp_
     for (let i = 0; i < 32; i++) {>
       result += chars.charAt(Math.floor(Math.random() * chars.length));
     }
@@ -439,7 +439,7 @@ export class IntegrationService {
         isActive: true,
         usageCount: 15420,
         rateLimit: 5000,
-        description: '用于生产环境的主要API密钥'
+        description: '用于生产环境的主要API密钥
       },
       {
         id: '2',
@@ -451,7 +451,7 @@ export class IntegrationService {
         isActive: true,
         usageCount: 3240,
         rateLimit: 1000,
-        description: '用于测试和开发环境'
+        description: '用于测试和开发环境
       },
       {
         id: '3',
@@ -462,7 +462,7 @@ export class IntegrationService {
         isActive: false,
         usageCount: 890,
         rateLimit: 500,
-        description: '用于持续集成和部署流程'
+        description: '用于持续集成和部署流程
       }
     ];
   }
@@ -496,7 +496,7 @@ export class IntegrationService {
         secret: 'webhook_secret_key_123',
         headers: {
           'Content-Type': 'application/json',
-          'X-API-Key': 'internal-monitoring-key'
+          'X-API-Key': 'internal-monitoring-key
         },
         retryPolicy: {
           maxRetries: 5,
@@ -522,13 +522,13 @@ export class IntegrationService {
         config: {
           webhookUrl: 'https://hooks.slack.com/services/...',
           channel: '#testing',
-          username: 'TestWebApp'
+          username: 'TestWebApp
         },
         status: 'connected',
         lastSync: '2025-06-19T10:30:00Z',
         description: '发送测试结果和告警到Slack频道',
         icon: '💬',
-        category: 'notification'
+        category: 'notification
       },
       {
         id: '2',
@@ -538,13 +538,13 @@ export class IntegrationService {
         config: {
           token: 'ghp_xxxxxxxxxxxxxxxxxxxx',
           repository: 'company/web-app',
-          branch: 'main'
+          branch: 'main
         },
         status: 'connected',
         lastSync: '2025-06-19T09:45:00Z',
         description: '与GitHub Actions集成进行自动化测试',
         icon: '🐙',
-        category: 'cicd'
+        category: 'cicd
       },
       {
         id: '3',
@@ -554,12 +554,12 @@ export class IntegrationService {
         config: {
           accessKeyId: 'AKIA...',
           region: 'us-east-1',
-          logGroup: '/testweb/monitoring'
+          logGroup: '/testweb/monitoring
         },
         status: 'disconnected',
         description: '将监控数据发送到AWS CloudWatch',
         icon: '☁️',
-        category: 'cloud'
+        category: 'cloud
       }
     ];
   }
@@ -574,7 +574,7 @@ export class IntegrationService {
       activeIntegrations: 2,
       apiCallsToday: 1250,
       webhookCallsToday: 45,
-      lastActivity: '2025-06-19T10:30:00Z'
+      lastActivity: '2025-06-19T10:30:00Z
     };
   }
 }

@@ -6,21 +6,21 @@ export enum UserRole {
   USER = 'user',
   TESTER = 'tester',
   MANAGER = 'manager',
-  VIEWER = 'viewer'
+  VIEWER = 'viewer
 }
 
 export enum UserStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
   SUSPENDED = 'suspended',
-  PENDING = 'pending'
+  PENDING = 'pending
 }
 
 export enum AuthStatus {
   AUTHENTICATED = 'authenticated',
   UNAUTHENTICATED = 'unauthenticated',
   LOADING = 'loading',
-  ERROR = 'error'
+  ERROR = 'error
 }
 
 export interface Permission     {
@@ -43,11 +43,11 @@ export interface Role     {
 // ==================== 用户相关类型 ====================
 
 export interface UserPreferences     {
-  theme: 'light' | 'dark' | 'auto'
-  language: 'zh-CN' | 'en-US' | 'ja-JP'
+  theme: 'light' | 'dark' | 'auto
+  language: 'zh-CN' | 'en-US' | 'ja-JP
   timezone: string;
-  dateFormat: 'YYYY-MM-DD' | 'MM/DD/YYYY' | 'DD/MM/YYYY'
-  timeFormat: '24h' | '12h'
+  dateFormat: 'YYYY-MM-DD' | 'MM/DD/YYYY' | 'DD/MM/YYYY
+  timeFormat: '24h' | '12h
   notifications: {
     email: boolean;
     sms: boolean;
@@ -161,7 +161,7 @@ export interface UserSession     {
   userAgent: string;
   isActive: boolean;
   deviceInfo?: {
-    type: 'desktop' | 'mobile' | 'tablet'
+    type: 'desktop' | 'mobile' | 'tablet
     os?: string;
     browser?: string;
   };
@@ -320,9 +320,9 @@ export interface LoginAttempt     {
 export interface SecurityEvent     {
   id: string;
   userId?: string;
-  type: 'login' | 'logout' | 'password_change' | 'permission_change' | 'suspicious_activity'
+  type: 'login' | 'logout' | 'password_change' | 'permission_change' | 'suspicious_activity
   description: string;
-  severity: 'low' | 'medium' | 'high' | 'critical'
+  severity: 'low' | 'medium' | 'high' | 'critical
   ipAddress: string;
   userAgent: string;
   timestamp: string;
@@ -331,7 +331,7 @@ export interface SecurityEvent     {
 
 export interface TwoFactorAuth     {
   enabled: boolean;
-  method: 'totp' | 'sms' | 'email'
+  method: 'totp' | 'sms' | 'email
   backupCodes?: string[];
   lastUsed?: string;
 }

@@ -56,7 +56,7 @@ export interface TestConfig     {
 
   // API测试配置
   api?: {
-    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH
     headers?: Record<string, string>;
     body?: any;
     expectedStatus?: number[];
@@ -273,7 +273,7 @@ export function testHistoryToDatabase(testHistory: TestHistory): TestHistoryData
 export function validateTestConfig(type: string, config: any):   { isValid: boolean; errors: string[] } {
   const errors: string[]  = [];
   switch (type) {
-    case 'performance': ''
+    case 'performance': 
       if (!config.performance?.users || config.performance.users < 1) {
         errors.push('性能测试需要指定用户数量");
       }
@@ -282,13 +282,13 @@ export function validateTestConfig(type: string, config: any):   { isValid: bool
       }
       break;
 
-    case 'api': ''
+    case 'api': 
       if (!config.api?.method) {
         errors.push('API测试需要指定HTTP方法");
       }
       break;
 
-    case 'stress': ''
+    case 'stress': 
       if (!config.stress?.maxUsers || config.stress.maxUsers < 1) {
         errors.push('压力测试需要指定最大用户数");
       }

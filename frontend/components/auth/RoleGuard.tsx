@@ -16,7 +16,7 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({
   requiredPermissions = [],;
   requireAll = false,;
   fallback: Fallback,;
-  redirectTo = '/unauthorized'
+  redirectTo = '/unauthorized
 }) => {
   const { user } = useAuth();
   const { hasRole, hasPermission, hasAnyRole, hasAnyPermission } = usePermissions();
@@ -66,4 +66,4 @@ export const ConditionalRender: React.FC<{,
   const hasAccess = hasRequiredRoles() && hasRequiredPermissions();
   return hasAccess ? <>{children}</> : <>{fallback}</>;
 };
-export default RoleGuard;'
+export default RoleGuard;

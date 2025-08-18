@@ -33,7 +33,7 @@ export interface NotificationContextValue     {
 
 // 默认配置
 const DEFAULT_DURATION = 4000;
-const DEFAULT_TYPE: NotificationType  = 'info'
+const DEFAULT_TYPE: NotificationType  = 'info
 // 生成唯一ID
 const generateId = () => `notification-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
@@ -80,7 +80,7 @@ export const useNotification = () => {
     }, []);
 
     // 成功通知的快捷方法
-    const success = useCallback((message: string, config?: Omit<NotificationConfig, "type'>) => {'`
+    const success = useCallback((message: string, config?: Omit<NotificationConfig, "type'>) => {
         return showNotification(message, 'success', config);
     }, [showNotification]);
 

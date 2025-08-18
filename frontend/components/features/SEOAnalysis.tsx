@@ -10,4 +10,4 @@ const SEOAnalysis: React.FC<SEOAnalysisProps> = (props) => {
     </div>
   );
 };
-export default SEOAnalysis;'"
+export default SEOAnalysis;

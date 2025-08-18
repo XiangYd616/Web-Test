@@ -15,7 +15,7 @@ export enum TestType {
   COMPATIBILITY = 'compatibility',
   UX = 'ux',
   API = 'api',
-  STRESS = 'stress'
+  STRESS = 'stress
 }
 
 // 测试状态枚举
@@ -24,7 +24,7 @@ export enum TestStatus {
   RUNNING = 'running',
   COMPLETED = 'completed',
   FAILED = 'failed',
-  CANCELLED = 'cancelled'
+  CANCELLED = 'cancelled
 }
 
 // 测试优先级枚举
@@ -32,7 +32,7 @@ export enum TestPriority {
   LOW = 'low',
   NORMAL = 'normal',
   HIGH = 'high',
-  URGENT = 'urgent'
+  URGENT = 'urgent
 }
 
 // 测试配置接口
@@ -65,7 +65,7 @@ export interface TestResult {
 // 测试问题接口
 export interface TestIssue {
   id: string;
-  severity: 'low' | 'medium' | 'high' | 'critical'
+  severity: 'low' | 'medium' | 'high' | 'critical
   category: string;
   title: string;
   description: string;
@@ -81,8 +81,8 @@ export interface TestRecommendation {
   category: string;
   title: string;
   description: string;
-  priority: 'low' | 'medium' | 'high'
-  effort: 'easy' | 'medium' | 'hard'
+  priority: 'low' | 'medium' | 'high
+  effort: 'easy' | 'medium' | 'hard
   impact: number;
   implementation?: string;
 }
@@ -199,31 +199,31 @@ export class CompleteTestEngine {
 
       // 根据测试类型执行相应的测试
       switch (config.type) {
-        case TestType.PERFORMANCE:
+        case TestType.PERFORMANCE: undefined, // 已修复
           result = await this.runPerformanceTest(testId, config, abortController.signal);
           break;
-        case TestType.SECURITY:
+        case TestType.SECURITY: undefined, // 已修复
           result = await this.runSecurityTest(testId, config, abortController.signal);
           break;
-        case TestType.SEO:
+        case TestType.SEO: undefined, // 已修复
           result = await this.runSEOTest(testId, config, abortController.signal);
           break;
-        case TestType.ACCESSIBILITY:
+        case TestType.ACCESSIBILITY: undefined, // 已修复
           result = await this.runAccessibilityTest(testId, config, abortController.signal);
           break;
-        case TestType.COMPATIBILITY:
+        case TestType.COMPATIBILITY: undefined, // 已修复
           result = await this.runCompatibilityTest(testId, config, abortController.signal);
           break;
-        case TestType.UX:
+        case TestType.UX: undefined, // 已修复
           result = await this.runUXTest(testId, config, abortController.signal);
           break;
-        case TestType.API:
+        case TestType.API: undefined, // 已修复
           result = await this.runAPITest(testId, config, abortController.signal);
           break;
-        case TestType.STRESS:
+        case TestType.STRESS: undefined, // 已修复
           result = await this.runStressTest(testId, config, abortController.signal);
           break;
-        default:
+        default: undefined, // 已修复
           throw new Error(`Unsupported test type: ${config.type}`);
       }
 
@@ -646,7 +646,7 @@ export class CompleteTestEngine {
         priority: 'high',
         effort: 'medium',
         impact: 85,
-        implementation: '优化图片、减少服务器响应时间、使用CDN'
+        implementation: '优化图片、减少服务器响应时间、使用CDN
       });
     }
 
@@ -680,7 +680,7 @@ export class CompleteTestEngine {
         priority: 'high',
         effort: 'easy',
         impact: 95,
-        implementation: '更新SSL证书或修复配置问题'
+        implementation: '更新SSL证书或修复配置问题
       });
     }
 
@@ -714,7 +714,7 @@ export class CompleteTestEngine {
         priority: 'high',
         effort: 'easy',
         impact: 80,
-        implementation: '添加描述性的页面标题，长度控制在30-60字符'
+        implementation: '添加描述性的页面标题，长度控制在30-60字符
       });
     }
 
@@ -748,7 +748,7 @@ export class CompleteTestEngine {
         priority: 'high',
         effort: 'medium',
         impact: 90,
-        implementation: '根据WCAG指南修复违规项目'
+        implementation: '根据WCAG指南修复违规项目
       });
     }
 

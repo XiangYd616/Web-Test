@@ -24,7 +24,7 @@ export {
 // ==================== 前端特有的接口定义 ====================
 
 export interface RequestConfig     {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS'
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS
   headers?: Record<string, string>;
   body?: string | FormData | URLSearchParams | Record<string, any>;
   timeout?: number;
@@ -45,7 +45,7 @@ export interface QueryParams     {
   page?: number;
   limit?: number;
   sort?: string;
-  order?: 'asc' | 'desc'
+  order?: 'asc' | 'desc
   search?: string;
   filters?: Record<string, any>;
 }

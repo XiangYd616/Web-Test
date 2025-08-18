@@ -129,7 +129,7 @@ export const useRealTimeData = (channel: string, config: RealTimeDataConfig = {}
                                 data: {
                                     timestamp: new Date().toISOString(),
                                     value: Math.random() * 100,
-                                    status: Math.random() > 0.8 ? 'warning' : 'normal'
+                                    status: Math.random() > 0.8 ? 'warning' : 'normal
                                 }
                             };
                             updateState({ data: mockData });
@@ -141,7 +141,7 @@ export const useRealTimeData = (channel: string, config: RealTimeDataConfig = {}
             }, 100);
 
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : '连接失败'
+            const errorMessage = error instanceof Error ? error.message : '连接失败
             updateState({
                 connectionStatus: 'error',
                 error: errorMessage,
@@ -172,7 +172,7 @@ export const useRealTimeData = (channel: string, config: RealTimeDataConfig = {}
         if (state.reconnectAttempts >= finalConfig.maxReconnectAttempts) {
             updateState({
                 connectionStatus: 'error',
-                error: '超过最大重连次数'
+                error: '超过最大重连次数
             });
             return;
         }
@@ -207,11 +207,11 @@ export const useRealTimeData = (channel: string, config: RealTimeDataConfig = {}
     const subscribe = useCallback((eventType: string, callback: (data: any) => void) => {
         // 在实际实现中，这里会设置事件监听器
         // 现在我们只是模拟订阅
-        console.log(`Subscribed to ${eventType} on channel ${channel}`);`
+        console.log(`Subscribed to ${eventType} on channel ${channel}`);
 
         // 返回取消订阅函数
         return () => {
-            console.log(`Unsubscribed from ${eventType} on channel ${channel}`);`
+            console.log(`Unsubscribed from ${eventType} on channel ${channel}`);
         };
     }, [channel]);
 

@@ -5,7 +5,7 @@
 
 import React from 'react';export interface TestResult     {
   executionId: string;
-  status: 'running' | 'completed' | 'failed'
+  status: 'running' | 'completed' | 'failed
   testType: string;
   score?: number;
   metrics?: {
@@ -31,7 +31,7 @@ export const TestResults: React.FC<TestResultsProps> = ({
 }) => {
   
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState("");
+  const [pageTitle, setPageTitle] = useState(");
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
@@ -42,7 +42,7 @@ export const TestResults: React.FC<TestResultsProps> = ({
   // 页面可见性检测
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState ==="visible') {'`"`
+      if (document.visibilityState ==="visible') {'
         // 页面变为可见时刷新数据
         fetchData?.();
       }
@@ -50,7 +50,7 @@ export const TestResults: React.FC<TestResultsProps> = ({
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
-      document.removeEventListener("visibilitychange', handleVisibilityChange);"
+      document.removeEventListener("visibilitychange', handleVisibilityChange);
     };
   }, [fetchData]);
   
@@ -89,9 +89,9 @@ export const TestResults: React.FC<TestResultsProps> = ({
   
   const ariaProps = {
     id: componentId,
-    "aria-label': ariaLabel,'`"`
+    "aria-label': ariaLabel,'
     'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': ['']
+    'aria-describedby': [']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
@@ -118,17 +118,17 @@ export const TestResults: React.FC<TestResultsProps> = ({
   }, []);
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'text-green-600'
-      case 'failed': return 'text-red-600'
-      case 'running': return 'text-blue-600'
-      default: return 'text-gray-600'
+      case 'completed': return 'text-green-600
+      case 'failed': return 'text-red-600
+      case 'running': return 'text-blue-600
+      default: return 'text-gray-600
     }
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600'
-    if (score >= 60) return 'text-yellow-600'
-    return 'text-red-600'
+    if (score >= 80) return 'text-green-600
+    if (score >= 60) return 'text-yellow-600
+    return 'text-red-600
   };
 
   return (
@@ -142,15 +142,15 @@ export const TestResults: React.FC<TestResultsProps> = ({
           {onRetry && (
             <button>
               onClick={onRetry}
-              className='px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600'
+              className='px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600
             >
               重新测试
             </button>
           )}
-          {onDownload && result.status ==='completed' 
+          {onDownload && result.status ==='completed
             <button>
               onClick={onDownload}
-              className='px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600'
+              className='px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600
             >
               下载报告
             </button>
@@ -161,10 +161,10 @@ export const TestResults: React.FC<TestResultsProps> = ({
       <div className='grid grid-cols-2 gap-4 mb-4'>
         <div>
           <label className='text-sm font-medium text-gray-700'>状态</label>
-          <p className={`text-lg font-semibold ${getStatusColor(result.status)}`}>`
-            {result.status ==="running' && '运行中'}'`"`
+          <p className={`text-lg font-semibold ${getStatusColor(result.status)}`}>
+            {result.status ==="running' && '运行中'}'
             {result.status ==='completed' && '已完成'}
-            {result.status ==='failed' && "失败'}"
+            {result.status ==='failed' && "失败'}
           </p>
         </div>
         <div>
@@ -176,14 +176,14 @@ export const TestResults: React.FC<TestResultsProps> = ({
       {result.score !== undefined && (
         <div className='mb-4'>
           <label className='text-sm font-medium text-gray-700'>总体评分</label>
-          <p className={`text-2xl font-bold ${getScoreColor(result.score)}`}>`
+          <p className={`text-2xl font-bold ${getScoreColor(result.score)}`}>
             {result.score}/100
           </p>
         </div>
       )}
 
       {result.metrics && (
-        <div className="mb-4'>`'"`
+        <div className="mb-4'>`
           <h4 className='text-md font-semibold mb-2'>性能指标</h4>
           <div className='grid grid-cols-3 gap-4'>
             {result.metrics.responseTime && (

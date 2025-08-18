@@ -4,9 +4,9 @@
  */
 
 export interface PreloadOptions     {
-  priority?: 'high' | 'medium' | 'low'
-  crossOrigin?: 'anonymous' | 'use-credentials'
-  as?: 'script' | 'style' | 'image' | 'font' | 'fetch'
+  priority?: 'high' | 'medium' | 'low
+  crossOrigin?: 'anonymous' | 'use-credentials
+  as?: 'script' | 'style' | 'image' | 'font' | 'fetch
   type?: string;
 }
 
@@ -26,7 +26,7 @@ class ResourcePreloader {
       }
 
       const link = document.createElement('link");
-      link.rel = 'preload'
+      link.rel = 'preload
       link.href = url;
 
       if (options.as) link.as = options.as;
@@ -39,7 +39,7 @@ class ResourcePreloader {
       };
 
       link.onerror = () => {
-        reject(new Error(`Failed to preload: ${url}`));`
+        reject(new Error(`Failed to preload: ${url}`));
       };
 
       document.head.appendChild(link);
@@ -64,7 +64,7 @@ class ResourcePreloader {
         resolve(img);
       };
       img.onerror = () => {
-        reject(new Error(`Failed to preload image: ${src}`));`
+        reject(new Error(`Failed to preload image: ${src}`));
       };
       img.src = src;
     });
@@ -73,11 +73,11 @@ class ResourcePreloader {
   /**
    * 预加载字体
    */
-  preloadFont(url: string, format: string = "woff2'): Promise<void> {'`
+  preloadFont(url: string, format: string = "woff2'): Promise<void> {
     return this.preload(url, {
       as: 'font',
-      type: `font/${format}`,`
-      crossOrigin: "anonymous";`
+      type: `font/${format}`,
+      crossOrigin: "anonymous";
     });
   }
 
@@ -100,7 +100,7 @@ class ResourcePreloader {
    */
   async preloadBatch(resources: Array<{ url: string; options?: PreloadOptions }>): Promise<void> {
     const promises = resources.map(({ url, options }) => this.preload(url, options).catch(error => {
-        console.warn(`Failed to preload ${url}:`, error);`
+        console.warn(`Failed to preload ${url}:`, error);
       })
     );
 
@@ -110,9 +110,9 @@ class ResourcePreloader {
   /**
    * 智能预加载（基于用户行为）
    */
-  smartPreload(urls: string[], userBehavior: "hover' | 'idle' | 'visible'): void {'`
+  smartPreload(urls: string[], userBehavior: "hover' | 'idle' | 'visible'): void {
     switch (userBehavior) {
-      case 'hover': ''
+      case 'hover': 
         // 鼠标悬停时预加载
         document.addEventListener('mouseover', (e) => {
           const target = e.target as HTMLElement;
@@ -123,7 +123,7 @@ class ResourcePreloader {
         });
         break;
 
-      case 'idle': ''
+      case 'idle': 
         // 浏览器空闲时预加载
         if ('requestIdleCallback' in window) {
           requestIdleCallback(() => {
@@ -136,7 +136,7 @@ class ResourcePreloader {
         }
         break;
 
-      case 'visible': ''
+      case 'visible': 
         // 元素可见时预加载
         const observer = new IntersectionObserver((entries) => {
           entries.forEach(entry => {

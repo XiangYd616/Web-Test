@@ -126,7 +126,7 @@ export function buildQueryString(params: Record<string, any>): string   {
     const searchParams = new URLSearchParams();
 
     Object.entries(params).forEach(([key, value]) => {
-        if (value !== null && value !== undefined && value !== '') {
+        if (value !== null && value !== undefined && value !== ') {
             if (Array.isArray(value)) {
                 searchParams.append(key, value.join(','));
             } else {
@@ -170,5 +170,5 @@ export function extractApiData<T>(response: ApiResponse<T>): T | null   {
  * @returns 错误信息
  */
 export function extractApiError<T>(response: ApiResponse<T>): string | null   {
-    return !isApiSuccess(response) ? response.error?.message || "未知错误' : null;'`
+    return !isApiSuccess(response) ? response.error?.message || "未知错误' : null;
 }

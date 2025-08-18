@@ -1,6 +1,6 @@
 import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Pause, Play, Plus, RefreshCw, Trash2, XCircle    } from 'lucide-react';import { useState, useEffect    } from 'react';import { useAsyncErrorHandler    } from '../hooks/useAsyncErrorHandler';import TestResults from '../components/TestResults';import React, { useEffect, useState    } from 'react';import { ScheduledTest, TestExecution, testScheduler    } from '../../../services/testing/testScheduler.ts';const TestSchedule: React.FC  = () => {
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState("");
+  const [pageTitle, setPageTitle] = useState(");
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
@@ -11,7 +11,7 @@ import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Pause, Play, Plus
   // 页面可见性检测
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState ==="visible') {'`"`
+      if (document.visibilityState ==="visible') {'
         // 页面变为可见时刷新数据
         fetchData?.();
       }
@@ -23,11 +23,11 @@ import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Pause, Play, Plus
     };
   }, [fetchData]);
   
-  const [feedback, setFeedback] = useState({ type: '', message: '' });
+  const [feedback, setFeedback] = useState({ type: ', message: ' });
   const showFeedback = (type, message, duration = 3000) => {
     setFeedback({ type, message });
     setTimeout(() => {
-      setFeedback({ type: '', message: '' });
+      setFeedback({ type: ', message: ' });
     }, duration);
   };
   
@@ -90,8 +90,8 @@ import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Pause, Play, Plus
   const pollTestResult = async (executionId) => {
     const interval = setInterval(async () => {
       const result = await executeAsync(
-        () => fetch(`/api/tests/results/${executionId}`).then(res => res.json()),`
-        { context: "TestExecution.pollResult' }'`"`
+        () => fetch(`/api/tests/results/${executionId}`).then(res => res.json()),
+        { context: "TestExecution.pollResult' }'
       );
       
       if (result && result.success && result.data.status ==='completed') {
@@ -154,7 +154,7 @@ import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Pause, Play, Plus
             <div className='mt-4'>
               <button>
                 onClick={() => window.location.reload()}
-                className='bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200'
+                className='bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200
               >
                 重试
               </button>
@@ -195,22 +195,22 @@ import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Pause, Play, Plus
       await testScheduler.executeTest(id);
       fetchSchedules();
     } catch (error) {
-      console.error("Manual execution failed: ', error);"
+      console.error("Manual execution failed: ', error);
     }
   };
 
   // 获取状态图标
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'active': ''
+      case 'active': 
         return <CheckCircle className='w-4 h-4 text-green-400'    />
-      case 'paused': ''
+      case 'paused': 
         return <Pause className='w-4 h-4 text-yellow-400'    />
-      case 'completed': ''
+      case 'completed': 
         return <CheckCircle className='w-4 h-4 text-blue-400'    />
-      case "failed': "
+      case "failed': 
         return <XCircle className='w-4 h-4 text-red-400'    />
-      default:
+      default: undefined, // 已修复
         return <AlertCircle className='w-4 h-4 text-gray-400'    />
     }
   };
@@ -222,7 +222,7 @@ import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Pause, Play, Plus
 
   // 格式化持续时间
   const formatDuration = (duration?: number) => {
-    if (!duration) return "-"
+    if (!duration) return "-
     const seconds = Math.floor(duration / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
@@ -230,17 +230,17 @@ import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Pause, Play, Plus
     if (hours > 0) {
       
         return `${hours`}
-      }h ${minutes % 60}m`;`
+      }h ${minutes % 60}m`;
     } else if (minutes > 0) {
       
         return `${minutes`}
-      }m ${seconds % 60}s`;`
+      }m ${seconds % 60}s`;
     } else {
       return `${seconds}s`;
     }
   };
 
-  return (<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6'>`'"`
+  return (<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6'>`
       <div className='max-w-7xl mx-auto space-y-6'>
         {/* 页面标题 */}
         <div className='bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6'>
@@ -251,17 +251,17 @@ import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Pause, Play, Plus
             </div>
             <div className='flex items-center space-x-3'>
               <button>
-                type='button'
+                type='button
                 onClick={() => setShowCreateModal(true)}
-                className='px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center space-x-2 transition-colors'
+                className='px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center space-x-2 transition-colors
               >
                 <Plus className='w-4 h-4'    />
                 <span>创建调度</span>
               </button>
               <button>
-                type='button'
+                type='button
                 onClick={fetchSchedules}
-                className='px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center space-x-2'
+                className='px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700/50 transition-colors flex items-center space-x-2
               >
                 <RefreshCw className='w-4 h-4'    />
                 <span>刷新</span>
@@ -285,9 +285,9 @@ import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Pause, Play, Plus
                   <Calendar className='w-12 h-12 text-gray-500 mx-auto mb-4'    />
                   <p className='text-gray-400'>暂无调度任务</p>
                   <button>
-                    type='button'
+                    type='button
                     onClick={() => setShowCreateModal(true)}
-                    className='mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors'
+                    className='mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors
                   >
                     创建第一个调度
                   </button>
@@ -297,12 +297,12 @@ import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Pause, Play, Plus
                     <div>
                       key={schedule.id}
                       className={`p-4 rounded-lg border cursor-pointer transition-all ${selectedSchedule === schedule.id`}
-                          ? "border-blue-500 bg-blue-500/10";``
-                          : 'border-gray-600 bg-gray-700/30 hover:bg-gray-700/50'
-                        }`}`
+                          ? "border-blue-500 bg-blue-500/10";
+                          : 'border-gray-600 bg-gray-700/30 hover:bg-gray-700/50
+                        }`}
                       onClick={() => setSelectedSchedule(schedule.id)}
                     >
-                      <div className="flex items-center justify-between mb-2'>`'"`
+                      <div className="flex items-center justify-between mb-2'>`
                         <div className='flex items-center space-x-3'>
                           {getStatusIcon(schedule.status)}
                           <h4 className='font-medium text-white'>{schedule.name}</h4>
@@ -312,39 +312,39 @@ import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Pause, Play, Plus
                         </div>
                         <div className='flex items-center space-x-2'>
                           <button>
-                            type='button'
+                            type='button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleManualExecution(schedule.id);
                             }}
-                            className='p-1 text-blue-400 hover:text-blue-300 transition-colors'
-                            title='手动执行'
+                            className='p-1 text-blue-400 hover:text-blue-300 transition-colors
+                            title='手动执行
                           >
                             <Play className='w-4 h-4'    />
                           </button>
                           <button>
-                            type='button'
+                            type='button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleToggleSchedule(schedule.id, schedule.status);
                             }}
-                            className='p-1 text-yellow-400 hover:text-yellow-300 transition-colors'
-                            title={schedule.status ==='active' ? "暂停" : "恢复'}'
+                            className='p-1 text-yellow-400 hover:text-yellow-300 transition-colors
+                            title={schedule.status ==='active' ? "暂停" : "恢复'}
                           >
-                            {schedule.status ==='active' ? ('')
+                            {schedule.status ==='active' ? (')
                               <Pause className='w-4 h-4'    />
                             ) : (
                               <Play className='w-4 h-4'    />
                             )}
                           </button>
                           <button>
-                            type='button'
+                            type='button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleDeleteSchedule(schedule.id);
                             }}
-                            className='p-1 text-red-400 hover:text-red-300 transition-colors'
-                            title='删除'
+                            className='p-1 text-red-400 hover:text-red-300 transition-colors
+                            title='删除
                           >
                             <Trash2 className='w-4 h-4'    />
                           </button>
@@ -355,7 +355,7 @@ import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Pause, Play, Plus
                         <div className='flex items-center space-x-4'>
                           <div className='flex items-center space-x-1'>
                             <Clock className='w-3 h-3'    />
-                            <span>下次运行: {schedule.nextRun ? formatTime(schedule.nextRun) : "未安排'}</span>"
+                            <span>下次运行: {schedule.nextRun ? formatTime(schedule.nextRun) : "未安排'}</span>
                           </div>
                           <div className='flex items-center space-x-1'>
                             <BarChart3 className='w-3 h-3'    />
@@ -403,21 +403,21 @@ import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Pause, Play, Plus
                         <div>
                           <label className='text-sm text-gray-400'>调度类型</label>
                           <p className='text-white'>
-                            {schedule.schedule.type ==='once' ? "单次执行" : "重复执行'}'
-                            {schedule.schedule.interval && ` (${schedule.schedule.interval})`}`
+                            {schedule.schedule.type ==='once' ? "单次执行" : "重复执行'}
+                            {schedule.schedule.interval && ` (${schedule.schedule.interval})`}
                           </p>
                         </div>
                         <div>
-                          <label className="text-sm text-gray-400'>下次运行</label>`'"`
+                          <label className="text-sm text-gray-400'>下次运行</label>`
                           <p className='text-white'>
-                            {schedule.nextRun ? formatTime(schedule.nextRun) : "未安排'}"
+                            {schedule.nextRun ? formatTime(schedule.nextRun) : "未安排'}
                           </p>
                         </div>
                         <div>
                           <label className='text-sm text-gray-400'>运行统计</label>
                           <p className='text-white'>
                             已运行 {schedule.runCount} 次
-                            {schedule.maxRuns && ` / ${schedule.maxRuns}`}`
+                            {schedule.maxRuns && ` / ${schedule.maxRuns}`}
                           </p>
                         </div>
                       </div>
@@ -426,7 +426,7 @@ import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Pause, Play, Plus
                 </div>
 
                 {/* 执行历史 */}
-                <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6'>`'"`
+                <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6'>`
                   <h3 className='text-lg font-semibold text-white mb-4'>执行历史</h3>
 
                   {executions.length === 0 ? (
@@ -480,18 +480,18 @@ import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Pause, Play, Plus
                 <div>
                   <label className='block text-sm font-medium text-gray-300 mb-2'>调度名称</label>
                   <input>
-                    type='text'
-                    placeholder='输入调度名称'
-                    className='w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                    type='text
+                    placeholder='输入调度名称
+                    className='w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500
                   />
                 </div>
 
                 <div>
                   <label htmlFor='test-type-select' className='block text-sm font-medium text-gray-300 mb-2'>测试类型</label>
                   <select>
-                    id='test-type-select'
-                    className='w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
-                    aria-label='选择测试类型'
+                    id='test-type-select
+                    className='w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500
+                    aria-label='选择测试类型
                   >
                     <option value='performance'>性能测试</option>
                     <option value='security'>安全检测</option>
@@ -504,9 +504,9 @@ import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Pause, Play, Plus
                   <div>
                     <label htmlFor='schedule-type-select' className='block text-sm font-medium text-gray-300 mb-2'>调度类型</label>
                     <select>
-                      id='schedule-type-select'
-                      className='w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
-                      aria-label='选择调度类型'
+                      id='schedule-type-select
+                      className='w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500
+                      aria-label='选择调度类型
                     >
                       <option value='once'>单次执行</option>
                       <option value='recurring'>重复执行</option>
@@ -516,9 +516,9 @@ import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Pause, Play, Plus
                   <div>
                     <label htmlFor='interval-select' className='block text-sm font-medium text-gray-300 mb-2'>执行间隔</label>
                     <select>
-                      id='interval-select'
-                      className='w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
-                      aria-label='选择执行间隔'
+                      id='interval-select
+                      className='w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500
+                      aria-label='选择执行间隔
                     >
                       <option value='hourly'>每小时</option>
                       <option value='daily'>每天</option>
@@ -531,25 +531,25 @@ import { AlertCircle, BarChart3, Calendar, CheckCircle, Clock, Pause, Play, Plus
                 <div>
                   <label htmlFor='start-time-input' className='block text-sm font-medium text-gray-300 mb-2'>开始时间</label>
                   <input>
-                    id='start-time-input'
-                    type='datetime-local'
-                    className='w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
-                    aria-label='选择开始时间'
+                    id='start-time-input
+                    type='datetime-local
+                    className='w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500
+                    aria-label='选择开始时间
                   />
                 </div>
               </div>
 
               <div className='flex items-center justify-end space-x-3 mt-6'>
                 <button>
-                  type='button'
+                  type='button
                   onClick={() => setShowCreateModal(false)}
-                  className='px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors'
+                  className='px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors
                 >
                   取消
                 </button>
                 <button>
-                  type='button'
-                  className='px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors'
+                  type='button
+                  className='px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors
                 >
                   创建调度
                 </button>

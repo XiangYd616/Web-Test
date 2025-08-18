@@ -9,5 +9,5 @@ const RechartsChart: React.FC<RechartsChartProps> = (props) => {
       <p>组件内容</p>
     </div>
   );
-};'"
-export default RechartsChart;'"
+};
+export default RechartsChart;'

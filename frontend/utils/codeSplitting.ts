@@ -48,10 +48,9 @@ export function createAnalyzedLazyComponent<T extends ComponentType<any>>(compon
       const loadTime = performance.now() - startTime;
 
       // 记录加载性能
-      console.log(`📊 Component ${componentName} loaded in ${loadTime.toFixed(2)}ms`);`
-
+      console.log(`📊 Component ${componentName} loaded in ${loadTime.toFixed(2)}ms`);
       // 发送性能数据（如果有分析服务）
-      if (typeof window !== "undefined' && (window as any).analytics) {'`
+      if (typeof window !== "undefined' && (window as any).analytics) {
         (window as any).analytics.track("component_load_time', {
           component: componentName,
           loadTime,
@@ -62,7 +61,7 @@ export function createAnalyzedLazyComponent<T extends ComponentType<any>>(compon
 
       return module;
     }).catch(error => {
-      console.error(`❌ Failed to load component ${componentName}:`, error);`
+      console.error(`❌ Failed to load component ${componentName}:`, error);
       throw error;
     });
   };
@@ -76,7 +75,7 @@ export function createAnalyzedLazyComponent<T extends ComponentType<any>>(compon
       enhancedImportFn().catch(() => {
         // 预加载失败不影响正常使用
       });
-    }, priority === "high' ? 1000 : priority === 'medium' ? 3000 : 5000);'`
+    }, priority === "high' ? 1000 : priority === 'medium' ? 3000 : 5000);
   }
 
   return LazyComponent;
@@ -131,7 +130,7 @@ export async function loadLibrary<T = any>(
 ): Promise<T> {
   const lib = lazyLibraries[library];
   if (!lib || !lib[functionName as keyof typeof lib]) {
-    throw new Error(`Library function ${library}.${functionName} not found`);`
+    throw new Error(`Library function ${library}.${functionName} not found`);
   }
 
   const startTime = performance.now();
@@ -140,11 +139,10 @@ export async function loadLibrary<T = any>(
     const module = await lib[functionName as keyof typeof lib]();
     const loadTime = performance.now() - startTime;
 
-    console.log(`📚 Library ${library}.${functionName} loaded in ${loadTime.toFixed(2)}ms`);`
-
+    console.log(`📚 Library ${library}.${functionName} loaded in ${loadTime.toFixed(2)}ms`);
     return module.default || module;
   } catch (error) {
-    console.error(`❌ Failed to load ${library}.${functionName}:`, error);`
+    console.error(`❌ Failed to load ${library}.${functionName}:`, error);
     throw error;
   }
 }
@@ -183,7 +181,7 @@ export function useLazyLibrary<T = any>(
 export const createPageChunks = (pageName: string) => {
   const chunkStrategies = {
     // 大型测试页面 - 使用实际存在的页面
-    "StressTest': {'`
+    "StressTest': {
       main: () => import('../pages/testing/StressTest'),
       detail: () => import('../pages/StressTestDetail'),
       report: () => import('../pages/StressTestReport'),
@@ -225,11 +223,11 @@ class AggressivePreloader {
       await importFn();
       this.loadedChunks.add(chunkName);
       this.loadingChunks.delete(chunkName);
-      console.log(`✅ Preloaded chunk: ${chunkName}`);`
+      console.log(`✅ Preloaded chunk: ${chunkName}`);
     } catch (error) {
       this.failedChunks.add(chunkName);
       this.loadingChunks.delete(chunkName);
-      console.warn(`❌ Failed to preload chunk: ${chunkName}`, error);`
+      console.warn(`❌ Failed to preload chunk: ${chunkName}`, error);
     }
   }
 
@@ -248,8 +246,7 @@ export const aggressivePreloader = new AggressivePreloader();
 // 初始化激进的代码分割策略
 export const initializeAggressiveCodeSplitting = () => {
   // 预加载高优先级组件
-  const highPriorityComponents = [
-    "TestInterface','`
+  const highPriorityComponents = ["TestInterface',
     'TestResultsDisplay',
     'Chart',
     'StatCard

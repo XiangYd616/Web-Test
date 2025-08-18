@@ -10,7 +10,7 @@ import React from 'react';interface CodeEditorProps   {
 }
 
 const CodeEditor: React.FC<CodeEditorProps>  = ({
-  value = '',
+  value = ',
   onChange,
   language = 'javascript',
   readOnly = false
@@ -22,7 +22,7 @@ const CodeEditor: React.FC<CodeEditorProps>  = ({
     style: computedStyle,
     disabled,
     'aria-label': ariaLabel,
-    "data-testid': testId'
+    "data-testid': testId
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
   // 变体和主题支持
   const variantStyles = useMemo(() => {
@@ -30,17 +30,17 @@ const CodeEditor: React.FC<CodeEditorProps>  = ({
       primary: {
         backgroundColor: '#007bff',
         color: '#ffffff',
-        border: '1px solid #007bff'
+        border: '1px solid #007bff
       },
       secondary: {
         backgroundColor: '#6c757d',
         color: '#ffffff',
-        border: '1px solid #6c757d'
+        border: '1px solid #6c757d
       },
       outline: {
         backgroundColor: 'transparent',
         color: '#007bff',
-        border: '1px solid #007bff'
+        border: '1px solid #007bff
       }
     };
 
@@ -51,15 +51,15 @@ const CodeEditor: React.FC<CodeEditorProps>  = ({
     const styles = {
       small: {
         padding: '0.25rem 0.5rem',
-        fontSize: '0.875rem'
+        fontSize: '0.875rem
       },
       medium: {
         padding: '0.5rem 1rem',
-        fontSize: '1rem'
+        fontSize: '1rem
       },
       large: {
         padding: '0.75rem 1.5rem',
-        fontSize: '1.125rem'
+        fontSize: '1.125rem
       }
     };
 
@@ -95,7 +95,7 @@ const CodeEditor: React.FC<CodeEditorProps>  = ({
       onClick?.(event as any);
     }
   }, [onClick]);
-  return (<div className= 'code-editor'>
+  return (<div className='code-editor'>
       <textarea
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
@@ -104,7 +104,7 @@ const CodeEditor: React.FC<CodeEditorProps>  = ({
           width: '100%',
           height: '300px',
           fontFamily: 'monospace',
-          fontSize: '14px'
+          fontSize: '14px
         }}
       />
     </div>

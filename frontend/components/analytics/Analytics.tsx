@@ -9,5 +9,5 @@ const Analytics: React.FC<AnalyticsProps> = (props) => {
       <p>组件内容</p>
     </div>
   );
-};'"
-export default Analytics;'"
+};
+export default Analytics;'

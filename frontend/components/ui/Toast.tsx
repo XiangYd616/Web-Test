@@ -4,8 +4,8 @@ import React from 'react';import toast, { Toaster, ToastOptions  } from 'react-h
   style?: React.CSSProperties;
   disabled?: boolean;
   loading?: boolean;
-  variant?: 'primary' | 'secondary' | 'outline'
-  size?: 'small' | 'medium' | 'large'
+  variant?: 'primary' | 'secondary' | 'outline
+  size?: 'small' | 'medium' | 'large
   onClick?: (event: React.MouseEvent<HTMLElement>) => void;
   onChange?: (value: any) => void;
   onFocus?: (event: React.FocusEvent<HTMLElement>) => void;
@@ -54,22 +54,22 @@ export const ToastProvider: React.FC<ToastProps> = (props) => {
     style: computedStyle,
     disabled,
     'aria-label': ariaLabel,
-    "data-testid': testId'
+    "data-testid': testId
   }), [combinedClassName, computedStyle, disabled, ariaLabel, testId]);
   
   // 样式和主题支持
   const {
-    className = '',
+    className = ',
     style,
     variant = 'primary',
-    size = 'medium'
+    size = 'medium
   } = props;
 
-  const baseClasses = 'component-base'
+  const baseClasses = 'component-base
   const variantClasses = `component--${variant}`;
   const sizeClasses = `component--${size}`;
   const stateClasses = [
-    disabled && "component--disabled','`
+    disabled && "component--disabled',
     loading && 'component--loading
   ].filter(Boolean).join(' ");
   const combinedClassName = [
@@ -92,7 +92,7 @@ export const ToastProvider: React.FC<ToastProps> = (props) => {
     'aria-describedby': ariaDescribedBy,
     role,
     tabIndex: disabled ? -1 : tabIndex,
-    "data-testid': testId'
+    "data-testid': testId
   };
 
   // 键盘导航支持
@@ -105,7 +105,7 @@ export const ToastProvider: React.FC<ToastProps> = (props) => {
   return (
     <>
       {children}
-      <Toaster position= 'top-right'
+      <Toaster position= 'top-right
         reverseOrder={false}
         gutter={8}
         containerClassName=

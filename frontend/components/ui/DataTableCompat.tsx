@@ -5,7 +5,7 @@ export interface DataTableColumn<T>     {
   sortable?: boolean;
   render?: (value: any, record: T) => React.ReactNode;
   width?: string;
-  align?: 'left' | 'center' | 'right'
+  align?: 'left' | 'center' | 'right
 }
 
 // 原DataTable的属性接口
@@ -14,7 +14,7 @@ interface DataTableCompatProps<T>   {
   data: T[];
   loading?: boolean;
   sortBy?: keyof T;
-  sortOrder?: 'asc' | 'desc'
+  sortOrder?: 'asc' | 'desc
   onSort?: (key: keyof T, order: 'asc' | 'desc') => void;
   emptyText?: string;
   emptyIcon?: React.ReactNode;
@@ -31,8 +31,8 @@ function DataTableCompat<T extends Record<string, any>>({
   onSort,
   emptyText = '暂无数据',
   emptyIcon,
-  className = '',
-  rowKey = 'id'
+  className = ',
+  rowKey = 'id
 }: DataTableCompatProps<T>) {
 
   // 转换列定义：从DataTable格式转换为Table格式
@@ -46,25 +46,25 @@ function DataTableCompat<T extends Record<string, any>>({
       return col.render!(value, record);
     } : undefined,
     width: col.width,
-    className: col.align === 'center' ? 'text-center' : ''
-      col.align === 'right' ? 'text-right' : 'text-left'
+    className: col.align === 'center' ? 'text-center' : 
+      col.align === 'right' ? 'text-right' : 'text-left
   }));
 
   // 处理排序状态
   const [currentSortField, setCurrentSortField] = React.useState<string | null>(sortBy ? String(sortBy): null
   );
-  const [currentSortOrder, setCurrentSortOrder] = React.useState<'ascend' | 'descend' | null>('')
-    sortOrder === 'asc' ? 'ascend' : sortOrder === 'desc' ? "descend' : null"
+  const [currentSortOrder, setCurrentSortOrder] = React.useState<'ascend' | 'descend' | null>(')
+    sortOrder === 'asc' ? 'ascend' : sortOrder === 'desc' ? "descend' : null
   );
 
   // 同步外部排序状态
   React.useEffect(()  => {
     setCurrentSortField(sortBy ? String(sortBy): null);
-    setCurrentSortOrder(sortOrder === 'asc' ? 'ascend' : sortOrder === 'desc' ? "descend' : null);"
+    setCurrentSortOrder(sortOrder === 'asc' ? 'ascend' : sortOrder === 'desc' ? "descend' : null);
   }, [sortBy, sortOrder]);
 
   // 处理排序变化
-  const handleSortChange = (field: string | null, order: 'ascend' | "descend' | null)  => {"
+  const handleSortChange = (field: string | null, order: 'ascend' | "descend' | null)  => {
   // 性能优化
   const memoizedProps = useMemo(() => ({
     className: combinedClassName,
@@ -81,7 +81,7 @@ function DataTableCompat<T extends Record<string, any>>({
       onClick?.(event);
     } catch (error) {
       console.error('Click handler error: ', error);
-      setError('操作失败，请重试");"
+      setError('操作失败，请重试");
     }
   }, [disabled, loading, onClick]);
   
@@ -106,7 +106,7 @@ function DataTableCompat<T extends Record<string, any>>({
     onBlur?.(event);
   }, [onBlur, updateState]);
     if (onSort && field && order) {
-      const dataTableOrder = order === 'ascend' ? 'asc' : 'desc'
+      const dataTableOrder = order === 'ascend' ? 'asc' : 'desc
       onSort(field as keyof T, dataTableOrder);
     }
   };
@@ -121,16 +121,16 @@ function DataTableCompat<T extends Record<string, any>>({
 
   // 自定义空状态内容
   const emptyContent = emptyIcon ? (
-    <div className= 'text-center py-12'>
-      <div className= 'mb-4' aria-hidden= 'true'>{emptyIcon}</div>
-      <p className= 'text-gray-400'>{emptyText}</p>
+    <div className='text-center py-12'>
+      <div className= 'mb-4' aria-hidden='true'>{emptyIcon}</div>
+      <p className='text-gray-400'>{emptyText}</p>
     </div>
   ) : emptyText;
 
   return (
     <div className={cn(>
       // 保持原DataTable的视觉风格
-      "bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 overflow-hidden',"
+      "bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 overflow-hidden',
       // 添加自定义样式类
       'datatable-compat-container',
       className
@@ -141,7 +141,7 @@ function DataTableCompat<T extends Record<string, any>>({
         rowKey={getRowKey}
         emptyText={emptyContent}
         showHeader={true}
-        size= 'middle'
+        size= 'middle
         className={cn(
           // 自定义样式类来模拟原DataTable外观
           'datatable-compat',
@@ -151,10 +151,10 @@ function DataTableCompat<T extends Record<string, any>>({
           '[&_tbody_tr]:transition-colors',
           '[&_tbody_tr:hover]:bg-gray-700/20',
           '[&_th]:border-none [&_th]:px-6 [&_th]:py-4 [&_th]:text-gray-300 [&_th]:font-medium [&_th]:text-sm',
-          "[&_td]:border-none [&_td]:px-6 [&_td]:py-4 [&_td]:text-gray-100 [&_td]:text-sm',"
+          "[&_td]:border-none [&_td]:px-6 [&_td]:py-4 [&_td]:text-gray-100 [&_td]:text-sm',
           // 响应式样式
-          "md:[&_th]:px-4 md:[&_th]:py-3 md:[&_td]:px-4 md:[&_td]:py-3',"
-          'sm:[&_th]:px-3 sm:[&_th]:py-2 sm:[&_td]:px-3 sm:[&_td]:py-2 sm:[&_th]:text-xs sm:[&_td]:text-xs'
+          "md:[&_th]:px-4 md:[&_th]:py-3 md:[&_td]:px-4 md:[&_td]:py-3',
+          'sm:[&_th]:px-3 sm:[&_th]:py-2 sm:[&_td]:px-3 sm:[&_td]:py-2 sm:[&_th]:text-xs sm:[&_td]:text-xs
         )}
          />
     </div>

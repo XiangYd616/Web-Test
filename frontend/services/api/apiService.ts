@@ -5,7 +5,7 @@ let remoteApiService: any = null;
 // 动态导入函数
 const getAuthService = async () => {
   if (!authService) {
-    const { authService: auth }  = await import('../auth/authService");"
+    const { authService: auth }  = await import('../auth/authService");
     authService = auth;
   }
   return authService;
@@ -63,7 +63,7 @@ class ApiService {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError'
+    const errorType = error.name || 'UnknownError
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -101,7 +101,7 @@ class ApiService {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
@@ -112,7 +112,7 @@ class ApiService {
   constructor() {
     // 在浏览器环境中使用远程 API，在桌面环境中使用本地存储
     this.useRemoteApi = !isDesktopEnvironment();
-    this.baseURL = process.env.REACT_APP_API_URL || "http://localhost:3001";``
+    this.baseURL = process.env.REACT_APP_API_URL || "http://localhost:3001";
   }
 
   // 强制使用远程 API（用于测试）
@@ -122,7 +122,7 @@ class ApiService {
 
   // Token 管理
   getToken(): string | null {
-    return localStorage.getItem('auth_token");"
+    return localStorage.getItem('auth_token");
   }
 
   setToken(token: string): void {
@@ -130,15 +130,15 @@ class ApiService {
   }
 
   removeToken(): void {
-    localStorage.removeItem('auth_token");"
+    localStorage.removeItem('auth_token");
   }
 
   // 基础 HTTP 客户端方法
   private async request(url: string, options: RequestInit = {}): Promise<any> {
-    const response = await fetch(`${this.baseURL}${url}`, {`
+    const response = await fetch(`${this.baseURL}${url}`, {
       headers: {
-        "Content-Type': 'application/json','`"`
-        ...(this.getToken() ? { 'Authorization': `Bearer ${this.getToken()}` } : {}),'`
+        "Content-Type': 'application/json','
+        ...(this.getToken() ? { 'Authorization': `Bearer ${this.getToken()}` } : {}),
         ...options.headers
       },
       ...options
@@ -155,32 +155,32 @@ class ApiService {
   async get(url: string, config?: any): Promise<ApiResponse> {
     if (this.useRemoteApi) {
       // 使用配置管理器获取API URL
-      const { enhancedConfigManager } = await import("../../config/ConfigManager");``
-      const apiBaseUrl = enhancedConfigManager.get('api.baseUrl");"
-      const response = await fetch(`${apiBaseUrl}${url}`, {`
-        method: "GET','`"`
+      const { enhancedConfigManager } = await import("../../config/ConfigManager");
+      const apiBaseUrl = enhancedConfigManager.get('api.baseUrl");
+      const response = await fetch(`${apiBaseUrl}${url}`, {
+        method: "GET',"
         headers: {
           'Content-Type': 'application/json',
-          ...(this.getToken() ? { 'Authorization': `Bearer ${this.getToken()}` } : {}),'`
+          ...(this.getToken() ? { 'Authorization': `Bearer ${this.getToken()}` } : {}),
           ...config?.headers
         },
         ...config
       });
       return response.json();
     }
-    throw new Error("GET method not supported in desktop mode");``
+    throw new Error("GET method not supported in desktop mode");
   }
 
   async post(url: string, data?: any, config?: any): Promise<ApiResponse> {
     if (this.useRemoteApi) {
       // 使用配置管理器获取API URL
-      const { enhancedConfigManager } = await import('../../config/ConfigManager");"
-      const apiBaseUrl = enhancedConfigManager.get('api.baseUrl");"
-      const response = await fetch(`${apiBaseUrl}${url}`, {`
-        method: "POST','`"`
+      const { enhancedConfigManager } = await import('../../config/ConfigManager");
+      const apiBaseUrl = enhancedConfigManager.get('api.baseUrl");
+      const response = await fetch(`${apiBaseUrl}${url}`, {
+        method: "POST',"
         headers: {
           'Content-Type': 'application/json',
-          ...(this.getToken() ? { 'Authorization': `Bearer ${this.getToken()}` } : {}),'`
+          ...(this.getToken() ? { 'Authorization': `Bearer ${this.getToken()}` } : {}),
           ...(config?.headers || {})
         },
         body: data ? JSON.stringify(data) : undefined,
@@ -188,16 +188,16 @@ class ApiService {
       });
       return response.json();
     }
-    throw new Error("POST method not supported in desktop mode");``
+    throw new Error("POST method not supported in desktop mode");
   }
 
   async put(url: string, data?: any, config?: any): Promise<ApiResponse> {
     if (this.useRemoteApi) {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}${url}`, {'`
-        method: "PUT','`"`
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}${url}`, {
+        method: "PUT',"
         headers: {
           'Content-Type': 'application/json',
-          ...(this.getToken() ? { 'Authorization': `Bearer ${this.getToken()}` } : {}),'`
+          ...(this.getToken() ? { 'Authorization': `Bearer ${this.getToken()}` } : {}),
           ...(config?.headers || {})
         },
         body: data ? JSON.stringify(data) : undefined,
@@ -205,23 +205,23 @@ class ApiService {
       });
       return response.json();
     }
-    throw new Error("PUT method not supported in desktop mode");``
+    throw new Error("PUT method not supported in desktop mode");
   }
 
   async delete(url: string, config?: any): Promise<ApiResponse> {
     if (this.useRemoteApi) {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || "http://localhost:3001'}${url}`, {'`"
-        method: "DELETE','`"`
+      const response = await fetch(`${process.env.REACT_APP_API_URL || "http://localhost:3001'}${url}`, {'
+        method: "DELETE',"
         headers: {
           'Content-Type': 'application/json',
-          ...(this.getToken() ? { 'Authorization': `Bearer ${this.getToken()}` } : {}),'`
+          ...(this.getToken() ? { 'Authorization': `Bearer ${this.getToken()}` } : {}),
           ...(config?.headers || {})
         },
         ...(config || {})
       });
       return response.json();
     }
-    throw new Error("DELETE method not supported in desktop mode");``
+    throw new Error("DELETE method not supported in desktop mode");
   }
 
   // 认证相关方法
@@ -238,7 +238,7 @@ class ApiService {
             success: true,
             user: response.data.user,
             token: response.data.token,
-            message: response.message || '登录成功'
+            message: response.message || '登录成功
       };
         } else {
           return {
@@ -269,7 +269,7 @@ class ApiService {
             success: true,
             user: response.data.user,
             token: response.data.token,
-            message: response.message || '注册成功'
+            message: response.message || '注册成功
       };
         } else {
           return {
@@ -330,12 +330,12 @@ class ApiService {
           return {
             success: true,
             user: response.data.user,
-            message: response.message || '更新成功'
+            message: response.message || '更新成功
       };
         } else {
           return {
             success: false,
-            message: response.error || '更新失败'
+            message: response.error || '更新失败
           };
         }
       } catch (error) {
@@ -360,14 +360,14 @@ class ApiService {
         console.warn('远程 API 修改密码失败:', error);
         return {
           success: false,
-          message: '密码修改失败，请稍后重试'
+          message: '密码修改失败，请稍后重试
         };
       }
     } else {
       // 桌面环境暂不支持密码修改
       return {
         success: false,
-        message: '桌面版暂不支持密码修改功能'
+        message: '桌面版暂不支持密码修改功能
       };
     }
   }
@@ -437,7 +437,7 @@ class ApiService {
 
     // 返回本地测试历史
     try {
-      const localTests = localStorage.getItem('test_web_app_test_history");"
+      const localTests = localStorage.getItem('test_web_app_test_history");
       return localTests ? JSON.parse(localTests) : [];
     } catch (error) {
       console.error('获取本地测试历史失败:', error);
@@ -472,7 +472,7 @@ class ApiService {
   // 管理员功能（仅远程 API）
   async getAdminDashboard(): Promise<any> {
     if (!this.useRemoteApi) {
-      throw new Error('管理员功能仅在浏览器版本中可用");"
+      throw new Error('管理员功能仅在浏览器版本中可用");
     }
 
     const remoteApi = await getRemoteApiService();
@@ -481,12 +481,12 @@ class ApiService {
       
         return response.data;
       }
-    throw new Error(response.error || '获取管理员面板数据失败");"
+    throw new Error(response.error || '获取管理员面板数据失败");
   }
 
   async getAdminUsers(page = 1, limit = 20): Promise<any> {
     if (!this.useRemoteApi) {
-      throw new Error('用户管理功能仅在浏览器版本中可用");"
+      throw new Error('用户管理功能仅在浏览器版本中可用");
     }
 
     const remoteApi = await getRemoteApiService();
@@ -495,12 +495,12 @@ class ApiService {
       
         return response.data;
       }
-    throw new Error(response.error || '获取用户列表失败");"
+    throw new Error(response.error || '获取用户列表失败");
   }
 
   async createUser(userData: any): Promise<User> {
     if (!this.useRemoteApi) {
-      throw new Error('用户创建功能仅在浏览器版本中可用");"
+      throw new Error('用户创建功能仅在浏览器版本中可用");
     }
 
     const remoteApi = await getRemoteApiService();
@@ -509,12 +509,12 @@ class ApiService {
       
         return response.data.user;
       }
-    throw new Error(response.error || '创建用户失败");"
+    throw new Error(response.error || '创建用户失败");
   }
 
   async updateUser(userId: string, userData: any): Promise<User> {
     if (!this.useRemoteApi) {
-      throw new Error('用户更新功能仅在浏览器版本中可用");"
+      throw new Error('用户更新功能仅在浏览器版本中可用");
     }
 
     const remoteApi = await getRemoteApiService();
@@ -523,18 +523,18 @@ class ApiService {
       
         return response.data.user;
       }
-    throw new Error(response.error || '更新用户失败");"
+    throw new Error(response.error || '更新用户失败");
   }
 
   async deleteUser(userId: string): Promise<void> {
     if (!this.useRemoteApi) {
-      throw new Error('用户删除功能仅在浏览器版本中可用");"
+      throw new Error('用户删除功能仅在浏览器版本中可用");
     }
 
     const remoteApi = await getRemoteApiService();
     const response = await remoteApi.deleteUser(userId);
     if (!response.success) {
-      throw new Error(response.error || '删除用户失败");"
+      throw new Error(response.error || '删除用户失败");
     }
   }
 
@@ -560,7 +560,7 @@ class ApiService {
       features: [
         'User Authentication',
         'Test Execution',
-        'Data Analytics'
+        'Data Analytics
       ]
     };
   }

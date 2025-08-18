@@ -57,9 +57,9 @@ const ListItem: React.FC<ListItemProps>  = memo(({ index, style, data }) => {
   
   const ariaProps = {
     id: componentId,;
-    "aria-label': ariaLabel,'`;"`
+    "aria-label': ariaLabel,';
     'aria-labelledby': ariaLabelledBy,;
-    'aria-describedby': [''];
+    'aria-describedby': ['];
       error ? errorId : null,;
       description ? descriptionId : null,;
       ariaDescribedBy;
@@ -116,7 +116,7 @@ const ListItem: React.FC<ListItemProps>  = memo(({ index, style, data }) => {
   if (!result) return null;
 
   return (;
-    <div style={style} className= 'px-2 py-1'>
+    <div style={style} className='px-2 py-1'>
       <ResultCard result={result}
         isSelected={selectedResults.has(result.id)}
         showDetails={showDetails[result.id] || false}
@@ -129,7 +129,7 @@ const ListItem: React.FC<ListItemProps>  = memo(({ index, style, data }) => {
   );
 });
 
-ListItem.displayName = 'ListItem'
+ListItem.displayName = 'ListItem
 const VirtualizedResultList: React.FC<VirtualizedResultListProps>  = memo(({
   results,;
   selectedResults,;
@@ -194,7 +194,7 @@ const VirtualizedResultList: React.FC<VirtualizedResultListProps>  = memo(({
   // 如果结果数量较少，使用普通渲染
   if (results.length <= 20) {
     
-        return (<div className= 'space-y-4'>;
+        return (<div className='space-y-4'>;
         {results.map((result) => (
           <ResultCard key={result.id
       }
@@ -213,14 +213,14 @@ const VirtualizedResultList: React.FC<VirtualizedResultListProps>  = memo(({
 
   // 大量结果时使用虚拟化列表
   return (;
-    <div className= 'border border-gray-700 rounded-lg overflow-hidden'>;
+    <div className='border border-gray-700 rounded-lg overflow-hidden'>;
       <List;
         height={containerHeight}
         itemCount={results.length}
         itemSize={getItemSize}
         itemData={itemData}
         overscanCount={5}
-        className= 'scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800'
+        className= 'scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800
       >;
         {ListItem}
       </List>
@@ -228,5 +228,5 @@ const VirtualizedResultList: React.FC<VirtualizedResultListProps>  = memo(({
   );
 });
 
-VirtualizedResultList.displayName = 'VirtualizedResultList'
+VirtualizedResultList.displayName = 'VirtualizedResultList
 export default VirtualizedResultList;

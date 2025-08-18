@@ -9,7 +9,7 @@ import { useCallback, useRef, useState    } from 'react';import { LocalSEOAnalys
   checkSocialMedia?: boolean;
   checkStructuredData?: boolean;
   checkSecurity?: boolean;
-  depth?: 'basic' | 'standard' | 'comprehensive'
+  depth?: 'basic' | 'standard' | 'comprehensive
 }
 
 interface SEOTestConfig   {
@@ -28,7 +28,7 @@ export const useUnifiedSEOTest = () => {
   const [currentMode, setCurrentMode] = useState<SEOTestMode>('online");
   const [localProgress, setLocalProgress] = useState<SEOTestProgress>({
     progress: 0,
-    currentStep: '',
+    currentStep: ',
     isRunning: false
   });
   const [localResults, setLocalResults] = useState<SEOAnalysisResult | null>(null);
@@ -57,7 +57,7 @@ export const useUnifiedSEOTest = () => {
       // 清除本地测试状态
       setLocalResults(null);
       setLocalError(null);
-      setLocalProgress({ progress: 0, currentStep: '', isRunning: false });
+      setLocalProgress({ progress: 0, currentStep: ', isRunning: false });
       // 启动在线测试
       return startOnlineTest(config.online);
     } else if (config.mode === 'local' && config.local) {
@@ -122,7 +122,7 @@ export const useUnifiedSEOTest = () => {
         localEngineRef.current.stopAnalysis();
         localEngineRef.current = null;
       }
-      setLocalProgress({ progress: 0, currentStep: '', isRunning: false });
+      setLocalProgress({ progress: 0, currentStep: ', isRunning: false });
     }
   }, [currentMode, stopOnlineTest]);
 
@@ -136,7 +136,7 @@ export const useUnifiedSEOTest = () => {
       if (mode === 'online') {
         setLocalResults(null);
         setLocalError(null);
-        setLocalProgress({ progress: 0, currentStep: '', isRunning: false });
+        setLocalProgress({ progress: 0, currentStep: ', isRunning: false });
       }
 
       setCurrentMode(mode);
@@ -148,7 +148,7 @@ export const useUnifiedSEOTest = () => {
     await stopTest();
     setLocalResults(null);
     setLocalError(null);
-    setLocalProgress({ progress: 0, currentStep: '', isRunning: false });
+    setLocalProgress({ progress: 0, currentStep: ', isRunning: false });
     setCurrentMode('online");
   }, [stopTest]);
 

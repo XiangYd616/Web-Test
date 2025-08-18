@@ -1,6 +1,6 @@
 import React, { createContext, ReactNode, useCallback, useContext, useState    } from 'react';import { AlertTriangle, CheckCircle, Info, X, XCircle    } from 'lucide-react';export interface Notification     {
   id: string;
-  type: 'success' | 'error' | 'warning' | 'info'
+  type: 'success' | 'error' | 'warning' | 'info
   title: string;
   message?: string;
   duration?: number;
@@ -27,7 +27,7 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 export const useNotifications = () => {
   const context = useContext(NotificationContext);
   if (!context) {
-    throw new Error('useNotifications must be used within a NotificationProvider");"
+    throw new Error('useNotifications must be used within a NotificationProvider");
   }
   return context;
 };
@@ -114,7 +114,7 @@ const NotificationContainer: React.FC  = () => {
         return null;
       }
 
-  return (<div className= 'fixed top-4 right-4 z-50 space-y-2 max-w-sm w-full'>
+  return (<div className='fixed top-4 right-4 z-50 space-y-2 max-w-sm w-full'>
       {notifications.map(notification => (
         <NotificationItem>
           key={notification.id}
@@ -134,66 +134,66 @@ interface NotificationItemProps   {
 const NotificationItem: React.FC<NotificationItemProps>  = ({ notification, onRemove }) => {
   const getIcon = () => {
     switch (notification.type) {
-      case 'success': ''
-        return <CheckCircle className= 'w-5 h-5 text-green-500'    />;
-      case 'error': ''
-        return <XCircle className= 'w-5 h-5 text-red-500'    />;
-      case 'warning': ''
-        return <AlertTriangle className= 'w-5 h-5 text-yellow-500'    />;
-      case 'info': ''
-        return <Info className= 'w-5 h-5 text-blue-500'    />;
+      case 'success': 
+        return <CheckCircle className='w-5 h-5 text-green-500' />;
+      case 'error': 
+        return <XCircle className='w-5 h-5 text-red-500' />;
+      case 'warning': 
+        return <AlertTriangle className='w-5 h-5 text-yellow-500' />;
+      case 'info': 
+        return <Info className='w-5 h-5 text-blue-500' />;
     }
   };
 
   const getBackgroundColor = () => {
     switch (notification.type) {
-      case 'success': ''
-        return 'bg-green-50 border-green-200'
-      case 'error': ''
-        return 'bg-red-50 border-red-200'
-      case 'warning': ''
-        return 'bg-yellow-50 border-yellow-200'
-      case 'info': ''
-        return 'bg-blue-50 border-blue-200'
+      case 'success': 
+        return 'bg-green-50 border-green-200
+      case 'error': 
+        return 'bg-red-50 border-red-200
+      case 'warning': 
+        return 'bg-yellow-50 border-yellow-200
+      case 'info': 
+        return 'bg-blue-50 border-blue-200
     }
   };
 
   return (
-    <div className={`rounded-lg border p-4 shadow-lg ${getBackgroundColor()} transform transition-all duration-300 ease-in-out`}>`
-      <div className= "flex items-start'>`'"`
-        <div className= 'flex-shrink-0'>
+    <div className={`rounded-lg border p-4 shadow-lg ${getBackgroundColor()} transform transition-all duration-300 ease-in-out`}>
+      <div className="flex items-start'>`
+        <div className='flex-shrink-0'>
           {getIcon()}
         </div>
-        <div className= 'ml-3 flex-1'>
-          <h4 className= 'text-sm font-medium text-gray-900'>
+        <div className='ml-3 flex-1'>
+          <h4 className='text-sm font-medium text-gray-900'>
             {notification.title}
           </h4>
           {notification.message && (
-            <p className= 'mt-1 text-sm text-gray-600'>
+            <p className='mt-1 text-sm text-gray-600'>
               {notification.message}
             </p>
           )}
           {notification.action && (
-            <div className= 'mt-2'>
+            <div className='mt-2'>
               <button>
-                type= 'button'
+                type= 'button
                 onClick={notification.action.onClick}
-                className= 'text-sm font-medium text-blue-600 hover:text-blue-500'
+                className= 'text-sm font-medium text-blue-600 hover:text-blue-500
               >
                 {notification.action.label}
               </button>
             </div>
           )}
         </div>
-        <div className= 'ml-4 flex-shrink-0'>
+        <div className='ml-4 flex-shrink-0'>
           <button>
-            type= 'button'
+            type= 'button
             onClick={onRemove}
-            className= 'inline-flex text-gray-400 hover:text-gray-600 focus:outline-none'
-            aria-label= '关闭通知'
-            title= '关闭通知'
+            className= 'inline-flex text-gray-400 hover:text-gray-600 focus:outline-none
+            aria-label= '关闭通知
+            title= '关闭通知
           >
-            <X className= 'w-4 h-4'    />
+            <X className='w-4 h-4' />
           </button>
         </div>
       </div>

@@ -66,7 +66,7 @@ import { useCallback, useEffect, useState    } from 'react';import { ActivityIte
 
     const fullActivity: ActivityItem  = {
       ...activity,
-      id: `activity_${Date.now()}`,`
+      id: `activity_${Date.now()}`,
       timestamp: new Date().toISOString()
     };
     userStatsService.addActivity(user.id, fullActivity);

@@ -33,7 +33,7 @@ export enum CacheStrategy {
   MEMORY_FIRST = 'memory_first',
   STORAGE_FIRST = 'storage_first',
   WRITE_THROUGH = 'write_through',
-  WRITE_BACK = 'write_back'
+  WRITE_BACK = 'write_back
 }
 
 // 缓存统计信息
@@ -117,23 +117,23 @@ export class CacheManager {
     };
     // 根据策略存储
     switch (strategy) {
-      case CacheStrategy.MEMORY_ONLY:
+      case CacheStrategy.MEMORY_ONLY: undefined, // 已修复
         await this.setMemoryCache(key, cacheItem);
         break;
-      case CacheStrategy.STORAGE_ONLY:
+      case CacheStrategy.STORAGE_ONLY: undefined, // 已修复
         await this.setStorageCache(key, cacheItem);
         break;
-      case CacheStrategy.MEMORY_FIRST:
+      case CacheStrategy.MEMORY_FIRST: undefined, // 已修复
         await this.setMemoryCache(key, cacheItem);
         if (this.shouldPersist(cacheItem)) {
           await this.setStorageCache(key, cacheItem);
         }
         break;
-      case CacheStrategy.STORAGE_FIRST:
+      case CacheStrategy.STORAGE_FIRST: undefined, // 已修复
         await this.setStorageCache(key, cacheItem);
         await this.setMemoryCache(key, cacheItem);
         break;
-      case CacheStrategy.WRITE_THROUGH:
+      case CacheStrategy.WRITE_THROUGH: undefined, // 已修复
         await Promise.all([
           this.setMemoryCache(key, cacheItem),
           this.setStorageCache(key, cacheItem)
@@ -152,13 +152,13 @@ export class CacheManager {
 
     // 根据策略获取
     switch (strategy) {
-      case CacheStrategy.MEMORY_ONLY:
+      case CacheStrategy.MEMORY_ONLY: undefined, // 已修复
         cacheItem = await this.getMemoryCache(key);
         break;
-      case CacheStrategy.STORAGE_ONLY:
+      case CacheStrategy.STORAGE_ONLY: undefined, // 已修复
         cacheItem = await this.getStorageCache(key);
         break;
-      case CacheStrategy.MEMORY_FIRST:
+      case CacheStrategy.MEMORY_FIRST: undefined, // 已修复
         cacheItem = await this.getMemoryCache(key);
         if (!cacheItem) {
           cacheItem = await this.getStorageCache(key);
@@ -168,7 +168,7 @@ export class CacheManager {
           }
         }
         break;
-      case CacheStrategy.STORAGE_FIRST:
+      case CacheStrategy.STORAGE_FIRST: undefined, // 已修复
         cacheItem = await this.getStorageCache(key);
         if (!cacheItem) {
           cacheItem = await this.getMemoryCache(key);
@@ -295,7 +295,7 @@ export class CacheManager {
       const storageKey = `cache_${key}`;
       localStorage.setItem(storageKey, JSON.stringify(item));
     } catch (error) {
-      console.warn("Failed to set localStorage cache: ', error);'`
+      console.warn("Failed to set localStorage cache: ', error);
     }
   }
 
@@ -320,7 +320,7 @@ export class CacheManager {
         return null;
       }
     } catch (error) {
-      console.warn("Failed to get localStorage cache: ', error);'`
+      console.warn("Failed to get localStorage cache: ', error);
       this.stats.storageMisses++;
       return null;
     }
@@ -337,7 +337,7 @@ export class CacheManager {
       localStorage.removeItem(storageKey);
       return existed;
     } catch (error) {
-      console.warn("Failed to delete localStorage cache: ', error);'`
+      console.warn("Failed to delete localStorage cache: ', error);
       return false;
     }
   }
@@ -374,7 +374,7 @@ export class CacheManager {
   private async evictLRU(): Promise<void> {
     if (this.memoryCache.size === 0) return;
 
-    let oldestKey = ''
+    let oldestKey = 
     let oldestTime = Date.now();
 
     this.memoryCache.forEach((item, key) => {

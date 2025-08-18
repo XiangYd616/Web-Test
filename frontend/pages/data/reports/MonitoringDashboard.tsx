@@ -3,7 +3,7 @@ interface MonitoringSite   {
   id: string;
   name: string;
   url: string;
-  status: 'online' | 'offline' | 'warning'
+  status: 'online' | 'offline' | 'warning
   responseTime: number;
   uptime: number;
   lastCheck: Date;
@@ -13,7 +13,7 @@ interface MonitoringSite   {
 const MonitoringDashboard: React.FC  = () => {
   
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState('");"
+  const [pageTitle, setPageTitle] = useState(');
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
@@ -24,7 +24,7 @@ const MonitoringDashboard: React.FC  = () => {
   // 页面可见性检测
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible') {'`"`
+      if (document.visibilityState === "visible') {'
         // 页面变为可见时刷新数据
         fetchData?.();
       }
@@ -32,13 +32,13 @@ const MonitoringDashboard: React.FC  = () => {
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
-      document.removeEventListener("visibilitychange', handleVisibilityChange);"
+      document.removeEventListener("visibilitychange', handleVisibilityChange);
     };
   }, [fetchData]);
   
   // 图表和数据可视化
   const [chartData, setChartData] = useState(null);
-  const [chartType, setChartType] = useState('line");"
+  const [chartType, setChartType] = useState('line");
   const processChartData = useCallback((rawData) => {
     if (!rawData) return null;
 
@@ -61,11 +61,11 @@ const MonitoringDashboard: React.FC  = () => {
     }
   }, [data, processChartData]);
   
-  const [feedback, setFeedback] = useState({ type: '', message: '' });
+  const [feedback, setFeedback] = useState({ type: ', message: ' });
   const showFeedback = (type, message, duration = 3000) => {
     setFeedback({ type, message });
     setTimeout(() => {
-      setFeedback({ type: '', message: '' });
+      setFeedback({ type: ', message: ' });
     }, duration);
   };
   
@@ -78,8 +78,8 @@ const MonitoringDashboard: React.FC  = () => {
   const [showAddSiteModal, setShowAddSiteModal] = useState(false);
   const [addingSite, setAddingSite] = useState(false);
   const [newSite, setNewSite] = useState({
-    name: '',
-    url: "',"
+    name: ',
+    url: ",
     interval: 5
   });
 
@@ -132,7 +132,7 @@ const MonitoringDashboard: React.FC  = () => {
 };
 
     setSites(prev => [...prev, site]);
-    setNewSite({ name: '', url: "', interval: 5 });"
+    setNewSite({ name: ', url: ", interval: 5 });
     setShowAddSiteModal(false);
     setAddingSite(false);
   };
@@ -142,49 +142,49 @@ const MonitoringDashboard: React.FC  = () => {
     
   if (state.isLoading || loading) {
     return (
-      <div className= 'space-y-4 p-6'>
-        <div className= 'animate-pulse'>
-          <div className= 'h-4 bg-gray-200 rounded w-3/4 mb-4'></div>
-          <div className= 'h-4 bg-gray-200 rounded w-1/2 mb-4'></div>
-          <div className= 'h-32 bg-gray-200 rounded mb-4'></div>
-          <div className= 'h-4 bg-gray-200 rounded w-2/3'></div>
+      <div className='space-y-4 p-6'>
+        <div className='animate-pulse'>
+          <div className='h-4 bg-gray-200 rounded w-3/4 mb-4'></div>
+          <div className='h-4 bg-gray-200 rounded w-1/2 mb-4'></div>
+          <div className='h-32 bg-gray-200 rounded mb-4'></div>
+          <div className='h-4 bg-gray-200 rounded w-2/3'></div>
         </div>
       </div>
     );
   }
 
   return (
-      <div className= 'space-y-4 p-6'>
-        <div className= 'animate-pulse'>
-          <div className= 'h-4 bg-gray-200 rounded w-3/4 mb-4'></div>
-          <div className= 'h-4 bg-gray-200 rounded w-1/2 mb-4'></div>
-          <div className= 'h-32 bg-gray-200 rounded mb-4'></div>
-          <div className= 'h-4 bg-gray-200 rounded w-2/3'></div>
+      <div className='space-y-4 p-6'>
+        <div className='animate-pulse'>
+          <div className='h-4 bg-gray-200 rounded w-3/4 mb-4'></div>
+          <div className='h-4 bg-gray-200 rounded w-1/2 mb-4'></div>
+          <div className='h-32 bg-gray-200 rounded mb-4'></div>
+          <div className='h-4 bg-gray-200 rounded w-2/3'></div>
         </div>
       </div>
     );
   }
 
-  return (<div className= 'min-h-screen bg-gray-900 p-6'>
-      <div className= 'max-w-7xl mx-auto'>
+  return (<div className='min-h-screen bg-gray-900 p-6'>
+      <div className='max-w-7xl mx-auto'>
         {/* 页面标题 */}
-        <div className= 'mb-8'>
-          <h1 className= 'text-3xl font-bold text-white mb-2'>监控面板</h1>
-          <p className= 'text-gray-400'>实时监控网站状态和性能</p>
+        <div className='mb-8'>
+          <h1 className='text-3xl font-bold text-white mb-2'>监控面板</h1>
+          <p className='text-gray-400'>实时监控网站状态和性能</p>
         </div>
 
         {/* 快速操作 */}
-        <div className= 'mb-8'>
-          <Card className= 'bg-gray-800/50 border-gray-700'>
-            <h2 className= 'text-lg font-semibold text-white mb-4'>快速操作</h2>
-            <div className= 'flex gap-4'>
+        <div className='mb-8'>
+          <Card className='bg-gray-800/50 border-gray-700'>
+            <h2 className='text-lg font-semibold text-white mb-4'>快速操作</h2>
+            <div className='flex gap-4'>
               <Button>
                 onClick={() => setShowAddSiteModal(true)}
-                className= 'bg-blue-600 hover:bg-blue-700'
+                className= 'bg-blue-600 hover:bg-blue-700
               >
                 添加新监控
               </Button>
-              <Button variant= 'outline' className= 'border-gray-600 text-gray-300'>
+              <Button variant= 'outline' className='border-gray-600 text-gray-300'>
                 导出报告
               </Button>
             </div>
@@ -192,31 +192,30 @@ const MonitoringDashboard: React.FC  = () => {
         </div>
 
         {/* 监控站点列表 */}
-        <div className= 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
           {sites.map(site => (
-            <Card key={site.id} className= 'bg-gray-800/50 border-gray-700'>
-              <div className= 'flex items-center justify-between mb-4'>
-                <h3 className= 'text-lg font-semibold text-white'>{site.name}</h3>
+            <Card key={site.id} className='bg-gray-800/50 border-gray-700'>
+              <div className='flex items-center justify-between mb-4'>
+                <h3 className='text-lg font-semibold text-white'>{site.name}</h3>
                 <StatusIndicator status={site.status === 'online' ? 'success' : 'error'}>
-                  size= 'sm'
-                   />
+                  size='sm' />
               </div>
-              <div className= 'space-y-2 text-sm'>
-                <div className= 'flex justify-between'>
-                  <span className= 'text-gray-400'>URL:</span>
-                  <span className= 'text-gray-300'>{site.url}</span>
+              <div className='space-y-2 text-sm'>
+                <div className='flex justify-between'>
+                  <span className='text-gray-400'>URL:</span>
+                  <span className='text-gray-300'>{site.url}</span>
                 </div>
-                <div className= 'flex justify-between'>
-                  <span className= 'text-gray-400'>响应时间:</span>
-                  <span className= 'text-gray-300'>{site.responseTime}ms</span>
+                <div className='flex justify-between'>
+                  <span className='text-gray-400'>响应时间:</span>
+                  <span className='text-gray-300'>{site.responseTime}ms</span>
                 </div>
-                <div className= 'flex justify-between'>
-                  <span className= 'text-gray-400'>可用性:</span>
-                  <span className= 'text-gray-300'>{site.uptime.toFixed(1)}%</span>
+                <div className='flex justify-between'>
+                  <span className='text-gray-400'>可用性:</span>
+                  <span className='text-gray-300'>{site.uptime.toFixed(1)}%</span>
                 </div>
-                <div className= 'flex justify-between'>
-                  <span className= 'text-gray-400'>最后检查:</span>
-                  <span className= 'text-gray-300'>
+                <div className='flex justify-between'>
+                  <span className='text-gray-400'>最后检查:</span>
+                  <span className='text-gray-300'>
                     {site.lastCheck.toLocaleTimeString()}
                   </span>
                 </div>
@@ -229,41 +228,38 @@ const MonitoringDashboard: React.FC  = () => {
         <Modal>
           isOpen={showAddSiteModal}
           onClose={() => setShowAddSiteModal(false)}
-          title= '添加监控站点'
+          title= '添加监控站点
         >
-          <div className= 'space-y-4'>
+          <div className='space-y-4'>
             <Input>
-              label= '站点名称'
+              label= '站点名称
               value={newSite.name}
               onChange={(e) => setNewSite(prev => ({ ...prev, name: e.target.value }))}
-              placeholder= '输入站点名称'
-            />
+              placeholder='输入站点名称' />
             <Input>
-              label= 'URL地址'
+              label= 'URL地址
               value={newSite.url}
               onChange={(e) => setNewSite(prev => ({ ...prev, url: e.target.value }))}
-              placeholder= 'https://example.com'
-            />
+              placeholder='https://example.com' />
             <Input>
-              label= '检查间隔(分钟)'
-              type= 'number'
+              label= '检查间隔(分钟)
+              type= 'number
               value={newSite.interval.toString()}
               onChange={(e) => setNewSite(prev => ({ ...prev, interval: parseInt(e.target.value) || 5 }))}
-              min= '1'
-              max= '60'
-            />
-            <div className= 'flex gap-3 pt-4'>
+              min= '1
+              max='60' />
+            <div className='flex gap-3 pt-4'>
               <Button>
                 onClick={handleAddSite}
                 disabled={!newSite.name || !newSite.url || addingSite}
-                className= 'bg-blue-600 hover:bg-blue-700'
+                className= 'bg-blue-600 hover:bg-blue-700
               >
                 {addingSite ? '添加中..." : "添加监控'}
               </Button>
               <Button>
-                variant= 'outline'
+                variant= 'outline
                 onClick={() => setShowAddSiteModal(false)}
-                className= 'border-gray-600 text-gray-300'
+                className= 'border-gray-600 text-gray-300
               >
                 取消
               </Button>

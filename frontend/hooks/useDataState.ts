@@ -10,7 +10,7 @@ export enum DataStatus {
   LOADING = 'loading',
   SUCCESS = 'success',
   ERROR = 'error',
-  EMPTY = 'empty'
+  EMPTY = 'empty
 }
 
 // 数据状态接口
@@ -60,7 +60,7 @@ const DEFAULT_CONFIG: Required<DataOperationConfig>  = {
   maxRetries: 3,
   retryDelay: 1000,
   enableCache: false,
-  cacheKey: '',
+  cacheKey: ',
   cacheTTL: 300,
   onSuccess: () => {},
   onError: () => {},
@@ -140,8 +140,8 @@ export function useDataState<T = any>(config: DataOperationConfig = {}): [
       const result = await apiErrorHandler.executeWithRetry(
         fetcher,
         {
-          requestId: finalConfig.cacheKey || `data_${Date.now()}`,`
-          operation: "data_fetch";`
+          requestId: finalConfig.cacheKey || `data_${Date.now()}`,
+          operation: "data_fetch";
         },
         {
           maxRetries: finalConfig.maxRetries,
@@ -177,8 +177,8 @@ export function useDataState<T = any>(config: DataOperationConfig = {}): [
     } catch (error) {
       // 处理错误
       const { error: apiError }  = await apiErrorHandler.handleError(error, {
-        requestId: finalConfig.cacheKey || `data_${Date.now()}`,`
-        operation: "data_fetch";`
+        requestId: finalConfig.cacheKey || `data_${Date.now()}`,
+        operation: "data_fetch";
       });
       updateState({
         status: DataStatus.ERROR,

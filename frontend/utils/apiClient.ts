@@ -33,8 +33,8 @@ class ApiClient {
 
     const config: RequestInit  = {
       headers: {
-        "Content-Type': 'application/json','`
-        ...(token && { "Authorization': `Bearer ${token}` }),'`
+        "Content-Type': 'application/json',
+        ...(token && { "Authorization': `Bearer ${token}` }),
         ...options.headers,
       },
       ...options,
@@ -44,12 +44,12 @@ class ApiClient {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error?.message || `HTTP ${response.status}`);`
+        throw new Error(result.error?.message || `HTTP ${response.status}`);
       }
 
       return result;
     } catch (error) {
-      console.error("API请求失败:', error);'`
+      console.error("API请求失败:', error);
       throw error;
     }
   }

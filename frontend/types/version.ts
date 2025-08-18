@@ -6,9 +6,9 @@
 
 // ==================== 版本信息 ====================
 
-export const DATA_MODEL_VERSION = '1.0.0'
-export const API_VERSION = 'v1'
-export const SCHEMA_VERSION = '2024.1'
+export const DATA_MODEL_VERSION = '1.0.0
+export const API_VERSION = 'v1
+export const SCHEMA_VERSION = '2024.1
 // ==================== 版本兼容性映射 ====================
 
 export interface VersionInfo     {
@@ -140,7 +140,7 @@ export class VersionChecker {
     while (currentVersion !== toVersion) {
       const nextVersion = typeInfo.migrationPath[currentVersion];
       if (!nextVersion) {
-        throw new Error(`No migration path from ${fromVersion} to ${toVersion} for type ${typeName}`);`
+        throw new Error(`No migration path from ${fromVersion} to ${toVersion} for type ${typeName}`);
       }
       path.push(nextVersion);
       currentVersion = nextVersion;
@@ -180,7 +180,7 @@ export class VersionedDataWrapper<T = any> {
   constructor(
     public readonly version: string,
     public readonly data: T,
-    public readonly metadata?: VersionedData<T>["metadata']'`
+    public readonly metadata?: VersionedData<T>["metadata']
   ) { }
 
   /**
@@ -190,7 +190,7 @@ export class VersionedDataWrapper<T = any> {
     return new VersionedDataWrapper(version, data, {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      source: 'client'
+      source: 'client
     });
   }
 
@@ -260,7 +260,7 @@ export class ApiVersionNegotiator {
     let negotiatedVersion = serverVersion;
 
     if (!compatible) {
-      errors.push(`Client version ${clientVersion} is not compatible with server version ${serverVersion}`);`
+      errors.push(`Client version ${clientVersion} is not compatible with server version ${serverVersion}`);
 
       // 尝试找到兼容的版本
       const compatibleVersion = supportedVersions.find(v =>
@@ -269,15 +269,15 @@ export class ApiVersionNegotiator {
 
       if (compatibleVersion) {
         negotiatedVersion = compatibleVersion;
-        warnings.push(`Using compatible version ${compatibleVersion} instead of ${serverVersion}`);`
+        warnings.push(`Using compatible version ${compatibleVersion} instead of ${serverVersion}`);
       }
     }
 
     // 检查版本差异
     if (VersionChecker.compareVersions(clientVersion, serverVersion) < 0) {
-      warnings.push(`Client version ${clientVersion} is older than server version ${serverVersion}`);`
+      warnings.push(`Client version ${clientVersion} is older than server version ${serverVersion}`);
     } else if (VersionChecker.compareVersions(clientVersion, serverVersion) > 0) {
-      warnings.push(`Client version ${clientVersion} is newer than server version ${serverVersion}`);`
+      warnings.push(`Client version ${clientVersion} is newer than server version ${serverVersion}`);
     }
 
     return {
@@ -307,14 +307,14 @@ export class TypeVersionRegistry {
    * 注册类型版本信息
    */
   static register(info: TypeVersionInfo): void {
-    this.registry.set(`${info.name}@${info.version}`, info);`
+    this.registry.set(`${info.name}@${info.version}`, info);
   }
 
   /**
    * 获取类型版本信息
    */
   static get(name: string, version: string): TypeVersionInfo | undefined {
-    return this.registry.get(`${name}@${version}`);`
+    return this.registry.get(`${name}@${version}`);
   }
 
   /**
@@ -347,8 +347,8 @@ export class TypeVersionRegistry {
    */
   static getVersions(name: string): string[] {
     return Array.from(this.registry.keys())
-      .filter(key => key.startsWith(`${name}@`))`
-      .map(key => key.split("@')[1])'`
+      .filter(key => key.startsWith(`${name}@`))
+      .map(key => key.split("@')[1])
       .sort((a, b) => VersionChecker.compareVersions(b, a)); // 降序排列
   }
 }
@@ -391,14 +391,14 @@ export class AutoMigrationSystem {
     for (const nextVersion of migrationPath) {
       const migration = this.findMigration(typeName, currentData.version, nextVersion);
       if (!migration) {
-        throw new Error(`No migration found from ${currentData.version} to ${nextVersion} for type ${typeName}`);`
+        throw new Error(`No migration found from ${currentData.version} to ${nextVersion} for type ${typeName}`);
       }
 
       const migratedData = migration.migrate(currentData.data);
 
       // 验证迁移结果
       if (migration.validate && !migration.validate(migratedData)) {
-        throw new Error(`Migration validation failed for ${typeName} from ${currentData.version} to ${nextVersion}`);`
+        throw new Error(`Migration validation failed for ${typeName} from ${currentData.version} to ${nextVersion}`);
       }
 
       currentData = {
@@ -407,7 +407,7 @@ export class AutoMigrationSystem {
         metadata: {
           ...currentData.metadata,
           updatedAt: new Date().toISOString(),
-          source: "migration";`
+          source: "migration";
         }
       };
     }
@@ -463,7 +463,7 @@ export class CompatibilityChecker {
     const compatible = VersionChecker.isCompatible(clientVersion, serverVersion);
 
     if (!compatible) {
-      errors.push(`Client version ${clientVersion} is not compatible with server version ${serverVersion}`);`
+      errors.push(`Client version ${clientVersion} is not compatible with server version ${serverVersion}`);
     }
 
     // 检查端点兼容性（简化实现）
@@ -476,7 +476,7 @@ export class CompatibilityChecker {
     });
 
     if (VersionChecker.compareVersions(clientVersion, serverVersion) < 0) {
-      warnings.push(`Client version ${clientVersion} is older than server version ${serverVersion}. Some features may not be available.`);`
+      warnings.push(`Client version ${clientVersion} is older than server version ${serverVersion}. Some features may not be available.`);
     }
 
     return {
@@ -505,7 +505,7 @@ export class CompatibilityChecker {
       const serverVersion = serverModels[modelName];
 
       if (!serverVersion) {
-        warnings.push(`Model ${modelName} not found on server`);`
+        warnings.push(`Model ${modelName} not found on server`);
         continue;
       }
 
@@ -538,10 +538,10 @@ export const autoMigrationSystem = new AutoMigrationSystem();
 
 // 注册默认的类型版本信息
 TypeVersionRegistry.register({
-  name: "User','`
+  name: "User',
   version: '1.0.0',
   validator: (data: any) => {
-    return data && typeof data.id === 'string' && typeof data.email === 'string'
+    return data && typeof data.id === 'string' && typeof data.email === 'string
   }
 });
 
@@ -549,7 +549,7 @@ TypeVersionRegistry.register({
   name: 'TestResult',
   version: '1.0.0',
   validator: (data: any) => {
-    return data && typeof data.id === 'string' && typeof data.testType === 'string'
+    return data && typeof data.id === 'string' && typeof data.testType === 'string
   }
 });
 
@@ -557,6 +557,6 @@ TypeVersionRegistry.register({
   name: 'ApiResponse',
   version: '1.0.0',
   validator: (data: any) => {
-    return data && typeof data.success === 'boolean'
+    return data && typeof data.success === 'boolean
   }
 });

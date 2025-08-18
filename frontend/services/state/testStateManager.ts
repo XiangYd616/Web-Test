@@ -5,9 +5,9 @@
 
 export interface TestState     {
   id: string;
-  type: 'performance' | 'security' | 'seo' | 'stress' | 'api' | 'compatibility'
+  type: 'performance' | 'security' | 'seo' | 'stress' | 'api' | 'compatibility
   url: string;
-  status: 'idle' | 'pending' | 'running' | 'completed' | 'failed' | 'cancelled'
+  status: 'idle' | 'pending' | 'running' | 'completed' | 'failed' | 'cancelled
   progress: number;
   startTime?: Date;
   endTime?: Date;
@@ -33,7 +33,7 @@ export interface StateChangeListener     {
 class TestStateManager {
   private state: GlobalTestState;
   private listeners: Set<StateChangeListener> = new Set();
-  private storageKey = 'test-state'
+  private storageKey = 'test-state
   constructor() {
     this.state = {
       activeTests: new Map(),
@@ -108,7 +108,7 @@ class TestStateManager {
     this.updateState(state => {
       const testToUpdate = state.activeTests.get(testId);
       if (testToUpdate) {
-        testToUpdate.status = 'running'
+        testToUpdate.status = 'running
         testToUpdate.startTime = new Date();
         testToUpdate.progress = 0;
         state.currentTest = testToUpdate;
@@ -150,7 +150,7 @@ class TestStateManager {
     this.updateState(state => {
       const testToUpdate = state.activeTests.get(testId);
       if (testToUpdate) {
-        testToUpdate.status = 'completed'
+        testToUpdate.status = 'completed
         testToUpdate.endTime = new Date();
         testToUpdate.duration = testToUpdate.endTime.getTime() - (testToUpdate.startTime?.getTime() || 0);
         testToUpdate.progress = 100;
@@ -184,7 +184,7 @@ class TestStateManager {
     this.updateState(state => {
       const testToUpdate = state.activeTests.get(testId);
       if (testToUpdate) {
-        testToUpdate.status = 'failed'
+        testToUpdate.status = 'failed
         testToUpdate.endTime = new Date();
         testToUpdate.duration = testToUpdate.endTime.getTime() - (testToUpdate.startTime?.getTime() || 0);
         testToUpdate.error = error;
@@ -220,7 +220,7 @@ class TestStateManager {
       // 从活跃测试中移除
       if (state.activeTests.has(testId)) {
         const testToUpdate = state.activeTests.get(testId)!;
-        testToUpdate.status = 'cancelled'
+        testToUpdate.status = 'cancelled
         testToUpdate.endTime = new Date();
         testToUpdate.duration = testToUpdate.endTime.getTime() - (testToUpdate.startTime?.getTime() || 0);
 
@@ -232,7 +232,7 @@ class TestStateManager {
       const queueIndex = state.queuedTests.findIndex(t => t.id === testId);
       if (queueIndex !== -1) {
         const queuedTest = state.queuedTests[queueIndex];
-        queuedTest.status = 'cancelled'
+        queuedTest.status = 'cancelled
         state.testHistory.unshift({ ...queuedTest });
         state.queuedTests.splice(queueIndex, 1);
       }

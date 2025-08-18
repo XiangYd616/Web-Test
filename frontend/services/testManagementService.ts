@@ -4,10 +4,10 @@ export interface TestTemplate {
   id: string;
   name: string;
   description: string;
-  category: 'performance' | 'security' | 'seo' | 'accessibility' | 'api'
+  category: 'performance' | 'security' | 'seo' | 'accessibility' | 'api
   configuration: {
     url?: string;
-    method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+    method?: 'GET' | 'POST' | 'PUT' | 'DELETE
     headers?: Record<string, string>;
     body?: any;
     timeout?: number;
@@ -29,7 +29,7 @@ export interface TestExecution {
   id: string;
   testId: string;
   templateId?: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled'
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled
   progress: number;
   startTime: string;
   endTime?: string;
@@ -248,9 +248,9 @@ class TestManagementService {
   }
 
   async getTestTrends(params: {
-    metric: 'count' | 'success_rate' | 'avg_duration'
-    timeRange: '24h' | '7d' | '30d' | '90d'
-    granularity: 'hour' | 'day' | 'week'
+    metric: 'count' | 'success_rate' | 'avg_duration
+    timeRange: '24h' | '7d' | '30d' | '90d
+    granularity: 'hour' | 'day' | 'week
   }): Promise<Array<{
     timestamp: string;
     value: number;

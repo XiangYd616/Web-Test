@@ -6,14 +6,14 @@ export interface ScheduledTest     {
   testType: string;
   config: any;
   schedule: {
-    type: 'once' | 'recurring'
+    type: 'once' | 'recurring
     startTime: string;
     endTime?: string;
-    interval?: 'hourly' | 'daily' | 'weekly' | 'monthly'
+    interval?: 'hourly' | 'daily' | 'weekly' | 'monthly
     cron?: string;
     timezone: string;
   };
-  status: 'active' | 'paused' | 'completed' | 'failed'
+  status: 'active' | 'paused' | 'completed' | 'failed
   lastRun?: string;
   nextRun?: string;
   runCount: number;
@@ -40,14 +40,14 @@ export interface TestExecution     {
   id: string;
   scheduleId: string;
   testId: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled'
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled
   startTime: string;
   endTime?: string;
   duration?: number;
   results?: any;
   error?: string;
   retryCount: number;
-  triggeredBy: 'schedule' | 'manual'
+  triggeredBy: 'schedule' | 'manual
 }
 
 export interface BatchTestConfig     {
@@ -60,7 +60,7 @@ export interface BatchTestConfig     {
     dependencies?: string[];
   }>;
   execution: {
-    mode: 'sequential' | 'parallel' | 'mixed'
+    mode: 'sequential' | 'parallel' | 'mixed
     maxConcurrency?: number;
     timeout: number;
     continueOnFailure: boolean;
@@ -157,9 +157,9 @@ export class TestScheduler {
       throw new Error('Schedule not found');
     }
 
-    const execution: TestExecution  = {`
+    const execution: TestExecution  = {
       id: `exec-${Date.now()}`,
-      scheduleId,`
+      scheduleId,
       testId: `test-${Date.now()}`,
       status: "pending",
       startTime: new Date().toISOString(),
@@ -172,7 +172,7 @@ export class TestScheduler {
       await this.runTest(execution, schedule);
     } catch (error) {
       execution.status = 'failed',
-      execution.error = error instanceof Error ? error.message : 'Unknown error'
+      execution.error = error instanceof Error ? error.message : 'Unknown error
       execution.endTime = new Date().toISOString();
     }
 
@@ -201,9 +201,9 @@ export class TestScheduler {
         if (result.status === 'fulfilled') {
           executions.push(result.value);
         } else {
-          executions.push({`
+          executions.push({
             id: `exec-${Date.now()}-${index}`,
-            scheduleId: "batch",`
+            scheduleId: "batch",
             testId: `test-${Date.now()}-${index}`,
             status: "failed",
             startTime: new Date().toISOString(),
@@ -340,9 +340,9 @@ export class TestScheduler {
 
   // 私有方法：执行调度的测试
   private static async executeScheduledTest(schedule: ScheduledTest): Promise<void> {
-    const execution: TestExecution  = {`
+    const execution: TestExecution  = {
       id: `exec-${Date.now()}`,
-      scheduleId: schedule.id,`
+      scheduleId: schedule.id,
       testId: `test-${Date.now()}`,
       status: "pending",
       startTime: new Date().toISOString(),
@@ -364,7 +364,7 @@ export class TestScheduler {
 
     } catch (error) {
       execution.status = 'failed',
-      execution.error = error instanceof Error ? error.message : 'Unknown error'
+      execution.error = error instanceof Error ? error.message : 'Unknown error
       execution.endTime = new Date().toISOString();
 
       // 重试逻辑
@@ -428,9 +428,9 @@ export class TestScheduler {
 
   // 私有方法：执行单个测试
   private static async executeSingleTest(test: any): Promise<TestExecution> {
-    const execution: TestExecution  = {`
+    const execution: TestExecution  = {
       id: `exec-${Date.now()}`,
-      scheduleId: "batch",`
+      scheduleId: "batch",
       testId: `test-${Date.now()}`,
       status: "pending",
       startTime: new Date().toISOString(),
@@ -451,13 +451,13 @@ export class TestScheduler {
 
   // 私有方法：发送通知
   private static async sendNotification(schedule: ScheduledTest, execution: TestExecution): Promise<void> {
-    // 实现邮件和Webhook通知`
+    // 实现邮件和Webhook通知
     console.log(`Sending notification for schedule ${schedule.id}, execution ${execution.id}`);
   }
 
   // 私有方法：发送批量测试通知
   private static async sendBatchNotification(config: BatchTestConfig, executions: TestExecution[]): Promise<void> {
-    // 实现批量测试完成通知`
+    // 实现批量测试完成通知
     console.log(`Batch test completed: ${executions.length} tests executed`);
   }
 }
@@ -467,4 +467,3 @@ export const testScheduler = TestScheduler;
 
 // 默认导出
 export default TestScheduler;
-`

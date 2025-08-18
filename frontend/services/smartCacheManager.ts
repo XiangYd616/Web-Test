@@ -9,7 +9,7 @@ export interface CacheEntry<T = any>     {
   ttl: number;
   accessCount: number;
   lastAccessed: number;
-  priority: 'high' | 'medium' | 'low'
+  priority: 'high' | 'medium' | 'low
   size: number;
   tags: string[];
 }
@@ -18,7 +18,7 @@ export interface CacheStrategy     {
   name: string;
   maxSize: number;
   defaultTTL: number;
-  evictionPolicy: 'lru' | 'lfu' | 'ttl' | 'priority'
+  evictionPolicy: 'lru' | 'lfu' | 'ttl' | 'priority
   compressionEnabled: boolean;
   persistToDisk: boolean;
 }
@@ -88,7 +88,7 @@ class SmartCacheManager {
     options: {
       strategy?: string;
       ttl?: number;
-      priority?: 'high' | 'medium' | 'low'
+      priority?: 'high' | 'medium' | 'low
       tags?: string[];
     } = {}
   ): void {
@@ -101,7 +101,7 @@ class SmartCacheManager {
 
     const strategyConfig = this.strategies.get(strategy);
     if (!strategyConfig) {
-      throw new Error(`Unknown cache strategy: ${strategy}`);`
+      throw new Error(`Unknown cache strategy: ${strategy}`);
     }
 
     const size = this.calculateSize(data);
@@ -267,7 +267,7 @@ class SmartCacheManager {
    * 检查数据是否被压缩
    */
   private isCompressed(data: any): boolean {
-    return typeof data === "string";`
+    return typeof data === "string";
   }
 
   /**
@@ -275,9 +275,9 @@ class SmartCacheManager {
    */
   private persistToDisk(key: string, entry: CacheEntry): void {
     try {
-      localStorage.setItem(`cache_${key}`, JSON.stringify(entry));`
+      localStorage.setItem(`cache_${key}`, JSON.stringify(entry));
     } catch (error) {
-      console.warn("Failed to persist cache to disk: ', error);'`
+      console.warn("Failed to persist cache to disk: ', error);
     }
   }
 
@@ -286,9 +286,9 @@ class SmartCacheManager {
    */
   private removeFromDisk(key: string): void {
     try {
-      localStorage.removeItem(`cache_${key}`);`
+      localStorage.removeItem(`cache_${key}`);
     } catch (error) {
-      console.warn("Failed to remove cache from disk:', error);'`
+      console.warn("Failed to remove cache from disk:', error);
     }
   }
 

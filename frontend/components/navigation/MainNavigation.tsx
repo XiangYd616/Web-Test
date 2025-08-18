@@ -11,7 +11,7 @@ import React, { useState    } from 'react';import { Link, useLocation    } from 
  }
 
 export const MainNavigation: React.FC<MainNavigationProps> = ({
-  className ='',;
+  className =',;
   items,;
   logo,;
   onMenuToggle;
@@ -55,12 +55,12 @@ export const MainNavigation: React.FC<MainNavigationProps> = ({
               // 调用登出逻辑
             }
           }}
-          className={ `nav-item nav-button ${isActive ? 'active' : "' }`}'`"`
+          className={ `nav-item nav-button ${isActive ? 'active' : " }`}'
         >
-          {item.icon && <span className="nav-icon'>{item.icon}</span>}'`"`
+          {item.icon && <span className="nav-icon'>{item.icon}</span>}'
           <span className='nav-label'>{item.label}</span>
           {item.badge && (
-            <span className={`nav-badge nav-badge--${item.badge.variant}`}>`
+            <span className={`nav-badge nav-badge--${item.badge.variant}`}>
               {item.badge.text}
             </span>
           )}
@@ -69,8 +69,8 @@ export const MainNavigation: React.FC<MainNavigationProps> = ({
     }
 
     if (hasChildren) {
-      return (<div key={index} className={ `nav-item nav-dropdown ${isActive ? 'active' : "' }`}>`'"`
-          <button className="nav-dropdown-toggle'>`;'"`
+      return (<div key={index} className={ `nav-item nav-dropdown ${isActive ? 'active' : " }`}>`
+          <button className="nav-dropdown-toggle'>`;
             {item.icon && <span className='nav-icon'>{item.icon}</span>}
             <span className='nav-label'>{item.label}</span>
             <span className='nav-arrow'>▼</span>
@@ -81,14 +81,14 @@ export const MainNavigation: React.FC<MainNavigationProps> = ({
                 key={childIndex}
                 to={child.path || '#'}
                 className={`nav-dropdown-item ${`}
-                  location.pathname === child.path ? "active' : "";`'"`
-                }`}`
+                  location.pathname === child.path ? "active' : ";'
+                }`}
                 target={ child.external ? child.target : undefined }
               >
-                {child.icon && <span className="nav-icon'>{child.icon}</span>}'`"`
+                {child.icon && <span className="nav-icon'>{child.icon}</span>}'
                 <span className='nav-label'>{child.label}</span>
                 {child.badge && (
-                  <span className={`nav-badge nav-badge--${child.badge.variant}`}>`
+                  <span className={`nav-badge nav-badge--${child.badge.variant}`}>
                     {child.badge.text}
                   </span>
                 )}
@@ -102,14 +102,14 @@ export const MainNavigation: React.FC<MainNavigationProps> = ({
     return (;
       <Link
         key={index}
-        to={item.path || "#'}'`"`
-        className={ `nav-item nav-link ${isActive ? 'active' : '' }`}'`'`
+        to={item.path || "#'}'
+        className={ `nav-item nav-link ${isActive ? 'active' : ' }`}'
         target={ item.external ? item.target : undefined }
       >
-        {item.icon && <span className="nav-icon'>{item.icon}</span>}'`"`
+        {item.icon && <span className="nav-icon'>{item.icon}</span>}'
         <span className='nav-label'>{item.label}</span>
         {item.badge && (
-          <span className={`nav-badge nav-badge--${item.badge.variant}`}>`
+          <span className={`nav-badge nav-badge--${item.badge.variant}`}>
             {item.badge.text}
           </span>
         )}
@@ -118,8 +118,8 @@ export const MainNavigation: React.FC<MainNavigationProps> = ({
   };
 
   return (;
-    <nav className={`main-navigation ${className}`}>`
-      <div className="nav-container'>`;'"`
+    <nav className={`main-navigation ${className}`}>
+      <div className="nav-container'>`;
         {/* Logo */}
         <div className='nav-brand'>
           {logo || (
@@ -136,9 +136,9 @@ export const MainNavigation: React.FC<MainNavigationProps> = ({
 
         {/* Mobile Menu Toggle */}
         <button
-          className='nav-mobile-toggle'
+          className='nav-mobile-toggle
           onClick={handleMobileMenuToggle}
-          aria-label='Toggle mobile menu'
+          aria-label='Toggle mobile menu
         >
           <span className='hamburger-line'></span>
           <span className='hamburger-line'></span>

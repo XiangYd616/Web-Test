@@ -19,7 +19,7 @@ import { useState, useCallback    } from 'react';import { useAuth    } from '../
 
     try {
       const executionId = await executeAsync(() => testFlowManager.startTest(config),
-        { context: "BusinessFlow.executeTest' }'`
+        { context: "BusinessFlow.executeTest' }
       );
 
       return executionId;
@@ -40,28 +40,28 @@ import { useState, useCallback    } from 'react';import { useAuth    } from '../
     try {
       let result;
       switch (operation) {
-        case "query': ''`
+        case "query': '
           result = await executeAsync(() => dataFlowManager.queryData(data as DataQuery),
             { context: 'BusinessFlow.queryData' }
           );
           break;
-        case 'create': ''
+        case 'create': 
           result = await executeAsync(() => dataFlowManager.createData(data),
             { context: 'BusinessFlow.createData' }
           );
           break;
-        case 'update': ''
+        case 'update': 
           result = await executeAsync(() => dataFlowManager.updateData(data.id, data),
             { context: 'BusinessFlow.updateData' }
           );
           break;
-        case 'delete': ''
+        case 'delete': 
           result = await executeAsync(() => dataFlowManager.deleteData(data.id),
             { context: 'BusinessFlow.deleteData' }
           );
           break;
-        default:
-          throw new Error(`不支持的操作: ${operation}`);`
+        default: undefined, // 已修复
+          throw new Error(`不支持的操作: ${operation}`);
       }
 
       return result;
@@ -91,7 +91,7 @@ import { useState, useCallback    } from 'react';import { useAuth    } from '../
     isFlowActive,
 
     // 流程状态检查
-    isTestFlowActive: () => isFlowActive("test'),'`
+    isTestFlowActive: () => isFlowActive("test'),
     isDataFlowActive: () => isFlowActive('data'),
     hasActiveFlows: () => activeFlows.length > 0
   };

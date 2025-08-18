@@ -10,4 +10,4 @@ const SecurityTest: React.FC<SecurityTestProps> = (props) => {
     </div>
   );
 };
-export default SecurityTest;'"
+export default SecurityTest;

@@ -91,7 +91,7 @@ export class TestSuite {
       failed,
       passRate: total > 0 ? (passed / total * 100).toFixed(2) : '0',
       totalDuration: totalDuration.toFixed(2),
-      avgDuration: total > 0 ? (totalDuration / total).toFixed(2) : '0'
+      avgDuration: total > 0 ? (totalDuration / total).toFixed(2) : '0
     };
   }
 }
@@ -191,9 +191,9 @@ export class PerformanceTester {
     const renderTime = measure ? measure.duration : 0;
 
     return {
-      metric: `${componentName} Render Time`,`
+      metric: `${componentName} Render Time`,
       value: renderTime,
-      unit: "ms','`
+      unit: "ms',
       threshold: this.thresholds.renderTime,
       passed: renderTime <= this.thresholds.renderTime
     };
@@ -259,7 +259,7 @@ export class UXTester {
     const inputs = form.querySelectorAll('input[required]");
     if (inputs.length > 0) {
       const firstInput = inputs[0] as HTMLInputElement;
-      firstInput.value = ''
+      firstInput.value = 
       firstInput.blur();
     }
 
@@ -329,11 +329,11 @@ export class APITester {
       const duration = performance.now() - startTime;
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);`
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
       return {
-        name: `API Response: ${url}`,`
+        name: `API Response: ${url}`,
         passed: true,
         duration,
         details: {
@@ -345,7 +345,7 @@ export class APITester {
     } catch (error) {
       const duration = performance.now() - startTime;
       return {
-        name: `API Response: ${url}`,`
+        name: `API Response: ${url}`,
         passed: false,
         duration,
         error: error instanceof Error ? error.message : String(error)
@@ -361,9 +361,9 @@ export class APITester {
 
     try {
       // 故意发送错误请求
-      const response = await fetch(url + "/nonexistent', {'`
+      const response = await fetch(url + "/nonexistent', {
         method: 'POST',
-        body: 'invalid data'
+        body: 'invalid data
       });
 
       const duration = performance.now() - startTime;
@@ -372,7 +372,7 @@ export class APITester {
       const hasErrorResponse = !response.ok;
 
       return {
-        name: `Error Handling: ${url}`,`
+        name: `Error Handling: ${url}`,
         passed: hasErrorResponse,
         duration,
         details: {
@@ -384,7 +384,7 @@ export class APITester {
     } catch (error) {
       const duration = performance.now() - startTime;
       return {
-        name: `Error Handling: ${url}`,`
+        name: `Error Handling: ${url}`,
         passed: true, // 网络错误也是正确的错误处理
         duration,
         details: {
@@ -413,7 +413,7 @@ export class TestRunner {
     api: TestResult[];
     summary: any;
   }> {
-    console.log("🧪 开始运行完整测试套件...");`
+    console.log("🧪 开始运行完整测试套件...");
 
     try {
       // 性能测试

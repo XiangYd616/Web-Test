@@ -1,9 +1,9 @@
 
-import { PERFORMANCE_CONFIG_PRESETS, PerformanceTestProgress, PerformanceTestResult, PerformanceConfig    } from '../../types/performance';import { performanceTestCore    } from './performanceTestCore';// ==================== 兼容性接口定义 ==================== ''
+import { PERFORMANCE_CONFIG_PRESETS, PerformanceTestProgress, PerformanceTestResult, PerformanceConfig    } from '../../types/performance';import { performanceTestCore    } from './performanceTestCore';// ==================== 兼容性接口定义 ==================== 
 // 兼容旧的性能测试配置接口
 export interface LegacyPerformanceTestConfig     {
   url: string;
-  mode: 'basic' | 'standard' | 'comprehensive' | 'lighthouse'
+  mode: 'basic' | 'standard' | 'comprehensive' | 'lighthouse
   checkPageSpeed: boolean;
   checkCoreWebVitals: boolean;
   checkResourceOptimization: boolean;
@@ -14,7 +14,7 @@ export interface LegacyPerformanceTestConfig     {
   checkCSSOptimization: boolean;
   checkMobilePerformance: boolean;
   checkAccessibility: boolean;
-  device: 'desktop' | 'mobile' | 'both'
+  device: 'desktop' | 'mobile' | 'both
 }
 
 // 兼容旧的测试进度接口
@@ -51,7 +51,7 @@ export class PerformanceTestAdapter {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
@@ -105,8 +105,8 @@ export class PerformanceTestAdapter {
   static async runWebsitePerformanceTest(
     url: string,
     options: {
-      device?: "desktop' | 'mobile' | 'both";`
-      level?: 'basic' | 'standard' | 'comprehensive'
+      device?: "desktop' | 'mobile' | 'both";
+      level?: 'basic' | 'standard' | 'comprehensive
       includeAccessibility?: boolean;
     } = {}
   ): Promise<any> {
@@ -119,7 +119,7 @@ export class PerformanceTestAdapter {
       caching: true,
       compression: true,
       imageOptimization: true,
-      mobilePerformance: options.device !== 'desktop'
+      mobilePerformance: options.device !== 'desktop
     };
     const result = await performanceTestCore.runPerformanceTest(url, config);
 
@@ -155,7 +155,7 @@ export class PerformanceTestAdapter {
   static async runSEOPerformanceTest(
     url: string,
     options: {
-      device?: 'desktop' | 'mobile' | 'both'
+      device?: 'desktop' | 'mobile' | 'both
       checkMobile?: boolean;
     } = {}
   ): Promise<any> {
@@ -184,7 +184,7 @@ export class PerformanceTestAdapter {
         mobileScore: result.mobilePerformance?.score || null
       },
       issues: result.issues.filter(issue =>
-        issue.type === 'speed' || issue.type === 'size'
+        issue.type === 'speed' || issue.type === 'size
       ).map(issue => ({
         type: 'performance',
         severity: issue.severity,
@@ -226,7 +226,7 @@ export class PerformanceTestAdapter {
       ttfb: result.pageSpeed?.ttfb || 0,
       score: result.overallScore,
       issues: result.issues.filter(issue =>
-        issue.type === 'speed'
+        issue.type === 'speed
       ).map(issue => ({
         type: 'slow_response',
         severity: issue.severity,
@@ -303,7 +303,7 @@ export class PerformanceTestAdapter {
 
 export async function quickPerformanceTest(
   url: string,
-  level: 'basic' | 'standard' | 'comprehensive' = 'standard'
+  level: 'basic' | 'standard' | 'comprehensive' = 'standard
 ): Promise<any> {
   const config = PERFORMANCE_CONFIG_PRESETS[level];
   const result = await performanceTestCore.runPerformanceTest(url, config);
@@ -315,7 +315,7 @@ export async function getPerformanceMetrics(
   options: {
     includeVitals?: boolean;
     includeMobile?: boolean;
-    device?: 'desktop' | 'mobile' | 'both'
+    device?: 'desktop' | 'mobile' | 'both
   } = {}
 ): Promise<{
   loadTime: number;

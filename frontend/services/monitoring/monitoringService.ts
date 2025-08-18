@@ -3,7 +3,7 @@ export interface MonitoringSite     {
   id: string;
   url: string;
   name: string;
-  status: 'online' | 'offline' | 'warning' | 'maintenance'
+  status: 'online' | 'offline' | 'warning' | 'maintenance
   responseTime: number;
   uptime: number;
   lastCheck: string;
@@ -37,8 +37,8 @@ export interface AlertRule     {
   id: string;
   name: string;
   siteId: string;
-  condition: 'response_time' | 'status_code' | 'uptime' | 'ssl_expiry'
-  operator: '>' | '<' | '= ' | '!= '
+  condition: 'response_time' | 'status_code' | 'uptime' | 'ssl_expiry
+  operator: '>' | '<' | '= ' | '!= 
   threshold: number;
   enabled: boolean;
   notifications: ('email' | 'webhook' | 'sms')[];
@@ -66,12 +66,12 @@ class MonitoringService {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
   }
-  private baseUrl = "http://localhost:3001/api";`
+  private baseUrl = "http://localhost:3001/api";
   private monitoringInterval: NodeJS.Timeout | null = null;
   private sites: MonitoringSite[] = [];
   private alertRules: AlertRule[] = [];
@@ -84,7 +84,7 @@ class MonitoringService {
     const token = localStorage.getItem('auth_token");
     return {
       'Content-Type': 'application/json',
-      ...(token && { "Authorization': `Bearer ${token}` })'`
+      ...(token && { "Authorization': `Bearer ${token}` })
     };
   }
 
@@ -93,7 +93,7 @@ class MonitoringService {
    */
   async getSites(): Promise<MonitoringSite[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/monitoring/sites`, {`
+      const response = await fetch(`${this.baseUrl}/monitoring/sites`, {
         headers: this.getAuthHeaders()
       });
       const data = await response.json();
@@ -107,7 +107,7 @@ class MonitoringService {
         return this.getLocalSites();
       }
     } catch (error) {
-      console.warn("Backend not available, using local data: ', error);'`
+      console.warn("Backend not available, using local data: ', error);
       return this.getLocalSites();
     }
   }
@@ -128,8 +128,8 @@ class MonitoringService {
       ...siteData
     };
     try {
-      const response = await fetch(`${this.baseUrl}/monitoring/sites`, {`
-        method: "POST','`
+      const response = await fetch(`${this.baseUrl}/monitoring/sites`, {
+        method: "POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newSite)
       });
@@ -141,7 +141,7 @@ class MonitoringService {
         return data.data;
       }
     } catch (error) {
-      console.warn("Backend not available, using local storage: ', error);'
+      console.warn("Backend not available, using local storage: ', error);
     }
 
     // 本地存储
@@ -161,8 +161,8 @@ class MonitoringService {
    */
   async removeSite(siteId: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/monitoring/sites/${siteId}`, {`
-        method: "DELETE";`
+      const response = await fetch(`${this.baseUrl}/monitoring/sites/${siteId}`, {
+        method: "DELETE";
       });
 
       if (response.ok) {
@@ -240,7 +240,7 @@ class MonitoringService {
         connectTime: 0,
         downloadTime: 0,
         responseSize: 0,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error
       };
       // 更新站点状态为离线
       this.updateSiteStatus(site.id, {
@@ -305,7 +305,7 @@ class MonitoringService {
             });
           }
         } catch (error) {
-          console.error(`Error checking site ${site.url}:`, error);`
+          console.error(`Error checking site ${site.url}:`, error);
         }
 
         // 避免同时发送太多请求
@@ -344,7 +344,7 @@ class MonitoringService {
    */
   getMonitoringStats(): MonitoringStats {
     const totalSites = this.sites.length;
-    const onlineSites = this.sites.filter(site => site.status === "online').length;'`
+    const onlineSites = this.sites.filter(site => site.status === "online').length;
     const avgResponseTime = totalSites > 0
       ? this.sites.reduce((sum, site) => sum + site.responseTime, 0) / totalSites
       : 0;
@@ -389,13 +389,13 @@ class MonitoringService {
       let shouldAlert = false;
 
       switch (alert.condition) {
-        case 'response_time': ''
+        case 'response_time': 
           shouldAlert = this.evaluateCondition(data.responseTime, alert.operator, alert.threshold);
           break;
-        case 'status_code': ''
+        case 'status_code': 
           shouldAlert = this.evaluateCondition(data.status, alert.operator, alert.threshold);
           break;
-        case 'uptime': ''
+        case 'uptime': 
           shouldAlert = this.evaluateCondition(data.uptime, alert.operator, alert.threshold);
           break;
       }
@@ -423,7 +423,7 @@ class MonitoringService {
    * 私有方法：触发告警
    */
   private triggerAlert(alert: AlertRule, site: MonitoringSite, data: MonitoringData): void {
-    console.warn(`Alert triggered: ${alert.name} for site ${site.name}`, {`
+    console.warn(`Alert triggered: ${alert.name} for site ${site.name}`, {
       alert,
       site,
       data
@@ -441,7 +441,7 @@ class MonitoringService {
    */
   private getLocalSites(): MonitoringSite[] {
     try {
-      const stored = localStorage.getItem("monitoring_sites");`
+      const stored = localStorage.getItem("monitoring_sites");
       if (stored) {
         
         this.sites = JSON.parse(stored);

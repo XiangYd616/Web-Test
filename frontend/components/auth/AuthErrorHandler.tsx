@@ -10,4 +10,4 @@ const AuthErrorHandler: React.FC<AuthErrorHandlerProps> = (props) => {
     </div>
   );
 };
-export default AuthErrorHandler;'"
+export default AuthErrorHandler;

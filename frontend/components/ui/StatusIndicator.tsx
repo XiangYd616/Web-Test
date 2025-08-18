@@ -4,7 +4,7 @@ import React from 'react';import { AlertTriangle, CheckCircle, Clock, Loader, XC
   /** 状态文本 */
   text?: string;
   /** 尺寸 */
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg
   /** 是否显示图标 */
   showIcon?: boolean;
   /** 自定义类名 */
@@ -28,9 +28,9 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
   
   const ariaProps = {
     id: componentId,
-    "aria-label': ariaLabel,'`
+    "aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': ['']
+    'aria-describedby': [']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
@@ -50,42 +50,42 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
       color: 'text-green-400',
       bgColor: 'bg-green-500/20',
       borderColor: 'border-green-500/30',
-      dotColor: 'bg-green-500'
+      dotColor: 'bg-green-500
     },
     error: {
       icon: XCircle,
       color: 'text-red-400',
       bgColor: 'bg-red-500/20',
       borderColor: 'border-red-500/30',
-      dotColor: 'bg-red-500'
+      dotColor: 'bg-red-500
     },
     warning: {
       icon: AlertTriangle,
       color: 'text-yellow-400',
       bgColor: 'bg-yellow-500/20',
       borderColor: 'border-yellow-500/30',
-      dotColor: 'bg-yellow-500'
+      dotColor: 'bg-yellow-500
     },
     pending: {
       icon: Clock,
       color: 'text-gray-400',
       bgColor: 'bg-gray-500/20',
       borderColor: 'border-gray-500/30',
-      dotColor: 'bg-gray-500'
+      dotColor: 'bg-gray-500
     },
     loading: {
       icon: Loader,
       color: 'text-blue-400',
       bgColor: 'bg-blue-500/20',
       borderColor: 'border-blue-500/30',
-      dotColor: 'bg-blue-500'
+      dotColor: 'bg-blue-500
     },
     info: {
       icon: CheckCircle,
       color: 'text-blue-400',
       bgColor: 'bg-blue-500/20',
       borderColor: 'border-blue-500/30',
-      dotColor: 'bg-blue-500'
+      dotColor: 'bg-blue-500
     }
   };
 
@@ -98,19 +98,19 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
       icon: 'w-3 h-3',
       text: 'text-xs',
       padding: 'px-2 py-1',
-      dot: 'w-2 h-2'
+      dot: 'w-2 h-2
     },
     md: {
       icon: 'w-4 h-4',
       text: 'text-sm',
       padding: 'px-3 py-1.5',
-      dot: 'w-3 h-3'
+      dot: 'w-3 h-3
     },
     lg: {
       icon: 'w-5 h-5',
       text: 'text-base',
       padding: 'px-4 py-2',
-      dot: 'w-4 h-4'
+      dot: 'w-4 h-4
     }
   };
 
@@ -127,7 +127,7 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
             'rounded-full',
             sizeClasses.dot,
             config.dotColor,
-            status === 'loading' && 'animate-pulse'
+            status === 'loading' && 'animate-pulse
           )}
         />
         {text && (
@@ -154,7 +154,7 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
         <Icon className={cn(
             sizeClasses.icon,
             config.color,
-            status === 'loading' && 'animate-spin'
+            status === 'loading' && 'animate-spin
           )}
            />
       )}
@@ -169,11 +169,11 @@ export const StatusIndicator: React.FC<StatusIndicatorProps> = ({
 
 interface TestStatusIndicatorProps   {
   /** 测试状态 */
-  status: 'idle' | 'running' | 'completed' | 'failed' | 'cancelled'
+  status: 'idle' | 'running' | 'completed' | 'failed' | 'cancelled
   /** 自定义文本 */
   text?: string;
   /** 尺寸 */
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg
   /** 自定义类名 */
   className?: string;
 }
@@ -189,14 +189,14 @@ export const TestStatusIndicator: React.FC<TestStatusIndicatorProps> = ({
     running: 'loading',
     completed: 'success',
     failed: 'error',
-    cancelled: 'warning'
+    cancelled: 'warning
   };
   const defaultText = {
     idle: '待开始',
     running: '运行中',
     completed: '已完成',
     failed: '失败',
-    cancelled: '已取消'
+    cancelled: '已取消
   };
 
   return (
@@ -210,7 +210,7 @@ export const TestStatusIndicator: React.FC<TestStatusIndicatorProps> = ({
 
 interface ConnectionStatusIndicatorProps   {
   /** 连接状态 */
-  status: 'connected' | 'disconnected' | 'connecting' | 'error'
+  status: 'connected' | 'disconnected' | 'connecting' | 'error
   /** 自定义文本 */
   text?: string;
   /** 是否显示为圆点 */
@@ -229,20 +229,20 @@ export const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps>
     connected: 'success',
     disconnected: 'error',
     connecting: 'loading',
-    error: 'error'
+    error: 'error
   };
   const defaultText = {
     connected: '已连接',
     disconnected: '已断开',
     connecting: '连接中',
-    error: '连接错误'
+    error: '连接错误
   };
 
   return (
     <StatusIndicator status={statusMap[status]}
       text={text || defaultText[status]}
       dot={dot}
-      size= 'sm'
+      size= 'sm
       className={className}
        />
   );

@@ -24,13 +24,13 @@ import type { CreateUserData, UpdateUserData, User  } from '../types/user';class
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
   }
   private static instance: AdminService;
-  private baseURL = "/api/admin";``
+  private baseURL = "/api/admin";
   private constructor() { }
 
   static getInstance(): AdminService {
@@ -42,9 +42,9 @@ import type { CreateUserData, UpdateUserData, User  } from '../types/user';class
 
   // 获取认证令牌
   private getAuthToken(): string {
-    const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken");"
+    const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken");
     if (!token) {
-      throw new Error('未找到认证令牌，请重新登录");"
+      throw new Error('未找到认证令牌，请重新登录");
     }
     return token;
   }
@@ -57,8 +57,8 @@ import type { CreateUserData, UpdateUserData, User  } from '../types/user';class
     const url = `${this.baseURL}${endpoint}`;
 
     const defaultHeaders = {
-      "Content-Type': 'application/json','`"`
-      'Authorization': `Bearer ${this.getAuthToken()}`'`
+      "Content-Type': 'application/json','
+      'Authorization': `Bearer ${this.getAuthToken()}
     };
 
     const config: RequestInit  = {
@@ -74,25 +74,25 @@ import type { CreateUserData, UpdateUserData, User  } from '../types/user';class
       if (!response.ok) {
         if (response.status === 401) {
           // 认证失败，清除令牌并重定向到登录页
-          localStorage.removeItem("authToken");``
-          sessionStorage.removeItem('authToken");"
-          window.location.href = '/login'
-          throw new Error('认证失败，请重新登录");"
+          localStorage.removeItem("authToken");
+          sessionStorage.removeItem('authToken");
+          window.location.href = '/login
+          throw new Error('认证失败，请重新登录");
         }
 
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);`
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
 
       if (!result.success) {
-        throw new Error(result.error || "请求失败");``
+        throw new Error(result.error || "请求失败");
       }
 
       return result.data;
     } catch (error) {
-      console.error(`API请求失败 [${endpoint}]:`, error);`
+      console.error(`API请求失败 [${endpoint}]:`, error);
       throw error;
     }
   }
@@ -100,15 +100,15 @@ import type { CreateUserData, UpdateUserData, User  } from '../types/user';class
   // ==================== 系统统计 ====================
 
   async getSystemStats(): Promise<SystemStats> {
-    return this.apiRequest<SystemStats>("/stats");``
+    return this.apiRequest<SystemStats>("/stats");
   }
 
   async getSystemMonitor(): Promise<SystemMonitor> {
-    return this.apiRequest<SystemMonitor>('/monitor");"
+    return this.apiRequest<SystemMonitor>('/monitor");
   }
 
   async getTestHistory(): Promise<any[]> {
-    return this.apiRequest<any[]>('/test-history");"
+    return this.apiRequest<any[]>('/test-history");
   }
 
   // ==================== 用户管理 ====================
@@ -122,22 +122,22 @@ import type { CreateUserData, UpdateUserData, User  } from '../types/user';class
       if (filter.search) queryParams.append('search', filter.search);
       if (filter.emailVerified !== undefined) queryParams.append('email_verified', filter.emailVerified.toString());
       queryParams.append('page', page.toString());
-      queryParams.append("limit', limit.toString());"
+      queryParams.append("limit', limit.toString());
       const endpoint = `/users?${queryParams.toString()}`;
-      const response = await fetch(`${this.baseURL}${endpoint}`, {`
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
         headers: {
-          'Authorization': `Bearer ${this.getAuthToken()}`'`
+          'Authorization': `Bearer ${this.getAuthToken()}
         }
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
 
       if (!result.success) {
-        throw new Error(result.error || "获取用户列表失败");``
+        throw new Error(result.error || "获取用户列表失败");
       }
 
       return {
@@ -149,143 +149,143 @@ import type { CreateUserData, UpdateUserData, User  } from '../types/user';class
       console.error('获取用户列表失败:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : "获取用户列表失败"
+        error: error instanceof Error ? error.message : "获取用户列表失败
       };
     }
   }
 
   async createUser(userData: CreateUserData): Promise<AdminApiResponse<User>> {
     try {
-      const response = await fetch(`${this.baseURL}/users`, {`
-        method: "POST','`"`
+      const response = await fetch(`${this.baseURL}/users`, {
+        method: "POST',"
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.getAuthToken()}`'`
+          'Authorization': `Bearer ${this.getAuthToken()}
         },
         body: JSON.stringify(userData)
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
 
       if (!result.success) {
-        throw new Error(result.error || "创建用户失败");``
+        throw new Error(result.error || "创建用户失败");
       }
 
       return {
         success: true,
         data: result.data,
-        message: result.message || '用户创建成功'
+        message: result.message || '用户创建成功
       };
     } catch (error) {
       console.error('创建用户失败:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : '创建用户失败'
+        error: error instanceof Error ? error.message : '创建用户失败
       };
     }
   }
 
   async updateUser(userId: string, updateData: UpdateUserData): Promise<AdminApiResponse<User>> {
     try {
-      const response = await fetch(`${this.baseURL}/users/${userId}`, {`
-        method: "PUT','`"`
+      const response = await fetch(`${this.baseURL}/users/${userId}`, {
+        method: "PUT',"
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.getAuthToken()}`'`
+          'Authorization': `Bearer ${this.getAuthToken()}
         },
         body: JSON.stringify(updateData)
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
 
       if (!result.success) {
-        throw new Error(result.error || "更新用户失败");``
+        throw new Error(result.error || "更新用户失败");
       }
 
       return {
         success: true,
         data: result.data,
-        message: result.message || '用户更新成功'
+        message: result.message || '用户更新成功
       };
     } catch (error) {
       console.error('更新用户失败:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : "更新用户失败"
+        error: error instanceof Error ? error.message : "更新用户失败
       };
     }
   }
 
   async deleteUser(userId: string): Promise<AdminApiResponse> {
     try {
-      const response = await fetch(`${this.baseURL}/users/${userId}`, {`
-        method: "DELETE','`"`
+      const response = await fetch(`${this.baseURL}/users/${userId}`, {
+        method: "DELETE',"
         headers: {
-          'Authorization': `Bearer ${this.getAuthToken()}`'`
+          'Authorization': `Bearer ${this.getAuthToken()}
         }
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
 
       if (!result.success) {
-        throw new Error(result.error || "删除用户失败");``
+        throw new Error(result.error || "删除用户失败");
       }
 
       return {
         success: true,
-        message: result.message || '用户删除成功'
+        message: result.message || '用户删除成功
       };
     } catch (error) {
       console.error('删除用户失败:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : '删除用户失败'
+        error: error instanceof Error ? error.message : '删除用户失败
       };
     }
   }
 
   async bulkUserAction(action: UserBulkAction): Promise<AdminApiResponse> {
     try {
-      const response = await fetch(`${this.baseURL}/users/bulk`, {`
-        method: "POST','`"`
+      const response = await fetch(`${this.baseURL}/users/bulk`, {
+        method: "POST',"
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.getAuthToken()}`'`
+          'Authorization': `Bearer ${this.getAuthToken()}
         },
         body: JSON.stringify(action)
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
 
       if (!result.success) {
-        throw new Error(result.error || "批量操作失败");``
+        throw new Error(result.error || "批量操作失败");
       }
 
       return {
         success: true,
-        message: result.message || '批量操作完成'
+        message: result.message || '批量操作完成
       };
     } catch (error) {
       console.error('批量用户操作失败:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : '批量操作失败'
+        error: error instanceof Error ? error.message : '批量操作失败
       };
     }
   }
@@ -302,22 +302,22 @@ import type { CreateUserData, UpdateUserData, User  } from '../types/user';class
       if (filter.priority) queryParams.append('priority', filter.priority);
       if (filter.search) queryParams.append('search', filter.search);
       queryParams.append('page', page.toString());
-      queryParams.append("limit', limit.toString());"
+      queryParams.append("limit', limit.toString());
       const endpoint = `/tests?${queryParams.toString()}`;
-      const response = await fetch(`${this.baseURL}${endpoint}`, {`
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
         headers: {
-          'Authorization': `Bearer ${this.getAuthToken()}`'`
+          'Authorization': `Bearer ${this.getAuthToken()}
         }
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
 
       if (!result.success) {
-        throw new Error(result.error || "获取测试列表失败");``
+        throw new Error(result.error || "获取测试列表失败");
       }
 
       return {
@@ -329,39 +329,39 @@ import type { CreateUserData, UpdateUserData, User  } from '../types/user';class
       console.error('获取测试列表失败:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : "获取测试列表失败"
+        error: error instanceof Error ? error.message : "获取测试列表失败
       };
     }
   }
 
   async cancelTest(testId: string): Promise<AdminApiResponse> {
     try {
-      const response = await fetch(`${this.baseURL}/tests/${testId}/cancel`, {`
-        method: "POST','`"`
+      const response = await fetch(`${this.baseURL}/tests/${testId}/cancel`, {
+        method: "POST',"
         headers: {
-          'Authorization': `Bearer ${this.getAuthToken()}`'`
+          'Authorization': `Bearer ${this.getAuthToken()}
         }
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
 
       if (!result.success) {
-        throw new Error(result.error || "取消测试失败");``
+        throw new Error(result.error || "取消测试失败");
       }
 
       return {
         success: true,
-        message: result.message || '测试已取消'
+        message: result.message || '测试已取消
       };
     } catch (error) {
       console.error('取消测试失败:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : '取消测试失败'
+        error: error instanceof Error ? error.message : '取消测试失败
       };
     }
   }
@@ -379,22 +379,22 @@ import type { CreateUserData, UpdateUserData, User  } from '../types/user';class
       if (filter.success !== undefined) queryParams.append('success', filter.success.toString());
       if (filter.search) queryParams.append('search', filter.search);
       queryParams.append('page', page.toString());
-      queryParams.append("limit', limit.toString());"
+      queryParams.append("limit', limit.toString());
       const endpoint = `/logs?${queryParams.toString()}`;
-      const response = await fetch(`${this.baseURL}${endpoint}`, {`
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
         headers: {
-          'Authorization': `Bearer ${this.getAuthToken()}`'`
+          'Authorization': `Bearer ${this.getAuthToken()}
         }
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
 
       if (!result.success) {
-        throw new Error(result.error || "获取活动日志失败");``
+        throw new Error(result.error || "获取活动日志失败");
       }
 
       return {
@@ -406,7 +406,7 @@ import type { CreateUserData, UpdateUserData, User  } from '../types/user';class
       console.error('获取活动日志失败:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : "获取活动日志失败"
+        error: error instanceof Error ? error.message : "获取活动日志失败
       };
     }
   }
@@ -415,20 +415,20 @@ import type { CreateUserData, UpdateUserData, User  } from '../types/user';class
 
   async getSystemConfig(): Promise<AdminApiResponse<SystemConfig>> {
     try {
-      const response = await fetch(`${this.baseURL}/config`, {`
+      const response = await fetch(`${this.baseURL}/config`, {
         headers: {
-          'Authorization': `Bearer ${this.getAuthToken()}`'`
+          'Authorization': `Bearer ${this.getAuthToken()}
         }
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
 
       if (!result.success) {
-        throw new Error(result.error || "获取系统配置失败");``
+        throw new Error(result.error || "获取系统配置失败");
       }
 
       return {
@@ -439,41 +439,41 @@ import type { CreateUserData, UpdateUserData, User  } from '../types/user';class
       console.error('获取系统配置失败:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : '获取系统配置失败'
+        error: error instanceof Error ? error.message : '获取系统配置失败
       };
     }
   }
 
   async updateSystemConfig(config: SystemConfig): Promise<AdminApiResponse> {
     try {
-      const response = await fetch(`${this.baseURL}/config`, {`
-        method: "PUT','`"`
+      const response = await fetch(`${this.baseURL}/config`, {
+        method: "PUT',"
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.getAuthToken()}`'`
+          'Authorization': `Bearer ${this.getAuthToken()}
         },
         body: JSON.stringify(config)
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
 
       if (!result.success) {
-        throw new Error(result.error || "更新系统配置失败");``
+        throw new Error(result.error || "更新系统配置失败");
       }
 
       return {
         success: true,
-        message: result.message || '系统配置更新成功'
+        message: result.message || '系统配置更新成功
       };
     } catch (error) {
       console.error('更新系统配置失败:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : "更新系统配置失败"
+        error: error instanceof Error ? error.message : "更新系统配置失败
       };
     }
   }
@@ -482,20 +482,20 @@ import type { CreateUserData, UpdateUserData, User  } from '../types/user';class
 
   async getBackups(): Promise<AdminApiResponse<BackupInfo[]>> {
     try {
-      const response = await fetch(`${this.baseURL}/backups`, {`
+      const response = await fetch(`${this.baseURL}/backups`, {
         headers: {
-          'Authorization': `Bearer ${this.getAuthToken()}`'`
+          'Authorization': `Bearer ${this.getAuthToken()}
         }
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
 
       if (!result.success) {
-        throw new Error(result.error || "获取备份列表失败");``
+        throw new Error(result.error || "获取备份列表失败");
       }
 
       return {
@@ -506,105 +506,105 @@ import type { CreateUserData, UpdateUserData, User  } from '../types/user';class
       console.error('获取备份列表失败:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : '获取备份列表失败'
+        error: error instanceof Error ? error.message : '获取备份列表失败
       };
     }
   }
 
   async createBackup(options: { includeDatabase: boolean; includeFiles: boolean; includeConfigs: boolean }): Promise<AdminApiResponse> {
     try {
-      const response = await fetch(`${this.baseURL}/backups`, {`
-        method: "POST','`"`
+      const response = await fetch(`${this.baseURL}/backups`, {
+        method: "POST',"
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.getAuthToken()}`'`
+          'Authorization': `Bearer ${this.getAuthToken()}
         },
         body: JSON.stringify(options)
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
 
       if (!result.success) {
-        throw new Error(result.error || "创建备份失败");``
+        throw new Error(result.error || "创建备份失败");
       }
 
       return {
         success: true,
-        message: result.message || '备份创建成功'
+        message: result.message || '备份创建成功
       };
     } catch (error) {
       console.error('创建备份失败:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : "创建备份失败"
+        error: error instanceof Error ? error.message : "创建备份失败
       };
     }
   }
 
   async deleteBackup(backupId: string): Promise<AdminApiResponse> {
     try {
-      const response = await fetch(`${this.baseURL}/backups/${backupId}`, {`
-        method: "DELETE','`"`
+      const response = await fetch(`${this.baseURL}/backups/${backupId}`, {
+        method: "DELETE',"
         headers: {
-          'Authorization': `Bearer ${this.getAuthToken()}`'`
+          'Authorization': `Bearer ${this.getAuthToken()}
         }
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
 
       if (!result.success) {
-        throw new Error(result.error || "删除备份失败");``
+        throw new Error(result.error || "删除备份失败");
       }
 
       return {
         success: true,
-        message: result.message || '备份删除成功'
+        message: result.message || '备份删除成功
       };
     } catch (error) {
       console.error('删除备份失败:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : '删除备份失败'
+        error: error instanceof Error ? error.message : '删除备份失败
       };
     }
   }
 
   async restoreBackup(backupId: string): Promise<AdminApiResponse> {
     try {
-      const response = await fetch(`${this.baseURL}/backups/${backupId}/restore`, {`
-        method: "POST','`"`
+      const response = await fetch(`${this.baseURL}/backups/${backupId}/restore`, {
+        method: "POST',"
         headers: {
-          'Authorization': `Bearer ${this.getAuthToken()}`'`
+          'Authorization': `Bearer ${this.getAuthToken()}
         }
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
 
       if (!result.success) {
-        throw new Error(result.error || "恢复备份失败");``
+        throw new Error(result.error || "恢复备份失败");
       }
 
       return {
         success: true,
-        message: result.message || '备份恢复成功'
+        message: result.message || '备份恢复成功
       };
     } catch (error) {
       console.error('恢复备份失败:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : "恢复备份失败"
+        error: error instanceof Error ? error.message : "恢复备份失败
       };
     }
   }
@@ -613,20 +613,20 @@ import type { CreateUserData, UpdateUserData, User  } from '../types/user';class
 
   async getPermissionGroups(): Promise<AdminApiResponse<PermissionGroup[]>> {
     try {
-      const response = await fetch(`${this.baseURL}/permissions/groups`, {`
+      const response = await fetch(`${this.baseURL}/permissions/groups`, {
         headers: {
-          'Authorization': `Bearer ${this.getAuthToken()}`'`
+          'Authorization': `Bearer ${this.getAuthToken()}
         }
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
 
       if (!result.success) {
-        throw new Error(result.error || "获取权限组失败");``
+        throw new Error(result.error || "获取权限组失败");
       }
 
       return {
@@ -637,7 +637,7 @@ import type { CreateUserData, UpdateUserData, User  } from '../types/user';class
       console.error('获取权限组失败:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : '获取权限组失败'
+        error: error instanceof Error ? error.message : '获取权限组失败
       };
     }
   }
@@ -646,20 +646,20 @@ import type { CreateUserData, UpdateUserData, User  } from '../types/user';class
 
   async getDatabaseHealth(): Promise<AdminApiResponse<any>> {
     try {
-      const response = await fetch(`${this.baseURL}/health`, {`
+      const response = await fetch(`${this.baseURL}/health`, {
         headers: {
-          "Authorization': `Bearer ${this.getAuthToken()}`'`"
+          "Authorization': `Bearer ${this.getAuthToken()}`
         }
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);`
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
 
       if (!result.success) {
-        throw new Error(result.error || "获取数据库健康状态失败");``
+        throw new Error(result.error || "获取数据库健康状态失败");
       }
 
       return {
@@ -670,7 +670,7 @@ import type { CreateUserData, UpdateUserData, User  } from '../types/user';class
       console.error('获取数据库健康状态失败:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : '获取数据库健康状态失败'
+        error: error instanceof Error ? error.message : '获取数据库健康状态失败
       };
     }
   }

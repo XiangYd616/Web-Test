@@ -45,7 +45,7 @@ export interface User   {
 export interface TestConfig   {
   id?: string;
   name: string;
-  type: 'performance' | 'seo' | 'security' | 'api' | 'stress'
+  type: 'performance' | 'seo' | 'security' | 'api' | 'stress
   url: string;
   settings: Record<string, any>;
   createdAt?: string;
@@ -55,7 +55,7 @@ export interface TestConfig   {
 export interface TestResult   {
   id: string;
   testId: string;
-  status: 'pending' | 'running' | 'completed' | 'failed'
+  status: 'pending' | 'running' | 'completed' | 'failed
   score?: number;
   metrics: Record<string, any>;
   recommendations?: string[];
@@ -72,7 +72,7 @@ export interface BaseComponentProps   {
 }
 
 export interface LoadingProps extends BaseComponentProps   {
-  size?: 'small' | 'medium' | 'large'
+  size?: 'small' | 'medium' | 'large
   text?: string;
 }
 
@@ -85,7 +85,7 @@ export interface ErrorBoundaryProps extends BaseComponentProps   {
 export interface FormField   {
   name: string;
   label: string;
-  type: 'text' | 'email' | 'password' | 'number' | 'select' | 'textarea'
+  type: 'text' | 'email' | 'password' | 'number' | 'select' | 'textarea
   required?: boolean;
   placeholder?: string;
   options?: Array<{ label: string; value: string | number }>;

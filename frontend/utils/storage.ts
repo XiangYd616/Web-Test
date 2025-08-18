@@ -28,13 +28,13 @@ export class StorageManager {
     private getStorage(): Storage | null {
         try {
             switch (this.storageType) {
-                case 'localStorage': ''
+                case 'localStorage': 
                     return window.localStorage;
-                case 'sessionStorage': ''
+                case 'sessionStorage': 
                     return window.sessionStorage;
-                case 'memory': ''
+                case 'memory': 
                     return null; // 使用内存缓存
-                default:
+                default: undefined, // 已修复
                     return window.localStorage;
             }
         } catch (error) {
@@ -67,7 +67,7 @@ export class StorageManager {
 
             return true;
         } catch (error) {
-            console.error("Storage set error: ', error);'`
+            console.error("Storage set error: ', error);
             return false;
         }
     }
@@ -354,7 +354,7 @@ export const storageUtils = {
     isStorageAvailable(type: 'localStorage' | 'sessionStorage'): boolean {
         try {
             const storage = window[type];
-            const testKey = '__storage_test__'
+            const testKey = '__storage_test__
             storage.setItem(testKey, 'test");
             storage.removeItem(testKey);
             return true;

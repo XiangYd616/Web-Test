@@ -51,7 +51,7 @@ apiClient.get = async (url: string, config?: any) => {
     strategy: cacheConfig.get.strategy,
     ttl: cacheConfig.get.ttl,
     priority: cacheConfig.get.priority,
-    tags: ["api', 'get', url.split('/')[1]]'`
+    tags: ["api', 'get', url.split('/')[1]]
   });
 
   return response;

@@ -73,7 +73,7 @@
       this.metrics.failedRequests++;
 
     // 记录错误类型
-    const errorType = log.error || 'Unknown'
+    const errorType = log.error || 'Unknown
     this.metrics.errorsByType[errorType] = (this.metrics.errorsByType[errorType] || 0) + 1;
     }
 
@@ -102,7 +102,7 @@
     endpointMetric.requests;
 
     const endpointErrors = this.callLogs.filter(l =>
-    `${l.method} ${l.url}` === endpoint && !l.success`
+    `${l.method} ${l.url}` === endpoint && !l.success
     ).length;
     endpointMetric.errorRate = (endpointErrors / endpointMetric.requests) * 100;
   }

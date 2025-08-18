@@ -3,9 +3,9 @@
 export interface Report     {
     id: string;
     name: string;
-    type: 'performance' | 'security' | 'comprehensive' | 'custom'
-    format: 'pdf' | 'excel' | 'html' | 'json'
-    status: 'generating' | 'completed' | 'failed'
+    type: 'performance' | 'security' | 'comprehensive' | 'custom
+    format: 'pdf' | 'excel' | 'html' | 'json
+    status: 'generating' | 'completed' | 'failed
     progress: number;
     createdAt: string;
     completedAt?: string;
@@ -38,7 +38,7 @@ export interface ReportTemplate     {
     id: string;
     name: string;
     description: string;
-    type: 'performance' | 'security' | 'comprehensive'
+    type: 'performance' | 'security' | 'comprehensive
     sections: ReportSection[];
     defaultConfig: ReportConfig;
     preview?: string;
@@ -47,7 +47,7 @@ export interface ReportTemplate     {
 export interface ReportSection     {
     id: string;
     title: string;
-    type: 'summary' | 'chart' | 'table' | 'recommendations' | 'raw_data'
+    type: 'summary' | 'chart' | 'table' | 'recommendations' | 'raw_data
     required: boolean;
     configurable: boolean;
     description: string;
@@ -56,8 +56,8 @@ export interface ReportSection     {
 export interface ExportTask     {
     id: string;
     name: string;
-    format: 'json' | 'csv' | 'excel' | 'pdf'
-    status: 'preparing' | 'exporting' | 'completed' | 'failed'
+    format: 'json' | 'csv' | 'excel' | 'pdf
+    status: 'preparing' | 'exporting' | 'completed' | 'failed
     progress: number;
     recordCount?: number;
     downloadUrl?: string;

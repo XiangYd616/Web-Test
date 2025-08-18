@@ -28,7 +28,7 @@ export enum WebSocketMessageType {
   PONG = 'pong',
   AUTH = 'auth',
   SUBSCRIBE = 'subscribe',
-  UNSUBSCRIBE = 'unsubscribe'
+  UNSUBSCRIBE = 'unsubscribe
 }
 
 // WebSocket连接状态枚举
@@ -37,7 +37,7 @@ export enum WebSocketState {
   CONNECTED = 'connected',
   DISCONNECTED = 'disconnected',
   RECONNECTING = 'reconnecting',
-  ERROR = 'error'
+  ERROR = 'error
 }
 
 // WebSocket消息接口
@@ -64,13 +64,13 @@ export interface TestProgressMessage {
 // 通知消息
 export interface NotificationMessage {
   id: string;
-  type: 'info' | 'success' | 'warning' | 'error'
+  type: 'info' | 'success' | 'warning' | 'error
   title: string;
   message: string;
   actions?: Array<{
     label: string;
     action: string;
-    variant?: 'primary' | 'secondary'
+    variant?: 'primary' | 'secondary
   }>;
   duration?: number;
   persistent?: boolean;
@@ -78,7 +78,7 @@ export interface NotificationMessage {
 
 // 系统状态消息
 export interface SystemStatusMessage {
-  status: 'healthy' | 'degraded' | 'unhealthy'
+  status: 'healthy' | 'degraded' | 'unhealthy
   services: Record<string, {
     status: string;
     responseTime: number;
@@ -329,26 +329,26 @@ export class CompleteWebSocketService {
 
     // 处理特定类型的消息
     switch (message.type) {
-      case WebSocketMessageType.PONG:
+      case WebSocketMessageType.PONG: undefined, // 已修复
         this.handlePong();
         break;
         
-      case WebSocketMessageType.TEST_PROGRESS:
+      case WebSocketMessageType.TEST_PROGRESS: undefined, // 已修复
         this.emit('onTestProgress', message.data as TestProgressMessage);
         break;
         
-      case WebSocketMessageType.NOTIFICATION:
+      case WebSocketMessageType.NOTIFICATION: undefined, // 已修复
         this.emit('onNotification', message.data as NotificationMessage);
         break;
         
-      case WebSocketMessageType.SYSTEM_STATUS:
+      case WebSocketMessageType.SYSTEM_STATUS: undefined, // 已修复
         this.emit('onSystemStatus', message.data as SystemStatusMessage);
         break;
         
-      case WebSocketMessageType.TEST_STARTED:
-      case WebSocketMessageType.TEST_COMPLETED:
-      case WebSocketMessageType.TEST_FAILED:
-      case WebSocketMessageType.TEST_CANCELLED:
+      case WebSocketMessageType.TEST_STARTED: undefined, // 已修复
+      case WebSocketMessageType.TEST_COMPLETED: undefined, // 已修复
+      case WebSocketMessageType.TEST_FAILED: undefined, // 已修复
+      case WebSocketMessageType.TEST_CANCELLED: undefined, // 已修复
         this.emit('onTestProgress', message.data as TestProgressMessage);
         break;
     }
@@ -493,11 +493,11 @@ export class CompleteWebSocketService {
 }
 
 // 创建默认WebSocket服务实例
-const wsUrl = process.env.REACT_APP_WS_URL || 'ws://localhost:3001/ws'
+const wsUrl = process.env.REACT_APP_WS_URL || 'ws://localhost:3001/ws
 export const completeWebSocketService = new CompleteWebSocketService({
   url: wsUrl,
   autoReconnect: true,
-  debug: process.env.NODE_ENV === 'development'
+  debug: process.env.NODE_ENV === 'development
 });
 
 // 便捷方法

@@ -35,11 +35,11 @@ export interface EnhancedModalProps {
 
 // 确认对话框属性
 export interface EnhancedConfirmModalProps extends Omit<EnhancedModalProps, 'footer'> {
-  type?: 'info' | 'success' | 'warning' | 'error' | 'confirm'
+  type?: 'info' | 'success' | 'warning' | 'error' | 'confirm
   content?: React.ReactNode;
   okText?: string;
   cancelText?: string;
-  okType?: 'primary' | 'danger' | 'default'
+  okType?: 'primary' | 'danger' | 'default
   okButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
   cancelButtonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
   icon?: React.ReactNode;
@@ -48,8 +48,8 @@ export interface EnhancedConfirmModalProps extends Omit<EnhancedModalProps, 'foo
 
 // 抽屉属性
 export interface EnhancedDrawerProps extends Omit<EnhancedModalProps, 'centered'> {
-  placement?: 'top' | 'right' | 'bottom' | 'left'
-  size?: 'small' | 'default' | 'large'
+  placement?: 'top' | 'right' | 'bottom' | 'left
+  size?: 'small' | 'default' | 'large
   push?: boolean;
   level?: string | string[] | null;
   handler?: React.ReactNode;
@@ -63,7 +63,7 @@ const useFocusTrap = (containerRef: React.RefObject<HTMLElement>, active: boolea
 
     const container = containerRef.current;
     const focusableElements = container.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])
     );
     const firstElement = focusableElements[0] as HTMLElement;
     const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
@@ -129,11 +129,11 @@ export const EnhancedModal: React.FC<EnhancedModalProps> = ({
   keyboard = true,
   destroyOnClose = false,
   zIndex = 1000,
-  className = '',
+  className = ',
   style,
   bodyStyle,
   maskStyle,
-  wrapClassName = '',
+  wrapClassName = ',
   getContainer,
   afterClose,
   afterOpen
@@ -179,9 +179,9 @@ export const EnhancedModal: React.FC<EnhancedModalProps> = ({
   // 阻止滚动
   useEffect(() => {
     if (visible) {
-      document.body.style.overflow = 'hidden'
+      document.body.style.overflow = 'hidden
       return () => {
-        document.body.style.overflow = ''
+        document.body.style.overflow = 
       };
     }
   }, [visible]);
@@ -198,7 +198,7 @@ export const EnhancedModal: React.FC<EnhancedModalProps> = ({
       {/* 遮罩层 */}
       <div
         className={`enhanced-modal-mask fixed inset-0 bg-black transition-opacity duration-300 ${
-          animationState === 'entered' ? 'opacity-50' : 'opacity-0'
+          animationState === 'entered' ? 'opacity-50' : 'opacity-0
         }`}
         style={maskStyle}
         onClick={handleMaskClick}
@@ -207,24 +207,24 @@ export const EnhancedModal: React.FC<EnhancedModalProps> = ({
       {/* 模态框容器 */}
       <div
         className={`enhanced-modal-wrap fixed inset-0 overflow-auto ${
-          centered ? 'flex items-center justify-center' : 'pt-16'
+          centered ? 'flex items-center justify-center' : 'pt-16
         }`}
         onClick={handleMaskClick}
       >
         <div
           ref={modalRef}
           className={`enhanced-modal-content bg-white rounded-lg shadow-xl mx-auto transition-all duration-300 ${
-            animationState === 'entered' 
-              ? 'opacity-100 scale-100 translate-y-0' 
-              : 'opacity-0 scale-95 translate-y-4'
+            animationState === 'entered
+              ? 'opacity-100 scale-100 translate-y-0
+              : 'opacity-0 scale-95 translate-y-4
           } ${className}`}
           style={{
             width,
             height,
             ...style
           }}
-          role="dialog"
-          aria-modal="true"
+          role="dialog
+          aria-modal="true
           aria-labelledby={title ? 'enhanced-modal-title' : undefined}
         >
           {/* 标题栏 */}
@@ -238,8 +238,8 @@ export const EnhancedModal: React.FC<EnhancedModalProps> = ({
               {closable && (
                 <button
                   onClick={onCancel}
-                  className="enhanced-modal-close text-gray-400 hover:text-gray-600 transition-colors"
-                  aria-label="关闭"
+                  className="enhanced-modal-close text-gray-400 hover:text-gray-600 transition-colors
+                  aria-label="关闭
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -261,13 +261,13 @@ export const EnhancedModal: React.FC<EnhancedModalProps> = ({
                 <>
                   <button
                     onClick={onCancel}
-                    className="px-4 py-2 text-gray-700 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
+                    className="px-4 py-2 text-gray-700 bg-gray-100 rounded hover:bg-gray-200 transition-colors
                   >
                     取消
                   </button>
                   <button
                     onClick={onOk}
-                    className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors"
+                    className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors
                   >
                     确定
                   </button>
@@ -346,7 +346,7 @@ export const EnhancedConfirmModal: React.FC<EnhancedConfirmModalProps> = ({
   const buttonTypeClass = {
     primary: 'bg-blue-500 hover:bg-blue-600 text-white',
     danger: 'bg-red-500 hover:bg-red-600 text-white',
-    default: 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+    default: 'bg-gray-100 hover:bg-gray-200 text-gray-700
   };
 
   const footer = (
@@ -354,7 +354,7 @@ export const EnhancedConfirmModal: React.FC<EnhancedConfirmModalProps> = ({
       <button
         ref={cancelButtonRef}
         onClick={modalProps.onCancel}
-        className="px-4 py-2 text-gray-700 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
+        className="px-4 py-2 text-gray-700 bg-gray-100 rounded hover:bg-gray-200 transition-colors
         {...cancelButtonProps}
       >
         {cancelText}
@@ -375,7 +375,7 @@ export const EnhancedConfirmModal: React.FC<EnhancedConfirmModalProps> = ({
       {...modalProps}
       width={416}
       footer={footer}
-      className={`enhanced-confirm-modal ${modalProps.className || ''}`}
+      className={`enhanced-confirm-modal ${modalProps.className || '}`}
     >
       <div className="flex items-start gap-4">
         <div className="flex-shrink-0 mt-1">

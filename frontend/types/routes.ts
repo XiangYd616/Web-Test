@@ -41,10 +41,10 @@ export interface NavigationItem        {
   children?: NavigationItem[];
   badge?: {
     text: string;
-    variant: 'primary' | 'secondary' | 'success' | 'warning' | 'error'
+    variant: 'primary' | 'secondary' | 'success' | 'warning' | 'error
   };
   external?: boolean;
-  target?: '_blank' | '_self'
+  target?: '_blank' | '_self
 }
 
 export interface RouteGuardContext        {

@@ -10,4 +10,4 @@ const AuthLoadingState: React.FC<AuthLoadingStateProps> = (props) => {
     </div>
   );
 };
-export default AuthLoadingState;'"
+export default AuthLoadingState;

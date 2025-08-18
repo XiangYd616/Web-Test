@@ -51,7 +51,7 @@ class AuthService {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError'
+    const errorType = error.name || 'UnknownError
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -89,12 +89,12 @@ class AuthService {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
   }
-  private baseUrl = "/api/auth";``
+  private baseUrl = "/api/auth";
   private token: string | null = null;
 
   /**
@@ -102,8 +102,8 @@ class AuthService {
    */
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      const response = await fetch(`${this.baseUrl}/login`, {`
-        method: "POST','`"`
+      const response = await fetch(`${this.baseUrl}/login`, {
+        method: "POST',"
         headers: {
           'Content-Type': 'application/json',
         },
@@ -113,7 +113,7 @@ class AuthService {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error?.message || '登录失败");"
+        throw new Error(result.error?.message || '登录失败");
       }
 
       // 保存token
@@ -132,8 +132,8 @@ class AuthService {
    */
   async register(userData: RegisterData): Promise<{ user: User; message: string }> {
     try {
-      const response = await fetch(`${this.baseUrl}/register`, {`
-        method: "POST','`"`
+      const response = await fetch(`${this.baseUrl}/register`, {
+        method: "POST',"
         headers: {
           'Content-Type': 'application/json',
         },
@@ -143,12 +143,12 @@ class AuthService {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error?.message || '注册失败");"
+        throw new Error(result.error?.message || '注册失败");
       }
 
       return result.data;
     } catch (error) {
-      console.error("注册错误:', error);"
+      console.error("注册错误:', error);
       throw error;
     }
   }
@@ -158,19 +158,19 @@ class AuthService {
    */
   async logout(): Promise<void> {
     try {
-      await fetch(`${this.baseUrl}/logout`, {`
-        method: "POST','`"`
+      await fetch(`${this.baseUrl}/logout`, {
+        method: "POST',"
         headers: {
-          'Authorization': `Bearer ${this.token}`,'`
+          'Authorization': `Bearer ${this.token}`,
         },
       });
     } catch (error) {
-      console.error("登出错误:', error);'`"`
+      console.error("登出错误:', error);
     } finally {
       // 清除本地存储
       this.token = null;
-      localStorage.removeItem('auth_token");"
-      localStorage.removeItem('user");"
+      localStorage.removeItem('auth_token");
+      localStorage.removeItem('user");
     }
   }
 
@@ -179,14 +179,14 @@ class AuthService {
    */
   async getCurrentUser(): Promise<User | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/me`, {`
+      const response = await fetch(`${this.baseUrl}/me`, {
         headers: {
-          "Authorization': `Bearer ${this.token}`,'`"
+          "Authorization': `Bearer ${this.token}`,'
         },
       });
 
       if (!response.ok) {
-        throw new Error("获取用户信息失败");``
+        throw new Error("获取用户信息失败");
       }
 
       const result = await response.json();
@@ -209,7 +209,7 @@ class AuthService {
    */
   getToken(): string | null {
     if (!this.token) {
-      this.token = localStorage.getItem('auth_token");"
+      this.token = localStorage.getItem('auth_token");
     }
     return this.token;
   }
@@ -219,7 +219,7 @@ class AuthService {
    */
   getUser(): User | null {
     try {
-      const userStr = localStorage.getItem('user");"
+      const userStr = localStorage.getItem('user");
       return userStr ? JSON.parse(userStr) : null;
     } catch {
       return null;

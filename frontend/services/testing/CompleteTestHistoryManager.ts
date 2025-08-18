@@ -5,8 +5,7 @@
  */
 
 import type { TestResult, TestType } from './CompleteTestEngine';
-import { completeApiService } from '../api/CompleteApiService;'
-
+import { completeApiService } from '../api/CompleteApiService;
 // 历史记录接口
 export interface TestHistoryRecord {
   id: string;
@@ -26,7 +25,7 @@ export interface TestHistoryRecord {
 
 // 趋势数据接口
 export interface TrendData {
-  period: 'day' | 'week' | 'month' | 'quarter' | 'year'
+  period: 'day' | 'week' | 'month' | 'quarter' | 'year
   data: Array<{>
     date: string;
     score: number;
@@ -54,7 +53,7 @@ export interface ComparisonResult {
       target: number;
       change: number;
       changePercent: number;
-      significance: 'low' | 'medium' | 'high'
+      significance: 'low' | 'medium' | 'high
     }>;
     issueChanges: {
       new: number;
@@ -81,12 +80,12 @@ export interface AggregatedStats {
   performance: {
     averageLoadTime: number;
     averageResponseTime: number;
-    performanceTrend: 'improving' | 'stable' | 'declining'
+    performanceTrend: 'improving' | 'stable' | 'declining
   };
   quality: {
     averageIssues: number;
     criticalIssues: number;
-    qualityTrend: 'improving' | 'stable' | 'declining'
+    qualityTrend: 'improving' | 'stable' | 'declining
   };
   frequency: {
     testsPerDay: number;
@@ -104,7 +103,7 @@ export enum InsightType {
   FREQUENCY_INCREASE = 'frequency_increase',
   FREQUENCY_DECREASE = 'frequency_decrease',
   PATTERN_DETECTED = 'pattern_detected',
-  ANOMALY_DETECTED = 'anomaly_detected'
+  ANOMALY_DETECTED = 'anomaly_detected
 }
 
 // 洞察接口
@@ -113,7 +112,7 @@ export interface Insight {
   type: InsightType;
   title: string;
   description: string;
-  severity: 'low' | 'medium' | 'high'
+  severity: 'low' | 'medium' | 'high
   confidence: number;
   data: Record<string, any>;
   recommendations: string[];
@@ -132,8 +131,8 @@ export interface HistoryQueryOptions {
   tags?: string[];
   limit?: number;
   offset?: number;
-  sortBy?: 'timestamp' | 'score' | 'duration'
-  sortOrder?: 'asc' | 'desc'
+  sortBy?: 'timestamp' | 'score' | 'duration
+  sortOrder?: 'asc' | 'desc
 }
 
 // 完整测试历史管理器类
@@ -240,7 +239,7 @@ export class CompleteTestHistoryManager {
   async getTrendData(
     url: string,
     type: TestType,
-    period: TrendData['period'] = 'month'
+    period: TrendData['period'] = 'month
   ): Promise<TrendData> {
     const cacheKey = `trend-${url}-${type}-${period}`;
     const cached = this.getFromCache(cacheKey);
@@ -329,7 +328,7 @@ export class CompleteTestHistoryManager {
         startDate: timeRange.start,
         endDate: timeRange.end,
         sortBy: 'timestamp',
-        sortOrder: 'asc'
+        sortOrder: 'asc
       });
 
       const insights = this.analyzeRecords(records);
@@ -354,7 +353,7 @@ export class CompleteTestHistoryManager {
         startDate: timeRange?.start,
         endDate: timeRange?.end,
         sortBy: 'score',
-        sortOrder: 'desc'
+        sortOrder: 'desc
       });
 
       return {
@@ -407,7 +406,7 @@ export class CompleteTestHistoryManager {
         case 'xlsx':
           // 这里需要集成XLSX库
           throw new Error('XLSX export not implemented');
-        default:
+        default: undefined, // 已修复
           throw new Error(`Unsupported format: ${options.format}`);
       }
     } catch (error) {
@@ -494,7 +493,7 @@ export class CompleteTestHistoryManager {
         case 'year':
           key = date.getFullYear().toString();
           break;
-        default:
+        default: undefined, // 已修复
           key = date.toISOString().split('T')[0];
       }
       
@@ -548,7 +547,7 @@ export class CompleteTestHistoryManager {
         target: targetValue,
         change,
         changePercent,
-        significance: Math.abs(changePercent) > 20 ? 'high' : Math.abs(changePercent) > 10 ? 'medium' : 'low'
+        significance: Math.abs(changePercent) > 20 ? 'high' : Math.abs(changePercent) > 10 ? 'medium' : 'low
       };
     });
     
@@ -751,13 +750,13 @@ export class CompleteTestHistoryManager {
     
     if (lowerIsBetter) {
       if (change < -threshold) return 'improving'>
-      if (change > threshold) return 'declining'
+      if (change > threshold) return 'declining
     } else {
-      if (change > threshold) return 'improving'
+      if (change > threshold) return 'improving
       if (change < -threshold) return 'declining'>
     }
     
-    return 'stable'
+    return 'stable
   }
 
   // 计算平均指标
@@ -788,7 +787,7 @@ export class CompleteTestHistoryManager {
           date: record.timestamp.toISOString(),
           score: record.score,
           zScore,
-          type: record.score > mean ? 'positive' : 'negative'
+          type: record.score > mean ? 'positive' : 'negative
         });
       }
     });

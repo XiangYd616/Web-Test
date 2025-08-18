@@ -34,7 +34,7 @@ class ConfigService {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError'
+    const errorType = error.name || 'UnknownError
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -67,7 +67,7 @@ class ConfigService {
   private cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
   
   private getCacheKey(url: string, options: RequestInit): string {
-    return `${options.method || 'GET'}:${url}:${JSON.stringify(options.body || {})}`;'`
+    return `${options.method || 'GET'}:${url}:${JSON.stringify(options.body || {})}`;
   }
   
   private getFromCache(key: string): any | null {
@@ -98,23 +98,23 @@ class ConfigService {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
   }
-  private baseUrl = "/api/test/config";``
-  private localStorageKey = 'test-configs'
+  private baseUrl = "/api/test/config";
+  private localStorageKey = 'test-configs
   /**
    * 获取测试配置模板
    */
   async getConfigTemplates(testType?: string): Promise<TestConfigTemplate[]> {
     try {
-      const params = testType ? `?testType=${testType}` : "";`
-      const response = await apiService.get(`${this.baseUrl}/templates${params}`);`
+      const params = testType ? `?testType=${testType}` : ";
+      const response = await apiService.get(`${this.baseUrl}/templates${params}`);
       return response.data || [];
     } catch (error) {
-      console.error("获取配置模板失败:', error);'`"`
+      console.error("获取配置模板失败:', error);
       // 返回本地存储的配置
       return this.getLocalConfigs(testType);
     }
@@ -125,10 +125,10 @@ class ConfigService {
    */
   async saveConfigTemplate(template: Omit<TestConfigTemplate, 'id' | 'createdAt' | 'updatedAt'>): Promise<TestConfigTemplate> {
     try {
-      const response = await apiService.post(`${this.baseUrl}/templates`, template);`
+      const response = await apiService.post(`${this.baseUrl}/templates`, template);
       return response.data;
     } catch (error) {
-      console.error("保存配置模板失败:', error);'`"`
+      console.error("保存配置模板失败:', error);
       // 保存到本地存储
       return this.saveLocalConfig(template);
     }
@@ -139,11 +139,11 @@ class ConfigService {
    */
   async updateConfigTemplate(id: string, template: Partial<TestConfigTemplate>): Promise<TestConfigTemplate> {
     try {
-      const response = await apiService.put(`${this.baseUrl}/templates/${id}`, template);`
+      const response = await apiService.put(`${this.baseUrl}/templates/${id}`, template);
       return response.data;
     } catch (error) {
-      console.error("更新配置模板失败:', error);'`"`
-      throw new Error('更新配置模板失败");"
+      console.error("更新配置模板失败:', error);
+      throw new Error('更新配置模板失败");
     }
   }
 
@@ -152,10 +152,10 @@ class ConfigService {
    */
   async deleteConfigTemplate(id: string): Promise<void> {
     try {
-      await apiService.delete(`${this.baseUrl}/templates/${id}`);`
+      await apiService.delete(`${this.baseUrl}/templates/${id}`);
     } catch (error) {
-      console.error("删除配置模板失败:', error);'`"`
-      throw new Error('删除配置模板失败");"
+      console.error("删除配置模板失败:', error);
+      throw new Error('删除配置模板失败");
     }
   }
 
@@ -171,7 +171,7 @@ class ConfigService {
         validateSSL: true,
         headers: {},
         authentication: {
-          type: 'none'
+          type: 'none
         }
       },
       security: {
@@ -181,7 +181,7 @@ class ConfigService {
         checkXSS: true,
         checkSQLInjection: true,
         checkCSRF: true,
-        scanDepth: 'medium'
+        scanDepth: 'medium
       },
       stress: {
         duration: 60,
@@ -212,7 +212,7 @@ class ConfigService {
         checkUsability: true,
         checkMobile: true,
         performanceThreshold: 3000,
-        accessibilityLevel: 'AA'
+        accessibilityLevel: 'AA
       }
     };
 
@@ -225,35 +225,35 @@ class ConfigService {
   validateConfig(testType: string, config: any): { valid: boolean; errors: string[] } {
     const errors: string[]  = [];
     if (!config || typeof config !== 'object') {
-        errors.push('配置不能为空");"
+        errors.push('配置不能为空");
       return { valid: false, errors
       };
     }
 
     switch (testType) {
-      case 'api': ''
+      case 'api': 
         if (config.timeout && (typeof config.timeout !== 'number' || config.timeout < 1000 || config.timeout > 300000)) {
-          errors.push('超时时间必须是1秒到5分钟之间的数字");"
+          errors.push('超时时间必须是1秒到5分钟之间的数字");
         }
         if (config.retries && (typeof config.retries !== 'number' || config.retries < 0 || config.retries > 10)) {
-          errors.push('重试次数必须是0到10之间的数字");"
+          errors.push('重试次数必须是0到10之间的数字");
         }
         break;
 
-      case 'stress': ''
+      case 'stress': 
         if (config.duration && (typeof config.duration !== 'number' || config.duration < 10 || config.duration > 3600)) {
-          errors.push('测试时长必须是10秒到1小时之间的数字");"
+          errors.push('测试时长必须是10秒到1小时之间的数字");
         }
         if (config.concurrency && (typeof config.concurrency !== 'number' || config.concurrency < 1 || config.concurrency > 1000)) {
-          errors.push('并发用户数必须是1到1000之间的数字");"
+          errors.push('并发用户数必须是1到1000之间的数字");
         }
         break;
 
-      case 'seo': ''
-        const requiredChecks = ['checkTechnical', 'checkContent', 'checkMobile"];"
+      case 'seo': 
+        const requiredChecks = ['checkTechnical', 'checkContent', 'checkMobile"];
         const hasAnyCheck = requiredChecks.some(check => config[check] === true);
         if (!hasAnyCheck) {
-          errors.push('至少需要选择一项SEO检查");"
+          errors.push('至少需要选择一项SEO检查");
         }
         break;
     }
@@ -287,12 +287,12 @@ class ConfigService {
   /**
    * 保存配置到本地存储
    */
-  private saveLocalConfig(template: Omit<TestConfigTemplate, 'id' | 'createdAt' | "updatedAt'>): TestConfigTemplate {"
+  private saveLocalConfig(template: Omit<TestConfigTemplate, 'id' | 'createdAt' | "updatedAt'>): TestConfigTemplate {
     try {
       const configs = this.getLocalConfigs();
       const newTemplate: TestConfigTemplate  = {
         ...template,
-        id: `local-${Date.now()}`,`
+        id: `local-${Date.now()}`,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
@@ -301,8 +301,8 @@ class ConfigService {
 
       return newTemplate;
     } catch (error) {
-      console.error("保存本地配置失败:', error);'`"`
-      throw new Error('保存配置失败");"
+      console.error("保存本地配置失败:', error);
+      throw new Error('保存配置失败");
     }
   }
 
@@ -351,17 +351,17 @@ class ConfigService {
       const blob = new Blob([dataStr], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
 
-      const link = document.createElement('a");"
+      const link = document.createElement('a");
       link.href = url;
-      link.download = `test-configs-${new Date().toISOString().split('T')[0]}.json`;'`
+      link.download = `test-configs-${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("导出配置失败:', error);'`"`
-      throw new Error('导出配置失败");"
+      console.error("导出配置失败:', error);
+      throw new Error('导出配置失败");
     }
   }
 }

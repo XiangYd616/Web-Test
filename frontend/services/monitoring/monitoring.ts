@@ -3,7 +3,7 @@ export interface MonitoringTarget     {
   id: string;
   name: string;
   url: string;
-  type: 'website' | 'api' | 'service'
+  type: 'website' | 'api' | 'service
   interval: number; // 监控间隔（秒）
   timeout: number;
   enabled: boolean;
@@ -12,7 +12,7 @@ export interface MonitoringTarget     {
   tags: string[];
   createdAt: string;
   lastChecked?: string;
-  status: 'healthy' | 'warning' | 'critical' | 'unknown'
+  status: 'healthy' | 'warning' | 'critical' | 'unknown
 }
 
 export interface MonitoringThresholds     {
@@ -24,7 +24,7 @@ export interface MonitoringThresholds     {
 
 export interface NotificationConfig     {
   id: string;
-  type: 'email' | 'webhook' | 'sms' | 'slack' | 'teams'
+  type: 'email' | 'webhook' | 'sms' | 'slack' | 'teams
   enabled: boolean;
   config: {
     email?: { recipients: string[]; subject?: string };
@@ -41,7 +41,7 @@ export interface MonitoringResult     {
   id: string;
   targetId: string;
   timestamp: string;
-  status: 'success' | 'warning' | 'error'
+  status: 'success' | 'warning' | 'error
   responseTime: number;
   statusCode?: number;
   errorMessage?: string;
@@ -58,8 +58,8 @@ export interface MonitoringResult     {
 export interface Alert     {
   id: string;
   targetId: string;
-  type: 'down' | 'slow' | 'error' | 'recovery'
-  severity: 'warning' | 'critical'
+  type: 'down' | 'slow' | 'error' | 'recovery
+  severity: 'warning' | 'critical
   title: string;
   message: string;
   timestamp: string;
@@ -94,7 +94,7 @@ export class RealTimeMonitoringService {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
@@ -119,12 +119,12 @@ export class RealTimeMonitoringService {
   }
 
   // 添加监控目标
-  public addTarget(target: Omit<MonitoringTarget, "id' | 'createdAt' | 'status'>): MonitoringTarget {'`"`
+  public addTarget(target: Omit<MonitoringTarget, "id' | 'createdAt' | 'status'>): MonitoringTarget {'
     const newTarget: MonitoringTarget  = {
       ...target,
       id: this.generateId(),
       createdAt: new Date().toISOString(),
-      status: 'unknown'
+      status: 'unknown
     };
     this.targets.set(newTarget.id, newTarget);
     this.saveToStorage();
@@ -193,7 +193,7 @@ export class RealTimeMonitoringService {
       }
     });
 
-    this.emit('monitoringStarted");"
+    this.emit('monitoringStarted");
   }
 
   // 停止全局监控
@@ -205,7 +205,7 @@ export class RealTimeMonitoringService {
       this.stopMonitoring(id);
     });
 
-    this.emit('monitoringStopped");"
+    this.emit('monitoringStopped");
   }
 
   // 启动单个目标监控
@@ -258,7 +258,7 @@ export class RealTimeMonitoringService {
           errorRate: response.ok ? 0 : 100
         },
         location: 'local',
-        userAgent: 'TestWeb-Monitor/1.0'
+        userAgent: 'TestWeb-Monitor/1.0
       };
 
     } catch (error) {
@@ -276,7 +276,7 @@ export class RealTimeMonitoringService {
           errorRate: 100
         },
         location: 'local',
-        userAgent: 'TestWeb-Monitor/1.0'
+        userAgent: 'TestWeb-Monitor/1.0
       };
     }
 
@@ -303,7 +303,7 @@ export class RealTimeMonitoringService {
         signal: controller.signal,
         headers: {
           'User-Agent': 'TestWeb-Monitor/1.0',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
         }
       });
 
@@ -317,10 +317,10 @@ export class RealTimeMonitoringService {
 
   // 确定状态
   private determineStatus(response: Response, responseTime: number, thresholds: MonitoringThresholds): 'success' | 'warning' | 'error' {
-    if (!response.ok) return 'error'
-    if (responseTime > thresholds.responseTime.critical) return 'error'
-    if (responseTime > thresholds.responseTime.warning) return 'warning'
-    return 'success'
+    if (!response.ok) return 'error
+    if (responseTime > thresholds.responseTime.critical) return 'error
+    if (responseTime > thresholds.responseTime.warning) return 'warning
+    return 'success
   }
 
   // 保存检查结果
@@ -343,19 +343,19 @@ export class RealTimeMonitoringService {
     const target = this.targets.get(targetId);
     if (!target) return;
 
-    let status: MonitoringTarget['status"];"
+    let status: MonitoringTarget['status"];
     switch (result.status) {
-      case 'success': ''
-        status = 'healthy'
+      case 'success': 
+        status = 'healthy
         break;
-      case 'warning': ''
-        status = 'warning'
+      case 'warning': 
+        status = 'warning
         break;
-      case 'error': ''
-        status = 'critical'
+      case 'error': 
+        status = 'critical
         break;
-      default:
-        status = 'unknown'
+      default: undefined, // 已修复
+        status = 'unknown
     }
 
     target.status = status;
@@ -369,22 +369,22 @@ export class RealTimeMonitoringService {
 
     // 检查是否需要触发告警
     if (result.status === 'error') {
-      this.createAlert(target, 'down', 'critical', "服务不可用', `${target.name} 无法访问`);'`"
-    } else if (result.status === "warning') {'`"`
-      this.createAlert(target, 'slow', 'warning', '响应缓慢', `${target.name} 响应时间过长: ${result.responseTime}ms`);'`
-    } else if (result.status === "success') {'`"`
+      this.createAlert(target, 'down', 'critical', "服务不可用', `${target.name} 无法访问`);
+    } else if (result.status === "warning') {'
+      this.createAlert(target, 'slow', 'warning', '响应缓慢', `${target.name} 响应时间过长: ${result.responseTime}ms`);
+    } else if (result.status === "success') {'
       // 检查是否需要发送恢复通知
       const hasActiveAlert = Array.from(this.alerts.values()).some(
         alert => alert.targetId === target.id && !alert.resolved
       );
       if (hasActiveAlert) {
-        this.createAlert(target, 'recovery', 'warning', "服务恢复', `${target.name} 已恢复正常`);'`"
+        this.createAlert(target, 'recovery', 'warning', "服务恢复', `${target.name} 已恢复正常`);
       }
     }
   }
 
   // 创建告警
-  private createAlert(target: MonitoringTarget, type: Alert["type'], severity: Alert['severity'], title: string, message: string): void {'`"`
+  private createAlert(target: MonitoringTarget, type: Alert["type'], severity: Alert['severity'], title: string, message: string): void {'
     const alert: Alert  = {
       id: this.generateId(),
       targetId: target.id,
@@ -424,13 +424,13 @@ export class RealTimeMonitoringService {
   // 发送单个通知
   private async sendNotification(config: NotificationConfig, alert: Alert, target: MonitoringTarget): Promise<void> {
     switch (config.type) {
-      case 'email': ''
+      case 'email': 
         await this.sendEmailNotification(config, alert, target);
         break;
-      case 'webhook': ''
+      case 'webhook': 
         await this.sendWebhookNotification(config, alert, target);
         break;
-      case 'slack': ''
+      case 'slack': 
         await this.sendSlackNotification(config, alert, target);
         break;
       // 其他通知类型的实现...
@@ -441,8 +441,8 @@ export class RealTimeMonitoringService {
   private async sendEmailNotification(config: NotificationConfig, alert: Alert, target: MonitoringTarget): Promise<void> {
     console.log('Sending email notification: ', {
       to: config.config.email?.recipients,
-      subject: `[${alert.severity.toUpperCase()}] ${alert.title}`,`
-      body: `目标: ${target.name}/nURL: ${target.url}/n消息: ${alert.message}/n时间: ${alert.timestamp}``
+      subject: `[${alert.severity.toUpperCase()}] ${alert.title}`,
+      body: `目标: ${target.name}/nURL: ${target.url}/n消息: ${alert.message}/n时间: ${alert.timestamp}
     });
   }
 
@@ -457,7 +457,7 @@ export class RealTimeMonitoringService {
     };
 
     await fetch(config.config.webhook.url, {
-      method: config.config.webhook.method || "POST','`"`
+      method: config.config.webhook.method || "POST','
       headers: {
         'Content-Type': 'application/json',
         ...config.config.webhook.headers
@@ -470,7 +470,7 @@ export class RealTimeMonitoringService {
   private async sendSlackNotification(config: NotificationConfig, alert: Alert, target: MonitoringTarget): Promise<void> {
     if (!config.config.slack?.webhook) return;
 
-    const color = alert.severity === 'critical' ? 'danger' : 'warning'
+    const color = alert.severity === 'critical' ? 'danger' : 'warning
     const payload = {
       attachments: [{
         color,
@@ -558,7 +558,7 @@ export class RealTimeMonitoringService {
     const allResults = Array.from(this.results.values()).flat();
     if (allResults.length === 0) return 100;
 
-    const successCount = allResults.filter(result => result.status === "success').length;'`"`
+    const successCount = allResults.filter(result => result.status === "success').length;'
     return Math.round((successCount / allResults.length) * 100 * 100) / 100;
   }
 
@@ -574,13 +574,13 @@ export class RealTimeMonitoringService {
 
   private loadFromStorage(): void {
     try {
-      const targetsData = localStorage.getItem('monitoring_targets");"
+      const targetsData = localStorage.getItem('monitoring_targets");
       if (targetsData) {
         const entries = JSON.parse(targetsData);
         this.targets = new Map(entries);
       }
 
-      const alertsData = localStorage.getItem('monitoring_alerts");"
+      const alertsData = localStorage.getItem('monitoring_alerts");
       if (alertsData) {
         const entries = JSON.parse(alertsData);
         this.alerts = new Map(entries);

@@ -6,9 +6,8 @@ import {
   WarningOutlined, 
   CheckCircleOutlined,
   CloseCircleOutlined,
-  ReloadOutlined
-} from '@ant-design/icons';
-
+  // ReloadOutlined
+} from '@ant-design/icons'; // 已修复
 const { Title, Text } = Typography;
 const { Search } = Input;
 
@@ -30,7 +29,7 @@ const ContentDetection: React.FC<ContentDetectionProps> = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [results, setResults] = useState<DetectionResult[]>([]);
   const [progress, setProgress] = useState(0);
-  const [targetUrl, setTargetUrl] = useState('');
+  const [targetUrl, setTargetUrl] = useState(');
 
   // 模拟检测结果数据
   const mockResults: DetectionResult[] = [
@@ -156,9 +155,9 @@ const ContentDetection: React.FC<ContentDetectionProps> = () => {
       key: 'action',
       render: (record: DetectionResult) => (
         <Button 
-          type="link" 
+          type="link
           icon={<EyeOutlined />} 
-          size="small"
+          size="small
         >
           详情
         </Button>
@@ -200,7 +199,7 @@ const ContentDetection: React.FC<ContentDetectionProps> = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Title level={4}>内容检测</Title>
                   <Button
-                    type="primary"
+                    type="primary
                     icon={<SearchOutlined />}
                     onClick={() => startDetection(targetUrl)}
                     loading={isScanning}
@@ -211,7 +210,7 @@ const ContentDetection: React.FC<ContentDetectionProps> = () => {
                 </div>
 
                 <Search
-                  placeholder="输入要检测的网站URL"
+                  placeholder="输入要检测的网站URL
                   value={targetUrl}
                   onChange={(e) => setTargetUrl(e.target.value)}
                   onSearch={startDetection}
@@ -262,7 +261,7 @@ const ContentDetection: React.FC<ContentDetectionProps> = () => {
                     </Row>
 
                     <Alert
-                      message="内容检测完成"
+                      message="内容检测完成
                       description={`共检测了 ${results.length} 个内容项，发现 ${statusCounts.warning + statusCounts.dangerous} 个潜在风险`}
                       type={statusCounts.dangerous > 0 ? 'error' : statusCounts.warning > 0 ? 'warning' : 'success'}
                       showIcon
@@ -272,10 +271,10 @@ const ContentDetection: React.FC<ContentDetectionProps> = () => {
                     <Table
                       columns={columns}
                       dataSource={results}
-                      rowKey="id"
+                      rowKey="id
                       pagination={{ pageSize: 10 }}
                       style={{ marginTop: 16 }}
-                      size="small"
+                      size="small
                     />
                   </>
                 )}
@@ -293,10 +292,10 @@ const ContentDetection: React.FC<ContentDetectionProps> = () => {
                   <Col span={8}>
                     <div style={{ textAlign: 'center' }}>
                       <Progress
-                        type="circle"
+                        type="circle
                         percent={Math.round((riskCounts.low / results.length) * 100)}
                         format={() => `${riskCounts.low}`}
-                        strokeColor="#52c41a"
+                        strokeColor="#52c41a
                         size={80}
                       />
                       <div style={{ marginTop: 8 }}>
@@ -307,10 +306,10 @@ const ContentDetection: React.FC<ContentDetectionProps> = () => {
                   <Col span={8}>
                     <div style={{ textAlign: 'center' }}>
                       <Progress
-                        type="circle"
+                        type="circle
                         percent={Math.round((riskCounts.medium / results.length) * 100)}
                         format={() => `${riskCounts.medium}`}
-                        strokeColor="#faad14"
+                        strokeColor="#faad14
                         size={80}
                       />
                       <div style={{ marginTop: 8 }}>
@@ -321,10 +320,10 @@ const ContentDetection: React.FC<ContentDetectionProps> = () => {
                   <Col span={8}>
                     <div style={{ textAlign: 'center' }}>
                       <Progress
-                        type="circle"
+                        type="circle
                         percent={Math.round((riskCounts.high / results.length) * 100)}
                         format={() => `${riskCounts.high}`}
-                        strokeColor="#ff4d4f"
+                        strokeColor="#ff4d4f
                         size={80}
                       />
                       <div style={{ marginTop: 8 }}>

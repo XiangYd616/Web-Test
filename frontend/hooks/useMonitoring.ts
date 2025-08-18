@@ -8,8 +8,8 @@ export interface MonitoringTarget     {
     id: string;
     name: string;
     url: string;
-    type: 'website' | 'api' | 'database' | 'service'
-    status: 'online' | 'offline' | 'warning' | 'error'
+    type: 'website' | 'api' | 'database' | 'service
+    status: 'online' | 'offline' | 'warning' | 'error
     enabled: boolean;
     interval: number;
     timeout: number;
@@ -25,8 +25,8 @@ export interface Alert     {
     id: string;
     targetId: string;
     targetName: string;
-    type: 'down' | 'slow' | 'error' | 'timeout'
-    severity: 'low' | 'medium' | 'high' | 'critical'
+    type: 'down' | 'slow' | 'error' | 'timeout
+    severity: 'low' | 'medium' | 'high' | 'critical
     message: string;
     timestamp: string;
     resolved: boolean;
@@ -57,17 +57,17 @@ export const useMonitoring = () => {
             const response = await fetch('/api/monitoring/start', {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${state.auth.token}`'`
+                    'Authorization': `Bearer ${state.auth.token}
                 }
             });
 
             if (!response.ok) {
-                throw new Error("启动监控失败");``
+                throw new Error("启动监控失败");
             }
 
             dispatch({ type: 'MONITORING_START' });
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : '启动监控失败'
+            const errorMessage = error instanceof Error ? error.message : '启动监控失败
             dispatch({
                 type: 'MONITORING_SET_ERROR',
                 payload: { error: errorMessage }
@@ -82,17 +82,17 @@ export const useMonitoring = () => {
             const response = await fetch('/api/monitoring/stop', {
                 method: 'POST',
                 headers: {
-                    "Authorization': `Bearer ${state.auth.token}`'`"
+                    "Authorization': `Bearer ${state.auth.token}
                 }
             });
 
             if (!response.ok) {
-                throw new Error("停止监控失败");``
+                throw new Error("停止监控失败");
             }
 
             dispatch({ type: 'MONITORING_STOP' });
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : '停止监控失败'
+            const errorMessage = error instanceof Error ? error.message : '停止监控失败
             dispatch({
                 type: 'MONITORING_SET_ERROR',
                 payload: { error: errorMessage }
@@ -108,13 +108,13 @@ export const useMonitoring = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${state.auth.token}`'`
+                    'Authorization': `Bearer ${state.auth.token}
                 },
                 body: JSON.stringify(target)
             });
 
             if (!response.ok) {
-                throw new Error("添加监控目标失败");``
+                throw new Error("添加监控目标失败");
             }
 
             const data = await response.json();
@@ -130,7 +130,7 @@ export const useMonitoring = () => {
             });
 
         } catch (error) {
-            console.error("Add target error: ', error);"
+            console.error("Add target error: ', error);
             throw error;
         }
     }, [state.auth.token, dispatch]);
@@ -138,17 +138,17 @@ export const useMonitoring = () => {
     // 更新监控目标
     const updateTarget = useCallback(async (targetId: string, updates: Partial<MonitoringTarget>): Promise<void>  => {
         try {
-            const response = await fetch(`/api/monitoring/targets/${targetId}`, {`
-                method: "PUT','`"`
+            const response = await fetch(`/api/monitoring/targets/${targetId}`, {
+                method: "PUT',"
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${state.auth.token}`'`
+                    'Authorization': `Bearer ${state.auth.token}
                 },
                 body: JSON.stringify(updates)
             });
 
             if (!response.ok) {
-                throw new Error("更新监控目标失败");``
+                throw new Error("更新监控目标失败");
             }
 
             dispatch({
@@ -157,7 +157,7 @@ export const useMonitoring = () => {
             });
 
         } catch (error) {
-            console.error("Update target error: ', error);"
+            console.error("Update target error: ', error);
             throw error;
         }
     }, [state.auth.token, dispatch]);
@@ -165,15 +165,15 @@ export const useMonitoring = () => {
     // 删除监控目标
     const removeTarget = useCallback(async (targetId: string): Promise<void>  => {
         try {
-            const response = await fetch(`/api/monitoring/targets/${targetId}`, {`
-                method: "DELETE','`"`
+            const response = await fetch(`/api/monitoring/targets/${targetId}`, {
+                method: "DELETE',"
                 headers: {
-                    'Authorization': `Bearer ${state.auth.token}`'`
+                    'Authorization': `Bearer ${state.auth.token}
                 }
             });
 
             if (!response.ok) {
-                throw new Error("删除监控目标失败");``
+                throw new Error("删除监控目标失败");
             }
 
             dispatch({
@@ -182,7 +182,7 @@ export const useMonitoring = () => {
             });
 
         } catch (error) {
-            console.error("Remove target error: ', error);"
+            console.error("Remove target error: ', error);
             throw error;
         }
     }, [state.auth.token, dispatch]);
@@ -190,15 +190,15 @@ export const useMonitoring = () => {
     // 手动检查目标
     const checkTarget = useCallback(async (targetId: string): Promise<void>  => {
         try {
-            const response = await fetch(`/api/monitoring/targets/${targetId}/check`, {`
-                method: "POST','`"`
+            const response = await fetch(`/api/monitoring/targets/${targetId}/check`, {
+                method: "POST',"
                 headers: {
-                    'Authorization': `Bearer ${state.auth.token}`'`
+                    'Authorization': `Bearer ${state.auth.token}
                 }
             });
 
             if (!response.ok) {
-                throw new Error("检查目标失败");``
+                throw new Error("检查目标失败");
             }
 
             const data = await response.json();
@@ -226,12 +226,12 @@ export const useMonitoring = () => {
         try {
             const response = await fetch('/api/monitoring/targets', {
                 headers: {
-                    "Authorization': `Bearer ${state.auth.token}`'`"
+                    "Authorization': `Bearer ${state.auth.token}
                 }
             });
 
             if (!response.ok) {
-                throw new Error("获取监控目标失败");``
+                throw new Error("获取监控目标失败");
             }
 
             const data = await response.json();
@@ -256,14 +256,14 @@ export const useMonitoring = () => {
             if (filters?.severity) queryParams.append('severity', filters.severity);
             if (filters?.limit) queryParams.append('limit', filters.limit.toString());
             if (filters?.offset) queryParams.append('offset', filters.offset.toString());
-            const response = await fetch(`/api/monitoring/alerts?${queryParams}`, {`
+            const response = await fetch(`/api/monitoring/alerts?${queryParams}`, {
                 headers: {
-                    "Authorization': `Bearer ${state.auth.token}`'`"
+                    "Authorization': `Bearer ${state.auth.token}
                 }
             });
 
             if (!response.ok) {
-                throw new Error("获取告警列表失败");``
+                throw new Error("获取告警列表失败");
             }
 
             const data = await response.json();
@@ -278,15 +278,15 @@ export const useMonitoring = () => {
     // 解决告警
     const resolveAlert = useCallback(async (alertId: string): Promise<void>  => {
         try {
-            const response = await fetch(`/api/monitoring/alerts/${alertId}/resolve`, {`
-                method: "POST','`"`
+            const response = await fetch(`/api/monitoring/alerts/${alertId}/resolve`, {
+                method: "POST',"
                 headers: {
-                    "Authorization': `Bearer ${state.auth.token}`'`"
+                    "Authorization': `Bearer ${state.auth.token}
                 }
             });
 
             if (!response.ok) {
-                throw new Error("解决告警失败");``
+                throw new Error("解决告警失败");
             }
 
             dispatch({
@@ -305,12 +305,12 @@ export const useMonitoring = () => {
         try {
             const response = await fetch('/api/monitoring/stats', {
                 headers: {
-                    'Authorization': `Bearer ${state.auth.token}`'`
+                    'Authorization': `Bearer ${state.auth.token}
                 }
             });
 
             if (!response.ok) {
-                throw new Error("获取监控统计失败");``
+                throw new Error("获取监控统计失败");
             }
 
             const data = await response.json();
@@ -367,14 +367,14 @@ export const useMonitoring = () => {
     // 获取目标详情
     const getTargetDetails = useCallback(async (targetId: string): Promise<MonitoringTarget | null>  => {
         try {
-            const response = await fetch(`/api/monitoring/targets/${targetId}`, {`
+            const response = await fetch(`/api/monitoring/targets/${targetId}`, {
                 headers: {
-                    'Authorization': `Bearer ${state.auth.token}`'`
+                    'Authorization': `Bearer ${state.auth.token}
                 }
             });
 
             if (!response.ok) {
-                throw new Error("获取目标详情失败");``
+                throw new Error("获取目标详情失败");
             }
 
             const data = await response.json();
@@ -393,13 +393,13 @@ export const useMonitoring = () => {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    "Authorization': `Bearer ${state.auth.token}`'`"
+                    "Authorization': `Bearer ${state.auth.token}
                 },
                 body: JSON.stringify({ targetIds, updates })
             });
 
             if (!response.ok) {
-                throw new Error("批量更新目标失败");``
+                throw new Error("批量更新目标失败");
             }
 
             // 更新每个目标的状态

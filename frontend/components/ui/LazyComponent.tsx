@@ -16,7 +16,7 @@ interface LazyComponentOptions   {
   /** 是否在视口中才加载 */
   loadOnVisible?: boolean;
   /** 预加载策略 */
-  preload?: 'immediate' | 'hover' | 'idle' | "none'; // 已删除 // 已删除'
+  preload?: 'immediate' | 'hover' | 'idle' | "none'; // 已删除 // 已删除
 }
 
 /**
@@ -31,7 +31,7 @@ export function createLazyComponent<T extends ComponentType<any>>(// // importFn
     fallback,
     retryCount = 3,
     loadOnVisible = false,
-    preload = 'none'
+    preload = 'none
   } = options;
 
   // 创建懒加载组件
@@ -53,9 +53,9 @@ export function createLazyComponent<T extends ComponentType<any>>(// // importFn
   
   const ariaProps = {
     id: componentId,
-    "aria-label': ariaLabel,'`
+    "aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': ['']
+    'aria-describedby': [']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
@@ -64,7 +64,7 @@ export function createLazyComponent<T extends ComponentType<any>>(// // importFn
     'aria-disabled': disabled,
     'aria-busy': loading,
     'aria-expanded': expanded,
-    "aria-selected': selected,'
+    "aria-selected': selected,
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -105,7 +105,7 @@ export function createLazyComponent<T extends ComponentType<any>>(// // importFn
         { threshold: 0.1 }
       );
 
-      const element = document.getElementById(`lazy-component-${Math.random()}`); // 已删除 // 已删除`
+      const element = document.getElementById(`lazy-component-${Math.random()}`); // 已删除 // 已删除
       if (element) {
         observer.observe(element);
       }
@@ -115,7 +115,7 @@ export function createLazyComponent<T extends ComponentType<any>>(// // importFn
 
     // 预加载处理
     useEffect(() => {
-      if (preload === "immediate') {'`
+      if (preload === "immediate') {
         setShouldLoad(true);
       } else if (preload === 'idle') {
         const timeoutId = setTimeout(() => {
@@ -140,8 +140,8 @@ export function createLazyComponent<T extends ComponentType<any>>(// // importFn
 
     // 自定义加载组件
     const loadingFallback = fallback || (
-      <div className= 'flex items-center justify-center p-8'>
-        <LoadingSpinner size= 'md' text= '加载组件...'    />
+      <div className='flex items-center justify-center p-8'>
+        <LoadingSpinner size= 'md' text='加载组件...' />
       </div>
     );
 
@@ -151,10 +151,10 @@ export function createLazyComponent<T extends ComponentType<any>>(// // importFn
         return (
         <div
           id={`lazy-component-${Math.random()`}
-      }`}`
-          className= "min-h-[100px] flex items-center justify-center";`
+      }`}
+          className= "min-h-[100px] flex items-center justify-center";
         >
-          <div className= 'text-gray-500 text-sm'>组件准备加载...</div>
+          <div className='text-gray-500 text-sm'>组件准备加载...</div>
         </div>
       );
     }
@@ -167,18 +167,18 @@ export function createLazyComponent<T extends ComponentType<any>>(// // importFn
 
     return (<ErrorBoundary
         onError={(error) => {
-          console.error("LazyComponent error: ', error);'
+          console.error("LazyComponent error: ', error);
           if (retries < retryCount) {
             setTimeout(handleRetry, 1000);
           }
         }}
         fallback={
-          <div className= 'p-4 text-center'>
-            <p className= 'text-red-600 mb-2'>组件加载失败</p>
+          <div className='p-4 text-center'>
+            <p className='text-red-600 mb-2'>组件加载失败</p>
             {retries < retryCount && (
               <button
                 onClick={handleRetry}
-                className= 'px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700'
+                className= 'px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700
               >
                 重试 ({retries + 1}/{retryCount})
               </button>
@@ -216,7 +216,7 @@ export const LazyContainer: React.FC<LazyContainerProps> = ({
   loadOnVisible = true,
   placeholderHeight = 200,
   placeholder,
-  rootMargin = '50px'
+  rootMargin = '50px
 }) => {
   const [isVisible, setIsVisible] = useState(!loadOnVisible);
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -245,10 +245,10 @@ export const LazyContainer: React.FC<LazyContainerProps> = ({
 
   const defaultPlaceholder = (
     <div
-      className= 'flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg'
+      className= 'flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg
       style={{ height: placeholderHeight }}
     >
-      <div className= 'text-gray-500 text-sm'>内容加载中...</div>
+      <div className='text-gray-500 text-sm'>内容加载中...</div>
     </div>
   );
 
@@ -269,8 +269,8 @@ export const LazyChart = createLazyComponent(() => import('../charts/Chart'),
     loadOnVisible: true,
     preload: 'idle',
     fallback: (
-      <div className= 'h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center'>
-        <LoadingSpinner size= 'lg' text= '加载图表...'    />
+      <div className='h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center'>
+        <LoadingSpinner size= 'lg' text='加载图表...' />
       </div>
     )
   }
@@ -284,8 +284,8 @@ export const LazyDataTable = createLazyComponent(() => import('../ui/DataTable')
     loadOnVisible: true,
     preload: 'hover',
     fallback: (
-      <div className= 'h-96 bg-gray-50 dark:bg-gray-900 rounded-lg flex items-center justify-center'>
-        <LoadingSpinner size= 'lg' text= '加载数据表格...'    />
+      <div className='h-96 bg-gray-50 dark:bg-gray-900 rounded-lg flex items-center justify-center'>
+        <LoadingSpinner size= 'lg' text='加载数据表格...' />
       </div>
     )
   }
@@ -299,8 +299,8 @@ export const LazyCodeEditor = createLazyComponent(() => import('../ui/CodeEditor
     preload: 'none', // 只在需要时加载
     minLoadTime: 500,
     fallback: (
-      <div className= 'h-80 bg-gray-900 rounded-lg flex items-center justify-center'>
-        <LoadingSpinner size= 'lg' text= '加载代码编辑器...' color= 'white'    />
+      <div className='h-80 bg-gray-900 rounded-lg flex items-center justify-center'>
+        <LoadingSpinner size= 'lg' text= '加载代码编辑器...' color='white' />
       </div>
     )
   }

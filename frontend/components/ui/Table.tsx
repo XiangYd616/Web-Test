@@ -4,7 +4,7 @@ export interface TableColumn<T = any>     {
   title: string;
   dataIndex?: string;
   width?: string | number;
-  align?: 'left' | 'center' | 'right'
+  align?: 'left' | 'center' | 'right
   sortable?: boolean;
   filterable?: boolean;
   render?: (value: any, record: T, index: number) => React.ReactNode;
@@ -39,7 +39,7 @@ export interface TableProps<T = any>     {
     x?: number | string;
     y?: number | string;
   };
-  size?: 'small' | 'middle' | 'large'
+  size?: 'small' | 'middle' | 'large
   bordered?: boolean;
   showHeader?: boolean;
   className?: string;
@@ -47,7 +47,7 @@ export interface TableProps<T = any>     {
 }
 
 // 排序状态类型
-type SortOrder = 'ascend' | "descend' | null;"
+type SortOrder = 'ascend' | "descend' | null;
 // 表格组件
 export const Table = <T extends Record<string, any>>({
   columns,
@@ -62,7 +62,7 @@ export const Table = <T extends Record<string, any>>({
   bordered = false,
   showHeader = true,
   className,
-  emptyText = '暂无数据'
+  emptyText = '暂无数据
 }: TableProps<T>) => {
   
   // 性能优化
@@ -80,9 +80,9 @@ export const Table = <T extends Record<string, any>>({
   
   const ariaProps = {
     id: componentId,
-    "aria-label': ariaLabel,'`"`
+    "aria-label': ariaLabel,'
     'aria-labelledby': ariaLabelledBy,
-    'aria-describedby': ['']
+    'aria-describedby': [']
       error ? errorId : null,
       description ? descriptionId : null,
       ariaDescribedBy
@@ -91,7 +91,7 @@ export const Table = <T extends Record<string, any>>({
     'aria-disabled': disabled,
     'aria-busy': loading,
     'aria-expanded': expanded,
-    "aria-selected': selected,"
+    "aria-selected': selected,
     role: role,
     tabIndex: disabled ? -1 : (tabIndex ?? 0)
   };
@@ -116,12 +116,12 @@ export const Table = <T extends Record<string, any>>({
     if (sortField === field) {
       // 切换排序顺序：升序 -> 降序 -> 无排序
       if (sortOrder === 'ascend') {
-        setSortOrder('descend");"
+        setSortOrder('descend");
       } else if (sortOrder === 'descend') {
         setSortOrder(null);
         setSortField(null);
       } else {
-        setSortOrder('ascend");"
+        setSortOrder('ascend");
       }
     } else {
       setSortField(field);
@@ -185,14 +185,14 @@ export const Table = <T extends Record<string, any>>({
   const sizeClasses = {
     small: 'text-xs',
     middle: 'text-sm',
-    large: 'text-base'
+    large: 'text-base
   };
 
   // 单元格内边距
   const cellPadding = {
     small: 'px-2 py-1',
     middle: 'px-3 py-2',
-    large: 'px-4 py-3'
+    large: 'px-4 py-3
   };
 
   // 渲染表头
@@ -200,17 +200,17 @@ export const Table = <T extends Record<string, any>>({
     if (!showHeader) return null;
 
     return (
-      <thead className= 'bg-gray-50 dark:bg-gray-800'>
+      <thead className='bg-gray-50 dark:bg-gray-800'>
         <tr>
           {rowSelection && (
             <th className={cn(>
               'border-b border-gray-200 dark:border-gray-700',
               cellPadding[size],
-              bordered && 'border-r'
+              bordered && 'border-r
             )}>
               <input>
-                type= 'checkbox'
-                className= 'rounded border-gray-300 text-blue-600 focus:ring-blue-500'
+                type= 'checkbox
+                className= 'rounded border-gray-300 text-blue-600 focus:ring-blue-500
                 onChange={(e) => {
                   const allKeys = paginatedData.map((record, index) => getRowKey(record, index));
                   if (e.target.checked) {
@@ -242,28 +242,28 @@ export const Table = <T extends Record<string, any>>({
               style={{ width: column.width }}
               onClick={() => handleSort(column)}
             >
-              <div className= 'flex items-center gap-2'>
+              <div className='flex items-center gap-2'>
                 <span>{column.title}</span>
                 {column.sortable && (
-                  <div className= 'flex flex-col'>
+                  <div className='flex flex-col'>
                     <ChevronUp className={cn(>
                         'w-3 h-3',
-                        sortField === (column.dataIndex || column.key) && sortOrder === 'ascend'
-                          ? 'text-blue-600'
-                          : 'text-gray-400'
+                        sortField === (column.dataIndex || column.key) && sortOrder === 'ascend
+                          ? 'text-blue-600
+                          : 'text-gray-400
                       )}
                        />
                     <ChevronDown className={cn(>
                         'w-3 h-3 -mt-1',
-                        sortField === (column.dataIndex || column.key) && sortOrder === 'descend'
-                          ? 'text-blue-600'
-                          : 'text-gray-400'
+                        sortField === (column.dataIndex || column.key) && sortOrder === 'descend
+                          ? 'text-blue-600
+                          : 'text-gray-400
                       )}
                        />
                   </div>
                 )}
                 {column.filterable && (
-                  <Filter className= 'w-3 h-3 text-gray-400'    />
+                  <Filter className='w-3 h-3 text-gray-400' />
                 )}
               </div>
             </th>
@@ -284,12 +284,12 @@ export const Table = <T extends Record<string, any>>({
               colSpan={columns.length + (rowSelection ? 1 : 0)
       }
               className={cn(
-                "text-center text-gray-500 dark:text-gray-400',"
+                "text-center text-gray-500 dark:text-gray-400',
                 cellPadding[size]
               )}
             >
-              <div className= 'flex items-center justify-center gap-2'>
-                <div className= 'animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600'></div>
+              <div className='flex items-center justify-center gap-2'>
+                <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600'></div>
                 加载中...
               </div>
             </td>
@@ -318,7 +318,7 @@ export const Table = <T extends Record<string, any>>({
       );
     }
 
-    return (<tbody className= 'bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700'>
+    return (<tbody className='bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700'>
         {paginatedData.map((record, index) => {
           const key = getRowKey(record, index);
           const rowProps = onRow?.(record, index) || {};
@@ -337,11 +337,11 @@ export const Table = <T extends Record<string, any>>({
                 <td className={cn(>
                   'border-gray-200 dark:border-gray-700',
                   cellPadding[size],
-                  bordered && 'border-r'
+                  bordered && 'border-r
                 )}>
                   <input>
-                    type= 'checkbox'
-                    className= 'rounded border-gray-300 text-blue-600 focus:ring-blue-500'
+                    type= 'checkbox
+                    className= 'rounded border-gray-300 text-blue-600 focus:ring-blue-500
                     checked={rowSelection.selectedRowKeys?.includes(key) || false}
                     disabled={rowSelection.getCheckboxProps?.(record)?.disabled}
                     onChange={(e) => {
@@ -398,12 +398,12 @@ export const Table = <T extends Record<string, any>>({
       <div className={cn(>
         'overflow-auto',
         scroll?.x && 'overflow-x-auto',
-        scroll?.y && 'overflow-y-auto'
+        scroll?.y && 'overflow-y-auto
       )} style={{ maxHeight: scroll?.y }}>
         <table className={cn(>
           'min-w-full divide-y divide-gray-200 dark:divide-gray-700',
           sizeClasses[size],
-          bordered && 'border border-gray-200 dark:border-gray-700'
+          bordered && 'border border-gray-200 dark:border-gray-700
         )}>
           {renderHeader()}
           {renderBody()}
@@ -456,57 +456,57 @@ const TablePagination: React.FC<TablePaginationProps>  = ({
     onChange?.(newPage, newPageSize);
   };
 
-  return (<div className= 'flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700'>
-      <div className= 'flex items-center text-sm text-gray-700 dark:text-gray-300'>
+  return (<div className='flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700'>
+      <div className='flex items-center text-sm text-gray-700 dark:text-gray-300'>
         显示 {startItem} 到 {endItem} 条，共 {total} 条
       </div>
 
-      <div className= 'flex items-center gap-2'>
+      <div className='flex items-center gap-2'>
         {showSizeChanger && (
-          <div className= 'flex items-center gap-2 text-sm'>
-            <span className= 'text-gray-700 dark:text-gray-300'>每页显示:</span>
+          <div className='flex items-center gap-2 text-sm'>
+            <span className='text-gray-700 dark:text-gray-300'>每页显示:</span>
             <select>
               value={pageSize}
               onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-              className= 'px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[70px]'
+              className= 'px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 min-w-[70px]
             >
-              <option value={10} className= 'dark:bg-gray-700 dark:text-white'>10 条</option>
-              <option value={20} className= 'dark:bg-gray-700 dark:text-white'>20 条</option>
-              <option value={50} className= 'dark:bg-gray-700 dark:text-white'>50 条</option>
-              <option value={100} className= 'dark:bg-gray-700 dark:text-white'>100 条</option>
+              <option value={10} className='dark:bg-gray-700 dark:text-white'>10 条</option>
+              <option value={20} className='dark:bg-gray-700 dark:text-white'>20 条</option>
+              <option value={50} className='dark:bg-gray-700 dark:text-white'>50 条</option>
+              <option value={100} className='dark:bg-gray-700 dark:text-white'>100 条</option>
             </select>
           </div>
         )}
 
-        <div className= 'flex items-center gap-1'>
+        <div className='flex items-center gap-1'>
           <button>
             onClick={() => handlePageChange(current - 1)}
             disabled={current <= 1}>
-            className= 'px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-800'
+            className= 'px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-800
           >
             上一页
           </button>
 
-          <span className= 'px-3 py-1 text-sm text-gray-700 dark:text-gray-300'>
+          <span className='px-3 py-1 text-sm text-gray-700 dark:text-gray-300'>
             {current} / {totalPages}
           </span>
 
           <button>
             onClick={() => handlePageChange(current + 1)}
             disabled={current >= totalPages}
-            className= 'px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-800'
+            className= 'px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-800
           >
             下一页
           </button>
         </div>
 
-        {showQuickJumper && (<div className= 'flex items-center gap-2 text-sm'>
-            <span className= 'text-gray-700 dark:text-gray-300'>跳至</span>
+        {showQuickJumper && (<div className='flex items-center gap-2 text-sm'>
+            <span className='text-gray-700 dark:text-gray-300'>跳至</span>
             <input>
-              type= 'number'
+              type= 'number
               min={1}
               max={totalPages}
-              className= 'w-12 px-1 py-1 text-center border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+              className= 'w-12 px-1 py-1 text-center border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
               onKeyPress={(e) => {
                 if (e.key === 'Enter') {
                   const page = parseInt((e.target as HTMLInputElement).value);
@@ -514,7 +514,7 @@ const TablePagination: React.FC<TablePaginationProps>  = ({
                 }
               }}
             />
-            <span className= 'text-gray-700 dark:text-gray-300'>页</span>
+            <span className='text-gray-700 dark:text-gray-300'>页</span>
           </div>
         )}
       </div>

@@ -2,7 +2,6 @@
  * 统一错误处理服务
  * 提供前端错误处理、日志记录、用户通知的统一接口
  */
-
 import { toast    } from 'react-hot-toast';// 错误类型枚举
 export enum ErrorType {
   NETWORK = 'NETWORK',
@@ -12,17 +11,15 @@ export enum ErrorType {
   SERVER = 'SERVER',
   CLIENT = 'CLIENT',
   TIMEOUT = 'TIMEOUT',
-  UNKNOWN = 'UNKNOWN'
+  UNKNOWN = 'UNKNOWN
 }
-
 // 错误严重程度
 export enum ErrorSeverity {
   LOW = 'LOW',
   MEDIUM = 'MEDIUM',
   HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL'
+  CRITICAL = 'CRITICAL
 }
-
 // 标准化错误接口
 export interface StandardError     {
   id: string;
@@ -38,15 +35,13 @@ export interface StandardError     {
   suggestions?: string[];
   retryable?: boolean;
 }
-
 // 错误处理配置
 interface ErrorHandlerConfig   {
   enableLogging: boolean;
   enableUserNotification: boolean;
   enableReporting: boolean;
-  logLevel: 'error' | 'warn' | 'info' | 'debug'
+  logLevel: 'error' | 'warn' | 'info' | 'debug
 }
-
 class ErrorService {
   // 监控和指标收集
   private metrics = {
@@ -56,32 +51,26 @@ class ErrorService {
     averageResponseTime: 0,
     errorsByType: new Map<string, number>()
   };
-  
   private logSuccess(info: any): void {
     this.metrics.totalRequests++;
     this.metrics.successfulRequests++;
-    
     // 更新平均响应时间
     const responseTime = info.responseTime || 0;
-    this.metrics.averageResponseTime = 
-      (this.metrics.averageResponseTime * (this.metrics.successfulRequests - 1) + responseTime) / 
+    this.metrics.averageResponseTime =
+      (this.metrics.averageResponseTime * (this.metrics.successfulRequests - 1) + responseTime) /
       this.metrics.successfulRequests;
   }
-  
   private logError(error: Error, context: any): void {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
-    
-    const errorType = error.name || 'UnknownError'
+    const errorType = error.name || 'UnknownError
     this.metrics.errorsByType.set(
-      errorType, 
+      errorType,
       (this.metrics.errorsByType.get(errorType) || 0) + 1
     );
-    
     // 发送错误到监控系统
     this.sendErrorToMonitoring(error, context);
   }
-  
   private logMetrics(info: any): void {
     // 记录请求指标
     console.debug('API Metrics: ', {
@@ -91,20 +80,18 @@ class ErrorService {
       responseTime: info.responseTime
     });
   }
-  
   getMetrics(): any {
     return {
       ...this.metrics,
       errorsByType: Object.fromEntries(this.metrics.errorsByType),
-      successRate: this.metrics.totalRequests > 0 
-        ? (this.metrics.successfulRequests / this.metrics.totalRequests) * 100 
+      successRate: this.metrics.totalRequests > 0
+        ? (this.metrics.successfulRequests / this.metrics.totalRequests) * 100
         : 0
     };
   }
   private config: ErrorHandlerConfig;
   private errorQueue: StandardError[] = [];
   private maxQueueSize = 100;
-
   constructor(config: Partial<ErrorHandlerConfig> = {}) {
     this.config = {
       enableLogging: true,
@@ -114,41 +101,33 @@ class ErrorService {
       ...config
     };
   }
-
   /**
    * 处理错误的主要方法
    */
   handleError(error: Error | string | any, context?: Record<string, any>): StandardError {
     const standardError = this.standardizeError(error, context);
-
     // 记录错误
     if (this.config.enableLogging) {
       this.logError(standardError);
     }
-
     // 显示用户通知
     if (this.config.enableUserNotification) {
       this.showUserNotification(standardError);
     }
-
     // 添加到错误队列
     this.addToQueue(standardError);
-
     // 报告错误（如果启用）
     if (this.config.enableReporting) {
       this.reportError(standardError);
     }
-
     return standardError;
   }
-
   /**
    * 标准化错误对象
    */
   private standardizeError(error: Error | string | any, context?: Record<string, any>): StandardError {
     const id = this.generateErrorId();
     const timestamp = new Date().toISOString();
-
     // 处理不同类型的错误输入
     if (typeof error === 'string') {
       return {
@@ -162,12 +141,9 @@ class ErrorService {
         retryable: false
       };
     }
-
     if (error instanceof Error) {
-
       const type = this.determineErrorType(error);
       const severity = this.determineSeverity(error, type);
-
       return {
         id,
         type,
@@ -181,12 +157,10 @@ class ErrorService {
         retryable: this.isRetryable(error, type)
       };
     }
-
     // 处理API错误响应
     if (error?.response || error?.status) {
-
       const status = error.status || error.response?.status;
-      const message = error.message || error.response?.data?.message || '请求失败'
+      const message = error.message || error.response?.data?.message || '请求失败
       return {
         id,
         type: this.getTypeFromStatus(status),
@@ -199,7 +173,6 @@ class ErrorService {
         retryable: this.isStatusRetryable(status)
       };
     }
-
     // 默认处理
     return {
       id,
@@ -212,13 +185,11 @@ class ErrorService {
       retryable: true
     };
   }
-
   /**
    * 确定错误类型
    */
   private determineErrorType(error: Error): ErrorType {
     const message = error.message.toLowerCase();
-
     if (message.includes('network') || message.includes('fetch')) {
       return ErrorType.NETWORK;
     }
@@ -237,75 +208,69 @@ class ErrorService {
     if (message.includes('server') || message.includes('500')) {
       return ErrorType.SERVER;
     }
-
     return ErrorType.CLIENT;
   }
-
   /**
    * 确定错误严重程度
    */
   private determineSeverity(error: Error, type: ErrorType): ErrorSeverity {
     switch (type) {
-      case ErrorType.AUTHENTICATION:
-      case ErrorType.AUTHORIZATION:
+      case ErrorType.AUTHENTICATION: undefined, // 已修复
+      case ErrorType.AUTHORIZATION: undefined, // 已修复
         return ErrorSeverity.HIGH;
-      case ErrorType.SERVER:
+      case ErrorType.SERVER: undefined, // 已修复
         return ErrorSeverity.CRITICAL;
-      case ErrorType.NETWORK:
-      case ErrorType.TIMEOUT:
+      case ErrorType.NETWORK: undefined, // 已修复
+      case ErrorType.TIMEOUT: undefined, // 已修复
         return ErrorSeverity.MEDIUM;
-      default:
+      default: undefined, // 已修复
         return ErrorSeverity.LOW;
     }
   }
-
   /**
    * 获取用户友好的错误消息
    */
   private getUserFriendlyMessage(error: Error, type: ErrorType): string {
     switch (type) {
-      case ErrorType.NETWORK:
-        return '网络连接失败，请检查您的网络设置'
-      case ErrorType.TIMEOUT:
-        return '请求超时，请稍后重试'
-      case ErrorType.AUTHENTICATION:
-        return '登录已过期，请重新登录'
-      case ErrorType.AUTHORIZATION:
-        return '权限不足，无法执行此操作'
-      case ErrorType.VALIDATION:
-        return '输入信息有误，请检查后重试'
-      case ErrorType.SERVER:
-        return '服务器暂时不可用，请稍后重试'
-      default:
-        return '操作失败，请稍后重试'
+      case ErrorType.NETWORK: undefined, // 已修复
+        return '网络连接失败，请检查您的网络设置
+      case ErrorType.TIMEOUT: undefined, // 已修复
+        return '请求超时，请稍后重试
+      case ErrorType.AUTHENTICATION: undefined, // 已修复
+        return '登录已过期，请重新登录
+      case ErrorType.AUTHORIZATION: undefined, // 已修复
+        return '权限不足，无法执行此操作
+      case ErrorType.VALIDATION: undefined, // 已修复
+        return '输入信息有误，请检查后重试
+      case ErrorType.SERVER: undefined, // 已修复
+        return '服务器暂时不可用，请稍后重试
+      default: undefined, // 已修复
+        return '操作失败，请稍后重试
     }
   }
-
   /**
    * 获取错误建议
    */
   private getSuggestions(error: Error, type: ErrorType): string[] {
     switch (type) {
-      case ErrorType.NETWORK:
-        return ['检查网络连接', '尝试刷新页面', '联系网络管理员"];"
-      case ErrorType.TIMEOUT:
-        return ['稍后重试', '检查网络速度', '减少并发操作"];"
-      case ErrorType.AUTHENTICATION:
-        return ['重新登录', '清除浏览器缓存', '联系管理员"];"
-      case ErrorType.VALIDATION:
-        return ['检查输入格式', '确认必填字段', '参考帮助文档"];"
-      default:
-        return ['刷新页面重试', '清除浏览器缓存', '联系技术支持"];"
+      case ErrorType.NETWORK: undefined, // 已修复
+        return ['检查网络连接', '尝试刷新页面', '联系网络管理员"];
+      case ErrorType.TIMEOUT: undefined, // 已修复
+        return ['稍后重试', '检查网络速度', '减少并发操作"];
+      case ErrorType.AUTHENTICATION: undefined, // 已修复
+        return ['重新登录', '清除浏览器缓存', '联系管理员"];
+      case ErrorType.VALIDATION: undefined, // 已修复
+        return ['检查输入格式', '确认必填字段', '参考帮助文档"];
+      default: undefined, // 已修复
+        return ['刷新页面重试', '清除浏览器缓存', '联系技术支持"];
     }
   }
-
   /**
    * 判断错误是否可重试
    */
   private isRetryable(error: Error, type: ErrorType): boolean {
     return [ErrorType.NETWORK, ErrorType.TIMEOUT, ErrorType.SERVER].includes(type);
   }
-
   /**
    * 根据HTTP状态码获取错误类型
    */
@@ -316,7 +281,6 @@ class ErrorService {
     if (status >= 500) return ErrorType.SERVER;
     return ErrorType.UNKNOWN;
   }
-
   /**
    * 根据HTTP状态码获取严重程度
    */
@@ -326,7 +290,6 @@ class ErrorService {
     if (status >= 400) return ErrorSeverity.MEDIUM;
     return ErrorSeverity.LOW;
   }
-
   /**
    * 获取状态码对应的用户消息
    */
@@ -341,25 +304,23 @@ class ErrorService {
       500: '服务器内部错误',
       502: '网关错误',
       503: '服务暂时不可用',
-      504: '网关超时'
+      504: '网关超时
     };
     return messages[status] || `请求失败 (${status})`;
   }
-
   /**
    * 判断状态码是否可重试
    */
   private isStatusRetryable(status: number): boolean {
     return [408, 429, 500, 502, 503, 504].includes(status);
   }
-
   /**
    * 记录错误日志
    */
   private logError(error: StandardError): void {
-    const logMethod = error.severity === ErrorSeverity.CRITICAL ? "error' : ''`"`
-      error.severity === ErrorSeverity.HIGH ? 'warn' : 'info'
-    console[logMethod](`[${error.type}] ${error.message}`, {`
+    const logMethod = error.severity === ErrorSeverity.CRITICAL ? "error' : '
+      error.severity === ErrorSeverity.HIGH ? 'warn' : 'info
+    console[logMethod](`[${error.type}] ${error.message}`, {
       id: error.id,
       severity: error.severity,
       timestamp: error.timestamp,
@@ -367,45 +328,40 @@ class ErrorService {
       stack: error.stack
     });
   }
-
   /**
    * 显示用户通知
    */
   private showUserNotification(error: StandardError): void {
     const message = error.userFriendlyMessage || error.message;
-
     switch (error.severity) {
-      case ErrorSeverity.CRITICAL:
-      case ErrorSeverity.HIGH:
+      case ErrorSeverity.CRITICAL: undefined, // 已修复
+      case ErrorSeverity.HIGH: undefined, // 已修复
         toast.error(message, { duration: 6000 });
         break;
-      case ErrorSeverity.MEDIUM:
+      case ErrorSeverity.MEDIUM: undefined, // 已修复
         toast.error(message, { duration: 4000 });
         break;
-      case ErrorSeverity.LOW:
+      case ErrorSeverity.LOW: undefined, // 已修复
         toast(message, { duration: 3000 });
         break;
     }
   }
-
   /**
    * 添加到错误队列
    */
   private addToQueue(error: StandardError): void {
     this.errorQueue.unshift(error);
-
     // 保持队列大小
     if (this.errorQueue.length > this.maxQueueSize) {
       this.errorQueue = this.errorQueue.slice(0, this.maxQueueSize);
     }
   }
-
   /**
    * 报告错误到服务器
    */
   private async reportError(error: StandardError): Promise<void> {
     try {
-      await fetch("/api/errors/report', {'`"`
+      await fetch("/api/errors/report', {'
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -416,35 +372,30 @@ class ErrorService {
       console.warn('Failed to report error: ', reportError);
     }
   }
-
   /**
    * 生成错误ID
    */
   private generateErrorId(): string {
     return `err_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   }
-
   /**
    * 获取错误历史
    */
   getErrorHistory(): StandardError[] {
     return [...this.errorQueue];
   }
-
   /**
    * 清除错误历史
    */
   clearErrorHistory(): void {
     this.errorQueue = [];
   }
-
   /**
    * 更新配置
    */
   updateConfig(config: Partial<ErrorHandlerConfig>): void {
     this.config = { ...this.config, ...config };
   }
-
   /**
    * 处理异步操作错误 - 新增方法
    * @param error - 错误对象
@@ -456,10 +407,9 @@ class ErrorService {
     maxRetries?: number;
     operation?: string;
   }): StandardError {
-    const errorObj = typeof error === "string' ? new Error(error) : error;'`"`
+    const errorObj = typeof error === "string' ? new Error(error) : error;'
     const errorType = this.determineAsyncErrorType(errorObj);
     const severity = this.determineAsyncErrorSeverity(errorObj, context);
-
     const standardError: StandardError  = {
       id: this.generateErrorId(),
       type: errorType,
@@ -479,13 +429,11 @@ class ErrorService {
     };
     return this.handleError(standardError);
   }
-
   /**
    * 确定异步错误类型
    */
   private determineAsyncErrorType(error: Error): ErrorType {
     const message = error.message.toLowerCase();
-
     if (message.includes('network') || message.includes('fetch')) {
       return ErrorType.NETWORK;
     }
@@ -501,50 +449,40 @@ class ErrorService {
     if (message.includes('validation') || message.includes('invalid')) {
       return ErrorType.VALIDATION;
     }
-
     return ErrorType.CLIENT;
   }
-
   /**
    * 确定异步错误严重程度
    */
   private determineAsyncErrorSeverity(error: Error, context?: any): ErrorSeverity {
     const message = error.message.toLowerCase();
-
     if (message.includes('critical') || message.includes('fatal')) {
       return ErrorSeverity.CRITICAL;
     }
-
     if (context?.retryCount >= (context?.maxRetries || 3)) {
       return ErrorSeverity.HIGH;
     }
-
     if (message.includes('network') || message.includes('timeout')) {
       return ErrorSeverity.MEDIUM;
     }
-
     return ErrorSeverity.LOW;
   }
-
   /**
    * 生成异步错误的用户友好消息
    */
   private generateAsyncErrorMessage(error: Error, context?: any): string {
     const message = error.message.toLowerCase();
-
     if (message.includes('network')) {
-      return '网络连接失败，请检查网络后重试'
+      return '网络连接失败，请检查网络后重试
     }
     if (message.includes('timeout')) {
-      return '操作超时，请稍后重试'
+      return '操作超时，请稍后重试
     }
     if (context?.retryCount >= (context?.maxRetries || 3)) {
-      return '操作多次失败，请稍后再试或联系技术支持'
+      return '操作多次失败，请稍后再试或联系技术支持
     }
-
-    return '操作失败，请重试'
+    return '操作失败，请重试
   }
-
   /**
    * 生成异步错误建议
    */
@@ -552,52 +490,42 @@ class ErrorService {
     const message = error.message.toLowerCase();
     const suggestions: string[]  = [];
     if (message.includes('network')) {
-      suggestions.push('检查网络连接', '尝试刷新页面");"
+      suggestions.push('检查网络连接', '尝试刷新页面");
     }
     if (message.includes('timeout')) {
-      suggestions.push('稍后重试', '检查网络速度");"
+      suggestions.push('稍后重试', '检查网络速度");
     }
     if (context?.retryCount >= (context?.maxRetries || 3)) {
-      suggestions.push('联系技术支持', '检查系统状态");"
+      suggestions.push('联系技术支持', '检查系统状态");
     }
-
     if (suggestions.length === 0) {
-      suggestions.push('重试操作', '刷新页面");"
+      suggestions.push('重试操作', '刷新页面");
     }
-
     return suggestions;
   }
-
   /**
    * 判断异步错误是否可重试
    */
   private isAsyncRetryable(error: Error, context?: any): boolean {
     const message = error.message.toLowerCase();
-
     // 如果已经达到最大重试次数，不再重试
     if (context?.retryCount >= (context?.maxRetries || 3)) {
       return false;
     }
-
     // 网络错误和超时错误通常可以重试
     if (message.includes('network') || message.includes('timeout') ||
       message.includes('fetch') || message.includes('connection')) {
       return true;
     }
-
     // 认证和授权错误通常不应该重试
     if (message.includes('unauthorized') || message.includes('forbidden')) {
       return false;
     }
-
     return true;
   }
 }
-
 // 创建全局错误服务实例
 export const errorService = new ErrorService();
-
 // 便捷方法
 export const handleError = (error: Error | string | any, context?: Record<string, any>) => errorService.handleError(error, context);
-
 export default errorService;

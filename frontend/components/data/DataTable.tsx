@@ -10,4 +10,4 @@ const DataTable: React.FC<DataTableProps> = (props) => {
     </div>
   );
 };
-export default DataTable;'"
+export default DataTable;

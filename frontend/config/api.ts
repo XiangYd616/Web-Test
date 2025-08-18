@@ -6,7 +6,7 @@
 interface EnvironmentConfig   {
   apiUrl: string;
   wsUrl: string;
-  environment: 'development' | 'production' | 'test'
+  environment: 'development' | 'production' | 'test
   features: {
     realTimeUpdates: boolean;
     advancedAnalytics: boolean;
@@ -17,7 +17,7 @@ interface EnvironmentConfig   {
 // 获取环境配置
 const getEnvironmentConfig = (): EnvironmentConfig  => {
   const isDev = import.meta.env.DEV;
-  const apiUrl = import.meta.env.VITE_API_URL || (isDev ? 'http://localhost:3001' : '");
+  const apiUrl = import.meta.env.VITE_API_URL || (isDev ? 'http://localhost:3001' : ');
   return {
     apiUrl,
     wsUrl: import.meta.env.VITE_WS_URL || apiUrl.replace('http', 'ws'),
@@ -25,7 +25,7 @@ const getEnvironmentConfig = (): EnvironmentConfig  => {
     features: {
       realTimeUpdates: import.meta.env.VITE_ENABLE_REALTIME !== 'false',
       advancedAnalytics: import.meta.env.VITE_ENABLE_ANALYTICS !== 'false',
-      debugMode: isDev || import.meta.env.VITE_DEBUG === 'true'
+      debugMode: isDev || import.meta.env.VITE_DEBUG === 'true
     }
   };
 };
@@ -50,7 +50,7 @@ export const API_ENDPOINTS = {
     LOGIN: '/api/auth/login',
     REGISTER: '/api/auth/register',
     LOGOUT: '/api/auth/logout',
-    REFRESH: '/api/auth/refresh'
+    REFRESH: '/api/auth/refresh
   },
 
   // 测试相关
@@ -58,21 +58,21 @@ export const API_ENDPOINTS = {
     HISTORY: '/api/test/history',
     START: '/api/test/start',
     STOP: '/api/test/stop',
-    RESULTS: '/api/test/results'
+    RESULTS: '/api/test/results
   },
 
   // 数据管理
   DATA: {
     LIST: '/api/data-management/list',
     EXPORT: '/api/data-management/export',
-    DELETE: '/api/data-management/delete'
+    DELETE: '/api/data-management/delete
   },
 
   // 用户相关
   USER: {
     PROFILE: '/api/user/profile',
     STATS: '/api/user/stats',
-    PREFERENCES: '/api/user/preferences'
+    PREFERENCES: '/api/user/preferences
   }
 };
 
@@ -87,6 +87,6 @@ export const getApiConfig = () => ({
   baseURL: getApiBaseUrl(),
   timeout: 30000,
   headers: {
-    "Content-Type': 'application/json";`
+    "Content-Type': 'application/json";
   }
 });

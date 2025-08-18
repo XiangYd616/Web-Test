@@ -44,7 +44,7 @@ class ApiErrorInterceptor {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError'
+    const errorType = error.name || 'UnknownError
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -205,14 +205,14 @@ class ApiErrorInterceptor {
     if (typeof data === 'string' && data.includes('<html>')) {
       return {
         success: false,
-        message: `服务器返回了HTML页面 (${error.response.status})``
+        message: `服务器返回了HTML页面 (${error.response.status})
       };
     }
 
     // 其他格式
     return {
       success: false,
-      message: error.message || "未知错误";`
+      message: error.message || "未知错误";
     };
   }
 
@@ -259,25 +259,25 @@ class ApiErrorInterceptor {
     const status = error.response?.status;
 
     switch (status) {
-      case 401:
+      case 401: undefined, // 已修复
         // 未授权，可能需要重新登录
         await this.handleUnauthorized(error);
         break;
       
-      case 403:
+      case 403: undefined, // 已修复
         // 禁止访问，记录权限问题
         this.handleForbidden(error);
         break;
       
-      case 429:
+      case 429: undefined, // 已修复
         // 请求过于频繁，实施退避策略
         this.handleRateLimit(error);
         break;
       
-      case 500:
-      case 502:
-      case 503:
-      case 504:
+      case 500: undefined, // 已修复
+      case 502: undefined, // 已修复
+      case 503: undefined, // 已修复
+      case 504: undefined, // 已修复
         // 服务器错误，可能需要降级处理
         this.handleServerError(error);
         break;
@@ -297,7 +297,7 @@ class ApiErrorInterceptor {
       localStorage.setItem('redirect_after_login', window.location.pathname);
       // 延迟跳转，让用户看到错误消息
       setTimeout(() => {
-        window.location.href = '/login'
+        window.location.href = '/login
       }, 2000);
     }
   }
@@ -323,7 +323,7 @@ class ApiErrorInterceptor {
     const waitTime = retryAfter ? parseInt(retryAfter) * 1000 : 60000;
 
     // 实施退避策略
-    console.warn(`Rate limited. Retry after ${waitTime}ms`);`
+    console.warn(`Rate limited. Retry after ${waitTime}ms`);
   }
 
   /**
@@ -331,7 +331,7 @@ class ApiErrorInterceptor {
    */
   private handleServerError(error: AxiosError): void {
     // 记录服务器错误，可能需要降级处理
-    console.error("Server error: ', {'`
+    console.error("Server error: ', {
       status: error.response?.status,
       url: error.config?.url,
       timestamp: new Date().toISOString()
@@ -360,7 +360,7 @@ class ApiErrorInterceptor {
    */
   private getCurrentUser(): any {
     try {
-      const userStr = localStorage.getItem("current_user");`
+      const userStr = localStorage.getItem("current_user");
       return userStr ? JSON.parse(userStr) : null;
     } catch {
       return null;

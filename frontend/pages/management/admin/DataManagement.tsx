@@ -4,7 +4,7 @@ import React, { useState, useEffect    } from 'react';import { Database, Downloa
 const DataManagement: React.FC  = () => {
   
   // 页面级功能
-  const [pageTitle, setPageTitle] = useState("");
+  const [pageTitle, setPageTitle] = useState(");
   // 设置页面标题
   useEffect(() => {
     if (pageTitle) {
@@ -15,7 +15,7 @@ const DataManagement: React.FC  = () => {
   // 页面可见性检测
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState ==="visible') {'`"`
+      if (document.visibilityState ==="visible') {'
         // 页面变为可见时刷新数据
         fetchData?.();
       }
@@ -46,14 +46,14 @@ const DataManagement: React.FC  = () => {
   
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [filter, setFilter] = useState("");
+  const [filter, setFilter] = useState(");
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
   // 加载数据
   const loadData = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/data-management/list");"
+      const response = await fetch('/api/data-management/list");
       const result = await response.json();
       if (result.success) {
         setData(result.data);
@@ -81,13 +81,13 @@ const DataManagement: React.FC  = () => {
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a");"
+        const a = document.createElement('a");
         a.href = url;
-        a.download = `data-export-${new Date().toISOString().split('T')[0]}.csv`;'`
+        a.download = `data-export-${new Date().toISOString().split('T')[0]}.csv`;
         a.click();
       }
     } catch (error) {
-      console.error("导出失败:', error);'`"`
+      console.error("导出失败:', error);
     }
   };
 
@@ -95,9 +95,9 @@ const DataManagement: React.FC  = () => {
   const handleDelete = async () => {
     if (!selectedItems.length) return;
     
-    if (confirm(`确定要删除 ${selectedItems.length} 项数据吗？`)) {`
+    if (confirm(`确定要删除 ${selectedItems.length} 项数据吗？`)) {
       try {
-        const response = await fetch("/api/data-management/delete', {'`"`
+        const response = await fetch("/api/data-management/delete', {'
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ids: selectedItems })
@@ -147,7 +147,7 @@ const DataManagement: React.FC  = () => {
             <div className='mt-4'>
               <button>
                 onClick={() => window.location.reload()}
-                className='bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200'
+                className='bg-red-100 px-2 py-1 text-sm text-red-800 rounded hover:bg-red-200
               >
                 重试
               </button>
@@ -174,15 +174,15 @@ const DataManagement: React.FC  = () => {
           <button>
             onClick={loadData}
             disabled={loading}
-            className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2'
+            className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : "'}`}    />`"
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : "}`}    />
             刷新
           </button>
           
           <button>
             onClick={handleExport}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2";``
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2";
           >
             <Download className='w-4 h-4'    />
             导出
@@ -191,7 +191,7 @@ const DataManagement: React.FC  = () => {
           {selectedItems.length > 0 && (
             <button>
               onClick={handleDelete}
-              className='px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2'
+              className='px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2
             >
               <Trash2 className='w-4 h-4'    />
               删除 ({selectedItems.length})
@@ -204,11 +204,11 @@ const DataManagement: React.FC  = () => {
       <div className='flex items-center gap-4'>
         <div className='flex-1'>
           <input>
-            type='text'
-            placeholder='搜索数据...'
+            type='text
+            placeholder='搜索数据...
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className='w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500'
+            className='w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500
           />
         </div>
         <Filter className='w-5 h-5 text-gray-400'    />
@@ -232,7 +232,7 @@ const DataManagement: React.FC  = () => {
                 <tr>
                   <th className='px-4 py-3 text-left'>
                     <input>
-                      type='checkbox'
+                      type='checkbox
                       checked={selectedItems.length === data.length}
                       onChange={(e) => {
                         if (e.target.checked) {
@@ -241,7 +241,7 @@ const DataManagement: React.FC  = () => {
                           setSelectedItems([]);
                         }
                       }}
-                      className='rounded'
+                      className='rounded
                     />
                   </th>
                   <th className='px-4 py-3 text-left text-gray-300'>ID</th>
@@ -256,7 +256,7 @@ const DataManagement: React.FC  = () => {
                   <tr key={item.id} className='hover:bg-gray-700/50'>
                     <td className='px-4 py-3'>
                       <input>
-                        type='checkbox'
+                        type='checkbox
                         checked={selectedItems.includes(item.id)}
                         onChange={(e) => {
                           if (e.target.checked) {
@@ -265,7 +265,7 @@ const DataManagement: React.FC  = () => {
                             setSelectedItems(selectedItems.filter(id => id !== item.id));
                           }
                         }}
-                        className='rounded'
+                        className='rounded
                       />
                     </td>
                     <td className='px-4 py-3 text-gray-300'>{item.id}</td>
@@ -273,14 +273,14 @@ const DataManagement: React.FC  = () => {
                     <td className='px-4 py-3 text-gray-300'>{item.url}</td>
                     <td className='px-4 py-3'>
                       <span className={`px-2 py-1 rounded-full text-xs ${`}>
-                        item.status ==="completed' ? 'bg-green-500/20 text-green-400' : ''`"`
-                        item.status ==='failed' ? 'bg-red-500/20 text-red-400' : ''
-                        'bg-yellow-500/20 text-yellow-400'
-                      }`}>`
+                        item.status ==="completed' ? 'bg-green-500/20 text-green-400' : '
+                        item.status ==='failed' ? 'bg-red-500/20 text-red-400' : 
+                        'bg-yellow-500/20 text-yellow-400
+                      }`}>
                         {item.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-300'>`'"`
+                    <td className="px-4 py-3 text-gray-300'>`
                       {new Date(item.created_at).toLocaleString()}
                     </td>
                   </tr>

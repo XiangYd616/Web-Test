@@ -16,7 +16,7 @@ export interface TestConfig     {
 export interface TestResult     {
     id: string;
     type: string;
-    status: 'running' | 'completed' | 'failed' | 'cancelled'
+    status: 'running' | 'completed' | 'failed' | 'cancelled
     score?: number;
     startTime: string;
     endTime?: string;
@@ -26,7 +26,7 @@ export interface TestResult     {
     recommendations?: Array<{>
         title: string;
         description: string;
-        priority: 'low' | 'medium' | 'high' | 'critical'
+        priority: 'low' | 'medium' | 'high' | 'critical
         solution: string;
     }>;
     error?: string;
@@ -60,13 +60,13 @@ export const useTest = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${state.auth.token}`'`
+                    'Authorization': `Bearer ${state.auth.token}
                 },
                 body: JSON.stringify(config)
             });
 
             if (!response.ok) {
-                throw new Error("测试启动失败");``
+                throw new Error("测试启动失败");
             }
 
             const result = await response.json();
@@ -74,7 +74,7 @@ export const useTest = () => {
             return result.testId || testId;
 
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : '测试启动失败'
+            const errorMessage = error instanceof Error ? error.message : '测试启动失败
             dispatch({
                 type: 'TEST_FAIL',
                 payload: { testId: Date.now().toString(), error: errorMessage }
@@ -106,16 +106,16 @@ export const useTest = () => {
         try {
             // 调用API取消测试
             if (state.auth.token) {
-                await fetch(`/api/test/${testId}/cancel`, {`
-                    method: "POST','`"`
+                await fetch(`/api/test/${testId}/cancel`, {
+                    method: "POST',"
                     headers: {
-                        'Authorization': `Bearer ${state.auth.token}`'`
+                        'Authorization': `Bearer ${state.auth.token}
                     }
                 });
             }
 
             dispatch({
-                type: "TEST_CANCEL','`"`
+                type: "TEST_CANCEL',"
                 payload: { testId }
             });
 
@@ -141,15 +141,15 @@ export const useTest = () => {
             if (filters?.type) queryParams.append('type', filters.type);
             if (filters?.status) queryParams.append('status', filters.status);
             if (filters?.limit) queryParams.append('limit', filters.limit.toString());
-            if (filters?.offset) queryParams.append("offset', filters.offset.toString());"
-            const response = await fetch(`/api/test/history?${queryParams}`, {`
+            if (filters?.offset) queryParams.append("offset', filters.offset.toString());
+            const response = await fetch(`/api/test/history?${queryParams}`, {
                 headers: {
-                    'Authorization': `Bearer ${state.auth.token}`'`
+                    'Authorization': `Bearer ${state.auth.token}
                 }
             });
 
             if (!response.ok) {
-                throw new Error("获取测试历史失败");``
+                throw new Error("获取测试历史失败");
             }
 
             const data = await response.json();
@@ -168,13 +168,13 @@ export const useTest = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    "Authorization': `Bearer ${state.auth.token}`'`"
+                    "Authorization': `Bearer ${state.auth.token}
                 },
                 body: JSON.stringify(config)
             });
 
             if (!response.ok) {
-                throw new Error("保存配置失败");``
+                throw new Error("保存配置失败");
             }
 
             const savedConfig = await response.json();
@@ -195,19 +195,19 @@ export const useTest = () => {
         try {
             const response = await fetch('/api/test/configurations', {
                 headers: {
-                    'Authorization': `Bearer ${state.auth.token}`'`
+                    'Authorization': `Bearer ${state.auth.token}
                 }
             });
 
             if (!response.ok) {
-                throw new Error("获取配置失败");``
+                throw new Error("获取配置失败");
             }
 
             const data = await response.json();
             return data.configurations || test.configurations;
 
         } catch (error) {
-            console.error("Get configurations error: ', error);"
+            console.error("Get configurations error: ', error);
             return test.configurations;
         }
     }, [state.auth.token, test.configurations]);
@@ -215,22 +215,22 @@ export const useTest = () => {
     // 删除测试配置
     const deleteConfiguration = useCallback(async (configId: string): Promise<void>  => {
         try {
-            const response = await fetch(`/api/test/configurations/${configId}`, {`
-                method: "DELETE','`"`
+            const response = await fetch(`/api/test/configurations/${configId}`, {
+                method: "DELETE',"
                 headers: {
-                    'Authorization': `Bearer ${state.auth.token}`'`
+                    'Authorization': `Bearer ${state.auth.token}
                 }
             });
 
             if (!response.ok) {
-                throw new Error("删除配置失败");``
+                throw new Error("删除配置失败");
             }
 
             // 更新本地状态
             // 这里可以添加删除配置的action
 
         } catch (error) {
-            console.error("Delete configuration error: ', error);"
+            console.error("Delete configuration error: ', error);
             throw error;
         }
     }, [state.auth.token]);
@@ -238,14 +238,14 @@ export const useTest = () => {
     // 获取测试详情
     const getTestDetails = useCallback(async (testId: string): Promise<TestResult | null>  => {
         try {
-            const response = await fetch(`/api/test/${testId}`, {`
+            const response = await fetch(`/api/test/${testId}`, {
                 headers: {
-                    'Authorization': `Bearer ${state.auth.token}`'`
+                    'Authorization': `Bearer ${state.auth.token}
                 }
             });
 
             if (!response.ok) {
-                throw new Error("获取测试详情失败");``
+                throw new Error("获取测试详情失败");
             }
 
             const data = await response.json();
@@ -263,14 +263,14 @@ export const useTest = () => {
             // 获取原测试配置
             const testDetails = await getTestDetails(testId);
             if (!testDetails) {
-                throw new Error('无法获取测试配置");"
+                throw new Error('无法获取测试配置");
             }
 
             // 使用原配置重新开始测试
             const config: TestConfig  = {
-                name: `重试-${testDetails.type}`,`
+                name: `重试-${testDetails.type}`,
                 type: testDetails.type,
-                url: "', // 需要从详情中获取'`"`
+                url: ", // 需要从详情中获取'
                 options: testDetails.details?.config || {}
             };
             return await startTest(config);
@@ -282,16 +282,16 @@ export const useTest = () => {
     }, [getTestDetails, startTest]);
 
     // 导出测试结果
-    const exportTestResult = useCallback(async (testId: string, format: 'json' | 'pdf' | "csv'): Promise<Blob>  => {"
+    const exportTestResult = useCallback(async (testId: string, format: 'json' | 'pdf' | "csv'): Promise<Blob>  => {
         try {
-            const response = await fetch(`/api/test/${testId}/export?format=${format}`, {`
+            const response = await fetch(`/api/test/${testId}/export?format=${format}`, {
                 headers: {
-                    "Authorization': `Bearer ${state.auth.token}`'`"
+                    "Authorization': `Bearer ${state.auth.token}
                 }
             });
 
             if (!response.ok) {
-                throw new Error("导出测试结果失败");``
+                throw new Error("导出测试结果失败");
             }
 
             return await response.blob();

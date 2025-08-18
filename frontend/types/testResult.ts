@@ -21,7 +21,7 @@ export enum TestType {
   SEO = 'seo',
   STRESS = 'stress',
   UX = 'ux',
-  WEBSITE = 'website'
+  WEBSITE = 'website
 }
 
 /**
@@ -32,7 +32,7 @@ export enum TestStatus {
   RUNNING = 'running',
   COMPLETED = 'completed',
   FAILED = 'failed',
-  CANCELLED = 'cancelled'
+  CANCELLED = 'cancelled
 }
 
 /**
@@ -42,7 +42,7 @@ export enum TestPriority {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical
 }
 
 /**
@@ -56,7 +56,7 @@ export enum TestGrade {
   C_PLUS = 'C+',
   C = 'C',
   D = 'D',
-  F = 'F'
+  F = 'F
 }
 
 // ==================== 测试配置接口 ====================
@@ -67,20 +67,20 @@ export interface BaseTestConfig     {
   retries?: number;
   priority?: TestPriority;
   tags?: string[];
-  environment?: 'development' | 'staging' | 'production'
+  environment?: 'development' | 'staging' | 'production
   metadata?: Record<string, any>;
 }
 
 export interface PerformanceTestConfig extends BaseTestConfig     {
-  device?: 'desktop' | 'mobile' | 'tablet'
-  throttling?: 'none' | '3g' | '4g' | 'slow-3g'
+  device?: 'desktop' | 'mobile' | 'tablet
+  throttling?: 'none' | '3g' | '4g' | 'slow-3g
   location?: string;
   lighthouse?: boolean;
   metrics?: string[];
 }
 
 export interface SecurityTestConfig extends BaseTestConfig     {
-  scanDepth?: 'shallow' | 'medium' | 'deep'
+  scanDepth?: 'shallow' | 'medium' | 'deep
   includeSubdomains?: boolean;
   checkSSL?: boolean;
   checkHeaders?: boolean;
@@ -88,13 +88,13 @@ export interface SecurityTestConfig extends BaseTestConfig     {
 }
 
 export interface APITestConfig extends BaseTestConfig     {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH
   headers?: Record<string, string>;
   body?: any;
   expectedStatus?: number[];
   schema?: any;
   authentication?: {
-    type: 'none' | 'basic' | 'bearer' | 'api-key'
+    type: 'none' | 'basic' | 'bearer' | 'api-key
     credentials?: Record<string, string>;
   };
 }
@@ -103,7 +103,7 @@ export interface StressTestConfig extends BaseTestConfig     {
   concurrentUsers?: number;
   duration?: number; // 秒
   rampUpTime?: number; // 秒
-  testType?: 'load' | 'stress' | 'spike' | 'volume'
+  testType?: 'load' | 'stress' | 'spike' | 'volume
 }
 
 // ==================== 测试结果相关接口 ====================
@@ -111,7 +111,7 @@ export interface StressTestConfig extends BaseTestConfig     {
 export interface TestError     {
   code: string;
   message: string;
-  severity: 'low' | 'medium' | 'high' | 'critical'
+  severity: 'low' | 'medium' | 'high' | 'critical
   category?: string;
   line?: number;
   column?: number;
@@ -135,7 +135,7 @@ export interface TestRecommendation     {
   description: string;
   action: string;
   impact?: string;
-  effort?: 'low' | 'medium' | 'high'
+  effort?: 'low' | 'medium' | 'high
   savings?: number; // 预期改进分数
 }
 
@@ -160,7 +160,7 @@ export interface TestMetrics     {
 }
 
 export interface TestArtifact     {
-  type: 'screenshot' | 'video' | 'report' | 'log' | 'trace' | 'har'
+  type: 'screenshot' | 'video' | 'report' | 'log' | 'trace' | 'har
   name: string;
   url?: string;
   path?: string;
@@ -283,7 +283,7 @@ export interface TestSession     {
   name: string;
   description?: string;
   tests: TestResult[];
-  status: 'active' | 'completed' | 'cancelled'
+  status: 'active' | 'completed' | 'cancelled
   startedAt: Timestamp;
   completedAt?: Timestamp;
   metadata?: Record<string, any>;
@@ -312,8 +312,8 @@ export interface TestResultFilter     {
 export interface TestResultQuery     {
   page?: number;
   limit?: number;
-  sortBy?: 'startedAt' | 'completedAt' | 'overallScore' | 'testName' | 'duration'
-  sortOrder?: 'asc' | 'desc'
+  sortBy?: 'startedAt' | 'completedAt' | 'overallScore' | 'testName' | 'duration
+  sortOrder?: 'asc' | 'desc
   filter?: TestResultFilter;
   includeDeleted?: boolean;
 }
@@ -343,7 +343,7 @@ export interface BatchTestRequest     {
     config: BaseTestConfig;
   }>;
   schedule?: {
-    type: 'once' | 'recurring'
+    type: 'once' | 'recurring
     startAt?: Timestamp;
     interval?: number; // 分钟
     endAt?: Timestamp;
@@ -354,7 +354,7 @@ export interface BatchTestResult     {
   id: UUID;
   name: string;
   description?: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled'
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled
   totalTests: number;
   completedTests: number;
   failedTests: number;
@@ -399,7 +399,7 @@ export function fromDatabaseFields(dbData: TestResultDatabaseFields): TestResult
     testName: dbData.test_name,
     url: dbData.url,
     status: dbData.status as TestStatus,
-    startedAt: dbData.started_at || '',
+    startedAt: dbData.started_at || ',
     completedAt: dbData.completed_at,
     duration: dbData.duration_ms,
     overallScore: dbData.overall_score,

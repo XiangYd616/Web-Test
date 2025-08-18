@@ -25,7 +25,7 @@ export interface TestHistoryFilters     {
 }
 
 export interface ExportOptions     {
-  format: 'csv' | 'json' | 'pdf' | 'xlsx'
+  format: 'csv' | 'json' | 'pdf' | 'xlsx
   includeDetails: boolean;
   dateRange?: {
     start: string;
@@ -59,7 +59,7 @@ class TestHistoryService {
     this.metrics.totalRequests++;
     this.metrics.failedRequests++;
     
-    const errorType = error.name || 'UnknownError'
+    const errorType = error.name || 'UnknownError
     this.metrics.errorsByType.set(
       errorType, 
       (this.metrics.errorsByType.get(errorType) || 0) + 1
@@ -97,12 +97,12 @@ class TestHistoryService {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
   }
-  private baseUrl = "/api/test-history";``
+  private baseUrl = "/api/test-history";
   private cache = new Map<string, any>();
   private cacheTimeout = 5 * 60 * 1000; // 5分钟缓存
 
@@ -110,10 +110,10 @@ class TestHistoryService {
    * 获取认证头
    */
   private getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem('auth_token') || localStorage.getItem('token");"
+    const token = localStorage.getItem('auth_token') || localStorage.getItem('token");
     return {
       'Content-Type': 'application/json',
-      "Authorization': `Bearer ${token}`'`"
+      "Authorization': `Bearer ${token}`
     };
   }
 
@@ -154,7 +154,7 @@ class TestHistoryService {
    * 获取所有测试历史（主表数据）
    */
   async getAllTestHistory(query: TestHistoryQuery = {}): Promise<TestHistoryResponse> {
-    const cacheKey = this.getCacheKey("all-history', query);'`"`
+    const cacheKey = this.getCacheKey("all-history', query);"
     const cached = this.getCache(cacheKey);
     if (cached) return cached;
 
@@ -182,12 +182,12 @@ class TestHistoryService {
     if (query.dateFrom) params.append('dateFrom', query.dateFrom);
     if (query.dateTo) params.append('dateTo', query.dateTo);
     try {
-      const response = await fetch(`${this.baseUrl}?${params}`, {`
+      const response = await fetch(`${this.baseUrl}?${params}`, {
         headers: this.getAuthHeaders()
       });
 
       if (!response.ok) {
-        throw new Error(`获取测试历史失败: ${response.statusText}`);`
+        throw new Error(`获取测试历史失败: ${response.statusText}`);
       }
 
       const data = await response.json();
@@ -195,7 +195,7 @@ class TestHistoryService {
       return data;
 
     } catch (error) {
-      console.error("获取测试历史失败:', error);'`"`
+      console.error("获取测试历史失败:', error);
       throw error;
     }
   }
@@ -204,22 +204,22 @@ class TestHistoryService {
    * 获取特定类型的测试历史（带详细数据）
    */
   async getTestHistoryByType(testType: TestType, query: TestHistoryQuery = {}): Promise<TestHistoryResponse> {
-    const cacheKey = this.getCacheKey(`${testType}-history`, query);`
+    const cacheKey = this.getCacheKey(`${testType}-history`, query);
     const cached = this.getCache(cacheKey);
     if (cached) return cached;
 
     const params = new URLSearchParams();
-    if (query.page) params.append("page', query.page.toString());'`"`
+    if (query.page) params.append("page', query.page.toString());'
     if (query.limit) params.append('limit', query.limit.toString());
     if (query.sortBy) params.append('sortBy', query.sortBy);
     if (query.sortOrder) params.append('sortOrder', query.sortOrder);
     try {
-      const response = await fetch(`${this.baseUrl}/${testType}?${params}`, {`
+      const response = await fetch(`${this.baseUrl}/${testType}?${params}`, {
         headers: this.getAuthHeaders()
       });
 
       if (!response.ok) {
-        throw new Error(`获取${testType}测试历史失败: ${response.statusText}`);`
+        throw new Error(`获取${testType}测试历史失败: ${response.statusText}`);
       }
 
       const data = await response.json();
@@ -227,7 +227,7 @@ class TestHistoryService {
       return data;
 
     } catch (error) {
-      console.error(`获取${testType}测试历史失败:`, error);`
+      console.error(`获取${testType}测试历史失败:`, error);
       throw error;
     }
   }
@@ -236,17 +236,17 @@ class TestHistoryService {
    * 获取测试详情（主表+从表数据）
    */
   async getTestDetail(sessionId: string): Promise<TestSession> {
-    const cacheKey = this.getCacheKey("test-detail', { sessionId });'`"`
+    const cacheKey = this.getCacheKey("test-detail', { sessionId });"
     const cached = this.getCache(cacheKey);
     if (cached) return cached;
 
     try {
-      const response = await fetch(`${this.baseUrl}/${sessionId}`, {`
+      const response = await fetch(`${this.baseUrl}/${sessionId}`, {
         headers: this.getAuthHeaders()
       });
 
       if (!response.ok) {
-        throw new Error(`获取测试详情失败: ${response.statusText}`);`
+        throw new Error(`获取测试详情失败: ${response.statusText}`);
       }
 
       const data = await response.json();
@@ -254,7 +254,7 @@ class TestHistoryService {
       return data;
 
     } catch (error) {
-      console.error("获取测试详情失败:', error);'`"`
+      console.error("获取测试详情失败:', error);
       throw error;
     }
   }
@@ -271,14 +271,14 @@ class TestHistoryService {
     tags?: string[];
   }): Promise<TestSession> {
     try {
-      const response = await fetch(`${this.baseUrl}/sessions`, {`
-        method: "POST','`"`
+      const response = await fetch(`${this.baseUrl}/sessions`, {
+        method: "POST',"
         headers: this.getAuthHeaders(),
         body: JSON.stringify(sessionData)
       });
 
       if (!response.ok) {
-        throw new Error(`创建测试会话失败: ${response.statusText}`);`
+        throw new Error(`创建测试会话失败: ${response.statusText}`);
       }
 
       const data = await response.json();
@@ -286,7 +286,7 @@ class TestHistoryService {
       return data;
 
     } catch (error) {
-      console.error("创建测试会话失败:', error);'`"`
+      console.error("创建测试会话失败:', error);
       throw error;
     }
   }
@@ -296,20 +296,20 @@ class TestHistoryService {
    */
   async updateTestStatus(sessionId: string, status: string, additionalData?: any): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/${sessionId}/status`, {`
-        method: "PATCH','`"`
+      const response = await fetch(`${this.baseUrl}/${sessionId}/status`, {
+        method: "PATCH',"
         headers: this.getAuthHeaders(),
         body: JSON.stringify({ status, ...additionalData })
       });
 
       if (!response.ok) {
-        throw new Error(`更新测试状态失败: ${response.statusText}`);`
+        throw new Error(`更新测试状态失败: ${response.statusText}`);
       }
 
       this.clearCache();
 
     } catch (error) {
-      console.error("更新测试状态失败:', error);'`"`
+      console.error("更新测试状态失败:', error);
       throw error;
     }
   }
@@ -319,20 +319,20 @@ class TestHistoryService {
    */
   async completeTest(sessionId: string, results: any): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/${sessionId}/complete`, {`
-        method: "POST','`"`
+      const response = await fetch(`${this.baseUrl}/${sessionId}/complete`, {
+        method: "POST',"
         headers: this.getAuthHeaders(),
         body: JSON.stringify(results)
       });
 
       if (!response.ok) {
-        throw new Error(`完成测试失败: ${response.statusText}`);`
+        throw new Error(`完成测试失败: ${response.statusText}`);
       }
 
       this.clearCache();
 
     } catch (error) {
-      console.error("完成测试失败:', error);'`"`
+      console.error("完成测试失败:', error);
       throw error;
     }
   }
@@ -342,19 +342,19 @@ class TestHistoryService {
    */
   async deleteTest(sessionId: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/${sessionId}`, {`
-        method: "DELETE','`"`
+      const response = await fetch(`${this.baseUrl}/${sessionId}`, {
+        method: "DELETE',"
         headers: this.getAuthHeaders()
       });
 
       if (!response.ok) {
-        throw new Error(`删除测试失败: ${response.statusText}`);`
+        throw new Error(`删除测试失败: ${response.statusText}`);
       }
 
       this.clearCache();
 
     } catch (error) {
-      console.error("删除测试失败:', error);'`"`
+      console.error("删除测试失败:', error);
       throw error;
     }
   }
@@ -364,14 +364,14 @@ class TestHistoryService {
    */
   async batchDeleteTests(sessionIds: string[]): Promise<BatchOperationResult> {
     try {
-      const response = await fetch(`${this.baseUrl}/batch/delete`, {`
-        method: "POST','`"`
+      const response = await fetch(`${this.baseUrl}/batch/delete`, {
+        method: "POST',"
         headers: this.getAuthHeaders(),
         body: JSON.stringify({ sessionIds })
       });
 
       if (!response.ok) {
-        throw new Error(`批量删除失败: ${response.statusText}`);`
+        throw new Error(`批量删除失败: ${response.statusText}`);
       }
 
       const result = await response.json();
@@ -379,7 +379,7 @@ class TestHistoryService {
       return result;
 
     } catch (error) {
-      console.error("批量删除失败:', error);'`"`
+      console.error("批量删除失败:', error);
       throw error;
     }
   }
@@ -388,17 +388,17 @@ class TestHistoryService {
    * 获取测试统计信息
    */
   async getTestStatistics(): Promise<TestStatistics> {
-    const cacheKey = this.getCacheKey('statistics");"
+    const cacheKey = this.getCacheKey('statistics");
     const cached = this.getCache(cacheKey);
     if (cached) return cached;
 
     try {
-      const response = await fetch(`${this.baseUrl}/statistics`, {`
+      const response = await fetch(`${this.baseUrl}/statistics`, {
         headers: this.getAuthHeaders()
       });
 
       if (!response.ok) {
-        throw new Error(`获取统计信息失败: ${response.statusText}`);`
+        throw new Error(`获取统计信息失败: ${response.statusText}`);
       }
 
       const data = await response.json();
@@ -406,7 +406,7 @@ class TestHistoryService {
       return data;
 
     } catch (error) {
-      console.error("获取统计信息失败:', error);'`"`
+      console.error("获取统计信息失败:', error);
       throw error;
     }
   }
@@ -416,20 +416,20 @@ class TestHistoryService {
    */
   async exportTestHistory(options: ExportOptions): Promise<Blob> {
     try {
-      const response = await fetch(`${this.baseUrl}/export`, {`
-        method: "POST','`"`
+      const response = await fetch(`${this.baseUrl}/export`, {
+        method: "POST',"
         headers: this.getAuthHeaders(),
         body: JSON.stringify(options)
       });
 
       if (!response.ok) {
-        throw new Error(`导出失败: ${response.statusText}`);`
+        throw new Error(`导出失败: ${response.statusText}`);
       }
 
       return await response.blob();
 
     } catch (error) {
-      console.error("导出测试历史失败:', error);'`"`
+      console.error("导出测试历史失败:', error);
       throw error;
     }
   }
@@ -455,18 +455,18 @@ class TestHistoryService {
     }
 
     try {
-      const response = await fetch(`${this.baseUrl}/search?${params}`, {`
+      const response = await fetch(`${this.baseUrl}/search?${params}`, {
         headers: this.getAuthHeaders()
       });
 
       if (!response.ok) {
-        throw new Error(`搜索失败: ${response.statusText}`);`
+        throw new Error(`搜索失败: ${response.statusText}`);
       }
 
       return await response.json();
 
     } catch (error) {
-      console.error("搜索测试历史失败:', error);'`"`
+      console.error("搜索测试历史失败:', error);
       throw error;
     }
   }

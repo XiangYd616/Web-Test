@@ -104,7 +104,7 @@ export interface SystemMonitor     {
   };
   alerts: Array<{
     id: string;
-    type: 'warning' | 'error' | 'info'
+    type: 'warning' | 'error' | 'info
     message: string;
     timestamp: string;
     resolved: boolean;
@@ -130,7 +130,7 @@ export interface UserFilter     {
 }
 
 export interface UserBulkAction     {
-  action: 'activate' | 'deactivate' | 'suspend' | 'changeRole' | 'delete'
+  action: 'activate' | 'deactivate' | 'suspend' | 'changeRole' | 'delete
   userIds: string[];
   newRole?: string;
   reason?: string;
@@ -142,7 +142,7 @@ export interface TestManagement     {
   url: string;
   userId: string;
   username: string;
-  status: 'idle' | 'starting' | 'running' | 'completed' | 'failed' | 'cancelled'
+  status: 'idle' | 'starting' | 'running' | 'completed' | 'failed' | 'cancelled
   createdAt: string;
   completedAt?: string;
   duration?: number;
@@ -190,7 +190,7 @@ export interface SystemConfig     {
     };
     defaultLocations: string[];
     maxFileUploadSize: number;
-    screenshotQuality: 'low' | 'medium' | 'high'
+    screenshotQuality: 'low' | 'medium' | 'high
     videoRecording: boolean;
     harGeneration: boolean;
   };
@@ -228,9 +228,9 @@ export interface SystemConfig     {
   };
   backup: {
     enabled: boolean;
-    frequency: 'daily' | 'weekly' | 'monthly'
+    frequency: 'daily' | 'weekly' | 'monthly
     retentionDays: number;
-    location: 'local' | 's3' | 'ftp'
+    location: 'local' | 's3' | 'ftp
     s3Config?: {
       bucket: string;
       region: string;
@@ -251,7 +251,7 @@ export interface ActivityLog     {
   ipAddress: string;
   userAgent: string;
   timestamp: string;
-  severity: 'info' | 'warning' | 'error' | 'critical'
+  severity: 'info' | 'warning' | 'error' | 'critical
   category?: string;
   success: boolean;
   errorMessage?: string;
@@ -276,8 +276,8 @@ export interface BackupInfo     {
   filename: string;
   size: number;
   createdAt: string;
-  type: 'manual' | 'scheduled'
-  status: 'completed' | 'failed' | 'in_progress'
+  type: 'manual' | 'scheduled
+  status: 'completed' | 'failed' | 'in_progress
   description?: string;
 }
 

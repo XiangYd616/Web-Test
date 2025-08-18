@@ -41,8 +41,8 @@ export class ChromeCompatibilityHelper {
       isEdge: this.isEdge(),
       isSafari: this.isSafari(),
       isFirefox: this.isFirefox(),
-      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
-      vendor: typeof navigator !== 'undefined' ? navigator.vendor : ''
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : ',
+      vendor: typeof navigator !== 'undefined' ? navigator.vendor : 
     };
   }
 
@@ -112,7 +112,7 @@ export class ChromeCompatibilityHelper {
    */
   private static fixBackdropFilter() {
     const style = document.createElement('style");
-    style.textContent = ``
+    style.textContent = 
       .chrome-browser .backdrop-blur-xl,
       .chrome-browser .backdrop-blur-lg,
       .chrome-browser .backdrop-blur-md,
@@ -128,8 +128,8 @@ export class ChromeCompatibilityHelper {
    * 修复Grid布局
    */
   private static fixGridLayout() {
-    const style = document.createElement("style");`
-    style.textContent = ``
+    const style = document.createElement("style");
+    style.textContent = 
       .chrome-browser .grid {
         display: -ms-grid !important;
         display: grid !important;
@@ -162,8 +162,8 @@ export class ChromeCompatibilityHelper {
    * 修复Flexbox
    */
   private static fixFlexbox() {
-    const style = document.createElement("style");`
-    style.textContent = ``
+    const style = document.createElement("style");
+    style.textContent = 
       .chrome-browser .flex {
         display: -webkit-box !important;
         display: -ms-flexbox !important;
@@ -196,8 +196,8 @@ export class ChromeCompatibilityHelper {
    * 修复颜色渲染
    */
   private static fixColorRendering() {
-    const style = document.createElement("style");`
-    style.textContent = ``
+    const style = document.createElement("style");
+    style.textContent = 
       .chrome-browser .border-green-500 {
         border-color: #10b981 !important;
       }
@@ -243,7 +243,7 @@ export class ChromeCompatibilityHelper {
     const issues: string[]  = [];
     if (browserInfo.isChrome) {
       if (!cssSupport.backdropFilter) {
-        issues.push("backdrop-filter不支持");`
+        issues.push("backdrop-filter不支持");
       }
       if (!cssSupport.grid) {
         issues.push('CSS Grid不支持");

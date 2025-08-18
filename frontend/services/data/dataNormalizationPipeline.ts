@@ -17,7 +17,7 @@ export interface TestPhase     {
   name: string;
   startTime: number;
   endTime?: number;
-  status: 'pending' | 'running' | 'completed' | 'failed'
+  status: 'pending' | 'running' | 'completed' | 'failed
 }
 
 // 原始数据源接口
@@ -126,7 +126,7 @@ export class DataNormalizationPipeline {
   private cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
   
   private getCacheKey(url: string, options: RequestInit): string {
-    return `${options.method || "GET'}:${url}:${JSON.stringify(options.body || {})}`;'`
+    return `${options.method || "GET'}:${url}:${JSON.stringify(options.body || {})}`;
   }
   
   private getFromCache(key: string): any | null {
@@ -157,7 +157,7 @@ export class DataNormalizationPipeline {
           throw error;
         }
         
-        console.warn(`请求失败，第${attempt}次重试:`, error.message);`
+        console.warn(`请求失败，第${attempt}次重试:`, error.message);
     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
   }
 }
@@ -233,7 +233,7 @@ export class DataNormalizationPipeline {
         }
       }
     } catch (error) {
-      console.error("Error processing WebSocket data: ', error);'`
+      console.error("Error processing WebSocket data: ', error);
     }
 
     return result;

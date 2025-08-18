@@ -15,7 +15,7 @@ export interface DataPoint     {
 
 export interface OptimizationConfig     {
   maxDataPoints: number;
-  samplingStrategy: 'uniform' | 'adaptive' | 'importance'
+  samplingStrategy: 'uniform' | 'adaptive' | 'importance
   preserveKeyPoints: boolean;
   enableCaching: boolean;
   performanceThreshold: number; // ms
@@ -83,16 +83,16 @@ class DataVisualizationOptimizer {
     let optimizedData: DataPoint[];
 
     switch (finalConfig.samplingStrategy) {
-      case 'uniform': ''
+      case 'uniform': 
         optimizedData = this.uniformSampling(data, finalConfig.maxDataPoints);
         break;
-      case 'adaptive': ''
+      case 'adaptive': 
         optimizedData = this.adaptiveSampling(data, finalConfig);
         break;
-      case 'importance': ''
+      case 'importance': 
         optimizedData = this.importanceSampling(data, finalConfig);
         break;
-      default:
+      default: undefined, // 已修复
         optimizedData = this.adaptiveSampling(data, finalConfig);
     }
 
