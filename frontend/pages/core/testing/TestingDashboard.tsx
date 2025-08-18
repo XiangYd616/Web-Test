@@ -3,7 +3,11 @@
  * 展示所有9个测试工具的统一入口
  */
 
-import React, { useState, useEffect    } from 'react';import { useState, useEffect    } from 'react';import { useAsyncErrorHandler    } from '../hooks/useAsyncErrorHandler';import TestResults from '../components/TestResults';import { Link, useNavigate    } from 'react-router-dom';import { TestType    } from '../../../types/testConfig';import { TestService    } from '../../../services/unifiedTestService';const TestingDashboard: React.FC  = () => {
+import React, { useState, useEffect, useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Card, Button, Row, Col, Badge, Spin } from 'antd';
+
+const TestingDashboard: React.FC = () => {
   // 页面级功能
   const [pageTitle, setPageTitle] = useState("");
   // 设置页面标题
@@ -16,7 +20,7 @@ import React, { useState, useEffect    } from 'react';import { useState, useEffe
   // 页面可见性检测
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState ==="visible') {'`"`
+      if (document.visibilityState === "visible') {'`"`
         // 页面变为可见时刷新数据
         fetchData?.();
       }
@@ -120,8 +124,9 @@ import React, { useState, useEffect    } from 'react';import { useState, useEffe
   const pollTestResult = async (executionId) => {
     const interval = setInterval(async () => {
       const result = await executeAsync(
-        () => fetch(`/api/tests/results/${executionId}`).then(res => res.json()),`
-        { context: "TestExecution.pollResult' }'`"`
+        () => fetch(`/ api / tests / results / ${ executionId } `).then(res => res.json()),`
+      {
+        context: "TestExecution.pollResult' }'`"`
       );
       
       if (result && result.success && result.data.status ==='completed') {
@@ -365,27 +370,28 @@ import React, { useState, useEffect    } from 'react';import { useState, useEffe
             <button>
               key={category.id}
               onClick={() => setSelectedCategory(category.id)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg border transition-colors ${`}
+              className={`flex items - center space - x - 2 px - 4 py - 2 rounded - lg border transition - colors ${
+          `}
                 selectedCategory === category.id
                   ? "bg-blue-600 text-white border-blue-600";``
                   : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-              }`}`
+              }`} `
             >
               <span className="text-lg'>{category.icon}</span>`'"`
-              <span className='font-medium'>{category.name}</span>
-              <span className={`text-xs px-2 py-0.5 rounded-full ${`}>
+          < span className = 'font-medium' > { category.name }</span >
+            <span className={`text-xs px-2 py-0.5 rounded-full ${`}>
                 selectedCategory === category.id
                   ? "bg-blue-500 text-white";``
                   : 'bg-gray-100 text-gray-600'
               }`}>`
                 {category.count}
-              </span>
-            </button>
+              </span >
+            </button >
           ))}
-        </div>
+        </div >
 
-        {/* 测试工具网格 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>`'"`
+  {/* 测试工具网格 */ }
+  < div className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>`'"`
           {filteredTools.map(tool => (
             <div>
               key={tool.id}
@@ -399,10 +405,10 @@ import React, { useState, useEffect    } from 'react';import { useState, useEffe
                     <div>
                       <h3 className='text-lg font-semibold text-gray-900'>{tool.name}</h3>
                       <div className='flex items-center space-x-2 mt-1'>
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getComplexityColor(tool.complexity)}`}>`
-                          {getComplexityLabel(tool.complexity)}
-                        </span>
-                        <span className="text-xs text-gray-500'>{tool.estimatedTime}</span>`'"`
+                        <span className={`px - 2 py - 0.5 rounded - full text - xs font - medium ${ getComplexityColor(tool.complexity) } `}>`
+{ getComplexityLabel(tool.complexity) }
+                        </span >
+  <span className="text-xs text-gray-500'>{tool.estimatedTime}</span>`'"`
                       </div>
                     </div>
                   </div>
@@ -412,34 +418,35 @@ import React, { useState, useEffect    } from 'react';import { useState, useEffe
                     {isLoading ? (
                       <div className='w-3 h-3 bg-gray-300 rounded-full animate-pulse'></div>
                     ) : (
-                      <div className={`w-3 h-3 rounded-full ${`}>
+                      <div className={`w - 3 h - 3 rounded - full ${
+  `}>
                         engineStatus[tool.id] ? "bg-green-500' : 'bg-red-500";``
-                      }`} title={engineStatus[tool.id] ? '引擎可用" : "引擎不可用'}></div>`
+                      }`} title = { engineStatus[tool.id]? '引擎可用" : "引擎不可用' } ></div > `
                     )}
                   </div>
                 </div>
 
                 {/* 工具描述 */}
                 <p className="text-gray-600 text-sm mb-4 line-clamp-2'>`'"`
-                  {tool.description}
-                </p>
+{ tool.description }
+                </p >
 
-                {/* 功能特性 */}
-                <div className='mb-4'>
-                  <div className='flex flex-wrap gap-1'>
-                    {tool.features.slice(0, 4).map(feature => (
-                      <span>
-                        key={feature}
-                        className='px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded'
+  {/* 功能特性 */ }
+  < div className = 'mb-4' >
+    <div className='flex flex-wrap gap-1'>
+      {tool.features.slice(0, 4).map(feature => (
+        <span>
+          key={feature}
+          className='px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded'
                       >
-                        {feature}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+          {feature}
+        </span>
+      ))}
+    </div>
+                </div >
 
-                {/* 操作按钮 */}
-                <div className='flex space-x-2'>
+  {/* 操作按钮 */ }
+  < div className = 'flex space-x-2' >
                   <Link>
                     to={tool.path}
                     className={`flex-1 px-4 py-2 rounded-md text-center font-medium transition-colors ${`}
@@ -462,14 +469,14 @@ import React, { useState, useEffect    } from 'react';import { useState, useEffe
                   >
                     📊
                   </Link>
-                </div>
-              </div>
-            </div>
+                </div >
+              </div >
+            </div >
           ))}
-        </div>
+        </div >
 
-        {/* 快速开始指南 */}
-        <div className='mt-12 bg-white rounded-lg shadow-sm border border-gray-200 p-6'>
+  {/* 快速开始指南 */ }
+  < div className = 'mt-12 bg-white rounded-lg shadow-sm border border-gray-200 p-6' >
           <h2 className='text-xl font-semibold text-gray-900 mb-4'>快速开始</h2>
           <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
             <div className='text-center'>
@@ -488,9 +495,9 @@ import React, { useState, useEffect    } from 'react';import { useState, useEffe
               <p className='text-sm text-gray-600'>获取详细报告和改进建议</p>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
+        </div >
+      </div >
+    </div >
   );
 };
 

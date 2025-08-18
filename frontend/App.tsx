@@ -8,16 +8,9 @@ import Layout from './components/layout/Layout';
 import Dashboard from './pages/core/Dashboard';
 import Settings from './pages/core/Settings';
 import Help from './pages/user/docs/Help';
-// 测试工具页面
-import APITest from './pages/core/testing/APITest';
-import CompatibilityTest from './pages/core/testing/CompatibilityTest';
-import SecurityTest from './pages/core/testing/SecurityTest';
-import SEOTest from './pages/core/testing/SEOTest';
+// 整合的测试工具页面
 import StressTest from './pages/core/testing/StressTest';
-import UXTest from './pages/core/testing/UXTest';
-import WebsiteTest from './pages/core/testing/WebsiteTest';
-// 数据管理页面
-import AnalyticsPage from './pages/analytics/AnalyticsPage';
+import TestingDashboard from './pages/core/testing/TestingDashboard';
 // 管理页面
 // 导入样式
 import './styles/global.css';
@@ -74,26 +67,10 @@ const App: React.FC = () => {
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
 
-              {/* 测试工具路由 */}
-              <Route path="testing/api" element={<APITest />} />
-              <Route path="testing/performance" element={<div>性能测试页面开发中...</div>} />
-              <Route path="testing/security" element={<SecurityTest />} />
-              <Route path="testing/seo" element={<SEOTest />} />
-              <Route path="testing/stress" element={<StressTest />} />
-              <Route path="testing/compatibility" element={<CompatibilityTest />} />
-              <Route path="testing/ux" element={<UXTest />} />
-              <Route path="testing/website" element={<WebsiteTest />} />
-              <Route path="testing/infrastructure" element={<div>基础设施测试页面开发中...</div>} />
-
-              {/* 数据管理路由 */}
-              <Route path="data/reports" element={<div>测试报告页面开发中...</div>} />
-              <Route path="data/results" element={<div>测试结果页面开发中...</div>} />
-              <Route path="data/analytics" element={<AnalyticsPage />} />
-
-              {/* 系统管理路由 */}
-              <Route path="management/admin" element={<div>管理员面板开发中...</div>} />
-              <Route path="management/integration" element={<div>集成管理页面开发中...</div>} />
-              <Route path="management/scheduling" element={<div>任务调度页面开发中...</div>} />
+              {/* 整合的测试工具 */}
+              <Route path="testing" element={<TestingDashboard />} />
+              <Route path="stress-test" element={<StressTest />} />
+              <Route path="content-detection" element={<div>内容检测页面开发中...</div>} />
 
               <Route path="settings" element={<Settings />} />
               <Route path="help" element={<Help />} />
